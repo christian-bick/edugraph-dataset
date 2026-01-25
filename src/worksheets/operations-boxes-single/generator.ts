@@ -55,7 +55,7 @@ function generateName(params: { [key: string]: any }) {
 function generateLabels(params: { [key: string]: any }) {
 
     let numScopes;
-    if (params.includeTenCarry) {
+    if (!params.includeTenCarry) {
         numScopes = [Scope.NumbersSmaller10]
     } else if (params.operations.includes('multiply') || params.operations.includes('divide')) {
         numScopes = [Scope.NumbersSmaller100]
