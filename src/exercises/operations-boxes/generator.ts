@@ -1,29 +1,35 @@
 import PermutationBuilder from "../../lib/permutation-builder.ts";
 import {Area, Scope, Ability} from "edugraph-ts";
-import {numScopes, withNegativesScope} from "../../lib/labels.ts";
+import {withNegativesScope} from "../../lib/labels.ts";
 
 function generatePermutations() {
     return [
-        // Same operations with same problem digits
         ...new PermutationBuilder()
-            .applyRange(['digitsNum1', "digitsNum2"], [2, 3])
             .applyVariants('operations', ['add', 'subtract', 'multiply', 'divide'])
             .applyVariants('blankPart', ['answer', 'problem', 'problem-answer', 'random'])
+            .applyVariants('includeZero', [true, false])
             .applyVariants('allowNegatives', [false, true])
             .build(),
 
-        // Same operations with random problem digits
         ...new PermutationBuilder()
             .applyVariants('operations', ['add', 'subtract', 'multiply', 'divide'])
-            .applyVariants('blankPart', ['answer', 'problem', 'problem-answer'])
+            .applyVariants('blankPart', ['answer', 'problem', 'problem-answer', 'random'])
+            .applyVariants('includeTenCarry', [true, false])
             .applyVariants('allowNegatives', [false, true])
             .build(),
     ]
 }
 
 function generateName(params: { [key: string]: any }) {
-    const {digitsNum1, digitsNum2, operations, allowNegatives, blankPart} = params;
-    let name = `${digitsNum1 || 'R'}x${digitsNum2 || 'R'}_hide_${blankPart}_for_${operations.replaceAll(',', '-')}`;
+    const {operations = 'all', allowNegatives, blankPart = 'answer', includeTenCarry, includeZero} = params;
+    let name = `single-digit_${operations.replaceAll(',', '-')}`;
+    name += `_${blankPart}`;
+    if (Object.prototype.hasOwnProperty.call(params, 'includeTenCarry')) {
+        name += includeTenCarry ? '_with-carry' : '_no-carry';
+    }
+    if (Object.prototype.hasOwnProperty.call(params, 'includeZero')) {
+        name += includeZero ? '_with-zero' : '_no-zero';
+    }
     if (allowNegatives) {
         name += '_neg';
     }
@@ -31,12 +37,22 @@ function generateName(params: { [key: string]: any }) {
 }
 
 function generateLabels(params: { [key: string]: any }) {
+
+    let numScopes;
+    if (!params.includeTenCarry) {
+        numScopes = [Scope.NumbersSmaller10]
+    } else if (params.operations.includes('multiply') || params.operations.includes('divide')) {
+        numScopes = [Scope.NumbersSmaller100]
+    } else {
+        numScopes = [Scope.NumbersSmaller20]
+    }
+
     const scopes = [
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersWithoutZero,
+        params.includeZero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero,
         withNegativesScope(params.allowNegatives),
-        ...numScopes([params.digitsNum1 || 3, params.digitsNum2 || 3]),
+        ...numScopes
     ]
 
     const areas = params.operations.split(',').map((op: string) => {

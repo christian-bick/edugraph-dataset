@@ -152,8 +152,8 @@ async function main() {
         generationConfig: { totalCount: 20, seed: 42, constraints: { operations: ['add', 'subtract', 'multiply'], maxDigits: 5, allowNegatives: true } },
         splits,
         visualDistribution: [
-            { rendererId: 'operations-boxes-single', visualParams: { blankPart: 'answer' }, instancesPerProblem: 1 },
-            { rendererId: 'operations-boxes-single', visualParams: { blankPart: 'problem' }, instancesPerProblem: 1 },
+            { rendererId: 'operations-boxes', visualParams: { blankPart: 'answer' }, instancesPerProblem: 1 },
+            { rendererId: 'operations-boxes', visualParams: { blankPart: 'problem' }, instancesPerProblem: 1 },
             { rendererId: 'operations-vertical', visualParams: {}, instancesPerProblem: 1 }
         ]
     };

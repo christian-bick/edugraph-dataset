@@ -53,6 +53,8 @@ function createProblemHTML(
 window.renderExercise = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('exercise');
     
+    // We only need one container now, but if both exist we'll just use the first or clear the DOM.
+    // The orchestrator calls renderExercise twice: once with isAnswerView=false, once with true.
     if (exerciseContainer) {
         const { problem, config, isAnswerView } = payload;
         
@@ -91,6 +93,7 @@ window.renderExercise = (payload: RenderPayload) => {
             isAnswerView
         );
 
+        // Hide the old answer container if it exists, as the ML pipeline doesn't use it
         const answerContainer = document.getElementById('answer');
         if (answerContainer) {
             answerContainer.style.display = 'none';
