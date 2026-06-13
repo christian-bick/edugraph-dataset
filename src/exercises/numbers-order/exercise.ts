@@ -31,10 +31,12 @@ function createProblemHTML(problem: number[], desc: boolean, isAnswer: boolean) 
         return `<div class="writing-box ${isAnswer ? 'answer' : ''}">${isAnswer ? n : ''}</div>`;
     }).join('');
 
+    const arrowSymbol = desc ? '↘' : '↗';
+
     return `
         <div class="problem-row">
             <div class="unordered-numbers">${unorderedNumbersHTML}</div>
-            <div class="arrow">↓</div>
+            <div class="arrow">${arrowSymbol}</div>
             <div class="writing-boxes">${orderedBoxesHTML}</div>
         </div>`;
 }
