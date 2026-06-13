@@ -28,13 +28,19 @@ function generateProblem(max: number, type: string) {
 
 function createProblemHTML(problem: { numObjects: number, icon: string, type: string, answer: number }, showAnswer: boolean) {
     const objectsHTML = Array(problem.numObjects).fill(`<img src="/icons/counting/${problem.icon}" alt="counting object">`).join('');
-    const arrowClass = problem.type === 'inc' ? 'triangle-up' : 'triangle-down';
+    const isInc = problem.type === 'inc';
+    const arrowClass = isInc ? 'triangle-up' : 'triangle-down';
+    const textClass = isInc ? 'up' : 'down';
+    
     return `
         <div class="problem">
             <div class="objects-container">${objectsHTML}</div>
             <div class="answer-container">
-                <div class="${arrowClass}"></div>
-                <div class="answer-box">${showAnswer ? problem.answer : ''}</div>
+                <div class="arrow-wrapper">
+                    <div class="${arrowClass}"></div>
+                    <span class="arrow-text ${textClass}">1</span>
+                </div>
+                <div class="answer-box ${showAnswer ? 'solution' : ''}">${showAnswer ? problem.answer : ''}</div>
             </div>
         </div>`;
 }
