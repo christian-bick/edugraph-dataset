@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "generate": "npx vite-node src/scripts/generate-pdf.ts",
+    "generate:exercises": "npx vite-node src/scripts/generate-exercises.ts",
     "generate:dry": "npx vite-node src/scripts/generate-pdf.ts --sync --dry",
     "upload:gcs": "npx vite-node src/scripts/upload-to-gcs.ts",
     "sync:gcs": "npx vite-node src/scripts/upload-to-gcs.ts --sync",

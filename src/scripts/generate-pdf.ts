@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const OUT_DIR = resolve(PROJECT_ROOT, 'out');
+const OUT_DIR = resolve(PROJECT_ROOT, 'out', 'worksheets');
 const BASE_URL = 'http://localhost:5173';
 
 interface Generator {
