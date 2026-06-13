@@ -20,7 +20,7 @@ function formatTime(time: string, interval: number): string {
     return `${hour12}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-function createClock(time: string, interval: number, isEmpty: boolean): string {
+function createClock(time: string, interval: number, isEmpty: boolean, isSolution: boolean): string {
     const [h, m, s] = time.split(':').map(Number);
     const hourAngle = (h % 12 + m / 60) * 30;
     const minuteAngle = (m + s / 60) * 6;
@@ -44,9 +44,10 @@ function createClock(time: string, interval: number, isEmpty: boolean): string {
         }
     }
 
-    const hourHand = isEmpty ? '' : `<line class="hand hour-hand" x1="50" y1="50" x2="50" y2="25" transform="rotate(${hourAngle} 50 50)"/>`;
-    const minuteHand = isEmpty ? '' : `<line class="hand minute-hand" x1="50" y1="50" x2="50" y2="15" transform="rotate(${minuteAngle} 50 50)"/>`;
-    const secondHand = (isEmpty || interval > 60) ? '' : `<line class="hand second-hand" x1="50" y1="50" x2="50" y2="10" transform="rotate(${secondAngle} 50 50)"/>`;
+    const handColorClass = isSolution ? 'solution' : '';
+    const hourHand = isEmpty ? '' : `<line class="hand hour-hand ${handColorClass}" x1="50" y1="50" x2="50" y2="25" transform="rotate(${hourAngle} 50 50)"/>`;
+    const minuteHand = isEmpty ? '' : `<line class="hand minute-hand ${handColorClass}" x1="50" y1="50" x2="50" y2="15" transform="rotate(${minuteAngle} 50 50)"/>`;
+    const secondHand = (isEmpty || interval > 60) ? '' : `<line class="hand second-hand ${handColorClass}" x1="50" y1="50" x2="50" y2="10" transform="rotate(${secondAngle} 50 50)"/>`;
 
     return `
         <svg class="clock" viewBox="0 0 100 100" width="200" height="200">
@@ -66,7 +67,9 @@ function createProblemHTML(problem: Problem, isAnswer: boolean, interval: number
     const showHands = !isReverse || isAnswer;
     const showTime = isReverse || isAnswer;
 
-    const clockHTML = createClock(problem.time, interval, !showHands);
+    // The solution is the clock hands if it's reverse mode and an answer.
+    const isClockSolution = isReverse && isAnswer;
+    const clockHTML = createClock(problem.time, interval, !showHands, isClockSolution);
     const formattedTime = formatTime(problem.time, interval);
 
     return `
