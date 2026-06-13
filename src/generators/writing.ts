@@ -2,7 +2,7 @@ import { ProblemGenerator, DatasetGenerationConfig, AbstractProblem } from "../t
 import { Area, Scope, Ability } from "edugraph-ts";
 
 export class WritingGenerator implements ProblemGenerator {
-    type: AbstractProblem['type'] = 'arithmetic'; // Or counting
+    type: AbstractProblem['type'] = 'writing';
     compatibleRenderers = ['numbers-write'];
 
     private generateLabels() {
@@ -47,7 +47,7 @@ export class WritingGenerator implements ProblemGenerator {
                     
                     generatedProblems.push({
                         id: `write-${generatedProblems.length + 1}-${problemKey}`,
-                        type: 'counting',
+                        type: this.type,
                         data: {
                             number: currentNum,
                             _permutationParams: params 

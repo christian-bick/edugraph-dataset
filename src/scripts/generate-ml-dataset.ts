@@ -54,11 +54,16 @@ async function renderDatasetSplit(
         // Filter problems to match the blueprint's type
         const relevantProblems = problems.filter(p => {
             if (p.type === 'arithmetic' && blueprint.rendererId.startsWith('operations')) return true;
-            if (p.type === 'counting' && blueprint.rendererId.startsWith('counting') && !blueprint.rendererId.includes('write')) return true;
+            if (p.type === 'counting' && blueprint.rendererId.startsWith('counting')) {
+                const isSimple = !p.data.incDecType;
+                if (blueprint.rendererId === 'counting-objects' && isSimple) return true;
+                if (blueprint.rendererId === 'counting-inc-dec' && !isSimple) return true;
+                return false;
+            }
             if (p.type === 'measurement' && blueprint.rendererId.startsWith('measure')) return true;
             if (p.type === 'comparison' && blueprint.rendererId.startsWith('numbers-compare')) return true;
             if (p.type === 'ordering' && blueprint.rendererId.startsWith('numbers-order')) return true;
-            if (p.type === 'counting' && blueprint.rendererId.startsWith('numbers-write')) return true; // Writing uses counting abstract problem type
+            if (p.type === 'writing' && blueprint.rendererId.startsWith('numbers-write')) return true;
             if (p.type === 'time' && blueprint.rendererId.startsWith('time')) return true;
             return false;
         });
@@ -295,6 +300,12 @@ async function main() {
     }
 
     processSplits(arithmeticDataset, splits);
+    processSplits(countingDataset, splits);
+    processSplits(measurementDataset, splits);
+    processSplits(comparisonDataset, splits);
+    processSplits(orderingDataset, splits);
+    processSplits(writingDataset, splits);
+    processSplits(timeDataset, splits);
 
     console.log(`Split distribution: Train (${trainSet.length}), Val (${valSet.length}), Test (${testSet.length})`);
 
