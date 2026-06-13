@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { readdirSync, existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,11 +20,33 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-// We use 2.5-pro for complex visual reasoning and adherence to strict rules
+
+// Schema for constrained output
+const responseSchema = {
+    type: SchemaType.OBJECT,
+    properties: {
+        pass: { type: SchemaType.BOOLEAN },
+        general_checks: {
+            type: SchemaType.OBJECT,
+            properties: {
+                no_overlaps: { type: SchemaType.BOOLEAN },
+                no_placeholders: { type: SchemaType.BOOLEAN },
+                sane_padding: { type: SchemaType.BOOLEAN },
+            },
+            required: ["no_overlaps", "no_placeholders", "sane_padding"]
+        },
+        coloring_pass: { type: SchemaType.BOOLEAN },
+        layout_pass: { type: SchemaType.BOOLEAN },
+        reasoning: { type: SchemaType.STRING },
+    },
+    required: ["pass", "general_checks", "coloring_pass", "layout_pass", "reasoning"]
+};
+
 const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-pro",
+    model: "gemini-3.5-flash", // Using the 2026-era high-performance model requested by the user
     generationConfig: {
         responseMimeType: "application/json",
+        responseSchema: responseSchema,
     }
 });
 
@@ -84,46 +106,53 @@ async function validateSamples() {
         const aImage = fileToGenerativePart(sample.aPath, "image/png");
 
         const prompt = `
-You are a strict visual QA engineer. I am providing you with two images:
-Image 1 (Question View): The first image provided.
-Image 2 (Answer View): The second image provided.
+You are a senior Visual QA Engineer. Evaluate these two math exercise images:
+Image 1: Question Mode (_mode-Q)
+Image 2: Answer Mode (_mode-A)
+Module Type: "${sample.module}"
 
-This is a module from a math exercise generator. The module type is: "${sample.module}".
+STRICT CHECKLIST:
+1. General UI Integrity:
+   - NO overlapping components (e.g. text on top of borders, symbols colliding).
+   - NO broken text placeholders (strictly search for: "NaN", "undefined", "null", "[object]").
+   - Sane Panning/Padding: Comfortable whitespace around elements, nothing clipped at the edges.
+2. Global Coloring:
+   - Question Mode MUST NOT contain any green.
+   - Answer Mode MUST contain forestgreen highlighting ONLY the specific solution element.
+3. Operations (Boxes & Vertical): 
+   - The task part must be empty in Q and green in A. 
+   - Numbers and symbols must be centered in their respective boxes.
+4. Measure Length:
+   - Normal: Rectangle is SteelBlue. Box text empty in Q, green in A.
+   - Reverse: Box text black. Rectangle hidden in Q, green in A.
+5. Counting Inc/Dec:
+   - Layout is horizontal. Indicator sits LEFT of the answer box.
+   - Indicator is an up/down triangle with a bold white "1" clearly visible inside.
+6. Numbers Order:
+   - Layout is horizontal. Arrow reflects direction: ↗ (ascending) or ↘ (descending).
+7. Numbers Write:
+   - Order MUST BE: Ten-frame (left) -> Number Label (middle) -> Writing Boxes (right).
+   - Ten-frame MUST be pre-filled with blue dots in BOTH modes.
+8. Time Analog:
+   - Normal: Hands black. Digital box empty in Q, green in A.
+   - Reverse: Digital box text black. Clock hands hidden in Q, green in A.
 
-Please evaluate the images strictly against the following checklist:
-1. Global Coloring: Question image MUST NOT contain the color green (forestgreen). Answer image MUST contain forestgreen highlighting strictly the missing solution element.
-2. If module is 'operations-boxes' or 'operations-vertical': The specific missing blank part must be empty in Q, and filled with green in A.
-3. If module is 'measure-length': 
-   - Normal mode: Rectangle is colored. Box text is empty in Q, green in A.
-   - Reverse mode: Box text is black. Rectangle is hidden in Q, green in A.
-4. If module is 'counting-inc-dec': Layout is horizontal. Indicator is to the left of the box, is an up/down triangle with a bold white '1'.
-5. If module is 'numbers-order': Layout is horizontal. Connecting arrow explicitly reflects sorting direction (↗ or ↘).
-6. If module is 'numbers-write': Order is exactly Ten-frame -> Number Label -> Writing Boxes. Ten-frame must be pre-filled with blue dots (not green).
-7. If module is 'time-analog':
-   - Normal mode: Hands are black. Digital box is empty in Q, green in A.
-   - Reverse mode: Digital box text is black. Clock hands are hidden in Q, green in A.
-
-Respond in pure JSON with this schema:
-{
-    "pass": boolean,
-    "reasoning": "Detailed explanation of what passed or failed, referencing specific elements like color and layout.",
-    "questionViewHasGreen": boolean,
-    "answerViewHasGreen": boolean
-}
+Respond only in the provided JSON schema.
 `;
 
         try {
             const result = await model.generateContent([prompt, qImage, aImage]);
             const responseText = result.response.text();
             
-            try {
-                const parsed = JSON.parse(responseText);
-                const status = parsed.pass ? '✅ PASS' : '❌ FAIL';
-                console.log(`${status} - Q has Green: ${parsed.questionViewHasGreen}, A has Green: ${parsed.answerViewHasGreen}`);
-                console.log(`Reasoning: ${parsed.reasoning}\n`);
-            } catch (e) {
-                console.log(`⚠️ Invalid JSON returned: ${responseText}\n`);
-            }
+            const parsed = JSON.parse(responseText);
+            const status = parsed.pass ? '✅ PASS' : '❌ FAIL';
+            console.log(`${status}`);
+            console.log(`- Overlaps: ${parsed.general_checks.no_overlaps ? 'None' : 'DETECTED'}`);
+            console.log(`- Placeholders: ${parsed.general_checks.no_placeholders ? 'None' : 'DETECTED'}`);
+            console.log(`- Padding: ${parsed.general_checks.sane_padding ? 'Good' : 'BAD'}`);
+            console.log(`- Coloring: ${parsed.coloring_pass ? 'Correct' : 'INCORRECT'}`);
+            console.log(`- Layout: ${parsed.layout_pass ? 'Correct' : 'INCORRECT'}`);
+            console.log(`Reasoning: ${parsed.reasoning}\n`);
 
         } catch (error) {
             console.error(`🚨 Error calling Gemini API for ${sample.module}:`, error, '\n');
