@@ -38,12 +38,15 @@
         }
 
         .answer-box {
-            color: forestgreen;
             min-height: 2.5rem;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             width: 100%;
+
+            &.solution {
+                color: forestgreen;
+            }
         }
     }
 }

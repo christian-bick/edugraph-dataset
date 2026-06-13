@@ -52,11 +52,18 @@ function createProblemHTML(problem: Problem, config: { decimal: boolean, reverse
     const showRectangle = !config.reverse || isAnswer;
     const showAnswerInBox = config.reverse || isAnswer;
 
+    // The text in the box is the solution only in normal mode (not reverse) when isAnswer is true.
+    const isTextSolution = !config.reverse && isAnswer;
+
     const rectColor = config.reverse ? 'forestgreen' : color;
     const rectangleHTML = showRectangle ? createRectangle(problem.problemLength, rectColor) : `<div style="height: 22px; width: ${problem.problemLength * 30}px"></div>`;
 
     const answer = config.decimal ? (problem.problemLength).toFixed(1) : (problem.problemLength * 10).toFixed(0);
     const unit = config.decimal ? 'cm' : 'mm';
+
+    let answerBoxClasses = 'answer-box';
+    if (config.reverse) answerBoxClasses += ' reverse';
+    if (isTextSolution) answerBoxClasses += ' solution';
 
     return `
         <div class="problem">
@@ -64,7 +71,7 @@ function createProblemHTML(problem: Problem, config: { decimal: boolean, reverse
                 ${rectangleHTML}
                 ${measureBandHTML}
             </div>
-            <div class="answer-box ${config.reverse ? 'reverse' : ''}" data-unit="${unit}">${showAnswerInBox ? answer : ''}</div>
+            <div class="${answerBoxClasses}" data-unit="${unit}">${showAnswerInBox ? answer : ''}</div>
         </div>`;
 }
 

@@ -22,7 +22,7 @@ function createProblemHTML(problem: Problem, isAnswer: boolean) {
                 <span class="operator">${problem.symbol}</span>${problem.num2}
             </span>
             <div class="line"></div>
-            <div class="answer-box">${isAnswer ? problem.answer : ''}</div>
+            <div class="answer-box ${isAnswer ? 'solution' : ''}">${isAnswer ? problem.answer : ''}</div>
         </div>`;
 }
 

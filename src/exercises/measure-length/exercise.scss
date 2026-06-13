@@ -47,7 +47,10 @@
             font-size: 1.5rem;
             position: relative;
             margin-top: 10px;
-            color: forestgreen;
+
+            &.solution {
+                color: forestgreen;
+            }
 
             &::after {
                 content: attr(data-unit);
@@ -60,7 +63,6 @@
 
             &.reverse {
                 border-style: dashed;
-                color: forestgreen;
             }
         }
     }
