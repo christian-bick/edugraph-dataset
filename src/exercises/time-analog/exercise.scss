@@ -1,0 +1,69 @@
+@import "../../worksheets/base";
+
+.exercise-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    width: fit-content;
+
+    &.answer {
+        margin-top: 20px;
+    }
+
+    .problem {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+
+        .clock {
+            width: 200px;
+            height: 200px;
+
+            .face {
+                fill: none;
+                stroke: #333;
+                stroke-width: 2;
+            }
+
+            .hand {
+                stroke: #333;
+                stroke-linecap: round;
+            }
+
+            .hour-hand {
+                stroke-width: 4;
+            }
+
+            .minute-hand {
+                stroke-width: 3;
+            }
+
+            .second-hand {
+                stroke: #e74c3c;
+                stroke-width: 1.5;
+            }
+        }
+
+        .answer-box {
+            border: 2px solid #333;
+            border-radius: 5px;
+            padding: 10px 15px;
+            min-width: 100px;
+            min-height: 50px;
+            text-align: center;
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+
+            &.reverse {
+                border-style: dashed;
+                color: forestgreen;
+            }
+        }
+    }
+}

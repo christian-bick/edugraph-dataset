@@ -1,0 +1,72 @@
+@import "../../worksheets/base";
+
+.exercise-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    width: fit-content;
+
+    &.answer {
+        margin-top: 20px;
+    }
+
+    .problem-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .number-label {
+            font-size: 3rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .writing-boxes {
+            display: flex;
+            gap: 10px;
+
+            .writing-box {
+                border: 2px solid #333;
+                border-radius: 5px;
+                width: 60px;
+                height: 60px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 2rem;
+                font-family: 'Roboto Mono', monospace;
+
+                &.answer {
+                    color: forestgreen;
+                }
+
+                &.outline {
+                    color: #ddd;
+                }
+            }
+        }
+
+        .ten-frame {
+            display: grid;
+            grid-template-columns: repeat(5, 30px);
+            grid-template-rows: repeat(2, 30px);
+            gap: 2px;
+            border: 2px solid #333;
+
+            .ten-frame-box {
+                width: 30px;
+                height: 30px;
+                border: 1px solid #ccc;
+
+                &.filled {
+                    background-color: #3498db;
+                    border-radius: 50%;
+                    transform: scale(0.8);
+                }
+            }
+        }
+    }
+}

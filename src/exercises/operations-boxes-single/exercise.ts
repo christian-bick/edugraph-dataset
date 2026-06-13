@@ -1,15 +1,14 @@
 import "./exercise.scss"
 import {getParams} from "../../lib/params.ts";
-import {generateProblem} from "../../lib/arithmetic-problems.ts"
+import {generateProblem} from "../../lib/single-digit-problems.ts"
 
 function getConfig() {
-    const params = getParams(['operations', 'allowNegatives', 'blankPart', 'digitsNum1', 'digitsNum2', 'maxDigits'])
+    const params = getParams(['operations', 'allowNegatives', 'blankPart', 'includeTenCarry', 'includeZero'])
     return {
         operations: params.operations ? params.operations.split(',') : ['add'],
         allowNegatives: params.allowNegatives === 'true' || params.allowNegatives === '1',
-        digitsNum1: params.digitsNum1 ? parseInt(params.digitsNum1, 10) : undefined,
-        digitsNum2: params.digitsNum2 ? parseInt(params.digitsNum2, 10) : undefined,
-        maxDigits: params.maxDigits ? parseInt(params.maxDigits, 10) : 5,
+        includeTenCarry: params.includeTenCarry === 'true' || params.includeTenCarry === '1',
+        includeZero: params.includeZero === 'true' || params.includeZero === '1',
         blankPart: params.blankPart || 'answer'
     }
 }
@@ -20,9 +19,8 @@ const problem = generateProblem(operation, {
     operations: config.operations,
     problemCount: 1,
     allowNegatives: config.allowNegatives,
-    digitsNum1: config.digitsNum1,
-    digitsNum2: config.digitsNum2,
-    maxDigits: config.maxDigits
+    includeTenCarry: config.includeTenCarry,
+    includeZero: config.includeZero
 })
 
 function createProblemHTML(problem: any, blankPart: string, isAnswer: boolean) {

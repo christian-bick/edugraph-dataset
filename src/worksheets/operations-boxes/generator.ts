@@ -1,5 +1,3 @@
-// --- PERMUTATION GENERATORS ---
-
 import PermutationBuilder from "../../lib/permutation-builder.ts";
 import {Area, Scope, Ability} from "edugraph-ts";
 import {numScopes, withNegativesScope} from "../../lib/labels.ts";

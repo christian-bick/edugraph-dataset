@@ -1,0 +1,66 @@
+@import "../../worksheets/base";
+
+.exercise-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    width: fit-content;
+
+    &.answer {
+        margin-top: 20px;
+    }
+
+    .problem {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+
+        .measurement-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+
+            .measured-rectangle {
+                height: 20px;
+                margin-bottom: 2px;
+            }
+
+            .measure-band {
+                height: 50px;
+            }
+        }
+
+        .answer-box {
+            border: 2px solid #333;
+            border-radius: 5px;
+            padding: 10px 15px;
+            min-width: 80px;
+            min-height: 50px;
+            text-align: center;
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+            margin-top: 10px;
+
+            &::after {
+                content: attr(data-unit);
+                position: absolute;
+                right: -40px;
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #555;
+            }
+
+            &.reverse {
+                border-style: dashed;
+                color: forestgreen;
+            }
+        }
+    }
+}
