@@ -69,13 +69,21 @@ function createProblemHTML(problem: Problem, isAnswer: boolean, interval: number
 
     // The solution is the clock hands if it's reverse mode and an answer.
     const isClockSolution = isReverse && isAnswer;
+    
+    // The solution is the text in the box if it's normal mode and an answer.
+    const isTextSolution = !isReverse && isAnswer;
+
     const clockHTML = createClock(problem.time, interval, !showHands, isClockSolution);
     const formattedTime = formatTime(problem.time, interval);
+
+    let answerBoxClasses = 'answer-box';
+    if (isReverse) answerBoxClasses += ' reverse';
+    if (isTextSolution) answerBoxClasses += ' solution';
 
     return `
         <div class="problem">
             ${clockHTML}
-            <div class="answer-box ${isReverse ? 'reverse' : ''}">${showTime ? formattedTime : ''}</div>
+            <div class="${answerBoxClasses}">${showTime ? formattedTime : ''}</div>
         </div>`;
 }
 

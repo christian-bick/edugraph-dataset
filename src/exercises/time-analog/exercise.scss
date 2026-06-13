@@ -62,7 +62,10 @@
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            color: forestgreen;
+
+            &.solution {
+                color: forestgreen;
+            }
 
             &.reverse {
                 border-style: dashed;
