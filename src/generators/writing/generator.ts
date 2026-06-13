@@ -1,4 +1,4 @@
-import { ProblemGenerator, DatasetGenerationConfig, AbstractProblem } from "../types/ml-engine.ts";
+import { ProblemGenerator, DatasetGenerationConfig, AbstractProblem } from "../../types/ml-engine.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
 export class WritingGenerator implements ProblemGenerator {
@@ -55,7 +55,6 @@ export class WritingGenerator implements ProblemGenerator {
                         if (countForThisPerm >= maxNum - minNum + 1) break;
                     }
                 } else {
-                    // Only one number allowed for this permutation if it's fixed
                     break;
                 }
             }

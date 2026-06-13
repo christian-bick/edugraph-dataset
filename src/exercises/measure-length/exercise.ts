@@ -2,22 +2,25 @@ import "./exercise.scss";
 import { RenderPayload } from "../../types/ml-engine.ts";
 
 function createMeasureBand(bandLength: number): string {
+    const margin = 20;
+    const width = bandLength * 30 + margin * 2;
     let markers = '';
     for (let i = 0; i <= bandLength; i++) {
-        markers += `<line x1="${i * 30}" y1="0" x2="${i * 30}" y2="20" stroke="black" stroke-width="1"/>`;
-        markers += `<text x="${i * 30}" y="40" text-anchor="middle" font-size="12">${i}</text>`;
+        const x = i * 30 + margin;
+        markers += `<line x1="${x}" y1="0" x2="${x}" y2="20" stroke="black" stroke-width="1"/>`;
+        markers += `<text x="${x}" y="40" text-anchor="middle" font-size="12" fill="black">${i}</text>`;
 
         if (i < bandLength) {
             for (let j = 1; j < 10; j++) {
                 const y2 = (j === 5) ? 14 : 10;
-                markers += `<line x1="${i * 30 + j * 3}" y1="0" x2="${i * 30 + j * 3}" y2="${y2}" stroke="black" stroke-width="0.5"/>`;
+                markers += `<line x1="${x + j * 3}" y1="0" x2="${x + j * 3}" y2="${y2}" stroke="black" stroke-width="0.5"/>`;
             }
         }
     }
 
     return `
-        <svg class="measure-band" viewBox="0 0 ${bandLength * 30} 50" width="${bandLength * 30}" height="50">
-            <rect x="0" y="0" width="${bandLength * 30}" height="20" fill="#f0f0f0" stroke="black" stroke-width="1"/>
+        <svg class="measure-band" viewBox="0 0 ${width} 50" width="${width}" height="50" style="overflow: visible;">
+            <rect x="${margin}" y="0" width="${bandLength * 30}" height="20" fill="#f0f0f0" stroke="black" stroke-width="1"/>
             ${markers}
         </svg>
     `;
@@ -25,11 +28,13 @@ function createMeasureBand(bandLength: number): string {
 
 function createRectangle(length: number, color: string): string {
     const rectHeight = 20;
+    const margin = 20; // Match the band margin
     const displayLength = length * 30;
+    const width = displayLength + margin; // Only need left margin for alignment
 
     return `
-        <svg class="measured-rectangle" viewBox="0 0 ${displayLength} ${rectHeight}" width="${displayLength}" height="${rectHeight}">
-            <rect x="0" y="0" width="${displayLength}" height="${rectHeight}" fill="${color}"/>
+        <svg class="measured-rectangle" viewBox="0 0 ${width} ${rectHeight}" width="${width}" height="${rectHeight}" style="overflow: visible;">
+            <rect x="${margin}" y="0" width="${displayLength}" height="${rectHeight}" fill="${color}"/>
         </svg>
     `;
 }

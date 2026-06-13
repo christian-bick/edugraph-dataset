@@ -18,6 +18,8 @@
         align-items: flex-end;
         font-size: 2rem;
         font-family: 'Roboto Mono', monospace;
+        letter-spacing: 2px;
+        white-space: nowrap;
 
         .number {
             display: flex;

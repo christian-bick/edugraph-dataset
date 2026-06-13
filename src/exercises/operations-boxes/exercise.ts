@@ -1,4 +1,4 @@
-import { random } from "../../lib/random.ts";
+import { random, setSeed } from "../../lib/random.ts";
 import "./exercise.scss";
 import { RenderPayload } from "../../types/ml-engine.ts";
 
@@ -53,10 +53,12 @@ function createProblemHTML(
 window.renderExercise = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('exercise');
     
-    // We only need one container now, but if both exist we'll just use the first or clear the DOM.
-    // The orchestrator calls renderExercise twice: once with isAnswerView=false, once with true.
     if (exerciseContainer) {
         const { problem, config, isAnswerView } = payload;
+        
+        // --- Deterministic Blank Selection ---
+        // We seed with the problem ID so Q and A always pick the same part to blank
+        setSeed(problem.id);
         
         let blankPartKey = '';
         const requestedBlank = config.visualParams.blankPart || 'answer';
@@ -93,7 +95,6 @@ window.renderExercise = (payload: RenderPayload) => {
             isAnswerView
         );
 
-        // Hide the old answer container if it exists, as the ML pipeline doesn't use it
         const answerContainer = document.getElementById('answer');
         if (answerContainer) {
             answerContainer.style.display = 'none';

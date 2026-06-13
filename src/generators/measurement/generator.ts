@@ -1,5 +1,5 @@
-import { ProblemGenerator, DatasetGenerationConfig, AbstractProblem } from "../types/ml-engine.ts";
-import { random } from "../lib/random.ts";
+import { ProblemGenerator, DatasetGenerationConfig, AbstractProblem } from "../../types/ml-engine.ts";
+import { random } from "../../lib/random.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
 export class MeasurementGenerator implements ProblemGenerator {

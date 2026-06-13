@@ -1,8 +1,8 @@
-import { ProblemGenerator, DatasetGenerationConfig, AbstractProblem } from "../types/ml-engine.ts";
-import { generateAddition, generateSubtraction, generateMultiplication, generateDivision } from "../lib/arithmetic-problems.ts";
-import { random } from "../lib/random.ts";
+import { ProblemGenerator, DatasetGenerationConfig, AbstractProblem } from "../../types/ml-engine.ts";
+import { generateAddition, generateSubtraction, generateMultiplication, generateDivision } from "../../lib/arithmetic-problems.ts";
+import { random } from "../../lib/random.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
-import { numScopes, withNegativesScope } from "../lib/labels.ts";
+import { numScopes, withNegativesScope } from "../../lib/labels.ts";
 
 export class ArithmeticGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'arithmetic';

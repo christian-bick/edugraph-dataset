@@ -9,8 +9,19 @@ if (typeof window !== 'undefined' && window.location) {
     }
 }
 
-export function setSeed(newSeed: number) {
-    seed = newSeed;
+export function setSeed(newSeed: number | string) {
+    if (typeof newSeed === 'string') {
+        // Simple hash function for string seeds
+        let hash = 0;
+        for (let i = 0; i < newSeed.length; i++) {
+            const char = newSeed.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        seed = Math.abs(hash);
+    } else {
+        seed = newSeed;
+    }
 }
 
 // Mulberry32 PRNG
