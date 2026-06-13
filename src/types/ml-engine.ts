@@ -60,6 +60,12 @@ declare global {
 
 // --- Generator Interfaces ---
 
+/** 
+ * A partial problem returned by generators, containing only the identity and raw data.
+ * type and tags are filled in by the orchestrator.
+ */
+export type ProblemStub = Pick<AbstractProblem, 'id' | 'data'>;
+
 /**
  * The configuration used by the Abstract Generators to produce datasets.
  */
@@ -92,7 +98,7 @@ export interface ProblemGenerator {
      * The returned ID is used for deduplication during dataset generation.
      * Returns null if a valid problem could not be generated for the given parameters (triggers a retry).
      */
-    generate(params: Record<string, any>): Omit<AbstractProblem, "tags" | "type"> | null;
+    generate(params: Record<string, any>): ProblemStub | null;
 }
 
 // --- ML Orchestrator Interfaces ---
