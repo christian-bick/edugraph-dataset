@@ -1,16 +1,9 @@
-import { chromium, Browser, BrowserContext } from 'playwright';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { mkdirSync, rmSync, existsSync } from 'fs';
-import { ArithmeticGenerator } from '../generators/arithmetic.ts';
-import { CountingGenerator } from '../generators/counting.ts';
-import { MeasurementGenerator } from '../generators/measurement.ts';
-import { ComparisonGenerator } from '../generators/comparison.ts';
-import { OrderingGenerator } from '../generators/ordering.ts';
-import { WritingGenerator } from '../generators/writing.ts';
-import { TimeGenerator } from '../generators/time.ts';
-import { MLDatasetPipelineConfig, RenderPayload, AbstractProblem, VisualBlueprint } from '../types/ml-engine.ts';
-import PermutationBuilder from '../lib/permutation-builder.ts';
+import {Browser, chromium} from 'playwright';
+import {dirname, resolve} from 'path';
+import {fileURLToPath} from 'url';
+import {existsSync, mkdirSync, rmSync} from 'fs';
+import {AbstractProblem, RenderPayload, VisualBlueprint} from '../types/ml-engine.ts';
+import {pipelineConfigs} from '../config/ml-pipeline.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -154,176 +147,57 @@ async function renderDatasetSplit(
 async function main() {
     console.log('--- Starting ML Dataset Pipeline ---');
 
-    // Prepare Output Directory once
     if (existsSync(OUT_DIR)) {
         rmSync(OUT_DIR, { recursive: true, force: true });
     }
     mkdirSync(OUT_DIR, { recursive: true });
 
-    const splits = { train: 0.7, val: 0.2, test: 0.1 };
+    const trainSet: AbstractProblem[] = [];
+    const valSet: AbstractProblem[] = [];
+    const testSet: AbstractProblem[] = [];
+    const allBlueprints: VisualBlueprint[] = [];
 
-    // --- PERMUTATIONS ---
-    const singleDigitPerms = new PermutationBuilder()
-        .applyVariants('operations', ['add', 'subtract', 'multiply', 'divide'])
-        .applyVariants('blankPart', ['answer', 'problem', 'problem-answer', 'random'])
-        .applyVariants('includeZero', [true, false])
-        .applyVariants('allowNegatives', [false, true])
-        .build().map(p => p.params);
+    // Dynamically load generators and build datasets
+    for (const config of pipelineConfigs) {
+        console.log(`Loading generator: ${config.generatorName}`);
+        
+        let GeneratorClass;
+        switch(config.generatorName) {
+            case 'arithmetic': GeneratorClass = (await import('../generators/arithmetic.ts')).ArithmeticGenerator; break;
+            case 'counting': GeneratorClass = (await import('../generators/counting.ts')).CountingGenerator; break;
+            case 'measurement': GeneratorClass = (await import('../generators/measurement.ts')).MeasurementGenerator; break;
+            case 'comparison': GeneratorClass = (await import('../generators/comparison.ts')).ComparisonGenerator; break;
+            case 'ordering': GeneratorClass = (await import('../generators/ordering.ts')).OrderingGenerator; break;
+            case 'writing': GeneratorClass = (await import('../generators/writing.ts')).WritingGenerator; break;
+            case 'time': GeneratorClass = (await import('../generators/time.ts')).TimeGenerator; break;
+            default:
+                console.error(`Unknown generator: ${config.generatorName}`);
+                continue;
+        }
 
-    const multiDigitPerms = new PermutationBuilder()
-        .applyRange(['digitsNum1', "digitsNum2"], [2, 3])
-        .applyVariants('operations', ['add', 'subtract', 'multiply'])
-        .applyVariants('allowNegatives', [false, true])
-        .build().map(p => p.params);
+        const generator = new GeneratorClass();
+        console.log(`Generating abstract problems for ${config.generatorName}...`);
+        const dataset = generator.generateDataset(config.generationConfig);
 
-    const countingPerms = new PermutationBuilder()
-        .applyVariants('maxCount', [5, 10, 15, 20])
-        .applyVariants('type', ['inc', 'dec', undefined])
-        .build().map(p => p.params);
-
-    const measurementPerms = new PermutationBuilder()
-        .applyVariants('bandLength', [10, 20])
-        .build().map(p => p.params);
-
-    const comparisonPerms = new PermutationBuilder()
-        .applyVariants('digits', [1, 2, 3])
-        .applyVariants('includesZero', [true, false])
-        .build().map(p => p.params);
-
-    const orderingPerms = new PermutationBuilder()
-        .applyVariants('includesZero', [true, false])
-        .build().map(p => p.params);
-
-    const writingPerms = new PermutationBuilder()
-        .applyRange(['number'], [1, 9])
-        .build().map(p => p.params);
-
-    const timePerms = new PermutationBuilder()
-        .applyVariants('interval', [3600, 1800, 900, 60, 1])
-        .build().map(p => p.params);
-
-    // 1. Arithmetic
-    const arithmeticPipelineConfig: MLDatasetPipelineConfig = {
-        generationConfig: { 
-            permutations: [...singleDigitPerms, ...multiDigitPerms], 
-            countPerPermutation: 1, 
-            seed: 42 
-        },
-        splits,
-        visualDistribution: [
-            { rendererId: 'operations-boxes', visualParams: {}, instancesPerProblem: 1 },
-            { rendererId: 'operations-vertical', visualParams: {}, instancesPerProblem: 1 }
-        ]
-    };
-
-    // 2. Counting
-    const countingPipelineConfig: MLDatasetPipelineConfig = {
-        generationConfig: { permutations: countingPerms, countPerPermutation: 1, seed: 42 },
-        splits,
-        visualDistribution: [
-            { rendererId: 'counting-objects', visualParams: {}, instancesPerProblem: 1 },
-            { rendererId: 'counting-inc-dec', visualParams: {}, instancesPerProblem: 1 }
-        ]
-    };
-
-    // 3. Measurement
-    const measurementPipelineConfig: MLDatasetPipelineConfig = {
-        generationConfig: { permutations: measurementPerms, countPerPermutation: 1, seed: 42 },
-        splits,
-        visualDistribution: [
-            { rendererId: 'measure-length', visualParams: { decimal: true, reverse: false }, instancesPerProblem: 1 },
-            { rendererId: 'measure-length', visualParams: { decimal: true, reverse: true }, instancesPerProblem: 1 }
-        ]
-    };
-
-    // 4. Comparison
-    const comparisonPipelineConfig: MLDatasetPipelineConfig = {
-        generationConfig: { permutations: comparisonPerms, countPerPermutation: 1, seed: 42 },
-        splits,
-        visualDistribution: [
-            { rendererId: 'numbers-compare', visualParams: {}, instancesPerProblem: 1 }
-        ]
-    };
-
-    // 5. Ordering
-    const orderingPipelineConfig: MLDatasetPipelineConfig = {
-        generationConfig: { permutations: orderingPerms, countPerPermutation: 1, seed: 42 },
-        splits,
-        visualDistribution: [
-            { rendererId: 'numbers-order', visualParams: { desc: false }, instancesPerProblem: 1 },
-            { rendererId: 'numbers-order', visualParams: { desc: true }, instancesPerProblem: 1 }
-        ]
-    };
-
-    // 6. Writing
-    const writingPipelineConfig: MLDatasetPipelineConfig = {
-        generationConfig: { permutations: writingPerms, countPerPermutation: 1, seed: 42 },
-        splits,
-        visualDistribution: [
-            { rendererId: 'numbers-write', visualParams: { outline: false }, instancesPerProblem: 1 },
-            { rendererId: 'numbers-write', visualParams: { outline: true }, instancesPerProblem: 1 }
-        ]
-    };
-
-    // 7. Time
-    const timePipelineConfig: MLDatasetPipelineConfig = {
-        generationConfig: { permutations: timePerms, countPerPermutation: 1, seed: 42 },
-        splits,
-        visualDistribution: [
-            { rendererId: 'time-analog', visualParams: { reverse: false }, instancesPerProblem: 1 },
-            { rendererId: 'time-analog', visualParams: { reverse: true }, instancesPerProblem: 1 }
-        ]
-    };
-
-    console.log(`Generating abstract problems...`);
-    const arithmeticDataset = new ArithmeticGenerator().generateDataset(arithmeticPipelineConfig.generationConfig);
-    const countingDataset = new CountingGenerator().generateDataset(countingPipelineConfig.generationConfig);
-    const measurementDataset = new MeasurementGenerator().generateDataset(measurementPipelineConfig.generationConfig);
-    const comparisonDataset = new ComparisonGenerator().generateDataset(comparisonPipelineConfig.generationConfig);
-    const orderingDataset = new OrderingGenerator().generateDataset(orderingPipelineConfig.generationConfig);
-    const writingDataset = new WritingGenerator().generateDataset(writingPipelineConfig.generationConfig);
-    const timeDataset = new TimeGenerator().generateDataset(timePipelineConfig.generationConfig);
-
-    const fullDataset = [...arithmeticDataset, ...countingDataset, ...measurementDataset, ...comparisonDataset, ...orderingDataset, ...writingDataset, ...timeDataset];
-
-    const trainSet = [];
-    const valSet = [];
-    const testSet = [];
-
-    const processSplits = (dataset: AbstractProblem[], ratios: any) => {
+        // Process splits
         const count = dataset.length;
-        const trainC = Math.floor(count * ratios.train);
-        const valC = Math.floor(count * ratios.val);
+        const trainC = Math.floor(count * config.splits.train);
+        const valC = Math.floor(count * config.splits.val);
         trainSet.push(...dataset.slice(0, trainC));
         valSet.push(...dataset.slice(trainC, trainC + valC));
         testSet.push(...dataset.slice(trainC + valC));
+        
+        // Collect blueprints
+        allBlueprints.push(...config.visualDistribution);
     }
 
-    processSplits(arithmeticDataset, splits);
-    processSplits(countingDataset, splits);
-    processSplits(measurementDataset, splits);
-    processSplits(comparisonDataset, splits);
-    processSplits(orderingDataset, splits);
-    processSplits(writingDataset, splits);
-    processSplits(timeDataset, splits);
-
-    console.log(`Split distribution: Train (${trainSet.length}), Val (${valSet.length}), Test (${testSet.length})`);
+    console.log(`\nGlobal Split distribution: Train (${trainSet.length}), Val (${valSet.length}), Test (${testSet.length})`);
 
     console.log(`Launching browser with ${DEFAULT_CONCURRENCY} parallel workers...`);
     const browser = await chromium.launch({ headless: true });
 
     const startTime = performance.now();
     let totalRenderedImages = 0;
-
-    const allBlueprints = [
-        ...arithmeticPipelineConfig.visualDistribution, 
-        ...countingPipelineConfig.visualDistribution,
-        ...measurementPipelineConfig.visualDistribution,
-        ...comparisonPipelineConfig.visualDistribution,
-        ...orderingPipelineConfig.visualDistribution,
-        ...writingPipelineConfig.visualDistribution,
-        ...timePipelineConfig.visualDistribution
-    ];
 
     totalRenderedImages += await renderDatasetSplit(browser, 'train', trainSet, allBlueprints, DEFAULT_CONCURRENCY);
     totalRenderedImages += await renderDatasetSplit(browser, 'val', valSet, allBlueprints, DEFAULT_CONCURRENCY);

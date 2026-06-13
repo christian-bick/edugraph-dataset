@@ -83,6 +83,10 @@ export interface ProblemGenerator {
     type: AbstractProblem['type'];
     /** Visual modules capable of rendering problems from this generator */
     compatibleRenderers: string[];
+    /**
+     * Generates pedagogical tags (from edugraph-ts ontology) based on the permutation parameters.
+     */
+    generateLabels(permutationParams: Record<string, any>): string[];
     /** 
      * Generates a set of guaranteed-unique abstract problems based on the constraints.
      * Uses the global seed internally.
@@ -106,6 +110,8 @@ export interface VisualBlueprint {
  * Configuration for the ML Orchestrator to build the final dataset.
  */
 export interface MLDatasetPipelineConfig {
+    /** The filename or registry ID of the generator (e.g., 'arithmetic') */
+    generatorName: string;
     generationConfig: DatasetGenerationConfig;
     
     /** 
