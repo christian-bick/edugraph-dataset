@@ -1,3 +1,4 @@
+import { random } from "./random.ts";
 // --- PROBLEM GENERATION ---
 
 const operatorList = ['add', 'subtract', 'multiply', 'divide'];
@@ -44,7 +45,7 @@ function generateNumber(digits: number | undefined, maxDigits: number, allowNega
     if (digits) {
         exp = digits;
     } else {
-        exp = Math.floor(Math.random() * maxDigits) + 1;
+        exp = Math.floor(random() * maxDigits) + 1;
     }
 
     let minNum = Math.pow(10, exp - 1);
@@ -58,7 +59,7 @@ function generateNumber(digits: number | undefined, maxDigits: number, allowNega
         maxNum = absMaxNum;
     }
 
-    return Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+    return Math.floor(random() * (maxNum - minNum + 1)) + minNum;
 }
 
 interface MinMaxBounds {
@@ -71,7 +72,7 @@ function getMinMaxBounds(digits: number | undefined, maxDigits: number, allowNeg
     if (digits) {
         exp = digits;
     } else {
-        exp = Math.floor(Math.random() * maxDigits) + 1;
+        exp = Math.floor(random() * maxDigits) + 1;
     }
 
     let minNum = Math.pow(10, exp - 1);
@@ -106,7 +107,7 @@ export function generateSubtraction(params: SubtractionConfig): Problem {
         if (digitsNum2) {
             exp2 = digitsNum2;
         } else {
-            exp2 = Math.floor(Math.random() * maxDigits) + 1;
+            exp2 = Math.floor(random() * maxDigits) + 1;
         }
         let minNum2ForSubtraction = Math.pow(10, exp2 - 1);
         let maxNum2ForSubtraction = Math.pow(10, exp2) - 1;
@@ -118,7 +119,7 @@ export function generateSubtraction(params: SubtractionConfig): Problem {
         if (minNum2ForSubtraction > maxNum2ForSubtraction) {
             num2 = num1; // Fallback to ensure a valid problem (answer 0)
         } else {
-            num2 = Math.floor(Math.random() * (maxNum2ForSubtraction - minNum2ForSubtraction + 1)) + minNum2ForSubtraction;
+            num2 = Math.floor(random() * (maxNum2ForSubtraction - minNum2ForSubtraction + 1)) + minNum2ForSubtraction;
         }
     }
     const answer = num1 - num2;
@@ -148,7 +149,7 @@ export function generateDivision(params: DivisionConfig): Problem {
     while (tries < maxTries) {
         tries++;
 
-        divisor = Math.floor(Math.random() * (divMaxNum2 - divMinNum2 + 1)) + divMinNum2;
+        divisor = Math.floor(random() * (divMaxNum2 - divMinNum2 + 1)) + divMinNum2;
         if (divisor === 0) continue;
 
         let currentMaxQuotient, currentMinQuotient;
@@ -164,7 +165,7 @@ export function generateDivision(params: DivisionConfig): Problem {
 
         if (currentMaxQuotient < currentMinQuotient) continue;
 
-        quotient = Math.floor(Math.random() * (currentMaxQuotient - currentMinQuotient + 1)) + currentMinQuotient;
+        quotient = Math.floor(random() * (currentMaxQuotient - currentMinQuotient + 1)) + currentMinQuotient;
 
         if (divisor > -2 && divisor < 2) continue;
         if (quotient > -2 && quotient < 2) continue;
@@ -245,11 +246,11 @@ export function generateProblem(op: string, config: ProblemSetConfig): Problem {
 
 export function getNextOperator(operations: string[]): string {
     if (operations.length === 0) {
-        return operatorList[Math.floor(Math.random() * operatorList.length)]
+        return operatorList[Math.floor(random() * operatorList.length)]
     } else if (operations.length === 1) {
         return operations[0]
     } else {
-        return operations[Math.floor(Math.random() * operations.length)]
+        return operations[Math.floor(random() * operations.length)]
     }
 }
 

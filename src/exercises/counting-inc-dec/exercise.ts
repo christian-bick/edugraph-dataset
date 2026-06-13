@@ -1,3 +1,4 @@
+import { random } from "../../lib/random.ts";
 import "./exercise.scss";
 import { getParams } from "../../lib/params.ts";
 
@@ -12,17 +13,17 @@ function getConfig() {
 }
 
 function generateProblem(max: number, type: string) {
-    const problemType = type === 'mixed' ? (Math.random() < 0.5 ? 'inc' : 'dec') : type;
+    const problemType = type === 'mixed' ? (random() < 0.5 ? 'inc' : 'dec') : type;
     let numObjects;
 
     if (problemType === 'dec') {
-        numObjects = Math.floor(Math.random() * (max - 2 + 1)) + 2;
+        numObjects = Math.floor(random() * (max - 2 + 1)) + 2;
     } else { // 'inc'
-        numObjects = Math.floor(Math.random() * (max - 1)) + 1;
+        numObjects = Math.floor(random() * (max - 1)) + 1;
     }
 
     const answer = problemType === 'inc' ? numObjects + 1 : numObjects - 1;
-    const icon = ICONS[Math.floor(Math.random() * ICONS.length)];
+    const icon = ICONS[Math.floor(random() * ICONS.length)];
     return { numObjects, icon, type: problemType, answer };
 }
 

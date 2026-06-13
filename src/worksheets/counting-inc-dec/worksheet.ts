@@ -1,3 +1,4 @@
+import { random } from "../../lib/random.ts";
 import "./worksheet.scss";
 import { getParams } from "../../lib/params.ts";
 
@@ -17,14 +18,14 @@ function getConfig() {
 function generateProblems(max: number, type: string, numProblems: number, exclude: {inc: number[], dec: number[], icons: string[]} = {inc: [], dec: [], icons: []}) {
     const problems = [];
     const availableIcons = ICONS.filter(icon => !exclude.icons.includes(icon));
-    const shuffledIcons = [...availableIcons].sort(() => 0.5 - Math.random());
+    const shuffledIcons = [...availableIcons].sort(() => 0.5 - random());
 
     let problemTypes: string[] = [];
     if (type === 'mixed') {
         const numInc = Math.ceil(numProblems / 2);
         const numDec = numProblems - numInc;
         problemTypes = [...Array(numInc).fill('inc'), ...Array(numDec).fill('dec')];
-        problemTypes.sort(() => 0.5 - Math.random()); // Shuffle the types
+        problemTypes.sort(() => 0.5 - random()); // Shuffle the types
     } else {
         problemTypes = Array(numProblems).fill(type);
     }
@@ -34,14 +35,14 @@ function generateProblems(max: number, type: string, numProblems: number, exclud
         let numObjects;
 
         if (problemType === 'dec') {
-            numObjects = Math.floor(Math.random() * (max - 2 + 1)) + 2;
+            numObjects = Math.floor(random() * (max - 2 + 1)) + 2;
             while(exclude.dec.includes(numObjects)) {
-                numObjects = Math.floor(Math.random() * (max - 2 + 1)) + 2;
+                numObjects = Math.floor(random() * (max - 2 + 1)) + 2;
             }
         } else { // 'inc'
-            numObjects = Math.floor(Math.random() * (max - 1)) + 1;
+            numObjects = Math.floor(random() * (max - 1)) + 1;
             while(exclude.inc.includes(numObjects)) {
-                numObjects = Math.floor(Math.random() * (max - 1)) + 1;
+                numObjects = Math.floor(random() * (max - 1)) + 1;
             }
         }
 

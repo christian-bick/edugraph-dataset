@@ -1,3 +1,4 @@
+import { random } from "../../lib/random.ts";
 import "./exercise.scss";
 import { getParams } from "../../lib/params.ts";
 
@@ -13,8 +14,8 @@ function getConfig() {
 
 function generateProblem(maxCount: number) {
     const minCount = Math.max(1, maxCount - 9); // e.g. for count=10, minCount=1; for count=20, minCount=11
-    const numObjects = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
-    const icon = ICONS[Math.floor(Math.random() * ICONS.length)];
+    const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
+    const icon = ICONS[Math.floor(random() * ICONS.length)];
     return { numObjects, icon };
 }
 

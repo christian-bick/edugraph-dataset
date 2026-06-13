@@ -1,3 +1,4 @@
+import { random } from "../../lib/random.ts";
 import "./exercise.scss"
 import {getParams} from "../../lib/params.ts";
 import {generateProblem} from "../../lib/arithmetic-problems.ts"
@@ -15,7 +16,7 @@ function getConfig() {
 }
 
 const config = getConfig()
-const operation = config.operations[Math.floor(Math.random() * config.operations.length)];
+const operation = config.operations[Math.floor(random() * config.operations.length)];
 const problem = generateProblem(operation, {
     operations: config.operations,
     problemCount: 1,
@@ -61,12 +62,12 @@ if (exerciseContainer && answerContainer) {
     switch (config.blankPart) {
         case 'problem': {
             const parts = ['num1', 'num2'];
-            blankPartKey = parts[Math.floor(Math.random() * parts.length)];
+            blankPartKey = parts[Math.floor(random() * parts.length)];
             break;
         }
         case 'problem-answer': {
             const parts = ['num1', 'num2', 'answer'];
-            blankPartKey = parts[Math.floor(Math.random() * parts.length)];
+            blankPartKey = parts[Math.floor(random() * parts.length)];
             break;
         }
         case 'operator':
@@ -74,7 +75,7 @@ if (exerciseContainer && answerContainer) {
             break;
         case 'random': {
             const allParts = ['num1', 'num2', 'answer', 'symbol'];
-            blankPartKey = allParts[Math.floor(Math.random() * allParts.length)];
+            blankPartKey = allParts[Math.floor(random() * allParts.length)];
             break;
         }
         case 'answer':

@@ -1,3 +1,4 @@
+import { random } from "./random.ts";
 export interface Problem {
     time: string;
 }
@@ -7,7 +8,7 @@ export function generateProblemSet(config: { interval: number, problemCount: num
     const dayInSeconds = 24 * 3600;
 
     while (problems.size < config.problemCount) {
-        const randomSeconds = Math.floor(Math.random() * dayInSeconds);
+        const randomSeconds = Math.floor(random() * dayInSeconds);
         const roundedSeconds = Math.round(randomSeconds / config.interval) * config.interval;
 
         const hour = Math.floor(roundedSeconds / 3600) % 24;

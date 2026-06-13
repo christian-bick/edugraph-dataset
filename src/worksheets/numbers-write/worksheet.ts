@@ -1,3 +1,4 @@
+import { random } from "../../lib/random.ts";
 import "./worksheet.scss";
 import { getParams } from "../../lib/params.ts";
 
@@ -61,7 +62,7 @@ const answersContainer = document.getElementById('answers-container'); // Get an
 if (problemsContainer && answersContainer) { // Check both containers
     let numbers = Array.from({ length: 9 }, (_, i) => i + 1);
     if (config.order === 'random') {
-        numbers = numbers.sort(() => Math.random() - 0.5);
+        numbers = numbers.sort(() => random() - 0.5);
     }
 
     numbers.forEach((number, index) => {

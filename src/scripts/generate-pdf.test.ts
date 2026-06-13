@@ -49,7 +49,7 @@ describe('generate-pdf/generateConfigs', () => {
     it('should generate correct configurations', () => {
         const configs = generateConfigs('test-module', mockGenerator);
         expect(configs).toHaveLength(2);
-        expect(configs[0].questionDoc).toBe('test-module_mock-name-a-1_question.pdf');
+        expect(configs[0].questionDoc).toBe('test-module_mock-name-a-1_view-Q.pdf');
     });
 });
 
@@ -91,6 +91,6 @@ describe('generatePdfs', () => {
 
         // Act & Assert
         await expect(generatePdfs('test-module', {loadConfig: mockLoadConfig}))
-            .rejects.toThrow('Duplicate filename detected in the same run: test-module_duplicate-name_question.pdf');
+            .rejects.toThrow('Duplicate filename detected in the same run: test-module_duplicate-name_view-Q.pdf');
     });
 });

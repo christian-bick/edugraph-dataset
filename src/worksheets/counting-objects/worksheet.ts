@@ -1,3 +1,4 @@
+import { random } from "../../lib/random.ts";
 import "./worksheet.scss";
 import { getParams } from "../../lib/params.ts";
 
@@ -19,10 +20,10 @@ function generateProblems(count: number, numProblems: number) {
     const minCount = Math.max(1, count - 10);
 
     // Shuffle icons to ensure variety
-    const shuffledIcons = [...ICONS].sort(() => 0.5 - Math.random());
+    const shuffledIcons = [...ICONS].sort(() => 0.5 - random());
 
     for (let i = 0; i < numProblems; i++) {
-        const numObjects = Math.floor(Math.random() * (count - minCount + 1)) + minCount;
+        const numObjects = Math.floor(random() * (count - minCount + 1)) + minCount;
         // Use a unique icon for each problem
         const icon = shuffledIcons[i % shuffledIcons.length];
         problems.push({ numObjects, icon });

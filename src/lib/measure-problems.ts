@@ -1,3 +1,4 @@
+import { random } from "./random.ts";
 export interface Problem {
     bandLength: number; // in cm
     problemLength: number; // in cm
@@ -9,7 +10,7 @@ export function generateProblemSet(config: { problemCount: number, bandLength: n
 
     while (problemSet.length < config.problemCount) {
         const minProblemLength = config.bandLength * 0.25;
-        const problemLength = parseFloat((Math.random() * (config.bandLength - minProblemLength) + minProblemLength).toFixed(1)); // Random length, 1 decimal place
+        const problemLength = parseFloat((random() * (config.bandLength - minProblemLength) + minProblemLength).toFixed(1)); // Random length, 1 decimal place
 
         const problemKey = `${config.bandLength}-${problemLength}`;
         if (!problems.has(problemKey)) {

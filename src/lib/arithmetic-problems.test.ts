@@ -1,3 +1,4 @@
+import * as randomModule from "./random.ts";
 import {
     generateSubtraction,
     generateAddition,
@@ -15,7 +16,7 @@ describe('generateSubtraction', () => {
     // --- Standard Cases ---
     describe('Standard Operation', () => {
         it('should correctly subtract single-digit numbers', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(4 / 9).mockReturnValueOnce(0.2);
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(4 / 9).mockReturnValueOnce(0.2);
             const config = {digitsNum1: 1, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateSubtraction(config);
             expect(num1).toBe(5);
@@ -24,7 +25,7 @@ describe('generateSubtraction', () => {
         });
 
         it('should correctly subtract two-digit numbers', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(4 / 9).mockReturnValueOnce(15 / 41);
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(4 / 9).mockReturnValueOnce(15 / 41);
             const config = {digitsNum1: 2, digitsNum2: 2, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateSubtraction(config);
             expect(num1).toBe(50);
@@ -33,7 +34,7 @@ describe('generateSubtraction', () => {
         });
 
         it('should correctly subtract a 3-digit number from a 4-digit number', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(234 / 9000).mockReturnValueOnce(467.000000000001 / 900);
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(234 / 9000).mockReturnValueOnce(467.000000000001 / 900);
             const config = {digitsNum1: 4, digitsNum2: 3, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateSubtraction(config);
             expect(num1).toBe(1234);
@@ -43,7 +44,7 @@ describe('generateSubtraction', () => {
 
         it('should ensure the answer is always non-negative by capping num2', () => {
             // Force num1 to be a specific value, then try to generate the highest possible num2.
-            vi.spyOn(Math, 'random')
+            vi.spyOn(randomModule, "random")
                 .mockReturnValueOnce(0.2) // Generates num1: floor(0.2 * (10-5+1)) + 5 = 6
                 .mockReturnValueOnce(0.999); // Tries to generate the highest possible num2
 
@@ -62,7 +63,7 @@ describe('generateSubtraction', () => {
 
     describe('when allowNegatives is true', () => {
         it('should produce a negative answer when subtracting a larger positive number', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0.999999); // Selects minimums
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0).mockReturnValueOnce(0.999999); // Selects minimums
             const config = {digitsNum1: 2, digitsNum2: 2, maxDigits: 5, allowNegatives: true};
             const {num1, num2, answer} = generateSubtraction(config);
 
@@ -72,7 +73,7 @@ describe('generateSubtraction', () => {
         });
 
         it('should correctly subtract a negative number from a positive number (e.g., 10 - (-5))', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0.999999).mockReturnValueOnce(0); // Selects minimums
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0.999999).mockReturnValueOnce(0); // Selects minimums
             const config = {digitsNum1: 2, digitsNum2: 1, maxDigits: 5, allowNegatives: true};
             const {num1, num2, answer} = generateSubtraction(config);
 
@@ -86,7 +87,7 @@ describe('generateSubtraction', () => {
     describe('Boundary Conditions', () => {
         it('should use 1 for random 0 minimum number', () => {
             // Force num1 to be 0
-            vi.spyOn(Math, 'random').mockReturnValue(0);
+            vi.spyOn(randomModule, "random").mockReturnValue(0);
             const config = {digitsNum1: 1, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateSubtraction(config);
 
@@ -97,9 +98,9 @@ describe('generateSubtraction', () => {
             expect(answer).toBe(0);
         });
 
-        it('should generate the minimum possible numbers when Math.random returns 0', () => {
-            // Mock Math.random to always return 0, which will select the minimum values.
-            vi.spyOn(Math, 'random').mockReturnValue(0);
+        it('should generate the minimum possible numbers when randomModule.random returns 0', () => {
+            // Mock randomModule.random to always return 0, which will select the minimum values.
+            vi.spyOn(randomModule, "random").mockReturnValue(0);
 
             const config = {digitsNum1: 2, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateSubtraction(config);
@@ -114,9 +115,9 @@ describe('generateSubtraction', () => {
             expect(answer).toBe(9);
         });
 
-        it('should generate the maximum possible numbers when Math.random is close to 1', () => {
-            // Mock Math.random to return a value just under 1 to select the maximum values.
-            vi.spyOn(Math, 'random').mockReturnValue(0.999999);
+        it('should generate the maximum possible numbers when randomModule.random is close to 1', () => {
+            // Mock randomModule.random to return a value just under 1 to select the maximum values.
+            vi.spyOn(randomModule, "random").mockReturnValue(0.999999);
 
             const config = {digitsNum1: 2, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateSubtraction(config);
@@ -134,7 +135,7 @@ describe('generateSubtraction', () => {
 
     describe('Digit Constraints', () => {
         it('should generate num1 with exact digitsNum1 and num2 with exact digitsNum2', () => {
-            vi.spyOn(Math, 'random')
+            vi.spyOn(randomModule, "random")
                 .mockReturnValueOnce(0.1) // For num1 (2 digits)
                 .mockReturnValueOnce(0.5); // For num2 (1 digit)
 
@@ -157,7 +158,7 @@ describe('generateAddition', () => {
     // --- Standard Cases ---
     describe('Standard Operation', () => {// --- Casual Use Cases ---
         it('should correctly add single-digit numbers', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(7 / 9).mockReturnValueOnce(0);
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(7 / 9).mockReturnValueOnce(0);
             const config = {digitsNum1: 1, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateAddition(config);
             expect(num1).toBe(8);
@@ -166,7 +167,7 @@ describe('generateAddition', () => {
         });
 
         it('should correctly add two-digit numbers', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(15 / 90).mockReturnValueOnce(65 / 90);
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(15 / 90).mockReturnValueOnce(65 / 90);
             const config = {digitsNum1: 2, digitsNum2: 2, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateAddition(config);
             expect(num1).toBe(25);
@@ -178,8 +179,8 @@ describe('generateAddition', () => {
     // --- Boundary Cases ---
     describe('Boundary Cases', () => {
 
-        it('should generate the minimum possible numbers when Math.random returns 0', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0);
+        it('should generate the minimum possible numbers when randomModule.random returns 0', () => {
+            vi.spyOn(randomModule, "random").mockReturnValue(0);
             const config = {digitsNum1: 2, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateAddition(config);
 
@@ -188,8 +189,8 @@ describe('generateAddition', () => {
             expect(answer).toBe(11);
         });
 
-        it('should generate the maximum possible numbers when Math.random is close to 1', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.999999);
+        it('should generate the maximum possible numbers when randomModule.random is close to 1', () => {
+            vi.spyOn(randomModule, "random").mockReturnValue(0.999999);
             const config = {digitsNum1: 2, digitsNum2: 2, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateAddition(config);
 
@@ -202,7 +203,7 @@ describe('generateAddition', () => {
 
     describe('when allowNegatives is true', () => {
         it('should correctly add two negative numbers', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0); // Selects minimum values
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0).mockReturnValueOnce(0); // Selects minimum values
             const config = {digitsNum1: 2, digitsNum2: 2, maxDigits: 5, allowNegatives: true};
             const {num1, num2, answer} = generateAddition(config);
 
@@ -212,7 +213,7 @@ describe('generateAddition', () => {
         });
 
         it('should correctly add a positive and a negative number', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0.999999).mockReturnValueOnce(0); // Selects maximum values
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0.999999).mockReturnValueOnce(0); // Selects maximum values
             const config = {digitsNum1: 2, digitsNum2: 2, maxDigits: 5, allowNegatives: true};
             const {num1, num2, answer} = generateAddition(config);
 
@@ -224,7 +225,7 @@ describe('generateAddition', () => {
 
     describe('Digit Constraints', () => {
         it('should generate num1 with exact digitsNum1 and num2 with exact digitsNum2', () => {
-            vi.spyOn(Math, 'random')
+            vi.spyOn(randomModule, "random")
                 .mockReturnValueOnce(0.1) // For num1 (2 digits)
                 .mockReturnValueOnce(0.5); // For num2 (1 digit)
 
@@ -245,7 +246,7 @@ describe('generateMultiplication', () => {
     // --- Standard Cases ---
     describe('Standard Operation', () => {
         it('should multiply two numbers', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0); // Selects minimums
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0).mockReturnValueOnce(0); // Selects minimums
             const config = {digitsNum1: 2, digitsNum2: 2, maxDigits: 5, allowNegatives: false };
             const {num1, num2, answer} = generateMultiplication(config);
 
@@ -255,8 +256,8 @@ describe('generateMultiplication', () => {
         });
     })
     describe('Boundary Cases', () => {
-        it('should generate the minimum possible factors when Math.random returns 0', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0);
+        it('should generate the minimum possible factors when randomModule.random returns 0', () => {
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0).mockReturnValueOnce(0);
             const config = {digitsNum1: 1, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateMultiplication(config);
 
@@ -265,8 +266,8 @@ describe('generateMultiplication', () => {
             expect(answer).toBe(1);
         });
 
-        it('should generate the maximum possible factors when Math.random is close to 1', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0.999999).mockReturnValueOnce(0.999999);
+        it('should generate the maximum possible factors when randomModule.random is close to 1', () => {
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0.999999).mockReturnValueOnce(0.999999);
             const config = {digitsNum1: 1, digitsNum2: 1, maxDigits: 5, allowNegatives: false};
             const {num1, num2, answer} = generateMultiplication(config);
 
@@ -278,7 +279,7 @@ describe('generateMultiplication', () => {
 
     describe('when allowNegatives is true', () => {
         it('should produce a positive result when multiplying two negative numbers', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0); // Selects minimums
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0).mockReturnValueOnce(0); // Selects minimums
             const config = {digitsNum1: 2, digitsNum2: 1, maxDigits: 5, allowNegatives: true};
             const {num1, num2, answer} = generateMultiplication(config);
 
@@ -288,7 +289,7 @@ describe('generateMultiplication', () => {
         });
 
         it('should produce a negative result when multiplying a positive and a negative number', () => {
-            vi.spyOn(Math, 'random').mockReturnValueOnce(0.999999).mockReturnValueOnce(0); // Selects maximums
+            vi.spyOn(randomModule, "random").mockReturnValueOnce(0.999999).mockReturnValueOnce(0); // Selects maximums
             const config = {digitsNum1: 1, digitsNum2: 1, maxDigits: 5, allowNegatives: true};
             const {num1, num2, answer} = generateMultiplication(config);
 
@@ -300,7 +301,7 @@ describe('generateMultiplication', () => {
 
     describe('Digit Constraints', () => {
         it('should generate num1 with exact digitsNum1 and num2 with exact digitsNum2', () => {
-            vi.spyOn(Math, 'random')
+            vi.spyOn(randomModule, "random")
                 .mockReturnValueOnce(0.1) // For num1 (2 digits)
                 .mockReturnValueOnce(0.5); // For num2 (1 digit)
 
@@ -321,7 +322,7 @@ describe('generateDivision', () => {
     // --- Standard Cases ---
     it('should generate a valid problem on the first attempt', () => {
         // Mock random to generate divisor=4, then quotient=2
-        vi.spyOn(Math, 'random')
+        vi.spyOn(randomModule, "random")
             .mockReturnValueOnce(0.5) // floor(0.5 * (6-2+1)) + 2 = 4. Divisor is 4.
             .mockReturnValueOnce(0.3888888888888889); // maxQuotient=floor(20/4)=5. quotient=floor(0.388...*18)+2 = 7+2=9.
 
@@ -335,7 +336,7 @@ describe('generateDivision', () => {
 
     // --- Edge Cases & Loop Behavior ---
     it('should re-generate if the first divisor is 1', () => {
-        vi.spyOn(Math, 'random')
+        vi.spyOn(randomModule, "random")
             // First attempt:
             .mockReturnValueOnce(0)      // Generates divisor = 1, which causes the loop to repeat.
             .mockReturnValueOnce(0.5)    // This generates quotient = 10. The loop condition (1 >= 1) is met.
@@ -350,11 +351,11 @@ describe('generateDivision', () => {
         expect(num2).toBe(5); // divisor
         expect(answer).toBe(9); // quotient
         expect(num1).toBe(45); // quotient * divisor
-        expect(Math.random).toHaveBeenCalledTimes(4);
+        expect(randomModule.random).toHaveBeenCalledTimes(4);
     });
 
     it('should re-generate if the first quotient is 0 or 1', () => {
-        vi.spyOn(Math, 'random')
+        vi.spyOn(randomModule, "random")
             // First attempt:
             .mockReturnValueOnce(0.5) // Generates divisor = 4.
             .mockReturnValueOnce(0.1) // With maxQuotient=5, this generates quotient = 0, which causes the loop to repeat.
@@ -368,16 +369,16 @@ describe('generateDivision', () => {
         expect(num2).toBe(5); // Final divisor
         expect(answer).toBe(3); // Final quotient
         expect(num1).toBe(15);
-        expect(Math.random).toHaveBeenCalledTimes(2);
+        expect(randomModule.random).toHaveBeenCalledTimes(2);
     });
 
 
     describe('when allowNegatives is true', () => {
         it('should correctly divide when the divisor is negative', () => {
-            // This test mocks Math.random to produce a specific, non-trivial result.
+            // This test mocks randomModule.random to produce a specific, non-trivial result.
             // 1st call to random() generates the divisor.
             // 2nd call to random() generates the quotient.
-            vi.spyOn(Math, 'random')
+            vi.spyOn(randomModule, "random")
                 .mockReturnValueOnce(0)      // Will produce divisor = -9.
                 .mockReturnValueOnce(0.7);   // With maxQuotient=11, minQuotient=-11, will produce quotient = 5.
 
@@ -390,7 +391,7 @@ describe('generateDivision', () => {
         })
 
         it('should correctly divide a negative number by a positive number', () => {
-            vi.spyOn(Math, 'random')
+            vi.spyOn(randomModule, "random")
                 .mockReturnValueOnce(0.999999) // divisor = 9
                 .mockReturnValueOnce(0.27); // With maxQuotient=11, minQuotient=-11, will produce quotient = -5.
 
@@ -406,7 +407,7 @@ describe('generateDivision', () => {
 
     describe('Digit Constraints', () => {
         it('should generate num1 with exact digitsNum1 and num2 with exact digitsNum2', () => {
-            vi.spyOn(Math, 'random')
+            vi.spyOn(randomModule, "random")
                 .mockReturnValueOnce(0.1) // For num1 (2 digits)
                 .mockReturnValueOnce(0.5); // For num2 (1 digit)
 

@@ -1,3 +1,4 @@
+import { random } from "./random.ts";
 export interface Problem {
     num1: number;
     num2: number;
@@ -17,8 +18,8 @@ export function generateProblemSet(config: { digits: number, problemCount: numbe
 
     // Generate two unique examples
     while (problemSet.length < 2) {
-        const num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-        const num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+        const num1 = Math.floor(random() * (max - min + 1)) + min;
+        const num2 = Math.floor(random() * (max - min + 1)) + min;
 
         if (num1 === num2) {
             continue;
@@ -44,8 +45,8 @@ export function generateProblemSet(config: { digits: number, problemCount: numbe
 
 
     while (problemSet.length < config.problemCount) {
-        const num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-        const num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+        const num1 = Math.floor(random() * (max - min + 1)) + min;
+        const num2 = Math.floor(random() * (max - min + 1)) + min;
 
         if (num1 === num2) {
             continue;

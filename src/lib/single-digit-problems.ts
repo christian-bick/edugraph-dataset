@@ -1,3 +1,4 @@
+import { random } from "./random.ts";
 // --- PROBLEM GENERATION ---
 
 const operatorList = ['add', 'subtract', 'multiply', 'divide'];
@@ -25,8 +26,8 @@ interface ProblemSetConfig {
 
 function getRandomDigit(allowZero: boolean, allowNegative: boolean): number {
     const min = allowZero ? 0 : 1;
-    let digit = Math.floor(Math.random() * (10 - min)) + min;
-    if (allowNegative && Math.random() < 0.5) {
+    let digit = Math.floor(random() * (10 - min)) + min;
+    if (allowNegative && random() < 0.5) {
         digit = -digit;
     }
     return digit;
@@ -162,11 +163,11 @@ export function generateProblem(op: string, config: ProblemSetConfig): Problem {
 
 export function getNextOperator(operations: string[]): string {
     if (operations.length === 0) {
-        return operatorList[Math.floor(Math.random() * operatorList.length)];
+        return operatorList[Math.floor(random() * operatorList.length)];
     } else if (operations.length === 1) {
         return operations[0];
     } else {
-        return operations[Math.floor(Math.random() * operations.length)];
+        return operations[Math.floor(random() * operations.length)];
     }
 }
 

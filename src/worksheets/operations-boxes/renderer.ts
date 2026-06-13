@@ -1,3 +1,4 @@
+import { random } from "../../lib/random.ts";
 export interface Problem {
     num1: number;
     num2: number;
@@ -33,12 +34,12 @@ export function renderContent(config, problemSet: Problem[]) {
             switch (config.blankPart) {
                 case 'problem': {
                     const parts = ['num1', 'num2'];
-                    blankPartKey = parts[Math.floor(Math.random() * parts.length)];
+                    blankPartKey = parts[Math.floor(random() * parts.length)];
                     break;
                 }
                 case 'problem-answer': {
                     const parts = ['num1', 'num2', 'answer'];
-                    blankPartKey = parts[Math.floor(Math.random() * parts.length)];
+                    blankPartKey = parts[Math.floor(random() * parts.length)];
                     break;
                 }
                 case 'operator':
@@ -46,7 +47,7 @@ export function renderContent(config, problemSet: Problem[]) {
                     break;
                 case 'random': {
                     const allParts = ['num1', 'num2', 'answer', 'symbol'];
-                    blankPartKey = allParts[Math.floor(Math.random() * allParts.length)];
+                    blankPartKey = allParts[Math.floor(random() * allParts.length)];
                     break;
                 }
                 case 'answer':

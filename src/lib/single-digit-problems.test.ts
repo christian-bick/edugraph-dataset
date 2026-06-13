@@ -1,3 +1,4 @@
+import * as randomModule from "./random.ts";
 import {
     generateAddition,
     generateSubtraction,
@@ -40,7 +41,7 @@ describe('generateAddition', () => {
     });
 
     it('should generate a problem with negative numbers', () => {
-        vi.spyOn(Math, 'random')
+        vi.spyOn(randomModule, "random")
             .mockReturnValueOnce(0.1) // digit for num1 = 1
             .mockReturnValueOnce(0.4) // sign for num1 = negative
             .mockReturnValueOnce(0.2) // digit for num2 = 2
@@ -81,7 +82,7 @@ describe('generateSubtraction', () => {
     });
 
     it('should generate a problem with negative numbers', () => {
-        vi.spyOn(Math, 'random')
+        vi.spyOn(randomModule, "random")
             .mockReturnValueOnce(0.8) // digit for num1 = 8
             .mockReturnValueOnce(0.6) // sign for num1 = positive
             .mockReturnValueOnce(0.1) // digit for num2 = 1
@@ -96,7 +97,7 @@ describe('generateSubtraction', () => {
 
 describe('generateMultiplication', () => {
     it('should generate a problem with negative numbers', () => {
-        vi.spyOn(Math, 'random')
+        vi.spyOn(randomModule, "random")
             .mockReturnValueOnce(0.4) // digit for num1 = 4
             .mockReturnValueOnce(0.4) // sign for num1 = negative
             .mockReturnValueOnce(0.6) // digit for num2 = 6
@@ -111,7 +112,7 @@ describe('generateMultiplication', () => {
 
 describe('generateDivision', () => {
     it('should generate a problem with negative numbers', () => {
-        vi.spyOn(Math, 'random')
+        vi.spyOn(randomModule, "random")
             .mockReturnValueOnce(0.8) // digit for divisor = 8
             .mockReturnValueOnce(0.4) // sign for divisor = negative
             .mockReturnValueOnce(0.2) // digit for quotient = 2
