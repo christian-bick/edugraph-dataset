@@ -6,7 +6,7 @@ export class CountingGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'counting';
     compatibleRenderers = ['counting-objects', 'counting-inc-dec'];
 
-    private generateLabels(params: { [key: string]: any }) {
+    generateLabels(params: Record<string, any>): string[] {
         const count = params.maxCount || params.count || 10;
         const scopes = [
             Scope.ArabicNumerals,
@@ -18,7 +18,7 @@ export class CountingGenerator implements ProblemGenerator {
         ];
 
         const areas = [Area.NumerationWithIntegers];
-        if (!params.type) { // simple objects
+        if (!params.type) {
             areas.push(Area.IntegerNotation);
         }
 
@@ -27,11 +27,7 @@ export class CountingGenerator implements ProblemGenerator {
             abilities.push(Ability.ProcedureApplication);
         }
 
-        return {
-            Area: areas,
-            Scope: scopes,
-            Ability: abilities,
-        };
+        return [...areas, ...scopes, ...abilities];
     }
 
     generateDataset(config: DatasetGenerationConfig): AbstractProblem[] {
@@ -41,15 +37,8 @@ export class CountingGenerator implements ProblemGenerator {
 
         for (const params of permutations) {
             const maxCount = params.maxCount || params.count || 10;
-            const incDecType = params.type; // 'inc', 'dec', or undefined (for simple objects)
+            const incDecType = params.type; 
             
-            const labels = this.generateLabels(params);
-            const tags = [
-                ...labels.Area,
-                ...labels.Scope,
-                ...labels.Ability
-            ];
-
             let countForThisPerm = 0;
             let attempts = 0;
             const maxAttempts = countPerPermutation * 50;
@@ -60,7 +49,6 @@ export class CountingGenerator implements ProblemGenerator {
                 const minCount = Math.max(1, maxCount - 9); 
                 const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
                 
-                // Ensure we don't decrement below 1
                 if (incDecType === 'dec' && numObjects <= 1) {
                     continue; 
                 }
@@ -84,8 +72,7 @@ export class CountingGenerator implements ProblemGenerator {
                             incDecAnswer: incDecAnswer,
                             simpleAnswer: numObjects,
                             _permutationParams: params 
-                        },
-                        tags: tags
+                        }
                     });
                 }
             }

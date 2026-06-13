@@ -15,12 +15,15 @@ export class OrderingGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'ordering';
     compatibleRenderers = ['numbers-order'];
 
-    private generateLabels(params: { [key: string]: any }) {
-        return {
-            Area: [Area.NumerationWithIntegers],
-            Ability: [Ability.ProcedureApplication, Ability.ProcedureExecution],
-            Scope: [Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller10, params.includesZero === 'true' || params.includesZero === true ? Scope.NumbersWithZero : Scope.NumbersWithoutZero],
-        };
+    generateLabels(params: Record<string, any>): string[] {
+        const includesZero = params.includesZero === 'true' || params.includesZero === true;
+        const zeroScope = includesZero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero;
+
+        return [
+            Area.NumerationWithIntegers,
+            Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller10, zeroScope,
+            Ability.ProcedureApplication, Ability.ProcedureExecution
+        ];
     }
 
     generateDataset(config: DatasetGenerationConfig): AbstractProblem[] {
@@ -34,13 +37,6 @@ export class OrderingGenerator implements ProblemGenerator {
             const numberSet = includesZero
                 ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                 : [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-            const labels = this.generateLabels(params);
-            const tags = [
-                ...labels.Area,
-                ...labels.Scope,
-                ...labels.Ability
-            ];
 
             let countForThisPerm = 0;
             let attempts = 0;
@@ -63,8 +59,7 @@ export class OrderingGenerator implements ProblemGenerator {
                         data: {
                             numbers: selectedNumbers,
                             _permutationParams: params 
-                        },
-                        tags: tags
+                        }
                     });
                 }
             }

@@ -10,7 +10,7 @@ export interface AbstractProblem {
     /** The core mathematical data. e.g. { num1: 15, num2: 7, operator: 'subtract', answer: 8 } */
     data: Record<string, any>;
     /** Pedagogical tags for dataset balancing (e.g., ['has_zero', 'requires_carry', 'negative_result']) */
-    tags: string[];
+    tags?: string[];
 }
 
 /**
@@ -121,7 +121,6 @@ export interface MLDatasetPipelineConfig {
     splits: {
         train: number;
         val: number;
-        test?: number;
     };
 
     /**

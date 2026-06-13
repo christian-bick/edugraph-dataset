@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest --run",
     "generate": "npx vite-node src/scripts/generate-pdf.ts",
     "generate:exercises": "npx vite-node src/scripts/generate-exercises.ts",
     "generate:dry": "npx vite-node src/scripts/generate-pdf.ts --sync --dry",
@@ -21,6 +21,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.525.0",
     "@google-cloud/storage": "^7.16.0",
+    "@google/generative-ai": "^0.24.1",
     "cross-env": "^10.0.0",
     "dotenv": "^17.2.1",
     "glob": "^11.0.3",

@@ -6,7 +6,7 @@ export class TimeGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'time';
     compatibleRenderers = ['time-analog'];
 
-    private generateLabels(params: { [key: string]: any }) {
+    generateLabels(params: Record<string, any>): string[] {
         const interval = params.interval || 3600;
         let intervalScope;
         if (interval < 60) {
@@ -16,11 +16,11 @@ export class TimeGenerator implements ProblemGenerator {
         } else {
             intervalScope = Scope.HourIntervals
         }
-        return {
-            Area: [Area.MeasuringTime],
-            Scope: [Scope.AnalogClock, intervalScope],
-            Ability: [Ability.ProcedureApplication, Ability.ProcedureExecution],
-        }
+        return [
+            Area.MeasuringTime,
+            Scope.AnalogClock, intervalScope,
+            Ability.ProcedureApplication, Ability.ProcedureExecution
+        ];
     }
 
     generateDataset(config: DatasetGenerationConfig): AbstractProblem[] {
@@ -30,13 +30,6 @@ export class TimeGenerator implements ProblemGenerator {
 
         for (const params of permutations) {
             const interval = params.interval || 3600;
-
-            const labels = this.generateLabels(params);
-            const tags = [
-                ...labels.Area,
-                ...labels.Scope,
-                ...labels.Ability
-            ];
 
             let countForThisPerm = 0;
             let attempts = 0;
@@ -63,9 +56,6 @@ export class TimeGenerator implements ProblemGenerator {
                     existingKeys.add(problemKey);
                     countForThisPerm++;
                     
-                    if (hour >= 12) tags.push('pm');
-                    else tags.push('am');
-                    
                     generatedProblems.push({
                         id: `time-${generatedProblems.length + 1}-${problemKey.replace(/:/g, '-')}`,
                         type: this.type,
@@ -73,8 +63,7 @@ export class TimeGenerator implements ProblemGenerator {
                             time: timeStr,
                             interval: interval,
                             _permutationParams: params 
-                        },
-                        tags: [...tags] // copy to avoid modifying base tags
+                        }
                     });
                 }
             }

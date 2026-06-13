@@ -1,6 +1,8 @@
-import { readdirSync, existsSync } from 'fs';
+import 'dotenv/config';
+import { readdirSync, existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,19 +14,28 @@ if (!existsSync(DATASET_DIR)) {
     process.exit(1);
 }
 
+if (!process.env.GEMINI_API_KEY) {
+    console.error('Missing GEMINI_API_KEY in environment variables or .env file. Required for VQA validation.');
+    process.exit(1);
+}
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// We use 2.5-pro for complex visual reasoning and adherence to strict rules
+const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-pro",
+    generationConfig: {
+        responseMimeType: "application/json",
+    }
+});
+
 // Group files by visual module
 const files = readdirSync(DATASET_DIR).filter(f => f.endsWith('.png'));
 const moduleMap = new Map<string, string[]>();
 
 for (const file of files) {
-    // Format: id_rendererId_params_inst-X_view-Y.png
-    // e.g. arithmetic-1-705-subtract--6503_operations-boxes-single_blankPart-answer_inst-0_view-A.png
-    
-    // Extract the rendererId by splitting by '_'
     const parts = file.split('_');
     if (parts.length >= 2) {
         let rendererId = parts[1];
-        // handle 'operations-boxes-single' which has hyphens but no underscores
         if (!moduleMap.has(rendererId)) {
             moduleMap.set(rendererId, []);
         }
@@ -34,53 +45,90 @@ for (const file of files) {
 
 console.log('--- Random Sample Selection for Visual Validation ---');
 
-const samples: { module: string, qPath: string, aPath: string }[] = [];
+const samples: { module: string, qPath: string, aPath: string, baseName: string }[] = [];
 
 for (const [module, moduleFiles] of moduleMap.entries()) {
-    // Find a random Question file
-    const qFiles = moduleFiles.filter(f => f.includes('_view-Q.png'));
+    const qFiles = moduleFiles.filter(f => f.includes('_mode-Q.png'));
     if (qFiles.length === 0) continue;
     
     const randomQFile = qFiles[Math.floor(Math.random() * qFiles.length)];
-    
-    // Find the corresponding Answer file
-    const baseName = randomQFile.replace('_view-Q.png', '');
-    const expectedAFile = `${baseName}_view-A.png`;
+    const baseName = randomQFile.replace('_mode-Q.png', '');
+    const expectedAFile = `${baseName}_mode-A.png`;
     
     if (moduleFiles.includes(expectedAFile)) {
         samples.push({
             module: module,
+            baseName: baseName,
             qPath: resolve(DATASET_DIR, randomQFile),
             aPath: resolve(DATASET_DIR, expectedAFile)
         });
     }
 }
 
-console.log(`Selected ${samples.length} pairs for review.\n`);
+console.log(`Selected ${samples.length} pairs for automated VQA review.\n`);
 
-for (const sample of samples) {
-    console.log(`[Module: ${sample.module}]`);
-    console.log(`Q: ${sample.qPath}`);
-    console.log(`A: ${sample.aPath}\n`);
+function fileToGenerativePart(path: string, mimeType: string) {
+    return {
+        inlineData: {
+            data: Buffer.from(readFileSync(path)).toString("base64"),
+            mimeType
+        },
+    };
 }
 
-console.log('--- Validation Checklist ---');
-console.log(`
-1. Strict Stimulus/Response Coloring:
-   - Q images must contain NO green.
-   - A images must contain forestgreen highlighting strictly the missing solution element.
-2. Operations (Boxes & Vertical): Blank part missing in Q, green in A.
-3. Measure Length:
-   - Normal: Rectangle is colored. Box text empty in Q, green in A.
-   - Reverse: Box text black. Rectangle hidden in Q, green in A.
-4. Counting Inc/Dec: Horizontal layout. Indicator left of box, up/down triangle with bold white '1'.
-5. Numbers Order: Horizontal layout. Connecting arrow reflects sorting direction (↗ or ↘).
-6. Numbers Write: Order: Ten-frame -> Number Label -> Writing Boxes. Ten-frame pre-filled with blue dots (not green).
-7. Time Analog:
-   - Normal: Hands black. Box empty in Q, green in A.
-   - Reverse: Box text black. Hands hidden in Q, green in A.
-`);
+async function validateSamples() {
+    for (const sample of samples) {
+        console.log(`Evaluating [${sample.module}] pair: ${sample.baseName}...`);
+        
+        const qImage = fileToGenerativePart(sample.qPath, "image/png");
+        const aImage = fileToGenerativePart(sample.aPath, "image/png");
 
-// TODO (Option 3): Integrate Google Vertex AI or Gemini SDK here
-// to loop over `samples`, encode the images as base64, attach the checklist prompt,
-// and parse the JSON results.
+        const prompt = `
+You are a strict visual QA engineer. I am providing you with two images:
+Image 1 (Question View): The first image provided.
+Image 2 (Answer View): The second image provided.
+
+This is a module from a math exercise generator. The module type is: "${sample.module}".
+
+Please evaluate the images strictly against the following checklist:
+1. Global Coloring: Question image MUST NOT contain the color green (forestgreen). Answer image MUST contain forestgreen highlighting strictly the missing solution element.
+2. If module is 'operations-boxes' or 'operations-vertical': The specific missing blank part must be empty in Q, and filled with green in A.
+3. If module is 'measure-length': 
+   - Normal mode: Rectangle is colored. Box text is empty in Q, green in A.
+   - Reverse mode: Box text is black. Rectangle is hidden in Q, green in A.
+4. If module is 'counting-inc-dec': Layout is horizontal. Indicator is to the left of the box, is an up/down triangle with a bold white '1'.
+5. If module is 'numbers-order': Layout is horizontal. Connecting arrow explicitly reflects sorting direction (↗ or ↘).
+6. If module is 'numbers-write': Order is exactly Ten-frame -> Number Label -> Writing Boxes. Ten-frame must be pre-filled with blue dots (not green).
+7. If module is 'time-analog':
+   - Normal mode: Hands are black. Digital box is empty in Q, green in A.
+   - Reverse mode: Digital box text is black. Clock hands are hidden in Q, green in A.
+
+Respond in pure JSON with this schema:
+{
+    "pass": boolean,
+    "reasoning": "Detailed explanation of what passed or failed, referencing specific elements like color and layout.",
+    "questionViewHasGreen": boolean,
+    "answerViewHasGreen": boolean
+}
+`;
+
+        try {
+            const result = await model.generateContent([prompt, qImage, aImage]);
+            const responseText = result.response.text();
+            
+            try {
+                const parsed = JSON.parse(responseText);
+                const status = parsed.pass ? '✅ PASS' : '❌ FAIL';
+                console.log(`${status} - Q has Green: ${parsed.questionViewHasGreen}, A has Green: ${parsed.answerViewHasGreen}`);
+                console.log(`Reasoning: ${parsed.reasoning}\n`);
+            } catch (e) {
+                console.log(`⚠️ Invalid JSON returned: ${responseText}\n`);
+            }
+
+        } catch (error) {
+            console.error(`🚨 Error calling Gemini API for ${sample.module}:`, error, '\n');
+        }
+    }
+}
+
+validateSamples().then(() => console.log('Validation complete.'));

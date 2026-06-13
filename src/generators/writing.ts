@@ -5,12 +5,12 @@ export class WritingGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'writing';
     compatibleRenderers = ['numbers-write'];
 
-    private generateLabels() {
-        return {
-            Area: [Area.IntegerNotation],
-            Ability: [Ability.ProcedureExecution],
-            Scope: [Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller10, Scope.NumbersWithoutZero],
-        };
+    generateLabels(params: Record<string, any>): string[] {
+        return [
+            Area.IntegerNotation,
+            Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller10, Scope.NumbersWithoutZero,
+            Ability.ProcedureExecution
+        ];
     }
 
     generateDataset(config: DatasetGenerationConfig): AbstractProblem[] {
@@ -22,13 +22,6 @@ export class WritingGenerator implements ProblemGenerator {
             const minNum = params.min || 1;
             const maxNum = params.max || 9;
             const fixedNumber = params.number;
-
-            const labels = this.generateLabels();
-            const tags = [
-                ...labels.Area,
-                ...labels.Scope,
-                ...labels.Ability
-            ];
 
             let countForThisPerm = 0;
             let attempts = 0;
@@ -51,8 +44,7 @@ export class WritingGenerator implements ProblemGenerator {
                         data: {
                             number: currentNum,
                             _permutationParams: params 
-                        },
-                        tags: tags
+                        }
                     });
                 }
                 

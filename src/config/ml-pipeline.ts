@@ -1,7 +1,7 @@
 import { MLDatasetPipelineConfig } from "../types/ml-engine.ts";
 import PermutationBuilder from "../lib/permutation-builder.ts";
 
-const splits = { train: 0.7, val: 0.2, test: 0.1 };
+const splits = { train: 0.8, val: 0.2 };
 const SEED = 42;
 
 const arithmeticConfig: MLDatasetPipelineConfig = {

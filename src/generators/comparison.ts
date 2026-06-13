@@ -6,17 +6,19 @@ export class ComparisonGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'comparison';
     compatibleRenderers = ['numbers-compare'];
 
-    private generateLabels(params: { [key: string]: any }) {
+    generateLabels(params: Record<string, any>): string[] {
         let scope;
         if (params.digits === 1) scope = Scope.NumbersSmaller10;
         else if (params.digits === 2) scope = Scope.NumbersSmaller100;
         else scope = Scope.NumbersSmaller1000;
 
-        return {
-            Area: [Area.NumerationWithIntegers],
-            Ability: [Ability.ProcedureApplication, Ability.ProcedureExecution],
-            Scope: [Scope.ArabicNumerals, Scope.Base10, scope, params.includesZero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero],
-        };
+        const zeroScope = params.includesZero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero;
+
+        return [
+            Area.NumerationWithIntegers,
+            Scope.ArabicNumerals, Scope.Base10, scope, zeroScope,
+            Ability.ProcedureApplication, Ability.ProcedureExecution
+        ];
     }
 
     generateDataset(config: DatasetGenerationConfig): AbstractProblem[] {
@@ -27,13 +29,6 @@ export class ComparisonGenerator implements ProblemGenerator {
         for (const params of permutations) {
             const digits = params.digits || 1;
             const includesZero = params.includesZero !== false;
-
-            const labels = this.generateLabels(params);
-            const tags = [
-                ...labels.Area,
-                ...labels.Scope,
-                ...labels.Ability
-            ];
 
             let countForThisPerm = 0;
             let attempts = 0;
@@ -70,8 +65,7 @@ export class ComparisonGenerator implements ProblemGenerator {
                             num2: num2,
                             answer: answer,
                             _permutationParams: params 
-                        },
-                        tags: tags
+                        }
                     });
                 }
             }

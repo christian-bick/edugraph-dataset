@@ -40,6 +40,7 @@ async function renderDatasetSplit(
     }
 
     let totalImages = 0;
+    const metadata: any[] = [];
     
     // We flatten the work into a queue of tasks
     const taskQueue: { problem: AbstractProblem, blueprint: VisualBlueprint, instance: number }[] = [];
@@ -101,28 +102,38 @@ async function renderDatasetSplit(
 
                 const baseFilename = createSafeFilename(problem.id, blueprint.rendererId, blueprint.visualParams, instance);
 
-                // Construct the payload for the Question view
-                const payloadQ: RenderPayload = {
-                    problem,
-                    config: {
-                        rendererId: blueprint.rendererId,
-                        visualParams: blueprint.visualParams
-                    },
-                    isAnswerView: false
+                const renderAndRecord = async (isAnswerView: boolean, modeTag: string, modeName: string) => {
+                    const payload: RenderPayload = {
+                        problem,
+                        config: {
+                            rendererId: blueprint.rendererId,
+                            visualParams: blueprint.visualParams
+                        },
+                        isAnswerView
+                    };
+
+                    await page.evaluate((p) => window.renderExercise!(p), payload);
+                    const filename = `${baseFilename}_mode-${modeTag}.png`;
+                    const outPath = resolve(splitOutputDir, filename);
+                    await page.locator('#exercise').screenshot({ path: outPath, omitBackground: true });
+                    
+                    metadata.push({
+                        filename,
+                        problemId: problem.id,
+                        type: problem.type,
+                        mode: modeName,
+                        tags: problem.tags,
+                        parameters: blueprint.visualParams
+                    });
+                    
+                    totalImages++;
                 };
 
-                await page.evaluate((p) => window.renderExercise!(p), payloadQ);
-                const qPath = resolve(splitOutputDir, `${baseFilename}_view-Q.png`);
-                await page.locator('#exercise').screenshot({ path: qPath, omitBackground: true });
-                totalImages++;
+                // Construct and inject payload for Question view
+                await renderAndRecord(false, 'Q', 'question');
 
                 // Construct and inject payload for Answer view
-                const payloadA = { ...payloadQ, isAnswerView: true };
-                await page.evaluate((p) => window.renderExercise!(p), payloadA);
-
-                const aPath = resolve(splitOutputDir, `${baseFilename}_view-A.png`);
-                await page.locator('#exercise').screenshot({ path: aPath, omitBackground: true });
-                totalImages++;
+                await renderAndRecord(true, 'A', 'answer');
 
                 completedTasks++;
                 // Progress logging every 10%
@@ -141,6 +152,12 @@ async function renderDatasetSplit(
     }
 
     await Promise.allSettled(workers);
+    
+    // Write metadata file for the split
+    const metaPath = resolve(splitOutputDir, 'meta.json');
+    import('fs').then(fs => fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2)));
+    console.log(`[${splitName}] Wrote metadata for ${metadata.length} items to meta.json`);
+    
     return totalImages;
 }
 
@@ -179,19 +196,23 @@ async function main() {
         console.log(`Generating abstract problems for ${config.generatorName}...`);
         const dataset = generator.generateDataset(config.generationConfig);
 
+        // Assign tags via explicit label generation phase
+        for (const problem of dataset) {
+            problem.tags = generator.generateLabels(problem.data._permutationParams || {});
+        }
+
         // Process splits
         const count = dataset.length;
         const trainC = Math.floor(count * config.splits.train);
         const valC = Math.floor(count * config.splits.val);
         trainSet.push(...dataset.slice(0, trainC));
         valSet.push(...dataset.slice(trainC, trainC + valC));
-        testSet.push(...dataset.slice(trainC + valC));
         
         // Collect blueprints
         allBlueprints.push(...config.visualDistribution);
     }
 
-    console.log(`\nGlobal Split distribution: Train (${trainSet.length}), Val (${valSet.length}), Test (${testSet.length})`);
+    console.log(`\nGlobal Split distribution: Train (${trainSet.length}), Val (${valSet.length})`);
 
     console.log(`Launching browser with ${DEFAULT_CONCURRENCY} parallel workers...`);
     const browser = await chromium.launch({ headless: true });
@@ -201,7 +222,6 @@ async function main() {
 
     totalRenderedImages += await renderDatasetSplit(browser, 'train', trainSet, allBlueprints, DEFAULT_CONCURRENCY);
     totalRenderedImages += await renderDatasetSplit(browser, 'val', valSet, allBlueprints, DEFAULT_CONCURRENCY);
-    totalRenderedImages += await renderDatasetSplit(browser, 'test', testSet, allBlueprints, DEFAULT_CONCURRENCY);
 
     await browser.close();
     const duration = ((performance.now() - startTime) / 1000).toFixed(2);

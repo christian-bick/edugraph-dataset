@@ -6,12 +6,12 @@ export class MeasurementGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'measurement';
     compatibleRenderers = ['measure-length'];
 
-    private generateLabels(params: { [key: string]: any }) {
-        return {
-            Area: [Area.MeasuringObjects, Area.DigitNotation],
-            Ability: [Ability.ProcedureApplication, Ability.ProcedureExecution],
-            Scope: [Scope.CentimeterScale, Scope.MillimeterScale, Scope.Tapemeter],
-        };
+    generateLabels(params: Record<string, any>): string[] {
+        return [
+            Area.MeasuringObjects, Area.DigitNotation,
+            Scope.CentimeterScale, Scope.MillimeterScale, Scope.Tapemeter,
+            Ability.ProcedureApplication, Ability.ProcedureExecution
+        ];
     }
 
     generateDataset(config: DatasetGenerationConfig): AbstractProblem[] {
@@ -21,13 +21,6 @@ export class MeasurementGenerator implements ProblemGenerator {
 
         for (const params of permutations) {
             const bandLength = params.bandLength || 20;
-
-            const labels = this.generateLabels(params);
-            const tags = [
-                ...labels.Area,
-                ...labels.Scope,
-                ...labels.Ability
-            ];
 
             let countForThisPerm = 0;
             let attempts = 0;
@@ -52,8 +45,7 @@ export class MeasurementGenerator implements ProblemGenerator {
                             bandLength: bandLength,
                             problemLength: problemLength,
                             _permutationParams: params 
-                        },
-                        tags: tags
+                        }
                     });
                 }
             }

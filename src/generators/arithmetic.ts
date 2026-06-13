@@ -8,7 +8,7 @@ export class ArithmeticGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'arithmetic';
     compatibleRenderers = ['operations-boxes', 'operations-vertical'];
 
-    private generateLabels(params: { [key: string]: any }) {
+    generateLabels(params: Record<string, any>): string[] {
         const scopes = [
             Scope.ArabicNumerals,
             Scope.Base10,
@@ -30,11 +30,7 @@ export class ArithmeticGenerator implements ProblemGenerator {
 
         const abilities = [Ability.ProcedureApplication];
 
-        return {
-            Area: areas,
-            Scope: scopes,
-            Ability: abilities,
-        };
+        return [...areas, ...scopes, ...abilities];
     }
 
     generateDataset(config: DatasetGenerationConfig): AbstractProblem[] {
@@ -43,21 +39,11 @@ export class ArithmeticGenerator implements ProblemGenerator {
         const existingKeys = new Set<string>();
 
         for (const params of permutations) {
-            // Unpack params provided by the ML Orchestrator (originally from PermutationBuilder)
             const operations = params.operations ? params.operations.split(',') : ['add'];
             const digitsNum1 = params.digitsNum1;
             const digitsNum2 = params.digitsNum2;
             const maxDigits = params.maxDigits || 5;
             const allowNegatives = params.allowNegatives === true || params.allowNegatives === 'true';
-
-            // Generate ontological tags for this specific permutation
-            const labels = this.generateLabels(params);
-            // Flatten labels into a string array for the ML abstract problem
-            const tags = [
-                ...labels.Area,
-                ...labels.Scope,
-                ...labels.Ability
-            ];
 
             let countForThisPerm = 0;
             let attempts = 0;
@@ -78,14 +64,12 @@ export class ArithmeticGenerator implements ProblemGenerator {
                     default: mathProblem = generateAddition(numberGenParams); break;
                 }
 
-                // Make the key unique for this mathematical problem
                 const problemKey = `${mathProblem.num1},${op},${mathProblem.num2}`;
                 
                 if (!existingKeys.has(problemKey)) {
                     existingKeys.add(problemKey);
                     countForThisPerm++;
                     
-                    // We attach the full parameter object so the visual blueprint can use it
                     generatedProblems.push({
                         id: `arithmetic-${generatedProblems.length + 1}-${problemKey}`,
                         type: this.type,
@@ -94,11 +78,8 @@ export class ArithmeticGenerator implements ProblemGenerator {
                             num2: mathProblem.num2,
                             answer: mathProblem.answer,
                             operator: op,
-                            // Pass the permutation params down so the visual layer knows 
-                            // e.g., what 'blankPart' was requested for this specific problem
                             _permutationParams: params 
-                        },
-                        tags: tags
+                        }
                     });
                 }
             }
