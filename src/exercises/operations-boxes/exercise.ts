@@ -35,13 +35,21 @@ function createProblemHTML(problem: any, blankPart: string, isAnswer: boolean) {
         }
     }
 
+    const getClass = (partName: string, baseClass: string) => {
+        let cls = baseClass;
+        if (isAnswer && blankPart === partName) {
+            cls += ' solution';
+        }
+        return cls;
+    };
+
     return `
         <div class="problem">
-            <div class="box">${displayProblem.num1}</div>
-            <div class="symbol">${displayProblem.symbol}</div>
-            <div class="box">${displayProblem.num2}</div>
+            <div class="${getClass('num1', 'box')}">${displayProblem.num1}</div>
+            <div class="${getClass('symbol', 'symbol')}">${displayProblem.symbol}</div>
+            <div class="${getClass('num2', 'box')}">${displayProblem.num2}</div>
             <div class="symbol">=</div>
-            <div class="box answer-box">${displayProblem.answer}</div>
+            <div class="${getClass('answer', 'box answer-box')}">${displayProblem.answer}</div>
         </div>`;
 }
 

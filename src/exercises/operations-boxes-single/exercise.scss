@@ -36,12 +36,19 @@
             font-weight: 700;
             width: 50px;
             text-align: center;
+
+            &.solution {
+                color: forestgreen;
+            }
+        }
+
+        .solution {
+            color: forestgreen;
         }
 
         .answer-box {
             font-family: 'Roboto Mono', monospace;
             letter-spacing: 2px;
-            color: forestgreen;
         }
     }
 
