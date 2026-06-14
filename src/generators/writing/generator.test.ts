@@ -17,31 +17,23 @@ describe('WritingGenerator', () => {
         expect(generator.compatibleRenderers).toContain('numbers-write');
     });
 
-    describe('generateLabels', () => {
-        it('should generate labels', () => {
-            const labels = generator.generateLabels({});
-            expect(labels).toContain(Area.IntegerNotation);
-            expect(labels).toContain(Ability.ProcedureExecution);
-        });
-    });
-
     describe('generate', () => {
         it('should generate valid problem stubs for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const stub = generator.generate(params);
+            config.generationConfig.permutations.forEach(input => {
+                const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
-                    expect(stub.data.number).toBe(params.number);
+                    expect(stub.data.number).toBe(input.constraints.number);
                 }
             });
         });
 
         it('should be deterministic with the same seed', () => {
-            const params = config.generationConfig.permutations[0];
+            const input = config.generationConfig.permutations[0];
             setSeed(123);
-            const stub1 = generator.generate(params);
+            const stub1 = generator.generate(input);
             setSeed(123);
-            const stub2 = generator.generate(params);
+            const stub2 = generator.generate(input);
             expect(stub1).toEqual(stub2);
         });
     });

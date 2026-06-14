@@ -18,37 +18,19 @@ describe('CountingGenerator', () => {
         expect(generator.compatibleRenderers).toContain('counting-inc-dec');
     });
 
-    describe('generateLabels', () => {
-        it('should generate labels for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const labels = generator.generateLabels(params);
-                expect(labels).toBeInstanceOf(Array);
-                expect(labels.length).toBeGreaterThan(0);
-                expect(labels).toContain(Area.NumerationWithIntegers);
-                expect(labels).toContain(Scope.CountingSymbols);
-                
-                if (params.type === 'inc' || params.type === 'dec') {
-                    expect(labels).toContain(Ability.ProcedureApplication);
-                } else {
-                    expect(labels).toContain(Area.IntegerNotation);
-                }
-            });
-        });
-    });
-
     describe('generate', () => {
         it('should generate valid problem stubs or null for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const stub = generator.generate(params);
+            config.generationConfig.permutations.forEach(input => {
+                const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
                     expect(stub.data).toBeDefined();
                     expect(stub.data.numObjects).toBeGreaterThanOrEqual(1);
-                    expect(stub.data.incDecType).toBe(params.type);
+                    expect(stub.data.incDecType).toBe(input.constraints.type);
                     
-                    if (params.type === 'inc') {
+                    if (input.constraints.type === 'inc') {
                         expect(stub.data.incDecAnswer).toBe(stub.data.numObjects + 1);
-                    } else if (params.type === 'dec') {
+                    } else if (input.constraints.type === 'dec') {
                         expect(stub.data.incDecAnswer).toBe(stub.data.numObjects - 1);
                         expect(stub.data.numObjects).toBeGreaterThan(1);
                     }
@@ -57,28 +39,32 @@ describe('CountingGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const params = config.generationConfig.permutations[0];
+            const input = config.generationConfig.permutations[0];
             setSeed(123);
-            const stub1 = generator.generate(params);
+            const stub1 = generator.generate(input);
             setSeed(123);
-            const stub2 = generator.generate(params);
+            const stub2 = generator.generate(input);
             expect(stub1).toEqual(stub2);
         });
     });
 
     describe('generate edge cases', () => {
         it('should return null when attempting to decrement 1 object', () => {
-            // We force a scenario where numObjects is likely to be 1
-            // By setting maxCount to 1, minCount becomes 1, and numObjects must be 1.
-            const params = { type: 'dec', maxCount: 1 };
-            const stub = generator.generate(params);
+            const input = { 
+                labels: [Scope.NumbersSmaller10], 
+                constraints: { type: 'dec', maxCount: 1 } 
+            };
+            const stub = generator.generate(input);
             expect(stub).toBeNull();
         });
 
         it('should never return more than maxCount objects', () => {
-            const params = { maxCount: 5 };
+            const input = { 
+                labels: [], 
+                constraints: { maxCount: 5 } 
+            };
             for (let i = 0; i < 50; i++) {
-                const stub = generator.generate(params);
+                const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.data.numObjects).toBeLessThanOrEqual(5);
                 }

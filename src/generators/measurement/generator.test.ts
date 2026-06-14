@@ -17,34 +17,25 @@ describe('MeasurementGenerator', () => {
         expect(generator.compatibleRenderers).toContain('measure-length');
     });
 
-    describe('generateLabels', () => {
-        it('should generate labels', () => {
-            const labels = generator.generateLabels({});
-            expect(labels).toContain(Area.MeasuringObjects);
-            expect(labels).toContain(Scope.CentimeterScale);
-            expect(labels).toContain(Ability.ProcedureApplication);
-        });
-    });
-
     describe('generate', () => {
         it('should generate valid problem stubs for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const stub = generator.generate(params);
+            config.generationConfig.permutations.forEach(input => {
+                const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
-                    expect(stub.data.bandLength).toBe(params.bandLength);
+                    expect(stub.data.bandLength).toBe(input.constraints.bandLength);
                     expect(stub.data.problemLength).toBeGreaterThan(0);
-                    expect(stub.data.problemLength).toBeLessThanOrEqual(params.bandLength);
+                    expect(stub.data.problemLength).toBeLessThanOrEqual(input.constraints.bandLength);
                 }
             });
         });
 
         it('should be deterministic with the same seed', () => {
-            const params = config.generationConfig.permutations[0];
+            const input = config.generationConfig.permutations[0];
             setSeed(123);
-            const stub1 = generator.generate(params);
+            const stub1 = generator.generate(input);
             setSeed(123);
-            const stub2 = generator.generate(params);
+            const stub2 = generator.generate(input);
             expect(stub1).toEqual(stub2);
         });
     });

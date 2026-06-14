@@ -17,30 +17,18 @@ describe('OrderingGenerator', () => {
         expect(generator.compatibleRenderers).toContain('numbers-order');
     });
 
-    describe('generateLabels', () => {
-        it('should generate labels for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const labels = generator.generateLabels(params);
-                expect(labels).toContain(Area.NumerationWithIntegers);
-                expect(labels).toContain(Ability.ProcedureExecution);
-                if (params.includesZero) {
-                    expect(labels).toContain(Scope.NumbersWithZero);
-                } else {
-                    expect(labels).toContain(Scope.NumbersWithoutZero);
-                }
-            });
-        });
-    });
-
     describe('generate', () => {
         it('should generate valid problem stubs for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const stub = generator.generate(params);
+            config.generationConfig.permutations.forEach(input => {
+                const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
                     expect(stub.data.numbers).toBeInstanceOf(Array);
                     expect(stub.data.numbers.length).toBe(5);
-                    if (!params.includesZero) {
+                    
+                    const includesZero = input.labels.includes(Scope.NumbersWithZero) || 
+                                       input.constraints.includesZero === true;
+                    if (!includesZero) {
                         expect(stub.data.numbers).not.toContain(0);
                     }
                     // Verify uniqueness in the set
@@ -50,11 +38,11 @@ describe('OrderingGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const params = config.generationConfig.permutations[0];
+            const input = config.generationConfig.permutations[0];
             setSeed(123);
-            const stub1 = generator.generate(params);
+            const stub1 = generator.generate(input);
             setSeed(123);
-            const stub2 = generator.generate(params);
+            const stub2 = generator.generate(input);
             expect(stub1).toEqual(stub2);
         });
     });
