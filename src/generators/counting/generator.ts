@@ -1,4 +1,4 @@
-import { ProblemGenerator, AbstractProblem } from "../../types/ml-engine.ts";
+import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { random } from "../../lib/random.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
@@ -6,33 +6,10 @@ export class CountingGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'counting';
     compatibleRenderers = ['counting-objects', 'counting-inc-dec'];
 
-    generateLabels(params: Record<string, any>): string[] {
-        const count = params.maxCount || params.count || 10;
-        const scopes = [
-            Scope.ArabicNumerals,
-            Scope.Base10,
-            Scope.NumbersWithoutZero,
-            Scope.NumbersWithoutNegatives,
-            Scope.CountingSymbols,
-            count <= 10 ? Scope.NumbersSmaller10 : Scope.NumbersSmaller20
-        ];
-
-        const areas = [Area.NumerationWithIntegers];
-        if (!params.type) {
-            areas.push(Area.IntegerNotation);
-        }
-
-        const abilities = [Ability.ProcedureExecution];
-        if (params.type === 'inc' || params.type === 'dec') {
-            abilities.push(Ability.ProcedureApplication);
-        }
-
-        return [...areas, ...scopes, ...abilities];
-    }
-
-    generate(params: Record<string, any>): Omit<AbstractProblem, "tags" | "type"> | null {
-        const maxCount = params.maxCount || params.count || 10;
-        const incDecType = params.type; 
+    generate(input: GeneratorInput): ProblemStub | null {
+        const { constraints } = input;
+        const maxCount = constraints.maxCount || constraints.count || 10;
+        const incDecType = constraints.type; 
         
         const minCount = Math.max(1, maxCount - 9); 
         const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;

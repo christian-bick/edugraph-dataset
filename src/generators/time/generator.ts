@@ -1,4 +1,4 @@
-import { ProblemGenerator, AbstractProblem } from "../../types/ml-engine.ts";
+import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { random } from "../../lib/random.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
@@ -6,25 +6,9 @@ export class TimeGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'time';
     compatibleRenderers = ['time-analog'];
 
-    generateLabels(params: Record<string, any>): string[] {
-        const interval = params.interval || 3600;
-        let intervalScope;
-        if (interval < 60) {
-            intervalScope = Scope.SecondIntervals
-        } else if (interval < 3600) {
-            intervalScope = Scope.MinuteIntervals
-        } else {
-            intervalScope = Scope.HourIntervals
-        }
-        return [
-            Area.MeasuringTime,
-            Scope.AnalogClock, intervalScope,
-            Ability.ProcedureApplication, Ability.ProcedureExecution
-        ];
-    }
-
-    generate(params: Record<string, any>): Omit<AbstractProblem, "tags" | "type"> | null {
-        const interval = params.interval || 3600;
+    generate(input: GeneratorInput): ProblemStub | null {
+        const { constraints } = input;
+        const interval = constraints.interval || 3600;
         const dayInSeconds = 24 * 3600;
 
         const maxIntervals = Math.floor(dayInSeconds / interval);

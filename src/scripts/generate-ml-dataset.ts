@@ -186,10 +186,10 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
                     ...problemStub,
                     id: `${moduleName}-${dataset.length + 1}-${problemStub.id}`,
                     type: generator.type,
-                    tags: generator.generateLabels(params)
+                    tags: [...new Set(params.labels)]
                 };
                 
-                problem.data._permutationParams = params;
+                problem.data._permutationParams = params.constraints;
                 dataset.push(problem);
             }
         }

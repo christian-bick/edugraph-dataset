@@ -67,14 +67,23 @@ declare global {
 export type ProblemStub = Pick<AbstractProblem, 'id' | 'data'>;
 
 /**
+ * The dual input for problem generation: 
+ * - labels: High-level pedagogical constraints from the ontology.
+ * - constraints: Low-level technical or visual constraints.
+ */
+export interface GeneratorInput {
+    labels: string[];
+    constraints: Record<string, any>;
+}
+
+/**
  * The configuration used by the Abstract Generators to produce datasets.
  */
 export interface DatasetGenerationConfig {
     /** 
-     * An array of predefined parameter configurations (permutations).
-     * The generator will generate problems that fulfill each parameter set.
+     * An array of predefined configurations.
      */
-    permutations: Record<string, any>[];
+    permutations: GeneratorInput[];
     /** The global random seed to use for this generation run */
     seed: number;
     /** How many unique mathematical problems to generate PER permutation. Default is 1. */
@@ -89,16 +98,11 @@ export interface ProblemGenerator {
     type: AbstractProblem['type'];
     /** Visual modules capable of rendering problems from this generator */
     compatibleRenderers: string[];
-    /**
-     * Generates pedagogical tags (from edugraph-ts ontology) based on the permutation parameters.
-     */
-    generateLabels(permutationParams: Record<string, any>): string[];
     /** 
-     * Generates a single unique abstract problem based on the constraints.
-     * The returned ID is used for deduplication during dataset generation.
-     * Returns null if a valid problem could not be generated for the given parameters (triggers a retry).
+     * Generates a single unique abstract problem based on the labels and constraints.
+     * Returns null if a valid problem could not be generated (triggers a retry).
      */
-    generate(params: Record<string, any>): ProblemStub | null;
+    generate(input: GeneratorInput): ProblemStub | null;
 }
 
 // --- ML Orchestrator Interfaces ---

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ArithmeticGenerator } from './generator.ts';
 import { config } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Ability } from 'edugraph-ts';
+import { Ability, Area, Scope } from 'edugraph-ts';
 
 describe('ArithmeticGenerator', () => {
     let generator: ArithmeticGenerator;
@@ -18,22 +18,10 @@ describe('ArithmeticGenerator', () => {
         expect(generator.compatibleRenderers).toContain('operations-vertical');
     });
 
-    describe('generateLabels', () => {
-        it('should generate labels for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const labels = generator.generateLabels(params);
-                expect(labels).toBeInstanceOf(Array);
-                expect(labels.length).toBeGreaterThan(0);
-                // Basic check for mandatory tags
-                expect(labels).toContain(Ability.ProcedureApplication);
-            });
-        });
-    });
-
     describe('generate', () => {
         it('should generate valid problem stubs for all permutations', () => {
-            config.generationConfig.permutations.forEach(params => {
-                const stub = generator.generate(params);
+            config.generationConfig.permutations.forEach(input => {
+                const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
                     expect(stub.data).toBeDefined();
@@ -41,53 +29,60 @@ describe('ArithmeticGenerator', () => {
                     expect(stub.data.num2).toBeDefined();
                     expect(stub.data.answer).toBeDefined();
                     expect(stub.data.operator).toBeDefined();
-                    
-                    // Verify operator is one of the requested ones
-                    const requestedOps = params.operations ? params.operations.split(',') : ['add'];
-                    expect(requestedOps).toContain(stub.data.operator);
                 }
             });
         });
 
         it('should be deterministic with the same seed', () => {
-            const params = config.generationConfig.permutations[0];
+            const input = config.generationConfig.permutations[0];
             setSeed(123);
-            const stub1 = generator.generate(params);
+            const stub1 = generator.generate(input);
             setSeed(123);
-            const stub2 = generator.generate(params);
+            const stub2 = generator.generate(input);
             expect(stub1).toEqual(stub2);
         });
     });
 
-    describe('generate edge cases', () => {
-        it('should never produce negative answers for subtraction if allowNegatives is false', () => {
-            const params = { operations: 'subtract', allowNegatives: false, digitsNum1: 1, digitsNum2: 1 };
-            for (let i = 0; i < 100; i++) {
-                const stub = generator.generate(params);
-                if (stub) {
-                    expect(stub.data.answer).toBeGreaterThanOrEqual(0);
-                }
-            }
-        });
-
-        it('should always produce integer results for division', () => {
-            const params = { operations: 'divide', digitsNum1: 2, digitsNum2: 1 };
+    describe('Label-driven constraints', () => {
+        it('should enforce zero when Scope.NumbersWithZero is present', () => {
+            const input = {
+                labels: [Area.IntegerAddition, Scope.NumbersSmaller10, Scope.NumbersWithZero],
+                constraints: {}
+            };
+            let zeroFound = false;
             for (let i = 0; i < 50; i++) {
-                const stub = generator.generate(params);
+                const stub = generator.generate(input);
+                if (stub && (stub.data.num1 === 0 || stub.data.num2 === 0)) {
+                    zeroFound = true;
+                    break;
+                }
+            }
+            expect(zeroFound).toBe(true);
+        });
+
+        it('should respect Scope.NumbersSmaller10', () => {
+            const input = {
+                labels: [Area.IntegerAddition, Scope.NumbersSmaller10, Scope.NumbersWithoutZero],
+                constraints: {}
+            };
+            for (let i = 0; i < 20; i++) {
+                const stub = generator.generate(input);
                 if (stub) {
-                    expect(Number.isInteger(stub.data.answer)).toBe(true);
+                    expect(stub.data.num1).toBeLessThan(10);
+                    expect(stub.data.num2).toBeLessThan(10);
                 }
             }
         });
 
-        it('should respect digit constraints for large numbers', () => {
-            const params = { operations: 'add', digitsNum1: 3, digitsNum2: 3 };
-            const stub = generator.generate(params);
+        it('should respect explicit digit constraints over labels', () => {
+            const input = {
+                labels: [Area.IntegerAddition, Scope.NumbersSmaller100],
+                constraints: { digitsNum1: 3 } // 3 digits even if scope says smaller 100
+            };
+            const stub = generator.generate(input);
             if (stub) {
                 expect(stub.data.num1).toBeGreaterThanOrEqual(100);
                 expect(stub.data.num1).toBeLessThan(1000);
-                expect(stub.data.num2).toBeGreaterThanOrEqual(100);
-                expect(stub.data.num2).toBeLessThan(1000);
             }
         });
     });

@@ -1,4 +1,4 @@
-import { ProblemGenerator, AbstractProblem } from "../../types/ml-engine.ts";
+import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { random } from "../../lib/random.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
@@ -15,19 +15,9 @@ export class OrderingGenerator implements ProblemGenerator {
     type: AbstractProblem['type'] = 'ordering';
     compatibleRenderers = ['numbers-order'];
 
-    generateLabels(params: Record<string, any>): string[] {
-        const includesZero = params.includesZero === 'true' || params.includesZero === true;
-        const zeroScope = includesZero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero;
-
-        return [
-            Area.NumerationWithIntegers,
-            Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller10, zeroScope,
-            Ability.ProcedureApplication, Ability.ProcedureExecution
-        ];
-    }
-
-    generate(params: Record<string, any>): Omit<AbstractProblem, "tags" | "type"> | null {
-        const includesZero = params.includesZero === 'true' || params.includesZero === true;
+    generate(input: GeneratorInput): ProblemStub | null {
+        const { constraints } = input;
+        const includesZero = constraints.includesZero === 'true' || constraints.includesZero === true;
         
         const numberSet = includesZero
             ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
