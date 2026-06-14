@@ -7,9 +7,18 @@ export class ComparisonGenerator implements ProblemGenerator {
     compatibleRenderers = ['numbers-compare'];
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
-        const digits = constraints.digits || 1;
-        const includesZero = constraints.includesZero !== false;
+        const { labels, constraints } = input;
+        
+        let digits = constraints.digits;
+        if (!digits) {
+            if (labels.includes(Scope.NumbersSmaller1000)) digits = 3;
+            else if (labels.includes(Scope.NumbersSmaller100)) digits = 2;
+            else digits = 1;
+        }
+
+        const includesZero = constraints.includesZero !== undefined 
+            ? constraints.includesZero 
+            : !labels.includes(Scope.NumbersWithoutZero);
 
         const max = Math.pow(10, digits) - 1;
         let min = digits > 1 ? Math.pow(10, digits - 1) : 0;

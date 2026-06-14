@@ -1,39 +1,34 @@
-import { MLDatasetPipelineConfig, GeneratorInput } from "../../types/ml-engine.ts";
-import PermutationBuilder from "../../lib/permutation-builder.ts";
+import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
+import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 
 const SEED = 42;
 
-function buildPermutations(): GeneratorInput[] {
-    return new PermutationBuilder()
-        .applyVariants('maxCount', [5, 10, 15, 20])
-        .applyVariants('type', ['inc', 'dec', undefined])
-        .build().map(p => {
-            const params = p.params;
-            const count = params.maxCount || params.count || 10;
-            const scopes = [
-                Scope.ArabicNumerals,
-                Scope.Base10,
-                Scope.NumbersWithoutZero,
-                Scope.NumbersWithoutNegatives,
-                Scope.CountingSymbols,
-                count <= 10 ? Scope.NumbersSmaller10 : Scope.NumbersSmaller20
-            ];
-
-            const areas = [Area.NumerationWithIntegers];
-            if (!params.type) {
-                areas.push(Area.IntegerNotation);
+function buildPermutations() {
+    return new DatasetPermutationBuilder()
+        .addLabels([
+            Scope.ArabicNumerals,
+            Scope.Base10,
+            Scope.NumbersWithoutZero,
+            Scope.NumbersWithoutNegatives,
+            Scope.CountingSymbols,
+            Area.NumerationWithIntegers
+        ])
+        .applyLabelVariants([
+            [Scope.NumbersSmaller10],
+            [Scope.NumbersSmaller20]
+        ])
+        .applyConstraintVariants('type', ['inc', 'dec', undefined])
+        .build().map(input => {
+            // Add conditional labels based on constraints for counting
+            if (!input.constraints.type) {
+                input.labels.push(Area.IntegerNotation);
+                input.labels.push(Ability.ProcedureExecution);
+            } else {
+                input.labels.push(Ability.ProcedureApplication);
+                input.labels.push(Ability.ProcedureExecution);
             }
-
-            const abilities = [Ability.ProcedureExecution];
-            if (params.type === 'inc' || params.type === 'dec') {
-                abilities.push(Ability.ProcedureApplication);
-            }
-
-            return {
-                labels: [...areas, ...scopes, ...abilities],
-                constraints: params
-            };
+            return input;
         });
 }
 

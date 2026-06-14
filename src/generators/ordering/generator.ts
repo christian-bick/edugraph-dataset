@@ -16,8 +16,10 @@ export class OrderingGenerator implements ProblemGenerator {
     compatibleRenderers = ['numbers-order'];
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
-        const includesZero = constraints.includesZero === 'true' || constraints.includesZero === true;
+        const { labels, constraints } = input;
+        const includesZero = constraints.includesZero !== undefined 
+            ? (constraints.includesZero === 'true' || constraints.includesZero === true)
+            : labels.includes(Scope.NumbersWithZero);
         
         const numberSet = includesZero
             ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

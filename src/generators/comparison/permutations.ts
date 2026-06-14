@@ -1,31 +1,28 @@
-import { MLDatasetPipelineConfig, GeneratorInput } from "../../types/ml-engine.ts";
-import PermutationBuilder from "../../lib/permutation-builder.ts";
+import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
+import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
 const SEED = 42;
 
-function buildPermutations(): GeneratorInput[] {
-    return new PermutationBuilder()
-        .applyVariants('digits', [1, 2, 3])
-        .applyVariants('includesZero', [true, false])
-        .build().map(p => {
-            const params = p.params;
-            let scope;
-            if (params.digits === 1) scope = Scope.NumbersSmaller10;
-            else if (params.digits === 2) scope = Scope.NumbersSmaller100;
-            else scope = Scope.NumbersSmaller1000;
-
-            const zeroScope = params.includesZero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero;
-
-            return {
-                labels: [
-                    Area.NumerationWithIntegers,
-                    Scope.ArabicNumerals, Scope.Base10, scope, zeroScope,
-                    Ability.ProcedureApplication, Ability.ProcedureExecution
-                ],
-                constraints: params
-            };
-        });
+function buildPermutations() {
+    return new DatasetPermutationBuilder()
+        .addLabels([
+            Area.NumerationWithIntegers,
+            Scope.ArabicNumerals, 
+            Scope.Base10, 
+            Ability.ProcedureApplication, 
+            Ability.ProcedureExecution
+        ])
+        .applyLabelVariants([
+            [Scope.NumbersSmaller10],
+            [Scope.NumbersSmaller100],
+            [Scope.NumbersSmaller1000]
+        ])
+        .applyLabelVariants([
+            [Scope.NumbersWithZero],
+            [Scope.NumbersWithoutZero]
+        ])
+        .build();
 }
 
 export const config: MLDatasetPipelineConfig = {

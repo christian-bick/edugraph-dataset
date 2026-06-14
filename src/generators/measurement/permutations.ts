@@ -1,22 +1,22 @@
-import { MLDatasetPipelineConfig, GeneratorInput } from "../../types/ml-engine.ts";
-import PermutationBuilder from "../../lib/permutation-builder.ts";
+import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
+import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
 const SEED = 42;
 
-function buildPermutations(): GeneratorInput[] {
-    return new PermutationBuilder()
-        .applyVariants('bandLength', [10, 20])
-        .build().map(p => {
-            return {
-                labels: [
-                    Area.MeasuringObjects, Area.DigitNotation,
-                    Scope.CentimeterScale, Scope.MillimeterScale, Scope.Tapemeter,
-                    Ability.ProcedureApplication, Ability.ProcedureExecution
-                ],
-                constraints: p.params
-            };
-        });
+function buildPermutations() {
+    return new DatasetPermutationBuilder()
+        .addLabels([
+            Area.MeasuringObjects, 
+            Area.DigitNotation,
+            Scope.CentimeterScale, 
+            Scope.MillimeterScale, 
+            Scope.Tapemeter,
+            Ability.ProcedureApplication, 
+            Ability.ProcedureExecution
+        ])
+        .applyConstraintVariants('bandLength', [10, 20])
+        .build();
 }
 
 export const config: MLDatasetPipelineConfig = {

@@ -1,31 +1,29 @@
-import { MLDatasetPipelineConfig, GeneratorInput } from "../../types/ml-engine.ts";
-import PermutationBuilder from "../../lib/permutation-builder.ts";
+import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
+import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
 const SEED = 42;
 
-function buildPermutations(): GeneratorInput[] {
-    return new PermutationBuilder()
-        .applyVariants('interval', [3600, 1800, 900, 60, 1])
-        .build().map(p => {
-            const params = p.params;
-            const interval = params.interval || 3600;
-            let intervalScope;
+function buildPermutations() {
+    return new DatasetPermutationBuilder()
+        .addLabels([
+            Area.MeasuringTime,
+            Scope.AnalogClock,
+            Ability.ProcedureApplication,
+            Ability.ProcedureExecution
+        ])
+        .applyConstraintVariants('interval', [3600, 1800, 900, 60, 1])
+        .build()
+        .map(p => {
+            const interval = p.constraints.interval;
             if (interval < 60) {
-                intervalScope = Scope.SecondIntervals
+                p.labels.push(Scope.SecondIntervals);
             } else if (interval < 3600) {
-                intervalScope = Scope.MinuteIntervals
+                p.labels.push(Scope.MinuteIntervals);
             } else {
-                intervalScope = Scope.HourIntervals
+                p.labels.push(Scope.HourIntervals);
             }
-            return {
-                labels: [
-                    Area.MeasuringTime,
-                    Scope.AnalogClock, intervalScope,
-                    Ability.ProcedureApplication, Ability.ProcedureExecution
-                ],
-                constraints: params
-            };
+            return p;
         });
 }
 

@@ -7,8 +7,15 @@ export class TimeGenerator implements ProblemGenerator {
     compatibleRenderers = ['time-analog'];
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
-        const interval = constraints.interval || 3600;
+        const { labels, constraints } = input;
+        
+        let interval = constraints.interval;
+        if (!interval) {
+            if (labels.includes(Scope.SecondIntervals)) interval = 1;
+            else if (labels.includes(Scope.MinuteIntervals)) interval = 60;
+            else interval = 3600;
+        }
+
         const dayInSeconds = 24 * 3600;
 
         const maxIntervals = Math.floor(dayInSeconds / interval);

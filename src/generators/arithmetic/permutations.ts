@@ -1,32 +1,28 @@
-import { MLDatasetPipelineConfig, GeneratorInput } from "../../types/ml-engine.ts";
+import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
 import { Area, Scope } from "edugraph-ts";
+import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 
 const SEED = 42;
 
-function buildPermutations(): GeneratorInput[] {
-    const perms: GeneratorInput[] = [];
-    const ops = [Area.IntegerAddition, Area.IntegerSubtraction, Area.IntegerMultiplication, Area.IntegerDivision];
-    const scopes = [Scope.NumbersSmaller10, Scope.NumbersSmaller100];
-    const zeros = [Scope.NumbersWithZero, Scope.NumbersWithoutZero];
-
-    for (const op of ops) {
-        for (const scope of scopes) {
-            for (const zero of zeros) {
-                perms.push({
-                    labels: [op, scope, zero, Scope.ArabicNumerals, Scope.Base10],
-                    constraints: { blankPart: 'answer' }
-                });
-            }
-        }
-    }
-    
-    // Add specific digit constraint examples
-    perms.push({
-        labels: [Area.IntegerAddition, Scope.NumbersSmaller100, Scope.NumbersWithoutZero],
-        constraints: { digitsNum1: 2, digitsNum2: 1, blankPart: 'answer' }
-    });
-
-    return perms;
+function buildPermutations() {
+    return new DatasetPermutationBuilder()
+        .addLabels([Scope.ArabicNumerals, Scope.Base10])
+        .applyLabelVariants([
+            [Area.IntegerAddition],
+            [Area.IntegerSubtraction],
+            [Area.IntegerMultiplication],
+            [Area.IntegerDivision]
+        ])
+        .applyLabelVariants([
+            [Scope.NumbersSmaller10],
+            [Scope.NumbersSmaller100]
+        ])
+        .applyLabelVariants([
+            [Scope.NumbersWithZero],
+            [Scope.NumbersWithoutZero]
+        ])
+        .applyConstraintVariants('blankPart', ['answer', 'problem'])
+        .build();
 }
 
 export const config: MLDatasetPipelineConfig = {

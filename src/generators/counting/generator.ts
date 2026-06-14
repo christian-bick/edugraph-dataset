@@ -7,9 +7,20 @@ export class CountingGenerator implements ProblemGenerator {
     compatibleRenderers = ['counting-objects', 'counting-inc-dec'];
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
-        const maxCount = constraints.maxCount || constraints.count || 10;
-        const incDecType = constraints.type; 
+        const { labels, constraints } = input;
+        
+        let maxCount = constraints.maxCount || constraints.count;
+        if (!maxCount) {
+            if (labels.includes(Scope.NumbersSmaller20)) maxCount = 20;
+            else if (labels.includes(Scope.NumbersSmaller10)) maxCount = 10;
+            else maxCount = 10;
+        }
+
+        let incDecType = constraints.type; 
+        if (incDecType === undefined && labels.includes(Ability.ProcedureApplication)) {
+            // Pick inc or dec randomly if not specified but label says it should be one of them
+            incDecType = random() > 0.5 ? 'inc' : 'dec';
+        }
         
         const minCount = Math.max(1, maxCount - 9); 
         const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
