@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
 
@@ -21,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies
         run: npm ci
@@ -56,11 +58,11 @@ jobs:
           # Copy license so it's included in the HF repo
           cp LICENSE out/dataset/
           
-          # Install huggingface_hub cli
-          pip install -U "huggingface_hub[cli]"
+          # Install huggingface_hub
+          pip install -U huggingface_hub
           
           # Push the dataset folder to the HF repo under the specific tag
-          huggingface-cli upload christian-bick/edugraph-exercises ./out/dataset . --repo-type dataset --revision ${{ github.ref_name }} --create-pr
+          hf upload christian-bick/edugraph-exercises ./out/dataset . --repo-type dataset --revision ${{ github.ref_name }} --create-pr
 
       - name: Create Release
         id: create_release
