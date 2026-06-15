@@ -1,7 +1,7 @@
 import { Browser, chromium } from 'playwright';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync, mkdirSync, rmSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync, readdirSync, readFileSync, appendFileSync } from 'fs';
 import { DatasetConfig } from '../config/dataset.config.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,6 +20,44 @@ function createSafeFilename(problemId: string, rendererId: string, params: any, 
     
     const paramPart = paramStrings ? `_${paramStrings}` : '';
     return `${safeId}_${rendererId}${paramPart}_inst-${instance}`;
+}
+
+/**
+ * Merges hidden .metadata.jsonl files from module subdirectories into a single root metadata.jsonl
+ */
+function finalizeMetadata(splitName: string) {
+    const splitDir = resolve(OUT_DIR, splitName);
+    if (!existsSync(splitDir)) return;
+
+    const rootMetaPath = resolve(splitDir, 'metadata.jsonl');
+    
+    // We start fresh for the root metadata.jsonl
+    writeFileSync(rootMetaPath, '');
+
+    const modules = readdirSync(splitDir, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .map(d => d.name);
+
+    for (const moduleName of modules) {
+        const moduleMetaPath = resolve(splitDir, moduleName, '.metadata.jsonl');
+        if (existsSync(moduleMetaPath)) {
+            const content = readFileSync(moduleMetaPath, 'utf-8');
+            const lines = content.split('\n').filter(l => l.trim() !== '');
+            
+            const adjustedLines = lines.map(line => {
+                const entry = JSON.parse(line);
+                // Adjust file_name to be relative to the split root
+                entry.file_name = `${moduleName}/${entry.file_name}`;
+                return JSON.stringify(entry);
+            });
+
+            if (adjustedLines.length > 0) {
+                appendFileSync(rootMetaPath, adjustedLines.join('\n') + '\n');
+            }
+        }
+    }
+    
+    console.log(`[${splitName}] Finalized root metadata.jsonl`);
 }
 
 async function renderDatasetSplit(
@@ -130,10 +168,10 @@ async function renderDatasetSplit(
 
     await Promise.allSettled(workers);
     
-    const metaPath = resolve(splitOutputDir, 'metadata.jsonl');
+    const metaPath = resolve(splitOutputDir, '.metadata.jsonl');
     const jsonlContent = metadata.map(entry => JSON.stringify(entry)).join('\n') + '\n';
     writeFileSync(metaPath, jsonlContent);
-    console.log(`[${moduleName}:${splitName}] Wrote metadata for ${metadata.length} items to metadata.jsonl`);
+    console.log(`[${moduleName}:${splitName}] Wrote modular metadata to .metadata.jsonl`);
     
     return totalImages;
 }
@@ -199,11 +237,11 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
     const trainSet = dataset.slice(0, trainC);
     const valSet = dataset.slice(trainC);
 
-    console.log(`[${moduleName}] Generated ${count} problems. Split: Train (${trainSet.length}), Val (${valSet.length})`);
+    console.log(`[${moduleName}] Generated ${count} problems. Split: Train (${trainSet.length}), Validation (${valSet.length})`);
 
     let moduleImages = 0;
     moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainSet, config.visualDistribution, DEFAULT_CONCURRENCY);
-    moduleImages += await renderDatasetSplit(browser, 'val', moduleName, valSet, config.visualDistribution, DEFAULT_CONCURRENCY);
+    moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valSet, config.visualDistribution, DEFAULT_CONCURRENCY);
 
     return moduleImages;
 }
@@ -220,7 +258,7 @@ async function main() {
         mkdirSync(OUT_DIR, { recursive: true });
     } else {
         // Clear specific module in both splits
-        ['train', 'val'].forEach(split => {
+        ['train', 'validation'].forEach(split => {
             const moduleDir = resolve(OUT_DIR, split, targetModule);
             if (existsSync(moduleDir)) {
                 console.log(`Cleaning target directory for module [${targetModule}] in split [${split}]...`);
@@ -250,6 +288,11 @@ async function main() {
     }
 
     await browser.close();
+
+    // Finalization step: Merge metadata
+    finalizeMetadata('train');
+    finalizeMetadata('validation');
+
     const duration = ((performance.now() - startTime) / 1000).toFixed(2);
     console.log(`\nDONE! Generated ${totalImages} images in ${duration}s.`);
 }

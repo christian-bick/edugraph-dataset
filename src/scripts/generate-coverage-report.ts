@@ -22,7 +22,7 @@ function generateReport() {
     const combinationCounts: Record<string, number> = {};
     let totalEntries = 0;
 
-    const splits = ['train', 'val'];
+    const splits = ['train', 'validation'];
     const modules = readdirSync(join(OUT_DIR, 'train'), { withFileTypes: true })
         .filter(d => d.isDirectory())
         .map(d => d.name);
@@ -30,25 +30,23 @@ function generateReport() {
     console.log(`Analyzing dataset across modules: ${modules.join(', ')}...\n`);
 
     for (const split of splits) {
-        for (const module of modules) {
-            const metaPath = join(OUT_DIR, split, module, 'metadata.jsonl');
-            if (existsSync(metaPath)) {
-                const fileContent = readFileSync(metaPath, 'utf8');
-                const lines = fileContent.split('\n').filter(line => line.trim() !== '');
+        const rootMetaPath = join(OUT_DIR, split, 'metadata.jsonl');
+        if (existsSync(rootMetaPath)) {
+            const fileContent = readFileSync(rootMetaPath, 'utf8');
+            const lines = fileContent.split('\n').filter(line => line.trim() !== '');
+            
+            for (const line of lines) {
+                const entry: MetaEntry = JSON.parse(line);
+                totalEntries++;
                 
-                for (const line of lines) {
-                    const entry: MetaEntry = JSON.parse(line);
-                    totalEntries++;
-                    
-                    // Independent Label Counts
-                    for (const label of entry.tags) {
-                        labelCounts[label] = (labelCounts[label] || 0) + 1;
-                    }
-
-                    // Combination Counts (sorted to ensure uniqueness)
-                    const combo = [...entry.tags].sort().join(' | ');
-                    combinationCounts[combo] = (combinationCounts[combo] || 0) + 1;
+                // Independent Label Counts
+                for (const label of entry.tags) {
+                    labelCounts[label] = (labelCounts[label] || 0) + 1;
                 }
+
+                // Combination Counts (sorted to ensure uniqueness)
+                const combo = [...entry.tags].sort().join(' | ');
+                combinationCounts[combo] = (combinationCounts[combo] || 0) + 1;
             }
         }
     }
@@ -63,7 +61,8 @@ function generateReport() {
     const sortedLabels = Object.entries(labelCounts).sort((a, b) => b[1] - a[1]);
     for (const [label, count] of sortedLabels) {
         const percentage = ((count / totalEntries) * 100).toFixed(2);
-        report += `| ${label} | ${count} | ${percentage}% |\n`;
+        const cleanLabel = label.replace(/http:\/\/edugraph\.io\/edu[\/#]/g, '');
+        report += `| ${cleanLabel} | ${count} | ${percentage}% |\n`;
     }
 
     report += `\n## 2. Label Combination Frequency\n`;
@@ -72,7 +71,10 @@ function generateReport() {
     const sortedCombos = Object.entries(combinationCounts).sort((a, b) => b[1] - a[1]);
     for (const [combo, count] of sortedCombos) {
         const percentage = ((count / totalEntries) * 100).toFixed(2);
-        const cleanCombo = combo.replace(/http:\/\/edugraph\.io\/edu#/g, '');
+        // Remove the URI prefix and replace the pipe separator with something that doesn't break the Markdown table
+        const cleanCombo = combo
+            .replace(/http:\/\/edugraph\.io\/edu[\/#]/g, '')
+            .replace(/ \| /g, ', ');
         report += `| ${cleanCombo} | ${count} | ${percentage}% |\n`;
     }
 

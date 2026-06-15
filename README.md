@@ -1,3 +1,12 @@
+---
+configs:
+- data_files:
+  - split: train
+    path: "train/**"
+  - split: validation
+    path: "validation/**"
+---
+
 # EduGraph Dataset
 
 **EduGraph Dataset** is a synthetic ML dataset generator designed to produce highly controlled, precisely labeled training data for AI models in the education sector. 

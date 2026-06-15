@@ -58,6 +58,9 @@ jobs:
           # Copy license so it's included in the HF repo
           cp LICENSE out/dataset/
           
+          # Clean up intermediate .metadata.jsonl files
+          find out/dataset -name ".metadata.jsonl" -delete
+
           # Install huggingface_hub
           pip install -U huggingface_hub
           
