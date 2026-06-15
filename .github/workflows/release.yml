@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Disable AppArmor for Puppeteer
+      - name: Disable AppArmor for Playwright/Chromium
         run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
 
       - name: Set up Node.js
@@ -25,6 +25,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run Tests
+        run: npm run test
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
@@ -43,7 +46,7 @@ jobs:
         run: echo "sha_short=$(git rev-parse --short=12 HEAD)" >> $GITHUB_OUTPUT
 
       - name: Create tarball
-        run: tar -czf dataset.tar.gz -C out dataset coverage-report.md
+        run: tar -czf dataset.tar.gz -C out dataset
 
       - name: Create Release
         id: create_release
