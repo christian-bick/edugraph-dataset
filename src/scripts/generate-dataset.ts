@@ -7,7 +7,7 @@ import { AbstractProblem, RenderPayload, VisualBlueprint } from '../types/ml-eng
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const OUT_DIR = resolve(PROJECT_ROOT, 'out', 'ml-dataset');
+const OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
 const BASE_URL = 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
 

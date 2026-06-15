@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest --run",
-    "generate:ml": "npx vite-node src/scripts/generate-ml-dataset.ts",
+    "generate:dataset": "npx vite-node src/scripts/generate-dataset.ts",
     "report:coverage": "npx vite-node src/scripts/generate-coverage-report.ts",
     "upload:gcs": "npx vite-node src/scripts/upload-to-gcs.ts",
     "sync:gcs": "npx vite-node src/scripts/upload-to-gcs.ts --sync",

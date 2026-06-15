@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const OUT_DIR = resolve(PROJECT_ROOT, 'out', 'ml-dataset');
+const OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
 
 interface MetaEntry {
     tags: string[];

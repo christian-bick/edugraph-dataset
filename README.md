@@ -38,10 +38,10 @@ This will start a local server, and you can navigate to different exercise URLs 
 
 ### Generating ML Datasets
 
-To generate the ML dataset, use the `generate-ml-dataset` script:
+To generate the dataset, use the `generate-dataset` script:
 
 ```bash
-npm run generate:ml
+npm run generate:dataset
 ```
 
 This will process the exercise generators and produce a dataset suitable for model training.

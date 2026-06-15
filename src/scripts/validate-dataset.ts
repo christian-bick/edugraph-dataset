@@ -7,7 +7,7 @@ import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'ml-dataset', 'train');
+const DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset', 'train');
 const GENERATORS_ROOT = resolve(PROJECT_ROOT, 'src', 'generators');
 
 if (!process.env.GEMINI_API_KEY) {
