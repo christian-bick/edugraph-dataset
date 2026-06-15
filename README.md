@@ -1,6 +1,6 @@
-# EduGraph Content
+# EduGraph Dataset
 
-**EduGraph Content** is a synthetic ML dataset generator designed to produce highly controlled, precisely labeled training data for AI models in the education sector. 
+**EduGraph Dataset** is a synthetic ML dataset generator designed to produce highly controlled, precisely labeled training data for AI models in the education sector. 
 
 By leveraging the [EduGraph Ontology](https://github.com/christian-bick/edugraph-ontology), this project programmatically generates math-related visual datasets—ranging from basic counting exercises to complex arithmetic procedures—where every generated image is mathematically bound to its educational labels.
 
