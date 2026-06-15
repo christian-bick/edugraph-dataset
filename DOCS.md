@@ -27,8 +27,8 @@ The data contract passed from the Playwright orchestrator into the browser's `wi
 *   `isAnswerView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
 
 ### Determinism
-To ensure that the Question (`_mode-Q`) and Answer (`_mode-A`) renderings match exactly (especially when visual parameters dictate randomized placement, like scattering counting objects), the system relies on global seeded randomness via `src/lib/random.ts`. 
-The renderer typically seeds the RNG using the `problem.id`.
+### Determinism
+To ensure that the Question (`_mode-Q`) and Solution (`_mode-S`) renderings match exactly (especially when visual parameters dictate randomized placement, like scattering counting objects), the system relies on global seeded randomness via `src/lib/random.ts`. The renderer typically seeds the RNG using the `problem.id`.
 
 ## 3. Directory & Script Reference
 
@@ -91,8 +91,8 @@ Write robust unit tests verifying that the generator outputs correct math and re
 
 ### Step 5: Visual Implementation (`exercise.*`)
 Implement the DOM logic in `src/views/<renderer>/exercise.ts`.
-*   Ensure that `isAnswerView: false` visually hides the answer (or renders an empty box/placeholder).
-*   Ensure that `isAnswerView: true` renders the exact same layout but with the answer visible.
+*   Ensure that `isSolutionView: false` visually hides the answer (or renders an empty box/placeholder).
+*   Ensure that `isSolutionView: true` renders the exact same layout but with the answer visible.
 *   Use `setSeed(problem.id)` before making randomized layout decisions.
 
 ### Step 6: Registration

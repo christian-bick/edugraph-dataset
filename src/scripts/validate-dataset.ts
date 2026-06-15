@@ -76,8 +76,8 @@ async function validateModule(moduleName: string) {
     }
 
     const randomQFile = files[Math.floor(Math.random() * files.length)];
-    const randomAFile = randomQFile.replace('_mode-Q.png', '_mode-A.png');
-    
+    const randomAFile = randomQFile.replace('_mode-Q.png', '_mode-S.png');
+
     const qPath = resolve(moduleDir, randomQFile);
     const aPath = resolve(moduleDir, randomAFile);
 
@@ -89,7 +89,7 @@ async function validateModule(moduleName: string) {
     const prompt = `
 You are a senior Visual QA Engineer. Evaluate these two math exercise images:
 Image 1: Question Mode (_mode-Q)
-Image 2: Answer Mode (_mode-A)
+Image 2: Solution Mode (_mode-S)
 Module: "${moduleName}"
 
 STRICT CHECKLIST:

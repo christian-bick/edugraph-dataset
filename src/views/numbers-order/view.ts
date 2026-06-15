@@ -1,12 +1,12 @@
 import "./view.scss";
 import { RenderPayload } from "../../types/ml-engine.ts";
 
-function createProblemHTML(numbers: number[], isDesc: boolean, isAnswerView: boolean) {
+function createProblemHTML(numbers: number[], isDesc: boolean, isSolutionView: boolean) {
     const unorderedNumbersHTML = numbers.map(n => `<div class="number-box">${n}</div>`).join('');
     const sortedNumbers = [...numbers].sort((a, b) => isDesc ? b - a : a - b);
 
     const orderedBoxesHTML = sortedNumbers.map((n) => {
-        return `<div class="writing-box ${isAnswerView ? 'solution' : ''}">${isAnswerView ? n : ''}</div>`;
+        return `<div class="writing-box ${isSolutionView ? 'solution' : ''}">${isSolutionView ? n : ''}</div>`;
     }).join('');
 
     const arrowSymbol = isDesc ? '↘' : '↗';
@@ -23,14 +23,14 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, config, isAnswerView } = payload;
+        const { problem, config, isSolutionView } = payload;
         const isDesc = config.visualParams.desc === true || config.visualParams.desc === 'true';
         
-        exerciseContainer.innerHTML = createProblemHTML(problem.data.numbers, isDesc, isAnswerView);
+        exerciseContainer.innerHTML = createProblemHTML(problem.data.numbers, isDesc, isSolutionView);
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };

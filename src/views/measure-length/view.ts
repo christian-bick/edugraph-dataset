@@ -39,15 +39,15 @@ function createRectangle(length: number, color: string): string {
     `;
 }
 
-function createProblemHTML(data: any, visualParams: any, color: string, isAnswerView: boolean) {
+function createProblemHTML(data: any, visualParams: any, color: string, isSolutionView: boolean) {
     const isReverse = visualParams.reverse === true || visualParams.reverse === 'true';
     const isDecimal = visualParams.decimal === true || visualParams.decimal === 'true';
 
     const measureBandHTML = createMeasureBand(data.bandLength);
     
-    const showRectangle = !isReverse || isAnswerView;
-    const showAnswerInBox = isReverse || isAnswerView;
-    const isTextSolution = !isReverse && isAnswerView;
+    const showRectangle = !isReverse || isSolutionView;
+    const showAnswerInBox = isReverse || isSolutionView;
+    const isTextSolution = !isReverse && isSolutionView;
 
     const rectColor = isReverse ? 'forestgreen' : color;
     const rectangleHTML = showRectangle ? createRectangle(data.problemLength, rectColor) : `<div style="height: 22px; width: ${data.problemLength * 30}px"></div>`;
@@ -55,9 +55,9 @@ function createProblemHTML(data: any, visualParams: any, color: string, isAnswer
     const answer = isDecimal ? (data.problemLength).toFixed(1) : (data.problemLength * 10).toFixed(0);
     const unit = isDecimal ? 'cm' : 'mm';
 
-    let answerBoxClasses = 'answer-box';
-    if (isReverse) answerBoxClasses += ' reverse';
-    if (isTextSolution) answerBoxClasses += ' solution';
+    let solutionBoxClasses = 'solution-box';
+    if (isReverse) solutionBoxClasses += ' reverse';
+    if (isTextSolution) solutionBoxClasses += ' solution';
 
     return `
         <div class="problem">
@@ -65,7 +65,7 @@ function createProblemHTML(data: any, visualParams: any, color: string, isAnswer
                 ${rectangleHTML}
                 ${measureBandHTML}
             </div>
-            <div class="${answerBoxClasses}" data-unit="${unit}">${showAnswerInBox ? answer : ''}</div>
+            <div class="${solutionBoxClasses}" data-unit="${unit}">${showAnswerInBox ? answer : ''}</div>
         </div>`;
 }
 
@@ -73,14 +73,14 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, config, isAnswerView } = payload;
+        const { problem, config, isSolutionView } = payload;
         const color = '#4682B4'; // SteelBlue
         
-        exerciseContainer.innerHTML = createProblemHTML(problem.data, config.visualParams, color, isAnswerView);
+        exerciseContainer.innerHTML = createProblemHTML(problem.data, config.visualParams, color, isSolutionView);
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };

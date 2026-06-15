@@ -78,14 +78,14 @@ async function renderDatasetSplit(
 
                 const baseFilename = createSafeFilename(problem.id, blueprint.viewId, blueprint.visualParams, instance);
 
-                const renderAndRecord = async (isAnswerView: boolean, modeTag: string, modeName: string) => {
+                const renderAndRecord = async (isSolutionView: boolean, modeTag: string, modeName: string) => {
                     const payload: any = {
                         problem,
                         config: {
                             viewId: blueprint.viewId,
                             visualParams: blueprint.visualParams
                         },
-                        isAnswerView
+                        isSolutionView
                     };
 
                     await page.evaluate((p) => window.renderView!(p), payload);
@@ -93,20 +93,25 @@ async function renderDatasetSplit(
                     const outPath = resolve(splitOutputDir, filename);
                     await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
                     
-                    metadata.push({
-                        filename,
-                        problemId: problem.id,
+                    totalImages++;
+
+                    return {
+                        file_name: filename,
+                        problem_id: problem.id,
                         type: problem.type,
+                        solution_visible: isSolutionView,
                         mode: modeName,
                         tags: problem.tags,
-                        parameters: blueprint.visualParams
-                    });
-                    
-                    totalImages++;
+                        parameters: {
+                            ...(problem.data._permutationParams || {}),
+                            ...blueprint.visualParams
+                        }
+                    };
                 };
 
-                await renderAndRecord(false, 'Q', 'question');
-                await renderAndRecord(true, 'A', 'answer');
+                const qMeta = await renderAndRecord(false, 'Q', 'question');
+                const aMeta = await renderAndRecord(true, 'S', 'solution');
+                metadata.push(qMeta, aMeta);
 
                 completedTasks++;
                 if (completedTasks % Math.max(1, Math.floor(totalTasks / 10)) === 0) {
@@ -125,9 +130,10 @@ async function renderDatasetSplit(
 
     await Promise.allSettled(workers);
     
-    const metaPath = resolve(splitOutputDir, 'meta.json');
-    writeFileSync(metaPath, JSON.stringify(metadata, null, 2));
-    console.log(`[${moduleName}:${splitName}] Wrote metadata for ${metadata.length} items to meta.json`);
+    const metaPath = resolve(splitOutputDir, 'metadata.jsonl');
+    const jsonlContent = metadata.map(entry => JSON.stringify(entry)).join('\n') + '\n';
+    writeFileSync(metaPath, jsonlContent);
+    console.log(`[${moduleName}:${splitName}] Wrote metadata for ${metadata.length} items to metadata.jsonl`);
     
     return totalImages;
 }

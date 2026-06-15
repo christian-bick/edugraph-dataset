@@ -12,19 +12,19 @@ const operatorSymbols: { [key: string]: string } = {
 function createProblemHTML(
     data: { num1: number, num2: number, answer: number, operator: string }, 
     visualParams: any, 
-    isAnswerView: boolean
+    isSolutionView: boolean
 ) {
-    const blankPart = visualParams.blankPart || 'answer';
+    const blankPart = visualParams.blankPart || 'solution';
     const symbol = operatorSymbols[data.operator] || '?';
     
     const displayProblem: any = { 
         num1: data.num1, 
         num2: data.num2, 
-        answer: data.answer,
+        solution: data.answer,
         symbol: symbol
     };
 
-    if (!isAnswerView) {
+    if (!isSolutionView) {
         if (blankPart === 'symbol') {
             displayProblem.symbol = '';
         } else {
@@ -34,7 +34,7 @@ function createProblemHTML(
 
     const getClass = (partName: string, baseClass: string) => {
         let cls = baseClass;
-        if (isAnswerView && blankPart === partName) {
+        if (isSolutionView && blankPart === partName) {
             cls += ' solution';
         }
         return cls;
@@ -46,7 +46,7 @@ function createProblemHTML(
             <div class="${getClass('symbol', 'symbol')}">${displayProblem.symbol}</div>
             <div class="${getClass('num2', 'box')}">${displayProblem.num2}</div>
             <div class="symbol">=</div>
-            <div class="${getClass('answer', 'box answer-box')}">${displayProblem.answer}</div>
+            <div class="${getClass('solution', 'box solution-box')}">${displayProblem.solution}</div>
         </div>`;
 }
 
@@ -54,14 +54,14 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, config, isAnswerView } = payload;
+        const { problem, config, isSolutionView } = payload;
         
         // --- Deterministic Blank Selection ---
         // We seed with the problem ID so Q and A always pick the same part to blank
         setSeed(problem.id);
         
         let blankPartKey = '';
-        const requestedBlank = config.visualParams.blankPart || 'answer';
+        const requestedBlank = config.visualParams.blankPart || 'solution';
         
         switch (requestedBlank) {
             case 'problem': {
@@ -70,7 +70,7 @@ window.renderView = (payload: RenderPayload) => {
                 break;
             }
             case 'problem-answer': {
-                const parts = ['num1', 'num2', 'answer'];
+                const parts = ['num1', 'num2', 'solution'];
                 blankPartKey = parts[Math.floor(random() * parts.length)];
                 break;
             }
@@ -78,7 +78,7 @@ window.renderView = (payload: RenderPayload) => {
                 blankPartKey = 'symbol';
                 break;
             case 'random': {
-                const allParts = ['num1', 'num2', 'answer', 'symbol'];
+                const allParts = ['num1', 'num2', 'solution', 'symbol'];
                 blankPartKey = allParts[Math.floor(random() * allParts.length)];
                 break;
             }
@@ -92,12 +92,12 @@ window.renderView = (payload: RenderPayload) => {
         exerciseContainer.innerHTML = createProblemHTML(
             problem.data as any, 
             specificVisualParams, 
-            isAnswerView
+            isSolutionView
         );
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };

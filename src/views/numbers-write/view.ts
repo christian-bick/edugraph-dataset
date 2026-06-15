@@ -1,12 +1,12 @@
 import "./view.scss";
 import { RenderPayload } from "../../types/ml-engine.ts";
 
-function createProblemHTML(number: number, isAnswerView: boolean, outline: boolean) {
+function createProblemHTML(number: number, isSolutionView: boolean, outline: boolean) {
     const boxesHTML = Array.from({ length: 3 }, (_, i) => {
         let boxClass = 'writing-box';
         let content: number | string = '';
 
-        if (isAnswerView) {
+        if (isSolutionView) {
             boxClass += ' solution';
             content = number;
         } else {
@@ -41,14 +41,14 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, config, isAnswerView } = payload;
+        const { problem, config, isSolutionView } = payload;
         const outline = config.visualParams.outline === true || config.visualParams.outline === 'true';
         
-        exerciseContainer.innerHTML = createProblemHTML(problem.data.number, isAnswerView, outline);
+        exerciseContainer.innerHTML = createProblemHTML(problem.data.number, isSolutionView, outline);
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };

@@ -10,7 +10,7 @@ const operatorSymbols: { [key: string]: string } = {
 
 function createProblemHTML(
     data: { num1: number, num2: number, answer: number, operator: string },
-    isAnswerView: boolean
+    isSolutionView: boolean
 ) {
     const symbol = operatorSymbols[data.operator] || '?';
 
@@ -21,7 +21,7 @@ function createProblemHTML(
                 <span class="operator">${symbol}</span>${data.num2}
             </span>
             <div class="line"></div>
-            <div class="answer-box ${isAnswerView ? 'solution' : ''}">${isAnswerView ? data.answer : ''}</div>
+            <div class="solution-box ${isSolutionView ? 'solution' : ''}">${isSolutionView ? data.answer : ''}</div>
         </div>`;
 }
 
@@ -29,13 +29,13 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, isAnswerView } = payload;
+        const { problem, isSolutionView } = payload;
         
-        exerciseContainer.innerHTML = createProblemHTML(problem.data as any, isAnswerView);
+        exerciseContainer.innerHTML = createProblemHTML(problem.data as any, isSolutionView);
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };

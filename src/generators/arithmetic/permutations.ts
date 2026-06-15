@@ -25,7 +25,7 @@ function buildPermutations() {
             [Scope.IntegersWithZero],
             [Scope.IntegersWithoutZero]
         ])
-        .applyConstraintVariants('blankPart', ['answer', 'problem'])
+        .applyConstraintVariants('blankPart', ['solution', 'problem'])
         .build();
 }
 

@@ -9,7 +9,7 @@ function createProblemHTML(numObjects: number, icon: string, showAnswer: boolean
     return `
         <div class="problem">
             <div class="objects-container">${objectsHTML}</div>
-            <div class="answer-box">${showAnswer ? numObjects : ''}</div>
+            <div class="solution-box">${showAnswer ? numObjects : ''}</div>
         </div>`;
 }
 
@@ -17,18 +17,18 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, isAnswerView } = payload;
+        const { problem, isSolutionView } = payload;
         
         // We pick an icon pseudo-randomly based on the problem id so it stays consistent between Q and A views,
         // or we can just pick one deterministically. Let's use the problem ID to derive an index.
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
         const icon = ICONS[iconIndex];
         
-        exerciseContainer.innerHTML = createProblemHTML(problem.data.numObjects, icon, isAnswerView);
+        exerciseContainer.innerHTML = createProblemHTML(problem.data.numObjects, icon, isSolutionView);
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };

@@ -31,11 +31,13 @@ function generateReport() {
 
     for (const split of splits) {
         for (const module of modules) {
-            const metaPath = join(OUT_DIR, split, module, 'meta.json');
+            const metaPath = join(OUT_DIR, split, module, 'metadata.jsonl');
             if (existsSync(metaPath)) {
-                const data: MetaEntry[] = JSON.parse(readFileSync(metaPath, 'utf8'));
+                const fileContent = readFileSync(metaPath, 'utf8');
+                const lines = fileContent.split('\n').filter(line => line.trim() !== '');
                 
-                for (const entry of data) {
+                for (const line of lines) {
+                    const entry: MetaEntry = JSON.parse(line);
                     totalEntries++;
                     
                     // Independent Label Counts

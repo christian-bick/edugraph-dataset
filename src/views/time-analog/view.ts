@@ -52,24 +52,24 @@ function createClock(time: string, interval: number, isEmpty: boolean, isSolutio
     `;
 }
 
-function createProblemHTML(time: string, interval: number, isReverse: boolean, isAnswerView: boolean) {
-    const showHands = !isReverse || isAnswerView;
-    const showTime = isReverse || isAnswerView;
+function createProblemHTML(time: string, interval: number, isReverse: boolean, isSolutionView: boolean) {
+    const showHands = !isReverse || isSolutionView;
+    const showTime = isReverse || isSolutionView;
 
-    const isClockSolution = isReverse && isAnswerView;
-    const isTextSolution = !isReverse && isAnswerView;
+    const isClockSolution = isReverse && isSolutionView;
+    const isTextSolution = !isReverse && isSolutionView;
 
     const clockHTML = createClock(time, interval, !showHands, isClockSolution);
     const formattedTime = formatTime(time, interval);
 
-    let answerBoxClasses = 'answer-box';
-    if (isReverse) answerBoxClasses += ' reverse';
-    if (isTextSolution) answerBoxClasses += ' solution';
+    let solutionBoxClasses = 'solution-box';
+    if (isReverse) solutionBoxClasses += ' reverse';
+    if (isTextSolution) solutionBoxClasses += ' solution';
 
     return `
         <div class="problem">
             ${clockHTML}
-            <div class="${answerBoxClasses}">${showTime ? formattedTime : ''}</div>
+            <div class="${solutionBoxClasses}">${showTime ? formattedTime : ''}</div>
         </div>`;
 }
 
@@ -77,14 +77,14 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, config, isAnswerView } = payload;
+        const { problem, config, isSolutionView } = payload;
         const isReverse = config.visualParams.reverse === true || config.visualParams.reverse === 'true';
         
-        exerciseContainer.innerHTML = createProblemHTML(problem.data.time, problem.data.interval, isReverse, isAnswerView);
+        exerciseContainer.innerHTML = createProblemHTML(problem.data.time, problem.data.interval, isReverse, isSolutionView);
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };

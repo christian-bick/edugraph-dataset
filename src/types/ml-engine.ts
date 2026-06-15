@@ -34,7 +34,7 @@ export interface RenderPayload {
     problem: AbstractProblem;
     config: RenderConfig;
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
-    isAnswerView: boolean;
+    isSolutionView: boolean;
 }
 
 /**

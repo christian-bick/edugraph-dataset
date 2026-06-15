@@ -17,7 +17,7 @@ function createProblemHTML(data: { numObjects: number, icon: string, type: strin
                     <div class="${arrowClass}"></div>
                     <span class="arrow-text ${textClass}">1</span>
                 </div>
-                <div class="answer-box ${showAnswer ? 'solution' : ''}">${showAnswer ? data.answer : ''}</div>
+                <div class="solution-box ${showAnswer ? 'solution' : ''}">${showAnswer ? data.answer : ''}</div>
             </div>
         </div>`;
 }
@@ -26,7 +26,7 @@ window.renderView = (payload: RenderPayload) => {
     const exerciseContainer = document.getElementById('view');
     
     if (exerciseContainer) {
-        const { problem, isAnswerView } = payload;
+        const { problem, isSolutionView } = payload;
         
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
         const icon = ICONS[iconIndex];
@@ -38,11 +38,11 @@ window.renderView = (payload: RenderPayload) => {
             answer: problem.data.incDecAnswer
         };
 
-        exerciseContainer.innerHTML = createProblemHTML(problemData, isAnswerView);
+        exerciseContainer.innerHTML = createProblemHTML(problemData, isSolutionView);
 
-        const answerContainer = document.getElementById('answer');
-        if (answerContainer) {
-            answerContainer.style.display = 'none';
+        const solutionContainer = document.getElementById('solution');
+        if (solutionContainer) {
+            solutionContainer.style.display = 'none';
         }
     }
 };
