@@ -4,6 +4,11 @@
 
 By leveraging the [EduGraph Ontology](https://github.com/christian-bick/edugraph-ontology), this project programmatically generates math-related visual datasets—ranging from basic counting exercises to complex arithmetic procedures—where every generated image is mathematically bound to its educational labels.
 
+## Dataset
+
+The latest generated and released version of the dataset is available on Hugging Face:
+👉 **[christian-bick/edugraph-exercises](https://huggingface.co/datasets/christian-bick/edugraph-exercises)**
+
 ## General Concepts
 
 The pipeline is built on a **Label-Driven Generation** paradigm. Instead of generating a math problem and attempting to label it, the system receives a set of constraints (e.g., "Must include zero", "Uses addition") and generates problems that mathematically satisfy those semantic labels.
