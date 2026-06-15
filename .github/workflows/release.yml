@@ -62,7 +62,7 @@ jobs:
           pip install -U huggingface_hub
           
           # Push the dataset folder to the HF repo under the specific tag
-          hf upload christian-bick/edugraph-exercises ./out/dataset . --repo-type dataset --revision ${{ github.ref_name }} --create-pr
+          hf upload christian-bick/edugraph-exercises ./out/dataset . --repo-type dataset --revision ${{ github.ref_name }}
 
       - name: Create Release
         id: create_release
