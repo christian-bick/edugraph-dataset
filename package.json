@@ -38,6 +38,6 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "edugraph-ts": "https://github.com/christian-bick/edugraph-ontology/releases/download/v0.6.0/edugraph-ts.tgz"
+    "edugraph-ts": "https://github.com/christian-bick/edugraph-ontology/releases/download/v0.6.2/edugraph-ts.tgz"
   }
 }
