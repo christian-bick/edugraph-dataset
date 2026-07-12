@@ -10,6 +10,7 @@
     "test": "vitest --run",
     "generate:dataset": "npx vite-node src/scripts/generate-dataset.ts",
     "report:coverage": "npx vite-node src/scripts/generate-coverage-report.ts",
+    "generate:standards-explorer": "npx vite-node src/scripts/generate-standards-explorer.ts",
     "upload:gcs": "npx vite-node src/scripts/upload-to-gcs.ts",
     "sync:gcs": "npx vite-node src/scripts/upload-to-gcs.ts --sync",
     "sync:gcs:dry": "npx vite-node src/scripts/upload-to-gcs.ts --sync --dry",

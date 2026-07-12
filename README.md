@@ -67,6 +67,12 @@ npm run dev
 
 Contributions are welcome! Adding new generators and views is a great way to help grow the available labeled training data for open-source AI education models. Please read `DOCS.md` to understand how to scaffold and register a new dataset module.
 
-## License
+## License & Attributions
 
-This project is licensed under the Apache 2.0 License. See the `LICENSE` file for details.
+This project is licensed under the Apache 2.0 License. See the [LICENSE](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/LICENSE) file for details.
+
+### Third-Party Data Attributions
+
+* **Common Core State Standards**: The educational standards mappings are aligned with the Common Core State Standards.
+  * *Common Core State Standards © Copyright 2010. National Governors Association Center for Best Practices and Council of Chief State School Officers. All rights reserved.*
+* **Achieve the Core Dataset**: Standards metadata is structured using dataset entries compiled from the [achieve-the-core](https://huggingface.co/datasets/allenai/achieve-the-core) database by the Allen Institute for AI, which is licensed under the Open Data Commons Attribution License ([ODC-By 1.0](https://opendatacommons.org/licenses/by/)).
