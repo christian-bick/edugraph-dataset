@@ -122,6 +122,17 @@ async function main() {
     const domainGroups = JSON.parse(fs.readFileSync(DOMAINS_PATH, 'utf-8'));
     const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
 
+    let coverageData: any = null;
+    const COVERAGE_PATH = path.resolve('./public/coverage/ccss-coverage.json');
+    if (fs.existsSync(COVERAGE_PATH)) {
+      try {
+        coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
+        console.log('Loaded standards coverage and tasks data.');
+      } catch (e) {
+        console.warn('Error reading coverage data:', e);
+      }
+    }
+
     const standards: RawStandard[] = [];
     for (const line of standardsLines) {
       if (line.trim()) {
@@ -259,6 +270,20 @@ async function main() {
       }
     }
 
+    // 4.5 Save ccss-tree.json to public/coverage directory
+    const COVERAGE_DIR = path.resolve('./public/coverage');
+    if (!fs.existsSync(COVERAGE_DIR)) {
+      fs.mkdirSync(COVERAGE_DIR, { recursive: true });
+    }
+
+    const treeData = {
+      tree,
+      standardsMap: standardMap
+    };
+    const treeJson = JSON.stringify(treeData, null, 2);
+    fs.writeFileSync(path.join(COVERAGE_DIR, 'ccss-tree.json'), treeJson);
+    console.log('Saved ccss-tree.json to coverage/.');
+
     // 5. Generate Standalone HTML File
     console.log('Generating HTML visualizer...');
     const htmlContent = `<!DOCTYPE html>
@@ -348,16 +373,20 @@ async function main() {
     </div>
     <div class="flex flex-wrap items-center gap-2 text-xs md:text-sm">
       <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
-        <span class="text-slate-400 font-medium">Standards:</span>
+        <span class="text-slate-400 font-medium">Dataset Coverage:</span>
+        <span class="text-emerald-400 font-semibold ml-1" id="stat-coverage">0%</span>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
+        <span class="text-slate-400 font-medium">Missing Gen/View:</span>
+        <span class="text-orange-400 font-semibold ml-1" id="stat-missing-gen">0</span>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
+        <span class="text-slate-400 font-medium">Missing Ontology:</span>
+        <span class="text-red-400 font-semibold ml-1" id="stat-missing-onto">0</span>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
+        <span class="text-slate-400 font-medium">Leaf Standards:</span>
         <span class="text-indigo-400 font-semibold ml-1" id="stat-standards">0</span>
-      </div>
-      <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
-        <span class="text-slate-400 font-medium">Sub-standards:</span>
-        <span class="text-emerald-400 font-semibold ml-1" id="stat-substandards">0</span>
-      </div>
-      <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
-        <span class="text-slate-400 font-medium">Aspects Linked:</span>
-        <span class="text-amber-400 font-semibold ml-1" id="stat-aspects">0</span>
       </div>
     </div>
   </header>
@@ -368,49 +397,85 @@ async function main() {
     <!-- Left Panel: Navigation & Filters -->
     <div class="w-full lg:w-96 bg-slate-900/50 border-r border-slate-800 flex flex-col min-h-0 shrink-0">
       
-      <!-- Filters and Search -->
-      <div class="p-4 border-b border-slate-800 flex flex-col gap-3">
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-          <input type="text" id="search-input" placeholder="Search standard ID or description..." 
-            class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
-        </div>
-        
-        <!-- Filters Accordion Trigger -->
-        <button onclick="toggleFilters()" class="text-xs text-slate-400 flex items-center justify-between hover:text-white transition-colors py-1">
-          <span><i class="fa-solid fa-sliders mr-1.5"></i> Filter by Aspects & Modeling</span>
-          <i id="filters-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
+      <!-- Tab Switcher -->
+      <div class="flex border-b border-slate-800 shrink-0">
+        <button id="tab-explorer-btn" onclick="switchMainTab('explorer')" class="flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-indigo-500 bg-slate-900 text-white">
+          <i class="fa-solid fa-sitemap mr-1.5"></i> Explorer
         </button>
-        
-        <!-- Filter Options -->
-        <div id="filter-options" class="hidden flex flex-col gap-2 pt-1 pb-2 border-t border-slate-800/40">
-          <div class="text-xs text-slate-400 mb-1">Learning Aspects</div>
-          <div class="flex flex-wrap gap-1.5">
-            <button onclick="toggleAspectFilter('conceptual')" id="btn-filter-conceptual" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Conceptual
-            </button>
-            <button onclick="toggleAspectFilter('procedural')" id="btn-filter-procedural" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-blue-500"></span> Procedural
-            </button>
-            <button onclick="toggleAspectFilter('application')" id="btn-filter-application" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-purple-500"></span> Application
-            </button>
+        <button id="tab-backlog-btn" onclick="switchMainTab('backlog')" class="flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-list-check mr-1.5"></i> Task Backlog (<span id="backlog-count">0</span>)
+        </button>
+      </div>
+
+      <!-- Explorer Tab Content -->
+      <div id="tab-content-explorer" class="flex-1 flex flex-col min-h-0">
+        <!-- Filters and Search -->
+        <div class="p-4 border-b border-slate-800 flex flex-col gap-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <input type="text" id="search-input" placeholder="Search standard ID or description..." 
+              class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
           </div>
-          <div class="flex items-center gap-2 mt-2">
-            <input type="checkbox" id="chk-filter-modeling" onchange="toggleModelingFilter()" class="rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-slate-950">
-            <label for="chk-filter-modeling" class="text-[11px] text-slate-400 hover:text-white cursor-pointer select-none">Requires Modeling Aspect</label>
+          
+          <!-- Filters Accordion Trigger -->
+          <button onclick="toggleFilters()" class="text-xs text-slate-400 flex items-center justify-between hover:text-white transition-colors py-1">
+            <span><i class="fa-solid fa-sliders mr-1.5"></i> Filter by Aspects & Modeling</span>
+            <i id="filters-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
+          </button>
+          
+          <!-- Filter Options -->
+          <div id="filter-options" class="hidden flex flex-col gap-2 pt-1 pb-2 border-t border-slate-800/40">
+            <div class="text-xs text-slate-400 mb-1">Learning Aspects</div>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="toggleAspectFilter('conceptual')" id="btn-filter-conceptual" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Conceptual
+              </button>
+              <button onclick="toggleAspectFilter('procedural')" id="btn-filter-procedural" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span> Procedural
+              </button>
+              <button onclick="toggleAspectFilter('application')" id="btn-filter-application" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span> Application
+              </button>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <input type="checkbox" id="chk-filter-modeling" onchange="toggleModelingFilter()" class="rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-slate-950">
+              <label for="chk-filter-modeling" class="text-[11px] text-slate-400 hover:text-white cursor-pointer select-none">Requires Modeling Aspect</label>
+            </div>
           </div>
+        </div>
+
+        <!-- Grade Navigation Tabs -->
+        <div id="grade-tabs-container" class="grid grid-cols-2 gap-2 p-3 bg-slate-950 border-b border-slate-800 shrink-0">
+          <!-- Grade tabs populated via JS -->
+        </div>
+
+        <!-- Accordion Tree Navigation -->
+        <div id="tree-container" class="flex-1 overflow-y-auto p-4 space-y-3">
+          <!-- Accordion nodes loaded dynamically -->
         </div>
       </div>
 
-      <!-- Grade Navigation Tabs -->
-      <div id="grade-tabs-container" class="grid grid-cols-2 gap-2 p-3 bg-slate-950 border-b border-slate-800 shrink-0">
-        <!-- Grade tabs populated via JS -->
-      </div>
-
-      <!-- Accordion Tree Navigation -->
-      <div id="tree-container" class="flex-1 overflow-y-auto p-4 space-y-3">
-        <!-- Accordion nodes loaded dynamically -->
+      <!-- Backlog Tab Content -->
+      <div id="tab-content-backlog" class="hidden flex-1 flex flex-col min-h-0 bg-slate-955">
+        <!-- Backlog filters -->
+        <div class="p-4 border-b border-slate-800 flex flex-col gap-2">
+          <div class="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Filter Tasks</div>
+          <div class="flex gap-1.5">
+            <button onclick="filterTasks('ALL')" id="btn-task-all" class="flex-1 py-1.5 bg-indigo-600 border border-indigo-500 rounded text-[10px] text-white font-semibold transition-colors">
+              All
+            </button>
+            <button onclick="filterTasks('DATASET_ENRICHMENT')" id="btn-task-enrich" class="flex-1 py-1.5 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 hover:text-white transition-colors">
+              Gen/View
+            </button>
+            <button onclick="filterTasks('ONTOLOGY_EXTENSION')" id="btn-task-onto" class="flex-1 py-1.5 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 hover:text-white transition-colors">
+              Ontology
+            </button>
+          </div>
+        </div>
+        <!-- Backlog lists -->
+        <div id="backlog-tree-container" class="flex-1 overflow-y-auto p-4 space-y-3">
+          <!-- Populated via JS -->
+        </div>
       </div>
     </div>
 
@@ -454,6 +519,51 @@ async function main() {
             <span id="detail-modeling" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400">FALSE</span>
           </div>
         </div>
+
+        <!-- Mapping details -->
+        <div id="detail-mapping-section" class="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs hidden">
+          <span class="text-slate-500 block">Mapping Status</span>
+          <div class="flex items-center gap-1.5">
+            <span id="detail-coverage-badge" class="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400">UNMAPPED</span>
+            <span id="detail-module-badge" class="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hidden"></span>
+          </div>
+          <div>
+            <span class="text-slate-500 block mb-1">Matched Areas</span>
+            <div id="detail-matched-areas" class="flex flex-wrap gap-1">
+              <span class="text-slate-400 italic text-[10px]">None</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-slate-500 block mb-1">Matched Scopes</span>
+            <div id="detail-matched-scopes" class="flex flex-wrap gap-1">
+              <span class="text-slate-400 italic text-[10px]">None</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-slate-500 block mb-1">Matched Abilities</span>
+            <div id="detail-matched-abilities" class="flex flex-wrap gap-1">
+              <span class="text-slate-400 italic text-[10px]">None</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task Detail Card (hidden by default) -->
+      <div id="task-detail-card" class="p-6 border-b border-slate-800 bg-slate-900/60 hidden flex-col gap-4">
+        <div class="flex items-start justify-between">
+          <span class="px-2.5 py-0.5 bg-orange-500/10 border border-orange-500/20 text-orange-300 rounded text-[10px] font-mono font-bold tracking-wider" id="task-detail-type">DATASET_ENRICHMENT</span>
+          <span class="text-xs text-slate-500 font-mono" id="task-detail-id">task-generator-K.CC.B</span>
+        </div>
+        <div>
+          <h3 class="text-base font-semibold text-white leading-snug" id="task-detail-title">Task Title</h3>
+          <p class="text-xs text-slate-300 mt-2 whitespace-pre-wrap leading-relaxed" id="task-detail-desc">Task description...</p>
+        </div>
+        <div class="border-t border-slate-800/80 pt-3 text-xs">
+          <span class="text-slate-500 block mb-1.5">Affected Standards</span>
+          <div id="task-detail-standards" class="flex flex-wrap gap-1.5">
+            <!-- Standards listed as badges -->
+          </div>
+        </div>
       </div>
 
       <!-- Connection Graph Panel -->
@@ -486,9 +596,10 @@ async function main() {
   </div>
 
   <script>
-    // Embedded parsed standards data
-    const STANDARDS_MAP = ${JSON.stringify(standardMap)};
-    const GRADES_TREE = ${JSON.stringify(tree)};
+    // Fetched parsed standards data
+    let STANDARDS_MAP = {};
+    let GRADES_TREE = {};
+    let COVERAGE_DATA = null;
 
     // UI state
     let activeGrade = 'Kindergarten';
@@ -497,44 +608,291 @@ async function main() {
     let activeCluster = null;
     let activeStandardId = null;
     
+    // Backlog UI state
+    let activeTab = 'explorer';
+    let activeTaskTypeFilter = 'ALL';
+    let activeTaskId = null;
+    
     // Filters
     let searchFilter = '';
     let aspectFilters = { conceptual: false, procedural: false, application: false };
     let requireModeling = false;
 
     // Initialize Page
-    window.addEventListener('DOMContentLoaded', () => {
-      calculateStats();
-      renderGradeTabs();
-      loadGrade(activeGrade);
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Add loading state in UI
+      const mainContentHeader = document.getElementById('main-content-header');
+      if (mainContentHeader) {
+        mainContentHeader.style.opacity = '0.3';
+      }
       
-      // Setup search listeners
-      const search = document.getElementById('search-input');
-      search.addEventListener('input', (e) => {
-        searchFilter = e.target.value.toLowerCase().trim();
-        runSearch();
-      });
+      try {
+        const [treeRes, coverageRes] = await Promise.all([
+          fetch('/coverage/ccss-tree.json').then(r => r.json()),
+          fetch('/coverage/ccss-coverage.json').then(r => r.json()).catch(() => null)
+        ]);
+        STANDARDS_MAP = treeRes.standardsMap;
+        GRADES_TREE = treeRes.tree;
+        COVERAGE_DATA = coverageRes;
+        
+        if (mainContentHeader) {
+          mainContentHeader.style.opacity = '1';
+        }
+        
+        calculateStats();
+        renderGradeTabs();
+        loadGrade(activeGrade);
+        
+        // Setup search listeners
+        const search = document.getElementById('search-input');
+        search.addEventListener('input', (e) => {
+          searchFilter = e.target.value.toLowerCase().trim();
+          runSearch();
+        });
+
+        // Initialize backlog count
+        if (COVERAGE_DATA && COVERAGE_DATA.tasks) {
+          document.getElementById('backlog-count').textContent = COVERAGE_DATA.tasks.length;
+        }
+      } catch (err) {
+        console.error("Failed to load dynamically fetched CCSS explorer data:", err);
+      }
     });
 
     function calculateStats() {
-      let standardsCount = 0;
-      let subStandardsCount = 0;
-      let aspectsCount = 0;
+      let leafCount = 0;
+      let coveredCount = 0;
+      let missingGenCount = 0;
+      let missingOntoCount = 0;
+
+      if (COVERAGE_DATA && COVERAGE_DATA.metadata) {
+        leafCount = COVERAGE_DATA.metadata.total_leaves_scanned;
+        coveredCount = COVERAGE_DATA.metadata.covered_count;
+        missingGenCount = COVERAGE_DATA.metadata.missing_generator_count;
+        missingOntoCount = COVERAGE_DATA.metadata.missing_ontology_count;
+
+        const percentage = leafCount > 0 ? Math.round((coveredCount / leafCount) * 100) : 0;
+        document.getElementById('stat-coverage').textContent = percentage + '% (' + coveredCount + ')';
+        document.getElementById('stat-missing-gen').textContent = missingGenCount;
+        document.getElementById('stat-missing-onto').textContent = missingOntoCount;
+        document.getElementById('stat-standards').textContent = leafCount;
+      } else {
+        // Fallback if no coverage data is available
+        let standardsCount = 0;
+        Object.values(STANDARDS_MAP).forEach(std => {
+          if (std.level.toLowerCase() === 'standard') {
+            standardsCount++;
+          }
+        });
+        document.getElementById('stat-standards').textContent = standardsCount;
+      }
+    }
+
+    // Switch main tabs
+    function switchMainTab(tab) {
+      activeTab = tab;
       
-      Object.values(STANDARDS_MAP).forEach(std => {
-        if (std.level.toLowerCase() === 'standard') {
-          standardsCount++;
-        } else if (std.level.toLowerCase() === 'sub-standard') {
-          subStandardsCount++;
+      const explorerBtn = document.getElementById('tab-explorer-btn');
+      const backlogBtn = document.getElementById('tab-backlog-btn');
+      const explorerContent = document.getElementById('tab-content-explorer');
+      const backlogContent = document.getElementById('tab-content-backlog');
+      
+      if (tab === 'explorer') {
+        explorerBtn.className = 'flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-indigo-500 bg-slate-900 text-white';
+        backlogBtn.className = 'flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+        explorerContent.classList.remove('hidden');
+        backlogContent.classList.add('hidden');
+        
+        // Restore standard panels
+        document.getElementById('detail-card').classList.remove('hidden');
+        document.getElementById('task-detail-card').classList.add('hidden');
+        
+        if (activeStandardId) {
+          selectStandard(activeStandardId);
+        } else {
+          document.getElementById('detail-desc').textContent = 'Select a standard from the list to display details.';
         }
-        if (std.aspects && std.aspects.length > 0) {
-          aspectsCount += std.aspects.length;
+        
+        // Show main list again
+        if (activeCluster) {
+          selectCluster(activeGrade, activeDomainGroup, activeDomain, activeCluster);
+        } else {
+          loadGrade(activeGrade);
         }
+      } else {
+        backlogBtn.className = 'flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-indigo-500 bg-slate-900 text-white';
+        explorerBtn.className = 'flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+        backlogContent.classList.remove('hidden');
+        explorerContent.classList.add('hidden');
+        
+        // Hide standard details, show task details
+        document.getElementById('detail-card').classList.add('hidden');
+        document.getElementById('task-detail-card').classList.remove('hidden');
+        
+        renderBacklogList();
+      }
+    }
+
+    function renderBacklogList() {
+      const container = document.getElementById('backlog-tree-container');
+      container.innerHTML = '';
+      
+      if (!COVERAGE_DATA || !COVERAGE_DATA.tasks || COVERAGE_DATA.tasks.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-500 italic text-center py-6">No tasks found.</div>';
+        return;
+      }
+      
+      const filteredTasks = COVERAGE_DATA.tasks.filter(t => {
+        if (activeTaskTypeFilter === 'ALL') return true;
+        return t.type === activeTaskTypeFilter;
       });
       
-      document.getElementById('stat-standards').textContent = standardsCount;
-      document.getElementById('stat-substandards').textContent = subStandardsCount;
-      document.getElementById('stat-aspects').textContent = aspectsCount;
+      document.getElementById('backlog-count').textContent = COVERAGE_DATA.tasks.length;
+      
+      if (filteredTasks.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-500 italic text-center py-6">No tasks matching filter.</div>';
+        return;
+      }
+      
+      // Render tasks in Left Panel
+      filteredTasks.forEach(task => {
+        const item = document.createElement('div');
+        item.className = \`p-3 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-1.5 border-slate-800/60 hover:border-slate-700 \${
+          activeTaskId === task.id ? 'border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5' : ''
+        }\`;
+        
+        let typeBadge = task.type === 'ONTOLOGY_EXTENSION' 
+          ? '<span class="px-1.5 py-0.5 rounded text-[8px] bg-red-500/10 text-red-400 border border-red-500/20 font-bold shrink-0">ONTOLOGY</span>' 
+          : '<span class="px-1.5 py-0.5 rounded text-[8px] bg-orange-500/10 text-orange-400 border border-orange-500/20 font-bold shrink-0">GEN/VIEW</span>';
+          
+        item.innerHTML = \`
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-mono font-bold text-slate-400">\${task.cluster_id}</span>
+            \${typeBadge}
+          </div>
+          <h4 class="text-xs font-semibold text-slate-200 leading-snug">\${task.title}</h4>
+          <span class="text-[9px] text-slate-500">\${task.standards.length} standards affected</span>
+        \`;
+        
+        item.onclick = (e) => {
+          e.stopPropagation();
+          selectTask(task.id);
+        };
+        
+        container.appendChild(item);
+      });
+      
+      // Render center list
+      renderCenterTaskList(filteredTasks);
+    }
+
+    function renderCenterTaskList(tasks) {
+      const listContainer = document.getElementById('standards-list');
+      listContainer.innerHTML = '';
+      
+      document.getElementById('breadcrumbs').textContent = 'TASK BACKLOG';
+      document.getElementById('cluster-title').textContent = 'Pedagogical Task Backlog';
+      document.getElementById('cluster-desc').textContent = 'Backlog of missing generators, views, or ontology definitions grouped by Cluster.';
+      
+      tasks.forEach(task => {
+        const card = document.createElement('div');
+        card.id = \`center-task-\${task.id}\`;
+        card.className = \`bg-slate-900/40 border rounded-xl p-5 space-y-4 shadow-sm transition-all hover:bg-slate-900/60 cursor-pointer \${
+          activeTaskId === task.id ? 'border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5' : 'border-slate-800/80'
+        }\`;
+        
+        let typeBadge = task.type === 'ONTOLOGY_EXTENSION' 
+          ? '<span class="px-2 py-0.5 rounded text-[9px] bg-red-500/10 text-red-400 border border-red-500/20 font-bold">ONTOLOGY EXTENSION</span>' 
+          : '<span class="px-2 py-0.5 rounded text-[9px] bg-orange-500/10 text-orange-400 border border-orange-500/20 font-bold">DATASET ENRICHMENT (GENERATOR/VIEW)</span>';
+          
+        card.innerHTML = \`
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-mono font-bold text-slate-400">\${task.cluster_id}</span>
+                <span class="text-xs text-slate-600">|</span>
+                <span class="text-xs text-slate-500 font-medium">\${task.cluster_description}</span>
+              </div>
+              <h3 class="text-base font-bold text-white">\${task.title}</h3>
+            </div>
+            \${typeBadge}
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">\${task.description}</p>
+          <div class="flex flex-wrap gap-1.5 items-center pt-2 border-t border-slate-800/40">
+            <span class="text-[10px] text-slate-500 font-semibold mr-1">Standards:</span>
+            \${task.standards.map(std => '<span class="px-2 py-0.5 bg-slate-950/60 border border-slate-800 rounded font-mono text-[9px] text-slate-400">' + std + '</span>').join('')}
+          </div>
+        \`;
+        
+        card.onclick = (e) => {
+          e.stopPropagation();
+          selectTask(task.id);
+        };
+        
+        listContainer.appendChild(card);
+      });
+    }
+
+    function selectTask(taskId) {
+      activeTaskId = taskId;
+      
+      // Update styling in Left backlog list
+      document.querySelectorAll('#backlog-tree-container > div').forEach(el => {
+        el.className = el.className.replace('border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5', 'border-slate-800/60 hover:border-slate-700');
+      });
+      
+      // Update center backlog list styling
+      document.querySelectorAll('#standards-list > div').forEach(el => {
+        el.className = el.className.replace('border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5', 'border-slate-800/80');
+      });
+      
+      // Find task data
+      const task = COVERAGE_DATA.tasks.find(t => t.id === taskId);
+      if (!task) return;
+      
+      // Highlight left list item
+      renderBacklogList();
+      
+      // Show details in Right Panel
+      const typeSpan = document.getElementById('task-detail-type');
+      typeSpan.textContent = task.type;
+      if (task.type === 'ONTOLOGY_EXTENSION') {
+        typeSpan.className = 'px-2.5 py-0.5 bg-red-500/10 border border-red-500/20 text-red-300 rounded text-[10px] font-mono font-bold tracking-wider';
+      } else {
+        typeSpan.className = 'px-2.5 py-0.5 bg-orange-500/10 border border-orange-500/20 text-orange-300 rounded text-[10px] font-mono font-bold tracking-wider';
+      }
+      
+      document.getElementById('task-detail-id').textContent = task.id;
+      document.getElementById('task-detail-title').textContent = task.title;
+      document.getElementById('task-detail-desc').textContent = task.description;
+      
+      const stdsDiv = document.getElementById('task-detail-standards');
+      stdsDiv.innerHTML = '';
+      task.standards.forEach(std => {
+        const badge = document.createElement('span');
+        badge.className = 'px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-400';
+        badge.textContent = std;
+        stdsDiv.appendChild(badge);
+      });
+    }
+
+    function filterTasks(type) {
+      activeTaskTypeFilter = type;
+      
+      // Update button styling
+      const btnAll = document.getElementById('btn-task-all');
+      const btnEnrich = document.getElementById('btn-task-enrich');
+      const btnOnto = document.getElementById('btn-task-onto');
+      
+      btnAll.className = 'flex-1 py-1.5 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 hover:text-white transition-colors';
+      btnEnrich.className = 'flex-1 py-1.5 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 hover:text-white transition-colors';
+      btnOnto.className = 'flex-1 py-1.5 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 hover:text-white transition-colors';
+      
+      if (type === 'ALL') btnAll.className = 'flex-1 py-1.5 bg-indigo-600 border border-indigo-500 rounded text-[10px] text-white font-semibold transition-colors';
+      else if (type === 'DATASET_ENRICHMENT') btnEnrich.className = 'flex-1 py-1.5 bg-indigo-600 border border-indigo-500 rounded text-[10px] text-white font-semibold transition-colors';
+      else if (type === 'ONTOLOGY_EXTENSION') btnOnto.className = 'flex-1 py-1.5 bg-indigo-600 border border-indigo-500 rounded text-[10px] text-white font-semibold transition-colors';
+      
+      renderBacklogList();
     }
 
     // Toggle Filters panel
@@ -715,14 +1073,28 @@ async function main() {
             // Apply filtering logic here if any is active
             if (!matchesFilters(std)) return;
 
+            let statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5' : 'border-slate-800/60 hover:border-slate-700';
+            let statusBadge = '';
+            if (COVERAGE_DATA && COVERAGE_DATA.coverage && COVERAGE_DATA.coverage[std.id]) {
+              const cov = COVERAGE_DATA.coverage[std.id];
+              if (cov.dataset_covered) {
+                statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-emerald-500/5' : 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/5';
+                statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
+              } else if (cov.ontology_covered) {
+                statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-orange-500/5' : 'border-orange-500/30 hover:border-orange-500/50 bg-orange-500/5';
+                statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Gen/View</span>';
+              } else {
+                statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-red-500/5' : 'border-red-500/30 hover:border-red-500/50 bg-red-500/5';
+                statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle-xmark mr-0.5"></i> Ontology</span>';
+              }
+            }
+
             const stdEl = document.createElement('div');
             stdEl.id = \`card-\${std.id.replace(/\\./g, '_')}\`;
-            stdEl.className = \`p-3.5 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-2.5 \${
-              activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5' : 'border-slate-800/60 hover:border-slate-700'
-            }\`;
+            stdEl.className = \`p-3.5 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-2.5 \${statusClass}\`;
             
             // Build aspect badges
-            let aspectBadges = '';
+            let aspectBadges = statusBadge;
             std.aspects.forEach(asp => {
               let color = 'bg-slate-800 text-slate-400';
               if (asp.toLowerCase().includes('conceptual')) color = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
@@ -747,7 +1119,7 @@ async function main() {
             // Append sub-standards if present
             if (std.subStandards && std.subStandards.length > 0) {
               const subsList = document.createElement('div');
-              subsList.className = 'border-t border-slate-800/40 pt-2.5 mt-1 space-y-2';
+              subsList.className = 'border-t border-slate-800/40 pt-2.5 mt-1.5 space-y-2';
               std.subStandards.forEach(sub => {
                 let subBadges = '';
                 sub.aspects.forEach(asp => {
@@ -755,18 +1127,45 @@ async function main() {
                   if (asp.toLowerCase().includes('conceptual')) color = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
                   else if (asp.toLowerCase().includes('procedural')) color = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
                   else if (asp.toLowerCase().includes('application')) color = 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
-                  subBadges += \`<span class="px-1.5 py-0.5 rounded text-[8px] font-semibold \${color}">\${asp}</span>\`;
+                  subBadges += '<span class="px-1.5 py-0.5 rounded text-[8px] font-semibold ' + color + '">' + asp + '</span>';
                 });
 
-                subsList.innerHTML += \`
-                  <div class="pl-4 border-l-2 border-slate-800 flex flex-col gap-1">
-                    <div class="flex items-center justify-between text-[11px]">
-                      <span class="font-mono font-semibold text-slate-400">\${sub.id}</span>
-                      <div class="flex gap-1">\${subBadges}</div>
-                    </div>
-                    <p class="text-[11px] text-slate-400 leading-normal">\${sub.description}</p>
-                  </div>
-                \`;
+                let subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-indigo-500/5 ring-1 ring-indigo-500/30' : 'border-slate-800/40 hover:border-slate-700 bg-slate-900/10';
+                let subStatusBadge = '';
+                
+                if (COVERAGE_DATA && COVERAGE_DATA.coverage && COVERAGE_DATA.coverage[sub.id]) {
+                  const cov = COVERAGE_DATA.coverage[sub.id];
+                  if (cov.dataset_covered) {
+                    subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-emerald-500/10 ring-1 ring-indigo-500/50' : 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5';
+                    subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
+                  } else if (cov.ontology_covered) {
+                    subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-orange-500/10 ring-1 ring-indigo-500/50' : 'border-orange-500/20 hover:border-orange-500/40 bg-orange-500/5';
+                    subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Gen/View</span>';
+                  } else {
+                    subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-red-500/10 ring-1 ring-indigo-500/50' : 'border-red-500/20 hover:border-red-500/40 bg-red-500/5';
+                    subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle-xmark mr-0.5"></i> Ontology</span>';
+                  }
+                }
+
+                const subEl = document.createElement('div');
+                subEl.id = \'card-\' + sub.id.split(\'.\').join(\'_\');
+                subEl.className = \'p-2.5 border rounded-md transition-all duration-150 cursor-pointer flex flex-col gap-1.5 \' + subStatusClass;
+                
+                subEl.innerHTML = \'<div class="flex items-center justify-between text-[11px] font-medium">\' +
+                    \'<div class="flex items-center gap-1.5 font-medium">\' +
+                      \'<span class="font-mono font-semibold text-slate-300">\' + sub.id + \'</span>\' +
+                      subStatusBadge +
+                    \'</div>\' +
+                    \'<div class="flex gap-1">\' + subBadges + \'</div>\' +
+                  \'</div>\' +
+                  \'<p class="text-[11px] text-slate-400 leading-normal">\' + sub.description + \'</p>\';
+
+                subEl.onclick = (e) => {
+                  e.stopPropagation();
+                  selectStandard(sub.id);
+                };
+
+                subsList.appendChild(subEl);
               });
               stdEl.appendChild(subsList);
             }
@@ -854,6 +1253,66 @@ async function main() {
         modSpan.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-500';
       }
 
+      // Update mapping section in right detail card
+      const mapSection = document.getElementById('detail-mapping-section');
+      if (COVERAGE_DATA && COVERAGE_DATA.coverage && COVERAGE_DATA.coverage[stdId]) {
+        mapSection.classList.remove('hidden');
+        const cov = COVERAGE_DATA.coverage[stdId];
+        
+        const badge = document.getElementById('detail-coverage-badge');
+        const modBadge = document.getElementById('detail-module-badge');
+        
+        if (cov.dataset_covered) {
+          badge.textContent = 'COVERED';
+          badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+          modBadge.textContent = (cov.generator_module || '').toUpperCase();
+          modBadge.classList.remove('hidden');
+        } else if (cov.ontology_covered) {
+          badge.textContent = 'MISSING GEN/VIEW';
+          badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20';
+          modBadge.classList.add('hidden');
+        } else {
+          badge.textContent = 'MISSING ONTOLOGY';
+          badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20';
+          modBadge.classList.add('hidden');
+        }
+        
+        const areasDiv = document.getElementById('detail-matched-areas');
+        areasDiv.innerHTML = '';
+        if (cov.matched_areas && cov.matched_areas.length > 0) {
+          cov.matched_areas.forEach(iri => {
+            const shortName = iri.split('/').pop();
+            areasDiv.innerHTML += '<span title="' + iri + '" class="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-300">' + shortName + '</span>';
+          });
+        } else {
+          areasDiv.innerHTML = '<span class="text-slate-500 italic text-[10px]">None</span>';
+        }
+        
+        const scopesDiv = document.getElementById('detail-matched-scopes');
+        scopesDiv.innerHTML = '';
+        if (cov.matched_scopes && cov.matched_scopes.length > 0) {
+          cov.matched_scopes.forEach(iri => {
+            const shortName = iri.split('/').pop();
+            scopesDiv.innerHTML += '<span title="' + iri + '" class="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-300">' + shortName + '</span>';
+          });
+        } else {
+          scopesDiv.innerHTML = '<span class="text-slate-500 italic text-[10px]">None</span>';
+        }
+        
+        const abilsDiv = document.getElementById('detail-matched-abilities');
+        abilsDiv.innerHTML = '';
+        if (cov.matched_abilities && cov.matched_abilities.length > 0) {
+          cov.matched_abilities.forEach(iri => {
+            const shortName = iri.split('/').pop();
+            abilsDiv.innerHTML += '<span title="' + iri + '" class="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-300">' + shortName + '</span>';
+          });
+        } else {
+          abilsDiv.innerHTML = '<span class="text-slate-500 italic text-[10px]">None</span>';
+        }
+      } else {
+        mapSection.classList.add('hidden');
+      }
+
       // Update Prerequisite Tree Graph
       updateGraph(stdId);
     }
@@ -909,13 +1368,27 @@ async function main() {
       stdContainer.className = 'space-y-3';
 
       matches.forEach(std => {
+        let statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5' : 'border-slate-800/60 hover:border-slate-700';
+        let statusBadge = '';
+        if (COVERAGE_DATA && COVERAGE_DATA.coverage && COVERAGE_DATA.coverage[std.id]) {
+          const cov = COVERAGE_DATA.coverage[std.id];
+          if (cov.dataset_covered) {
+            statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-emerald-500/5' : 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/5';
+            statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
+          } else if (cov.ontology_covered) {
+            statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-orange-500/5' : 'border-orange-500/30 hover:border-orange-500/50 bg-orange-500/5';
+            statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Gen/View</span>';
+          } else {
+            statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-red-500/5' : 'border-red-500/30 hover:border-red-500/50 bg-red-500/5';
+            statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle-xmark mr-0.5"></i> Ontology</span>';
+          }
+        }
+
         const stdEl = document.createElement('div');
         stdEl.id = \`card-\${std.id.replace(/\\./g, '_')}\`;
-        stdEl.className = \`p-3.5 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-2.5 \${
-          activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5' : 'border-slate-800/60 hover:border-slate-700'
-        }\`;
+        stdEl.className = \`p-3.5 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-2.5 \${statusClass}\`;
         
-        let aspectBadges = '';
+        let aspectBadges = statusBadge;
         std.aspects.forEach(asp => {
           let color = 'bg-slate-800 text-slate-400';
           if (asp.toLowerCase().includes('conceptual')) color = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
