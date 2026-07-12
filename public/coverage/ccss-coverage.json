@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generated_at": "2026-07-12T15:04:25.058Z",
+    "generated_at": "2026-07-12T18:12:31.922Z",
     "ontology_version": "v0.6.0",
     "total_leaves_scanned": 467,
-    "covered_count": 3,
-    "missing_generator_count": 365,
+    "covered_count": 19,
+    "missing_generator_count": 349,
     "missing_ontology_count": 99
   },
   "coverage": {
@@ -27,7 +27,7 @@
         "description": ""
       },
       "dataset_covered": true,
-      "generator_module": "comparison",
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "K.CC.A"
     },
     "K.CC.A.2": {
@@ -48,8 +48,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "K.CC.A"
     },
     "K.CC.A.3": {
@@ -141,8 +141,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "K.CC.B"
     },
     "K.CC.B.5": {
@@ -210,7 +210,7 @@
         "description": ""
       },
       "dataset_covered": true,
-      "generator_module": "arithmetic",
+      "generator_module": "arithmetic, comparison, counting, measurement, ordering, writing",
       "cluster_id": "K.CC.C"
     },
     "K.OA.A.1": {
@@ -331,8 +331,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "K.OA.A"
     },
     "K.NBT.A.1": {
@@ -677,8 +677,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting",
       "cluster_id": "1.OA.B"
     },
     "1.OA.C.5": {
@@ -703,8 +703,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "1.OA.C"
     },
     "1.OA.C.6": {
@@ -730,8 +730,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "1.OA.C"
     },
     "1.OA.D.7": {
@@ -810,8 +810,8 @@
         "title": "Add Specific Range Scope",
         "description": "Consider adding a specific 'NumbersSmaller120' scope to capture the exact boundary of Grade 1 counting."
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, measurement, ordering, writing",
       "cluster_id": "1.NBT.A"
     },
     "1.NBT.B.2a": {
@@ -1222,8 +1222,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting",
       "cluster_id": "2.OA.B"
     },
     "2.OA.C.3": {
@@ -1270,8 +1270,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "2.OA.C"
     },
     "2.NBT.A.1a": {
@@ -1850,8 +1850,8 @@
         "title": "Add Equal Groups Concept",
         "description": "Add an Area class for 'EqualGroups' or 'RepeatedAddition' to represent the conceptual models of multiplication."
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting",
       "cluster_id": "3.OA.A"
     },
     "3.OA.A.2": {
@@ -1874,8 +1874,8 @@
         "title": "Add Partition and Measurement Division Concepts",
         "description": "Add specific classes for 'PartitiveDivision' and 'QuotitiveDivision' to distinguish between sharing and grouping models."
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting",
       "cluster_id": "3.OA.A"
     },
     "3.OA.A.3": {
@@ -1899,8 +1899,8 @@
         "title": "Add Word Problem Solving Area",
         "description": "Add a specific Area class for 'MathematicalWordProblems' to represent the translation of textual scenarios into mathematical operations."
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting",
       "cluster_id": "3.OA.A"
     },
     "3.OA.A.4": {
@@ -2681,8 +2681,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, counting, measurement, writing",
       "cluster_id": "4.OA.A"
     },
     "4.OA.A.2": {
@@ -2705,8 +2705,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, counting, measurement, writing",
       "cluster_id": "4.OA.A"
     },
     "4.OA.A.3": {
@@ -2866,8 +2866,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "4.NBT.B"
     },
     "4.NBT.B.5": {
@@ -3695,7 +3695,7 @@
         "description": ""
       },
       "dataset_covered": true,
-      "generator_module": "arithmetic",
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "5.NBT.B"
     },
     "5.NBT.B.6": {
@@ -4534,8 +4534,8 @@
         "title": "",
         "description": ""
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic, comparison, counting, ordering, writing",
       "cluster_id": "6.NS.B"
     },
     "6.NS.B.3": {
@@ -10665,9 +10665,8 @@
       "cluster_id": "K.CC.A",
       "cluster_description": "Know number names and the count sequence.",
       "title": "Generate Dataset for K.CC.A",
-      "description": "Implement/extend generators and views to cover: K.CC.A.2, K.CC.A.3. Suggested tasks:\n- K.CC.A.2: Map to matching ontology tags\n- K.CC.A.3: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: K.CC.A.3. Suggested tasks:\n- K.CC.A.3: Map to matching ontology tags",
       "standards": [
-        "K.CC.A.2",
         "K.CC.A.3"
       ]
     },
@@ -10677,11 +10676,10 @@
       "cluster_id": "K.CC.B",
       "cluster_description": "Count to tell the number of objects.",
       "title": "Generate Dataset for K.CC.B",
-      "description": "Implement/extend generators and views to cover: K.CC.B.4a, K.CC.B.4b, K.CC.B.4c, K.CC.B.5. Suggested tasks:\n- K.CC.B.4a: Map to matching ontology tags\n- K.CC.B.4b: Map to matching ontology tags\n- K.CC.B.4c: Map to matching ontology tags\n- K.CC.B.5: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: K.CC.B.4a, K.CC.B.4b, K.CC.B.5. Suggested tasks:\n- K.CC.B.4a: Map to matching ontology tags\n- K.CC.B.4b: Map to matching ontology tags\n- K.CC.B.5: Map to matching ontology tags",
       "standards": [
         "K.CC.B.4a",
         "K.CC.B.4b",
-        "K.CC.B.4c",
         "K.CC.B.5"
       ]
     },
@@ -10702,13 +10700,12 @@
       "cluster_id": "K.OA.A",
       "cluster_description": "Understand addition as putting together and adding to, and understand subtraction as taking apart and taking from.",
       "title": "Generate Dataset for K.OA.A",
-      "description": "Implement/extend generators and views to cover: K.OA.A.1, K.OA.A.2, K.OA.A.3, K.OA.A.4, K.OA.A.5. Suggested tasks:\n- K.OA.A.1: Map to matching ontology tags\n- K.OA.A.2: Map to matching ontology tags\n- K.OA.A.3: Map to matching ontology tags\n- K.OA.A.4: Map to matching ontology tags\n- K.OA.A.5: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: K.OA.A.1, K.OA.A.2, K.OA.A.3, K.OA.A.4. Suggested tasks:\n- K.OA.A.1: Map to matching ontology tags\n- K.OA.A.2: Map to matching ontology tags\n- K.OA.A.3: Map to matching ontology tags\n- K.OA.A.4: Map to matching ontology tags",
       "standards": [
         "K.OA.A.1",
         "K.OA.A.2",
         "K.OA.A.3",
-        "K.OA.A.4",
-        "K.OA.A.5"
+        "K.OA.A.4"
       ]
     },
     {
@@ -10789,22 +10786,9 @@
       "cluster_id": "1.OA.B",
       "cluster_description": "Understand and apply properties of operations and the relationship between addition and subtraction.",
       "title": "Generate Dataset for 1.OA.B",
-      "description": "Implement/extend generators and views to cover: 1.OA.B.3, 1.OA.B.4. Suggested tasks:\n- 1.OA.B.3: Map to matching ontology tags\n- 1.OA.B.4: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: 1.OA.B.3. Suggested tasks:\n- 1.OA.B.3: Map to matching ontology tags",
       "standards": [
-        "1.OA.B.3",
-        "1.OA.B.4"
-      ]
-    },
-    {
-      "id": "task-generator-1.OA.C",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "1.OA.C",
-      "cluster_description": "Add and subtract within 20.",
-      "title": "Generate Dataset for 1.OA.C",
-      "description": "Implement/extend generators and views to cover: 1.OA.C.5, 1.OA.C.6. Suggested tasks:\n- 1.OA.C.5: Map to matching ontology tags\n- 1.OA.C.6: Map to matching ontology tags",
-      "standards": [
-        "1.OA.C.5",
-        "1.OA.C.6"
+        "1.OA.B.3"
       ]
     },
     {
@@ -10817,17 +10801,6 @@
       "standards": [
         "1.OA.D.7",
         "1.OA.D.8"
-      ]
-    },
-    {
-      "id": "task-generator-1.NBT.A",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "1.NBT.A",
-      "cluster_description": "Extend the counting sequence.",
-      "title": "Generate Dataset for 1.NBT.A",
-      "description": "Implement/extend generators and views to cover: 1.NBT.A.1. Suggested tasks:\n- 1.NBT.A.1: Consider adding a specific 'NumbersSmaller120' scope to capture the exact boundary of Grade 1 counting.",
-      "standards": [
-        "1.NBT.A.1"
       ]
     },
     {
@@ -10916,26 +10889,14 @@
       ]
     },
     {
-      "id": "task-generator-2.OA.B",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "2.OA.B",
-      "cluster_description": "Add and subtract within 20.",
-      "title": "Generate Dataset for 2.OA.B",
-      "description": "Implement/extend generators and views to cover: 2.OA.B.2. Suggested tasks:\n- 2.OA.B.2: Map to matching ontology tags",
-      "standards": [
-        "2.OA.B.2"
-      ]
-    },
-    {
       "id": "task-generator-2.OA.C",
       "type": "DATASET_ENRICHMENT",
       "cluster_id": "2.OA.C",
       "cluster_description": "Work with equal groups of objects to gain foundations for multiplication.",
       "title": "Generate Dataset for 2.OA.C",
-      "description": "Implement/extend generators and views to cover: 2.OA.C.3, 2.OA.C.4. Suggested tasks:\n- 2.OA.C.3: Map to matching ontology tags\n- 2.OA.C.4: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: 2.OA.C.3. Suggested tasks:\n- 2.OA.C.3: Map to matching ontology tags",
       "standards": [
-        "2.OA.C.3",
-        "2.OA.C.4"
+        "2.OA.C.3"
       ]
     },
     {
@@ -11047,11 +11008,8 @@
       "cluster_id": "3.OA.A",
       "cluster_description": "Represent and solve problems involving multiplication and division.",
       "title": "Generate Dataset for 3.OA.A",
-      "description": "Implement/extend generators and views to cover: 3.OA.A.1, 3.OA.A.2, 3.OA.A.3, 3.OA.A.4. Suggested tasks:\n- 3.OA.A.1: Add an Area class for 'EqualGroups' or 'RepeatedAddition' to represent the conceptual models of multiplication.\n- 3.OA.A.2: Add specific classes for 'PartitiveDivision' and 'QuotitiveDivision' to distinguish between sharing and grouping models.\n- 3.OA.A.3: Add a specific Area class for 'MathematicalWordProblems' to represent the translation of textual scenarios into mathematical operations.\n- 3.OA.A.4: Add a specific class for 'UnknownVariables' or 'OpenEquations' to represent equations with missing values.",
+      "description": "Implement/extend generators and views to cover: 3.OA.A.4. Suggested tasks:\n- 3.OA.A.4: Add a specific class for 'UnknownVariables' or 'OpenEquations' to represent equations with missing values.",
       "standards": [
-        "3.OA.A.1",
-        "3.OA.A.2",
-        "3.OA.A.3",
         "3.OA.A.4"
       ]
     },
@@ -11190,10 +11148,8 @@
       "cluster_id": "4.OA.A",
       "cluster_description": "Use the four operations with whole numbers to solve problems.",
       "title": "Generate Dataset for 4.OA.A",
-      "description": "Implement/extend generators and views to cover: 4.OA.A.1, 4.OA.A.2, 4.OA.A.3. Suggested tasks:\n- 4.OA.A.1: Map to matching ontology tags\n- 4.OA.A.2: Map to matching ontology tags\n- 4.OA.A.3: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: 4.OA.A.3. Suggested tasks:\n- 4.OA.A.3: Map to matching ontology tags",
       "standards": [
-        "4.OA.A.1",
-        "4.OA.A.2",
         "4.OA.A.3"
       ]
     },
@@ -11248,9 +11204,8 @@
       "cluster_id": "4.NBT.B",
       "cluster_description": "Use place value understanding and properties of operations to perform multi-digit arithmetic.\nGrade 4 expectations in this domain are limited to whole numbers less than or equal to 1,000,000.",
       "title": "Generate Dataset for 4.NBT.B",
-      "description": "Implement/extend generators and views to cover: 4.NBT.B.4, 4.NBT.B.5, 4.NBT.B.6. Suggested tasks:\n- 4.NBT.B.4: Map to matching ontology tags\n- 4.NBT.B.5: Map to matching ontology tags\n- 4.NBT.B.6: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: 4.NBT.B.5, 4.NBT.B.6. Suggested tasks:\n- 4.NBT.B.5: Map to matching ontology tags\n- 4.NBT.B.6: Map to matching ontology tags",
       "standards": [
-        "4.NBT.B.4",
         "4.NBT.B.5",
         "4.NBT.B.6"
       ]
@@ -11524,9 +11479,8 @@
       "cluster_id": "6.NS.B",
       "cluster_description": "Compute fluently with multi-digit numbers and find common factors and multiples.",
       "title": "Generate Dataset for 6.NS.B",
-      "description": "Implement/extend generators and views to cover: 6.NS.B.2, 6.NS.B.3, 6.NS.B.4. Suggested tasks:\n- 6.NS.B.2: Map to matching ontology tags\n- 6.NS.B.3: Map to matching ontology tags\n- 6.NS.B.4: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: 6.NS.B.3, 6.NS.B.4. Suggested tasks:\n- 6.NS.B.3: Map to matching ontology tags\n- 6.NS.B.4: Map to matching ontology tags",
       "standards": [
-        "6.NS.B.2",
         "6.NS.B.3",
         "6.NS.B.4"
       ]

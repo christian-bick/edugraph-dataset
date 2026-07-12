@@ -215,7 +215,7 @@ function findParentClusterId(stdId: string, standardsMap: Record<string, any>): 
 async function main() {
   const args = process.argv.slice(2);
   const gradeLimit = args.find(a => a.startsWith('--grade='))?.split('=')[1];
-  const includeHS = args.includes('--hs') || args.includes('--include-hs');
+  const excludeHS = args.includes('--k8') || args.includes('--exclude-hs');
 
   console.log('--- Initiating CCSS Ontology Mapping Pipeline ---');
 
@@ -252,11 +252,11 @@ async function main() {
 
   for (const std of Object.values(standardsMap)) {
     if (std.children && std.children.length === 0) {
-      // Exclude high school standards unless explicitly requested
+      // Include all leaf standards, but allow excluding High School if requested
       const first = std.id.split('.')[0];
       const isHS = first.startsWith('HS') || /^[NAFGS]-/.test(first);
       
-      if (!isHS || includeHS) {
+      if (!isHS || !excludeHS) {
         leafNodes.push(std);
       }
     }
@@ -440,20 +440,38 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
     if (evalObj.ontology_covered) {
       const requiredTags = [
         ...evalObj.matched_areas,
-        ...evalObj.matched_scopes,
-        ...evalObj.matched_abilities
+        ...evalObj.matched_scopes
       ];
 
       if (requiredTags.length > 0) {
-        // Find if any permutation covers all required tags
-        for (const perm of activePermsList) {
-          const coversAll = requiredTags.every(reqTag => {
-            return Array.from(perm.labels).some(genLabel => isSubConceptOf(genLabel, reqTag, rdfNodes));
+        const allAbilities = Object.values(Ability);
+        
+        // Find all permutations that overlap with the required tags (excluding abilities)
+        const qualifyingPerms = activePermsList.filter(perm => {
+          const permTags = Array.from(perm.labels).filter(l => !allAbilities.includes(l as any));
+          return permTags.some(genLabel => {
+            return requiredTags.some(reqTag => isSubConceptOf(genLabel, reqTag, rdfNodes));
           });
+        });
+
+        if (qualifyingPerms.length > 0) {
+          const unionTags = new Set<string>();
+          qualifyingPerms.forEach(p => {
+            Array.from(p.labels)
+              .filter(l => !allAbilities.includes(l as any))
+              .forEach(t => unionTags.add(t));
+          });
+
+          // Standard is covered if all required Areas/Scopes are in this union
+          const coversAll = requiredTags.every(reqTag => {
+            return Array.from(unionTags).some(qTag => isSubConceptOf(qTag, reqTag, rdfNodes));
+          });
+
           if (coversAll) {
             dataset_covered = true;
-            generator_module = perm.moduleName;
-            break;
+            // Since it's a union, we list the distinct modules involved
+            const modules = Array.from(new Set(qualifyingPerms.map(p => p.moduleName)));
+            generator_module = modules.join(', ');
           }
         }
       }
