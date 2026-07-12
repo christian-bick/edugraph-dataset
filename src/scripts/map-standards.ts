@@ -11,7 +11,6 @@ const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const TEMP_DIR = path.resolve(PROJECT_ROOT, 'temp', 'common-core');
 const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
-const RDF_PATH = path.join(TEMP_DIR, 'core-ontology-math.rdf');
 const OUTPUT_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-coverage.json');
 
 // 1. Read package.json to sync ontology version
@@ -21,6 +20,7 @@ const edugraphTsUrl = pkg.dependencies['edugraph-ts'] || '';
 const versionMatch = edugraphTsUrl.match(/\/releases\/download\/(v[\d.]+)\//);
 const version = versionMatch ? versionMatch[1] : 'v0.6.0';
 
+const RDF_PATH = path.join(TEMP_DIR, `core-ontology-math-${version}.rdf`);
 const RDF_URL = `https://github.com/christian-bick/edugraph-ontology/releases/download/${version}/core-ontology-math.rdf`;
 
 interface RDFNode {
@@ -267,10 +267,20 @@ async function main() {
   if (gradeLimit) {
     targetLeaves = leafNodes.filter(n => {
       const first = n.id.split('.')[0];
-      if (gradeLimit.toLowerCase() === 'k' && first === 'K') return true;
-      if (gradeLimit.toLowerCase() === 'kindergarten' && first === 'K') return true;
+      const normalizedLimit = gradeLimit.toLowerCase().trim();
+      
+      // Kindergarten
+      if ((normalizedLimit === 'k' || normalizedLimit === 'kindergarten') && first === 'K') return true;
+      
+      // High School
+      if (normalizedLimit === 'hs' || normalizedLimit === 'high school') {
+        return first.startsWith('HS') || /^[NAFGS]-/.test(first);
+      }
+      
+      // Specific numerical grade
       if (first === gradeLimit) return true;
-      if (`grade ${first}`.toLowerCase() === gradeLimit.toLowerCase()) return true;
+      if (`grade ${first}`.toLowerCase() === normalizedLimit) return true;
+      
       return false;
     });
     console.log(`[CCSS] Filtering standards for Grade Limit: ${gradeLimit}. Found ${targetLeaves.length} leaf nodes.`);
@@ -359,7 +369,12 @@ async function main() {
     }
   }
 
-  const uncachedLeaves = targetLeaves.filter(leaf => !cache[leaf.id] || cache[leaf.id].ontology_covered === undefined);
+  const evalOntology = args.includes('--eval-ontology');
+  const uncachedLeaves = targetLeaves.filter(leaf => 
+    !cache[leaf.id] || 
+    cache[leaf.id].ontology_covered === undefined ||
+    (evalOntology && cache[leaf.id].ontology_covered === false)
+  );
   console.log(`[CCSS] ${targetLeaves.length - uncachedLeaves.length} standards already cached. ${uncachedLeaves.length} need evaluation.`);
 
   const BATCH_SIZE = 10;
@@ -423,7 +438,7 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
   console.log('[Coverage] Running deterministic dataset checks...');
   const finalCoverageMap: Record<string, any> = {};
 
-  for (const std of targetLeaves) {
+  for (const std of leafNodes) {
     const evalObj = results[std.id] || cache[std.id] || {
       id: std.id,
       ontology_covered: false,
@@ -538,7 +553,7 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
     metadata: {
       generated_at: new Date().toISOString(),
       ontology_version: version,
-      total_leaves_scanned: targetLeaves.length,
+      total_leaves_scanned: leafNodes.length,
       covered_count: Object.values(finalCoverageMap).filter(s => s.dataset_covered).length,
       missing_generator_count: Object.values(finalCoverageMap).filter(s => s.ontology_covered && !s.dataset_covered).length,
       missing_ontology_count: Object.values(finalCoverageMap).filter(s => !s.ontology_covered).length,

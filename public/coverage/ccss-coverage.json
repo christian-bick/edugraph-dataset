@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generated_at": "2026-07-12T18:12:31.922Z",
-    "ontology_version": "v0.6.0",
+    "generated_at": "2026-07-12T20:19:58.870Z",
+    "ontology_version": "v0.6.2",
     "total_leaves_scanned": 467,
-    "covered_count": 19,
-    "missing_generator_count": 349,
-    "missing_ontology_count": 99
+    "covered_count": 20,
+    "missing_generator_count": 352,
+    "missing_ontology_count": 95
   },
   "coverage": {
     "K.CC.A.1": {
@@ -1690,17 +1690,24 @@
     },
     "2.MD.C.8": {
       "id": "2.MD.C.8",
-      "ontology_covered": false,
-      "matched_areas": [],
+      "ontology_covered": true,
+      "matched_areas": [
+        "http://edugraph.io/edu/Addition",
+        "http://edugraph.io/edu/Subtraction",
+        "http://edugraph.io/edu/FoundationalOperations"
+      ],
       "matched_scopes": [],
-      "matched_abilities": [],
-      "reasoning": "The ontology currently lacks concepts related to financial literacy, money, or currency (such as dollar bills, quarters, dimes, nickels, pennies, and their respective symbols).",
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureExecution",
+        "http://edugraph.io/edu/Understanding"
+      ],
+      "reasoning": "The standard requires solving word problems with money (dollars and cents). This is covered by the foundational arithmetic operations (Addition, Subtraction) applied within the Dollar currency scope, integrating both major (Dollar) and minor (Cent) denominations, represented via coins and banknotes.",
       "suggested_task": {
-        "title": "Add Currency and Money Concepts",
-        "description": "Introduce a new Area for MonetaryCalculations and Scopes representing physical currency units (dollar bills, quarters, dimes, nickels, pennies) to support financial literacy standards."
+        "title": "Add CurrencyArithmetic Area",
+        "description": "Consider adding a specific 'CurrencyArithmetic' area under 'Arithmetic' to explicitly group money-related calculations and word problems."
       },
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic",
       "cluster_id": "2.MD.C"
     },
     "2.MD.D.9": {
@@ -2833,14 +2840,22 @@
     },
     "4.NBT.A.3": {
       "id": "4.NBT.A.3",
-      "ontology_covered": false,
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
-      "reasoning": "The ontology contains 'DecimalRounding' but lacks a general 'IntegerRounding' or 'Rounding' area to represent rounding whole numbers based on place value.",
+      "ontology_covered": true,
+      "matched_areas": [
+        "http://edugraph.io/edu/PlaceValue"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/IntegerNumbers",
+        "http://edugraph.io/edu/NumbersLarger1000",
+        "http://edugraph.io/edu/Base10"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureExecution"
+      ],
+      "reasoning": "The standard requires students to round multi-digit whole numbers using place value. This is fully covered by the Area concepts 'IntegerRounding' and 'PlaceValue'. The scope of multi-digit whole numbers up to 1,000,000 is represented by 'IntegerNumbers' and 'NumbersLarger1000' in 'Base10'. The cognitive action of performing the rounding algorithm is mapped to the Ability 'ProcedureExecution'.",
       "suggested_task": {
-        "title": "Add Integer Rounding Area",
-        "description": "Create a new Area individual 'IntegerRounding' under 'IntegerArithmetic' to represent the rules and procedures for approximating whole numbers to a specified place value."
+        "title": "",
+        "description": ""
       },
       "dataset_covered": false,
       "generator_module": null,
@@ -4738,14 +4753,24 @@
     },
     "6.NS.C.7c": {
       "id": "6.NS.C.7c",
-      "ontology_covered": false,
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
-      "reasoning": "The standard introduces the concept of absolute value as a distance from zero on a number line. The ontology currently lacks a specific 'AbsoluteValue' concept or area under NumberSense.",
+      "ontology_covered": true,
+      "matched_areas": [
+        "http://edugraph.io/edu/ZeroConcept",
+        "http://edugraph.io/edu/DistanceCalculation"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/RationalNumbers",
+        "http://edugraph.io/edu/Numberline",
+        "http://edugraph.io/edu/IntegersWithNegatives"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/Understanding",
+        "http://edugraph.io/edu/ResultInterpretation"
+      ],
+      "reasoning": "The standard requires understanding absolute value as distance from zero on a number line and interpreting it in real-world contexts (like debt in dollars). The ontology fully supports this with the AbsoluteValue area, Numberline scope, Dollar scope, and Understanding/ResultInterpretation abilities.",
       "suggested_task": {
-        "title": "Add Absolute Value Concept",
-        "description": "Introduce 'AbsoluteValue' as an Area under NumberSense, representing the magnitude of a real number as its distance from zero, and link it to 'DistanceCalculation' and 'Numberline'."
+        "title": "",
+        "description": ""
       },
       "dataset_covered": false,
       "generator_module": null,
@@ -4753,14 +4778,23 @@
     },
     "6.NS.C.7d": {
       "id": "6.NS.C.7d",
-      "ontology_covered": false,
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
-      "reasoning": "This standard requires distinguishing comparisons of absolute value from standard order statements. Since 'AbsoluteValue' is missing from the ontology, this comparison distinction cannot be modeled.",
+      "ontology_covered": true,
+      "matched_areas": [
+        "http://edugraph.io/edu/NumericComparison",
+        "http://edugraph.io/edu/NumericOrder"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/RationalNumbers",
+        "http://edugraph.io/edu/IntegersWithNegatives"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/AnalyticalCapability",
+        "http://edugraph.io/edu/ConceptClassification"
+      ],
+      "reasoning": "This standard requires distinguishing between the order of signed numbers (e.g., -50 < -30) and the comparison of their absolute values (e.g., |-50| > |-30|). The ontology covers this through the combination of AbsoluteValue, NumericComparison, and NumericOrder areas, along with RationalNumbers and IntegersWithNegatives scopes. The cognitive demand of distinguishing these concepts maps to AnalyticalCapability and ConceptClassification.",
       "suggested_task": {
-        "title": "Add Absolute Value Comparison",
-        "description": "Introduce 'AbsoluteValueComparison' as an Area expanding 'NumericComparison' to distinguish magnitude comparisons from standard order comparisons."
+        "title": "",
+        "description": ""
       },
       "dataset_covered": false,
       "generator_module": null,
@@ -10956,17 +10990,6 @@
       ]
     },
     {
-      "id": "task-ontology-2.MD.C",
-      "type": "ONTOLOGY_EXTENSION",
-      "cluster_id": "2.MD.C",
-      "cluster_description": "Work with time and money.",
-      "title": "Extend Ontology for 2.MD.C",
-      "description": "Extend ontology to support: 2.MD.C.8 (Add Currency and Money Concepts). Details:\n- 2.MD.C.8: Introduce a new Area for MonetaryCalculations and Scopes representing physical currency units (dollar bills, quarters, dimes, nickels, pennies) to support financial literacy standards.",
-      "standards": [
-        "2.MD.C.8"
-      ]
-    },
-    {
       "id": "task-generator-2.MD.C",
       "type": "DATASET_ENRICHMENT",
       "cluster_id": "2.MD.C",
@@ -11176,26 +11199,16 @@
       ]
     },
     {
-      "id": "task-ontology-4.NBT.A",
-      "type": "ONTOLOGY_EXTENSION",
-      "cluster_id": "4.NBT.A",
-      "cluster_description": "Generalize place value understanding for multi-digit whole numbers.\nGrade 4 expectations in this domain are limited to whole numbers less than or equal to 1,000,000.",
-      "title": "Extend Ontology for 4.NBT.A",
-      "description": "Extend ontology to support: 4.NBT.A.3 (Add Integer Rounding Area). Details:\n- 4.NBT.A.3: Create a new Area individual 'IntegerRounding' under 'IntegerArithmetic' to represent the rules and procedures for approximating whole numbers to a specified place value.",
-      "standards": [
-        "4.NBT.A.3"
-      ]
-    },
-    {
       "id": "task-generator-4.NBT.A",
       "type": "DATASET_ENRICHMENT",
       "cluster_id": "4.NBT.A",
       "cluster_description": "Generalize place value understanding for multi-digit whole numbers.\nGrade 4 expectations in this domain are limited to whole numbers less than or equal to 1,000,000.",
       "title": "Generate Dataset for 4.NBT.A",
-      "description": "Implement/extend generators and views to cover: 4.NBT.A.1, 4.NBT.A.2. Suggested tasks:\n- 4.NBT.A.1: Map to matching ontology tags\n- 4.NBT.A.2: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: 4.NBT.A.1, 4.NBT.A.2, 4.NBT.A.3. Suggested tasks:\n- 4.NBT.A.1: Map to matching ontology tags\n- 4.NBT.A.2: Map to matching ontology tags\n- 4.NBT.A.3: Map to matching ontology tags",
       "standards": [
         "4.NBT.A.1",
-        "4.NBT.A.2"
+        "4.NBT.A.2",
+        "4.NBT.A.3"
       ]
     },
     {
@@ -11486,24 +11499,12 @@
       ]
     },
     {
-      "id": "task-ontology-6.NS.C",
-      "type": "ONTOLOGY_EXTENSION",
-      "cluster_id": "6.NS.C",
-      "cluster_description": "Apply and extend previous understandings of numbers to the system of rational numbers.",
-      "title": "Extend Ontology for 6.NS.C",
-      "description": "Extend ontology to support: 6.NS.C.7c (Add Absolute Value Concept), 6.NS.C.7d (Add Absolute Value Comparison). Details:\n- 6.NS.C.7c: Introduce 'AbsoluteValue' as an Area under NumberSense, representing the magnitude of a real number as its distance from zero, and link it to 'DistanceCalculation' and 'Numberline'.\n- 6.NS.C.7d: Introduce 'AbsoluteValueComparison' as an Area expanding 'NumericComparison' to distinguish magnitude comparisons from standard order comparisons.",
-      "standards": [
-        "6.NS.C.7c",
-        "6.NS.C.7d"
-      ]
-    },
-    {
       "id": "task-generator-6.NS.C",
       "type": "DATASET_ENRICHMENT",
       "cluster_id": "6.NS.C",
       "cluster_description": "Apply and extend previous understandings of numbers to the system of rational numbers.",
       "title": "Generate Dataset for 6.NS.C",
-      "description": "Implement/extend generators and views to cover: 6.NS.C.5, 6.NS.C.6a, 6.NS.C.6b, 6.NS.C.6c, 6.NS.C.7a, 6.NS.C.7b, 6.NS.C.8. Suggested tasks:\n- 6.NS.C.5: Map to matching ontology tags\n- 6.NS.C.6a: Map to matching ontology tags\n- 6.NS.C.6b: Map to matching ontology tags\n- 6.NS.C.6c: Map to matching ontology tags\n- 6.NS.C.7a: Map to matching ontology tags\n- 6.NS.C.7b: Map to matching ontology tags\n- 6.NS.C.8: Map to matching ontology tags",
+      "description": "Implement/extend generators and views to cover: 6.NS.C.5, 6.NS.C.6a, 6.NS.C.6b, 6.NS.C.6c, 6.NS.C.7a, 6.NS.C.7b, 6.NS.C.7c, 6.NS.C.7d, 6.NS.C.8. Suggested tasks:\n- 6.NS.C.5: Map to matching ontology tags\n- 6.NS.C.6a: Map to matching ontology tags\n- 6.NS.C.6b: Map to matching ontology tags\n- 6.NS.C.6c: Map to matching ontology tags\n- 6.NS.C.7a: Map to matching ontology tags\n- 6.NS.C.7b: Map to matching ontology tags\n- 6.NS.C.7c: Map to matching ontology tags\n- 6.NS.C.7d: Map to matching ontology tags\n- 6.NS.C.8: Map to matching ontology tags",
       "standards": [
         "6.NS.C.5",
         "6.NS.C.6a",
@@ -11511,6 +11512,8 @@
         "6.NS.C.6c",
         "6.NS.C.7a",
         "6.NS.C.7b",
+        "6.NS.C.7c",
+        "6.NS.C.7d",
         "6.NS.C.8"
       ]
     },

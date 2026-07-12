@@ -4,8 +4,16 @@ import path from 'path';
 const PROJECT_ROOT = path.resolve('.');
 const TEMP_DIR = path.join(PROJECT_ROOT, 'temp', 'common-core');
 const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
-const RDF_PATH = path.join(TEMP_DIR, 'core-ontology-math.rdf');
 const COVERAGE_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-coverage.json');
+
+// Read package.json to sync ontology version
+const pkgPath = path.resolve(PROJECT_ROOT, 'package.json');
+const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+const edugraphTsUrl = pkg.dependencies['edugraph-ts'] || '';
+const versionMatch = edugraphTsUrl.match(/\/releases\/download\/(v[\d.]+)\//);
+const version = versionMatch ? versionMatch[1] : 'v0.6.0';
+
+const RDF_PATH = path.join(TEMP_DIR, `core-ontology-math-${version}.rdf`);
 
 interface ValidationResult {
   passed: boolean;
