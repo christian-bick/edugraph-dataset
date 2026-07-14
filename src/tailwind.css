@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Common resets or custom utilities can be placed here */
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
