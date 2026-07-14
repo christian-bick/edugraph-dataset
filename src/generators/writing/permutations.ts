@@ -5,7 +5,7 @@ import { Area, Scope, Ability } from "edugraph-ts";
 const SEED = 42;
 
 function buildPermutations() {
-    return new DatasetPermutationBuilder()
+    const legacy = new DatasetPermutationBuilder()
         .addLabels([
             Area.IntegerNotation,
             Scope.ArabicNumerals, 
@@ -14,8 +14,36 @@ function buildPermutations() {
             Scope.IntegersWithoutZero,
             Ability.ProcedureExecution
         ])
+        .addConstraints({ mode: 'stroke' })
         .applyConstraintRange(['number'], [1, 9])
         .build();
+
+    const strokePractice = new DatasetPermutationBuilder()
+        .addLabels([
+            Area.DigitNotation,
+            Scope.ArabicNumerals,
+            Scope.NumbersSmaller20,
+            Scope.IntegersWithZero,
+            Ability.ProcedureExecution
+        ])
+        .addConstraints({ mode: 'stroke' })
+        .applyConstraintRange(['number'], [0, 20])
+        .build();
+
+    const countObjects = new DatasetPermutationBuilder()
+        .addLabels([
+            Area.Numeration,
+            Scope.ArabicNumerals,
+            Scope.NumbersSmaller20,
+            Scope.IntegersWithZero,
+            Scope.PhysicalNumbers,
+            Ability.ProcedureExecution
+        ])
+        .addConstraints({ mode: 'count-objects' })
+        .applyConstraintRange(['number'], [0, 20])
+        .build();
+
+    return [...legacy, ...strokePractice, ...countObjects];
 }
 
 export const config: MLDatasetPipelineConfig = {

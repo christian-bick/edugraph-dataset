@@ -1,0 +1,129 @@
+@import "../shared";
+
+.view-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    width: fit-content;
+
+    .problem-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 480px;
+
+        .prompt-text {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .double-ten-frame-area {
+            display: flex;
+            gap: 20px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1.5px dashed #cbd5e1;
+            margin-bottom: 25px;
+
+            .frame-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+
+                .frame-label {
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: #64748b;
+                    text-transform: uppercase;
+                }
+            }
+
+            .ten-frame {
+                display: grid;
+                grid-template-columns: repeat(5, 32px);
+                grid-template-rows: repeat(2, 32px);
+                gap: 3px;
+                border: 2px solid #475569;
+                background: #ffffff;
+                border-radius: 6px;
+                overflow: hidden;
+
+                .ten-frame-box {
+                    width: 32px;
+                    height: 32px;
+                    border: 0.5px solid #e2e8f0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    &.filled {
+                        &::after {
+                            content: "";
+                            display: block;
+                            width: 22px;
+                            height: 22px;
+                            border-radius: 50%;
+                        }
+
+                        &.color-a::after {
+                            background: radial-gradient(circle, #f43f5e 0%, #be123c 100%);
+                            box-shadow: 0 2px 4px rgba(190, 18, 60, 0.3);
+                        }
+
+                        &.color-b::after {
+                            background: radial-gradient(circle, #fbbf24 0%, #d97706 100%);
+                            box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+
+        .equation-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            .eq-num, .eq-op {
+                font-size: 2.2rem;
+                font-weight: 800;
+                color: #334155;
+            }
+
+            .eq-op {
+                color: #64748b;
+            }
+
+            .input-box {
+                width: 60px;
+                height: 60px;
+                border: 2px solid #475569;
+                border-radius: 8px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 2.2rem;
+                font-family: 'Roboto Mono', monospace;
+                font-weight: 800;
+                color: #1e293b;
+                background: #ffffff;
+
+                &.solution {
+                    color: #16a34a;
+                    border-color: #16a34a;
+                    background: #f0fdf4;
+                }
+            }
+        }
+    }
+}

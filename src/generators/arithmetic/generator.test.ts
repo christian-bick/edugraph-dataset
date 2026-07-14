@@ -16,6 +16,9 @@ describe('ArithmeticGenerator', () => {
         expect(generator.type).toBe('arithmetic');
         expect(generator.compatibleRenderers).toContain('operations-boxes');
         expect(generator.compatibleRenderers).toContain('operations-vertical');
+        expect(generator.compatibleRenderers).toContain('operations-representation');
+        expect(generator.compatibleRenderers).toContain('operations-decompose');
+        expect(generator.compatibleRenderers).toContain('place-value-blocks');
     });
 
     describe('generate', () => {
@@ -25,10 +28,28 @@ describe('ArithmeticGenerator', () => {
                 if (stub) {
                     expect(stub.id).toBeDefined();
                     expect(stub.data).toBeDefined();
-                    expect(stub.data.num1).toBeDefined();
-                    expect(stub.data.num2).toBeDefined();
-                    expect(stub.data.answer).toBeDefined();
-                    expect(stub.data.operator).toBeDefined();
+                    if (input.constraints.mode === 'decompose') {
+                        expect(stub.data.targetNumber).toBeDefined();
+                        expect(stub.data.pair1).toBeDefined();
+                        expect(stub.data.pair2).toBeDefined();
+                    } else if (input.constraints.mode === 'make-ten') {
+                        expect(stub.data.givenNumber).toBeDefined();
+                        expect(stub.data.missingNumber).toBeDefined();
+                        expect(stub.data.target).toBe(10);
+                    } else if (input.constraints.mode === 'compose-teen' || input.constraints.mode === 'decompose-teen') {
+                        expect(stub.data.ones).toBeDefined();
+                        expect(stub.data.target).toBeDefined();
+                    } else if (input.constraints.mode === 'representation' || input.constraints.mode === 'word-problem') {
+                        expect(stub.data.num1).toBeDefined();
+                        expect(stub.data.num2).toBeDefined();
+                        expect(stub.data.answer).toBeDefined();
+                        expect(stub.data.operation).toBeDefined();
+                    } else {
+                        expect(stub.data.num1).toBeDefined();
+                        expect(stub.data.num2).toBeDefined();
+                        expect(stub.data.answer).toBeDefined();
+                        expect(stub.data.operator).toBeDefined();
+                    }
                 }
             });
         });

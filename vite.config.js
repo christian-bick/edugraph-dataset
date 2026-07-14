@@ -16,7 +16,7 @@ export default defineConfig({
         rollupOptions: {
             input: Object.fromEntries(
                 // ✨ Find all HTML files within the new root ('src')
-                                globSync('./src/**/*.{html,js,ts,css,scss}').map(file => [
+                                globSync('./src/**/*.html').map(file => [
                     // ✨ The key is now naturally relative to 'src'
                     // e.g., 'pages/about.html' -> 'pages/about'
                     // e.g., 'index.html' -> 'index'

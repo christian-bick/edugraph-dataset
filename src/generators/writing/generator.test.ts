@@ -24,6 +24,7 @@ describe('WritingGenerator', () => {
                 if (stub) {
                     expect(stub.id).toBeDefined();
                     expect(stub.data.number).toBe(input.constraints.number);
+                    expect(stub.data.mode).toBe(input.constraints.mode);
                 }
             });
         });

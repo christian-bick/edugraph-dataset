@@ -5,17 +5,41 @@ import { Area, Scope, Ability } from "edugraph-ts";
 const SEED = 42;
 
 function buildPermutations() {
-    return new DatasetPermutationBuilder()
+    // 1. Legacy Standard
+    const legacy = new DatasetPermutationBuilder()
         .addLabels([
-            Area.MeasuringObjects, 
-            Area.DigitNotation,
-            Scope.CentimeterScale, 
-            Scope.MillimeterScale, 
-            Scope.Tapemeter,
+            Area.Measurement,
+            Scope.NumbersSmaller100, 
             Ability.ProcedureExecution
         ])
         .applyConstraintVariants('bandLength', [10, 20])
         .build();
+
+    // 2. K.MD.A.1 Describe measurable attributes
+    const attributeType = new DatasetPermutationBuilder()
+        .addLabels([Area.Measurement, Area.MeasuringObjects, Ability.ConceptSpecification])
+        .applyLabelVariants([
+            [Scope.LengthMeasurement],
+            [Scope.WeightMeasurement]
+        ])
+        .addConstraints({ mode: 'attribute-type' })
+        .applyConstraintVariants('attribute', ['length', 'height', 'weight'])
+        .build();
+
+    // 3. K.MD.A.2 Compare two objects
+    const directCompareLen = new DatasetPermutationBuilder()
+        .addLabels([Area.Measurement, Area.MeasuringObjects, Area.Difference, Scope.LengthMeasurement, Ability.ProcedureExecution])
+        .addConstraints({ mode: 'direct-compare', attribute: 'length' })
+        .applyConstraintVariants('relation', ['longer', 'shorter'])
+        .build();
+
+    const directCompareWt = new DatasetPermutationBuilder()
+        .addLabels([Area.Measurement, Area.MeasuringObjects, Area.Difference, Scope.WeightMeasurement, Ability.ProcedureExecution])
+        .addConstraints({ mode: 'direct-compare', attribute: 'weight' })
+        .applyConstraintVariants('relation', ['heavier', 'lighter'])
+        .build();
+
+    return [...legacy, ...attributeType, ...directCompareLen, ...directCompareWt];
 }
 
 export const config: MLDatasetPipelineConfig = {
@@ -27,7 +51,8 @@ export const config: MLDatasetPipelineConfig = {
     },
     splits: { train: 0.8, val: 0.2 },
     visualDistribution: [
-        { viewId: 'measure-length', visualParams: { decimal: true, reverse: false }, instancesPerProblem: 1 },
-        { viewId: 'measure-length', visualParams: { decimal: true, reverse: true }, instancesPerProblem: 1 }
+        { viewId: 'measure-length', visualParams: {}, instancesPerProblem: 1 },
+        { viewId: 'measure-attributes', visualParams: {}, instancesPerProblem: 1 },
+        { viewId: 'measure-compare', visualParams: {}, instancesPerProblem: 1 }
     ]
 };

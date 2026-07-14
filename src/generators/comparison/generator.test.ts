@@ -15,6 +15,7 @@ describe('ComparisonGenerator', () => {
     it('should have the correct type and compatible renderers', () => {
         expect(generator.type).toBe('comparison');
         expect(generator.compatibleRenderers).toContain('numbers-compare');
+        expect(generator.compatibleRenderers).toContain('numbers-compare-groups');
     });
 
     describe('generate', () => {
@@ -26,8 +27,15 @@ describe('ComparisonGenerator', () => {
                     expect(stub.data).toBeDefined();
                     expect(stub.data.num1).toBeDefined();
                     expect(stub.data.num2).toBeDefined();
-                    expect(stub.data.answer).toMatch(/^[<>]$/);
-                    expect(stub.data.num1).not.toBe(stub.data.num2);
+                    if (input.constraints.mode === 'matching' || input.constraints.mode === 'count-compare') {
+                        expect(stub.data.answer).toMatch(/^(A|B|equal)$/);
+                        if (input.constraints.comparisonType !== 'equal') {
+                            expect(stub.data.num1).not.toBe(stub.data.num2);
+                        }
+                    } else {
+                        expect(stub.data.answer).toMatch(/^[<>]$/);
+                        expect(stub.data.num1).not.toBe(stub.data.num2);
+                    }
                 }
             });
         });

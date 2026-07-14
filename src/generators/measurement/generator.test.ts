@@ -15,6 +15,8 @@ describe('MeasurementGenerator', () => {
     it('should have the correct type and compatible renderers', () => {
         expect(generator.type).toBe('measurement');
         expect(generator.compatibleRenderers).toContain('measure-length');
+        expect(generator.compatibleRenderers).toContain('measure-attributes');
+        expect(generator.compatibleRenderers).toContain('measure-compare');
     });
 
     describe('generate', () => {
@@ -23,9 +25,17 @@ describe('MeasurementGenerator', () => {
                 const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
-                    expect(stub.data.bandLength).toBe(input.constraints.bandLength);
-                    expect(stub.data.problemLength).toBeGreaterThan(0);
-                    expect(stub.data.problemLength).toBeLessThanOrEqual(input.constraints.bandLength);
+                    if (input.constraints.mode === 'attribute-type') {
+                        expect(stub.data.attribute).toBeDefined();
+                    } else if (input.constraints.mode === 'direct-compare') {
+                        expect(stub.data.attribute).toBeDefined();
+                        expect(stub.data.relation).toBeDefined();
+                        expect(stub.data.answer).toBeDefined();
+                    } else {
+                        expect(stub.data.bandLength).toBe(input.constraints.bandLength);
+                        expect(stub.data.problemLength).toBeGreaterThan(0);
+                        expect(stub.data.problemLength).toBeLessThanOrEqual(input.constraints.bandLength);
+                    }
                 }
             });
         });
