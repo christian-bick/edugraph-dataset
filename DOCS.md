@@ -43,7 +43,7 @@ The primary pipeline orchestrator.
 *   **Function**: Scans all `meta.json` files in the generated dataset. It outputs a markdown report (`out/dataset/coverage-report.md`) detailing absolute frequencies of individual labels and the percentage breakdown of unique label combinations.
 
 ### `src/scripts/validate-dataset.ts`
-*   **Execution**: `npm run test:vqa [moduleName]` (Implicit execution via Node)
+*   **Execution**: `npx vite-node src/scripts/validate-dataset.ts [moduleName]`
 *   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze a representative random selection of Q/A image pairs from the dataset against rules defined in `global-checklist.md` and module-specific `checklist.md` files.
 
 ### `src/lib/dataset-permutation-builder.ts`
