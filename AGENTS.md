@@ -13,7 +13,9 @@ When starting a new session, confirm that you have read this document as well as
 - **Planning:** Make a plan and weigh options before starting larger codings tasks.
 - **Design Principles:** Prefer loose coupling, high composability and statelessness. 
 - **Refactoring:** When encountering large code blocks, split them into small chainable functions before touching the existing code.
-- **Tests:** Generate and execute unit tests for all code in `scripts` and `lib`using the {filename}.tests.js convention in the same directory as the tested file
+- **Tests:** Generate and execute unit tests for all code in `scripts`, `lib`, and generator modules using the `{filename}.tests.js` (or `{filename}.test.ts`) convention in the same directory. Unit tests must achieve high coverage, which should be verified by running `npm run test:coverage`.
+- **Validation Checklists:** A `checklist.md` for visual and structural validation must be added for every generator module (detailing abstract pedagogical requirements) and view module (detailing visual layout, interactive, and rendering requirements).
+- **Visual Dataset Validation:** Perform visual and schema dataset validation for each touched module by running: `npx vite-node src/scripts/validate-dataset.ts --{module_name}`.
 
 ## 3. Project Context
 
