@@ -21,7 +21,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Mary has 90 stickers. She gives 25 stickers to Tom and 18 stickers to Anna. How many stickers does Mary have left?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `operations-word` or extend `operations-boxes` with support for descriptive text display.
+* **Reuse or create new view:** Create a new view `operations-word-problem` or extend `operations-boxes` with support for descriptive text display.
 * **UI Layout details:** Display the word problem text in a clear readable block with adjustable font size. Underneath, render a grid layout containing the equation fields `[num1] [operator] [num2] = [answer]` (with the input box corresponding to `unknownPosition`) or a multi-box equation layout for two-step calculations. Include a digital scratchpad panel for drawings. Responsive layout must stack elements on smaller mobile viewports.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -54,7 +54,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Write an equation showing that 12 is even: 12 = [6] + [6]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `counting-objects` view for Permutation A and extend `operations-boxes` for Permutation B.
+* **Reuse or create new view:** Reuse `counting-objects` view for Permutation A and extend `operations-boxes` for Permutation B.
 * **UI Layout details:** 
   - For Permutation A: Display a collection of icons (up to 20) grouped in pairs with a box outlining each pair, followed by selector buttons for "Odd" and "Even".
   - For Permutation B: Show a horizontal equation template `N = [input] + [input]` with a label prompting for equal numbers. Make the layout responsive by scaling icons to fit small screens.
@@ -89,7 +89,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "10 tens = [100]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `place-value-blocks` or extend `counting-objects` to support Base-10 block visuals.
+* **Reuse or create new view:** Create a new view `place-value-blocks` or extend `counting-objects` to support Base-10 block visuals.
 * **UI Layout details:** Display 10 vertical rods (representing 10 tens). Allow the user to press a button to bundle them into a single hundred-flat grid. Display a text input field below the animation. The interface must dynamically scale blocks to prevent overflow.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -122,7 +122,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "4 hundreds, 0 tens, and 0 ones equals what number? [400]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-write` view.
+* **Reuse or create new view:** Reuse `numbers-write` view.
 * **UI Layout details:** Display a question statement with multiple inline text inputs for hundreds, tens, and ones. Ensure the input fields only accept digits and align correctly on mobile layouts.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -155,7 +155,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Count backward by 10s: 820, 810, 800, [790], [780]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-order` or design/extend `numbers-write` for horizontal sequence display.
+* **Reuse or create new view:** Reuse `numbers-order` or design/extend `numbers-write` for horizontal sequence display.
 * **UI Layout details:** Display a sequence of boxes horizontally. Some boxes are filled, while others contain editable input fields. Add a focus effect to the active input box. The horizontal strip must wrap cleanly on vertical screens.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -188,7 +188,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Write 706 in expanded form: [700] + [0] + [6]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-write` view.
+* **Reuse or create new view:** Reuse `numbers-write` view.
 * **UI Layout details:** Display the source text in a large typography card. Render input text boxes or select cards for writing standard numerals or expanded addition symbols. Maintain responsiveness with input fields auto-focusing on display.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -221,7 +221,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "439 has more [tens] than 429, so 439 > 429."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-compare` view.
+* **Reuse or create new view:** Reuse `numbers-compare` view.
 * **UI Layout details:** Render the two numbers side-by-side. Center a clickable bubble that opens a dropdown containing comparison operators (`<`, `=`, `>`). Optimize bubble sizes for comfortable touch-screen targets on mobile.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -254,7 +254,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "72 - 35 = [37]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` (horizontal layout) and `operations-vertical` (vertical column layout) views.
+* **Reuse or create new view:** Reuse `operations-boxes` (horizontal layout) and `operations-vertical` (vertical column layout) views.
 * **UI Layout details:** Display arithmetic problems with standard grids. For column operations, align digits precisely by place value (tens and ones). The virtual keyboard should display only numbers and clear keys.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -287,7 +287,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Add: 17 + 25 + 34 + 12 = [88]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-vertical` view.
+* **Reuse or create new view:** Reuse `operations-vertical` view.
 * **UI Layout details:** Stack the 3 or 4 two-digit numbers vertically, aligning tens and ones columns. Show a single long horizontal sum line with the input field underneath. Draw small carry indicators above the tens column.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -320,7 +320,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "612 - 345 = [267]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-vertical` and design a side-by-side or toggled place-value block display container.
+* **Reuse or create new view:** Reuse `operations-vertical` and design a side-by-side or toggled place-value block display container.
 * **UI Layout details:** Display the vertical math equation on one side of the layout. On the other side, render Base-10 block visuals (hundred-flats, ten-rods, one-units) representing each number. Selecting digits in the equation should highlight corresponding block bundles. Make the visual panel scrollable on smaller tablet displays.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -353,7 +353,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "What is 100 less than 706? [606]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view.
 * **UI Layout details:** Display a simple question sentence in bold text. Follow it with an equation template like `543 + 10 = [input]` or `608 - 100 = [input]`. Keep the visual styling minimal to reinforce that this is a mental math activity.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -386,7 +386,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Why does 35 + 18 equal 35 + 10 + 8? [Because 18 can be decomposed into 10 + 8, and we add them sequentially]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `operations-explanations`.
+* **Reuse or create new view:** Create a new view `operations-explanations`.
 * **UI Layout details:** Display a mathematical assertion or equation. Below it, show multiple-choice answers or drag-and-drop tiles representing steps of the reasoning path. Ensure target lines are large enough for dragging gestures on mobile screens.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -419,7 +419,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Align the ruler to measure the pencil. How long is the pencil? [8] centimeters."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse and extend the `measure-length` view.
+* **Reuse or create new view:** Reuse and extend the `measure-length` view.
 * **UI Layout details:** Renders a virtual object (e.g., pencil, key, crayon) and a draggable ruler overlay. The user can drag the ruler horizontally to align the 0 mark with the edge of the object, then read the value. Standard scales (inches and centimeters) must be visually distinct.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -452,7 +452,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Why does it take fewer inches than centimeters to measure a desk? [Because an inch is longer than a centimeter]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Extend `measure-length` view to support multiple rulers.
+* **Reuse or create new view:** Extend `measure-length` view to support multiple rulers.
 * **UI Layout details:** Display a virtual object. Directly below it, render two rulers stacked vertically (one marked in inches, the other in centimeters). Render input boxes for both measurements, followed by a multiple-choice question explaining the ratio difference.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -485,7 +485,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Estimate the height of a real door: [7 feet / 7 inches / 70 feet]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `measure-length` view by presenting standard visual benchmarks instead of interactive rulers.
+* **Reuse or create new view:** Reuse `measure-length` view by presenting standard visual benchmarks instead of interactive rulers.
 * **UI Layout details:** Display an illustration of a common object (e.g., table, door, coin) alongside a visual reference (like a hand or paperclip). Present 3 or 4 large radio option cards for the estimations. The options must scale cleanly on portrait phone screens.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -518,7 +518,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Measure both lines below. What is the difference in their lengths? [4] inches."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Extend `measure-length` view.
+* **Reuse or create new view:** Extend `measure-length` view.
 * **UI Layout details:** Render two lines/objects horizontally parallel to each other. Below them, display a standard ruler. Render input boxes next to labels: `Line A: [ ] cm`, `Line B: [ ] cm`, and `Difference: [ ] cm`. Align the vertical margins to ensure comparisons are easy to read.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -551,7 +551,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "A rope is 80 meters long. Farmer John cuts off 35 meters. How much rope is left? [45] meters."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view and support a text rendering card.
+* **Reuse or create new view:** Reuse `operations-boxes` view and support a text rendering card.
 * **UI Layout details:** Show the story context on a soft-shaded background panel. Render a visual illustration of a ruler or a ribbon matching the quantities described in the text. Underneath, show equation boxes where the user fills in the values.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -584,7 +584,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "Which math problem is shown on the number line hops? [Options: 10 + 5 = 15, 10 + 10 = 20]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `number-line`.
+* **Reuse or create new view:** Create a new view `number-line`.
 * **UI Layout details:** Draw an SVG horizontal axis with tick marks, customizable labels, and arrowheads. For operations, render curved hop lines above the number line, detailing steps. Make the SVG scale dynamically on high-resolution screens without loss of clarity.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -617,7 +617,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "You eat breakfast at 7:15 in the morning. Is this 7:15 AM or 7:15 PM? [AM]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `time-analog` view.
+* **Reuse or create new view:** Reuse `time-analog` view.
 * **UI Layout details:** Display a circular clock face. Make hour and minute hands distinct in color and thickness. Show a toggle panel containing "AM" and "PM" choices. Ensure hand placement snaps precisely to 5-minute tick marks.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -650,7 +650,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "How many pencils are exactly 5 inches long according to the line plot? [2] pencils."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `line-plot`.
+* **Reuse or create new view:** Create a new view `line-plot`.
 * **UI Layout details:** Display a table showing raw object measurements on top. Below, render a horizontal axis with numbers. Allow users to click columns above each number to add or remove 'X' mark symbols. Keep spacing uniform and center labels under tick marks.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -671,7 +671,7 @@ This backlog specifies the problem generators, views, checklists, and validation
 * **Ontology Reference:** Matched Areas: `Area.Statistics`, `Area.Addition`, `Area.Subtraction`, Scopes: `Scope.VisualNumbers`, `Scope.NumbersSmaller100`
 
 ### Subtask 1: Problem Generator Specifications
-* **Extension/New module:** Extend `counting` or create a visual graphing data compiler to output structured category counts.
+* **Extension/New module:** Extend `counting` or create a new 'statistics' generator module to output structured category counts.
 * **Competency Breakdowns (2-3 combinations):**
   1. **Permutation A (Graph Construction):**
      - **Labels:** `Area.Statistics`, `Scope.VisualNumbers`, `Ability.VisualArticulation`
@@ -683,7 +683,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "How many more cherries are there than bananas? [2]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `data-graphs`.
+* **Reuse or create new view:** Create a new view `data-graphs`.
 * **UI Layout details:** 
   - For Bar Graph: Draw a vertical or horizontal chart. Grid lines indicate counts from 0 to 10. Columns are click-adjustable: clicking inside a grid cell fills that column up to the clicked height.
   - For Picture Graph: Render a column array. Clicking a category row adds icons (e.g. apple icon). 
@@ -707,7 +707,7 @@ This backlog specifies the problem generators, views, checklists, and validation
 * **Ontology Reference:** Matched Areas: `Area.ShapeRecognition`, `Area.Triangle`, `Area.Quadrilateral`, `Area.Pentagon`, `Area.Hexagon`, `Area.Cube`, Scopes: `Scope.TwoDimensional`, `Scope.ThreeDimensional`, `Scope.VisualGeometry`
 
 ### Subtask 1: Problem Generator Specifications
-* **Extension/New module:** Design a new generator module `geometry` to handle 2D and 3D shape identification and partition properties.
+* **Extension/New module:** Create a new generator module `geometry` to handle 2D and 3D shape identification and partition properties.
 * **Competency Breakdowns (2-3 combinations):**
   1. **Permutation A (Shape Classification):**
      - **Labels:** `Area.ShapeRecognition`, `Scope.TwoDimensional`, `Scope.VisualGeometry`, `Ability.VisualRecognition`
@@ -719,7 +719,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "How many equal faces does a cube have? [6] faces."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `geometry-shapes`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:** Render standard geometry shapes (triangle, square, trapezoid, pentagon, hexagon) using SVGs. For 3D shapes (cubes), draw wireframe perspective lines. Make shapes interactive by highlighting vertices/edges/faces when tapped. Display select buttons on a side menu.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -752,7 +752,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "A rectangle is divided into a grid of squares. Count the squares: [8] squares."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `geometry-partition`.
+* **Reuse or create new view:** Create a new view `fractions-visual`.
 * **UI Layout details:** Display an empty rectangle container. Render horizontal and vertical slice buttons. When clicked, slice lines divide the rectangle into rows and columns. Allow tapping squares to color them, tracking count. Center equation prompts dynamically.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -785,7 +785,7 @@ This backlog specifies the problem generators, views, checklists, and validation
      - **Sample Question:** "This circle is divided into 4 equal shares. One share is a [fourth / half / third]."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Extend `geometry-partition` view.
+* **Reuse or create new view:** Extend `geometry-partition` view.
 * **UI Layout details:** Display circle or rectangle shapes. Draw thin dividing lines (radial spokes for circle, columns/rows for rectangles). Render clickable shares that fill with color when clicked. Show text selections on the bottom panel.
 
 ### Subtask 3: Developer Implementation Checklist

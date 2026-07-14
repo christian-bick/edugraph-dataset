@@ -13,7 +13,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.ParenthesesUsage, Area.OrderOfOperations, Scope.IntegersWithoutNegatives, Scope.Base10, Ability.ProcedureExecution], Parameters: { expressionType: 'brackets', maxNum: 100 }, Sample: "[2 * (6 - 3)] + 8 = ?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-boxes' view.
+* **Reuse or create new view:** Reuse 'operations-boxes' view.
 * **UI Layout details:** A horizontal display of the expression with brackets/parentheses using standard mathematical typography. The answer input box appears at the end of the expression, supporting a clean layout.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -38,7 +38,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.Multiplication, Area.Algebra, Scope.IntegersWithoutNegatives, Scope.Base10, Ability.AnalyticalReasoning], Parameters: { writingMode: 'expressionInterpretation' }, Sample: "How many times larger is 3 * (18932 + 921) than 18932 + 921? -> 3"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-boxes' view.
+* **Reuse or create new view:** Reuse 'operations-boxes' view.
 * **UI Layout details:** Displays the verbal prompt in a text box. In Permutation A, provides sub-boxes or an equation builder for the expression. In Permutation B, provides a text input for the scaling factor.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -63,7 +63,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.PointPlotting, Area.CoordinateAxes, Scope.CartesianCoordinateSystem, Scope.TwoDimensional, Ability.ProcedureExecution], Parameters: { plotPairs: [[0,0], [3,6], [6,12]] }, Sample: "Plot the generated points on the coordinate grid."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'coordinate-patterns'.
+* **Reuse or create new view:** Propose new view 'coordinate-patterns'.
 * **UI Layout details:** Left pane: A tabular view showing terms for Pattern X and Pattern Y side-by-side with fill-in-the-blank inputs. Right pane: A first-quadrant grid (0-20 scale) where students click to plot coordinate points corresponding to the table rows. Responsive layout drops grid below table on mobile devices.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -88,7 +88,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.PlaceValue, Area.DigitNotation, Scope.Base10, Scope.IntegersWithoutNegatives, Ability.ProcedureUnderstanding], Parameters: { relation: 'oneTenth', digit: 4, number: 4480 }, Sample: "In the number 4,480, the 4 in the hundreds place is what fraction of the 4 in the thousands place? -> 1/10"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'numbers-write' view.
+* **Reuse or create new view:** Reuse 'numbers-write' view.
 * **UI Layout details:** Displays the prompt text with the focus number underlined. Below the text, a horizontal place-value grid displays columns (Thousands, Hundreds, Tens, Ones) to help the student visualize the shift of digits.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -113,7 +113,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.DecimalPointAlignment, Area.Exponentiation, Area.Multiplication, Area.Division, Scope.DecimalNumbers, Scope.Base10, Ability.ProcedureExecution], Parameters: { operator: 'divide', base: 10, exponent: 2, num: 45.2 }, Sample: "45.2 / 10^2 = ? -> 0.452"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-boxes' view.
+* **Reuse or create new view:** Reuse 'operations-boxes' view.
 * **UI Layout details:** Displays standard horizontal mathematical expressions with superscript exponents (e.g., 10³). A text input box is aligned horizontally at the end of the equation.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -138,7 +138,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.DecimalPrecission, Area.PlaceValue, Scope.DecimalNumbers, Scope.Base10, Ability.ProcedureExecution], Parameters: { decimalMode: 'wordToStandard' }, Sample: "Write 'three hundred forty-seven and three hundred ninety-two thousandths' as a decimal -> 347.392"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'numbers-write' view.
+* **Reuse or create new view:** Reuse 'numbers-write' view.
 * **UI Layout details:** Displays the prompt (either written words or standard form) centered on the screen. Below is a text input field, or split input boxes corresponding to each place value column.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -163,7 +163,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.NumericComparison, Area.PlaceValue, Scope.DecimalNumbers, Scope.Base10, Ability.ProcedureExecution], Parameters: { val1: 0.3, val2: 0.298 }, Sample: "Compare: 0.3 [ ] 0.298 -> '>'"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'numbers-compare' view.
+* **Reuse or create new view:** Reuse 'numbers-compare' view.
 * **UI Layout details:** Displays the two numbers on the left and right sides with a central drop-down selector or clickable buttons containing comparison symbols (<, =, >).
 
 ### Subtask 3: Developer Implementation Checklist
@@ -188,7 +188,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.DecimalRounding, Area.PlaceValue, Scope.DecimalNumbers, Scope.Base10, Ability.ProcedureExecution], Parameters: { num: 0.294, roundTo: 'hundredths' }, Sample: "Round 0.294 to the nearest hundredth -> 0.29"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'numbers-write' view.
+* **Reuse or create new view:** Reuse 'numbers-write' view.
 * **UI Layout details:** Displays the rounding query in a large font. A highlighted horizontal scale/number line is rendered below to help visualize the nearest boundary value.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -213,7 +213,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.Division, Area.PlaceValue, Scope.IntegersWithZero, Scope.Base10, Scope.NumbersLarger1000, Ability.ProcedureExecution], Parameters: { dividend: 4832, divisor: 12, remainderMode: true }, Sample: "4832 / 12 = ? -> 402 R 8"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-vertical' view.
+* **Reuse or create new view:** Reuse 'operations-vertical' view.
 * **UI Layout details:** Displays standard long division boxes or vertical division layouts. Input boxes are provided for the quotient and the remainder if applicable.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -238,7 +238,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.Multiplication, Area.Division, Scope.DecimalNumbers, Scope.Base10, Ability.ProcedureExecution], Parameters: { op: 'multiply', num1: 2.5, num2: 1.4 }, Sample: "2.5 * 1.4 = ? -> 3.5"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-vertical' (for aligned column addition/subtraction) and 'operations-boxes' views.
+* **Reuse or create new view:** Reuse 'operations-vertical' (for aligned column addition/subtraction) and 'operations-boxes' views.
 * **UI Layout details:** Vertical grid columns aligned by decimal points for addition/subtraction, with empty input boxes for carrying/borrowing indicators and digit entries.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -263,7 +263,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionArithmetic, Area.LowestCommonDenominator, Area.Subtraction, Scope.FractionNumbers, Ability.ProcedureExecution], Parameters: { fractionOp: 'subtract', type: 'mixedNumbers' }, Sample: "2 1/2 - 1 1/3 = ? -> 1 1/6"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'fraction-operations'.
+* **Reuse or create new view:** Propose new view 'fraction-operations'.
 * **UI Layout details:** Renders mathematical fractions vertically (numerator over denominator separated by a fraction bar). In solution views, displays intermediate equivalence steps (e.g., 2/3 becomes 8/12).
 
 ### Subtask 3: Developer Implementation Checklist
@@ -288,7 +288,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.Estimation, Area.NumericComparison, Scope.FractionNumbers, Ability.PlausibilityEvaluation], Parameters: { estimationOnly: true }, Sample: "Estimate: Is 2/5 + 1/2 greater or less than 1? -> 'less'"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-boxes' view.
+* **Reuse or create new view:** Reuse 'operations-boxes' view.
 * **UI Layout details:** Text box at the top displaying the word problem scenario. Input fields below allow entering numerators and denominators for the final fraction answer.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -313,7 +313,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.Division, Area.RatioInterpretation, Scope.FractionNumbers, Scope.IntegersWithZero, Ability.ProcedureExecution], Parameters: { format: 'sharingWordProblem' }, Sample: "If 9 people share a 50-pound sack of rice equally, how many pounds does each get? -> 5 5/9"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-boxes' view.
+* **Reuse or create new view:** Reuse 'operations-boxes' view.
 * **UI Layout details:** Presents the word problem with clear visual prompts. Provides separate boxes for mixed numbers (whole, numerator, denominator) for answers.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -338,7 +338,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionArithmetic, Area.Multiplication, Scope.FractionNumbers, Ability.ProcedureExecution], Parameters: { type: 'fractionByFraction' }, Sample: "(2/3) * (4/5) = ? -> 8/15"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'fraction-multiplication-visual'.
+* **Reuse or create new view:** Propose new view 'fraction-multiplication-visual'.
 * **UI Layout details:** Left: A grid visual representation of multiplication where rows are partitioned by the first fraction and columns by the second fraction, creating a cross-shaded area. Right: Standard vertical fraction boxes.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -363,7 +363,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.AreaCalculation, Area.Rectangle, Area.Multiplication, Scope.FractionNumbers, Scope.TwoDimensional, Ability.ProcedureExecution], Parameters: { tileMode: false, width: '2/3', height: '4/5' }, Sample: "Find the area of a rectangle with sides 2/3 m and 4/5 m. -> 8/15 sq m"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'fractional-tiling'.
+* **Reuse or create new view:** Propose new view 'fractional-tiling'.
 * **UI Layout details:** A main rectangular box representing the area. In tileMode, displays grid lines representing the unit fractions, allowing students to count individual tiles and compare them to the calculated product.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -388,7 +388,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.NumericComparison, Area.Multiplication, Scope.FractionNumbers, Ability.LogicalReasoning], Parameters: { compareMode: 'greaterThanOne' }, Sample: "Compare: 7 * 1 1/3 [ ] 7 -> '>'"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'numbers-compare' view.
+* **Reuse or create new view:** Reuse 'numbers-compare' view.
 * **UI Layout details:** Left side displays expression (e.g. 7 * 4/5), right side displays reference value (7), with a comparison dropdown (<, =, >) in the middle.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -413,7 +413,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionEquivalence, Area.Multiplication, Scope.FractionNumbers, Ability.LogicalReasoning], Parameters: { explanationMode: 'identity' }, Sample: "Explain why (2/3) * (4/4) equals 8/12 -> Multiple choice indicating multiplying by 4/4 is equivalent to multiplying by 1."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'numbers-compare' view.
+* **Reuse or create new view:** Reuse 'numbers-compare' view.
 * **UI Layout details:** Displays the equation at the top. Below, a set of 3-4 text-based multiple-choice options are laid out as clickable cards.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -438,7 +438,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionArithmetic, Area.Multiplication, Scope.FractionNumbers, Ability.ProcedureExecution], Parameters: { wordProblemType: 'proper' }, Sample: "A park is 3/4 lawn. 1/3 of the lawn is mowed. What fraction of the park is mowed? -> 1/4"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-boxes' view.
+* **Reuse or create new view:** Reuse 'operations-boxes' view.
 * **UI Layout details:** Displays the contextual story problem. Empty fraction inputs are provided below for the final mixed number or proper fraction answer.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -463,7 +463,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionArithmetic, Area.Division, Scope.FractionNumbers, Ability.VisualArticulation], Parameters: { divType: 'fractionByWholeVisual' }, Sample: "Show partitioning of 1/3 of a bar into 4 equal parts."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'fraction-division-visual'.
+* **Reuse or create new view:** Propose new view 'fraction-division-visual'.
 * **UI Layout details:** Renders fraction bars: first bar shows the unit fraction (e.g. 1/3 highlighted), the second bar shows each segment divided into N parts (e.g., 12 total), showing that each slice is 1/12.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -488,7 +488,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionArithmetic, Area.Division, Scope.FractionNumbers, Ability.VisualArticulation], Parameters: { divType: 'wholeByFractionVisual' }, Sample: "Count total number of fifths across 4 whole blocks."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'fraction-division-visual'.
+* **Reuse or create new view:** Propose new view 'fraction-division-visual'.
 * **UI Layout details:** Renders N separate whole blocks, each divided into unit fractions (e.g., 4 circles split into fifths). Students count the total number of partitions (20).
 
 ### Subtask 3: Developer Implementation Checklist
@@ -513,7 +513,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionArithmetic, Area.Division, Scope.FractionNumbers, Ability.ProcedureExecution], Parameters: { wordProblemType: 'wholeByFraction' }, Sample: "How many 1/3-cup servings are in 2 cups of raisins? -> 6"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'operations-boxes' view.
+* **Reuse or create new view:** Reuse 'operations-boxes' view.
 * **UI Layout details:** Renders the word problem text. Standard input box is provided for the resulting whole number or fraction.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -538,7 +538,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.MeasuringObjects, Area.Multiplication, Scope.IntegersWithoutNegatives], Parameters: { system: 'customary', type: 'length' }, Sample: "Convert 3 feet to inches -> 36 inches"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'unit-conversion'.
+* **Reuse or create new view:** Propose new view 'unit-conversion'.
 * **UI Layout details:** Displays the starting measurement on the left (e.g., 5 cm), an equivalence arrow, and an input box followed by the target unit (e.g., meters). Includes a reference conversion chart option.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -563,7 +563,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.FractionArithmetic, Area.Addition, Area.Division, Scope.FractionNumbers, Scope.Numberline, Ability.ProcedureExecution], Parameters: { plotMode: 'redistribute' }, Sample: "Find the fair share amount if the total liquid was distributed equally among the 5 beakers -> 13/40"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'line-plot-view'.
+* **Reuse or create new view:** Propose new view 'line-plot-view'.
 * **UI Layout details:** Top: Interactive number line calibrated in eighths (1/8, 1/4, 3/8, 1/2, etc.). Students drag 'X' marks to plot points. Bottom: Formula and inputs for sum and division to calculate redistribution.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -588,7 +588,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.VolumeCalculation, Area.Cube, Area.SpaceConcept, Scope.ThreeDimensional, Ability.ConceptRecall], Parameters: { concept: 'stackedVolume' }, Sample: "A figure made of 5 unit cubes has what volume? -> 5 cubic units"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'volume-cubes'.
+* **Reuse or create new view:** Propose new view 'volume-cubes'.
 * **UI Layout details:** Displays isometric 3D illustrations of unit cubes. Text input is provided for the volume number and dropdown for the units.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -612,7 +612,7 @@ This document outlines the detailed backlog and technical specifications for gen
   1. **Permutation A:** Labels: [Area.VolumeCalculation, Area.Cube, Area.SpaceConcept, Scope.ThreeDimensional, Ability.ConceptRecall], Parameters: { concept: 'gaplessPacking' }, Sample: "If a box is packed with 12 unit cubes without gaps, what is its volume? -> 12 cubic units"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'volume-cubes'.
+* **Reuse or create new view:** Propose new view 'volume-cubes'.
 * **UI Layout details:** Draws a transparent box filled with individual unit cubes in an isometric projection. The student must select or write the total volume based on the count.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -637,7 +637,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.VolumeCalculation, Area.MeasuringObjects, Scope.ThreeDimensional, Scope.LinkingCubes, Ability.ProcedureExecution], Parameters: { prismType: 'irregular' }, Sample: "Count unit cubes in the irregular shape -> 9 cubic units"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'volume-cubes'.
+* **Reuse or create new view:** Propose new view 'volume-cubes'.
 * **UI Layout details:** Interactive 3D isometric grid where users can rotate the figure (using orbit controls) to count hidden cubes. Answers are inputted in text field.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -662,7 +662,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.VolumeCalculation, Area.AssociativeLaw, Area.Multiplication, Scope.ThreeDimensional, Ability.LogicalReasoning], Parameters: { associativeProof: true }, Sample: "Show that (4 * 3) * 2 matches 4 * (3 * 2) as volume layers."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'volume-cubes'.
+* **Reuse or create new view:** Propose new view 'volume-cubes'.
 * **UI Layout details:** Displays layers of unit cubes separating to demonstrate associative grouping (e.g. 2 layers of 12 cubes vs 4 slices of 6 cubes). Labeled inputs are provided for each term.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -687,7 +687,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.VolumeCalculation, Area.Multiplication, Scope.ThreeDimensional, Scope.IntegersWithoutNegatives, Ability.ProcedureExecution], Parameters: { formula: 'Bh', baseArea: 15, height: 4 }, Sample: "Use V = B * h to find volume -> 60"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'volume-cubes'.
+* **Reuse or create new view:** Propose new view 'volume-cubes'.
 * **UI Layout details:** Draws a right rectangular prism with dimension lines. Includes formula selection tabs and input boxes for variables and output.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -711,7 +711,7 @@ This document outlines the detailed backlog and technical specifications for gen
   1. **Permutation A:** Labels: [Area.VolumeCalculation, Area.Addition, Scope.ThreeDimensional, Ability.ProcedureExecution], Parameters: { compositeType: 'twoPrisms', dims1: [3, 2, 2], dims2: [2, 2, 4] }, Sample: "Find total volume of the two non-overlapping prisms -> 12 + 16 = 28"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'volume-cubes'.
+* **Reuse or create new view:** Propose new view 'volume-cubes'.
 * **UI Layout details:** Displays a composite solid composed of two colored right rectangular prisms. Dimension labels are printed for each prism. Students enter both separate volumes and the total.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -736,7 +736,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.CoordinateAxes, Area.PlaneConcept, Scope.CartesianCoordinateSystem, Scope.TwoDimensional, Ability.ConceptRecall], Parameters: { questionType: 'axesMovement' }, Sample: "In (4, 7), which coordinate indicates horizontal travel from the origin? -> 4"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'coordinate-graph'.
+* **Reuse or create new view:** Propose new view 'coordinate-graph'.
 * **UI Layout details:** Displays a full first-quadrant grid with labeled X-axis and Y-axis, arrows, and origin. Questions are printed alongside the coordinate graph.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -761,7 +761,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.PointPlotting, Area.CoordinateAxes, Scope.CartesianCoordinateSystem, Scope.TwoDimensional, Ability.Interpretation], Parameters: { plotMode: 'interpretPoint', data: [4, 40] }, Sample: "Point (4, 40) shows hours worked and earnings. What does 40 represent? -> Earnings ($)"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'coordinate-graph'.
+* **Reuse or create new view:** Propose new view 'coordinate-graph'.
 * **UI Layout details:** A 10x10 grid with gridlines, numbers, axis labels. Students tap coordinates to place dots. The coordinates update in real time in a text label.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -786,7 +786,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.Square, Area.Rhombus, Scope.TwoDimensional, Ability.LogicalReasoning], Parameters: { hierarchyMode: 'rhombusInheritance' }, Sample: "All rhombuses have four equal sides. A square is a rhombus. Therefore, all squares have four equal sides. -> True/False"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse 'numbers-compare' view.
+* **Reuse or create new view:** Reuse 'numbers-compare' view.
 * **UI Layout details:** Presents the deductive syllogism in a clear readable block. Multiple-choice answer buttons (Yes/No, True/False) are aligned underneath.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -811,7 +811,7 @@ This document outlines the detailed backlog and technical specifications for gen
   2. **Permutation B:** Labels: [Area.Square, Area.Rectangle, Area.Trapezoid, Scope.TwoDimensional, Ability.LogicalReasoning], Parameters: { classifyMode: 'hierarchyTree' }, Sample: "Drag figures into hierarchy order (Polygon -> Quadrilateral -> Parallelogram -> Rectangle -> Square)"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose new view 'shape-hierarchy-classifier'.
+* **Reuse or create new view:** Propose new view 'shape-hierarchy-classifier'.
 * **UI Layout details:** A drag-and-drop tree view representing geometric shapes. Students drag shape labels into their corresponding nested classifications. Fully touch-responsive on mobile devices.
 
 ### Subtask 3: Developer Implementation Checklist

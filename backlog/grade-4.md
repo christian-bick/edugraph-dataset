@@ -25,7 +25,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Estimate 289 + 412 by rounding each to the nearest hundred. Is 700 a reasonable estimate? (Yes/No)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `operations-word-problem`.
+* **Reuse or create new view:** Create a new view `operations-word-problem`-problem`.
 * **UI Layout details:** Simple card displaying the word problem text prominently. Below the text, render either a grid of multiple choice options (for equations) or a structured text field with fraction/whole layout. Highly readable fonts and mobile-friendly input boxes.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -62,7 +62,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Is 29 a prime number or composite number?"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `factors-selection`.
+* **Reuse or create new view:** Create a new view `factors-selection`.
 * **UI Layout details:** A large central block displaying the target number. Below it, an interactive grid of candidate number chips. The user taps chips to select factor pairs or multiples. Supports touch drag-and-drop on mobile.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -95,7 +95,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Given the rule 'Add 3' and start 1, the pattern is 1, 4, 7, 10, 13... What feature is true about the terms? (Options: They alternate odd/even, they are all even, they are all odd)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `pattern-grid`.
+* **Reuse or create new view:** Create a new view `pattern-grid`.
 * **UI Layout details:** A horizontal sequence of boxes displaying current numbers with empty input fields for target values. Below, a radio-button selection panel for implicit property questions. Fully responsive, wraps boxes nicely on small screens.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -128,7 +128,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Find the value: 7,000 ÷ 70 = _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `place-value-chart`.
+* **Reuse or create new view:** Create a new view `place-value-chart`.
 * **UI Layout details:** Displays a horizontal place value board (Millions, Hundred Thousands, Ten Thousands, Thousands, Hundreds, Tens, Ones) highlighting two adjacent columns with arrows indicating the 10x relationship. Below, a numeric or text input field. High-contrast colors, fits narrow mobile screens by scrolling the chart horizontally.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -161,7 +161,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Compare: 452,891 _ 452,981 (Choose <, >, or =)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-write` (for conversion inputs) and `numbers-compare` (for comparisons).
+* **Reuse or create new view:** Reuse `numbers-write` (for conversion inputs) and `numbers-compare` (for comparisons).
 * **UI Layout details:** The `numbers-compare` view displays the two large numbers in bold, with a large dropdown select field in the center. Completely responsive, aligns items vertically on extremely small screens to prevent clipping.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -194,7 +194,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Which of the following numbers round to 50,000 when rounded to the nearest ten thousand? Select all that apply. (Options: 48,200, 54,900, 44,999, 55,200)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `rounding-numberline`.
+* **Reuse or create new view:** Create a new view `number-line`.
 * **UI Layout details:** A horizontal number line illustrating the target interval (e.g. 30,000 to 40,000) with a marked midpoint. An interactive pin marks the number to be rounded, helping the student visualize the closest multiple. Fully interactive, scales fluidly across device widths.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -227,7 +227,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"For 25 × 14, complete the partial products: 20 × 10 = 200, 20 × 4 = 80, 5 × 10 = _, 5 × 4 = _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-vertical` for standard vertical multiplication. Propose a new view `operations-area-model` for distributive visual representations.
+* **Reuse or create new view:** Reuse `operations-vertical` for standard vertical multiplication. Create a new view `operations-area-model` for distributive visual representations.
 * **UI Layout details:** A split grid representing a rectangular area model (e.g. 2x2 grid for 2-digit multiplication) showing factors labeled on headers. Input boxes reside inside grid cells for students to compute partial products. Clear margins, touch-responsive grid cells.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -260,7 +260,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Divide 639 ÷ 3 by partitioning: 600 ÷ 3 = 200, 30 ÷ 3 = _, 9 ÷ 3 = _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `operations-partial-quotients`.
+* **Reuse or create new view:** Create a new view `operations-partial-quotients`.
 * **UI Layout details:** Display a vertical partial quotients bracket or partitioned boxes. User enters values step-by-step. Features a side panel detailing helper multiples. Optimized to scale on vertical screen orientations.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -293,7 +293,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Find the missing number: 2/5 = _/10"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `fractions-visual`.
+* **Reuse or create new view:** Create a new view `fractions-visual`.
 * **UI Layout details:** SVG rendering of circles, rectangles, or fraction bars divided into segments, with colored/shaded areas representing the fractions. Places two visual components next to each other, with clean input fields. SVG shapes adapt automatically to mobile layout widths.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -326,7 +326,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Which of the following is larger than 1/2? (Options: 3/8, 4/10, 5/8, 2/6)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-compare` view.
+* **Reuse or create new view:** Reuse `numbers-compare` view.
 * **UI Layout details:** The numbers-compare view should be updated to render fractional elements vertically (numerator, division line, denominator) side-by-side with a comparison button set in between. Centered alignment, scales text size on small viewports.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -359,7 +359,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"A pie has 5/8 of its slices left. If you remove 2/8, what fraction of the pie is left? _/_"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `fractions-visual` view.
+* **Reuse or create new view:** Reuse `fractions-visual` view.
 * **UI Layout details:** SVG pie charts or grid bars showing distinct color codings (e.g. blue segments for addend 1, green segments for addend 2) to illustrate merging. Display text input underneath. Responsive SVG scaling.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -392,7 +392,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Complete the decomposition: 1 2/5 = 5/5 + _/5"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view (configured for fractions) or `fractions-visual` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view (configured for fractions) or `fractions-visual` view.
 * **UI Layout details:** Display the equation inline. Render input fields for numerators. Below the equation, render a segmented rectangle bar showing color splits matching the decomposition. Responsive margins.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -425,7 +425,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Calculate: 3 1/6 - 1 4/6 = _ _/_"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `mixed-numbers-input`.
+* **Reuse or create new view:** Create a new view `mixed-numbers-input`.
 * **UI Layout details:** Main math problem displayed horizontally. The response element has three input fields: a whole number box, followed by vertical numerator/denominator fraction boxes. Supports responsive tab order.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -458,7 +458,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"A recipe requires 7/8 cups of milk. Leo has 3/8 cups of milk. How much more milk does he need? _/_ cups"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-word-problem` view.
+* **Reuse or create new view:** Reuse `operations-word-problem` view.
 * **UI Layout details:** Display word problem card containing fraction input text boxes. Ensure layout doesn't overlap text with inputs on narrow screens.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -491,7 +491,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Look at the 3 shapes. Each has 1/4 shaded. What is the total shaded area as a product? _ × 1/4 = _/_"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `fractions-visual` view or `operations-boxes` view.
+* **Reuse or create new view:** Reuse `fractions-visual` view or `operations-boxes` view.
 * **UI Layout details:** Display multiple separate fraction bars side-by-side (representing copies of 1/b). Below, place the numerical formula input fields. Responsive, handles wide SVGs on mobile devices.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -524,7 +524,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Rewrite: 3 × 3/8 = _ × 1/8"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view (configured for fraction outputs).
+* **Reuse or create new view:** Reuse `operations-boxes` view (configured for fraction outputs).
 * **UI Layout details:** Display mathematical formula with numerator/denominator input grid. High contrast layout.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -557,7 +557,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"A collection has 5 cups containing 3/4 liters of water each. The total water is 15/4 liters. Between which two whole numbers does 15/4 lie? (Options: 3 and 4, 4 and 5, 2 and 3)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-word-problem` view.
+* **Reuse or create new view:** Reuse `operations-word-problem` view.
 * **UI Layout details:** Display word problem text on card, with multiple-choice buttons (for bounding numbers) or mixed-number text boxes (for final product). Clean design.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -590,7 +590,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Calculate: 4/10 + 23/100 = _/100"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view.
 * **UI Layout details:** Display mathematical expressions horizontally with fraction structures. Response box targets numerator of solution.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -627,7 +627,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Which letter represents 0.3 on the number line? (Options: A, B, C)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-write` (for conversions). Propose a new view `numberline-interactive` for positioning.
+* **Reuse or create new view:** Reuse `numbers-write` (for conversions). Create a new view `number-line` for positioning.
 * **UI Layout details:** A horizontal number line marked from 0 to 1 with tick marks at intervals of 0.1 or 0.01. Key intervals are labeled with letter tags. User selects the letter matching the decimal target. Touch-friendly tick indicators.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -660,7 +660,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Look at the two shaded 10x10 grids. Grid A is 0.3 shaded, and Grid B is 0.35 shaded. Which is larger? (Grid A / Grid B)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-compare` view. Propose a new view `decimal-grids`.
+* **Reuse or create new view:** Reuse `numbers-compare` view. Create a new view `decimal-grids`.
 * **UI Layout details:** Two side-by-side grids containing 10x10 blocks, colored dynamically to represent the decimal values. Users tap the corresponding comparison operators. Displays vertically stacked on small mobile viewports.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -693,7 +693,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Complete the table: Hours | Minutes | 1 | 60 | 2 | _ | 3 | 180 | 4 | _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `measurement-table`.
+* **Reuse or create new view:** Create a new view `measurement-table`.
 * **UI Layout details:** A structured HTML table representing a conversion record with clean header columns and input cells for missing values. Clean borders, padding optimized for tap accuracy.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -726,7 +726,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Kevin spent $4.50 on a notepad and $1.75 on a pen. How much change does he get from a $10 bill? _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-word-problem` view.
+* **Reuse or create new view:** Reuse `operations-word-problem` view.
 * **UI Layout details:** Display word problem card. If scale representation is required, show a horizontal scale/ruler SVG segment marking intermediate values.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -759,7 +759,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"The perimeter of a rectangular rug is 24 feet. The width is 4 feet. What is the length of the rug? _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-rectangle`.
+* **Reuse or create new view:** Create a new view `geometry-rectangle`.
 * **UI Layout details:** Centered SVG rectangle displaying lengths on sides (or variables). Colored background area. Response inputs sit below the rectangle image. Responsive scaling.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -793,7 +793,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"A line plot lists sticks. Two sticks are 1/4 inches and one stick is 2/4 inches. What is their total combined length? _ _/_"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `data-line-plot`.
+* **Reuse or create new view:** Create a new view `line-plot`.
 * **UI Layout details:** SVG rendering showing a horizontal axis labeled in fraction increments (e.g. 0, 1/8, 2/8... 1). Values are plotted using stacked "X" markers. The text and response field are displayed below. Adapts beautifully to mobile viewports.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -827,7 +827,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"An angle turns through 60 one-degree angles. What is its measure in degrees? _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-angle-circle`.
+* **Reuse or create new view:** Create a new view `geometry-angle-circle`.
 * **UI Layout details:** Draw a circle containing two rays extending from the center point, with the arc between shaded. Highlights the 360-division concept. Text and inputs sit below. Fully responsive.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -861,7 +861,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"An angle that turns through 85 one-degree angles has an angle measure of _ degrees."`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view or `geometry-angle-circle` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view or `geometry-angle-circle` view.
 * **UI Layout details:** Text question box with simple input fields. Minimal layout.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -893,7 +893,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Which of the following angles measures 45 degrees? (Options: Angle A, Angle B, Angle C)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-protractor`.
+* **Reuse or create new view:** Create a new view `geometry-protractor`.
 * **UI Layout details:** Render an SVG protractor with an angle centered on the origin. The baseline aligns with 0, and the second ray points to the target angle division. Clean lines and tick numbers, scales automatically on mobile screens.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -927,7 +927,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"The total angle measures 90 degrees. One of the non-overlapping parts is 40 degrees. Solve for x: _"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-adjacent-angles`.
+* **Reuse or create new view:** Create a new view `geometry-adjacent-angles`.
 * **UI Layout details:** SVG drawing of two adjacent angles sharing a common inner ray. Dimension brackets and numeric tags label the parts (or variables like `x`). Clean line rendering, mobile-responsive layout.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -965,7 +965,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Are the two lines shown parallel, perpendicular, or intersecting? (Options: Parallel, Perpendicular, Intersecting)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-shapes-viewer`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:** Display high-quality SVG drawings of geometric elements (lines with arrows, segments with end-dots, intersecting grids). Selection options are laid out as large, easy-to-tap cards below. Responsive flex-layout.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -999,7 +999,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Identify the right triangle from the shapes below: (Options: Triangle A, Triangle B, Triangle C)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `geometry-shapes-viewer` view.
+* **Reuse or create new view:** Reuse `geometry-shapes-viewer` view.
 * **UI Layout details:** Display multiple SVG polygons side-by-side. Support angle indicators (square corner markers) and parallel arrows to visually indicate properties. Responsive layout grids.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -1032,7 +1032,7 @@ This document contains the detailed backlog of tasks for the Grade 4 leaf standa
      * Sample question: `"Which of the following figures has a line of symmetry? (Options: Figure A, Figure B, Figure C)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-symmetry`.
+* **Reuse or create new view:** Create a new view `geometry-symmetry`.
 * **UI Layout details:** Render an SVG shape with a dashed line passing through it at various angles (horizontal, vertical, diagonal). User selects Yes/No or chooses from shape cards. Touch-friendly target options.
 
 ### Subtask 3: Developer Implementation Checklist

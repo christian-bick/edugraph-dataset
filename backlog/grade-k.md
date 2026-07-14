@@ -19,7 +19,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: "Count the objects and write the number" (renders N objects, including 0 objects for count 0).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Extend `numbers-write` view.
+* **Reuse or create new view:** Extend `numbers-write` view.
 * **UI Layout details:**
   - For `mode: "stroke"`, display the large digit to write with directional tracing arrows in the first box, then two empty boxes. In solution view, the empty boxes are filled with the correct number.
   - For `mode: "count-objects"`, display double ten-frames (to support counts up to 20) with colorful circles. For count 0, show an empty ten-frame or blank space. A label "Count: [ ]" is provided with a blank box, filled in the solution view.
@@ -54,7 +54,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: Displays scattered apples, each labeled with a counting number badge representing the sequence.
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Extend `counting-objects` view.
+* **Reuse or create new view:** Extend `counting-objects` view.
 * **UI Layout details:**
   - Objects are placed either in a neat horizontal line or scattered with safe spacing.
   - Below each object, render an empty circle/box placeholder in question view.
@@ -90,7 +90,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: Renders Group A (5 dots close together) and Group B (5 dots spaced far apart). "Are there more dots in A, B, or are they the same?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `counting-conservation`.
+* **Reuse or create new view:** Create a new view `counting-conservation`.
 * **UI Layout details:**
   - For Cardinality: Show items with numbers 1, 2... N overlaid. Highlights the final item/number.
   - For Conservation: Show two rows. Row 1 has N items closely packed; Row 2 has N items widely spaced. Underneath, show three buttons: "Group A", "Group B", "They are the same". In solution view, highlight "They are the same".
@@ -129,7 +129,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: "Color 7 apples out of 10." (Renders 10 grey apples; in solution view, 7 are colored red).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Extend `counting-objects` view.
+* **Reuse or create new view:** Extend `counting-objects` view.
 * **UI Layout details:**
   - For circular layout, place items using polar coordinates (`cos(θ)`, `sin(θ)`) relative to a center point.
   - For scattered layout, generate coordinate pairs with a distance check (`dist > minDistance`) to prevent visual overlap.
@@ -164,7 +164,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: Group A has 8 apples. Group B has 6 apples. "Which group has fewer?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `numbers-compare-groups`.
+* **Reuse or create new view:** Create a new view `numbers-compare-groups`.
 * **UI Layout details:**
   - Group 1 on the left side, Group 2 on the right side.
   - In `matching` mode, render SVGs connecting elements of Group 1 to Group 2. Unmatched items in the larger group are highlighted in a red box in the solution.
@@ -200,7 +200,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: 7 apples are shown, 4 are crossed out with a red X. Write the matching subtraction: 7 - 4 = 3.
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `operations-representation`.
+* **Reuse or create new view:** Create a new view `operations-representation`.
 * **UI Layout details:**
   - Render a grid of objects. For addition, render `term1` in color A, `term2` in color B.
   - For subtraction, render `minuend` items, placing a clear red "X" overlay on the last `subtrahend` items.
@@ -235,7 +235,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: "There were 8 birds. 3 fly away. How many birds are left?" (Renders 8 birds, 3 crossed out).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-representation` view but add a text panel.
+* **Reuse or create new view:** Reuse `operations-representation` view but add a text panel.
 * **UI Layout details:**
   - Top section: Large text display of the word problem scenario.
   - Middle section: Visual object representations (added or crossed out).
@@ -266,7 +266,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: "Decompose 6 in two different ways." (Outputs stub with target: 6, pair1: [2, 4], pair2: [1, 5]).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `operations-decompose`.
+* **Reuse or create new view:** Create a new view `operations-decompose`.
 * **UI Layout details:**
   - Display the target number (e.g. 6) in a top circle.
   - Below, draw two split paths. Path 1 shows 6 circles split into two colors (e.g., 2 red, 4 yellow). Path 2 shows 6 circles split into (1 red, 5 yellow).
@@ -298,7 +298,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: 6 dots are in a ten-frame. How many more do you need to make 10?
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-write` ten-frame visualizer or create a focused ten-frame card.
+* **Reuse or create new view:** Reuse `numbers-write` ten-frame visualizer or create a focused ten-frame card.
 * **UI Layout details:**
   - Render a 2x5 grid (ten-frame).
   - Fill `givenNumber` boxes with blue dots. The other boxes are empty.
@@ -334,7 +334,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: 17 = 10 + [ ].
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `numbers-place-value`.
+* **Reuse or create new view:** Create a new view `place-value-blocks`.
 * **UI Layout details:**
   - Render one full ten-frame (10 red dots) and a second ten-frame containing `ones` yellow dots.
   - Below, render the equation: `target = 10 + [ ]` (or `10 + [ ] = target`), leaving the appropriate box empty.
@@ -343,7 +343,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Add `compose-teen` and `decompose-teen` to `src/generators/arithmetic/generator.ts`.
 - [ ] Add configurations to `src/generators/arithmetic/permutations.ts`.
-- [ ] Create `src/views/numbers-place-value/` (HTML, SCSS, TS) to render place value blocks or double ten-frames.
+- [ ] Create `src/views/place-value-blocks/` (HTML, SCSS, TS) to render place value blocks or double ten-frames.
 
 ### Subtask 4: Validation Plan
 - [ ] Write unit tests verifying generated parameters in `src/generators/arithmetic/generator.test.ts`.
@@ -369,7 +369,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: An apple on a scale. "What are we measuring with this scale?" (options: Length, Weight).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `measure-attributes`.
+* **Reuse or create new view:** Create a new view `measure-attributes`.
 * **UI Layout details:**
   - Render simple SVG objects (e.g., a pencil with horizontal measuring line, a tree with vertical height line, or a box sitting on a dial scale).
   - Multiple choice buttons below.
@@ -404,7 +404,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: Renders a balance scale tilted right (a ball on the left, a block on the right). "Which item is lighter?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `measure-compare`.
+* **Reuse or create new view:** Create a new view `measure-compare`.
 * **UI Layout details:**
   - Length: Render two horizontal SVGs aligned at `x = 10%`.
   - Weight: Render a balance scale tilted left or right based on relative weights.
@@ -439,7 +439,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: After classifying 4 circles, 6 squares, and 3 triangles. "Which shape has the least number of items?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `sorting-classify`.
+* **Reuse or create new view:** Create a new view `sorting-classify`.
 * **UI Layout details:**
   - Render a main box containing a mixed collection of simple stylized shapes (e.g. circles, triangles, stars in different colors).
   - Below, show a table or category cards with blank spaces: "Shapes: [ ]", "Stars: [ ]".
@@ -474,7 +474,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: A circular clock on the wall above a rectangular desk. "What shape is the clock above the desk?" (options: Circle, Triangle).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `geometry-positions`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:**
   - Render simple, high-contrast SVG scenes representing an indoor environment (e.g. desk, chair, wall clock, window, floor ball).
   - Highlight key objects. Text prompt: "Where is the ball?"
@@ -483,7 +483,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Create the new generator module in `src/generators/geometry/generator.ts`.
 - [ ] Add positional parameters to permutations configuration in `src/generators/geometry/permutations.ts`.
-- [ ] Create `src/views/geometry-positions/` HTML, SCSS, and TS.
+- [ ] Create `src/views/geometry-viewer/` HTML, SCSS, and TS.
 - [ ] Register `geometry` generator in dynamic imports of `generate-dataset.ts`.
 
 ### Subtask 4: Validation Plan
@@ -510,7 +510,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: Renders a cylinder tilted sideways. "What shape is this?" (options: Cylinder, Sphere, Cone).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `geometry-shapes-name`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:**
   - Center a single SVG shape. Apply rotation (`transform: rotate(Xdeg)`) and scale transformation in CSS.
   - Render 3D shapes using isometric projections or 3D shading techniques.
@@ -519,7 +519,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Implement `name-2d` and `name-3d` modes in `src/generators/geometry/generator.ts`.
 - [ ] Add the shape configurations to `src/generators/geometry/permutations.ts`.
-- [ ] Create `src/views/geometry-shapes-name/` HTML, SCSS, and TS.
+- [ ] Create `src/views/geometry-viewer/` HTML, SCSS, and TS.
 
 ### Subtask 4: Validation Plan
 - [ ] Write unit tests verifying generated parameters in `src/generators/geometry/generator.test.ts`.
@@ -541,7 +541,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: Renders a cube. "Is this shape flat (2D) or solid (3D)?" (options: Flat, Solid).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `geometry-dimension`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:**
   - Center a clean SVG representing the shape.
   - Display question text: "Is this shape flat (two-dimensional) or solid (three-dimensional)?"
@@ -550,7 +550,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Add `classify-dim` mode to `src/generators/geometry/generator.ts`.
 - [ ] Add configurations to `src/generators/geometry/permutations.ts`.
-- [ ] Create `src/views/geometry-dimension/` (HTML, SCSS, TS).
+- [ ] Create `src/views/geometry-viewer/` (HTML, SCSS, TS).
 
 ### Subtask 4: Validation Plan
 - [ ] Write unit tests verifying generated parameters in `src/generators/geometry/generator.test.ts`.
@@ -576,7 +576,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: Renders a sphere, a cube, and a cone. "Which of these shapes has no flat faces?" (options: Sphere, Cube, Cone).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `geometry-compare-shapes`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:**
   - Render multiple shapes side-by-side.
   - Use visual highlight dots on the vertices/sides to assist the user.
@@ -585,7 +585,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Implement comparative attribute math in `src/generators/geometry/generator.ts`.
 - [ ] Define permutations in `src/generators/geometry/permutations.ts`.
-- [ ] Create `src/views/geometry-compare-shapes/` (HTML, SCSS, TS).
+- [ ] Create `src/views/geometry-viewer/` (HTML, SCSS, TS).
 
 ### Subtask 4: Validation Plan
 - [ ] Write unit tests verifying generated parameters in `src/generators/geometry/generator.test.ts`.
@@ -611,7 +611,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: "Trace the circle." (Renders a dashed circle).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `geometry-model-shapes`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:**
   - For `build-shape` mode, show drawings of sticks and balls. Ask: "Sticks needed: [ ]", "Balls needed: [ ]" (filled in solution view).
   - For `draw-shape` mode, display the target shape using a dotted outline. In solution view, overlay a solid red line tracing the dots.
@@ -619,7 +619,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Add `build-shape` and `draw-shape` to `src/generators/geometry/generator.ts`.
 - [ ] Add permutations to `src/generators/geometry/permutations.ts`.
-- [ ] Create `src/views/geometry-model-shapes/` (HTML, SCSS, TS) view files.
+- [ ] Create `src/views/geometry-viewer/` (HTML, SCSS, TS) view files.
 
 ### Subtask 4: Validation Plan
 - [ ] Write unit tests verifying generated parameters in `src/generators/geometry/generator.test.ts`.
@@ -641,7 +641,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
      - Sample question: "Which two shapes can you join to make a rectangle?" (options: Two triangles, two circles).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create a new view `geometry-compose`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:**
   - Left panel: Target outline shape (e.g. rectangle).
   - Right panel: Pairs of candidate component shapes (e.g. Option A: two triangles, Option B: two circles).
@@ -650,7 +650,7 @@ This backlog outlines the tasks required to cover all uncovered Kindergarten lea
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Implement `compose-shapes` logic in `src/generators/geometry/generator.ts`.
 - [ ] Define permutations in `src/generators/geometry/permutations.ts`.
-- [ ] Create `src/views/geometry-compose/` (HTML, SCSS, TS).
+- [ ] Create `src/views/geometry-viewer/` (HTML, SCSS, TS).
 
 ### Subtask 4: Validation Plan
 - [ ] Write unit tests verifying generated parameters in `src/generators/geometry/generator.test.ts`.

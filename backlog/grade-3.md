@@ -25,7 +25,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `6 × 6 = _`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view.
 * **UI Layout details:** Extend the horizontal flex layout to allow rendering an empty rectangular box representing the input field at the position specified by `blankPosition` (operand 1, operand 2, or answer). The font size should be large and centered, adapting dynamically to mobile viewport widths.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -59,7 +59,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `8 × 7 = 8 × (5 + _)`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `operations-properties` or extend `operations-boxes`.
+* **Reuse or create new view:** Design new view `operations-properties` or extend `operations-boxes`.
 * **UI Layout details:** The view must support parentheses grouping visual styles. Render operators (`×`, `+`, `=`) and parentheses cleanly with uniform horizontal spacing. Highlight the blank box container to draw focus.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -90,7 +90,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `_ × 7 = 42 implies 42 ÷ 7 = _`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view with a stacked dual-equation layout.
+* **Reuse or create new view:** Reuse `operations-boxes` view with a stacked dual-equation layout.
 * **UI Layout details:** Vertically stack the helper multiplication equation on top of the target division equation. Provide an arrow or colored line linking the unknown positions to emphasize the inverse mathematical relation.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -124,7 +124,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `7 × _ = 63` and `63 ÷ 7 = _`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` (horizontal layout) and `operations-vertical` (vertical calculation grid).
+* **Reuse or create new view:** Reuse `operations-boxes` (horizontal layout) and `operations-vertical` (vertical calculation grid).
 * **UI Layout details:** Clear vertical alignment of digits in vertical form multiplication. Responsive layout, supporting both horizontal standard math blocks and vertical column grids.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -157,7 +157,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `12 + 6 × 3 = _`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `word-problems`.
+* **Reuse or create new view:** Create a new view `operations-word-problem`.
 * **UI Layout details:** Display a clean text block describing the problem context in an outline card. Position the visual equation box at the bottom, centered, with high-contrast text sizing. Responsive layout wraps paragraphs cleanly on small viewports.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -188,7 +188,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Is the product of an even number and an odd number even or odd? [Even]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-order` view or design `arithmetic-patterns`.
+* **Reuse or create new view:** Reuse `numbers-order` view or design `arithmetic-patterns`.
 * **UI Layout details:** Draw a row of sequential cards with decorative borders. Leave one slot empty containing a dotted outline and question mark where the user inputs the value. Simple responsive styling fits up to 6 terms.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -219,7 +219,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Round 438 to the nearest 100: [400]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-write` view or design a new `numberline-rounding` view.
+* **Reuse or create new view:** Reuse `numbers-write` view or design a new `numberline-rounding` view.
 * **UI Layout details:** Display a horizontal number line featuring the target number and its nearest multiples of 10 or 100 as boundary markers. Mark the point to round with a colored dot, providing visual support for finding the closer multiple.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -250,7 +250,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `713 - 256 = _`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-vertical` view.
+* **Reuse or create new view:** Reuse `operations-vertical` view.
 * **UI Layout details:** Numbers are stacked vertically, with ones, tens, and hundreds places aligned. Draw carry/borrow grid indicator boxes above the digits to aid column calculation. Keep margins aligned and text readable.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -281,7 +281,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `40 × 8 = _`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view.
 * **UI Layout details:** Large font horizontal equation layout. Highlight the factor digits to draw a visual parallel to basic 1-digit fact families (e.g., `4 × 8` and `4 × 80`).
 
 ### Subtask 3: Developer Implementation Checklist
@@ -311,7 +311,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"What fraction of the shape is shaded? [5/8]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Create new view `fractions-visual`.
+* **Reuse or create new view:** Create new view `fractions-visual`.
 * **UI Layout details:** Draw a geometric shape (circle, rectangle, or a set of blocks) partitioned into `b` equal segments using SVG. Fill `a` segments with a contrasting fill color. Position a vertical fraction input layout below.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -342,7 +342,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Partition this line into 4 parts and highlight the interval of size 1/4."`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `numberline-fraction`.
+* **Reuse or create new view:** Design new view `numberline-fraction`.
 * **UI Layout details:** Draw a horizontal number line from 0 to 1. Ticks partition the line into `b` equal segments. Position a pin or label tag `A` on the tick corresponding to `1/b`.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -373,7 +373,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Identify the point on the number line: [7/4]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numberline-fraction` view.
+* **Reuse or create new view:** Reuse `numberline-fraction` view.
 * **UI Layout details:** Highlight the interval from `0` to the plotted point `a/b` with a colored arch or highlighted bar, highlighting the concept of iteration (marking off `a` lengths of `1/b`).
 
 ### Subtask 3: Developer Implementation Checklist
@@ -404,7 +404,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Compare Model A (2/4 shaded) and Model B (1/2 shaded). Do they represent equivalent fractions? [Yes]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design view `fractions-equivalence-visual`.
+* **Reuse or create new view:** Design view `fractions-equivalence-visual`.
 * **UI Layout details:** Display two vertical stacked number lines (or adjacent shapes). Use aligned dotted lines to show how identical points or equal areas stack vertically.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -435,7 +435,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Select the equivalent fraction for 2/6: [1/3]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design `fractions-equivalence` view.
+* **Reuse or create new view:** Design `fractions-equivalence` view.
 * **UI Layout details:** Display equation boxes next to visual circular partition pie charts showing shaded portions. Clear horizontal flow with high-contrast text.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -469,7 +469,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `12/3 = _`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view.
 * **UI Layout details:** Stack fraction numerals vertically, divided by a crisp horizontal fraction bar. Align the equal sign and whole number elements horizontally.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -500,7 +500,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `3/4 [?] 3/6` (expected: `>`)
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-compare` view.
+* **Reuse or create new view:** Reuse `numbers-compare` view.
 * **UI Layout details:** Place the two fraction values side-by-side separated by the comparison bubble. Position two simple SVG bar models representing the quantities directly above each fraction to provide visual reasoning.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -531,7 +531,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"A game starts at 3:15 PM and ends at 3:48 PM. How many minutes did it last? [33 minutes]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `time-analog` view for clock-reading, and design new number-line layout for elapsed time.
+* **Reuse or create new view:** Reuse `time-analog` view for clock-reading, and design new number-line layout for elapsed time.
 * **UI Layout details:** The clock face must display clear, distinct tick marks for each of the 60 minutes. The interval number-line view should show timeline jumps from start to end time with arc indicators.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -565,7 +565,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"A recipe uses 250g of sugar and 180g of butter. What is the total mass? [430 grams]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `measure-volume-mass`.
+* **Reuse or create new view:** Design new view `measure-volume-mass`.
 * **UI Layout details:** Use SVG to draw a vertical beaker featuring horizontal measurement lines and labeled tick marks, filled with colored water representation. Balance scale drawing displays weights on a tray balanced with the target object.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -596,7 +596,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"What is the total count of pets? (Key: 1 icon = 10 pets)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `graphs-scaled`.
+* **Reuse or create new view:** Design new view `graphs-scaled`.
 * **UI Layout details:** Render standard SVG vertical bar charts (with labeled scales on the Y-axis) or pictographs displaying rows of repeated icons (e.g. apple shapes). Position a clear scale key at the bottom center.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -627,7 +627,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"How many sticks are 4 1/2 inches long? (Count Xs plotted over 4 1/2)"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Extend `measure-length` ruler graphics, and create view `line-plots`.
+* **Reuse or create new view:** Extend `measure-length` ruler graphics, and create view `line-plots`.
 * **UI Layout details:** The ruler must show distinct tick heights for whole, half, and quarter-inch intervals. Line plots display a horizontal axis with fractions (`1/4, 1/2, 3/4`) and vertical stacked 'X' markers.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -658,7 +658,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"This figure is made of unit squares. What is the area? [9]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `area-grids`.
+* **Reuse or create new view:** Design new view `area-grids`.
 * **UI Layout details:** Draw a grid of boxes, highlighting a single box (labeled "1 unit square") alongside a shape built from several highlighted grid boxes. Use solid border colors and high contrast.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -686,7 +686,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Find the area of the shape by counting the shaded unit squares: [14]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `area-grids` view.
+* **Reuse or create new view:** Reuse `area-grids` view.
 * **UI Layout details:** Render a larger grid array (e.g. 6x6) with block coordinates shaded to construct simple irregular forms (e.g., stairs, L-shapes). Ensure borders between cells are visible to assist counting.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -716,7 +716,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Each block is 1 square unit. Find the area: [16 blocks]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `area-grids` view.
+* **Reuse or create new view:** Reuse `area-grids` view.
 * **UI Layout details:** Add a legend box displaying grid scale details (e.g. "1 square = 1 square inch"). Center the legend clearly above the main grid layout.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -743,7 +743,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"This rectangle has 4 rows of 5 squares. Count the squares: [20]. Multiply the sides: 4 × 5 = [20]."`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `area-grids` view.
+* **Reuse or create new view:** Reuse `area-grids` view.
 * **UI Layout details:** Render a rectangle with labeled dimensions along the top and left side. Overlay grid divisions inside the rectangle. Highlight the row-by-column structure.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -773,7 +773,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"A rug is 7 feet long and 5 feet wide. What is its area? [35] square feet"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `measure-geometry`.
+* **Reuse or create new view:** Design new view `measure-geometry`.
 * **UI Layout details:** Draw an outline rectangle (no interior grid lines) with dimension markers and labels centered next to each side. Scale the rectangle aspect ratio dynamically.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -804,7 +804,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* Fill in the areas of partitioned rectangles (e.g. left part: 6x5, right part: 6x2).
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `area-distributive`.
+* **Reuse or create new view:** Design new view `area-distributive`.
 * **UI Layout details:** Draw a large rectangle split vertically into two sections shaded with different colors. Annotate the shared height `a` and widths `b` and `c` of the two partitioned sections.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -835,7 +835,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Decompose the figure and find the total area: Area A (15) + Area B (8) = [23]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `rectilinear-area`.
+* **Reuse or create new view:** Design new view `rectilinear-area`.
 * **UI Layout details:** Render an L-shaped or T-shaped polygon on an SVG canvas. Display annotated dimension strings next to outer edges. Optionally draw a dashed line showing the partition.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -869,7 +869,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Rectangle A: 4x6 (perimeter 20), Rectangle B: 3x7 (perimeter 20). Which has larger area? [A]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `measure-perimeter`.
+* **Reuse or create new view:** Design new view `measure-perimeter`.
 * **UI Layout details:** Draw custom SVG shapes (triangles, rectangles, pentagons, hexagons) with annotated side lengths along the outline. Position central prompt questions.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -900,7 +900,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* `"Identify the shape: 4 equal sides, no right angles. [Rhombus]"`
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design new view `shapes-classification`.
+* **Reuse or create new view:** Design new view `shapes-classification`.
 * **UI Layout details:** Display high-quality SVG shape outlines (rectangles, rhombuses, squares, trapezoids, general quadrilaterals). Position an interactive checkbox selection block for attribute matching below.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -931,7 +931,7 @@ This document outlines the detailed implementation backlog for the Grade 3 Commo
      * *Sample Question:* Rectangle partitioned into 3 parts, 1 shaded. Fraction = [1/3].
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `fractions-visual` view or design `partition-shapes`.
+* **Reuse or create new view:** Reuse `fractions-visual` view or design `partition-shapes`.
 * **UI Layout details:** Display shape contours (circles, rectangles, hexagons) split into equal divisions with interactive shading options. Divider lines must be clearly visible.
 
 ### Subtask 3: Developer Implementation Checklist

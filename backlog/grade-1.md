@@ -25,14 +25,14 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "Ben has 14 books. Anna has 6 books. How many more books does Ben have than Anna?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `operations-word-problems`.
+* **Reuse or create new view:** Create a new view `operations-word-problem`-problem`.
 * **UI Layout details:** Displays a stylized word problem card. The card features a clear, large text block containing the scenario. Below the text, a visual display zone renders side-by-side collections of SVG icons matching the scenario elements (e.g., apples, books, balloons) using seeded randomness to arrange them neatly. At the bottom, a horizontal equation is shown with the unknown position highlighted as a dashed border box. The design must be fully responsive, switching to a single-column layout on smaller viewports.
 
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Add `wordProblemType` and `unknownPosition` parameters to `arithmetic` generator config.
 - [ ] Implement the math logic and text templates for word scenarios in `src/generators/arithmetic/generator.ts`.
 - [ ] Add the permutations to `src/generators/arithmetic/permutations.ts` with matching labels.
-- [ ] Create the new view directory `src/views/operations-word-problems/` and implement `exercise.html`, `exercise.scss`, and `exercise.ts`.
+- [ ] Create the new view directory `src/views/operations-word-problem-problem/` and implement `exercise.html`, `exercise.scss`, and `exercise.ts`.
 - [ ] Register `operations-word-problems` view in `src/index.html` and generator pipeline.
 
 ### Subtask 4: Validation Plan
@@ -59,7 +59,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "Sam has 4 red apples, 5 green apples, and 3 yellow apples. How many apples does he have in total?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view and extend it.
+* **Reuse or create new view:** Reuse `operations-boxes` view and extend it.
 * **UI Layout details:** Aligns three addend boxes horizontally (e.g. `[Box 1] + [Box 2] + [Box 3] = [Box 4]`). In word-problem mode, it displays the scenario text at the top. The visual section displays three groups of colored circles, stars, or fruit SVGs representing the three addends. The answer box has a dashed border. Fully responsive scaling.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -92,7 +92,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "To solve 2 + 6 + 4, we can do 2 + [ ? ] = 12"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `operations-properties`.
+* **Reuse or create new view:** Create a new view `operations-properties`.
 * **UI Layout details:** Presents paired equations in a vertically stacked layout.
   - Commutative layout: Displays a "given" equation at the top with a subtle colored background border (e.g. "If 8 + 3 = 11"), and directly below it the query equation (e.g., "Then 3 + [ ? ] = 11") where the target input is highlighted.
   - Associative layout: Displays a three-number equation with a curved line grouping two terms that make ten, pointing to an intermediate fill-in-the-blank step. Responsive text scaling.
@@ -127,7 +127,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "Is 5 + 2 = 2 + 5 true or false? Is 4 + 1 = 5 + 2 true or false?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view, extending it with a toggle control.
+* **Reuse or create new view:** Reuse `operations-boxes` view, extending it with a toggle control.
 * **UI Layout details:** The equation is displayed centered in a very large font (e.g. `4 + 1 = 5 + 2`). Below the equation, there are two distinct interactive buttons: "True" (with a green styling) and "False" (with a red styling). In answer view, the correct button is highlighted with an active border, and an icon checkmark/cross is displayed next to the equation. Fully responsive.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -160,7 +160,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "5 = [ ? ] - 3"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view.
+* **Reuse or create new view:** Reuse `operations-boxes` view.
 * **UI Layout details:** The three-number equation is displayed centered. The unknown parameter is replaced by a square input box with a dashed border containing a question mark (e.g. `8 + [ ? ] = 11`). The placement of the blank box changes dynamically depending on the generator input. In solution view, the correct value is filled inside the box with a highlighted background.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -189,7 +189,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "10 ones = [ ? ] ten"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `place-value-blocks`.
+* **Reuse or create new view:** Create a new view `place-value-blocks`.
 * **UI Layout details:** The screen displays 10 individual unit cubes on the left side, grouped loosely. A bold transition arrow points to the right side, showing a single place-value rod (ten block). Below the visual, the text statement `10 ones = [ ? ] ten` is shown. In solution view, the correct answer `1` is filled into the dashed box. Fully responsive, adapting visually to horizontal or vertical layouts.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -223,7 +223,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "1 ten and 7 ones = [ ? ]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `place-value-decompositions` or reuse `place-value-blocks`.
+* **Reuse or create new view:** Create a new view `place-value-blocks` or reuse `place-value-blocks`.
 * **UI Layout details:** Shows a base-ten representation on the left: 1 ten-rod (rod) and a grid of unit blocks (e.g. 4 cubes). On the right, it displays the text decomposition equation with empty boxes: `14 = [ ? ] ten and [ ? ] ones`. The interface is clean, color-coded (tens in blue, ones in orange), and scales down dynamically for mobile displays.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -255,7 +255,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "7 tens = [ ? ]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `place-value-decompositions` view.
+* **Reuse or create new view:** Reuse `place-value-decompositions` view.
 * **UI Layout details:** Renders decade base-ten rods (e.g. 4 rods for 40) vertically on the left. The right side features a fill-in text card showing `40 = [ ? ] tens and [ ? ] ones` or `7 tens = [ ? ]`. Large typography, clear contrasting backgrounds, and responsive layout.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -287,7 +287,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "57 [ ? ] 54"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `numbers-compare` view and enrich it.
+* **Reuse or create new view:** Reuse `numbers-compare` view and enrich it.
 * **UI Layout details:** The numbers are rendered side-by-side in large circles or cards. Below each number, a representation of base-ten rods and unit blocks corresponding to the value is drawn. Between the numbers, a central dashed box is rendered for the comparison symbol. In solution view, the correct symbol (`<`, `>`, `=`) is displayed inside the central box. Fully responsive.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -319,7 +319,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "34 + 40 = [ ? ]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-vertical` or `operations-boxes` view, adding block displays.
+* **Reuse or create new view:** Reuse `operations-vertical` or `operations-boxes` view, adding block displays.
 * **UI Layout details:** The sum is rendered vertically in standard column addition format. Next to the column arithmetic block, a panel shows the place-value blocks (rods and units) for both addends. For regrouping, a dotted line loops 10 unit blocks together showing an arrow indicating their conversion into a new ten-rod. Clean, color-coded, and responsive.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -352,7 +352,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "What is 10 less than 72? [ ? ]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Design a new view `mental-increment-decrement`.
+* **Reuse or create new view:** Create a new view `mental-increment-decrement`.
 * **UI Layout details:** Features a friendly dialog card: "What is 10 more/less than [Number]?". Below the question, a clean blank answer box `[ ? ]` is displayed. An optional 100-chart fragment centered on the target number is displayed with the adjacent vertical numbers hidden to highlight place-value jump concepts. Responsive, with large numbers and cards.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -381,7 +381,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "70 - 30 = [ ? ]"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `operations-boxes` view, displaying decade block visuals.
+* **Reuse or create new view:** Reuse `operations-boxes` view, displaying decade block visuals.
 * **UI Layout details:** Displays the horizontal equation `70 - 30 = [ ? ]`. Above the equation, 7 base-ten rods are rendered. 3 of the rods are crossed out with a red X to represent subtraction, illustrating that 7 tens minus 3 tens equals 4 tens. Highly readable and fully responsive.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -414,7 +414,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "Pencil A is longer than Pencil B. Pencil B is longer than Pencil C. Which is longer: Pencil A or Pencil C?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `measure-compare-lengths`.
+* **Reuse or create new view:** Create a new view `measure-compare-lengths`.
 * **UI Layout details:**
   - For ordering: Renders three objects (e.g. crayons, pencils, or paintbrushes) vertically aligned at their left edge. Each object has a distinct length. Next to or below them are empty ordering slots (marked 1, 2, 3).
   - For indirect comparison: Renders a structured word problem card with accompanying illustrative SVGs showing relative alignments of the objects. Clean, colored borders, and mobile responsive.
@@ -445,7 +445,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "How many paperclips long is the crayon? [ ? ] paperclips."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `measure-length` view and modify it.
+* **Reuse or create new view:** Reuse `measure-length` view and modify it.
 * **UI Layout details:** The main panel displays an item (e.g. toothbrush, paintbrush, key). Directly underneath it, a contiguous row of identical, non-standard unit SVGs (like small colorful blocks or metal paperclips) are rendered starting precisely at the left edge of the object and ending at the right edge, without gaps or overlaps. Below, a box asks: "How many [units] long is the [object]?" with an answer field. Fully responsive.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -477,7 +477,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "Match the clock that shows 4:30."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Reuse `time-analog` view.
+* **Reuse or create new view:** Reuse `time-analog` view.
 * **UI Layout details:** Renders an elegant SVG analog clock face with clear hour numbers (1-12), a long minute hand, and a short hour hand. In `analog-to-digital` mode, the student fills in a digital clock input block `[ ? ] : [ ? ]` below it. The layout is optimized to look crisp on both desktop and mobile viewports.
 
 ### Subtask 3: Developer Implementation Checklist
@@ -497,7 +497,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
 * **Ontology Reference:** Matched Areas: `Area.Statistics`, `Area.ObjectSorting`, `Area.Difference`, Scopes: `Scope.QuantityMeasurement`
 
 ### Subtask 1: Problem Generator Specifications
-* **Extension/New module:** Extend the existing `counting` generator (or create a new `statistics` module) to output category lists, tally charts, and comparison questions.
+* **Extension/New module:** Extend the existing `counting` generator (or create a new 'statistics' generator module) to output category lists, tally charts, and comparison questions.
 * **Competency Breakdowns (2-3 combinations):**
   1. **Permutation A:** Find category count from chart.
      - **Labels:** `Area.ObjectSorting`, `Area.Statistics`, `Scope.QuantityMeasurement`, `Ability.ProcedureExecution`
@@ -513,13 +513,13 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "How many fruits are there in total?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `statistics-charts`.
+* **Reuse or create new view:** Create a new view `data-graphs`.
 * **UI Layout details:** A card displays a simple picture graph or tally chart with up to 3 columns/rows representing different categories (e.g. Apples, Bananas, Oranges). Each category displays count using simple SVG icons or tick marks. Below the chart, a question prompt is displayed next to an answer input field. Fully responsive grid layout.
 
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Implement data generation, categories, and question templates in generator code.
 - [ ] Add configurations to `permutations.ts`.
-- [ ] Create new view directory `src/views/statistics-charts/` and code the HTML/SCSS/TS files.
+- [ ] Create new view directory `src/views/data-graphs/` and code the HTML/SCSS/TS files.
 - [ ] Register the new view.
 
 ### Subtask 4: Validation Plan
@@ -546,14 +546,14 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "Find all squares."
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-shapes`.
+* **Reuse or create new view:** Create a new view `geometry-viewer`.
 * **UI Layout details:** A clean, grid-based card showing 4 candidate shapes rendered as high-quality SVGs. The shapes have randomized colors (red, blue, green), sizes (small, medium, large), and orientations (rotated by 30, 45, 90 degrees). One shape is the correct target matching the defining attribute, while others are distractors (e.g. open shapes or shapes with wrong side count). Checkbox indicators are placed below each shape.
 
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Create new generator directory `src/generators/geometry/`.
 - [ ] Implement `generator.ts` with shape generation and attribute descriptions.
 - [ ] Register generator configuration in `permutations.ts`.
-- [ ] Create new view directory `src/views/geometry-shapes/` and implement code.
+- [ ] Create new view directory `src/views/geometry-viewer/` and implement code.
 - [ ] Register new generator and view in the dataset orchestration script.
 
 ### Subtask 4: Validation Plan
@@ -580,7 +580,7 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "How many small cubes make up this rectangular prism?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-composition`.
+* **Reuse or create new view:** Create a new view `geometry-composition`.
 * **UI Layout details:**
   - For 2D: Displays a target shape outline on the left and a grid of potential part shapes on the right. Dotted lines illustrate division lines on candidate pieces.
   - For 3D: Renders a beautiful isometric 3D drawing of stacked cubes forming a composite prism. The student inputs the number of cubes. Responsive canvas.
@@ -615,13 +615,13 @@ This backlog contains the implementation specifications for all Grade 1 Common C
      - **Sample question:** "Which share is smaller: a half of a circle or a fourth of a circle?"
 
 ### Subtask 2: View & UI Design
-* **Reuse or New View:** Propose a new view `geometry-partitions`.
+* **Reuse or create new view:** Create a new view `fractions-visual`s`.
 * **UI Layout details:** Displays three SVGs of circles/rectangles. One shape is split into equal halves/fourths, one is split unequally, and one is unsplit. Shaded portions highlight individual shares. The text prompt asks the student to choose the correctly partitioned shape or compare fractions. Completely responsive design.
 
 ### Subtask 3: Developer Implementation Checklist
 - [ ] Implement partitioning and shading calculation logic in `src/generators/geometry/generator.ts`.
 - [ ] Add partitioning permutations to `src/generators/geometry/permutations.ts`.
-- [ ] Create `src/views/geometry-partitions/` HTML/SCSS/TS files.
+- [ ] Create `src/views/fractions-visuals/` HTML/SCSS/TS files.
 - [ ] Verify views hookup and registration.
 
 ### Subtask 4: Validation Plan
