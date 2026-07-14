@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ArithmeticGenerator } from './generator.ts';
 import { config } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Ability, Area, Scope } from 'edugraph-ts';
+import { Area, Scope } from 'edugraph-ts';
 
 describe('ArithmeticGenerator', () => {
     let generator: ArithmeticGenerator;
@@ -21,7 +21,7 @@ describe('ArithmeticGenerator', () => {
         expect(generator.compatibleRenderers).toContain('place-value-blocks');
     });
 
-    describe('generate', () => {
+    describe('generate basic permutations', () => {
         it('should generate valid problem stubs for all permutations', () => {
             config.generationConfig.permutations.forEach(input => {
                 const stub = generator.generate(input);
@@ -64,47 +64,99 @@ describe('ArithmeticGenerator', () => {
         });
     });
 
-    describe('Label-driven constraints', () => {
-        it('should enforce zero when Scope.IntegersWithZero is present', () => {
+    describe('generate comprehensive edge cases', () => {
+        it('should respect representation addition limits', () => {
             const input = {
-                labels: [Area.Addition, Scope.NumbersSmaller10, Scope.IntegersWithZero],
-                constraints: {}
+                labels: [],
+                constraints: { mode: 'representation', operation: 'addition', maxSum: 10 }
             };
-            let zeroFound = false;
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(input);
-                if (stub && (stub.data.num1 === 0 || stub.data.num2 === 0)) {
-                    zeroFound = true;
-                    break;
-                }
+                expect(stub).not.toBeNull();
+                expect(stub!.data.operation).toBe('addition');
+                expect(stub!.data.num1).toBeGreaterThanOrEqual(1);
+                expect(stub!.data.num2).toBeGreaterThanOrEqual(1);
+                expect(stub!.data.answer).toBeLessThanOrEqual(10);
+                expect(stub!.data.num1 + stub!.data.num2).toBe(stub!.data.answer);
             }
-            expect(zeroFound).toBe(true);
         });
 
-        it('should respect Scope.NumbersSmaller10', () => {
+        it('should respect representation subtraction limits', () => {
             const input = {
-                labels: [Area.Addition, Scope.NumbersSmaller10, Scope.IntegersWithoutZero],
-                constraints: {}
+                labels: [],
+                constraints: { mode: 'representation', operation: 'subtraction', maxMinuend: 10 }
             };
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(input);
-                if (stub) {
-                    expect(stub.data.num1).toBeLessThan(10);
-                    expect(stub.data.num2).toBeLessThan(10);
-                }
+                expect(stub).not.toBeNull();
+                expect(stub!.data.operation).toBe('subtraction');
+                expect(stub!.data.num1).toBeLessThanOrEqual(10);
+                expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
+                expect(stub!.data.answer).toBeGreaterThanOrEqual(0);
+                expect(stub!.data.num1 - stub!.data.num2).toBe(stub!.data.answer);
             }
         });
 
-        it('should respect explicit digit constraints over labels', () => {
+        it('should generate non-empty scenario text for word problems', () => {
             const input = {
-                labels: [Area.Addition, Scope.NumbersSmaller100],
-                constraints: { digitsNum1: 3 } // 3 digits even if scope says smaller 100
+                labels: [],
+                constraints: { mode: 'word-problem', operation: 'addition', maxSum: 10 }
             };
             const stub = generator.generate(input);
-            if (stub) {
-                expect(stub.data.num1).toBeGreaterThanOrEqual(100);
-                expect(stub.data.num1).toBeLessThan(1000);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.textScenario).toMatch(/\w+/);
+            expect(stub!.data.textScenario).toContain(String(stub!.data.num1));
+            expect(stub!.data.textScenario).toContain(String(stub!.data.num2));
+        });
+
+        it('should generate valid decomposition pairs', () => {
+            const input = {
+                labels: [],
+                constraints: { mode: 'decompose', targetNumber: 6 }
+            };
+            for (let i = 0; i < 50; i++) {
+                const stub = generator.generate(input);
+                expect(stub).not.toBeNull();
+                expect(stub!.data.targetNumber).toBe(6);
+                
+                const p1 = stub!.data.pair1;
+                const p2 = stub!.data.pair2;
+                expect(p1[0] + p1[1]).toBe(6);
+                expect(p2[0] + p2[1]).toBe(6);
+                expect(p1[0] === p2[0] && p1[1] === p2[1]).toBe(false);
             }
+        });
+
+        it('should generate correct make-ten missing addends', () => {
+            const input = {
+                labels: [],
+                constraints: { mode: 'make-ten', givenNumber: 7 }
+            };
+            const stub = generator.generate(input);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.givenNumber).toBe(7);
+            expect(stub!.data.missingNumber).toBe(3);
+            expect(stub!.data.target).toBe(10);
+        });
+
+        it('should generate correct teen compose / decompose structures', () => {
+            const input1 = {
+                labels: [],
+                constraints: { mode: 'compose-teen', ones: 5 }
+            };
+            const stub1 = generator.generate(input1);
+            expect(stub1).not.toBeNull();
+            expect(stub1!.data.ones).toBe(5);
+            expect(stub1!.data.target).toBe(15);
+
+            const input2 = {
+                labels: [],
+                constraints: { mode: 'decompose-teen', ones: 7 }
+            };
+            const stub2 = generator.generate(input2);
+            expect(stub2).not.toBeNull();
+            expect(stub2!.data.ones).toBe(7);
+            expect(stub2!.data.target).toBe(17);
         });
     });
 });

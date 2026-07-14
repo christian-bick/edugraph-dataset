@@ -36,4 +36,12 @@ export default defineConfig({
             partialDirectory: resolve(__dirname, './src/partials'),
         }),
     ],
+    test: {
+        coverage: {
+            provider: 'v8',
+            include: ['generators/**/generator.ts'],
+            reporter: ['text', 'json-summary'],
+            reportsDirectory: '../coverage'
+        }
+    }
 });

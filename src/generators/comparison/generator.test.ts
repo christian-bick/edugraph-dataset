@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComparisonGenerator } from './generator.ts';
 import { config } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Ability, Area, Scope } from 'edugraph-ts';
+import { Scope } from 'edugraph-ts';
 
 describe('ComparisonGenerator', () => {
     let generator: ComparisonGenerator;
@@ -18,7 +18,7 @@ describe('ComparisonGenerator', () => {
         expect(generator.compatibleRenderers).toContain('numbers-compare-groups');
     });
 
-    describe('generate', () => {
+    describe('generate basic permutations', () => {
         it('should generate valid problem stubs or null for all permutations', () => {
             config.generationConfig.permutations.forEach(input => {
                 const stub = generator.generate(input);
@@ -50,8 +50,8 @@ describe('ComparisonGenerator', () => {
         });
     });
 
-    describe('generate edge cases', () => {
-        it('should return null if numbers are equal', () => {
+    describe('generate comprehensive edge cases', () => {
+        it('should return null if numbers are equal in legacy mode', () => {
             for (let i = 0; i < 100; i++) {
                 const stub = generator.generate({ 
                     labels: [Scope.NumbersSmaller10], 
@@ -63,26 +63,42 @@ describe('ComparisonGenerator', () => {
             }
         });
 
-        it('should respect digit counts from constraints', () => {
-            const input = { 
-                labels: [], 
-                constraints: { digits: 2 } 
+        it('should respect matching mode with greater constraint', () => {
+            const input = {
+                labels: [],
+                constraints: { mode: 'matching', comparisonType: 'greater' }
             };
-            const stub = generator.generate(input);
-            if (stub) {
-                expect(stub.data.num1).toBeGreaterThanOrEqual(10);
-                expect(stub.data.num1).toBeLessThan(100);
+            for (let i = 0; i < 50; i++) {
+                const stub = generator.generate(input);
+                expect(stub).not.toBeNull();
+                expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
+                expect(stub!.data.answer).toBe('A');
             }
         });
 
-        it('should respect scope labels when constraints are missing', () => {
-            const input = { 
-                labels: [Scope.NumbersSmaller100], 
-                constraints: {} 
+        it('should respect matching mode with less constraint', () => {
+            const input = {
+                labels: [],
+                constraints: { mode: 'matching', comparisonType: 'less' }
             };
-            const stub = generator.generate(input);
-            if (stub) {
-                expect(stub.data.num1).toBeLessThan(100);
+            for (let i = 0; i < 50; i++) {
+                const stub = generator.generate(input);
+                expect(stub).not.toBeNull();
+                expect(stub!.data.num1).toBeLessThan(stub!.data.num2);
+                expect(stub!.data.answer).toBe('B');
+            }
+        });
+
+        it('should respect matching mode with equal constraint', () => {
+            const input = {
+                labels: [],
+                constraints: { mode: 'matching', comparisonType: 'equal' }
+            };
+            for (let i = 0; i < 50; i++) {
+                const stub = generator.generate(input);
+                expect(stub).not.toBeNull();
+                expect(stub!.data.num1).toEqual(stub!.data.num2);
+                expect(stub!.data.answer).toBe('equal');
             }
         });
     });
