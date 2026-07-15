@@ -1,7 +1,15 @@
 import { ViewSpec, limitsAndMean } from '../../../types/view-spec.ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-conservation',
+    supportedLabels: [
+        Area.Numeration,
+        Area.NumericIdentity,
+        Scope.AdditiveCount,
+        Scope.NumbersSmaller20,
+        Ability.DirectUnderstanding
+    ],
     constraints: {
         numObjects: { type: 'range', min: 1, max: 15 }
     },

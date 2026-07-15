@@ -1,7 +1,17 @@
 import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'sorting-classify',
+    supportedLabels: [
+        Area.ObjectSorting,
+        Area.CollectionSense,
+        Area.Numeration,
+        Area.NumericOrder,
+        Scope.NumbersSmaller10,
+        Ability.ConceptClassification,
+        Ability.ProcedureExecution
+    ],
     constraints: {
         mode: { type: 'options', values: ['classify-count', 'classify-sort'] },
         classifyType: { type: 'options', values: ['shape', 'color'] },

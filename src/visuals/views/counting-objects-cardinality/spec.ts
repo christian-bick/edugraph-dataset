@@ -1,7 +1,15 @@
 import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-objects-cardinality',
+    supportedLabels: [
+        Area.Numeration,
+        Area.NumericIdentity,
+        Scope.PhysicalNumbers,
+        Scope.NumbersSmaller20,
+        Ability.ProcedureUnderstanding
+    ],
     constraints: {
         numObjects: { type: 'range', min: 1, max: 20 },
         arrangement: { type: 'options', values: ['line', 'circle', 'scattered', 'array'] }

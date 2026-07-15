@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import https from 'https';
-import { fileURLToPath } from 'url';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
-import { Area, Scope, Ability } from 'edugraph-ts';
+import {fileURLToPath} from 'url';
+import {GoogleGenerativeAI, SchemaType} from '@google/generative-ai';
+import {Ability, Area, Scope} from 'edugraph-ts';
+import {isSubConceptOf} from '../lib/ontology.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,159 +22,6 @@ const version = versionMatch ? versionMatch[1] : 'v0.6.0';
 
 const RDF_PATH = path.join(TEMP_DIR, `core-ontology-math-${version}.rdf`);
 const RDF_URL = `https://github.com/christian-bick/edugraph-ontology/releases/download/${version}/core-ontology-math.rdf`;
-
-interface RDFNode {
-  uri: string;
-  type: 'Area' | 'Scope' | 'Ability' | 'Unknown';
-  partOf: string[];
-  expands: string[];
-}
-
-function parseRDF(rdfContent: string): Record<string, RDFNode> {
-  const nodes: Record<string, RDFNode> = {};
-  
-  const descriptionRegex = /<rdf:Description\s+rdf:about="([^"]+)">([\s\S]*?)<\/rdf:Description>/g;
-  let match;
-  
-  while ((match = descriptionRegex.exec(rdfContent)) !== null) {
-    const uri = match[1];
-    const innerContent = match[2];
-    
-    const partOf: string[] = [];
-    const partOfRegex = /<edu:partOf\s+rdf:resource="([^"]+)"\s*\/>/g;
-    let partMatch;
-    while ((partMatch = partOfRegex.exec(innerContent)) !== null) {
-      partOf.push(partMatch[1]);
-    }
-    
-    const expands: string[] = [];
-    const expandsRegex = /<edu:expands\s+rdf:resource="([^"]+)"\s*\/>/g;
-    let expMatch;
-    while ((expMatch = expandsRegex.exec(innerContent)) !== null) {
-      expands.push(expMatch[1]);
-    }
-    
-    let type: 'Area' | 'Scope' | 'Ability' | 'Unknown' = 'Unknown';
-    if (innerContent.includes('rdf:resource="http://edugraph.io/edu#Area"')) {
-      type = 'Area';
-    } else if (innerContent.includes('rdf:resource="http://edugraph.io/edu#Scope"')) {
-      type = 'Scope';
-    } else if (innerContent.includes('rdf:resource="http://edugraph.io/edu#Ability"')) {
-      type = 'Ability';
-    }
-    
-    nodes[uri] = { uri, type, partOf, expands };
-  }
-  
-  return nodes;
-}
-
-function isSubConceptOf(childUri: string, parentUri: string, rdfNodes: Record<string, RDFNode>): boolean {
-  if (childUri === parentUri) return true;
-  
-  const visited = new Set<string>();
-  const queue = [childUri];
-  
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    if (current === parentUri) return true;
-    if (visited.has(current)) continue;
-    visited.add(current);
-    
-    const node = rdfNodes[current];
-    if (node) {
-      for (const parent of [...node.partOf, ...node.expands]) {
-        if (!visited.has(parent)) {
-          queue.push(parent);
-        }
-      }
-    }
-  }
-  
-  return false;
-}
-
-// Cache RDF file
-function downloadWithRedirects(urlStr: string, destPath: string, timeoutMs = 15000, retries = 3): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const attemptDownload = (currentUrl: string, attemptsLeft: number) => {
-      const request = https.get(currentUrl, (response) => {
-        const { statusCode } = response;
-        
-        // Handle redirect status codes (301, 302, 303, 307, 308)
-        if (statusCode && [301, 302, 303, 307, 308].includes(statusCode)) {
-          const redirectUrl = response.headers.location;
-          if (redirectUrl) {
-            request.destroy();
-            attemptDownload(redirectUrl, attemptsLeft);
-            return;
-          }
-        }
-
-        if (statusCode !== 200) {
-          request.destroy();
-          if (attemptsLeft > 1) {
-            console.warn(`[Download] Received status code ${statusCode} for ${currentUrl}. Retrying in 2s...`);
-            setTimeout(() => attemptDownload(currentUrl, attemptsLeft - 1), 2000);
-          } else {
-            reject(new Error(`Failed to download file. Status code: ${statusCode}`));
-          }
-          return;
-        }
-
-        const file = fs.createWriteStream(destPath);
-        response.pipe(file);
-        
-        file.on('finish', () => {
-          file.close();
-          resolve();
-        });
-
-        file.on('error', (err) => {
-          fs.unlink(destPath, () => {});
-          reject(err);
-        });
-      });
-
-      request.on('error', (err) => {
-        request.destroy();
-        if (attemptsLeft > 1) {
-          console.warn(`[Download] Error occurred: ${err.message}. Retrying in 2s...`);
-          setTimeout(() => attemptDownload(currentUrl, attemptsLeft - 1), 2000);
-        } else {
-          reject(err);
-        }
-      });
-
-      request.setTimeout(timeoutMs, () => {
-        request.destroy();
-        if (attemptsLeft > 1) {
-          console.warn(`[Download] Timeout occurred. Retrying in 2s...`);
-          setTimeout(() => attemptDownload(currentUrl, attemptsLeft - 1), 2000);
-        } else {
-          reject(new Error('Request timed out'));
-        }
-      });
-    };
-
-    attemptDownload(urlStr, retries);
-  });
-}
-
-async function ensureRdfCached(): Promise<string> {
-  if (fs.existsSync(RDF_PATH)) {
-    console.log(`[Ontology] RDF cached copy found at ${RDF_PATH}`);
-    return fs.readFileSync(RDF_PATH, 'utf-8');
-  }
-
-  console.log(`[Ontology] Cache miss. Downloading RDF from: ${RDF_URL}`);
-  if (!fs.existsSync(TEMP_DIR)) {
-    fs.mkdirSync(TEMP_DIR, { recursive: true });
-  }
-
-  await downloadWithRedirects(RDF_URL, RDF_PATH);
-  return fs.readFileSync(RDF_PATH, 'utf-8');
-}
 
 // Load active generator configurations statically
 async function loadGeneratorPermutations() {
@@ -224,10 +71,7 @@ async function main() {
     process.exit(1);
   }
 
-  // 1. Load ontology context
-  const ontologyRdf = await ensureRdfCached();
-  const rdfNodes = parseRDF(ontologyRdf);
-  console.log(`[Ontology] Parsed ${Object.keys(rdfNodes).length} nodes from RDF schema.`);
+  console.log(`[Ontology] Loaded pre-compiled schema from edugraph-ts.`);
 
   // Extract valid Area, Scope, Ability values
   const allAreas = Object.values(Area);
@@ -461,11 +305,10 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
       if (requiredTags.length > 0) {
         const allAbilities = Object.values(Ability);
         
-        // Find all permutations that overlap with the required tags (excluding abilities)
         const qualifyingPerms = activePermsList.filter(perm => {
           const permTags = Array.from(perm.labels).filter(l => !allAbilities.includes(l as any));
           return permTags.some(genLabel => {
-            return requiredTags.some(reqTag => isSubConceptOf(genLabel, reqTag, rdfNodes));
+            return requiredTags.some(reqTag => isSubConceptOf(genLabel, reqTag));
           });
         });
 
@@ -479,7 +322,7 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
 
           // Standard is covered if all required Areas/Scopes are in this union
           const coversAll = requiredTags.every(reqTag => {
-            return Array.from(unionTags).some(qTag => isSubConceptOf(qTag, reqTag, rdfNodes));
+            return Array.from(unionTags).some(qTag => isSubConceptOf(qTag, reqTag));
           });
 
           if (coversAll) {

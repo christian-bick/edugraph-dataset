@@ -40,11 +40,13 @@ type CompatibleViewsFor<TProblemData> = {
 
 export interface ModuleConfig<TProblemData = any> {
     generatorClass: new () => ProblemGenerator<TProblemData>;
+    supportedLabels?: string[];
     splits: {
         train: number;
         val: number;
     };
-    visualDistribution: VisualBlueprint<CompatibleViewsFor<TProblemData>>[];
+    visualDistribution?: VisualBlueprint<CompatibleViewsFor<TProblemData>>[];
+    views?: string[];
 }
 
 export interface DatasetConfigType {
@@ -77,15 +79,24 @@ export const DatasetConfig: DatasetConfigType = {
         },
         counting: {
             generatorClass: CountingGenerator,
+            supportedLabels: [
+                'http://edugraph.io/edu/Numeration',
+                'http://edugraph.io/edu/PhysicalNumbers',
+                'http://edugraph.io/edu/AdditiveCount',
+                'http://edugraph.io/edu/NumericIdentity',
+                'http://edugraph.io/edu/ObjectSorting',
+                'http://edugraph.io/edu/CollectionSense',
+                'http://edugraph.io/edu/NumericOrder',
+                'http://edugraph.io/edu/NumericRange'
+            ],
             splits: { train: 0.8, val: 0.2 },
-            visualDistribution: [
-                { viewId: 'counting-objects-simple', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'counting-objects-one-to-one', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'counting-objects-cardinality', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'counting-objects-count-out', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'counting-inc-dec', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'counting-conservation', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'sorting-classify', visualParams: {}, instancesPerProblem: 1 }
+            views: [
+                'counting-objects-simple',
+                'counting-objects-one-to-one',
+                'counting-objects-cardinality',
+                'counting-objects-count-out',
+                'counting-conservation',
+                'sorting-classify'
             ]
         },
         measurement: {

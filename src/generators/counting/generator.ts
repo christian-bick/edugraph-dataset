@@ -1,14 +1,32 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { CountingSimpleProblem, CountingIncDecProblem, CountingConservationProblem, CountingClassifyProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
-import { Scope } from "edugraph-ts";
+import { Scope, Area, Ability } from "edugraph-ts";
 
 export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem | CountingIncDecProblem | CountingConservationProblem | CountingClassifyProblem> {
     type: AbstractProblem['type'] = 'counting';
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
-        const mode = constraints.mode || 'simple';
+        
+        let mode = constraints.mode;
+        if (!mode) {
+            if (labels.includes(Area.NumericIdentity)) {
+                mode = 'conservation';
+            } else if (labels.includes(Area.ObjectSorting)) {
+                if (labels.includes(Ability.ConceptClassification)) {
+                    mode = 'classify-count';
+                } else {
+                    mode = 'classify-sort';
+                }
+            } else if (constraints.countOut) {
+                mode = 'count-out';
+            } else if (labels.includes(Scope.AdditiveCount) && labels.includes(Scope.PhysicalNumbers)) {
+                mode = labels.includes(Ability.ProcedureUnderstanding) ? 'cardinality' : 'one-to-one';
+            } else {
+                mode = 'simple';
+            }
+        }
 
         if (mode === 'conservation') {
             const minCount = constraints.minCount || 5;

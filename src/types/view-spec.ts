@@ -13,6 +13,8 @@ export type ViewConstraint = RangeConstraint | OptionsConstraint;
 
 export interface ViewSpec {
     viewId: string;
+    /** Ontological labels supported/rendered by this view */
+    supportedLabels?: string[];
     /** Parameter constraints used for both runtime validation and test value derivation */
     constraints: Record<string, ViewConstraint>;
     /** Configuration for the visual boundary test permutations.

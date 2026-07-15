@@ -50,7 +50,7 @@ export function SortingClassify({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    const mode = data.mode || 'classify-count';
+    const mode = data.relation ? 'classify-sort' : 'classify-count';
     const classifyType = data.classifyType || 'shape';
     const relation = data.relation || 'most';
 
