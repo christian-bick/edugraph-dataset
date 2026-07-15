@@ -7,7 +7,7 @@ import { WritingGenerator } from '../generators/writing/generator.ts';
 import { TimeGenerator } from '../generators/time/generator.ts';
 import { GeometryGenerator } from '../generators/geometry/generator.ts';
 
-import { ProblemGenerator } from '../types/ml-engine.ts';
+import { ProblemGenerator, VisualBlueprint } from '../types/ml-engine.ts';
 import { 
     ViewTypeMap,
     ArithmeticStandardProblem, 
@@ -35,7 +35,11 @@ type CompatibleViewsFor<TProblemData> = {
 
 export interface ModuleConfig<TProblemData = any> {
     generatorClass: new () => ProblemGenerator<TProblemData>;
-    compatibleViews: CompatibleViewsFor<TProblemData>[];
+    splits: {
+        train: number;
+        val: number;
+    };
+    visualDistribution: VisualBlueprint<CompatibleViewsFor<TProblemData>>[];
 }
 
 export interface DatasetConfigType {
@@ -55,35 +59,72 @@ export const DatasetConfig: DatasetConfigType = {
     modules: {
         arithmetic: {
             generatorClass: ArithmeticGenerator,
-            compatibleViews: ['operations-vertical', 'operations-boxes', 'operations-representation', 'operations-decompose', 'place-value-blocks']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'operations-boxes', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'operations-vertical', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'operations-representation', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'operations-decompose', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'place-value-blocks', visualParams: {}, instancesPerProblem: 1 }
+            ]
         },
         counting: {
             generatorClass: CountingGenerator,
-            compatibleViews: ['counting-objects', 'counting-inc-dec', 'counting-conservation', 'sorting-classify']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'counting-objects', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'counting-inc-dec', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'counting-conservation', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'sorting-classify', visualParams: {}, instancesPerProblem: 1 }
+            ]
         },
         measurement: {
             generatorClass: MeasurementGenerator,
-            compatibleViews: ['measure-length', 'measure-attributes', 'measure-compare']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'measure-length', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'measure-attributes', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'measure-compare', visualParams: {}, instancesPerProblem: 1 }
+            ]
         },
         comparison: {
             generatorClass: ComparisonGenerator,
-            compatibleViews: ['numbers-compare', 'numbers-compare-groups']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'numbers-compare', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'numbers-compare-groups', visualParams: {}, instancesPerProblem: 1 }
+            ]
         },
         ordering: {
             generatorClass: OrderingGenerator,
-            compatibleViews: ['numbers-order']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'numbers-order', visualParams: { desc: false }, instancesPerProblem: 1 },
+                { viewId: 'numbers-order', visualParams: { desc: true }, instancesPerProblem: 1 }
+            ]
         },
         writing: {
             generatorClass: WritingGenerator,
-            compatibleViews: ['numbers-write']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'numbers-write', visualParams: { outline: false }, instancesPerProblem: 1 },
+                { viewId: 'numbers-write', visualParams: { outline: true }, instancesPerProblem: 1 }
+            ]
         },
         time: {
             generatorClass: TimeGenerator,
-            compatibleViews: ['time-analog']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'time-analog', visualParams: { reverse: false }, instancesPerProblem: 1 },
+                { viewId: 'time-analog', visualParams: { reverse: true }, instancesPerProblem: 1 }
+            ]
         },
         geometry: {
             generatorClass: GeometryGenerator,
-            compatibleViews: ['geometry-viewer']
+            splits: { train: 0.8, val: 0.2 },
+            visualDistribution: [
+                { viewId: 'geometry-viewer', visualParams: {}, instancesPerProblem: 1 }
+            ]
         }
     }
 };

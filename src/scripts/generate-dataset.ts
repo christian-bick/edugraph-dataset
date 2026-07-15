@@ -193,11 +193,11 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
 
     const GeneratorClass = moduleConfig.generatorClass;
 
-    const { config } = await import(`../generators/${moduleName}/permutations.ts`);
+    const { generationConfig } = await import(`../generators/${moduleName}/permutations.ts`);
     const { setSeed } = await import(`../lib/random.ts`);
     
-    if (config.generationConfig.seed !== undefined) {
-        setSeed(config.generationConfig.seed);
+    if (generationConfig.seed !== undefined) {
+        setSeed(generationConfig.seed);
     }
 
     const generator = new GeneratorClass();
@@ -205,7 +205,7 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
     
     const dataset: AbstractProblem[] = [];
     const existingKeys = new Set<string>();
-    const { permutations, countPerPermutation = 1 } = config.generationConfig;
+    const { permutations, countPerPermutation = 1 } = generationConfig;
 
     for (const params of permutations) {
         let countForThisPerm = 0;
@@ -235,15 +235,15 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
 
     // Split logic
     const count = dataset.length;
-    const trainC = Math.floor(count * config.splits.train);
+    const trainC = Math.floor(count * moduleConfig.splits.train);
     const trainSet = dataset.slice(0, trainC);
     const valSet = dataset.slice(trainC);
 
     console.log(`[${moduleName}] Generated ${count} problems. Split: Train (${trainSet.length}), Validation (${valSet.length})`);
 
     let moduleImages = 0;
-    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainSet, config.visualDistribution, DEFAULT_CONCURRENCY);
-    moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valSet, config.visualDistribution, DEFAULT_CONCURRENCY);
+    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainSet, moduleConfig.visualDistribution, DEFAULT_CONCURRENCY);
+    moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valSet, moduleConfig.visualDistribution, DEFAULT_CONCURRENCY);
 
     return moduleImages;
 }

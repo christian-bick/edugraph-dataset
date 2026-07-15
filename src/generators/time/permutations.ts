@@ -1,4 +1,5 @@
-import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
+
+import { DatasetGenerationConfig } from "../../types/ml-engine.ts";
 import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
@@ -26,16 +27,8 @@ function buildPermutations() {
         });
 }
 
-export const config: MLDatasetPipelineConfig = {
-    generatorName: 'time',
-    generationConfig: {
-        permutations: buildPermutations(),
-        countPerPermutation: 1,
-        seed: SEED
-    },
-    splits: { train: 0.8, val: 0.2 },
-    visualDistribution: [
-        { viewId: 'time-analog', visualParams: { reverse: false }, instancesPerProblem: 1 },
-        { viewId: 'time-analog', visualParams: { reverse: true }, instancesPerProblem: 1 }
-    ]
+export const generationConfig: DatasetGenerationConfig = {
+    permutations: buildPermutations(),
+    countPerPermutation: 1,
+    seed: SEED
 };

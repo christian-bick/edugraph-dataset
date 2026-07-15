@@ -1,4 +1,4 @@
-import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
+import { DatasetGenerationConfig } from "../../types/ml-engine.ts";
 import { Ability, Area, Scope } from "edugraph-ts";
 import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 
@@ -94,19 +94,8 @@ function buildPermutations() {
     ];
 }
 
-export const config: MLDatasetPipelineConfig = {
-    generatorName: 'arithmetic',
-    generationConfig: {
-        permutations: buildPermutations(),
-        countPerPermutation: 1,
-        seed: SEED
-    },
-    splits: { train: 0.8, val: 0.2 },
-    visualDistribution: [
-        { viewId: 'operations-boxes', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'operations-vertical', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'operations-representation', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'operations-decompose', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'place-value-blocks', visualParams: {}, instancesPerProblem: 1 }
-    ]
+export const generationConfig: DatasetGenerationConfig = {
+    permutations: buildPermutations(),
+    countPerPermutation: 1,
+    seed: SEED
 };

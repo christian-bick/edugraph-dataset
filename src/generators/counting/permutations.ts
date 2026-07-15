@@ -1,4 +1,5 @@
-import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
+
+import { DatasetGenerationConfig } from "../../types/ml-engine.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 
@@ -107,18 +108,8 @@ function buildPermutations() {
     ];
 }
 
-export const config: MLDatasetPipelineConfig = {
-    generatorName: 'counting',
-    generationConfig: {
-        permutations: buildPermutations(),
-        countPerPermutation: 1,
-        seed: SEED
-    },
-    splits: { train: 0.8, val: 0.2 },
-    visualDistribution: [
-        { viewId: 'counting-objects', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'counting-inc-dec', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'counting-conservation', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'sorting-classify', visualParams: {}, instancesPerProblem: 1 }
-    ]
+export const generationConfig: DatasetGenerationConfig = {
+    permutations: buildPermutations(),
+    countPerPermutation: 1,
+    seed: SEED
 };

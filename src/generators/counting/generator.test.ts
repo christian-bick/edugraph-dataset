@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CountingGenerator } from './generator.ts';
-import { config } from './permutations.ts';
+import { generationConfig } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Scope } from 'edugraph-ts';
 
@@ -9,7 +9,7 @@ describe('CountingGenerator', () => {
 
     beforeEach(() => {
         generator = new CountingGenerator();
-        setSeed(config.generationConfig.seed);
+        setSeed(generationConfig.seed);
     });
 
     it('should have the correct type', () => {
@@ -18,7 +18,7 @@ describe('CountingGenerator', () => {
 
     describe('generate basic permutations', () => {
         it('should generate valid problem stubs or null for all permutations', () => {
-            config.generationConfig.permutations.forEach(input => {
+            generationConfig.permutations.forEach(input => {
                 const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
@@ -28,7 +28,7 @@ describe('CountingGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const input = config.generationConfig.permutations[0];
+            const input = generationConfig.permutations[0];
             setSeed(123);
             const stub1 = generator.generate(input);
             setSeed(123);

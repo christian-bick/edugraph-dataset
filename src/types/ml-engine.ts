@@ -116,8 +116,8 @@ export interface ProblemGenerator<TData = any> {
 /**
  * A blueprint defining a specific visual variation to apply to an abstract problem.
  */
-export interface VisualBlueprint {
-    viewId: string;
+export interface VisualBlueprint<TViewId extends string = string> {
+    viewId: TViewId;
     visualParams: Record<string, any>;
     /** How many instances of THIS specific variation to generate per problem */
     instancesPerProblem: number; 

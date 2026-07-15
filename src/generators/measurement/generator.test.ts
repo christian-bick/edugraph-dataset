@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MeasurementGenerator } from './generator.ts';
-import { config } from './permutations.ts';
+import { generationConfig } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
 
 describe('MeasurementGenerator', () => {
@@ -8,7 +8,7 @@ describe('MeasurementGenerator', () => {
 
     beforeEach(() => {
         generator = new MeasurementGenerator();
-        setSeed(config.generationConfig.seed);
+        setSeed(generationConfig.seed);
     });
 
     it('should have the correct type', () => {
@@ -17,7 +17,7 @@ describe('MeasurementGenerator', () => {
 
     describe('generate basic permutations', () => {
         it('should generate valid problem stubs for all permutations', () => {
-            config.generationConfig.permutations.forEach(input => {
+            generationConfig.permutations.forEach(input => {
                 const stub = generator.generate(input);
                 if (stub) {
                     expect(stub.id).toBeDefined();
@@ -37,7 +37,7 @@ describe('MeasurementGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const input = config.generationConfig.permutations[0];
+            const input = generationConfig.permutations[0];
             setSeed(123);
             const stub1 = generator.generate(input);
             setSeed(123);

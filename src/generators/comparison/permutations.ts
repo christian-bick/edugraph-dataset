@@ -1,4 +1,5 @@
-import { MLDatasetPipelineConfig } from "../../types/ml-engine.ts";
+
+import { DatasetGenerationConfig } from "../../types/ml-engine.ts";
 import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 
@@ -52,16 +53,8 @@ function buildPermutations() {
     return [...legacy, ...matching, ...countCompare];
 }
 
-export const config: MLDatasetPipelineConfig = {
-    generatorName: 'comparison',
-    generationConfig: {
-        permutations: buildPermutations(),
-        countPerPermutation: 1,
-        seed: SEED
-    },
-    splits: { train: 0.8, val: 0.2 },
-    visualDistribution: [
-        { viewId: 'numbers-compare', visualParams: {}, instancesPerProblem: 1 },
-        { viewId: 'numbers-compare-groups', visualParams: {}, instancesPerProblem: 1 }
-    ]
+export const generationConfig: DatasetGenerationConfig = {
+    permutations: buildPermutations(),
+    countPerPermutation: 1,
+    seed: SEED
 };
