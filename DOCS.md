@@ -10,7 +10,7 @@ The core philosophy of this system is **Label-Driven Generation**. Pedagogical l
 ### The Three Pillars
 The architecture is divided into three distinct layers:
 1.  **The Brain (`src/generators/`)**: Handles the abstract mathematical logic, permutation definition, and label constraint satisfaction. It has no knowledge of how a problem is visualized.
-2.  **The Body (`src/views/`)**: HTML/CSS/TS renderers that run in the browser. They receive abstract problem data and convert it into a visual DOM representation.
+2.  **The Body (`src/visuals/`)**: HTML/CSS/TS renderers that run in the browser. It is organized into `views/` (individual exercise layouts), `components/` (shared UI elements), and `helpers/` (shared layout/math algorithms).
 3.  **The Heart (`src/scripts/`)**: Node.js scripts orchestrating Playwright (headless browser). These scripts unite the Brain and the Body, generating problems, injecting them into the renderers, taking screenshots, and compiling the metadata.
 
 ## 2. Core Concepts & Types
@@ -41,9 +41,14 @@ To ensure that the Question (`_mode-Q`) and Solution (`_mode-S`) renderings matc
 
 ### `src/scripts/generate-dataset.ts`
 The primary pipeline orchestrator.
-*   **Execution**: `npm run generate:dataset [moduleName]`
-*   **Function**: Bootstraps Playwright, loads the specified generator(s), generates abstract problems according to the permutations config, serves the `src/views/` renderers via Vite, and captures headless screenshots.
-*   **Clearing Logic**: If no module is specified, it wipes the entire `out/dataset/` directory. If a specific module is provided, it performs a surgical wipe of only `out/dataset/train/<module>` and `out/dataset/val/<module>`.
+*   **Execution**: `npm run generate:dataset [moduleName] [--training-only]`
+*   **Function**: Bootstraps Playwright, loads the specified generator(s) and their configuration from `DatasetConfig`, runs the decoupled training and validation generation phases, serves the `src/visuals/views/` renderers via Vite, and captures headless screenshots.
+*   **Decoupled Seeding & Proportional Split**: 
+    - **Training Set**: Uses the base random seed (`seed`) to generate `countPerPermutation` problems per permutation.
+    - **Validation Set**: Uses a validation seed offset (`seed + 10000`) and generates validation problems proportionally based on the split ratio (generating a validation problem for every Nth training problem).
+    - **Shifted Visual Cycling**: Problems are mapped to a single view by cycling through the `visualDistribution` list (ensuring smaller dataset sizes). The validation cycle is shifted by an index offset of `1`, guaranteeing that validation tests a different layout than training for each permutation standard.
+*   **`--training-only` Flag**: If specified, skips validation problem generation, validation image rendering, and validation metadata writing.
+*   **Clearing Logic**: If no module is specified, it wipes the entire `out/dataset/` directory. If a specific module is provided, it clears only `out/dataset/train/<module>` and `out/dataset/validation/<module>`.
 
 ### `src/scripts/generate-coverage-report.ts`
 *   **Execution**: `npm run report:coverage`
@@ -62,13 +67,16 @@ Adding content means creating two interconnected directories: a Generator and a 
 
 ### The Generator Module (`src/generators/<module>/`)
 *   **`generator.ts`**: Implements `ProblemGenerator`. It takes a `GeneratorInput` (labels and constraints) and returns a `ProblemStub` or `null`. Returning `null` (e.g., if a constraint cannot be mathematically satisfied) triggers an automatic retry in the orchestrator.
-*   **`permutations.ts`**: Exports the configuration defining the dataset splits, the number of instances per permutation, and uses the `DatasetPermutationBuilder` to map ontology labels to required visual variations.
+*   **`permutations.ts`**: Exports `generationConfig: DatasetGenerationConfig` (defining the seed, count, and mathematical permutations list). It contains **zero** details about split ratios or visual renderers.
 *   **`generator.test.ts`**: A Vitest suite. Must deeply test edge cases (e.g., digit boundaries, non-negative constraints) to ensure the constraint satisfier behaves correctly.
 *   **`checklist.md`**: (Optional) Specific instructions for the Visual QA LLM regarding how this specific module should visually render.
 
-### The Visual Renderer (`src/views/<renderer>/`)
-*   **`view.html`**: The base HTML template containing a mount point for React.
-*   **`view.tsx`**: React entry point implementing `window.renderView = (payload: RenderPayload) => { ... }`. It uses React to render components into the DOM.
+### The Visual Renderer (`src/visuals/`)
+*   **`src/visuals/views/<renderer>/`**:
+    - **`view.html`**: The base HTML template containing a mount point for React.
+    - **`view.tsx`**: React entry point implementing `window.renderView = (payload: RenderPayload) => { ... }`. It uses React to render components into the DOM.
+*   **`src/visuals/components/`**: Reusable shared React elements (such as `TenFrame.tsx`) that help keep visual views DRY.
+*   **`src/visuals/helpers/`**: Shared layout rendering calculations (such as `counting-helpers.ts`).
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)
 
@@ -76,18 +84,10 @@ To add a new mathematical concept or visual style to the dataset:
 
 ### Step 1: Scaffolding
 1. Create a new directory in `src/generators/` (e.g., `src/generators/fractions`).
-2. Create a corresponding renderer directory in `src/views/` (e.g., `src/views/fractions-pie`).
+2. Create a corresponding renderer directory in `src/visuals/views/` (e.g., `src/visuals/views/fractions-pie`).
 
 ### Step 2: Defining the Pedagogy (`permutations.ts`)
-Write the `permutations.ts` file. Determine which labels from `edugraph-ts` apply. Use the `DatasetPermutationBuilder` to cross-multiply labels with visual parameters. All permutations MUST include `Ability.ProcedureExecution`.
-```typescript
-// Example snippet
-new DatasetPermutationBuilder()
-    .addLabels([Ability.ProcedureExecution, Scope.Fractions])
-    .applyLabelVariants('Area', [Area.Addition, Area.Subtraction])
-    .applyConstraintVariants('denominator', [2, 4, 8])
-    .buildVisuals('fractions-pie', { pieColors: ['blue', 'red'] })
-```
+Write the `permutations.ts` file to export the mathematical `generationConfig` specifying permutations generated using `DatasetPermutationBuilder`.
 
 ### Step 3: Writing the Generator (`generator.ts`)
 Implement the mathematical logic. Ensure that the properties of the generated problem strictly adhere to the requested labels. If a label requests `Area.Addition`, the problem must use addition.
@@ -96,15 +96,12 @@ Implement the mathematical logic. Ensure that the properties of the generated pr
 Write robust unit tests verifying that the generator outputs correct math and respects bounds (e.g., resulting fractions do not exceed 1 if constrained). Run `npm run test` to verify.
 
 ### Step 5: Visual Implementation (`view.*`)
-Implement the component logic in `src/views/<renderer>/view.tsx`.
+Implement the component logic in `src/visuals/views/<renderer>/view.tsx`.
 *   Ensure that `isSolutionView: false` visually hides the answer (or renders an empty box/placeholder).
 *   Ensure that `isSolutionView: true` renders the exact same layout but with the answer visible.
 *   Use `setSeed(problem.id)` before making randomized layout decisions.
 
 ### Step 6: Registration
 1.  Add a link to your new renderer in `src/index.html` for easy debugging.
-2.  Open `src/scripts/generate-dataset.ts` and add your new generator to the `runModulePipeline` dynamic import mapping:
-    ```typescript
-    else if (moduleName === 'fractions') GeneratorClass = (await import(`../generators/${moduleName}/generator.ts`)).FractionsGenerator;
-    ```
+2.  Open [src/config/dataset.config.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/config/dataset.config.ts) and register the new module under `DatasetConfig.modules` with its generator class, splits ratio, and visual distribution mapping of views and parameters.
 3. Run `npm run generate:dataset fractions` to test the pipeline locally.
