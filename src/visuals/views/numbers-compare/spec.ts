@@ -12,8 +12,8 @@ export const spec: ViewSpec = {
         Ability.ProcedureExecution
     ],
     constraints: {
-        num1: { type: 'range', min: 0, max: 20 },
-        num2: { type: 'range', min: 0, max: 20 }
+        num1: { type: 'range', min: 0, max: 99 },
+        num2: { type: 'range', min: 0, max: 99 }
     },
     testParams: {
         num1: (c) => limitsAndMean(c),
