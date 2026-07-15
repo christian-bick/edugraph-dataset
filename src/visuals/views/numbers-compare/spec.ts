@@ -5,7 +5,7 @@ export const spec: ViewSpec = {
     viewId: 'numbers-compare',
     supportedLabels: [
         Area.Numeration,
-        Area.Comparison,
+        Area.NumericComparison,
         Scope.ArabicNumerals,
         Scope.NumericRange,
         Ability.ProcedureExecution

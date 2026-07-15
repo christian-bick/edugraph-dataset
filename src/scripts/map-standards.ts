@@ -20,9 +20,6 @@ const edugraphTsUrl = pkg.dependencies['edugraph-ts'] || '';
 const versionMatch = edugraphTsUrl.match(/\/releases\/download\/(v[\d.]+)\//);
 const version = versionMatch ? versionMatch[1] : 'v0.6.0';
 
-const RDF_PATH = path.join(TEMP_DIR, `core-ontology-math-${version}.rdf`);
-const RDF_URL = `https://github.com/christian-bick/edugraph-ontology/releases/download/${version}/core-ontology-math.rdf`;
-
 // Load active generator configurations statically
 async function loadGeneratorPermutations() {
   const generatorsDir = path.resolve(PROJECT_ROOT, 'src', 'generators');

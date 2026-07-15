@@ -5,7 +5,7 @@ export const spec: ViewSpec = {
     viewId: 'numbers-compare-groups',
     supportedLabels: [
         Area.Numeration,
-        Area.Comparison,
+        Area.NumericComparison,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
         Ability.ProcedureExecution

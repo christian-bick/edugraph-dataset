@@ -7,8 +7,7 @@ export const spec: ViewSpec = {
         Area.BaseOperations,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
-        Ability.ProcedureExecution,
-        Ability.ProblemSolving
+        Ability.ProcedureExecution
     ],
     constraints: {
         operation: { type: 'options', values: ['addition', 'subtraction'] },
