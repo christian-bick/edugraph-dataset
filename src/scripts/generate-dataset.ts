@@ -1,11 +1,10 @@
-import { Browser, chromium } from 'playwright';
-import { resolve, dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import { existsSync, mkdirSync, rmSync, writeFileSync, readdirSync, readFileSync, appendFileSync } from 'fs';
-import { DatasetConfig } from '../config/dataset.config.ts';
-import { AbstractProblem, VisualBlueprint } from '../types/ml-engine.ts';
-import { isSubConceptOf, doesViewSupportProblem, doesGeneratorSupportCompetency } from '../lib/ontology.ts';
-import { KindergartenSpec } from '../../config/spec/ccss/kindergarten.ts';
+import {Browser, chromium} from 'playwright';
+import {dirname, resolve} from 'path';
+import {fileURLToPath} from 'url';
+import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'fs';
+import {AbstractProblem, VisualBlueprint} from '../types/ml-engine.ts';
+import {doesGeneratorSupportCompetency, doesViewSupportProblem} from '../lib/ontology.ts';
+import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -350,14 +349,25 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
         throw new Error(`Generator folder not found: ${modulePath}`);
     }
 
-    const moduleConfig = DatasetConfig.modules[moduleName];
-    if (!moduleConfig) {
-        throw new Error(`Module ${moduleName} not found in DatasetConfig`);
+    // Dynamic import of spec.ts
+    const specPath = resolve(modulePath, 'spec.ts');
+    if (!existsSync(specPath)) {
+        throw new Error(`spec.ts not found in generator ${moduleName}`);
     }
+    const specModule = await import(`../generators/${moduleName}/spec.ts`);
+    const generatorSpec = specModule.spec;
 
-    const GeneratorClass = moduleConfig.generatorClass;
-    const { setSeed } = await import(`../lib/random.ts`);
+    // Dynamic import of generator class
+    const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
+    const className = camelCase(moduleName[0].toUpperCase() + moduleName.slice(1)) + 'Generator';
+    const generatorModule = await import(`../generators/${moduleName}/generator.ts`);
+    const GeneratorClass = generatorModule[className];
+    if (!GeneratorClass) {
+        throw new Error(`Could not find generator class ${className} in ${moduleName}`);
+    }
     const generator = new GeneratorClass();
+
+    const { setSeed } = await import(`../lib/random.ts`);
 
     const trainDataset: AbstractProblem[] = [];
     const valDataset: AbstractProblem[] = [];
@@ -365,21 +375,33 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
     const trainKeys = new Set<string>();
     const valKeys = new Set<string>();
 
-    const valRatio = moduleConfig.splits.val / moduleConfig.splits.train;
+    const valRatio = 0.25; // Default 80/20 train/val split
 
-    if (moduleConfig.views) {
+    if (generatorSpec.supportedLabels && generatorSpec.supportedLabels.length > 0) {
         console.log(`Using decoupled ontology-driven matching for ${moduleName}...`);
         
-        // Load specs for all registered views
+        // Scan src/visuals/views directory to dynamically load specs for ALL views
+        const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
+        const allViewDirs = readdirSync(viewsDir, { withFileTypes: true })
+            .filter(d => d.isDirectory())
+            .map(d => d.name);
+        
         const compatibleViews = [];
-        for (const viewId of moduleConfig.views) {
-            const specModule = await import(`../visuals/views/${viewId}/spec.ts`);
-            compatibleViews.push(specModule.spec);
+        for (const viewId of allViewDirs) {
+            const viewSpecPath = resolve(viewsDir, viewId, 'spec.ts');
+            if (existsSync(viewSpecPath)) {
+                try {
+                    const viewSpecModule = await import(`../visuals/views/${viewId}/spec.ts`);
+                    compatibleViews.push(viewSpecModule.spec);
+                } catch (e) {
+                    console.warn(`Could not import view spec for ${viewId}:`, e);
+                }
+            }
         }
 
         // Filter competency targets for this generator
         const matchedTargets = KindergartenSpec.filter(target =>
-            doesGeneratorSupportCompetency(moduleConfig.supportedLabels || [], target.labels)
+            doesGeneratorSupportCompetency(generatorSpec.supportedLabels || [], target.labels)
         );
 
         console.log(`Found ${matchedTargets.length} matched competency targets for generator [${moduleName}]`);
@@ -443,7 +465,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                     trainDataset.push(problem);
 
                     // Generate validation sample
-                    if (!trainingOnly && valRatio > 0) {
+                    if (!trainingOnly) {
                         const currentValCount = Math.floor(trainDataset.length * valRatio);
                         const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
                         
@@ -515,7 +537,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                     problem.data._permutationParams = params.constraints;
                     trainDataset.push(problem);
 
-                    if (!trainingOnly && valRatio > 0) {
+                    if (!trainingOnly) {
                         const currentValCount = Math.floor(trainDataset.length * valRatio);
                         const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
                         
@@ -555,10 +577,10 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
     console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);
 
     let moduleImages = 0;
-    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, moduleConfig.visualDistribution || [], 0, DEFAULT_CONCURRENCY);
+    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, generatorSpec.visualDistribution || [], 0, DEFAULT_CONCURRENCY);
     
     if (!trainingOnly && valDataset.length > 0) {
-        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, moduleConfig.visualDistribution || [], 1, DEFAULT_CONCURRENCY);
+        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, generatorSpec.visualDistribution || [], 1, DEFAULT_CONCURRENCY);
     }
     return moduleImages;
 }
