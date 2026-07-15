@@ -1,49 +1,16 @@
 import fs from 'fs';
 import path from 'path';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 const PROJECT_ROOT = path.resolve('.');
 const TEMP_DIR = path.join(PROJECT_ROOT, 'temp', 'common-core');
 const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
 const COVERAGE_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-coverage.json');
 
-// Read package.json to sync ontology version
-const pkgPath = path.resolve(PROJECT_ROOT, 'package.json');
-const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-const edugraphTsUrl = pkg.dependencies['edugraph-ts'] || '';
-const versionMatch = edugraphTsUrl.match(/\/releases\/download\/(v[\d.]+)\//);
-const version = versionMatch ? versionMatch[1] : 'v0.6.0';
-
-const RDF_PATH = path.join(TEMP_DIR, `core-ontology-math-${version}.rdf`);
-
 interface ValidationResult {
   passed: boolean;
   errors: string[];
   warnings: string[];
-}
-
-function parseRDF(rdfContent: string): Record<string, string> {
-  const nodes: Record<string, string> = {}; // URI -> Type
-  const descriptionRegex = /<rdf:Description\s+rdf:about="([^"]+)">([\s\S]*?)<\/rdf:Description>/g;
-  let match;
-  
-  while ((match = descriptionRegex.exec(rdfContent)) !== null) {
-    const uri = match[1];
-    const innerContent = match[2];
-    
-    let type = 'Unknown';
-    if (innerContent.includes('rdf:resource="http://edugraph.io/edu#Area"')) {
-      type = 'Area';
-    } else if (innerContent.includes('rdf:resource="http://edugraph.io/edu#Scope"')) {
-      type = 'Scope';
-    } else if (innerContent.includes('rdf:resource="http://edugraph.io/edu#Ability"')) {
-      type = 'Ability';
-    }
-    
-    if (type !== 'Unknown') {
-      nodes[uri] = type;
-    }
-  }
-  return nodes;
 }
 
 function runValidation() {
@@ -63,21 +30,23 @@ function runValidation() {
     printReport(result);
     return;
   }
-  if (!fs.existsSync(RDF_PATH)) {
-    result.errors.push(`RDF ontology file not found at: ${RDF_PATH}`);
-    result.passed = false;
-    printReport(result);
-    return;
-  }
 
   // 2. Load data
   const coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
-  const rdfContent = fs.readFileSync(RDF_PATH, 'utf-8');
   const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
 
-  // Parse RDF
-  const rdfNodes = parseRDF(rdfContent);
-  console.log(`[Ontology] Loaded ${Object.keys(rdfNodes).length} valid concepts from RDF.`);
+  // Populate rdfNodes dynamically from edugraph-ts enums
+  const rdfNodes: Record<string, string> = {};
+  for (const a of Object.values(Area)) {
+    rdfNodes[a] = 'Area';
+  }
+  for (const s of Object.values(Scope)) {
+    rdfNodes[s] = 'Scope';
+  }
+  for (const ab of Object.values(Ability)) {
+    rdfNodes[ab] = 'Ability';
+  }
+  console.log(`[Ontology] Loaded ${Object.keys(rdfNodes).length} valid concepts from edugraph-ts.`);
 
   // Parse Standards.jsonl
   const standardsMap: Record<string, any> = {};
