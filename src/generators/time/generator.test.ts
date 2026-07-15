@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TimeGenerator } from './generator.ts';
-import { generationConfig } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Scope } from 'edugraph-ts';
 
@@ -9,7 +8,7 @@ describe('TimeGenerator', () => {
 
     beforeEach(() => {
         generator = new TimeGenerator();
-        setSeed(generationConfig.seed);
+        setSeed(42);
     });
 
     it('should have the correct type', () => {
@@ -17,23 +16,23 @@ describe('TimeGenerator', () => {
     });
 
     describe('generate', () => {
-        it('should generate valid problem stubs for all permutations', () => {
-            generationConfig.permutations.forEach(input => {
+        it('should generate valid problem stubs', () => {
+            const inputs = [
+                { labels: [Scope.HourIntervals], constraints: { interval: 3600 } },
+                { labels: [Scope.MinuteIntervals], constraints: { interval: 60 } },
+                { labels: [Scope.SecondIntervals], constraints: { interval: 1 } }
+            ];
+            inputs.forEach(input => {
                 const stub = generator.generate(input);
-                if (stub) {
-                    expect(stub.id).toBeDefined();
-                    expect(stub.data.time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
-                    // Either constraint or default based on labels
-                    const expectedInterval = input.constraints.interval || 
-                                            (input.labels.includes(Scope.HourIntervals) ? 3600 : 
-                                             input.labels.includes(Scope.MinuteIntervals) ? 60 : 1);
-                    expect(stub.data.interval).toBe(expectedInterval);
-                }
+                expect(stub).not.toBeNull();
+                expect(stub!.id).toBeDefined();
+                expect(stub!.data.time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+                expect(stub!.data.interval).toBe(input.constraints.interval);
             });
         });
 
         it('should be deterministic with the same seed', () => {
-            const input = generationConfig.permutations[0];
+            const input = { labels: [Scope.HourIntervals], constraints: { interval: 3600 } };
             setSeed(123);
             const stub1 = generator.generate(input);
             setSeed(123);

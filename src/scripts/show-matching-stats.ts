@@ -2,8 +2,11 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, readdirSync } from 'fs';
 import { KindergartenSpec } from '../../config/spec/ccss/kindergarten.ts';
+import { Grade1Spec } from '../../config/spec/ccss/grade-01.ts';
 import { doesGeneratorSupportCompetency, findCompatibleViews } from '../lib/ontology.ts';
 import { setSeed } from '../lib/random.ts';
+
+const allTargets = [...KindergartenSpec, ...Grade1Spec];
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -68,7 +71,7 @@ async function main() {
 
     console.log(`Loaded ${allViewSpecs.length} View Specifications.`);
     console.log(`Loaded ${allGeneratorSpecs.length} Generator Specifications.`);
-    console.log(`Loaded ${KindergartenSpec.length} CCSS Kindergarten Targets.\n`);
+    console.log(`Loaded ${allTargets.length} CCSS Targets (Kindergarten + Grade 1).\n`);
 
     let targetCount = 0;
     const generatorStats: Record<string, { targetMatches: number; viewPairs: number }> = {};
@@ -76,10 +79,10 @@ async function main() {
         generatorStats[gen.generatorId] = { targetMatches: 0, viewPairs: 0 };
     }
 
-    for (const target of KindergartenSpec) {
+    for (const target of allTargets) {
         targetCount++;
         console.log(`------------------------------------------------------------------------`);
-        console.log(`Target ${targetCount}/${KindergartenSpec.length}: ${target.id}`);
+        console.log(`Target ${targetCount}/${allTargets.length}: ${target.id}`);
         console.log(`Labels: ${target.labels.map(l => l.split('/').pop()).join(', ')}`);
         
         let targetHasMatch = false;

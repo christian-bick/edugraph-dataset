@@ -5,6 +5,9 @@ import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync
 import {AbstractProblem, VisualBlueprint} from '../types/ml-engine.ts';
 import {doesGeneratorSupportCompetency, doesViewSupportProblem} from '../lib/ontology.ts';
 import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
+import {Grade1Spec} from '../../config/spec/ccss/grade-01.ts';
+
+const allTargets = [...KindergartenSpec, ...Grade1Spec];
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -303,195 +306,124 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
 
     const valRatio = 0.25; // Default 80/20 train/val split
 
-    if (generatorSpec.supportedLabels && generatorSpec.supportedLabels.length > 0) {
-        console.log(`Using decoupled ontology-driven matching for ${moduleName}...`);
-        
-        // Scan src/visuals/views directory to dynamically load specs for ALL views
-        const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-        const allViewDirs = readdirSync(viewsDir, { withFileTypes: true })
-            .filter(d => d.isDirectory())
-            .map(d => d.name);
-        
-        const compatibleViews = [];
-        for (const viewId of allViewDirs) {
-            const viewSpecPath = resolve(viewsDir, viewId, 'spec.ts');
-            if (existsSync(viewSpecPath)) {
-                try {
-                    const viewSpecModule = await import(`../visuals/views/${viewId}/spec.ts`);
-                    compatibleViews.push(viewSpecModule.spec);
-                } catch (e) {
-                    console.warn(`Could not import view spec for ${viewId}:`, e);
-                }
+    console.log(`Using decoupled ontology-driven matching for ${moduleName}...`);
+    
+    // Scan src/visuals/views directory to dynamically load specs for ALL views
+    const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
+    const allViewDirs = readdirSync(viewsDir, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .map(d => d.name);
+    
+    const compatibleViews = [];
+    for (const viewId of allViewDirs) {
+        const viewSpecPath = resolve(viewsDir, viewId, 'spec.ts');
+        if (existsSync(viewSpecPath)) {
+            try {
+                const viewSpecModule = await import(`../visuals/views/${viewId}/spec.ts`);
+                compatibleViews.push(viewSpecModule.spec);
+            } catch (e) {
+                console.warn(`Could not import view spec for ${viewId}:`, e);
             }
         }
+    }
 
-        // Filter competency targets for this generator
-        const matchedTargets = KindergartenSpec.filter(target =>
-            doesGeneratorSupportCompetency(generatorSpec.supportedLabels || [], target.labels)
-        );
+    // Filter competency targets for this generator
+    const matchedTargets = allTargets.filter(target =>
+        doesGeneratorSupportCompetency(generatorSpec.supportedLabels || [], target.labels)
+    );
 
-        console.log(`Found ${matchedTargets.length} matched competency targets for generator [${moduleName}]`);
+    console.log(`Found ${matchedTargets.length} matched competency targets for generator [${moduleName}]`);
 
-        for (const target of matchedTargets) {
-            let countForThisTarget = 0;
-            let attempts = 0;
-            const countPerPermutation = 1;
-            const maxAttempts = 50;
+    for (const target of matchedTargets) {
+        let countForThisTarget = 0;
+        let attempts = 0;
+        const countPerPermutation = 1;
+        const maxAttempts = 50;
 
-            while (countForThisTarget < countPerPermutation && attempts < maxAttempts) {
-                attempts++;
-                
-                setSeed(42 + trainDataset.length);
-                
-                const problemStub = generator.generate({
-                    labels: target.labels,
-                    constraints: target.constraints
+        while (countForThisTarget < countPerPermutation && attempts < maxAttempts) {
+            attempts++;
+            
+            setSeed(42 + trainDataset.length);
+            
+            const problemStub = generator.generate({
+                labels: target.labels,
+                constraints: target.constraints
+            });
+
+            if (problemStub && !trainKeys.has(problemStub.id)) {
+                // Match views that support this problem
+                const matchedViews = compatibleViews.filter(viewSpec => {
+                    const labelsMatch = doesViewSupportProblem(viewSpec.supportedLabels || [], target.labels);
+                    if (!labelsMatch) return false;
+
+                    // Check physical constraints
+                    if (viewSpec.constraints) {
+                        for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
+                            const val = problemStub.data[key];
+                            if (val === undefined) continue;
+                            if (constraint.type === 'range') {
+                                if (val < constraint.min || val > constraint.max) return false;
+                            } else if (constraint.type === 'options') {
+                                if (!constraint.values.includes(val)) return false;
+                            }
+                        }
+                    }
+                    return true;
                 });
 
-                if (problemStub && !trainKeys.has(problemStub.id)) {
-                    // Match views that support this problem
-                    const matchedViews = compatibleViews.filter(viewSpec => {
-                        const labelsMatch = doesViewSupportProblem(viewSpec.supportedLabels || [], target.labels);
-                        if (!labelsMatch) return false;
-
-                        // Check physical constraints
-                        if (viewSpec.constraints) {
-                            for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-                                const val = problemStub.data[key];
-                                if (val === undefined) continue;
-                                if (constraint.type === 'range') {
-                                    if (val < constraint.min || val > constraint.max) return false;
-                                } else if (constraint.type === 'options') {
-                                    if (!constraint.values.includes(val)) return false;
-                                }
-                            }
-                        }
-                        return true;
-                    });
-
-                    if (matchedViews.length === 0) {
-                        continue;
-                    }
-
-                    trainKeys.add(problemStub.id);
-                    countForThisTarget++;
-
-                    const problem: AbstractProblem = {
-                        ...problemStub,
-                        id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
-                        type: generator.type,
-                        tags: Array.from(new Set(target.labels))
-                    };
-                    problem.data._permutationParams = target.constraints;
-                    (problem as any).matchedBlueprints = matchedViews.map(v => ({
-                        viewId: v.viewId,
-                        visualParams: {},
-                        instancesPerProblem: 1
-                    }));
-                    trainDataset.push(problem);
-
-                    // Generate validation sample
-                    if (!trainingOnly) {
-                        const currentValCount = Math.floor(trainDataset.length * valRatio);
-                        const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
-                        
-                        if (currentValCount > prevValCount) {
-                            let valAttempts = 0;
-                            let valSuccess = false;
-                            while (!valSuccess && valAttempts < 50) {
-                                valAttempts++;
-                                setSeed(42 + 10000 + valDataset.length);
-                                const valStub = generator.generate({
-                                    labels: target.labels,
-                                    constraints: target.constraints
-                                });
-                                if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
-                                    valKeys.add(valStub.id);
-                                    valSuccess = true;
-
-                                    const valProblem: AbstractProblem = {
-                                        ...valStub,
-                                        id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
-                                        type: generator.type,
-                                        tags: Array.from(new Set(target.labels))
-                                    };
-                                    valProblem.data._permutationParams = target.constraints;
-                                    (valProblem as any).matchedBlueprints = matchedViews.map(v => ({
-                                        viewId: v.viewId,
-                                        visualParams: {},
-                                        instancesPerProblem: 1
-                                    }));
-                                    valDataset.push(valProblem);
-                                }
-                            }
-                        }
-                    }
+                if (matchedViews.length === 0) {
+                    continue;
                 }
-            }
-        }
-    } else {
-        // Legacy pipeline
-        const { generationConfig } = await import(`../generators/${moduleName}/permutations.ts`);
-        const { permutations, countPerPermutation = 1 } = generationConfig;
-        
-        console.log(`Generating abstract problems for legacy module ${moduleName}...`);
-        for (const params of permutations) {
-            let countForThisPerm = 0;
-            let attempts = 0;
-            const maxAttempts = countPerPermutation * 50;
 
-            while (countForThisPerm < countPerPermutation && attempts < maxAttempts) {
-                attempts++;
-                
-                if (generationConfig.seed !== undefined) {
-                    setSeed(generationConfig.seed + trainDataset.length);
-                }
-                
-                const problemStub = generator.generate(params);
-                
-                if (problemStub && !trainKeys.has(problemStub.id)) {
-                    trainKeys.add(problemStub.id);
-                    countForThisPerm++;
-                    
-                    const problem: AbstractProblem = {
-                        ...problemStub,
-                        id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
-                        type: generator.type,
-                        tags: Array.from(new Set(params.labels))
-                    };
-                    
-                    problem.data._permutationParams = params.constraints;
-                    trainDataset.push(problem);
+                trainKeys.add(problemStub.id);
+                countForThisTarget++;
 
-                    if (!trainingOnly) {
-                        const currentValCount = Math.floor(trainDataset.length * valRatio);
-                        const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
-                        
-                        if (currentValCount > prevValCount) {
-                            let valAttempts = 0;
-                            let valSuccess = false;
-                            while (!valSuccess && valAttempts < 50) {
-                                valAttempts++;
-                                
-                                if (generationConfig.seed !== undefined) {
-                                    setSeed(generationConfig.seed + 10000 + valDataset.length);
-                                }
-                                
-                                const valStub = generator.generate(params);
-                                if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
-                                    valKeys.add(valStub.id);
-                                    valSuccess = true;
-                                    
-                                    const valProblem: AbstractProblem = {
-                                        ...valStub,
-                                        id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
-                                        type: generator.type,
-                                        tags: Array.from(new Set(params.labels))
-                                    };
-                                    
-                                    valProblem.data._permutationParams = params.constraints;
-                                    valDataset.push(valProblem);
-                                }
+                const problem: AbstractProblem = {
+                    ...problemStub,
+                    id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
+                    type: generator.type,
+                    tags: Array.from(new Set(target.labels))
+                };
+                problem.data._permutationParams = target.constraints;
+                (problem as any).matchedBlueprints = matchedViews.map(v => ({
+                    viewId: v.viewId,
+                    visualParams: {},
+                    instancesPerProblem: 1
+                }));
+                trainDataset.push(problem);
+
+                // Generate validation sample
+                if (!trainingOnly) {
+                    const currentValCount = Math.floor(trainDataset.length * valRatio);
+                    const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
+                    
+                    if (currentValCount > prevValCount) {
+                        let valAttempts = 0;
+                        let valSuccess = false;
+                        while (!valSuccess && valAttempts < 50) {
+                            valAttempts++;
+                            setSeed(42 + 10000 + valDataset.length);
+                            const valStub = generator.generate({
+                                labels: target.labels,
+                                constraints: target.constraints
+                            });
+                            if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
+                                valKeys.add(valStub.id);
+                                valSuccess = true;
+
+                                const valProblem: AbstractProblem = {
+                                    ...valStub,
+                                    id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
+                                    type: generator.type,
+                                    tags: Array.from(new Set(target.labels))
+                                };
+                                valProblem.data._permutationParams = target.constraints;
+                                (valProblem as any).matchedBlueprints = matchedViews.map(v => ({
+                                    viewId: v.viewId,
+                                    visualParams: {},
+                                    instancesPerProblem: 1
+                                }));
+                                valDataset.push(valProblem);
                             }
                         }
                     }

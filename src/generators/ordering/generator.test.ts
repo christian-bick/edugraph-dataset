@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { OrderingGenerator } from './generator.ts';
-import { generationConfig } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Scope } from 'edugraph-ts';
 
@@ -9,7 +8,7 @@ describe('OrderingGenerator', () => {
 
     beforeEach(() => {
         generator = new OrderingGenerator();
-        setSeed(generationConfig.seed);
+        setSeed(42);
     });
 
     it('should have the correct type', () => {
@@ -17,27 +16,30 @@ describe('OrderingGenerator', () => {
     });
 
     describe('generate', () => {
-        it('should generate valid problem stubs for all permutations', () => {
-            generationConfig.permutations.forEach(input => {
+        it('should generate valid problem stubs', () => {
+            const inputs = [
+                { labels: [Scope.NumbersWithZero], constraints: { includesZero: true } },
+                { labels: [Scope.NumbersWithoutZero], constraints: { includesZero: false } }
+            ];
+            inputs.forEach(input => {
                 const stub = generator.generate(input);
-                if (stub) {
-                    expect(stub.id).toBeDefined();
-                    expect(stub.data.numbers).toBeInstanceOf(Array);
-                    expect(stub.data.numbers.length).toBe(5);
-                    
-                    const includesZero = input.labels.includes(Scope.NumbersWithZero) || 
-                                       input.constraints.includesZero === true;
-                    if (!includesZero) {
-                        expect(stub.data.numbers).not.toContain(0);
-                    }
-                    // Verify uniqueness in the set
-                    expect(new Set(stub.data.numbers).size).toBe(5);
+                expect(stub).not.toBeNull();
+                expect(stub!.id).toBeDefined();
+                expect(stub!.data.numbers).toBeInstanceOf(Array);
+                expect(stub!.data.numbers.length).toBe(5);
+                
+                const includesZero = input.labels.includes(Scope.NumbersWithZero) || 
+                                   input.constraints.includesZero === true;
+                if (!includesZero) {
+                    expect(stub!.data.numbers).not.toContain(0);
                 }
+                // Verify uniqueness in the set
+                expect(new Set(stub!.data.numbers).size).toBe(5);
             });
         });
 
         it('should be deterministic with the same seed', () => {
-            const input = generationConfig.permutations[0];
+            const input = { labels: [Scope.NumbersWithZero], constraints: { includesZero: true } };
             setSeed(123);
             const stub1 = generator.generate(input);
             setSeed(123);

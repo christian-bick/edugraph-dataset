@@ -1,30 +1,21 @@
-import { spec as countingOneToOneSpec } from '../../../Documents/EduGraph/edugraph-content/src/visuals/views/counting-objects-one-to-one/spec.ts';
+import { spec as orderingSpec } from '../../../Documents/EduGraph/edugraph-content/src/generators/ordering/spec.ts';
 import { KindergartenSpec } from '../../../Documents/EduGraph/edugraph-content/config/spec/ccss/kindergarten.ts';
-import { CountingGenerator } from '../../../Documents/EduGraph/edugraph-content/src/generators/counting/generator.ts';
-import { doesViewSupportProblem } from '../../../Documents/EduGraph/edugraph-content/src/lib/ontology.ts';
+import { doesGeneratorSupportCompetency, isSubConceptOf } from '../../../Documents/EduGraph/edugraph-content/src/lib/ontology.ts';
+import { Scope } from 'edugraph-ts';
 
-const target = KindergartenSpec.find(t => t.id === 'K.CC.B.4a-linear-1-10')!;
-const gen = new CountingGenerator();
-
-const problemStub = gen.generate({
-    labels: target.labels,
-    constraints: target.constraints
-})!;
-
-console.log('Generated Problem Data:', problemStub.data);
-console.log('View Supported Labels:', countingOneToOneSpec.supportedLabels);
+const target = KindergartenSpec.find(t => t.id === '1.NBT.A.1-ordering-with-zero')!;
 console.log('Target Labels:', target.labels);
-console.log('Labels Match:', doesViewSupportProblem(countingOneToOneSpec.supportedLabels || [], target.labels));
+console.log('Generator supportedLabels:', orderingSpec.supportedLabels);
 
-const viewSpec = countingOneToOneSpec;
-if (viewSpec.constraints) {
-    for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-        const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints[key];
-        console.log(`Checking constraint [${key}]:`, {
-            val,
-            constraint,
-            matchRange: constraint.type === 'range' ? (val >= constraint.min && val <= constraint.max) : undefined,
-            matchOptions: constraint.type === 'options' ? constraint.values.includes(val) : undefined
-        });
-    }
+for (const label of target.labels) {
+    const matched = orderingSpec.supportedLabels.some((genLabel: string) => isSubConceptOf(label, genLabel));
+    console.log(`Checking label [${label}]:`, {
+        matched,
+        isSub: orderingSpec.supportedLabels.map((genLabel: string) => ({
+            genLabel,
+            isSub: isSubConceptOf(label, genLabel)
+        }))
+    });
 }
+
+console.log('Final Match:', doesGeneratorSupportCompetency(orderingSpec.supportedLabels, target.labels));
