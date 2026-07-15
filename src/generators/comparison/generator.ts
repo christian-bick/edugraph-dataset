@@ -8,22 +8,32 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonNumericPr
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
-        const mode = constraints.mode || 'numeric';
+        let mode = constraints.mode || 'numeric';
+        if (mode === 'compare-groups') {
+            mode = 'matching';
+        }
+        if (!constraints.mode && labels) {
+            if (labels.includes('http://edugraph.io/edu/PhysicalNumbers')) {
+                mode = 'matching';
+            }
+        }
 
         if (mode === 'matching' || mode === 'count-compare') {
             const comparisonType = constraints.comparisonType || (random() > 0.5 ? 'greater' : 'less');
-            let count1 = Math.floor(random() * 10) + 1;
-            let count2 = Math.floor(random() * 10) + 1;
+            const minCount = constraints.minCount !== undefined ? constraints.minCount : 1;
+            const maxCount = constraints.maxCount !== undefined ? constraints.maxCount : 10;
+            let count1 = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
+            let count2 = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
 
             if (comparisonType === 'greater') {
                 while (count1 <= count2) {
-                    count1 = Math.floor(random() * 10) + 1;
-                    count2 = Math.floor(random() * 10) + 1;
+                    count1 = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
+                    count2 = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
                 }
             } else if (comparisonType === 'less') {
                 while (count1 >= count2) {
-                    count1 = Math.floor(random() * 10) + 1;
-                    count2 = Math.floor(random() * 10) + 1;
+                    count1 = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
+                    count2 = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
                 }
             } else if (comparisonType === 'equal') {
                 count1 = count2;

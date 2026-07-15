@@ -1,7 +1,14 @@
 import { ViewSpec, limitsAndMean } from '../../../types/view-spec.ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-decompose',
+    supportedLabels: [
+        Area.BaseOperations,
+        Scope.PhysicalNumbers,
+        Scope.NumericRange,
+        Ability.ProcedureUnderstanding
+    ],
     constraints: {
         targetNumber: { type: 'range', min: 2, max: 10 }
     },

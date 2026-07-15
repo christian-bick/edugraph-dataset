@@ -1,7 +1,12 @@
 import { ViewSpec, allOptions } from '../../../types/view-spec.ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-viewer',
+    supportedLabels: [
+        Area.Geometry,
+        Ability.ProcedureExecution
+    ],
     constraints: {
         mode: { type: 'options', values: ['position', 'env-shapes', 'name-2d', 'name-3d', 'classify-dim', 'compare-attributes', 'same-attribute', 'build-shape', 'draw-shape', 'compose-shapes'] },
         relation: { type: 'options', values: ['above', 'below', 'beside', 'nextTo'] },

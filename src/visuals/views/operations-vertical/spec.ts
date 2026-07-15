@@ -1,7 +1,14 @@
 import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-vertical',
+    supportedLabels: [
+        Area.BaseOperations,
+        Scope.ArabicNumerals,
+        Scope.NumericRange,
+        Ability.ProcedureExecution
+    ],
     constraints: {
         num1: { type: 'range', min: 0, max: 99 },
         num2: { type: 'range', min: 0, max: 99 },

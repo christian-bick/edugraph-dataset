@@ -1,7 +1,15 @@
 import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-compare',
+    supportedLabels: [
+        Area.Numeration,
+        Area.Comparison,
+        Scope.ArabicNumerals,
+        Scope.NumericRange,
+        Ability.ProcedureExecution
+    ],
     constraints: {
         num1: { type: 'range', min: 0, max: 20 },
         num2: { type: 'range', min: 0, max: 20 },

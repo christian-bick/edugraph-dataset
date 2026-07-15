@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, rmSync, writeFileSync, readdirSync, readFileSync
 import { DatasetConfig } from '../config/dataset.config.ts';
 import { AbstractProblem, VisualBlueprint } from '../types/ml-engine.ts';
 import { isSubConceptOf, doesViewSupportProblem, doesGeneratorSupportCompetency } from '../lib/ontology.ts';
-import { CompetencyRequirements } from '../config/competencies.ts';
+import { KindergartenSpec } from '../../config/spec/ccss/kindergarten.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -378,7 +378,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
         }
 
         // Filter competency targets for this generator
-        const matchedTargets = CompetencyRequirements.filter(target =>
+        const matchedTargets = KindergartenSpec.filter(target =>
             doesGeneratorSupportCompetency(moduleConfig.supportedLabels || [], target.labels)
         );
 

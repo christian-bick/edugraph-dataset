@@ -7,7 +7,13 @@ export class MeasurementGenerator implements ProblemGenerator<MeasurementStandar
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
-        const mode = constraints.mode || 'standard';
+        let mode = constraints.mode || 'standard';
+        if (mode === 'measure-attributes') {
+            mode = 'attribute-type';
+        }
+        if (mode === 'compare-attributes') {
+            mode = 'direct-compare';
+        }
 
         if (mode === 'attribute-type') {
             const attribute = constraints.attribute || (random() > 0.5 ? 'length' : 'weight'); // length, height, weight

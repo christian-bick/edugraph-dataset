@@ -66,15 +66,21 @@ export const DatasetConfig: DatasetConfigType = {
     modules: {
         arithmetic: {
             generatorClass: ArithmeticGenerator,
+            supportedLabels: [
+                'http://edugraph.io/edu/BaseOperations',
+                'http://edugraph.io/edu/PhysicalNumbers',
+                'http://edugraph.io/edu/ArabicNumerals',
+                'http://edugraph.io/edu/NumericRange'
+            ],
             splits: { train: 0.8, val: 0.2 },
-            visualDistribution: [
-                { viewId: 'operations-boxes', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'operations-vertical', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'operations-representation', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'operations-decompose', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'place-value-compose-teen', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'place-value-decompose-teen', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'place-value-make-ten', visualParams: {}, instancesPerProblem: 1 }
+            views: [
+                'operations-boxes',
+                'operations-vertical',
+                'operations-representation',
+                'operations-decompose',
+                'place-value-compose-teen',
+                'place-value-decompose-teen',
+                'place-value-make-ten'
             ]
         },
         counting: {
@@ -101,19 +107,30 @@ export const DatasetConfig: DatasetConfigType = {
         },
         measurement: {
             generatorClass: MeasurementGenerator,
+            supportedLabels: [
+                'http://edugraph.io/edu/Measurement',
+                'http://edugraph.io/edu/NumericRange'
+            ],
             splits: { train: 0.8, val: 0.2 },
-            visualDistribution: [
-                { viewId: 'measure-length', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'measure-attributes', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'measure-compare', visualParams: {}, instancesPerProblem: 1 }
+            views: [
+                'measure-length',
+                'measure-attributes',
+                'measure-compare'
             ]
         },
         comparison: {
             generatorClass: ComparisonGenerator,
+            supportedLabels: [
+                'http://edugraph.io/edu/Numeration',
+                'http://edugraph.io/edu/Comparison',
+                'http://edugraph.io/edu/PhysicalNumbers',
+                'http://edugraph.io/edu/ArabicNumerals',
+                'http://edugraph.io/edu/NumericRange'
+            ],
             splits: { train: 0.8, val: 0.2 },
-            visualDistribution: [
-                { viewId: 'numbers-compare', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'numbers-compare-groups', visualParams: {}, instancesPerProblem: 1 }
+            views: [
+                'numbers-compare',
+                'numbers-compare-groups'
             ]
         },
         ordering: {
@@ -126,10 +143,17 @@ export const DatasetConfig: DatasetConfigType = {
         },
         writing: {
             generatorClass: WritingGenerator,
+            supportedLabels: [
+                'http://edugraph.io/edu/DigitNotation',
+                'http://edugraph.io/edu/Numeration',
+                'http://edugraph.io/edu/ArabicNumerals',
+                'http://edugraph.io/edu/PhysicalNumbers',
+                'http://edugraph.io/edu/NumbersWithZero',
+                'http://edugraph.io/edu/NumericRange'
+            ],
             splits: { train: 0.8, val: 0.2 },
-            visualDistribution: [
-                { viewId: 'numbers-write', visualParams: { outline: false }, instancesPerProblem: 1 },
-                { viewId: 'numbers-write', visualParams: { outline: true }, instancesPerProblem: 1 }
+            views: [
+                'numbers-write'
             ]
         },
         time: {
@@ -142,9 +166,12 @@ export const DatasetConfig: DatasetConfigType = {
         },
         geometry: {
             generatorClass: GeometryGenerator,
+            supportedLabels: [
+                'http://edugraph.io/edu/Geometry'
+            ],
             splits: { train: 0.8, val: 0.2 },
-            visualDistribution: [
-                { viewId: 'geometry-viewer', visualParams: {}, instancesPerProblem: 1 }
+            views: [
+                'geometry-viewer'
             ]
         }
     }
