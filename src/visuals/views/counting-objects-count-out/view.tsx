@@ -12,7 +12,9 @@ interface Props {
 
 export function CountingObjectsCountOut({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const { numObjects, totalCount, arrangement } = problem.data;
+    const numObjects = problem.data.numObjects;
+    const totalCount = problem.data.totalCount !== undefined ? problem.data.totalCount : (numObjects + 3);
+    const arrangement = problem.data.arrangement || 'line';
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
@@ -39,7 +41,7 @@ export function CountingObjectsCountOut({ payload }: Props) {
                 <div className="relative w-[450px] h-[300px] bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
                     {positions.map((pos, i) => {
                         const isColored = i < numObjects;
-                        let imgClass = 'w-10 h-10 transition-all duration-300';
+                        let imgClass = 'w-8 h-8 transition-all duration-300';
                         if (isColored && isSolutionView) {
                             imgClass += ' drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]';
                         } else {
@@ -49,7 +51,7 @@ export function CountingObjectsCountOut({ payload }: Props) {
                         return (
                             <div 
                                 key={i}
-                                className="absolute w-10 h-10 flex justify-center items-center"
+                                className="absolute w-8 h-8 flex justify-center items-center"
                                 style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
                             >
                                 <img className={imgClass} src={`/icons/counting/${icon}`} alt="counting object" />

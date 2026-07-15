@@ -34,8 +34,8 @@ describe('Ontology Helper', () => {
             expect(doesViewSupportProblem(viewLabels, problemLabels)).toBe(false);
         });
 
-        it('should return true if view declares no supported labels (fallback)', () => {
-            expect(doesViewSupportProblem([], [Scope.NumbersSmaller10])).toBe(true);
+        it('should return false if view declares no supported labels (no match)', () => {
+            expect(doesViewSupportProblem([], [Scope.NumbersSmaller10])).toBe(false);
         });
     });
 

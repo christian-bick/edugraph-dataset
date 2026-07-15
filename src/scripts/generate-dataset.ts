@@ -81,81 +81,7 @@ async function renderDatasetSplit(
 
     let totalImages = 0;
     const metadata: any[] = [];
-    
 
-    // Pre-load view specs for validation
-    const specMap: Record<string, any> = {};
-    const allBlueprints = [...blueprints];
-    problems.forEach(p => {
-        if ((p as any).matchedBlueprints) {
-            allBlueprints.push(...(p as any).matchedBlueprints);
-        }
-    });
-
-    for (const blueprint of allBlueprints) {
-        if (!specMap[blueprint.viewId]) {
-            const specPath = resolve(PROJECT_ROOT, 'src', 'visuals', 'views', blueprint.viewId, 'spec.ts');
-            if (existsSync(specPath)) {
-                try {
-                    // Use file URL path for TS compatibility in ES modules on Windows
-                    const specModule = await import(`../visuals/views/${blueprint.viewId}/spec.ts`);
-                    specMap[blueprint.viewId] = specModule.spec;
-                } catch (e) {
-                    console.warn(`Could not import spec for view ${blueprint.viewId}:`, e);
-                }
-            }
-        }
-    }
-
-    // Generic constraints validator
-    const validateConstraints = (data: any, constraints: any, viewId: string) => {
-        for (const [key, constraint] of Object.entries(constraints) as any) {
-            const val = data[key];
-            if (val === undefined) continue;
-
-            if (constraint.type === 'range') {
-                if (val < constraint.min || val > constraint.max) {
-                    throw new Error(`[${viewId}] Range violation: parameter "${key}" must be between ${constraint.min} and ${constraint.max}. Got: ${val}`);
-                }
-            } else if (constraint.type === 'options') {
-                if (!constraint.values.includes(val)) {
-                    throw new Error(`[${viewId}] Option violation: parameter "${key}" must be one of [${constraint.values.join(', ')}]. Got: ${val}`);
-                }
-            }
-        }
-    };
-
-    // Run view spec validations
-    for (const problem of problems) {
-        const index = problems.indexOf(problem);
-        const problemBlueprints = (problem as any).matchedBlueprints;
-        if (problemBlueprints) {
-            for (const blueprint of problemBlueprints) {
-                const spec = specMap[blueprint.viewId];
-                if (spec && spec.constraints) {
-                    try {
-                        validateConstraints(problem.data, spec.constraints, blueprint.viewId);
-                    } catch (err: any) {
-                        console.error(`Validation Error for problem ID ${problem.id}:`, err.message);
-                        throw err;
-                    }
-                }
-            }
-        } else {
-            if (blueprints && blueprints.length > 0) {
-                const blueprint = blueprints[(index + viewIndexOffset) % blueprints.length];
-                const spec = specMap[blueprint.viewId];
-                if (spec && spec.constraints) {
-                    try {
-                        validateConstraints(problem.data, spec.constraints, blueprint.viewId);
-                    } catch (err: any) {
-                        console.error(`Validation Error for problem ID ${problem.id}:`, err.message);
-                        throw err;
-                    }
-                }
-            }
-        }
-    }
     
     const taskQueue: { problem: AbstractProblem, blueprint: VisualBlueprint, instance: number }[] = [];
     problems.forEach((problem, index) => {
@@ -255,7 +181,7 @@ async function renderDatasetSplit(
                                 const a = rects[i];
                                 const b = rects[j];
 
-                                if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
+                                if (a.el.contains(b.el) || b.el.contains(a.el) || a.el.parentElement === b.el.parentElement) continue;
 
                                 const r1 = a.rect;
                                 const r2 = b.rect;
@@ -432,7 +358,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                         if (viewSpec.constraints) {
                             for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
                                 const val = problemStub.data[key];
-                                if (val === undefined) continue;
+                                if (val === undefined) return false;
                                 if (constraint.type === 'range') {
                                     if (val < constraint.min || val > constraint.max) return false;
                                 } else if (constraint.type === 'options') {

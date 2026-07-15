@@ -31,17 +31,30 @@ export function isSubConceptOf(child: string, parent: string): boolean {
     return false;
 }
 
+const areasList = new Set<string>(Object.values(Area));
+
 /**
  * Returns true if the view supports all the labels required by the problem.
- * A view supports a problem label if the problem label is a subconcept of the view label
- * via taxonomic partOf generalization (e.g. problem requires NumbersSmaller10, view supports NumericRange).
+ * Strict exact matching is enforced for Area labels, while transitive partOf matching is used for others.
  */
 export function doesViewSupportProblem(viewSpecSupportedLabels: string[], problemLabels: string[]): boolean {
     if (!viewSpecSupportedLabels || viewSpecSupportedLabels.length === 0) {
-        return true;
+        return false;
+    }
+
+    // 1. Strict exact matching for Area labels (e.g. BaseOperations views cannot match Numeration problems)
+    const problemAreas = problemLabels.filter(l => areasList.has(l));
+    const hasUnmatchedArea = problemAreas.some(probArea => 
+        !viewSpecSupportedLabels.includes(probArea)
+    );
+    if (hasUnmatchedArea) {
+        return false;
     }
 
     return problemLabels.every(problemLabel => {
+        if (areasList.has(problemLabel)) {
+            return true;
+        }
         // If the problem label is not related to Area, Scope, or Ability (e.g., custom tags), skip validation
         if (!problemLabel.startsWith('http://edugraph.io/edu/')) {
             return true;
@@ -66,5 +79,35 @@ export function doesGeneratorSupportCompetency(genSupportedLabels: string[], com
             return true;
         }
         return genSupportedLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
+    });
+}
+
+import { ViewSpec } from '../types/view-spec.ts';
+
+/**
+ * Finds all compatible views that support a given competency target labels and problem data constraints.
+ */
+export function findCompatibleViews(
+    targetLabels: string[],
+    problemData: Record<string, any>,
+    allViews: ViewSpec[],
+    targetConstraints: Record<string, any> = {}
+): ViewSpec[] {
+    return allViews.filter(viewSpec => {
+        const labelsMatch = doesViewSupportProblem(viewSpec.supportedLabels || [], targetLabels);
+        if (!labelsMatch) return false;
+
+        if (viewSpec.constraints) {
+            for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
+                const val = problemData[key] !== undefined ? problemData[key] : targetConstraints[key];
+                if (val === undefined) continue;
+                if (constraint.type === 'range') {
+                    if (val < constraint.min || val > constraint.max) return false;
+                } else if (constraint.type === 'options') {
+                    if (!constraint.values.includes(val)) return false;
+                }
+            }
+        }
+        return true;
     });
 }

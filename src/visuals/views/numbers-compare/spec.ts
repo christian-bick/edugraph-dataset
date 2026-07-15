@@ -12,8 +12,7 @@ export const spec: ViewSpec = {
     ],
     constraints: {
         num1: { type: 'range', min: 0, max: 20 },
-        num2: { type: 'range', min: 0, max: 20 },
-        relation: { type: 'options', values: ['greater', 'less', 'equal'] }
+        num2: { type: 'range', min: 0, max: 20 }
     },
     testParams: {
         num1: (c) => limitsAndMean(c),

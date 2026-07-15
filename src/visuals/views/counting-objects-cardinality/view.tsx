@@ -40,11 +40,11 @@ export function CountingObjectsCardinality({ payload }: Props) {
                         return (
                             <div 
                                 key={i}
-                                className="absolute w-10 h-10 flex justify-center items-center"
+                                className="absolute w-8 h-8 flex justify-center items-center"
                                 style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
                             >
-                                <img className="w-10 h-10 transition-all duration-300" src={`/icons/counting/${icon}`} alt="counting object" />
-                                <div className={`absolute -top-3 bg-white/90 border rounded px-1 text-[0.75rem] font-bold text-slate-600 flex justify-center items-center ${
+                                <img className="w-8 h-8 transition-all duration-300" src={`/icons/counting/${icon}`} alt="counting object" />
+                                <div className={`absolute -top-2 bg-white/90 border rounded px-1 text-[0.75rem] font-bold text-slate-600 flex justify-center items-center ${
                                     isFinal 
                                         ? 'bg-yellow-100 border-yellow-600 text-yellow-800 text-[0.9rem] px-[6px] py-[2px] shadow-[0_0_8px_rgba(234,179,8,0.4)] z-10' 
                                         : 'border-slate-300'
