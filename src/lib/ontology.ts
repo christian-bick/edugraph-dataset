@@ -31,30 +31,17 @@ export function isSubConceptOf(child: string, parent: string): boolean {
     return false;
 }
 
-const areasList = new Set<string>(Object.values(Area));
-
 /**
  * Returns true if the view supports all the labels required by the problem.
- * Strict exact matching is enforced for Area labels, while transitive partOf matching is used for others.
+ * A view supports a problem label if the problem label is a subconcept of the view label
+ * via taxonomic partOf generalization.
  */
 export function doesViewSupportProblem(viewSpecSupportedLabels: string[], problemLabels: string[]): boolean {
     if (!viewSpecSupportedLabels || viewSpecSupportedLabels.length === 0) {
         return false;
     }
 
-    // 1. Strict exact matching for Area labels (e.g. BaseOperations views cannot match Numeration problems)
-    const problemAreas = problemLabels.filter(l => areasList.has(l));
-    const hasUnmatchedArea = problemAreas.some(probArea => 
-        !viewSpecSupportedLabels.includes(probArea)
-    );
-    if (hasUnmatchedArea) {
-        return false;
-    }
-
     return problemLabels.every(problemLabel => {
-        if (areasList.has(problemLabel)) {
-            return true;
-        }
         // If the problem label is not related to Area, Scope, or Ability (e.g., custom tags), skip validation
         if (!problemLabel.startsWith('http://edugraph.io/edu/')) {
             return true;
