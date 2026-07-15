@@ -1,12 +1,15 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { MeasurementStandardProblem, MeasurementAttributeProblem, MeasurementCompareProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
+import { resolveRangeFromLabels } from "../../lib/ontology.ts";
 
 export class MeasurementGenerator implements ProblemGenerator<MeasurementStandardProblem | MeasurementAttributeProblem | MeasurementCompareProblem> {
     type: AbstractProblem['type'] = 'measurement';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
+        const { labels, constraints } = input;
+        const resolvedRange = resolveRangeFromLabels(labels || []);
+
         let mode = constraints.mode || 'standard';
         if (mode === 'measure-attributes') {
             mode = 'attribute-type';
@@ -67,7 +70,7 @@ export class MeasurementGenerator implements ProblemGenerator<MeasurementStandar
         }
 
         // Standard measure-length (legacy)
-        const bandLength = constraints.bandLength || 20;
+        const bandLength = constraints.bandLength || resolvedRange.max;
         const minProblemLength = bandLength * 0.1;
         const problemLength = parseFloat((random() * (bandLength - minProblemLength) + minProblemLength).toFixed(1));
         

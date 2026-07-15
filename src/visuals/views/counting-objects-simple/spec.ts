@@ -7,6 +7,7 @@ export const spec: ViewSpec = {
         Area.Numeration,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
+        Scope.NumbersWithoutZero,
         Ability.ProcedureExecution,
         Ability.ProcedureUnderstanding
     ],

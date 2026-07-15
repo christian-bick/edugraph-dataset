@@ -2,6 +2,7 @@ import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "
 import { CountingSimpleProblem, CountingIncDecProblem, CountingConservationProblem, CountingClassifyProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { Scope, Area, Ability } from "edugraph-ts";
+import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
 
 export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem | CountingIncDecProblem | CountingConservationProblem | CountingClassifyProblem> {
     type: AbstractProblem['type'] = 'counting';
@@ -11,26 +12,27 @@ export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem
         
         let mode = constraints.mode;
         if (!mode) {
-            if (labels.includes(Area.NumericIdentity)) {
+            if (labels.some(l => isSubConceptOf(l, Area.NumericIdentity))) {
                 mode = 'conservation';
-            } else if (labels.includes(Area.ObjectSorting)) {
-                if (labels.includes(Ability.ConceptClassification)) {
+            } else if (labels.some(l => isSubConceptOf(l, Area.ObjectSorting))) {
+                if (labels.some(l => isSubConceptOf(l, Ability.ConceptClassification))) {
                     mode = 'classify-count';
                 } else {
                     mode = 'classify-sort';
                 }
             } else if (constraints.countOut) {
                 mode = 'count-out';
-            } else if (labels.includes(Scope.AdditiveCount) && labels.includes(Scope.PhysicalNumbers)) {
-                mode = labels.includes(Ability.ProcedureUnderstanding) ? 'cardinality' : 'one-to-one';
+            } else if (labels.some(l => isSubConceptOf(l, Scope.AdditiveCount)) && labels.some(l => isSubConceptOf(l, Scope.PhysicalNumbers))) {
+                mode = labels.some(l => isSubConceptOf(l, Ability.ProcedureUnderstanding)) ? 'cardinality' : 'one-to-one';
             } else {
                 mode = 'simple';
             }
         }
 
         if (mode === 'conservation') {
-            const minCount = constraints.minCount || 5;
-            const maxCount = constraints.maxCount || 12;
+            const resolvedRange = resolveRangeFromLabels(labels || []);
+            const minCount = constraints.minCount !== undefined ? constraints.minCount : resolvedRange.min;
+            const maxCount = constraints.maxCount !== undefined ? constraints.maxCount : resolvedRange.max;
             const count = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
             return {
                 id: `conservation-${count}`,
@@ -86,8 +88,6 @@ export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem
                 let targetCategory = '';
                 let targetCount = relation === 'most' ? -1 : 999;
                 
-                // For 'least', we only consider categories that have at least 1 item to make it interesting, or any category.
-                // Let's support any category.
                 possibleCategories.forEach(cat => {
                     const c = counts[cat];
                     if (relation === 'most') {
@@ -125,15 +125,11 @@ export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem
         }
 
         // For how-many, one-to-one, count-out, simple/inc-dec
-        let maxCount = constraints.maxCount || constraints.count;
-        if (!maxCount) {
-            if (labels.includes(Scope.NumbersSmaller20)) maxCount = 20;
-            else if (labels.includes(Scope.NumbersSmaller10)) maxCount = 10;
-            else maxCount = 10;
-        }
-
+        const resolvedRange = resolveRangeFromLabels(labels || []);
+        let maxCount = constraints.maxCount || constraints.count || resolvedRange.max;
+        let minCount = constraints.minCount || (constraints.count !== undefined ? constraints.count : resolvedRange.min);
+        
         let incDecType = constraints.type; 
-        const minCount = constraints.minCount || Math.max(1, maxCount - 9); 
         const numObjects = constraints.count !== undefined ? constraints.count : Math.floor(random() * (maxCount - minCount + 1)) + minCount;
         
         if (incDecType === 'dec' && numObjects <= 1) {
@@ -157,8 +153,9 @@ export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem
             };
         }
 
-        const layout = constraints.layout || 'linear';
         const arrangement = constraints.arrangement || 'line';
+        // Map arrangement to legacy layout property for backward compatibility
+        const layout = arrangement === 'line' ? 'linear' : arrangement === 'scattered' ? 'scattered' : 'linear';
 
         return {
             id: `${mode}-${numObjects}-${incDecType || 'simple'}-${layout}-${arrangement}`,

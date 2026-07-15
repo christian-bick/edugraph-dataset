@@ -152,5 +152,43 @@ describe('ArithmeticGenerator', () => {
             expect(stub2!.data.ones).toBe(7);
             expect(stub2!.data.target).toBe(17);
         });
+
+        it('should generate correct legacy mode problems', () => {
+            const addStub = generator.generate({
+                labels: ['http://edugraph.io/edu/Addition'],
+                constraints: { digitsNum1: 1, digitsNum2: 1 }
+            });
+            expect(addStub).not.toBeNull();
+            expect(addStub!.data.operation).toBe('addition');
+            expect(addStub!.data.mode).toBe('standard');
+
+            const subStub = generator.generate({
+                labels: ['http://edugraph.io/edu/Subtraction'],
+                constraints: { digitsNum1: 1, digitsNum2: 1 }
+            });
+            expect(subStub).not.toBeNull();
+            expect(subStub!.data.operation).toBe('subtraction');
+
+            const mulStub = generator.generate({
+                labels: ['http://edugraph.io/edu/Multiplication'],
+                constraints: { digitsNum1: 1, digitsNum2: 1 }
+            });
+            expect(mulStub).not.toBeNull();
+            expect(mulStub!.data.operation).toBe('multiplication');
+
+            const divStub = generator.generate({
+                labels: ['http://edugraph.io/edu/Division'],
+                constraints: { digitsNum1: 1, digitsNum2: 1 }
+            });
+            expect(divStub).not.toBeNull();
+            expect(divStub!.data.operation).toBe('division');
+            expect(divStub!.data.num1).toBe(divStub!.data.answer * divStub!.data.num2);
+            
+            const zeroNegStub = generator.generate({
+                labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/NumbersWithZero', 'http://edugraph.io/edu/NumbersWithNegatives'],
+                constraints: { digitsNum1: 1, digitsNum2: 1 }
+            });
+            expect(zeroNegStub).not.toBeNull();
+        });
     });
 });

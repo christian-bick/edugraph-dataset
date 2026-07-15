@@ -14,66 +14,66 @@ export const KindergartenSpec: CompetencyTarget[] = [
     // --- K.CC.A.3: Write numbers & represent counts ---
     {
         id: 'K.CC.A.3-stroke-0-20',
-        labels: [Area.DigitNotation, Scope.ArabicNumerals, Scope.NumericRange, Scope.NumbersWithZero, Ability.ProcedureExecution],
-        constraints: { mode: 'stroke', minVal: 0, maxVal: 20 }
+        labels: [Area.DigitNotation, Scope.ArabicNumerals, Scope.NumbersSmaller20, Scope.NumbersWithZero, Ability.ProcedureExecution],
+        constraints: {}
     },
     {
         id: 'K.CC.A.3-count-represent-0-20',
-        labels: [Area.Numeration, Scope.ArabicNumerals, Scope.NumericRange, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'count-objects', minVal: 0, maxVal: 20 }
+        labels: [Area.Numeration, Scope.ArabicNumerals, Scope.NumbersSmaller20, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: {}
     },
 
     // --- K.CC.B.4a: One-to-one Correspondence ---
     {
         id: 'K.CC.B.4a-linear-1-10',
-        labels: [Area.Numeration, Scope.AdditiveCount, Scope.PhysicalNumbers, Scope.NumericRange, Ability.ProcedureExecution],
-        constraints: { minCount: 1, maxCount: 10, layout: 'linear' }
+        labels: [Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Scope.AdditiveCount, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: { arrangement: 'line' }
     },
     {
         id: 'K.CC.B.4a-scattered-11-20',
-        labels: [Area.Numeration, Scope.AdditiveCount, Scope.PhysicalNumbers, Scope.NumericRange, Ability.ProcedureExecution],
-        constraints: { minCount: 11, maxCount: 20, layout: 'scattered' }
+        labels: [Area.Numeration, Scope.NumbersSmaller20, Scope.NumbersLarger10, Scope.AdditiveCount, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: { arrangement: 'scattered' }
     },
 
     // --- K.CC.B.4b: Cardinality & Conservation ---
     {
         id: 'K.CC.B.4b-cardinality-1-10',
-        labels: [Area.Numeration, Scope.AdditiveCount, Scope.PhysicalNumbers, Scope.NumericRange, Ability.ProcedureUnderstanding],
-        constraints: { minCount: 1, maxCount: 10 }
+        labels: [Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Scope.AdditiveCount, Scope.PhysicalNumbers, Ability.ProcedureUnderstanding],
+        constraints: {}
     },
     {
         id: 'K.CC.B.4b-conservation-5-12',
-        labels: [Area.Numeration, Area.NumericIdentity, Scope.AdditiveCount, Scope.NumericRange, Ability.DirectUnderstanding],
+        labels: [Area.Numeration, Area.NumericIdentity, Scope.NumbersSmaller20, Scope.AdditiveCount, Scope.NumericRange, Ability.DirectUnderstanding],
         constraints: { minCount: 5, maxCount: 12 }
     },
 
     // --- K.CC.B.5: Count to tell "how many?" ---
     {
         id: 'K.CC.B.5-how-many-line-1-20',
-        labels: [Area.Numeration, Scope.NumericRange, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
-        constraints: { minCount: 1, maxCount: 20, arrangement: 'line' }
+        labels: [Area.Numeration, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
+        constraints: { arrangement: 'line' }
     },
     {
         id: 'K.CC.B.5-how-many-circle-1-20',
-        labels: [Area.Numeration, Scope.NumericRange, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
-        constraints: { minCount: 1, maxCount: 20, arrangement: 'circle' }
+        labels: [Area.Numeration, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
+        constraints: { arrangement: 'circle' }
     },
     {
         id: 'K.CC.B.5-how-many-scattered-1-10',
-        labels: [Area.Numeration, Scope.NumericRange, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
-        constraints: { minCount: 1, maxCount: 10, arrangement: 'scattered' }
+        labels: [Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
+        constraints: { arrangement: 'scattered' }
     },
     {
         id: 'K.CC.B.5-count-out-1-20',
-        labels: [Area.Numeration, Scope.NumericRange, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
-        constraints: { minCount: 1, maxCount: 20, countOut: true }
+        labels: [Area.Numeration, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.PhysicalNumbers, Scope.AdditiveCount, Ability.ProcedureExecution],
+        constraints: { countOut: true }
     },
 
     // --- K.CC.C.6: Compare groups of objects ---
     {
         id: 'K.CC.C.6-compare-groups-1-10',
-        labels: [Area.Numeration, Area.NumericComparison, Scope.NumericRange, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'compare-groups', minCount: 1, maxCount: 10 }
+        labels: [Area.Numeration, Area.NumericComparison, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: {}
     },
 
     // ==========================================
@@ -83,23 +83,23 @@ export const KindergartenSpec: CompetencyTarget[] = [
     // --- K.OA.A.1 & K.OA.A.2: Addition and Subtraction representations ---
     {
         id: 'K.OA.A.1-add-represent-0-10',
-        labels: [Area.BaseOperations, Scope.NumericRange, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'addition', maxVal: 10 }
+        labels: [Area.BaseOperations, Scope.NumbersSmaller10, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: {}
     },
     {
         id: 'K.OA.A.2-add-sub-word-0-10',
-        labels: [Area.BaseOperations, Scope.NumericRange, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'word-problem', maxVal: 10 }
+        labels: [Area.BaseOperations, Scope.NumbersSmaller10, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: { mode: 'word-problem' }
     },
     {
         id: 'K.OA.A.3-decompose-0-10',
-        labels: [Area.BaseOperations, Scope.NumericRange, Scope.PhysicalNumbers, Ability.ProcedureUnderstanding],
-        constraints: { mode: 'decompose', maxVal: 10 }
+        labels: [Area.BaseOperations, Scope.NumbersSmaller10, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.ProcedureUnderstanding],
+        constraints: {}
     },
     {
         id: 'K.OA.A.4-make-ten',
-        labels: [Area.BaseOperations, Scope.NumericRange, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'make-ten', targetSum: 10 }
+        labels: [Area.BaseOperations, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: { targetSum: 10 }
     },
 
     // ==========================================
@@ -109,13 +109,13 @@ export const KindergartenSpec: CompetencyTarget[] = [
     // --- K.NBT.A.1: Compose/decompose 11-19 ---
     {
         id: 'K.NBT.A.1-compose-teen',
-        labels: [Area.BaseOperations, Scope.NumericRange, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'compose-teen', minVal: 11, maxVal: 19 }
+        labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersLarger10, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: { mode: 'compose-teen' }
     },
     {
         id: 'K.NBT.A.1-decompose-teen',
-        labels: [Area.BaseOperations, Scope.NumericRange, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'decompose-teen', minVal: 11, maxVal: 19 }
+        labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersLarger10, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        constraints: { mode: 'decompose-teen' }
     },
 
     // ==========================================
@@ -125,24 +125,24 @@ export const KindergartenSpec: CompetencyTarget[] = [
     // --- K.MD.A.1 & K.MD.A.2: Compare attributes ---
     {
         id: 'K.MD.A.1-measure-attributes',
-        labels: [Area.Measurement, Scope.NumericRange, Ability.ProcedureExecution],
-        constraints: { mode: 'measure-length', bandLength: 10 }
+        labels: [Area.Measurement, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ProcedureExecution],
+        constraints: { mode: 'measure-length' }
     },
     {
         id: 'K.MD.A.2-compare-attributes',
-        labels: [Area.Measurement, Scope.NumericRange, Ability.ProcedureExecution],
+        labels: [Area.Measurement, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ProcedureExecution],
         constraints: { mode: 'compare-attributes' }
     },
 
     // --- K.MD.B.3: Classify & Sort ---
     {
         id: 'K.MD.B.3-classify-count-5-10',
-        labels: [Area.ObjectSorting, Area.CollectionSense, Area.Numeration, Scope.NumericRange, Ability.ConceptClassification],
+        labels: [Area.ObjectSorting, Area.CollectionSense, Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ConceptClassification],
         constraints: { minTotal: 5, maxTotal: 10 }
     },
     {
         id: 'K.MD.B.3-classify-sort-5-10',
-        labels: [Area.ObjectSorting, Area.NumericOrder, Scope.NumericRange, Ability.ProcedureExecution],
+        labels: [Area.ObjectSorting, Area.NumericOrder, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ProcedureExecution],
         constraints: { minTotal: 5, maxTotal: 10 }
     },
 

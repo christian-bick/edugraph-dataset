@@ -11,6 +11,7 @@ export const spec: GeneratorSpec = {
         Area.ObjectSorting,
         Area.CollectionSense,
         Area.NumericOrder,
-        Scope.NumericRange
+        Scope.NumericRange,
+        Scope.NumericZero
     ]
 };

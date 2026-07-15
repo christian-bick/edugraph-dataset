@@ -152,3 +152,44 @@ export function findCompatibleViews(
         return true;
     });
 }
+
+/**
+ * Resolves the numeric range boundary from a list of ontological labels.
+ */
+export function resolveRangeFromLabels(labels: string[]): { min: number; max: number } {
+    let min = 1;
+    let max = 10;
+
+    // 1. Resolve minimum boundary (Zero scopes)
+    const hasZero = labels.some(l => isSubConceptOf(l, Scope.NumbersWithZero));
+    const hasNoZero = labels.some(l => isSubConceptOf(l, Scope.NumbersWithoutZero));
+    if (hasZero) {
+        min = 0;
+    } else if (hasNoZero) {
+        min = 1;
+    }
+
+    // 2. Resolve maximum boundary (SmallerThan scopes)
+    if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller1000))) {
+        max = 1000;
+    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller100))) {
+        max = 100;
+    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller20))) {
+        max = 20;
+    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller10))) {
+        max = 10;
+    }
+
+    // 3. Resolve minimum boundary from LargerThan scopes
+    if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger1000))) {
+        min = 1001;
+    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger100))) {
+        min = 101;
+    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger20))) {
+        min = 21;
+    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger10))) {
+        min = 11;
+    }
+
+    return { min, max };
+}

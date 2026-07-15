@@ -9,6 +9,7 @@ export const spec: ViewSpec = {
         Area.Numeration,
         Area.NumericOrder,
         Scope.NumericRange,
+        Scope.NumbersWithoutZero,
         Ability.ConceptClassification,
         Ability.ProcedureExecution
     ],

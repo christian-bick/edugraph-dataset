@@ -8,6 +8,7 @@ export const spec: ViewSpec = {
         Area.NumericIdentity,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
+        Scope.NumbersWithoutZero,
         Scope.AdditiveCount,
         Ability.ProcedureUnderstanding
     ],

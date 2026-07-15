@@ -358,7 +358,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                         if (viewSpec.constraints) {
                             for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
                                 const val = problemStub.data[key];
-                                if (val === undefined) return false;
+                                if (val === undefined) continue;
                                 if (constraint.type === 'range') {
                                     if (val < constraint.min || val > constraint.max) return false;
                                 } else if (constraint.type === 'options') {

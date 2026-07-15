@@ -2,21 +2,23 @@ import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "
 import { WritingProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { Area } from "edugraph-ts";
+import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
 
 export class WritingGenerator implements ProblemGenerator<WritingProblem> {
     type: AbstractProblem['type'] = 'writing';
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints, labels } = input;
-        const minNum = constraints.minVal !== undefined ? constraints.minVal : (constraints.min !== undefined ? constraints.min : 1);
-        const maxNum = constraints.maxVal !== undefined ? constraints.maxVal : (constraints.max !== undefined ? constraints.max : 9);
+        const resolvedRange = resolveRangeFromLabels(labels || []);
+        const minNum = constraints.minVal !== undefined ? constraints.minVal : (constraints.min !== undefined ? constraints.min : resolvedRange.min);
+        const maxNum = constraints.maxVal !== undefined ? constraints.maxVal : (constraints.max !== undefined ? constraints.max : resolvedRange.max);
         const fixedNumber = constraints.number;
         
         let mode = constraints.mode;
         if (!mode && labels) {
-            if (labels.includes(Area.Numeration)) {
+            if (labels.some(l => isSubConceptOf(l, Area.Numeration))) {
                 mode = 'count-objects';
-            } else if (labels.includes(Area.DigitNotation)) {
+            } else if (labels.some(l => isSubConceptOf(l, Area.DigitNotation))) {
                 mode = 'stroke';
             }
         }

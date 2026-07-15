@@ -1,14 +1,28 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { ArithmeticStandardProblem, ArithmeticDecomposeProblem, ArithmeticRepresentationProblem, PlaceValueComposeTeenProblem, PlaceValueDecomposeTeenProblem, PlaceValueMakeTenProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
-import { Area, Scope } from "edugraph-ts";
+import { Area, Scope, Ability } from "edugraph-ts";
+import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
 
 export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | PlaceValueComposeTeenProblem | PlaceValueDecomposeTeenProblem | PlaceValueMakeTenProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
-        const mode = constraints.mode || 'standard';
+        
+        let mode = constraints.mode;
+        if (!mode && labels) {
+            if (labels.some(l => isSubConceptOf(l, Ability.ProcedureUnderstanding))) {
+                mode = 'decompose';
+            } else if (labels.some(l => isSubConceptOf(l, Ability.ProcedureExecution))) {
+                mode = 'representation';
+            } else {
+                mode = 'standard';
+            }
+        }
+        if (!mode) mode = 'standard';
+
+        const resolvedRange = resolveRangeFromLabels(labels || []);
 
         if (mode === 'representation' || mode === 'word-problem') {
             const operation = constraints.operation || (random() > 0.5 ? 'addition' : 'subtraction');
@@ -17,12 +31,12 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
             let answer = 0;
 
             if (operation === 'addition') {
-                const maxSum = constraints.maxSum || 10;
+                const maxSum = constraints.maxSum || resolvedRange.max;
                 num1 = Math.floor(random() * (maxSum - 1)) + 1; // 1 to maxSum-1
                 num2 = Math.floor(random() * (maxSum - num1)) + 1; // 1 to maxSum-num1
                 answer = num1 + num2;
             } else {
-                const maxMinuend = constraints.maxMinuend || 10;
+                const maxMinuend = constraints.maxMinuend || resolvedRange.max;
                 num1 = Math.floor(random() * (maxMinuend - 2)) + 2; // 2 to maxMinuend
                 num2 = Math.floor(random() * (num1 - 1)) + 1; // 1 to num1-1
                 answer = num1 - num2;
@@ -56,9 +70,8 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
         }
 
         if (mode === 'decompose') {
-            const targetNumber = constraints.targetNumber || Math.floor(random() * (10 - 3 + 1)) + 3; // 3 to 10
+            const targetNumber = constraints.targetNumber || Math.floor(random() * (resolvedRange.max - 3 + 1)) + 3; // 3 to resolved max (usually 10)
             
-            // Find all unique pairs (a, b) such that a + b = targetNumber and a >= b
             const pairs: [number, number][] = [];
             for (let i = 1; i <= Math.floor(targetNumber / 2); i++) {
                 pairs.push([i, targetNumber - i]);
@@ -68,8 +81,6 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
                 return null;
             }
 
-            // We need 2 distinct pairs if possible.
-            // If only 1 pair exists (e.g. target is 3: only [1, 2]), we can use [1, 2] and [2, 1] as different orders.
             let pair1: [number, number] = [0, 0];
             let pair2: [number, number] = [0, 0];
 
@@ -81,7 +92,6 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
                 }
                 pair1 = pairs[idx1];
                 pair2 = pairs[idx2];
-                // Randomly shuffle order of pairs
                 if (random() > 0.5) pair1 = [pair1[1], pair1[0]];
                 if (random() > 0.5) pair2 = [pair2[1], pair2[0]];
             } else {
@@ -101,21 +111,26 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
         }
 
         if (mode === 'make-ten') {
-            const givenNumber = constraints.givenNumber || Math.floor(random() * 9) + 1; // 1 to 9
-            const missingNumber = 10 - givenNumber;
+            const target = constraints.targetSum || 10;
+            const givenNumber = constraints.givenNumber || Math.floor(random() * (target - 1)) + 1; // 1 to target-1
+            const missingNumber = target - givenNumber;
             return {
                 id: `make-ten-${givenNumber}`,
                 data: {
                     mode,
                     givenNumber,
                     missingNumber,
-                    target: 10
+                    target
                 }
             };
         }
 
         if (mode === 'compose-teen' || mode === 'decompose-teen') {
-            const ones = constraints.ones || Math.floor(random() * 9) + 1; // 1 to 9
+            const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;
+            const resolvedMax = resolvedRange.max <= 20 ? resolvedRange.max : 19;
+            const ones = constraints.ones !== undefined 
+                ? constraints.ones 
+                : (constraints.target !== undefined ? constraints.target - 10 : Math.floor(random() * (resolvedMax - resolvedMin + 1)) + resolvedMin - 10);
             const target = 10 + ones;
             return {
                 id: `${mode}-${target}`,
@@ -129,13 +144,13 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
 
         // Standard arithmetic (legacy)
         let operation: 'addition' | 'subtraction' | 'multiplication' | 'division' = 'addition';
-        if (labels.includes(Area.Addition)) operation = 'addition';
-        else if (labels.includes(Area.Subtraction)) operation = 'subtraction';
-        else if (labels.includes(Area.Multiplication)) operation = 'multiplication';
-        else if (labels.includes(Area.Division)) operation = 'division';
+        if (labels.some(l => isSubConceptOf(l, Area.Addition))) operation = 'addition';
+        else if (labels.some(l => isSubConceptOf(l, Area.Subtraction))) operation = 'subtraction';
+        else if (labels.some(l => isSubConceptOf(l, Area.Multiplication))) operation = 'multiplication';
+        else if (labels.some(l => isSubConceptOf(l, Area.Division))) operation = 'division';
 
-        const allowNegatives = labels.includes(Scope.NumbersWithNegatives);
-        const includeZero = labels.includes(Scope.NumbersWithZero);
+        const allowNegatives = labels.some(l => isSubConceptOf(l, Scope.NumbersWithNegatives));
+        const includeZero = labels.some(l => isSubConceptOf(l, Scope.NumbersWithZero));
         
         const getRange = (digitConstraint?: number) => {
             if (digitConstraint) {
@@ -144,10 +159,7 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
                     max: Math.pow(10, digitConstraint) - 1 
                 };
             }
-            if (labels.includes(Scope.NumbersSmaller10)) return { min: 0, max: 9 };
-            if (labels.includes(Scope.NumbersSmaller100)) return { min: 0, max: 99 };
-            if (labels.includes(Scope.NumbersSmaller1000)) return { min: 0, max: 999 };
-            return { min: 0, max: 9 };
+            return { min: resolvedRange.min, max: resolvedRange.max };
         };
 
         const range1 = getRange(constraints.digitsNum1);

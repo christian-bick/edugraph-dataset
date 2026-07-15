@@ -7,6 +7,7 @@ export const spec: ViewSpec = {
         Area.BaseOperations,
         Scope.ArabicNumerals,
         Scope.NumericRange,
+        Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ],
     constraints: {

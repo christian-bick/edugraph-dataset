@@ -7,6 +7,8 @@ export const spec: GeneratorSpec = {
         Area.BaseOperations,
         Scope.PhysicalNumbers,
         Scope.ArabicNumerals,
-        Scope.NumericRange
+        Scope.NumericRange,
+        Scope.NumericZero,
+        Scope.NumericSign
     ]
 };
