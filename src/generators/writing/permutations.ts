@@ -12,7 +12,7 @@ function buildPermutations() {
             Scope.ArabicNumerals, 
             Scope.Base10, 
             Scope.NumbersSmaller10, 
-            Scope.IntegersWithoutZero,
+            Scope.NumbersWithoutZero,
             Ability.ProcedureExecution
         ])
         .addConstraints({ mode: 'stroke' })
@@ -24,7 +24,7 @@ function buildPermutations() {
             Area.DigitNotation,
             Scope.ArabicNumerals,
             Scope.NumbersSmaller20,
-            Scope.IntegersWithZero,
+            Scope.NumbersWithZero,
             Ability.ProcedureExecution
         ])
         .addConstraints({ mode: 'stroke' })
@@ -36,7 +36,7 @@ function buildPermutations() {
             Area.Numeration,
             Scope.ArabicNumerals,
             Scope.NumbersSmaller20,
-            Scope.IntegersWithZero,
+            Scope.NumbersWithZero,
             Scope.PhysicalNumbers,
             Ability.ProcedureExecution
         ])

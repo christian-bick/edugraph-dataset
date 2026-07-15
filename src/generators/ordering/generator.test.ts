@@ -25,7 +25,7 @@ describe('OrderingGenerator', () => {
                     expect(stub.data.numbers).toBeInstanceOf(Array);
                     expect(stub.data.numbers.length).toBe(5);
                     
-                    const includesZero = input.labels.includes(Scope.IntegersWithZero) || 
+                    const includesZero = input.labels.includes(Scope.NumbersWithZero) || 
                                        input.constraints.includesZero === true;
                     if (!includesZero) {
                         expect(stub.data.numbers).not.toContain(0);

@@ -1,6 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { ComparisonNumericProblem, ComparisonMatchingProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
+import { Scope } from "edugraph-ts";
 
 export class ComparisonGenerator implements ProblemGenerator<ComparisonNumericProblem | ComparisonMatchingProblem> {
     type: AbstractProblem['type'] = 'comparison';
@@ -45,14 +46,14 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonNumericPr
         // Numeric comparison (legacy)
         let digits = constraints.digits;
         if (!digits) {
-            if (labels.includes('Scope.NumbersSmaller1000')) digits = 3;
-            else if (labels.includes('Scope.NumbersSmaller100')) digits = 2;
+            if (labels.includes(Scope.NumbersSmaller1000)) digits = 3;
+            else if (labels.includes(Scope.NumbersSmaller100)) digits = 2;
             else digits = 1;
         }
 
         const includesZero = constraints.includesZero !== undefined 
             ? constraints.includesZero 
-            : !labels.includes('Scope.IntegersWithoutZero');
+            : !labels.includes(Scope.NumbersWithoutZero);
 
         const max = Math.pow(10, digits) - 1;
         let min = digits > 1 ? Math.pow(10, digits - 1) : 0;

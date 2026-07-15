@@ -134,8 +134,8 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
         else if (labels.includes(Area.Multiplication)) operation = 'multiplication';
         else if (labels.includes(Area.Division)) operation = 'division';
 
-        const allowNegatives = labels.includes(Scope.IntegersWithNegatives);
-        const includeZero = labels.includes(Scope.IntegersWithZero);
+        const allowNegatives = labels.includes(Scope.NumbersWithNegatives);
+        const includeZero = labels.includes(Scope.NumbersWithZero);
         
         const getRange = (digitConstraint?: number) => {
             if (digitConstraint) {

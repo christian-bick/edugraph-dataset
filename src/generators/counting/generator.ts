@@ -1,6 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { CountingSimpleProblem, CountingIncDecProblem, CountingConservationProblem, CountingClassifyProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
+import { Scope } from "edugraph-ts";
 
 export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem | CountingIncDecProblem | CountingConservationProblem | CountingClassifyProblem> {
     type: AbstractProblem['type'] = 'counting';
@@ -108,8 +109,8 @@ export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem
         // For how-many, one-to-one, count-out, simple/inc-dec
         let maxCount = constraints.maxCount || constraints.count;
         if (!maxCount) {
-            if (labels.includes('Scope.NumbersSmaller20')) maxCount = 20;
-            else if (labels.includes('Scope.NumbersSmaller10')) maxCount = 10;
+            if (labels.includes(Scope.NumbersSmaller20)) maxCount = 20;
+            else if (labels.includes(Scope.NumbersSmaller10)) maxCount = 10;
             else maxCount = 10;
         }
 
