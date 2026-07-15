@@ -38,7 +38,7 @@
         "http://edugraph.io/edu/NumericOrder"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -63,12 +63,12 @@
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
         "http://edugraph.io/edu/ArabicNumerals",
-        "http://edugraph.io/edu/IntegersWithZero"
+        "http://edugraph.io/edu/NumbersWithZero"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
       ],
-      "reasoning": "Writing numbers 0-20 and representing objects with numerals maps to DigitNotation, ZeroConcept, and Numeration. The scopes cover the range (NumbersSmaller20), the representation (ArabicNumerals), and the inclusion of zero (IntegersWithZero).",
+      "reasoning": "Writing numbers 0-20 and representing objects with numerals maps to DigitNotation, ZeroConcept, and Numeration. The scopes cover the range (NumbersSmaller20), the representation (ArabicNumerals), and the inclusion of zero (NumbersWithZero).",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -131,7 +131,7 @@
         "http://edugraph.io/edu/Numeration"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureUnderstanding"
@@ -246,7 +246,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller10",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/VisualNumbers"
       ],
@@ -271,7 +271,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller10",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/VisualNumbers"
       ],
@@ -296,7 +296,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller10",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/VisualNumbers"
       ],
@@ -321,7 +321,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller10",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -346,7 +346,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
         "http://edugraph.io/edu/NumbersLarger10",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/VisualNumbers"
       ],
@@ -591,14 +591,14 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/VisualNumbers"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
       ],
-      "reasoning": "The standard involves addition and subtraction within 20 to solve word problems. This is covered by Addition, Subtraction, Difference, and Sum areas, with NumbersSmaller20, IntegersWithoutNegatives, PhysicalNumbers, and VisualNumbers scopes, and ProcedureExecution ability.",
+      "reasoning": "The standard involves addition and subtraction within 20 to solve word problems. This is covered by Addition, Subtraction, Difference, and Sum areas, with NumbersSmaller20, NumbersWithoutNegatives, PhysicalNumbers, and VisualNumbers scopes, and ProcedureExecution ability.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -616,14 +616,14 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/VisualNumbers"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
       ],
-      "reasoning": "The standard involves adding three whole numbers with a sum less than or equal to 20. This is covered by Addition and Sum areas, with NumbersSmaller20, IntegersWithoutNegatives, PhysicalNumbers, and VisualNumbers scopes, and ProcedureExecution ability.",
+      "reasoning": "The standard involves adding three whole numbers with a sum less than or equal to 20. This is covered by Addition and Sum areas, with NumbersSmaller20, NumbersWithoutNegatives, PhysicalNumbers, and VisualNumbers scopes, and ProcedureExecution ability.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -643,12 +643,12 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureApplication"
       ],
-      "reasoning": "The standard involves applying commutative and associative properties to add and subtract. This is covered by CommutativeLaw, AssociativeLaw, Addition, and Subtraction areas, with NumbersSmaller20 and IntegersWithoutNegatives scopes, and ProcedureApplication ability.",
+      "reasoning": "The standard involves applying commutative and associative properties to add and subtract. This is covered by CommutativeLaw, AssociativeLaw, Addition, and Subtraction areas, with NumbersSmaller20 and NumbersWithoutNegatives scopes, and ProcedureApplication ability.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -667,12 +667,12 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureUnderstanding"
       ],
-      "reasoning": "The standard involves understanding subtraction as an unknown-addend problem. This is covered by Subtraction, Addition, and Difference areas, with NumbersSmaller20 and IntegersWithoutNegatives scopes, and ProcedureUnderstanding ability.",
+      "reasoning": "The standard involves understanding subtraction as an unknown-addend problem. This is covered by Subtraction, Addition, and Difference areas, with NumbersSmaller20 and NumbersWithoutNegatives scopes, and ProcedureUnderstanding ability.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -693,12 +693,12 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureUnderstanding"
       ],
-      "reasoning": "The standard involves relating counting to addition and subtraction. This is covered by Numeration, Addition, Subtraction, Increment, and Decrement areas, with NumbersSmaller20 and IntegersWithoutNegatives scopes, and ProcedureUnderstanding ability.",
+      "reasoning": "The standard involves relating counting to addition and subtraction. This is covered by Numeration, Addition, Subtraction, Increment, and Decrement areas, with NumbersSmaller20 and NumbersWithoutNegatives scopes, and ProcedureUnderstanding ability.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -720,12 +720,12 @@
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
         "http://edugraph.io/edu/NumbersSmaller10",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
       ],
-      "reasoning": "The standard involves adding and subtracting within 20, demonstrating fluency within 10, using various strategies. This is covered by Addition, Subtraction, Numeration, Increment, and Decrement areas, with NumbersSmaller20, NumbersSmaller10, and IntegersWithoutNegatives scopes, and ProcedureExecution ability.",
+      "reasoning": "The standard involves adding and subtracting within 20, demonstrating fluency within 10, using various strategies. This is covered by Addition, Subtraction, Numeration, Increment, and Decrement areas, with NumbersSmaller20, NumbersSmaller10, and NumbersWithoutNegatives scopes, and ProcedureExecution ability.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -744,7 +744,7 @@
         "http://edugraph.io/edu/NumericIdentity"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersSmaller20"
       ],
@@ -771,7 +771,7 @@
         "http://edugraph.io/edu/Algebra"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersSmaller20"
       ],
@@ -800,7 +800,7 @@
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Numerals",
         "http://edugraph.io/edu/NumbersSmaller1000",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -875,7 +875,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/IntegersWithZero"
+        "http://edugraph.io/edu/NumbersWithZero"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ConceptSpecification",
@@ -1031,7 +1031,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/LengthMeasurement",
         "http://edugraph.io/edu/PhysicalNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -1187,7 +1187,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -1211,7 +1211,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureMemorization",
@@ -1403,7 +1403,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -1648,7 +1648,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/Numberline",
         "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/IntegersWithZero"
+        "http://edugraph.io/edu/NumbersWithZero"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -1845,7 +1845,7 @@
         "http://edugraph.io/edu/BaseOperations"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/NumbersSmaller100"
       ],
       "matched_abilities": [
@@ -1869,7 +1869,7 @@
         "http://edugraph.io/edu/BaseOperations"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/NumbersSmaller100"
       ],
       "matched_abilities": [
@@ -1895,7 +1895,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -1919,7 +1919,7 @@
         "http://edugraph.io/edu/Algebra"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/NumbersSmaller100"
       ],
       "matched_abilities": [
@@ -1946,7 +1946,7 @@
         "http://edugraph.io/edu/Division"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/NumbersSmaller100"
       ],
       "matched_abilities": [
@@ -1971,7 +1971,7 @@
         "http://edugraph.io/edu/FactorsAndMultiples"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/NumbersSmaller100"
       ],
       "matched_abilities": [
@@ -1999,7 +1999,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller100",
         "http://edugraph.io/edu/IntegerNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -2026,7 +2026,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/IntegerNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -2053,7 +2053,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/IntegerNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/InductiveReasoning",
@@ -2081,7 +2081,7 @@
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersSmaller1000",
         "http://edugraph.io/edu/IntegerNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -2107,7 +2107,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller1000",
         "http://edugraph.io/edu/IntegerNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -2132,7 +2132,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller100",
         "http://edugraph.io/edu/IntegerNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/Base10"
       ],
       "matched_abilities": [
@@ -2498,7 +2498,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/TwoDimensional",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalGeometry"
       ],
       "matched_abilities": [
@@ -2524,7 +2524,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/TwoDimensional",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/VisualGeometry"
       ],
       "matched_abilities": [
@@ -2552,7 +2552,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/TwoDimensional",
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/VisualGeometry"
       ],
       "matched_abilities": [
@@ -2579,7 +2579,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/TwoDimensional",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -2605,7 +2605,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/TwoDimensional",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -2677,7 +2677,7 @@
         "http://edugraph.io/edu/NumericComparison"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Interpretation",
@@ -2701,7 +2701,7 @@
         "http://edugraph.io/edu/NumericComparison"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -2726,7 +2726,7 @@
         "http://edugraph.io/edu/DecimalRounding"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -3723,7 +3723,7 @@
         "http://edugraph.io/edu/BaseOperations"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithZero",
+        "http://edugraph.io/edu/NumbersWithZero",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersLarger1000"
       ],
@@ -4538,13 +4538,13 @@
         "http://edugraph.io/edu/BaseOperations"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/Base10"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
       ],
-      "reasoning": "Fluently dividing multi-digit numbers using the standard algorithm maps to procedural execution of division and base operations on positive integers (IntegersWithoutNegatives) in base 10.",
+      "reasoning": "Fluently dividing multi-digit numbers using the standard algorithm maps to procedural execution of division and base operations on positive integers (NumbersWithoutNegatives) in base 10.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -4586,7 +4586,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -4609,8 +4609,8 @@
         "http://edugraph.io/edu/IntegerArithmetic"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithNegatives",
-        "http://edugraph.io/edu/IntegersWithZero"
+        "http://edugraph.io/edu/NumbersWithNegatives",
+        "http://edugraph.io/edu/NumbersWithZero"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Understanding",
@@ -4634,7 +4634,7 @@
         "http://edugraph.io/edu/Numeration"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithNegatives",
+        "http://edugraph.io/edu/NumbersWithNegatives",
         "http://edugraph.io/edu/Numberline"
       ],
       "matched_abilities": [
@@ -4711,7 +4711,7 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/Numberline",
-        "http://edugraph.io/edu/IntegersWithNegatives"
+        "http://edugraph.io/edu/NumbersWithNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Understanding",
@@ -4735,14 +4735,14 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/RationalNumbers",
-        "http://edugraph.io/edu/IntegersWithNegatives",
+        "http://edugraph.io/edu/NumbersWithNegatives",
         "http://edugraph.io/edu/TemperatureAbstraction"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
         "http://edugraph.io/edu/DirectUnderstanding"
       ],
-      "reasoning": "The standard requires writing and interpreting inequality statements for rational numbers in real-world contexts (like temperature). This is fully covered by the ontology's NumericOrder and NumericComparison areas, combined with the TemperatureAbstraction and IntegersWithNegatives scopes.",
+      "reasoning": "The standard requires writing and interpreting inequality statements for rational numbers in real-world contexts (like temperature). This is fully covered by the ontology's NumericOrder and NumericComparison areas, combined with the TemperatureAbstraction and NumbersWithNegatives scopes.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -4761,7 +4761,7 @@
       "matched_scopes": [
         "http://edugraph.io/edu/RationalNumbers",
         "http://edugraph.io/edu/Numberline",
-        "http://edugraph.io/edu/IntegersWithNegatives"
+        "http://edugraph.io/edu/NumbersWithNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Understanding",
@@ -4785,13 +4785,13 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/RationalNumbers",
-        "http://edugraph.io/edu/IntegersWithNegatives"
+        "http://edugraph.io/edu/NumbersWithNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/AnalyticalCapability",
         "http://edugraph.io/edu/ConceptClassification"
       ],
-      "reasoning": "This standard requires distinguishing between the order of signed numbers (e.g., -50 < -30) and the comparison of their absolute values (e.g., |-50| > |-30|). The ontology covers this through the combination of AbsoluteValue, NumericComparison, and NumericOrder areas, along with RationalNumbers and IntegersWithNegatives scopes. The cognitive demand of distinguishing these concepts maps to AnalyticalCapability and ConceptClassification.",
+      "reasoning": "This standard requires distinguishing between the order of signed numbers (e.g., -50 < -30) and the comparison of their absolute values (e.g., |-50| > |-30|). The ontology covers this through the combination of AbsoluteValue, NumericComparison, and NumericOrder areas, along with RationalNumbers and NumbersWithNegatives scopes. The cognitive demand of distinguishing these concepts maps to AnalyticalCapability and ConceptClassification.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -4834,7 +4834,7 @@
         "http://edugraph.io/edu/PowerOperations"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -5023,12 +5023,12 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/RationalNumbers",
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
       ],
-      "reasoning": "Solving one-step equations of the form x + p = q and px = q with nonnegative rational numbers maps to Algebra, Addition, and Multiplication areas, RationalNumbers and IntegersWithoutNegatives scopes, and ProcedureExecution.",
+      "reasoning": "Solving one-step equations of the form x + p = q and px = q with nonnegative rational numbers maps to Algebra, Addition, and Multiplication areas, RationalNumbers and NumbersWithoutNegatives scopes, and ProcedureExecution.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -5284,7 +5284,7 @@
         "http://edugraph.io/edu/Numeration"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithoutNegatives"
+        "http://edugraph.io/edu/NumbersWithoutNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -5515,13 +5515,13 @@
         "http://edugraph.io/edu/Sum"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/IntegersWithNegatives",
-        "http://edugraph.io/edu/IntegersWithZero"
+        "http://edugraph.io/edu/NumbersWithNegatives",
+        "http://edugraph.io/edu/NumbersWithZero"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Understanding"
       ],
-      "reasoning": "Describing situations where opposite quantities combine to make 0 involves understanding zero as a concept, integer signs (positive and negative), and the sum of opposite quantities. This maps to ZeroConcept, IntegerSigns, and Sum areas, with IntegersWithNegatives and IntegersWithZero scopes, requiring the Understanding ability.",
+      "reasoning": "Describing situations where opposite quantities combine to make 0 involves understanding zero as a concept, integer signs (positive and negative), and the sum of opposite quantities. This maps to ZeroConcept, IntegerSigns, and Sum areas, with NumbersWithNegatives and NumbersWithZero scopes, requiring the Understanding ability.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -5541,13 +5541,13 @@
       "matched_scopes": [
         "http://edugraph.io/edu/Numberline",
         "http://edugraph.io/edu/RationalNumbers",
-        "http://edugraph.io/edu/IntegersWithNegatives"
+        "http://edugraph.io/edu/NumbersWithNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Understanding",
         "http://edugraph.io/edu/ResultInterpretation"
       ],
-      "reasoning": "Understanding addition as a distance on a number line and additive inverses summing to 0 maps to Addition, ZeroConcept, and DistanceCalculation areas. The scopes are Numberline, RationalNumbers, and IntegersWithNegatives. The abilities required are Understanding and ResultInterpretation for real-world contexts.",
+      "reasoning": "Understanding addition as a distance on a number line and additive inverses summing to 0 maps to Addition, ZeroConcept, and DistanceCalculation areas. The scopes are Numberline, RationalNumbers, and NumbersWithNegatives. The abilities required are Understanding and ResultInterpretation for real-world contexts.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -5568,13 +5568,13 @@
       "matched_scopes": [
         "http://edugraph.io/edu/Numberline",
         "http://edugraph.io/edu/RationalNumbers",
-        "http://edugraph.io/edu/IntegersWithNegatives"
+        "http://edugraph.io/edu/NumbersWithNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Understanding",
         "http://edugraph.io/edu/ProcedureExecution"
       ],
-      "reasoning": "Understanding subtraction as adding the additive inverse and finding the distance between numbers as the absolute value of their difference maps to Subtraction, Addition, Difference, and DistanceCalculation. The scopes are Numberline, RationalNumbers, and IntegersWithNegatives, requiring Understanding and ProcedureExecution.",
+      "reasoning": "Understanding subtraction as adding the additive inverse and finding the distance between numbers as the absolute value of their difference maps to Subtraction, Addition, Difference, and DistanceCalculation. The scopes are Numberline, RationalNumbers, and NumbersWithNegatives, requiring Understanding and ProcedureExecution.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -5618,13 +5618,13 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/RationalNumbers",
-        "http://edugraph.io/edu/IntegersWithNegatives"
+        "http://edugraph.io/edu/NumbersWithNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/Understanding",
         "http://edugraph.io/edu/ResultInterpretation"
       ],
-      "reasoning": "Extending multiplication to rational numbers using properties like the distributive law and rules of signs maps to Multiplication, DistributiveLaw, RulesOfSigns, and RationalArithmetic. The scopes are RationalNumbers and IntegersWithNegatives, requiring Understanding and ResultInterpretation.",
+      "reasoning": "Extending multiplication to rational numbers using properties like the distributive law and rules of signs maps to Multiplication, DistributiveLaw, RulesOfSigns, and RationalArithmetic. The scopes are RationalNumbers and NumbersWithNegatives, requiring Understanding and ResultInterpretation.",
       "suggested_task": {
         "title": "",
         "description": ""
@@ -5803,7 +5803,7 @@
         "http://edugraph.io/edu/RationalNumbers",
         "http://edugraph.io/edu/FractionNumbers",
         "http://edugraph.io/edu/DecimalNumbers",
-        "http://edugraph.io/edu/IntegersWithNegatives"
+        "http://edugraph.io/edu/NumbersWithNegatives"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
