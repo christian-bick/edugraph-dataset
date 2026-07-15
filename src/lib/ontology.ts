@@ -31,10 +31,64 @@ export function isSubConceptOf(child: string, parent: string): boolean {
     return false;
 }
 
+// Explicit inclusion map using Scope enums
+const INCLUDED_BY_MAP: Record<string, string[]> = {
+    [Scope.NumbersSmaller10]: [
+        Scope.NumbersSmaller20
+    ],
+    [Scope.NumbersSmaller20]: [
+        Scope.NumbersSmaller100
+    ],
+    [Scope.NumbersSmaller100]: [
+        Scope.NumbersSmaller1000
+    ],
+    [Scope.NumbersWithoutZero]: [
+        Scope.NumbersWithZero
+    ],
+    [Scope.NumbersWithoutNegatives]: [
+        Scope.NumbersWithNegatives
+    ]
+};
+
+/**
+ * Returns true if child is compatible with parent.
+ * It traverses standard partOf relations, but also follows explicit custom INCLUDED_BY_MAP relations.
+ */
+export function isCompatibleConcept(child: string, parent: string): boolean {
+    if (child === parent) return true;
+
+    const visited = new Set<string>();
+    const queue: string[] = [child];
+
+    while (queue.length > 0) {
+        const current = queue.shift()!;
+        if (current === parent) return true;
+        if (visited.has(current)) continue;
+        visited.add(current);
+
+        try {
+            const nextNodes = [...(partOf(current as CompetencyDescriptor) || [])];
+            
+            // Traverse explicit capability inclusion relations
+            const inclusions = INCLUDED_BY_MAP[current] || [];
+            nextNodes.push(...inclusions);
+
+            for (const n of nextNodes) {
+                if (!visited.has(n)) {
+                    queue.push(n);
+                }
+            }
+        } catch {
+            // Handle cases where concept is not defined in edugraph-ts
+        }
+    }
+
+    return false;
+}
+
 /**
  * Returns true if the view supports all the labels required by the problem.
- * A view supports a problem label if the problem label is a subconcept of the view label
- * via taxonomic partOf generalization.
+ * A view supports a problem label if the problem label is compatible with the view label.
  */
 export function doesViewSupportProblem(viewSpecSupportedLabels: string[], problemLabels: string[]): boolean {
     if (!viewSpecSupportedLabels || viewSpecSupportedLabels.length === 0) {
@@ -47,7 +101,7 @@ export function doesViewSupportProblem(viewSpecSupportedLabels: string[], proble
             return true;
         }
         
-        return viewSpecSupportedLabels.some(viewLabel => isSubConceptOf(problemLabel, viewLabel));
+        return viewSpecSupportedLabels.some(viewLabel => isCompatibleConcept(problemLabel, viewLabel));
     });
 }
 
