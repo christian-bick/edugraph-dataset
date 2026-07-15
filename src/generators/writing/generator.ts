@@ -1,6 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
 import { WritingProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
+import { Area } from "edugraph-ts";
 
 export class WritingGenerator implements ProblemGenerator<WritingProblem> {
     type: AbstractProblem['type'] = 'writing';
@@ -13,9 +14,9 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem> {
         
         let mode = constraints.mode;
         if (!mode && labels) {
-            if (labels.includes('http://edugraph.io/edu/Numeration')) {
+            if (labels.includes(Area.Numeration)) {
                 mode = 'count-objects';
-            } else if (labels.includes('http://edugraph.io/edu/DigitNotation')) {
+            } else if (labels.includes(Area.DigitNotation)) {
                 mode = 'stroke';
             }
         }

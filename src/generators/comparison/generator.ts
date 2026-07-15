@@ -13,7 +13,7 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonNumericPr
             mode = 'matching';
         }
         if (!constraints.mode && labels) {
-            if (labels.includes('http://edugraph.io/edu/PhysicalNumbers')) {
+            if (labels.includes(Scope.PhysicalNumbers)) {
                 mode = 'matching';
             }
         }

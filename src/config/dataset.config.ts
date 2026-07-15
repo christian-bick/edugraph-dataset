@@ -34,6 +34,8 @@ import {
     GeometryProblem
 } from '../types/problems.ts';
 
+import { Area, Scope } from 'edugraph-ts';
+
 type CompatibleViewsFor<TProblemData> = {
     [K in keyof ViewTypeMap]: ViewTypeMap[K] extends TProblemData ? K : never;
 }[keyof ViewTypeMap];
@@ -67,10 +69,10 @@ export const DatasetConfig: DatasetConfigType = {
         arithmetic: {
             generatorClass: ArithmeticGenerator,
             supportedLabels: [
-                'http://edugraph.io/edu/BaseOperations',
-                'http://edugraph.io/edu/PhysicalNumbers',
-                'http://edugraph.io/edu/ArabicNumerals',
-                'http://edugraph.io/edu/NumericRange'
+                Area.BaseOperations,
+                Scope.PhysicalNumbers,
+                Scope.ArabicNumerals,
+                Scope.NumericRange
             ],
             splits: { train: 0.8, val: 0.2 },
             views: [
@@ -86,14 +88,14 @@ export const DatasetConfig: DatasetConfigType = {
         counting: {
             generatorClass: CountingGenerator,
             supportedLabels: [
-                'http://edugraph.io/edu/Numeration',
-                'http://edugraph.io/edu/PhysicalNumbers',
-                'http://edugraph.io/edu/AdditiveCount',
-                'http://edugraph.io/edu/NumericIdentity',
-                'http://edugraph.io/edu/ObjectSorting',
-                'http://edugraph.io/edu/CollectionSense',
-                'http://edugraph.io/edu/NumericOrder',
-                'http://edugraph.io/edu/NumericRange'
+                Area.Numeration,
+                Scope.PhysicalNumbers,
+                Scope.AdditiveCount,
+                Area.NumericIdentity,
+                Area.ObjectSorting,
+                Area.CollectionSense,
+                Area.NumericOrder,
+                Scope.NumericRange
             ],
             splits: { train: 0.8, val: 0.2 },
             views: [
@@ -108,8 +110,8 @@ export const DatasetConfig: DatasetConfigType = {
         measurement: {
             generatorClass: MeasurementGenerator,
             supportedLabels: [
-                'http://edugraph.io/edu/Measurement',
-                'http://edugraph.io/edu/NumericRange'
+                Area.Measurement,
+                Scope.NumericRange
             ],
             splits: { train: 0.8, val: 0.2 },
             views: [
@@ -121,11 +123,11 @@ export const DatasetConfig: DatasetConfigType = {
         comparison: {
             generatorClass: ComparisonGenerator,
             supportedLabels: [
-                'http://edugraph.io/edu/Numeration',
-                'http://edugraph.io/edu/Comparison',
-                'http://edugraph.io/edu/PhysicalNumbers',
-                'http://edugraph.io/edu/ArabicNumerals',
-                'http://edugraph.io/edu/NumericRange'
+                Area.Numeration,
+                Area.NumericComparison,
+                Scope.PhysicalNumbers,
+                Scope.ArabicNumerals,
+                Scope.NumericRange
             ],
             splits: { train: 0.8, val: 0.2 },
             views: [
@@ -144,12 +146,12 @@ export const DatasetConfig: DatasetConfigType = {
         writing: {
             generatorClass: WritingGenerator,
             supportedLabels: [
-                'http://edugraph.io/edu/DigitNotation',
-                'http://edugraph.io/edu/Numeration',
-                'http://edugraph.io/edu/ArabicNumerals',
-                'http://edugraph.io/edu/PhysicalNumbers',
-                'http://edugraph.io/edu/NumbersWithZero',
-                'http://edugraph.io/edu/NumericRange'
+                Area.DigitNotation,
+                Area.Numeration,
+                Scope.ArabicNumerals,
+                Scope.PhysicalNumbers,
+                Scope.NumbersWithZero,
+                Scope.NumericRange
             ],
             splits: { train: 0.8, val: 0.2 },
             views: [
@@ -167,7 +169,7 @@ export const DatasetConfig: DatasetConfigType = {
         geometry: {
             generatorClass: GeometryGenerator,
             supportedLabels: [
-                'http://edugraph.io/edu/Geometry'
+                Area.Geometry
             ],
             splits: { train: 0.8, val: 0.2 },
             views: [
