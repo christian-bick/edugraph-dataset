@@ -10,6 +10,8 @@
     "test": "vitest --run",
     "test:coverage": "vitest run --coverage && npx vite-node src/scripts/check-generator-coverage.ts",
     "generate:dataset": "npx vite-node src/scripts/generate-dataset.ts",
+    "test:views": "npx vite-node src/scripts/test-view-boundaries.ts",
+    "test:vqa": "npx vite-node src/scripts/validate-dataset.ts",
     "report:coverage": "npx vite-node src/scripts/generate-coverage-report.ts",
     "generate:standards-explorer": "npx vite-node src/scripts/generate-standards-explorer.ts",
     "map:standards": "npx vite-node src/scripts/map-standards.ts",

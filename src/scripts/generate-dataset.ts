@@ -81,6 +81,56 @@ async function renderDatasetSplit(
     let totalImages = 0;
     const metadata: any[] = [];
     
+    // Pre-load view specs for validation
+    const specMap: Record<string, any> = {};
+    for (const blueprint of blueprints) {
+        if (!specMap[blueprint.viewId]) {
+            const specPath = resolve(PROJECT_ROOT, 'src', 'visuals', 'views', blueprint.viewId, 'spec.ts');
+            if (existsSync(specPath)) {
+                try {
+                    // Use file URL path for TS compatibility in ES modules on Windows
+                    const specModule = await import(`../visuals/views/${blueprint.viewId}/spec.ts`);
+                    specMap[blueprint.viewId] = specModule.spec;
+                } catch (e) {
+                    console.warn(`Could not import spec for view ${blueprint.viewId}:`, e);
+                }
+            }
+        }
+    }
+
+    // Generic constraints validator
+    const validateConstraints = (data: any, constraints: any, viewId: string) => {
+        for (const [key, constraint] of Object.entries(constraints) as any) {
+            const val = data[key];
+            if (val === undefined) continue;
+
+            if (constraint.type === 'range') {
+                if (val < constraint.min || val > constraint.max) {
+                    throw new Error(`[${viewId}] Range violation: parameter "${key}" must be between ${constraint.min} and ${constraint.max}. Got: ${val}`);
+                }
+            } else if (constraint.type === 'options') {
+                if (!constraint.values.includes(val)) {
+                    throw new Error(`[${viewId}] Option violation: parameter "${key}" must be one of [${constraint.values.join(', ')}]. Got: ${val}`);
+                }
+            }
+        }
+    };
+
+    // Run view spec validations
+    for (const problem of problems) {
+        const index = problems.indexOf(problem);
+        const blueprint = blueprints[(index + viewIndexOffset) % blueprints.length];
+        const spec = specMap[blueprint.viewId];
+        if (spec && spec.constraints) {
+            try {
+                validateConstraints(problem.data, spec.constraints, blueprint.viewId);
+            } catch (err: any) {
+                console.error(`Validation Error for problem ID ${problem.id}:`, err.message);
+                throw err;
+            }
+        }
+    }
+    
     const taskQueue: { problem: AbstractProblem, blueprint: VisualBlueprint, instance: number }[] = [];
     problems.forEach((problem, index) => {
         const blueprint = blueprints[(index + viewIndexOffset) % blueprints.length];
@@ -129,23 +179,92 @@ async function renderDatasetSplit(
 
                     await page.evaluate((p) => window.renderView!(p), payload);
                     await page.waitForTimeout(60);
+
+                    // Client-Side Bounding Box Overlap Checker
+                    const layoutCheck = await page.evaluate(() => {
+                        const viewContainer = document.getElementById('view');
+                        if (!viewContainer) return { pass: true, errors: ['#view container not found'] };
+
+                        const allElements = Array.from(viewContainer.querySelectorAll('*')) as HTMLElement[];
+                        
+                        const elementsToCheck = allElements.filter(el => {
+                            const rect = el.getBoundingClientRect();
+                            if (rect.width === 0 || rect.height === 0) return false;
+                            
+                            const style = window.getComputedStyle(el);
+                            if (style.visibility === 'hidden' || style.display === 'none' || style.opacity === '0') return false;
+                            
+                            const isLeaf = el.children.length === 0;
+                            const isRenderNode = ['IMG', 'SVG', 'INPUT', 'BUTTON', 'CANVAS'].includes(el.tagName);
+                            const hasDirectText = Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim().length > 0);
+                            
+                            return isLeaf || isRenderNode || hasDirectText;
+                        });
+
+                        const rects = elementsToCheck.map(el => ({
+                            el,
+                            rect: el.getBoundingClientRect()
+                        }));
+
+                        const errors: string[] = [];
+
+                        for (let i = 0; i < rects.length; i++) {
+                            for (let j = i + 1; j < rects.length; j++) {
+                                const a = rects[i];
+                                const b = rects[j];
+
+                                if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
+
+                                const r1 = a.rect;
+                                const r2 = b.rect;
+
+                                const overlaps = !(
+                                    r1.right <= r2.left ||
+                                    r1.left >= r2.right ||
+                                    r1.bottom <= r2.top ||
+                                    r1.top >= r2.bottom
+                                );
+
+                                if (overlaps) {
+                                    const labelA = `${a.el.tagName}${a.el.className ? '.' + Array.from(a.el.classList).join('.') : ''}`;
+                                    const labelB = `${b.el.tagName}${b.el.className ? '.' + Array.from(b.el.classList).join('.') : ''}`;
+                                    errors.push(`Overlap: ${labelA} intersects with ${labelB}`);
+                                }
+                            }
+                        }
+
+                        return {
+                            pass: errors.length === 0,
+                            errors
+                        };
+                    });
+
+                    if (!layoutCheck.pass) {
+                        console.warn(`[Layout Warning] Overlaps detected in ${baseFilename}_mode-${modeTag}.png:`, layoutCheck.errors);
+                    }
+
                     const filename = `${baseFilename}_mode-${modeTag}.png`;
                     const outPath = resolve(splitOutputDir, filename);
                     await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
                     
                     totalImages++;
 
+                    const { _permutationParams, ...cleanedData } = problem.data;
+
                     return {
                         file_name: filename,
                         problem_id: problem.id,
+                        generator: moduleName,
+                        view: blueprint.viewId,
                         type: problem.type,
                         solution_visible: isSolutionView,
                         mode: modeName,
                         tags: problem.tags,
                         parameters: {
-                            ...(problem.data._permutationParams || {}),
+                            ...cleanedData,
                             ...blueprint.visualParams
-                        }
+                        },
+                        layout_checks: layoutCheck
                     };
                 };
 
@@ -292,7 +411,22 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
 
 async function main() {
     const args = process.argv.slice(2);
-    const targetModule = args.find(a => !a.startsWith('--'));
+    let targetModule: string | undefined = undefined;
+
+    // Check for positional arguments
+    const positionalArgs = args.filter(a => !a.startsWith('--'));
+    if (positionalArgs.length > 0) {
+        console.error('Error: Positional arguments are not allowed.');
+        console.error('Usage: npm run generate:dataset -- --generator=X [--training-only]');
+        process.exit(1);
+    }
+
+    const generatorArg = args.find(a => a.startsWith('--generator='));
+    if (generatorArg) {
+        targetModule = generatorArg.split('=')[1];
+    }
+
+    const trainingOnly = args.includes('--training-only');
 
     if (!targetModule) {
         if (existsSync(OUT_DIR)) {
@@ -303,7 +437,7 @@ async function main() {
     } else {
         // Clear specific module in both splits
         ['train', 'validation'].forEach(split => {
-            const moduleDir = resolve(OUT_DIR, split, targetModule);
+            const moduleDir = resolve(OUT_DIR, split, targetModule!);
             if (existsSync(moduleDir)) {
                 console.log(`Cleaning target directory for module [${targetModule}] in split [${split}]...`);
                 rmSync(moduleDir, { recursive: true, force: true });
@@ -321,7 +455,6 @@ async function main() {
         .filter(d => d.isDirectory())
         .map(d => d.name);
 
-    const trainingOnly = args.includes('--training-only');
     const modulesToRun = targetModule ? [targetModule] : allModules;
 
     for (const moduleName of modulesToRun) {
