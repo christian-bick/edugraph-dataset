@@ -1,17 +1,16 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { ComparisonNumericProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getComparisonSymbol } from './helpers.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'numbers-compare'>;
 }
 
 export function NumbersCompare({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as ComparisonNumericProblem;
+    const data = problem.data;
 
     const displayAnswer = useMemo(() => {
         return getComparisonSymbol(data.answer);
@@ -34,7 +33,7 @@ export function NumbersCompare({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'numbers-compare'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

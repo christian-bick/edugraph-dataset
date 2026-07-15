@@ -1,17 +1,16 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { TimeProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { formatTime, getClockAngles, getTickMarks } from './helpers.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'time-analog'>;
 }
 
 export function TimeAnalog({ payload }: Props) {
     const { problem, config, isSolutionView } = payload;
-    const data = problem.data as TimeProblem;
+    const data = problem.data;
     const isReverse = config.visualParams.reverse === true || config.visualParams.reverse === 'true';
 
     const showHands = !isReverse || isSolutionView;
@@ -96,7 +95,7 @@ export function TimeAnalog({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'time-analog'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

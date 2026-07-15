@@ -1,12 +1,11 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { GeometryProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getBallPosition, getTracePath } from './helpers.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'geometry-viewer'>;
 }
 
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
@@ -90,7 +89,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
 
 export function GeometryViewer({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as GeometryProblem;
+    const data = problem.data;
 
     const mode = data.mode || 'name-2d';
     const answer = data.answer;
@@ -320,7 +319,7 @@ export function GeometryViewer({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'geometry-viewer'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

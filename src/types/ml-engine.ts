@@ -1,14 +1,16 @@
+import { ViewTypeMap } from './problems.ts';
+
 /**
  * Represents the fundamental, abstract mathematical or conceptual problem.
  * This is completely independent of how it will be visually represented.
  */
-export interface AbstractProblem {
+export interface AbstractProblem<TData = any> {
     /** A unique identifier representing the underlying problem (e.g., '15-subtract-7') */
     id: string;
     /** The type of problem to route it to compatible renderers */
     type: 'arithmetic' | 'counting' | 'measurement' | 'time' | 'ordering' | 'comparison' | 'writing' | 'geometry';
     /** The core mathematical data. e.g. { num1: 15, num2: 7, operator: 'subtract', answer: 8 } */
-    data: Record<string, any>;
+    data: TData;
     /** Pedagogical tags for dataset balancing (e.g., ['has_zero', 'requires_carry', 'negative_result']) */
     tags?: string[];
 }
@@ -30,12 +32,17 @@ export interface RenderConfig {
 /**
  * The final payload sent from the Node orchestrator to the browser DOM.
  */
-export interface RenderPayload {
-    problem: AbstractProblem;
+export interface RenderPayload<TProblem extends AbstractProblem = AbstractProblem> {
+    problem: TProblem;
     config: RenderConfig;
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
     isSolutionView: boolean;
 }
+
+/**
+ * Helper utility to get a type-safe RenderPayload for a specific view ID defined in ViewTypeMap.
+ */
+export type ViewRenderPayload<TViewId extends keyof ViewTypeMap> = RenderPayload<AbstractProblem<ViewTypeMap[TViewId]>>;
 
 /**
  * The contract that every visual module in `src/exercises/` must adhere to.
@@ -46,7 +53,7 @@ export interface ExerciseRenderer {
      * @param payload The data and configuration to render
      * @param container The DOM element where the exercise should be injected
      */
-    render(payload: RenderPayload, container: HTMLElement): void;
+    render(payload: RenderPayload<any>, container: HTMLElement): void;
 }
 
 /**
@@ -54,7 +61,7 @@ export interface ExerciseRenderer {
  */
 declare global {
     interface Window {
-        renderView?: (payload: RenderPayload) => void;
+        renderView?: (payload: RenderPayload<any>) => void;
     }
 }
 
@@ -64,7 +71,7 @@ declare global {
  * A partial problem returned by generators, containing only the identity and raw data.
  * type and tags are filled in by the orchestrator.
  */
-export type ProblemStub = Pick<AbstractProblem, 'id' | 'data'>;
+export type ProblemStub<TData = any> = Pick<AbstractProblem<TData>, 'id' | 'data'>;
 
 /**
  * The dual input for problem generation: 
@@ -93,7 +100,7 @@ export interface DatasetGenerationConfig {
 /**
  * The contract for a Problem Generator (living in `src/generators/`).
  */
-export interface ProblemGenerator {
+export interface ProblemGenerator<TData = any> {
     /** The type of problems this generates */
     type: AbstractProblem['type'];
     /** Visual modules capable of rendering problems from this generator */
@@ -102,8 +109,9 @@ export interface ProblemGenerator {
      * Generates a single unique abstract problem based on the labels and constraints.
      * Returns null if a valid problem could not be generated (triggers a retry).
      */
-    generate(input: GeneratorInput): ProblemStub | null;
+    generate(input: GeneratorInput): ProblemStub<TData> | null;
 }
+
 
 // --- ML Orchestrator Interfaces ---
 

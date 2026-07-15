@@ -1,11 +1,9 @@
-import React, { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { ArithmeticTeenProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'place-value-blocks'>;
 }
 
 function TenFrame({ filledCount, colorClass }: { filledCount: number; colorClass: 'color-a' | 'color-b' }) {
@@ -29,7 +27,7 @@ function TenFrame({ filledCount, colorClass }: { filledCount: number; colorClass
 
 export function PlaceValueBlocks({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as ArithmeticTeenProblem;
+    const data = problem.data;
 
     const mode = data.mode || 'compose-teen';
     const isMakeTen = mode === 'make-ten';
@@ -128,7 +126,7 @@ export function PlaceValueBlocks({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'place-value-blocks'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

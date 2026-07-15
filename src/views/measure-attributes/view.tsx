@@ -1,11 +1,9 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { MeasurementAttributeProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'measure-attributes'>;
 }
 
 function Illustration({ attribute }: { attribute: string }) {
@@ -82,7 +80,7 @@ function Illustration({ attribute }: { attribute: string }) {
 
 export function MeasureAttributes({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as MeasurementAttributeProblem;
+    const data = problem.data;
     const attribute = data.attribute || 'length';
 
     const promptText = "What are we measuring with this setup?";
@@ -120,7 +118,7 @@ export function MeasureAttributes({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'measure-attributes'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

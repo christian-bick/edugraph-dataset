@@ -1,19 +1,18 @@
-import React, { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { CountingConservationProblem } from '../../types/problems.ts';
+import { useMemo } from 'react';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getClosePositions, getFarPositions } from './helpers.ts';
 import '../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'counting-conservation'>;
 }
 
 export function CountingConservation({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as CountingConservationProblem;
+    const data = problem.data;
     const number = data.numObjects || 6;
 
     const icon = useMemo(() => {
@@ -83,7 +82,7 @@ export function CountingConservation({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'counting-conservation'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

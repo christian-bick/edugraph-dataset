@@ -1,19 +1,18 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { ComparisonMatchingProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getIconIndexes, getCorrectChoice } from './helpers.ts';
 import '../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'numbers-compare-groups'>;
 }
 
 export function NumbersCompareGroups({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as ComparisonMatchingProblem;
+    const data = problem.data;
 
     const mode = data.mode || 'count-compare';
     const num1 = data.num1;
@@ -135,7 +134,7 @@ export function NumbersCompareGroups({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'numbers-compare-groups'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

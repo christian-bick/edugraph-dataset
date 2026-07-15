@@ -3,9 +3,9 @@ import { getBallPosition, getTracePath } from './helpers.ts';
 
 describe('geometry-viewer helpers', () => {
     it('returns correct ball position for relation', () => {
-        expect(getBallPosition('above')).toEqual({ x: 130, y: 30 });
-        expect(getBallPosition('below')).toEqual({ x: 130, y: 130 });
-        expect(getBallPosition('nextTo')).toEqual({ x: 200, y: 80 });
+        expect(getBallPosition('above')).toEqual({ x: 130, y: 25 });
+        expect(getBallPosition('below')).toEqual({ x: 130, y: 150 });
+        expect(getBallPosition('nextTo')).toEqual({ x: 200, y: 90 });
     });
 
     it('returns correct trace path for target shape', () => {

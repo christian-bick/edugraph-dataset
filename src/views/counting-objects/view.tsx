@@ -1,19 +1,18 @@
 import React, { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { CountingSimpleProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { generatePositions } from './helpers.ts';
 import '../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'counting-objects'>;
 }
 
 export function CountingObjects({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as CountingSimpleProblem;
+    const data = problem.data;
     
     const mode = data.mode || 'simple';
     const numObjects = data.numObjects;
@@ -117,7 +116,7 @@ export function CountingObjects({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'counting-objects'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

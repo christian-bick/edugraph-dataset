@@ -31,7 +31,7 @@ export type ArithmeticTeenProblem = {
 };
 
 export type CountingSimpleProblem = {
-    mode: 'simple' | 'how-many' | 'one-to-one' | 'count-out';
+    mode: 'simple' | 'how-many' | 'one-to-one' | 'count-out' | 'cardinality';
     numObjects: number;
     simpleAnswer: number;
     layout: string;
@@ -105,7 +105,7 @@ export type OrderingProblem = {
 
 export type WritingProblem = {
     number: number;
-    mode: 'stroke' | 'standard';
+    mode: 'stroke' | 'standard' | 'count-objects';
 };
 
 export type TimeProblem = {
@@ -132,6 +132,15 @@ export type GeometryProblem = {
     answer: string;
 };
 
+/**
+ * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
+ * to their expected mathematical problem data schemas.
+ * 
+ * Since views (Browser/React) are dynamically loaded headlessly by Playwright
+ * and not statically imported by the generators (Node.js), this map serves as
+ * the single source of truth that ensures type compatibility between the generator's
+ * output data and the renderer's expectations.
+ */
 export interface ViewTypeMap {
     'operations-vertical': ArithmeticStandardProblem;
     'operations-boxes': ArithmeticStandardProblem;

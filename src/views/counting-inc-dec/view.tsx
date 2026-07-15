@@ -1,18 +1,17 @@
-import React, { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { CountingIncDecProblem } from '../../types/problems.ts';
+import { useMemo } from 'react';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import '../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'counting-inc-dec'>;
 }
 
 export function CountingIncDec({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as CountingIncDecProblem;
+    const data = problem.data;
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
@@ -67,7 +66,7 @@ export function CountingIncDec({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'counting-inc-dec'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

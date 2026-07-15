@@ -1,7 +1,5 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { ArithmeticStandardProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getBlankPart } from './helpers.ts';
 import '../../tailwind.css';
 
@@ -17,12 +15,12 @@ const operatorSymbols: { [key: string]: string } = {
 };
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'operations-boxes'>;
 }
 
 export function OperationsBoxes({ payload }: Props) {
     const { problem, config, isSolutionView } = payload;
-    const data = problem.data as ArithmeticStandardProblem;
+    const data = problem.data;
     const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
 
     const requestedBlank = config.visualParams.blankPart || 'solution';
@@ -75,7 +73,7 @@ export function OperationsBoxes({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'operations-boxes'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

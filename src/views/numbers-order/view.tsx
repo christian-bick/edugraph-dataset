@@ -1,17 +1,16 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { OrderingProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { sortNumbers } from './helpers.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'numbers-order'>;
 }
 
 export function NumbersOrder({ payload }: Props) {
     const { problem, config, isSolutionView } = payload;
-    const data = problem.data as OrderingProblem;
+    const data = problem.data;
     const isDesc = config.visualParams.desc === true || config.visualParams.desc === 'true';
 
     const sortedNumbers = useMemo(() => {
@@ -55,7 +54,7 @@ export function NumbersOrder({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'numbers-order'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

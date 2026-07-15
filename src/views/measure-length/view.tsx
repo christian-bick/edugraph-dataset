@@ -1,17 +1,16 @@
 import React, { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { MeasurementStandardProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getRulerTicks, formatMeasureAnswer } from './helpers.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'measure-length'>;
 }
 
 export function MeasureLength({ payload }: Props) {
     const { problem, config, isSolutionView } = payload;
-    const data = problem.data as MeasurementStandardProblem;
+    const data = problem.data;
     const color = '#4682B4'; // SteelBlue
 
     const isReverse = config.visualParams.reverse === true || config.visualParams.reverse === 'true';
@@ -98,7 +97,7 @@ export function MeasureLength({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'measure-length'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

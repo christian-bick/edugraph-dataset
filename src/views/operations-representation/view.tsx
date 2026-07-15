@@ -1,19 +1,18 @@
 import React, { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { ArithmeticRepresentationProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getAdditionLayout, getSubtractionLayout } from './helpers.ts';
 import '../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'operations-representation'>;
 }
 
 export function OperationsRepresentation({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as ArithmeticRepresentationProblem;
+    const data = problem.data;
 
     const mode = data.mode || 'representation';
     let operation = data.operation || 'addition';
@@ -163,7 +162,7 @@ export function OperationsRepresentation({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'operations-representation'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

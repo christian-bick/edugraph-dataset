@@ -1,12 +1,11 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { MeasurementCompareProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getWeightLayout } from './helpers.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'measure-compare'>;
 }
 
 function Illustration({ attribute, val1, val2 }: { attribute: string; val1: number; val2: number }) {
@@ -81,7 +80,7 @@ function Illustration({ attribute, val1, val2 }: { attribute: string; val1: numb
 
 export function MeasureCompare({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as MeasurementCompareProblem;
+    const data = problem.data;
 
     const attribute = data.attribute || 'length';
     const relation = data.relation || 'longer';
@@ -128,7 +127,7 @@ export function MeasureCompare({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'measure-compare'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

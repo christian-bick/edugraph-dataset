@@ -3,6 +3,7 @@ import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, mkdirSync, rmSync, writeFileSync, readdirSync, readFileSync, appendFileSync } from 'fs';
 import { DatasetConfig } from '../config/dataset.config.ts';
+import { AbstractProblem, VisualBlueprint } from '../types/ml-engine.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -223,7 +224,7 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
                     ...problemStub,
                     id: `${moduleName}-${dataset.length + 1}-${problemStub.id}`,
                     type: generator.type,
-                    tags: [...new Set(params.labels)]
+                    tags: Array.from(new Set(params.labels))
                 };
                 
                 problem.data._permutationParams = params.constraints;

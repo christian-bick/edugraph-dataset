@@ -1,12 +1,11 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { WritingProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getTracingPaths } from './helpers.ts';
 import '../../tailwind.css';
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'numbers-write'>;
 }
 
 function DigitSVG({ digit, isSingle }: { digit: string; isSingle: boolean }) {
@@ -86,7 +85,7 @@ function DoubleTenFrame({ number }: { number: number }) {
 
 export function NumbersWrite({ payload }: Props) {
     const { problem, config, isSolutionView } = payload;
-    const data = problem.data as WritingProblem;
+    const data = problem.data;
 
     const outline = config.visualParams.outline === true || config.visualParams.outline === 'true';
     const mode = data.mode || 'stroke';
@@ -157,7 +156,7 @@ export function NumbersWrite({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'numbers-write'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

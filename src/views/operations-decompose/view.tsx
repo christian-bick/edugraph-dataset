@@ -1,14 +1,13 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { ArithmeticDecomposeProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { getDecomposeLayout } from './helpers.ts';
 import '../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'operations-decompose'>;
 }
 
 function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
@@ -61,7 +60,7 @@ function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
 
 export function OperationsDecompose({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as ArithmeticDecomposeProblem;
+    const data = problem.data;
 
     const targetNumber = useMemo(() => {
         if (data.targetNumber !== undefined) return data.targetNumber;
@@ -156,7 +155,7 @@ export function OperationsDecompose({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'operations-decompose'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {

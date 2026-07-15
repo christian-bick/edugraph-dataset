@@ -20,11 +20,18 @@ Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of
 *   **`ProblemStub`**: The raw output of a Generator (`{ id, data }`).
 *   **`AbstractProblem`**: The fully realized object injected into the dataset, containing the `ProblemStub`, the `type`, and the resolved array of `tags` (labels).
 
-### `RenderPayload`
+### `RenderPayload` & `ViewTypeMap`
 The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
 *   `problem`: The `AbstractProblem`.
-*   `config.visualParams`: Rendering instructions (e.g., `{ blankPart: 'answer', colors: 'vibrant' }`).
-*   `isAnswerView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
+*   `config`: The `RenderConfig` containing `viewId` and `visualParams`.
+*   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
+
+To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
+1. **`ViewTypeMap`** (defined in [problems.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/types/problems.ts)): A central contract mapping visual view identifiers (like `'operations-vertical'`) to their expected mathematical data structure (like `ArithmeticStandardProblem`).
+2. **`ViewRenderPayload<TViewId>`** (defined in [ml-engine.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/types/ml-engine.ts)): A utility type that automatically resolves to the correct type-safe `RenderPayload` for a specific view ID, eliminating the need for manual type assertions (`as ...`) within the view components.
+
+**Environment Separation & Mapping:**
+Because the Node orchestrator and generator configurations do not statically import the React view files (which are dynamically bundled by Vite and loaded headlessly inside Playwright via URLs), TypeScript cannot automatically inspect `window.renderView` in the browser code from the Node side. `ViewTypeMap` serves as a shared bridge, allowing the compiler to statically verify that generators specify view names compatible with the data structures the views expect to render.
 
 ### Determinism
 ### Determinism

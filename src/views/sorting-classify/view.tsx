@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RenderPayload } from '../../types/ml-engine.ts';
-import { CountingClassifyProblem } from '../../types/problems.ts';
+import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { generateScatteredPositions, getRelationAnswer } from './helpers.ts';
 import '../../tailwind.css';
 
@@ -17,7 +16,7 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 interface Props {
-    payload: RenderPayload;
+    payload: ViewRenderPayload<'sorting-classify'>;
 }
 
 function ItemSVG({ item, size = 40 }: { item: Item; size?: number }) {
@@ -49,7 +48,7 @@ function ItemSVG({ item, size = 40 }: { item: Item; size?: number }) {
 
 export function SortingClassify({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const data = problem.data as CountingClassifyProblem;
+    const data = problem.data;
 
     const mode = data.mode || 'classify-count';
     const classifyType = data.classifyType || 'shape';
@@ -186,7 +185,7 @@ export function SortingClassify({ payload }: Props) {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: RenderPayload) => {
+window.renderView = (payload: ViewRenderPayload<'sorting-classify'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) {
