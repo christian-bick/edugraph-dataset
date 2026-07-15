@@ -1,9 +1,9 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
+import { MeasurementStandardProblem, MeasurementAttributeProblem, MeasurementCompareProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 
-export class MeasurementGenerator implements ProblemGenerator {
+export class MeasurementGenerator implements ProblemGenerator<MeasurementStandardProblem | MeasurementAttributeProblem | MeasurementCompareProblem> {
     type: AbstractProblem['type'] = 'measurement';
-    compatibleRenderers = ['measure-length', 'measure-attributes', 'measure-compare'];
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;

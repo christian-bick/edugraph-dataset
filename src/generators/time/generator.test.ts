@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TimeGenerator } from './generator.ts';
 import { config } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Ability, Area, Scope } from 'edugraph-ts';
+import { Scope } from 'edugraph-ts';
 
 describe('TimeGenerator', () => {
     let generator: TimeGenerator;
@@ -12,9 +12,8 @@ describe('TimeGenerator', () => {
         setSeed(config.generationConfig.seed);
     });
 
-    it('should have the correct type and compatible renderers', () => {
+    it('should have the correct type', () => {
         expect(generator.type).toBe('time');
-        expect(generator.compatibleRenderers).toContain('time-analog');
     });
 
     describe('generate', () => {
@@ -68,7 +67,7 @@ describe('TimeGenerator', () => {
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(input);
                 if (stub) {
-                    const [h, m, s] = stub.data.time.split(':').map(Number);
+                    const [, m, s] = stub.data.time.split(':').map(Number);
                     expect(m % 15).toBe(0);
                     expect(s).toBe(0);
                 }

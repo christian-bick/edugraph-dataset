@@ -1,10 +1,10 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
+import { TimeProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
-import { Area, Scope, Ability } from "edugraph-ts";
+import { Scope } from "edugraph-ts";
 
-export class TimeGenerator implements ProblemGenerator {
+export class TimeGenerator implements ProblemGenerator<TimeProblem> {
     type: AbstractProblem['type'] = 'time';
-    compatibleRenderers = ['time-analog'];
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;

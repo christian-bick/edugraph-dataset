@@ -1,9 +1,9 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
+import { CountingSimpleProblem, CountingIncDecProblem, CountingConservationProblem, CountingClassifyProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 
-export class CountingGenerator implements ProblemGenerator {
+export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem | CountingIncDecProblem | CountingConservationProblem | CountingClassifyProblem> {
     type: AbstractProblem['type'] = 'counting';
-    compatibleRenderers = ['counting-objects', 'counting-inc-dec', 'counting-conservation', 'sorting-classify'];
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;

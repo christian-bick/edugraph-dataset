@@ -1,10 +1,10 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
+import { ArithmeticStandardProblem, ArithmeticDecomposeProblem, ArithmeticRepresentationProblem, ArithmeticTeenProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { Area, Scope } from "edugraph-ts";
 
-export class ArithmeticGenerator implements ProblemGenerator {
+export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | ArithmeticTeenProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
-    compatibleRenderers = ['operations-boxes', 'operations-vertical', 'operations-representation', 'operations-decompose', 'place-value-blocks'];
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;

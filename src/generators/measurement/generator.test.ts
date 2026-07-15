@@ -11,11 +11,8 @@ describe('MeasurementGenerator', () => {
         setSeed(config.generationConfig.seed);
     });
 
-    it('should have the correct type and compatible renderers', () => {
+    it('should have the correct type', () => {
         expect(generator.type).toBe('measurement');
-        expect(generator.compatibleRenderers).toContain('measure-length');
-        expect(generator.compatibleRenderers).toContain('measure-attributes');
-        expect(generator.compatibleRenderers).toContain('measure-compare');
     });
 
     describe('generate basic permutations', () => {

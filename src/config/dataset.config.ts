@@ -8,13 +8,50 @@ import { TimeGenerator } from '../generators/time/generator.ts';
 import { GeometryGenerator } from '../generators/geometry/generator.ts';
 
 import { ProblemGenerator } from '../types/ml-engine.ts';
+import { 
+    ViewTypeMap,
+    ArithmeticStandardProblem, 
+    ArithmeticDecomposeProblem, 
+    ArithmeticRepresentationProblem, 
+    ArithmeticTeenProblem,
+    CountingSimpleProblem, 
+    CountingIncDecProblem, 
+    CountingConservationProblem, 
+    CountingClassifyProblem,
+    MeasurementStandardProblem, 
+    MeasurementAttributeProblem, 
+    MeasurementCompareProblem,
+    ComparisonNumericProblem, 
+    ComparisonMatchingProblem,
+    OrderingProblem,
+    WritingProblem,
+    TimeProblem,
+    GeometryProblem
+} from '../types/problems.ts';
 
-export interface ModuleConfig {
-    generatorClass: new () => ProblemGenerator;
-    compatibleViews: string[];
+type CompatibleViewsFor<TProblemData> = {
+    [K in keyof ViewTypeMap]: ViewTypeMap[K] extends TProblemData ? K : never;
+}[keyof ViewTypeMap];
+
+export interface ModuleConfig<TProblemData = any> {
+    generatorClass: new () => ProblemGenerator<TProblemData>;
+    compatibleViews: CompatibleViewsFor<TProblemData>[];
 }
 
-export const DatasetConfig: { modules: Record<string, ModuleConfig> } = {
+export interface DatasetConfigType {
+    modules: Record<string, ModuleConfig> & {
+        arithmetic: ModuleConfig<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | ArithmeticTeenProblem>;
+        counting: ModuleConfig<CountingSimpleProblem | CountingIncDecProblem | CountingConservationProblem | CountingClassifyProblem>;
+        measurement: ModuleConfig<MeasurementStandardProblem | MeasurementAttributeProblem | MeasurementCompareProblem>;
+        comparison: ModuleConfig<ComparisonNumericProblem | ComparisonMatchingProblem>;
+        ordering: ModuleConfig<OrderingProblem>;
+        writing: ModuleConfig<WritingProblem>;
+        time: ModuleConfig<TimeProblem>;
+        geometry: ModuleConfig<GeometryProblem>;
+    };
+}
+
+export const DatasetConfig: DatasetConfigType = {
     modules: {
         arithmetic: {
             generatorClass: ArithmeticGenerator,

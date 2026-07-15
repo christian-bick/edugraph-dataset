@@ -12,12 +12,8 @@ describe('CountingGenerator', () => {
         setSeed(config.generationConfig.seed);
     });
 
-    it('should have the correct type and compatible renderers', () => {
-        expect(generator.type).toBe('counting');
-        expect(generator.compatibleRenderers).toContain('counting-objects');
-        expect(generator.compatibleRenderers).toContain('counting-inc-dec');
-        expect(generator.compatibleRenderers).toContain('counting-conservation');
-        expect(generator.compatibleRenderers).toContain('sorting-classify');
+    it('should have the correct type', () => {
+         expect(generator.type).toBe('counting');
     });
 
     describe('generate basic permutations', () => {

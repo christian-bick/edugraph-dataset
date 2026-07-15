@@ -12,10 +12,8 @@ describe('ComparisonGenerator', () => {
         setSeed(config.generationConfig.seed);
     });
 
-    it('should have the correct type and compatible renderers', () => {
+    it('should have the correct type', () => {
         expect(generator.type).toBe('comparison');
-        expect(generator.compatibleRenderers).toContain('numbers-compare');
-        expect(generator.compatibleRenderers).toContain('numbers-compare-groups');
     });
 
     describe('generate basic permutations', () => {

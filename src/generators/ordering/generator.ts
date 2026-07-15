@@ -1,6 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
+import { OrderingProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
-import { Area, Scope, Ability } from "edugraph-ts";
+import { Scope } from "edugraph-ts";
 
 function shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];
@@ -11,9 +12,8 @@ function shuffleArray<T>(array: T[]): T[] {
     return shuffled;
 }
 
-export class OrderingGenerator implements ProblemGenerator {
+export class OrderingGenerator implements ProblemGenerator<OrderingProblem> {
     type: AbstractProblem['type'] = 'ordering';
-    compatibleRenderers = ['numbers-order'];
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;

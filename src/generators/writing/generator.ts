@@ -1,10 +1,9 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
+import { WritingProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
-import { Area, Scope, Ability } from "edugraph-ts";
 
-export class WritingGenerator implements ProblemGenerator {
+export class WritingGenerator implements ProblemGenerator<WritingProblem> {
     type: AbstractProblem['type'] = 'writing';
-    compatibleRenderers = ['numbers-write'];
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;

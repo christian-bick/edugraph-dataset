@@ -103,8 +103,6 @@ export interface DatasetGenerationConfig {
 export interface ProblemGenerator<TData = any> {
     /** The type of problems this generates */
     type: AbstractProblem['type'];
-    /** Visual modules capable of rendering problems from this generator */
-    compatibleRenderers: string[];
     /** 
      * Generates a single unique abstract problem based on the labels and constraints.
      * Returns null if a valid problem could not be generated (triggers a retry).

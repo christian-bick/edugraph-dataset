@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { OrderingGenerator } from './generator.ts';
 import { config } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Ability, Area, Scope } from 'edugraph-ts';
+import { Scope } from 'edugraph-ts';
 
 describe('OrderingGenerator', () => {
     let generator: OrderingGenerator;
@@ -12,9 +12,8 @@ describe('OrderingGenerator', () => {
         setSeed(config.generationConfig.seed);
     });
 
-    it('should have the correct type and compatible renderers', () => {
+    it('should have the correct type', () => {
         expect(generator.type).toBe('ordering');
-        expect(generator.compatibleRenderers).toContain('numbers-order');
     });
 
     describe('generate', () => {

@@ -1,9 +1,9 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
+import { ComparisonNumericProblem, ComparisonMatchingProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 
-export class ComparisonGenerator implements ProblemGenerator {
+export class ComparisonGenerator implements ProblemGenerator<ComparisonNumericProblem | ComparisonMatchingProblem> {
     type: AbstractProblem['type'] = 'comparison';
-    compatibleRenderers = ['numbers-compare', 'numbers-compare-groups'];
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;

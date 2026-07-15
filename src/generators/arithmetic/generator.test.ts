@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ArithmeticGenerator } from './generator.ts';
 import { config } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Area, Scope } from 'edugraph-ts';
 
 describe('ArithmeticGenerator', () => {
     let generator: ArithmeticGenerator;
@@ -12,13 +11,8 @@ describe('ArithmeticGenerator', () => {
         setSeed(config.generationConfig.seed);
     });
 
-    it('should have the correct type and compatible renderers', () => {
+    it('should have the correct type', () => {
         expect(generator.type).toBe('arithmetic');
-        expect(generator.compatibleRenderers).toContain('operations-boxes');
-        expect(generator.compatibleRenderers).toContain('operations-vertical');
-        expect(generator.compatibleRenderers).toContain('operations-representation');
-        expect(generator.compatibleRenderers).toContain('operations-decompose');
-        expect(generator.compatibleRenderers).toContain('place-value-blocks');
     });
 
     describe('generate basic permutations', () => {

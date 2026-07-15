@@ -11,9 +11,8 @@ describe('GeometryGenerator', () => {
         setSeed(config.generationConfig.seed);
     });
 
-    it('should have the correct type and compatible renderers', () => {
+    it('should have the correct type', () => {
         expect(generator.type).toBe('geometry');
-        expect(generator.compatibleRenderers).toContain('geometry-viewer');
     });
 
     describe('generate basic permutations', () => {
