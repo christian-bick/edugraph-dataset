@@ -22,21 +22,52 @@ export type ArithmeticDecomposeProblem = {
     pair2: [number, number];
 };
 
-export type ArithmeticTeenProblem = {
-    mode: 'compose-teen' | 'decompose-teen' | 'make-ten';
-    ones?: number;
-    givenNumber?: number;
-    missingNumber?: number;
+export type PlaceValueComposeTeenProblem = {
+    mode: 'compose-teen';
+    ones: number;
     target: number;
 };
 
+export type PlaceValueDecomposeTeenProblem = {
+    mode: 'decompose-teen';
+    ones: number;
+    target: number;
+};
+
+export type PlaceValueMakeTenProblem = {
+    mode: 'make-ten';
+    givenNumber: number;
+    missingNumber: number;
+    target: 10;
+};
+
 export type CountingSimpleProblem = {
-    mode: 'simple' | 'how-many' | 'one-to-one' | 'count-out' | 'cardinality';
+    mode: 'simple' | 'how-many' | 'cardinality';
     numObjects: number;
     simpleAnswer: number;
-    layout: string;
     arrangement: string;
-    totalCount?: number;
+};
+
+export type CountingOneToOneProblem = {
+    mode: 'one-to-one';
+    numObjects: number;
+    simpleAnswer: number;
+    arrangement: string;
+};
+
+export type CountingCardinalityProblem = {
+    mode: 'cardinality';
+    numObjects: number;
+    simpleAnswer: number;
+    arrangement: string;
+};
+
+export type CountingCountOutProblem = {
+    mode: 'count-out';
+    numObjects: number;
+    simpleAnswer: number;
+    arrangement: string;
+    totalCount: number;
 };
 
 export type CountingIncDecProblem = {
@@ -146,9 +177,14 @@ export interface ViewTypeMap {
     'operations-boxes': ArithmeticStandardProblem;
     'operations-representation': ArithmeticRepresentationProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
-    'place-value-blocks': ArithmeticTeenProblem;
+    'place-value-compose-teen': PlaceValueComposeTeenProblem;
+    'place-value-decompose-teen': PlaceValueDecomposeTeenProblem;
+    'place-value-make-ten': PlaceValueMakeTenProblem;
 
-    'counting-objects': CountingSimpleProblem;
+    'counting-objects-simple': CountingSimpleProblem;
+    'counting-objects-one-to-one': CountingOneToOneProblem;
+    'counting-objects-cardinality': CountingCardinalityProblem;
+    'counting-objects-count-out': CountingCountOutProblem;
     'counting-inc-dec': CountingIncDecProblem;
     'counting-conservation': CountingConservationProblem;
     'sorting-classify': CountingClassifyProblem;

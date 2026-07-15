@@ -13,8 +13,13 @@ import {
     ArithmeticStandardProblem, 
     ArithmeticDecomposeProblem, 
     ArithmeticRepresentationProblem, 
-    ArithmeticTeenProblem,
+    PlaceValueComposeTeenProblem,
+    PlaceValueDecomposeTeenProblem,
+    PlaceValueMakeTenProblem,
     CountingSimpleProblem, 
+    CountingOneToOneProblem,
+    CountingCardinalityProblem,
+    CountingCountOutProblem,
     CountingIncDecProblem, 
     CountingConservationProblem, 
     CountingClassifyProblem,
@@ -44,8 +49,8 @@ export interface ModuleConfig<TProblemData = any> {
 
 export interface DatasetConfigType {
     modules: Record<string, ModuleConfig> & {
-        arithmetic: ModuleConfig<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | ArithmeticTeenProblem>;
-        counting: ModuleConfig<CountingSimpleProblem | CountingIncDecProblem | CountingConservationProblem | CountingClassifyProblem>;
+        arithmetic: ModuleConfig<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | PlaceValueComposeTeenProblem | PlaceValueDecomposeTeenProblem | PlaceValueMakeTenProblem>;
+        counting: ModuleConfig<CountingSimpleProblem | CountingOneToOneProblem | CountingCardinalityProblem | CountingCountOutProblem | CountingIncDecProblem | CountingConservationProblem | CountingClassifyProblem>;
         measurement: ModuleConfig<MeasurementStandardProblem | MeasurementAttributeProblem | MeasurementCompareProblem>;
         comparison: ModuleConfig<ComparisonNumericProblem | ComparisonMatchingProblem>;
         ordering: ModuleConfig<OrderingProblem>;
@@ -65,14 +70,19 @@ export const DatasetConfig: DatasetConfigType = {
                 { viewId: 'operations-vertical', visualParams: {}, instancesPerProblem: 1 },
                 { viewId: 'operations-representation', visualParams: {}, instancesPerProblem: 1 },
                 { viewId: 'operations-decompose', visualParams: {}, instancesPerProblem: 1 },
-                { viewId: 'place-value-blocks', visualParams: {}, instancesPerProblem: 1 }
+                { viewId: 'place-value-compose-teen', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'place-value-decompose-teen', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'place-value-make-ten', visualParams: {}, instancesPerProblem: 1 }
             ]
         },
         counting: {
             generatorClass: CountingGenerator,
             splits: { train: 0.8, val: 0.2 },
             visualDistribution: [
-                { viewId: 'counting-objects', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'counting-objects-simple', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'counting-objects-one-to-one', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'counting-objects-cardinality', visualParams: {}, instancesPerProblem: 1 },
+                { viewId: 'counting-objects-count-out', visualParams: {}, instancesPerProblem: 1 },
                 { viewId: 'counting-inc-dec', visualParams: {}, instancesPerProblem: 1 },
                 { viewId: 'counting-conservation', visualParams: {}, instancesPerProblem: 1 },
                 { viewId: 'sorting-classify', visualParams: {}, instancesPerProblem: 1 }

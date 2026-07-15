@@ -1,9 +1,9 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { ArithmeticStandardProblem, ArithmeticDecomposeProblem, ArithmeticRepresentationProblem, ArithmeticTeenProblem } from "../../types/problems.ts";
+import { ArithmeticStandardProblem, ArithmeticDecomposeProblem, ArithmeticRepresentationProblem, PlaceValueComposeTeenProblem, PlaceValueDecomposeTeenProblem, PlaceValueMakeTenProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { Area, Scope } from "edugraph-ts";
 
-export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | ArithmeticTeenProblem> {
+export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | PlaceValueComposeTeenProblem | PlaceValueDecomposeTeenProblem | PlaceValueMakeTenProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
