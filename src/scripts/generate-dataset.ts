@@ -108,7 +108,7 @@ async function renderDatasetSplit(
                 if (!task) break;
 
                 const { problem, blueprint, instance } = task;
-                const url = `${BASE_URL}/views/${blueprint.viewId}/view.html`;
+                const url = `${BASE_URL}/visuals/views/${blueprint.viewId}/view.html`;
                 
                 if (currentViewUrl !== url) {
                     await page.goto(url, { waitUntil: 'networkidle' });
@@ -158,6 +158,8 @@ async function renderDatasetSplit(
                     console.log(`[${moduleName}:${splitName}] Progress: ${Math.floor((completedTasks / totalTasks) * 100)}%`);
                 }
             }
+        } catch (err) {
+            console.error('Worker error:', err);
         } finally {
             await context.close();
         }
