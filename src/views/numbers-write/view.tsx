@@ -37,7 +37,7 @@ function DigitSVG({ digit, isSingle }: { digit: string; isSingle: boolean }) {
                 {digit}
             </text>
             {paths.map((p, index) => (
-                <path key={index} d={p} stroke="#16a34a" strokeWidth="1.5" fill="none" />
+                <path key={index} d={p} stroke="#4f46e5" strokeWidth="1.5" fill="none" />
             ))}
         </svg>
     );

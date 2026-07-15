@@ -44,7 +44,7 @@ export function generatePositions(
             });
         }
     } else if (actualArrangement === 'scattered') {
-        const minDistance = 55;
+        const minDistance = numObjects > 15 ? 42 : (numObjects > 10 ? 46 : 55);
         for (let i = 0; i < numObjects; i++) {
             let attempts = 0;
             let found = false;

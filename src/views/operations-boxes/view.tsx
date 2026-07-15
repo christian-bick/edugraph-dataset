@@ -7,9 +7,13 @@ import '../../tailwind.css';
 
 const operatorSymbols: { [key: string]: string } = {
     add: '+',
+    addition: '+',
     subtract: '−',
+    subtraction: '−',
     multiply: '×',
-    divide: '÷'
+    multiplication: '×',
+    divide: '÷',
+    division: '÷'
 };
 
 interface Props {
@@ -19,7 +23,7 @@ interface Props {
 export function OperationsBoxes({ payload }: Props) {
     const { problem, config, isSolutionView } = payload;
     const data = problem.data as ArithmeticStandardProblem;
-    const symbol = operatorSymbols[data.operator] || '?';
+    const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
 
     const requestedBlank = config.visualParams.blankPart || 'solution';
     const blankPart = getBlankPart(problem.id, requestedBlank);

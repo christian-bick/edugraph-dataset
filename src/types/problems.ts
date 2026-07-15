@@ -2,7 +2,7 @@ export type ArithmeticStandardProblem = {
     mode: 'standard';
     num1: number;
     num2: number;
-    operator: 'add' | 'subtract' | 'multiply' | 'divide';
+    operation: 'addition' | 'subtraction' | 'multiplication' | 'division';
     answer: number;
 };
 

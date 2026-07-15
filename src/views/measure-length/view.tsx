@@ -17,23 +17,26 @@ export function MeasureLength({ payload }: Props) {
     const isReverse = config.visualParams.reverse === true || config.visualParams.reverse === 'true';
     const isDecimal = config.visualParams.decimal === true || config.visualParams.decimal === 'true';
 
+    const bandLength = data.bandLength !== undefined ? data.bandLength : 10;
+    const problemLength = data.problemLength !== undefined ? data.problemLength : 6.0;
+
     const showRectangle = !isReverse || isSolutionView;
     const showAnswerInBox = isReverse || isSolutionView;
     const isTextSolution = !isReverse && isSolutionView;
 
     const rectColor = isReverse ? 'forestgreen' : color;
     const { answer, unit } = useMemo(() => {
-        return formatMeasureAnswer(data.problemLength, isDecimal);
-    }, [data.problemLength, isDecimal]);
+        return formatMeasureAnswer(problemLength, isDecimal);
+    }, [problemLength, isDecimal]);
 
     const margin = 20;
-    const bandWidth = data.bandLength * 30 + margin * 2;
-    const rectWidth = data.problemLength * 30 + margin;
-    const displayLength = data.problemLength * 30;
+    const bandWidth = bandLength * 30 + margin * 2;
+    const rectWidth = problemLength * 30 + margin;
+    const displayLength = problemLength * 30;
 
     const ticks = useMemo(() => {
-        return getRulerTicks(data.bandLength, margin);
-    }, [data.bandLength]);
+        return getRulerTicks(bandLength, margin);
+    }, [bandLength]);
 
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">

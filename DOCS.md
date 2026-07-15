@@ -60,9 +60,8 @@ Adding content means creating two interconnected directories: a Generator and a 
 *   **`checklist.md`**: (Optional) Specific instructions for the Visual QA LLM regarding how this specific module should visually render.
 
 ### The Visual Renderer (`src/views/<renderer>/`)
-*   **`exercise.html`**: The base DOM. Must include `<div id="view"></div>` (the target for the Playwright screenshot).
-*   **`exercise.scss`**: Styling. Must `@import "../shared.scss"` to inherit base font and reset styles.
-*   **`exercise.ts`**: Implements `window.renderView = (payload: RenderPayload) => { ... }`. Responsible for reading `payload.isAnswerView` and toggling visibility of the solution.
+*   **`view.html`**: The base HTML template containing a mount point for React.
+*   **`view.tsx`**: React entry point implementing `window.renderView = (payload: RenderPayload) => { ... }`. It uses React to render components into the DOM.
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)
 
@@ -89,8 +88,8 @@ Implement the mathematical logic. Ensure that the properties of the generated pr
 ### Step 4: Writing Tests (`generator.test.ts`)
 Write robust unit tests verifying that the generator outputs correct math and respects bounds (e.g., resulting fractions do not exceed 1 if constrained). Run `npm run test` to verify.
 
-### Step 5: Visual Implementation (`exercise.*`)
-Implement the DOM logic in `src/views/<renderer>/exercise.ts`.
+### Step 5: Visual Implementation (`view.*`)
+Implement the component logic in `src/views/<renderer>/view.tsx`.
 *   Ensure that `isSolutionView: false` visually hides the answer (or renders an empty box/placeholder).
 *   Ensure that `isSolutionView: true` renders the exact same layout but with the answer visible.
 *   Use `setSeed(problem.id)` before making randomized layout decisions.

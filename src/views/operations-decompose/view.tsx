@@ -63,13 +63,25 @@ export function OperationsDecompose({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data as ArithmeticDecomposeProblem;
 
-    const targetNumber = data.targetNumber !== undefined ? data.targetNumber : 6;
-    
+    const targetNumber = useMemo(() => {
+        if (data.targetNumber !== undefined) return data.targetNumber;
+        if (data.pair1) return data.pair1[0] + data.pair1[1];
+        const n1 = (data as any).num1 || 3;
+        const n2 = (data as any).num2 || 3;
+        if (n1 < 0 || n2 < 0 || (n1 + n2) > 10) {
+            return 6;
+        }
+        return n1 + n2;
+    }, [data.targetNumber, data.pair1, (data as any).num1, (data as any).num2]);
+
     // Decompose parts fallback
     const pair1 = useMemo(() => {
         if (data.pair1) return data.pair1;
         const n1 = (data as any).num1 || 3;
         const n2 = (data as any).num2 || 3;
+        if (n1 < 0 || n2 < 0 || (n1 + n2) > 10) {
+            return [2, 4] as [number, number];
+        }
         return [n1, n2] as [number, number];
     }, [data.pair1, (data as any).num1, (data as any).num2]);
 
@@ -77,6 +89,9 @@ export function OperationsDecompose({ payload }: Props) {
         if (data.pair2) return data.pair2;
         const n1 = (data as any).num1 || 3;
         const n2 = (data as any).num2 || 3;
+        if (n1 < 0 || n2 < 0 || (n1 + n2) > 10) {
+            return [1, 5] as [number, number];
+        }
         return (n1 > 1 ? [n1 - 1, n2 + 1] : [n1, n2]) as [number, number];
     }, [data.pair2, (data as any).num1, (data as any).num2]);
 

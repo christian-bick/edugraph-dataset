@@ -68,7 +68,7 @@ export function TimeAnalog({ payload }: Props) {
                                 transform={`rotate(${angles.minuteAngle} 50 50)`} 
                             />
                             {/* Second hand */}
-                            {data.interval <= 60 && (
+                            {data.interval < 60 && (
                                 <line 
                                     className={`stroke-linecap-round stroke-[1.5px] ${handColorClass}`} 
                                     x1="50" 

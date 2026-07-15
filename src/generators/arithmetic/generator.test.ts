@@ -48,7 +48,7 @@ describe('ArithmeticGenerator', () => {
                         expect(stub.data.num1).toBeDefined();
                         expect(stub.data.num2).toBeDefined();
                         expect(stub.data.answer).toBeDefined();
-                        expect(stub.data.operator).toBeDefined();
+                        expect(stub.data.operation).toBeDefined();
                     }
                 }
             });

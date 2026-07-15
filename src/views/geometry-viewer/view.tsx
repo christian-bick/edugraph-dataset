@@ -123,8 +123,8 @@ export function GeometryViewer({ payload }: Props) {
             return (
                 <svg width="300" height="180" className="overflow-visible">
                     {/* Box */}
-                    <rect x="100" y="80" width="60" height="60" fill="#e2e8f0" stroke="#475569" strokeWidth="2" rx="4"/>
-                    <text x="130" y="115" fill="#475569" fontWeight="bold" fontSize="14" textAnchor="middle">Box</text>
+                    <rect x="100" y="60" width="60" height="60" fill="#e2e8f0" stroke="#475569" strokeWidth="2" rx="4"/>
+                    <text x="130" y="95" fill="#475569" fontWeight="bold" fontSize="14" textAnchor="middle">Box</text>
                     {/* Ball */}
                     <circle cx={pos.x} cy={pos.y} r="20" fill="#f43f5e" stroke="#be123c" strokeWidth="2" />
                     <text x={pos.x} y={pos.y + 4} fill="#ffffff" fontWeight="bold" fontSize="12" textAnchor="middle">Ball</text>

@@ -128,11 +128,11 @@ export class ArithmeticGenerator implements ProblemGenerator {
         }
 
         // Standard arithmetic (legacy)
-        let operator: 'add' | 'subtract' | 'multiply' | 'divide' = 'add';
-        if (labels.includes(Area.Addition)) operator = 'add';
-        else if (labels.includes(Area.Subtraction)) operator = 'subtract';
-        else if (labels.includes(Area.Multiplication)) operator = 'multiply';
-        else if (labels.includes(Area.Division)) operator = 'divide';
+        let operation: 'addition' | 'subtraction' | 'multiplication' | 'division' = 'addition';
+        if (labels.includes(Area.Addition)) operation = 'addition';
+        else if (labels.includes(Area.Subtraction)) operation = 'subtraction';
+        else if (labels.includes(Area.Multiplication)) operation = 'multiplication';
+        else if (labels.includes(Area.Division)) operation = 'division';
 
         const allowNegatives = labels.includes(Scope.IntegersWithNegatives);
         const includeZero = labels.includes(Scope.IntegersWithZero);
@@ -169,12 +169,12 @@ export class ArithmeticGenerator implements ProblemGenerator {
         }
 
         let answer;
-        if (operator === 'add') {
+        if (operation === 'addition') {
             answer = num1 + num2;
-        } else if (operator === 'subtract') {
+        } else if (operation === 'subtraction') {
             if (!allowNegatives && num1 < num2) [num1, num2] = [num2, num1];
             answer = num1 - num2;
-        } else if (operator === 'multiply') {
+        } else if (operation === 'multiplication') {
             answer = num1 * num2;
         } else {
             if (num2 === 0) num2 = (random() > 0.5 ? 1 : 2) * (allowNegatives && random() > 0.5 ? -1 : 1);
@@ -184,8 +184,8 @@ export class ArithmeticGenerator implements ProblemGenerator {
         }
 
         return {
-            id: `${num1}_${operator}_${num2}`,
-            data: { num1, num2, answer, operator, mode: 'standard' }
+            id: `${num1}_${operation}_${num2}`,
+            data: { num1, num2, answer, operation, mode: 'standard' }
         };
     }
 }

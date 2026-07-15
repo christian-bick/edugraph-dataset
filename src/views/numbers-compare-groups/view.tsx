@@ -55,7 +55,7 @@ export function NumbersCompareGroups({ payload }: Props) {
                 
                 <div 
                     className="relative w-[360px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-5"
-                    style={{ height: `${Math.max(220, (maxCount * spacing) + 40)}px` }}
+                    style={{ height: `${Math.max(220, (maxCount * spacing) + 80)}px` }}
                 >
                     <div className="absolute top-2 text-[0.95rem] font-extrabold text-slate-400 uppercase tracking-[0.5px] left-[45px]">Group A</div>
                     <div className="absolute top-2 text-[0.95rem] font-extrabold text-slate-400 uppercase tracking-[0.5px] left-[225px]">Group B</div>

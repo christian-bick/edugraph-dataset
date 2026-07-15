@@ -127,6 +127,7 @@ async function renderDatasetSplit(
                     };
 
                     await page.evaluate((p) => window.renderView!(p), payload);
+                    await page.waitForTimeout(60);
                     const filename = `${baseFilename}_mode-${modeTag}.png`;
                     const outPath = resolve(splitOutputDir, filename);
                     await page.locator('#view').screenshot({ path: outPath, omitBackground: true });

@@ -21,8 +21,8 @@ export function generateScatteredPositions(
         let x = 0, y = 0;
         while (attempts < 300 && !found) {
             attempts++;
-            x = Math.floor(random() * (width - 60)) + 30;
-            y = Math.floor(random() * (height - 60)) + 30;
+            x = Math.floor(random() * (width - 70)) + 15;
+            y = Math.floor(random() * (height - 70)) + 15;
             const tooClose = positions.some(p => {
                 const dx = p.x - x;
                 const dy = p.y - y;
@@ -35,8 +35,8 @@ export function generateScatteredPositions(
         }
         if (!found) {
             positions.push({
-                x: 30 + (i % 6) * 60,
-                y: 30 + Math.floor(i / 6) * 60
+                x: 15 + (i % 6) * 65,
+                y: 15 + Math.floor(i / 6) * 45
             });
         }
     }

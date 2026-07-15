@@ -13,7 +13,7 @@ interface Item {
 const COLOR_MAP: Record<string, string> = {
     red: '#ef4444',
     blue: '#3b82f6',
-    green: '#10b981'
+    green: '#14b8a6'
 };
 
 interface Props {
@@ -55,8 +55,37 @@ export function SortingClassify({ payload }: Props) {
     const classifyType = data.classifyType || 'shape';
     const relation = data.relation || 'most';
 
-    const items = data.items || [];
-    const categories = data.categories || {};
+    const { items, categories } = useMemo(() => {
+        const itemsList = [...(data.items || [])];
+        const categoriesMap = { ...(data.categories || {}) };
+
+        if (itemsList.length === 0) {
+            const numObjects = data.numObjects || 8;
+            const shapes = ['circle', 'square', 'triangle'];
+            const colors = ['red', 'blue', 'green'];
+            
+            // Simple deterministic PRNG based on string hash
+            let seed = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const nextRand = () => {
+                const x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            };
+
+            for (let i = 0; i < numObjects; i++) {
+                const shape = shapes[Math.floor(nextRand() * shapes.length)];
+                const color = colors[Math.floor(nextRand() * colors.length)];
+                itemsList.push({ shape, color });
+                const key = classifyType === 'shape' ? shape : color;
+                categoriesMap[key] = (categoriesMap[key] || 0) + 1;
+            }
+            
+            const possible = classifyType === 'shape' ? shapes : colors;
+            possible.forEach(cat => {
+                if (categoriesMap[cat] === undefined) categoriesMap[cat] = 0;
+            });
+        }
+        return { items: itemsList, categories: categoriesMap };
+    }, [data.items, data.categories, data.numObjects, problem.id, classifyType]);
 
     const positions = useMemo(() => {
         return generateScatteredPositions(items.length, problem.id);
