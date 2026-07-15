@@ -67,6 +67,7 @@ async function renderDatasetSplit(
     moduleName: string,
     problems: AbstractProblem[],
     blueprints: VisualBlueprint[],
+    viewIndexOffset: number,
     concurrency: number
 ) {
     if (problems.length === 0) return 0;
@@ -81,18 +82,17 @@ async function renderDatasetSplit(
     const metadata: any[] = [];
     
     const taskQueue: { problem: AbstractProblem, blueprint: VisualBlueprint, instance: number }[] = [];
-    for (const blueprint of blueprints) {
-        for (const problem of problems) {
-            const mergedVisualParams = { 
-                ...blueprint.visualParams, 
-                ...(problem.data._permutationParams || {}) 
-            };
-            const specificBlueprint = { ...blueprint, visualParams: mergedVisualParams };
-            for (let i = 0; i < blueprint.instancesPerProblem; i++) {
-                taskQueue.push({ problem, blueprint: specificBlueprint, instance: i });
-            }
+    problems.forEach((problem, index) => {
+        const blueprint = blueprints[(index + viewIndexOffset) % blueprints.length];
+        const mergedVisualParams = { 
+            ...blueprint.visualParams, 
+            ...(problem.data._permutationParams || {}) 
+        };
+        const specificBlueprint = { ...blueprint, visualParams: mergedVisualParams };
+        for (let i = 0; i < blueprint.instancesPerProblem; i++) {
+            taskQueue.push({ problem, blueprint: specificBlueprint, instance: i });
         }
-    }
+    });
 
     const totalTasks = taskQueue.length;
     let completedTasks = 0;
@@ -180,7 +180,7 @@ async function renderDatasetSplit(
     return totalImages;
 }
 
-async function runModulePipeline(browser: Browser, moduleName: string) {
+async function runModulePipeline(browser: Browser, moduleName: string, trainingOnly: boolean) {
     console.log(`\n--- Starting Pipeline for Module: ${moduleName} ---`);
     
     const modulePath = resolve(PROJECT_ROOT, 'src', 'generators', moduleName);
@@ -198,16 +198,18 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
     const { generationConfig } = await import(`../generators/${moduleName}/permutations.ts`);
     const { setSeed } = await import(`../lib/random.ts`);
     
-    if (generationConfig.seed !== undefined) {
-        setSeed(generationConfig.seed);
-    }
-
     const generator = new GeneratorClass();
-    console.log(`Generating abstract problems for ${moduleName}...`);
-    
-    const dataset: AbstractProblem[] = [];
-    const existingKeys = new Set<string>();
     const { permutations, countPerPermutation = 1 } = generationConfig;
+
+    // Generate datasets
+    const trainDataset: AbstractProblem[] = [];
+    const valDataset: AbstractProblem[] = [];
+    
+    const trainKeys = new Set<string>();
+    const valKeys = new Set<string>();
+
+    const valRatio = moduleConfig.splits.val / moduleConfig.splits.train;
+    console.log(`Generating abstract problems for ${moduleName}...`);
 
     for (const params of permutations) {
         let countForThisPerm = 0;
@@ -216,36 +218,74 @@ async function runModulePipeline(browser: Browser, moduleName: string) {
 
         while (countForThisPerm < countPerPermutation && attempts < maxAttempts) {
             attempts++;
+            
+            // Seed for training problem
+            if (generationConfig.seed !== undefined) {
+                setSeed(generationConfig.seed + trainDataset.length);
+            }
+            
             const problemStub = generator.generate(params);
             
-            if (problemStub && !existingKeys.has(problemStub.id)) {
-                existingKeys.add(problemStub.id);
+            if (problemStub && !trainKeys.has(problemStub.id)) {
+                trainKeys.add(problemStub.id);
                 countForThisPerm++;
                 
                 const problem: AbstractProblem = {
                     ...problemStub,
-                    id: `${moduleName}-${dataset.length + 1}-${problemStub.id}`,
+                    id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
                     type: generator.type,
                     tags: Array.from(new Set(params.labels))
                 };
                 
                 problem.data._permutationParams = params.constraints;
-                dataset.push(problem);
+                trainDataset.push(problem);
+
+                // Determine if we generate a validation sample for this training sample
+                if (!trainingOnly && valRatio > 0) {
+                    const currentValCount = Math.floor(trainDataset.length * valRatio);
+                    const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
+                    
+                    if (currentValCount > prevValCount) {
+                        // Generate validation problem
+                        let valAttempts = 0;
+                        let valSuccess = false;
+                        while (!valSuccess && valAttempts < 50) {
+                            valAttempts++;
+                            
+                            if (generationConfig.seed !== undefined) {
+                                setSeed(generationConfig.seed + 10000 + valDataset.length);
+                            }
+                            
+                            const valStub = generator.generate(params);
+                            if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
+                                valKeys.add(valStub.id);
+                                valSuccess = true;
+                                
+                                const valProblem: AbstractProblem = {
+                                    ...valStub,
+                                    id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
+                                    type: generator.type,
+                                    tags: Array.from(new Set(params.labels))
+                                };
+                                
+                                valProblem.data._permutationParams = params.constraints;
+                                valDataset.push(valProblem);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
-    // Split logic
-    const count = dataset.length;
-    const trainC = Math.floor(count * moduleConfig.splits.train);
-    const trainSet = dataset.slice(0, trainC);
-    const valSet = dataset.slice(trainC);
-
-    console.log(`[${moduleName}] Generated ${count} problems. Split: Train (${trainSet.length}), Validation (${valSet.length})`);
+    console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);
 
     let moduleImages = 0;
-    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainSet, moduleConfig.visualDistribution, DEFAULT_CONCURRENCY);
-    moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valSet, moduleConfig.visualDistribution, DEFAULT_CONCURRENCY);
+    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, moduleConfig.visualDistribution, 0, DEFAULT_CONCURRENCY);
+    
+    if (!trainingOnly && valDataset.length > 0) {
+        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, moduleConfig.visualDistribution, 1, DEFAULT_CONCURRENCY);
+    }
 
     return moduleImages;
 }
@@ -281,11 +321,12 @@ async function main() {
         .filter(d => d.isDirectory())
         .map(d => d.name);
 
+    const trainingOnly = args.includes('--training-only');
     const modulesToRun = targetModule ? [targetModule] : allModules;
 
     for (const moduleName of modulesToRun) {
         try {
-            totalImages += await runModulePipeline(browser, moduleName);
+            totalImages += await runModulePipeline(browser, moduleName, trainingOnly);
         } catch (e) {
             console.error(`Failed to run pipeline for ${moduleName}:`, e);
         }
@@ -295,7 +336,9 @@ async function main() {
 
     // Finalization step: Merge metadata
     finalizeMetadata('train');
-    finalizeMetadata('validation');
+    if (!trainingOnly) {
+        finalizeMetadata('validation');
+    }
 
     const duration = ((performance.now() - startTime) / 1000).toFixed(2);
     console.log(`\nDONE! Generated ${totalImages} images in ${duration}s.`);
