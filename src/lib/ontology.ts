@@ -1,8 +1,8 @@
-import { CompetencyDescriptor, partOf, expands, Scope, Area, Ability } from 'edugraph-ts';
+import { CompetencyDescriptor, partOf, Scope, Area, Ability } from 'edugraph-ts';
 
 /**
  * Returns true if child is equal to parent, or if parent is a transitive 
- * ancestor of child (via partOf or expands relations).
+ * ancestor of child via the taxonomic partOf relation.
  */
 export function isSubConceptOf(child: string, parent: string): boolean {
     if (child === parent) return true;
@@ -18,10 +18,7 @@ export function isSubConceptOf(child: string, parent: string): boolean {
 
         try {
             const parents = partOf(current as CompetencyDescriptor) || [];
-            const expanded = expands(current as CompetencyDescriptor) || [];
-            const direct = [...parents, ...expanded];
-
-            for (const p of direct) {
+            for (const p of parents) {
                 if (!visited.has(p)) {
                     queue.push(p);
                 }
@@ -34,13 +31,10 @@ export function isSubConceptOf(child: string, parent: string): boolean {
     return false;
 }
 
-const scopesList = new Set<string>(Object.values(Scope));
-
 /**
  * Returns true if the view supports all the labels required by the problem.
- * A view supports a problem label if:
- * - For Scopes: the view label is a subconcept of the problem label (e.g. view supports NumbersSmaller20, problem has NumbersSmaller10).
- * - For Areas/Abilities: the problem label is a subconcept of the view label (e.g. problem requires Addition, view supports BaseOperations).
+ * A view supports a problem label if the problem label is a subconcept of the view label
+ * via taxonomic partOf generalization (e.g. problem requires NumbersSmaller10, view supports NumericRange).
  */
 export function doesViewSupportProblem(viewSpecSupportedLabels: string[], problemLabels: string[]): boolean {
     if (!viewSpecSupportedLabels || viewSpecSupportedLabels.length === 0) {
@@ -53,15 +47,7 @@ export function doesViewSupportProblem(viewSpecSupportedLabels: string[], proble
             return true;
         }
         
-        const isScope = scopesList.has(problemLabel);
-
-        return viewSpecSupportedLabels.some(viewLabel => {
-            if (isScope) {
-                return isSubConceptOf(viewLabel, problemLabel);
-            } else {
-                return isSubConceptOf(problemLabel, viewLabel);
-            }
-        });
+        return viewSpecSupportedLabels.some(viewLabel => isSubConceptOf(problemLabel, viewLabel));
     });
 }
 

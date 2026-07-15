@@ -8,7 +8,7 @@ export const spec: ViewSpec = {
         Area.CollectionSense,
         Area.Numeration,
         Area.NumericOrder,
-        Scope.NumbersSmaller10,
+        Scope.NumericRange,
         Ability.ConceptClassification,
         Ability.ProcedureExecution
     ],

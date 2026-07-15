@@ -8,13 +8,12 @@ describe('Ontology Helper', () => {
             expect(isSubConceptOf(Scope.NumbersSmaller10, Scope.NumbersSmaller10)).toBe(true);
         });
 
-        it('should return true for transitive child-to-parent relation (20 expands 10)', () => {
-            // NumbersSmaller20 expands NumbersSmaller10, so 20 is the sub-concept of 10
-            expect(isSubConceptOf(Scope.NumbersSmaller20, Scope.NumbersSmaller10)).toBe(true);
+        it('should return true for taxonomic child-to-parent relation (10 is partOf NumericRange)', () => {
+            expect(isSubConceptOf(Scope.NumbersSmaller10, Scope.NumericRange)).toBe(true);
         });
 
-        it('should return false for parent-to-child relation (10 does not expand 20)', () => {
-            expect(isSubConceptOf(Scope.NumbersSmaller10, Scope.NumbersSmaller20)).toBe(false);
+        it('should return false for parent-to-child relation (NumericRange is not partOf 10)', () => {
+            expect(isSubConceptOf(Scope.NumericRange, Scope.NumbersSmaller10)).toBe(false);
         });
 
         it('should return false for unrelated concepts', () => {
@@ -23,8 +22,8 @@ describe('Ontology Helper', () => {
     });
 
     describe('doesViewSupportProblem', () => {
-        it('should return true if view supports matching/broader scopes', () => {
-            const viewLabels = [Area.Numeration, Scope.NumbersSmaller20, Ability.ProcedureExecution];
+        it('should return true if view supports matching/broader scopes (NumericRange)', () => {
+            const viewLabels = [Area.Numeration, Scope.NumericRange, Ability.ProcedureExecution];
             const problemLabels = [Area.Numeration, Scope.NumbersSmaller10, Ability.ProcedureExecution];
             expect(doesViewSupportProblem(viewLabels, problemLabels)).toBe(true);
         });

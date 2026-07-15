@@ -7,7 +7,7 @@ export const spec: ViewSpec = {
         Area.Numeration,
         Scope.PhysicalNumbers,
         Scope.AdditiveCount,
-        Scope.NumbersSmaller20,
+        Scope.NumericRange,
         Ability.ProcedureExecution
     ],
     constraints: {
