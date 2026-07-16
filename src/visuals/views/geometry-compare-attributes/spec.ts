@@ -1,4 +1,4 @@
-import { ViewSpec, allOptions } from '../../../types/view-spec.ts';
+import { ViewSpec } from '../../../types/view-spec.ts';
 import { Area, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {

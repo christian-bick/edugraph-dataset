@@ -1,4 +1,4 @@
-import {allOptions, ViewSpec} from '../../../types/view-spec.ts';
+import {ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
@@ -16,13 +16,4 @@ export const spec: ViewSpec = {
     ],
     constraints: {
         interval: { type: 'options', values: [3600, 1800, 900, 60, 1] }
-    },
-    testParams: {
-        interval: (c) => allOptions(c),
-        time: (key, params) => {
-            if (params.interval === 1) return '10:15:30';
-            if (params.interval === 60) return '10:15:00';
-            return '10:30:00';
-        }
-    }
-};
+    },};

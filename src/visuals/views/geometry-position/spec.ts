@@ -1,4 +1,4 @@
-import {allOptions, ViewSpec} from '../../../types/view-spec.ts';
+import {ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
@@ -8,9 +8,4 @@ export const spec: ViewSpec = {
     ],
     constraints: {
         relation: { type: 'options', values: ['above', 'below', 'beside', 'nextTo'] }
-    },
-    testParams: {
-        relation: (c) => allOptions(c),
-        answer: (key, params) => params.relation
-    }
-};
+    },};

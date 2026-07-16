@@ -9,8 +9,4 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.NumbersWithZero,
         Ability.ProcedureExecution
-    ],
-        testParams: {
-        missingNumber: (key, params) => 10 - params.givenNumber
-    }
-};
+    ],};

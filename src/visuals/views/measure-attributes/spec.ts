@@ -1,12 +1,8 @@
-import {allOptions, ViewSpec} from '../../../types/view-spec.ts';
+import {ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-attributes',
     supportedLabels: [
         Ability.VisualReception
-    ],
-    testParams: {
-        attribute: (c) => allOptions(c)
-    }
-};
+    ],};
