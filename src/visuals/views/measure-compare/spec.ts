@@ -8,7 +8,10 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        Scope.LengthMeasurement,
+        Scope.HeightMeasurement,
+        Scope.WeightMeasurement
     ],
     constraints: {
         attribute: { type: 'options', values: ['length', 'height', 'weight'] }

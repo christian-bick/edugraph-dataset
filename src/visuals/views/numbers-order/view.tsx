@@ -11,7 +11,7 @@ interface Props {
 export function NumbersOrder({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const isDesc = payload.constraints.desc === true || payload.constraints.desc === 'true';
+    const isDesc = payload.labels.includes('http://edugraph.io/edu/Most' as any);
 
     const sortedNumbers = useMemo(() => {
         return sortNumbers(data.numbers, isDesc);

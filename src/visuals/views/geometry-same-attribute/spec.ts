@@ -1,11 +1,12 @@
 import { ViewSpec, allOptions } from '../../../types/view-spec.ts';
-import { Area, Ability } from 'edugraph-ts';
+import { Area, Ability, Scope } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-same-attribute',
     supportedLabels: [
         Area.Geometry,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        Scope.ShapeProperties
     ],
     constraints: {
         attribute: { type: 'options', values: ['can-roll', 'can-stack', 'flat-faces'] }

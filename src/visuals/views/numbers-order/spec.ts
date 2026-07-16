@@ -9,7 +9,8 @@ export const spec: ViewSpec = {
         Scope.Base10,
         Scope.NumericRange,
         Scope.NumericZero,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        Scope.OrderAbstraction
     ],
     constraints: {
         desc: { type: 'options', values: [true, false] }

@@ -13,7 +13,10 @@ interface Props {
 export function CountingObjectsOneToOne({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const { numObjects } = problem.data;
-    const arrangement = payload.constraints.arrangement || 'scattered';
+    let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
+    if (payload.labels.includes('http://edugraph.io/edu/LinearArrangement' as any)) arrangement = 'line';
+    else if (payload.labels.includes('http://edugraph.io/edu/CircularArrangement' as any)) arrangement = 'circle';
+    else if (payload.labels.includes('http://edugraph.io/edu/ScatteredArrangement' as any)) arrangement = 'scattered';
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;

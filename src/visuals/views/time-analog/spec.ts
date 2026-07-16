@@ -10,15 +10,15 @@ export const spec: ViewSpec = {
         Scope.MinuteIntervals,
         Scope.SecondIntervals,
         Scope.ArabicNumerals,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        Ability.VisualReception,
+        Ability.VisualArticulation
     ],
     constraints: {
-        interval: { type: 'options', values: [3600, 1800, 900, 60, 1] },
-        reverse: { type: 'options', values: [true, false] }
+        interval: { type: 'options', values: [3600, 1800, 900, 60, 1] }
     },
     testParams: {
         interval: (c) => allOptions(c),
-        reverse: (c) => allOptions(c),
         time: (key, params) => {
             if (params.interval === 1) return '10:15:30';
             if (params.interval === 60) return '10:15:00';

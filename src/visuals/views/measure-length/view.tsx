@@ -13,7 +13,7 @@ export function MeasureLength({ payload }: Props) {
     const data = problem.data;
     const color = '#4682B4'; // SteelBlue
 
-    const isReverse = payload.constraints.reverse === true || payload.constraints.reverse === 'true';
+    const isReverse = payload.labels.includes('http://edugraph.io/edu/VisualArticulation' as any);
     const isDecimal = payload.constraints.decimal === true || payload.constraints.decimal === 'true';
 
     const bandLength = data.bandLength !== undefined ? data.bandLength : 10;

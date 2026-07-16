@@ -82,7 +82,10 @@ export function MeasureCompare({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    const attribute = data.attribute || 'length';
+    let attribute = 'length';
+    if (payload.labels.includes('http://edugraph.io/edu/HeightMeasurement' as any)) attribute = 'height';
+    else if (payload.labels.includes('http://edugraph.io/edu/WeightMeasurement' as any)) attribute = 'weight';
+    else if (payload.labels.includes('http://edugraph.io/edu/LengthMeasurement' as any)) attribute = 'length';
     const relation = data.relation || 'longer';
     const val1 = data.val1 !== undefined ? data.val1 : 8;
     const val2 = data.val2 !== undefined ? data.val2 : 4;

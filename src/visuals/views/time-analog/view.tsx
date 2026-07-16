@@ -11,7 +11,7 @@ interface Props {
 export function TimeAnalog({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const isReverse = payload.constraints.reverse === true || payload.constraints.reverse === 'true';
+    const isReverse = payload.labels.includes('http://edugraph.io/edu/VisualArticulation' as any);
 
     const showHands = !isReverse || isSolutionView;
     const showTime = isReverse || isSolutionView;
