@@ -31,13 +31,7 @@ export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
     arrangement: string;
-};
-
-export type CountingCountOutProblem = {
-    numObjects: number;
-    simpleAnswer: number;
-    arrangement: string;
-    totalCount: number;
+    totalCount?: number;
 };
 
 export type CountingIncDecProblem = {
@@ -49,9 +43,7 @@ export type CountingIncDecProblem = {
     arrangement: string;
 };
 
-export type CountingConservationProblem = {
-    numObjects: number;
-};
+
 
 export type CountingClassifyCountProblem = {
     classifyType: 'shape' | 'color';
@@ -195,9 +187,9 @@ export interface ViewTypeMap {
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;
     'counting-objects-cardinality': CountingProblem;
-    'counting-objects-count-out': CountingCountOutProblem;
+    'counting-objects-count-out': CountingProblem;
     'counting-inc-dec': CountingIncDecProblem;
-    'counting-conservation': CountingConservationProblem;
+    'counting-conservation': CountingProblem;
     'sorting-classify': CountingClassifyProblem;
 
     'measure-length': MeasurementStandardProblem;

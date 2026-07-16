@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CountingGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
+import { Area } from 'edugraph-ts';
 
 describe('CountingGenerator', () => {
     let generator: CountingGenerator;
@@ -47,10 +48,34 @@ describe('CountingGenerator', () => {
         expect(stub!.data.numObjects).toBeLessThanOrEqual(5);
     });
 
+    it('should generate valid conservation stubs', () => {
+        const input = {
+            labels: [Area.NumericIdentity],
+            constraints: { maxCount: 8 }
+        };
+        const stub = generator.generate(input);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.numObjects).toBeLessThanOrEqual(8);
+        expect(stub!.id).toContain('conservation');
+    });
+
+    it('should generate valid count-out stubs', () => {
+        const input = {
+            labels: [],
+            constraints: { mode: 'count-out', maxCount: 10 }
+        };
+        for (let i = 0; i < 20; i++) {
+            const stub = generator.generate(input);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.totalCount).toBeDefined();
+            expect(stub!.data.totalCount!).toBeGreaterThanOrEqual(stub!.data.numObjects);
+        }
+    });
+
     it('should return null for unsupported modes', () => {
         const stub = generator.generate({
             labels: [],
-            constraints: { mode: 'conservation' }
+            constraints: { mode: 'unsupported' }
         });
         expect(stub).toBeNull();
     });

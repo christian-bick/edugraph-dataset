@@ -5,6 +5,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'counting',
     supportedLabels: [
         Area.Numeration,
+        Area.NumericIdentity,
         Scope.PhysicalNumbers,
         Scope.AdditiveCount,
         Area.CollectionSense,
