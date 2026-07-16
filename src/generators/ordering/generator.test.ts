@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { OrderingGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
-import { Scope } from 'edugraph-ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {OrderingGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('OrderingGenerator', () => {
     let generator: OrderingGenerator;

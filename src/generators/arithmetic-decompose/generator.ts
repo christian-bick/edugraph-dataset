@@ -1,8 +1,7 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { ArithmeticDecomposeProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { Ability } from "edugraph-ts";
-import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {ArithmeticDecomposeProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class ArithmeticDecomposeGenerator implements ProblemGenerator<ArithmeticDecomposeProblem> {
     type: AbstractProblem['type'] = 'arithmetic';

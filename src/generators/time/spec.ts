@@ -1,6 +1,6 @@
-import { GeneratorSpec } from '../../types/generator-spec.ts';
-import { VisualBlueprint } from '../../types/ml-engine.ts';
-import { Area, Scope } from 'edugraph-ts';
+import {GeneratorSpec} from '../../types/generator-spec.ts';
+import {VisualBlueprint} from '../../types/ml-engine.ts';
+import {Area, Scope} from 'edugraph-ts';
 
 export interface TimeGeneratorSpec extends GeneratorSpec {
     visualDistribution: VisualBlueprint[];

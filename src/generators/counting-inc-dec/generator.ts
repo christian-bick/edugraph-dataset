@@ -1,7 +1,7 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { CountingIncDecProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { resolveRangeFromLabels } from "../../lib/ontology.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {CountingIncDecProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecProblem> {
     type: AbstractProblem['type'] = 'counting';

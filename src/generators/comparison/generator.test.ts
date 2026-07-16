@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { ComparisonGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
-import { Scope } from 'edugraph-ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {ComparisonGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('ComparisonGenerator', () => {
     let generator: ComparisonGenerator;

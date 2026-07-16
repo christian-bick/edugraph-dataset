@@ -1,8 +1,7 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { CountingProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { Area, Scope } from "edugraph-ts";
-import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {CountingProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class CountingGenerator implements ProblemGenerator<CountingProblem> {
     type: AbstractProblem['type'] = 'counting';

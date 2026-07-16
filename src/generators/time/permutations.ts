@@ -1,7 +1,6 @@
-
-import { DatasetGenerationConfig } from "../../types/ml-engine.ts";
+import {DatasetGenerationConfig} from "../../types/ml-engine.ts";
 import DatasetPermutationBuilder from "../../lib/dataset-permutation-builder.ts";
-import { Area, Scope, Ability } from "edugraph-ts";
+import {Ability, Area, Scope} from "edugraph-ts";
 
 const SEED = 42;
 

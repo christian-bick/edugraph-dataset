@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { MeasurementAttributeGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {MeasurementAttributeGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
 
 describe('MeasurementAttributeGenerator', () => {
     let generator: MeasurementAttributeGenerator;

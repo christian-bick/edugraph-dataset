@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { GeometryPositionGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {GeometryPositionGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
 
 describe('GeometryPositionGenerator', () => {
     let generator: GeometryPositionGenerator;
