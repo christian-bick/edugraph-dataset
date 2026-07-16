@@ -1,0 +1,13 @@
+import { GeneratorSpec } from '../../types/generator-spec.ts';
+import { Area, Scope } from 'edugraph-ts';
+
+export const spec: GeneratorSpec = {
+    generatorId: 'counting-cardinality',
+    supportedLabels: [
+        Area.Numeration,
+        Scope.PhysicalNumbers,
+        Scope.AdditiveCount,
+        Scope.NumericRange,
+        Scope.NumericZero
+    ]
+};

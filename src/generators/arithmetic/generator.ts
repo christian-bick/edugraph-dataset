@@ -1,148 +1,29 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { ArithmeticStandardProblem, ArithmeticDecomposeProblem, ArithmeticRepresentationProblem, PlaceValueComposeTeenProblem, PlaceValueDecomposeTeenProblem, PlaceValueMakeTenProblem } from "../../types/problems.ts";
+import { ArithmeticStandardProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { Area, Scope, Ability } from "edugraph-ts";
 import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
 
-export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardProblem | ArithmeticRepresentationProblem | ArithmeticDecomposeProblem | PlaceValueComposeTeenProblem | PlaceValueDecomposeTeenProblem | PlaceValueMakeTenProblem> {
+export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
         
-        let mode = constraints.mode;
-        if (!mode && labels) {
-            if (labels.some(l => isSubConceptOf(l, Ability.ProcedureUnderstanding))) {
-                mode = 'decompose';
-            } else if (labels.some(l => isSubConceptOf(l, Ability.ProcedureExecution))) {
-                mode = 'representation';
-            } else {
-                mode = 'standard';
+        // Guard to ensure we only generate standard arithmetic problems
+        if (constraints.mode && constraints.mode !== 'standard') {
+            return null;
+        }
+        if (!constraints.mode && labels) {
+            if (labels.some(l => isSubConceptOf(l, Ability.ProcedureUnderstanding)) ||
+                (labels.some(l => isSubConceptOf(l, Scope.PhysicalNumbers)) && labels.some(l => isSubConceptOf(l, Ability.ProcedureExecution))) ||
+                labels.some(l => isSubConceptOf(l, Scope.NumbersLarger10))) {
+                return null;
             }
         }
-        if (!mode) mode = 'standard';
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
 
-        if (mode === 'representation' || mode === 'word-problem') {
-            const operation = constraints.operation || (random() > 0.5 ? 'addition' : 'subtraction');
-            let num1 = 0;
-            let num2 = 0;
-            let answer = 0;
-
-            if (operation === 'addition') {
-                const maxSum = constraints.maxSum || resolvedRange.max;
-                num1 = Math.floor(random() * (maxSum - 1)) + 1; // 1 to maxSum-1
-                num2 = Math.floor(random() * (maxSum - num1)) + 1; // 1 to maxSum-num1
-                answer = num1 + num2;
-            } else {
-                const maxMinuend = constraints.maxMinuend || resolvedRange.max;
-                num1 = Math.floor(random() * (maxMinuend - 2)) + 2; // 2 to maxMinuend
-                num2 = Math.floor(random() * (num1 - 1)) + 1; // 1 to num1-1
-                answer = num1 - num2;
-            }
-
-            let textScenario = '';
-            if (mode === 'word-problem') {
-                const addTemplates = [
-                    `Maya has ${num1} stickers. She gets ${num2} more. How many stickers does she have now?`,
-                    `There are ${num1} red birds and ${num2} blue birds on a tree. How many birds are there in total?`
-                ];
-                const subTemplates = [
-                    `There were ${num1} apples on a table. Liam ate ${num2} of them. How many apples are left?`,
-                    `There are ${num1} balloons. ${num2} balloons pop. How many balloons are left?`
-                ];
-                const templates = operation === 'addition' ? addTemplates : subTemplates;
-                textScenario = templates[Math.floor(random() * templates.length)];
-            }
-
-            return {
-                id: `${mode}-${operation}-${num1}-${num2}`,
-                data: {
-                    mode,
-                    operation,
-                    num1,
-                    num2,
-                    answer,
-                    textScenario
-                }
-            };
-        }
-
-        if (mode === 'decompose') {
-            const targetNumber = constraints.targetNumber || Math.floor(random() * (resolvedRange.max - 3 + 1)) + 3; // 3 to resolved max (usually 10)
-            
-            const pairs: [number, number][] = [];
-            for (let i = 1; i <= Math.floor(targetNumber / 2); i++) {
-                pairs.push([i, targetNumber - i]);
-            }
-
-            if (pairs.length < 1) {
-                return null;
-            }
-
-            let pair1: [number, number] = [0, 0];
-            let pair2: [number, number] = [0, 0];
-
-            if (pairs.length >= 2) {
-                const idx1 = Math.floor(random() * pairs.length);
-                let idx2 = Math.floor(random() * pairs.length);
-                while (idx1 === idx2) {
-                    idx2 = Math.floor(random() * pairs.length);
-                }
-                pair1 = pairs[idx1];
-                pair2 = pairs[idx2];
-                if (random() > 0.5) pair1 = [pair1[1], pair1[0]];
-                if (random() > 0.5) pair2 = [pair2[1], pair2[0]];
-            } else {
-                pair1 = pairs[0];
-                pair2 = [pairs[0][1], pairs[0][0]];
-            }
-
-            return {
-                id: `decompose-${targetNumber}-${pair1[0]}-${pair2[0]}`,
-                data: {
-                    mode,
-                    targetNumber,
-                    pair1,
-                    pair2
-                }
-            };
-        }
-
-        if (mode === 'make-ten') {
-            const target = constraints.targetSum || 10;
-            const givenNumber = constraints.givenNumber || Math.floor(random() * (target - 1)) + 1; // 1 to target-1
-            const missingNumber = target - givenNumber;
-            return {
-                id: `make-ten-${givenNumber}`,
-                data: {
-                    mode,
-                    givenNumber,
-                    missingNumber,
-                    target
-                }
-            };
-        }
-
-        if (mode === 'compose-teen' || mode === 'decompose-teen') {
-            const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;
-            const resolvedMax = resolvedRange.max <= 20 ? resolvedRange.max : 19;
-            const ones = constraints.ones !== undefined 
-                ? constraints.ones 
-                : (constraints.target !== undefined ? constraints.target - 10 : Math.floor(random() * (resolvedMax - resolvedMin + 1)) + resolvedMin - 10);
-            const target = 10 + ones;
-            return {
-                id: `${mode}-${target}`,
-                data: {
-                    mode,
-                    ones,
-                    target
-                }
-            };
-        }
-
-        // Standard arithmetic (legacy)
         let operation: 'addition' | 'subtraction' | 'multiplication' | 'division' = 'addition';
         if (labels.some(l => isSubConceptOf(l, Area.Addition))) operation = 'addition';
         else if (labels.some(l => isSubConceptOf(l, Area.Subtraction))) operation = 'subtraction';

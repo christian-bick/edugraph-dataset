@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MeasurementGenerator } from './generator.ts';
-import { generationConfig } from './permutations.ts';
 import { setSeed } from '../../lib/random.ts';
 
 describe('MeasurementGenerator', () => {
@@ -8,117 +7,39 @@ describe('MeasurementGenerator', () => {
 
     beforeEach(() => {
         generator = new MeasurementGenerator();
-        setSeed(generationConfig.seed);
+        setSeed(42);
     });
 
     it('should have the correct type', () => {
         expect(generator.type).toBe('measurement');
     });
 
-    describe('generate basic permutations', () => {
-        it('should generate valid problem stubs for all permutations', () => {
-            generationConfig.permutations.forEach(input => {
-                const stub = generator.generate(input);
-                if (stub) {
-                    expect(stub.id).toBeDefined();
-                    if (input.constraints.mode === 'attribute-type') {
-                        expect(stub.data.attribute).toBeDefined();
-                    } else if (input.constraints.mode === 'direct-compare') {
-                        expect(stub.data.attribute).toBeDefined();
-                        expect(stub.data.relation).toBeDefined();
-                        expect(stub.data.answer).toBeDefined();
-                    } else {
-                        expect(stub.data.bandLength).toBe(input.constraints.bandLength);
-                        expect(stub.data.problemLength).toBeGreaterThan(0);
-                        expect(stub.data.problemLength).toBeLessThanOrEqual(input.constraints.bandLength);
-                    }
-                }
-            });
-        });
-
-        it('should be deterministic with the same seed', () => {
-            const input = generationConfig.permutations[0];
-            setSeed(123);
-            const stub1 = generator.generate(input);
-            setSeed(123);
-            const stub2 = generator.generate(input);
-            expect(stub1).toEqual(stub2);
-        });
+    it('should be deterministic with the same seed', () => {
+        const input = { labels: [], constraints: { bandLength: 10 } };
+        setSeed(123);
+        const stub1 = generator.generate(input);
+        setSeed(123);
+        const stub2 = generator.generate(input);
+        expect(stub1).toEqual(stub2);
     });
 
-    describe('generate comprehensive edge cases', () => {
-        it('should validate attribute-type modes', () => {
-            const input = {
-                labels: [],
-                constraints: { mode: 'attribute-type', attribute: 'weight' }
-            };
-            const stub = generator.generate(input);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.mode).toBe('attribute-type');
-            expect(stub!.data.attribute).toBe('weight');
-        });
+    it('should validate standard measure bounds', () => {
+        const input = {
+            labels: [],
+            constraints: { mode: 'standard', bandLength: 10 }
+        };
+        const stub = generator.generate(input);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.bandLength).toBe(10);
+        expect(stub!.data.problemLength).toBeGreaterThan(0);
+        expect(stub!.data.problemLength).toBeLessThanOrEqual(10);
+    });
 
-        it('should validate direct-compare length longer relation', () => {
-            const input = {
-                labels: [],
-                constraints: { mode: 'direct-compare', attribute: 'length', relation: 'longer' }
-            };
-            for (let i = 0; i < 50; i++) {
-                const stub = generator.generate(input);
-                expect(stub).not.toBeNull();
-                expect(stub!.data.mode).toBe('direct-compare');
-                expect(stub!.data.attribute).toBe('length');
-                expect(stub!.data.relation).toBe('longer');
-                
-                const { val1, val2, answer } = stub!.data;
-                if (answer === 'A') {
-                    expect(val1).toBeGreaterThan(val2);
-                } else {
-                    expect(val1).toBeLessThan(val2);
-                }
-            }
+    it('should return null for non-standard modes', () => {
+        const stub = generator.generate({
+            labels: [],
+            constraints: { mode: 'attribute-type' }
         });
-
-        it('should validate direct-compare length shorter relation', () => {
-            const input = {
-                labels: [],
-                constraints: { mode: 'direct-compare', attribute: 'length', relation: 'shorter' }
-            };
-            for (let i = 0; i < 50; i++) {
-                const stub = generator.generate(input);
-                expect(stub).not.toBeNull();
-                expect(stub!.data.mode).toBe('direct-compare');
-                expect(stub!.data.attribute).toBe('length');
-                expect(stub!.data.relation).toBe('shorter');
-                
-                const { val1, val2, answer } = stub!.data;
-                if (answer === 'A') {
-                    expect(val1).toBeLessThan(val2);
-                } else {
-                    expect(val1).toBeGreaterThan(val2);
-                }
-            }
-        });
-
-        it('should validate direct-compare weight heavier relation', () => {
-            const input = {
-                labels: [],
-                constraints: { mode: 'direct-compare', attribute: 'weight', relation: 'heavier' }
-            };
-            for (let i = 0; i < 50; i++) {
-                const stub = generator.generate(input);
-                expect(stub).not.toBeNull();
-                expect(stub!.data.mode).toBe('direct-compare');
-                expect(stub!.data.attribute).toBe('weight');
-                expect(stub!.data.relation).toBe('heavier');
-                
-                const { val1, val2, answer } = stub!.data;
-                if (answer === 'A') {
-                    expect(val1).toBeGreaterThan(val2);
-                } else {
-                    expect(val1).toBeLessThan(val2);
-                }
-            }
-        });
+        expect(stub).toBeNull();
     });
 });

@@ -9,30 +9,29 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem> {
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints, labels } = input;
+
+        // Guard
+        const mode = constraints.mode || 'stroke';
+        if (mode === 'count-objects') {
+            return null;
+        }
+        if (!constraints.mode && labels && labels.some(l => isSubConceptOf(l, Area.Numeration))) {
+            return null;
+        }
+
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const minNum = constraints.minVal !== undefined ? constraints.minVal : (constraints.min !== undefined ? constraints.min : resolvedRange.min);
         const maxNum = constraints.maxVal !== undefined ? constraints.maxVal : (constraints.max !== undefined ? constraints.max : resolvedRange.max);
         const fixedNumber = constraints.number;
         
-        let mode = constraints.mode;
-        if (!mode && labels) {
-            if (labels.some(l => isSubConceptOf(l, Area.Numeration))) {
-                mode = 'count-objects';
-            } else if (labels.some(l => isSubConceptOf(l, Area.DigitNotation))) {
-                mode = 'stroke';
-            }
-        }
-        if (!mode) mode = 'stroke';
-
         const currentNum = fixedNumber !== undefined ? fixedNumber : Math.floor(random() * (maxNum - minNum + 1)) + minNum;
         
         return {
             id: `${mode}-${currentNum}`,
             data: {
                 number: currentNum,
-                mode: mode
+                mode: mode as 'stroke' | 'standard'
             }
         };
     }
 }
-
