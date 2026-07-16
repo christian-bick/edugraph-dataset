@@ -7,7 +7,6 @@ export const spec: GeneratorSpec = {
         Area.Numeration,
         Area.ObjectSorting,
         Area.NumericOrder,
-        Scope.PhysicalNumbers,
         Scope.NumericRange,
         Scope.NumericZero
     ]

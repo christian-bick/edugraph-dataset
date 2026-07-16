@@ -5,7 +5,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'arithmetic',
     supportedLabels: [
         Area.BaseOperations,
-        Scope.PhysicalNumbers,
         Scope.NumericRange,
         Scope.NumericZero,
         Scope.NumericSign,

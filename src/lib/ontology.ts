@@ -116,6 +116,11 @@ export function doesGeneratorSupportCompetency(genSupportedLabels: string[], com
         if (abilitiesList.has(compLabel)) {
             return true;
         }
+        // Skip representational scopes, as they dictate HOW the data is displayed (view concern)
+        // rather than the mathematical abstract problem (generator concern)
+        if (isSubConceptOf(compLabel, Scope.RepresentationalScope)) {
+            return true;
+        }
         if (!compLabel.startsWith('http://edugraph.io/edu/')) {
             return true;
         }

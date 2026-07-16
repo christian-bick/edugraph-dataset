@@ -5,7 +5,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'place-value-teen',
     supportedLabels: [
         Area.BaseOperations,
-        Scope.PhysicalNumbers,
         Scope.NumericRange,
         Scope.NumericZero
     ]

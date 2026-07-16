@@ -6,7 +6,6 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.Numeration,
         Area.NumericIdentity,
-        Scope.PhysicalNumbers,
         Scope.AdditiveCount,
         Area.CollectionSense,
         Area.NumericOrder,
