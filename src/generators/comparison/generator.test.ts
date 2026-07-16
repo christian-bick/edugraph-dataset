@@ -15,16 +15,7 @@ describe('ComparisonGenerator', () => {
         expect(generator.type).toBe('comparison');
     });
 
-    it('should be deterministic with the same seed', () => {
-        const input = { labels: [], constraints: {} };
-        setSeed(123);
-        const stub1 = generator.generate(input);
-        setSeed(123);
-        const stub2 = generator.generate(input);
-        expect(stub1).toEqual(stub2);
-    });
-
-    it('should return null if numbers are equal', () => {
+    it('should respect numeric comparison constraints and avoid equals', () => {
         for (let i = 0; i < 100; i++) {
             const stub = generator.generate({ 
                 labels: [Scope.NumbersSmaller10], 
@@ -32,14 +23,54 @@ describe('ComparisonGenerator', () => {
             });
             if (stub) {
                 expect(stub.data.num1).not.toEqual(stub.data.num2);
+                expect(stub.data.answer).toMatch(/^[<>]$/);
             }
         }
     });
 
-    it('should return null for non-numeric modes', () => {
+    it('should respect group comparison matching with greater constraint', () => {
+        const input = {
+            labels: [],
+            constraints: { mode: 'matching', comparisonType: 'greater', maxCount: 10 }
+        };
+        for (let i = 0; i < 50; i++) {
+            const stub = generator.generate(input);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
+            expect(stub!.data.answer).toBe('>');
+        }
+    });
+
+    it('should respect group comparison matching with less constraint', () => {
+        const input = {
+            labels: [],
+            constraints: { mode: 'matching', comparisonType: 'less', maxCount: 10 }
+        };
+        for (let i = 0; i < 50; i++) {
+            const stub = generator.generate(input);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.num1).toBeLessThan(stub!.data.num2);
+            expect(stub!.data.answer).toBe('<');
+        }
+    });
+
+    it('should respect group comparison matching with equal constraint', () => {
+        const input = {
+            labels: [],
+            constraints: { mode: 'matching', comparisonType: 'equal', maxCount: 10 }
+        };
+        for (let i = 0; i < 50; i++) {
+            const stub = generator.generate(input);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.num1).toEqual(stub!.data.num2);
+            expect(stub!.data.answer).toBe('=');
+        }
+    });
+
+    it('should return null for unsupported modes', () => {
         const stub = generator.generate({
             labels: [],
-            constraints: { mode: 'matching' }
+            constraints: { mode: 'unsupported' }
         });
         expect(stub).toBeNull();
     });

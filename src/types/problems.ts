@@ -86,24 +86,10 @@ export type MeasurementCompareProblem = {
     answer: 'A' | 'B';
 };
 
-export type ComparisonNumericProblem = {
+export type ComparisonProblem = {
     num1: number;
     num2: number;
-    answer: '<' | '>';
-};
-
-export type ComparisonMatchingProblem = {
-    num1: number;
-    num2: number;
-    comparisonType: 'greater' | 'less' | 'equal';
-    answer: 'A' | 'B' | 'equal';
-};
-
-export type ComparisonCountCompareProblem = {
-    num1: number;
-    num2: number;
-    comparisonType: 'greater' | 'less' | 'equal';
-    answer: 'A' | 'B' | 'equal';
+    answer: '<' | '>' | '=';
 };
 
 export type OrderingProblem = {
@@ -218,8 +204,8 @@ export interface ViewTypeMap {
     'measure-attributes': MeasurementAttributeProblem;
     'measure-compare': MeasurementCompareProblem;
 
-    'numbers-compare': ComparisonNumericProblem;
-    'numbers-compare-groups': ComparisonMatchingProblem | ComparisonCountCompareProblem;
+    'numbers-compare': ComparisonProblem;
+    'numbers-compare-groups': ComparisonProblem;
 
     'numbers-order': OrderingProblem;
     'numbers-write': WritingProblem;
