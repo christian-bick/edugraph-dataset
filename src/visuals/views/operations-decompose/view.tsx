@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { getDecomposeLayout } from './helpers.ts';
+import {useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {getDecomposeLayout} from './helpers.ts';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];

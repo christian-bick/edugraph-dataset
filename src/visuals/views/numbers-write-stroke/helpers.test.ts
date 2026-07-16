@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getTracingPaths } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getTracingPaths} from './helpers.ts';
 
 describe('numbers-write-stroke helpers', () => {
     it('returns path string for 1', () => {

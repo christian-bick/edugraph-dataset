@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { formatTime, getClockAngles, getTickMarks } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {formatTime, getClockAngles, getTickMarks} from './helpers.ts';
 
 describe('time-analog helpers', () => {
     it('formats time correctly based on interval', () => {

@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { getRulerTicks, formatMeasureAnswer } from './helpers.ts';
+import {Ability} from 'edugraph-ts';
+import React, {useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {formatMeasureAnswer, getRulerTicks} from './helpers.ts';
 import '../../../tailwind.css';
 
 interface Props {
@@ -13,7 +14,7 @@ export function MeasureLength({ payload }: Props) {
     const data = problem.data;
     const color = '#4682B4'; // SteelBlue
 
-    const isReverse = payload.labels.includes('http://edugraph.io/edu/VisualArticulation' as any);
+    const isReverse = payload.labels.includes(Ability.VisualArticulation);
     const isDecimal = payload.constraints.decimal === true || payload.constraints.decimal === 'true';
 
     const bandLength = data.bandLength !== undefined ? data.bandLength : 10;

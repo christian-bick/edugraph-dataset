@@ -1,7 +1,7 @@
-import { createRoot } from 'react-dom/client';
-import { useMemo } from 'react';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { getClosePositions, getFarPositions } from './helpers.ts';
+import {createRoot} from 'react-dom/client';
+import {useMemo} from 'react';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {getClosePositions, getFarPositions} from './helpers.ts';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];

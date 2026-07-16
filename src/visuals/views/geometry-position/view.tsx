@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { getBallPosition } from './helpers.ts';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {getBallPosition} from './helpers.ts';
 import '../../../tailwind.css';
 
 interface Props {

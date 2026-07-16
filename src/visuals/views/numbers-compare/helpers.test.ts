@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getComparisonSymbol } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getComparisonSymbol} from './helpers.ts';
 
 describe('numbers-compare helpers', () => {
     it('maps A to greater-than symbol', () => {

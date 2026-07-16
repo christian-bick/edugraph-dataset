@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { sortNumbers } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {sortNumbers} from './helpers.ts';
 
 describe('numbers-order helpers', () => {
     it('sorts numbers in ascending order', () => {

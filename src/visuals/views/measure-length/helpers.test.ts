@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getRulerTicks, formatMeasureAnswer } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {formatMeasureAnswer, getRulerTicks} from './helpers.ts';
 
 describe('measure-length helpers', () => {
     it('formats answer correctly', () => {

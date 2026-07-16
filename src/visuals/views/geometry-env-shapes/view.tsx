@@ -1,5 +1,5 @@
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import '../../../tailwind.css';
 
 interface Props {

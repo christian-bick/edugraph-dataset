@@ -1,4 +1,4 @@
-import { setSeed, random } from '../../../lib/random.ts';
+import {random, setSeed} from '../../../lib/random.ts';
 
 export interface Position {
     x: number;

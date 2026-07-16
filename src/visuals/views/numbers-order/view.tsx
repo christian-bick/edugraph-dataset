@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { sortNumbers } from './helpers.ts';
+import {Scope} from 'edugraph-ts';
+import {useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {sortNumbers} from './helpers.ts';
 import '../../../tailwind.css';
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 export function NumbersOrder({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const isDesc = payload.labels.includes('http://edugraph.io/edu/Most' as any);
+    const isDesc = payload.labels.includes(Scope.Most);
 
     const sortedNumbers = useMemo(() => {
         return sortNumbers(data.numbers, isDesc);

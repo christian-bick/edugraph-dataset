@@ -1,4 +1,4 @@
-import { setSeed, random } from '../../../lib/random.ts';
+import {random, setSeed} from '../../../lib/random.ts';
 
 export function getBlankPart(problemId: string, requestedBlank: string): string {
     setSeed(problemId);

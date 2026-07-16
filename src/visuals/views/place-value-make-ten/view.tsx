@@ -1,6 +1,6 @@
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { TenFrame } from '../../components/TenFrame.tsx';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {TenFrame} from '../../components/TenFrame.tsx';
 import '../../../tailwind.css';
 
 interface Props {

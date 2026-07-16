@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getWeightLayout } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getWeightLayout} from './helpers.ts';
 
 describe('measure-compare helpers', () => {
     it('calculates layout correctly when left is heavier', () => {

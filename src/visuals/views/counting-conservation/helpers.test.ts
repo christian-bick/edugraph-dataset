@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getClosePositions, getFarPositions } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getClosePositions, getFarPositions} from './helpers.ts';
 
 describe('counting-conservation helpers', () => {
     it('calculates close positions correctly', () => {

@@ -1,6 +1,6 @@
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { getBlankPart } from './helpers.ts';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {getBlankPart} from './helpers.ts';
 import '../../../tailwind.css';
 
 const operatorSymbols: { [key: string]: string } = {

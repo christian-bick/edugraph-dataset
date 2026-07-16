@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getDecomposeLayout } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getDecomposeLayout} from './helpers.ts';
 
 describe('operations-decompose helpers', () => {
     it('calculates decompose layout start position correctly', () => {

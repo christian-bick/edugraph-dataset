@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getTracePath } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getTracePath} from './helpers.ts';
 
 describe('geometry-draw-shape helpers', () => {
     it('returns correct trace path for target shape', () => {

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getBlankPart } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getBlankPart} from './helpers.ts';
 
 describe('operations-boxes helpers', () => {
     it('returns exact blank value if requestedBlank is specific', () => {

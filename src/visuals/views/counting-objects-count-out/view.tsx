@@ -1,3 +1,4 @@
+import { Scope, Ability } from 'edugraph-ts';
 import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
@@ -24,9 +25,9 @@ export function CountingObjectsCountOut({ payload }: Props) {
     }, [problem.id, numObjects]);
 
     let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
-    if (payload.labels.includes('http://edugraph.io/edu/LinearArrangement' as any)) arrangement = 'line';
-    else if (payload.labels.includes('http://edugraph.io/edu/CircularArrangement' as any)) arrangement = 'circle';
-    else if (payload.labels.includes('http://edugraph.io/edu/ScatteredArrangement' as any)) arrangement = 'scattered';
+    if (payload.labels.includes(Scope.LinearArrangement)) arrangement = 'line';
+    else if (payload.labels.includes(Scope.CircularArrangement)) arrangement = 'circle';
+    else if (payload.labels.includes(Scope.ScatteredArrangement)) arrangement = 'scattered';
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;

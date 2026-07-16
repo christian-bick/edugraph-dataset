@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getBallPosition } from './helpers.ts';
+import {describe, expect, it} from 'vitest';
+import {getBallPosition} from './helpers.ts';
 
 describe('geometry-position helpers', () => {
     it('returns correct ball position for relation', () => {

@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { getWeightLayout } from './helpers.ts';
+import {Scope} from 'edugraph-ts';
+import {useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {getWeightLayout} from './helpers.ts';
 import '../../../tailwind.css';
 
 interface Props {
@@ -83,9 +84,9 @@ export function MeasureCompare({ payload }: Props) {
     const data = problem.data;
 
     let attribute = 'length';
-    if (payload.labels.includes('http://edugraph.io/edu/HeightMeasurement' as any)) attribute = 'height';
-    else if (payload.labels.includes('http://edugraph.io/edu/WeightMeasurement' as any)) attribute = 'weight';
-    else if (payload.labels.includes('http://edugraph.io/edu/LengthMeasurement' as any)) attribute = 'length';
+    if (payload.labels.includes(Scope.HeightMeasurement)) attribute = 'height';
+    else if (payload.labels.includes(Scope.WeightMeasurement)) attribute = 'weight';
+    else if (payload.labels.includes(Scope.LengthMeasurement)) attribute = 'length';
     const relation = data.relation || 'longer';
     const val1 = data.val1 !== undefined ? data.val1 : 8;
     const val2 = data.val2 !== undefined ? data.val2 : 4;

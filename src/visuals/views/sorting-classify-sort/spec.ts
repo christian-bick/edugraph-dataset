@@ -1,5 +1,5 @@
-import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
-import { Area, Scope, Ability } from 'edugraph-ts';
+import {allOptions, limitsAndMean, ViewSpec} from '../../../types/view-spec.ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'sorting-classify-sort',

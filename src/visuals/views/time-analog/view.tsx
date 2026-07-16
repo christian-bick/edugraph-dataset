@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { formatTime, getClockAngles, getTickMarks } from './helpers.ts';
+import {Ability} from 'edugraph-ts';
+import {useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {formatTime, getClockAngles, getTickMarks} from './helpers.ts';
 import '../../../tailwind.css';
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 export function TimeAnalog({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const isReverse = payload.labels.includes('http://edugraph.io/edu/VisualArticulation' as any);
+    const isReverse = payload.labels.includes(Ability.VisualArticulation);
 
     const showHands = !isReverse || isSolutionView;
     const showTime = isReverse || isSolutionView;
