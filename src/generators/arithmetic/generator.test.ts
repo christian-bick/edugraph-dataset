@@ -16,45 +16,39 @@ describe('ArithmeticGenerator', () => {
 
     it('should generate correct addition/subtraction/multiplication/division problems', () => {
         const addStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Addition'],
-            constraints: { digitsNum1: 1, digitsNum2: 1 }
+            labels: ['http://edugraph.io/edu/Addition']
         });
         expect(addStub).not.toBeNull();
         expect(addStub!.data.operation).toBe('addition');
 
         const subStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Subtraction'],
-            constraints: { digitsNum1: 1, digitsNum2: 1 }
+            labels: ['http://edugraph.io/edu/Subtraction']
         });
         expect(subStub).not.toBeNull();
         expect(subStub!.data.operation).toBe('subtraction');
 
         const mulStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Multiplication'],
-            constraints: { digitsNum1: 1, digitsNum2: 1 }
+            labels: ['http://edugraph.io/edu/Multiplication']
         });
         expect(mulStub).not.toBeNull();
         expect(mulStub!.data.operation).toBe('multiplication');
 
         const divStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Division'],
-            constraints: { digitsNum1: 1, digitsNum2: 1 }
+            labels: ['http://edugraph.io/edu/Division']
         });
         expect(divStub).not.toBeNull();
         expect(divStub!.data.operation).toBe('division');
         expect(divStub!.data.num1).toBe(divStub!.data.answer * divStub!.data.num2);
         
         const zeroNegStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/NumbersWithZero', 'http://edugraph.io/edu/NumbersWithNegatives'],
-            constraints: { digitsNum1: 1, digitsNum2: 1 }
+            labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/NumbersWithZero', 'http://edugraph.io/edu/NumbersWithNegatives']
         });
         expect(zeroNegStub).not.toBeNull();
     });
 
     it('should generate correct physical arithmetic problems', () => {
         const addStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/PhysicalNumbers'],
-            constraints: { maxSum: 10 }
+            labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/PhysicalNumbers']
         });
         expect(addStub).not.toBeNull();
         expect(addStub!.data.operation).toBe('addition');
@@ -64,8 +58,7 @@ describe('ArithmeticGenerator', () => {
         expect(addStub!.data.num1 + addStub!.data.num2).toBe(addStub!.data.answer);
 
         const subStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Subtraction', 'http://edugraph.io/edu/PhysicalNumbers'],
-            constraints: { maxMinuend: 10 }
+            labels: ['http://edugraph.io/edu/Subtraction', 'http://edugraph.io/edu/PhysicalNumbers']
         });
         expect(subStub).not.toBeNull();
         expect(subStub!.data.operation).toBe('subtraction');

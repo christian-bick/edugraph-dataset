@@ -8,7 +8,7 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem> {
     type: AbstractProblem['type'] = 'time';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints = {} } = input;
+        const { labels } = input;
         
         let interval = 3600; // default HourIntervals
         if (labels && labels.some(l => isSubConceptOf(l, Scope.SecondIntervals))) {

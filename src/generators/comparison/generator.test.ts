@@ -18,8 +18,7 @@ describe('ComparisonGenerator', () => {
     it('should respect resolved ranges', () => {
         for (let i = 0; i < 100; i++) {
             const stub = generator.generate({ 
-                labels: [Scope.NumbersSmaller10], 
-                constraints: {} 
+                labels: [Scope.NumbersSmaller10] 
             });
             if (stub) {
                 expect(stub.data.num1).toBeGreaterThanOrEqual(0);

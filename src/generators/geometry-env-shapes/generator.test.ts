@@ -23,7 +23,7 @@ describe('GeometryEnvShapesGenerator', () => {
             'book': 'rectangle',
             'table': 'rectangle'
         };
-        const input = { labels: [], constraints: {} };
+        const input = { labels: [] };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
         expect(ENV_ITEMS[stub!.data.target]).toBeDefined();

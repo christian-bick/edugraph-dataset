@@ -16,8 +16,7 @@ describe('GeometryClassifyDimGenerator', () => {
 
     it('should validate classify-dim outputs', () => {
         const input = {
-            labels: [],
-            constraints: {}
+            labels: []
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

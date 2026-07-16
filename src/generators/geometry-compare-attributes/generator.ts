@@ -8,9 +8,9 @@ export class GeometryCompareAttributesGenerator implements ProblemGenerator<Geom
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints = {} } = input;
+        const { labels } = input;
 
-        const attribute = constraints.attribute || (random() > 0.5 ? 'sides' : 'corners');
+        const attribute = random() > 0.5 ? 'sides' : 'corners';
 
         const validShapes = new Set<string>();
         if (labels) {

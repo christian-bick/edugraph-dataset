@@ -8,7 +8,4 @@ export const spec: ViewSpec = {
         Area.Triangle,
         Ability.ProcedureExecution
     ],
-    constraints: {
-        target: { type: 'options', values: ['clock', 'window', 'table'] }
-    },
 };

@@ -15,8 +15,8 @@ describe('WritingGenerator', () => {
         expect(generator.type).toBe('writing');
     });
 
-    it('should default min to 1 and max to 9 if constraints are missing', () => {
-        const input = { labels: [], constraints: {} };
+    it('should default min to 1 and max to 9 if labels are empty', () => {
+        const input = { labels: [] };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
@@ -26,7 +26,7 @@ describe('WritingGenerator', () => {
     });
 
     it('should respect custom min/max bounds including zero and twenty via ontology', () => {
-        const input = { labels: [Scope.NumbersWithZero, Scope.NumbersSmaller20], constraints: {} };
+        const input = { labels: [Scope.NumbersWithZero, Scope.NumbersSmaller20] };
         let zeroFound = false;
         let twentyFound = false;
         for (let i = 0; i < 100; i++) {

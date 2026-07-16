@@ -17,8 +17,7 @@ describe('CountingGenerator', () => {
 
     it('should respect resolved ranges from labels', () => {
         const input = { 
-            labels: [Scope.NumbersSmaller10], 
-            constraints: {} 
+            labels: [Scope.NumbersSmaller10] 
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -31,8 +30,7 @@ describe('CountingGenerator', () => {
 
     it('should generate valid stubs', () => {
         const input = { 
-            labels: [Scope.NumbersSmaller10], 
-            constraints: {} 
+            labels: [Scope.NumbersSmaller10] 
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

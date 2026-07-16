@@ -8,7 +8,7 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
     type: AbstractProblem['type'] = 'measurement';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints = {} } = input;
+        const { labels } = input;
 
         const validAttributes: ('length' | 'weight')[] = [];
         if (!labels || labels.length === 0) {

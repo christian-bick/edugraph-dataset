@@ -17,8 +17,7 @@ describe('PlaceValueTeenGenerator', () => {
 
     it('should generate valid place value teen stubs', () => {
         const input: GeneratorInput = {
-            labels: [Area.PlaceValue, Scope.NumbersSmaller20],
-            constraints: {}
+            labels: [Area.PlaceValue, Scope.NumbersSmaller20]
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

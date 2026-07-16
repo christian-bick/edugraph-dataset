@@ -16,8 +16,7 @@ describe('MeasurementAttributeGenerator', () => {
 
     it('should validate attribute-type modes', () => {
         const input = {
-            labels: [],
-            constraints: { attribute: 'weight' }
+            labels: []
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

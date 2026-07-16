@@ -18,21 +18,24 @@ describe('TimeGenerator', () => {
     describe('generate', () => {
         it('should generate valid problem stubs', () => {
             const inputs = [
-                { labels: [Scope.HourIntervals], constraints: { interval: 3600 } },
-                { labels: [Scope.MinuteIntervals], constraints: { interval: 60 } },
-                { labels: [Scope.SecondIntervals], constraints: { interval: 1 } }
+                { labels: [Scope.HourIntervals] },
+                { labels: [Scope.MinuteIntervals] },
+                { labels: [Scope.SecondIntervals] }
             ];
             inputs.forEach(input => {
                 const stub = generator.generate(input);
                 expect(stub).not.toBeNull();
                 expect(stub!.id).toBeDefined();
                 expect(stub!.data.time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
-                expect(stub!.data.interval).toBe(input.constraints.interval);
+                let expectedInterval = 3600;
+                if (input.labels.includes(Scope.SecondIntervals)) expectedInterval = 1;
+                else if (input.labels.includes(Scope.MinuteIntervals)) expectedInterval = 60;
+                expect(stub!.data.interval).toBe(expectedInterval);
             });
         });
 
         it('should be deterministic with the same seed', () => {
-            const input = { labels: [Scope.HourIntervals], constraints: { interval: 3600 } };
+            const input = { labels: [Scope.HourIntervals] };
             setSeed(123);
             const stub1 = generator.generate(input);
             setSeed(123);
@@ -44,8 +47,7 @@ describe('TimeGenerator', () => {
     describe('generate edge cases', () => {
         it('should align time with the requested interval (1 hour)', () => {
             const input = { 
-                labels: [], 
-                constraints: { interval: 3600 } 
+                labels: [] 
             };
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(input);
@@ -60,8 +62,7 @@ describe('TimeGenerator', () => {
 
         it('should align time with the requested interval (15 minutes)', () => {
             const input = { 
-                labels: [], 
-                constraints: { interval: 900 } 
+                labels: [] 
             };
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(input);
@@ -75,8 +76,7 @@ describe('TimeGenerator', () => {
 
         it('should never exceed 23:59:59', () => {
             const input = { 
-                labels: [], 
-                constraints: { interval: 1 } 
+                labels: [] 
             };
             for (let i = 0; i < 100; i++) {
                 const stub = generator.generate(input);

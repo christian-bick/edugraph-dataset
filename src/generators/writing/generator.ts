@@ -7,7 +7,7 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem> {
     type: AbstractProblem['type'] = 'writing';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints = {}, labels } = input;
+        const { labels } = input;
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const minNum = resolvedRange.min;

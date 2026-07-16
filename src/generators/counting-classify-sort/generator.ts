@@ -8,7 +8,7 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
     type: AbstractProblem['type'] = 'counting';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints = {} } = input;
+        const { labels } = input;
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const total = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;

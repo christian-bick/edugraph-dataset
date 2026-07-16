@@ -15,7 +15,7 @@ describe('MeasurementGenerator', () => {
     });
 
     it('should be deterministic with the same seed', () => {
-        const input = { labels: [], constraints: { bandLength: 10 } };
+        const input = { labels: [] };
         setSeed(123);
         const stub1 = generator.generate(input);
         setSeed(123);
@@ -25,8 +25,7 @@ describe('MeasurementGenerator', () => {
 
     it('should validate standard measure bounds', () => {
         const input = {
-            labels: [],
-            constraints: { bandLength: 10 }
+            labels: []
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

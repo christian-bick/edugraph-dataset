@@ -18,8 +18,8 @@ describe('OrderingGenerator', () => {
     describe('generate', () => {
         it('should generate valid problem stubs', () => {
             const inputs = [
-                { labels: [Scope.NumbersWithZero], constraints: { includesZero: true } },
-                { labels: [Scope.NumbersWithoutZero], constraints: { includesZero: false } }
+                { labels: [Scope.NumbersWithZero] },
+                { labels: [Scope.NumbersWithoutZero] }
             ];
             inputs.forEach(input => {
                 const stub = generator.generate(input);
@@ -28,8 +28,7 @@ describe('OrderingGenerator', () => {
                 expect(stub!.data.numbers).toBeInstanceOf(Array);
                 expect(stub!.data.numbers.length).toBe(5);
                 
-                const includesZero = input.labels.includes(Scope.NumbersWithZero) || 
-                                   input.constraints.includesZero === true;
+                const includesZero = input.labels.includes(Scope.NumbersWithZero);
                 if (!includesZero) {
                     expect(stub!.data.numbers).not.toContain(0);
                 }
@@ -39,7 +38,7 @@ describe('OrderingGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const input = { labels: [Scope.NumbersWithZero], constraints: { includesZero: true } };
+            const input = { labels: [Scope.NumbersWithZero] };
             setSeed(123);
             const stub1 = generator.generate(input);
             setSeed(123);

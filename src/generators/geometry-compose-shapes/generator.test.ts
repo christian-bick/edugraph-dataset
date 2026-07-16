@@ -16,8 +16,7 @@ describe('GeometryComposeShapesGenerator', () => {
 
     it('should validate compose-shapes outputs', () => {
         const input = {
-            labels: [],
-            constraints: {}
+            labels: []
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

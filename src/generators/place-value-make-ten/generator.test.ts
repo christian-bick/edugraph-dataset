@@ -17,8 +17,7 @@ describe('PlaceValueMakeTenGenerator', () => {
 
     it('should generate correct make-ten missing addends', () => {
         const input: GeneratorInput = {
-            labels: [Area.PlaceValue, Scope.NumbersSmaller20],
-            constraints: {}
+            labels: [Area.PlaceValue, Scope.NumbersSmaller20]
         };
 
         const stub = generator.generate(input);

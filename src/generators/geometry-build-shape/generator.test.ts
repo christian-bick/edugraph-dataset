@@ -16,8 +16,7 @@ describe('GeometryBuildShapeGenerator', () => {
 
     it('should validate build-shape sticks and corners counts', () => {
         const input = {
-            labels: [],
-            constraints: {}
+            labels: []
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

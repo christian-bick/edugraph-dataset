@@ -16,8 +16,7 @@ describe('CountingClassifyCountGenerator', () => {
 
     it('should validate classify-count items and categories logic', () => {
         const input = {
-            labels: [],
-            constraints: {}
+            labels: []
         };
         for (let i = 0; i < 20; i++) {
             const stub = generator.generate(input);

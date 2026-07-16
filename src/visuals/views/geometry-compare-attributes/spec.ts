@@ -6,7 +6,5 @@ export const spec: ViewSpec = {
     supportedLabels: [
         Ability.VisualDecomposition
     ],
-    constraints: {
-        attribute: { type: 'options', values: ['sides', 'corners'] },
-    },
+
 };

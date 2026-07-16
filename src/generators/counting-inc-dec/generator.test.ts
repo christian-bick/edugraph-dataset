@@ -18,8 +18,7 @@ describe('CountingIncDecGenerator', () => {
 
     it('should generate valid inc stubs with AdditiveCount label', () => {
         const input = { 
-            labels: [Scope.AdditiveCount], 
-            constraints: {} 
+            labels: [Scope.AdditiveCount] 
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
@@ -29,8 +28,7 @@ describe('CountingIncDecGenerator', () => {
 
     it('should generate valid dec stubs with SubtractiveCount label', () => {
         const input = { 
-            labels: [Scope.SubtractiveCount], 
-            constraints: {} 
+            labels: [Scope.SubtractiveCount] 
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
@@ -46,8 +44,7 @@ describe('CountingIncDecGenerator', () => {
         for (let i = 0; i < 100; i++) {
             setSeed(i);
             const input = { 
-                labels: [Scope.SubtractiveCount], 
-                constraints: {} 
+                labels: [Scope.SubtractiveCount] 
             };
             const stub = generator.generate(input);
             if (stub === null) {

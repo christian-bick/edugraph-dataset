@@ -16,8 +16,7 @@ describe('GeometryCompareAttributesGenerator', () => {
 
     it('should validate compare-attributes sides/corners comparison math', () => {
         const input = {
-            labels: [],
-            constraints: {}
+            labels: []
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

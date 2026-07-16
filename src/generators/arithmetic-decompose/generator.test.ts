@@ -16,8 +16,7 @@ describe('ArithmeticDecomposeGenerator', () => {
 
     it('should generate valid decomposition pairs', () => {
         const input = {
-            labels: [],
-            constraints: { targetNumber: 6 }
+            labels: []
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
