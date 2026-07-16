@@ -9,5 +9,6 @@ export const spec: GeneratorSpec = {
         Area.Rectangle,
         Area.Triangle,
         Area.Hexagon,
+        Area.Polygon
     ]
 };

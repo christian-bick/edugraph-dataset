@@ -8,6 +8,8 @@ export const spec: GeneratorSpec = {
         Area.ObjectSorting,
         Area.NumericOrder,
         Scope.NumericRange,
-        Scope.NumericZero
+        Scope.NumericZero,
+        Scope.Most,
+        Scope.Least
     ]
 };

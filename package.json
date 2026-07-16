@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest --run",
     "test:coverage": "vitest run --coverage && npx vite-node src/scripts/check-generator-coverage.ts",
+    "check:labels": "npx vite-node src/scripts/check-labels.ts",
     "generate:dataset": "npx vite-node src/scripts/generate-dataset.ts",
     "test:vqa": "npx vite-node src/scripts/validate-dataset.ts",
     "report:coverage": "npx vite-node src/scripts/generate-coverage-report.ts",

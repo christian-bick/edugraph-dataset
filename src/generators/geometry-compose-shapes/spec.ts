@@ -6,5 +6,6 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.Rectangle,
         Area.Square,
+        Area.Triangle
     ]
 };

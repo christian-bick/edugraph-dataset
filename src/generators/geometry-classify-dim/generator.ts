@@ -1,7 +1,7 @@
 import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryClassifyDimProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {Area} from "edugraph-ts";
+import {Area, Scope} from "edugraph-ts";
 import {isSubConceptOf} from "../../lib/ontology.ts";
 
 export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryClassifyDimProblem> {
@@ -14,8 +14,8 @@ export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryCl
         if (!labels || labels.length === 0) {
             validTypes.push('2d', '3d');
         } else {
-            if (labels.some(l => isSubConceptOf(l, Area.TwoDimensionalObjects))) validTypes.push('2d');
-            if (labels.some(l => isSubConceptOf(l, Area.ThreeDimensionalObjects))) validTypes.push('3d');
+            if (labels.some(l => isSubConceptOf(l, Scope.TwoDimensional))) validTypes.push('2d');
+            if (labels.some(l => isSubConceptOf(l, Scope.ThreeDimensional))) validTypes.push('3d');
             if (validTypes.length === 0) {
                 validTypes.push('2d', '3d');
             }

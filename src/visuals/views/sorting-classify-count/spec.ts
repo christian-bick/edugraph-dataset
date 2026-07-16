@@ -9,6 +9,7 @@ export const spec: ViewSpec = {
         Area.Numeration,
         Scope.NumericRange,
         Scope.NumbersWithZero,
-        Ability.ConceptClassification
+        Ability.ConceptClassification,
+        Scope.ShapeProperties
     ]
 };
