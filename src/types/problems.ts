@@ -11,12 +11,7 @@ export type ArithmeticDecomposeProblem = {
     pair2: [number, number];
 };
 
-export type PlaceValueComposeTeenProblem = {
-    ones: number;
-    target: number;
-};
-
-export type PlaceValueDecomposeTeenProblem = {
+export type PlaceValueTeenProblem = {
     ones: number;
     target: number;
 };
@@ -177,8 +172,8 @@ export interface ViewTypeMap {
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
-    'place-value-compose-teen': PlaceValueComposeTeenProblem;
-    'place-value-decompose-teen': PlaceValueDecomposeTeenProblem;
+    'place-value-compose-teen': PlaceValueTeenProblem;
+    'place-value-decompose-teen': PlaceValueTeenProblem;
     'place-value-make-ten': PlaceValueMakeTenProblem;
 
     'counting-objects-simple': CountingProblem;

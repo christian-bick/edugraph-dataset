@@ -1,16 +1,17 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { PlaceValueDecomposeTeenProblem } from "../../types/problems.ts";
+import { PlaceValueTeenProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { resolveRangeFromLabels } from "../../lib/ontology.ts";
 
-export class PlaceValueDecomposeTeenGenerator implements ProblemGenerator<PlaceValueDecomposeTeenProblem> {
+export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
 
         // Guard
-        if (constraints.mode && constraints.mode !== 'decompose-teen') {
+        const mode = constraints.mode || 'compose-teen';
+        if (mode !== 'compose-teen' && mode !== 'decompose-teen') {
             return null;
         }
 
@@ -23,7 +24,7 @@ export class PlaceValueDecomposeTeenGenerator implements ProblemGenerator<PlaceV
         const target = 10 + ones;
 
         return {
-            id: `decompose-teen-${target}`,
+            id: `${mode}-${target}`,
             data: {
                 ones,
                 target
