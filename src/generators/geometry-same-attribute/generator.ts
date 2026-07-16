@@ -1,15 +1,27 @@
 import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometrySameAttributeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
+import {isSubConceptOf} from "../../lib/ontology.ts";
+import {Scope} from "edugraph-ts";
 
 export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometrySameAttributeProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints = {} } = input;
+        const { labels = [] } = input;
 
-        const allAttributes = ['can-roll', 'can-stack', 'flat-faces'];
-        const attribute = constraints.attribute || allAttributes[Math.floor(random() * allAttributes.length)];
+        const possible: string[] = [];
+        if (labels.some(l => isSubConceptOf(l, Scope.Rollable))) possible.push('can-roll');
+        if (labels.some(l => isSubConceptOf(l, Scope.Stackable))) possible.push('can-stack');
+        if (labels.some(l => isSubConceptOf(l, Scope.FlatFaces))) possible.push('flat-faces');
+
+        let attribute = 'can-roll';
+        if (possible.length > 0) {
+            attribute = possible[Math.floor(random() * possible.length)];
+        } else {
+            const allAttributes = ['can-roll', 'can-stack', 'flat-faces'];
+            attribute = allAttributes[Math.floor(random() * allAttributes.length)];
+        }
         let answer = '';
         if (attribute === 'can-roll') answer = 'sphere'; // sphere rolls easily
         else if (attribute === 'can-stack') answer = 'cube'; // cube is stackable

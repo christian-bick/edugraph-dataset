@@ -1,7 +1,8 @@
 import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {ComparisonProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels} from "../../lib/ontology.ts";
+import {resolveRangeFromLabels, isSubConceptOf} from "../../lib/ontology.ts";
+import {Scope} from "edugraph-ts";
 
 export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> {
     type: AbstractProblem['type'] = 'comparison';
@@ -16,7 +17,22 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> 
         let num1 = Math.floor(random() * (max - min + 1)) + min;
         let num2 = Math.floor(random() * (max - min + 1)) + min;
 
-        const comparisonType = constraints.comparisonType;
+        const wantsGreater = labels.some(l => isSubConceptOf(l, Scope.Greater));
+        const wantsLess = labels.some(l => isSubConceptOf(l, Scope.Less));
+        const wantsEqual = labels.some(l => isSubConceptOf(l, Scope.Equal));
+
+        let comparisonType = 'random';
+        const possible: string[] = [];
+        if (wantsGreater) possible.push('greater');
+        if (wantsLess) possible.push('less');
+        if (wantsEqual) possible.push('equal');
+
+        if (possible.length > 1) {
+            comparisonType = possible[Math.floor(random() * possible.length)];
+        } else if (possible.length === 1) {
+            comparisonType = possible[0];
+        }
+
         if (comparisonType === 'equal') {
             num2 = num1;
         } else if (comparisonType === 'greater') {

@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {GeometryPositionGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('GeometryPositionGenerator', () => {
     let generator: GeometryPositionGenerator;
@@ -16,8 +17,7 @@ describe('GeometryPositionGenerator', () => {
 
     it('should validate position mode mappings', () => {
         const input = {
-            labels: [],
-            constraints: { relation: 'below' }
+            labels: [Scope.Below]
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();

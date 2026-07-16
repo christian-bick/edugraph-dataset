@@ -12,9 +12,7 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem> {
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const minNum = resolvedRange.min;
         const maxNum = resolvedRange.max;
-        const fixedNumber = constraints.number;
-        
-        const currentNum = fixedNumber !== undefined ? fixedNumber : Math.floor(random() * (maxNum - minNum + 1)) + minNum;
+        const currentNum = Math.floor(random() * (maxNum - minNum + 1)) + minNum;
         
         return {
             id: `writing-${currentNum}`,

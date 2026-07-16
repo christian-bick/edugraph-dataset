@@ -23,7 +23,18 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
         }
 
         const attribute = validAttributes[Math.floor(random() * validAttributes.length)];
-        const relation = constraints.relation || (attribute === 'length' ? (random() > 0.5 ? 'longer' : 'shorter') : (random() > 0.5 ? 'heavier' : 'lighter'));
+        const wantsGreater = labels.some(l => isSubConceptOf(l, Scope.Greater));
+        const wantsLess = labels.some(l => isSubConceptOf(l, Scope.Less));
+        let relation: string;
+        if (attribute === 'length') {
+            if (wantsGreater && !wantsLess) relation = 'longer';
+            else if (wantsLess && !wantsGreater) relation = 'shorter';
+            else relation = random() > 0.5 ? 'longer' : 'shorter';
+        } else {
+            if (wantsGreater && !wantsLess) relation = 'heavier';
+            else if (wantsLess && !wantsGreater) relation = 'lighter';
+            else relation = random() > 0.5 ? 'heavier' : 'lighter';
+        }
         const answer = random() > 0.5 ? 'A' : 'B';
 
         let val1 = 0;

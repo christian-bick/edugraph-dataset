@@ -11,9 +11,7 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem> {
         const { labels, constraints = {} } = input;
         
         let interval = 3600; // default HourIntervals
-        if (constraints.interval) {
-            interval = constraints.interval;
-        } else if (labels && labels.some(l => isSubConceptOf(l, Scope.SecondIntervals))) {
+        if (labels && labels.some(l => isSubConceptOf(l, Scope.SecondIntervals))) {
             interval = 1;
         } else if (labels && labels.some(l => isSubConceptOf(l, Scope.MinuteIntervals))) {
             interval = 60;

@@ -42,10 +42,5 @@ describe('WritingGenerator', () => {
         expect(twentyFound).toBe(true);
     });
 
-    it('should respect exact fixed number constraint', () => {
-        const input = { labels: [], constraints: { number: 15 } };
-        const stub = generator.generate(input);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.number).toBe(15);
-    });
+
 });

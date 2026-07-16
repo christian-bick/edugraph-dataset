@@ -1,7 +1,8 @@
 import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {CountingClassifySortProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels} from "../../lib/ontology.ts";
+import {resolveRangeFromLabels, isSubConceptOf} from "../../lib/ontology.ts";
+import {Scope} from "edugraph-ts";
 
 export class CountingClassifySortGenerator implements ProblemGenerator<CountingClassifySortProblem> {
     type: AbstractProblem['type'] = 'counting';
@@ -25,7 +26,12 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
             counts[cat]++;
         }
 
-        const relation = constraints.relation || (random() > 0.5 ? 'most' : 'least');
+        const wantsMost = labels.some(l => isSubConceptOf(l, Scope.Most));
+        const wantsLeast = labels.some(l => isSubConceptOf(l, Scope.Least));
+        let relation = 'most';
+        if (wantsMost && !wantsLeast) relation = 'most';
+        else if (wantsLeast && !wantsMost) relation = 'least';
+        else relation = random() > 0.5 ? 'most' : 'least';
         let targetCategory = '';
         let targetCount = relation === 'most' ? -1 : 999;
         

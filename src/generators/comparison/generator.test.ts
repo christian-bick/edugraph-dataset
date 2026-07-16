@@ -33,8 +33,7 @@ describe('ComparisonGenerator', () => {
 
     it('should respect greater constraint', () => {
         const input = {
-            labels: [Scope.NumbersSmaller20],
-            constraints: { comparisonType: 'greater' as const }
+            labels: [Scope.NumbersSmaller20, Scope.Greater]
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -46,8 +45,7 @@ describe('ComparisonGenerator', () => {
 
     it('should respect less constraint', () => {
         const input = {
-            labels: [Scope.NumbersSmaller20],
-            constraints: { comparisonType: 'less' as const }
+            labels: [Scope.NumbersSmaller20, Scope.Less]
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -59,8 +57,7 @@ describe('ComparisonGenerator', () => {
 
     it('should respect equal constraint', () => {
         const input = {
-            labels: [Scope.NumbersSmaller20],
-            constraints: { comparisonType: 'equal' as const }
+            labels: [Scope.NumbersSmaller20, Scope.Equal]
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);

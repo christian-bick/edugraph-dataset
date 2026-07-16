@@ -17,8 +17,7 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length longer relation', () => {
         const input = {
-            labels: [Scope.LengthMeasurement],
-            constraints: { relation: 'longer' }
+            labels: [Scope.LengthMeasurement, Scope.Greater]
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -37,8 +36,7 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length shorter relation', () => {
         const input = {
-            labels: [Scope.LengthMeasurement],
-            constraints: { relation: 'shorter' }
+            labels: [Scope.LengthMeasurement, Scope.Less]
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -57,8 +55,7 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare weight heavier relation', () => {
         const input = {
-            labels: [Scope.WeightMeasurement],
-            constraints: { relation: 'heavier' }
+            labels: [Scope.WeightMeasurement, Scope.Greater]
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);

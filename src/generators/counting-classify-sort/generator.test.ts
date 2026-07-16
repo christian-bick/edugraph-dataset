@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {CountingClassifySortGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('CountingClassifySortGenerator', () => {
     let generator: CountingClassifySortGenerator;
@@ -16,8 +17,7 @@ describe('CountingClassifySortGenerator', () => {
 
     it('should validate classify-sort least/most logic and tie filtering', () => {
         const input = {
-            labels: [],
-            constraints: { relation: 'most' }
+            labels: [Scope.Most]
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
