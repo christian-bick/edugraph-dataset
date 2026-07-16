@@ -23,7 +23,6 @@ describe('ArithmeticDecomposeGenerator', () => {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
             expect(stub!.data.targetNumber).toBe(6);
-            expect(stub!.data.mode).toBe('decompose');
             
             const p1 = stub!.data.pair1;
             const p2 = stub!.data.pair2;

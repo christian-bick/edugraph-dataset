@@ -21,7 +21,6 @@ describe('WritingGenerator', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBeGreaterThanOrEqual(1);
             expect(stub!.data.number).toBeLessThanOrEqual(9);
-            expect(stub!.data.mode).toBe('stroke');
         }
     });
 

@@ -21,7 +21,6 @@ describe('PlaceValueMakeTenGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('make-ten');
         expect(stub!.data.givenNumber).toBe(7);
         expect(stub!.data.missingNumber).toBe(3);
         expect(stub!.data.target).toBe(10);

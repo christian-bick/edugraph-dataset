@@ -48,7 +48,6 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonNumericPr
         return {
             id: problemKey,
             data: {
-                mode: 'numeric',
                 num1: num1,
                 num2: num2,
                 answer: answer

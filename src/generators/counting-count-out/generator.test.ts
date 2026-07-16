@@ -21,7 +21,6 @@ describe('CountingCountOutGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('count-out');
         expect(stub!.data.numObjects).toBe(7);
         expect(stub!.data.totalCount).toBe(12);
     });

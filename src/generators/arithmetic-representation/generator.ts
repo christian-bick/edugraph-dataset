@@ -41,12 +41,10 @@ export class ArithmeticRepresentationGenerator implements ProblemGenerator<Arith
         return {
             id: `representation-${operation}-${num1}-${num2}`,
             data: {
-                mode: 'representation',
                 operation,
                 num1,
                 num2,
-                answer,
-                textScenario: ''
+                answer
             }
         };
     }

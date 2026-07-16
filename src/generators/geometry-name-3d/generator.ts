@@ -1,8 +1,8 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometryProblem } from "../../types/problems.ts";
+import { GeometryName3dProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 
-export class GeometryName3dGenerator implements ProblemGenerator<GeometryProblem> {
+export class GeometryName3dGenerator implements ProblemGenerator<GeometryName3dProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -20,7 +20,6 @@ export class GeometryName3dGenerator implements ProblemGenerator<GeometryProblem
         return {
             id: `geometry-name-3d-${shape}-${rotation}-${scale}`.replace('.', '-'),
             data: {
-                mode: 'name-3d',
                 shape,
                 rotation,
                 scale,

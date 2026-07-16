@@ -26,7 +26,6 @@ export class CountingConservationGenerator implements ProblemGenerator<CountingC
         return {
             id: `conservation-${count}`,
             data: {
-                mode: 'conservation',
                 numObjects: count
             }
         };

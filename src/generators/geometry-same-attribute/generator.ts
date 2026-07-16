@@ -1,7 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometryProblem } from "../../types/problems.ts";
+import { GeometrySameAttributeProblem } from "../../types/problems.ts";
 
-export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometryProblem> {
+export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometrySameAttributeProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -21,8 +21,7 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
         return {
             id: `geometry-same-attr-${attribute}`,
             data: {
-                mode: 'same-attribute',
-                attribute,
+                attribute: attribute as 'can-roll' | 'can-stack' | 'flat-faces',
                 answer: attribute === 'flat-faces' ? 'sphere' : answer // if 'flat-faces' -> "no flat faces" -> answer is sphere
             }
         };

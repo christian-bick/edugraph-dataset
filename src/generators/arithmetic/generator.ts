@@ -78,7 +78,7 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticStandardP
 
         return {
             id: `${num1}_${operation}_${num2}`,
-            data: { num1, num2, answer, operation, mode: 'standard' }
+            data: { num1, num2, answer, operation }
         };
     }
 }

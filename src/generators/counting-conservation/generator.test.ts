@@ -22,7 +22,6 @@ describe('CountingConservationGenerator', () => {
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
-            expect(stub!.data.mode).toBe('conservation');
             expect(stub!.data.numObjects).toBeGreaterThanOrEqual(5);
             expect(stub!.data.numObjects).toBeLessThanOrEqual(12);
         }

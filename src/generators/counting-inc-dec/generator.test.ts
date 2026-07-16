@@ -30,7 +30,6 @@ describe('CountingIncDecGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('simple');
         expect(stub!.data.numObjects).toBe(5);
         expect(stub!.data.incDecType).toBe('inc');
         expect(stub!.data.incDecAnswer).toBe(6);

@@ -18,8 +18,7 @@ export class MeasurementAttributeGenerator implements ProblemGenerator<Measureme
         return {
             id: `attribute-type-${attribute}`,
             data: {
-                mode: 'attribute-type',
-                attribute
+                attribute: attribute as 'length' | 'height' | 'weight'
             }
         };
     }

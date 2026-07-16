@@ -1,8 +1,8 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometryProblem } from "../../types/problems.ts";
+import { GeometryClassifyDimProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 
-export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryProblem> {
+export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryClassifyDimProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -23,7 +23,6 @@ export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryPr
         return {
             id: `geometry-classify-dim-${shapeType}-${shape}`,
             data: {
-                mode: 'classify-dim',
                 shapeType,
                 shape,
                 answer

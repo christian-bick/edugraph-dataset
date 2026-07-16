@@ -21,7 +21,6 @@ describe('CountingCardinalityGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('cardinality');
         expect(stub!.data.numObjects).toBeLessThanOrEqual(5);
     });
 

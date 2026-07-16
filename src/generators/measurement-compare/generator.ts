@@ -43,8 +43,7 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
         return {
             id: `direct-compare-${attribute}-${relation}-${answer}`,
             data: {
-                mode: 'direct-compare',
-                attribute,
+                attribute: attribute as 'length' | 'weight',
                 relation,
                 val1,
                 val2,

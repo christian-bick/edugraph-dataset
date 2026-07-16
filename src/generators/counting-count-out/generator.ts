@@ -28,7 +28,6 @@ export class CountingCountOutGenerator implements ProblemGenerator<CountingCount
         return {
             id: `count-out-${numObjects}-${totalCount}`,
             data: {
-                mode: 'count-out',
                 numObjects,
                 totalCount,
                 simpleAnswer: numObjects,

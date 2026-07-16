@@ -21,7 +21,6 @@ describe('PlaceValueDecomposeTeenGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('decompose-teen');
         expect(stub!.data.ones).toBe(7);
         expect(stub!.data.target).toBe(17);
     });

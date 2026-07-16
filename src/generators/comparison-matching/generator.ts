@@ -50,7 +50,6 @@ export class ComparisonMatchingGenerator implements ProblemGenerator<ComparisonM
         return {
             id: `${mode}-${count1}-${count2}-${comparisonType}`,
             data: {
-                mode: mode as 'matching' | 'count-compare',
                 num1: count1,
                 num2: count2,
                 comparisonType,

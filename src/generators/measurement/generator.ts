@@ -25,7 +25,6 @@ export class MeasurementGenerator implements ProblemGenerator<MeasurementStandar
         return {
             id: problemKey.replace('.', '-'),
             data: {
-                mode: 'standard',
                 bandLength: bandLength,
                 problemLength: problemLength
             }

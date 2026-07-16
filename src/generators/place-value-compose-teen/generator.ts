@@ -25,7 +25,6 @@ export class PlaceValueComposeTeenGenerator implements ProblemGenerator<PlaceVal
         return {
             id: `compose-teen-${target}`,
             data: {
-                mode: 'compose-teen',
                 ones,
                 target
             }

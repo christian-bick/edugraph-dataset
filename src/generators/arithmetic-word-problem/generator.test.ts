@@ -21,7 +21,6 @@ describe('ArithmeticWordProblemGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('word-problem');
         expect(stub!.data.textScenario).toMatch(/\w+/);
         expect(stub!.data.textScenario).toContain(String(stub!.data.num1));
         expect(stub!.data.textScenario).toContain(String(stub!.data.num2));

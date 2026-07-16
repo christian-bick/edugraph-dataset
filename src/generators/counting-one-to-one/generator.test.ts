@@ -21,7 +21,6 @@ describe('CountingOneToOneGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('one-to-one');
         expect(stub!.data.numObjects).toBeLessThanOrEqual(5);
     });
 

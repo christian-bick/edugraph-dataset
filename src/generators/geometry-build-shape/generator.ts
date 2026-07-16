@@ -1,7 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometryProblem } from "../../types/problems.ts";
+import { GeometryBuildShapeProblem } from "../../types/problems.ts";
 
-export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryProblem> {
+export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBuildShapeProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -21,7 +21,6 @@ export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryPro
         return {
             id: `geometry-build-${target}`,
             data: {
-                mode: 'build-shape',
                 target,
                 sides,
                 corners,

@@ -36,7 +36,6 @@ export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem
         return {
             id: `${mode}-${numObjects}-simple-linear-${arrangement}`,
             data: {
-                mode: mode as 'simple' | 'how-many' | 'cardinality',
                 numObjects: numObjects,
                 simpleAnswer: numObjects,
                 arrangement

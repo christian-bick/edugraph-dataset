@@ -1,9 +1,9 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { ArithmeticRepresentationProblem } from "../../types/problems.ts";
+import { ArithmeticWordProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { resolveRangeFromLabels } from "../../lib/ontology.ts";
 
-export class ArithmeticWordProblemGenerator implements ProblemGenerator<ArithmeticRepresentationProblem> {
+export class ArithmeticWordProblemGenerator implements ProblemGenerator<ArithmeticWordProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -46,7 +46,6 @@ export class ArithmeticWordProblemGenerator implements ProblemGenerator<Arithmet
         return {
             id: `word-problem-${operation}-${num1}-${num2}`,
             data: {
-                mode: 'word-problem',
                 operation,
                 num1,
                 num2,

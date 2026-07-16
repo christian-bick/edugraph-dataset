@@ -24,7 +24,6 @@ describe('ComparisonMatchingGenerator', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
             expect(stub!.data.answer).toBe('A');
-            expect(stub!.data.mode).toBe('matching');
         }
     });
 

@@ -32,7 +32,6 @@ describe('ComparisonGenerator', () => {
             });
             if (stub) {
                 expect(stub.data.num1).not.toEqual(stub.data.num2);
-                expect(stub.data.mode).toBe('numeric');
             }
         }
     });

@@ -25,7 +25,6 @@ export class PlaceValueDecomposeTeenGenerator implements ProblemGenerator<PlaceV
         return {
             id: `decompose-teen-${target}`,
             data: {
-                mode: 'decompose-teen',
                 ones,
                 target
             }

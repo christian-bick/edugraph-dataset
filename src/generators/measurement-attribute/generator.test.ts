@@ -21,7 +21,6 @@ describe('MeasurementAttributeGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('attribute-type');
         expect(stub!.data.attribute).toBe('weight');
     });
 

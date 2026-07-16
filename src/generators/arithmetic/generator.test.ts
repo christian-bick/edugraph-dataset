@@ -21,7 +21,6 @@ describe('ArithmeticGenerator', () => {
         });
         expect(addStub).not.toBeNull();
         expect(addStub!.data.operation).toBe('addition');
-        expect(addStub!.data.mode).toBe('standard');
 
         const subStub = generator.generate({
             labels: ['http://edugraph.io/edu/Subtraction'],

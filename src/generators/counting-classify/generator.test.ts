@@ -22,7 +22,6 @@ describe('CountingClassifyGenerator', () => {
         for (let i = 0; i < 20; i++) {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
-            expect(stub!.data.mode).toBe('classify-count');
             expect(stub!.data.classifyType).toBe('shape');
             expect(stub!.data.items.length).toBeGreaterThanOrEqual(6);
             expect(stub!.data.items.length).toBeLessThanOrEqual(10);
@@ -41,7 +40,6 @@ describe('CountingClassifyGenerator', () => {
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
             if (stub) {
-                expect(stub.data.mode).toBe('classify-sort');
                 expect(stub.data.classifyType).toBe('color');
                 expect(stub.data.relation).toBe('most');
                 

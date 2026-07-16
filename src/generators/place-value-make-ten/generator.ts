@@ -20,10 +20,9 @@ export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMa
         return {
             id: `make-ten-${givenNumber}`,
             data: {
-                mode: 'make-ten',
                 givenNumber,
                 missingNumber,
-                target: 10 // target must be exactly 10 according to type definition
+                target: 10
             }
         };
     }

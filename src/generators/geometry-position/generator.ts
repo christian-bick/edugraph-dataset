@@ -1,7 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometryProblem } from "../../types/problems.ts";
+import { GeometryPositionProblem } from "../../types/problems.ts";
 
-export class GeometryPositionGenerator implements ProblemGenerator<GeometryProblem> {
+export class GeometryPositionGenerator implements ProblemGenerator<GeometryPositionProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -18,7 +18,6 @@ export class GeometryPositionGenerator implements ProblemGenerator<GeometryProbl
         return {
             id: `geometry-position-${relation}`,
             data: {
-                mode: 'position',
                 relation,
                 answer
             }

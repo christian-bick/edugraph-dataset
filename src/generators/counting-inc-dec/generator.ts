@@ -35,7 +35,6 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
         return {
             id: `simple-${numObjects}-${incDecType}-linear-${arrangement}`,
             data: {
-                mode: 'simple',
                 numObjects: numObjects,
                 incDecType: incDecType as 'inc' | 'dec',
                 incDecAnswer: incDecAnswer,

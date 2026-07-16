@@ -1,10 +1,10 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { WritingProblem } from "../../types/problems.ts";
+import { WritingCountObjectsProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { Area } from "edugraph-ts";
 import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
 
-export class WritingCountObjectsGenerator implements ProblemGenerator<WritingProblem> {
+export class WritingCountObjectsGenerator implements ProblemGenerator<WritingCountObjectsProblem> {
     type: AbstractProblem['type'] = 'writing';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -29,8 +29,7 @@ export class WritingCountObjectsGenerator implements ProblemGenerator<WritingPro
         return {
             id: `count-objects-${currentNum}`,
             data: {
-                number: currentNum,
-                mode: 'count-objects'
+                number: currentNum
             }
         };
     }

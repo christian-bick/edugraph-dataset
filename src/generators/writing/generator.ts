@@ -29,8 +29,7 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem> {
         return {
             id: `${mode}-${currentNum}`,
             data: {
-                number: currentNum,
-                mode: mode as 'stroke' | 'standard'
+                number: currentNum
             }
         };
     }

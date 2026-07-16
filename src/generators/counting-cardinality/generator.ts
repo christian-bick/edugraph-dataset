@@ -33,7 +33,6 @@ export class CountingCardinalityGenerator implements ProblemGenerator<CountingCa
         return {
             id: `cardinality-${numObjects}-simple-linear-${arrangement}`,
             data: {
-                mode: 'cardinality',
                 numObjects: numObjects,
                 simpleAnswer: numObjects,
                 arrangement

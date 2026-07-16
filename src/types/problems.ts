@@ -1,5 +1,4 @@
 export type ArithmeticStandardProblem = {
-    mode: 'standard';
     num1: number;
     num2: number;
     operation: 'addition' | 'subtraction' | 'multiplication' | 'division';
@@ -7,7 +6,13 @@ export type ArithmeticStandardProblem = {
 };
 
 export type ArithmeticRepresentationProblem = {
-    mode: 'representation' | 'word-problem';
+    operation: 'addition' | 'subtraction';
+    num1: number;
+    num2: number;
+    answer: number;
+};
+
+export type ArithmeticWordProblem = {
     operation: 'addition' | 'subtraction';
     num1: number;
     num2: number;
@@ -16,54 +21,46 @@ export type ArithmeticRepresentationProblem = {
 };
 
 export type ArithmeticDecomposeProblem = {
-    mode: 'decompose';
     targetNumber: number;
     pair1: [number, number];
     pair2: [number, number];
 };
 
 export type PlaceValueComposeTeenProblem = {
-    mode: 'compose-teen';
     ones: number;
     target: number;
 };
 
 export type PlaceValueDecomposeTeenProblem = {
-    mode: 'decompose-teen';
     ones: number;
     target: number;
 };
 
 export type PlaceValueMakeTenProblem = {
-    mode: 'make-ten';
     givenNumber: number;
     missingNumber: number;
     target: 10;
 };
 
 export type CountingSimpleProblem = {
-    mode: 'simple' | 'how-many' | 'cardinality';
     numObjects: number;
     simpleAnswer: number;
     arrangement: string;
 };
 
 export type CountingOneToOneProblem = {
-    mode: 'one-to-one';
     numObjects: number;
     simpleAnswer: number;
     arrangement: string;
 };
 
 export type CountingCardinalityProblem = {
-    mode: 'cardinality';
     numObjects: number;
     simpleAnswer: number;
     arrangement: string;
 };
 
 export type CountingCountOutProblem = {
-    mode: 'count-out';
     numObjects: number;
     simpleAnswer: number;
     arrangement: string;
@@ -71,7 +68,6 @@ export type CountingCountOutProblem = {
 };
 
 export type CountingIncDecProblem = {
-    mode: 'simple';
     numObjects: number;
     incDecType: 'inc' | 'dec';
     incDecAnswer: number;
@@ -81,33 +77,35 @@ export type CountingIncDecProblem = {
 };
 
 export type CountingConservationProblem = {
-    mode: 'conservation';
     numObjects: number;
 };
 
-export type CountingClassifyProblem = {
-    mode: 'classify-count' | 'classify-sort';
+export type CountingClassifyCountProblem = {
     classifyType: 'shape' | 'color';
     items: Array<{ shape: string; color: string }>;
     categories: Record<string, number>;
     numObjects: number;
-    relation?: 'most' | 'least';
-    answer?: string;
+};
+
+export type CountingClassifySortProblem = {
+    classifyType: 'shape' | 'color';
+    items: Array<{ shape: string; color: string }>;
+    categories: Record<string, number>;
+    numObjects: number;
+    relation: 'most' | 'least';
+    answer: string;
 };
 
 export type MeasurementStandardProblem = {
-    mode: 'standard';
     bandLength: number;
     problemLength: number;
 };
 
 export type MeasurementAttributeProblem = {
-    mode: 'attribute-type';
     attribute: 'length' | 'height' | 'weight';
 };
 
 export type MeasurementCompareProblem = {
-    mode: 'direct-compare';
     attribute: 'length' | 'weight';
     relation: string;
     val1: number;
@@ -116,14 +114,19 @@ export type MeasurementCompareProblem = {
 };
 
 export type ComparisonNumericProblem = {
-    mode: 'numeric';
     num1: number;
     num2: number;
     answer: '<' | '>';
 };
 
 export type ComparisonMatchingProblem = {
-    mode: 'matching' | 'count-compare';
+    num1: number;
+    num2: number;
+    comparisonType: 'greater' | 'less' | 'equal';
+    answer: 'A' | 'B' | 'equal';
+};
+
+export type ComparisonCountCompareProblem = {
     num1: number;
     num2: number;
     comparisonType: 'greater' | 'less' | 'equal';
@@ -134,9 +137,16 @@ export type OrderingProblem = {
     numbers: number[];
 };
 
-export type WritingProblem = {
+export type WritingStrokeProblem = {
     number: number;
-    mode: 'stroke' | 'standard' | 'count-objects';
+};
+
+export type WritingStandardProblem = {
+    number: number;
+};
+
+export type WritingCountObjectsProblem = {
+    number: number;
 };
 
 export type TimeProblem = {
@@ -144,38 +154,99 @@ export type TimeProblem = {
     interval: number;
 };
 
-export type GeometryProblem = {
-    mode: 'position' | 'env-shapes' | 'name-2d' | 'name-3d' | 'classify-dim' | 'compare-attributes' | 'same-attribute' | 'build-shape' | 'draw-shape' | 'compose-shapes';
-    relation?: 'above' | 'below' | 'beside' | 'nextTo';
-    target?: string;
-    shape?: string;
-    rotation?: number;
-    scale?: number;
-    shapeType?: '2d' | '3d';
-    attribute?: string;
-    shape1?: string;
-    shape2?: string;
-    val1?: number;
-    val2?: number;
-    sides?: number;
-    corners?: number;
-    components?: string[];
+// --- Geometry Split Problem Types ---
+
+export type GeometryName2dProblem = {
+    shape: string;
+    rotation: number;
+    scale: number;
     answer: string;
 };
+
+export type GeometryPositionProblem = {
+    relation: 'above' | 'below' | 'beside' | 'nextTo';
+    answer: string;
+};
+
+export type GeometryEnvShapesProblem = {
+    target: string;
+    answer: string;
+};
+
+export type GeometryName3dProblem = {
+    shape: string;
+    rotation: number;
+    scale: number;
+    answer: string;
+};
+
+export type GeometryClassifyDimProblem = {
+    shapeType: '2d' | '3d';
+    shape: string;
+    answer: string;
+};
+
+export type GeometryCompareAttributesProblem = {
+    attribute: 'sides' | 'corners';
+    shape1: string;
+    shape2: string;
+    val1: number;
+    val2: number;
+    answer: string;
+};
+
+export type GeometrySameAttributeProblem = {
+    attribute: 'can-roll' | 'can-stack' | 'flat-faces';
+    answer: string;
+};
+
+export type GeometryBuildShapeProblem = {
+    target: string;
+    sides: number;
+    corners: number;
+    answer: string;
+};
+
+export type GeometryDrawShapeProblem = {
+    target: string;
+    answer: string;
+};
+
+export type GeometryComposeShapesProblem = {
+    target: string;
+    components: string[];
+    answer: string;
+};
+
+export type GeometryProblem = 
+    | GeometryName2dProblem
+    | GeometryPositionProblem
+    | GeometryEnvShapesProblem
+    | GeometryName3dProblem
+    | GeometryClassifyDimProblem
+    | GeometryCompareAttributesProblem
+    | GeometrySameAttributeProblem
+    | GeometryBuildShapeProblem
+    | GeometryDrawShapeProblem
+    | GeometryComposeShapesProblem;
+
+export type WritingProblem = 
+    | WritingStrokeProblem
+    | WritingStandardProblem
+    | WritingCountObjectsProblem;
+
+export type CountingClassifyProblem = 
+    | CountingClassifyCountProblem
+    | CountingClassifySortProblem;
 
 /**
  * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
  * to their expected mathematical problem data schemas.
- * 
- * Since views (Browser/React) are dynamically loaded headlessly by Playwright
- * and not statically imported by the generators (Node.js), this map serves as
- * the single source of truth that ensures type compatibility between the generator's
- * output data and the renderer's expectations.
  */
 export interface ViewTypeMap {
     'operations-vertical': ArithmeticStandardProblem;
     'operations-boxes': ArithmeticStandardProblem;
-    'operations-representation': ArithmeticRepresentationProblem;
+    'operations-representation': ArithmeticRepresentationProblem | ArithmeticWordProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'place-value-compose-teen': PlaceValueComposeTeenProblem;
     'place-value-decompose-teen': PlaceValueDecomposeTeenProblem;
@@ -194,7 +265,7 @@ export interface ViewTypeMap {
     'measure-compare': MeasurementCompareProblem;
 
     'numbers-compare': ComparisonNumericProblem;
-    'numbers-compare-groups': ComparisonMatchingProblem;
+    'numbers-compare-groups': ComparisonMatchingProblem | ComparisonCountCompareProblem;
 
     'numbers-order': OrderingProblem;
     'numbers-write': WritingProblem;

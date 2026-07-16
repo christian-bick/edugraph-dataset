@@ -23,7 +23,6 @@ describe('CountingGenerator', () => {
             const stub = generator.generate(input);
             if (stub) {
                 expect(stub.data.numObjects).toBeLessThanOrEqual(5);
-                expect(stub.data.mode).toBe('simple');
             }
         }
     });

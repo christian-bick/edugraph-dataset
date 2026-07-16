@@ -18,7 +18,7 @@ describe('WritingCountObjectsGenerator', () => {
         const input = { labels: [], constraints: { mode: 'count-objects' } };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('count-objects');
+        expect(stub!.data.number).toBeGreaterThanOrEqual(1);
     });
 
     it('should return null for stroke mode', () => {

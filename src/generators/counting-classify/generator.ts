@@ -55,7 +55,6 @@ export class CountingClassifyGenerator implements ProblemGenerator<CountingClass
             return {
                 id: `classify-count-${classifyType}-${total}-${Math.floor(random() * 1000)}`,
                 data: {
-                    mode: 'classify-count',
                     classifyType,
                     items,
                     categories: counts,
@@ -90,7 +89,6 @@ export class CountingClassifyGenerator implements ProblemGenerator<CountingClass
             return {
                 id: `classify-sort-${classifyType}-${relation}-${total}-${Math.floor(random() * 1000)}`,
                 data: {
-                    mode: 'classify-sort',
                     classifyType,
                     items,
                     categories: counts,

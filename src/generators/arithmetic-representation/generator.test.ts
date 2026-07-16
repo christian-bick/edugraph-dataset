@@ -23,7 +23,6 @@ describe('ArithmeticRepresentationGenerator', () => {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
             expect(stub!.data.operation).toBe('addition');
-            expect(stub!.data.mode).toBe('representation');
             expect(stub!.data.num1).toBeGreaterThanOrEqual(1);
             expect(stub!.data.num2).toBeGreaterThanOrEqual(1);
             expect(stub!.data.answer).toBeLessThanOrEqual(10);
@@ -40,7 +39,6 @@ describe('ArithmeticRepresentationGenerator', () => {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
             expect(stub!.data.operation).toBe('subtraction');
-            expect(stub!.data.mode).toBe('representation');
             expect(stub!.data.num1).toBeLessThanOrEqual(10);
             expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
             expect(stub!.data.answer).toBeGreaterThanOrEqual(0);

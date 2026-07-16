@@ -1,7 +1,7 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometryProblem } from "../../types/problems.ts";
+import { GeometryCompareAttributesProblem } from "../../types/problems.ts";
 
-export class GeometryCompareAttributesGenerator implements ProblemGenerator<GeometryProblem> {
+export class GeometryCompareAttributesGenerator implements ProblemGenerator<GeometryCompareAttributesProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
@@ -30,8 +30,7 @@ export class GeometryCompareAttributesGenerator implements ProblemGenerator<Geom
         return {
             id: `geometry-compare-attr-${attribute}-${shape1}-${shape2}`,
             data: {
-                mode: 'compare-attributes',
-                attribute,
+                attribute: attribute as 'sides' | 'corners',
                 shape1,
                 shape2,
                 val1,

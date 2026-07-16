@@ -21,7 +21,6 @@ describe('PlaceValueComposeTeenGenerator', () => {
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.mode).toBe('compose-teen');
         expect(stub!.data.ones).toBe(5);
         expect(stub!.data.target).toBe(15);
     });

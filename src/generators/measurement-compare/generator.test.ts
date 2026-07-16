@@ -22,7 +22,6 @@ describe('MeasurementCompareGenerator', () => {
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
-            expect(stub!.data.mode).toBe('direct-compare');
             expect(stub!.data.attribute).toBe('length');
             expect(stub!.data.relation).toBe('longer');
             
@@ -43,7 +42,6 @@ describe('MeasurementCompareGenerator', () => {
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
-            expect(stub!.data.mode).toBe('direct-compare');
             expect(stub!.data.attribute).toBe('length');
             expect(stub!.data.relation).toBe('shorter');
             
@@ -64,7 +62,6 @@ describe('MeasurementCompareGenerator', () => {
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
-            expect(stub!.data.mode).toBe('direct-compare');
             expect(stub!.data.attribute).toBe('weight');
             expect(stub!.data.relation).toBe('heavier');
             

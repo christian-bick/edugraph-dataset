@@ -33,7 +33,6 @@ export class CountingOneToOneGenerator implements ProblemGenerator<CountingOneTo
         return {
             id: `one-to-one-${numObjects}-simple-linear-${arrangement}`,
             data: {
-                mode: 'one-to-one',
                 numObjects: numObjects,
                 simpleAnswer: numObjects,
                 arrangement
