@@ -1,8 +1,8 @@
-import { Scope } from 'edugraph-ts';
-import { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ViewRenderPayload } from '../../../types/ml-engine.ts';
-import { generateScatteredPositions } from './helpers.ts';
+import {Scope} from 'edugraph-ts';
+import {useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {generateScatteredPositions} from './helpers.ts';
 import '../../../tailwind.css';
 
 interface Item {
@@ -81,7 +81,7 @@ export function SortingClassifyCount({ payload }: Props) {
             return x - Math.floor(x);
         };
 
-        const chosenClassifyType = payload.constraints.classifyType || (payload.labels.includes(Scope.ShapeProperties) ? 'shape' : (nextRand() > 0.5 ? 'shape' : 'color'));
+        const chosenClassifyType = payload.labels.includes(Scope.ShapeProperties) ? 'shape' : (nextRand() > 0.5 ? 'shape' : 'color');
         
         const shapes = ['circle', 'square', 'triangle'];
         const colors = ['red', 'blue', 'green'];

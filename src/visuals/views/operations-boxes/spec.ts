@@ -9,8 +9,5 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.NumbersWithZero,
         Ability.ProcedureExecution
-    ],
-    constraints: {
-        operation: { type: 'options', values: ['addition', 'subtraction', 'multiplication', 'division'] },
-        blankPart: { type: 'options', values: ['num1', 'num2', 'solution'] }
-    },};
+    ]
+};

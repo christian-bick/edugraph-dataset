@@ -10,7 +10,5 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.NumbersWithZero,
         Ability.ConceptClassification
-    ],
-    constraints: {
-        classifyType: { type: 'options', values: ['shape', 'color'] },
-    },};
+    ]
+};

@@ -15,7 +15,7 @@ export function MeasureLength({ payload }: Props) {
     const color = '#4682B4'; // SteelBlue
 
     const isReverse = payload.labels.includes(Ability.VisualArticulation);
-    const isDecimal = payload.constraints.decimal === true || payload.constraints.decimal === 'true';
+    const isDecimal = data.problemLength !== undefined && data.problemLength % 1 !== 0;
 
     const bandLength = data.bandLength !== undefined ? data.bandLength : 10;
     const problemLength = data.problemLength !== undefined ? data.problemLength : 6.0;

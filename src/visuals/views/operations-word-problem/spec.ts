@@ -9,7 +9,5 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.NumbersWithZero,
         Ability.TextualReception
-    ],
-    constraints: {
-        operation: { type: 'options', values: ['addition', 'subtraction'] },
-    },};
+    ]
+};

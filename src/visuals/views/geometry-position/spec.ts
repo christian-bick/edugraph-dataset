@@ -1,11 +1,9 @@
 import {ViewSpec} from '../../../types/view-spec.ts';
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-position',
     supportedLabels: [
         Ability.SpatialInterpretation,
-    ],
-    constraints: {
-        relation: { type: 'options', values: ['above', 'below', 'beside', 'nextTo'] }
-    },};
+    ]
+};

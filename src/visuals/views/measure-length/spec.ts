@@ -5,14 +5,8 @@ export const spec: ViewSpec = {
     viewId: 'measure-length',
     supportedLabels: [
         Area.Measurement,
-        Scope.NumericRange,
         Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Ability.ProcedureExecution,
         Ability.VisualReception,
         Ability.VisualArticulation
-    ],
-    constraints: {
-        decimal: { type: 'options', values: [true, false] }
-    }
+    ]
 };

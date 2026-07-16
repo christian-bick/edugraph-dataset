@@ -11,7 +11,5 @@ export const spec: ViewSpec = {
         Scope.NumericZero,
         Ability.ProcedureExecution,
         Scope.OrderAbstraction
-    ],
-    constraints: {
-        desc: { type: 'options', values: [true, false] }
-    },};
+    ]
+};
