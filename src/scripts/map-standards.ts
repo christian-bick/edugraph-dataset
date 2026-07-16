@@ -20,31 +20,6 @@ const edugraphTsUrl = pkg.dependencies['edugraph-ts'] || '';
 const versionMatch = edugraphTsUrl.match(/\/releases\/download\/(v[\d.]+)\//);
 const version = versionMatch ? versionMatch[1] : 'v0.6.0';
 
-// Load active generator configurations statically
-async function loadGeneratorPermutations() {
-  const generatorsDir = path.resolve(PROJECT_ROOT, 'src', 'generators');
-  const modules = fs.readdirSync(generatorsDir).filter(d => {
-    return fs.statSync(path.join(generatorsDir, d)).isDirectory() && d !== 'shared';
-  });
-
-  const generatorPerms: Record<string, any[]> = {};
-  for (const moduleName of modules) {
-    const permPath = path.join(generatorsDir, moduleName, 'permutations.ts');
-    if (fs.existsSync(permPath)) {
-      try {
-        const { config } = await import(`../generators/${moduleName}/permutations.ts`);
-        if (config && config.generationConfig && config.generationConfig.permutations) {
-          generatorPerms[moduleName] = config.generationConfig.permutations;
-          console.log(`[Generators] Statically loaded ${config.generationConfig.permutations.length} permutations for [${moduleName}]`);
-        }
-      } catch (e) {
-        console.warn(`[Generators] Could not load permutations for ${moduleName}:`, e);
-      }
-    }
-  }
-  return generatorPerms;
-}
-
 // Recursively find the parent Cluster ID for a standard
 function findParentClusterId(stdId: string, standardsMap: Record<string, any>): string {
   let current = standardsMap[stdId];
@@ -127,18 +102,6 @@ async function main() {
     console.log(`[CCSS] Filtering standards for Grade Limit: ${gradeLimit}. Found ${targetLeaves.length} leaf nodes.`);
   } else {
     console.log(`[CCSS] Found ${targetLeaves.length} total leaf nodes to evaluate.`);
-  }
-
-  // 3. Load active generator permutations
-  const generatorPerms = await loadGeneratorPermutations();
-  const activePermsList: { moduleName: string; labels: Set<string> }[] = [];
-  for (const [moduleName, perms] of Object.entries(generatorPerms)) {
-    for (const perm of perms) {
-      activePermsList.push({
-        moduleName,
-        labels: new Set(perm.labels)
-      });
-    }
   }
 
   // 4. Configure Gemini client
@@ -290,52 +253,8 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
       suggested_task: { title: 'Map Standard', description: 'Re-run evaluation for this standard.' }
     };
 
-    let dataset_covered = false;
-    let generator_module = null;
-
-    if (evalObj.ontology_covered) {
-      const requiredTags = [
-        ...evalObj.matched_areas,
-        ...evalObj.matched_scopes
-      ];
-
-      if (requiredTags.length > 0) {
-        const allAbilities = Object.values(Ability);
-        
-        const qualifyingPerms = activePermsList.filter(perm => {
-          const permTags = Array.from(perm.labels).filter(l => !allAbilities.includes(l as any));
-          return permTags.some(genLabel => {
-            return requiredTags.some(reqTag => isSubConceptOf(genLabel, reqTag));
-          });
-        });
-
-        if (qualifyingPerms.length > 0) {
-          const unionTags = new Set<string>();
-          qualifyingPerms.forEach(p => {
-            Array.from(p.labels)
-              .filter(l => !allAbilities.includes(l as any))
-              .forEach(t => unionTags.add(t));
-          });
-
-          // Standard is covered if all required Areas/Scopes are in this union
-          const coversAll = requiredTags.every(reqTag => {
-            return Array.from(unionTags).some(qTag => isSubConceptOf(qTag, reqTag));
-          });
-
-          if (coversAll) {
-            dataset_covered = true;
-            // Since it's a union, we list the distinct modules involved
-            const modules = Array.from(new Set(qualifyingPerms.map(p => p.moduleName)));
-            generator_module = modules.join(', ');
-          }
-        }
-      }
-    }
-
     finalCoverageMap[std.id] = {
       ...evalObj,
-      dataset_covered,
-      generator_module,
       cluster_id: findParentClusterId(std.id, standardsMap)
     };
   }
@@ -345,7 +264,7 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
   const tasksByCluster: Record<string, any[]> = {};
   
   for (const [stdId, data] of Object.entries(finalCoverageMap)) {
-    if (data.dataset_covered) continue;
+    if (data.ontology_covered) continue;
 
     const clusterId = data.cluster_id;
     if (!tasksByCluster[clusterId]) {

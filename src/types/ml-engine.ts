@@ -84,20 +84,6 @@ export interface GeneratorInput {
 }
 
 /**
- * The configuration used by the Abstract Generators to produce datasets.
- */
-export interface DatasetGenerationConfig {
-    /** 
-     * An array of predefined configurations.
-     */
-    permutations: GeneratorInput[];
-    /** The global random seed to use for this generation run */
-    seed: number;
-    /** How many unique mathematical problems to generate PER permutation. Default is 1. */
-    countPerPermutation?: number;
-}
-
-/**
  * The contract for a Problem Generator (living in `src/generators/`).
  */
 export interface ProblemGenerator<TData = any> {
@@ -129,8 +115,7 @@ export interface VisualBlueprint<TViewId extends string = string> {
 export interface MLDatasetPipelineConfig {
     /** The filename or registry ID of the generator (e.g., 'arithmetic') */
     generatorName: string;
-    generationConfig: DatasetGenerationConfig;
-    
+
     /** 
      * Ratios for splitting the abstract problems. Must sum to 1.0.
      * e.g., { train: 0.8, val: 0.2 }
