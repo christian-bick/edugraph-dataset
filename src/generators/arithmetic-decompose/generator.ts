@@ -10,13 +10,6 @@ export class ArithmeticDecomposeGenerator implements ProblemGenerator<Arithmetic
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'decompose') {
-            return null;
-        }
-        if (!constraints.mode && labels && !labels.some(l => isSubConceptOf(l, Ability.ProcedureUnderstanding))) {
-            return null;
-        }
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const targetNumber = constraints.targetNumber || Math.floor(random() * (resolvedRange.max - 3 + 1)) + 3; // 3 to resolved max (usually 10)

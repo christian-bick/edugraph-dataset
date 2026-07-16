@@ -47,19 +47,4 @@ describe('WritingGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.number).toBe(15);
     });
-
-    it('should generate successfully in count-objects mode', () => {
-        const input = { labels: [], constraints: { mode: 'count-objects', number: 8 } };
-        const stub = generator.generate(input);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.number).toBe(8);
-    });
-
-    it('should return null for unsupported modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'unsupported' }
-        });
-        expect(stub).toBeNull();
-    });
 });

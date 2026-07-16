@@ -8,15 +8,9 @@ export class MeasurementAttributeGenerator implements ProblemGenerator<Measureme
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        const mode = constraints.mode || 'attribute-type';
-        if (mode !== 'attribute-type' && mode !== 'measure-attributes') {
-            return null;
-        }
-
         const attribute = constraints.attribute || (random() > 0.5 ? 'length' : 'weight'); // length, height, weight
         return {
-            id: `attribute-type-${attribute}`,
+            id: `measurement-attribute-${attribute}`,
             data: {
                 attribute: attribute as 'length' | 'height' | 'weight'
             }

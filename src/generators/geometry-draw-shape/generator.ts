@@ -7,10 +7,6 @@ export class GeometryDrawShapeGenerator implements ProblemGenerator<GeometryDraw
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'draw-shape') {
-            return null;
-        }
 
         const target = constraints.target || 'circle'; // circle, triangle, square
 

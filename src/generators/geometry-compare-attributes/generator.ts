@@ -7,10 +7,6 @@ export class GeometryCompareAttributesGenerator implements ProblemGenerator<Geom
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'compare-attributes') {
-            return null;
-        }
 
         const attribute = constraints.attribute || 'sides'; // sides, corners
         const shape1 = constraints.shape1 || 'rectangle';

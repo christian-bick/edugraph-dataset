@@ -7,10 +7,6 @@ export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBui
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'build-shape') {
-            return null;
-        }
 
         const target = constraints.target || 'triangle'; // triangle, square, rectangle
         const sidesMap: Record<string, number> = { triangle: 3, square: 4, rectangle: 4 };

@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { GeometryDrawShapeGenerator } from './generator.ts';
+import { GeometryNamingGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
 
-describe('GeometryDrawShapeGenerator', () => {
-    let generator: GeometryDrawShapeGenerator;
+describe('GeometryNamingGenerator', () => {
+    let generator: GeometryNamingGenerator;
 
     beforeEach(() => {
-        generator = new GeometryDrawShapeGenerator();
+        generator = new GeometryNamingGenerator();
         setSeed(42);
     });
 
@@ -14,14 +14,14 @@ describe('GeometryDrawShapeGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should validate draw-shape outputs', () => {
+    it('should generate valid shape naming stubs', () => {
         const input = {
             labels: [],
-            constraints: { target: 'circle' }
+            constraints: { shape: 'triangle' }
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('circle');
-        expect(stub!.data.answer).toBe('circle');
+        expect(stub!.data.shape).toBe('triangle');
+        expect(stub!.data.answer).toBe('triangle');
     });
 });

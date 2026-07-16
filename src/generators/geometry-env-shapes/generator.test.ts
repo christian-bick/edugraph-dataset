@@ -21,20 +21,12 @@ describe('GeometryEnvShapesGenerator', () => {
         targets.forEach((target, index) => {
             const input = {
                 labels: [],
-                constraints: { mode: 'env-shapes', target }
+                constraints: { target }
             };
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
             expect(stub!.data.target).toBe(target);
             expect(stub!.data.answer).toBe(expectedAnswers[index]);
         });
-    });
-
-    it('should return null for non-env-shapes modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'name-2d' }
-        });
-        expect(stub).toBeNull();
     });
 });

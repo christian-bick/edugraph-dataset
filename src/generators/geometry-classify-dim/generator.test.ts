@@ -17,7 +17,7 @@ describe('GeometryClassifyDimGenerator', () => {
     it('should validate classify-dim 2D and 3D outputs', () => {
         const input2D = {
             labels: [],
-            constraints: { mode: 'classify-dim', shapeType: '2d' }
+            constraints: { shapeType: '2d' }
         };
         const stub2D = generator.generate(input2D);
         expect(stub2D).not.toBeNull();
@@ -26,19 +26,11 @@ describe('GeometryClassifyDimGenerator', () => {
 
         const input3D = {
             labels: [],
-            constraints: { mode: 'classify-dim', shapeType: '3d' }
+            constraints: { shapeType: '3d' }
         };
         const stub3D = generator.generate(input3D);
         expect(stub3D).not.toBeNull();
         expect(stub3D!.data.shapeType).toBe('3d');
         expect(stub3D!.data.answer).toBe('3d');
-    });
-
-    it('should return null for non-classify-dim modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'name-2d' }
-        });
-        expect(stub).toBeNull();
     });
 });

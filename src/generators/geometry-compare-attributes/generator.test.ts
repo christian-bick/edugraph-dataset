@@ -17,7 +17,7 @@ describe('GeometryCompareAttributesGenerator', () => {
     it('should validate compare-attributes sides/corners comparison math', () => {
         const input = {
             labels: [],
-            constraints: { mode: 'compare-attributes', attribute: 'sides', shape1: 'rectangle', shape2: 'triangle' }
+            constraints: { attribute: 'sides', shape1: 'rectangle', shape2: 'triangle' }
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
@@ -27,13 +27,5 @@ describe('GeometryCompareAttributesGenerator', () => {
         expect(stub!.data.val1).toBe(4);
         expect(stub!.data.val2).toBe(3);
         expect(stub!.data.answer).toBe('rectangle'); // rectangle has more sides
-    });
-
-    it('should return null for non-compare-attributes modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'name-2d' }
-        });
-        expect(stub).toBeNull();
     });
 });

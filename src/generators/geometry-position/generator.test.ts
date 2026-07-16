@@ -17,19 +17,11 @@ describe('GeometryPositionGenerator', () => {
     it('should validate position mode mappings', () => {
         const input = {
             labels: [],
-            constraints: { mode: 'position', relation: 'below' }
+            constraints: { relation: 'below' }
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('below');
         expect(stub!.data.answer).toBe('below');
-    });
-
-    it('should return null for non-position modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'name-2d' }
-        });
-        expect(stub).toBeNull();
     });
 });

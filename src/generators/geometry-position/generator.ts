@@ -7,10 +7,6 @@ export class GeometryPositionGenerator implements ProblemGenerator<GeometryPosit
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'position') {
-            return null;
-        }
 
         const relation = constraints.relation || 'above'; // above, below, beside, nextTo
         const answer = relation; // The correct relation is the target

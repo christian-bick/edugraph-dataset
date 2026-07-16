@@ -7,10 +7,6 @@ export class GeometryEnvShapesGenerator implements ProblemGenerator<GeometryEnvS
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'env-shapes') {
-            return null;
-        }
 
         const target = constraints.target || 'clock'; // clock, window, table
         const shapesMap: Record<string, string> = {

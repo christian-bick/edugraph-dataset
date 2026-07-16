@@ -8,10 +8,6 @@ export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMa
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'make-ten') {
-            return null;
-        }
 
         const target = constraints.targetSum || 10;
         const givenNumber = constraints.givenNumber || Math.floor(random() * (target - 1)) + 1; // 1 to target-1

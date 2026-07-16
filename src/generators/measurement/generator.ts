@@ -9,11 +9,6 @@ export class MeasurementGenerator implements ProblemGenerator<MeasurementStandar
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
 
-        // Guard
-        const mode = constraints.mode || 'standard';
-        if (mode !== 'standard' && mode !== 'measure-length') {
-            return null;
-        }
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const bandLength = constraints.bandLength || resolvedRange.max;

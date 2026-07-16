@@ -7,10 +7,6 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'same-attribute') {
-            return null;
-        }
 
         const attribute = constraints.attribute || 'can-roll'; // can-roll, can-stack, flat-faces
         let answer = '';

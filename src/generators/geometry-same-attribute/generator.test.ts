@@ -17,7 +17,7 @@ describe('GeometrySameAttributeGenerator', () => {
     it('should validate same-attribute rolls/stacks/flat properties', () => {
         const inputRoll = {
             labels: [],
-            constraints: { mode: 'same-attribute', attribute: 'can-roll' }
+            constraints: { attribute: 'can-roll' }
         };
         const stubRoll = generator.generate(inputRoll);
         expect(stubRoll).not.toBeNull();
@@ -25,18 +25,10 @@ describe('GeometrySameAttributeGenerator', () => {
 
         const inputStack = {
             labels: [],
-            constraints: { mode: 'same-attribute', attribute: 'can-stack' }
+            constraints: { attribute: 'can-stack' }
         };
         const stubStack = generator.generate(inputStack);
         expect(stubStack).not.toBeNull();
         expect(stubStack!.data.answer).toBe('cube');
-    });
-
-    it('should return null for non-same-attribute modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'name-2d' }
-        });
-        expect(stub).toBeNull();
     });
 });

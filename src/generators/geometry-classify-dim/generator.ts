@@ -8,10 +8,6 @@ export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryCl
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        if (constraints.mode && constraints.mode !== 'classify-dim') {
-            return null;
-        }
 
         const shapeType = constraints.shapeType || '2d'; // 2d, 3d
         const shapes2D = ['circle', 'square', 'triangle', 'rectangle', 'hexagon'];

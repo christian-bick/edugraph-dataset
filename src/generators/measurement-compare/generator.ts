@@ -8,12 +8,6 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-        // Guard
-        const mode = constraints.mode || 'direct-compare';
-        if (mode !== 'direct-compare' && mode !== 'compare-attributes') {
-            return null;
-        }
-
         const attribute = constraints.attribute || 'length'; // length, weight
         const relation = constraints.relation || (attribute === 'length' ? (random() > 0.5 ? 'longer' : 'shorter') : (random() > 0.5 ? 'heavier' : 'lighter'));
         const answer = random() > 0.5 ? 'A' : 'B';
@@ -41,7 +35,7 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
         }
 
         return {
-            id: `direct-compare-${attribute}-${relation}-${answer}`,
+            id: `measurement-compare-${attribute}-${relation}-${answer}`,
             data: {
                 attribute: attribute as 'length' | 'weight',
                 relation,

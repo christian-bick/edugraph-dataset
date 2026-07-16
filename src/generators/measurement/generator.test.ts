@@ -26,20 +26,12 @@ describe('MeasurementGenerator', () => {
     it('should validate standard measure bounds', () => {
         const input = {
             labels: [],
-            constraints: { mode: 'standard', bandLength: 10 }
+            constraints: { bandLength: 10 }
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
         expect(stub!.data.bandLength).toBe(10);
         expect(stub!.data.problemLength).toBeGreaterThan(0);
         expect(stub!.data.problemLength).toBeLessThanOrEqual(10);
-    });
-
-    it('should return null for non-standard modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'attribute-type' }
-        });
-        expect(stub).toBeNull();
     });
 });

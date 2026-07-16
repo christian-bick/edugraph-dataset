@@ -17,7 +17,7 @@ describe('MeasurementCompareGenerator', () => {
     it('should validate direct-compare length longer relation', () => {
         const input = {
             labels: [],
-            constraints: { mode: 'direct-compare', attribute: 'length', relation: 'longer' }
+            constraints: { attribute: 'length', relation: 'longer' }
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -37,7 +37,7 @@ describe('MeasurementCompareGenerator', () => {
     it('should validate direct-compare length shorter relation', () => {
         const input = {
             labels: [],
-            constraints: { mode: 'direct-compare', attribute: 'length', relation: 'shorter' }
+            constraints: { attribute: 'length', relation: 'shorter' }
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -57,7 +57,7 @@ describe('MeasurementCompareGenerator', () => {
     it('should validate direct-compare weight heavier relation', () => {
         const input = {
             labels: [],
-            constraints: { mode: 'direct-compare', attribute: 'weight', relation: 'heavier' }
+            constraints: { attribute: 'weight', relation: 'heavier' }
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -72,13 +72,5 @@ describe('MeasurementCompareGenerator', () => {
                 expect(val1).toBeLessThan(val2);
             }
         }
-    });
-
-    it('should return null for non-direct-compare modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'standard' }
-        });
-        expect(stub).toBeNull();
     });
 });

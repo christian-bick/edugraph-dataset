@@ -9,12 +9,6 @@ export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenP
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
 
-        // Guard
-        const mode = constraints.mode || 'compose-teen';
-        if (mode !== 'compose-teen' && mode !== 'decompose-teen') {
-            return null;
-        }
-
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;
         const resolvedMax = resolvedRange.max <= 20 ? resolvedRange.max : 19;
@@ -24,7 +18,7 @@ export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenP
         const target = 10 + ones;
 
         return {
-            id: `${mode}-${target}`,
+            id: `place-value-teen-${target}`,
             data: {
                 ones,
                 target
