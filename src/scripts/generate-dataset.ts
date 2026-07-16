@@ -3,7 +3,9 @@ import {dirname, resolve} from 'path';
 import {fileURLToPath} from 'url';
 import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'fs';
 import {AbstractProblem, VisualBlueprint} from '../types/ml-engine.ts';
-import {doesGeneratorSupportCompetency, doesViewSupportProblem} from '../lib/ontology.ts';
+import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
+import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
+import { Ability } from 'edugraph-ts';
 import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
 import {Grade1Spec} from '../../config/spec/ccss/grade-01.ts';
 
@@ -308,6 +310,10 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
 
     console.log(`Using decoupled ontology-driven matching for ${moduleName}...`);
     
+    const viewToType = getViewToProblemTypeMap();
+    const abilitiesList = new Set<string>(Object.values(Ability));
+    const genTypeName = getGeneratorProblemType(moduleName);
+
     // Scan src/visuals/views directory to dynamically load specs for ALL views
     const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
     const allViewDirs = readdirSync(viewsDir, { withFileTypes: true })
@@ -327,10 +333,24 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
         }
     }
 
-    // Filter competency targets for this generator
-    const matchedTargets = allTargets.filter(target =>
-        doesGeneratorSupportCompetency(generatorSpec.supportedLabels || [], target.labels)
-    );
+    const filteredViews = compatibleViews.filter(v => viewToType[v.viewId] === genTypeName);
+
+    // Filter competency targets for this generator using union of labels
+    const matchedTargets = allTargets.filter(target => {
+        if (!generatorSpec.supportedLabels) return false;
+        return filteredViews.some(viewSpec => {
+            if (!viewSpec.supportedLabels) return false;
+            return target.labels.every(compLabel => {
+                if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
+                if (abilitiesList.has(compLabel)) {
+                    return viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                }
+                const supportedByGen = generatorSpec.supportedLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
+                const supportedByView = viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                return supportedByGen || supportedByView;
+            });
+        });
+    });
 
     console.log(`Found ${matchedTargets.length} matched competency targets for generator [${moduleName}]`);
 
@@ -352,15 +372,30 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
 
             if (problemStub && !trainKeys.has(problemStub.id)) {
                 // Match views that support this problem
-                const matchedViews = compatibleViews.filter(viewSpec => {
-                    const labelsMatch = doesViewSupportProblem(viewSpec.supportedLabels || [], target.labels);
+                const matchedViews = filteredViews.filter(viewSpec => {
+                    if (!viewSpec.supportedLabels || !generatorSpec.supportedLabels) return false;
+                    const labelsMatch = target.labels.every(compLabel => {
+                        if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
+                        if (abilitiesList.has(compLabel)) {
+                            return viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                        }
+                        const supportedByGen = generatorSpec.supportedLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
+                        const supportedByView = viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                        return supportedByGen || supportedByView;
+                    });
                     if (!labelsMatch) return false;
 
                     // Check physical constraints
                     if (viewSpec.constraints) {
                         for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-                            const val = problemStub.data[key];
-                            if (val === undefined) continue;
+                            const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints[key];
+                            if (val === undefined) {
+                                const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
+                                if (VISUAL_PARAMS.has(key)) {
+                                    continue;
+                                }
+                                return false;
+                            }
                             if (constraint.type === 'range') {
                                 if (val < constraint.min || val > constraint.max) return false;
                             } else if (constraint.type === 'options') {

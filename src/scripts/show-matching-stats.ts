@@ -3,8 +3,10 @@ import { fileURLToPath } from 'url';
 import { existsSync, readdirSync } from 'fs';
 import { KindergartenSpec } from '../../config/spec/ccss/kindergarten.ts';
 import { Grade1Spec } from '../../config/spec/ccss/grade-01.ts';
-import { doesGeneratorSupportCompetency, findCompatibleViews } from '../lib/ontology.ts';
+import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { setSeed } from '../lib/random.ts';
+import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
+import { Ability } from 'edugraph-ts';
 
 const allTargets = [...KindergartenSpec, ...Grade1Spec];
 
@@ -73,6 +75,9 @@ async function main() {
     console.log(`Loaded ${allGeneratorSpecs.length} Generator Specifications.`);
     console.log(`Loaded ${allTargets.length} CCSS Targets (Kindergarten + Grade 1).\n`);
 
+    const viewToType = getViewToProblemTypeMap();
+    const abilitiesList = new Set<string>(Object.values(Ability));
+
     let targetCount = 0;
     const generatorStats: Record<string, { targetMatches: number; viewPairs: number }> = {};
     for (const gen of allGeneratorSpecs) {
@@ -88,33 +93,70 @@ async function main() {
         let targetHasMatch = false;
 
         for (const gen of allGeneratorSpecs) {
-            // Check if generator supports this target
-            if (gen.spec.supportedLabels && gen.spec.supportedLabels.length > 0) {
-                const isMatched = doesGeneratorSupportCompetency(gen.spec.supportedLabels, target.labels);
-                if (isMatched) {
-                    targetHasMatch = true;
-                    generatorStats[gen.generatorId].targetMatches++;
+            const genTypeName = getGeneratorProblemType(gen.generatorId);
+            if (!genTypeName) continue;
 
-                    // Generate a deterministic sample problem to test views
-                    setSeed(42);
-                    const problemStub = gen.generator.generate({
-                        labels: target.labels,
-                        constraints: target.constraints
+            const compatibleViews = allViewSpecs.filter(v => viewToType[v.viewId] === genTypeName);
+            if (compatibleViews.length === 0) continue;
+
+            if (!gen.spec || !gen.spec.supportedLabels) {
+                continue;
+            }
+
+            // Check if union of labels supports target labels
+            const matchingViewsForTarget = compatibleViews.filter(viewSpec => {
+                if (!viewSpec.supportedLabels) return false;
+                return target.labels.every(compLabel => {
+                    if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
+                    if (abilitiesList.has(compLabel)) {
+                        return viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                    }
+                    const supportedByGen = gen.spec.supportedLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
+                    const supportedByView = viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                    return supportedByGen || supportedByView;
+                });
+            });
+
+            if (matchingViewsForTarget.length > 0) {
+                // Generate a deterministic sample problem to test constraints
+                setSeed(42);
+                const problemStub = gen.generator.generate({
+                    labels: target.labels,
+                    constraints: target.constraints
+                });
+
+                if (problemStub) {
+                    const matchedViews = matchingViewsForTarget.filter(viewSpec => {
+                        if (viewSpec.constraints) {
+                            for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
+                                const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints[key];
+                                if (val === undefined) {
+                                    const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
+                                    if (VISUAL_PARAMS.has(key)) {
+                                        continue;
+                                    }
+                                    return false;
+                                }
+                                if (constraint.type === 'range') {
+                                    if (val < constraint.min || val > constraint.max) return false;
+                                } else if (constraint.type === 'options') {
+                                    if (!constraint.values.includes(val)) return false;
+                                }
+                            }
+                        }
+                        return true;
                     });
 
-                    if (problemStub) {
-                        const matchedViews = findCompatibleViews(target.labels, problemStub.data, allViewSpecs, target.constraints);
+                    if (matchedViews.length > 0) {
+                        targetHasMatch = true;
+                        generatorStats[gen.generatorId].targetMatches++;
                         generatorStats[gen.generatorId].viewPairs += matchedViews.length;
-                        
+
                         console.log(`  └─► Generator: [${gen.generatorId}]`);
-                        if (matchedViews.length > 0) {
-                            console.log(`      └─► Compatible Views: [${matchedViews.map(v => v.viewId).join(', ')}]`);
-                        } else {
-                            console.log(`      └─► Compatible Views: NONE (No views matched physical constraints)`);
-                        }
-                    } else {
-                        console.log(`  └─► Generator: [${gen.generatorId}] (Returned null stub)`);
+                        console.log(`      └─► Compatible Views: [${matchedViews.map(v => v.viewId).join(', ')}]`);
                     }
+                } else {
+                    console.log(`  └─► Generator: [${gen.generatorId}] (Returned null stub)`);
                 }
             }
         }
