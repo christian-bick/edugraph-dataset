@@ -141,7 +141,13 @@ export function findCompatibleViews(
         if (viewSpec.constraints) {
             for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
                 const val = problemData[key] !== undefined ? problemData[key] : targetConstraints[key];
-                if (val === undefined) continue;
+                if (val === undefined) {
+                    const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
+                    if (VISUAL_PARAMS.has(key)) {
+                        continue;
+                    }
+                    return false;
+                }
                 if (constraint.type === 'range') {
                     if (val < constraint.min || val > constraint.max) return false;
                 } else if (constraint.type === 'options') {

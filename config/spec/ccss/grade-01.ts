@@ -59,7 +59,7 @@ export const Grade1Spec: CompetencyTarget[] = [
     // --- 1.OA.A.1: Addition & Subtraction word problems within 20 ---
     {
         id: '1.OA.A.1-add-sub-word-20',
-        labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
+        labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.TextualReception],
         constraints: { mode: 'word-problem' }
     },
 

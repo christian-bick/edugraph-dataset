@@ -7,16 +7,14 @@ export const spec: ViewSpec = {
         Area.BaseOperations,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
-        Scope.NumbersWithoutZero,
+        Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ],
     constraints: {
-        givenNumber: { type: 'range', min: 1, max: 9 },
-        mode: { type: 'options', values: ['make-ten'] }
+        givenNumber: { type: 'range', min: 1, max: 9 }
     },
     testParams: {
         givenNumber: (c) => limitsAndMean(c),
-        mode: (c) => 'make-ten',
         missingNumber: (key, params) => 10 - params.givenNumber
     }
 };

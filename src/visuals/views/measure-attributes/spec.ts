@@ -10,11 +10,9 @@ export const spec: ViewSpec = {
         Ability.ProcedureExecution
     ],
     constraints: {
-        attribute: { type: 'options', values: ['length', 'height', 'weight'] },
-        mode: { type: 'options', values: ['attribute-type'] }
+        attribute: { type: 'options', values: ['length', 'height', 'weight'] }
     },
     testParams: {
-        attribute: (c) => allOptions(c),
-        mode: (c) => 'attribute-type'
+        attribute: (c) => allOptions(c)
     }
 };

@@ -2,19 +2,18 @@ import { ViewSpec, limitsAndMean } from '../../../types/view-spec.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
-    viewId: 'place-value-decompose-teen',
+    viewId: 'numbers-write-count',
     supportedLabels: [
-        Area.BaseOperations,
+        Area.Numeration,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
         Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ],
     constraints: {
-        ones: { type: 'range', min: 0, max: 9 }
+        number: { type: 'range', min: 0, max: 20 }
     },
     testParams: {
-        ones: (c) => limitsAndMean(c),
-        target: (key, params) => 10 + params.ones
+        number: (c) => limitsAndMean(c)
     }
 };

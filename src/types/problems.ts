@@ -171,6 +171,7 @@ export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticProblem;
+    'operations-word-problem': ArithmeticProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;
@@ -182,17 +183,30 @@ export interface ViewTypeMap {
     'counting-objects-count-out': CountingProblem;
     'counting-inc-dec': CountingIncDecProblem;
     'counting-conservation': CountingProblem;
-    'sorting-classify': CountingClassifyProblem;
+    'sorting-classify-count': CountingClassifyProblem;
+    'sorting-classify-sort': CountingClassifyProblem;
 
     'measure-length': MeasurementStandardProblem;
     'measure-attributes': MeasurementAttributeProblem;
     'measure-compare': MeasurementCompareProblem;
 
     'numbers-compare': ComparisonProblem;
-    'numbers-compare-groups': ComparisonProblem;
+    'numbers-compare-matching': ComparisonProblem;
+    'numbers-compare-counting': ComparisonProblem;
 
     'numbers-order': OrderingProblem;
-    'numbers-write': WritingProblem;
+    'numbers-write-stroke': WritingProblem;
+    'numbers-write-standard': WritingProblem;
+    'numbers-write-count': WritingProblem;
     'time-analog': TimeProblem;
-    'geometry-viewer': GeometryProblem;
+
+    'geometry-naming': GeometryNamingProblem;
+    'geometry-position': GeometryPositionProblem;
+    'geometry-env-shapes': GeometryEnvShapesProblem;
+    'geometry-classify-dim': GeometryClassifyDimProblem;
+    'geometry-compare-attributes': GeometryCompareAttributesProblem;
+    'geometry-same-attribute': GeometrySameAttributeProblem;
+    'geometry-build-shape': GeometryBuildShapeProblem;
+    'geometry-compose-shapes': GeometryComposeShapesProblem;
+    'geometry-draw-shape': GeometryDrawShapeProblem;
 }

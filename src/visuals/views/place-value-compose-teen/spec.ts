@@ -7,16 +7,14 @@ export const spec: ViewSpec = {
         Area.BaseOperations,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
-        Scope.NumbersWithoutZero,
+        Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ],
     constraints: {
-        ones: { type: 'range', min: 0, max: 9 },
-        mode: { type: 'options', values: ['compose-teen'] }
+        ones: { type: 'range', min: 0, max: 9 }
     },
     testParams: {
         ones: (c) => limitsAndMean(c),
-        mode: (c) => 'compose-teen',
         target: (key, params) => 10 + params.ones
     }
 };
