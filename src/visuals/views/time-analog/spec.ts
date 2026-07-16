@@ -9,6 +9,7 @@ export const spec: ViewSpec = {
         Scope.HourIntervals,
         Scope.MinuteIntervals,
         Scope.SecondIntervals,
+        Scope.ArabicNumerals,
         Ability.ProcedureExecution
     ],
     constraints: {

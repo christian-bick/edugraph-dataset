@@ -5,7 +5,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement-compare',
     supportedLabels: [
         Area.Measurement,
-        Scope.ArabicNumerals,
         Scope.NumericRange
     ]
 };

@@ -10,6 +10,7 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.NumbersWithoutZero,
         Scope.AdditiveCount,
+        Scope.ArabicNumerals,
         Ability.ProcedureUnderstanding
     ],
     constraints: {

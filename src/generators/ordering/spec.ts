@@ -10,7 +10,6 @@ export const spec: OrderingGeneratorSpec = {
     generatorId: 'ordering',
     supportedLabels: [
         Area.NumerationWithIntegers,
-        Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumericRange,
         Scope.NumericZero

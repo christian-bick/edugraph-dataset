@@ -9,7 +9,8 @@ export const spec: ViewSpec = {
         Scope.AdditiveCount,
         Scope.NumericRange,
         Scope.NumbersWithoutZero,
-        Ability.DirectUnderstanding
+        Ability.DirectUnderstanding,
+        Scope.ArabicNumerals
     ],
     constraints: {
         numObjects: { type: 'range', min: 1, max: 15 }

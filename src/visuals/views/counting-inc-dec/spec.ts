@@ -1,7 +1,9 @@
 import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
+import { Scope } from '../../../types/scope.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-inc-dec',
+    scopes: [Scope.SubtractiveCount, Scope.ArabicNumerals],
     constraints: {
         numObjects: { type: 'range', min: 1, max: 15 },
         incDecType: { type: 'options', values: ['inc', 'dec'] }

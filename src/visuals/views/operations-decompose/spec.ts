@@ -8,6 +8,7 @@ export const spec: ViewSpec = {
         Scope.PhysicalNumbers,
         Scope.NumericRange,
         Scope.NumbersWithZero,
+        Scope.ArabicNumerals,
         Ability.ProcedureUnderstanding
     ],
     constraints: {

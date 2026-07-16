@@ -5,7 +5,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement-attribute',
     supportedLabels: [
         Area.Measurement,
-        Scope.ArabicNumerals,
         Scope.NumericRange
     ]
 };

@@ -5,8 +5,9 @@ export const spec: ViewSpec = {
     viewId: 'counting-objects-one-to-one',
     supportedLabels: [
         Area.Numeration,
-        Scope.PhysicalNumbers,
+        Scope.NumbersWithoutZero,
         Scope.AdditiveCount,
+        Scope.ArabicNumerals,
         Scope.NumericRange,
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution

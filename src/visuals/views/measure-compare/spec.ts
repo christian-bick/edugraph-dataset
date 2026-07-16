@@ -6,6 +6,7 @@ export const spec: ViewSpec = {
     supportedLabels: [
         Area.Measurement,
         Scope.NumericRange,
+        Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ],
