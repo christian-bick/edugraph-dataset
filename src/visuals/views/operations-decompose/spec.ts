@@ -1,4 +1,4 @@
-import {limitsAndMean, ViewSpec} from '../../../types/view-spec.ts';
+import {ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
@@ -11,11 +11,7 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.ProcedureUnderstanding
     ],
-    constraints: {
-        targetNumber: { type: 'range', min: 2, max: 10 }
-    },
-    testParams: {
-        targetNumber: (c) => limitsAndMean(c),
+        testParams: {
         pair1: (key, params) => {
             const half = Math.floor(params.targetNumber / 2);
             return [half, params.targetNumber - half];

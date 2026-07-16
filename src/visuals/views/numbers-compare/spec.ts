@@ -1,4 +1,4 @@
-import {allOptions, limitsAndMean, ViewSpec} from '../../../types/view-spec.ts';
+import {allOptions, ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
@@ -11,13 +11,7 @@ export const spec: ViewSpec = {
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ],
-    constraints: {
-        num1: { type: 'range', min: 0, max: 99 },
-        num2: { type: 'range', min: 0, max: 99 }
-    },
-    testParams: {
-        num1: (c) => limitsAndMean(c),
-        num2: (c) => limitsAndMean(c),
+        testParams: {
         relation: (c) => allOptions(c),
         answer: (key, params) => {
             if (params.relation === 'greater') return params.num1 > params.num2;

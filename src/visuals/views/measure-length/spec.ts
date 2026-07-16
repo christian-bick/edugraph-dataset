@@ -1,4 +1,4 @@
-import {allOptions, limitsAndMean, ViewSpec} from '../../../types/view-spec.ts';
+import {allOptions, ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
@@ -13,11 +13,9 @@ export const spec: ViewSpec = {
         Ability.VisualArticulation
     ],
     constraints: {
-        bandLength: { type: 'range', min: 5, max: 15 },
         decimal: { type: 'options', values: [true, false] }
     },
     testParams: {
-        bandLength: (c) => limitsAndMean(c),
         decimal: (c) => allOptions(c),
         problemLength: (key, params) => params.bandLength - 2
     }

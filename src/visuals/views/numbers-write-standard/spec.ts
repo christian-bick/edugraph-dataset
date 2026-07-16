@@ -1,5 +1,5 @@
-import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
-import { Area, Scope, Ability } from 'edugraph-ts';
+import {ViewSpec} from '../../../types/view-spec.ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-write-standard',
@@ -10,12 +10,4 @@ export const spec: ViewSpec = {
         Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ],
-    constraints: {
-        number: { type: 'range', min: 0, max: 20 },
-        outline: { type: 'options', values: [true, false] }
-    },
-    testParams: {
-        number: (c) => limitsAndMean(c),
-        outline: (c) => allOptions(c)
-    }
-};
+        };

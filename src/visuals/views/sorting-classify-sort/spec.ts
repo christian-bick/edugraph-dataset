@@ -1,4 +1,4 @@
-import {allOptions, limitsAndMean, ViewSpec} from '../../../types/view-spec.ts';
+import {allOptions, ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
@@ -13,12 +13,10 @@ export const spec: ViewSpec = {
     constraints: {
         classifyType: { type: 'options', values: ['shape', 'color'] },
         relation: { type: 'options', values: ['most', 'least'] },
-        numObjects: { type: 'range', min: 4, max: 15 }
     },
     testParams: {
         classifyType: (c) => allOptions(c),
         relation: (c) => allOptions(c),
-        numObjects: (c) => limitsAndMean(c),
         items: (key, params) => {
             const items = [];
             const shapes = ['circle', 'square', 'triangle'];

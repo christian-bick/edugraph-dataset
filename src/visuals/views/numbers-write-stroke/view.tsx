@@ -86,8 +86,6 @@ function DoubleTenFrame({ number }: { number: number }) {
 export function NumbersWriteStroke({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-
-    const outline = payload.constraints.outline === true || payload.constraints.outline === 'true';
     const number = data.number;
 
     return (
@@ -104,17 +102,13 @@ export function NumbersWriteStroke({ payload }: Props) {
                     </div>
                     {/* Box 2 & 3: Interactive/Response Boxes */}
                     {Array.from({ length: 2 }).map((_, idx) => {
-                        let content = '';
+                        let content = String(number);
                         let cls = 'border-2 border-slate-500 rounded-lg w-[70px] h-[70px] flex justify-center items-center text-[2.2rem] font-mono bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden';
                         
                         if (isSolutionView) {
                             cls += ' text-green-600 border-green-600 bg-green-50 font-bold';
-                            content = String(number);
-                        } else if (outline) {
-                            cls += ' text-slate-300 font-normal';
-                            content = String(number);
                         } else {
-                            cls += ' text-slate-800';
+                            cls += ' text-slate-300 font-normal border-dashed';
                         }
 
                         return (

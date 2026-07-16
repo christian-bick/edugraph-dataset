@@ -1,5 +1,5 @@
-import { ViewSpec, limitsAndMean } from '../../../types/view-spec.ts';
-import { Area, Scope, Ability } from 'edugraph-ts';
+import {ViewSpec} from '../../../types/view-spec.ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'place-value-compose-teen',
@@ -10,11 +10,7 @@ export const spec: ViewSpec = {
         Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ],
-    constraints: {
-        ones: { type: 'range', min: 0, max: 9 }
-    },
-    testParams: {
-        ones: (c) => limitsAndMean(c),
+        testParams: {
         target: (key, params) => 10 + params.ones
     }
 };
