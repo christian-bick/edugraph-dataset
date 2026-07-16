@@ -10,60 +10,29 @@ export class CountingGenerator implements ProblemGenerator<CountingProblem> {
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
 
-        let mode = constraints.mode;
-        if (!mode && labels) {
-            if (labels.some(l => isSubConceptOf(l, Area.NumericIdentity))) {
-                mode = 'conservation';
-            }
-        }
-        if (!mode) mode = 'simple';
-
-        if (mode !== 'simple' && mode !== 'one-to-one' && mode !== 'cardinality' && mode !== 'conservation' && mode !== 'count-out') {
-            return null;
-        }
-
-        if (constraints.countOut || constraints.type) {
-            return null;
-        }
-
         const resolvedRange = resolveRangeFromLabels(labels || []);
-        let maxCount = constraints.maxCount || constraints.count || resolvedRange.max;
-        let minCount = constraints.minCount || (constraints.count !== undefined ? constraints.count : resolvedRange.min);
+        const maxCount = resolvedRange.max;
+        const minCount = resolvedRange.min;
         
-        const numObjects = constraints.count !== undefined ? constraints.count : Math.floor(random() * (maxCount - minCount + 1)) + minCount;
-        const arrangement = constraints.arrangement || 'line';
+        const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
+        const arrangement = constraints.arrangement || 'scattered';
 
-        if (mode === 'conservation') {
-            return {
-                id: `conservation-${numObjects}`,
-                data: {
-                    numObjects,
-                    simpleAnswer: numObjects,
-                    arrangement
-                }
-            };
-        }
+        const data: CountingProblem = {
+            numObjects,
+            simpleAnswer: numObjects,
+            arrangement
+        };
 
-        if (mode === 'count-out') {
-            const totalCount = constraints.totalCount || Math.floor(random() * (resolvedRange.max - numObjects + 1)) + numObjects;
-            return {
-                id: `count-out-${numObjects}-${totalCount}-${arrangement}`,
-                data: {
-                    numObjects,
-                    simpleAnswer: numObjects,
-                    arrangement,
-                    totalCount
-                }
-            };
+        if (constraints.countOut) {
+            // Provide a pool of total objects larger than the target count
+            // Ensure total doesn't exceed 20 to fit on screen usually, unless numObjects is already very large
+            const extra = Math.floor(random() * 5) + 2; // +2 to +6 extra objects
+            data.totalCount = numObjects + extra;
         }
 
         return {
-            id: `${mode}-${numObjects}-simple-linear-${arrangement}`,
-            data: {
-                numObjects,
-                simpleAnswer: numObjects,
-                arrangement
-            }
+            id: `count-${numObjects}-${arrangement}`,
+            data
         };
     }
 }

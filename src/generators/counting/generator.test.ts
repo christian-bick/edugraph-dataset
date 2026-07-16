@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CountingGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Area } from 'edugraph-ts';
+import { Area, Scope } from 'edugraph-ts';
 
 describe('CountingGenerator', () => {
     let generator: CountingGenerator;
@@ -15,68 +15,51 @@ describe('CountingGenerator', () => {
          expect(generator.type).toBe('counting');
     });
 
-    it('should never return more than maxCount objects in simple mode', () => {
+    it('should respect resolved ranges from labels', () => {
         const input = { 
-            labels: [], 
-            constraints: { maxCount: 5 } 
+            labels: [Scope.NumbersSmaller10], 
+            constraints: {} 
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
             if (stub) {
-                expect(stub.data.numObjects).toBeLessThanOrEqual(5);
+                expect(stub.data.numObjects).toBeGreaterThanOrEqual(0);
+                expect(stub.data.numObjects).toBeLessThanOrEqual(10);
             }
         }
     });
 
-    it('should generate valid one-to-one stubs', () => {
+    it('should generate valid stubs with default arrangement', () => {
         const input = { 
-            labels: [], 
-            constraints: { mode: 'one-to-one', maxCount: 5 } 
+            labels: [Scope.NumbersSmaller10], 
+            constraints: {} 
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.numObjects).toBeLessThanOrEqual(5);
+        expect(stub!.data.arrangement).toBe('scattered');
     });
 
-    it('should generate valid cardinality stubs', () => {
+    it('should respect arrangement constraint', () => {
         const input = { 
-            labels: [], 
-            constraints: { mode: 'cardinality', maxCount: 5 } 
+            labels: [Scope.NumbersSmaller10], 
+            constraints: { arrangement: 'line' } 
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.numObjects).toBeLessThanOrEqual(5);
+        expect(stub!.data.arrangement).toBe('line');
+        expect(stub!.id).toContain('line');
     });
 
-    it('should generate valid conservation stubs', () => {
+    it('should generate totalCount pool when countOut constraint is provided', () => {
         const input = {
-            labels: [Area.NumericIdentity],
-            constraints: { maxCount: 8 }
-        };
-        const stub = generator.generate(input);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.numObjects).toBeLessThanOrEqual(8);
-        expect(stub!.id).toContain('conservation');
-    });
-
-    it('should generate valid count-out stubs', () => {
-        const input = {
-            labels: [],
-            constraints: { mode: 'count-out', maxCount: 10 }
+            labels: [Scope.NumbersSmaller10],
+            constraints: { countOut: true }
         };
         for (let i = 0; i < 20; i++) {
             const stub = generator.generate(input);
             expect(stub).not.toBeNull();
             expect(stub!.data.totalCount).toBeDefined();
-            expect(stub!.data.totalCount!).toBeGreaterThanOrEqual(stub!.data.numObjects);
+            expect(stub!.data.totalCount!).toBeGreaterThan(stub!.data.numObjects);
         }
-    });
-
-    it('should return null for unsupported modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'unsupported' }
-        });
-        expect(stub).toBeNull();
     });
 });

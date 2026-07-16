@@ -44,7 +44,7 @@ export const KindergartenSpec: CompetencyTarget[] = [
     {
         id: 'K.CC.B.4b-conservation-5-12',
         labels: [Area.Numeration, Area.NumericIdentity, Scope.NumbersSmaller20, Scope.AdditiveCount, Scope.NumericRange, Ability.DirectUnderstanding],
-        constraints: { minCount: 5, maxCount: 12 }
+        constraints: {}
     },
 
     // --- K.CC.B.5: Count to tell "how many?" ---
