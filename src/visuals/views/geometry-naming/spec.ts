@@ -5,7 +5,7 @@ export const spec: ViewSpec = {
     viewId: 'geometry-naming',
     supportedLabels: [
         Area.Geometry,
-        Ability.ProcedureExecution
+        Ability.VisualRecognition
     ],
     constraints: {
         shape: { type: 'options', values: ['circle', 'square', 'rectangle', 'triangle', 'hexagon', 'cube', 'cone', 'cylinder', 'sphere'] }

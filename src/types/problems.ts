@@ -92,7 +92,7 @@ export type TimeProblem = {
 
 // --- Geometry Split Problem Types ---
 
-export type GeometryNamingProblem = {
+export type GeometryIdentityProblem = {
     shape: string;
     answer: string;
 };
@@ -135,10 +135,7 @@ export type GeometryBuildShapeProblem = {
     corners: number;
 };
 
-export type GeometryDrawShapeProblem = {
-    target: string;
-    answer: string;
-};
+
 
 export type GeometryComposeShapesProblem = {
     target: string;
@@ -184,7 +181,7 @@ export interface ViewTypeMap {
     'numbers-write-count': WritingProblem;
     'time-analog': TimeProblem;
 
-    'geometry-naming': GeometryNamingProblem;
+    'geometry-naming': GeometryIdentityProblem;
     'geometry-position': GeometryPositionProblem;
     'geometry-env-shapes': GeometryEnvShapesProblem;
     'geometry-classify-dim': GeometryClassifyDimProblem;
@@ -192,5 +189,5 @@ export interface ViewTypeMap {
     'geometry-same-attribute': GeometrySameAttributeProblem;
     'geometry-build-shape': GeometryBuildShapeProblem;
     'geometry-compose-shapes': GeometryComposeShapesProblem;
-    'geometry-draw-shape': GeometryDrawShapeProblem;
+    'geometry-draw-shape': GeometryIdentityProblem;
 }

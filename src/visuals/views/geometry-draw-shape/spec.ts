@@ -5,13 +5,13 @@ export const spec: ViewSpec = {
     viewId: 'geometry-draw-shape',
     supportedLabels: [
         Area.Geometry,
-        Ability.ProcedureExecution
+        Ability.VisualArticulation
     ],
     constraints: {
-        target: { type: 'options', values: ['circle', 'square', 'triangle'] }
+        shape: { type: 'options', values: ['circle', 'square', 'triangle'] }
     },
     testParams: {
-        target: (c) => allOptions(c),
-        answer: (key, params) => params.target
+        shape: (c) => allOptions(c),
+        answer: (key, params) => params.shape
     }
 };

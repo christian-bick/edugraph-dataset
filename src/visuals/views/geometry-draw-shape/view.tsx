@@ -11,9 +11,9 @@ export function GeometryDrawShape({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    const target = data.target || 'circle';
-    const promptText = `Trace the ${target}.`;
-    const pathD = getTracePath(target);
+    const shape = data.shape || 'circle';
+    const promptText = `Trace the ${shape}.`;
+    const pathD = getTracePath(shape);
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">

@@ -151,7 +151,12 @@ export const KindergartenSpec: CompetencyTarget[] = [
     // --- K.G.A.1, K.G.A.2, K.G.A.3, K.G.B.4: Identify and analyze shapes ---
     {
         id: 'K.G.A.2-shape-name',
-        labels: [Area.Geometry, Ability.ProcedureExecution],
-        constraints: { mode: 'name-2d' }
+        labels: [Area.Geometry, Ability.VisualRecognition],
+        constraints: {}
+    },
+    {
+        id: 'K.G.A.2-shape-draw',
+        labels: [Area.Geometry, Ability.VisualArticulation],
+        constraints: {}
     }
 ];

@@ -197,20 +197,20 @@ export const Grade1Spec: CompetencyTarget[] = [
     {
         id: '1.G.A.1-shape-attributes',
         labels: [Area.Geometry, Ability.ProcedureExecution],
-        constraints: { mode: 'name-2d' }
+        constraints: {}
     },
 
     // --- 1.G.A.2: Compose 2D/3D shapes ---
     {
         id: '1.G.A.2-shape-composition',
         labels: [Area.Geometry, Ability.ProcedureExecution],
-        constraints: { mode: 'name-2d' }
+        constraints: {}
     },
 
     // --- 1.G.A.3: Partition circles/rectangles into halves/fourths ---
     {
         id: '1.G.A.3-partition-shapes',
         labels: [Area.Geometry, Ability.ProcedureExecution],
-        constraints: { mode: 'name-2d' }
+        constraints: {}
     }
 ];
