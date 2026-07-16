@@ -6,7 +6,7 @@ export class GeometryPositionGenerator implements ProblemGenerator<GeometryPosit
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
+        const { constraints = {} } = input;
 
         const allRelations = ['above', 'below', 'beside', 'nextTo'];
         const relation = constraints.relation || allRelations[Math.floor(random() * allRelations.length)];

@@ -7,7 +7,7 @@ export class CountingGenerator implements ProblemGenerator<CountingProblem> {
     type: AbstractProblem['type'] = 'counting';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints } = input;
+        const { labels } = input;
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const maxCount = resolvedRange.max;

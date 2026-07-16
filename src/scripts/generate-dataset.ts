@@ -366,7 +366,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
             
             const problemStub = generator.generate({
                 labels: target.labels,
-                constraints: target.constraints
+                constraints: target.constraints || {}
             });
 
             if (problemStub && !trainKeys.has(problemStub.id)) {
@@ -387,7 +387,8 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                     // Check physical constraints
                     if (viewSpec.constraints) {
                         for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-                            const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints[key];
+                            const targetConstraints = target.constraints || {};
+                            const val = problemStub.data[key] !== undefined ? problemStub.data[key] : targetConstraints[key];
                             if (val === undefined) {
                                 const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
                                 if (VISUAL_PARAMS.has(key)) {
@@ -439,7 +440,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                             setSeed(42 + 10000 + valDataset.length);
                             const valStub = generator.generate({
                                 labels: target.labels,
-                                constraints: target.constraints
+                                constraints: target.constraints || {}
                             });
                             if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
                                 valKeys.add(valStub.id);

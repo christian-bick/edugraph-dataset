@@ -7,7 +7,7 @@ export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenP
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints } = input;
+        const { labels } = input;
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;

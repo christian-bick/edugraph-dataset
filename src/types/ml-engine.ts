@@ -22,7 +22,7 @@ export interface RenderPayload<TProblem extends AbstractProblem = AbstractProble
     problem: TProblem;
     viewId: string;
     labels: string[];
-    constraints: Record<string, any>;
+    constraints?: Record<string, any>;
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
     isSolutionView: boolean;
 }
@@ -68,7 +68,7 @@ export type ProblemStub<TData = any> = Pick<AbstractProblem<TData>, 'id' | 'data
  */
 export interface GeneratorInput {
     labels: string[];
-    constraints: Record<string, any>;
+    constraints?: Record<string, any>;
 }
 
 /**
@@ -92,7 +92,7 @@ export interface ProblemGenerator<TData = any> {
  */
 export interface VisualBlueprint<TViewId extends string = string> {
     viewId: TViewId;
-    constraints: Record<string, any>;
+    constraints?: Record<string, any>;
     /** How many instances of THIS specific variation to generate per problem */
     instancesPerProblem: number; 
 }

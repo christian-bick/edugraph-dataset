@@ -6,7 +6,7 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
+        const { constraints = {} } = input;
 
         const allAttributes = ['can-roll', 'can-stack', 'flat-faces'];
         const attribute = constraints.attribute || allAttributes[Math.floor(random() * allAttributes.length)];

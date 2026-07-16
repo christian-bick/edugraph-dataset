@@ -8,7 +8,7 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
     type: AbstractProblem['type'] = 'counting';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints } = input;
+        const { labels } = input;
 
         let incDecType: 'inc' | 'dec' = 'inc';
         if (labels && labels.some(l => isSubConceptOf(l, Scope.SubtractiveCount))) {

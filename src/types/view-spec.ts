@@ -16,7 +16,7 @@ export interface ViewSpec {
     /** Ontological labels supported/rendered by this view */
     supportedLabels?: string[];
     /** Parameter constraints used for both runtime validation and test value derivation */
-    constraints: Record<string, ViewConstraint>;
+    constraints?: Record<string, ViewConstraint>;
     /** Configuration for the visual boundary test permutations.
      * - Keys mapping to an Array (or function returning an Array) are varied and cross-multiplied.
      * - Keys mapping to a non-Array value (or function (params) => non-Array) are evaluated statically or dynamically per permutation.

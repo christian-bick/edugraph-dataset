@@ -7,7 +7,7 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> 
     type: AbstractProblem['type'] = 'comparison';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints } = input;
+        const { labels, constraints = {} } = input;
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const min = resolvedRange.min;

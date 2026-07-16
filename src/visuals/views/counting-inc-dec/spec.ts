@@ -1,5 +1,5 @@
 import { ViewSpec, limitsAndMean, allOptions } from '../../../types/view-spec.ts';
-import { Scope } from '../../../types/scope.ts';
+import { Scope } from 'edugraph-ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-inc-dec',
