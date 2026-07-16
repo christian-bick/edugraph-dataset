@@ -2,7 +2,7 @@ import { GeneratorSpec } from '../../types/generator-spec.ts';
 import { Area, Scope } from 'edugraph-ts';
 
 export const spec: GeneratorSpec = {
-    generatorId: 'counting-classify',
+    generatorId: 'counting-classify-count',
     supportedLabels: [
         Area.Numeration,
         Area.ObjectSorting,

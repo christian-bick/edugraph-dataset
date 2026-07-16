@@ -148,20 +148,6 @@ export type GeometryComposeShapesProblem = {
     answer: string;
 };
 
-export type GeometryProblem = 
-    | GeometryNamingProblem
-    | GeometryPositionProblem
-    | GeometryEnvShapesProblem
-    | GeometryClassifyDimProblem
-    | GeometryCompareAttributesProblem
-    | GeometrySameAttributeProblem
-    | GeometryBuildShapeProblem
-    | GeometryDrawShapeProblem
-    | GeometryComposeShapesProblem;
-
-export type CountingClassifyProblem = 
-    | CountingClassifyCountProblem
-    | CountingClassifySortProblem;
 
 /**
  * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
@@ -183,8 +169,8 @@ export interface ViewTypeMap {
     'counting-objects-count-out': CountingProblem;
     'counting-inc-dec': CountingIncDecProblem;
     'counting-conservation': CountingProblem;
-    'sorting-classify-count': CountingClassifyProblem;
-    'sorting-classify-sort': CountingClassifyProblem;
+    'sorting-classify-count': CountingClassifyCountProblem;
+    'sorting-classify-sort': CountingClassifySortProblem;
 
     'measure-length': MeasurementStandardProblem;
     'measure-attributes': MeasurementAttributeProblem;
