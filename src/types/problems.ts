@@ -41,15 +41,13 @@ export type CountingIncDecProblem = {
 
 
 export type CountingClassifyCountProblem = {
-    classifyType: 'shape' | 'color';
-    items: Array<{ shape: string; color: string }>;
+    items: string[];
     categories: Record<string, number>;
     numObjects: number;
 };
 
 export type CountingClassifySortProblem = {
-    classifyType: 'shape' | 'color';
-    items: Array<{ shape: string; color: string }>;
+    items: string[];
     categories: Record<string, number>;
     numObjects: number;
     relation: 'most' | 'least';

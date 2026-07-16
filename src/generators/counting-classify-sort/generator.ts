@@ -1,37 +1,29 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { CountingClassifySortProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {CountingClassifySortProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class CountingClassifySortGenerator implements ProblemGenerator<CountingClassifySortProblem> {
     type: AbstractProblem['type'] = 'counting';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
+        const { labels, constraints } = input;
 
-        const minTotal = constraints.minTotal || 5;
-        const maxTotal = constraints.maxTotal || 10;
-        const total = Math.floor(random() * (maxTotal - minTotal + 1)) + minTotal;
+        const resolvedRange = resolveRangeFromLabels(labels || []);
+        const total = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
 
-        const shapes = ['circle', 'square', 'triangle'];
-        const colors = ['red', 'blue', 'green'];
-        const classifyType = constraints.classifyType || (random() > 0.5 ? 'shape' : 'color');
-
-        const items: { shape: string; color: string }[] = [];
+        const possibleCategories = ['A', 'B', 'C'];
+        const items: string[] = [];
         const counts: Record<string, number> = {};
 
+        // Ensure we initialize the counts to 0
+        possibleCategories.forEach(cat => counts[cat] = 0);
+
         for (let i = 0; i < total; i++) {
-            const shape = shapes[Math.floor(random() * shapes.length)];
-            const color = colors[Math.floor(random() * colors.length)];
-            items.push({ shape, color });
-
-            const key = classifyType === 'shape' ? shape : color;
-            counts[key] = (counts[key] || 0) + 1;
+            const cat = possibleCategories[Math.floor(random() * possibleCategories.length)];
+            items.push(cat);
+            counts[cat]++;
         }
-
-        const possibleCategories = classifyType === 'shape' ? shapes : colors;
-        possibleCategories.forEach(cat => {
-            if (counts[cat] === undefined) counts[cat] = 0;
-        });
 
         const relation = constraints.relation || (random() > 0.5 ? 'most' : 'least');
         let targetCategory = '';
@@ -58,12 +50,11 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
         }
 
         return {
-            id: `classify-sort-${classifyType}-${relation}-${total}`,
+            id: `classify-sort-${relation}-${total}`,
             data: {
-                classifyType,
                 items,
                 categories: counts,
-                relation,
+                relation: relation as 'most' | 'least',
                 answer: targetCategory,
                 numObjects: total
             }

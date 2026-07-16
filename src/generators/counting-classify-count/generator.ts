@@ -1,42 +1,34 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { CountingClassifyCountProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {CountingClassifyCountProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class CountingClassifyCountGenerator implements ProblemGenerator<CountingClassifyCountProblem> {
     type: AbstractProblem['type'] = 'counting';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
+        const { labels } = input;
 
-        const minTotal = constraints.minTotal || 5;
-        const maxTotal = constraints.maxTotal || 10;
-        const total = Math.floor(random() * (maxTotal - minTotal + 1)) + minTotal;
+        const resolvedRange = resolveRangeFromLabels(labels || []);
+        const total = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
 
-        const shapes = ['circle', 'square', 'triangle'];
-        const colors = ['red', 'blue', 'green'];
-        const classifyType = constraints.classifyType || (random() > 0.5 ? 'shape' : 'color');
-
-        const items: { shape: string; color: string }[] = [];
+        // Abstract categories: A, B, C
+        const possibleCategories = ['A', 'B', 'C'];
+        const items: string[] = [];
         const counts: Record<string, number> = {};
 
-        for (let i = 0; i < total; i++) {
-            const shape = shapes[Math.floor(random() * shapes.length)];
-            const color = colors[Math.floor(random() * colors.length)];
-            items.push({ shape, color });
+        // Ensure we initialize the counts to 0
+        possibleCategories.forEach(cat => counts[cat] = 0);
 
-            const key = classifyType === 'shape' ? shape : color;
-            counts[key] = (counts[key] || 0) + 1;
+        for (let i = 0; i < total; i++) {
+            const cat = possibleCategories[Math.floor(random() * possibleCategories.length)];
+            items.push(cat);
+            counts[cat]++;
         }
 
-        const possibleCategories = classifyType === 'shape' ? shapes : colors;
-        possibleCategories.forEach(cat => {
-            if (counts[cat] === undefined) counts[cat] = 0;
-        });
-
         return {
-            id: `classify-count-${classifyType}-${total}`,
+            id: `classify-count-${total}`,
             data: {
-                classifyType,
                 items,
                 categories: counts,
                 numObjects: total

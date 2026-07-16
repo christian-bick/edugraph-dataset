@@ -1,8 +1,8 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { ArithmeticProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { Area, Scope, Ability } from "edugraph-ts";
-import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {ArithmeticProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {Area, Scope} from "edugraph-ts";
+import {isSubConceptOf, resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -23,19 +23,9 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
         const allowNegatives = labels.some(l => isSubConceptOf(l, Scope.NumbersWithNegatives));
         const includeZero = labels.some(l => isSubConceptOf(l, Scope.NumbersWithZero));
         
-        const getRange = (digitConstraint?: number) => {
-            if (digitConstraint) {
-                return { 
-                    min: Math.pow(10, digitConstraint - 1), 
-                    max: Math.pow(10, digitConstraint) - 1 
-                };
-            }
-            return { min: resolvedRange.min, max: resolvedRange.max };
-        };
-
-        const generateFromRange = (range: {min: number, max: number}, forceZero = false) => {
+        const generateFromRange = (forceZero = false) => {
             if (forceZero) return 0;
-            let n = Math.floor(random() * (range.max - range.min + 1)) + range.min;
+            let n = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
             if (allowNegatives && random() > 0.5) n = -n;
             if (!includeZero && n === 0) return random() > 0.5 ? 1 : -1;
             return n;
@@ -46,58 +36,31 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
         let answer = 0;
 
         if (operation === 'addition') {
-            if (constraints.digitsNum1 || constraints.digitsNum2) {
-                const range1 = getRange(constraints.digitsNum1);
-                const range2 = getRange(constraints.digitsNum2);
-                num1 = generateFromRange(range1);
-                num2 = generateFromRange(range2);
-                if (includeZero && num1 !== 0 && num2 !== 0) {
-                    if (random() > 0.5) num1 = 0; else num2 = 0;
-                }
-                answer = num1 + num2;
-            } else {
-                const minVal = includeZero ? 0 : 1;
-                const effectiveMax = resolvedRange.max;
-                
-                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal;
-                num2 = Math.floor(random() * (effectiveMax - num1 - minVal + 1)) + minVal;
-                answer = num1 + num2;
-            }
+            const minVal = includeZero ? 0 : 1;
+            const effectiveMax = resolvedRange.max;
+            
+            num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal;
+            num2 = Math.floor(random() * (effectiveMax - num1 - minVal + 1)) + minVal;
+            answer = num1 + num2;
         } else if (operation === 'subtraction') {
-            if (constraints.digitsNum1 || constraints.digitsNum2) {
-                const range1 = getRange(constraints.digitsNum1);
-                const range2 = getRange(constraints.digitsNum2);
-                num1 = generateFromRange(range1);
-                num2 = generateFromRange(range2);
-                if (includeZero && num1 !== 0 && num2 !== 0) {
-                    if (random() > 0.5) num1 = 0; else num2 = 0;
-                }
-                if (!allowNegatives && num1 < num2) [num1, num2] = [num2, num1];
-                answer = num1 - num2;
-            } else {
-                const minVal = includeZero ? 0 : 1;
-                const effectiveMax = resolvedRange.max;
-                
-                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal * 2;
-                num2 = Math.floor(random() * (num1 - minVal + 1)) + minVal;
-                if (num2 > num1 - minVal) num2 = num1 - minVal;
-                answer = num1 - num2;
-            }
+            const minVal = includeZero ? 0 : 1;
+            const effectiveMax = resolvedRange.max;
+            
+            num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal * 2;
+            num2 = Math.floor(random() * (num1 - minVal + 1)) + minVal;
+            if (num2 > num1 - minVal) num2 = num1 - minVal;
+            answer = num1 - num2;
         } else if (operation === 'multiplication') {
-            const range1 = getRange(constraints.digitsNum1);
-            const range2 = getRange(constraints.digitsNum2);
-            num1 = generateFromRange(range1);
-            num2 = generateFromRange(range2);
+            num1 = generateFromRange();
+            num2 = generateFromRange();
             if (includeZero && num1 !== 0 && num2 !== 0) {
                 if (random() > 0.5) num1 = 0; else num2 = 0;
             }
             answer = num1 * num2;
         } else {
-            const range1 = getRange(constraints.digitsNum1);
-            const range2 = getRange(constraints.digitsNum2);
-            num2 = generateFromRange(range2);
+            num2 = generateFromRange();
             if (num2 === 0) num2 = (random() > 0.5 ? 1 : 2) * (allowNegatives && random() > 0.5 ? -1 : 1);
-            answer = generateFromRange(range1);
+            answer = generateFromRange();
             num1 = answer * num2;
             if (includeZero && random() > 0.7) { num1 = 0; answer = 0; }
         }

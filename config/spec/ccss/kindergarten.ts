@@ -137,13 +137,11 @@ export const KindergartenSpec: CompetencyTarget[] = [
     // --- K.MD.B.3: Classify & Sort ---
     {
         id: 'K.MD.B.3-classify-count-5-10',
-        labels: [Area.ObjectSorting, Area.CollectionSense, Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ConceptClassification],
-        constraints: { minTotal: 5, maxTotal: 10 }
+        labels: [Area.ObjectSorting, Area.CollectionSense, Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ConceptClassification]
     },
     {
         id: 'K.MD.B.3-classify-sort-5-10',
-        labels: [Area.ObjectSorting, Area.NumericOrder, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ProcedureExecution],
-        constraints: { minTotal: 5, maxTotal: 10 }
+        labels: [Area.ObjectSorting, Area.NumericOrder, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ProcedureExecution]
     },
 
     // ==========================================

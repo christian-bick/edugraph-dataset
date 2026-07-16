@@ -1,7 +1,7 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { PlaceValueTeenProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { resolveRangeFromLabels } from "../../lib/ontology.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {PlaceValueTeenProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -12,9 +12,7 @@ export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenP
         const resolvedRange = resolveRangeFromLabels(labels || []);
         const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;
         const resolvedMax = resolvedRange.max <= 20 ? resolvedRange.max : 19;
-        const ones = constraints.ones !== undefined 
-            ? constraints.ones 
-            : (constraints.target !== undefined ? constraints.target - 10 : Math.floor(random() * (resolvedMax - resolvedMin + 1)) + resolvedMin - 10);
+        const ones = Math.floor(random() * (resolvedMax - resolvedMin + 1)) + resolvedMin - 10;
         const target = 10 + ones;
 
         return {

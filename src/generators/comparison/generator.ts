@@ -1,8 +1,7 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { ComparisonProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { Scope } from "edugraph-ts";
-import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {ComparisonProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> {
     type: AbstractProblem['type'] = 'comparison';
@@ -11,20 +10,8 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> 
         const { labels, constraints } = input;
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
-        let min = resolvedRange.min;
-        let max = resolvedRange.max;
-
-        let digits = constraints.digits;
-        if (digits) {
-            max = Math.pow(10, digits) - 1;
-            min = digits > 1 ? Math.pow(10, digits - 1) : 0;
-            const includesZero = constraints.includesZero !== undefined 
-                ? constraints.includesZero 
-                : (labels ? !labels.some(l => isSubConceptOf(l, Scope.NumbersWithoutZero)) : true);
-            if (!includesZero && digits === 1) {
-                min = 1;
-            }
-        }
+        const min = resolvedRange.min;
+        const max = resolvedRange.max;
 
         let num1 = Math.floor(random() * (max - min + 1)) + min;
         let num2 = Math.floor(random() * (max - min + 1)) + min;

@@ -20,7 +20,7 @@ export const Grade1Spec: CompetencyTarget[] = [
     {
         id: '1.NBT.A.1-write-120',
         labels: [Area.DigitNotation, Scope.ArabicNumerals, Scope.NumbersSmaller20, Scope.NumbersWithZero, Ability.ProcedureExecution],
-        constraints: { mode: 'stroke', minVal: 1, maxVal: 20 }
+        constraints: { mode: 'stroke' }
     },
 
     // ==========================================
@@ -186,8 +186,7 @@ export const Grade1Spec: CompetencyTarget[] = [
     // --- 1.MD.C.4: Organize, represent, and interpret data ---
     {
         id: '1.MD.C.4-interpret-data',
-        labels: [Area.ObjectSorting, Area.CollectionSense, Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ConceptClassification],
-        constraints: { minTotal: 5, maxTotal: 10 }
+        labels: [Area.ObjectSorting, Area.CollectionSense, Area.Numeration, Scope.NumbersSmaller10, Scope.NumbersWithoutZero, Ability.ConceptClassification]
     },
 
     // ==========================================

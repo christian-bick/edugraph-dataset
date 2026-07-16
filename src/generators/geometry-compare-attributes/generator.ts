@@ -1,17 +1,38 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometryCompareAttributesProblem } from "../../types/problems.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {GeometryCompareAttributesProblem} from "../../types/problems.ts";
+import {Area} from "edugraph-ts";
+import {isSubConceptOf} from "../../lib/ontology.ts";
+import {random} from "../../lib/random.ts";
 
 export class GeometryCompareAttributesGenerator implements ProblemGenerator<GeometryCompareAttributesProblem> {
     type: AbstractProblem['type'] = 'geometry';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { constraints } = input;
+        const { labels, constraints } = input;
 
+        const attribute = constraints.attribute || (random() > 0.5 ? 'sides' : 'corners');
 
-        const attribute = constraints.attribute || 'sides'; // sides, corners
-        const shape1 = constraints.shape1 || 'rectangle';
-        const shape2 = constraints.shape2 || 'triangle';
+        const validShapes = new Set<string>();
+        if (labels) {
+            if (labels.some(l => isSubConceptOf(l, Area.Triangle))) validShapes.add('triangle');
+            if (labels.some(l => isSubConceptOf(l, Area.Square))) validShapes.add('square');
+            if (labels.some(l => isSubConceptOf(l, Area.Rectangle))) validShapes.add('rectangle');
+            if (labels.some(l => isSubConceptOf(l, Area.Polygon))) validShapes.add('hexagon'); // simplistic fallback
+        }
         
+        let pool = Array.from(validShapes);
+        if (pool.length < 2) {
+            pool = ['triangle', 'square', 'rectangle', 'hexagon'];
+        }
+
+        const idx1 = Math.floor(random() * pool.length);
+        let idx2 = Math.floor(random() * pool.length);
+        while (idx2 === idx1) {
+            idx2 = Math.floor(random() * pool.length);
+        }
+
+        const shape1 = pool[idx1];
+        const shape2 = pool[idx2];
         const attrs: Record<string, Record<string, number>> = {
             rectangle: { sides: 4, corners: 4 },
             triangle: { sides: 3, corners: 3 },

@@ -1,7 +1,8 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { TimeProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { Scope } from "edugraph-ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {TimeProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {Scope} from "edugraph-ts";
+import {isSubConceptOf} from "../../lib/ontology.ts";
 
 export class TimeGenerator implements ProblemGenerator<TimeProblem> {
     type: AbstractProblem['type'] = 'time';
@@ -9,11 +10,15 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem> {
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
         
-        let interval = constraints.interval;
-        if (!interval) {
-            if (labels.includes(Scope.SecondIntervals)) interval = 1;
-            else if (labels.includes(Scope.MinuteIntervals)) interval = 60;
-            else interval = 3600;
+        let interval = 3600; // default HourIntervals
+        if (constraints.interval) {
+            interval = constraints.interval;
+        } else if (labels && labels.some(l => isSubConceptOf(l, Scope.SecondIntervals))) {
+            interval = 1;
+        } else if (labels && labels.some(l => isSubConceptOf(l, Scope.MinuteIntervals))) {
+            interval = 60;
+        } else if (labels && labels.some(l => isSubConceptOf(l, Scope.HourIntervals))) {
+            interval = 3600;
         }
 
         const dayInSeconds = 24 * 3600;

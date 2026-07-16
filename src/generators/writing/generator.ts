@@ -1,8 +1,7 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { WritingProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
-import { Area } from "edugraph-ts";
-import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {WritingProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
+import {resolveRangeFromLabels} from "../../lib/ontology.ts";
 
 export class WritingGenerator implements ProblemGenerator<WritingProblem> {
     type: AbstractProblem['type'] = 'writing';
@@ -11,8 +10,8 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem> {
         const { constraints, labels } = input;
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
-        const minNum = constraints.minVal !== undefined ? constraints.minVal : (constraints.min !== undefined ? constraints.min : resolvedRange.min);
-        const maxNum = constraints.maxVal !== undefined ? constraints.maxVal : (constraints.max !== undefined ? constraints.max : resolvedRange.max);
+        const minNum = resolvedRange.min;
+        const maxNum = resolvedRange.max;
         const fixedNumber = constraints.number;
         
         const currentNum = fixedNumber !== undefined ? fixedNumber : Math.floor(random() * (maxNum - minNum + 1)) + minNum;

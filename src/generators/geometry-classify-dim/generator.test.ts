@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { GeometryClassifyDimGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {GeometryClassifyDimGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
 
 describe('GeometryClassifyDimGenerator', () => {
     let generator: GeometryClassifyDimGenerator;
@@ -14,23 +14,14 @@ describe('GeometryClassifyDimGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should validate classify-dim 2D and 3D outputs', () => {
-        const input2D = {
+    it('should validate classify-dim outputs', () => {
+        const input = {
             labels: [],
-            constraints: { shapeType: '2d' }
+            constraints: {}
         };
-        const stub2D = generator.generate(input2D);
-        expect(stub2D).not.toBeNull();
-        expect(stub2D!.data.shapeType).toBe('2d');
-        expect(stub2D!.data.answer).toBe('2d');
-
-        const input3D = {
-            labels: [],
-            constraints: { shapeType: '3d' }
-        };
-        const stub3D = generator.generate(input3D);
-        expect(stub3D).not.toBeNull();
-        expect(stub3D!.data.shapeType).toBe('3d');
-        expect(stub3D!.data.answer).toBe('3d');
+        const stub = generator.generate(input);
+        expect(stub).not.toBeNull();
+        expect(['2d', '3d']).toContain(stub!.data.shapeType);
+        expect(stub!.data.answer).toBe(stub!.data.shapeType);
     });
 });

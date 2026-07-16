@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { WritingGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {WritingGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('WritingGenerator', () => {
     let generator: WritingGenerator;
@@ -24,8 +25,8 @@ describe('WritingGenerator', () => {
         }
     });
 
-    it('should respect custom min/max bounds including zero and twenty', () => {
-        const input = { labels: [], constraints: { min: 0, max: 20 } };
+    it('should respect custom min/max bounds including zero and twenty via ontology', () => {
+        const input = { labels: [Scope.NumbersWithZero, Scope.NumbersSmaller20], constraints: {} };
         let zeroFound = false;
         let twentyFound = false;
         for (let i = 0; i < 100; i++) {

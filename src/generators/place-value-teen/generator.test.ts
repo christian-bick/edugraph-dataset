@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { PlaceValueTeenGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {PlaceValueTeenGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
+import {Area, Scope} from 'edugraph-ts';
 
 describe('PlaceValueTeenGenerator', () => {
     let generator: PlaceValueTeenGenerator;
@@ -15,14 +16,14 @@ describe('PlaceValueTeenGenerator', () => {
     });
 
     it('should generate valid place value teen stubs', () => {
-        const input = {
-            labels: [],
-            constraints: { target: 15 }
+        const input: GeneratorInput = {
+            labels: [Area.PlaceValue, Scope.NumbersSmaller20],
+            constraints: {}
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.ones).toBe(5);
-        expect(stub!.data.target).toBe(15);
-        expect(stub!.id).toBe('place-value-teen-15');
+        expect(stub!.data.ones).toBeGreaterThanOrEqual(1);
+        expect(stub!.data.ones).toBeLessThanOrEqual(9);
+        expect(stub!.data.target).toBe(10 + stub!.data.ones);
     });
 });

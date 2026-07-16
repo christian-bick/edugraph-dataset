@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { GeometryEnvShapesGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {GeometryEnvShapesGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
 
 describe('GeometryEnvShapesGenerator', () => {
     let generator: GeometryEnvShapesGenerator;
@@ -15,18 +15,18 @@ describe('GeometryEnvShapesGenerator', () => {
     });
 
     it('should validate env-shapes mapping values', () => {
-        const targets = ['clock', 'window', 'table'];
-        const expectedAnswers = ['circle', 'square', 'rectangle'];
-        
-        targets.forEach((target, index) => {
-            const input = {
-                labels: [],
-                constraints: { target }
-            };
-            const stub = generator.generate(input);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.target).toBe(target);
-            expect(stub!.data.answer).toBe(expectedAnswers[index]);
-        });
+        const ENV_ITEMS: Record<string, string> = {
+            'clock': 'circle',
+            'window': 'square',
+            'door': 'rectangle',
+            'pizza': 'circle',
+            'book': 'rectangle',
+            'table': 'rectangle'
+        };
+        const input = { labels: [], constraints: {} };
+        const stub = generator.generate(input);
+        expect(stub).not.toBeNull();
+        expect(ENV_ITEMS[stub!.data.target]).toBeDefined();
+        expect(stub!.data.answer).toBe(ENV_ITEMS[stub!.data.target]);
     });
 });

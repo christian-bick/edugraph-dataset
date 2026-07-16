@@ -1,6 +1,6 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { PlaceValueMakeTenProblem } from "../../types/problems.ts";
-import { random } from "../../lib/random.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {PlaceValueMakeTenProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
 
 export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMakeTenProblem> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -8,9 +8,8 @@ export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMa
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-
-        const target = constraints.targetSum || 10;
-        const givenNumber = constraints.givenNumber || Math.floor(random() * (target - 1)) + 1; // 1 to target-1
+        const target = 10;
+        const givenNumber = Math.floor(random() * (target - 1)) + 1; // 1 to 9
         const missingNumber = target - givenNumber;
 
         return {

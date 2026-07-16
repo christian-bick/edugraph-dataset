@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { MeasurementCompareGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {MeasurementCompareGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('MeasurementCompareGenerator', () => {
     let generator: MeasurementCompareGenerator;
@@ -16,8 +17,8 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length longer relation', () => {
         const input = {
-            labels: [],
-            constraints: { attribute: 'length', relation: 'longer' }
+            labels: [Scope.LengthMeasurement],
+            constraints: { relation: 'longer' }
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -36,8 +37,8 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length shorter relation', () => {
         const input = {
-            labels: [],
-            constraints: { attribute: 'length', relation: 'shorter' }
+            labels: [Scope.LengthMeasurement],
+            constraints: { relation: 'shorter' }
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);
@@ -56,8 +57,8 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare weight heavier relation', () => {
         const input = {
-            labels: [],
-            constraints: { attribute: 'weight', relation: 'heavier' }
+            labels: [Scope.WeightMeasurement],
+            constraints: { relation: 'heavier' }
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(input);

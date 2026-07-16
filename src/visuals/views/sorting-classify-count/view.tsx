@@ -49,16 +49,14 @@ export function SortingClassifyCount({ payload }: Props) {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    const classifyType = data.classifyType || 'shape';
-
-    const { items, categories } = useMemo(() => {
+    const { items, categories, classifyType, mappedCategories } = useMemo(() => {
         const itemsList = [...(data.items || [])];
         const categoriesMap = { ...(data.categories || {}) };
 
+        // Fallback generation for tests if generator is bypassed
         if (itemsList.length === 0) {
             const numObjects = data.numObjects || 8;
-            const shapes = ['circle', 'square', 'triangle'];
-            const colors = ['red', 'blue', 'green'];
+            const possibleCats = ['A', 'B', 'C'];
             
             let seed = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const nextRand = () => {
@@ -66,29 +64,58 @@ export function SortingClassifyCount({ payload }: Props) {
                 return x - Math.floor(x);
             };
 
+            possibleCats.forEach(c => categoriesMap[c] = 0);
             for (let i = 0; i < numObjects; i++) {
-                const shape = shapes[Math.floor(nextRand() * shapes.length)];
-                const color = colors[Math.floor(nextRand() * colors.length)];
-                itemsList.push({ shape, color });
-                const key = classifyType === 'shape' ? shape : color;
-                categoriesMap[key] = (categoriesMap[key] || 0) + 1;
+                const cat = possibleCats[Math.floor(nextRand() * possibleCats.length)];
+                itemsList.push(cat as any);
+                categoriesMap[cat]++;
             }
-            
-            const possible = classifyType === 'shape' ? shapes : colors;
-            possible.forEach(cat => {
-                if (categoriesMap[cat] === undefined) categoriesMap[cat] = 0;
-            });
         }
-        return { items: itemsList, categories: categoriesMap };
-    }, [data.items, data.categories, data.numObjects, problem.id, classifyType]);
+
+        // View logic: Randomly decide how to represent the abstract groups visually
+        const seedStr = problem.id + itemsList.join('');
+        let seed = Array.from(seedStr).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const nextRand = () => {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        };
+
+        const chosenClassifyType = nextRand() > 0.5 ? 'shape' : 'color';
+        
+        const shapes = ['circle', 'square', 'triangle'];
+        const colors = ['red', 'blue', 'green'];
+        
+        // Map abstract categories (A, B, C) to the primary sorting trait
+        const activeTraits = chosenClassifyType === 'shape' ? shapes : colors;
+        const mappedCategories: Record<string, string> = {};
+        Object.keys(categoriesMap).forEach((cat, index) => {
+            mappedCategories[cat] = activeTraits[index % activeTraits.length];
+        });
+
+        // Map items to physical objects
+        const physicalItems = itemsList.map(cat => {
+            const primaryTrait = mappedCategories[cat as unknown as string];
+            const secondaryTraits = chosenClassifyType === 'shape' ? colors : shapes;
+            const secondaryTrait = secondaryTraits[Math.floor(nextRand() * secondaryTraits.length)];
+            
+            if (chosenClassifyType === 'shape') {
+                return { shape: primaryTrait, color: secondaryTrait };
+            } else {
+                return { shape: secondaryTrait, color: primaryTrait };
+            }
+        });
+
+        return { 
+            items: physicalItems, 
+            categories: categoriesMap, 
+            classifyType: chosenClassifyType,
+            mappedCategories 
+        };
+    }, [data.items, data.categories, data.numObjects, problem.id]);
 
     const positions = useMemo(() => {
         return generateScatteredPositions(items.length, problem.id);
     }, [items.length, problem.id]);
-
-    const possibleCategories = useMemo(() => {
-        return classifyType === 'shape' ? ['circle', 'square', 'triangle'] : ['red', 'blue', 'green'];
-    }, [classifyType]);
 
     const promptText = `Classify and count the objects by ${classifyType}.`;
 
@@ -112,13 +139,14 @@ export function SortingClassifyCount({ payload }: Props) {
                 </div>
 
                 <div className="w-full flex flex-col gap-[15px]">
-                    {possibleCategories.map(cat => {
-                        const count = categories[cat] || 0;
-                        const labelText = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    {Object.keys(categories).sort().map(cat => {
+                        const count = categories[cat];
+                        const trait = mappedCategories[cat];
+                        const labelText = trait.charAt(0).toUpperCase() + trait.slice(1);
                         
                         const catItem = classifyType === 'shape' 
-                            ? { shape: cat, color: 'blue' } 
-                            : { shape: 'circle', color: cat };
+                            ? { shape: trait, color: 'blue' } 
+                            : { shape: 'circle', color: trait };
 
                         return (
                             <div key={cat} className="flex justify-between items-center bg-slate-50 py-2.5 px-5 border border-slate-200 rounded-lg">

@@ -1,5 +1,6 @@
-import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { GeometrySameAttributeProblem } from "../../types/problems.ts";
+import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {GeometrySameAttributeProblem} from "../../types/problems.ts";
+import {random} from "../../lib/random.ts";
 
 export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometrySameAttributeProblem> {
     type: AbstractProblem['type'] = 'geometry';
@@ -7,8 +8,8 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
     generate(input: GeneratorInput): ProblemStub | null {
         const { constraints } = input;
 
-
-        const attribute = constraints.attribute || 'can-roll'; // can-roll, can-stack, flat-faces
+        const allAttributes = ['can-roll', 'can-stack', 'flat-faces'];
+        const attribute = constraints.attribute || allAttributes[Math.floor(random() * allAttributes.length)];
         let answer = '';
         if (attribute === 'can-roll') answer = 'sphere'; // sphere rolls easily
         else if (attribute === 'can-stack') answer = 'cube'; // cube is stackable

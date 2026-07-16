@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { GeometryNamingGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {GeometryNamingGenerator} from './generator.ts';
+import {setSeed} from '../../lib/random.ts';
 
 describe('GeometryNamingGenerator', () => {
     let generator: GeometryNamingGenerator;
@@ -17,11 +17,11 @@ describe('GeometryNamingGenerator', () => {
     it('should generate valid shape naming stubs', () => {
         const input = {
             labels: [],
-            constraints: { shape: 'triangle' }
+            constraints: {}
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.shape).toBe('triangle');
-        expect(stub!.data.answer).toBe('triangle');
+        expect(stub!.data.shape).toBeDefined();
+        expect(stub!.data.answer).toBe(stub!.data.shape);
     });
 });
