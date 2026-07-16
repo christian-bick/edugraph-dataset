@@ -16,7 +16,7 @@ export const spec: TimeGeneratorSpec = {
         Scope.SecondIntervals
     ],
     visualDistribution: [
-        { viewId: 'time-analog', visualParams: { reverse: false }, instancesPerProblem: 1 },
-        { viewId: 'time-analog', visualParams: { reverse: true }, instancesPerProblem: 1 }
+        { viewId: 'time-analog', constraints: { reverse: false }, instancesPerProblem: 1 },
+        { viewId: 'time-analog', constraints: { reverse: true }, instancesPerProblem: 1 }
     ]
 };

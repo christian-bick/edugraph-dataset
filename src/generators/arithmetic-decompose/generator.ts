@@ -7,11 +7,11 @@ export class ArithmeticDecomposeGenerator implements ProblemGenerator<Arithmetic
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints } = input;
+        const { labels } = input;
 
 
         const resolvedRange = resolveRangeFromLabels(labels || []);
-        const targetNumber = constraints.targetNumber || Math.floor(random() * (resolvedRange.max - 3 + 1)) + 3; // 3 to resolved max (usually 10)
+        const targetNumber = Math.floor(random() * (resolvedRange.max - 3 + 1)) + 3; // 3 to resolved max (usually 10)
         
         const pairs: [number, number][] = [];
         for (let i = 1; i <= Math.floor(targetNumber / 2); i++) {

@@ -188,7 +188,9 @@ async function testViewBoundaries(browser: Browser, viewId: string) {
         const renderAndCheck = async (isSolutionView: boolean, modeTag: string) => {
             const payload = {
                 problem,
-                config: { viewId, visualParams: params },
+                viewId,
+                labels: [], // No active labels in boundary testing by default
+                constraints: params,
                 isSolutionView
             };
 

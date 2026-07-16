@@ -19,11 +19,11 @@ interface Props {
 }
 
 export function OperationsBoxes({ payload }: Props) {
-    const { problem, config, isSolutionView } = payload;
+    const { problem, isSolutionView } = payload;
     const data = problem.data;
     const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
 
-    const requestedBlank = config.visualParams.blankPart || 'solution';
+    const requestedBlank = payload.constraints.blankPart || 'solution';
     const blankPart = getBlankPart(problem.id, requestedBlank);
 
     const isBlanked = (part: string) => {

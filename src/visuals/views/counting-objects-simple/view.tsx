@@ -12,7 +12,8 @@ interface Props {
 
 export function CountingObjectsSimple({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const { numObjects, arrangement } = problem.data;
+    const { numObjects } = problem.data;
+    const arrangement = payload.constraints.arrangement || 'scattered';
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;

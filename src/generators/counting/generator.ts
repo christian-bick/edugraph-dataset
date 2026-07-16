@@ -14,12 +14,10 @@ export class CountingGenerator implements ProblemGenerator<CountingProblem> {
         const minCount = resolvedRange.min;
         
         const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
-        const arrangement = constraints.arrangement || 'scattered';
 
         const data: CountingProblem = {
             numObjects,
-            simpleAnswer: numObjects,
-            arrangement
+            simpleAnswer: numObjects
         };
 
         if (constraints.countOut) {
@@ -30,7 +28,7 @@ export class CountingGenerator implements ProblemGenerator<CountingProblem> {
         }
 
         return {
-            id: `count-${numObjects}-${arrangement}`,
+            id: `count-${numObjects}`,
             data
         };
     }

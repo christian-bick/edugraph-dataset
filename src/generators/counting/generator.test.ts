@@ -29,26 +29,16 @@ describe('CountingGenerator', () => {
         }
     });
 
-    it('should generate valid stubs with default arrangement', () => {
+    it('should generate valid stubs', () => {
         const input = { 
             labels: [Scope.NumbersSmaller10], 
             constraints: {} 
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.arrangement).toBe('scattered');
+        expect(stub!.data.numObjects).toBeDefined();
     });
 
-    it('should respect arrangement constraint', () => {
-        const input = { 
-            labels: [Scope.NumbersSmaller10], 
-            constraints: { arrangement: 'line' } 
-        };
-        const stub = generator.generate(input);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.arrangement).toBe('line');
-        expect(stub!.id).toContain('line');
-    });
 
     it('should generate totalCount pool when countOut constraint is provided', () => {
         const input = {

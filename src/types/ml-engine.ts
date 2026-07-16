@@ -16,25 +16,13 @@ export interface AbstractProblem<TData = any> {
 }
 
 /**
- * Defines the configuration needed by a specific visual renderer.
- * These are the parameters that dictate HOW the problem is shown, not WHAT the problem is.
- */
-export interface RenderConfig {
-    /** The ID of the visual module to use (e.g., 'operations-boxes', 'operations-vertical') */
-    viewId: string;
-    /** Visual-specific settings. 
-     * e.g. for operations-boxes: { blankPart: 'answer' }
-     * e.g. for operations-vertical: { showGridLines: true }
-     */
-    visualParams: Record<string, any>;
-}
-
-/**
  * The final payload sent from the Node orchestrator to the browser DOM.
  */
 export interface RenderPayload<TProblem extends AbstractProblem = AbstractProblem> {
     problem: TProblem;
-    config: RenderConfig;
+    viewId: string;
+    labels: string[];
+    constraints: Record<string, any>;
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
     isSolutionView: boolean;
 }
@@ -104,7 +92,7 @@ export interface ProblemGenerator<TData = any> {
  */
 export interface VisualBlueprint<TViewId extends string = string> {
     viewId: TViewId;
-    visualParams: Record<string, any>;
+    constraints: Record<string, any>;
     /** How many instances of THIS specific variation to generate per problem */
     instancesPerProblem: number; 
 }

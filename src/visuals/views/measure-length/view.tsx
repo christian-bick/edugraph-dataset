@@ -9,12 +9,12 @@ interface Props {
 }
 
 export function MeasureLength({ payload }: Props) {
-    const { problem, config, isSolutionView } = payload;
+    const { problem, isSolutionView } = payload;
     const data = problem.data;
     const color = '#4682B4'; // SteelBlue
 
-    const isReverse = config.visualParams.reverse === true || config.visualParams.reverse === 'true';
-    const isDecimal = config.visualParams.decimal === true || config.visualParams.decimal === 'true';
+    const isReverse = payload.constraints.reverse === true || payload.constraints.reverse === 'true';
+    const isDecimal = payload.constraints.decimal === true || payload.constraints.decimal === 'true';
 
     const bandLength = data.bandLength !== undefined ? data.bandLength : 10;
     const problemLength = data.problemLength !== undefined ? data.problemLength : 6.0;

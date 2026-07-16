@@ -16,7 +16,7 @@ export const spec: OrderingGeneratorSpec = {
         Scope.NumericZero
     ],
     visualDistribution: [
-        { viewId: 'numbers-order', visualParams: { desc: false }, instancesPerProblem: 1 },
-        { viewId: 'numbers-order', visualParams: { desc: true }, instancesPerProblem: 1 }
+        { viewId: 'numbers-order', constraints: { desc: false }, instancesPerProblem: 1 },
+        { viewId: 'numbers-order', constraints: { desc: true }, instancesPerProblem: 1 }
     ]
 };

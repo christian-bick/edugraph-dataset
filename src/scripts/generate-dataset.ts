@@ -93,11 +93,11 @@ async function renderDatasetSplit(
         const problemBlueprints = (problem as any).matchedBlueprints;
         if (problemBlueprints) {
             problemBlueprints.forEach((blueprint: any) => {
-                const mergedVisualParams = { 
-                    ...blueprint.visualParams, 
+                const mergedConstraints = { 
+                    ...blueprint.constraints, 
                     ...(problem.data._permutationParams || {}) 
                 };
-                const specificBlueprint = { ...blueprint, visualParams: mergedVisualParams };
+                const specificBlueprint = { ...blueprint, constraints: mergedConstraints };
                 for (let i = 0; i < blueprint.instancesPerProblem; i++) {
                     taskQueue.push({ problem, blueprint: specificBlueprint, instance: i });
                 }
@@ -105,11 +105,11 @@ async function renderDatasetSplit(
         } else {
             if (blueprints && blueprints.length > 0) {
                 const blueprint = blueprints[(index + viewIndexOffset) % blueprints.length];
-                const mergedVisualParams = { 
-                    ...blueprint.visualParams, 
+                const mergedConstraints = { 
+                    ...blueprint.constraints, 
                     ...(problem.data._permutationParams || {}) 
                 };
-                const specificBlueprint = { ...blueprint, visualParams: mergedVisualParams };
+                const specificBlueprint = { ...blueprint, constraints: mergedConstraints };
                 for (let i = 0; i < blueprint.instancesPerProblem; i++) {
                     taskQueue.push({ problem, blueprint: specificBlueprint, instance: i });
                 }
@@ -138,15 +138,14 @@ async function renderDatasetSplit(
                     currentViewUrl = url;
                 }
 
-                const baseFilename = createSafeFilename(problem.id, blueprint.viewId, blueprint.visualParams, instance);
+                const baseFilename = createSafeFilename(problem.id, blueprint.viewId, blueprint.constraints, instance);
 
                 const renderAndRecord = async (isSolutionView: boolean, modeTag: string, modeName: string) => {
                     const payload: any = {
                         problem,
-                        config: {
-                            viewId: blueprint.viewId,
-                            visualParams: blueprint.visualParams
-                        },
+                        viewId: blueprint.viewId,
+                        labels: problem.tags || [],
+                        constraints: blueprint.constraints,
                         isSolutionView
                     };
 
@@ -235,7 +234,7 @@ async function renderDatasetSplit(
                         tags: problem.tags,
                         parameters: {
                             ...cleanedData,
-                            ...blueprint.visualParams
+                            ...blueprint.constraints
                         },
                         layout_checks: layoutCheck
                     };
@@ -422,7 +421,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                 problem.data._permutationParams = target.constraints;
                 (problem as any).matchedBlueprints = matchedViews.map(v => ({
                     viewId: v.viewId,
-                    visualParams: {},
+                    constraints: {},
                     instancesPerProblem: 1
                 }));
                 trainDataset.push(problem);
@@ -455,7 +454,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                                 valProblem.data._permutationParams = target.constraints;
                                 (valProblem as any).matchedBlueprints = matchedViews.map(v => ({
                                     viewId: v.viewId,
-                                    visualParams: {},
+                                    constraints: {},
                                     instancesPerProblem: 1
                                 }));
                                 valDataset.push(valProblem);

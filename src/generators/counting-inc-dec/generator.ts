@@ -33,18 +33,13 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
         if (incDecType === 'inc') incDecAnswer = numObjects + 1;
         if (incDecType === 'dec') incDecAnswer = numObjects - 1;
 
-        const arrangement = constraints.arrangement || 'line';
-        const layout = arrangement === 'line' ? 'linear' : arrangement === 'scattered' ? 'scattered' : 'linear';
-
         return {
-            id: `simple-${numObjects}-${incDecType}-linear-${arrangement}`,
+            id: `simple-${numObjects}-${incDecType}`,
             data: {
                 numObjects: numObjects,
                 incDecType: incDecType as 'inc' | 'dec',
                 incDecAnswer: incDecAnswer,
-                simpleAnswer: numObjects,
-                layout,
-                arrangement
+                simpleAnswer: numObjects
             }
         };
     }

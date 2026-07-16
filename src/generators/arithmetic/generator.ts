@@ -8,7 +8,7 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
     type: AbstractProblem['type'] = 'arithmetic';
 
     generate(input: GeneratorInput): ProblemStub | null {
-        const { labels, constraints } = input;
+        const { labels } = input;
         
         const resolvedRange = resolveRangeFromLabels(labels || []);
 

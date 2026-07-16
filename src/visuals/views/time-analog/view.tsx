@@ -9,9 +9,9 @@ interface Props {
 }
 
 export function TimeAnalog({ payload }: Props) {
-    const { problem, config, isSolutionView } = payload;
+    const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const isReverse = config.visualParams.reverse === true || config.visualParams.reverse === 'true';
+    const isReverse = payload.constraints.reverse === true || payload.constraints.reverse === 'true';
 
     const showHands = !isReverse || isSolutionView;
     const showTime = isReverse || isSolutionView;

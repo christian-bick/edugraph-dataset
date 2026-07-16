@@ -33,10 +33,10 @@ function DoubleTenFrame({ number }: { number: number }) {
 }
 
 export function NumbersWriteStandard({ payload }: Props) {
-    const { problem, config, isSolutionView } = payload;
+    const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    const outline = config.visualParams.outline === true || config.visualParams.outline === 'true';
+    const outline = payload.constraints.outline === true || payload.constraints.outline === 'true';
     const number = data.number;
 
     return (
