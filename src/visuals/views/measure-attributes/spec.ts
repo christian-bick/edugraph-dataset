@@ -4,14 +4,8 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 export const spec: ViewSpec = {
     viewId: 'measure-attributes',
     supportedLabels: [
-        Area.Measurement,
-        Scope.NumericRange,
-        Scope.NumbersWithoutZero,
-        Ability.ProcedureExecution
+        Ability.VisualReception
     ],
-    constraints: {
-        attribute: { type: 'options', values: ['length', 'height', 'weight'] }
-    },
     testParams: {
         attribute: (c) => allOptions(c)
     }

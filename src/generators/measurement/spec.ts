@@ -5,6 +5,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement',
     supportedLabels: [
         Area.Measurement,
+        Scope.LengthMeasurement,
         Scope.NumericRange,
         Scope.NumericZero
     ]

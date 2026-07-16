@@ -6,7 +6,9 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.Numeration,
         Area.NumericComparison,
-        Scope.NumericRange,
+        Scope.Greater,
+        Scope.Equal,
+        Scope.Less,
         Scope.NumericZero
     ]
 };

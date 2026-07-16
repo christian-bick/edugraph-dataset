@@ -4,11 +4,7 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 export const spec: ViewSpec = {
     viewId: 'numbers-compare-counting',
     supportedLabels: [
-        Area.Numeration,
-        Area.NumericComparison,
         Scope.PhysicalNumbers,
-        Scope.NumericRange,
-        Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ],
     constraints: {

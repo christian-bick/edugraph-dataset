@@ -14,9 +14,5 @@ export const spec: ViewSpec = {
     ],
     constraints: {
         decimal: { type: 'options', values: [true, false] }
-    },
-    testParams: {
-        decimal: (c) => allOptions(c),
-        problemLength: (key, params) => params.bandLength - 2
     }
 };

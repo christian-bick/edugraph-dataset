@@ -4,9 +4,7 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 export const spec: ViewSpec = {
     viewId: 'geometry-position',
     supportedLabels: [
-        Area.Geometry,
-        Ability.ProcedureExecution,
-        Scope.SpatialDirection
+        Ability.SpatialInterpretation,
     ],
     constraints: {
         relation: { type: 'options', values: ['above', 'below', 'beside', 'nextTo'] }
