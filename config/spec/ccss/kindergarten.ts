@@ -89,7 +89,7 @@ export const KindergartenSpec: CompetencyTarget[] = [
     {
         id: 'K.OA.A.2-add-sub-word-0-10',
         labels: [Area.BaseOperations, Scope.NumbersSmaller10, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'word-problem' }
+        constraints: {}
     },
     {
         id: 'K.OA.A.3-decompose-0-10',

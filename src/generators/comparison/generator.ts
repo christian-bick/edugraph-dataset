@@ -10,66 +10,51 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
 
-        let mode = constraints.mode;
-        if (!mode && labels) {
-            if (labels.some(l => isSubConceptOf(l, Scope.PhysicalNumbers))) {
-                mode = 'count-compare';
-            } else {
-                mode = 'numeric';
+        const resolvedRange = resolveRangeFromLabels(labels || []);
+        let min = resolvedRange.min;
+        let max = resolvedRange.max;
+
+        let digits = constraints.digits;
+        if (digits) {
+            max = Math.pow(10, digits) - 1;
+            min = digits > 1 ? Math.pow(10, digits - 1) : 0;
+            const includesZero = constraints.includesZero !== undefined 
+                ? constraints.includesZero 
+                : (labels ? !labels.some(l => isSubConceptOf(l, Scope.NumbersWithoutZero)) : true);
+            if (!includesZero && digits === 1) {
+                min = 1;
             }
         }
-        if (!mode) mode = 'numeric';
 
-        if (mode !== 'numeric' && mode !== 'matching' && mode !== 'count-compare') {
-            return null;
-        }
+        let num1 = Math.floor(random() * (max - min + 1)) + min;
+        let num2 = Math.floor(random() * (max - min + 1)) + min;
 
-        const resolvedRange = resolveRangeFromLabels(labels || []);
-        let num1 = 0;
-        let num2 = 0;
-
-        if (mode === 'numeric') {
-            let min = resolvedRange.min;
-            let max = resolvedRange.max;
-
-            let digits = constraints.digits;
-            if (digits) {
-                max = Math.pow(10, digits) - 1;
-                min = digits > 1 ? Math.pow(10, digits - 1) : 0;
-                const includesZero = constraints.includesZero !== undefined 
-                    ? constraints.includesZero 
-                    : !labels.some(l => isSubConceptOf(l, Scope.NumbersWithoutZero));
-                if (!includesZero && digits === 1) {
-                    min = 1;
+        const comparisonType = constraints.comparisonType;
+        if (comparisonType === 'equal') {
+            num2 = num1;
+        } else if (comparisonType === 'greater') {
+            if (num1 <= num2) {
+                if (max > min) {
+                    num1 = Math.floor(random() * (max - (min + 1) + 1)) + min + 1;
+                    num2 = Math.floor(random() * (num1 - min)) + min;
+                } else {
+                    return null;
                 }
             }
-
-            num1 = Math.floor(random() * (max - min + 1)) + min;
-            num2 = Math.floor(random() * (max - min + 1)) + min;
-
-            if (num1 === num2) {
-                return null;
+        } else if (comparisonType === 'less') {
+            if (num1 >= num2) {
+                if (max > min) {
+                    num2 = Math.floor(random() * (max - (min + 1) + 1)) + min + 1;
+                    num1 = Math.floor(random() * (num2 - min)) + min;
+                } else {
+                    return null;
+                }
             }
         } else {
-            let maxCount = constraints.maxCount || constraints.count || resolvedRange.max;
-            let minCount = constraints.minCount || (constraints.count !== undefined ? constraints.count : resolvedRange.min);
-            
-            num1 = constraints.count !== undefined ? constraints.count : Math.floor(random() * (maxCount - minCount + 1)) + minCount;
-            num2 = constraints.count !== undefined ? constraints.count : Math.floor(random() * (maxCount - minCount + 1)) + minCount;
-            
-            const comparisonType = constraints.comparisonType || 'greater';
-            if (comparisonType === 'equal') {
+            // Give a slight bump to the chance of generating equal numbers for variety
+            // especially for wider ranges where the natural probability is low.
+            if (random() < 0.1) {
                 num2 = num1;
-            } else if (comparisonType === 'greater') {
-                if (num1 <= num2) {
-                    num1 = Math.floor(random() * (maxCount - (minCount + 1) + 1)) + minCount + 1;
-                    num2 = Math.floor(random() * (num1 - minCount)) + minCount;
-                }
-            } else if (comparisonType === 'less') {
-                if (num1 >= num2) {
-                    num2 = Math.floor(random() * (maxCount - (minCount + 1) + 1)) + minCount + 1;
-                    num1 = Math.floor(random() * (num2 - minCount)) + minCount;
-                }
             }
         }
 
@@ -79,7 +64,7 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> 
         else answer = '=';
 
         return {
-            id: `${mode}-${num1}-${num2}`,
+            id: `compare-${num1}-${num2}`,
             data: {
                 num1,
                 num2,

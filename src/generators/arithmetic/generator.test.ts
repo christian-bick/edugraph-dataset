@@ -14,7 +14,7 @@ describe('ArithmeticGenerator', () => {
         expect(generator.type).toBe('arithmetic');
     });
 
-    it('should generate correct standard mode problems', () => {
+    it('should generate correct addition/subtraction/multiplication/division problems', () => {
         const addStub = generator.generate({
             labels: ['http://edugraph.io/edu/Addition'],
             constraints: { digitsNum1: 1, digitsNum2: 1 }
@@ -51,10 +51,10 @@ describe('ArithmeticGenerator', () => {
         expect(zeroNegStub).not.toBeNull();
     });
 
-    it('should generate correct representation mode problems', () => {
+    it('should generate correct physical arithmetic problems', () => {
         const addStub = generator.generate({
             labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/PhysicalNumbers'],
-            constraints: { mode: 'representation', maxSum: 10 }
+            constraints: { maxSum: 10 }
         });
         expect(addStub).not.toBeNull();
         expect(addStub!.data.operation).toBe('addition');
@@ -65,7 +65,7 @@ describe('ArithmeticGenerator', () => {
 
         const subStub = generator.generate({
             labels: ['http://edugraph.io/edu/Subtraction', 'http://edugraph.io/edu/PhysicalNumbers'],
-            constraints: { mode: 'representation', maxMinuend: 10 }
+            constraints: { maxMinuend: 10 }
         });
         expect(subStub).not.toBeNull();
         expect(subStub!.data.operation).toBe('subtraction');
@@ -75,19 +75,4 @@ describe('ArithmeticGenerator', () => {
         expect(subStub!.data.num1 - subStub!.data.num2).toBe(subStub!.data.answer);
     });
 
-    it('should return null for physical/representation modes with invalid operations', () => {
-        const mulStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Multiplication', 'http://edugraph.io/edu/PhysicalNumbers'],
-            constraints: { mode: 'representation' }
-        });
-        expect(mulStub).toBeNull();
-    });
-
-    it('should return null for unsupported modes', () => {
-        const stub = generator.generate({
-            labels: [],
-            constraints: { mode: 'decompose' }
-        });
-        expect(stub).toBeNull();
-    });
 });

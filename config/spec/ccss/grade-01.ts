@@ -60,56 +60,56 @@ export const Grade1Spec: CompetencyTarget[] = [
     {
         id: '1.OA.A.1-add-sub-word-20',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithZero, Scope.PhysicalNumbers, Ability.TextualReception],
-        constraints: { mode: 'word-problem' }
+        constraints: {}
     },
 
     // --- 1.OA.A.2: Addition of three whole numbers with a sum <= 20 ---
     {
         id: '1.OA.A.2-three-addends-20',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard' }
+        constraints: {}
     },
 
     // --- 1.OA.B.3: Apply properties of operations ---
     {
         id: '1.OA.B.3-properties-addition',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard' }
+        constraints: {}
     },
 
     // --- 1.OA.B.4: Understand subtraction as unknown-addend ---
     {
         id: '1.OA.B.4-sub-unknown-addend',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.PhysicalNumbers, Ability.ProcedureExecution],
-        constraints: { mode: 'make-ten', targetSum: 20 }
+        constraints: { targetSum: 20 }
     },
 
     // --- 1.OA.C.5: Relate counting to addition/subtraction ---
     {
         id: '1.OA.C.5-relate-counting',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard' }
+        constraints: {}
     },
 
     // --- 1.OA.C.6: Add/subtract within 20, fluency within 10 ---
     {
         id: '1.OA.C.6-add-sub-fluency',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard' }
+        constraints: {}
     },
 
     // --- 1.OA.D.7: Meaning of equal sign ---
     {
         id: '1.OA.D.7-equation-plausibility',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard' }
+        constraints: {}
     },
 
     // --- 1.OA.D.8: Determine unknown number ---
     {
         id: '1.OA.D.8-unknown-number',
         labels: [Area.BaseOperations, Scope.NumbersSmaller20, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'make-ten', targetSum: 20 }
+        constraints: { targetSum: 20 }
     },
 
     // ==========================================
@@ -148,21 +148,21 @@ export const Grade1Spec: CompetencyTarget[] = [
     {
         id: '1.NBT.C.4-addition-100',
         labels: [Area.BaseOperations, Scope.NumbersSmaller100, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard' }
+        constraints: {}
     },
 
     // --- 1.NBT.C.5: Mentally find 10 more or 10 less ---
     {
         id: '1.NBT.C.5-mental-10-more-less',
         labels: [Area.BaseOperations, Scope.NumbersSmaller100, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard', num2: 10 }
+        constraints: { num2: 10 }
     },
 
     // --- 1.NBT.C.6: Subtract multiples of 10 ---
     {
         id: '1.NBT.C.6-subtract-multiples-10',
         labels: [Area.BaseOperations, Scope.NumbersSmaller100, Scope.NumbersWithoutZero, Scope.ArabicNumerals, Ability.ProcedureExecution],
-        constraints: { mode: 'standard', num2: 20 }
+        constraints: { num2: 20 }
     },
 
     // ==========================================

@@ -10,18 +10,6 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
         
-        const mode = constraints.mode || 'standard';
-        // Guard to ensure we only generate supported modes
-        if (mode !== 'standard' && mode !== 'representation' && mode !== 'word-problem') {
-            return null;
-        }
-        if (!constraints.mode && labels) {
-            if (labels.some(l => isSubConceptOf(l, Ability.ProcedureUnderstanding)) ||
-                labels.some(l => isSubConceptOf(l, Scope.NumbersLarger10))) {
-                return null;
-            }
-        }
-
         const resolvedRange = resolveRangeFromLabels(labels || []);
 
         let operation: 'addition' | 'subtraction' | 'multiplication' | 'division' = 'addition';
@@ -30,10 +18,7 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
         else if (labels.some(l => isSubConceptOf(l, Area.Multiplication))) operation = 'multiplication';
         else if (labels.some(l => isSubConceptOf(l, Area.Division))) operation = 'division';
 
-        const isPhysical = labels.some(l => isSubConceptOf(l, Scope.PhysicalNumbers)) || mode === 'representation' || mode === 'word-problem';
-        if (isPhysical && operation !== 'addition' && operation !== 'subtraction') {
-            return null;
-        }
+
 
         const allowNegatives = labels.some(l => isSubConceptOf(l, Scope.NumbersWithNegatives));
         const includeZero = labels.some(l => isSubConceptOf(l, Scope.NumbersWithZero));
@@ -61,12 +46,7 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
         let answer = 0;
 
         if (operation === 'addition') {
-            const maxSum = constraints.maxSum || (isPhysical ? resolvedRange.max : undefined);
-            if (maxSum !== undefined) {
-                num1 = Math.floor(random() * (maxSum - 1)) + 1;
-                num2 = Math.floor(random() * (maxSum - num1)) + 1;
-                answer = num1 + num2;
-            } else {
+            if (constraints.digitsNum1 || constraints.digitsNum2) {
                 const range1 = getRange(constraints.digitsNum1);
                 const range2 = getRange(constraints.digitsNum2);
                 num1 = generateFromRange(range1);
@@ -75,14 +55,16 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
                     if (random() > 0.5) num1 = 0; else num2 = 0;
                 }
                 answer = num1 + num2;
+            } else {
+                const minVal = includeZero ? 0 : 1;
+                const effectiveMax = resolvedRange.max;
+                
+                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal;
+                num2 = Math.floor(random() * (effectiveMax - num1 - minVal + 1)) + minVal;
+                answer = num1 + num2;
             }
         } else if (operation === 'subtraction') {
-            const maxMinuend = constraints.maxMinuend || (isPhysical ? resolvedRange.max : undefined);
-            if (maxMinuend !== undefined) {
-                num1 = Math.floor(random() * (maxMinuend - 2)) + 2;
-                num2 = Math.floor(random() * (num1 - 1)) + 1;
-                answer = num1 - num2;
-            } else {
+            if (constraints.digitsNum1 || constraints.digitsNum2) {
                 const range1 = getRange(constraints.digitsNum1);
                 const range2 = getRange(constraints.digitsNum2);
                 num1 = generateFromRange(range1);
@@ -91,6 +73,14 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> 
                     if (random() > 0.5) num1 = 0; else num2 = 0;
                 }
                 if (!allowNegatives && num1 < num2) [num1, num2] = [num2, num1];
+                answer = num1 - num2;
+            } else {
+                const minVal = includeZero ? 0 : 1;
+                const effectiveMax = resolvedRange.max;
+                
+                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal * 2;
+                num2 = Math.floor(random() * (num1 - minVal + 1)) + minVal;
+                if (num2 > num1 - minVal) num2 = num1 - minVal;
                 answer = num1 - num2;
             }
         } else if (operation === 'multiplication') {
