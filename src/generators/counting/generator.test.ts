@@ -40,16 +40,5 @@ describe('CountingGenerator', () => {
     });
 
 
-    it('should generate totalCount pool when countOut constraint is provided', () => {
-        const input = {
-            labels: [Scope.NumbersSmaller10],
-            constraints: { countOut: true }
-        };
-        for (let i = 0; i < 20; i++) {
-            const stub = generator.generate(input);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.totalCount).toBeDefined();
-            expect(stub!.data.totalCount!).toBeGreaterThan(stub!.data.numObjects);
-        }
-    });
+
 });

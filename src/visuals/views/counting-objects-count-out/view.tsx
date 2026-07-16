@@ -12,8 +12,17 @@ interface Props {
 
 export function CountingObjectsCountOut({ payload }: Props) {
     const { problem, isSolutionView } = payload;
-    const { numObjects, totalCount: rawTotalCount } = problem.data;
-    const totalCount = rawTotalCount !== undefined ? rawTotalCount : (numObjects + 3);
+    const { numObjects } = problem.data;
+    
+    const totalCount = useMemo(() => {
+        let hash = 0;
+        for (let i = 0; i < problem.id.length; i++) {
+            hash = problem.id.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const extra = (Math.abs(hash) % 5) + 2; // +2 to +6 extra objects
+        return numObjects + extra;
+    }, [problem.id, numObjects]);
+
     const arrangement = payload.constraints.arrangement || 'line';
 
     const icon = useMemo(() => {

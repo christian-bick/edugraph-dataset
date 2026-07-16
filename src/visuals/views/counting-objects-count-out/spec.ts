@@ -18,7 +18,6 @@ export const spec: ViewSpec = {
     testParams: {
         numObjects: (c) => limitsAndMean(c),
         arrangement: (c) => allOptions(c),
-        mode: 'count-out',
-        totalCount: (key, params) => params.numObjects + 3
+        mode: 'count-out'
     }
 };

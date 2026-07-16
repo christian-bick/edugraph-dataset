@@ -25,7 +25,6 @@ export type PlaceValueMakeTenProblem = {
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
-    totalCount?: number;
 };
 
 export type CountingIncDecProblem = {

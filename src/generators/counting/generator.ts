@@ -20,13 +20,6 @@ export class CountingGenerator implements ProblemGenerator<CountingProblem> {
             simpleAnswer: numObjects
         };
 
-        if (constraints.countOut) {
-            // Provide a pool of total objects larger than the target count
-            // Ensure total doesn't exceed 20 to fit on screen usually, unless numObjects is already very large
-            const extra = Math.floor(random() * 5) + 2; // +2 to +6 extra objects
-            data.totalCount = numObjects + extra;
-        }
-
         return {
             id: `count-${numObjects}`,
             data
