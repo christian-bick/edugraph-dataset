@@ -5,6 +5,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'geometry-position',
     supportedLabels: [
         Area.Geometry,
-        Area.SpatialRelations
+        Area.SpatialModelling
     ]
 };
