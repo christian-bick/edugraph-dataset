@@ -102,6 +102,12 @@ Adding content means creating two interconnected directories: a Generator and a 
 *   **`generator.test.ts`**: A Vitest suite. Must deeply test edge cases (e.g., digit boundaries, non-negative constraints) to ensure the constraint satisfier behaves correctly.
 *   **`checklist.md`**: (Optional) Specific instructions for the Visual QA LLM regarding how this specific module should visually render.
 
+#### Generator Design Guidelines
+Based on architectural best practices, all generators must adhere to the following design principles:
+1. **Purely Mathematical**: The generated problem data payload (`data`) must contain only raw mathematical attributes (e.g., values, shape names, dimensions, abstract relations). It must *not* contain visual properties (such as rotation angle, render scale, layout coords) or user-facing formatted strings (like button labels or localized answer texts). The View layer is solely responsible for rendering, transforming, and formatting these abstract values.
+2. **Single Return Type**: A generator should return a single, uniform type signature (e.g. mapping to a unified type in `problems.ts`). If different problem modes require different data shapes, they should be split into distinct generator modules.
+3. **Single Logical Flow (No Modes)**: Avoid using artificial `mode` constraints to branch into entirely different mathematical generation pathways inside a single generator. If two exercises require different mathematical calculation steps (even if they share the same return type shape), they are conceptually distinct and must be kept in separate generator files to prevent spaghetti code and preserve high modularity.
+
 ### The Visual Renderer (`src/visuals/`)
 *   **`src/visuals/views/<renderer>/`**:
     - **`view.html`**: The base HTML template containing a mount point for React.
