@@ -1,17 +1,17 @@
 import { ProblemGenerator, GeneratorInput, ProblemStub, AbstractProblem } from "../../types/ml-engine.ts";
-import { CountingSimpleProblem } from "../../types/problems.ts";
+import { CountingProblem } from "../../types/problems.ts";
 import { random } from "../../lib/random.ts";
 import { Scope, Area } from "edugraph-ts";
 import { resolveRangeFromLabels, isSubConceptOf } from "../../lib/ontology.ts";
 
-export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem> {
+export class CountingGenerator implements ProblemGenerator<CountingProblem> {
     type: AbstractProblem['type'] = 'counting';
 
     generate(input: GeneratorInput): ProblemStub | null {
         const { labels, constraints } = input;
         
         let mode = constraints.mode || 'simple';
-        if (mode === 'cardinality' || mode === 'one-to-one' || mode === 'count-out' || mode === 'conservation' || mode === 'classify-count' || mode === 'classify-sort') {
+        if (mode !== 'simple' && mode !== 'one-to-one' && mode !== 'cardinality') {
             return null;
         }
         if (constraints.countOut || constraints.type) {
@@ -19,8 +19,7 @@ export class CountingGenerator implements ProblemGenerator<CountingSimpleProblem
         }
         if (!constraints.mode && labels) {
             if (labels.some(l => isSubConceptOf(l, Area.NumericIdentity)) ||
-                labels.some(l => isSubConceptOf(l, Area.ObjectSorting)) ||
-                (labels.some(l => isSubConceptOf(l, Scope.AdditiveCount)) && labels.some(l => isSubConceptOf(l, Scope.PhysicalNumbers)))) {
+                labels.some(l => isSubConceptOf(l, Area.ObjectSorting))) {
                 return null;
             }
         }

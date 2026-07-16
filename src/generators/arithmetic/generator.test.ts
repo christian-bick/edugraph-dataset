@@ -51,7 +51,39 @@ describe('ArithmeticGenerator', () => {
         expect(zeroNegStub).not.toBeNull();
     });
 
-    it('should return null for non-standard modes', () => {
+    it('should generate correct representation mode problems', () => {
+        const addStub = generator.generate({
+            labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/PhysicalNumbers'],
+            constraints: { mode: 'representation', maxSum: 10 }
+        });
+        expect(addStub).not.toBeNull();
+        expect(addStub!.data.operation).toBe('addition');
+        expect(addStub!.data.num1).toBeGreaterThanOrEqual(1);
+        expect(addStub!.data.num2).toBeGreaterThanOrEqual(1);
+        expect(addStub!.data.answer).toBeLessThanOrEqual(10);
+        expect(addStub!.data.num1 + addStub!.data.num2).toBe(addStub!.data.answer);
+
+        const subStub = generator.generate({
+            labels: ['http://edugraph.io/edu/Subtraction', 'http://edugraph.io/edu/PhysicalNumbers'],
+            constraints: { mode: 'representation', maxMinuend: 10 }
+        });
+        expect(subStub).not.toBeNull();
+        expect(subStub!.data.operation).toBe('subtraction');
+        expect(subStub!.data.num1).toBeLessThanOrEqual(10);
+        expect(subStub!.data.num1).toBeGreaterThan(subStub!.data.num2);
+        expect(subStub!.data.answer).toBeGreaterThanOrEqual(0);
+        expect(subStub!.data.num1 - subStub!.data.num2).toBe(subStub!.data.answer);
+    });
+
+    it('should return null for physical/representation modes with invalid operations', () => {
+        const mulStub = generator.generate({
+            labels: ['http://edugraph.io/edu/Multiplication', 'http://edugraph.io/edu/PhysicalNumbers'],
+            constraints: { mode: 'representation' }
+        });
+        expect(mulStub).toBeNull();
+    });
+
+    it('should return null for unsupported modes', () => {
         const stub = generator.generate({
             labels: [],
             constraints: { mode: 'decompose' }

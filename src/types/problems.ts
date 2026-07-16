@@ -1,23 +1,8 @@
-export type ArithmeticStandardProblem = {
+export type ArithmeticProblem = {
     num1: number;
     num2: number;
     operation: 'addition' | 'subtraction' | 'multiplication' | 'division';
     answer: number;
-};
-
-export type ArithmeticRepresentationProblem = {
-    operation: 'addition' | 'subtraction';
-    num1: number;
-    num2: number;
-    answer: number;
-};
-
-export type ArithmeticWordProblem = {
-    operation: 'addition' | 'subtraction';
-    num1: number;
-    num2: number;
-    answer: number;
-    textScenario: string;
 };
 
 export type ArithmeticDecomposeProblem = {
@@ -42,19 +27,7 @@ export type PlaceValueMakeTenProblem = {
     target: 10;
 };
 
-export type CountingSimpleProblem = {
-    numObjects: number;
-    simpleAnswer: number;
-    arrangement: string;
-};
-
-export type CountingOneToOneProblem = {
-    numObjects: number;
-    simpleAnswer: number;
-    arrangement: string;
-};
-
-export type CountingCardinalityProblem = {
+export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
     arrangement: string;
@@ -137,15 +110,7 @@ export type OrderingProblem = {
     numbers: number[];
 };
 
-export type WritingStrokeProblem = {
-    number: number;
-};
-
-export type WritingStandardProblem = {
-    number: number;
-};
-
-export type WritingCountObjectsProblem = {
+export type WritingProblem = {
     number: number;
 };
 
@@ -156,7 +121,7 @@ export type TimeProblem = {
 
 // --- Geometry Split Problem Types ---
 
-export type GeometryName2dProblem = {
+export type GeometryNamingProblem = {
     shape: string;
     rotation: number;
     scale: number;
@@ -173,12 +138,7 @@ export type GeometryEnvShapesProblem = {
     answer: string;
 };
 
-export type GeometryName3dProblem = {
-    shape: string;
-    rotation: number;
-    scale: number;
-    answer: string;
-};
+
 
 export type GeometryClassifyDimProblem = {
     shapeType: '2d' | '3d';
@@ -219,21 +179,15 @@ export type GeometryComposeShapesProblem = {
 };
 
 export type GeometryProblem = 
-    | GeometryName2dProblem
+    | GeometryNamingProblem
     | GeometryPositionProblem
     | GeometryEnvShapesProblem
-    | GeometryName3dProblem
     | GeometryClassifyDimProblem
     | GeometryCompareAttributesProblem
     | GeometrySameAttributeProblem
     | GeometryBuildShapeProblem
     | GeometryDrawShapeProblem
     | GeometryComposeShapesProblem;
-
-export type WritingProblem = 
-    | WritingStrokeProblem
-    | WritingStandardProblem
-    | WritingCountObjectsProblem;
 
 export type CountingClassifyProblem = 
     | CountingClassifyCountProblem
@@ -244,17 +198,17 @@ export type CountingClassifyProblem =
  * to their expected mathematical problem data schemas.
  */
 export interface ViewTypeMap {
-    'operations-vertical': ArithmeticStandardProblem;
-    'operations-boxes': ArithmeticStandardProblem;
-    'operations-representation': ArithmeticRepresentationProblem | ArithmeticWordProblem;
+    'operations-vertical': ArithmeticProblem;
+    'operations-boxes': ArithmeticProblem;
+    'operations-representation': ArithmeticProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'place-value-compose-teen': PlaceValueComposeTeenProblem;
     'place-value-decompose-teen': PlaceValueDecomposeTeenProblem;
     'place-value-make-ten': PlaceValueMakeTenProblem;
 
-    'counting-objects-simple': CountingSimpleProblem;
-    'counting-objects-one-to-one': CountingOneToOneProblem;
-    'counting-objects-cardinality': CountingCardinalityProblem;
+    'counting-objects-simple': CountingProblem;
+    'counting-objects-one-to-one': CountingProblem;
+    'counting-objects-cardinality': CountingProblem;
     'counting-objects-count-out': CountingCountOutProblem;
     'counting-inc-dec': CountingIncDecProblem;
     'counting-conservation': CountingConservationProblem;

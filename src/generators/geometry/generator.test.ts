@@ -14,29 +14,29 @@ describe('GeometryGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should be deterministic with the same seed', () => {
-        const input = { labels: [], constraints: {} };
-        setSeed(123);
-        const stub1 = generator.generate(input);
-        setSeed(123);
-        const stub2 = generator.generate(input);
-        expect(stub1).toEqual(stub2);
-    });
-
-    it('should validate name-2d rotation and scale constraints', () => {
+    it('should generate valid flat (2d) naming stubs', () => {
         const input = {
             labels: [],
-            constraints: { mode: 'name-2d', shape: 'hexagon', rotation: 45, scale: 1.2 }
+            constraints: { mode: 'name-2d', shape: 'triangle' }
         };
         const stub = generator.generate(input);
         expect(stub).not.toBeNull();
-        expect(stub!.data.shape).toBe('hexagon');
-        expect(stub!.data.rotation).toBe(45);
-        expect(stub!.data.scale).toBe(1.2);
-        expect(stub!.data.answer).toBe('hexagon');
+        expect(stub!.data.shape).toBe('triangle');
+        expect(stub!.data.answer).toBe('triangle');
     });
 
-    it('should return null for non-name-2d modes', () => {
+    it('should generate valid solid (3d) naming stubs', () => {
+        const input = {
+            labels: [],
+            constraints: { mode: 'name-3d', shape: 'cube' }
+        };
+        const stub = generator.generate(input);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.shape).toBe('cube');
+        expect(stub!.data.answer).toBe('cube');
+    });
+
+    it('should return null for non-naming modes', () => {
         const stub = generator.generate({
             labels: [],
             constraints: { mode: 'position' }

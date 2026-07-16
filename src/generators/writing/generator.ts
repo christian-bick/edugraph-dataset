@@ -12,10 +12,7 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem> {
 
         // Guard
         const mode = constraints.mode || 'stroke';
-        if (mode === 'count-objects') {
-            return null;
-        }
-        if (!constraints.mode && labels && labels.some(l => isSubConceptOf(l, Area.Numeration))) {
+        if (mode !== 'stroke' && mode !== 'standard' && mode !== 'count-objects') {
             return null;
         }
 
