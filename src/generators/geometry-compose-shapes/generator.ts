@@ -14,7 +14,7 @@ export class GeometryComposeShapesGenerator implements ProblemGenerator<Geometry
 
         const target = constraints.target || 'rectangle'; // rectangle, square
         const components = constraints.components || ['triangles']; // triangles, rectangles
-        const answer = 'Two triangles';
+        const answer = 'triangle';
 
         return {
             id: `geometry-compose-${target}`,

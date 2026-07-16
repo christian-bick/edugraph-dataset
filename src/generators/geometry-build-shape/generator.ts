@@ -23,8 +23,7 @@ export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBui
             data: {
                 target,
                 sides,
-                corners,
-                answer: `${sides} sticks, ${corners} balls`
+                corners
             }
         };
     }

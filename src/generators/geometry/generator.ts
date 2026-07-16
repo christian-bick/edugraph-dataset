@@ -15,15 +15,12 @@ export class GeometryGenerator implements ProblemGenerator<GeometryNamingProblem
         }
 
         const shape = constraints.shape || (mode === 'name-2d' ? 'triangle' : 'cube');
-        const rotation = constraints.rotation !== undefined ? constraints.rotation : Math.floor(random() * 360);
-        const scale = constraints.scale !== undefined ? constraints.scale : parseFloat((random() * 1.0 + 0.5).toFixed(1));
+        const seed = Math.floor(random() * 1000);
 
         return {
-            id: `geometry-${mode}-${shape}-${rotation}-${scale}`.replace('.', '-'),
+            id: `geometry-${mode}-${shape}-${seed}`,
             data: {
                 shape,
-                rotation,
-                scale,
                 answer: shape
             }
         };

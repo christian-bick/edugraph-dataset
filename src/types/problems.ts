@@ -101,8 +101,6 @@ export type TimeProblem = {
 
 export type GeometryNamingProblem = {
     shape: string;
-    rotation: number;
-    scale: number;
     answer: string;
 };
 
@@ -121,7 +119,7 @@ export type GeometryEnvShapesProblem = {
 export type GeometryClassifyDimProblem = {
     shapeType: '2d' | '3d';
     shape: string;
-    answer: string;
+    answer: '2d' | '3d';
 };
 
 export type GeometryCompareAttributesProblem = {
@@ -142,7 +140,6 @@ export type GeometryBuildShapeProblem = {
     target: string;
     sides: number;
     corners: number;
-    answer: string;
 };
 
 export type GeometryDrawShapeProblem = {

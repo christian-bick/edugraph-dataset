@@ -24,7 +24,6 @@ describe('GeometryBuildShapeGenerator', () => {
         expect(stub!.data.target).toBe('triangle');
         expect(stub!.data.sides).toBe(3);
         expect(stub!.data.corners).toBe(3);
-        expect(stub!.data.answer).toBe('3 sticks, 3 balls');
     });
 
     it('should return null for non-build-shape modes', () => {

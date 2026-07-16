@@ -8,6 +8,15 @@ interface Props {
     payload: ViewRenderPayload<'geometry-viewer'>;
 }
 
+function hashCode(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash);
+}
+
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     const commonProps = {
         width: size,
@@ -151,8 +160,9 @@ export function GeometryViewer({ payload }: Props) {
 
         if (mode === 'name-2d' || mode === 'name-3d') {
             const shape = data.shape || 'triangle';
-            const rotation = data.rotation || 0;
-            const scale = data.scale || 1.0;
+            const hash = hashCode(problem.id);
+            const rotation = hash % 360;
+            const scale = parseFloat(((hash % 11) / 10 + 0.5).toFixed(1));
             return (
                 <div 
                     style={{ transform: `rotate(${rotation}deg) scale(${scale})`, transformOrigin: 'center' }} 
@@ -265,11 +275,11 @@ export function GeometryViewer({ payload }: Props) {
         if (mode === 'env-shapes') return ['circle', 'square', 'rectangle'];
         if (mode === 'name-2d') return ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
         if (mode === 'name-3d') return ['cube', 'cone', 'cylinder', 'sphere'];
-        if (mode === 'classify-dim') return ['Flat (2D)', 'Solid (3D)'];
+        if (mode === 'classify-dim') return ['2d', '3d'];
         if (mode === 'compare-attributes') return [data.shape1 || '', data.shape2 || ''];
         if (mode === 'same-attribute') return ['sphere', 'cube', 'cone'];
         if (mode === 'build-shape') return ['3 sticks, 3 balls', '4 sticks, 4 balls'];
-        if (mode === 'compose-shapes') return ['Two triangles', 'Two circles'];
+        if (mode === 'compose-shapes') return ['triangle', 'circle'];
         return [];
     };
 
@@ -277,7 +287,9 @@ export function GeometryViewer({ payload }: Props) {
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
-        const isCorrect = opt === answer;
+        const isCorrect = mode === 'build-shape'
+            ? opt === `${data.sides} sticks, ${data.corners} balls`
+            : opt === answer;
         if (isCorrect && isSolutionView) {
             cls += "border-green-600 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(22,163,74,0.2)] font-bold";
         } else {
@@ -289,6 +301,8 @@ export function GeometryViewer({ payload }: Props) {
     const getLabelText = (opt: string) => {
         if (mode === 'position' && opt === 'nextTo') return 'Next to the box';
         if (mode === 'position') return opt.charAt(0).toUpperCase() + opt.slice(1) + ' the box';
+        if (mode === 'classify-dim') return opt === '2d' ? 'Flat (2D)' : 'Solid (3D)';
+        if (mode === 'compose-shapes') return 'Two ' + (opt === 'triangle' ? 'triangles' : 'circles');
         return opt.charAt(0).toUpperCase() + opt.slice(1);
     };
 

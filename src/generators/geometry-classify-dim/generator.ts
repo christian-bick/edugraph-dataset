@@ -18,7 +18,7 @@ export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryCl
         const shapes3D = ['cube', 'cone', 'cylinder', 'sphere'];
         const list = shapeType === '2d' ? shapes2D : shapes3D;
         const shape = list[Math.floor(random() * list.length)];
-        const answer = shapeType === '2d' ? 'Flat (2D)' : 'Solid (3D)';
+        const answer = shapeType as '2d' | '3d';
 
         return {
             id: `geometry-classify-dim-${shapeType}-${shape}`,

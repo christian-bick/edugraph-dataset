@@ -23,7 +23,7 @@ describe('GeometryComposeShapesGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.target).toBe('rectangle');
         expect(stub!.data.components).toEqual(['triangles']);
-        expect(stub!.data.answer).toBe('Two triangles');
+        expect(stub!.data.answer).toBe('triangle');
     });
 
     it('should return null for non-compose-shapes modes', () => {
