@@ -2,7 +2,7 @@ import {Browser, chromium} from 'playwright';
 import {dirname, resolve} from 'path';
 import {fileURLToPath} from 'url';
 import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'fs';
-import {AbstractProblem, VisualBlueprint} from '../types/ml-engine.ts';
+import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { Ability } from 'edugraph-ts';
@@ -72,8 +72,6 @@ async function renderDatasetSplit(
     splitName: string,
     moduleName: string,
     problems: AbstractProblem[],
-    blueprints: VisualBlueprint[],
-    viewIndexOffset: number,
     concurrency: number
 ) {
     if (problems.length === 0) return 0;
@@ -88,7 +86,7 @@ async function renderDatasetSplit(
     const metadata: any[] = [];
 
     
-    const taskQueue: { problem: AbstractProblem, blueprint: VisualBlueprint, instance: number }[] = [];
+    const taskQueue: { problem: AbstractProblem, blueprint: any, instance: number }[] = [];
     problems.forEach((problem, index) => {
         const problemBlueprints = (problem as any).matchedBlueprints;
         if (problemBlueprints) {
@@ -102,18 +100,6 @@ async function renderDatasetSplit(
                     taskQueue.push({ problem, blueprint: specificBlueprint, instance: i });
                 }
             });
-        } else {
-            if (blueprints && blueprints.length > 0) {
-                const blueprint = blueprints[(index + viewIndexOffset) % blueprints.length];
-                const mergedConstraints = { 
-                    ...blueprint.constraints, 
-                    ...(problem.data._permutationParams || {}) 
-                };
-                const specificBlueprint = { ...blueprint, constraints: mergedConstraints };
-                for (let i = 0; i < blueprint.instancesPerProblem; i++) {
-                    taskQueue.push({ problem, blueprint: specificBlueprint, instance: i });
-                }
-            }
         }
     });
 
@@ -470,10 +456,10 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
     console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);
 
     let moduleImages = 0;
-    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, generatorSpec.visualDistribution || [], 0, DEFAULT_CONCURRENCY);
+    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, DEFAULT_CONCURRENCY);
     
     if (!trainingOnly && valDataset.length > 0) {
-        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, generatorSpec.visualDistribution || [], 1, DEFAULT_CONCURRENCY);
+        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, DEFAULT_CONCURRENCY);
     }
     return moduleImages;
 }

@@ -1,9 +1,10 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-same-attribute',
     supportedLabels: [
-        Area.Geometry
+        Area.ObjectSorting,
+        Scope.ShapeProperties,
     ]
 };

@@ -13,8 +13,5 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Scope.ObjectArrangement,
         Ability.ProcedureUnderstanding
-    ],
-        testParams: {
-        mode: 'cardinality'
-    }
+    ]
 };

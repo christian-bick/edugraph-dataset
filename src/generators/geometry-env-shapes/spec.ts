@@ -4,6 +4,9 @@ import {Area} from 'edugraph-ts';
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-env-shapes',
     supportedLabels: [
-        Area.Geometry
+        Area.Square,
+        Area.Rectangle,
+        Area.Circle,
+        Area.ShapeRecognition
     ]
 };

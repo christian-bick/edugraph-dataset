@@ -12,4 +12,4 @@ export const spec: ViewSpec = {
         Ability.DirectUnderstanding,
         Scope.ArabicNumerals
     ],
-        };
+};

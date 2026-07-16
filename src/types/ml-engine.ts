@@ -84,19 +84,6 @@ export interface ProblemGenerator<TData = any> {
     generate(input: GeneratorInput): ProblemStub<TData> | null;
 }
 
-
-// --- ML Orchestrator Interfaces ---
-
-/**
- * A blueprint defining a specific visual variation to apply to an abstract problem.
- */
-export interface VisualBlueprint<TViewId extends string = string> {
-    viewId: TViewId;
-    constraints?: Record<string, any>;
-    /** How many instances of THIS specific variation to generate per problem */
-    instancesPerProblem: number; 
-}
-
 /**
  * Configuration for the ML Orchestrator to build the final dataset.
  */
@@ -113,10 +100,4 @@ export interface MLDatasetPipelineConfig {
         val: number;
     };
 
-    /**
-     * The array of visual variations applied to EVERY abstract problem.
-     * By applying this blueprint uniformly, we guarantee the exact same 
-     * visual diversity ratio in the Train, Val, and Test splits.
-     */
-    visualDistribution: VisualBlueprint[];
 }

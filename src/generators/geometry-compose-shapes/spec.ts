@@ -1,9 +1,10 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Area} from 'edugraph-ts';
+import {Ability, Area} from 'edugraph-ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-compose-shapes',
     supportedLabels: [
-        Area.Geometry
+        Area.Rectangle,
+        Area.Square,
     ]
 };
