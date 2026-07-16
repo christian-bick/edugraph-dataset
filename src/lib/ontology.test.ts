@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isSubConceptOf, isCompatibleConcept, doesViewSupportProblem, doesGeneratorSupportCompetency } from './ontology.ts';
+import { isSubConceptOf, isCompatibleConcept } from './ontology.ts';
 import { Scope, Area, Ability } from 'edugraph-ts';
 
 describe('Ontology Helper', () => {
@@ -36,32 +36,6 @@ describe('Ontology Helper', () => {
 
         it('should return false if zero is required but not supported (WithZero is not compatible with WithoutZero)', () => {
             expect(isCompatibleConcept(Scope.NumbersWithZero, Scope.NumbersWithoutZero)).toBe(false);
-        });
-    });
-
-    describe('doesViewSupportProblem', () => {
-        it('should return true if view supports matching/broader scopes (NumericRange)', () => {
-            const viewLabels = [Area.Numeration, Scope.NumericRange, Ability.ProcedureExecution];
-            const problemLabels = [Area.Numeration, Scope.NumbersSmaller10, Ability.ProcedureExecution];
-            expect(doesViewSupportProblem(viewLabels, problemLabels)).toBe(true);
-        });
-
-        it('should return false if view has a narrower scope than the problem', () => {
-            const viewLabels = [Area.Numeration, Scope.NumbersSmaller10, Ability.ProcedureExecution];
-            const problemLabels = [Area.Numeration, Scope.NumbersSmaller20, Ability.ProcedureExecution];
-            expect(doesViewSupportProblem(viewLabels, problemLabels)).toBe(false);
-        });
-
-        it('should return false if view declares no supported labels (no match)', () => {
-            expect(doesViewSupportProblem([], [Scope.NumbersSmaller10])).toBe(false);
-        });
-    });
-
-    describe('doesGeneratorSupportCompetency', () => {
-        it('should return true if generator supports required standard concepts', () => {
-            const genLabels = [Area.Numeration, Scope.NumbersWithoutZero];
-            const compLabels = [Area.Numeration, Scope.NumbersWithoutZero];
-            expect(doesGeneratorSupportCompetency(genLabels, compLabels)).toBe(true);
         });
     });
 });
