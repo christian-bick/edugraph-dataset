@@ -1,8 +1,8 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Area, Scope} from 'edugraph-ts';
-import { ConfigFromSchema } from '../../types/schema.ts';
-import { hasLabel } from '../../lib/resolvers.ts';
-import { deductCompatible, resolveRangeFromLabels } from '../../lib/ontology.ts';
+import {Area, deductCompatible, Scope} from 'edugraph-ts';
+import {ConfigFromSchema} from '../../types/schema.ts';
+import {hasLabel} from '../../lib/resolvers.ts';
+import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic',
@@ -35,16 +35,7 @@ export const ArithmeticGeneratorSchema = {
         hasLabel(Scope.NumbersWithZero)
     ],
     range: [
-        [
-            Scope.NumbersSmaller10,
-            Scope.NumbersSmaller20,
-            Scope.NumbersSmaller100,
-            Scope.NumbersSmaller1000,
-            Scope.NumbersLarger10,
-            Scope.NumbersLarger20,
-            Scope.NumbersLarger100,
-            Scope.NumbersLarger1000
-        ],
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
         (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels))
     ]
 } as const;

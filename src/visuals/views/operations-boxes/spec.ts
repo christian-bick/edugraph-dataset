@@ -1,7 +1,7 @@
 import {ViewSpec} from '../../../types/view-spec.ts';
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Area, deductCompatible, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../types/schema.ts';
-import { deductCompatible, resolveRangeFromLabels } from '../../../lib/ontology.ts';
+import { resolveRangeFromLabels } from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-boxes',
@@ -27,12 +27,7 @@ export const OperationsBoxesViewSchema = {
         Area.Division
     ],
     range: [
-        [
-            Scope.NumbersSmaller10,
-            Scope.NumbersSmaller20,
-            Scope.NumbersSmaller100,
-            Scope.NumbersSmaller1000
-        ],
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
         (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels))
     ]
 } as const;
