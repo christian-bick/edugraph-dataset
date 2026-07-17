@@ -1,17 +1,15 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {ArithmeticProblem} from "../../types/problems.ts";
+import {Area} from "edugraph-ts";
 import {random} from "../../lib/random.ts";
 import {extractConfig} from "../../lib/utils.ts";
-import {ArithmeticGeneratorSchema} from "./spec.ts";
-import {Area} from "edugraph-ts";
+import {ArithmeticGeneratorConfig, ArithmeticGeneratorSchema} from "./spec.ts";
 
-export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem> {
+export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, ArithmeticGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
+    schema = ArithmeticGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-        
-        const { config } = extractConfig(ArithmeticGeneratorSchema, labels || []);
+    generate(config: ArithmeticGeneratorConfig): ProblemStub | null {
 
         const operation = config.operation;
         const allowNegatives = config.allowNegatives;

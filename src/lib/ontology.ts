@@ -73,3 +73,11 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
 
     return { min, max };
 }
+
+/**
+ * Checks if child and parent concepts are mutually compatible.
+ * Used for abilities matching where compatibility implies one is part of another.
+ */
+export function isCompatibleConcept(child: string, parent: string): boolean {
+    return isSubConceptOf(child, parent) || isSubConceptOf(parent, child);
+}

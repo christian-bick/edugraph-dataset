@@ -1,8 +1,8 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getBlankPart} from './helpers.ts';
-import {extractConfig} from '../../../lib/utils.ts';
-import {OperationsBoxesViewSchema} from './spec.ts';
+import {OperationsBoxesViewConfig, OperationsBoxesViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const operatorSymbols: { [key: string]: string } = {
@@ -16,17 +16,13 @@ const operatorSymbols: { [key: string]: string } = {
     division: '÷'
 };
 
-interface Props {
+interface CoreProps {
+    config: OperationsBoxesViewConfig;
     payload: ViewRenderPayload<'operations-boxes'>;
 }
 
-export function OperationsBoxes({ payload }: Props) {
-    const { problem, isSolutionView, labels } = payload;
-    
-    // Extract strictly typed view configuration from pedagogical labels
-    const { config } = extractConfig(OperationsBoxesViewSchema, labels || []);
-    // Just to show we consumed it properly:
-    // console.log("Extracted View Config:", config);
+const OperationsBoxesCore = ({ config, payload }: CoreProps) => {
+    const { problem, isSolutionView } = payload;
 
     const data = problem.data;
     const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
@@ -77,7 +73,9 @@ export function OperationsBoxes({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const OperationsBoxes = withConfig(OperationsBoxesViewSchema, OperationsBoxesCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

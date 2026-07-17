@@ -36,6 +36,6 @@ export function getGeneratorProblemType(genId: string): string | null {
         return null;
     }
     const content = readFileSync(genPath, 'utf8');
-    const match = content.match(/implements\s+ProblemGenerator<(\w+)>/);
-    return match ? match[1] : null;
+    const match = content.match(/implements\s+ProblemGenerator<([^>]+)>/);
+    return match ? match[1].split(',')[0].trim() : null;
 }

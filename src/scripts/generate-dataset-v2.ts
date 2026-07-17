@@ -5,6 +5,7 @@ import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync
 import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
+import { extractConfig } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
 import {Grade1Spec} from '../../config/spec/ccss/grade-01.ts';
@@ -360,10 +361,16 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
             
             setSeed(42 + trainDataset.length);
             
-            const problemStub = generator.generate({
-                labels: target.labels,
-                constraints: target.constraints || {}
-            });
+            let problemStub;
+            if (generator.schema) {
+                const { config } = extractConfig(generator.schema, target.labels);
+                problemStub = generator.generate(config);
+            } else {
+                problemStub = generator.generate({
+                    labels: target.labels,
+                    constraints: target.constraints || {}
+                });
+            }
 
             if (problemStub && !trainKeys.has(problemStub.id)) {
                 // Match views that support this problem
@@ -435,10 +442,16 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                         while (!valSuccess && valAttempts < 50) {
                             valAttempts++;
                             setSeed(42 + 10000 + valDataset.length);
-                            const valStub = generator.generate({
-                                labels: target.labels,
-                                constraints: target.constraints || {}
-                            });
+                            let valStub;
+                            if (generator.schema) {
+                                const { config } = extractConfig(generator.schema, target.labels);
+                                valStub = generator.generate(config);
+                            } else {
+                                valStub = generator.generate({
+                                    labels: target.labels,
+                                    constraints: target.constraints || {}
+                                });
+                            }
                             if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
                                 valKeys.add(valStub.id);
                                 valSuccess = true;

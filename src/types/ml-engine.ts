@@ -74,14 +74,16 @@ export interface GeneratorInput {
 /**
  * The contract for a Problem Generator (living in `src/generators/`).
  */
-export interface ProblemGenerator<TData = any> {
+export interface ProblemGenerator<TData = any, TConfig = any> {
     /** The type of problems this generates */
     type: AbstractProblem['type'];
+    /** The configuration schema exposed to the dataset orchestrator */
+    schema?: any; // Marked optional temporarily to avoid breaking unmigrated generators
     /** 
-     * Generates a single unique abstract problem based on the labels and constraints.
+     * Generates a single unique abstract problem based on the provided configuration.
      * Returns null if a valid problem could not be generated (triggers a retry).
      */
-    generate(input: GeneratorInput): ProblemStub<TData> | null;
+    generate(config: TConfig): ProblemStub<TData> | null;
 }
 
 /**
