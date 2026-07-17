@@ -15,10 +15,12 @@ describe('GeometryComposeShapesGenerator', () => {
     });
 
     it('should validate compose-shapes outputs', () => {
-        const input = {
-            labels: []
+        const config = {
+            wantsRectangle: false,
+            wantsSquare: false,
+            wantsTriangle: false
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(['rectangle', 'square']).toContain(stub!.data.target);
         expect(stub!.data.components.length).toBeGreaterThan(0);

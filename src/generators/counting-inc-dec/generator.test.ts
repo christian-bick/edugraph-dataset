@@ -17,20 +17,24 @@ describe('CountingIncDecGenerator', () => {
     });
 
     it('should generate valid inc stubs with AdditiveCount label', () => {
-        const input = { 
-            labels: [Scope.AdditiveCount] 
+        const config = { 
+            range: { min: 0, max: 10 },
+            wantsAdditive: true,
+            wantsSubtractive: false
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
     });
 
     it('should generate valid dec stubs with SubtractiveCount label', () => {
-        const input = { 
-            labels: [Scope.SubtractiveCount] 
+        const config = { 
+            range: { min: 0, max: 10 },
+            wantsAdditive: false,
+            wantsSubtractive: true
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
         expect(stub!.data.numObjects).toBeGreaterThan(1);
@@ -43,10 +47,12 @@ describe('CountingIncDecGenerator', () => {
         let foundNull = false;
         for (let i = 0; i < 100; i++) {
             setSeed(i);
-            const input = { 
-                labels: [Scope.SubtractiveCount] 
+            const config = { 
+                range: { min: 0, max: 10 },
+                wantsAdditive: false,
+                wantsSubtractive: true
             };
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             if (stub === null) {
                 foundNull = true;
                 break;

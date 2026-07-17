@@ -1,30 +1,24 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {MeasurementCompareProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {Scope} from "edugraph-ts";
-import {isSubConceptOf} from "../../lib/ontology.ts";
+import {MeasurementCompareGeneratorConfig, MeasurementCompareGeneratorSchema} from "./spec.ts";
 
-export class MeasurementCompareGenerator implements ProblemGenerator<MeasurementCompareProblem> {
+export class MeasurementCompareGenerator implements ProblemGenerator<MeasurementCompareProblem, MeasurementCompareGeneratorConfig> {
     type: AbstractProblem['type'] = 'measurement';
+    schema = MeasurementCompareGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
+    generate(config: MeasurementCompareGeneratorConfig): ProblemStub | null {
+        const { hasLength, hasWeight, wantsGreater, wantsLess } = config;
 
         const validAttributes: ('length' | 'weight')[] = [];
-        if (!labels || labels.length === 0) {
+        if (hasLength) validAttributes.push('length');
+        if (hasWeight) validAttributes.push('weight');
+        if (validAttributes.length === 0) {
+            // Default fallback if no specific scope provided
             validAttributes.push('length', 'weight');
-        } else {
-            if (labels.some(l => isSubConceptOf(l, Scope.LengthMeasurement))) validAttributes.push('length');
-            if (labels.some(l => isSubConceptOf(l, Scope.WeightMeasurement))) validAttributes.push('weight');
-            if (validAttributes.length === 0) {
-                // Default fallback if no specific scope provided
-                validAttributes.push('length', 'weight');
-            }
         }
 
         const attribute = validAttributes[Math.floor(random() * validAttributes.length)];
-        const wantsGreater = labels.some(l => isSubConceptOf(l, Scope.Greater));
-        const wantsLess = labels.some(l => isSubConceptOf(l, Scope.Less));
         let relation: string;
         if (attribute === 'length') {
             if (wantsGreater && !wantsLess) relation = 'longer';

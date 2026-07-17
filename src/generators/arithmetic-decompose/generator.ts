@@ -1,16 +1,16 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {ArithmeticDecomposeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels} from "../../lib/ontology.ts";
+import {ArithmeticDecomposeGeneratorConfig, ArithmeticDecomposeGeneratorSchema} from "./spec.ts";
 
-export class ArithmeticDecomposeGenerator implements ProblemGenerator<ArithmeticDecomposeProblem> {
+export class ArithmeticDecomposeGenerator implements ProblemGenerator<ArithmeticDecomposeProblem, ArithmeticDecomposeGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
+    schema = ArithmeticDecomposeGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-
-
-        const resolvedRange = resolveRangeFromLabels(labels || []);
+    generate(config: ArithmeticDecomposeGeneratorConfig): ProblemStub | null {
+        const resolvedRange = config.range;
+        if (!resolvedRange) return null;
+        
         const targetNumber = Math.floor(random() * (resolvedRange.max - 3 + 1)) + 3; // 3 to resolved max (usually 10)
         
         const pairs: [number, number][] = [];

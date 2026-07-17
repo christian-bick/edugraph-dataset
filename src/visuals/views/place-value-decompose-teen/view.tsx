@@ -1,13 +1,16 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { TenFrame } from '../../components/TenFrame.tsx';
+import { PlaceValueDecomposeTeenViewConfig, PlaceValueDecomposeTeenViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: PlaceValueDecomposeTeenViewConfig;
     payload: ViewRenderPayload<'place-value-decompose-teen'>;
 }
 
-export function PlaceValueDecomposeTeen({ payload }: Props) {
+const PlaceValueDecomposeTeenCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const { ones, target } = problem.data;
 
@@ -44,7 +47,9 @@ export function PlaceValueDecomposeTeen({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const PlaceValueDecomposeTeen = withConfig(PlaceValueDecomposeTeenViewSchema, PlaceValueDecomposeTeenCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

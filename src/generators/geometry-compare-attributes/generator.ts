@@ -1,24 +1,20 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryCompareAttributesProblem} from "../../types/problems.ts";
-import {Area} from "edugraph-ts";
-import {isSubConceptOf} from "../../lib/ontology.ts";
 import {random} from "../../lib/random.ts";
+import {GeometryCompareAttributesGeneratorConfig, GeometryCompareAttributesGeneratorSchema} from "./spec.ts";
 
-export class GeometryCompareAttributesGenerator implements ProblemGenerator<GeometryCompareAttributesProblem> {
+export class GeometryCompareAttributesGenerator implements ProblemGenerator<GeometryCompareAttributesProblem, GeometryCompareAttributesGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
+    schema = GeometryCompareAttributesGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-
+    generate(config: GeometryCompareAttributesGeneratorConfig): ProblemStub | null {
         const attribute = random() > 0.5 ? 'sides' : 'corners';
 
         const validShapes = new Set<string>();
-        if (labels) {
-            if (labels.some(l => isSubConceptOf(l, Area.Triangle))) validShapes.add('triangle');
-            if (labels.some(l => isSubConceptOf(l, Area.Square))) validShapes.add('square');
-            if (labels.some(l => isSubConceptOf(l, Area.Rectangle))) validShapes.add('rectangle');
-            if (labels.some(l => isSubConceptOf(l, Area.Polygon))) validShapes.add('hexagon'); // simplistic fallback
-        }
+        if (config.wantsTriangle) validShapes.add('triangle');
+        if (config.wantsSquare) validShapes.add('square');
+        if (config.wantsRectangle) validShapes.add('rectangle');
+        if (config.wantsPolygon) validShapes.add('hexagon'); // simplistic fallback
         
         let pool = Array.from(validShapes);
         if (pool.length < 2) {

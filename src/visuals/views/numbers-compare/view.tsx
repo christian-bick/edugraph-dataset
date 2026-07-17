@@ -2,13 +2,16 @@ import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getComparisonSymbol} from './helpers.ts';
+import {NumbersCompareViewConfig, NumbersCompareViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: NumbersCompareViewConfig;
     payload: ViewRenderPayload<'numbers-compare'>;
 }
 
-export function NumbersCompare({ payload }: Props) {
+const NumbersCompareCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -29,7 +32,9 @@ export function NumbersCompare({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const NumbersCompare = withConfig(NumbersCompareViewSchema, NumbersCompareCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

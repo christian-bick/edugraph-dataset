@@ -1,13 +1,16 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { TenFrame } from '../../components/TenFrame.tsx';
+import { PlaceValueComposeTeenViewConfig, PlaceValueComposeTeenViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: PlaceValueComposeTeenViewConfig;
     payload: ViewRenderPayload<'place-value-compose-teen'>;
 }
 
-export function PlaceValueComposeTeen({ payload }: Props) {
+const PlaceValueComposeTeenCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const { ones, target } = problem.data;
 
@@ -44,7 +47,9 @@ export function PlaceValueComposeTeen({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const PlaceValueComposeTeen = withConfig(PlaceValueComposeTeenViewSchema, PlaceValueComposeTeenCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

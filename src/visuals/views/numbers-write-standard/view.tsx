@@ -1,8 +1,11 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
+import { NumbersWriteStandardViewConfig, NumbersWriteStandardViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: NumbersWriteStandardViewConfig;
     payload: ViewRenderPayload<'numbers-write-standard'>;
 }
 
@@ -32,7 +35,7 @@ function DoubleTenFrame({ number }: { number: number }) {
     );
 }
 
-export function NumbersWriteStandard({ payload }: Props) {
+const NumbersWriteStandardCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     const number = data.number;
@@ -66,7 +69,9 @@ export function NumbersWriteStandard({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const NumbersWriteStandard = withConfig(NumbersWriteStandardViewSchema, NumbersWriteStandardCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

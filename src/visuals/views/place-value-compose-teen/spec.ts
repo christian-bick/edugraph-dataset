@@ -1,5 +1,7 @@
 import {ViewSpec} from '../../../types/view-spec.ts';
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Area, deductCompatible, Scope} from 'edugraph-ts';
+import { ConfigFromSchema } from '../../../types/schema.ts';
+import { resolveRangeFromLabels } from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'place-value-compose-teen',
@@ -9,4 +11,20 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.NumbersWithZero,
         Ability.ProcedureExecution
-    ],};
+    ]
+};
+
+export const PlaceValueComposeTeenGeneralLabels = [
+    Scope.PhysicalNumbers,
+    Ability.ProcedureExecution
+];
+
+export const PlaceValueComposeTeenViewSchema = {
+    // TODO: Consider other ontological properties like Scope.PhysicalNumbers
+    range: [
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
+        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+    ]
+} as const;
+
+export type PlaceValueComposeTeenViewConfig = ConfigFromSchema<typeof PlaceValueComposeTeenViewSchema>;

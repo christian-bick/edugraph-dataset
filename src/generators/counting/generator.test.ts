@@ -16,11 +16,11 @@ describe('CountingGenerator', () => {
     });
 
     it('should respect resolved ranges from labels', () => {
-        const input = { 
-            labels: [Scope.NumbersSmaller10] 
+        const config = { 
+            range: { min: 0, max: 10 }
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             if (stub) {
                 expect(stub.data.numObjects).toBeGreaterThanOrEqual(0);
                 expect(stub.data.numObjects).toBeLessThanOrEqual(10);
@@ -29,10 +29,10 @@ describe('CountingGenerator', () => {
     });
 
     it('should generate valid stubs', () => {
-        const input = { 
-            labels: [Scope.NumbersSmaller10] 
+        const config = { 
+            range: { min: 0, max: 10 }
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(stub!.data.numObjects).toBeDefined();
     });

@@ -1,33 +1,19 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryIdentityProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Area} from "edugraph-ts";
-import {isSubConceptOf} from "../../lib/ontology.ts";
+import {GeometryIdentityGeneratorConfig, GeometryIdentityGeneratorSchema} from "./spec.ts";
 
-export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdentityProblem> {
+export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdentityProblem, GeometryIdentityGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
+    schema = GeometryIdentityGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
+    generate(config: GeometryIdentityGeneratorConfig): ProblemStub | null {
+        let validShapes = config.shapes || [];
 
-        const validShapes: string[] = [];
-        if (!labels || labels.length === 0) {
-            validShapes.push('triangle', 'square', 'rectangle', 'circle', 'cube', 'sphere', 'cone', 'cylinder', 'hexagon');
-        } else {
-            if (labels.some(l => isSubConceptOf(l, Area.Triangle))) validShapes.push('triangle');
-            if (labels.some(l => isSubConceptOf(l, Area.Square))) validShapes.push('square');
-            if (labels.some(l => isSubConceptOf(l, Area.Rectangle))) validShapes.push('rectangle');
-            if (labels.some(l => isSubConceptOf(l, Area.Circle))) validShapes.push('circle');
-            if (labels.some(l => isSubConceptOf(l, Area.Hexagon))) validShapes.push('hexagon');
-            if (labels.some(l => isSubConceptOf(l, Area.Cube))) validShapes.push('cube');
-            if (labels.some(l => isSubConceptOf(l, Area.Sphere))) validShapes.push('sphere');
-            if (labels.some(l => isSubConceptOf(l, Area.Cone))) validShapes.push('cone');
-            if (labels.some(l => isSubConceptOf(l, Area.Cylinder))) validShapes.push('cylinder');
-            
-            if (validShapes.length === 0) {
-                // Default fallback to basic 2D shapes
-                validShapes.push('triangle', 'square', 'rectangle', 'circle');
-            }
+        if (validShapes.length === 0) {
+            // Default fallback to basic 2D shapes
+            validShapes = [Area.Triangle, Area.Square, Area.Rectangle, Area.Circle];
         }
 
         const shape = validShapes[Math.floor(random() * validShapes.length)];

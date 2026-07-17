@@ -1,10 +1,9 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {GeometryBuildShapeViewConfig, GeometryBuildShapeViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
+import {Area} from 'edugraph-ts';
 import '../../../tailwind.css';
-
-interface Props {
-    payload: ViewRenderPayload<'geometry-build-shape'>;
-}
 
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     const commonProps = {
@@ -42,13 +41,23 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     return null;
 }
 
-export function GeometryBuildShape({ payload }: Props) {
-    const { problem, isSolutionView } = payload;
-    const data = problem.data;
+interface CoreProps {
+    config: GeometryBuildShapeViewConfig;
+    payload: ViewRenderPayload<'geometry-build-shape'>;
+}
 
-    const target = data.target || 'triangle';
-    const sides = data.sides || 3;
-    const corners = data.corners || 3;
+const GeometryBuildShapeCore = ({ config, payload }: CoreProps) => {
+    const { isSolutionView } = payload;
+
+    const shapeConfigMap: Record<string, { target: string, sides: number, corners: number }> = {
+        [Area.Triangle]: { target: 'triangle', sides: 3, corners: 3 },
+        [Area.Square]: { target: 'square', sides: 4, corners: 4 },
+        [Area.Rectangle]: { target: 'rectangle', sides: 4, corners: 4 },
+        [Area.Hexagon]: { target: 'hexagon', sides: 6, corners: 6 },
+    };
+
+    // Default to triangle if for some reason targetShape is missing
+    const { target, sides, corners } = shapeConfigMap[config.targetShape || Area.Triangle] || shapeConfigMap[Area.Triangle];
 
     const promptText = `To build a ${target}, how many sticks (sides) and clay balls (corners) do you need?`;
     const options = ['3 sticks, 3 balls', '4 sticks, 4 balls', '6 sticks, 6 balls'];
@@ -99,7 +108,9 @@ export function GeometryBuildShape({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryBuildShape = withConfig(GeometryBuildShapeViewSchema, GeometryBuildShapeCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

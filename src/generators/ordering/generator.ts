@@ -1,7 +1,7 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {OrderingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels} from "../../lib/ontology.ts";
+import {OrderingGeneratorConfig, OrderingGeneratorSchema} from "./spec.ts";
 
 function shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];
@@ -12,19 +12,31 @@ function shuffleArray<T>(array: T[]): T[] {
     return shuffled;
 }
 
-export class OrderingGenerator implements ProblemGenerator<OrderingProblem> {
+export class OrderingGenerator implements ProblemGenerator<OrderingProblem, OrderingGeneratorConfig> {
     type: AbstractProblem['type'] = 'ordering';
+    schema = OrderingGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-        const resolvedRange = resolveRangeFromLabels(labels || []);
+    generate(config: OrderingGeneratorConfig): ProblemStub | null {
+        const resolvedRange = config.range;
+        const allowNegatives = config.allowNegatives;
+        const includeZero = config.includeZero;
+
+        if (!resolvedRange) return null;
         
+        const generateFromRange = (forceZero = false) => {
+            if (forceZero) return 0;
+            let n = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
+            if (allowNegatives && random() > 0.5) n = -n;
+            if (!includeZero && n === 0) return random() > 0.5 ? 1 : -1;
+            return n;
+        };
+
         const numberSet = new Set<number>();
         const maxAttempts = 100;
         let attempts = 0;
         
         while (numberSet.size < 5 && attempts < maxAttempts) {
-            const num = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
+            const num = generateFromRange();
             numberSet.add(num);
             attempts++;
         }

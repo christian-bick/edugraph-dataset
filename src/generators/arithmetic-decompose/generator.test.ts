@@ -15,11 +15,11 @@ describe('ArithmeticDecomposeGenerator', () => {
     });
 
     it('should generate valid decomposition pairs', () => {
-        const input = {
-            labels: []
+        const config = {
+            range: { min: 1, max: 10 }
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             
             const target = stub!.data.targetNumber;

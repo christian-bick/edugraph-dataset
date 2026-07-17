@@ -15,10 +15,12 @@ describe('GeometryBuildShapeGenerator', () => {
     });
 
     it('should validate build-shape sticks and corners counts', () => {
-        const input = {
-            labels: []
+        const config = {
+            wantsTriangle: false,
+            wantsSquare: false,
+            wantsRectangle: false
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         
         const target = stub!.data.target;

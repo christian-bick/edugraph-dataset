@@ -1,15 +1,16 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {WritingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels} from "../../lib/ontology.ts";
+import {WritingGeneratorConfig, WritingGeneratorSchema} from "./spec.ts";
 
-export class WritingGenerator implements ProblemGenerator<WritingProblem> {
+export class WritingGenerator implements ProblemGenerator<WritingProblem, WritingGeneratorConfig> {
     type: AbstractProblem['type'] = 'writing';
+    schema = WritingGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
+    generate(config: WritingGeneratorConfig): ProblemStub | null {
+        const resolvedRange = config.range;
+        if (!resolvedRange) return null;
 
-        const resolvedRange = resolveRangeFromLabels(labels || []);
         const minNum = resolvedRange.min;
         const maxNum = resolvedRange.max;
         const currentNum = Math.floor(random() * (maxNum - minNum + 1)) + minNum;

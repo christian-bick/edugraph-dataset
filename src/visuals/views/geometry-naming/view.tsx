@@ -1,8 +1,11 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {GeometryNamingViewConfig, GeometryNamingViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: GeometryNamingViewConfig;
     payload: ViewRenderPayload<'geometry-naming'>;
 }
 
@@ -94,7 +97,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     return null;
 }
 
-export function GeometryNaming({ payload }: Props) {
+const GeometryNamingCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -152,7 +155,9 @@ export function GeometryNaming({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryNaming = withConfig(GeometryNamingViewSchema, GeometryNamingCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -1,15 +1,17 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {MeasurementStandardProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels} from "../../lib/ontology.ts";
+import {MeasurementGeneratorConfig, MeasurementGeneratorSchema} from "./spec.ts";
 
-export class MeasurementGenerator implements ProblemGenerator<MeasurementStandardProblem> {
+export class MeasurementGenerator implements ProblemGenerator<MeasurementStandardProblem, MeasurementGeneratorConfig> {
     type: AbstractProblem['type'] = 'measurement';
+    schema = MeasurementGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
+    generate(config: MeasurementGeneratorConfig): ProblemStub | null {
+        const resolvedRange = config.range;
 
-        const resolvedRange = resolveRangeFromLabels(labels || []);
+        if (!resolvedRange) return null;
+
         const bandLength = resolvedRange.max;
         const minProblemLength = bandLength * 0.1;
         const problemLength = parseFloat((random() * (bandLength - minProblemLength) + minProblemLength).toFixed(1));

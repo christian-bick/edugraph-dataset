@@ -1,17 +1,20 @@
-import { Scope, Ability } from 'edugraph-ts';
+import { Scope } from 'edugraph-ts';
 import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { generatePositions } from '../../helpers/counting-helpers.ts';
+import { CountingObjectsCountOutViewConfig, CountingObjectsCountOutViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
-interface Props {
+interface CoreProps {
+    config: CountingObjectsCountOutViewConfig;
     payload: ViewRenderPayload<'counting-objects-count-out'>;
 }
 
-export function CountingObjectsCountOut({ payload }: Props) {
+const CountingObjectsCountOutCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const { numObjects } = problem.data;
     
@@ -25,9 +28,9 @@ export function CountingObjectsCountOut({ payload }: Props) {
     }, [problem.id, numObjects]);
 
     let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
-    if (payload.labels.includes(Scope.LinearArrangement)) arrangement = 'line';
-    else if (payload.labels.includes(Scope.CircularArrangement)) arrangement = 'circle';
-    else if (payload.labels.includes(Scope.ScatteredArrangement)) arrangement = 'scattered';
+    if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';
+    else if (config.arrangement === Scope.CircularArrangement) arrangement = 'circle';
+    else if (config.arrangement === Scope.ScatteredArrangement) arrangement = 'scattered';
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
@@ -82,6 +85,8 @@ export function CountingObjectsCountOut({ payload }: Props) {
         </div>
     );
 }
+
+export const CountingObjectsCountOut = withConfig(CountingObjectsCountOutViewSchema, CountingObjectsCountOutCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

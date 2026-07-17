@@ -1,5 +1,7 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import { OperationsVerticalViewConfig, OperationsVerticalViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const operatorSymbols: { [key: string]: string } = {
@@ -13,11 +15,12 @@ const operatorSymbols: { [key: string]: string } = {
     division: '÷'
 };
 
-interface Props {
+interface CoreProps {
+    config: OperationsVerticalViewConfig;
     payload: ViewRenderPayload<'operations-vertical'>;
 }
 
-export function OperationsVertical({ payload }: Props) {
+const OperationsVerticalCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
@@ -37,7 +40,9 @@ export function OperationsVertical({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const OperationsVertical = withConfig(OperationsVerticalViewSchema, OperationsVerticalCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

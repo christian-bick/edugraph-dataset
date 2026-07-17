@@ -36,7 +36,7 @@ export const ArithmeticGeneratorSchema = {
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels))
+        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
     ]
 } as const;
 

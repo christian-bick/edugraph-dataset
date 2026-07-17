@@ -1,7 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {MeasurementCompareGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
-import {Scope} from 'edugraph-ts';
 
 describe('MeasurementCompareGenerator', () => {
     let generator: MeasurementCompareGenerator;
@@ -16,11 +15,14 @@ describe('MeasurementCompareGenerator', () => {
     });
 
     it('should validate direct-compare length longer relation', () => {
-        const input = {
-            labels: [Scope.LengthMeasurement, Scope.Greater]
+        const config = {
+            hasLength: true,
+            hasWeight: false,
+            wantsGreater: true,
+            wantsLess: false
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.attribute).toBe('length');
             expect(stub!.data.relation).toBe('longer');
@@ -35,11 +37,14 @@ describe('MeasurementCompareGenerator', () => {
     });
 
     it('should validate direct-compare length shorter relation', () => {
-        const input = {
-            labels: [Scope.LengthMeasurement, Scope.Less]
+        const config = {
+            hasLength: true,
+            hasWeight: false,
+            wantsGreater: false,
+            wantsLess: true
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.attribute).toBe('length');
             expect(stub!.data.relation).toBe('shorter');
@@ -54,11 +59,14 @@ describe('MeasurementCompareGenerator', () => {
     });
 
     it('should validate direct-compare weight heavier relation', () => {
-        const input = {
-            labels: [Scope.WeightMeasurement, Scope.Greater]
+        const config = {
+            hasLength: false,
+            hasWeight: true,
+            wantsGreater: true,
+            wantsLess: false
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.attribute).toBe('weight');
             expect(stub!.data.relation).toBe('heavier');

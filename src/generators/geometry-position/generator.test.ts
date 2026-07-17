@@ -16,10 +16,9 @@ describe('GeometryPositionGenerator', () => {
     });
 
     it('should validate position mode mappings', () => {
-        const input = {
-            labels: [Scope.Below]
-        };
-        const stub = generator.generate(input);
+        const stub = generator.generate({
+            relations: [Scope.Below]
+        });
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('below');
         expect(stub!.data.answer).toBe('below');

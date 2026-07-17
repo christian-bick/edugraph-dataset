@@ -1,18 +1,20 @@
-import {Scope} from 'edugraph-ts';
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {sortNumbers} from './helpers.ts';
+import { NumbersOrderViewConfig, NumbersOrderViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: NumbersOrderViewConfig;
     payload: ViewRenderPayload<'numbers-order'>;
 }
 
-export function NumbersOrder({ payload }: Props) {
+const NumbersOrderCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const isDesc = payload.labels.includes(Scope.Most);
+    const isDesc = config.isDesc;
 
     const sortedNumbers = useMemo(() => {
         return sortNumbers(data.numbers, isDesc);
@@ -51,7 +53,9 @@ export function NumbersOrder({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const NumbersOrder = withConfig(NumbersOrderViewSchema, NumbersOrderCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

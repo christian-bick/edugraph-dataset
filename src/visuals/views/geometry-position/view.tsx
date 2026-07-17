@@ -1,13 +1,16 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getBallPosition} from './helpers.ts';
+import {GeometryPositionViewConfig, GeometryPositionViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: GeometryPositionViewConfig;
     payload: ViewRenderPayload<'geometry-position'>;
 }
 
-export function GeometryPosition({ payload }: Props) {
+const GeometryPositionCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -63,7 +66,9 @@ export function GeometryPosition({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryPosition = withConfig(GeometryPositionViewSchema, GeometryPositionCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -1,25 +1,25 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {ComparisonProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels, isSubConceptOf} from "../../lib/ontology.ts";
-import {Scope} from "edugraph-ts";
+import {ComparisonGeneratorConfig, ComparisonGeneratorSchema} from "./spec.ts";
 
-export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem> {
+export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, ComparisonGeneratorConfig> {
     type: AbstractProblem['type'] = 'comparison';
+    schema = ComparisonGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
+    generate(config: ComparisonGeneratorConfig): ProblemStub | null {
+        const resolvedRange = config.range;
+        if (!resolvedRange) return null;
 
-        const resolvedRange = resolveRangeFromLabels(labels || []);
         const min = resolvedRange.min;
         const max = resolvedRange.max;
 
         let num1 = Math.floor(random() * (max - min + 1)) + min;
         let num2 = Math.floor(random() * (max - min + 1)) + min;
 
-        const wantsGreater = labels.some(l => isSubConceptOf(l, Scope.Greater));
-        const wantsLess = labels.some(l => isSubConceptOf(l, Scope.Less));
-        const wantsEqual = labels.some(l => isSubConceptOf(l, Scope.Equal));
+        const wantsGreater = config.wantsGreater;
+        const wantsLess = config.wantsLess;
+        const wantsEqual = config.wantsEqual;
 
         let comparisonType = 'random';
         const possible: string[] = [];

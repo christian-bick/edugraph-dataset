@@ -1,10 +1,8 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {GeometryClassifyDimViewConfig, GeometryClassifyDimViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
-
-interface Props {
-    payload: ViewRenderPayload<'geometry-classify-dim'>;
-}
 
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     const commonProps = {
@@ -85,7 +83,12 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     return null;
 }
 
-export function GeometryClassifyDim({ payload }: Props) {
+interface CoreProps {
+    config: GeometryClassifyDimViewConfig;
+    payload: ViewRenderPayload<'geometry-classify-dim'>;
+}
+
+const GeometryClassifyDimCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -132,7 +135,9 @@ export function GeometryClassifyDim({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryClassifyDim = withConfig(GeometryClassifyDimViewSchema, GeometryClassifyDimCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -1,5 +1,6 @@
 import {ViewSpec} from '../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
+import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-compare-matching',
@@ -8,3 +9,14 @@ export const spec: ViewSpec = {
         Ability.ProcedureExecution
     ],
 };
+
+export const NumbersCompareMatchingGeneralLabels = [
+    Scope.PhysicalNumbers,
+    Ability.ProcedureExecution
+];
+
+export const NumbersCompareMatchingViewSchema = {
+    // TODO: add ontological relations where beneficial
+} as const;
+
+export type NumbersCompareMatchingViewConfig = ConfigFromSchema<typeof NumbersCompareMatchingViewSchema>;

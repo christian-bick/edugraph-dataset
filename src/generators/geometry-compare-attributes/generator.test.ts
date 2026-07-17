@@ -15,10 +15,13 @@ describe('GeometryCompareAttributesGenerator', () => {
     });
 
     it('should validate compare-attributes sides/corners comparison math', () => {
-        const input = {
-            labels: []
+        const config = {
+            wantsTriangle: false,
+            wantsSquare: false,
+            wantsRectangle: false,
+            wantsPolygon: false
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         
         const { shape1, shape2, val1, val2, attribute, answer } = stub!.data;

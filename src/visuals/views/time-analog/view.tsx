@@ -3,16 +3,19 @@ import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {formatTime, getClockAngles, getTickMarks} from './helpers.ts';
+import { TimeAnalogViewConfig, TimeAnalogViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: TimeAnalogViewConfig;
     payload: ViewRenderPayload<'time-analog'>;
 }
 
-export function TimeAnalog({ payload }: Props) {
+const TimeAnalogCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const isReverse = payload.labels.includes(Ability.VisualArticulation);
+    const isReverse = config.isReverse;
 
     const showHands = !isReverse || isSolutionView;
     const showTime = isReverse || isSolutionView;
@@ -92,7 +95,9 @@ export function TimeAnalog({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const TimeAnalog = withConfig(TimeAnalogViewSchema, TimeAnalogCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

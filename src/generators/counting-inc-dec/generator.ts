@@ -1,25 +1,24 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {CountingIncDecProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels, isSubConceptOf} from "../../lib/ontology.ts";
-import {Scope} from "edugraph-ts";
+import {CountingIncDecGeneratorConfig, CountingIncDecGeneratorSchema} from "./spec.ts";
 
-export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecProblem> {
+export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecProblem, CountingIncDecGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
+    schema = CountingIncDecGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-
+    generate(config: CountingIncDecGeneratorConfig): ProblemStub | null {
         let incDecType: 'inc' | 'dec' = 'inc';
-        if (labels && labels.some(l => isSubConceptOf(l, Scope.SubtractiveCount))) {
+        if (config.wantsSubtractive) {
             incDecType = 'dec';
-        } else if (labels && labels.some(l => isSubConceptOf(l, Scope.AdditiveCount))) {
+        } else if (config.wantsAdditive) {
             incDecType = 'inc';
         } else {
             incDecType = random() > 0.5 ? 'inc' : 'dec';
         }
 
-        const resolvedRange = resolveRangeFromLabels(labels || []);
+        const resolvedRange = config.range;
+        if (!resolvedRange) return null;
         let maxCount = resolvedRange.max;
         let minCount = resolvedRange.min;
         

@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {MeasurementAttributeGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('MeasurementAttributeGenerator', () => {
     let generator: MeasurementAttributeGenerator;
@@ -15,10 +16,10 @@ describe('MeasurementAttributeGenerator', () => {
     });
 
     it('should validate attribute-type modes', () => {
-        const input = {
-            labels: []
+        const config = {
+            attribute: Scope.WeightMeasurement
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(stub!.data.attribute).toBe('weight');
     });

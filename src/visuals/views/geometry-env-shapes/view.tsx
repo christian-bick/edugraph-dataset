@@ -1,12 +1,15 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {GeometryEnvShapesViewConfig, GeometryEnvShapesViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: GeometryEnvShapesViewConfig;
     payload: ViewRenderPayload<'geometry-env-shapes'>;
 }
 
-export function GeometryEnvShapes({ payload }: Props) {
+const GeometryEnvShapesCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -63,7 +66,9 @@ export function GeometryEnvShapes({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryEnvShapes = withConfig(GeometryEnvShapesViewSchema, GeometryEnvShapesCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

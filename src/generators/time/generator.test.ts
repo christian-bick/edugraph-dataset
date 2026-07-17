@@ -17,40 +17,40 @@ describe('TimeGenerator', () => {
 
     describe('generate', () => {
         it('should generate valid problem stubs', () => {
-            const inputs = [
-                { labels: [Scope.HourIntervals] },
-                { labels: [Scope.MinuteIntervals] },
-                { labels: [Scope.SecondIntervals] }
+            const configs = [
+                { intervalLabel: Scope.HourIntervals },
+                { intervalLabel: Scope.MinuteIntervals },
+                { intervalLabel: Scope.SecondIntervals }
             ];
-            inputs.forEach(input => {
-                const stub = generator.generate(input);
+            configs.forEach(config => {
+                const stub = generator.generate(config);
                 expect(stub).not.toBeNull();
                 expect(stub!.id).toBeDefined();
                 expect(stub!.data.time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
                 let expectedInterval = 3600;
-                if (input.labels.includes(Scope.SecondIntervals)) expectedInterval = 1;
-                else if (input.labels.includes(Scope.MinuteIntervals)) expectedInterval = 60;
+                if (config.intervalLabel === Scope.SecondIntervals) expectedInterval = 1;
+                else if (config.intervalLabel === Scope.MinuteIntervals) expectedInterval = 60;
                 expect(stub!.data.interval).toBe(expectedInterval);
             });
         });
 
         it('should be deterministic with the same seed', () => {
-            const input = { labels: [Scope.HourIntervals] };
+            const config = { intervalLabel: Scope.HourIntervals };
             setSeed(123);
-            const stub1 = generator.generate(input);
+            const stub1 = generator.generate(config);
             setSeed(123);
-            const stub2 = generator.generate(input);
+            const stub2 = generator.generate(config);
             expect(stub1).toEqual(stub2);
         });
     });
 
     describe('generate edge cases', () => {
         it('should align time with the requested interval (1 hour)', () => {
-            const input = { 
-                labels: [] 
+            const config = { 
+                intervalLabel: Scope.HourIntervals 
             };
             for (let i = 0; i < 50; i++) {
-                const stub = generator.generate(input);
+                const stub = generator.generate(config);
                 if (stub) {
                     const [h, m, s] = stub.data.time.split(':').map(Number);
                     expect(m).toBe(0);
@@ -61,11 +61,11 @@ describe('TimeGenerator', () => {
         });
 
         it('should align time with the requested interval (15 minutes)', () => {
-            const input = { 
-                labels: [] 
+            const config = { 
+                intervalLabel: Scope.HourIntervals 
             };
             for (let i = 0; i < 50; i++) {
-                const stub = generator.generate(input);
+                const stub = generator.generate(config);
                 if (stub) {
                     const [, m, s] = stub.data.time.split(':').map(Number);
                     expect(m % 15).toBe(0);
@@ -75,11 +75,11 @@ describe('TimeGenerator', () => {
         });
 
         it('should never exceed 23:59:59', () => {
-            const input = { 
-                labels: [] 
+            const config = { 
+                intervalLabel: Scope.HourIntervals 
             };
             for (let i = 0; i < 100; i++) {
-                const stub = generator.generate(input);
+                const stub = generator.generate(config);
                 if (stub) {
                     const [h, m, s] = stub.data.time.split(':').map(Number);
                     expect(h).toBeLessThan(24);

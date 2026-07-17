@@ -2,9 +2,12 @@ import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getTracingPaths} from './helpers.ts';
+import { NumbersWriteStrokeViewConfig, NumbersWriteStrokeViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: NumbersWriteStrokeViewConfig;
     payload: ViewRenderPayload<'numbers-write-stroke'>;
 }
 
@@ -83,7 +86,7 @@ function DoubleTenFrame({ number }: { number: number }) {
     );
 }
 
-export function NumbersWriteStroke({ payload }: Props) {
+const NumbersWriteStrokeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     const number = data.number;
@@ -121,7 +124,9 @@ export function NumbersWriteStroke({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const NumbersWriteStroke = withConfig(NumbersWriteStrokeViewSchema, NumbersWriteStrokeCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -1,20 +1,21 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryPositionProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {isSubConceptOf} from "../../lib/ontology.ts";
 import {Scope} from "edugraph-ts";
+import {GeometryPositionGeneratorConfig, GeometryPositionGeneratorSchema} from "./spec.ts";
 
-export class GeometryPositionGenerator implements ProblemGenerator<GeometryPositionProblem> {
+export class GeometryPositionGenerator implements ProblemGenerator<GeometryPositionProblem, GeometryPositionGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
+    schema = GeometryPositionGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels = [] } = input;
+    generate(config: GeometryPositionGeneratorConfig): ProblemStub | null {
+        const relations = config.relations || [];
 
         const possible: string[] = [];
-        if (labels.some(l => isSubConceptOf(l, Scope.Above))) possible.push('above');
-        if (labels.some(l => isSubConceptOf(l, Scope.Below))) possible.push('below');
-        if (labels.some(l => isSubConceptOf(l, Scope.Beside))) possible.push('beside');
-        if (labels.some(l => isSubConceptOf(l, Scope.Behind))) possible.push('behind');
+        if (relations.includes(Scope.Above)) possible.push('above');
+        if (relations.includes(Scope.Below)) possible.push('below');
+        if (relations.includes(Scope.Beside)) possible.push('beside');
+        if (relations.includes(Scope.Behind)) possible.push('behind');
 
         let relation = 'above';
         if (possible.length > 0) {

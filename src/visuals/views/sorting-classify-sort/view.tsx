@@ -3,6 +3,8 @@ import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {generateScatteredPositions} from './helpers.ts';
+import { SortingClassifySortViewConfig, SortingClassifySortViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 interface Item {
@@ -16,7 +18,8 @@ const COLOR_MAP: Record<string, string> = {
     green: '#14b8a6'
 };
 
-interface Props {
+interface CoreProps {
+    config: SortingClassifySortViewConfig;
     payload: ViewRenderPayload<'sorting-classify-sort'>;
 }
 
@@ -46,7 +49,7 @@ function ItemSVG({ item, size = 40 }: { item: Item; size?: number }) {
     }
 }
 
-export function SortingClassifySort({ payload }: Props) {
+const SortingClassifySortCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -186,7 +189,9 @@ export function SortingClassifySort({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const SortingClassifySort = withConfig(SortingClassifySortViewSchema, SortingClassifySortCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -1,13 +1,16 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {TenFrame} from '../../components/TenFrame.tsx';
+import { PlaceValueMakeTenViewConfig, PlaceValueMakeTenViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: PlaceValueMakeTenViewConfig;
     payload: ViewRenderPayload<'place-value-make-ten'>;
 }
 
-export function PlaceValueMakeTen({ payload }: Props) {
+const PlaceValueMakeTenCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const { givenNumber, missingNumber } = problem.data;
 
@@ -44,7 +47,9 @@ export function PlaceValueMakeTen({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const PlaceValueMakeTen = withConfig(PlaceValueMakeTenViewSchema, PlaceValueMakeTenCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

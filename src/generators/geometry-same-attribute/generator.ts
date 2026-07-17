@@ -1,19 +1,18 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometrySameAttributeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {isSubConceptOf} from "../../lib/ontology.ts";
-import {Scope} from "edugraph-ts";
+import {GeometrySameAttributeGeneratorConfig, GeometrySameAttributeGeneratorSchema} from "./spec.ts";
 
-export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometrySameAttributeProblem> {
+export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometrySameAttributeProblem, GeometrySameAttributeGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
+    schema = GeometrySameAttributeGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels = [] } = input;
+    generate(config: GeometrySameAttributeGeneratorConfig): ProblemStub | null {
 
         const possible: string[] = [];
-        if (labels.some(l => isSubConceptOf(l, Scope.Rollable))) possible.push('can-roll');
-        if (labels.some(l => isSubConceptOf(l, Scope.Stackable))) possible.push('can-stack');
-        if (labels.some(l => isSubConceptOf(l, Scope.FlatFaces))) possible.push('flat-faces');
+        if (config.rollable) possible.push('can-roll');
+        if (config.stackable) possible.push('can-stack');
+        if (config.flatFaces) possible.push('flat-faces');
 
         let attribute = 'can-roll';
         if (possible.length > 0) {

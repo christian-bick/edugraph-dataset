@@ -16,11 +16,13 @@ describe('CountingClassifySortGenerator', () => {
     });
 
     it('should validate classify-sort least/most logic and tie filtering', () => {
-        const input = {
-            labels: [Scope.Most]
+        const config = {
+            range: { min: 1, max: 10 },
+            wantsMost: true,
+            wantsLeast: false
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             if (stub) {
                 expect(stub.data.relation).toBe('most');
                 

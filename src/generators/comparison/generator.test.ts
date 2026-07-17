@@ -18,7 +18,10 @@ describe('ComparisonGenerator', () => {
     it('should respect resolved ranges', () => {
         for (let i = 0; i < 100; i++) {
             const stub = generator.generate({ 
-                labels: [Scope.NumbersSmaller10] 
+                range: { min: 0, max: 10 },
+                wantsGreater: false,
+                wantsLess: false,
+                wantsEqual: false
             });
             if (stub) {
                 expect(stub.data.num1).toBeGreaterThanOrEqual(0);
@@ -31,11 +34,14 @@ describe('ComparisonGenerator', () => {
     });
 
     it('should respect greater constraint', () => {
-        const input = {
-            labels: [Scope.NumbersSmaller20, Scope.Greater]
+        const config = {
+            range: { min: 0, max: 20 },
+            wantsGreater: true,
+            wantsLess: false,
+            wantsEqual: false
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
             expect(stub!.data.answer).toBe('>');
@@ -43,11 +49,14 @@ describe('ComparisonGenerator', () => {
     });
 
     it('should respect less constraint', () => {
-        const input = {
-            labels: [Scope.NumbersSmaller20, Scope.Less]
+        const config = {
+            range: { min: 0, max: 20 },
+            wantsGreater: false,
+            wantsLess: true,
+            wantsEqual: false
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.num1).toBeLessThan(stub!.data.num2);
             expect(stub!.data.answer).toBe('<');
@@ -55,11 +64,14 @@ describe('ComparisonGenerator', () => {
     });
 
     it('should respect equal constraint', () => {
-        const input = {
-            labels: [Scope.NumbersSmaller20, Scope.Equal]
+        const config = {
+            range: { min: 0, max: 20 },
+            wantsGreater: false,
+            wantsLess: false,
+            wantsEqual: true
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.num1).toEqual(stub!.data.num2);
             expect(stub!.data.answer).toBe('=');

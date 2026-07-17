@@ -1,11 +1,14 @@
-import {Scope} from 'edugraph-ts';
+
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getWeightLayout} from './helpers.ts';
+import {MeasureCompareViewConfig, MeasureCompareViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: MeasureCompareViewConfig;
     payload: ViewRenderPayload<'measure-compare'>;
 }
 
@@ -79,14 +82,11 @@ function Illustration({ attribute, val1, val2 }: { attribute: string; val1: numb
     }
 }
 
-export function MeasureCompare({ payload }: Props) {
+const MeasureCompareCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    let attribute = 'length';
-    if (payload.labels.includes(Scope.HeightMeasurement)) attribute = 'height';
-    else if (payload.labels.includes(Scope.WeightMeasurement)) attribute = 'weight';
-    else if (payload.labels.includes(Scope.LengthMeasurement)) attribute = 'length';
+    let attribute = config.attribute || 'length';
     const relation = data.relation || 'longer';
     const val1 = data.val1 !== undefined ? data.val1 : 8;
     const val2 = data.val2 !== undefined ? data.val2 : 4;
@@ -127,7 +127,9 @@ export function MeasureCompare({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const MeasureCompare = withConfig(MeasureCompareViewSchema, MeasureCompareCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -28,7 +28,7 @@ export const OperationsBoxesViewSchema = {
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels))
+        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
     ]
 } as const;
 

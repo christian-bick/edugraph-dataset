@@ -1,8 +1,12 @@
 import { createRoot } from 'react-dom/client';
+import { useMemo } from 'react';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
+import { GeometrySameAttributeViewConfig, GeometrySameAttributeViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: GeometrySameAttributeViewConfig;
     payload: ViewRenderPayload<'geometry-same-attribute'>;
 }
 
@@ -47,7 +51,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     return null;
 }
 
-export function GeometrySameAttribute({ payload }: Props) {
+const GeometrySameAttributeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -113,9 +117,10 @@ export function GeometrySameAttribute({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
 
-import { useMemo } from 'react';
+export const GeometrySameAttribute = withConfig(GeometrySameAttributeViewSchema, GeometrySameAttributeCore);
+
 let root: ReturnType<typeof createRoot> | null = null;
 
 window.renderView = (payload: ViewRenderPayload<'geometry-same-attribute'>) => {

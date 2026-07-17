@@ -15,11 +15,11 @@ describe('CountingClassifyCountGenerator', () => {
     });
 
     it('should validate classify-count items and categories logic', () => {
-        const input = {
-            labels: []
+        const config = {
+            range: { min: 1, max: 10 }
         };
         for (let i = 0; i < 20; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.items.length).toBeGreaterThanOrEqual(1);
             expect(stub!.data.items.length).toBeLessThanOrEqual(10);

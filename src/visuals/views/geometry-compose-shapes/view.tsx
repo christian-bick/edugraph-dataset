@@ -1,12 +1,15 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
+import { GeometryComposeShapesViewConfig, GeometryComposeShapesViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: GeometryComposeShapesViewConfig;
     payload: ViewRenderPayload<'geometry-compose-shapes'>;
 }
 
-export function GeometryComposeShapes({ payload }: Props) {
+const GeometryComposeShapesCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -14,7 +17,15 @@ export function GeometryComposeShapes({ payload }: Props) {
     const answer = data.answer;
 
     const promptText = `Which two shapes can you join to make a ${target}?`;
-    const options = ['triangle', 'circle'];
+    
+    // We can use the config to determine options, falling back to all options if none are resolved from labels
+    const options = [];
+    if (config.hasTriangle) options.push('triangle');
+    if (config.hasCircle) options.push('circle');
+    
+    if (options.length === 0) {
+        options.push('triangle', 'circle');
+    }
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
@@ -60,7 +71,9 @@ export function GeometryComposeShapes({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryComposeShapes = withConfig(GeometryComposeShapesViewSchema, GeometryComposeShapesCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

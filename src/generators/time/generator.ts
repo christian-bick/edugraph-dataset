@@ -1,21 +1,20 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {TimeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
-import {isSubConceptOf} from "../../lib/ontology.ts";
+import {TimeGeneratorConfig, TimeGeneratorSchema} from "./spec.ts";
 
-export class TimeGenerator implements ProblemGenerator<TimeProblem> {
+export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGeneratorConfig> {
     type: AbstractProblem['type'] = 'time';
+    schema = TimeGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-        
+    generate(config: TimeGeneratorConfig): ProblemStub | null {
         let interval = 3600; // default HourIntervals
-        if (labels && labels.some(l => isSubConceptOf(l, Scope.SecondIntervals))) {
+        if (config.intervalLabel === Scope.SecondIntervals) {
             interval = 1;
-        } else if (labels && labels.some(l => isSubConceptOf(l, Scope.MinuteIntervals))) {
+        } else if (config.intervalLabel === Scope.MinuteIntervals) {
             interval = 60;
-        } else if (labels && labels.some(l => isSubConceptOf(l, Scope.HourIntervals))) {
+        } else if (config.intervalLabel === Scope.HourIntervals) {
             interval = 3600;
         }
 

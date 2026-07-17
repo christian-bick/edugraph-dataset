@@ -1,8 +1,11 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {MeasureAttributesViewConfig, MeasureAttributesViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: MeasureAttributesViewConfig;
     payload: ViewRenderPayload<'measure-attributes'>;
 }
 
@@ -78,7 +81,7 @@ function Illustration({ attribute }: { attribute: string }) {
     }
 }
 
-export function MeasureAttributes({ payload }: Props) {
+const MeasureAttributesCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     const attribute = data.attribute || 'length';
@@ -114,7 +117,9 @@ export function MeasureAttributes({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const MeasureAttributes = withConfig(MeasureAttributesViewSchema, MeasureAttributesCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

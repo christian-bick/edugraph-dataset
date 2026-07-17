@@ -1,20 +1,22 @@
-import {Ability} from 'edugraph-ts';
 import React, {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {formatMeasureAnswer, getRulerTicks} from './helpers.ts';
+import {MeasureLengthViewConfig, MeasureLengthViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: MeasureLengthViewConfig;
     payload: ViewRenderPayload<'measure-length'>;
 }
 
-export function MeasureLength({ payload }: Props) {
+const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     const color = '#4682B4'; // SteelBlue
 
-    const isReverse = payload.labels.includes(Ability.VisualArticulation);
+    const isReverse = config.isReverse || false;
     const isDecimal = data.problemLength !== undefined && data.problemLength % 1 !== 0;
 
     const bandLength = data.bandLength !== undefined ? data.bandLength : 10;
@@ -94,7 +96,9 @@ export function MeasureLength({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const MeasureLength = withConfig(MeasureLengthViewSchema, MeasureLengthCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

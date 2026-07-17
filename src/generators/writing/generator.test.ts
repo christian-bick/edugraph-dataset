@@ -1,7 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {WritingGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
-import {Scope} from 'edugraph-ts';
 
 describe('WritingGenerator', () => {
     let generator: WritingGenerator;
@@ -16,9 +15,9 @@ describe('WritingGenerator', () => {
     });
 
     it('should default min to 1 and max to 9 if labels are empty', () => {
-        const input = { labels: [] };
+        const config = { range: { min: 1, max: 9 } };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBeGreaterThanOrEqual(1);
             expect(stub!.data.number).toBeLessThanOrEqual(9);
@@ -26,11 +25,11 @@ describe('WritingGenerator', () => {
     });
 
     it('should respect custom min/max bounds including zero and twenty via ontology', () => {
-        const input = { labels: [Scope.NumbersWithZero, Scope.NumbersSmaller20] };
+        const config = { range: { min: 0, max: 20 } };
         let zeroFound = false;
         let twentyFound = false;
         for (let i = 0; i < 100; i++) {
-            const stub = generator.generate(input);
+            const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             const num = stub!.data.number;
             expect(num).toBeGreaterThanOrEqual(0);

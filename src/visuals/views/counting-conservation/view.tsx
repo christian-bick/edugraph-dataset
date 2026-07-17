@@ -2,15 +2,18 @@ import {createRoot} from 'react-dom/client';
 import {useMemo} from 'react';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getClosePositions, getFarPositions} from './helpers.ts';
+import {CountingConservationViewConfig, CountingConservationViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
-interface Props {
+interface CoreProps {
+    config: CountingConservationViewConfig;
     payload: ViewRenderPayload<'counting-conservation'>;
 }
 
-export function CountingConservation({ payload }: Props) {
+const CountingConservationCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     const number = data.numObjects || 6;
@@ -78,7 +81,9 @@ export function CountingConservation({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const CountingConservation = withConfig(CountingConservationViewSchema, CountingConservationCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

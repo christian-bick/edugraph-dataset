@@ -1,13 +1,16 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getTracePath} from './helpers.ts';
+import {GeometryDrawShapeViewConfig, GeometryDrawShapeViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: GeometryDrawShapeViewConfig;
     payload: ViewRenderPayload<'geometry-draw-shape'>;
 }
 
-export function GeometryDrawShape({ payload }: Props) {
+const GeometryDrawShapeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -35,7 +38,9 @@ export function GeometryDrawShape({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryDrawShape = withConfig(GeometryDrawShapeViewSchema, GeometryDrawShapeCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -1,15 +1,16 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {CountingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels} from "../../lib/ontology.ts";
+import {CountingGeneratorConfig, CountingGeneratorSchema} from "./spec.ts";
 
-export class CountingGenerator implements ProblemGenerator<CountingProblem> {
+export class CountingGenerator implements ProblemGenerator<CountingProblem, CountingGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
+    schema = CountingGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-
-        const resolvedRange = resolveRangeFromLabels(labels || []);
+    generate(config: CountingGeneratorConfig): ProblemStub | null {
+        const resolvedRange = config.range;
+        if (!resolvedRange) return null;
+        
         const maxCount = resolvedRange.max;
         const minCount = resolvedRange.min;
         

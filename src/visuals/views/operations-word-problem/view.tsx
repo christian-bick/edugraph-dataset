@@ -1,27 +1,36 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
+import { OperationsWordProblemViewConfig, OperationsWordProblemViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-interface Props {
+interface CoreProps {
+    config: OperationsWordProblemViewConfig;
     payload: ViewRenderPayload<'operations-word-problem'>;
 }
 
-export function OperationsWordProblem({ payload }: Props) {
+const operatorSymbols: { [key: string]: string } = {
+    add: '+',
+    addition: '+',
+    subtract: '−',
+    subtraction: '−',
+    multiply: '×',
+    multiplication: '×',
+    divide: '÷',
+    division: '÷'
+};
+
+const OperationsWordProblemCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    let operation = data.operation || 'addition';
-    if (!data.operation && (data as any).operator) {
-        operation = (data as any).operator === 'subtract' ? 'subtraction' : 'addition';
-    }
+    const operation = data.operation || (data as any).operator || 'addition';
+    const symbol = operatorSymbols[operation] || '+';
 
     const num1 = data.num1 !== undefined ? data.num1 : 5;
     const num2 = data.num2 !== undefined ? data.num2 : 3;
     const answer = data.answer !== undefined ? data.answer : (operation === 'addition' ? num1 + num2 : num1 - num2);
     const textScenario = data.textScenario || '';
-
-    const isAddition = operation === 'addition';
-    const sign = isAddition ? '+' : '−';
 
     const boxContent1 = isSolutionView ? num1 : '';
     const boxContent2 = isSolutionView ? num2 : '';
@@ -49,7 +58,7 @@ export function OperationsWordProblem({ payload }: Props) {
 
                 <div className="flex items-center gap-3 mt-4">
                     <div className={getInputClass()}>{boxContent1}</div>
-                    <div className="text-[2rem] font-extrabold text-slate-500">{sign}</div>
+                    <div className="text-[2rem] font-extrabold text-slate-500">{symbol}</div>
                     <div className={getInputClass()}>{boxContent2}</div>
                     <div className="text-[2rem] font-extrabold text-slate-500">=</div>
                     <div className={getInputClass(true)}>{boxContentAnswer}</div>
@@ -57,7 +66,9 @@ export function OperationsWordProblem({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const OperationsWordProblem = withConfig(OperationsWordProblemViewSchema, OperationsWordProblemCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

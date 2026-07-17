@@ -1,16 +1,16 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {CountingClassifySortProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {resolveRangeFromLabels, isSubConceptOf} from "../../lib/ontology.ts";
-import {Scope} from "edugraph-ts";
+import {CountingClassifySortGeneratorConfig, CountingClassifySortGeneratorSchema} from "./spec.ts";
 
-export class CountingClassifySortGenerator implements ProblemGenerator<CountingClassifySortProblem> {
+export class CountingClassifySortGenerator implements ProblemGenerator<CountingClassifySortProblem, CountingClassifySortGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
+    schema = CountingClassifySortGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
+    generate(config: CountingClassifySortGeneratorConfig): ProblemStub | null {
+        const resolvedRange = config.range;
+        if (!resolvedRange) return null;
 
-        const resolvedRange = resolveRangeFromLabels(labels || []);
         const total = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
 
         const possibleCategories = ['A', 'B', 'C'];
@@ -26,8 +26,8 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
             counts[cat]++;
         }
 
-        const wantsMost = labels.some(l => isSubConceptOf(l, Scope.Most));
-        const wantsLeast = labels.some(l => isSubConceptOf(l, Scope.Least));
+        const wantsMost = config.wantsMost;
+        const wantsLeast = config.wantsLeast;
         let relation = 'most';
         if (wantsMost && !wantsLeast) relation = 'most';
         else if (wantsLeast && !wantsMost) relation = 'least';

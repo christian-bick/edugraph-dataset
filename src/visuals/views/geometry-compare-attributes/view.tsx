@@ -1,8 +1,11 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import '../../../tailwind.css';
+import { GeometryCompareAttributesViewConfig, GeometryCompareAttributesViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 
-interface Props {
+interface CoreProps {
+    config: GeometryCompareAttributesViewConfig;
     payload: ViewRenderPayload<'geometry-compare-attributes'>;
 }
 
@@ -48,7 +51,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     return null;
 }
 
-export function GeometryCompareAttributes({ payload }: Props) {
+const GeometryCompareAttributesCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -104,7 +107,9 @@ export function GeometryCompareAttributes({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const GeometryCompareAttributes = withConfig(GeometryCompareAttributesViewSchema, GeometryCompareAttributesCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

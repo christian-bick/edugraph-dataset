@@ -1,15 +1,18 @@
 import {createRoot} from 'react-dom/client';
 import {useMemo} from 'react';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {CountingIncDecViewConfig, CountingIncDecViewSchema} from './spec.ts';
+import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
-interface Props {
+interface CoreProps {
+    config: CountingIncDecViewConfig;
     payload: ViewRenderPayload<'counting-inc-dec'>;
 }
 
-export function CountingIncDec({ payload }: Props) {
+const CountingIncDecCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -62,7 +65,9 @@ export function CountingIncDec({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const CountingIncDec = withConfig(CountingIncDecViewSchema, CountingIncDecCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

@@ -2,11 +2,14 @@ import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getDecomposeLayout} from './helpers.ts';
+import { OperationsDecomposeViewConfig, OperationsDecomposeViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
-interface Props {
+interface CoreProps {
+    config: OperationsDecomposeViewConfig;
     payload: ViewRenderPayload<'operations-decompose'>;
 }
 
@@ -58,7 +61,7 @@ function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
     );
 }
 
-export function OperationsDecompose({ payload }: Props) {
+const OperationsDecomposeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -151,7 +154,9 @@ export function OperationsDecompose({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const OperationsDecompose = withConfig(OperationsDecomposeViewSchema, OperationsDecomposeCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

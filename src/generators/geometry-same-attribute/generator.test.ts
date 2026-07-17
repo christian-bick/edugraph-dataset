@@ -1,7 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {GeometrySameAttributeGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
-import {Scope} from 'edugraph-ts';
 
 describe('GeometrySameAttributeGenerator', () => {
     let generator: GeometrySameAttributeGenerator;
@@ -16,17 +15,19 @@ describe('GeometrySameAttributeGenerator', () => {
     });
 
     it('should validate same-attribute rolls/stacks/flat properties', () => {
-        const inputRoll = {
-            labels: [Scope.Rollable]
-        };
-        const stubRoll = generator.generate(inputRoll);
+        const stubRoll = generator.generate({
+            rollable: true,
+            stackable: false,
+            flatFaces: false
+        });
         expect(stubRoll).not.toBeNull();
         expect(stubRoll!.data.answer).toBe('sphere');
 
-        const inputStack = {
-            labels: [Scope.Stackable]
-        };
-        const stubStack = generator.generate(inputStack);
+        const stubStack = generator.generate({
+            rollable: false,
+            stackable: true,
+            flatFaces: false
+        });
         expect(stubStack).not.toBeNull();
         expect(stubStack!.data.answer).toBe('cube');
     });

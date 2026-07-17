@@ -15,10 +15,11 @@ describe('GeometryClassifyDimGenerator', () => {
     });
 
     it('should validate classify-dim outputs', () => {
-        const input = {
-            labels: []
+        const config = {
+            wants2D: false,
+            wants3D: false
         };
-        const stub = generator.generate(input);
+        const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(['2d', '3d']).toContain(stub!.data.shapeType);
         expect(stub!.data.answer).toBe(stub!.data.shapeType);

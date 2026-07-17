@@ -1,23 +1,27 @@
-import { Scope, Ability } from 'edugraph-ts';
+import { Scope } from 'edugraph-ts';
 import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { generatePositions } from '../../helpers/counting-helpers.ts';
+import { CountingObjectsSimpleViewConfig, CountingObjectsSimpleViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
-interface Props {
+interface CoreProps {
+    config: CountingObjectsSimpleViewConfig;
     payload: ViewRenderPayload<'counting-objects-simple'>;
 }
 
-export function CountingObjectsSimple({ payload }: Props) {
+const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const { numObjects } = problem.data;
+    
     let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
-    if (payload.labels.includes(Scope.LinearArrangement)) arrangement = 'line';
-    else if (payload.labels.includes(Scope.CircularArrangement)) arrangement = 'circle';
-    else if (payload.labels.includes(Scope.ScatteredArrangement)) arrangement = 'scattered';
+    if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';
+    else if (config.arrangement === Scope.CircularArrangement) arrangement = 'circle';
+    else if (config.arrangement === Scope.ScatteredArrangement) arrangement = 'scattered';
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
@@ -59,7 +63,9 @@ export function CountingObjectsSimple({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const CountingObjectsSimple = withConfig(CountingObjectsSimpleViewSchema, CountingObjectsSimpleCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

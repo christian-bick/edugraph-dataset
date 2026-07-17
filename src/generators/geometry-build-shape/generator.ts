@@ -1,25 +1,20 @@
-import {AbstractProblem, GeneratorInput, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
+import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryBuildShapeProblem} from "../../types/problems.ts";
-import {Area} from "edugraph-ts";
-import {isSubConceptOf} from "../../lib/ontology.ts";
 import {random} from "../../lib/random.ts";
+import {GeometryBuildShapeGeneratorConfig, GeometryBuildShapeGeneratorSchema} from "./spec.ts";
 
-export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBuildShapeProblem> {
+export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBuildShapeProblem, GeometryBuildShapeGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
+    schema = GeometryBuildShapeGeneratorSchema;
 
-    generate(input: GeneratorInput): ProblemStub | null {
-        const { labels } = input;
-
+    generate(config: GeometryBuildShapeGeneratorConfig): ProblemStub | null {
         const validTargets: string[] = [];
-        if (!labels || labels.length === 0) {
+        if (config.wantsTriangle) validTargets.push('triangle');
+        if (config.wantsSquare) validTargets.push('square');
+        if (config.wantsRectangle) validTargets.push('rectangle');
+        
+        if (validTargets.length === 0) {
             validTargets.push('triangle', 'square', 'rectangle');
-        } else {
-            if (labels.some(l => isSubConceptOf(l, Area.Triangle))) validTargets.push('triangle');
-            if (labels.some(l => isSubConceptOf(l, Area.Square))) validTargets.push('square');
-            if (labels.some(l => isSubConceptOf(l, Area.Rectangle))) validTargets.push('rectangle');
-            if (validTargets.length === 0) {
-                validTargets.push('triangle', 'square', 'rectangle');
-            }
         }
 
         const target = validTargets[Math.floor(random() * validTargets.length)];

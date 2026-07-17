@@ -2,15 +2,18 @@ import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { getIconIndexes, getCorrectChoice } from './helpers.ts';
+import { NumbersCompareCountingViewConfig, NumbersCompareCountingViewSchema } from './spec.ts';
+import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 
-interface Props {
+interface CoreProps {
+    config: NumbersCompareCountingViewConfig;
     payload: ViewRenderPayload<'numbers-compare-counting'>;
 }
 
-export function NumbersCompareCounting({ payload }: Props) {
+const NumbersCompareCountingCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -97,7 +100,9 @@ export function NumbersCompareCounting({ payload }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export const NumbersCompareCounting = withConfig(NumbersCompareCountingViewSchema, NumbersCompareCountingCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 
