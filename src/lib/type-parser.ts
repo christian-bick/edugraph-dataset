@@ -1,8 +1,12 @@
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
-const PROJECT_ROOT = 'c:/Users/silen/Documents/EduGraph/edugraph-content';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const PROJECT_ROOT = resolve(__dirname, '..', '..');
 export function getViewToProblemTypeMap(): Record<string, string> {
     const problemsPath = resolve(PROJECT_ROOT, 'src', 'types', 'problems.ts');
     if (!existsSync(problemsPath)) {

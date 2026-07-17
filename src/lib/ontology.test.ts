@@ -38,4 +38,32 @@ describe('Ontology Helper', () => {
             expect(isCompatibleConcept(Scope.NumbersWithZero, Scope.NumbersWithoutZero)).toBe(false);
         });
     });
+
+    describe('deductCompatible', () => {
+        const { deductCompatible } = require('./ontology.ts');
+        it('handles standard implication (no contradictions)', () => {
+            const result = deductCompatible([Scope.NumbersSmaller100]);
+            expect(result).toContain(Scope.NumbersSmaller100);
+            expect(result).toContain(Scope.NumbersSmaller20);
+            expect(result).toContain(Scope.NumbersSmaller10);
+            expect(result).not.toContain(Scope.NumbersSmaller1000);
+        });
+
+        it('handles contradictory bounds by pruning both and their implications', () => {
+            const result = deductCompatible([Scope.NumbersSmaller10, Scope.NumbersLarger20]);
+            expect(result).not.toContain(Scope.NumbersSmaller10);
+            expect(result).not.toContain(Scope.NumbersLarger20);
+            expect(result).not.toContain(Scope.NumbersLarger100);
+        });
+
+        it('resolves exactly to the intersection of compatible constraints', () => {
+            const result = deductCompatible([Scope.NumbersSmaller1000, Scope.NumbersLarger10]);
+            expect(result).toContain(Scope.NumbersSmaller1000);
+            expect(result).toContain(Scope.NumbersLarger10);
+            expect(result).not.toContain(Scope.NumbersSmaller10);
+            expect(result).not.toContain(Scope.NumbersLarger1000);
+            expect(result).toContain(Scope.NumbersSmaller100);
+            expect(result).toContain(Scope.NumbersLarger20);
+        });
+    });
 });

@@ -48,7 +48,7 @@ describe('ArithmeticGenerator', () => {
 
     it('should generate correct physical arithmetic problems', () => {
         const addStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/PhysicalNumbers']
+            labels: ['http://edugraph.io/edu/Addition', 'http://edugraph.io/edu/PhysicalNumbers', 'http://edugraph.io/edu/NumbersSmaller10']
         });
         expect(addStub).not.toBeNull();
         expect(addStub!.data.operation).toBe('addition');
@@ -58,7 +58,7 @@ describe('ArithmeticGenerator', () => {
         expect(addStub!.data.num1 + addStub!.data.num2).toBe(addStub!.data.answer);
 
         const subStub = generator.generate({
-            labels: ['http://edugraph.io/edu/Subtraction', 'http://edugraph.io/edu/PhysicalNumbers']
+            labels: ['http://edugraph.io/edu/Subtraction', 'http://edugraph.io/edu/PhysicalNumbers', 'http://edugraph.io/edu/NumbersSmaller10']
         });
         expect(subStub).not.toBeNull();
         expect(subStub!.data.operation).toBe('subtraction');

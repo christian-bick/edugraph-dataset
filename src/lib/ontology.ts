@@ -1,4 +1,5 @@
-import { CompetencyDescriptor, partOf, Scope } from 'edugraph-ts';
+import { partOf, Scope } from 'edugraph-ts';
+import type { CompetencyDescriptor } from 'edugraph-ts';
 
 /**
  * Returns true if child is equal to parent, or if parent is a transitive 
@@ -50,6 +51,74 @@ const INCLUDED_BY_MAP: Record<string, string[]> = {
     ]
 };
 
+// Logical implication map (e.g. <100 logically implies <20 for generators).
+// It's technically the reverse of taxonomic subsumption in terms of capabilities.
+export const IMPLIES_MAP: Record<string, string[]> = {
+    [Scope.NumbersSmaller1000]: [Scope.NumbersSmaller100, Scope.NumbersSmaller20, Scope.NumbersSmaller10],
+    [Scope.NumbersSmaller100]: [Scope.NumbersSmaller20, Scope.NumbersSmaller10],
+    [Scope.NumbersSmaller20]: [Scope.NumbersSmaller10],
+    [Scope.NumbersLarger10]: [Scope.NumbersLarger20, Scope.NumbersLarger100, Scope.NumbersLarger1000],
+    [Scope.NumbersLarger20]: [Scope.NumbersLarger100, Scope.NumbersLarger1000],
+    [Scope.NumbersLarger100]: [Scope.NumbersLarger1000]
+};
+
+// Logical contradictions
+export const CONTRADICTS_MAP: Record<string, string[]> = {
+    [Scope.NumbersSmaller10]: [Scope.NumbersLarger10, Scope.NumbersLarger20, Scope.NumbersLarger100, Scope.NumbersLarger1000],
+    [Scope.NumbersSmaller20]: [Scope.NumbersLarger20, Scope.NumbersLarger100, Scope.NumbersLarger1000],
+    [Scope.NumbersSmaller100]: [Scope.NumbersLarger100, Scope.NumbersLarger1000],
+    [Scope.NumbersSmaller1000]: [Scope.NumbersLarger1000],
+    [Scope.NumbersLarger10]: [Scope.NumbersSmaller10],
+    [Scope.NumbersLarger20]: [Scope.NumbersSmaller20, Scope.NumbersSmaller10],
+    [Scope.NumbersLarger100]: [Scope.NumbersSmaller100, Scope.NumbersSmaller20, Scope.NumbersSmaller10],
+    [Scope.NumbersLarger1000]: [Scope.NumbersSmaller1000, Scope.NumbersSmaller100, Scope.NumbersSmaller20, Scope.NumbersSmaller10]
+};
+
+/**
+ * Deducts the exact compatible subset of bounds from a given list of base constraints,
+ * applying logical implication and pruning logical contradictions.
+ */
+export function deductCompatible(baseConstraints: string[]): string[] {
+    const implied = new Set<string>();
+    
+    // 1. Gather all explicit constraints and their logical implications
+    for (const constraint of baseConstraints) {
+        implied.add(constraint);
+        if (IMPLIES_MAP[constraint]) {
+            for (const imp of IMPLIES_MAP[constraint]) {
+                implied.add(imp);
+            }
+        }
+    }
+
+    // 2. Identify all constraints that are contradicted by any of the base constraints
+    const contradicted = new Set<string>();
+    for (const constraint of baseConstraints) {
+        if (CONTRADICTS_MAP[constraint]) {
+            for (const c of CONTRADICTS_MAP[constraint]) {
+                contradicted.add(c);
+                // Also remove anything that the contradicted label implies
+                if (IMPLIES_MAP[c]) {
+                    for (const imp of IMPLIES_MAP[c]) {
+                        contradicted.add(imp);
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Subtract contradicted from implied
+    const finalSet = new Set<string>();
+    for (const item of implied) {
+        if (!contradicted.has(item)) {
+            finalSet.add(item);
+        }
+    }
+
+    return Array.from(finalSet);
+}
+
+
 /**
  * Returns true if child is compatible with parent.
  * It traverses standard partOf relations, but also follows explicit custom INCLUDED_BY_MAP relations.
@@ -94,8 +163,8 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
     let max = 10;
 
     // 1. Resolve minimum boundary (Zero scopes)
-    const hasZero = labels.some(l => isSubConceptOf(l, Scope.NumbersWithZero));
-    const hasNoZero = labels.some(l => isSubConceptOf(l, Scope.NumbersWithoutZero));
+    const hasZero = labels.includes(Scope.NumbersWithZero);
+    const hasNoZero = labels.includes(Scope.NumbersWithoutZero);
     if (hasZero) {
         min = 0;
     } else if (hasNoZero) {
@@ -103,24 +172,24 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
     }
 
     // 2. Resolve maximum boundary (SmallerThan scopes)
-    if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller1000))) {
+    if (labels.includes(Scope.NumbersSmaller1000)) {
         max = 1000;
-    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller100))) {
+    } else if (labels.includes(Scope.NumbersSmaller100)) {
         max = 100;
-    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller20))) {
+    } else if (labels.includes(Scope.NumbersSmaller20)) {
         max = 20;
-    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersSmaller10))) {
+    } else if (labels.includes(Scope.NumbersSmaller10)) {
         max = 10;
     }
 
     // 3. Resolve minimum boundary from LargerThan scopes
-    if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger1000))) {
+    if (labels.includes(Scope.NumbersLarger1000)) {
         min = 1001;
-    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger100))) {
+    } else if (labels.includes(Scope.NumbersLarger100)) {
         min = 101;
-    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger20))) {
+    } else if (labels.includes(Scope.NumbersLarger20)) {
         min = 21;
-    } else if (labels.some(l => isSubConceptOf(l, Scope.NumbersLarger10))) {
+    } else if (labels.includes(Scope.NumbersLarger10)) {
         min = 11;
     }
 

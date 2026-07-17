@@ -1,6 +1,8 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getBlankPart} from './helpers.ts';
+import {extractConfig} from '../../../lib/utils.ts';
+import {OperationsBoxesViewSchema} from './spec.ts';
 import '../../../tailwind.css';
 
 const operatorSymbols: { [key: string]: string } = {
@@ -19,11 +21,17 @@ interface Props {
 }
 
 export function OperationsBoxes({ payload }: Props) {
-    const { problem, isSolutionView } = payload;
+    const { problem, isSolutionView, labels } = payload;
+    
+    // Extract strictly typed view configuration from pedagogical labels
+    const { config } = extractConfig(OperationsBoxesViewSchema, labels || []);
+    // Just to show we consumed it properly:
+    // console.log("Extracted View Config:", config);
+
     const data = problem.data;
     const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
 
-    const requestedBlank = payload.constraints.blankPart || 'solution';
+    const requestedBlank = payload.constraints?.blankPart || 'solution';
     const blankPart = getBlankPart(problem.id, requestedBlank);
 
     const isBlanked = (part: string) => {
