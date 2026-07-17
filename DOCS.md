@@ -58,7 +58,9 @@ Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of
 ### `RenderPayload` & `ViewTypeMap`
 The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
 *   `problem`: The `AbstractProblem`.
-*   `config`: The `RenderConfig` containing `viewId` and `visualParams`.
+*   `viewId`: The string identifier of the view.
+*   `labels`: Raw pedagogical tags (used by the HOC wrapper, not the pure view).
+*   `constraints`: Raw configuration constraints.
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
 
 To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
@@ -94,26 +96,24 @@ The primary pipeline orchestrator.
 
 ## 4. Module Structure Breakdown
 
-Adding content means creating two interconnected directories: a Generator and a Renderer.
+Adding content means creating two interconnected directories: a Generator and a Renderer. Both strictly decouple pedagogical label resolution from core business logic using schemas and resolvers.
 
 ### The Generator Module (`src/generators/<module>/`)
-*   **`generator.ts`**: Implements `ProblemGenerator`. It takes a `GeneratorInput` (labels and constraints) and returns a `ProblemStub` or `null`. Returning `null` (e.g., if a constraint cannot be mathematically satisfied) triggers an automatic retry in the orchestrator.
-*   **`spec.ts`**: Exports `spec: GeneratorSpec` (defining the generator ID and its `supportedLabels` used for competency matching).
-*   **`generator.test.ts`**: A Vitest suite. Must deeply test edge cases (e.g., digit boundaries, non-negative constraints) to ensure the constraint satisfier behaves correctly.
-*   **`checklist.md`**: (Optional) Specific instructions for the Visual QA LLM regarding how this specific module should visually render.
+*   **`generator.ts`**: Implements `ProblemGenerator<TData, TConfig>`. It contains **no label parsing logic**. It is a pure mathematical function that takes a strongly-typed `config` object and returns a `ProblemStub` or `null`.
+*   **`spec.ts`**: The bridge to pedagogy. Exports `spec: GeneratorSpec` (broad matching capabilities), `GeneratorSchema` (defining how to map ontology labels to the typed `config` object using functional resolvers), and `Config` (the extracted type of the schema).
+*   **`generator.test.ts`**: A Vitest suite. Deeply tests edge cases of the generator by passing explicit `config` mocks.
+*   **`checklist.md`**: (Optional) Visual QA LLM instructions.
 
 #### Generator Design Guidelines
-Based on architectural best practices, all generators must adhere to the following design principles:
-1. **Purely Mathematical**: The generated problem data payload (`data`) must contain only raw mathematical attributes (e.g., values, shape names, dimensions, abstract relations). It must *not* contain visual properties (such as rotation angle, render scale, layout coords) or user-facing formatted strings (like button labels or localized answer texts). The View layer is solely responsible for rendering, transforming, and formatting these abstract values.
-2. **Single Return Type**: A generator should return a single, uniform type signature (e.g. mapping to a unified type in `problems.ts`). If different problem modes require different data shapes, they should be split into distinct generator modules.
-3. **Single Logical Flow (No Modes)**: Avoid using artificial `mode` constraints to branch into entirely different mathematical generation pathways inside a single generator. If two exercises require different mathematical calculation steps (even if they share the same return type shape), they are conceptually distinct and must be kept in separate generator files to prevent spaghetti code and preserve high modularity.
+1. **Purely Mathematical**: The generated problem data payload (`data`) must contain only raw mathematical attributes.
+2. **Schema-Driven Resolvers**: Pedagogical mapping is purely declarative via `spec.ts` schemas. Use `edugraph-ts` Enums (e.g., `Area`, `Scope`) and `resolvers.ts` (`hasSubConcept`, `extractFirstMatch`) to build the config objects.
 
 ### The Visual Renderer (`src/visuals/`)
 *   **`src/visuals/views/<renderer>/`**:
     - **`view.html`**: The base HTML template containing a mount point for React.
-    - **`view.tsx`**: React entry point implementing `window.renderView = (payload: RenderPayload) => { ... }`. It uses React to render components into the DOM.
-    - **`spec.ts`**: Exports `spec: ViewSpec` (defining the view ID, its `supportedLabels` for matching, and its physical constraints layout configuration).
-*   **`src/visuals/components/`**: Reusable shared React elements (such as `TenFrame.tsx`) that help keep visual views DRY.
+    - **`view.tsx`**: Exports the React component wrapped in `withConfig(ViewSchema, Component)`. The core component itself (`<Name>Core`) is a pure stateless function taking `{ config, payload }`. It does not parse labels.
+    - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
+*   **`src/visuals/components/`**: Reusable shared React elements (such as `TenFrame.tsx`).
 *   **`src/visuals/helpers/`**: Shared layout rendering calculations (such as `counting-helpers.ts`).
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)

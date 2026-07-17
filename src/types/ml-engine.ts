@@ -61,15 +61,7 @@ declare global {
  */
 export type ProblemStub<TData = any> = Pick<AbstractProblem<TData>, 'id' | 'data'>;
 
-/**
- * The dual input for problem generation: 
- * - labels: High-level pedagogical constraints from the ontology.
- * - constraints: Low-level technical or visual constraints.
- */
-export interface GeneratorInput {
-    labels: string[];
-    constraints?: Record<string, any>;
-}
+
 
 /**
  * The contract for a Problem Generator (living in `src/generators/`).
@@ -78,7 +70,7 @@ export interface ProblemGenerator<TData = any, TConfig = any> {
     /** The type of problems this generates */
     type: AbstractProblem['type'];
     /** The configuration schema exposed to the dataset orchestrator */
-    schema?: any; // Marked optional temporarily to avoid breaking unmigrated generators
+    schema: any;
     /** 
      * Generates a single unique abstract problem based on the provided configuration.
      * Returns null if a valid problem could not be generated (triggers a retry).

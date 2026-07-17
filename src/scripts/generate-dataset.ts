@@ -5,6 +5,7 @@ import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync
 import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
+import { extractConfig } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
 import {Grade1Spec} from '../../config/spec/ccss/grade-01.ts';
@@ -272,10 +273,13 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
     }
     const specModule = await import(`../generators/${moduleName}/spec.ts`);
     const generatorSpec = specModule.spec;
-
-    // Dynamic import of generator class
     const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
     const className = camelCase(moduleName[0].toUpperCase() + moduleName.slice(1)) + 'Generator';
+    
+    // Look for new strictly typed schema labels, fallback to old spec
+    const generatorGeneralLabels = specModule[`${className.replace('Generator', '')}GeneralLabels`] || generatorSpec?.supportedLabels;
+
+    // Dynamic import of generator class
     const generatorModule = await import(`../generators/${moduleName}/generator.ts`);
     const GeneratorClass = generatorModule[className];
     if (!GeneratorClass) {
@@ -306,12 +310,18 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
         .map(d => d.name);
     
     const compatibleViews = [];
+    const viewGeneralLabelsMap: Record<string, string[]> = {};
+
     for (const viewId of allViewDirs) {
         const viewSpecPath = resolve(viewsDir, viewId, 'spec.ts');
         if (existsSync(viewSpecPath)) {
             try {
                 const viewSpecModule = await import(`../visuals/views/${viewId}/spec.ts`);
                 compatibleViews.push(viewSpecModule.spec);
+                
+                const viewCamelCase = camelCase(viewId[0].toUpperCase() + viewId.slice(1));
+                const viewLabels = viewSpecModule[`${viewCamelCase}GeneralLabels`] || viewSpecModule.spec?.supportedLabels;
+                viewGeneralLabelsMap[viewId] = viewLabels;
             } catch (e) {
                 console.warn(`Could not import view spec for ${viewId}:`, e);
             }
@@ -322,16 +332,17 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
 
     // Filter competency targets for this generator using union of labels
     const matchedTargets = allTargets.filter(target => {
-        if (!generatorSpec.supportedLabels) return false;
+        if (!generatorGeneralLabels) return false;
         return filteredViews.some(viewSpec => {
-            if (!viewSpec.supportedLabels) return false;
+            const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
+            if (!viewLabels) return false;
             return target.labels.every(compLabel => {
                 if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
                 if (abilitiesList.has(compLabel)) {
-                    return viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                    return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
                 }
-                const supportedByGen = generatorSpec.supportedLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
-                const supportedByView = viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                const supportedByGen = generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
+                const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
                 return supportedByGen || supportedByView;
             });
         });
@@ -350,22 +361,24 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
             
             setSeed(42 + trainDataset.length);
             
-            const problemStub = generator.generate({
-                labels: target.labels,
-                constraints: target.constraints || {}
-            });
+            if (!generator.schema) {
+                throw new Error(`Generator ${moduleName} is missing a schema!`);
+            }
+            const { config } = extractConfig(generator.schema, target.labels);
+            const problemStub = generator.generate(config);
 
             if (problemStub && !trainKeys.has(problemStub.id)) {
                 // Match views that support this problem
                 const matchedViews = filteredViews.filter(viewSpec => {
-                    if (!viewSpec.supportedLabels || !generatorSpec.supportedLabels) return false;
+                    const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
+                    if (!viewLabels || !generatorGeneralLabels) return false;
                     const labelsMatch = target.labels.every(compLabel => {
                         if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
                         if (abilitiesList.has(compLabel)) {
-                            return viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                            return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
                         }
-                        const supportedByGen = generatorSpec.supportedLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
-                        const supportedByView = viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                        const supportedByGen = generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
+                        const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
                         return supportedByGen || supportedByView;
                     });
                     if (!labelsMatch) return false;
@@ -424,10 +437,11 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                         while (!valSuccess && valAttempts < 50) {
                             valAttempts++;
                             setSeed(42 + 10000 + valDataset.length);
-                            const valStub = generator.generate({
-                                labels: target.labels,
-                                constraints: target.constraints || {}
-                            });
+                            if (!generator.schema) {
+                                throw new Error(`Generator ${moduleName} is missing a schema!`);
+                            }
+                            const { config } = extractConfig(generator.schema, target.labels);
+                            const valStub = generator.generate(config);
                             if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
                                 valKeys.add(valStub.id);
                                 valSuccess = true;
