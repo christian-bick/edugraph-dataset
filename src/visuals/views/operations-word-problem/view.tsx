@@ -30,7 +30,23 @@ const OperationsWordProblemCore = ({ config, payload }: CoreProps) => {
     const num1 = data.num1 !== undefined ? data.num1 : 5;
     const num2 = data.num2 !== undefined ? data.num2 : 3;
     const answer = data.answer !== undefined ? data.answer : (operation === 'addition' ? num1 + num2 : num1 - num2);
-    const textScenario = data.textScenario || '';
+    const defaultScenario = (() => {
+        const op = operation.toLowerCase();
+        if (op === 'addition' || op === 'add') {
+            return `If you have ${num1} apples and get ${num2} more, how many apples do you have in total?`;
+        }
+        if (op === 'subtraction' || op === 'subtract') {
+            return `If you have ${num1} apples and give away ${num2}, how many apples do you have left?`;
+        }
+        if (op === 'multiplication' || op === 'multiply') {
+            return `If you have ${num1} groups of apples with ${num2} apples in each group, how many apples do you have in total?`;
+        }
+        if (op === 'division' || op === 'divide') {
+            return `If you share ${num1} apples equally among ${num2} friends, how many apples does each friend get?`;
+        }
+        return `Solve the following operation: ${num1} ${symbol} ${num2}`;
+    })();
+    const textScenario = data.textScenario || defaultScenario;
 
     const boxContent1 = isSolutionView ? num1 : '';
     const boxContent2 = isSolutionView ? num2 : '';
