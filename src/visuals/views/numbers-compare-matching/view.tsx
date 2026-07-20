@@ -13,15 +13,15 @@ interface CoreProps {
     payload: ViewRenderPayload<'numbers-compare-matching'>;
 }
 
-const NumbersCompareMatchingCore = ({ config, payload }: CoreProps) => {
+const NumbersCompareMatchingCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
     const num1 = data.num1;
     const num2 = data.num2;
-    const comparisonType = data.comparisonType || 'greater';
+    const relation = data.relation;
 
-    const isFewerQuestion = comparisonType === 'less';
+    const isFewerQuestion = relation === 'less';
     const promptText = isFewerQuestion ? "Which group has fewer items?" : "Which group has more items?";
 
     const { iconA, iconB } = useMemo(() => {

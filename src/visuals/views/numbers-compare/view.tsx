@@ -16,8 +16,8 @@ const NumbersCompareCore = ({ payload }: CoreProps) => {
     const data = problem.data;
 
     const displayAnswer = useMemo(() => {
-        return getComparisonSymbol(data.answer);
-    }, [data.answer]);
+        return getComparisonSymbol(data.relation);
+    }, [data.relation]);
 
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">

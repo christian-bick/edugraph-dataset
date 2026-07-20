@@ -70,7 +70,7 @@ export type MeasurementCompareProblem = {
 export type ComparisonProblem = {
     num1: number;
     num2: number;
-    answer: '<' | '>' | '=';
+    relation: 'less' | 'greater' | 'equal';
 };
 
 export type OrderingProblem = {

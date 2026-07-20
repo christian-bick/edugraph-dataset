@@ -1,6 +1,6 @@
-export function getComparisonSymbol(answer: string): string {
-    if (answer === 'A') return '>';
-    if (answer === 'B') return '<';
-    if (answer === 'equal') return '=';
-    return answer; // fallback if already a symbol
+export function getComparisonSymbol(relation: string): string {
+    if (relation === 'greater' || relation === 'A') return '>';
+    if (relation === 'less' || relation === 'B') return '<';
+    if (relation === 'equal') return '=';
+    return relation;
 }

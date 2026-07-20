@@ -18,63 +18,85 @@ describe('ComparisonGenerator', () => {
     it('should respect resolved ranges', () => {
         for (let i = 0; i < 100; i++) {
             const stub = generator.generate({ 
-                range: { min: 0, max: 10 },
-                wantsGreater: false,
-                wantsLess: false,
-                wantsEqual: false
+                range: { min: 0, max: 10 }
             });
             if (stub) {
                 expect(stub.data.num1).toBeGreaterThanOrEqual(0);
                 expect(stub.data.num1).toBeLessThanOrEqual(10);
                 expect(stub.data.num2).toBeGreaterThanOrEqual(0);
                 expect(stub.data.num2).toBeLessThanOrEqual(10);
-                expect(['<', '>', '=']).toContain(stub.data.answer);
+                expect(['less', 'greater', 'equal']).toContain(stub.data.relation);
             }
         }
     });
 
-    it('should respect greater constraint', () => {
+    it('should respect greater relation constraint', () => {
         const config = {
             range: { min: 0, max: 20 },
-            wantsGreater: true,
-            wantsLess: false,
-            wantsEqual: false
+            relation: Scope.Greater
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
-            expect(stub!.data.answer).toBe('>');
+            expect(stub!.data.relation).toBe('greater');
         }
     });
 
-    it('should respect less constraint', () => {
+    it('should respect less relation constraint', () => {
         const config = {
             range: { min: 0, max: 20 },
-            wantsGreater: false,
-            wantsLess: true,
-            wantsEqual: false
+            relation: Scope.Less
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.num1).toBeLessThan(stub!.data.num2);
-            expect(stub!.data.answer).toBe('<');
+            expect(stub!.data.relation).toBe('less');
         }
     });
 
-    it('should respect equal constraint', () => {
+    it('should respect equal relation constraint', () => {
         const config = {
             range: { min: 0, max: 20 },
-            wantsGreater: false,
-            wantsLess: false,
-            wantsEqual: true
+            relation: Scope.Equal
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.num1).toEqual(stub!.data.num2);
-            expect(stub!.data.answer).toBe('=');
+            expect(stub!.data.relation).toBe('equal');
         }
+    });
+
+    it('should respect includeZero: false', () => {
+        const config = {
+            range: { min: 0, max: 5 },
+            includeZero: false,
+            relation: Scope.Equal
+        };
+        for (let i = 0; i < 100; i++) {
+            const stub = generator.generate(config);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.num1).not.toBe(0);
+            expect(stub!.data.num2).not.toBe(0);
+        }
+    });
+
+    it('should respect allowNegatives: true', () => {
+        const config = {
+            range: { min: 1, max: 5 },
+            allowNegatives: true,
+            relation: Scope.Less
+        };
+        let sawNegative = false;
+        for (let i = 0; i < 200; i++) {
+            const stub = generator.generate(config);
+            expect(stub).not.toBeNull();
+            if (stub!.data.num1 < 0 || stub!.data.num2 < 0) {
+                sawNegative = true;
+            }
+        }
+        expect(sawNegative).toBe(true);
     });
 });
