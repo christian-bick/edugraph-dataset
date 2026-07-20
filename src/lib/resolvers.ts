@@ -23,3 +23,9 @@ export const extractFirstMatch = <T extends string>(targetLabels: readonly T[], 
 export const selectExactMatch = (labels: string[], supportedLabels?: readonly string[]): string | undefined => {
     return supportedLabels?.find(s => labels.includes(s));
 };
+
+export const matchAllExactLabels = (labels: string[], supportedLabels?: readonly string[]): string[] => {
+    if (!supportedLabels) return [];
+    return supportedLabels.filter(s => labels.some(l => isSubConceptOf(l, s)));
+};
+

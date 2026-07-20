@@ -31,7 +31,7 @@ const GeometryDrawShapeCore = ({ config, payload }: CoreProps) => {
                         <path d={pathD} fill="none" stroke="#cbd5e1" strokeWidth="3" strokeDasharray="4 4" />
                         {/* Solid trace path in solution view */}
                         {isSolutionView && (
-                            <path d={pathD} fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d={pathD} fill="none" stroke="forestgreen" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                         )}
                     </svg>
                 </div>

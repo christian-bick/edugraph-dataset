@@ -18,14 +18,14 @@ describe('GeometryIdentityGenerator', () => {
     it('should fall back to basic 2D shapes if no shapes provided', () => {
         const stub = generator.generate({ shapes: [] });
         expect(stub).not.toBeNull();
-        expect([Area.Triangle, Area.Square, Area.Rectangle, Area.Circle]).toContain(stub!.data.shape);
+        expect(['triangle', 'square', 'rectangle', 'circle']).toContain(stub!.data.shape);
     });
 
     it('should use provided shapes', () => {
         const stub = generator.generate({ shapes: [Area.Hexagon] });
         expect(stub).not.toBeNull();
-        expect(stub!.data.shape).toBe(Area.Hexagon);
-        expect(stub!.data.answer).toBe(Area.Hexagon);
-        expect(stub!.id).toContain(Area.Hexagon);
+        expect(stub!.data.shape).toBe('hexagon');
+        expect(stub!.data.answer).toBe('hexagon');
+        expect(stub!.id).toContain('hexagon');
     });
 });

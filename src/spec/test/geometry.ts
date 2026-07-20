@@ -67,6 +67,35 @@ const envShapesBuilder = new DatasetPermutationBuilder()
         [Area.Rectangle]
     ]);
 
+const identityNamingBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeIdentity,
+        Ability.VisualRecognition
+    ])
+    .applyLabelVariants([
+        [Area.Triangle],
+        [Area.Square],
+        [Area.Rectangle],
+        [Area.Circle],
+        [Area.Hexagon],
+        [Area.Cube],
+        [Area.Sphere],
+        [Area.Cone],
+        [Area.Cylinder]
+    ]);
+
+const identityDrawBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeIdentity,
+        Area.ShapePlotting,
+        Ability.VisualArticulation
+    ])
+    .applyLabelVariants([
+        [Area.Circle],
+        [Area.Square],
+        [Area.Triangle]
+    ]);
+
 export const GeometryTestSpec: CompetencyTarget[] = [
     ...builder.build().map((p, i) => ({
         id: `test-geometry-build-shape-${i}`,
@@ -90,6 +119,16 @@ export const GeometryTestSpec: CompetencyTarget[] = [
     })),
     ...envShapesBuilder.build().map((p, i) => ({
         id: `test-geometry-env-shapes-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    })),
+    ...identityNamingBuilder.build().map((p, i) => ({
+        id: `test-geometry-identity-naming-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    })),
+    ...identityDrawBuilder.build().map((p, i) => ({
+        id: `test-geometry-identity-draw-${i}`,
         labels: p.labels,
         constraints: p.constraints
     }))

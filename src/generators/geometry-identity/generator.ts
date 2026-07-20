@@ -9,17 +9,21 @@ export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdent
     schema = GeometryIdentityGeneratorSchema;
 
     generate(config: GeometryIdentityGeneratorConfig): ProblemStub | null {
-        let validShapes = config.shapes || [
-            Area.Triangle,
-            Area.Square,
-            Area.Rectangle,
-            Area.Circle
-        ]; // Default fallback to basic 2D shapes
+        const validShapes = config.shapes && config.shapes.length > 0
+            ? config.shapes
+            : [
+                Area.Triangle,
+                Area.Square,
+                Area.Rectangle,
+                Area.Circle
+            ];
 
-        const shape = validShapes[Math.floor(random() * validShapes.length)];
+        const selectedArea = validShapes[Math.floor(random() * validShapes.length)];
+        const shape = selectedArea.split('/').pop()!.toLowerCase();
 
+        const randomSuffix = Math.floor(random() * 1000000);
         return {
-            id: `geometry-identity-${shape}`,
+            id: `geometry-identity-${shape}-${randomSuffix}`,
             data: {
                 shape,
                 answer: shape
@@ -27,3 +31,4 @@ export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdent
         };
     }
 }
+

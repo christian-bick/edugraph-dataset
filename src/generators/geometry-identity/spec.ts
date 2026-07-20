@@ -1,7 +1,7 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, Ability} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {matchAllLabels} from '../../lib/resolvers.ts';
+import {matchAllExactLabels} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-identity',
@@ -25,7 +25,7 @@ export const GeometryIdentityGeneratorSchema = {
             Area.Cone,
             Area.Cylinder
         ],
-        matchAllLabels
+        matchAllExactLabels
     ]
 } as const;
 
