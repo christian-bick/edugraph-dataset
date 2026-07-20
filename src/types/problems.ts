@@ -53,6 +53,7 @@ export type CountingClassifySortProblem = {
 export type MeasurementStandardProblem = {
     bandLength: number;
     problemLength: number;
+    useDecimals?: boolean;
 };
 
 export type MeasurementAttributeProblem = {
