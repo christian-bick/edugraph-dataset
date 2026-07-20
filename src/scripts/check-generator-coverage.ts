@@ -44,7 +44,7 @@ function runCoverageCheck() {
         }
 
         const statusLabel = passed ? '✅ PASS' : '❌ FAIL';
-        reportLines.push(`| [${path.basename(relativePath)}](file:///${filePath}) | ${stmtPct}% | ${branchPct}% | ${statusLabel} |`);
+        reportLines.push(`| [${relativePath}](${relativePath}) | ${stmtPct}% | ${branchPct}% | ${statusLabel} |`);
     }
 
     reportLines.push('');
@@ -56,7 +56,8 @@ function runCoverageCheck() {
     // Save report as a local artifact markdown file so the user can easily click/view it
     const artifactPath = path.join(PROJECT_ROOT, 'coverage', 'generator-coverage-report.md');
     fs.writeFileSync(artifactPath, reportContent, 'utf-8');
-    console.log(`\nReport saved to: file:///${artifactPath.replace(/\\/g, '/')}\n`);
+    const relativeArtifactPath = path.relative(PROJECT_ROOT, artifactPath).replace(/\\/g, '/');
+    console.log(`\nReport saved to: ${relativeArtifactPath}\n`);
 
     if (!allPassed) {
         console.error('❌ Code coverage check failed. Some files do not meet the minimum thresholds.');
