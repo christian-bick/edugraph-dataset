@@ -54,11 +54,7 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    try {
-        validateProblemData('sorting-classify-sort', data, ['items', 'categories', 'relation', 'answer']);
-    } catch (e) {
-        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
-    }
+    validateProblemData('sorting-classify-sort', data, ['items', 'categories', 'relation', 'answer']);
 
     const relation = data.relation;
 

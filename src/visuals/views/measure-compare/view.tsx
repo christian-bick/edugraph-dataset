@@ -89,11 +89,7 @@ const MeasureCompareCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    try {
-        validateProblemData('measure-compare', data, ['attribute', 'relation', 'val1', 'val2', 'answer']);
-    } catch (e) {
-        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
-    }
+    validateProblemData('measure-compare', data, ['attribute', 'relation', 'val1', 'val2', 'answer']);
 
     const attribute = data.attribute;
     const relation = data.relation;

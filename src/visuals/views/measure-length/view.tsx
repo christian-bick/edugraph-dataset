@@ -16,16 +16,12 @@ const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    try {
-        validateProblemData('measure-length', data, ['bandLength', 'problemLength']);
-        if (data.bandLength > 1000) {
-            throw new ViewValidationError('measure-length', `bandLength ${data.bandLength} is too large to render.`);
-        }
-        if (data.problemLength > data.bandLength) {
-            throw new ViewValidationError('measure-length', `problemLength ${data.problemLength} is greater than bandLength ${data.bandLength}.`);
-        }
-    } catch (e) {
-        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
+    validateProblemData('measure-length', data, ['bandLength', 'problemLength']);
+    if (data.bandLength > 1000) {
+        throw new ViewValidationError('measure-length', `bandLength ${data.bandLength} is too large to render.`);
+    }
+    if (data.problemLength > data.bandLength) {
+        throw new ViewValidationError('measure-length', `problemLength ${data.problemLength} is greater than bandLength ${data.bandLength}.`);
     }
 
     const color = '#4682B4'; // SteelBlue

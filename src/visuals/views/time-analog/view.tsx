@@ -17,11 +17,7 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     
-    try {
-        validateProblemData('time-analog', data, ['time', 'interval']);
-    } catch (e) {
-        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
-    }
+    validateProblemData('time-analog', data, ['time', 'interval']);
 
     const isReverse = config.isReverse;
 

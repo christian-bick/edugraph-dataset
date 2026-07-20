@@ -86,11 +86,7 @@ const MeasureAttributesCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    try {
-        validateProblemData('measure-attributes', data, ['attribute']);
-    } catch (e) {
-        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
-    }
+    validateProblemData('measure-attributes', data, ['attribute']);
 
     const attribute = data.attribute;
 
