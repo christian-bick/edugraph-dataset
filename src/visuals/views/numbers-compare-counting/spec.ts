@@ -10,10 +10,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const NumbersCompareCountingGeneralLabels = [
-    Scope.PhysicalNumbers,
-    Ability.ProcedureExecution
-];
 
 export const NumbersCompareCountingViewSchema = {
     // TODO: add ontological relations where beneficial

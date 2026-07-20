@@ -16,19 +16,11 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-export const CountingGeneralLabels = [
-    Area.Numeration,
-    Area.NumericIdentity,
-    Scope.AdditiveCount,
-    Area.CollectionSense,
-    Area.NumericOrder,
-    Scope.NumericZero
-];
 
 export const CountingGeneratorSchema = {
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

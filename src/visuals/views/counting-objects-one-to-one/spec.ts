@@ -17,14 +17,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const CountingObjectsOneToOneGeneralLabels = [
-    Area.Numeration,
-    Scope.NumbersWithoutZero,
-    Scope.AdditiveCount,
-    Scope.ArabicNumerals,
-    Scope.ObjectArrangement,
-    Ability.ProcedureExecution
-];
 
 export const CountingObjectsOneToOneViewSchema = {
     arrangement: [
@@ -34,7 +26,7 @@ export const CountingObjectsOneToOneViewSchema = {
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
         // TODO: deductCompatible is exclusively for NumericRange, add relations for other properties to utilize it
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

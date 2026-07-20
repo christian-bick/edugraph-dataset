@@ -10,10 +10,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const NumbersCompareGeneralLabels = [
-    Scope.ArabicNumerals,
-    Ability.ProcedureExecution
-];
 
 export const NumbersCompareViewSchema = {} as const;
 

@@ -9,15 +9,10 @@ export const spec: ViewSpec = {
         Area.BaseOperations,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
-        Scope.NumbersWithZero,
         Ability.TextualReception
     ]
 };
 
-export const OperationsWordProblemGeneralLabels = [
-    Scope.PhysicalNumbers,
-    Ability.TextualReception
-];
 
 export const OperationsWordProblemViewSchema = {
     operation: [
@@ -29,7 +24,7 @@ export const OperationsWordProblemViewSchema = {
     // TODO: Consider other ontological properties like Scope.PhysicalNumbers
     range: [
         deductCompatible([Scope.NumbersWithZero, Scope.NumbersSmaller10000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

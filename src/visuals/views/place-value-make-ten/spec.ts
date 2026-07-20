@@ -14,16 +14,12 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const PlaceValueMakeTenGeneralLabels = [
-    Scope.PhysicalNumbers,
-    Ability.ProcedureExecution
-];
 
 export const PlaceValueMakeTenViewSchema = {
     // TODO: Consider other ontological properties like Scope.PhysicalNumbers
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

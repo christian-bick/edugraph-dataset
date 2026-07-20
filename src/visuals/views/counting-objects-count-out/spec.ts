@@ -18,20 +18,11 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const CountingObjectsCountOutGeneralLabels = [
-    Area.Numeration,
-    Scope.PhysicalNumbers,
-    Scope.NumbersWithoutZero,
-    Scope.AdditiveCount,
-    Ability.ProcedureExecution,
-    Scope.ArabicNumerals,
-    // TODO: Ontological relations would be beneficial here
-];
 
 export const CountingObjectsCountOutViewSchema = {
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ],
     arrangement: [
         // TODO: Ontological relations would be beneficial for arrangements

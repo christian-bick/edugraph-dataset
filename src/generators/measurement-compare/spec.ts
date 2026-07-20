@@ -8,18 +8,10 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.Measurement,
         Area.ObjectSorting,
-        Scope.LengthMeasurement,
-        Scope.WeightMeasurement,
-        Scope.NumericRange,
-        Scope.Greater,
-        Scope.Less
+        Scope.NumericRange
     ]
 };
 
-export const MeasurementCompareGeneralLabels = [
-    Area.Measurement,
-    Area.ObjectSorting
-];
 
 // TODO: Ontological relations could be beneficial in the future for non-range properties,
 // such as inferring 'heavier' vs 'lighter' from related physics concepts.

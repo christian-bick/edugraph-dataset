@@ -13,16 +13,12 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-export const WritingGeneralLabels = [
-    Area.DigitNotation,
-    Area.Numeration
-];
 
 export const WritingGeneratorSchema = {
     // TODO: Add ontological relations for non-range properties
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

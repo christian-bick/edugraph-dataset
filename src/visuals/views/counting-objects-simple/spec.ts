@@ -18,16 +18,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const CountingObjectsSimpleGeneralLabels = [
-    Area.Numeration,
-    Scope.PhysicalNumbers,
-    Scope.NumbersWithoutZero,
-    Scope.ArabicNumerals,
-    Scope.NumericRange,
-    Scope.ObjectArrangement,
-    Ability.ProcedureExecution,
-    Ability.ProcedureUnderstanding
-];
 
 export const CountingObjectsSimpleViewSchema = {
     arrangement: [
@@ -37,7 +27,7 @@ export const CountingObjectsSimpleViewSchema = {
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

@@ -11,6 +11,12 @@ export function extractConfig<T extends ConfigSchema>(
 
     for (const key in schema) {
         const schemaValue = schema[key];
+        
+        if (typeof schemaValue === 'function') {
+            config[key] = schemaValue(competencyLabels);
+            continue;
+        }
+
         const isTuple = Array.isArray(schemaValue) && schemaValue.length === 2 && typeof schemaValue[1] === 'function';
         
         const supportedLabels: string[] = isTuple ? (schemaValue[0] as string[]) : (schemaValue as string[]);
@@ -43,4 +49,25 @@ export function extractConfig<T extends ConfigSchema>(
     }
 
     return { config, consumedLabels: Array.from(consumedLabels) };
+}
+
+export function extractSchemaLabels<T extends ConfigSchema>(schema?: T): string[] {
+    if (!schema) return [];
+    const labels = new Set<string>();
+    
+    for (const key in schema) {
+        const schemaValue = schema[key];
+        if (typeof schemaValue === 'function') {
+            continue;
+        }
+        
+        const isTuple = Array.isArray(schemaValue) && schemaValue.length === 2 && typeof schemaValue[1] === 'function';
+        const supportedLabels: string[] = isTuple ? (schemaValue[0] as string[]) : (schemaValue as string[]);
+        
+        for (const label of supportedLabels) {
+            labels.add(label);
+        }
+    }
+    
+    return Array.from(labels);
 }

@@ -10,9 +10,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const GeometryClassifyDimGeneralLabels = [
-    Ability.ConceptClassification
-];
 
 export const GeometryClassifyDimViewSchema = {
     wants2D: [

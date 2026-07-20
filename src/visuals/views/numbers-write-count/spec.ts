@@ -13,13 +13,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const NumbersWriteCountGeneralLabels = [
-    Area.Numeration,
-    Scope.PhysicalNumbers,
-    Scope.NumericRange,
-    Scope.NumbersWithZero,
-    Ability.ProcedureExecution
-];
 
 export const NumbersWriteCountViewSchema = {
     // TODO: add ontological relations where beneficial

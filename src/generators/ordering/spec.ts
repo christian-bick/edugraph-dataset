@@ -9,16 +9,10 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.NumerationWithIntegers,
         Scope.Base10,
-        Scope.NumericRange,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithNegatives,
+        Scope.NumericRange
     ],
 };
 
-export const OrderingGeneralLabels = [
-    Area.NumerationWithIntegers,
-    Scope.Base10
-];
 
 export const OrderingGeneratorSchema = {
     // TODO: implement logical constraints relations on this property to make use of deductCompatible
@@ -33,7 +27,7 @@ export const OrderingGeneratorSchema = {
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

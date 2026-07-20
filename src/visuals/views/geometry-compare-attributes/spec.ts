@@ -8,17 +8,10 @@ export const spec: ViewSpec = {
     supportedLabels: [
         Ability.VisualDecomposition,
         Area.Circle,
-        Area.Square,
-        Area.Rectangle,
-        Area.Triangle,
-        Area.Hexagon,
-        Area.Polygon
+        Area.Hexagon
     ],
 };
 
-export const GeometryCompareAttributesGeneralLabels = [
-    Ability.VisualDecomposition
-];
 
 export const GeometryCompareAttributesViewSchema = {
     wantsTriangle: [

@@ -14,13 +14,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const MeasureLengthGeneralLabels = [
-    Area.Measurement,
-    Scope.ArabicNumerals,
-    Ability.VisualReception,
-    Ability.VisualArticulation,
-    Ability.ProcedureExecution
-];
 
 export const MeasureLengthViewSchema = {
     isReverse: [[], hasLabel(Ability.VisualArticulation)]

@@ -5,14 +5,9 @@ import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-compose-shapes',
-    supportedLabels: [
-        Area.Rectangle,
-        Area.Square,
-        Area.Triangle
-    ]
+    supportedLabels: []
 };
 
-export const GeometryComposeShapesGeneralLabels = [];
 
 export const GeometryComposeShapesGeneratorSchema = {
     wantsRectangle: [

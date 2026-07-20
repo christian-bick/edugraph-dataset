@@ -10,23 +10,11 @@ export const spec: ViewSpec = {
         Area.Numeration,
         Area.NumericIdentity,
         Scope.PhysicalNumbers,
-        Scope.NumericRange,
-        Scope.NumbersWithoutZero,
         Scope.AdditiveCount,
         Scope.ArabicNumerals,
-        Scope.ObjectArrangement,
         Ability.ProcedureUnderstanding
     ]
 };
-
-export const CountingObjectsCardinalityGeneralLabels = [
-    Area.Numeration,
-    Area.NumericIdentity,
-    Scope.PhysicalNumbers,
-    Scope.AdditiveCount,
-    Scope.ArabicNumerals,
-    Ability.ProcedureUnderstanding
-];
 
 export const CountingObjectsCardinalityViewSchema = {
     arrangement: extractFirstMatch([
@@ -39,7 +27,7 @@ export const CountingObjectsCardinalityViewSchema = {
         // It would be beneficial to have logical constraints relations on other properties
         // such as arrangement to use deductCompatible for them as well.
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

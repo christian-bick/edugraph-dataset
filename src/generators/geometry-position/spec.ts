@@ -6,21 +6,10 @@ import {matchAllLabels} from '../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-position',
     supportedLabels: [
-        Area.SpatialModelling,
-        Scope.Above,
-        Scope.Below,
-        Scope.Beside,
-        Scope.Behind
+        Area.SpatialModelling
     ]
 };
 
-export const GeometryPositionGeneralLabels = [
-    Area.SpatialModelling,
-    Scope.Above,
-    Scope.Below,
-    Scope.Beside,
-    Scope.Behind
-];
 
 export const GeometryPositionGeneratorSchema = {
     // TODO: Ontological constraints relations could be beneficial here in the future instead of manual resolvers.

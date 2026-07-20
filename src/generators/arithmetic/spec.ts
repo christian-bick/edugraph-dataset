@@ -15,9 +15,6 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-export const ArithmeticGeneralLabels = [
-    Scope.IntegerNumbers
-];
 
 export const ArithmeticGeneratorSchema = {
     operation: [
@@ -36,7 +33,7 @@ export const ArithmeticGeneratorSchema = {
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

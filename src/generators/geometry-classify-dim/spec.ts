@@ -15,15 +15,10 @@ export const spec: GeneratorSpec = {
         Area.Cone,
         Area.Cylinder,
         Area.Sphere,
-        Area.ShapeIdentity,
-        Scope.TwoDimensional,
-        Scope.ThreeDimensional,
+        Area.ShapeIdentity
     ]
 };
 
-export const GeometryClassifyDimGeneralLabels = [
-    Area.ShapeIdentity
-];
 
 export const GeometryClassifyDimGeneratorSchema = {
     wants2D: [

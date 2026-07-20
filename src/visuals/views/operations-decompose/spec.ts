@@ -14,14 +14,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const OperationsDecomposeGeneralLabels = [
-    Area.BaseOperations,
-    Scope.PhysicalNumbers,
-    Scope.NumericRange,
-    Scope.NumbersWithZero,
-    Scope.ArabicNumerals,
-    Ability.ProcedureUnderstanding
-];
 
 export const OperationsDecomposeViewSchema = {
     // TODO: add ontological relations where beneficial

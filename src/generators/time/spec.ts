@@ -6,19 +6,10 @@ import {extractFirstMatch} from '../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'time',
     supportedLabels: [
-        Area.MeasuringTime,
-        Scope.HourIntervals,
-        Scope.MinuteIntervals,
-        Scope.SecondIntervals
+        Area.MeasuringTime
     ],
 };
 
-export const TimeGeneralLabels = [
-    Area.MeasuringTime,
-    Scope.HourIntervals,
-    Scope.MinuteIntervals,
-    Scope.SecondIntervals
-];
 
 export const TimeGeneratorSchema = {
     // TODO: Consider defining ontological relations for time intervals in the future

@@ -13,13 +13,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const OperationsVerticalGeneralLabels = [
-    Area.BaseOperations,
-    Scope.ArabicNumerals,
-    Scope.NumericRange,
-    Scope.NumbersWithZero,
-    Ability.ProcedureExecution
-];
 
 export const OperationsVerticalViewSchema = {
     // TODO: add ontological relations where beneficial

@@ -15,15 +15,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const MeasureCompareGeneralLabels = [
-    Area.Measurement,
-    Scope.NumericRange,
-    Scope.ArabicNumerals,
-    Scope.NumbersWithoutZero,
-    Ability.ProcedureExecution,
-    Scope.LengthMeasurement,
-    Scope.WeightMeasurement
-];
 
 export const MeasureCompareViewSchema = {
     attribute: [

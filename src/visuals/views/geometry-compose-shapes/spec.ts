@@ -6,15 +6,10 @@ import { hasSubConcept } from '../../../lib/resolvers.ts';
 export const spec: ViewSpec = {
     viewId: 'geometry-compose-shapes',
     supportedLabels: [
-        Area.Triangle,
-        Area.Circle,
         Ability.ConceptComposition
     ]
 };
 
-export const GeometryComposeShapesGeneralLabels = [
-    Ability.ConceptComposition
-];
 
 // TODO: Ontological relations between shapes could allow us to deduct what can be composed into what.
 export const GeometryComposeShapesViewSchema = {

@@ -7,18 +7,10 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement-attribute',
     supportedLabels: [
         Area.Measurement,
-        Scope.LengthMeasurement,
-        Scope.WeightMeasurement,
         Scope.NumericRange
     ]
 };
 
-export const MeasurementAttributeGeneralLabels = [
-    Area.Measurement,
-    Scope.NumericRange,
-    Scope.NumbersWithoutZero,
-    Ability.ProcedureExecution
-];
 
 export const MeasurementAttributeGeneratorSchema = {
     // TODO: Ontological relations between measurement attributes could be defined

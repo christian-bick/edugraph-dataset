@@ -10,10 +10,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const GeometryDrawShapeGeneralLabels = [
-    Area.ShapePlotting,
-    Ability.VisualArticulation
-];
 
 export const GeometryDrawShapeViewSchema = {} as const;
 

@@ -16,14 +16,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const CountingConservationGeneralLabels = [
-    Area.Numeration,
-    Area.NumericIdentity,
-    Scope.AdditiveCount,
-    Scope.NumbersWithoutZero,
-    Ability.DirectUnderstanding,
-    Scope.ArabicNumerals
-];
 
 export const CountingConservationViewSchema = {
     // TODO: Add ontological relations for other properties once supported (e.g., Numeration, NumericIdentity)

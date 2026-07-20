@@ -13,18 +13,10 @@ export const spec: ViewSpec = {
         Scope.SecondIntervals,
         Scope.ArabicNumerals,
         Ability.ProcedureExecution,
-        Ability.VisualReception,
-        Ability.VisualArticulation
+        Ability.VisualReception
     ]
 };
 
-export const TimeAnalogGeneralLabels = [
-    Area.MeasuringTime,
-    Scope.AnalogClock,
-    Scope.ArabicNumerals,
-    Ability.ProcedureExecution,
-    Ability.VisualReception
-];
 
 export const TimeAnalogViewSchema = {
     // TODO: Consider ontological relations for time intervals

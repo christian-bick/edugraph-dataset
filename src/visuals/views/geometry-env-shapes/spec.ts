@@ -11,11 +11,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const GeometryEnvShapesGeneralLabels = [
-    Area.Circle,
-    Area.Triangle,
-    Ability.ProcedureExecution
-];
 
 export const GeometryEnvShapesViewSchema = {} as const;
 

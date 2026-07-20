@@ -11,23 +11,15 @@ export const spec: GeneratorSpec = {
         Area.ObjectSorting,
         Area.NumericOrder,
         Scope.NumericRange,
-        Scope.NumericZero,
-        Scope.Most,
-        Scope.Least
+        Scope.NumericZero
     ]
 };
 
-export const CountingClassifySortGeneralLabels = [
-    Area.Numeration,
-    Area.ObjectSorting,
-    Area.NumericOrder,
-    Scope.NumericZero
-];
 
 export const CountingClassifySortGeneratorSchema = {
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ],
     wantsMost: [
         [Scope.Most], // TODO: Consider ontological relations if applicable

@@ -6,17 +6,10 @@ import {extractFirstMatch} from '../../../lib/resolvers.ts';
 export const spec: ViewSpec = {
     viewId: 'geometry-build-shape',
     supportedLabels: [
-        Area.Triangle,
-        Area.Square,
-        Area.Rectangle,
-        Area.Hexagon,
         Ability.VisualArticulation
     ],
 };
 
-export const GeometryBuildShapeGeneralLabels = [
-    Ability.VisualArticulation
-];
 
 export const GeometryBuildShapeViewSchema = {
     targetShape: [

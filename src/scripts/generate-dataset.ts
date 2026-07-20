@@ -5,7 +5,7 @@ import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync
 import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
-import { extractConfig } from '../lib/utils.ts';
+import { extractConfig, extractSchemaLabels } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
 import {Grade1Spec} from '../../config/spec/ccss/grade-01.ts';
@@ -276,9 +276,6 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
     const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
     const className = camelCase(moduleName[0].toUpperCase() + moduleName.slice(1)) + 'Generator';
     
-    // Look for new strictly typed schema labels, fallback to old spec
-    const generatorGeneralLabels = specModule[`${className.replace('Generator', '')}GeneralLabels`] || generatorSpec?.supportedLabels;
-
     // Dynamic import of generator class
     const generatorModule = await import(`../generators/${moduleName}/generator.ts`);
     const GeneratorClass = generatorModule[className];
@@ -286,6 +283,12 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
         throw new Error(`Could not find generator class ${className} in ${moduleName}`);
     }
     const generator = new GeneratorClass();
+    
+    // Combine base supported labels with dynamically extracted schema labels
+    const generatorGeneralLabels = Array.from(new Set([
+        ...(generatorSpec?.supportedLabels || []),
+        ...extractSchemaLabels(generator.schema)
+    ]));
 
     const { setSeed } = await import(`../lib/random.ts`);
 
@@ -320,7 +323,11 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                 compatibleViews.push(viewSpecModule.spec);
                 
                 const viewCamelCase = camelCase(viewId[0].toUpperCase() + viewId.slice(1));
-                const viewLabels = viewSpecModule[`${viewCamelCase}GeneralLabels`] || viewSpecModule.spec?.supportedLabels;
+                const viewSchema = viewSpecModule[`${viewCamelCase}ViewSchema`];
+                const viewLabels = Array.from(new Set([
+                    ...(viewSpecModule.spec?.supportedLabels || []),
+                    ...extractSchemaLabels(viewSchema)
+                ]));
                 viewGeneralLabelsMap[viewId] = viewLabels;
             } catch (e) {
                 console.warn(`Could not import view spec for ${viewId}:`, e);

@@ -8,6 +8,6 @@ export const spec: GeneratorSpec = {
         Area.Square,
         Area.Hexagon,
         Area.Rectangle,
-        Area.ShapePlotting,
+        Area.ShapePlotting
     ]
 };

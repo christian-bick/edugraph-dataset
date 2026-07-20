@@ -14,10 +14,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const OperationsBoxesGeneralLabels = [
-    Scope.ArabicNumerals,
-    Ability.ProcedureExecution
-];
 
 export const OperationsBoxesViewSchema = {
     operation: [
@@ -28,7 +24,7 @@ export const OperationsBoxesViewSchema = {
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

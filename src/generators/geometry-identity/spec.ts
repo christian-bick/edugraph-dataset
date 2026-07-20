@@ -6,26 +6,12 @@ import {matchAllLabels} from '../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-identity',
     supportedLabels: [
-        Area.Circle,
-        Area.Square,
-        Area.Rectangle,
-        Area.Triangle,
-        Area.Hexagon,
-        Area.Cube,
-        Area.Cone,
-        Area.Cylinder,
-        Area.Sphere,
         Area.ShapeIdentity,
         Ability.VisualRecognition,
         Ability.VisualArticulation
     ]
 };
 
-export const GeometryIdentityGeneralLabels = [
-    Area.ShapeIdentity,
-    Ability.VisualRecognition,
-    Ability.VisualArticulation
-];
 
 const SupportedShapes = [
     Area.Triangle,

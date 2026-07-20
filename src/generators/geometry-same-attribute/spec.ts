@@ -7,14 +7,10 @@ export const spec: GeneratorSpec = {
     generatorId: 'geometry-same-attribute',
     supportedLabels: [
         Area.ObjectSorting,
-        Scope.ShapeProperties,
+        Scope.ShapeProperties
     ]
 };
 
-export const GeometrySameAttributeGeneralLabels = [
-    Area.ObjectSorting,
-    Scope.ShapeProperties,
-];
 
 export const GeometrySameAttributeGeneratorSchema = {
     // TODO: Ontological relations could be beneficial for ShapeProperties here in the future

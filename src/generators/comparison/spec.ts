@@ -9,23 +9,15 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.Numeration,
         Area.NumericComparison,
-        Scope.Greater,
-        Scope.Equal,
-        Scope.Less,
         Scope.NumericZero
     ]
 };
 
-export const ComparisonGeneralLabels = [
-    Area.Numeration,
-    Area.NumericComparison,
-    Scope.NumericZero
-];
 
 export const ComparisonGeneratorSchema = {
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ],
     wantsGreater: [
         [Scope.Greater], // TODO: Consider ontological relations if applicable

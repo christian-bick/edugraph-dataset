@@ -11,11 +11,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const MeasureAttributesGeneralLabels = [
-    Ability.VisualReception,
-    Ability.ProcedureExecution,
-    Scope.NumbersWithoutZero
-];
 
 export const MeasureAttributesViewSchema = {} as const;
 

@@ -14,17 +14,11 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-export const CountingClassifyCountGeneralLabels = [
-    Area.Numeration,
-    Area.ObjectSorting,
-    Area.CollectionSense,
-    Scope.NumericZero
-];
 
 export const CountingClassifyCountGeneratorSchema = {
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

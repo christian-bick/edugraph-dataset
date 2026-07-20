@@ -9,9 +9,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const GeometryNamingGeneralLabels = [
-    Ability.VisualRecognition
-];
 
 export const GeometryNamingViewSchema = {} as const;
 

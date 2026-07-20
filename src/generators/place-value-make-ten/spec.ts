@@ -9,19 +9,10 @@ export const spec: GeneratorSpec = {
         Area.BaseOperations,
         Scope.Base10,
         Scope.NumbersSmaller10,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithNegatives,
+        Scope.NumbersWithNegatives
     ]
 };
 
-export const PlaceValueMakeTenGeneralLabels = [
-    Area.BaseOperations,
-    Scope.Base10,
-    Scope.NumbersSmaller10,
-    Scope.NumbersWithoutZero,
-    Scope.NumbersWithZero,
-    Scope.NumbersWithNegatives
-];
 
 export const PlaceValueMakeTenGeneratorSchema = {
     includeZero: [

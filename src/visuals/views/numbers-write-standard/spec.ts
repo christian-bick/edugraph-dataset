@@ -13,13 +13,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const NumbersWriteStandardGeneralLabels = [
-    Area.DigitNotation,
-    Scope.ArabicNumerals,
-    Scope.NumericRange,
-    Scope.NumbersWithZero,
-    Ability.ProcedureExecution
-];
 
 export const NumbersWriteStandardViewSchema = {
     // TODO: add ontological relations where beneficial

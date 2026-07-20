@@ -10,24 +10,17 @@ export const spec: ViewSpec = {
         Area.CollectionSense,
         Area.Numeration,
         Scope.NumericRange,
-        Scope.NumbersWithZero,
         Ability.ConceptClassification,
         Scope.ShapeProperties
     ]
 };
 
-export const SortingClassifyCountGeneralLabels = [
-    Area.ObjectSorting,
-    Area.CollectionSense,
-    Area.Numeration,
-    Ability.ConceptClassification
-];
 
 export const SortingClassifyCountViewSchema = {
     // TODO: Consider other ontological properties like Scope.ShapeProperties
     range: [
         deductCompatible([Scope.NumbersWithZero, Scope.NumbersSmaller10000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
 } as const;
 

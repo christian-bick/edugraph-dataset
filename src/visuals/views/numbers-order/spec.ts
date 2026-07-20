@@ -16,15 +16,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const NumbersOrderGeneralLabels = [
-    Area.NumerationWithIntegers,
-    Scope.ArabicNumerals,
-    Scope.Base10,
-    Scope.NumericRange,
-    Scope.NumericZero,
-    Ability.ProcedureExecution,
-    Scope.OrderAbstraction
-];
 
 export const NumbersOrderViewSchema = {
     isDesc: [

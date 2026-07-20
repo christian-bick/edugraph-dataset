@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { isCompatibleConcept } from '../lib/ontology.ts';
+import { extractSchemaLabels } from '../lib/utils.ts';
 
 const enums = { Area, Scope, Ability };
 
@@ -12,6 +13,8 @@ function getEnumString(match: string): string | null {
     }
     return null;
 }
+
+const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
 
 async function checkLabels() {
     const issues: { file: string, type: string, used: string, supported: string[], usedEnum: string }[] = [];
@@ -38,7 +41,15 @@ async function checkLabels() {
                         try {
                             const specModule = await import(specPath);
                             const spec = specModule.spec;
-                            const supportedLabels = spec?.supportedLabels || [];
+                            const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
+                            const schemaName = type === 'generator' ? `${modulePrefix}GeneratorSchema` : `${modulePrefix}ViewSchema`;
+                            const schema = specModule[schemaName];
+                            
+                            const schemaLabels = schema ? extractSchemaLabels(schema) : [];
+                            const supportedLabels = Array.from(new Set([
+                                ...(spec?.supportedLabels || []),
+                                ...schemaLabels
+                            ]));
 
                             for (const usedEnumName of uniqueMatches) {
                                 const used = getEnumString(usedEnumName);

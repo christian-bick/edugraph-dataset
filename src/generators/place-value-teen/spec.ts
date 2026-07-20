@@ -8,24 +8,16 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.BaseOperations,
         Scope.Base10,
-        Scope.NumbersSmaller20,
         Scope.NumbersWithoutZero,
-        Scope.NumbersWithNegatives,
+        Scope.NumbersWithNegatives
     ]
 };
 
-export const PlaceValueTeenGeneralLabels = [
-    Area.BaseOperations,
-    Scope.Base10,
-    Scope.NumbersWithoutZero,
-    Scope.NumbersWithNegatives,
-    Scope.NumericRange,
-];
 
 export const PlaceValueTeenGeneratorSchema = {
     range: [
         deductCompatible([Scope.NumbersSmaller20]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as any))
+        resolveRangeFromLabels
     ]
     // TODO: Add ontological relations for other properties once supported,
     // e.g., deducting base 10 vs base 2 constraints.

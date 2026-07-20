@@ -11,11 +11,6 @@ export const spec: ViewSpec = {
     ],
 };
 
-export const GeometrySameAttributeGeneralLabels = [
-    Ability.VisualRecognition,
-    Ability.InductiveReasoning,
-    Scope.ShapeProperties
-];
 
 export const GeometrySameAttributeViewSchema = {} as const;
 
