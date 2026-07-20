@@ -19,8 +19,6 @@ export const PlaceValueTeenGeneratorSchema = {
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ]
-    // TODO: Add ontological relations for other properties once supported,
-    // e.g., deducting base 10 vs base 2 constraints.
 } as const;
 
 export type PlaceValueTeenGeneratorConfig = ConfigFromSchema<typeof PlaceValueTeenGeneratorSchema>;

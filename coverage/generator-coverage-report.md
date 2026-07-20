@@ -22,7 +22,7 @@
 | [src/generators/measurement-compare/generator.ts](src/generators/measurement-compare/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/ordering/generator.ts](src/generators/ordering/generator.ts) | 100% | 85% | ✅ PASS |
 | [src/generators/place-value-make-ten/generator.ts](src/generators/place-value-make-ten/generator.ts) | 100% | 100% | ✅ PASS |
-| [src/generators/place-value-teen/generator.ts](src/generators/place-value-teen/generator.ts) | 100% | 40% | ❌ FAIL |
+| [src/generators/place-value-teen/generator.ts](src/generators/place-value-teen/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/time/generator.ts](src/generators/time/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/writing/generator.ts](src/generators/writing/generator.ts) | 100% | 66.66% | ✅ PASS |
 

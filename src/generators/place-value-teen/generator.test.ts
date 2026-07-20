@@ -14,13 +14,28 @@ describe('PlaceValueTeenGenerator', () => {
         expect(generator.type).toBe('arithmetic');
     });
 
-    it('should generate valid place value teen stubs', () => {
+    it('should generate valid place value teen stubs with range within teen boundaries', () => {
         const stub = generator.generate({
-            range: { min: 11, max: 19 }
+            range: { min: 12, max: 18 }
+        });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.ones).toBeGreaterThanOrEqual(2);
+        expect(stub!.data.ones).toBeLessThanOrEqual(8);
+        expect(stub!.data.target).toBe(10 + stub!.data.ones);
+    });
+
+    it('should clamp bounds if range exceeds teen boundaries', () => {
+        const stub = generator.generate({
+            range: { min: 5, max: 25 }
         });
         expect(stub).not.toBeNull();
         expect(stub!.data.ones).toBeGreaterThanOrEqual(1);
         expect(stub!.data.ones).toBeLessThanOrEqual(9);
         expect(stub!.data.target).toBe(10 + stub!.data.ones);
+    });
+
+    it('should return null if range configuration is missing', () => {
+        const stub = generator.generate({} as any);
+        expect(stub).toBeNull();
     });
 });
