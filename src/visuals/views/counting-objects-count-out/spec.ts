@@ -2,7 +2,6 @@ import { ViewSpec } from '../../../types/view-spec.ts';
 import { Ability, Area, Scope, deductCompatible } from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../types/schema.ts';
 import { resolveRangeFromLabels } from '../../../lib/ontology.ts';
-import { extractFirstMatch } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-objects-count-out',
@@ -19,11 +18,7 @@ export const spec: ViewSpec = {
 
 
 export const CountingObjectsCountOutViewSchema = {
-    arrangement: [
-        // TODO: Ontological relations would be beneficial for arrangements
-        [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement],
-        extractFirstMatch([Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement], Scope.ScatteredArrangement)
-    ]
+    arrangement: [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement]
 } as const;
 
 export type CountingObjectsCountOutViewConfig = ConfigFromSchema<typeof CountingObjectsCountOutViewSchema>;
