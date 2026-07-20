@@ -19,7 +19,7 @@ export const spec: GeneratorSpec = {
 
 export const CountingClassifySortGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ],
     relation: [Scope.Least, Scope.Most],
