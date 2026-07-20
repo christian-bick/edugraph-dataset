@@ -26,7 +26,7 @@ const MeasureLengthCore = ({ config, payload }: CoreProps) => {
 
     const color = '#4682B4'; // SteelBlue
 
-    const isReverse = config.isReverse || false;
+    const isReverse = config.isReverse;
     
     const bandLength = data.bandLength;
     const problemLength = data.problemLength;

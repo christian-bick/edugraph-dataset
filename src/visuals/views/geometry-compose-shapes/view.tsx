@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { GeometryComposeShapesViewConfig, GeometryComposeShapesViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
-import { validateProblemData } from '../../helpers/validation.ts';
+import { validateProblemData, ViewValidationError } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -17,6 +17,10 @@ const GeometryComposeShapesCore = ({ config: _config, payload }: CoreProps) => {
 
     const target = data.target;
     const answer = data.answer;
+
+    if (target !== 'square' && target !== 'rectangle') {
+        throw new ViewValidationError('geometry-compose-shapes', `Unsupported target shape: ${target}`);
+    }
 
     const promptText = `Which two shapes can you join to make a ${target}?`;
     

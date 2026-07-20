@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { OperationsWordProblemViewConfig, OperationsWordProblemViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
-import { validateProblemData } from '../../helpers/validation.ts';
+import { validateProblemData, ViewValidationError } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -31,12 +31,15 @@ const OperationsWordProblemCore = ({ config, payload }: CoreProps) => {
 
     const operation = data.operation;
     const symbol = operatorSymbols[operation];
+    if (!symbol || !wordProblemTemplates[operation]) {
+        throw new ViewValidationError('operations-word-problem', `Unsupported operation: ${operation}`);
+    }
 
     const num1 = data.num1;
     const num2 = data.num2;
     const answer = data.answer;
 
-    const textScenario = wordProblemTemplates[operation]?.(num1, num2) || `Solve: ${num1} ${symbol} ${num2}`;
+    const textScenario = wordProblemTemplates[operation](num1, num2);
 
     const boxContent1 = isSolutionView ? num1 : '';
     const boxContent2 = isSolutionView ? num2 : '';

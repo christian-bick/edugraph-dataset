@@ -3,7 +3,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getBallPosition} from './helpers.ts';
 import {GeometryPositionViewConfig, GeometryPositionViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
-import {validateProblemData} from '../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -18,6 +18,10 @@ const GeometryPositionCore = ({ config: _config, payload }: CoreProps) => {
 
     const relation = data.relation;
     const answer = data.answer;
+
+    if (relation !== 'above' && relation !== 'below' && relation !== 'beside' && relation !== 'nextTo') {
+        throw new ViewValidationError('geometry-position', `Unsupported relation: ${relation}`);
+    }
 
     const promptText = "Where is the ball relative to the box?";
     const options = ['above', 'below', 'nextTo'];

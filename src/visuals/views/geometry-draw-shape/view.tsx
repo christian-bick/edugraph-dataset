@@ -3,7 +3,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getTracePath} from './helpers.ts';
 import {GeometryDrawShapeViewConfig, GeometryDrawShapeViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
-import {validateProblemData} from '../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -17,6 +17,11 @@ const GeometryDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
     validateProblemData('geometry-draw-shape', data, ['shape', 'answer']);
 
     const shape = data.shape;
+
+    if (shape !== 'circle' && shape !== 'triangle' && shape !== 'square') {
+        throw new ViewValidationError('geometry-draw-shape', `Unsupported shape: ${shape}`);
+    }
+
     const promptText = `Trace the ${shape}.`;
     const pathD = getTracePath(shape);
 

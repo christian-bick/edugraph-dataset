@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {GeometryEnvShapesViewConfig, GeometryEnvShapesViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
-import {validateProblemData} from '../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -17,6 +17,10 @@ const GeometryEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
 
     const target = data.target;
     const answer = data.answer;
+
+    if (target !== 'table' && target !== 'window' && target !== 'clock') {
+        throw new ViewValidationError('geometry-env-shapes', `Unsupported target environment shape: ${target}`);
+    }
 
     const promptText = `What shape is the ${target}?`;
     const options = ['circle', 'square', 'rectangle'];

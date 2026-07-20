@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {GeometryNamingViewConfig, GeometryNamingViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
-import {validateProblemData} from '../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -95,7 +95,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
             </svg>
         );
     }
-    return null;
+    throw new ViewValidationError('geometry-naming', `Unsupported shape: ${shape}`);
 }
 
 const GeometryNamingCore = ({ config: _config, payload }: CoreProps) => {

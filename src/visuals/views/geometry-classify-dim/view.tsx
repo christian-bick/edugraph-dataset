@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {GeometryClassifyDimViewConfig, GeometryClassifyDimViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
-import {validateProblemData} from '../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
@@ -81,7 +81,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
             </svg>
         );
     }
-    return null;
+    throw new ViewValidationError('geometry-classify-dim', `Unsupported shape: ${shape}`);
 }
 
 interface CoreProps {

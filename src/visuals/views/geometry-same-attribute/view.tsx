@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { GeometrySameAttributeViewConfig, GeometrySameAttributeViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
-import { validateProblemData } from '../../helpers/validation.ts';
+import { validateProblemData, ViewValidationError } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -47,7 +47,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
             </svg>
         );
     }
-    return null;
+    throw new ViewValidationError('geometry-same-attribute', `Unsupported shape: ${shape}`);
 }
 
 const GeometrySameAttributeCore = ({ config: _config, payload }: CoreProps) => {
@@ -64,7 +64,11 @@ const GeometrySameAttributeCore = ({ config: _config, payload }: CoreProps) => {
             'stackable': 'Which of these shapes is best for stacking?',
             'foldable': 'Which of these shapes can be folded?'
         };
-        return promptMap[attribute] || 'Choose the correct shape.';
+        const text = promptMap[attribute];
+        if (!text) {
+            throw new ViewValidationError('geometry-same-attribute', `Unsupported attribute: ${attribute}`);
+        }
+        return text;
     }, [attribute]);
 
     const options = ['sphere', 'cube', 'rectangle'];

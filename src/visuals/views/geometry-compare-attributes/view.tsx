@@ -3,7 +3,7 @@ import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import '../../../tailwind.css';
 import { GeometryCompareAttributesViewConfig, GeometryCompareAttributesViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
-import { validateProblemData } from '../../helpers/validation.ts';
+import { validateProblemData, ViewValidationError } from '../../helpers/validation.ts';
 
 interface CoreProps {
     config: GeometryCompareAttributesViewConfig;
@@ -49,7 +49,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
             </svg>
         );
     }
-    return null;
+    throw new ViewValidationError('geometry-compare-attributes', `Unsupported shape: ${shape}`);
 }
 
 const GeometryCompareAttributesCore = ({ payload }: CoreProps) => {

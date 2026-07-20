@@ -3,7 +3,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getBlankPart} from './helpers.ts';
 import {OperationsBoxesViewConfig, OperationsBoxesViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
-import {validateProblemData} from '../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 const operatorSymbols: Record<string, string> = {
@@ -24,6 +24,9 @@ const OperationsBoxesCore = ({ config, payload }: CoreProps) => {
     const data = problem.data;
     validateProblemData('operations-boxes', data, ['num1', 'num2', 'operation', 'answer']);
     const symbol = operatorSymbols[data.operation];
+    if (!symbol) {
+        throw new ViewValidationError('operations-boxes', `Unsupported operation: ${data.operation}`);
+    }
 
     const requestedBlank = payload.constraints?.blankPart || 'solution';
     const blankPart = getBlankPart(problem.id, requestedBlank);
