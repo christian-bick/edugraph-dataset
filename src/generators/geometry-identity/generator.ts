@@ -9,18 +9,17 @@ export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdent
     schema = GeometryIdentityGeneratorSchema;
 
     generate(config: GeometryIdentityGeneratorConfig): ProblemStub | null {
-        let validShapes = config.shapes || [];
-
-        if (validShapes.length === 0) {
-            // Default fallback to basic 2D shapes
-            validShapes = [Area.Triangle, Area.Square, Area.Rectangle, Area.Circle];
-        }
+        let validShapes = config.shapes || [
+            Area.Triangle,
+            Area.Square,
+            Area.Rectangle,
+            Area.Circle
+        ]; // Default fallback to basic 2D shapes
 
         const shape = validShapes[Math.floor(random() * validShapes.length)];
-        const seed = Math.floor(random() * 1000);
 
         return {
-            id: `geometry-identity-${shape}-${seed}`,
+            id: `geometry-identity-${shape}`,
             data: {
                 shape,
                 answer: shape

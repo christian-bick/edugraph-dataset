@@ -12,24 +12,19 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-
-const SupportedShapes = [
-    Area.Triangle,
-    Area.Square,
-    Area.Rectangle,
-    Area.Circle,
-    Area.Hexagon,
-    Area.Cube,
-    Area.Sphere,
-    Area.Cone,
-    Area.Cylinder
-] as const;
-
-// TODO: Ontological relations could be beneficial here in the future to automatically deduct 
-// shapes based on broader categories (e.g., 2D shapes vs 3D shapes).
 export const GeometryIdentityGeneratorSchema = {
     shapes: [
-        SupportedShapes,
+        [
+            Area.Triangle,
+            Area.Square,
+            Area.Rectangle,
+            Area.Circle,
+            Area.Hexagon,
+            Area.Cube,
+            Area.Sphere,
+            Area.Cone,
+            Area.Cylinder
+        ],
         matchAllLabels
     ]
 } as const;
