@@ -9,7 +9,9 @@ export const spec: GeneratorSpec = {
         Area.NumberNotation,
         Area.Addition,
         Scope.IntegerNumbers,
-        Scope.Base10
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
     ]
 };
 
