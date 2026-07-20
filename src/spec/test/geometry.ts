@@ -47,13 +47,24 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
 
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeComposition,
+        Area.ShapeIdentity,
         Ability.ConceptComposition
     ])
     .applyLabelVariants([
         [Area.Rectangle],
         [Area.Square],
         [Area.Triangle]
+    ]);
+
+const envShapesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Area.Circle],
+        [Area.Square],
+        [Area.Rectangle]
     ]);
 
 export const GeometryTestSpec: CompetencyTarget[] = [
@@ -74,6 +85,11 @@ export const GeometryTestSpec: CompetencyTarget[] = [
     })),
     ...composeShapesBuilder.build().map((p, i) => ({
         id: `test-geometry-compose-shapes-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    })),
+    ...envShapesBuilder.build().map((p, i) => ({
+        id: `test-geometry-env-shapes-${i}`,
         labels: p.labels,
         constraints: p.constraints
     }))

@@ -9,7 +9,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'geometry-env-shapes'>;
 }
 
-const GeometryEnvShapesCore = ({ config, payload }: CoreProps) => {
+const GeometryEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 

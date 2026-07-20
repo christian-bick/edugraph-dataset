@@ -1,6 +1,7 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {GeometryEnvShapesGenerator} from './generator.ts';
-import {setSeed} from '../../lib/random.ts';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { GeometryEnvShapesGenerator } from './generator.ts';
+import { setSeed } from '../../lib/random.ts';
+import { Area } from 'edugraph-ts';
 
 describe('GeometryEnvShapesGenerator', () => {
     let generator: GeometryEnvShapesGenerator;
@@ -14,23 +15,31 @@ describe('GeometryEnvShapesGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should validate env-shapes mapping values', () => {
-        const ENV_ITEMS: Record<string, string> = {
-            'clock': 'circle',
-            'window': 'square',
-            'door': 'rectangle',
-            'pizza': 'circle',
-            'book': 'rectangle',
-            'table': 'rectangle'
-        };
-        const config = {
-            wantsCircle: false,
-            wantsSquare: false,
-            wantsRectangle: false
-        };
-        const stub = generator.generate(config);
+    it('should validate env-shapes outputs when no config is provided', () => {
+        const stub = generator.generate({});
         expect(stub).not.toBeNull();
-        expect(ENV_ITEMS[stub!.data.target]).toBeDefined();
-        expect(stub!.data.answer).toBe(ENV_ITEMS[stub!.data.target]);
+        expect(['circle', 'square', 'rectangle']).toContain(stub!.data.answer);
+        expect(['clock', 'window', 'table']).toContain(stub!.data.target);
+    });
+
+    it('should generate clock when Circle is requested', () => {
+        const stub = generator.generate({ classify: Area.Circle });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.answer).toBe('circle');
+        expect(stub!.data.target).toBe('clock');
+    });
+
+    it('should generate window when Square is requested', () => {
+        const stub = generator.generate({ classify: Area.Square });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.answer).toBe('square');
+        expect(stub!.data.target).toBe('window');
+    });
+
+    it('should generate table when Rectangle is requested', () => {
+        const stub = generator.generate({ classify: Area.Rectangle });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.answer).toBe('rectangle');
+        expect(stub!.data.target).toBe('table');
     });
 });
