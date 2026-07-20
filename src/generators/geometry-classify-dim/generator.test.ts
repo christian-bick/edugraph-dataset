@@ -27,11 +27,45 @@ describe('GeometryClassifyDimGenerator', () => {
         expect(stub!.data.answer).toBe('2d');
     });
 
+    it('should generate 2D shapes for square, rectangle, triangle, hexagon', () => {
+        const shapes = [
+            { label: Area.Square, name: 'square' },
+            { label: Area.Rectangle, name: 'rectangle' },
+            { label: Area.Triangle, name: 'triangle' },
+            { label: Area.Hexagon, name: 'hexagon' }
+        ];
+        shapes.forEach(({ label, name }) => {
+            const stub = generator.generate({ classify: label });
+            expect(stub).not.toBeNull();
+            expect(stub!.data.shapeType).toBe('2d');
+            expect(stub!.data.shape).toBe(name);
+        });
+    });
+
     it('should generate 3D sphere when sphere is requested', () => {
         const stub = generator.generate({ classify: Area.Sphere });
         expect(stub).not.toBeNull();
         expect(stub!.data.shapeType).toBe('3d');
         expect(stub!.data.shape).toBe('sphere');
         expect(stub!.data.answer).toBe('3d');
+    });
+
+    it('should generate 3D shapes for cube, cone, cylinder', () => {
+        const shapes = [
+            { label: Area.Cube, name: 'cube' },
+            { label: Area.Cone, name: 'cone' },
+            { label: Area.Cylinder, name: 'cylinder' }
+        ];
+        shapes.forEach(({ label, name }) => {
+            const stub = generator.generate({ classify: label });
+            expect(stub).not.toBeNull();
+            expect(stub!.data.shapeType).toBe('3d');
+            expect(stub!.data.shape).toBe(name);
+        });
+    });
+
+    it('should return null for unrecognized classify label', () => {
+        const stub = generator.generate({ classify: 'unrecognized-label' as any });
+        expect(stub).toBeNull();
     });
 });

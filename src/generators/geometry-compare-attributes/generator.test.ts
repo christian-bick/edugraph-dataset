@@ -36,4 +36,18 @@ describe('GeometryCompareAttributesGenerator', () => {
         expect(stub!.data.shape2).not.toBe('circle');
         expect(stub!.data.val1).not.toBe(stub!.data.val2);
     });
+
+    it('should support square, rectangle, and hexagon', () => {
+        const labels = [Area.Square, Area.Rectangle, Area.Hexagon];
+        labels.forEach(label => {
+            const stub = generator.generate({ classify: label });
+            expect(stub).not.toBeNull();
+            expect(stub!.data.val1).toBeGreaterThan(0);
+        });
+    });
+
+    it('should return null for unrecognized classify label', () => {
+        const stub = generator.generate({ classify: 'unrecognized-label' as any });
+        expect(stub).toBeNull();
+    });
 });
