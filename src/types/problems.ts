@@ -66,6 +66,7 @@ export type MeasurementCompareProblem = {
     val1: number;
     val2: number;
     answer: 'A' | 'B';
+    maxVal?: number;
 };
 
 export type ComparisonProblem = {

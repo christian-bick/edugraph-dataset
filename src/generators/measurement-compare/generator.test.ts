@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {MeasurementCompareGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('MeasurementCompareGenerator', () => {
     let generator: MeasurementCompareGenerator;
@@ -16,10 +17,8 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length longer relation', () => {
         const config = {
-            hasLength: true,
-            hasWeight: false,
-            wantsGreater: true,
-            wantsLess: false
+            attribute: Scope.LengthMeasurement,
+            relation: Scope.Greater
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
@@ -28,6 +27,8 @@ describe('MeasurementCompareGenerator', () => {
             expect(stub!.data.relation).toBe('longer');
             
             const { val1, val2, answer } = stub!.data;
+            expect(val1).toBeLessThanOrEqual(10);
+            expect(val2).toBeLessThanOrEqual(10);
             if (answer === 'A') {
                 expect(val1).toBeGreaterThan(val2);
             } else {
@@ -38,10 +39,8 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length shorter relation', () => {
         const config = {
-            hasLength: true,
-            hasWeight: false,
-            wantsGreater: false,
-            wantsLess: true
+            attribute: Scope.LengthMeasurement,
+            relation: Scope.Less
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
@@ -50,6 +49,8 @@ describe('MeasurementCompareGenerator', () => {
             expect(stub!.data.relation).toBe('shorter');
             
             const { val1, val2, answer } = stub!.data;
+            expect(val1).toBeLessThanOrEqual(10);
+            expect(val2).toBeLessThanOrEqual(10);
             if (answer === 'A') {
                 expect(val1).toBeLessThan(val2);
             } else {
@@ -60,10 +61,8 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare weight heavier relation', () => {
         const config = {
-            hasLength: false,
-            hasWeight: true,
-            wantsGreater: true,
-            wantsLess: false
+            attribute: Scope.WeightMeasurement,
+            relation: Scope.Greater
         };
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
@@ -72,11 +71,18 @@ describe('MeasurementCompareGenerator', () => {
             expect(stub!.data.relation).toBe('heavier');
             
             const { val1, val2, answer } = stub!.data;
+            expect(val1).toBeLessThanOrEqual(10);
+            expect(val2).toBeLessThanOrEqual(10);
             if (answer === 'A') {
                 expect(val1).toBeGreaterThan(val2);
             } else {
                 expect(val1).toBeLessThan(val2);
             }
         }
+    });
+
+    it('should return null if parameters are missing', () => {
+        const stub = generator.generate({} as any);
+        expect(stub).toBeNull();
     });
 });

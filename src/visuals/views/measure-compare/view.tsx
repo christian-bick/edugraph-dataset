@@ -12,7 +12,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'measure-compare'>;
 }
 
-function Illustration({ attribute, val1, val2 }: { attribute: string; val1: number; val2: number }) {
+function Illustration({ attribute, val1, val2, maxVal }: { attribute: string; val1: number; val2: number; maxVal?: number }) {
     const layout = useMemo(() => {
         return getWeightLayout(val1, val2);
     }, [val1, val2]);
@@ -58,8 +58,10 @@ function Illustration({ attribute, val1, val2 }: { attribute: string; val1: numb
         );
     } else {
         // length
-        const widthA = val1 * 25;
-        const widthB = val2 * 25;
+        const resolvedMax = maxVal || Math.max(val1, val2, 10);
+        const scale = 250 / resolvedMax;
+        const widthA = val1 * scale;
+        const widthB = val2 * scale;
 
         return (
             <div className="flex flex-col gap-5 w-[320px] font-sans">
@@ -117,7 +119,7 @@ const MeasureCompareCore = ({ config, payload }: CoreProps) => {
                 </div>
                 
                 <div className="flex justify-center items-center w-[400px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px]">
-                    <Illustration attribute={attribute} val1={val1} val2={val2} />
+                    <Illustration attribute={attribute} val1={val1} val2={val2} maxVal={data.maxVal} />
                 </div>
 
                 <div className="flex gap-3 w-full animate-fade-in">

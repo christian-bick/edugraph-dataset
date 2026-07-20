@@ -1,6 +1,7 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {MeasurementCompareProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
+import {Scope} from "edugraph-ts";
 import {MeasurementCompareGeneratorConfig, MeasurementCompareGeneratorSchema} from "./spec.ts";
 
 export class MeasurementCompareGenerator implements ProblemGenerator<MeasurementCompareProblem, MeasurementCompareGeneratorConfig> {
@@ -8,53 +9,52 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
     schema = MeasurementCompareGeneratorSchema;
 
     generate(config: MeasurementCompareGeneratorConfig): ProblemStub | null {
-        const { hasLength, hasWeight, wantsGreater, wantsLess } = config;
+        const attributeLabel = config.attribute;
+        const relationLabel = config.relation;
 
-        const validAttributes: ('length' | 'weight')[] = [];
-        if (hasLength) validAttributes.push('length');
-        if (hasWeight) validAttributes.push('weight');
-        if (validAttributes.length === 0) {
-            // Default fallback if no specific scope provided
-            validAttributes.push('length', 'weight');
-        }
+        if (!attributeLabel || !relationLabel) return null;
 
-        const attribute = validAttributes[Math.floor(random() * validAttributes.length)];
+        const attribute = attributeLabel === Scope.LengthMeasurement ? 'length' : 'weight';
+        
         let relation: string;
         if (attribute === 'length') {
-            if (wantsGreater && !wantsLess) relation = 'longer';
-            else if (wantsLess && !wantsGreater) relation = 'shorter';
-            else relation = random() > 0.5 ? 'longer' : 'shorter';
+            relation = relationLabel === Scope.Greater ? 'longer' : 'shorter';
         } else {
-            if (wantsGreater && !wantsLess) relation = 'heavier';
-            else if (wantsLess && !wantsGreater) relation = 'lighter';
-            else relation = random() > 0.5 ? 'heavier' : 'lighter';
+            relation = relationLabel === Scope.Greater ? 'heavier' : 'lighter';
         }
+
+        const min = 1;
+        const max = 10;
+
+        const vMax = Math.floor(random() * (max - (min + 1) + 1)) + (min + 1);
+        const vMin = Math.floor(random() * ((vMax - 1) - min + 1)) + min;
+
         const answer = random() > 0.5 ? 'A' : 'B';
 
         let val1 = 0;
         let val2 = 0;
 
-        if (relation === 'longer' || relation === 'heavier') {
+        const isGreater = relation === 'longer' || relation === 'heavier';
+        if (isGreater) {
             if (answer === 'A') {
-                val1 = 8;
-                val2 = 4;
+                val1 = vMax;
+                val2 = vMin;
             } else {
-                val1 = 4;
-                val2 = 8;
+                val1 = vMin;
+                val2 = vMax;
             }
         } else {
-            // shorter or lighter
             if (answer === 'A') {
-                val1 = 4;
-                val2 = 8;
+                val1 = vMin;
+                val2 = vMax;
             } else {
-                val1 = 8;
-                val2 = 4;
+                val1 = vMax;
+                val2 = vMin;
             }
         }
 
         return {
-            id: `measurement-compare-${attribute}-${relation}-${answer}`,
+            id: `measurement-compare-${attribute}-${relation}-${answer}-${val1}-${val2}`,
             data: {
                 attribute: attribute as 'length' | 'weight',
                 relation,
