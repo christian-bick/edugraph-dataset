@@ -23,41 +23,6 @@ Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of
 ### `RenderPayload` & `ViewTypeMap`
 The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
 *   `problem`: The `AbstractProblem`.
-*   `config`: The `RenderConfig` containing `viewId` and `visualParams`.
-*   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
-
-To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
-1. **`ViewTypeMap`** (defined in [problems.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/types/problems.ts)): A central contract mapping visual view identifiers (like `'operations-vertical'`) to their expected mathematical data structure (like `ArithmeticStandardProblem`).
-2. **`ViewRenderPayload<TViewId>`** (defined in [ml-engine.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/types/ml-engine.ts)): A utility type that automatically resolves to the correct type-safe `RenderPayload` for a specific view ID, eliminating the need for manual type assertions (`as ...`) within the view components.
-
-**Environment Separation & Mapping:**
-Because the Node orchestrator and generator configurations do not statically import the React view files (which are dynamically bundled by Vite and loaded headlessly inside Playwright via URLs), TypeScript cannot automatically inspect `window.renderView` in the browser code from the Node side. `ViewTypeMap` serves as a shared bridge, allowing the compiler to statically verify that generators specify view names compatible with the data structures the views expect to render.
-
-# EduGraph Content: Technical Documentation
-
-This document provides a comprehensive technical overview of the EduGraph Content ML Dataset Generator. It is designed to guide developers and AI agents in understanding the system architecture, script orchestration, and the process for adding new educational content modules.
-
-## 1. Architecture Overview
-
-### Label-Driven Generation
-The core philosophy of this system is **Label-Driven Generation**. Pedagogical labels (derived from the EduGraph ontology, e.g., `Scope.IntegersWithZero`, `Area.Addition`) strictly dictate the mathematical properties of the generated problems. The system does not generate a problem and *then* label it; rather, it receives a set of constraints (labels) and acts as a constraint satisfier to generate a math problem that mathematically proves those labels.
-
-### The Three Pillars
-The architecture is divided into three distinct layers:
-1.  **The Brain (`src/generators/`)**: Handles the abstract mathematical logic, permutation definition, and label constraint satisfaction. It has no knowledge of how a problem is visualized.
-2.  **The Body (`src/visuals/`)**: HTML/CSS/TS renderers that run in the browser. It is organized into `views/` (individual exercise layouts), `components/` (shared UI elements), and `helpers/` (shared layout/math algorithms).
-3.  **The Heart (`src/scripts/`)**: Node.js scripts orchestrating Playwright (headless browser). These scripts unite the Brain and the Body, generating problems, injecting them into the renderers, taking screenshots, and compiling the metadata.
-
-## 2. Core Concepts & Types
-
-### `AbstractProblem` & `ProblemStub`
-Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of a math problem.
-*   **`ProblemStub`**: The raw output of a Generator (`{ id, data }`).
-*   **`AbstractProblem`**: The fully realized object injected into the dataset, containing the `ProblemStub`, the `type`, and the resolved array of `tags` (labels).
-
-### `RenderPayload` & `ViewTypeMap`
-The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
-*   `problem`: The `AbstractProblem`.
 *   `viewId`: The string identifier of the view.
 *   `labels`: Raw pedagogical tags (used by the HOC wrapper, not the pure view).
 *   `constraints`: Raw configuration constraints.
@@ -94,6 +59,10 @@ The primary pipeline orchestrator.
 *   **Execution**: `npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--spec=Z] [--force]`
 *   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze a representative random selection of Q/A image pairs from the dataset against rules defined in `global-checklist.md` and module-specific `checklist.md` files. It dynamically reads from `out/dataset-test/` when `--spec=test` is specified, or `out/dataset/` by default.
 
+### `src/scripts/validate-specs.ts`
+*   **Execution**: `npm run check:specs`
+*   **Function**: An automated spec validation script. It checks all `spec.ts` files across both generators and views, flagging (1) overlapping General Labels / parameter queries, and (2) duplicate parameterizations where a view re-specifies variables already computed by its matching generator. Detailed logs are outputted to `temp/check_output.txt`.
+
 ## 4. Module Structure Breakdown
 
 Adding content means creating two interconnected directories: a Generator and a Renderer. Both strictly decouple pedagogical label resolution from core business logic using schemas and resolvers.
@@ -102,21 +71,31 @@ Adding content means creating two interconnected directories: a Generator and a 
 *   **`generator.ts`**: Implements `ProblemGenerator<TData, TConfig>`. It contains **no label parsing logic**. It is a pure mathematical function that takes a strongly-typed `config` object and returns a `ProblemStub` or `null`.
 *   **`spec.ts`**: The bridge to pedagogy. Exports `spec: GeneratorSpec` (broad matching capabilities), `GeneratorSchema` (defining how to map ontology labels to the typed `config` object using functional resolvers), and `Config` (the extracted type of the schema).
 *   **`generator.test.ts`**: A Vitest suite. Deeply tests edge cases of the generator by passing explicit `config` mocks.
-*   **`checklist.md`**: (Optional) Visual QA LLM instructions.
-
-#### Generator Design Guidelines
-1. **Purely Mathematical**: The generated problem data payload (`data`) must contain only raw mathematical attributes.
-2. **Schema-Driven Resolvers & Strict Parameterization**: Pedagogical mapping is declarative. Total supported labels for a module are calculated dynamically by unionizing the general capabilities declared in `spec.generalLabels` and the parameterized capabilities extracted from the schema properties. 
-    - Schemas (`ConfigSchema`) accept values as: simple arrays of labels (`readonly string[]`), tuples binding constraints to a resolver (`[readonly string[], ResolverFn]`), or pure functions that execute at runtime without binding capability labels (`ResolverFn`).
-    - **Do NOT** duplicate schema-bound constraints (e.g., specific ranges, object arrangements) in `spec.generalLabels`. Keep `generalLabels` strictly for general capabilities (e.g., `Area.Numeration`, `Scope.IntegerNumbers`).
+*   **`checklist.md`**: Pedagogical/Mathematical verification list. Acts as the validation criteria for the abstract mathematical data. It **must not** contain any visual layout, coordinates, styles, colors, or CSS parameters.
 
 ### The Visual Renderer (`src/visuals/`)
 *   **`src/visuals/views/<renderer>/`**:
     - **`view.html`**: The base HTML template containing a mount point for React.
     - **`view.tsx`**: Exports the React component wrapped in `withConfig(ViewSchema, Component)`. The core component itself (`<Name>Core`) is a pure stateless function taking `{ config, payload }`. It does not parse labels.
     - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
+    - **`checklist.md`**: Visual layout, rendering, and interaction verification list. Used by Visual QA to check for elements positioning, SVG structures, rendering overflows, and Question (`_mode-Q`) vs. Solution (`_mode-S`) mode styling. It **must not** contain abstract mathematical generation logic.
 *   **`src/visuals/components/`**: Reusable shared React elements (such as `TenFrame.tsx`).
 *   **`src/visuals/helpers/`**: Shared layout rendering calculations (such as `counting-helpers.ts`).
+
+## 4b. Specification Design Rules & Validation Checks
+
+When designing or updating `spec.ts` files, you must strictly follow these rules:
+
+1. **Separation of Concerns**:
+   - **Generator Specs**: Map ontology labels **only** to abstract mathematical configurations (e.g. `range`, `includeZero`, `allowNegatives`, `useDecimals`, `attribute`, `relation`).
+   - **View Specs**: Map ontology labels **only** to visual/layout configurations (e.g. `isReverse`, `arrangement`, `showTenFrame`).
+2. **Resolver Reusability**:
+   - All general resolver functions (such as `hasLabel`, `selectExactMatch`, `extractFirstMatch`) must be imported and reused from `src/lib/resolvers.ts`. Do not define custom resolvers inline.
+   - Resolver functions must be passed as references (or output of curried factory functions) to the schema arrays, and not executed prematurely.
+3. **General Labels vs. Parameter Labels Overlap**:
+   - There must be zero overlap (including taxonomic ancestors via `partOf`) between the labels checked inside schema parameters and the spec's `generalLabels`. Specifically, when a label is declared as part of a schema parameter, it (and none of its ancestors) should appear in `generalLabels`.
+4. **No Duplicate Parameterization**:
+   - When a generator maps a label to configure the mathematical properties of a problem payload, that label (and none of its ancestors/descendants) should be queried in the schema of the matching view. The view must rely purely on the generated problem payload (e.g. `problem.data`) rather than querying the ontology itself.
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)
 
