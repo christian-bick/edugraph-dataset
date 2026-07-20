@@ -30,8 +30,8 @@ For the checklists.md:
 
 Reference examples: 
 
-- You can visit the neighboring "arithmetic" module and treat it as a reference implementation
-- You can also visit "comparison" and "counting" modules in case you need additional reference examples
+- You can visit the neighboring "arithmetic" module for guidance on numeric aspects
+- You can visit the neighboring "geometry-build-shape" for guidance on geometric aspects
 
 IMPORTANT: 
 
