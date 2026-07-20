@@ -17,12 +17,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const CountingConservationViewSchema = {
-    // TODO: Add ontological relations for other properties once supported (e.g., Numeration, NumericIdentity)
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
-        (labels: string[]) => resolveRangeFromLabels(deductCompatible(labels as CompetencyDescriptor[]))
-    ]
-} as const;
+export const CountingConservationViewSchema = {} as const;
 
 export type CountingConservationViewConfig = ConfigFromSchema<typeof CountingConservationViewSchema>;

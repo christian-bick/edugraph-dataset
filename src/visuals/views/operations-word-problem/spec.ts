@@ -15,18 +15,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const OperationsWordProblemViewSchema = {
-    operation: [
-        Area.Addition,
-        Area.Subtraction,
-        Area.Multiplication,
-        Area.Division
-    ],
-    // TODO: Consider other ontological properties like Scope.PhysicalNumbers
-    range: [
-        deductCompatible([Scope.NumbersWithZero, Scope.NumbersSmaller10000]),
-        resolveRangeFromLabels
-    ]
-} as const;
+export const OperationsWordProblemViewSchema = {} as const;
 
 export type OperationsWordProblemViewConfig = ConfigFromSchema<typeof OperationsWordProblemViewSchema>;

@@ -11,8 +11,7 @@ export const spec: ViewSpec = {
         Scope.Base10,
         Scope.NumericRange,
         Scope.NumericZero,
-        Ability.ProcedureExecution,
-        Scope.OrderAbstraction
+        Ability.ProcedureExecution
     ]
 };
 

@@ -11,11 +11,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const GeometryBuildShapeViewSchema = {
-    targetShape: [
-        [Area.Triangle, Area.Square, Area.Rectangle, Area.Hexagon], // TODO: Consider ontological relations to deduct compatible shapes if applicable
-        selectExactMatch
-    ]
-} as const;
+export const GeometryBuildShapeViewSchema = {} as const;
 
 export type GeometryBuildShapeViewConfig = ConfigFromSchema<typeof GeometryBuildShapeViewSchema>;

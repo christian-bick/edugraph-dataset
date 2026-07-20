@@ -15,17 +15,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const OperationsBoxesViewSchema = {
-    operation: [
-        Area.Addition,
-        Area.Subtraction,
-        Area.Multiplication,
-        Area.Division
-    ],
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
-        resolveRangeFromLabels
-    ]
-} as const;
+export const OperationsBoxesViewSchema = {} as const;
 
 export type OperationsBoxesViewConfig = ConfigFromSchema<typeof OperationsBoxesViewSchema>;

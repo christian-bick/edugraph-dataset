@@ -21,14 +21,7 @@ export const CountingObjectsCardinalityViewSchema = {
         Scope.LinearArrangement,
         Scope.CircularArrangement,
         Scope.ScatteredArrangement
-    ], Scope.ScatteredArrangement),
-    range: [
-        // TODO: deductCompatible is exclusively usable for children of NumericRange family.
-        // It would be beneficial to have logical constraints relations on other properties
-        // such as arrangement to use deductCompatible for them as well.
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
-        resolveRangeFromLabels
-    ]
+    ], Scope.ScatteredArrangement)
 } as const;
 
 export type CountingObjectsCardinalityViewConfig = ConfigFromSchema<typeof CountingObjectsCardinalityViewSchema>;

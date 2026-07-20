@@ -12,7 +12,6 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Scope.NumbersWithoutZero,
         Scope.ArabicNumerals,
-        Scope.ObjectArrangement,
         Ability.ProcedureExecution,
         Ability.ProcedureUnderstanding
     ]
@@ -24,10 +23,6 @@ export const CountingObjectsSimpleViewSchema = {
         [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement],
         // TODO: Could use deductCompatible if arrangements had logical constraint relations
         extractFirstMatch([Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement], Scope.ScatteredArrangement)
-    ],
-    range: [
-        deductCompatible([Scope.NumbersLargerZero]),
-        resolveRangeFromLabels
     ]
 } as const;
 

@@ -13,17 +13,12 @@ export const spec: ViewSpec = {
         Scope.NumbersWithoutZero,
         Scope.AdditiveCount,
         Ability.ProcedureExecution,
-        Scope.ArabicNumerals,
-        Scope.ObjectArrangement
+        Scope.ArabicNumerals
     ]
 };
 
 
 export const CountingObjectsCountOutViewSchema = {
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
-        resolveRangeFromLabels
-    ],
     arrangement: [
         // TODO: Ontological relations would be beneficial for arrangements
         [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement],

@@ -16,12 +16,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const PlaceValueDecomposeTeenViewSchema = {
-    // TODO: Consider other ontological properties like Scope.PhysicalNumbers
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10000]),
-        resolveRangeFromLabels
-    ]
-} as const;
+export const PlaceValueDecomposeTeenViewSchema = {} as const;
 
 export type PlaceValueDecomposeTeenViewConfig = ConfigFromSchema<typeof PlaceValueDecomposeTeenViewSchema>;

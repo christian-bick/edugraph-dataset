@@ -18,14 +18,7 @@ const GeometryComposeShapesCore = ({ config, payload }: CoreProps) => {
 
     const promptText = `Which two shapes can you join to make a ${target}?`;
     
-    // We can use the config to determine options, falling back to all options if none are resolved from labels
-    const options = [];
-    if (config.hasTriangle) options.push('triangle');
-    if (config.hasCircle) options.push('circle');
-    
-    if (options.length === 0) {
-        options.push('triangle', 'circle');
-    }
+    const options = ['triangle', 'circle'];
 
     const isSquare = target === 'square';
     const boxWidth = isSquare ? 80 : 120;

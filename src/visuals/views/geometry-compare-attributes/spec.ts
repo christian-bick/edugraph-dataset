@@ -13,23 +13,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const GeometryCompareAttributesViewSchema = {
-    wantsTriangle: [
-        [Area.Triangle], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Triangle)
-    ],
-    wantsSquare: [
-        [Area.Square], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Square)
-    ],
-    wantsRectangle: [
-        [Area.Rectangle], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Rectangle)
-    ],
-    wantsPolygon: [
-        [Area.Polygon], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Polygon)
-    ]
-} as const;
+export const GeometryCompareAttributesViewSchema = {} as const;
 
 export type GeometryCompareAttributesViewConfig = ConfigFromSchema<typeof GeometryCompareAttributesViewSchema>;

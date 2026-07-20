@@ -12,15 +12,6 @@ export const spec: ViewSpec = {
 
 
 // TODO: Ontological relations between shapes could allow us to deduct what can be composed into what.
-export const GeometryComposeShapesViewSchema = {
-    hasTriangle: [
-        [Area.Triangle],
-        hasSubConcept(Area.Triangle)
-    ],
-    hasCircle: [
-        [Area.Circle],
-        hasSubConcept(Area.Circle)
-    ]
-} as const;
+export const GeometryComposeShapesViewSchema = {} as const;
 
 export type GeometryComposeShapesViewConfig = ConfigFromSchema<typeof GeometryComposeShapesViewSchema>;

@@ -15,12 +15,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const SortingClassifySortViewSchema = {
-    // TODO: Consider other ontological properties like Scope.ShapeProperties
-    range: [
-        deductCompatible([Scope.NumbersWithZero, Scope.NumbersSmaller10000]),
-        resolveRangeFromLabels
-    ]
-} as const;
+export const SortingClassifySortViewSchema = {} as const;
 
 export type SortingClassifySortViewConfig = ConfigFromSchema<typeof SortingClassifySortViewSchema>;
