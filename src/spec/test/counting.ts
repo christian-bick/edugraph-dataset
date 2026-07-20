@@ -58,9 +58,32 @@ const sortBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
+const incDecBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Numeration,
+        Scope.ArabicNumerals,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Scope.PhysicalNumbers,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.AdditiveCount],
+        [Scope.SubtractiveCount]
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersSmaller10],
+        [Scope.NumbersSmaller20]
+    ]);
+
 export const CountingTestSpec: CompetencyTarget[] = [
     ...builder.build().map((p, i) => ({
         id: `test-counting-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    })),
+    ...incDecBuilder.build().map((p, i) => ({
+        id: `test-counting-inc-dec-${i}`,
         labels: p.labels,
         constraints: p.constraints
     })),

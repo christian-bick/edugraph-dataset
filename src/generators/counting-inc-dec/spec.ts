@@ -8,26 +8,20 @@ export const spec: GeneratorSpec = {
     generatorId: 'counting-inc-dec',
     generalLabels: [
         Area.Numeration,
-        Scope.NumericRange,
-        Scope.NumericZero,
+        Scope.IntegerNumbers,
         Scope.Base10,
-        Scope.IntegerNumbers]
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives
+    ]
 };
 
 
 export const CountingIncDecGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ],
-    wantsSubtractive: [
-        [Scope.SubtractiveCount], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Scope.SubtractiveCount)
-    ],
-    wantsAdditive: [
-        [Scope.AdditiveCount], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Scope.AdditiveCount)
-    ]
+    direction: [Scope.SubtractiveCount, Scope.AdditiveCount]
 } as const;
 
 export type CountingIncDecGeneratorConfig = ConfigFromSchema<typeof CountingIncDecGeneratorSchema>;

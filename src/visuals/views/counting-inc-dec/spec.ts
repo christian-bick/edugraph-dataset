@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../types/view-spec.ts';
-import {Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {hasSubConcept} from '../../../lib/resolvers.ts';
 
@@ -20,6 +20,8 @@ export type CountingIncDecViewConfig = ConfigFromSchema<typeof CountingIncDecVie
 export const spec: ViewSpec = {
     viewId: 'counting-inc-dec',
     generalLabels: [
-        Scope.ArabicNumerals
+        Scope.ArabicNumerals,
+        Scope.PhysicalNumbers,
+        Ability.ProcedureExecution
     ],
 };

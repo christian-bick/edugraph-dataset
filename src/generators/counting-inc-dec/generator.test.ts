@@ -19,8 +19,7 @@ describe('CountingIncDecGenerator', () => {
     it('should generate valid inc stubs with AdditiveCount label', () => {
         const config = { 
             range: { min: 0, max: 10 },
-            wantsAdditive: true,
-            wantsSubtractive: false
+            direction: Scope.AdditiveCount
         };
         const stub = generator.generate(config);
         expect(stub).not.toBeNull();
@@ -31,14 +30,27 @@ describe('CountingIncDecGenerator', () => {
     it('should generate valid dec stubs with SubtractiveCount label', () => {
         const config = { 
             range: { min: 0, max: 10 },
-            wantsAdditive: false,
-            wantsSubtractive: true
+            direction: Scope.SubtractiveCount
         };
         const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
         expect(stub!.data.numObjects).toBeGreaterThan(1);
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
+    });
+
+    it('should fallback to random direction when direction is not specified', () => {
+        const config = { range: { min: 2, max: 10 } };
+        let hasInc = false;
+        let hasDec = false;
+        for (let i = 0; i < 20; i++) {
+            setSeed(i);
+            const stub = generator.generate(config);
+            if (stub?.data.incDecType === 'inc') hasInc = true;
+            if (stub?.data.incDecType === 'dec') hasDec = true;
+        }
+        expect(hasInc).toBe(true);
+        expect(hasDec).toBe(true);
     });
 
     it('should return null when attempting to decrement 1 object', () => {
@@ -49,8 +61,7 @@ describe('CountingIncDecGenerator', () => {
             setSeed(i);
             const config = { 
                 range: { min: 0, max: 10 },
-                wantsAdditive: false,
-                wantsSubtractive: true
+                direction: Scope.SubtractiveCount
             };
             const stub = generator.generate(config);
             if (stub === null) {

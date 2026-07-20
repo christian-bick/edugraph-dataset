@@ -1,6 +1,7 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {CountingIncDecProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
+import {Scope} from "edugraph-ts";
 import {CountingIncDecGeneratorConfig, CountingIncDecGeneratorSchema} from "./spec.ts";
 
 export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecProblem, CountingIncDecGeneratorConfig> {
@@ -9,9 +10,9 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
 
     generate(config: CountingIncDecGeneratorConfig): ProblemStub | null {
         let incDecType: 'inc' | 'dec' = 'inc';
-        if (config.wantsSubtractive) {
+        if (config.direction === Scope.SubtractiveCount) {
             incDecType = 'dec';
-        } else if (config.wantsAdditive) {
+        } else if (config.direction === Scope.AdditiveCount) {
             incDecType = 'inc';
         } else {
             incDecType = random() > 0.5 ? 'inc' : 'dec';
@@ -21,6 +22,9 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
         if (!resolvedRange) return null;
         let maxCount = resolvedRange.max;
         let minCount = resolvedRange.min;
+        if (minCount < 1) {
+            minCount = 1;
+        }
         
         const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
         
