@@ -62,13 +62,13 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
 
     // 3. Resolve minimum boundary from LargerThan scopes
     if (labels.includes(Scope.NumbersLarger1000)) {
-        min = 1001;
+        min = 1000;
     } else if (labels.includes(Scope.NumbersLarger100)) {
-        min = 101;
+        min = 100;
     } else if (labels.includes(Scope.NumbersLarger20)) {
-        min = 21;
+        min = 20;
     } else if (labels.includes(Scope.NumbersLarger10)) {
-        min = 11;
+        min = 10;
     }
 
     return { min, max };
