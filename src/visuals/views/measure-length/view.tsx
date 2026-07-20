@@ -17,10 +17,13 @@ const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     const color = '#4682B4'; // SteelBlue
 
     const isReverse = config.isReverse || false;
-    const isDecimal = data.problemLength !== undefined && data.problemLength % 1 !== 0;
-
+    
     const bandLength = data.bandLength !== undefined ? data.bandLength : 10;
     const problemLength = data.problemLength !== undefined ? data.problemLength : 6.0;
+
+    const isDecimal = data.useDecimals !== undefined 
+        ? data.useDecimals 
+        : (data.problemLength !== undefined && data.problemLength % 1 !== 0);
 
     const showRectangle = !isReverse || isSolutionView;
     const showAnswerInBox = isReverse || isSolutionView;
@@ -31,14 +34,23 @@ const MeasureLengthCore = ({ config, payload }: CoreProps) => {
         return formatMeasureAnswer(problemLength, isDecimal);
     }, [problemLength, isDecimal]);
 
+    let pxPerUnit = 30;
+    if (bandLength > 50) {
+        pxPerUnit = 7;
+    } else if (bandLength > 20) {
+        pxPerUnit = 12;
+    } else if (bandLength > 12) {
+        pxPerUnit = 20;
+    }
+
     const margin = 20;
-    const bandWidth = bandLength * 30 + margin * 2;
-    const rectWidth = problemLength * 30 + margin;
-    const displayLength = problemLength * 30;
+    const bandWidth = bandLength * pxPerUnit + margin * 2;
+    const rectWidth = problemLength * pxPerUnit + margin;
+    const displayLength = problemLength * pxPerUnit;
 
     const ticks = useMemo(() => {
-        return getRulerTicks(bandLength, margin);
-    }, [bandLength]);
+        return getRulerTicks(bandLength, margin, pxPerUnit);
+    }, [bandLength, pxPerUnit]);
 
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">
