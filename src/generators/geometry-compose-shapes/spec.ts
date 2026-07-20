@@ -1,27 +1,26 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {hasSubConcept} from '../../lib/resolvers.ts';
+import {selectExactMatch} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-compose-shapes',
-    generalLabels: []
+    generalLabels: [
+        Area.ShapeIdentity,
+        Ability.ConceptComposition
+    ]
 };
 
 
 export const GeometryComposeShapesGeneratorSchema = {
-    wantsRectangle: [
-        [Area.Rectangle], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Rectangle)
+    classify: [
+        [
+            Area.Rectangle,
+            Area.Square,
+            Area.Triangle
+        ],
+        selectExactMatch
     ],
-    wantsSquare: [
-        [Area.Square], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Square)
-    ],
-    wantsTriangle: [
-        [Area.Triangle], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Triangle)
-    ]
 } as const;
 
 export type GeometryComposeShapesGeneratorConfig = ConfigFromSchema<typeof GeometryComposeShapesGeneratorSchema>;
