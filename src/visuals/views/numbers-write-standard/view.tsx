@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { NumbersWriteStandardViewConfig, NumbersWriteStandardViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -38,6 +39,7 @@ function DoubleTenFrame({ number }: { number: number }) {
 const NumbersWriteStandardCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('numbers-write-standard', data, ['number']);
     const number = data.number;
 
     return (

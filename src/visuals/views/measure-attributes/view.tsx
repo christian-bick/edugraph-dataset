@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {MeasureAttributesViewConfig, MeasureAttributesViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -84,7 +85,14 @@ function Illustration({ attribute }: { attribute: string }) {
 const MeasureAttributesCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const attribute = data.attribute || 'length';
+
+    try {
+        validateProblemData('measure-attributes', data, ['attribute']);
+    } catch (e) {
+        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
+    }
+
+    const attribute = data.attribute;
 
     const promptText = "What are we measuring with this setup?";
 

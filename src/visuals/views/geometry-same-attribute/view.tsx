@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { GeometrySameAttributeViewConfig, GeometrySameAttributeViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -49,11 +50,12 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     return null;
 }
 
-const GeometrySameAttributeCore = ({ config, payload }: CoreProps) => {
+const GeometrySameAttributeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-same-attribute', data, ['attribute', 'answer']);
 
-    const attribute = data.attribute || 'rollable';
+    const attribute = data.attribute;
     const answer = data.answer;
 
     const promptText = useMemo(() => {

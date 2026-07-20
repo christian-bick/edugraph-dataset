@@ -4,6 +4,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getComparisonSymbol} from './helpers.ts';
 import {NumbersCompareViewConfig, NumbersCompareViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -14,6 +15,7 @@ interface CoreProps {
 const NumbersCompareCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('numbers-compare', data, ['num1', 'num2', 'relation']);
 
     const displayAnswer = useMemo(() => {
         return getComparisonSymbol(data.relation);

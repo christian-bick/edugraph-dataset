@@ -4,6 +4,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {sortNumbers} from './helpers.ts';
 import { NumbersOrderViewConfig, NumbersOrderViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -14,6 +15,7 @@ interface CoreProps {
 const NumbersOrderCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('numbers-order', data, ['numbers']);
     const isDesc = config.isDesc;
 
     const sortedNumbers = useMemo(() => {

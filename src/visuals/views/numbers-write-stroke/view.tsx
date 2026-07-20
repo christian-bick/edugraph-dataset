@@ -4,6 +4,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getTracingPaths} from './helpers.ts';
 import { NumbersWriteStrokeViewConfig, NumbersWriteStrokeViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -89,6 +90,7 @@ function DoubleTenFrame({ number }: { number: number }) {
 const NumbersWriteStrokeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('numbers-write-stroke', data, ['number']);
     const number = data.number;
 
     return (

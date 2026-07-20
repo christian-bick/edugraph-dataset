@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {GeometryNamingViewConfig, GeometryNamingViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -97,11 +98,12 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     return null;
 }
 
-const GeometryNamingCore = ({ config, payload }: CoreProps) => {
+const GeometryNamingCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-naming', data, ['shape', 'answer']);
 
-    const shape = data.shape || 'triangle';
+    const shape = data.shape;
     const answer = data.answer;
 
     const is3D = ['cube', 'cone', 'cylinder', 'sphere'].includes(shape);

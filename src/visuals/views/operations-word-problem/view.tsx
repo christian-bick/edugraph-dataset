@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { OperationsWordProblemViewConfig, OperationsWordProblemViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -26,13 +27,14 @@ const wordProblemTemplates: Record<string, (num1: number, num2: number) => strin
 const OperationsWordProblemCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('operations-word-problem', data, ['num1', 'num2', 'operation', 'answer', 'type']);
 
-    const operation = data.operation || 'addition';
-    const symbol = operatorSymbols[operation] || '+';
+    const operation = data.operation;
+    const symbol = operatorSymbols[operation];
 
-    const num1 = data.num1 !== undefined ? data.num1 : 5;
-    const num2 = data.num2 !== undefined ? data.num2 : 3;
-    const answer = data.answer !== undefined ? data.answer : 8;
+    const num1 = data.num1;
+    const num2 = data.num2;
+    const answer = data.answer;
 
     const textScenario = wordProblemTemplates[operation]?.(num1, num2) || `Solve: ${num1} ${symbol} ${num2}`;
 

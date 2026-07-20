@@ -4,6 +4,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getDecomposeLayout} from './helpers.ts';
 import { OperationsDecomposeViewConfig, OperationsDecomposeViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -64,38 +65,11 @@ function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
 const OperationsDecomposeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('operations-decompose', data, ['targetNumber', 'pair1', 'pair2']);
 
-    const targetNumber = useMemo(() => {
-        if (data.targetNumber !== undefined) return data.targetNumber;
-        if (data.pair1) return data.pair1[0] + data.pair1[1];
-        const n1 = (data as any).num1 || 3;
-        const n2 = (data as any).num2 || 3;
-        if (n1 < 0 || n2 < 0 || (n1 + n2) > 10) {
-            return 6;
-        }
-        return n1 + n2;
-    }, [data.targetNumber, data.pair1, (data as any).num1, (data as any).num2]);
-
-    // Decompose parts fallback
-    const pair1 = useMemo(() => {
-        if (data.pair1) return data.pair1;
-        const n1 = (data as any).num1 || 3;
-        const n2 = (data as any).num2 || 3;
-        if (n1 < 0 || n2 < 0 || (n1 + n2) > 10) {
-            return [2, 4] as [number, number];
-        }
-        return [n1, n2] as [number, number];
-    }, [data.pair1, (data as any).num1, (data as any).num2]);
-
-    const pair2 = useMemo(() => {
-        if (data.pair2) return data.pair2;
-        const n1 = (data as any).num1 || 3;
-        const n2 = (data as any).num2 || 3;
-        if (n1 < 0 || n2 < 0 || (n1 + n2) > 10) {
-            return [1, 5] as [number, number];
-        }
-        return (n1 > 1 ? [n1 - 1, n2 + 1] : [n1, n2]) as [number, number];
-    }, [data.pair2, (data as any).num1, (data as any).num2]);
+    const targetNumber = data.targetNumber;
+    const pair1 = data.pair1;
+    const pair2 = data.pair2;
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;

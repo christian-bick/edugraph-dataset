@@ -5,6 +5,7 @@ import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { generatePositions } from '../../helpers/counting-helpers.ts';
 import { CountingObjectsOneToOneViewConfig, CountingObjectsOneToOneViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -16,7 +17,11 @@ interface CoreProps {
 
 const CountingObjectsOneToOneCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
-    const { numObjects } = problem.data;
+    const data = problem.data;
+
+    validateProblemData('counting-objects-one-to-one', data, ['numObjects']);
+
+    const { numObjects } = data;
     
     let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
     if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';

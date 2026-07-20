@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {GeometryEnvShapesViewConfig, GeometryEnvShapesViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -12,8 +13,9 @@ interface CoreProps {
 const GeometryEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-env-shapes', data, ['target', 'answer']);
 
-    const target = data.target || 'clock';
+    const target = data.target;
     const answer = data.answer;
 
     const promptText = `What shape is the ${target}?`;

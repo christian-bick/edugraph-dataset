@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {GeometryClassifyDimViewConfig, GeometryClassifyDimViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
@@ -91,8 +92,9 @@ interface CoreProps {
 const GeometryClassifyDimCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-classify-dim', data, ['shape', 'answer']);
 
-    const shape = data.shape || 'circle';
+    const shape = data.shape;
     const answer = data.answer;
 
     const promptText = "Is this shape flat (two-dimensional) or solid (three-dimensional)?";

@@ -4,6 +4,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getClosePositions, getFarPositions} from './helpers.ts';
 import {CountingConservationViewConfig, CountingConservationViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -13,10 +14,13 @@ interface CoreProps {
     payload: ViewRenderPayload<'counting-conservation'>;
 }
 
-const CountingConservationCore = ({ config, payload }: CoreProps) => {
+const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const number = data.numObjects || 6;
+
+    validateProblemData('counting-conservation', data, ['numObjects']);
+
+    const number = data.numObjects;
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;

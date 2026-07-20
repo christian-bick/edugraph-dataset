@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { GeometryComposeShapesViewConfig, GeometryComposeShapesViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -9,11 +10,12 @@ interface CoreProps {
     payload: ViewRenderPayload<'geometry-compose-shapes'>;
 }
 
-const GeometryComposeShapesCore = ({ config, payload }: CoreProps) => {
+const GeometryComposeShapesCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-compose-shapes', data, ['target', 'components', 'answer']);
 
-    const target = data.target || 'rectangle';
+    const target = data.target;
     const answer = data.answer;
 
     const promptText = `Which two shapes can you join to make a ${target}?`;

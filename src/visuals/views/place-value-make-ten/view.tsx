@@ -3,6 +3,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {TenFrame} from '../../components/TenFrame.tsx';
 import { PlaceValueMakeTenViewConfig, PlaceValueMakeTenViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -12,7 +13,9 @@ interface CoreProps {
 
 const PlaceValueMakeTenCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
-    const { givenNumber, missingNumber } = problem.data;
+    const data = problem.data;
+    validateProblemData('place-value-make-ten', data, ['givenNumber', 'missingNumber', 'target']);
+    const { givenNumber, missingNumber } = data;
 
     const solClass = isSolutionView ? 'text-green-600 border-green-600 bg-green-50 font-bold' : 'text-slate-800 bg-white';
     const missingVal = isSolutionView ? missingNumber : '';

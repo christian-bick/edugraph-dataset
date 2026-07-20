@@ -5,6 +5,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getWeightLayout} from './helpers.ts';
 import {MeasureCompareViewConfig, MeasureCompareViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -88,11 +89,17 @@ const MeasureCompareCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    let attribute = config.attribute || 'length';
-    const relation = data.relation || 'longer';
-    const val1 = data.val1 !== undefined ? data.val1 : 8;
-    const val2 = data.val2 !== undefined ? data.val2 : 4;
-    const answer = data.answer || 'A';
+    try {
+        validateProblemData('measure-compare', data, ['attribute', 'relation', 'val1', 'val2', 'answer']);
+    } catch (e) {
+        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
+    }
+
+    const attribute = data.attribute;
+    const relation = data.relation;
+    const val1 = data.val1;
+    const val2 = data.val2;
+    const answer = data.answer;
 
     const promptText = attribute === 'length' 
         ? `Which ribbon is ${relation}?` 

@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import { OperationsVerticalViewConfig, OperationsVerticalViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 const operatorSymbols: Record<string, string> = {
@@ -19,7 +20,8 @@ interface CoreProps {
 const OperationsVerticalCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const symbol = operatorSymbols[data.operation] || '?';
+    validateProblemData('operations-vertical', data, ['num1', 'num2', 'operation', 'answer']);
+    const symbol = operatorSymbols[data.operation];
 
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">

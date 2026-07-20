@@ -4,6 +4,7 @@ import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import { getIconIndexes, getCorrectChoice } from './helpers.ts';
 import { NumbersCompareMatchingViewConfig, NumbersCompareMatchingViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -16,6 +17,7 @@ interface CoreProps {
 const NumbersCompareMatchingCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('numbers-compare-matching', data, ['num1', 'num2', 'relation']);
 
     const num1 = data.num1;
     const num2 = data.num2;

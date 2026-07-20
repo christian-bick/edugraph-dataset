@@ -5,6 +5,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {formatTime, getClockAngles, getTickMarks} from './helpers.ts';
 import { TimeAnalogViewConfig, TimeAnalogViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -15,6 +16,13 @@ interface CoreProps {
 const TimeAnalogCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    
+    try {
+        validateProblemData('time-analog', data, ['time', 'interval']);
+    } catch (e) {
+        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
+    }
+
     const isReverse = config.isReverse;
 
     const showHands = !isReverse || isSolutionView;

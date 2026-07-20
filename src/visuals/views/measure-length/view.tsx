@@ -4,6 +4,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {formatMeasureAnswer, getRulerTicks} from './helpers.ts';
 import {MeasureLengthViewConfig, MeasureLengthViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -14,16 +15,29 @@ interface CoreProps {
 const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+
+    try {
+        validateProblemData('measure-length', data, ['bandLength', 'problemLength']);
+        if (data.bandLength > 1000) {
+            throw new ViewValidationError('measure-length', `bandLength ${data.bandLength} is too large to render.`);
+        }
+        if (data.problemLength > data.bandLength) {
+            throw new ViewValidationError('measure-length', `problemLength ${data.problemLength} is greater than bandLength ${data.bandLength}.`);
+        }
+    } catch (e) {
+        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
+    }
+
     const color = '#4682B4'; // SteelBlue
 
     const isReverse = config.isReverse || false;
     
-    const bandLength = data.bandLength !== undefined ? data.bandLength : 10;
-    const problemLength = data.problemLength !== undefined ? data.problemLength : 6.0;
+    const bandLength = data.bandLength;
+    const problemLength = data.problemLength;
 
     const isDecimal = data.useDecimals !== undefined 
         ? data.useDecimals 
-        : (data.problemLength !== undefined && data.problemLength % 1 !== 0);
+        : (data.problemLength % 1 !== 0);
 
     const showRectangle = !isReverse || isSolutionView;
     const showAnswerInBox = isReverse || isSolutionView;

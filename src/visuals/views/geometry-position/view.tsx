@@ -3,6 +3,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getBallPosition} from './helpers.ts';
 import {GeometryPositionViewConfig, GeometryPositionViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -10,11 +11,12 @@ interface CoreProps {
     payload: ViewRenderPayload<'geometry-position'>;
 }
 
-const GeometryPositionCore = ({ config, payload }: CoreProps) => {
+const GeometryPositionCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-position', data, ['relation', 'answer']);
 
-    const relation = data.relation || 'above';
+    const relation = data.relation;
     const answer = data.answer;
 
     const promptText = "Where is the ball relative to the box?";

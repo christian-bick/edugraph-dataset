@@ -5,6 +5,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {generateScatteredPositions} from './helpers.ts';
 import { SortingClassifyCountViewConfig, SortingClassifyCountViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface Item {
@@ -49,32 +50,15 @@ function ItemSVG({ item, size = 40 }: { item: Item; size?: number }) {
     }
 }
 
-const SortingClassifyCountCore = ({ config, payload }: CoreProps) => {
+const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
+    validateProblemData('sorting-classify-count', data, ['items', 'categories']);
+
     const { items, categories, classifyType, mappedCategories } = useMemo(() => {
-        const itemsList = [...(data.items || [])];
-        const categoriesMap = { ...(data.categories || {}) };
-
-        // Fallback generation for tests if generator is bypassed
-        if (itemsList.length === 0) {
-            const numObjects = data.numObjects || 8;
-            const possibleCats = ['A', 'B', 'C'];
-            
-            let seed = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            const nextRand = () => {
-                const x = Math.sin(seed++) * 10000;
-                return x - Math.floor(x);
-            };
-
-            possibleCats.forEach(c => categoriesMap[c] = 0);
-            for (let i = 0; i < numObjects; i++) {
-                const cat = possibleCats[Math.floor(nextRand() * possibleCats.length)];
-                itemsList.push(cat as any);
-                categoriesMap[cat]++;
-            }
-        }
+        const itemsList = [...data.items];
+        const categoriesMap = { ...data.categories };
 
         // View logic: Randomly decide how to represent the abstract groups visually
         const seedStr = problem.id + itemsList.join('');
@@ -115,7 +99,7 @@ const SortingClassifyCountCore = ({ config, payload }: CoreProps) => {
             classifyType: chosenClassifyType,
             mappedCategories 
         };
-    }, [data.items, data.categories, data.numObjects, problem.id]);
+    }, [data.items, data.categories, problem.id]);
 
     const positions = useMemo(() => {
         return generateScatteredPositions(items.length, problem.id);

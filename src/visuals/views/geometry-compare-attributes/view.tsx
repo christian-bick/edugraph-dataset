@@ -3,6 +3,7 @@ import { ViewRenderPayload } from '../../../types/ml-engine.ts';
 import '../../../tailwind.css';
 import { GeometryCompareAttributesViewConfig, GeometryCompareAttributesViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 
 interface CoreProps {
     config: GeometryCompareAttributesViewConfig;
@@ -54,10 +55,11 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
 const GeometryCompareAttributesCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-compare-attributes', data, ['attribute', 'shape1', 'shape2', 'val1', 'val2', 'answer']);
 
-    const attribute = data.attribute || 'sides';
-    const shape1 = data.shape1 || 'rectangle';
-    const shape2 = data.shape2 || 'triangle';
+    const attribute = data.attribute;
+    const shape1 = data.shape1;
+    const shape2 = data.shape2;
     const answer = data.answer;
 
     const promptText = `Which shape has more ${attribute}?`;

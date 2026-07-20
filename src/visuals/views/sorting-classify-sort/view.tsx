@@ -5,6 +5,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {generateScatteredPositions} from './helpers.ts';
 import { SortingClassifySortViewConfig, SortingClassifySortViewSchema } from './spec.ts';
 import { withConfig } from '../withConfig.tsx';
+import { validateProblemData } from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface Item {
@@ -53,30 +54,17 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    const relation = data.relation || 'most';
+    try {
+        validateProblemData('sorting-classify-sort', data, ['items', 'categories', 'relation', 'answer']);
+    } catch (e) {
+        return <div className="text-red-500 font-bold p-5">Invalid problem data: {(e as Error).message}</div>;
+    }
+
+    const relation = data.relation;
 
     const { items, categories, classifyType, mappedCategories } = useMemo(() => {
-        const itemsList = [...(data.items || [])];
-        const categoriesMap = { ...(data.categories || {}) };
-
-        // Fallback generation for tests if generator is bypassed
-        if (itemsList.length === 0) {
-            const numObjects = data.numObjects || 8;
-            const possibleCats = ['A', 'B', 'C'];
-            
-            let seed = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            const nextRand = () => {
-                const x = Math.sin(seed++) * 10000;
-                return x - Math.floor(x);
-            };
-
-            possibleCats.forEach(c => categoriesMap[c] = 0);
-            for (let i = 0; i < numObjects; i++) {
-                const cat = possibleCats[Math.floor(nextRand() * possibleCats.length)];
-                itemsList.push(cat as any);
-                categoriesMap[cat]++;
-            }
-        }
+        const itemsList = data.items;
+        const categoriesMap = data.categories;
 
         // View logic: Randomly decide how to represent the abstract groups visually
         const seedStr = problem.id + itemsList.join('');
@@ -117,28 +105,15 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
             classifyType: chosenClassifyType,
             mappedCategories 
         };
-    }, [data.items, data.categories, data.numObjects, problem.id]);
+    }, [data.items, data.categories, problem.id, payload.labels]);
 
     const positions = useMemo(() => {
         return generateScatteredPositions(items.length, problem.id);
     }, [items.length, problem.id]);
 
     const resolvedAnswer = useMemo(() => {
-        if (data.answer && mappedCategories[data.answer]) return mappedCategories[data.answer];
-        
-        // Fallback calculation using mapped traits
-        let targetCat = '';
-        let targetCount = relation === 'most' ? -1 : 999;
-        Object.keys(categories).forEach(cat => {
-            const c = categories[cat];
-            if (relation === 'most') {
-                if (c > targetCount) { targetCount = c; targetCat = cat; }
-            } else {
-                if (c < targetCount) { targetCount = c; targetCat = cat; }
-            }
-        });
-        return mappedCategories[targetCat] || '';
-    }, [data.answer, categories, relation, mappedCategories]);
+        return mappedCategories[data.answer];
+    }, [data.answer, mappedCategories]);
 
     const promptText = `Which ${classifyType} has the ${relation} number of items?`;
 

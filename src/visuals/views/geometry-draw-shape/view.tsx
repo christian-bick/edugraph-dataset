@@ -3,6 +3,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {getTracePath} from './helpers.ts';
 import {GeometryDrawShapeViewConfig, GeometryDrawShapeViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 interface CoreProps {
@@ -10,11 +11,12 @@ interface CoreProps {
     payload: ViewRenderPayload<'geometry-draw-shape'>;
 }
 
-const GeometryDrawShapeCore = ({ config, payload }: CoreProps) => {
+const GeometryDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+    validateProblemData('geometry-draw-shape', data, ['shape', 'answer']);
 
-    const shape = data.shape || 'circle';
+    const shape = data.shape;
     const promptText = `Trace the ${shape}.`;
     const pathD = getTracePath(shape);
 

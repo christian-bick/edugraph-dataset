@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {GeometryBuildShapeViewConfig, GeometryBuildShapeViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
-import {Area} from 'edugraph-ts';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
@@ -46,8 +46,9 @@ interface CoreProps {
     payload: ViewRenderPayload<'geometry-build-shape'>;
 }
 
-const GeometryBuildShapeCore = ({ config, payload }: CoreProps) => {
+const GeometryBuildShapeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
+    validateProblemData('geometry-build-shape', problem.data, ['target', 'sides', 'corners']);
     const { target, sides, corners } = problem.data;
 
     const promptText = `To build a ${target}, how many sticks (sides) and clay balls (corners) do you need?`;

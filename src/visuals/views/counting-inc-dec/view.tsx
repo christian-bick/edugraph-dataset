@@ -3,6 +3,7 @@ import {useMemo} from 'react';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {CountingIncDecViewConfig, CountingIncDecViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
+import {validateProblemData} from '../../helpers/validation.ts';
 import '../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -12,9 +13,11 @@ interface CoreProps {
     payload: ViewRenderPayload<'counting-inc-dec'>;
 }
 
-const CountingIncDecCore = ({ config, payload }: CoreProps) => {
+const CountingIncDecCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+
+    validateProblemData('counting-inc-dec', data, ['numObjects', 'incDecType', 'incDecAnswer']);
 
     const icon = useMemo(() => {
         const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;

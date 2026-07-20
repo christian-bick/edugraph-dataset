@@ -1,7 +1,6 @@
 import { ViewSpec } from '../../../types/view-spec.ts';
-import { Area, Ability } from 'edugraph-ts';
+import { Ability } from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../types/schema.ts';
-import { hasSubConcept } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-compose-shapes',
