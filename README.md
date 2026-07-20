@@ -39,17 +39,30 @@ npx playwright install --with-deps chromium
 ### Usage
 
 **1. Generate the Dataset**
-Generate the full ML dataset (images + `meta.json`). The output will be saved in `out/dataset/`.
+Generate the ML dataset (images + `meta.json`). The output will be saved in `out/dataset/`.
+The `--spec` parameter must be specified to select the spec module.
 ```bash
-npm run generate:dataset
+# Generate using curriculum standards
+npm run generate:dataset -- --spec=ccss
+
+# Generate using test specifications
+npm run generate:dataset -- --spec=test
 ```
-*(Tip: You can generate a specific module by using the `--generator` flag, e.g., `npm run generate:dataset -- --generator=arithmetic`. You can also generate training images exclusively by adding the `--training-only` flag, e.g., `npm run generate:dataset -- --generator=arithmetic --training-only`.)*
+*(Tip: You can filter the generation using optional parameters:
+*   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic`).
+*   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
+*   `--training-only`: Skip validation set generation to speed up the process.)*
 
 **2. Generate Coverage Report**
 Analyze the generated dataset to ensure proper pedagogical label coverage and distribution.
 ```bash
-npm run report:coverage
+# Generate report for curriculum standards
+npm run report:coverage -- --spec=ccss
+
+# Generate report for test specifications
+npm run report:coverage -- --spec=test
 ```
+*(Tip: You can pass `--spec` to analyze different datasets; it defaults to `ccss`.)*
 
 **3. Run Tests**
 Validate the mathematical logic, constraints, and edge cases of the generators.

@@ -77,8 +77,8 @@ To ensure that the Question (`_mode-Q`) and Solution (`_mode-S`) renderings matc
 
 #### `src/scripts/generate-dataset.ts`
 The primary pipeline orchestrator.
-*   **Execution**: `npm run generate:dataset [moduleName] [--training-only]`
-*   **Function**: Bootstraps Playwright, dynamically loads all generators and views by scanning their directories, loads target specifications from the CCSS specs (`config/spec/ccss/`), filters compatible targets using the ontology solver (`doesGeneratorSupportCompetency`), and captures screenshots headlessly.
+*   **Execution**: `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only]`
+*   **Function**: Bootstraps Playwright, dynamically loads all generators and views by scanning their directories, loads target specifications from the spec module (e.g. `src/spec/ccss/` or `src/spec/test/`), filters compatible targets using the ontology solver (`doesGeneratorSupportCompetency`), and captures screenshots headlessly.
 *   **Decoupled Seeding & Proportional Split**: 
     - **Training Set**: Uses the base random seed (`seed`) to generate problems.
     - **Validation Set**: Generates validation problems proportionally based on the split ratio (using a validation seed offset).
@@ -87,12 +87,12 @@ The primary pipeline orchestrator.
 *   **Clearing Logic**: If no module is specified, it wipes the entire `out/dataset/` directory. If a specific module is provided, it clears only `out/dataset/train/<module>` and `out/dataset/validation/<module>`.
 
 ### `src/scripts/generate-coverage-report.ts`
-*   **Execution**: `npm run report:coverage`
-*   **Function**: Scans all `meta.json` files in the generated dataset. It outputs a markdown report (`out/dataset/coverage-report.md`) detailing absolute frequencies of individual labels and the percentage breakdown of unique label combinations.
+*   **Execution**: `npm run report:coverage -- [--spec=Z]`
+*   **Function**: Scans all `metadata.jsonl` files in the generated dataset. It outputs a markdown report (`out/dataset/coverage-report.md` or `out/dataset-test/coverage-report.md`) detailing absolute frequencies of individual labels and the percentage breakdown of unique label combinations.
 
 ### `src/scripts/validate-dataset.ts`
-*   **Execution**: `npx vite-node src/scripts/validate-dataset.ts [moduleName]`
-*   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze a representative random selection of Q/A image pairs from the dataset against rules defined in `global-checklist.md` and module-specific `checklist.md` files.
+*   **Execution**: `npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--spec=Z] [--force]`
+*   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze a representative random selection of Q/A image pairs from the dataset against rules defined in `global-checklist.md` and module-specific `checklist.md` files. It dynamically reads from `out/dataset-test/` when `--spec=test` is specified, or `out/dataset/` by default.
 
 ## 4. Module Structure Breakdown
 
@@ -123,10 +123,10 @@ Adding content means creating two interconnected directories: a Generator and a 
 To add a new mathematical concept or visual style to the dataset, follow this step-by-step workflow:
 
 ### Step 1: Define the Pedagogy
-Add the target specifications representing the CCSS curriculum standards (e.g. `1.G.A.3-fraction-halves`) to the appropriate grade level file in `config/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`).
+Add the target specifications representing the CCSS curriculum standards (e.g. `1.G.A.3-fraction-halves`) to the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`).
 
 ### Step 2: Analyze Matchings
-Run `npx vite-node src/scripts/show-matching-stats.ts` to see if the new targets map to any existing generator or views.
+Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` to see if the new targets map to any existing generator or views.
 
 ### Step 3: Decide Next Steps
 - **Case A: Both Match (100% Match):** If the new targets already map to an existing generator and a compatible view, **nothing else needs to be done**! The dataset pipeline will automatically generate problems and render images for these targets.
@@ -155,6 +155,15 @@ Create or update the `spec.ts` files for both your generator and visual view:
 ### Step 7: Tests (`generator.test.ts`)
 Write robust unit tests verifying that the generator outputs correct math and respects bounds. Run `npm run test` to verify.
 
+### Step 7b: Targeted Testing via Test Specs
+To visually verify and test both your generator and view modules through the actual image-generation pipeline, you should use the `test` specs module:
+1. **Extend Test Specs**: Add minimal test permutations for your module to the `test` specs directory (`src/spec/test/`). Use `DatasetPermutationBuilder` to build these permutations programmatically rather than manually writing static arrays.
+2. **Run Targeted Dataset Generation**: Test combinations of `--spec`, `--generator`, and `--view` to generate and render only the specific views and problems you want to check:
+   ```bash
+   npm run generate:dataset -- --spec=test --generator=arithmetic --view=operations-vertical --training-only
+   ```
+   This allows you to quickly inspect the generated output under `out/dataset/train/` without running the entire dataset generation.
+
 ### Step 8: Final Verification
-1. Run `npx vite-node src/scripts/show-matching-stats.ts` to confirm that the ontology dynamically binds your targets to your generator and views.
-2. Run `npm run generate:dataset [moduleName]` to test local dataset generation.
+1. Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` (or `--spec=test`) to confirm that the ontology dynamically binds your targets to your generator and views.
+2. Run `npm run generate:dataset -- --spec=ccss --generator=[moduleName]` to test local dataset generation.

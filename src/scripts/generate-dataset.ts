@@ -1,21 +1,17 @@
 import {Browser, chromium} from 'playwright';
 import {dirname, resolve} from 'path';
-import {fileURLToPath} from 'url';
-import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'fs';
+import {fileURLToPath, pathToFileURL} from 'url';
+import {appendFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'fs';
 import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { extractConfig, extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
-import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
-import {Grade1Spec} from '../../config/spec/ccss/grade-01.ts';
-
-const allTargets = [...KindergartenSpec, ...Grade1Spec];
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
+let OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
 const BASE_URL = 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
 
@@ -258,7 +254,13 @@ async function renderDatasetSplit(
     return totalImages;
 }
 
-async function runModulePipeline(browser: Browser, moduleName: string, trainingOnly: boolean) {
+async function runModulePipeline(
+    browser: Browser,
+    moduleName: string,
+    trainingOnly: boolean,
+    allTargets: any[],
+    targetView?: string
+) {
     console.log(`\n--- Starting Pipeline for Module: ${moduleName} ---`);
     
     const modulePath = resolve(PROJECT_ROOT, 'src', 'generators', moduleName);
@@ -335,7 +337,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
         }
     }
 
-    const filteredViews = compatibleViews.filter(v => viewToType[v.viewId] === genTypeName);
+    const filteredViews = compatibleViews.filter(v => viewToType[v.viewId] === genTypeName && (!targetView || v.viewId === targetView));
 
     // Filter competency targets for this generator using union of labels
     const matchedTargets = allTargets.filter(target => {
@@ -485,14 +487,61 @@ async function main() {
     const positionalArgs = args.filter(a => !a.startsWith('--'));
     if (positionalArgs.length > 0) {
         console.error('Error: Positional arguments are not allowed.');
-        console.error('Usage: npm run generate:dataset -- --generator=X [--training-only]');
+        console.error('Usage: npm run generate:dataset -- --spec=X [--generator=Y] [--view=Z] [--training-only]');
         process.exit(1);
+    }
+
+    const specArg = args.find(a => a.startsWith('--spec='));
+    if (!specArg) {
+        console.error('Error: The --spec parameter is required.');
+        console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only]');
+        console.error('Example: npm run generate:dataset -- --spec=test');
+        console.error('Example: npm run generate:dataset -- --spec=ccss');
+        process.exit(1);
+    }
+    const specName = specArg.split('=')[1];
+
+    if (specName === 'test') {
+        OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset-test');
+    }
+
+    const specPath = resolve(PROJECT_ROOT, 'src', 'spec', specName);
+    const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
+    const specFile = !specDir && existsSync(`${specPath}.ts`) ? `${specPath}.ts` : null;
+
+    if (!specDir && !specFile) {
+        console.error(`Error: Spec module not found at: ${specPath}`);
+        process.exit(1);
+    }
+
+    const allTargets: any[] = [];
+    if (specDir) {
+        const files = readdirSync(specDir).filter(f => f.endsWith('.ts'));
+        for (const file of files) {
+            const filePath = resolve(specDir, file);
+            const module = await import(pathToFileURL(filePath).href);
+            for (const [key, value] of Object.entries(module)) {
+                if (Array.isArray(value)) {
+                    allTargets.push(...value);
+                }
+            }
+        }
+    } else if (specFile) {
+        const module = await import(pathToFileURL(specFile).href);
+        for (const [key, value] of Object.entries(module)) {
+            if (Array.isArray(value)) {
+                allTargets.push(...value);
+            }
+        }
     }
 
     const generatorArg = args.find(a => a.startsWith('--generator='));
     if (generatorArg) {
         targetModule = generatorArg.split('=')[1];
     }
+
+    const viewArg = args.find(a => a.startsWith('--view='));
+    const targetView = viewArg ? viewArg.split('=')[1] : undefined;
 
     const trainingOnly = args.includes('--training-only');
 
@@ -527,7 +576,7 @@ async function main() {
 
     for (const moduleName of modulesToRun) {
         try {
-            totalImages += await runModulePipeline(browser, moduleName, trainingOnly);
+            totalImages += await runModulePipeline(browser, moduleName, trainingOnly, allTargets, targetView);
         } catch (e) {
             console.error(`Failed to run pipeline for ${moduleName}:`, e);
         }

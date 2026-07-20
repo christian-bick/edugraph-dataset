@@ -8,7 +8,7 @@ import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset', 'train');
+let DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset', 'train');
 const GENERATORS_ROOT = resolve(PROJECT_ROOT, 'src', 'generators');
 const CACHE_PATH = resolve(PROJECT_ROOT, 'temp', 'validation-cache.json');
 
@@ -168,22 +168,29 @@ async function main() {
     const positionalArgs = args.filter(a => !a.startsWith('--'));
     if (positionalArgs.length > 0) {
         console.error('Error: Positional arguments are not allowed.');
-        console.error('Usage: npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--force]');
+        console.error('Usage: npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--spec=Z] [--force]');
         process.exit(1);
     }
 
     let targetGenerator: string | undefined = undefined;
     let targetView: string | undefined = undefined;
     let force = false;
+    let specName = 'ccss';
 
     for (const arg of args) {
         if (arg.startsWith('--generator=')) {
             targetGenerator = arg.split('=')[1];
         } else if (arg.startsWith('--view=')) {
             targetView = arg.split('=')[1];
+        } else if (arg.startsWith('--spec=')) {
+            specName = arg.split('=')[1];
         } else if (arg === '--force' || arg === '--no-cache') {
             force = true;
         }
+    }
+
+    if (specName === 'test') {
+        DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset-test', 'train');
     }
 
     console.log('--- Starting Automated Modular VQA ---');

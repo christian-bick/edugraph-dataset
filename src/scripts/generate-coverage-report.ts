@@ -5,7 +5,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
+const args = process.argv.slice(2);
+const specArg = args.find(a => a.startsWith('--spec='));
+const specName = specArg ? specArg.split('=')[1] : 'ccss';
+
+let OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
+if (specName === 'test') {
+    OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset-test');
+}
 
 interface MetaEntry {
     tags: string[];

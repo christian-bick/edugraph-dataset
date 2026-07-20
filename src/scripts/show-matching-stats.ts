@@ -1,21 +1,64 @@
 import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { existsSync, readdirSync } from 'fs';
-import { KindergartenSpec } from '../../config/spec/ccss/kindergarten.ts';
-import { Grade1Spec } from '../../config/spec/ccss/grade-01.ts';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { existsSync, lstatSync, readdirSync } from 'fs';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { setSeed } from '../lib/random.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { Ability } from 'edugraph-ts';
-import { generateWithLabels } from '../lib/utils.ts';
-
-const allTargets = [...KindergartenSpec, ...Grade1Spec];
+import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 
 async function main() {
+    const args = process.argv.slice(2);
+    const specArg = args.find(a => a.startsWith('--spec='));
+    if (!specArg) {
+        console.error('Error: The --spec parameter is required.');
+        console.error('Usage: npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>');
+        console.error('Example: npx vite-node src/scripts/show-matching-stats.ts --spec=test');
+        console.error('Example: npx vite-node src/scripts/show-matching-stats.ts --spec=ccss');
+        process.exit(1);
+    }
+    const specName = specArg.split('=')[1];
+
+    const specPath = resolve(PROJECT_ROOT, 'src', 'spec', specName);
+    const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
+    const specFile = !specDir && existsSync(`${specPath}.ts`) ? `${specPath}.ts` : null;
+
+    if (!specDir && !specFile) {
+        console.error(`Error: Spec module not found at: ${specPath}`);
+        process.exit(1);
+    }
+
+    interface CompetencyTarget {
+        id: string;
+        labels: string[];
+        constraints?: Record<string, any>;
+    }
+
+    const allTargets: CompetencyTarget[] = [];
+    if (specDir) {
+        const files = readdirSync(specDir).filter(f => f.endsWith('.ts'));
+        for (const file of files) {
+            const filePath = resolve(specDir, file);
+            const module = await import(pathToFileURL(filePath).href);
+            for (const [key, value] of Object.entries(module)) {
+                if (Array.isArray(value)) {
+                    allTargets.push(...value);
+                }
+            }
+        }
+    } else if (specFile) {
+        const module = await import(pathToFileURL(specFile).href);
+        for (const [key, value] of Object.entries(module)) {
+            if (Array.isArray(value)) {
+                allTargets.push(...value);
+            }
+        }
+    }
+
     console.log('========================================================================');
     console.log('                 EduGraph Competency Matching Statistics                ');
     console.log('========================================================================\n');
@@ -27,12 +70,22 @@ async function main() {
         .map(d => d.name);
 
     const allViewSpecs = [];
+    const viewGeneralLabelsMap: Record<string, string[]> = {};
     for (const viewId of allViewDirs) {
         const viewSpecPath = resolve(viewsDir, viewId, 'spec.ts');
         if (existsSync(viewSpecPath)) {
             try {
                 const viewSpecModule = await import(`../visuals/views/${viewId}/spec.ts`);
                 allViewSpecs.push(viewSpecModule.spec);
+
+                const viewCamelCase = viewId.replace(/-([a-z])/g, g => g[1].toUpperCase());
+                const camelCaseName = viewCamelCase[0].toUpperCase() + viewCamelCase.slice(1);
+                const viewSchema = viewSpecModule[`${camelCaseName}ViewSchema`];
+                const viewLabels = Array.from(new Set([
+                    ...(viewSpecModule.spec?.generalLabels || []),
+                    ...extractSchemaLabels(viewSchema)
+                ]));
+                viewGeneralLabelsMap[viewId] = viewLabels;
             } catch (e) {
                 // Ignore missing or invalid specs
             }
@@ -60,10 +113,16 @@ async function main() {
                 const GeneratorClass = generatorModule[className];
                 
                 if (GeneratorClass) {
+                    const generator = new GeneratorClass();
+                    const generatorGeneralLabels = Array.from(new Set([
+                        ...(generatorSpec?.generalLabels || []),
+                        ...extractSchemaLabels(generator.schema)
+                    ]));
                     allGeneratorSpecs.push({
                         generatorId: genId,
                         spec: generatorSpec,
-                        generator: new GeneratorClass()
+                        generatorGeneralLabels,
+                        generator
                     });
                 }
             } catch (e) {
@@ -74,7 +133,7 @@ async function main() {
 
     console.log(`Loaded ${allViewSpecs.length} View Specifications.`);
     console.log(`Loaded ${allGeneratorSpecs.length} Generator Specifications.`);
-    console.log(`Loaded ${allTargets.length} CCSS Targets (Kindergarten + Grade 1).\n`);
+    console.log(`Loaded ${allTargets.length} targets from spec module "${specName}".\n`);
 
     const viewToType = getViewToProblemTypeMap();
     const abilitiesList = new Set<string>(Object.values(Ability));
@@ -100,20 +159,21 @@ async function main() {
             const compatibleViews = allViewSpecs.filter(v => viewToType[v.viewId] === genTypeName);
             if (compatibleViews.length === 0) continue;
 
-            if (!gen.spec || !gen.spec.generalLabels) {
+            if (!gen.generatorGeneralLabels) {
                 continue;
             }
 
             // Check if union of labels supports target labels
             const matchingViewsForTarget = compatibleViews.filter(viewSpec => {
-                if (!viewSpec.generalLabels) return false;
+                const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
+                if (!viewLabels) return false;
                 return target.labels.every(compLabel => {
                     if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
                     if (abilitiesList.has(compLabel)) {
-                        return viewSpec.generalLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                        return viewLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
                     }
-                    const supportedByGen = gen.spec.generalLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
-                    const supportedByView = viewSpec.generalLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                    const supportedByGen = gen.generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
+                    const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
                     return supportedByGen || supportedByView;
                 });
             });
