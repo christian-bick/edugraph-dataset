@@ -69,16 +69,24 @@ Adding content means creating two interconnected directories: a Generator and a 
 
 ### The Generator Module (`src/generators/<module>/`)
 *   **`generator.ts`**: Implements `ProblemGenerator<TData, TConfig>`. It contains **no label parsing logic**. It is a pure mathematical function that takes a strongly-typed `config` object and returns a `ProblemStub` or `null`.
+    - **Configuration Validation**: Must import `validateConfigFields` from `../../lib/errors.ts` (with correct relative path) and call it at the beginning of `generate(config)` with the required configuration parameters. It must throw a `GeneratorValidationError` if executed with missing/empty configurations (do not use silent internal fallbacks).
+    - **Ontology Tag Propagation**: Any runtime choices representing competencies (e.g. specific shape chosen, relation chosen) must be returned in the `tags` array of `ProblemStub` so they are not lost. Do NOT duplicate any tags or parameters that are already provided as part of the configuration parameters (as those are automatically captured in `consumedLabels` by the ontology mapping layer).
 *   **`spec.ts`**: The bridge to pedagogy. Exports `spec: GeneratorSpec` (broad matching capabilities), `GeneratorSchema` (defining how to map ontology labels to the typed `config` object using functional resolvers), and `Config` (the extracted type of the schema).
-*   **`generator.test.ts`**: A Vitest suite. Deeply tests edge cases of the generator by passing explicit `config` mocks.
-*   **`checklist.md`**: Pedagogical/Mathematical verification list. Acts as the validation criteria for the abstract mathematical data. It **must not** contain any visual layout, coordinates, styles, colors, or CSS parameters.
+*   **`generator.test.ts` / `spec.test.ts`**: Vitest suites to verify correctness.
+    - `generator.test.ts` deeply tests edge cases of the generator by passing explicit `config` mocks. It must cover mathematical boundaries and edge-cases (e.g. division by zero, invalid target ranges, subtraction yielding negative/zero values under non-negative constraints).
+    - `spec.test.ts` verifies tag resolution using `generateWithLabels` from `../../lib/utils.ts`.
+    - Both/either must include a test asserting that calling `generate` with an empty config throws an exception (e.g., `expect(() => generator.generate({})).toThrow()`).
+*   **`checklist.md`**: Pedagogical/Mathematical verification list. Acts as the validation criteria for the abstract mathematical data. It **must not** contain any visual layout, coordinates, styles, colors, or CSS parameters. See the Checklist Design Rules section below for detailed formatting constraints.
 
 ### The Visual Renderer (`src/visuals/`)
 *   **`src/visuals/views/<renderer>/`**:
     - **`view.html`**: The base HTML template containing a mount point for React.
     - **`view.tsx`**: Exports the React component wrapped in `withConfig(ViewSchema, Component)`. The core component itself (`<Name>Core`) is a pure stateless function taking `{ config, payload }`. It does not parse labels.
+        - **Strict Payload Validation**: Must import `validateProblemData` from `../../helpers/validation.ts` (with correct relative path) and call it at the beginning of the view component with the specific list of required fields accessed from `problem.data`.
+        - **Graceful Error Recovery**: If validation or range checks fail (e.g. coordinates or dimensions exceed visual limits), the view must throw a `ViewValidationError`. This is caught by the `ErrorBoundary` in the `withConfig` wrapper to display a standardized error card, preventing browser crashes, hangs, or infinite rendering loops during headless generation.
+        - **No Silent Fallbacks**: Remove all local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`). Consume resolved configuration parameters directly from the `config` prop and `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and correctly-typed values.
     - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
-    - **`checklist.md`**: Visual layout, rendering, and interaction verification list. Used by Visual QA to check for elements positioning, SVG structures, rendering overflows, and Question (`_mode-Q`) vs. Solution (`_mode-S`) mode styling. It **must not** contain abstract mathematical generation logic.
+    - **`checklist.md`**: Visual layout, rendering, and interaction verification list. Used by Visual QA to check for elements positioning, SVG structures, rendering overflows, and Question (`_mode-Q`) vs. Solution (`_mode-S`) mode styling. It **must not** contain abstract mathematical generation logic. See the Checklist Design Rules section below for detailed formatting constraints.
 *   **`src/visuals/components/`**: Reusable shared React elements (such as `TenFrame.tsx`).
 *   **`src/visuals/helpers/`**: Shared layout rendering calculations (such as `counting-helpers.ts`).
 
@@ -96,6 +104,22 @@ When designing or updating `spec.ts` files, you must strictly follow these rules
    - There must be zero overlap (including taxonomic ancestors via `partOf`) between the labels checked inside schema parameters and the spec's `generalLabels`. Specifically, when a label is declared as part of a schema parameter, it (and none of its ancestors) should appear in `generalLabels`.
 4. **No Duplicate Parameterization**:
    - When a generator maps a label to configure the mathematical properties of a problem payload, that label (and none of its ancestors/descendants) should be queried in the schema of the matching view. The view must rely purely on the generated problem payload (e.g. `problem.data`) rather than querying the ontology itself.
+5. **Prefer Simple Arrays for Schemas**:
+   - When mapping a parameter to a set of compatible standard labels (e.g. arrangements), prefer defining a simple array (e.g. `arrangement: [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement]`) over using resolvers. Fallbacks for missing labels are generated generically already and don't require specific resolvers.
+
+## 4c. Checklist Design Rules
+
+When writing or updating `checklist.md` files (which are used by the automated visual QA or manual checks), you must strictly follow these rules:
+
+1. **Separation of Concerns**:
+   - **Generator Checklists**: Specify *only* abstract mathematical and logic rules. Remove all layout/visual criteria (e.g., coordinates, shapes, colors, SVGs, button states, ruler bands, CSS styling, or answer box highlights).
+   - **View Checklists**: Specify *only* visual layout, rendering, and interaction rules. Remove all abstract logic criteria (e.g., mathematical generation algorithms, RNG selection logic, ontology/tag resolution).
+2. **Conciseness**:
+   - Focus on the most important validation aspects. Do not include excessive edge cases.
+3. **Unaware of Parameterization**:
+   - Assume that the validation mechanism is unaware of parameterization. Do not include conditional validation aspects (e.g., "If configuration parameter X is true, then...").
+4. **Question Mode (`_mode-Q`) vs. Solution Mode (`_mode-S`)**:
+   - View checklists must clearly distinguish between Question Mode (where answers are blank, inputs are empty, or elements are unselected) and Solution Mode (where correct answers are filled in, highlighted, or selected).
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)
 
