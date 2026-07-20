@@ -1,7 +1,7 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {hasLabel, hasSubConcept} from '../../lib/resolvers.ts';
+import {hasLabel} from '../../lib/resolvers.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
