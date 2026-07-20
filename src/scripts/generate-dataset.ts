@@ -5,7 +5,7 @@ import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync
 import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
-import { extractConfig, extractSchemaLabels } from '../lib/utils.ts';
+import { extractConfig, extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 import {KindergartenSpec} from '../../config/spec/ccss/kindergarten.ts';
 import {Grade1Spec} from '../../config/spec/ccss/grade-01.ts';
@@ -368,11 +368,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
             
             setSeed(42 + trainDataset.length);
             
-            if (!generator.schema) {
-                throw new Error(`Generator ${moduleName} is missing a schema!`);
-            }
-            const { config } = extractConfig(generator.schema, target.labels);
-            const problemStub = generator.generate(config);
+            const problemStub = generateWithLabels(generator, target.labels);
 
             if (problemStub && !trainKeys.has(problemStub.id)) {
                 // Match views that support this problem
@@ -444,11 +440,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                         while (!valSuccess && valAttempts < 50) {
                             valAttempts++;
                             setSeed(42 + 10000 + valDataset.length);
-                            if (!generator.schema) {
-                                throw new Error(`Generator ${moduleName} is missing a schema!`);
-                            }
-                            const { config } = extractConfig(generator.schema, target.labels);
-                            const valStub = generator.generate(config);
+                            const valStub = generateWithLabels(generator, target.labels);
                             if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
                                 valKeys.add(valStub.id);
                                 valSuccess = true;

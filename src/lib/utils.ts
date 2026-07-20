@@ -1,6 +1,8 @@
 import { ConfigSchema, ConfigFromSchema } from '../types/schema.ts';
 import { isSubConceptOf } from './ontology.ts';
 import { random } from './random.ts';
+import { ProblemGenerator, ProblemStub } from '../types/ml-engine.ts';
+
 
 export function extractConfig<T extends ConfigSchema>(
     schema: T,
@@ -71,3 +73,15 @@ export function extractSchemaLabels<T extends ConfigSchema>(schema?: T): string[
     
     return Array.from(labels);
 }
+
+export function generateWithLabels<TData = any, TConfig = any>(
+    generator: ProblemGenerator<TData, TConfig>,
+    labels: string[]
+): ProblemStub<TData> | null {
+    if (!generator.schema) {
+        throw new Error('Generator is missing a schema!');
+    }
+    const { config } = extractConfig(generator.schema, labels);
+    return generator.generate(config);
+}
+

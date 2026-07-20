@@ -32,20 +32,62 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, 
         let answer = 0;
 
         if (operation === Area.Addition) {
-            const minVal = includeZero ? 0 : 1;
-            const effectiveMax = resolvedRange.max;
-            
-            num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal;
-            num2 = Math.floor(random() * (effectiveMax - num1 - minVal + 1)) + minVal;
-            answer = num1 + num2;
+            if (allowNegatives) {
+                let success = false;
+                let attempts = 0;
+                const maxVal = resolvedRange.max;
+                const minVal = -maxVal;
+                
+                while (!success && attempts < 100) {
+                    attempts++;
+                    num1 = generateFromRange();
+                    answer = generateFromRange();
+                    num2 = answer - num1;
+                    
+                    if (num2 >= minVal && num2 <= maxVal) {
+                        if (includeZero || num2 !== 0) {
+                            success = true;
+                        }
+                    }
+                }
+                if (!success) return null;
+            } else {
+                const minVal = includeZero ? 0 : 1;
+                const effectiveMax = resolvedRange.max;
+                
+                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal;
+                num2 = Math.floor(random() * (effectiveMax - num1 - minVal + 1)) + minVal;
+                answer = num1 + num2;
+            }
         } else if (operation === Area.Subtraction) {
-            const minVal = includeZero ? 0 : 1;
-            const effectiveMax = resolvedRange.max;
-            
-            num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal * 2;
-            num2 = Math.floor(random() * (num1 - minVal + 1)) + minVal;
-            if (num2 > num1 - minVal) num2 = num1 - minVal;
-            answer = num1 - num2;
+            if (allowNegatives) {
+                let success = false;
+                let attempts = 0;
+                const maxVal = resolvedRange.max;
+                const minVal = -maxVal;
+                
+                while (!success && attempts < 100) {
+                    attempts++;
+                    num1 = generateFromRange();
+                    num2 = generateFromRange();
+                    answer = num1 - num2;
+                    
+                    if (answer >= minVal && answer <= maxVal) {
+                        if (includeZero || answer !== 0) {
+                            success = true;
+                        }
+                    }
+                }
+                if (!success) return null;
+            } else {
+                const minVal = includeZero ? 0 : 1;
+                const effectiveMax = resolvedRange.max;
+                
+                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal * 2;
+                num2 = Math.floor(random() * (num1 - minVal + 1)) + minVal;
+                if (num2 > num1 - minVal) num2 = num1 - minVal;
+                answer = num1 - num2;
+            }
         } else if (operation === Area.Multiplication) {
             num1 = generateFromRange();
             num2 = generateFromRange();
