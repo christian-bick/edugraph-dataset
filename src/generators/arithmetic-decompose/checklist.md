@@ -1,0 +1,5 @@
+- The problem must consist of a target number and two pairs of numbers that decompose the target number.
+- For each decomposition pair, the sum of the two numbers must exactly equal the target number.
+- The two decomposition pairs must be mathematically distinct from each other.
+- All numbers in the problem must be positive integers.
+- The problem identifier must uniquely represent the target number and its decomposition pairs.

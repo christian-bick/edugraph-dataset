@@ -1,1 +1,3 @@
-### Arithmetic Visual Checklist
+- The problem must represent a valid arithmetic equation with two operands, an operator, and a correct solution.
+- The solution must be the exact mathematical result of applying the operator to the operands.
+- The problem identifier must uniquely represent the arithmetic expression to avoid duplicates.
