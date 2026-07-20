@@ -5,7 +5,7 @@ import { resolveRangeFromLabels } from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'place-value-make-ten',
-    supportedLabels: [
+    generalLabels: [
         Area.BaseOperations,
         Scope.PhysicalNumbers,
         Scope.NumericRange,

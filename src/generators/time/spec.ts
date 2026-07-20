@@ -5,7 +5,7 @@ import {extractFirstMatch} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'time',
-    supportedLabels: [
+    generalLabels: [
         Area.MeasuringTime
     ],
 };

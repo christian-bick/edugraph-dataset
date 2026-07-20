@@ -5,7 +5,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-decompose',
-    supportedLabels: [
+    generalLabels: [
         Area.NumberNotation,
         Area.Addition,
         Scope.IntegerNumbers,

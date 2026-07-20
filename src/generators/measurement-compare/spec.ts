@@ -5,7 +5,7 @@ import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-compare',
-    supportedLabels: [
+    generalLabels: [
         Area.Measurement,
         Area.ObjectSorting,
         Scope.NumericRange

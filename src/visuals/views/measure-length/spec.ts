@@ -5,7 +5,7 @@ import { hasLabel } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-length',
-    supportedLabels: [
+    generalLabels: [
         Area.Measurement,
         Scope.ArabicNumerals,
         Ability.VisualReception,

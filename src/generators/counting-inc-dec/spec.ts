@@ -6,7 +6,7 @@ import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-inc-dec',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Scope.NumericRange,
         Scope.NumericZero,

@@ -5,7 +5,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'writing',
-    supportedLabels: [
+    generalLabels: [
         Area.DigitNotation,
         Area.Numeration,
         Scope.IntegerNumbers,

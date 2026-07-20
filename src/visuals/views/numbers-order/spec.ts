@@ -5,7 +5,7 @@ import { hasLabel } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-order',
-    supportedLabels: [
+    generalLabels: [
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.Base10,

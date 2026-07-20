@@ -5,7 +5,7 @@ import {hasSubConcept} from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-classify-dim',
-    supportedLabels: [
+    generalLabels: [
         Ability.ConceptClassification
     ]
 };

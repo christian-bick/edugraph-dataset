@@ -286,7 +286,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
     
     // Combine base supported labels with dynamically extracted schema labels
     const generatorGeneralLabels = Array.from(new Set([
-        ...(generatorSpec?.supportedLabels || []),
+        ...(generatorSpec?.generalLabels || []),
         ...extractSchemaLabels(generator.schema)
     ]));
 
@@ -325,7 +325,7 @@ async function runModulePipeline(browser: Browser, moduleName: string, trainingO
                 const viewCamelCase = camelCase(viewId[0].toUpperCase() + viewId.slice(1));
                 const viewSchema = viewSpecModule[`${viewCamelCase}ViewSchema`];
                 const viewLabels = Array.from(new Set([
-                    ...(viewSpecModule.spec?.supportedLabels || []),
+                    ...(viewSpecModule.spec?.generalLabels || []),
                     ...extractSchemaLabels(viewSchema)
                 ]));
                 viewGeneralLabelsMap[viewId] = viewLabels;

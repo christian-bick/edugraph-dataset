@@ -5,7 +5,7 @@ import { resolveRangeFromLabels } from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-boxes',
-    supportedLabels: [
+    generalLabels: [
         Area.BaseOperations,
         Scope.ArabicNumerals,
         Scope.NumericRange,

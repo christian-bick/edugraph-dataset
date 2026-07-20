@@ -5,7 +5,7 @@ import { hasLabel } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'time-analog',
-    supportedLabels: [
+    generalLabels: [
         Area.MeasuringTime,
         Scope.AnalogClock,
         Scope.HourIntervals,

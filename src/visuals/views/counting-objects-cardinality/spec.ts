@@ -6,7 +6,7 @@ import { extractFirstMatch } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-objects-cardinality',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Area.NumericIdentity,
         Scope.PhysicalNumbers,

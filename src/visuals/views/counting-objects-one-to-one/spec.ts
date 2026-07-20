@@ -6,7 +6,7 @@ import { resolveRangeFromLabels } from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-objects-one-to-one',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Scope.NumbersWithoutZero,
         Scope.AdditiveCount,

@@ -6,7 +6,7 @@ import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-classify-sort',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Area.ObjectSorting,
         Area.NumericOrder,

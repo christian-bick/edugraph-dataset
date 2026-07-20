@@ -5,7 +5,7 @@ import { resolveRangeFromLabels } from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'sorting-classify-sort',
-    supportedLabels: [
+    generalLabels: [
         Area.ObjectSorting,
         Area.NumericOrder,
         Scope.NumericRange,

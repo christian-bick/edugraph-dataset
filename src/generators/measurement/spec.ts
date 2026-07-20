@@ -5,7 +5,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement',
-    supportedLabels: [
+    generalLabels: [
         Area.Measurement,
         Scope.LengthMeasurement,
         Scope.DecimalNumbers,

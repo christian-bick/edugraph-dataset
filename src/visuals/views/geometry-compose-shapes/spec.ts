@@ -5,7 +5,7 @@ import { hasSubConcept } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-compose-shapes',
-    supportedLabels: [
+    generalLabels: [
         Ability.ConceptComposition
     ]
 };

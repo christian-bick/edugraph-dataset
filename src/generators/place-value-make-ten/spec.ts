@@ -5,7 +5,7 @@ import {hasLabel} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-make-ten',
-    supportedLabels: [
+    generalLabels: [
         Area.Difference,
         Scope.Base10,
         Scope.NumbersLargerZero,

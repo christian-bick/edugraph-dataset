@@ -4,7 +4,7 @@ import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-position',
-    supportedLabels: [
+    generalLabels: [
         Ability.SpatialInterpretation
     ]
 };

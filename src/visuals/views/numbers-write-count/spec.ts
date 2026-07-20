@@ -4,7 +4,7 @@ import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-write-count',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Scope.PhysicalNumbers,
         Scope.NumericRange,

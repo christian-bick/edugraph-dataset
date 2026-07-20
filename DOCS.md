@@ -106,7 +106,9 @@ Adding content means creating two interconnected directories: a Generator and a 
 
 #### Generator Design Guidelines
 1. **Purely Mathematical**: The generated problem data payload (`data`) must contain only raw mathematical attributes.
-2. **Schema-Driven Resolvers**: Pedagogical mapping is purely declarative via `spec.ts` schemas. Use `edugraph-ts` Enums (e.g., `Area`, `Scope`) and `resolvers.ts` (`hasSubConcept`, `extractFirstMatch`) to build the config objects.
+2. **Schema-Driven Resolvers & Strict Parameterization**: Pedagogical mapping is declarative. Total supported labels for a module are calculated dynamically by unionizing the general capabilities declared in `spec.generalLabels` and the parameterized capabilities extracted from the schema properties. 
+    - Schemas (`ConfigSchema`) accept values as: simple arrays of labels (`readonly string[]`), tuples binding constraints to a resolver (`[readonly string[], ResolverFn]`), or pure functions that execute at runtime without binding capability labels (`ResolverFn`).
+    - **Do NOT** duplicate schema-bound constraints (e.g., specific ranges, object arrangements) in `spec.generalLabels`. Keep `generalLabels` strictly for general capabilities (e.g., `Area.Numeration`, `Scope.IntegerNumbers`).
 
 ### The Visual Renderer (`src/visuals/`)
 *   **`src/visuals/views/<renderer>/`**:

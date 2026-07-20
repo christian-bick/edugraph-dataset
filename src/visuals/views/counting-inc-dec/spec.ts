@@ -19,7 +19,7 @@ export type CountingIncDecViewConfig = ConfigFromSchema<typeof CountingIncDecVie
 
 export const spec: ViewSpec = {
     viewId: 'counting-inc-dec',
-    supportedLabels: [
+    generalLabels: [
         Scope.ArabicNumerals
     ],
 };

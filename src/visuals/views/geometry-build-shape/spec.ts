@@ -5,7 +5,7 @@ import {extractFirstMatch} from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-build-shape',
-    supportedLabels: [
+    generalLabels: [
         Ability.VisualArticulation
     ],
 };

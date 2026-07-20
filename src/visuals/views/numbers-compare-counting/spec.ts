@@ -4,7 +4,7 @@ import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-compare-counting',
-    supportedLabels: [
+    generalLabels: [
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution,
         Scope.ArabicNumerals

@@ -4,7 +4,7 @@ import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-write-stroke',
-    supportedLabels: [
+    generalLabels: [
         Area.DigitNotation,
         Scope.ArabicNumerals,
         Scope.NumericRange,

@@ -5,7 +5,7 @@ import { hasSubConcept } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-compare-attributes',
-    supportedLabels: [
+    generalLabels: [
         Ability.VisualDecomposition,
         Area.Circle,
         Area.Hexagon

@@ -99,20 +99,20 @@ async function main() {
             const compatibleViews = allViewSpecs.filter(v => viewToType[v.viewId] === genTypeName);
             if (compatibleViews.length === 0) continue;
 
-            if (!gen.spec || !gen.spec.supportedLabels) {
+            if (!gen.spec || !gen.spec.generalLabels) {
                 continue;
             }
 
             // Check if union of labels supports target labels
             const matchingViewsForTarget = compatibleViews.filter(viewSpec => {
-                if (!viewSpec.supportedLabels) return false;
+                if (!viewSpec.generalLabels) return false;
                 return target.labels.every(compLabel => {
                     if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
                     if (abilitiesList.has(compLabel)) {
-                        return viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                        return viewSpec.generalLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
                     }
-                    const supportedByGen = gen.spec.supportedLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
-                    const supportedByView = viewSpec.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+                    const supportedByGen = gen.spec.generalLabels.some(genLabel => isSubConceptOf(compLabel, genLabel));
+                    const supportedByView = viewSpec.generalLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
                     return supportedByGen || supportedByView;
                 });
             });

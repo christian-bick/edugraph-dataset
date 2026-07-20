@@ -4,7 +4,7 @@ import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-vertical',
-    supportedLabels: [
+    generalLabels: [
         Area.BaseOperations,
         Scope.ArabicNumerals,
         Scope.NumericRange,

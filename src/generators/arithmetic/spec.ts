@@ -6,7 +6,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic',
-    supportedLabels: [
+    generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10
     ]

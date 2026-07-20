@@ -5,7 +5,7 @@ import {matchAllLabels} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-identity',
-    supportedLabels: [
+    generalLabels: [
         Area.ShapeIdentity,
         Ability.VisualRecognition,
         Ability.VisualArticulation

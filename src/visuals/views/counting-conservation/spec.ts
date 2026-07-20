@@ -5,7 +5,7 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-conservation',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Area.NumericIdentity,
         Scope.AdditiveCount,

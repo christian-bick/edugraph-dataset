@@ -5,7 +5,7 @@ import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-env-shapes',
-    supportedLabels: [
+    generalLabels: [
         Area.ShapeRecognition
     ]
 };

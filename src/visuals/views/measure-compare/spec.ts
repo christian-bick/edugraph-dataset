@@ -4,7 +4,7 @@ import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-compare',
-    supportedLabels: [
+    generalLabels: [
         Area.Measurement,
         Scope.NumericRange,
         Scope.ArabicNumerals,

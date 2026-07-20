@@ -6,7 +6,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'comparison',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Area.NumericComparison,
         Scope.IntegerNumbers,

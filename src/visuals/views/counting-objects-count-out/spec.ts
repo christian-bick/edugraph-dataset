@@ -6,7 +6,7 @@ import { extractFirstMatch } from '../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-objects-count-out',
-    supportedLabels: [
+    generalLabels: [
         Area.Numeration,
         Scope.PhysicalNumbers,
         Scope.NumericRange,

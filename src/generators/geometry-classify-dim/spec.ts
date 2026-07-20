@@ -5,7 +5,7 @@ import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-classify-dim',
-    supportedLabels: [
+    generalLabels: [
         Area.Circle,
         Area.Square,
         Area.Rectangle,

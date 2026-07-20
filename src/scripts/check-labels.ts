@@ -46,8 +46,8 @@ async function checkLabels() {
                             const schema = specModule[schemaName];
                             
                             const schemaLabels = schema ? extractSchemaLabels(schema) : [];
-                            const supportedLabels = Array.from(new Set([
-                                ...(spec?.supportedLabels || []),
+                            const generalLabels = Array.from(new Set([
+                                ...(spec?.generalLabels || []),
                                 ...schemaLabels
                             ]));
 
@@ -55,7 +55,7 @@ async function checkLabels() {
                                 const used = getEnumString(usedEnumName);
                                 if (!used) continue;
 
-                                const isSupported = supportedLabels.some((supported: string) => 
+                                const isSupported = generalLabels.some((supported: string) => 
                                     isCompatibleConcept(used, supported)
                                 );
 
@@ -65,7 +65,7 @@ async function checkLabels() {
                                         type,
                                         usedEnum: usedEnumName,
                                         used,
-                                        supported: supportedLabels
+                                        supported: generalLabels
                                     });
                                 }
                             }

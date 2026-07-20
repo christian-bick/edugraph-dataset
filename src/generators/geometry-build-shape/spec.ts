@@ -3,7 +3,7 @@ import {Area} from 'edugraph-ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-build-shape',
-    supportedLabels: [
+    generalLabels: [
         Area.Triangle,
         Area.Square,
         Area.Hexagon,
