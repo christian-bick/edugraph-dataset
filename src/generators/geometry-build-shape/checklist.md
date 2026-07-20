@@ -1,0 +1,3 @@
+- The problem must specify a target shape (triangle, square, rectangle, or hexagon).
+- The number of sides (sticks) and corners (clay balls) must match the mathematical definition of the target shape.
+- The options must include the correct combination of sticks and clay balls for the target shape.

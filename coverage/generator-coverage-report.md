@@ -9,7 +9,7 @@
 | [src/generators/counting-classify-count/generator.ts](src/generators/counting-classify-count/generator.ts) | 100% | 66.66% | ✅ PASS |
 | [src/generators/counting-classify-sort/generator.ts](src/generators/counting-classify-sort/generator.ts) | 100% | 90% | ✅ PASS |
 | [src/generators/counting-inc-dec/generator.ts](src/generators/counting-inc-dec/generator.ts) | 100% | 94.11% | ✅ PASS |
-| [src/generators/geometry-build-shape/generator.ts](src/generators/geometry-build-shape/generator.ts) | 100% | 40% | ❌ FAIL |
+| [src/generators/geometry-build-shape/generator.ts](src/generators/geometry-build-shape/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/geometry-classify-dim/generator.ts](src/generators/geometry-classify-dim/generator.ts) | 100% | 40% | ❌ FAIL |
 | [src/generators/geometry-compare-attributes/generator.ts](src/generators/geometry-compare-attributes/generator.ts) | 95.55% | 18.18% | ❌ FAIL |
 | [src/generators/geometry-compose-shapes/generator.ts](src/generators/geometry-compose-shapes/generator.ts) | 89.65% | 40% | ❌ FAIL |

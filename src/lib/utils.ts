@@ -45,8 +45,8 @@ export function extractConfig<T extends ConfigSchema>(
         }
 
         if (isTuple) {
-            const resolver = schemaValue[1] as (labels: string[]) => any;
-            config[key] = resolver(resolverLabels);
+            const resolver = schemaValue[1] as (labels: string[], supported?: readonly string[]) => any;
+            config[key] = resolver(resolverLabels, supportedLabels);
         } else {
             // For simple arrays, we must assign a single literal label, so we pick one randomly from the matches.
             const pickedLabel = matchingSupportedLabels[Math.floor(random() * matchingSupportedLabels.length)];

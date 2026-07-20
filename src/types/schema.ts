@@ -1,4 +1,4 @@
-export type ResolverFn<T> = (labels: string[]) => T;
+export type ResolverFn<T> = (labels: string[], supportedLabels?: readonly string[]) => T;
 
 export type SchemaValue<T = any> =
   | readonly string[]

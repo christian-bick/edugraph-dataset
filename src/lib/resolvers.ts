@@ -19,3 +19,7 @@ export const extractFirstMatch = <T extends string>(targetLabels: readonly T[], 
         return match ?? defaultValue;
     };
 };
+
+export const selectExactMatch = (labels: string[], supportedLabels?: readonly string[]): string | undefined => {
+    return supportedLabels?.find(s => labels.includes(s));
+};
