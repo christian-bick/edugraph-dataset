@@ -43,7 +43,7 @@ Generate the full ML dataset (images + `meta.json`). The output will be saved in
 ```bash
 npm run generate:dataset
 ```
-*(Tip: You can generate a specific module by appending its name, e.g., `npm run generate:dataset arithmetic`. You can also generate training images exclusively by adding the `--training-only` flag, e.g., `npm run generate:dataset arithmetic --training-only`.)*
+*(Tip: You can generate a specific module by using the `--generator` flag, e.g., `npm run generate:dataset -- --generator=arithmetic`. You can also generate training images exclusively by adding the `--training-only` flag, e.g., `npm run generate:dataset -- --generator=arithmetic --training-only`.)*
 
 **2. Generate Coverage Report**
 Analyze the generated dataset to ensure proper pedagogical label coverage and distribution.
