@@ -121,7 +121,7 @@ export type GeometryCompareAttributesProblem = {
 };
 
 export type GeometrySameAttributeProblem = {
-    attribute: 'can-roll' | 'can-stack' | 'flat-faces';
+    attribute: 'rollable' | 'stackable' | 'foldable';
     answer: string;
 };
 

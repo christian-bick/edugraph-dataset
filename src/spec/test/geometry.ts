@@ -108,6 +108,18 @@ const identityPositionBuilder = new DatasetPermutationBuilder()
         [Scope.Behind]
     ]);
 
+const sameAttributeBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ObjectSorting,
+        Ability.InductiveReasoning,
+        Scope.ShapeProperties
+    ])
+    .applyLabelVariants([
+        [Area.Sphere],
+        [Area.Cube],
+        [Area.Rectangle]
+    ]);
+
 export const GeometryTestSpec: CompetencyTarget[] = [
     ...builder.build().map((p, i) => ({
         id: `test-geometry-build-shape-${i}`,
@@ -146,6 +158,11 @@ export const GeometryTestSpec: CompetencyTarget[] = [
     })),
     ...identityPositionBuilder.build().map((p, i) => ({
         id: `test-geometry-identity-position-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    })),
+    ...sameAttributeBuilder.build().map((p, i) => ({
+        id: `test-geometry-same-attribute-${i}`,
         labels: p.labels,
         constraints: p.constraints
     }))

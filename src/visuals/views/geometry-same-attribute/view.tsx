@@ -26,14 +26,6 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
                 <path d="M 60 40 L 80 20 L 80 60 L 60 80 Z" fill="#2563eb" stroke="#1d4ed8" strokeWidth="2" />
             </svg>
         );
-    } else if (shape === 'cone') {
-        return (
-            <svg {...commonProps}>
-                <ellipse cx="50" cy="75" rx="30" ry="10" fill="#2563eb" stroke="#1d4ed8" strokeWidth="2" />
-                <polygon points="50,15 20,75 80,75" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
-                <path d="M 50 15 L 80 75 A 30 10 0 0 1 50 85 Z" fill="#1e40af" opacity="0.2"/>
-            </svg>
-        );
     } else if (shape === 'sphere') {
         return (
             <svg {...commonProps}>
@@ -47,6 +39,12 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
                 </defs>
             </svg>
         );
+    } else if (shape === 'rectangle') {
+        return (
+            <svg {...commonProps}>
+                <rect x="15" y="30" width="70" height="40" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" rx="4"/>
+            </svg>
+        );
     }
     return null;
 }
@@ -55,19 +53,19 @@ const GeometrySameAttributeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    const attribute = data.attribute || 'can-roll';
+    const attribute = data.attribute || 'rollable';
     const answer = data.answer;
 
     const promptText = useMemo(() => {
         const promptMap: Record<string, string> = {
-            'can-roll': 'Which of these shapes rolls easily?',
-            'can-stack': 'Which of these shapes is best for stacking?',
-            'flat-faces': 'Which of these shapes has NO flat faces?'
+            'rollable': 'Which of these shapes rolls easily?',
+            'stackable': 'Which of these shapes is best for stacking?',
+            'foldable': 'Which of these shapes can be folded?'
         };
         return promptMap[attribute] || 'Choose the correct shape.';
     }, [attribute]);
 
-    const options = ['sphere', 'cube', 'cone'];
+    const options = ['sphere', 'cube', 'rectangle'];
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
@@ -101,8 +99,8 @@ const GeometrySameAttributeCore = ({ config, payload }: CoreProps) => {
                             <span className="font-bold text-slate-500">Cube</span>
                         </div>
                         <div className="flex flex-col items-center gap-1.5">
-                            <ShapeSVG shape="cone" size={70} />
-                            <span className="font-bold text-slate-500">Cone</span>
+                            <ShapeSVG shape="rectangle" size={70} />
+                            <span className="font-bold text-slate-500">Rectangle</span>
                         </div>
                     </div>
                 </div>

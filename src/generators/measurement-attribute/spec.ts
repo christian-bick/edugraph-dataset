@@ -12,8 +12,6 @@ export const spec: GeneratorSpec = {
 
 
 export const MeasurementAttributeGeneratorSchema = {
-    // TODO: Ontological relations between measurement attributes could be defined
-    // to logically constrain compatible dimensions or units, similar to deductCompatible for ranges.
     attribute: [
         [Scope.LengthMeasurement, Scope.WeightMeasurement],
         selectExactMatch

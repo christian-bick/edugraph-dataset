@@ -1,30 +1,23 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {hasSubConcept} from '../../lib/resolvers.ts';
+import {matchAllExactLabels} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-same-attribute',
     generalLabels: [
         Area.ObjectSorting,
-        Scope.ShapeProperties
+        Scope.Foldable,
+        Scope.Rollable,
+        Scope.Stackable
     ]
 };
 
 
 export const GeometrySameAttributeGeneratorSchema = {
-    // TODO: Ontological relations could be beneficial for ShapeProperties here in the future
-    rollable: [
-        [Scope.Rollable, 'not-rollable'],
-        hasSubConcept(Scope.Rollable)
-    ],
-    stackable: [
-        [Scope.Stackable, 'not-stackable'],
-        hasSubConcept(Scope.Stackable)
-    ],
-    flatFaces: [
-        [Scope.FlatFaces, 'no-flat-faces'],
-        hasSubConcept(Scope.FlatFaces)
+    shapes: [
+        [Area.Sphere, Area.Cube, Area.Rectangle],
+        matchAllExactLabels
     ]
 } as const;
 

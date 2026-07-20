@@ -8,29 +8,29 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
     schema = GeometrySameAttributeGeneratorSchema;
 
     generate(config: GeometrySameAttributeGeneratorConfig): ProblemStub | null {
+        const shapes = config.shapes && config.shapes.length > 0
+            ? config.shapes
+            : ['sphere', 'cube', 'rectangle'];
 
-        const possible: string[] = [];
-        if (config.rollable) possible.push('can-roll');
-        if (config.stackable) possible.push('can-stack');
-        if (config.flatFaces) possible.push('flat-faces');
+        const selectedShape = shapes[Math.floor(random() * shapes.length)];
+        const shape = selectedShape.split('/').pop()!.toLowerCase();
 
-        let attribute = 'can-roll';
-        if (possible.length > 0) {
-            attribute = possible[Math.floor(random() * possible.length)];
-        } else {
-            const allAttributes = ['can-roll', 'can-stack', 'flat-faces'];
-            attribute = allAttributes[Math.floor(random() * allAttributes.length)];
+        let attribute: 'rollable' | 'stackable' | 'foldable' = 'rollable';
+        if (shape === 'sphere') {
+            attribute = 'rollable';
+        } else if (shape === 'cube') {
+            attribute = 'stackable';
+        } else if (shape === 'rectangle') {
+            attribute = 'foldable';
         }
-        let answer = '';
-        if (attribute === 'can-roll') answer = 'sphere'; // sphere rolls easily
-        else if (attribute === 'can-stack') answer = 'cube'; // cube is stackable
-        else if (attribute === 'flat-faces') answer = 'cube'; // or cone. Let's make the question "Which of these shapes has no flat faces?" -> answer: sphere.
-        
+
+        const answer = shape;
+
         return {
-            id: `geometry-same-attr-${attribute}`,
+            id: `geometry-same-attr-${attribute}-${answer}`,
             data: {
-                attribute: attribute as 'can-roll' | 'can-stack' | 'flat-faces',
-                answer: attribute === 'flat-faces' ? 'sphere' : answer // if 'flat-faces' -> "no flat faces" -> answer is sphere
+                attribute,
+                answer
             }
         };
     }

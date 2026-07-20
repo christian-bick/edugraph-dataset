@@ -1,0 +1,5 @@
+- The problem must specify a target attribute question (rollable, stackable, or foldable).
+- The solution (answer) must match the physical shape property:
+  - If attribute is 'rollable', answer must be 'sphere'.
+  - If attribute is 'stackable', answer must be 'cube'.
+  - If attribute is 'foldable', answer must be 'rectangle'.
