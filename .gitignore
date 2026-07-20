@@ -29,3 +29,7 @@ examples
 # Protect dev credentials
 .env
 gcloud-credentials.json
+
+# Unit test coverage outputs
+coverage/coverage-summary.json
+

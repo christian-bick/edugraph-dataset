@@ -2,7 +2,7 @@
 
 | Generator | Statement % | Branch % | Status |
 | :--- | :---: | :---: | :---: |
-| [src/generators/arithmetic/generator.ts](src/generators/arithmetic/generator.ts) | 100% | 82.97% | ✅ PASS |
+| [src/generators/arithmetic/generator.ts](src/generators/arithmetic/generator.ts) | 100% | 86.27% | ✅ PASS |
 | [src/generators/arithmetic-decompose/generator.ts](src/generators/arithmetic-decompose/generator.ts) | 95.23% | 80% | ✅ PASS |
 | [src/generators/comparison/generator.ts](src/generators/comparison/generator.ts) | 92.18% | 82.6% | ✅ PASS |
 | [src/generators/counting/generator.ts](src/generators/counting/generator.ts) | 100% | 66.66% | ✅ PASS |
