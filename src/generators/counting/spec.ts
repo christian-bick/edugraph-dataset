@@ -6,10 +6,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'counting',
     generalLabels: [
-        Area.Numeration,
-        Area.NumericIdentity,
-        Area.CollectionSense,
-        Area.NumericOrder,
+        Area.NumerationWithIntegers,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutZero,

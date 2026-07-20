@@ -6,7 +6,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'counting-classify-sort',
     generalLabels: [
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Area.ObjectSorting,
         Area.NumericOrder,
         Scope.IntegerNumbers,
