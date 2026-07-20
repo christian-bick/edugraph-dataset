@@ -1,6 +1,7 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {GeometryCompareAttributesGenerator} from './generator.ts';
-import {setSeed} from '../../lib/random.ts';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { GeometryCompareAttributesGenerator } from './generator.ts';
+import { setSeed } from '../../lib/random.ts';
+import { Area } from 'edugraph-ts';
 
 describe('GeometryCompareAttributesGenerator', () => {
     let generator: GeometryCompareAttributesGenerator;
@@ -14,25 +15,29 @@ describe('GeometryCompareAttributesGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should validate compare-attributes sides/corners comparison math', () => {
-        const config = {
-            wantsTriangle: false,
-            wantsSquare: false,
-            wantsRectangle: false,
-            wantsPolygon: false
-        };
-        const stub = generator.generate(config);
+    it('should generate problems using fallback when no config is provided', () => {
+        const stub = generator.generate({});
         expect(stub).not.toBeNull();
-        
-        const { shape1, shape2, val1, val2, attribute, answer } = stub!.data;
-        expect(['sides', 'corners']).toContain(attribute);
-        
-        const getVal = (shape: string) => shape === 'triangle' ? 3 : (shape === 'hexagon' ? 6 : (shape === 'circle' ? 0 : 4));
-        expect(val1).toBe(getVal(shape1));
-        expect(val2).toBe(getVal(shape2));
-        
-        if (val1 > val2) expect(answer).toBe(shape1);
-        else if (val2 > val1) expect(answer).toBe(shape2);
-        else expect(answer).toBe('equal');
+        expect(stub!.data.shape1).toBeDefined();
+        expect(stub!.data.shape2).toBeDefined();
+        expect(stub!.data.shape1).not.toBe(stub!.data.shape2);
+        expect(stub!.data.val1).not.toBe(stub!.data.val2);
+    });
+
+    it('should respect config constraints and compare different attribute counts', () => {
+        const stub = generator.generate({ classify: Area.Triangle });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.shape1).toBe('triangle');
+        expect(stub!.data.shape2).not.toBe('triangle');
+        expect(stub!.data.val1).not.toBe(stub!.data.val2);
+    });
+
+    it('should support circle and set values to 0', () => {
+        const stub = generator.generate({ classify: Area.Circle });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.shape1).toBe('circle');
+        expect(stub!.data.val1).toBe(0);
+        expect(stub!.data.shape2).not.toBe('circle');
+        expect(stub!.data.val1).not.toBe(stub!.data.val2);
     });
 });

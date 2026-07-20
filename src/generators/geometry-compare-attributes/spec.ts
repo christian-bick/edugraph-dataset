@@ -1,33 +1,34 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {hasSubConcept} from '../../lib/resolvers.ts';
+import {selectExactMatch} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-compare-attributes',
     generalLabels: [
-        Area.Circle,
-        Area.Hexagon
+        Area.ShapeRecognition,
+        Area.NumericComparison,
+        Scope.ShapeProperties,
+        Scope.IntegerNumbers,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithZero,
+        Scope.NumbersLargerZero,
+        Scope.NumbersSmaller10,
     ]
 };
 
 
 export const GeometryCompareAttributesGeneratorSchema = {
-    wantsTriangle: [
-        [Area.Triangle], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Triangle)
-    ],
-    wantsSquare: [
-        [Area.Square], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Square)
-    ],
-    wantsRectangle: [
-        [Area.Rectangle], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Rectangle)
-    ],
-    wantsPolygon: [
-        [Area.Polygon], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Area.Polygon)
+    classify: [
+        [
+            Area.Circle,
+            Area.Triangle,
+            Area.Square,
+            Area.Rectangle,
+            Area.Hexagon
+        ],
+        selectExactMatch
     ]
 } as const;
 

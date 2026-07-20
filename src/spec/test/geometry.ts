@@ -30,6 +30,21 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
         [Area.Cone]
     ]);
 
+const compareAttrBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Scope.ShapeProperties,
+        Area.ShapeRecognition,
+        Area.NumericComparison,
+        Ability.VisualDecomposition
+    ])
+    .applyLabelVariants([
+        [Area.Triangle],
+        [Area.Square],
+        [Area.Rectangle],
+        [Area.Hexagon],
+        [Area.Circle]
+    ]);
+
 export const GeometryTestSpec: CompetencyTarget[] = [
     ...builder.build().map((p, i) => ({
         id: `test-geometry-build-shape-${i}`,
@@ -38,6 +53,11 @@ export const GeometryTestSpec: CompetencyTarget[] = [
     })),
     ...classifyDimBuilder.build().map((p, i) => ({
         id: `test-geometry-classify-dim-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    })),
+    ...compareAttrBuilder.build().map((p, i) => ({
+        id: `test-geometry-compare-attributes-${i}`,
         labels: p.labels,
         constraints: p.constraints
     }))

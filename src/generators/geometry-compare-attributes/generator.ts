@@ -2,6 +2,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {GeometryCompareAttributesProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometryCompareAttributesGeneratorConfig, GeometryCompareAttributesGeneratorSchema} from "./spec.ts";
+import {Area} from "edugraph-ts";
 
 export class GeometryCompareAttributesGenerator implements ProblemGenerator<GeometryCompareAttributesProblem, GeometryCompareAttributesGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
@@ -10,34 +11,54 @@ export class GeometryCompareAttributesGenerator implements ProblemGenerator<Geom
     generate(config: GeometryCompareAttributesGeneratorConfig): ProblemStub | null {
         const attribute = random() > 0.5 ? 'sides' : 'corners';
 
-        const validShapes = new Set<string>();
-        if (config.wantsTriangle) validShapes.add('triangle');
-        if (config.wantsSquare) validShapes.add('square');
-        if (config.wantsRectangle) validShapes.add('rectangle');
-        if (config.wantsPolygon) validShapes.add('hexagon'); // simplistic fallback
-        
-        let pool = Array.from(validShapes);
-        if (pool.length < 2) {
-            pool = ['triangle', 'square', 'rectangle', 'hexagon'];
-        }
-
-        const idx1 = Math.floor(random() * pool.length);
-        let idx2 = Math.floor(random() * pool.length);
-        while (idx2 === idx1) {
-            idx2 = Math.floor(random() * pool.length);
-        }
-
-        const shape1 = pool[idx1];
-        const shape2 = pool[idx2];
         const attrs: Record<string, Record<string, number>> = {
-            rectangle: { sides: 4, corners: 4 },
+            circle: { sides: 0, corners: 0 },
             triangle: { sides: 3, corners: 3 },
             square: { sides: 4, corners: 4 },
+            rectangle: { sides: 4, corners: 4 },
             hexagon: { sides: 6, corners: 6 }
         };
 
-        const val1 = attrs[shape1]?.[attribute] || 4;
-        const val2 = attrs[shape2]?.[attribute] || 3;
+        const allShapes = Object.keys(attrs);
+
+        let shape1: string;
+        const label = config.classify;
+
+        if (label) {
+            switch (label) {
+                case Area.Circle:
+                    shape1 = 'circle';
+                    break;
+                case Area.Triangle:
+                    shape1 = 'triangle';
+                    break;
+                case Area.Square:
+                    shape1 = 'square';
+                    break;
+                case Area.Rectangle:
+                    shape1 = 'rectangle';
+                    break;
+                case Area.Hexagon:
+                    shape1 = 'hexagon';
+                    break;
+                default:
+                    shape1 = allShapes[Math.floor(random() * allShapes.length)];
+            }
+        } else {
+            shape1 = allShapes[Math.floor(random() * allShapes.length)];
+        }
+
+        const val1 = attrs[shape1][attribute];
+
+        // Filter pool to find shape2 that has a different count of the attribute
+        const pool = allShapes.filter(s => s !== shape1 && attrs[s][attribute] !== val1);
+        if (pool.length === 0) {
+            return null;
+        }
+
+        const shape2 = pool[Math.floor(random() * pool.length)];
+        const val2 = attrs[shape2][attribute];
+
         const answer = val1 > val2 ? shape1 : shape2;
 
         return {
