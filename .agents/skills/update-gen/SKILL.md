@@ -6,8 +6,10 @@ description: "/update-gen {moduleName} - Update the generator module src/generat
 Update the generator module "src/generators/{moduleName}" as follows: 
 
 - Consider spec.ts as the source of truth for the intended behavior
-- Create a spec.test.ts that using "generateWithLabels" from "utils.ts" if missing
+- Add a spec.test.ts that makes use of "generateWithLabels" from "utils.ts" if missing
+- Update generator.test.ts if necessary or make sure to cover edge-cases there
 - Adopt the behavior of the generator to match the specification if necessary
+- Update the checklist.md to match with items that cover the specification 
 
 If the interface for the generated problem needed to be changed to fulfill the generator requirements then:
 
@@ -20,7 +22,16 @@ For validation:
 - run the "src/scripts/generate-dataset.ts" script using the respective "--spec", "--generator" and "--view" settings
 - review the generation results and fix remaining issues if needed
 
-For reference: You can visit the neighboring "arithmetic" module and treat it as a reference implementation.
+For the checklists.md:
+
+- Only include use abstract mathematical criteria - do NOT include any visual aspects
+- Assume that the validation mechanism is unaware of parameterization - do NOT include conditional validation aspects
+- Be concise and focus on the most important logical validation aspects - do NOT include edge cases
+
+Reference examples: 
+
+- You can visit the neighboring "arithmetic" module and treat it as a reference implementation
+- You can also visit "comparison" and "counting" modules in case you need additional reference examples
 
 IMPORTANT: 
 
