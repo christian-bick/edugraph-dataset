@@ -27,11 +27,16 @@ export class OrderingGenerator implements ProblemGenerator<OrderingProblem, Orde
             if (forceZero) return 0;
             let n = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
             if (allowNegatives && random() > 0.5) n = -n;
-            if (!includeZero && n === 0) return random() > 0.5 ? 1 : -1;
+            if (!includeZero && n === 0) {
+                return (allowNegatives && random() > 0.5) ? -1 : 1;
+            }
             return n;
         };
 
         const numberSet = new Set<number>();
+        if (includeZero) {
+            numberSet.add(0);
+        }
         const maxAttempts = 100;
         let attempts = 0;
         

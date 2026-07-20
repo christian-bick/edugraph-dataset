@@ -28,15 +28,21 @@ describe('OrderingGenerator', () => {
                 expect(stub!.data.numbers).toBeInstanceOf(Array);
                 expect(stub!.data.numbers.length).toBe(5);
                 
-                if (!config.includeZero) {
+                if (config.includeZero) {
+                    expect(stub!.data.numbers).toContain(0);
+                } else {
                     expect(stub!.data.numbers).not.toContain(0);
                 }
                 if (!config.allowNegatives) {
                     stub!.data.numbers.forEach((n: number) => expect(n).toBeGreaterThanOrEqual(0));
                 }
-                // Verify uniqueness in the set
                 expect(new Set(stub!.data.numbers).size).toBe(5);
             });
+        });
+
+        it('should return null if range is missing', () => {
+            const stub = generator.generate({ includeZero: true, allowNegatives: true } as any);
+            expect(stub).toBeNull();
         });
 
         it('should be deterministic with the same seed', () => {

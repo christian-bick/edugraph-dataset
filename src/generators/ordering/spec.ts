@@ -7,9 +7,9 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'ordering',
     generalLabels: [
-        Area.NumerationWithIntegers,
+        Area.NumericOrder,
+        Scope.IntegerNumbers,
         Scope.Base10,
-        Scope.IntegerNumbers
     ],
 };
 
@@ -24,7 +24,7 @@ export const OrderingGeneratorSchema = {
         hasLabel(Scope.NumbersWithZero)
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
         resolveRangeFromLabels
     ]
 } as const;
