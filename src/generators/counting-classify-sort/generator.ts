@@ -1,3 +1,4 @@
+import {Scope} from 'edugraph-ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {CountingClassifySortProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
@@ -26,12 +27,7 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
             counts[cat]++;
         }
 
-        const wantsMost = config.wantsMost;
-        const wantsLeast = config.wantsLeast;
-        let relation = 'most';
-        if (wantsMost && !wantsLeast) relation = 'most';
-        else if (wantsLeast && !wantsMost) relation = 'least';
-        else relation = random() > 0.5 ? 'most' : 'least';
+        const relation = config.relation === Scope.Least ? 'least' : 'most';
         let targetCategory = '';
         let targetCount = relation === 'most' ? -1 : 999;
         

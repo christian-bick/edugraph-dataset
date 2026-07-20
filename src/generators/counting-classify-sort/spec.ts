@@ -23,14 +23,7 @@ export const CountingClassifySortGeneratorSchema = {
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
         resolveRangeFromLabels
     ],
-    wantsMost: [
-        [Scope.Most], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Scope.Most)
-    ],
-    wantsLeast: [
-        [Scope.Least], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Scope.Least)
-    ]
+    relation: [Scope.Least, Scope.Most],
 } as const;
 
 export type CountingClassifySortGeneratorConfig = ConfigFromSchema<typeof CountingClassifySortGeneratorSchema>;

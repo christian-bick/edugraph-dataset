@@ -49,7 +49,7 @@ function ItemSVG({ item, size = 40 }: { item: Item; size?: number }) {
     }
 }
 
-const SortingClassifySortCore = ({ config, payload }: CoreProps) => {
+const SortingClassifySortCore = ({ payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 

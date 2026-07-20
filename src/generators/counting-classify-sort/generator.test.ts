@@ -16,13 +16,12 @@ describe('CountingClassifySortGenerator', () => {
     });
 
     it('should validate classify-sort least/most logic and tie filtering', () => {
-        const config = {
+        const configMost = {
             range: { min: 1, max: 10 },
-            wantsMost: true,
-            wantsLeast: false
+            relation: Scope.Most
         };
         for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(config);
+            const stub = generator.generate(configMost);
             if (stub) {
                 expect(stub.data.relation).toBe('most');
                 
@@ -34,6 +33,28 @@ describe('CountingClassifySortGenerator', () => {
                 possibleCats.forEach(cat => {
                     if (cat !== answer) {
                         expect(cats[cat]).toBeLessThan(maxVal);
+                    }
+                });
+            }
+        }
+
+        const configLeast = {
+            range: { min: 1, max: 10 },
+            relation: Scope.Least
+        };
+        for (let i = 0; i < 50; i++) {
+            const stub = generator.generate(configLeast);
+            if (stub) {
+                expect(stub.data.relation).toBe('least');
+                
+                const answer = stub.data.answer;
+                const cats = stub.data.categories;
+                
+                const minVal = cats[answer];
+                const possibleCats = ['A', 'B', 'C'];
+                possibleCats.forEach(cat => {
+                    if (cat !== answer) {
+                        expect(cats[cat]).toBeGreaterThan(minVal);
                     }
                 });
             }
