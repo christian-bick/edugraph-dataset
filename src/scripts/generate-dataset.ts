@@ -425,7 +425,7 @@ async function runModulePipeline(
                     ...problemStub,
                     id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
                     type: generator.type,
-                    tags: Array.from(new Set(target.labels))
+                    tags: Array.from(new Set([...target.labels, ...(problemStub.tags || [])]))
                 };
                 problem.data._permutationParams = target.constraints;
                 (problem as any).matchedBlueprints = newMatchedViews.map(v => ({
@@ -462,7 +462,7 @@ async function runModulePipeline(
                                         ...valStub,
                                         id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
                                         type: generator.type,
-                                        tags: Array.from(new Set(target.labels))
+                                        tags: Array.from(new Set([...target.labels, ...(valStub.tags || [])]))
                                     };
                                     valProblem.data._permutationParams = target.constraints;
                                     (valProblem as any).matchedBlueprints = valMatchedViews.map(v => ({
