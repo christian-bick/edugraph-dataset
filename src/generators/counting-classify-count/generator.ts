@@ -2,14 +2,15 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {CountingClassifyCountProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {CountingClassifyCountGeneratorConfig, CountingClassifyCountGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class CountingClassifyCountGenerator implements ProblemGenerator<CountingClassifyCountProblem, CountingClassifyCountGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
     schema = CountingClassifyCountGeneratorSchema;
 
     generate(config: CountingClassifyCountGeneratorConfig): ProblemStub | null {
+        validateConfigFields('counting-classify-count', config, ['range']);
         const resolvedRange = config.range;
-        if (!resolvedRange) return null;
 
         const minVal = Math.max(1, resolvedRange.min);
         if (minVal > resolvedRange.max) return null;

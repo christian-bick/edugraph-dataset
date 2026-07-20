@@ -24,4 +24,8 @@ describe('PlaceValueTeenGenerator Spec Integration', () => {
             expect(stub!.data.target).toBe(10 + stub!.data.ones);
         }
     });
+
+    it('should throw an error if range configuration is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
 });

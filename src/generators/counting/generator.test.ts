@@ -15,6 +15,10 @@ describe('CountingGenerator', () => {
          expect(generator.type).toBe('counting');
     });
 
+    it('should throw validation error when range is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
+
     it('should respect resolved ranges from labels', () => {
         const config = { 
             range: { min: 0, max: 10 }

@@ -2,15 +2,15 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {PlaceValueTeenProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {PlaceValueTeenGeneratorConfig, PlaceValueTeenGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenProblem, PlaceValueTeenGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = PlaceValueTeenGeneratorSchema;
 
     generate(config: PlaceValueTeenGeneratorConfig): ProblemStub | null {
+        validateConfigFields('place-value-teen', config, ['range']);
         const resolvedRange = config.range;
-
-        if (!resolvedRange) return null;
 
         const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;
         const resolvedMax = resolvedRange.max <= 20 ? resolvedRange.max : 19;

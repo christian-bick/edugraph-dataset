@@ -15,6 +15,10 @@ describe('ArithmeticGenerator', () => {
         expect(generator.type).toBe('arithmetic');
     });
 
+    it('should throw validation error when range is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
+
     it('should generate correct addition/subtraction/multiplication/division problems', () => {
         const addStub = generator.generate({
             operation: Area.Addition,

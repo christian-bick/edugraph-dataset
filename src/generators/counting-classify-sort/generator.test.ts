@@ -15,6 +15,10 @@ describe('CountingClassifySortGenerator', () => {
          expect(generator.type).toBe('counting');
     });
 
+    it('should throw validation error when range is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
+
     it('should validate classify-sort least/most logic and tie filtering', () => {
         const configMost = {
             range: { min: 1, max: 10 },

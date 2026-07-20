@@ -2,15 +2,16 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {GeometrySameAttributeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometrySameAttributeGeneratorConfig, GeometrySameAttributeGeneratorSchema} from "./spec.ts";
+import {Area} from "edugraph-ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometrySameAttributeProblem, GeometrySameAttributeGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
     schema = GeometrySameAttributeGeneratorSchema;
 
     generate(config: GeometrySameAttributeGeneratorConfig): ProblemStub | null {
-        const shapes = config.shapes && config.shapes.length > 0
-            ? config.shapes
-            : ['sphere', 'cube', 'rectangle'];
+        validateConfigFields('geometry-same-attribute', config, ['shapes']);
+        const shapes = config.shapes;
 
         const selectedShape = shapes[Math.floor(random() * shapes.length)];
         const shape = selectedShape.split('/').pop()!.toLowerCase();
@@ -20,7 +21,7 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
             attribute = 'rollable';
         } else if (shape === 'cube') {
             attribute = 'stackable';
-        } else if (shape === 'rectangle') {
+        } else if (shape === 'rectangle' || shape === 'rectangularprism') {
             attribute = 'foldable';
         }
 
@@ -31,7 +32,8 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
             data: {
                 attribute,
                 answer
-            }
+            },
+            tags: [selectedShape]
         };
     }
 }

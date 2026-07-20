@@ -3,12 +3,14 @@ import {ArithmeticProblem} from "../../types/problems.ts";
 import {Area} from "edugraph-ts";
 import {random} from "../../lib/random.ts";
 import {ArithmeticGeneratorConfig, ArithmeticGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, ArithmeticGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticGeneratorSchema;
 
     generate(config: ArithmeticGeneratorConfig): ProblemStub | null {
+        validateConfigFields('arithmetic', config, ['range']);
 
         const operation = config.operation;
         const allowNegatives = config.allowNegatives;
@@ -16,7 +18,7 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, 
         const resolvedRange = config.range;
 
         // Fallbacks if schema parsing failed or got unhandled case
-        if (!operation || !resolvedRange) return null;
+        if (!operation) return null;
         
         const generateFromRange = (forceZero = false) => {
             if (forceZero) return 0;

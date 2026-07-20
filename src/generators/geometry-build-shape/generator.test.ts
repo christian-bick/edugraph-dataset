@@ -2,6 +2,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 import {GeometryBuildShapeGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
 import {Area} from 'edugraph-ts';
+import {GeneratorValidationError} from '../../lib/errors.ts';
 
 describe('GeometryBuildShapeGenerator', () => {
     let generator: GeometryBuildShapeGenerator;
@@ -47,9 +48,7 @@ describe('GeometryBuildShapeGenerator', () => {
         expect(stub!.data.corners).toBe(6);
     });
 
-    it('should fallback to random shape if target is not specified', () => {
-        const stub = generator.generate({});
-        expect(stub).not.toBeNull();
-        expect(['triangle', 'square', 'rectangle', 'hexagon']).toContain(stub!.data.target);
+    it('should throw validation error if target is not specified', () => {
+        expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
     });
 });

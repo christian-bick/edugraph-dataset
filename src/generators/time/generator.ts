@@ -3,12 +3,14 @@ import {TimeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
 import {TimeGeneratorConfig, TimeGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGeneratorConfig> {
     type: AbstractProblem['type'] = 'time';
     schema = TimeGeneratorSchema;
 
     generate(config: TimeGeneratorConfig): ProblemStub | null {
+        validateConfigFields('time', config, ['intervalLabel']);
         let interval = 3600; // default HourIntervals
         if (config.intervalLabel === Scope.SecondIntervals) {
             interval = 1;

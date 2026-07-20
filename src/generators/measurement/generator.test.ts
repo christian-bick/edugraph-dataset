@@ -44,9 +44,8 @@ describe('MeasurementGenerator', () => {
         expect(stub!.data.problemLength).toBeLessThanOrEqual(10);
     });
 
-    it('should return null if range is missing', () => {
+    it('should throw an error if range is missing', () => {
         const config = { range: null as any, useDecimals: true };
-        const stub = generator.generate(config);
-        expect(stub).toBeNull();
+        expect(() => generator.generate(config)).toThrow();
     });
 });

@@ -3,16 +3,16 @@ import {MeasurementCompareProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
 import {MeasurementCompareGeneratorConfig, MeasurementCompareGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class MeasurementCompareGenerator implements ProblemGenerator<MeasurementCompareProblem, MeasurementCompareGeneratorConfig> {
     type: AbstractProblem['type'] = 'measurement';
     schema = MeasurementCompareGeneratorSchema;
 
     generate(config: MeasurementCompareGeneratorConfig): ProblemStub | null {
+        validateConfigFields('measurement-compare', config, ['attribute', 'relation']);
         const attributeLabel = config.attribute;
         const relationLabel = config.relation;
-
-        if (!attributeLabel || !relationLabel) return null;
 
         const attribute = attributeLabel === Scope.LengthMeasurement ? 'length' : 'weight';
         

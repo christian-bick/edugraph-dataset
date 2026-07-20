@@ -59,7 +59,7 @@ declare global {
  * A partial problem returned by generators, containing only the identity and raw data.
  * type and tags are filled in by the orchestrator.
  */
-export type ProblemStub<TData = any> = Pick<AbstractProblem<TData>, 'id' | 'data'>;
+export type ProblemStub<TData = any> = Pick<AbstractProblem<TData>, 'id' | 'data' | 'tags'>;
 
 
 

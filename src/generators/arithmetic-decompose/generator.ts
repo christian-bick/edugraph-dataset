@@ -2,14 +2,15 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {ArithmeticDecomposeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {ArithmeticDecomposeGeneratorConfig, ArithmeticDecomposeGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class ArithmeticDecomposeGenerator implements ProblemGenerator<ArithmeticDecomposeProblem, ArithmeticDecomposeGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticDecomposeGeneratorSchema;
 
     generate(config: ArithmeticDecomposeGeneratorConfig): ProblemStub | null {
+        validateConfigFields('arithmetic-decompose', config, ['range']);
         const resolvedRange = config.range;
-        if (!resolvedRange) return null;
         
         const minVal = Math.max(resolvedRange.min, 3);
         const maxVal = Math.min(resolvedRange.max, 99);

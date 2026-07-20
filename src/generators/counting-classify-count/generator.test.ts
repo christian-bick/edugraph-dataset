@@ -14,6 +14,10 @@ describe('CountingClassifyCountGenerator', () => {
          expect(generator.type).toBe('counting');
     });
 
+    it('should throw validation error when range is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
+
     it('should validate classify-count items and categories logic', () => {
         const config = {
             range: { min: 1, max: 10 }

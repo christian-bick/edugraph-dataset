@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { GeometryEnvShapesGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Area } from 'edugraph-ts';
+import { GeneratorValidationError } from '../../lib/errors.ts';
 
 describe('GeometryEnvShapesGenerator', () => {
     let generator: GeometryEnvShapesGenerator;
@@ -15,11 +16,8 @@ describe('GeometryEnvShapesGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should validate env-shapes outputs when no config is provided', () => {
-        const stub = generator.generate({});
-        expect(stub).not.toBeNull();
-        expect(['circle', 'square', 'rectangle']).toContain(stub!.data.answer);
-        expect(['clock', 'window', 'table']).toContain(stub!.data.target);
+    it('should throw validation error when no config is provided', () => {
+        expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
     });
 
     it('should generate clock when Circle is requested', () => {

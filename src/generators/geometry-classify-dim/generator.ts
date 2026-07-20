@@ -2,30 +2,16 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {GeometryClassifyDimProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometryClassifyDimGeneratorConfig, GeometryClassifyDimGeneratorSchema} from "./spec.ts";
-import {Area} from "edugraph-ts";
+import {Area, Scope} from "edugraph-ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryClassifyDimProblem, GeometryClassifyDimGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
     schema = GeometryClassifyDimGeneratorSchema;
 
     generate(config: GeometryClassifyDimGeneratorConfig): ProblemStub | null {
+        validateConfigFields('geometry-classify-dim', config, ['classify']);
         let label = config.classify;
-        
-        // If no shape label is selected, pick one at random
-        if (!label) {
-            const allShapes = [
-                Area.Circle,
-                Area.Square,
-                Area.Rectangle,
-                Area.Triangle,
-                Area.Hexagon,
-                Area.Cube,
-                Area.Cone,
-                Area.Cylinder,
-                Area.Sphere
-            ];
-            label = allShapes[Math.floor(random() * allShapes.length)] as any;
-        }
 
         let shape: string;
         let shapeType: '2d' | '3d';
@@ -71,13 +57,16 @@ export class GeometryClassifyDimGenerator implements ProblemGenerator<GeometryCl
                 return null;
         }
 
+        const dimLabel = shapeType === '2d' ? Scope.TwoDimensional : Scope.ThreeDimensional;
+
         return {
             id: `geometry-classify-dim-${shapeType}-${shape}`,
             data: {
                 shapeType,
                 shape,
                 answer: shapeType
-            }
+            },
+            tags: [dimLabel, label]
         };
     }
 }

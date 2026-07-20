@@ -2,14 +2,15 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {WritingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {WritingGeneratorConfig, WritingGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class WritingGenerator implements ProblemGenerator<WritingProblem, WritingGeneratorConfig> {
     type: AbstractProblem['type'] = 'writing';
     schema = WritingGeneratorSchema;
 
     generate(config: WritingGeneratorConfig): ProblemStub | null {
+        validateConfigFields('writing', config, ['range']);
         const resolvedRange = config.range;
-        if (!resolvedRange) return null;
 
         const includeZero = config.includeZero;
         const minNum = includeZero ? resolvedRange.min : Math.max(1, resolvedRange.min);

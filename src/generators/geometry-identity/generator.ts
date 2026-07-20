@@ -3,20 +3,15 @@ import {GeometryIdentityProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Area} from "edugraph-ts";
 import {GeometryIdentityGeneratorConfig, GeometryIdentityGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdentityProblem, GeometryIdentityGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
     schema = GeometryIdentityGeneratorSchema;
 
     generate(config: GeometryIdentityGeneratorConfig): ProblemStub | null {
-        const validShapes = config.shapes && config.shapes.length > 0
-            ? config.shapes
-            : [
-                Area.Triangle,
-                Area.Square,
-                Area.Rectangle,
-                Area.Circle
-            ];
+        validateConfigFields('geometry-identity', config, ['shapes']);
+        const validShapes = config.shapes;
 
         const selectedArea = validShapes[Math.floor(random() * validShapes.length)];
         const shape = selectedArea.split('/').pop()!.toLowerCase();
@@ -26,7 +21,8 @@ export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdent
             data: {
                 shape,
                 answer: shape
-            }
+            },
+            tags: [selectedArea]
         };
     }
 }

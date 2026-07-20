@@ -81,8 +81,7 @@ describe('MeasurementCompareGenerator', () => {
         }
     });
 
-    it('should return null if parameters are missing', () => {
-        const stub = generator.generate({} as any);
-        expect(stub).toBeNull();
+    it('should throw an error if parameters are missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
     });
 });

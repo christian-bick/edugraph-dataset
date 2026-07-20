@@ -3,15 +3,15 @@ import {MeasurementAttributeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
 import {MeasurementAttributeGeneratorConfig, MeasurementAttributeGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class MeasurementAttributeGenerator implements ProblemGenerator<MeasurementAttributeProblem, MeasurementAttributeGeneratorConfig> {
     type: AbstractProblem['type'] = 'measurement';
     schema = MeasurementAttributeGeneratorSchema;
 
     generate(config: MeasurementAttributeGeneratorConfig): ProblemStub | null {
+        validateConfigFields('measurement-attribute', config, ['attribute']);
         const attributeLabel = config.attribute;
-
-        if (!attributeLabel) return null;
 
         let attribute: 'length' | 'height' | 'weight';
         if (attributeLabel === Scope.LengthMeasurement) {

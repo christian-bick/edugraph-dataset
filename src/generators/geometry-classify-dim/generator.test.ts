@@ -15,11 +15,8 @@ describe('GeometryClassifyDimGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should validate random fallback when config is empty', () => {
-        const stub = generator.generate({});
-        expect(stub).not.toBeNull();
-        expect(['2d', '3d']).toContain(stub!.data.shapeType);
-        expect(stub!.data.answer).toBe(stub!.data.shapeType);
+    it('should throw GeneratorValidationError when config is empty', () => {
+        expect(() => generator.generate({})).toThrow();
     });
 
     it('should generate 2D circle when circle is requested', () => {

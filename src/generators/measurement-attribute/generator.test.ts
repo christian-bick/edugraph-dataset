@@ -43,8 +43,7 @@ describe('MeasurementAttributeGenerator', () => {
         expect(hasHeight).toBe(true);
     });
 
-    it('should return null if attribute configuration is missing', () => {
-        const stub = generator.generate({} as any);
-        expect(stub).toBeNull();
+    it('should throw an error if attribute configuration is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
     });
 });

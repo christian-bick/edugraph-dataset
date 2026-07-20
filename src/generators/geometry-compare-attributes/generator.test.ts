@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { GeometryCompareAttributesGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Area } from 'edugraph-ts';
+import { GeneratorValidationError } from '../../lib/errors.ts';
 
 describe('GeometryCompareAttributesGenerator', () => {
     let generator: GeometryCompareAttributesGenerator;
@@ -15,13 +16,8 @@ describe('GeometryCompareAttributesGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should generate problems using fallback when no config is provided', () => {
-        const stub = generator.generate({});
-        expect(stub).not.toBeNull();
-        expect(stub!.data.shape1).toBeDefined();
-        expect(stub!.data.shape2).toBeDefined();
-        expect(stub!.data.shape1).not.toBe(stub!.data.shape2);
-        expect(stub!.data.val1).not.toBe(stub!.data.val2);
+    it('should throw validation error when no config is provided', () => {
+        expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
     });
 
     it('should respect config constraints and compare different attribute counts', () => {

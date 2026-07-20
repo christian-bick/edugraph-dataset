@@ -2,15 +2,15 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {MeasurementStandardProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {MeasurementGeneratorConfig, MeasurementGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class MeasurementGenerator implements ProblemGenerator<MeasurementStandardProblem, MeasurementGeneratorConfig> {
     type: AbstractProblem['type'] = 'measurement';
     schema = MeasurementGeneratorSchema;
 
     generate(config: MeasurementGeneratorConfig): ProblemStub | null {
+        validateConfigFields('measurement', config, ['range']);
         const resolvedRange = config.range;
-
-        if (!resolvedRange) return null;
 
         const bandLength = resolvedRange.max;
         const minProblemLength = bandLength * 0.1;

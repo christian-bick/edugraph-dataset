@@ -2,6 +2,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {OrderingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {OrderingGeneratorConfig, OrderingGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 function shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];
@@ -17,11 +18,10 @@ export class OrderingGenerator implements ProblemGenerator<OrderingProblem, Orde
     schema = OrderingGeneratorSchema;
 
     generate(config: OrderingGeneratorConfig): ProblemStub | null {
+        validateConfigFields('ordering', config, ['range']);
         const resolvedRange = config.range;
         const allowNegatives = config.allowNegatives;
         const includeZero = config.includeZero;
-
-        if (!resolvedRange) return null;
         
         const generateFromRange = (forceZero = false) => {
             if (forceZero) return 0;

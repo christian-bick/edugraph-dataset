@@ -3,14 +3,15 @@ import {ComparisonProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {ComparisonGeneratorConfig, ComparisonGeneratorSchema} from "./spec.ts";
 import {Scope} from 'edugraph-ts';
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, ComparisonGeneratorConfig> {
     type: AbstractProblem['type'] = 'comparison';
     schema = ComparisonGeneratorSchema;
 
     generate(config: ComparisonGeneratorConfig): ProblemStub<ComparisonProblem> | null {
+        validateConfigFields('comparison', config, ['range']);
         const resolvedRange = config.range;
-        if (!resolvedRange) return null;
 
         const min = resolvedRange.min;
         const max = resolvedRange.max;

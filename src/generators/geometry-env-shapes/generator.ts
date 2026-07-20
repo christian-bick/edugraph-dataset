@@ -3,12 +3,14 @@ import {GeometryEnvShapesProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometryEnvShapesGeneratorConfig, GeometryEnvShapesGeneratorSchema} from "./spec.ts";
 import {Area} from "edugraph-ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometryEnvShapesGenerator implements ProblemGenerator<GeometryEnvShapesProblem, GeometryEnvShapesGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
     schema = GeometryEnvShapesGeneratorSchema;
 
     generate(config: GeometryEnvShapesGeneratorConfig): ProblemStub | null {
+        validateConfigFields('geometry-env-shapes', config, ['classify']);
         const label = config.classify;
         
         let answer: string;
@@ -20,8 +22,7 @@ export class GeometryEnvShapesGenerator implements ProblemGenerator<GeometryEnvS
         } else if (label === Area.Rectangle) {
             answer = 'rectangle';
         } else {
-            const allShapes = ['circle', 'square', 'rectangle'];
-            answer = allShapes[Math.floor(random() * allShapes.length)];
+            return null;
         }
         
         const envMap: Record<string, string> = {
@@ -36,7 +37,8 @@ export class GeometryEnvShapesGenerator implements ProblemGenerator<GeometryEnvS
             data: {
                 target,
                 answer
-            }
+            },
+            tags: [label]
         };
     }
 }

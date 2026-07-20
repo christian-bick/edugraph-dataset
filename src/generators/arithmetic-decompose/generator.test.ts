@@ -14,6 +14,10 @@ describe('ArithmeticDecomposeGenerator', () => {
         expect(generator.type).toBe('arithmetic');
     });
 
+    it('should throw validation error when range is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
+
     it('should generate valid decomposition pairs', () => {
         const config = {
             range: { min: 1, max: 10 }

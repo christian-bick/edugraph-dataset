@@ -40,9 +40,8 @@ describe('OrderingGenerator', () => {
             });
         });
 
-        it('should return null if range is missing', () => {
-            const stub = generator.generate({ includeZero: true, allowNegatives: true } as any);
-            expect(stub).toBeNull();
+        it('should throw an error if range is missing', () => {
+            expect(() => generator.generate({ includeZero: true, allowNegatives: true } as any)).toThrow();
         });
 
         it('should be deterministic with the same seed', () => {

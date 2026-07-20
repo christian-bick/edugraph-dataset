@@ -34,8 +34,7 @@ describe('PlaceValueTeenGenerator', () => {
         expect(stub!.data.target).toBe(10 + stub!.data.ones);
     });
 
-    it('should return null if range configuration is missing', () => {
-        const stub = generator.generate({} as any);
-        expect(stub).toBeNull();
+    it('should throw validation error if range configuration is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
     });
 });

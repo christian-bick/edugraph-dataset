@@ -3,12 +3,14 @@ import {CountingIncDecProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
 import {CountingIncDecGeneratorConfig, CountingIncDecGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecProblem, CountingIncDecGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
     schema = CountingIncDecGeneratorSchema;
 
     generate(config: CountingIncDecGeneratorConfig): ProblemStub | null {
+        validateConfigFields('counting-inc-dec', config, ['range']);
         let incDecType: 'inc' | 'dec' = 'inc';
         if (config.direction === Scope.SubtractiveCount) {
             incDecType = 'dec';
@@ -19,7 +21,6 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
         }
 
         const resolvedRange = config.range;
-        if (!resolvedRange) return null;
         let maxCount = resolvedRange.max;
         let minCount = resolvedRange.min;
         if (minCount < 1) {

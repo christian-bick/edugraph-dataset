@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { GeometryComposeShapesGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Area } from 'edugraph-ts';
+import { GeneratorValidationError } from '../../lib/errors.ts';
 
 describe('GeometryComposeShapesGenerator', () => {
     let generator: GeometryComposeShapesGenerator;
@@ -15,12 +16,8 @@ describe('GeometryComposeShapesGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should validate compose-shapes outputs when no config is provided', () => {
-        const stub = generator.generate({});
-        expect(stub).not.toBeNull();
-        expect(['rectangle', 'square']).toContain(stub!.data.target);
-        expect(stub!.data.components).toEqual(['triangles']);
-        expect(stub!.data.answer).toBe('triangle');
+    it('should throw validation error when no config is provided', () => {
+        expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
     });
 
     it('should generate rectangle when Rectangle is requested', () => {

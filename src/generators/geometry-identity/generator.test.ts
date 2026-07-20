@@ -2,6 +2,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 import {GeometryIdentityGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
 import {Area} from 'edugraph-ts';
+import {GeneratorValidationError} from '../../lib/errors.ts';
 
 describe('GeometryIdentityGenerator', () => {
     let generator: GeometryIdentityGenerator;
@@ -15,10 +16,9 @@ describe('GeometryIdentityGenerator', () => {
         expect(generator.type).toBe('geometry');
     });
 
-    it('should fall back to basic 2D shapes if no shapes provided', () => {
-        const stub = generator.generate({ shapes: [] });
-        expect(stub).not.toBeNull();
-        expect(['triangle', 'square', 'rectangle', 'circle']).toContain(stub!.data.shape);
+    it('should throw validation error if no shapes provided or config is empty', () => {
+        expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({ shapes: [] })).toThrow(GeneratorValidationError);
     });
 
     it('should use provided shapes', () => {

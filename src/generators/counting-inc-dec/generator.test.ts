@@ -16,6 +16,10 @@ describe('CountingIncDecGenerator', () => {
          expect(generator.type).toBe('counting');
     });
 
+    it('should throw validation error when range is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
+
     it('should generate valid inc stubs with AdditiveCount label', () => {
         const config = { 
             range: { min: 0, max: 10 },

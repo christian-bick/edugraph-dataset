@@ -20,37 +20,45 @@ export function extractConfig<T extends ConfigSchema>(
         }
 
         const isTuple = Array.isArray(schemaValue) && schemaValue.length === 2 && typeof schemaValue[1] === 'function';
-        
         const supportedLabels: string[] = isTuple ? (schemaValue[0] as string[]) : (schemaValue as string[]);
-        
-        // Find matching labels (either exact match or generic ancestor in competency labels)
-        let matchingSupportedLabels = supportedLabels.filter(s => 
-            competencyLabels.some(l => isSubConceptOf(s, l) || isSubConceptOf(l, s))
-        );
-
-        let resolverLabels: string[];
-        if (matchingSupportedLabels.length === 0) {
-            // Fallback logic: pick one randomly from all supported labels
-            matchingSupportedLabels = [supportedLabels[Math.floor(random() * supportedLabels.length)]];
-            resolverLabels = competencyLabels;
-        } else {
-            // Record consumed labels based on what was actually matched
-            const matchingCompetencyLabels = competencyLabels.filter(l =>
-                matchingSupportedLabels.some(s => isSubConceptOf(s, l) || isSubConceptOf(l, s))
-            );
-            resolverLabels = matchingCompetencyLabels;
-            for (const l of matchingCompetencyLabels) {
-                consumedLabels.add(l);
-            }
-        }
 
         if (isTuple) {
             const resolver = schemaValue[1] as (labels: string[], supported?: readonly string[]) => any;
-            config[key] = resolver(resolverLabels, supportedLabels);
+            let resolved = resolver(competencyLabels, supportedLabels);
+            
+            if (resolved === undefined) {
+                const fallbackLabel = supportedLabels[Math.floor(random() * supportedLabels.length)];
+                resolved = resolver([fallbackLabel], supportedLabels);
+                consumedLabels.add(fallbackLabel);
+            } else {
+                const matchingCompetencyLabels = competencyLabels.filter(l =>
+                    supportedLabels.some(s => isSubConceptOf(s, l) || isSubConceptOf(l, s))
+                );
+                for (const l of matchingCompetencyLabels) {
+                    consumedLabels.add(l);
+                }
+            }
+            config[key] = resolved;
         } else {
-            // For simple arrays, we must assign a single literal label, so we pick one randomly from the matches.
-            const pickedLabel = matchingSupportedLabels[Math.floor(random() * matchingSupportedLabels.length)];
-            config[key] = pickedLabel;
+            const matchingSupportedLabels = supportedLabels.filter(s => 
+                competencyLabels.some(l => isSubConceptOf(s, l) || isSubConceptOf(l, s))
+            );
+            
+            if (matchingSupportedLabels.length === 0) {
+                const fallbackLabel = supportedLabels[Math.floor(random() * supportedLabels.length)];
+                config[key] = fallbackLabel;
+                consumedLabels.add(fallbackLabel);
+            } else {
+                const pickedLabel = matchingSupportedLabels[Math.floor(random() * matchingSupportedLabels.length)];
+                config[key] = pickedLabel;
+                
+                const matchingCompetencyLabels = competencyLabels.filter(l =>
+                    isSubConceptOf(pickedLabel, l) || isSubConceptOf(l, pickedLabel)
+                );
+                for (const l of matchingCompetencyLabels) {
+                    consumedLabels.add(l);
+                }
+            }
         }
     }
 
@@ -85,7 +93,11 @@ export function generateWithLabels<TData = any, TConfig = any>(
     if (!generator.schema) {
         throw new Error('Generator is missing a schema!');
     }
-    const { config } = extractConfig(generator.schema, labels);
-    return generator.generate(config);
+    const { config, consumedLabels } = extractConfig(generator.schema, labels);
+    const problem = generator.generate(config);
+    if (problem) {
+        problem.tags = Array.from(new Set([...(problem.tags || []), ...consumedLabels]));
+    }
+    return problem;
 }
 

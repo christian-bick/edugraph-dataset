@@ -3,12 +3,14 @@ import {GeometryComposeShapesProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometryComposeShapesGeneratorConfig, GeometryComposeShapesGeneratorSchema} from "./spec.ts";
 import {Area} from "edugraph-ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometryComposeShapesGenerator implements ProblemGenerator<GeometryComposeShapesProblem, GeometryComposeShapesGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
     schema = GeometryComposeShapesGeneratorSchema;
 
     generate(config: GeometryComposeShapesGeneratorConfig): ProblemStub | null {
+        validateConfigFields('geometry-compose-shapes', config, ['classify']);
         const label = config.classify;
         
         let target: 'rectangle' | 'square';
@@ -18,7 +20,7 @@ export class GeometryComposeShapesGenerator implements ProblemGenerator<Geometry
         } else if (label === Area.Square) {
             target = 'square';
         } else {
-            target = random() > 0.5 ? 'rectangle' : 'square';
+            return null;
         }
 
         const components = ['triangles'];
@@ -30,7 +32,8 @@ export class GeometryComposeShapesGenerator implements ProblemGenerator<Geometry
                 target,
                 components,
                 answer
-            }
+            },
+            tags: [label, Area.Triangle]
         };
     }
 }

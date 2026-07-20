@@ -89,4 +89,10 @@ describe('TimeGenerator', () => {
             }
         });
     });
+
+    describe('validation', () => {
+        it('should throw an error if intervalLabel is missing', () => {
+            expect(() => generator.generate({} as any)).toThrow();
+        });
+    });
 });

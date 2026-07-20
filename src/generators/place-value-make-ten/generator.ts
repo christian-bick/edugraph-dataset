@@ -2,13 +2,14 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {PlaceValueMakeTenProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {PlaceValueMakeTenGeneratorConfig, PlaceValueMakeTenGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMakeTenProblem, PlaceValueMakeTenGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = PlaceValueMakeTenGeneratorSchema;
 
     generate(config: PlaceValueMakeTenGeneratorConfig): ProblemStub | null {
-
+        validateConfigFields('place-value-make-ten', config, ['includeZero']);
         const includeZero = config.includeZero;
 
         const target = 10;

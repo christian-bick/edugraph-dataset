@@ -3,13 +3,15 @@ import {GeometryBuildShapeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometryBuildShapeGeneratorConfig, GeometryBuildShapeGeneratorSchema} from "./spec.ts";
 import {Area} from 'edugraph-ts';
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBuildShapeProblem, GeometryBuildShapeGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
     schema = GeometryBuildShapeGeneratorSchema;
 
     generate(config: GeometryBuildShapeGeneratorConfig): ProblemStub | null {
-        const targetLabel = config.target || [Area.Triangle, Area.Square, Area.Rectangle, Area.Hexagon][Math.floor(random() * 4)];
+        validateConfigFields('geometry-build-shape', config, ['target']);
+        const targetLabel = config.target;
         
         let target: string;
         let sides: number;
@@ -27,7 +29,7 @@ export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBui
             target = 'rectangle';
             sides = 4;
             corners = 4;
-                } else {
+        } else {
             target = 'hexagon';
             sides = 6;
             corners = 6;
@@ -39,7 +41,8 @@ export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBui
                 target,
                 sides,
                 corners
-            }
+            },
+            tags: [targetLabel]
         };
     }
 }

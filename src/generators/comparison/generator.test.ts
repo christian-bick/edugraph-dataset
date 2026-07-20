@@ -15,6 +15,10 @@ describe('ComparisonGenerator', () => {
         expect(generator.type).toBe('comparison');
     });
 
+    it('should throw validation error when range is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
+    });
+
     it('should respect resolved ranges', () => {
         for (let i = 0; i < 100; i++) {
             const stub = generator.generate({ 

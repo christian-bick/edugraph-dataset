@@ -3,14 +3,15 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {CountingClassifySortProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {CountingClassifySortGeneratorConfig, CountingClassifySortGeneratorSchema} from "./spec.ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class CountingClassifySortGenerator implements ProblemGenerator<CountingClassifySortProblem, CountingClassifySortGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
     schema = CountingClassifySortGeneratorSchema;
 
     generate(config: CountingClassifySortGeneratorConfig): ProblemStub | null {
+        validateConfigFields('counting-classify-sort', config, ['range']);
         const resolvedRange = config.range;
-        if (!resolvedRange) return null;
 
         const minVal = Math.max(1, resolvedRange.min);
         if (minVal > resolvedRange.max) return null;

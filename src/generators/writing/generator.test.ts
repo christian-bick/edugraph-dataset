@@ -56,8 +56,7 @@ describe('WritingGenerator', () => {
         expect(stub).toBeNull();
     });
 
-    it('should return null if range configuration is missing', () => {
-        const stub = generator.generate({} as any);
-        expect(stub).toBeNull();
+    it('should throw an error if range configuration is missing', () => {
+        expect(() => generator.generate({} as any)).toThrow();
     });
 });

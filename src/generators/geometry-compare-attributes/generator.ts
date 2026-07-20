@@ -3,12 +3,14 @@ import {GeometryCompareAttributesProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometryCompareAttributesGeneratorConfig, GeometryCompareAttributesGeneratorSchema} from "./spec.ts";
 import {Area} from "edugraph-ts";
+import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometryCompareAttributesGenerator implements ProblemGenerator<GeometryCompareAttributesProblem, GeometryCompareAttributesGeneratorConfig> {
     type: AbstractProblem['type'] = 'geometry';
     schema = GeometryCompareAttributesGeneratorSchema;
 
     generate(config: GeometryCompareAttributesGeneratorConfig): ProblemStub | null {
+        validateConfigFields('geometry-compare-attributes', config, ['classify']);
         const attribute = random() > 0.5 ? 'sides' : 'corners';
 
         const attrs: Record<string, Record<string, number>> = {
@@ -24,28 +26,24 @@ export class GeometryCompareAttributesGenerator implements ProblemGenerator<Geom
         let shape1: string;
         const label = config.classify;
 
-        if (label) {
-            switch (label) {
-                case Area.Circle:
-                    shape1 = 'circle';
-                    break;
-                case Area.Triangle:
-                    shape1 = 'triangle';
-                    break;
-                case Area.Square:
-                    shape1 = 'square';
-                    break;
-                case Area.Rectangle:
-                    shape1 = 'rectangle';
-                    break;
-                case Area.Hexagon:
-                    shape1 = 'hexagon';
-                    break;
-                default:
-                    shape1 = allShapes[Math.floor(random() * allShapes.length)];
-            }
-        } else {
-            shape1 = allShapes[Math.floor(random() * allShapes.length)];
+        switch (label) {
+            case Area.Circle:
+                shape1 = 'circle';
+                break;
+            case Area.Triangle:
+                shape1 = 'triangle';
+                break;
+            case Area.Square:
+                shape1 = 'square';
+                break;
+            case Area.Rectangle:
+                shape1 = 'rectangle';
+                break;
+            case Area.Hexagon:
+                shape1 = 'hexagon';
+                break;
+            default:
+                return null;
         }
 
         const val1 = attrs[shape1][attribute];
@@ -61,6 +59,14 @@ export class GeometryCompareAttributesGenerator implements ProblemGenerator<Geom
 
         const answer = val1 > val2 ? shape1 : shape2;
 
+        const SHAPE_LABELS: Record<string, string> = {
+            circle: Area.Circle,
+            triangle: Area.Triangle,
+            square: Area.Square,
+            rectangle: Area.Rectangle,
+            hexagon: Area.Hexagon
+        };
+
         return {
             id: `geometry-compare-attr-${attribute}-${shape1}-${shape2}`,
             data: {
@@ -70,7 +76,8 @@ export class GeometryCompareAttributesGenerator implements ProblemGenerator<Geom
                 val1,
                 val2,
                 answer
-            }
+            },
+            tags: [label, SHAPE_LABELS[shape2]]
         };
     }
 }

@@ -31,4 +31,14 @@ describe('PlaceValueMakeTenGenerator', () => {
         expect(stub!.data.missingNumber + stub!.data.givenNumber).toBe(10);
         expect(stub!.data.target).toBe(10);
     });
+
+    describe('validation', () => {
+        it('should throw an error if configuration is missing', () => {
+            expect(() => generator.generate(undefined as any)).toThrow();
+        });
+
+        it('should throw an error if includeZero is missing', () => {
+            expect(() => generator.generate({} as any)).toThrow();
+        });
+    });
 });

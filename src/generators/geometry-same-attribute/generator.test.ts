@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {GeometrySameAttributeGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
+import {GeneratorValidationError} from '../../lib/errors.ts';
 
 describe('GeometrySameAttributeGenerator', () => {
     let generator: GeometrySameAttributeGenerator;
@@ -12,6 +13,11 @@ describe('GeometrySameAttributeGenerator', () => {
 
     it('should have the correct type', () => {
         expect(generator.type).toBe('geometry');
+    });
+
+    it('should throw validation error when shapes is missing or empty', () => {
+        expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({ shapes: [] })).toThrow(GeneratorValidationError);
     });
 
     it('should validate same-attribute rolls/stacks/folds properties', () => {
