@@ -28,21 +28,25 @@ export function extractConfig<T extends ConfigSchema>(
             competencyLabels.some(l => isSubConceptOf(s, l) || isSubConceptOf(l, s))
         );
 
+        let resolverLabels: string[];
         if (matchingSupportedLabels.length === 0) {
             // Fallback logic: pick one randomly from all supported labels
             matchingSupportedLabels = [supportedLabels[Math.floor(random() * supportedLabels.length)]];
+            resolverLabels = competencyLabels;
         } else {
             // Record consumed labels based on what was actually matched
-            for (const l of competencyLabels) {
-                if (matchingSupportedLabels.some(s => isSubConceptOf(s, l) || isSubConceptOf(l, s))) {
-                    consumedLabels.add(l);
-                }
+            const matchingCompetencyLabels = competencyLabels.filter(l =>
+                matchingSupportedLabels.some(s => isSubConceptOf(s, l) || isSubConceptOf(l, s))
+            );
+            resolverLabels = matchingCompetencyLabels;
+            for (const l of matchingCompetencyLabels) {
+                consumedLabels.add(l);
             }
         }
 
         if (isTuple) {
             const resolver = schemaValue[1] as (labels: string[]) => any;
-            config[key] = resolver(matchingSupportedLabels);
+            config[key] = resolver(resolverLabels);
         } else {
             // For simple arrays, we must assign a single literal label, so we pick one randomly from the matches.
             const pickedLabel = matchingSupportedLabels[Math.floor(random() * matchingSupportedLabels.length)];
