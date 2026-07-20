@@ -6,7 +6,8 @@ export const spec: ViewSpec = {
     viewId: 'numbers-compare-counting',
     supportedLabels: [
         Scope.PhysicalNumbers,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        Scope.ArabicNumerals
     ]
 };
 

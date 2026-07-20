@@ -9,18 +9,16 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.NumerationWithIntegers,
         Scope.Base10,
-        Scope.NumericRange
+        Scope.IntegerNumbers
     ],
 };
 
 
 export const OrderingGeneratorSchema = {
-    // TODO: implement logical constraints relations on this property to make use of deductCompatible
     allowNegatives: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
         hasLabel(Scope.NumbersWithNegatives)
     ],
-    // TODO: implement logical constraints relations on this property to make use of deductCompatible
     includeZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)

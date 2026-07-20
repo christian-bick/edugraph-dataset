@@ -12,10 +12,9 @@ export const spec: GeneratorSpec = {
 
 
 export const GeometryPositionGeneratorSchema = {
-    // TODO: Ontological constraints relations could be beneficial here in the future instead of manual resolvers.
     relations: [
         [Scope.Above, Scope.Below, Scope.Beside, Scope.Behind],
-        matchAllLabels([Scope.Above, Scope.Below, Scope.Beside, Scope.Behind])
+        matchAllLabels
     ]
 } as const;
 

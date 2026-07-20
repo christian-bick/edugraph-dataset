@@ -8,11 +8,13 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.Numeration,
         Area.NumericIdentity,
-        Scope.AdditiveCount,
         Area.CollectionSense,
         Area.NumericOrder,
-        Scope.NumericRange,
-        Scope.NumericZero
+        Scope.IntegerNumbers,
+        Scope.Base10,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Scope.AdditiveCount
     ]
 };
 

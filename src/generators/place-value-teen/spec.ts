@@ -6,17 +6,17 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-teen',
     supportedLabels: [
-        Area.BaseOperations,
+        Area.Difference,
+        Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutZero,
-        Scope.NumbersWithNegatives
-    ]
+        Scope.NumbersWithoutNegatives]
 };
 
 
 export const PlaceValueTeenGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersSmaller20]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ]
     // TODO: Add ontological relations for other properties once supported,

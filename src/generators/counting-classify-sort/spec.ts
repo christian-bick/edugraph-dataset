@@ -12,7 +12,9 @@ export const spec: GeneratorSpec = {
         Area.NumericOrder,
         Scope.NumericRange,
         Scope.NumericZero
-    ]
+    ,
+        Scope.Base10,
+        Scope.IntegerNumbers]
 };
 
 

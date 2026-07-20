@@ -10,7 +10,8 @@ export const spec: ViewSpec = {
         Scope.PhysicalNumbers,
         Scope.NumericRange,
         Ability.TextualReception
-    ]
+    ,
+        Scope.ArabicNumerals]
 };
 
 

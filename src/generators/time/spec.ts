@@ -16,7 +16,7 @@ export const TimeGeneratorSchema = {
     // rather than extracting the first match, so we could deduct compatible intervals.
     intervalLabel: [
         [Scope.SecondIntervals, Scope.MinuteIntervals, Scope.HourIntervals],
-        extractFirstMatch([Scope.SecondIntervals, Scope.MinuteIntervals, Scope.HourIntervals], Scope.HourIntervals)
+        extractFirstMatch
     ]
 } as const;
 

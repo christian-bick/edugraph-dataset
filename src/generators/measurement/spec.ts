@@ -8,8 +8,10 @@ export const spec: GeneratorSpec = {
     supportedLabels: [
         Area.Measurement,
         Scope.LengthMeasurement,
-        Scope.NumericRange,
-        Scope.NumericZero
+        Scope.DecimalNumbers,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
     ]
 };
 
@@ -19,7 +21,6 @@ export const MeasurementGeneratorSchema = {
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
         resolveRangeFromLabels
     ]
-    // TODO: Add ontological relations for other properties like units or dimension when available
 } as const;
 
 export type MeasurementGeneratorConfig = ConfigFromSchema<typeof MeasurementGeneratorSchema>;

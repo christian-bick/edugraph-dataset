@@ -30,7 +30,7 @@ const SupportedShapes = [
 export const GeometryIdentityGeneratorSchema = {
     shapes: [
         SupportedShapes,
-        matchAllLabels(SupportedShapes)
+        matchAllLabels
     ]
 } as const;
 

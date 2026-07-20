@@ -12,7 +12,8 @@ export const spec: ViewSpec = {
         Scope.NumericRange,
         Ability.ConceptClassification,
         Scope.ShapeProperties
-    ]
+    ,
+        Scope.ArabicNumerals]
 };
 
 

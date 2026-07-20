@@ -6,10 +6,10 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-decompose',
     supportedLabels: [
-        Area.BaseOperations,
-        Scope.NumericRange,
-        Scope.NumericZero,
-        Scope.IntegerNumbers
+        Area.NumberNotation,
+        Area.Addition,
+        Scope.IntegerNumbers,
+        Scope.Base10
     ]
 };
 

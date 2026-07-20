@@ -7,7 +7,6 @@ export const spec: ViewSpec = {
     supportedLabels: [
         Ability.VisualReception,
         Ability.ProcedureExecution,
-        Scope.NumbersWithoutZero
     ]
 };
 

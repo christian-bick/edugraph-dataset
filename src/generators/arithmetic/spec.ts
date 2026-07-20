@@ -7,11 +7,8 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic',
     supportedLabels: [
-        Area.BaseOperations,
-        Scope.NumericRange,
-        Scope.NumericZero,
-        Scope.NumericSign,
-        Scope.IntegerNumbers
+        Scope.IntegerNumbers,
+        Scope.Base10
     ]
 };
 

@@ -6,10 +6,12 @@ import {hasLabel} from '../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-make-ten',
     supportedLabels: [
-        Area.BaseOperations,
+        Area.Difference,
         Scope.Base10,
+        Scope.NumbersLargerZero,
         Scope.NumbersSmaller10,
-        Scope.NumbersWithNegatives
+        Scope.NumbersWithoutNegatives,
+        Scope.IntegerNumbers
     ]
 };
 
@@ -19,7 +21,6 @@ export const PlaceValueMakeTenGeneratorSchema = {
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
     ]
-    // TODO: deductive capabilities for range properties like deductCompatible could be beneficial here in the future
 } as const;
 
 export type PlaceValueMakeTenGeneratorConfig = ConfigFromSchema<typeof PlaceValueMakeTenGeneratorSchema>;
