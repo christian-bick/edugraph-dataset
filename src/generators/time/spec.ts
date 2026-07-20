@@ -1,7 +1,7 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {extractFirstMatch} from '../../lib/resolvers.ts';
+import {selectExactMatch} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'time',
@@ -16,7 +16,7 @@ export const TimeGeneratorSchema = {
     // rather than extracting the first match, so we could deduct compatible intervals.
     intervalLabel: [
         [Scope.SecondIntervals, Scope.MinuteIntervals, Scope.HourIntervals],
-        extractFirstMatch
+        selectExactMatch
     ]
 } as const;
 

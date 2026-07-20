@@ -1,7 +1,7 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {extractFirstMatch} from '../../lib/resolvers.ts';
+import {selectExactMatch} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-attribute',
@@ -16,7 +16,7 @@ export const MeasurementAttributeGeneratorSchema = {
     // to logically constrain compatible dimensions or units, similar to deductCompatible for ranges.
     attribute: [
         [Scope.LengthMeasurement, Scope.WeightMeasurement],
-        extractFirstMatch
+        selectExactMatch
     ]
 } as const;
 
