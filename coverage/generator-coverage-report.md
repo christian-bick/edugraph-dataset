@@ -2,11 +2,11 @@
 
 | Generator | Statement % | Branch % | Status |
 | :--- | :---: | :---: | :---: |
-| [src/generators/arithmetic/generator.ts](src/generators/arithmetic/generator.ts) | 100% | 86.79% | ✅ PASS |
+| [src/generators/arithmetic/generator.ts](src/generators/arithmetic/generator.ts) | 100% | 84.9% | ✅ PASS |
 | [src/generators/arithmetic-decompose/generator.ts](src/generators/arithmetic-decompose/generator.ts) | 95.55% | 72.72% | ✅ PASS |
-| [src/generators/comparison/generator.ts](src/generators/comparison/generator.ts) | 94.28% | 86.36% | ✅ PASS |
+| [src/generators/comparison/generator.ts](src/generators/comparison/generator.ts) | 100% | 84.84% | ✅ PASS |
 | [src/generators/counting/generator.ts](src/generators/counting/generator.ts) | 100% | 50% | ❌ FAIL |
-| [src/generators/counting-classify-count/generator.ts](src/generators/counting-classify-count/generator.ts) | 100% | 80% | ✅ PASS |
+| [src/generators/counting-classify-count/generator.ts](src/generators/counting-classify-count/generator.ts) | 100% | 66.66% | ✅ PASS |
 | [src/generators/counting-classify-sort/generator.ts](src/generators/counting-classify-sort/generator.ts) | 100% | 94.11% | ✅ PASS |
 | [src/generators/counting-inc-dec/generator.ts](src/generators/counting-inc-dec/generator.ts) | 94.44% | 84.61% | ✅ PASS |
 | [src/generators/geometry-build-shape/generator.ts](src/generators/geometry-build-shape/generator.ts) | 100% | 40% | ❌ FAIL |

@@ -11,7 +11,10 @@ export class CountingClassifyCountGenerator implements ProblemGenerator<Counting
         const resolvedRange = config.range;
         if (!resolvedRange) return null;
 
-        const total = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
+        const minVal = Math.max(1, resolvedRange.min);
+        if (minVal > resolvedRange.max) return null;
+
+        const total = Math.floor(random() * (resolvedRange.max - minVal + 1)) + minVal;
 
         // Abstract categories: A, B, C
         const possibleCategories = ['A', 'B', 'C'];
