@@ -96,6 +96,18 @@ const identityDrawBuilder = new DatasetPermutationBuilder()
         [Area.Triangle]
     ]);
 
+const identityPositionBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.SpatialModelling,
+        Ability.SpatialInterpretation
+    ])
+    .applyLabelVariants([
+        [Scope.Above],
+        [Scope.Below],
+        [Scope.Beside],
+        [Scope.Behind]
+    ]);
+
 export const GeometryTestSpec: CompetencyTarget[] = [
     ...builder.build().map((p, i) => ({
         id: `test-geometry-build-shape-${i}`,
@@ -129,6 +141,11 @@ export const GeometryTestSpec: CompetencyTarget[] = [
     })),
     ...identityDrawBuilder.build().map((p, i) => ({
         id: `test-geometry-identity-draw-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    })),
+    ...identityPositionBuilder.build().map((p, i) => ({
+        id: `test-geometry-identity-position-${i}`,
         labels: p.labels,
         constraints: p.constraints
     }))

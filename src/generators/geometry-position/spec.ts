@@ -1,7 +1,7 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {matchAllLabels} from '../../lib/resolvers.ts';
+import {matchAllExactLabels} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-position',
@@ -14,7 +14,7 @@ export const spec: GeneratorSpec = {
 export const GeometryPositionGeneratorSchema = {
     relations: [
         [Scope.Above, Scope.Below, Scope.Beside, Scope.Behind],
-        matchAllLabels
+        matchAllExactLabels
     ]
 } as const;
 

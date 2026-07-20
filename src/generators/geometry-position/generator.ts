@@ -9,13 +9,15 @@ export class GeometryPositionGenerator implements ProblemGenerator<GeometryPosit
     schema = GeometryPositionGeneratorSchema;
 
     generate(config: GeometryPositionGeneratorConfig): ProblemStub | null {
-        const relations = config.relations || [];
+        const relations = config.relations;
 
         const possible: string[] = [];
-        if (relations.includes(Scope.Above)) possible.push('above');
-        if (relations.includes(Scope.Below)) possible.push('below');
-        if (relations.includes(Scope.Beside)) possible.push('beside');
-        if (relations.includes(Scope.Behind)) possible.push('behind');
+        if (relations && relations.length > 0) {
+            if (relations.includes(Scope.Above)) possible.push('above');
+            if (relations.includes(Scope.Below)) possible.push('below');
+            if (relations.includes(Scope.Beside)) possible.push('beside');
+            if (relations.includes(Scope.Behind)) possible.push('behind');
+        }
 
         let relation = 'above';
         if (possible.length > 0) {
@@ -26,8 +28,9 @@ export class GeometryPositionGenerator implements ProblemGenerator<GeometryPosit
         }
         const answer = relation; // The correct relation is the target
 
+        const randomSuffix = Math.floor(random() * 1000000);
         return {
-            id: `geometry-position-${relation}`,
+            id: `geometry-position-${relation}-${randomSuffix}`,
             data: {
                 relation,
                 answer
