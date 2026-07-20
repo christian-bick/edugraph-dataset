@@ -24,8 +24,8 @@ describe('WritingGenerator', () => {
         }
     });
 
-    it('should respect custom min/max bounds including zero and twenty via ontology', () => {
-        const config = { range: { min: 0, max: 20 } };
+    it('should respect custom min/max bounds including zero and twenty when includeZero is true', () => {
+        const config = { range: { min: 0, max: 20 }, includeZero: true };
         let zeroFound = false;
         let twentyFound = false;
         for (let i = 0; i < 100; i++) {
@@ -41,5 +41,23 @@ describe('WritingGenerator', () => {
         expect(twentyFound).toBe(true);
     });
 
+    it('should clamp min to 1 when includeZero is false', () => {
+        const config = { range: { min: 0, max: 20 }, includeZero: false };
+        for (let i = 0; i < 50; i++) {
+            const stub = generator.generate(config);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.number).toBeGreaterThanOrEqual(1);
+        }
+    });
 
+    it('should return null if range is invalid', () => {
+        const config = { range: { min: 5, max: 2 }, includeZero: false };
+        const stub = generator.generate(config);
+        expect(stub).toBeNull();
+    });
+
+    it('should return null if range configuration is missing', () => {
+        const stub = generator.generate({} as any);
+        expect(stub).toBeNull();
+    });
 });

@@ -11,8 +11,12 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
         const resolvedRange = config.range;
         if (!resolvedRange) return null;
 
-        const minNum = resolvedRange.min;
+        const includeZero = config.includeZero;
+        const minNum = includeZero ? resolvedRange.min : Math.max(1, resolvedRange.min);
         const maxNum = resolvedRange.max;
+        
+        if (maxNum - minNum < 0) return null;
+
         const currentNum = Math.floor(random() * (maxNum - minNum + 1)) + minNum;
         
         return {
