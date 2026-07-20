@@ -2,7 +2,6 @@ import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
-import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-classify-sort',
@@ -10,11 +9,11 @@ export const spec: GeneratorSpec = {
         Area.Numeration,
         Area.ObjectSorting,
         Area.NumericOrder,
-        Scope.NumericRange,
-        Scope.NumericZero
-    ,
+        Scope.IntegerNumbers,
         Scope.Base10,
-        Scope.IntegerNumbers]
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives
+    ]
 };
 
 

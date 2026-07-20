@@ -36,6 +36,28 @@ const classifyBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
+const sortBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Numeration,
+        Area.ObjectSorting,
+        Area.NumericOrder,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.Least],
+        [Scope.Most]
+    ])
+    .applyLabelVariants([
+        [Scope.ShapeProperties],
+        []
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersSmaller10],
+        [Scope.NumbersSmaller20]
+    ]);
+
 export const CountingTestSpec: CompetencyTarget[] = [
     ...builder.build().map((p, i) => ({
         id: `test-counting-${i}`,
@@ -46,6 +68,12 @@ export const CountingTestSpec: CompetencyTarget[] = [
         id: `test-classify-count-${i}`,
         labels: p.labels,
         constraints: p.constraints
+    })),
+    ...sortBuilder.build().map((p, i) => ({
+        id: `test-classify-sort-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
     }))
 ];
+
 

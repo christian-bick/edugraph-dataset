@@ -12,7 +12,10 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
         const resolvedRange = config.range;
         if (!resolvedRange) return null;
 
-        const total = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
+        const minVal = Math.max(1, resolvedRange.min);
+        if (minVal > resolvedRange.max) return null;
+
+        const total = Math.floor(random() * (resolvedRange.max - minVal + 1)) + minVal;
 
         const possibleCategories = ['A', 'B', 'C'];
         const items: string[] = [];
