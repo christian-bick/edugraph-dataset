@@ -372,7 +372,7 @@ async function runModulePipeline(
             
             const problemStub = generateWithLabels(generator, target.labels);
 
-            if (problemStub && !trainKeys.has(problemStub.id)) {
+            if (problemStub) {
                 // Match views that support this problem
                 const matchedViews = filteredViews.filter(viewSpec => {
                     const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
@@ -410,11 +410,15 @@ async function runModulePipeline(
                     return true;
                 });
 
-                if (matchedViews.length === 0) {
+                const newMatchedViews = matchedViews.filter(v => !trainKeys.has(`${problemStub.id}-${v.viewId}`));
+
+                if (newMatchedViews.length === 0) {
                     continue;
                 }
 
-                trainKeys.add(problemStub.id);
+                for (const v of newMatchedViews) {
+                    trainKeys.add(`${problemStub.id}-${v.viewId}`);
+                }
                 countForThisTarget++;
 
                 const problem: AbstractProblem = {
@@ -424,7 +428,7 @@ async function runModulePipeline(
                     tags: Array.from(new Set(target.labels))
                 };
                 problem.data._permutationParams = target.constraints;
-                (problem as any).matchedBlueprints = matchedViews.map(v => ({
+                (problem as any).matchedBlueprints = newMatchedViews.map(v => ({
                     viewId: v.viewId,
                     constraints: {},
                     instancesPerProblem: 1
@@ -443,23 +447,31 @@ async function runModulePipeline(
                             valAttempts++;
                             setSeed(42 + 10000 + valDataset.length);
                             const valStub = generateWithLabels(generator, target.labels);
-                            if (valStub && !valKeys.has(valStub.id) && !trainKeys.has(valStub.id)) {
-                                valKeys.add(valStub.id);
-                                valSuccess = true;
+                            if (valStub) {
+                                const valMatchedViews = newMatchedViews.filter(v => 
+                                    !valKeys.has(`${valStub.id}-${v.viewId}`) && 
+                                    !trainKeys.has(`${valStub.id}-${v.viewId}`)
+                                );
+                                if (valMatchedViews.length > 0) {
+                                    for (const v of valMatchedViews) {
+                                        valKeys.add(`${valStub.id}-${v.viewId}`);
+                                    }
+                                    valSuccess = true;
 
-                                const valProblem: AbstractProblem = {
-                                    ...valStub,
-                                    id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
-                                    type: generator.type,
-                                    tags: Array.from(new Set(target.labels))
-                                };
-                                valProblem.data._permutationParams = target.constraints;
-                                (valProblem as any).matchedBlueprints = matchedViews.map(v => ({
-                                    viewId: v.viewId,
-                                    constraints: {},
-                                    instancesPerProblem: 1
-                                }));
-                                valDataset.push(valProblem);
+                                    const valProblem: AbstractProblem = {
+                                        ...valStub,
+                                        id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
+                                        type: generator.type,
+                                        tags: Array.from(new Set(target.labels))
+                                    };
+                                    valProblem.data._permutationParams = target.constraints;
+                                    (valProblem as any).matchedBlueprints = valMatchedViews.map(v => ({
+                                        viewId: v.viewId,
+                                        constraints: {},
+                                        instancesPerProblem: 1
+                                    }));
+                                    valDataset.push(valProblem);
+                                }
                             }
                         }
                     }

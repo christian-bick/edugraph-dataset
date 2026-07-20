@@ -21,9 +21,8 @@ export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdent
         const selectedArea = validShapes[Math.floor(random() * validShapes.length)];
         const shape = selectedArea.split('/').pop()!.toLowerCase();
 
-        const randomSuffix = Math.floor(random() * 1000000);
         return {
-            id: `geometry-identity-${shape}-${randomSuffix}`,
+            id: `geometry-identity-${shape}`,
             data: {
                 shape,
                 answer: shape

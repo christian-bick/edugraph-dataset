@@ -28,9 +28,8 @@ export class GeometryPositionGenerator implements ProblemGenerator<GeometryPosit
         }
         const answer = relation; // The correct relation is the target
 
-        const randomSuffix = Math.floor(random() * 1000000);
         return {
-            id: `geometry-position-${relation}-${randomSuffix}`,
+            id: `geometry-position-${relation}`,
             data: {
                 relation,
                 answer

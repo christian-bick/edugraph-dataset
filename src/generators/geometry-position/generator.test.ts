@@ -22,6 +22,6 @@ describe('GeometryPositionGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('below');
         expect(stub!.data.answer).toBe('below');
-        expect(stub!.id).toContain('below');
+        expect(stub!.id).toBe('geometry-position-below');
     });
 });
