@@ -37,20 +37,17 @@ export function isSubConceptOf(child: string, parent: string): boolean {
  * Resolves the numeric range boundary from a list of ontological labels.
  */
 export function resolveRangeFromLabels(labels: string[]): { min: number; max: number } {
-    let min = 1;
-    let max = 10;
-
-    // 1. Resolve minimum boundary (Zero scopes)
-    const hasZero = labels.includes(Scope.NumbersWithZero);
-    const hasNoZero = labels.includes(Scope.NumbersWithoutZero);
-    if (hasZero) {
-        min = 0;
-    } else if (hasNoZero) {
-        min = 1;
-    }
+    let min = 0;
+    let max = Number.MAX_SAFE_INTEGER;
 
     // 2. Resolve maximum boundary (SmallerThan scopes)
-    if (labels.includes(Scope.NumbersSmaller1000)) {
+    if (labels.includes(Scope.NumbersSmaller1000000)) {
+        max = 1000000;
+    } else if (labels.includes(Scope.NumbersSmaller100000)) {
+        max = 100000;
+    } else if (labels.includes(Scope.NumbersSmaller10000)) {
+        max = 10000;
+    } else if (labels.includes(Scope.NumbersSmaller1000)) {
         max = 1000;
     } else if (labels.includes(Scope.NumbersSmaller100)) {
         max = 100;
@@ -61,7 +58,14 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
     }
 
     // 3. Resolve minimum boundary from LargerThan scopes
-    if (labels.includes(Scope.NumbersLarger1000)) {
+
+    if (labels.includes(Scope.NumbersLarger1000000)) {
+        min = 1000000;
+    } else if (labels.includes(Scope.NumbersLarger100000)) {
+        min = 100000;
+    } else if (labels.includes(Scope.NumbersLarger10000)) {
+        min = 10000;
+    } else if (labels.includes(Scope.NumbersLarger1000)) {
         min = 1000;
     } else if (labels.includes(Scope.NumbersLarger100)) {
         min = 100;
