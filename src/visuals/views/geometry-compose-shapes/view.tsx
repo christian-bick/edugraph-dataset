@@ -27,6 +27,10 @@ const GeometryComposeShapesCore = ({ config, payload }: CoreProps) => {
         options.push('triangle', 'circle');
     }
 
+    const isSquare = target === 'square';
+    const boxWidth = isSquare ? 80 : 120;
+    const boxHeight = 80;
+
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
         if (opt === answer && isSolutionView) {
@@ -49,15 +53,18 @@ const GeometryComposeShapesCore = ({ config, payload }: CoreProps) => {
                 </div>
                 
                 <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
-                    <div className="flex gap-[30px] items-center justify-center w-full">
-                        <div className="relative w-[100px] h-[70px] border-2 border-dashed border-slate-500 rounded flex justify-center items-center font-bold text-slate-500">
-                            Target: {target.toUpperCase()}
-                            {isSolutionView && target === 'rectangle' && (
+                    <div className="flex flex-col items-center gap-3">
+                        <div 
+                            style={{ width: `${boxWidth}px`, height: `${boxHeight}px` }}
+                            className="relative border-2 border-dashed border-slate-500 rounded flex justify-center items-center"
+                        >
+                            {isSolutionView && (
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                                    <line x1="0" y1="0" x2="100" y2="70" stroke="#ef4444" strokeWidth="2.5" strokeDasharray="3 3" />
+                                    <line x1="0" y1="0" x2={boxWidth} y2={boxHeight} stroke="#ef4444" strokeWidth="2.5" strokeDasharray="3 3" />
                                 </svg>
                             )}
                         </div>
+                        <span className="font-bold text-slate-500 uppercase">{target}</span>
                     </div>
                 </div>
 

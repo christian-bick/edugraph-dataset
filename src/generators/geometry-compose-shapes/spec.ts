@@ -6,7 +6,7 @@ import {selectExactMatch} from '../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-compose-shapes',
     generalLabels: [
-        Area.ShapeIdentity,
+        Area.ShapeComposition,
         Ability.ConceptComposition
     ]
 };
