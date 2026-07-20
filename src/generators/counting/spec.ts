@@ -21,7 +21,7 @@ export const spec: GeneratorSpec = {
 
 export const CountingGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ]
 } as const;

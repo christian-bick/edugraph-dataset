@@ -12,7 +12,12 @@ export class CountingGenerator implements ProblemGenerator<CountingProblem, Coun
         if (!resolvedRange) return null;
         
         const maxCount = resolvedRange.max;
-        const minCount = resolvedRange.min;
+        let minCount = resolvedRange.min;
+        if (minCount < 1) {
+            minCount = 1;
+        }
+
+        if (minCount > maxCount) return null;
         
         const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
 

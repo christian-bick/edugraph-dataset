@@ -7,6 +7,7 @@ import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { setSeed } from '../lib/random.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { Ability } from 'edugraph-ts';
+import { generateWithLabels } from '../lib/utils.ts';
 
 const allTargets = [...KindergartenSpec, ...Grade1Spec];
 
@@ -120,10 +121,7 @@ async function main() {
             if (matchingViewsForTarget.length > 0) {
                 // Generate a deterministic sample problem to test constraints
                 setSeed(42);
-                const problemStub = gen.generator.generate({
-                    labels: target.labels,
-                    constraints: target.constraints
-                });
+                const problemStub = generateWithLabels(gen.generator, target.labels);
 
                 if (problemStub) {
                     const matchedViews = matchingViewsForTarget.filter(viewSpec => {
