@@ -4,14 +4,10 @@ import { OperationsVerticalViewConfig, OperationsVerticalViewSchema } from './sp
 import { withConfig } from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-const operatorSymbols: { [key: string]: string } = {
-    add: '+',
+const operatorSymbols: Record<string, string> = {
     addition: '+',
-    subtract: '−',
     subtraction: '−',
-    multiply: '×',
     multiplication: '×',
-    divide: '÷',
     division: '÷'
 };
 
@@ -23,7 +19,7 @@ interface CoreProps {
 const OperationsVerticalCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
+    const symbol = operatorSymbols[data.operation] || '?';
 
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">

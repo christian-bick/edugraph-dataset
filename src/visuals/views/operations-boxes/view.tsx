@@ -5,14 +5,10 @@ import {OperationsBoxesViewConfig, OperationsBoxesViewSchema} from './spec.ts';
 import {withConfig} from '../withConfig.tsx';
 import '../../../tailwind.css';
 
-const operatorSymbols: { [key: string]: string } = {
-    add: '+',
+const operatorSymbols: Record<string, string> = {
     addition: '+',
-    subtract: '−',
     subtraction: '−',
-    multiply: '×',
     multiplication: '×',
-    divide: '÷',
     division: '÷'
 };
 
@@ -25,7 +21,7 @@ const OperationsBoxesCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
 
     const data = problem.data;
-    const symbol = operatorSymbols[data.operation || (data as any).operator] || '?';
+    const symbol = operatorSymbols[data.operation] || '?';
 
     const requestedBlank = payload.constraints?.blankPart || 'solution';
     const blankPart = getBlankPart(problem.id, requestedBlank);
