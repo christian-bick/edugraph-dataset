@@ -1,11 +1,20 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
-import {hasSubConcept} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'geometry-classify-dim',
     generalLabels: [
+        Area.ShapeRecognition,
+        Scope.ShapeProperties,
+        Scope.ThreeDimensional,
+        Scope.TwoDimensional,
+    ]
+};
+
+
+export const GeometryClassifyDimGeneratorSchema = {
+    classify: [
         Area.Circle,
         Area.Square,
         Area.Rectangle,
@@ -14,21 +23,8 @@ export const spec: GeneratorSpec = {
         Area.Cube,
         Area.Cone,
         Area.Cylinder,
-        Area.Sphere,
-        Area.ShapeIdentity
-    ]
-};
-
-
-export const GeometryClassifyDimGeneratorSchema = {
-    wants2D: [
-        [Scope.TwoDimensional], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Scope.TwoDimensional)
+        Area.Sphere
     ],
-    wants3D: [
-        [Scope.ThreeDimensional], // TODO: Consider ontological relations if applicable
-        hasSubConcept(Scope.ThreeDimensional)
-    ]
 } as const;
 
 export type GeometryClassifyDimGeneratorConfig = ConfigFromSchema<typeof GeometryClassifyDimGeneratorSchema>;
