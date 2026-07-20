@@ -18,7 +18,7 @@ export const spec: GeneratorSpec = {
 
 export const ArithmeticDecomposeGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
         resolveRangeFromLabels
     ]
 } as const;

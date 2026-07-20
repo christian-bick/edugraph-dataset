@@ -2,7 +2,6 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {ArithmeticProblem} from "../../types/problems.ts";
 import {Area} from "edugraph-ts";
 import {random} from "../../lib/random.ts";
-import {extractConfig} from "../../lib/utils.ts";
 import {ArithmeticGeneratorConfig, ArithmeticGeneratorSchema} from "./spec.ts";
 
 export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, ArithmeticGeneratorConfig> {
@@ -111,6 +110,11 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, 
         };
 
         const strOp = opMap[operation];
+
+        const normalizeZero = (val: number) => val === 0 ? 0 : val;
+        num1 = normalizeZero(num1);
+        num2 = normalizeZero(num2);
+        answer = normalizeZero(answer);
 
         return {
             id: `${num1}_${strOp}_${num2}`,

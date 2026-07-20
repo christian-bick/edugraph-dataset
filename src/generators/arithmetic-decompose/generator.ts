@@ -11,7 +11,10 @@ export class ArithmeticDecomposeGenerator implements ProblemGenerator<Arithmetic
         const resolvedRange = config.range;
         if (!resolvedRange) return null;
         
-        const targetNumber = Math.floor(random() * (resolvedRange.max - 3 + 1)) + 3; // 3 to resolved max (usually 10)
+        const minVal = Math.max(resolvedRange.min, 3);
+        const maxVal = Math.min(resolvedRange.max, 99);
+        if (minVal > maxVal) return null;
+        const targetNumber = Math.floor(random() * (maxVal - minVal + 1)) + minVal;
         
         const pairs: [number, number][] = [];
         for (let i = 1; i <= Math.floor(targetNumber / 2); i++) {

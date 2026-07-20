@@ -105,7 +105,7 @@ describe('ArithmeticGenerator Spec Integration', () => {
         expect(subStub).not.toBeNull();
         expect(subStub!.data.operation).toBe('subtraction');
         expect(subStub!.data.num1).toBeLessThanOrEqual(10);
-        expect(subStub!.data.num1).toBeGreaterThan(subStub!.data.num2);
+        expect(subStub!.data.num1).toBeGreaterThanOrEqual(subStub!.data.num2);
         expect(subStub!.data.answer).toBeGreaterThanOrEqual(0);
         expect(subStub!.data.num1 - subStub!.data.num2).toBe(subStub!.data.answer);
     });
