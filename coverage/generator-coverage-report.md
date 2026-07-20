@@ -18,7 +18,7 @@
 | [src/generators/geometry-position/generator.ts](src/generators/geometry-position/generator.ts) | 90.62% | 71.42% | ✅ PASS |
 | [src/generators/geometry-same-attribute/generator.ts](src/generators/geometry-same-attribute/generator.ts) | 96.55% | 83.33% | ✅ PASS |
 | [src/generators/measurement/generator.ts](src/generators/measurement/generator.ts) | 100% | 100% | ✅ PASS |
-| [src/generators/measurement-attribute/generator.ts](src/generators/measurement-attribute/generator.ts) | 100% | 50% | ❌ FAIL |
+| [src/generators/measurement-attribute/generator.ts](src/generators/measurement-attribute/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/measurement-compare/generator.ts](src/generators/measurement-compare/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/ordering/generator.ts](src/generators/ordering/generator.ts) | 100% | 76.92% | ✅ PASS |
 | [src/generators/place-value-make-ten/generator.ts](src/generators/place-value-make-ten/generator.ts) | 100% | 100% | ✅ PASS |
