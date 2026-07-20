@@ -1,19 +1,22 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Area, Scope} from 'edugraph-ts';
+import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
 import {selectExactMatch} from '../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'time',
     generalLabels: [
-        Area.MeasuringTime
+        Area.MeasuringTime,
+        Scope.IntegerNumbers,
+        Scope.Base10,
+        Scope.NumbersWithZero,
+        Scope.NumbersWithoutNegatives,
+        ...deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100])
     ],
 };
 
 
 export const TimeGeneratorSchema = {
-    // TODO: Consider defining ontological relations for time intervals in the future
-    // rather than extracting the first match, so we could deduct compatible intervals.
     intervalLabel: [
         [Scope.SecondIntervals, Scope.MinuteIntervals, Scope.HourIntervals],
         selectExactMatch

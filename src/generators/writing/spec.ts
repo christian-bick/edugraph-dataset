@@ -17,9 +17,8 @@ export const spec: GeneratorSpec = {
 
 
 export const WritingGeneratorSchema = {
-    // TODO: Add ontological relations for non-range properties
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10]),
         resolveRangeFromLabels
     ]
 } as const;
