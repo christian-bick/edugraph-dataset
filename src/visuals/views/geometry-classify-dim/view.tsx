@@ -88,7 +88,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'geometry-classify-dim'>;
 }
 
-const GeometryClassifyDimCore = ({ config, payload }: CoreProps) => {
+const GeometryClassifyDimCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
