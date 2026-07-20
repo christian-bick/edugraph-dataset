@@ -9,7 +9,6 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.Measurement,
         Scope.LengthMeasurement,
-        Scope.DecimalNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero
