@@ -14,7 +14,7 @@
 | [src/generators/measurement/measurement-length/generator.ts](src/generators/measurement/measurement-length/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/ordering/generator.ts](src/generators/ordering/generator.ts) | 100% | 83.33% | ✅ PASS |
 | [src/generators/place-value/place-value-make-ten/generator.ts](src/generators/place-value/place-value-make-ten/generator.ts) | 100% | 100% | ✅ PASS |
-| [src/generators/place-value/place-value-teen/generator.ts](src/generators/place-value/place-value-teen/generator.ts) | 100% | 100% | ✅ PASS |
+| [src/generators/place-value/place-value-teen/generator.ts](src/generators/place-value/place-value-teen/generator.ts) | 92.85% | 90.9% | ✅ PASS |
 | [src/generators/shape/shape-build-shape/generator.ts](src/generators/shape/shape-build-shape/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/shape/shape-classify-dim/generator.ts](src/generators/shape/shape-classify-dim/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/shape/shape-compare-attributes/generator.ts](src/generators/shape/shape-compare-attributes/generator.ts) | 97.05% | 94.11% | ✅ PASS |

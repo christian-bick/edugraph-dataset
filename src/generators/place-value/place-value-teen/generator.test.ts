@@ -37,4 +37,9 @@ describe('PlaceValueTeenGenerator', () => {
     it('should throw validation error if range configuration is missing', () => {
         expect(() => generator.generate({} as any)).toThrow();
     });
+
+    it('should throw validation error if range bounds are invalid', () => {
+        expect(() => generator.generate({ range: { min: 100, max: 10 } })).toThrow();
+        expect(() => generator.generate({ range: { min: 18, max: 12 } })).toThrow();
+    });
 });
