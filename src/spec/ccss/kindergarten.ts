@@ -1,4 +1,4 @@
-import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
@@ -512,13 +512,6 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
         [Area.Rectangle],
         [Area.Square]
     ]);
-
-const toTargets = (idPrefix: string, builder: DatasetPermutationBuilder): CompetencyTarget[] =>
-    builder.build().map((p, i) => ({
-        id: `${idPrefix}-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    }));
 
 export const KindergartenSpec: CompetencyTarget[] = [
     // K.CC - Counting and Cardinality

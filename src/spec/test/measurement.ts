@@ -1,4 +1,4 @@
-import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
@@ -18,8 +18,4 @@ const builder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller100]
     ]);
 
-export const MeasurementTestSpec: CompetencyTarget[] = builder.build().map((p, i) => ({
-    id: `test-measurement-${i}`,
-    labels: p.labels,
-    constraints: p.constraints
-}));
+export const MeasurementTestSpec: CompetencyTarget[] = toTargets('test-measurement', builder);

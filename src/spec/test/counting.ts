@@ -1,4 +1,4 @@
-import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
@@ -77,26 +77,10 @@ const incDecBuilder = new DatasetPermutationBuilder()
     ]);
 
 export const CountingTestSpec: CompetencyTarget[] = [
-    ...builder.build().map((p, i) => ({
-        id: `test-counting-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...incDecBuilder.build().map((p, i) => ({
-        id: `test-counting-inc-dec-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...classifyBuilder.build().map((p, i) => ({
-        id: `test-classify-count-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...sortBuilder.build().map((p, i) => ({
-        id: `test-classify-sort-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    }))
+    ...toTargets('test-counting', builder),
+    ...toTargets('test-counting-inc-dec', incDecBuilder),
+    ...toTargets('test-classify-count', classifyBuilder),
+    ...toTargets('test-classify-sort', sortBuilder)
 ];
 
 

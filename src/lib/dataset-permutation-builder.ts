@@ -1,4 +1,16 @@
-import { GeneratorInput } from "../types/ml-engine.ts";
+import { CompetencyTarget, GeneratorInput } from "../types/ml-engine.ts";
+
+/**
+ * Maps a builder's permutations to competency targets with indexed ids
+ * (e.g. `K.CC.B.5-how-many-0`, `K.CC.B.5-how-many-1`, ...).
+ */
+export function toTargets(idPrefix: string, builder: DatasetPermutationBuilder): CompetencyTarget[] {
+    return builder.build().map((p, i) => ({
+        id: `${idPrefix}-${i}`,
+        labels: p.labels,
+        constraints: p.constraints
+    }));
+}
 
 export default class DatasetPermutationBuilder {
     private permutations: GeneratorInput[] = [{ labels: [], constraints: {} }];

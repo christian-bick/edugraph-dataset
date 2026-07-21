@@ -1,4 +1,4 @@
-import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
@@ -17,8 +17,4 @@ const builder = new DatasetPermutationBuilder()
         [Ability.VisualArticulation]
     ]);
 
-export const TimeTestSpec: CompetencyTarget[] = builder.build().map((p, i) => ({
-    id: `test-time-${i}`,
-    labels: p.labels,
-    constraints: p.constraints
-}));
+export const TimeTestSpec: CompetencyTarget[] = toTargets('test-time', builder);

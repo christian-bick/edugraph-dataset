@@ -1,4 +1,4 @@
-import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
@@ -123,49 +123,13 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
     ]);
 
 export const GeometryTestSpec: CompetencyTarget[] = [
-    ...builder.build().map((p, i) => ({
-        id: `test-geometry-build-shape-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...classifyDimBuilder.build().map((p, i) => ({
-        id: `test-geometry-classify-dim-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...compareAttrBuilder.build().map((p, i) => ({
-        id: `test-geometry-compare-attributes-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...composeShapesBuilder.build().map((p, i) => ({
-        id: `test-geometry-compose-shapes-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...envShapesBuilder.build().map((p, i) => ({
-        id: `test-geometry-env-shapes-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...identityNamingBuilder.build().map((p, i) => ({
-        id: `test-geometry-identity-naming-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...identityDrawBuilder.build().map((p, i) => ({
-        id: `test-geometry-identity-draw-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...identityPositionBuilder.build().map((p, i) => ({
-        id: `test-geometry-identity-position-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    })),
-    ...sameAttributeBuilder.build().map((p, i) => ({
-        id: `test-geometry-same-attribute-${i}`,
-        labels: p.labels,
-        constraints: p.constraints
-    }))
+    ...toTargets('test-geometry-build-shape', builder),
+    ...toTargets('test-geometry-classify-dim', classifyDimBuilder),
+    ...toTargets('test-geometry-compare-attributes', compareAttrBuilder),
+    ...toTargets('test-geometry-compose-shapes', composeShapesBuilder),
+    ...toTargets('test-geometry-env-shapes', envShapesBuilder),
+    ...toTargets('test-geometry-identity-naming', identityNamingBuilder),
+    ...toTargets('test-geometry-identity-draw', identityDrawBuilder),
+    ...toTargets('test-geometry-identity-position', identityPositionBuilder),
+    ...toTargets('test-geometry-same-attribute', sameAttributeBuilder)
 ];

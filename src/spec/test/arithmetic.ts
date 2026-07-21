@@ -1,4 +1,4 @@
-import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
@@ -19,8 +19,4 @@ const builder = new DatasetPermutationBuilder()
     ])
     .addLabels([Scope.NumbersSmaller10]);
 
-export const ArithmeticTestSpec: CompetencyTarget[] = builder.build().map((p, i) => ({
-    id: `test-arithmetic-${i}`,
-    labels: p.labels,
-    constraints: p.constraints
-}));
+export const ArithmeticTestSpec: CompetencyTarget[] = toTargets('test-arithmetic', builder);
