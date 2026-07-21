@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CountingGenerator } from './generator.ts';
+import { CountingBasicGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Scope } from 'edugraph-ts';
 import { generateWithLabels } from '../../lib/utils.ts';
 
-describe('CountingGenerator Spec Integration', () => {
-    let generator: CountingGenerator;
+describe('CountingBasicGenerator Spec Integration', () => {
+    let generator: CountingBasicGenerator;
 
     beforeEach(() => {
-        generator = new CountingGenerator();
+        generator = new CountingBasicGenerator();
         setSeed(42);
     });
 

@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ArithmeticGenerator } from './generator.ts';
+import { ArithmeticOpsPairsGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
 import { Area, Scope } from 'edugraph-ts';
 import { generateWithLabels } from '../../lib/utils.ts';
 
-describe('ArithmeticGenerator Spec Integration', () => {
-    let generator: ArithmeticGenerator;
+describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
+    let generator: ArithmeticOpsPairsGenerator;
 
     beforeEach(() => {
-        generator = new ArithmeticGenerator();
+        generator = new ArithmeticOpsPairsGenerator();
         setSeed(42);
     });
 

@@ -1,15 +1,15 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {CountingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {CountingGeneratorConfig, CountingGeneratorSchema} from "./spec.ts";
+import {CountingBasicGeneratorConfig, CountingBasicGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../lib/errors.ts";
 
-export class CountingGenerator implements ProblemGenerator<CountingProblem, CountingGeneratorConfig> {
+export class CountingBasicGenerator implements ProblemGenerator<CountingProblem, CountingBasicGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
-    schema = CountingGeneratorSchema;
+    schema = CountingBasicGeneratorSchema;
 
-    generate(config: CountingGeneratorConfig): ProblemStub | null {
-        validateConfigFields('counting', config, ['range']);
+    generate(config: CountingBasicGeneratorConfig): ProblemStub | null {
+        validateConfigFields('counting-basic', config, ['range']);
         const resolvedRange = config.range!;
         
         const maxCount = resolvedRange.max;

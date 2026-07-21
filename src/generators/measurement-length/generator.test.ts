@@ -1,12 +1,12 @@
 import {beforeEach, describe, expect, it} from 'vitest';
-import {MeasurementGenerator} from './generator.ts';
+import {MeasurementLengthGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
 
-describe('MeasurementGenerator', () => {
-    let generator: MeasurementGenerator;
+describe('MeasurementLengthGenerator', () => {
+    let generator: MeasurementLengthGenerator;
 
     beforeEach(() => {
-        generator = new MeasurementGenerator();
+        generator = new MeasurementLengthGenerator();
         setSeed(42);
     });
 

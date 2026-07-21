@@ -1,12 +1,12 @@
 import {beforeEach, describe, expect, it} from 'vitest';
-import {CountingGenerator} from './generator.ts';
+import {CountingBasicGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
 
-describe('CountingGenerator', () => {
-    let generator: CountingGenerator;
+describe('CountingBasicGenerator', () => {
+    let generator: CountingBasicGenerator;
 
     beforeEach(() => {
-        generator = new CountingGenerator();
+        generator = new CountingBasicGenerator();
         setSeed(42);
     });
 

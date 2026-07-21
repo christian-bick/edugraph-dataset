@@ -1,14 +1,14 @@
 import {beforeEach, describe, expect, it} from 'vitest';
-import {MeasurementGenerator} from './generator.ts';
+import {MeasurementLengthGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../lib/utils.ts';
 
-describe('MeasurementGenerator Spec Integration', () => {
-    let generator: MeasurementGenerator;
+describe('MeasurementLengthGenerator Spec Integration', () => {
+    let generator: MeasurementLengthGenerator;
 
     beforeEach(() => {
-        generator = new MeasurementGenerator();
+        generator = new MeasurementLengthGenerator();
         setSeed(42);
     });
 

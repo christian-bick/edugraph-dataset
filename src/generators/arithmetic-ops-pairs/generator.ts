@@ -2,15 +2,15 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {ArithmeticProblem} from "../../types/problems.ts";
 import {Area} from "edugraph-ts";
 import {random} from "../../lib/random.ts";
-import {ArithmeticGeneratorConfig, ArithmeticGeneratorSchema} from "./spec.ts";
+import {ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../lib/errors.ts";
 
-export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, ArithmeticGeneratorConfig> {
+export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticProblem, ArithmeticOpsPairsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
-    schema = ArithmeticGeneratorSchema;
+    schema = ArithmeticOpsPairsGeneratorSchema;
 
-    generate(config: ArithmeticGeneratorConfig): ProblemStub | null {
-        validateConfigFields('arithmetic', config, ['range']);
+    generate(config: ArithmeticOpsPairsGeneratorConfig): ProblemStub | null {
+        validateConfigFields('arithmetic-ops-pairs', config, ['range']);
 
         const operation = config.operation;
         const allowNegatives = config.allowNegatives;

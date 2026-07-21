@@ -5,7 +5,7 @@ import {hasLabel} from '../../lib/resolvers.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
-    generatorId: 'arithmetic',
+    generatorId: 'arithmetic-ops-pairs',
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10
@@ -13,7 +13,7 @@ export const spec: GeneratorSpec = {
 };
 
 
-export const ArithmeticGeneratorSchema = {
+export const ArithmeticOpsPairsGeneratorSchema = {
     operation: [
         Area.Addition,
         Area.Subtraction,
@@ -34,4 +34,4 @@ export const ArithmeticGeneratorSchema = {
     ]
 } as const;
 
-export type ArithmeticGeneratorConfig = ConfigFromSchema<typeof ArithmeticGeneratorSchema>;
+export type ArithmeticOpsPairsGeneratorConfig = ConfigFromSchema<typeof ArithmeticOpsPairsGeneratorSchema>;

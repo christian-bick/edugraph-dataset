@@ -5,7 +5,7 @@ import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 import {hasLabel} from "../../lib/resolvers.ts";
 
 export const spec: GeneratorSpec = {
-    generatorId: 'measurement',
+    generatorId: 'measurement-length',
     generalLabels: [
         Area.Measurement,
         Scope.LengthMeasurement,
@@ -16,7 +16,7 @@ export const spec: GeneratorSpec = {
 };
 
 
-export const MeasurementGeneratorSchema = {
+export const MeasurementLengthGeneratorSchema = {
     useDecimals: [
         [
             Scope.IntegerNumbers,
@@ -30,4 +30,4 @@ export const MeasurementGeneratorSchema = {
     ]
 } as const;
 
-export type MeasurementGeneratorConfig = ConfigFromSchema<typeof MeasurementGeneratorSchema>;
+export type MeasurementLengthGeneratorConfig = ConfigFromSchema<typeof MeasurementLengthGeneratorSchema>;

@@ -4,7 +4,7 @@ import {ConfigFromSchema} from '../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 
 export const spec: GeneratorSpec = {
-    generatorId: 'counting',
+    generatorId: 'counting-basic',
     generalLabels: [
         Area.NumerationWithIntegers,
         Scope.IntegerNumbers,
@@ -16,11 +16,11 @@ export const spec: GeneratorSpec = {
 };
 
 
-export const CountingGeneratorSchema = {
+export const CountingBasicGeneratorSchema = {
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ]
 } as const;
 
-export type CountingGeneratorConfig = ConfigFromSchema<typeof CountingGeneratorSchema>;
+export type CountingBasicGeneratorConfig = ConfigFromSchema<typeof CountingBasicGeneratorSchema>;

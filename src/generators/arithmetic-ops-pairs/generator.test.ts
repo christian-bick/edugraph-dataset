@@ -1,13 +1,13 @@
 import {beforeEach, describe, expect, it} from 'vitest';
-import {ArithmeticGenerator} from './generator.ts';
+import {ArithmeticOpsPairsGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
 import {Area} from 'edugraph-ts';
 
-describe('ArithmeticGenerator', () => {
-    let generator: ArithmeticGenerator;
+describe('ArithmeticOpsPairsGenerator', () => {
+    let generator: ArithmeticOpsPairsGenerator;
 
     beforeEach(() => {
-        generator = new ArithmeticGenerator();
+        generator = new ArithmeticOpsPairsGenerator();
         setSeed(42);
     });
 
