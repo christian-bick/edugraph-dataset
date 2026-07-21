@@ -35,8 +35,7 @@ Reference examples:
 
 IMPORTANT: 
 
-- SOLELY focus on the generators and views
-- Do NOT update code outside the views and generators without user confirmation
-- Do NOT care about matching of competencies with the ccs standard for now
+- Do NOT update code outside views, generators and the "test" spec without user confirmation
+- Do NOT care about matching of competencies with specs other than "test"
 - Do NOT assume the need for backward compatibility with legacy code
 - Do NOT modify spec.ts without user confirmation
