@@ -10,9 +10,9 @@ export const spec: ViewSpec = {
         Area.Numeration,
         Scope.NumericRange,
         Ability.ConceptClassification,
-        Scope.ShapeProperties
-    ,
-        Scope.ArabicNumerals]
+        Scope.ShapeProperties,
+        Scope.ArabicNumerals
+    ]
 };
 
 

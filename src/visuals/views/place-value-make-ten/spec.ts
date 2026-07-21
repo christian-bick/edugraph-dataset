@@ -9,9 +9,9 @@ export const spec: ViewSpec = {
         Scope.PhysicalNumbers,
         Scope.NumericRange,
         Scope.NumbersWithZero,
-        Ability.ProcedureExecution
-    ,
-        Scope.ArabicNumerals]
+        Ability.ProcedureExecution,
+        Scope.ArabicNumerals
+    ]
 };
 
 

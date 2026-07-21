@@ -8,9 +8,9 @@ export const spec: ViewSpec = {
         Area.BaseOperations,
         Scope.PhysicalNumbers,
         Scope.NumericRange,
-        Ability.TextualReception
-    ,
-        Scope.ArabicNumerals]
+        Ability.TextualReception,
+        Scope.ArabicNumerals
+    ]
 };
 
 
