@@ -126,7 +126,11 @@ When writing or updating `checklist.md` files (which are used by the automated v
 To add a new mathematical concept or visual style to the dataset, follow this step-by-step workflow:
 
 ### Step 1: Define the Pedagogy
-Add the target specifications representing the CCSS curriculum standards (e.g. `1.G.A.3-fraction-halves`) to the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`).
+Declare the target specifications in the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`) using the `DatasetPermutationBuilder`:
+
+- Work from the **leaf nodes** of the CCSS tree (`public/coverage/ccss-tree.json`). A single leaf standard often bundles several competencies — create one builder per competency.
+- Use `.addLabels([...])` for the label set shared by all permutations of a competency and `.applyLabelVariants([...])` for orthogonal dimensions (e.g. number ranges, `Scope.NumbersWithZero` vs. `Scope.NumbersWithoutZero`, shapes, relations). Map the builder to targets with the shared `toTargets('<CCSS-id>-<slug>', builder)` helper from `src/lib/dataset-permutation-builder.ts`, so ids read like `K.CC.B.5-how-many-0`.
+- If a competency cannot be expressed (missing ontology label) or has no generator/view support, **do not stretch labels to force a match**. Instead, leave a `// TODO [<CCSS-id>]:` comment describing the gap together with a commented-out reference builder/permutation. See `src/spec/ccss/kindergarten.ts` for examples.
 
 ### Step 2: Analyze Matchings
 Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` to see if the new targets map to any existing generator or views.
