@@ -4,7 +4,7 @@ import {getBlankPart} from './helpers.ts';
 import {OperationsBoxesViewConfig, OperationsBoxesViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
-import '../../../tailwind.css';
+import '../../../../tailwind.css';
 
 const operatorSymbols: Record<string, string> = {
     addition: '+',

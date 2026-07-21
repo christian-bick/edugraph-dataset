@@ -6,7 +6,7 @@ import {generateScatteredPositions} from './helpers.ts';
 import { SortingClassifyCountViewConfig, SortingClassifyCountViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
-import '../../../tailwind.css';
+import '../../../../tailwind.css';
 
 interface Item {
     shape: string;

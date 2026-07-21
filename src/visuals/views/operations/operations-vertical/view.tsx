@@ -3,7 +3,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import { OperationsVerticalViewConfig, OperationsVerticalViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
-import '../../../tailwind.css';
+import '../../../../tailwind.css';
 
 const operatorSymbols: Record<string, string> = {
     addition: '+',

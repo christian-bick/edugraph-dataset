@@ -5,7 +5,7 @@ import {getDecomposeLayout} from './helpers.ts';
 import { OperationsDecomposeViewConfig, OperationsDecomposeViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
-import '../../../tailwind.css';
+import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
 

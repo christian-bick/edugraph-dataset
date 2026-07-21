@@ -4,7 +4,7 @@ import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { ShapeSameAttributeViewConfig, ShapeSameAttributeViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData, ViewValidationError } from '../../../helpers/validation.ts';
-import '../../../tailwind.css';
+import '../../../../tailwind.css';
 
 interface CoreProps {
     config: ShapeSameAttributeViewConfig;

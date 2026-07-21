@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
-import '../../../tailwind.css';
+import '../../../../tailwind.css';
 import { ShapeCompareAttributesViewConfig, ShapeCompareAttributesViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData, ViewValidationError } from '../../../helpers/validation.ts';

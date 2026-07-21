@@ -5,7 +5,7 @@ import {getTracingPaths} from './helpers.ts';
 import { NumbersWriteStrokeViewConfig, NumbersWriteStrokeViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
-import '../../../tailwind.css';
+import '../../../../tailwind.css';
 
 interface CoreProps {
     config: NumbersWriteStrokeViewConfig;
