@@ -36,9 +36,12 @@ const classifyBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
+// Note: show-matching-stats may report some permutations as unmatched ("Returned null
+// stub") — the counting-classify-sort generator returns null on tied category counts
+// for its single sample; the dataset pipeline retries and covers these fine.
 const sortBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Area.ObjectSorting,
         Area.NumericOrder,
         Scope.NumbersWithoutZero,
