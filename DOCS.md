@@ -63,6 +63,10 @@ The primary pipeline orchestrator.
 *   **Execution**: `npm run check:specs`
 *   **Function**: An automated spec validation script. It checks all `spec.ts` files across both generators and views, flagging (1) overlapping General Labels / parameter queries, and (2) duplicate parameterizations where a view re-specifies variables already computed by its matching generator. Detailed logs are outputted to `temp/check_output.txt`.
 
+### Type Checking (`npm run check:types`)
+*   **Execution**: `npm run check:types` (or `npx tsc --noEmit`)
+*   **Function**: Runs the TypeScript compiler in non-emitting mode (`tsc --noEmit`) to find and report type errors across all generators, renderers, scripts, schemas, and test suites.
+
 ## 4. Module Structure Breakdown
 
 Adding content means creating two interconnected directories: a Generator and a Renderer. Both strictly decouple pedagogical label resolution from core business logic using schemas and resolvers.
@@ -172,5 +176,6 @@ To visually verify and test both your generator and view modules through the act
    This allows you to quickly inspect the generated output under `out/dataset/train/` without running the entire dataset generation.
 
 ### Step 8: Final Verification
-1. Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` (or `--spec=test`) to confirm that the ontology dynamically binds your targets to your generator and views.
-2. Run `npm run generate:dataset -- --spec=ccss --generator=[moduleName]` to test local dataset generation.
+1. Run `npm run check:types` (or `npx tsc --noEmit`) to verify zero TypeScript typing errors across all generators, views, and scripts.
+2. Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` (or `--spec=test`) to confirm that the ontology dynamically binds your targets to your generator and views.
+3. Run `npm run generate:dataset -- --spec=ccss --generator=[moduleName]` to test local dataset generation.
