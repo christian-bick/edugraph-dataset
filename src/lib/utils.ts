@@ -101,3 +101,12 @@ export function generateWithLabels<TData = any, TConfig = any>(
     return problem;
 }
 
+export function shortenLabel(label: string): string {
+    const prefix = 'http://edugraph.io/edu/';
+    return label.startsWith(prefix) ? label.slice(prefix.length) : label;
+}
+
+export function formatLabelsKey(labels: string[]): string {
+    return labels.map(shortenLabel).sort().join('|');
+}
+

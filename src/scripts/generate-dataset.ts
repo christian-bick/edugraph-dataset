@@ -6,7 +6,7 @@ import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { findLeafModules, LeafModule } from '../lib/module-resolver.ts';
-import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
+import { extractSchemaLabels, generateWithLabels, formatLabelsKey } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,8 +18,9 @@ const DEFAULT_CONCURRENCY = 8;
 
 function createSafeFilename(problemId: string, rendererId: string, params: any, instance: number): string {
     const safeId = problemId.replace(/[^a-zA-Z0-9-]/g, '-');
-    const paramStrings = Object.entries(params)
-        .map(([k, v]) => `${k}-${v}`)
+    const paramStrings = Object.keys(params || {})
+        .sort()
+        .map((k) => `${k}-${params[k]}`)
         .join('_')
         .replace(/[^a-zA-Z0-9-_]/g, '');
     
@@ -41,7 +42,8 @@ function finalizeMetadata(splitName: string) {
 
     const modules = readdirSync(splitDir, { withFileTypes: true })
         .filter(d => d.isDirectory())
-        .map(d => d.name);
+        .map(d => d.name)
+        .sort();
 
     for (const moduleName of modules) {
         const moduleMetaPath = resolve(splitDir, moduleName, '.metadata.jsonl');
@@ -63,6 +65,56 @@ function finalizeMetadata(splitName: string) {
     }
     
     console.log(`[${splitName}] Finalized root metadata.jsonl`);
+}
+
+class TargetInstanceRegistry {
+    private registry = new Map<string, number>();
+
+    public getNextInstance(
+        moduleName: string,
+        splitName: string,
+        targetLabels: string[],
+        targetConstraints: Record<string, any>
+    ): number {
+        const sortedLabels = formatLabelsKey(targetLabels);
+        const sortedConstraintsKeys = Object.keys(targetConstraints || {}).sort();
+        const sortedConstraints = sortedConstraintsKeys.map(k => `${k}:${targetConstraints[k]}`).join('|');
+        const targetKey = `${moduleName}#${splitName}#${sortedLabels}#${sortedConstraints}`;
+
+        const current = this.registry.get(targetKey) || 0;
+        this.registry.set(targetKey, current + 1);
+        return current;
+    }
+}
+
+function computeTargetKey(
+    moduleName: string,
+    splitName: string,
+    targetLabels: string[],
+    targetConstraints: Record<string, any>,
+    instance: number
+): string {
+    const sortedLabels = formatLabelsKey(targetLabels);
+    const sortedConstraintsKeys = Object.keys(targetConstraints || {}).sort();
+    const sortedConstraints = sortedConstraintsKeys.map(k => `${k}:${targetConstraints[k]}`).join('|');
+    return `${moduleName}#${splitName}#${sortedLabels}#${sortedConstraints}#inst:${instance}`;
+}
+
+function computeTargetSeed(
+    targetKey: string,
+    attempt: number
+): { seed: number; hashHex: string } {
+    const rawKey = `${targetKey}#att:${attempt}`;
+
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < rawKey.length; i++) {
+        hash ^= rawKey.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193);
+    }
+    const positiveHash = Math.abs(hash);
+    const seed = positiveHash % 2147483647;
+    const hashHex = positiveHash.toString(16).padStart(8, '0');
+    return { seed, hashHex };
 }
 
 async function renderDatasetSplit(
@@ -118,7 +170,7 @@ async function renderDatasetSplit(
                 const { problem, blueprint, instance } = task;
                 const viewPath = viewPathMap[blueprint.viewId] || blueprint.viewId;
                 const url = `${BASE_URL}/visuals/views/${viewPath}/view.html`;
-                
+
                 if (currentViewUrl !== url) {
                     await page.goto(url, { waitUntil: 'networkidle' });
                     await page.waitForFunction(() => typeof (window as any).renderView === 'function');
@@ -127,11 +179,11 @@ async function renderDatasetSplit(
 
                 const baseFilename = createSafeFilename(problem.id, blueprint.viewId, blueprint.constraints, instance);
 
-                const renderAndRecord = async (isSolutionView: boolean, modeTag: string, modeName: string) => {
+                const renderAndRecord = async (probObj: AbstractProblem, isSolutionView: boolean, modeTag: string, modeName: string) => {
                     const payload: any = {
-                        problem,
+                        problem: probObj,
                         viewId: blueprint.viewId,
-                        labels: problem.tags || [],
+                        labels: probObj.tags || [],
                         constraints: blueprint.constraints,
                         isSolutionView
                     };
@@ -208,17 +260,19 @@ async function renderDatasetSplit(
                     
                     totalImages++;
 
-                    const { _permutationParams, ...cleanedData } = problem.data;
+                    const { _permutationParams, ...cleanedData } = probObj.data;
 
                     return {
                         file_name: filename,
-                        problem_id: problem.id,
+                        problem_id: probObj.id,
                         generator: moduleName,
                         view: blueprint.viewId,
-                        type: problem.type,
+                        type: probObj.type,
                         solution_visible: isSolutionView,
                         mode: modeName,
-                        tags: problem.tags,
+                        target_key: (probObj as any).targetKey || '',
+                        target_key_hash: (probObj as any).targetKeyHash || '',
+                        tags: probObj.tags,
                         parameters: {
                             ...cleanedData,
                             ...blueprint.constraints
@@ -227,8 +281,9 @@ async function renderDatasetSplit(
                     };
                 };
 
-                const qMeta = await renderAndRecord(false, 'Q', 'question');
-                const aMeta = await renderAndRecord(true, 'S', 'solution');
+                const qMeta = await renderAndRecord(problem, false, 'Q', 'question');
+                const solProblem = (problem as any).solutionProblem || problem;
+                const aMeta = await renderAndRecord(solProblem, true, 'S', 'solution');
                 metadata.push(qMeta, aMeta);
 
                 completedTasks++;
@@ -250,6 +305,7 @@ async function renderDatasetSplit(
 
     await Promise.allSettled(workers);
     
+    metadata.sort((a, b) => a.file_name.localeCompare(b.file_name));
     const metaPath = resolve(splitOutputDir, '.metadata.jsonl');
     const jsonlContent = metadata.map(entry => JSON.stringify(entry)).join('\n') + '\n';
     writeFileSync(metaPath, jsonlContent);
@@ -359,6 +415,8 @@ async function runModulePipeline(
 
     console.log(`Found ${matchedTargets.length} matched competency targets for generator [${moduleName}]`);
 
+    const targetRegistry = new TargetInstanceRegistry();
+
     for (const target of matchedTargets) {
         let countForThisTarget = 0;
         let attempts = 0;
@@ -368,7 +426,10 @@ async function runModulePipeline(
         while (countForThisTarget < countPerPermutation && attempts < maxAttempts) {
             attempts++;
             
-            setSeed(42 + trainDataset.length);
+            const qInstance = targetRegistry.getNextInstance(moduleName, 'train', target.labels, target.constraints || {});
+            const qTargetKey = computeTargetKey(moduleName, 'train', target.labels, target.constraints || {}, qInstance);
+            const { seed: qSeed, hashHex: qHashHex } = computeTargetSeed(qTargetKey, attempts);
+            setSeed(qSeed);
             
             const problemStub = generateWithLabels(generator, target.labels);
 
@@ -406,6 +467,7 @@ async function runModulePipeline(
                                 if (!constraint.values.includes(val)) return false;
                             }
                         }
+                        return true;
                     }
                     return true;
                 });
@@ -421,6 +483,12 @@ async function runModulePipeline(
                 }
                 countForThisTarget++;
 
+                const sInstance = targetRegistry.getNextInstance(moduleName, 'train', target.labels, target.constraints || {});
+                const sTargetKey = computeTargetKey(moduleName, 'train', target.labels, target.constraints || {}, sInstance);
+                const { seed: sSeed, hashHex: sHashHex } = computeTargetSeed(sTargetKey, attempts);
+                setSeed(sSeed);
+                const solutionStub = generateWithLabels(generator, target.labels) || problemStub;
+
                 const problem: AbstractProblem = {
                     ...problemStub,
                     id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
@@ -428,11 +496,25 @@ async function runModulePipeline(
                     tags: Array.from(new Set([...target.labels, ...(problemStub.tags || [])]))
                 };
                 problem.data._permutationParams = target.constraints;
+                (problem as any).targetKey = qTargetKey;
+                (problem as any).targetKeyHash = qHashHex;
+
+                const solutionProblem: AbstractProblem = {
+                    ...solutionStub,
+                    id: `${moduleName}-train-sol-${trainDataset.length + 1}-${solutionStub.id}`,
+                    type: generator.type,
+                    tags: Array.from(new Set([...target.labels, ...(solutionStub.tags || [])]))
+                };
+                solutionProblem.data._permutationParams = target.constraints;
+                (solutionProblem as any).targetKey = sTargetKey;
+                (solutionProblem as any).targetKeyHash = sHashHex;
+
                 (problem as any).matchedBlueprints = newMatchedViews.map(v => ({
                     viewId: v.viewId,
                     constraints: {},
                     instancesPerProblem: 1
                 }));
+                (problem as any).solutionProblem = solutionProblem;
                 trainDataset.push(problem);
 
                 // Generate validation sample
@@ -445,8 +527,18 @@ async function runModulePipeline(
                         let valSuccess = false;
                         while (!valSuccess && valAttempts < 50) {
                             valAttempts++;
-                            setSeed(42 + 10000 + valDataset.length);
+                            const valQInstance = targetRegistry.getNextInstance(moduleName, 'val', target.labels, target.constraints || {});
+                            const valQTargetKey = computeTargetKey(moduleName, 'val', target.labels, target.constraints || {}, valQInstance);
+                            const { seed: valQSeed, hashHex: valQHashHex } = computeTargetSeed(valQTargetKey, valAttempts);
+                            setSeed(valQSeed);
                             const valStub = generateWithLabels(generator, target.labels);
+
+                            const valSInstance = targetRegistry.getNextInstance(moduleName, 'val', target.labels, target.constraints || {});
+                            const valSTargetKey = computeTargetKey(moduleName, 'val', target.labels, target.constraints || {}, valSInstance);
+                            const { seed: valSSeed, hashHex: valSHashHex } = computeTargetSeed(valSTargetKey, valAttempts);
+                            setSeed(valSSeed);
+                            const valSolutionStub = generateWithLabels(generator, target.labels) || valStub;
+
                             if (valStub) {
                                 const valMatchedViews = newMatchedViews.filter(v => 
                                     !valKeys.has(`${valStub.id}-${v.viewId}`) && 
@@ -465,11 +557,26 @@ async function runModulePipeline(
                                         tags: Array.from(new Set([...target.labels, ...(valStub.tags || [])]))
                                     };
                                     valProblem.data._permutationParams = target.constraints;
+                                    (valProblem as any).targetKey = valQTargetKey;
+                                    (valProblem as any).targetKeyHash = valQHashHex;
+
+                                    const activeValSolStub = valSolutionStub || valStub;
+                                    const valSolutionProblem: AbstractProblem = {
+                                        ...activeValSolStub,
+                                        id: `${moduleName}-val-sol-${valDataset.length + 1}-${activeValSolStub.id}`,
+                                        type: generator.type,
+                                        tags: Array.from(new Set([...target.labels, ...(activeValSolStub.tags || [])]))
+                                    };
+                                    valSolutionProblem.data._permutationParams = target.constraints;
+                                    (valSolutionProblem as any).targetKey = valSTargetKey;
+                                    (valSolutionProblem as any).targetKeyHash = valSHashHex;
+
                                     (valProblem as any).matchedBlueprints = valMatchedViews.map(v => ({
                                         viewId: v.viewId,
                                         constraints: {},
                                         instancesPerProblem: 1
                                     }));
+                                    (valProblem as any).solutionProblem = valSolutionProblem;
                                     valDataset.push(valProblem);
                                 }
                             }
@@ -528,7 +635,7 @@ async function main() {
 
     const allTargets: any[] = [];
     if (specDir) {
-        const files = readdirSync(specDir).filter(f => f.endsWith('.ts'));
+        const files = readdirSync(specDir).filter(f => f.endsWith('.ts')).sort();
         for (const file of files) {
             const filePath = resolve(specDir, file);
             const module = await import(pathToFileURL(filePath).href);

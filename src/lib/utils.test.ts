@@ -58,4 +58,13 @@ describe('extractConfig & generateWithLabels', () => {
         expect(result!.id).toContain('mock-id-');
         expect(result!.tags).toContain(result!.data.shape);
     });
+
+    it('should strip http://edugraph.io/edu/ prefix via shortenLabel and formatLabelsKey', () => {
+        const { shortenLabel, formatLabelsKey } = require('./utils.ts');
+        expect(shortenLabel('http://edugraph.io/edu/Numeration')).toBe('Numeration');
+        expect(shortenLabel('CustomTag')).toBe('CustomTag');
+
+        const labels = ['http://edugraph.io/edu/Numeration', 'http://edugraph.io/edu/ArabicNumerals'];
+        expect(formatLabelsKey(labels)).toBe('ArabicNumerals|Numeration');
+    });
 });
