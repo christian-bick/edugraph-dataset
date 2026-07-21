@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
+import { IncomingMessage } from 'http';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import { CompetencyTarget, OntologyTodo } from '../types/ml-engine.ts';
@@ -15,7 +17,12 @@ const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const TEMP_DIR = path.resolve(PROJECT_ROOT, 'temp', 'common-core');
 const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
+const DOMAINS_PATH = path.join(TEMP_DIR, 'domain_groups.json');
 const OUTPUT_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-coverage.json');
+const TREE_OUT_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-tree.json');
+
+const STANDARDS_URL = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/standards.jsonl';
+const DOMAINS_URL = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/domain_groups.json';
 
 // 1. Read package.json to sync ontology version
 const pkgPath = path.resolve(PROJECT_ROOT, 'package.json');
@@ -23,6 +30,198 @@ const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
 const edugraphTsUrl = pkg.dependencies['edugraph-ts'] || '';
 const versionMatch = edugraphTsUrl.match(/\/releases\/download\/(v[\d.]+)\//);
 const version = versionMatch ? versionMatch[1] : 'v0.6.0';
+
+function downloadFile(url: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    console.log(`Downloading ${url} to ${dest}...`);
+    const file = fs.createWriteStream(dest);
+    https.get(url, (response: IncomingMessage) => {
+      if (response.statusCode !== 200) {
+        file.close();
+        fs.unlink(dest, () => {});
+        reject(new Error(`Failed to download file: status code ${response.statusCode}`));
+        return;
+      }
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        resolve();
+      });
+    }).on('error', (err) => {
+      file.close();
+      fs.unlink(dest, () => {});
+      reject(err);
+    });
+  });
+}
+
+function getDomainCat(id: string): string {
+  const parts = id.split('.');
+  const first = parts[0];
+  if (first.startsWith('HS')) return first.charAt(2) || '';
+  if (/^[NAFGS]-/.test(first)) return first.charAt(0);
+  return parts[1] || '';
+}
+
+function findDomainGroupName(domainCat: string, domainGroups: any): string {
+  if (!domainCat) return 'Other';
+  for (const [groupName, groupData] of Object.entries(domainGroups)) {
+    const cats = (groupData as any).domain_cats || [];
+    if (cats.includes(domainCat)) return groupName;
+  }
+  for (const [groupName, groupData] of Object.entries(domainGroups)) {
+    const cats = (groupData as any).domain_cats || [];
+    for (const cat of cats) {
+      if (domainCat.startsWith(cat) || cat.startsWith(domainCat)) return groupName;
+    }
+  }
+  return 'Other';
+}
+
+function getGrade(id: string): string {
+  const first = id.split('.')[0];
+  if (first.startsWith('HS') || /^[NAFGS]-/.test(first)) return 'High School';
+  if (first === 'K') return 'Kindergarten';
+  if (/^[1-8]$/.test(first)) return `Grade ${first}`;
+  return 'Other';
+}
+
+async function ensureStandardsAndTreeData() {
+  if (!fs.existsSync(TEMP_DIR)) {
+    fs.mkdirSync(TEMP_DIR, { recursive: true });
+  }
+  if (!fs.existsSync(STANDARDS_PATH)) {
+    await downloadFile(STANDARDS_URL, STANDARDS_PATH);
+  }
+  if (!fs.existsSync(DOMAINS_PATH)) {
+    await downloadFile(DOMAINS_URL, DOMAINS_PATH);
+  }
+
+  // Generate ccss-tree.json
+  const domainGroups = JSON.parse(fs.readFileSync(DOMAINS_PATH, 'utf-8'));
+  const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
+  const standards: any[] = [];
+  const standardMap: Record<string, any> = {};
+
+  for (const line of standardsLines) {
+    if (line.trim()) {
+      const std = JSON.parse(line);
+      standards.push(std);
+      standardMap[std.id] = std;
+    }
+  }
+
+  const tree: any = {};
+  const gradeOrder = [
+    'Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4',
+    'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'High School'
+  ];
+
+  for (const grade of gradeOrder) {
+    tree[grade] = {};
+    for (const groupName of Object.keys(domainGroups)) {
+      tree[grade][groupName] = {
+        description: domainGroups[groupName].description,
+        domains: {}
+      };
+    }
+    tree[grade]['Other'] = {
+      description: 'Other concepts and miscellaneous standards.',
+      domains: {}
+    };
+  }
+
+  const clusters = standards.filter(s => s.level.toLowerCase() === 'cluster');
+  const standardsList = standards.filter(s => s.level.toLowerCase() === 'standard');
+  const subStandards = standards.filter(s => s.level.toLowerCase() === 'sub-standard');
+
+  const domains: Record<string, any> = {};
+  for (const cluster of clusters) {
+    const parentDomainId = cluster.parent;
+    if (!parentDomainId) continue;
+    const grade = getGrade(cluster.id);
+    const domainCat = getDomainCat(cluster.id);
+    const groupName = findDomainGroupName(domainCat, domainGroups);
+
+    if (!domains[parentDomainId]) {
+      domains[parentDomainId] = {
+        id: parentDomainId,
+        name: `${parentDomainId} - ${groupName}`,
+        grade,
+        group: groupName,
+        clusters: []
+      };
+    }
+  }
+
+  const clusterMap: Record<string, any> = {};
+  for (const cluster of clusters) {
+    clusterMap[cluster.id] = {
+      id: cluster.id,
+      description: cluster.description,
+      cluster_type: cluster.cluster_type || 'major cluster',
+      standards: []
+    };
+    const domainId = cluster.parent;
+    if (domainId && domains[domainId]) {
+      domains[domainId].clusters.push(clusterMap[cluster.id]);
+    }
+  }
+
+  const standardUiMap: Record<string, any> = {};
+  for (const std of standardsList) {
+    standardUiMap[std.id] = {
+      id: std.id,
+      description: std.description,
+      aspects: std.aspects,
+      modeling: std.modeling,
+      subStandards: []
+    };
+    const clusterId = std.parent;
+    if (clusterId && clusterMap[clusterId]) {
+      clusterMap[clusterId].standards.push(standardUiMap[std.id]);
+    }
+  }
+
+  for (const sub of subStandards) {
+    const parentStdId = sub.parent;
+    if (parentStdId && standardUiMap[parentStdId]) {
+      standardUiMap[parentStdId].subStandards.push({
+        id: sub.id,
+        description: sub.description,
+        aspects: sub.aspects,
+        modeling: sub.modeling
+      });
+    }
+  }
+
+  for (const domain of Object.values(domains)) {
+    const { grade, group, id } = domain;
+    if (tree[grade] && tree[grade][group]) {
+      tree[grade][group].domains[id] = {
+        id,
+        name: domain.name,
+        clusters: domain.clusters
+      };
+    }
+  }
+
+  for (const grade of Object.keys(tree)) {
+    for (const groupName of Object.keys(tree[grade])) {
+      if (Object.keys(tree[grade][groupName].domains).length === 0) {
+        delete tree[grade][groupName];
+      }
+    }
+  }
+
+  const coverageDir = path.resolve(PROJECT_ROOT, 'public', 'coverage');
+  if (!fs.existsSync(coverageDir)) {
+    fs.mkdirSync(coverageDir, { recursive: true });
+  }
+
+  fs.writeFileSync(TREE_OUT_PATH, JSON.stringify({ tree, standardsMap: standardMap }, null, 2), 'utf-8');
+  console.log(`[Tree] Saved ccss-tree.json to: ${TREE_OUT_PATH}`);
+}
 
 // Recursively find the parent Cluster ID for a standard
 function findParentClusterId(stdId: string, standardsMap: Record<string, any>): string {
@@ -174,17 +373,15 @@ async function main() {
 
   console.log('--- Initiating CCSS Ontology Mapping Pipeline ---');
 
+  // 1. Ensure standards and tree data exist
+  await ensureStandardsAndTreeData();
+
   // Extract valid Area, Scope, Ability values
   const allAreas = Object.values(Area);
   const allScopes = Object.values(Scope);
   const allAbilities = Object.values(Ability);
 
   // 2. Load CCSS leaf standards
-  if (!fs.existsSync(STANDARDS_PATH)) {
-    console.error(`Error: standards.jsonl not found at ${STANDARDS_PATH}. Run generate:standards-explorer first.`);
-    process.exit(1);
-  }
-
   const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
   const standardsMap: Record<string, any> = {};
   const leafNodes: any[] = [];

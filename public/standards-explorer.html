@@ -89,7 +89,7 @@
         <span class="text-emerald-400 font-semibold ml-1" id="stat-coverage">0%</span>
       </div>
       <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
-        <span class="text-slate-400 font-medium">Missing Gen/View:</span>
+        <span class="text-slate-400 font-medium">Missing Implementation:</span>
         <span class="text-orange-400 font-semibold ml-1" id="stat-missing-gen">0</span>
       </div>
       <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
@@ -129,31 +129,7 @@
               class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
           </div>
           
-          <!-- Filters Accordion Trigger -->
-          <button onclick="toggleFilters()" class="text-xs text-slate-400 flex items-center justify-between hover:text-white transition-colors py-1">
-            <span><i class="fa-solid fa-sliders mr-1.5"></i> Filter by Aspects & Modeling</span>
-            <i id="filters-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
-          </button>
-          
-          <!-- Filter Options -->
-          <div id="filter-options" class="hidden flex flex-col gap-2 pt-1 pb-2 border-t border-slate-800/40">
-            <div class="text-xs text-slate-400 mb-1">Learning Aspects</div>
-            <div class="flex flex-wrap gap-1.5">
-              <button onclick="toggleAspectFilter('conceptual')" id="btn-filter-conceptual" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Conceptual
-              </button>
-              <button onclick="toggleAspectFilter('procedural')" id="btn-filter-procedural" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-blue-500"></span> Procedural
-              </button>
-              <button onclick="toggleAspectFilter('application')" id="btn-filter-application" class="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-purple-500"></span> Application
-              </button>
-            </div>
-            <div class="flex items-center gap-2 mt-2">
-              <input type="checkbox" id="chk-filter-modeling" onchange="toggleModelingFilter()" class="rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-slate-950">
-              <label for="chk-filter-modeling" class="text-[11px] text-slate-400 hover:text-white cursor-pointer select-none">Requires Modeling Aspect</label>
-            </div>
-          </div>
+
         </div>
 
         <!-- Grade Navigation Tabs -->
@@ -177,7 +153,7 @@
               All
             </button>
             <button onclick="filterTasks('DATASET_ENRICHMENT')" id="btn-task-enrich" class="flex-1 py-1.5 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 hover:text-white transition-colors">
-              Gen/View
+              Implementation
             </button>
             <button onclick="filterTasks('ONTOLOGY_EXTENSION')" id="btn-task-onto" class="flex-1 py-1.5 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 hover:text-white transition-colors">
               Ontology
@@ -218,19 +194,7 @@
           <h3 class="text-base font-semibold text-white leading-snug" id="detail-desc">Select a standard from the list to display details.</h3>
         </div>
         
-        <!-- Metadata attributes -->
-        <div class="grid grid-cols-2 gap-2 text-xs border-t border-slate-800/80 pt-3">
-          <div>
-            <span class="text-slate-500 block mb-0.5">Aspects</span>
-            <div id="detail-aspects" class="flex flex-wrap gap-1">
-              <span class="text-slate-400 italic">None specified</span>
-            </div>
-          </div>
-          <div>
-            <span class="text-slate-500 block mb-0.5">Modeling</span>
-            <span id="detail-modeling" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400">FALSE</span>
-          </div>
-        </div>
+
 
         <!-- Mapping details -->
         <div id="detail-mapping-section" class="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs hidden">
@@ -787,11 +751,6 @@
               <span class="px-2 py-0.5 bg-slate-800 border border-slate-700/60 text-slate-400 rounded text-[9px] font-mono tracking-wider">CLUSTER</span>
               <h3 class="text-sm font-semibold text-slate-200 mt-1.5 leading-snug">${cluster.id}: ${cluster.description}</h3>
             </div>
-            <span class="text-[9px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${
-              cluster.cluster_type.includes('major') 
-                ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' 
-                : 'bg-slate-800 text-slate-500'
-            }">${cluster.cluster_type}</span>
           </div>
         `;
 
@@ -810,41 +769,26 @@
             let statusBadge = '';
             if (COVERAGE_DATA && COVERAGE_DATA.coverage && COVERAGE_DATA.coverage[std.id]) {
               const cov = COVERAGE_DATA.coverage[std.id];
-              if (cov.dataset_covered) {
-                statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-emerald-500/5' : 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/5';
-                statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
-              } else if (cov.ontology_covered) {
-                statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-orange-500/5' : 'border-orange-500/30 hover:border-orange-500/50 bg-orange-500/5';
-                statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Gen/View</span>';
-              } else {
+              if (!cov.ontology_covered || (cov.ontology_todos && cov.ontology_todos.length > 0)) {
                 statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-red-500/5' : 'border-red-500/30 hover:border-red-500/50 bg-red-500/5';
                 statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle-xmark mr-0.5"></i> Ontology</span>';
+              } else if (cov.dataset_covered) {
+                statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-emerald-500/5' : 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/5';
+                statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
+              } else {
+                statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-orange-500/5' : 'border-orange-500/30 hover:border-orange-500/50 bg-orange-500/5';
+                statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Implementation</span>';
               }
             }
 
             const stdEl = document.createElement('div');
             stdEl.id = `card-${std.id.replace(/\./g, '_')}`;
             stdEl.className = `p-3.5 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-2.5 ${statusClass}`;
-            
-            // Build aspect badges
-            let aspectBadges = statusBadge;
-            std.aspects.forEach(asp => {
-              let color = 'bg-slate-800 text-slate-400';
-              if (asp.toLowerCase().includes('conceptual')) color = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-              else if (asp.toLowerCase().includes('procedural')) color = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-              else if (asp.toLowerCase().includes('application')) color = 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
-              
-              aspectBadges += `<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold ${color}">${asp}</span>`;
-            });
-
-            if (std.modeling) {
-              aspectBadges += `<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fa-solid fa-cubes mr-0.5"></i> Modeling</span>`;
-            }
 
             stdEl.innerHTML = `
               <div class="flex items-start justify-between gap-3">
                 <span class="text-xs font-mono font-bold text-slate-300">${std.id}</span>
-                <div class="flex items-center gap-1 shrink-0">${aspectBadges}</div>
+                <div class="flex items-center gap-1 shrink-0">${statusBadge}</div>
               </div>
               <p class="text-xs text-slate-300 leading-relaxed">${std.description}</p>
             `;
@@ -854,29 +798,20 @@
               const subsList = document.createElement('div');
               subsList.className = 'border-t border-slate-800/40 pt-2.5 mt-1.5 space-y-2';
               std.subStandards.forEach(sub => {
-                let subBadges = '';
-                sub.aspects.forEach(asp => {
-                  let color = 'bg-slate-800 text-slate-400';
-                  if (asp.toLowerCase().includes('conceptual')) color = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-                  else if (asp.toLowerCase().includes('procedural')) color = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-                  else if (asp.toLowerCase().includes('application')) color = 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
-                  subBadges += '<span class="px-1.5 py-0.5 rounded text-[8px] font-semibold ' + color + '">' + asp + '</span>';
-                });
-
                 let subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-indigo-500/5 ring-1 ring-indigo-500/30' : 'border-slate-800/40 hover:border-slate-700 bg-slate-900/10';
                 let subStatusBadge = '';
                 
                 if (COVERAGE_DATA && COVERAGE_DATA.coverage && COVERAGE_DATA.coverage[sub.id]) {
                   const cov = COVERAGE_DATA.coverage[sub.id];
-                  if (cov.dataset_covered) {
-                    subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-emerald-500/10 ring-1 ring-indigo-500/50' : 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5';
-                    subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
-                  } else if (cov.ontology_covered) {
-                    subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-orange-500/10 ring-1 ring-indigo-500/50' : 'border-orange-500/20 hover:border-orange-500/40 bg-orange-500/5';
-                    subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Gen/View</span>';
-                  } else {
+                  if (!cov.ontology_covered || (cov.ontology_todos && cov.ontology_todos.length > 0)) {
                     subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-red-500/10 ring-1 ring-indigo-500/50' : 'border-red-500/20 hover:border-red-500/40 bg-red-500/5';
                     subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle-xmark mr-0.5"></i> Ontology</span>';
+                  } else if (cov.dataset_covered) {
+                    subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-emerald-500/10 ring-1 ring-indigo-500/50' : 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5';
+                    subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
+                  } else {
+                    subStatusClass = activeStandardId === sub.id ? 'border-indigo-500 bg-orange-500/10 ring-1 ring-indigo-500/50' : 'border-orange-500/20 hover:border-orange-500/40 bg-orange-500/5';
+                    subStatusBadge = '<span class="px-1.5 py-0.5 rounded text-[8px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Implementation</span>';
                   }
                 }
 
@@ -887,9 +822,8 @@
                 subEl.innerHTML = '<div class="flex items-center justify-between text-[11px] font-medium">' +
                     '<div class="flex items-center gap-1.5 font-medium">' +
                       '<span class="font-mono font-semibold text-slate-300">' + sub.id + '</span>' +
-                      subStatusBadge +
                     '</div>' +
-                    '<div class="flex gap-1">' + subBadges + '</div>' +
+                    '<div class="flex gap-1">' + subStatusBadge + '</div>' +
                   '</div>' +
                   '<p class="text-[11px] text-slate-400 leading-normal">' + sub.description + '</p>';
 
@@ -995,18 +929,18 @@
         const badge = document.getElementById('detail-coverage-badge');
         const modBadge = document.getElementById('detail-module-badge');
         
-        if (cov.dataset_covered) {
+        if (!cov.ontology_covered || (cov.ontology_todos && cov.ontology_todos.length > 0)) {
+          badge.textContent = 'MISSING ONTOLOGY';
+          badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20';
+          modBadge.classList.add('hidden');
+        } else if (cov.dataset_covered) {
           badge.textContent = 'COVERED';
           badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
           modBadge.textContent = (cov.generator_module || '').toUpperCase();
           modBadge.classList.remove('hidden');
-        } else if (cov.ontology_covered) {
-          badge.textContent = 'MISSING GEN/VIEW';
-          badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20';
-          modBadge.classList.add('hidden');
         } else {
-          badge.textContent = 'MISSING ONTOLOGY';
-          badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20';
+          badge.textContent = 'MISSING IMPLEMENTATION';
+          badge.className = 'px-2.5 py-0.5 rounded text-[10px] font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20';
           modBadge.classList.add('hidden');
         }
         
@@ -1179,7 +1113,7 @@
             statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-0.5"></i> Covered</span>';
           } else if (cov.ontology_covered) {
             statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-orange-500/5' : 'border-orange-500/30 hover:border-orange-500/50 bg-orange-500/5';
-            statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Gen/View</span>';
+            statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> Implementation</span>';
           } else {
             statusClass = activeStandardId === std.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-red-500/5' : 'border-red-500/30 hover:border-red-500/50 bg-red-500/5';
             statusBadge = '<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-circle-xmark mr-0.5"></i> Ontology</span>';
@@ -1189,24 +1123,11 @@
         const stdEl = document.createElement('div');
         stdEl.id = `card-${std.id.replace(/\./g, '_')}`;
         stdEl.className = `p-3.5 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-2.5 ${statusClass}`;
-        
-        let aspectBadges = statusBadge;
-        std.aspects.forEach(asp => {
-          let color = 'bg-slate-800 text-slate-400';
-          if (asp.toLowerCase().includes('conceptual')) color = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-          else if (asp.toLowerCase().includes('procedural')) color = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-          else if (asp.toLowerCase().includes('application')) color = 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
-          aspectBadges += `<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold ${color}">${asp}</span>`;
-        });
-
-        if (std.modeling) {
-          aspectBadges += `<span class="px-2 py-0.5 rounded text-[9px] leading-none font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fa-solid fa-cubes mr-0.5"></i> Modeling</span>`;
-        }
 
         stdEl.innerHTML = `
           <div class="flex items-start justify-between gap-3">
             <span class="text-xs font-mono font-bold text-slate-300">${std.id}</span>
-            <div class="flex items-center gap-1 shrink-0">${aspectBadges}</div>
+            <div class="flex items-center gap-1 shrink-0">${statusBadge}</div>
           </div>
           <p class="text-xs text-slate-300 leading-relaxed">${std.description}</p>
         `;

@@ -15,7 +15,7 @@
     "generate:dataset": "npx vite-node src/scripts/generate-dataset.ts",
     "test:vqa": "npx vite-node src/scripts/validate-dataset.ts",
     "report:coverage": "npx vite-node src/scripts/generate-coverage-report.ts",
-    "generate:standards-explorer": "npx vite-node src/scripts/generate-standards-explorer.ts",
+    "generate:standards-explorer": "npm run map:standards",
     "map:standards": "npx vite-node src/scripts/map-standards.ts",
     "validate:coverage": "npx vite-node src/scripts/validate-coverage.ts",
     "upload:gcs": "npx vite-node src/scripts/upload-to-gcs.ts",
