@@ -179,9 +179,14 @@ async function main() {
             });
 
             if (matchingViewsForTarget.length > 0) {
-                // Generate a deterministic sample problem to test constraints
-                setSeed(42);
-                const problemStub = generateWithLabels(gen.generator, target.labels);
+                // Generate a deterministic sample problem to test constraints. Retry over a
+                // few fixed seeds: generators may legitimately return null for an unlucky
+                // sample (e.g. tied category counts), which the dataset pipeline retries too.
+                let problemStub = null;
+                for (let seed = 42; seed < 52 && !problemStub; seed++) {
+                    setSeed(seed);
+                    problemStub = generateWithLabels(gen.generator, target.labels);
+                }
 
                 if (problemStub) {
                     const matchedViews = matchingViewsForTarget.filter(viewSpec => {

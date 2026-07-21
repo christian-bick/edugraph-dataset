@@ -395,9 +395,6 @@ const interpretDataBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.MD.C.4: How many more or less in one category than in another ---
-// Note: show-matching-stats may report some permutations as unmatched ("Returned null
-// stub") — the counting-classify-sort generator returns null on tied category counts
-// for its single sample; the dataset pipeline retries and covers these fine.
 const compareDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,

@@ -358,9 +358,6 @@ const classifyCountBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- K.MD.B.3: Sort the categories by count (counts <= 10) ---
-// Note: show-matching-stats may report some permutations as unmatched ("Returned null
-// stub") — the counting-classify-sort generator returns null on tied category counts
-// for its single sample; the dataset pipeline retries and covers these fine.
 const sortByCountBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
