@@ -52,9 +52,11 @@ const NumbersCompareCountingCore = ({ payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit">
             <div className="flex flex-col items-center w-[480px]">
-                <div className="text-[1.4rem] font-bold text-slate-700 mb-[25px] text-center leading-relaxed font-sans">
-                    {promptText}
-                </div>
+                {!isSolutionView && (
+                    <div className="text-[1.4rem] font-bold text-slate-700 mb-[25px] text-center leading-relaxed font-sans">
+                        {promptText}
+                    </div>
+                )}
                 
                 <div 
                     className="relative w-[360px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-5"

@@ -110,9 +110,11 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="flex flex-col items-center w-[480px]">
-                <div className="text-[1.4rem] font-bold text-slate-700 mb-5 text-center leading-relaxed">
-                    {promptText}
-                </div>
+                {!isSolutionView && (
+                    <div className="text-[1.4rem] font-bold text-slate-700 mb-5 text-center leading-relaxed">
+                        {promptText}
+                    </div>
+                )}
                 
                 <div className="relative w-[450px] h-[160px] bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden mb-[25px]">
                     {positions.map((pos, i) => (

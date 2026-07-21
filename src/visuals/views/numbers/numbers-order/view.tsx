@@ -25,7 +25,12 @@ const NumbersOrderCore = ({ config, payload }: CoreProps) => {
     const arrowSymbol = isDesc ? '↘' : '↗';
 
     return (
-        <div className="flex justify-center items-center p-5 bg-white w-fit">
+        <div className="flex flex-col items-center p-5 bg-white w-fit">
+            {!isSolutionView && (
+                <div className="text-[1.2rem] font-bold text-slate-700 mb-4 text-center font-sans">
+                    Arrange the numbers in {isDesc ? 'descending' : 'ascending'} order:
+                </div>
+            )}
             <div className="flex flex-row items-center gap-[15px]">
                 <div className="flex gap-2.5 p-2.5 border-2 border-slate-200 rounded-xl bg-slate-50">
                     {data.numbers.map((n, i) => (

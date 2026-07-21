@@ -2,7 +2,8 @@
 
 #### Visual Layout & Rendering Requirements
 1. **Instruction:**
-   - The question text "How many objects are there?" must be clearly visible above the canvas.
+   - In **Question Mode (`_mode-Q`)**, the question text "How many objects are there?" must be clearly visible above the canvas.
+   - In **Solution Mode (`_mode-S`)**, instruction text headers must **NOT** be displayed.
 2. **Object Container & Placement:**
    - A box representing the canvas must be centered.
    - The objects rendered within the container must correspond to the correct SVG icon selected from the list (circle, square, triangle, etc.).

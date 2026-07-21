@@ -49,7 +49,7 @@ export const NumbersWriteCountCore = ({ config: _config, payload }: CoreProps) =
             <div className="flex items-center gap-[30px] flex-wrap">
                 <DoubleTenFrame number={number} />
                 <div className="flex items-center gap-[15px]">
-                    <div className="text-[2rem] font-bold text-slate-700">Count:</div>
+                    {!isSolutionView && <div className="text-[2rem] font-bold text-slate-700">Count:</div>}
                     <div className={`border-[2.5px] rounded-xl w-[75px] h-[75px] flex justify-center items-center text-[2.5rem] font-mono ${
                         isSolutionView 
                             ? 'text-green-600 border-green-600 bg-green-50 font-bold' 

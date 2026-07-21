@@ -42,9 +42,11 @@ const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit">
             <div className="flex flex-col items-center w-[480px]">
-                <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-relaxed font-sans">
-                    Are there more items in Group A, Group B, or are they the same?
-                </div>
+                {!isSolutionView && (
+                    <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-relaxed font-sans">
+                        Are there more items in Group A, Group B, or are they the same?
+                    </div>
+                )}
                 
                 <div className="w-full flex flex-col gap-[25px] bg-slate-50 p-5 rounded-xl border-[1.5px] border-slate-200 mb-[25px]">
                     <div className="flex items-center h-[50px]">

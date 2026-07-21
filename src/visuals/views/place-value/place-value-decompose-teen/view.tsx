@@ -23,9 +23,11 @@ const PlaceValueDecomposeTeenCore = ({ config: _config, payload }: CoreProps) =>
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit">
             <div className="flex flex-col items-center w-[480px]">
-                <div className="text-[1.35rem] font-bold text-slate-700 mb-5 text-center font-sans">
-                    Decompose the teen number.
-                </div>
+                {!isSolutionView && (
+                    <div className="text-[1.35rem] font-bold text-slate-700 mb-5 text-center font-sans">
+                        Decompose the teen number.
+                    </div>
+                )}
                 
                 <div className="flex gap-[20px] bg-slate-50 p-[15px] border-[1.5px] border-dashed border-slate-300 rounded-xl mb-[25px]">
                     <div className="flex flex-col items-center gap-1.5">

@@ -55,9 +55,11 @@ const CountingObjectsCountOutCore = ({ config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[25px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit">
             <div className="flex flex-col items-center w-[480px]">
-                <div className="text-2xl font-bold text-slate-700 mb-5 text-center font-sans">
-                    Color exactly {numObjects} objects.
-                </div>
+                {!isSolutionView && (
+                    <div className="text-2xl font-bold text-slate-700 mb-5 text-center font-sans">
+                        Color exactly {numObjects} objects.
+                    </div>
+                )}
                 
                 <div className="relative w-[450px] h-[300px] bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
                     {positions.map((pos, i) => {

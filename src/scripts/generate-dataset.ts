@@ -108,6 +108,8 @@ async function renderDatasetSplit(
     const processQueue = async () => {
         const context = await browser.newContext();
         const page = await context.newPage();
+        page.on('pageerror', err => console.error('Browser pageerror:', err.message));
+        page.on('console', msg => { if (msg.type() === 'error') console.error('Browser console error:', msg.text()); });
         let currentViewUrl = '';
 
         try {
@@ -121,6 +123,7 @@ async function renderDatasetSplit(
                 
                 if (currentViewUrl !== url) {
                     await page.goto(url, { waitUntil: 'networkidle' });
+                    await page.waitForFunction(() => typeof (window as any).renderView === 'function');
                     currentViewUrl = url;
                 }
 
