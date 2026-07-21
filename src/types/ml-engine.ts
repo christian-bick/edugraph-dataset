@@ -8,7 +8,7 @@ export interface AbstractProblem<TData = any> {
     /** A unique identifier representing the underlying problem (e.g., '15-subtract-7') */
     id: string;
     /** The type of problem to route it to compatible renderers */
-    type: 'arithmetic' | 'counting' | 'measurement' | 'time' | 'ordering' | 'comparison' | 'writing' | 'geometry';
+    type: 'arithmetic' | 'counting' | 'measurement' | 'time' | 'ordering' | 'comparison' | 'writing' | 'shapes';
     /** The core mathematical data. e.g. { num1: 15, num2: 7, operator: 'subtract', answer: 8 } */
     data: TData;
     /** Pedagogical tags for dataset balancing (e.g., ['has_zero', 'requires_carry', 'negative_result']) */

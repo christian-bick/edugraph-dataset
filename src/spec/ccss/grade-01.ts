@@ -451,7 +451,7 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.G.A.2: Compose two-dimensional shapes into composite shapes ---
-// TODO [1.G.A.2]: The geometry-compose-shapes generator only supports rectangle and
+// TODO [1.G.A.2]: The shapes-compose-shapes generator only supports rectangle and
 // square as composition targets (built from triangles). Trapezoids (Area.Trapezoid),
 // half-circles and quarter-circles (no ontology concept) as well as three-dimensional
 // composition (cubes, prisms, cones, cylinders) are not supported either.

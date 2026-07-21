@@ -377,7 +377,7 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
 // ==========================================
 
 // --- K.G.A.1: Describe objects in the environment using names of shapes ---
-// TODO [K.G.A.1]: The geometry-env-shapes generator only supports circle, square and
+// TODO [K.G.A.1]: The shapes-env-shapes generator only supports circle, square and
 // rectangle; further environment shapes (e.g. Area.Triangle, Area.Hexagon) are not
 // supported yet.
 const envShapesBuilder = new DatasetPermutationBuilder()
@@ -500,7 +500,7 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- K.G.B.6: Compose simple shapes to form larger shapes ---
-// TODO [K.G.B.6]: The geometry-compose-shapes generator only supports rectangle and
+// TODO [K.G.B.6]: The shapes-compose-shapes generator only supports rectangle and
 // square as composition targets (built from triangles); other target shapes
 // (e.g. [Area.Triangle], [Area.Hexagon]) are not supported.
 const composeShapesBuilder = new DatasetPermutationBuilder()
