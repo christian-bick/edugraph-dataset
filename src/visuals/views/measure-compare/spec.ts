@@ -16,15 +16,6 @@ export const spec: ViewSpec = {
 };
 
 
-export const MeasureCompareViewSchema = {
-    attribute: [
-        ['length', 'height', 'weight'],
-        (labels: string[]) => {
-            if (labels.includes(Scope.LengthMeasurement)) return 'height';
-            if (labels.includes(Scope.WeightMeasurement)) return 'weight';
-            return 'length';
-        }
-    ]
-} as const;
+export const MeasureCompareViewSchema = {} as const;
 
 export type MeasureCompareViewConfig = ConfigFromSchema<typeof MeasureCompareViewSchema>;
