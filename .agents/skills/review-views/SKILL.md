@@ -1,9 +1,14 @@
 ---
 name: review-views
-description: "/review-views - Review all view.tsx files in visuals/views to ensure standard problem data validation via validateProblemData, catch validation errors to prevent browser page hangs, and ensure no silent fallbacks are used."
+description: "/review-views [{viewName}] - Review view.tsx files in visuals/views (for a specific view module, or all views if omitted) to ensure standard problem payload validation."
 ---
 
-Review the `view.tsx` files across all visual view modules. The goal is to enforce the standardized payload validation contract and prevent browser-level freezes/hangs during headless dataset generation:
+Review the `view.tsx` files for the specified view module (or across all visual view modules if `{viewName}` is omitted). The goal is to enforce the standardized payload validation contract and prevent browser-level freezes/hangs during headless dataset generation:
+
+## Scope Resolution
+- **Specific Leaf Module**: If `{viewName}` matches a specific leaf view module ID (e.g., `/review-views operations-vertical`), restrict the review strictly to that leaf view module.
+- **Parent Category Module**: If `{viewName}` matches a parent category directory name (e.g., `/review-views operations` or `/review-views shape`), review all leaf view modules under that category folder.
+- **All Modules**: If `{viewName}` is omitted (e.g., `/review-views`), discover and review all view modules across `src/visuals/views/`.
 
 1. **Strict Payload Validation**:
    - Ensure `validateProblemData` is imported from `../../helpers/validation.ts` (with correct relative path).

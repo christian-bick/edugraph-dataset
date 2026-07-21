@@ -1,11 +1,16 @@
 ---
 name: review-checklists
-description: "/review-checklists - Review all checklist.md files in generators and views to ensure separation of concerns between math logic (generators) and visual rendering (views)."
+description: "/review-checklists [{moduleName}] - Review checklist.md files in generators and views (for a specific module, or all modules if omitted) to ensure separation of concerns."
 ---
 
-Review the `checklist.md` files across all generator and view modules. The goal is to enforce a clean separation of concerns by ensuring that:
+Review the `checklist.md` files for the specified generator or view module (or across all modules if `{moduleName}` is omitted). The goal is to enforce a clean separation of concerns by ensuring that:
 1. **Generators' checklists** specify *only* abstract mathematical and logic rules.
 2. **Views' checklists** specify *only* visual layout, rendering, and interaction rules.
+
+## Scope Resolution
+- **Specific Leaf Module**: If `{moduleName}` matches a specific leaf module ID (e.g., `/review-checklists arithmetic-ops-pairs` or `/review-checklists operations-vertical`), restrict the review strictly to that leaf module and its category parent checklist.
+- **Parent Category Module**: If `{moduleName}` matches a parent category directory name (e.g., `/review-checklists arithmetic` or `/review-checklists shape`), review the parent category `checklist.md` and all leaf module checklists under that category folder.
+- **All Modules**: If `{moduleName}` is omitted (e.g., `/review-checklists`), discover and review all modules across `src/generators/` and `src/visuals/views/`.
 
 Follow these instructions strictly during the review:
 

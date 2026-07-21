@@ -1,11 +1,16 @@
 ---
 name: review-specs
-description: "/review-specs - Review all spec.ts files in generators and views to ensure clean separation between mathematical parameters (generators) and visual layout parameters (views)."
+description: "/review-specs [{moduleName}] - Review spec.ts files in generators and views (for a specific module, or all modules if omitted) to ensure clean separation of concerns."
 ---
 
-Review the `spec.ts` files across all generator and view modules. The goal is to enforce a clean separation of concerns by ensuring that:
+Review the `spec.ts` files for the specified generator or view module (or across all generator and view modules if `{moduleName}` is omitted). The goal is to enforce a clean separation of concerns by ensuring that:
 1. **Generators' specs** contain *only* abstract mathematical and logical schemas.
 2. **Views' specs** contain *only* visual layout and rendering configuration schemas.
+
+## Scope Resolution
+- **Specific Leaf Module**: If `{moduleName}` matches a specific leaf module ID (e.g., `/review-specs arithmetic-ops-pairs` or `/review-specs operations-vertical`), restrict the spec review strictly to that leaf module.
+- **Parent Category Module**: If `{moduleName}` matches a parent category directory name (e.g., `/review-specs arithmetic` or `/review-specs shape`), review all spec files for leaf modules under that category folder.
+- **All Modules**: If `{moduleName}` is omitted (e.g., `/review-specs`), discover and review all spec files across `src/generators/` and `src/visuals/views/`.
 
 Spec validation (including parameter label vs. `generalLabels` overlap checking and duplicate parameterization checking) can be automatically executed by running the spec validation script:
 `npm run check:specs` (running [validate-specs.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/scripts/validate-specs.ts), which dumps validation logs to the ignored file `temp/check_output.txt`).

@@ -1,9 +1,14 @@
 ---
 name: review-generators
-description: "/review-generators - Review all generator.ts files to ensure standard configuration validation throws GeneratorValidationError and tags are correctly returned."
+description: "/review-generators [{moduleName}] - Review generator.ts files (for a specific generator module, or all modules if omitted) to ensure standard configuration validation."
 ---
 
-Review the `generator.ts` files across all generator modules. The goal is to enforce the centralized validation strategy and correct tag propagation:
+Review the `generator.ts` files for the specified generator module (or across all generator modules if `{moduleName}` is omitted). The goal is to enforce the centralized validation strategy and correct tag propagation:
+
+## Scope Resolution
+- **Specific Leaf Module**: If `{moduleName}` matches a specific leaf module ID (e.g., `/review-generators arithmetic-ops-pairs`), restrict the review strictly to that leaf module.
+- **Parent Category Module**: If `{moduleName}` matches a parent category directory name (e.g., `/review-generators arithmetic` or `/review-generators shape`), review all leaf modules under that category folder.
+- **All Modules**: If `{moduleName}` is omitted (e.g., `/review-generators`), discover and review all generator modules across `src/generators/`.
 
 1. **Centralized Configuration Validation**:
    - Ensure `validateConfigFields` is imported from `../../lib/errors.ts` (with correct relative path).
