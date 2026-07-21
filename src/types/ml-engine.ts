@@ -96,6 +96,16 @@ export interface CompetencyTarget {
     id: string;
     labels: string[];
     constraints?: Record<string, any>;
+    explanation?: string;
+}
+
+/**
+ * A missing ontology concept task defined in a spec module.
+ */
+export interface OntologyTodo {
+    standardId: string;
+    title: string;
+    description: string;
 }
 
 /**

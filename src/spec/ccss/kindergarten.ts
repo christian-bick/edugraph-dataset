@@ -1,33 +1,27 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { CompetencyTarget } from '../../types/ml-engine.ts';
+import { CompetencyTarget, OntologyTodo } from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Counting and Cardinality (K.CC)
 // ==========================================
 
 // --- K.CC.A.1: Count to 100 by ones and by tens ---
-// TODO [K.CC.A.1]: Not coverable. Counting generators cap at Scope.NumbersSmaller20 and
-// there is no generator/view for the rote count sequence to 100 or for skip counting
-// by tens (Scope.DerivedCount). Reference permutation:
-// const countTo100Builder = new DatasetPermutationBuilder()
-//     .addLabels([
-//         Area.Numeration,
-//         Scope.ArabicNumerals,
-//         Scope.NumbersSmaller100,
-//         Scope.NumbersWithoutZero,
-//         Scope.NumbersWithoutNegatives,
-//         Ability.ProcedureExecution
-//     ])
-//     .applyLabelVariants([
-//         [Scope.AdditiveCount], // count by ones
-//         [Scope.DerivedCount]   // skip count by tens
-//     ]);
+const countTo100Builder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Numeration,
+        Scope.ArabicNumerals,
+        Scope.NumbersSmaller100,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.AdditiveCount], // count by ones
+        [Scope.DerivedCount]   // skip count by tens
+    ]);
 
 // --- K.CC.A.2: Count forward beginning from a given number ---
-// TODO [K.CC.A.2]: Only ranges up to 20 are coverable (counting-inc-dec generator caps
-// at Scope.NumbersSmaller20); counting forward within the full known sequence (up to 100)
-// is not.
 const countForwardBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Numeration,
@@ -44,8 +38,6 @@ const countForwardBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- K.CC.A.3: Write numbers from 0 to 20 (stroke writing) ---
-// TODO [K.CC.A.3]: The writing generator declares a range cap of Scope.NumbersSmaller10,
-// so the teen numbers (11-20) required by the standard are not generated yet.
 const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
@@ -137,11 +129,7 @@ const oneLargerBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
-// --- K.CC.B.5: Count to answer "how many?" (line/circle up to 20, scattered up to 10)
-//     and count out a given number of objects (covered by the count-out view matching
-//     the same permutations) ---
-// TODO [K.CC.B.5]: The rectangular array arrangement (Scope.BoxArrangement) is not
-// supported by the counting views (only linear/circular/scattered arrangements).
+// --- K.CC.B.5: Count to answer "how many?" ---
 const howManyBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Numeration,
@@ -156,6 +144,22 @@ const howManyBuilder = new DatasetPermutationBuilder()
         [Scope.LinearArrangement, Scope.NumbersSmaller20],
         [Scope.CircularArrangement, Scope.NumbersSmaller20],
         [Scope.ScatteredArrangement, Scope.NumbersSmaller10]
+    ]);
+
+const boxArrangementBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Numeration,
+        Scope.ArabicNumerals,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Scope.AdditiveCount,
+        Scope.PhysicalNumbers,
+        Scope.BoxArrangement,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersSmaller10],
+        [Scope.NumbersSmaller20]
     ]);
 
 // --- K.CC.C.6: Compare the number of objects in two groups (up to 10 objects) ---
@@ -198,26 +202,23 @@ const compareNumeralsBuilder = new DatasetPermutationBuilder()
 // ==========================================
 
 // --- K.OA.A.1: Represent addition and subtraction with objects/drawings ---
-// TODO [K.OA.A.1]: Not coverable. The operations-representation view exists only as a
-// checklist stub (no spec.ts/view.tsx), so there is no view rendering object/drawing
-// representations of addition and subtraction. Reference permutation:
-// const representOperationsBuilder = new DatasetPermutationBuilder()
-//     .addLabels([
-//         Scope.ArabicNumerals,
-//         Scope.Base10,
-//         Scope.NumbersWithoutNegatives,
-//         Scope.NumbersSmaller10,
-//         Scope.PhysicalNumbers,
-//         Ability.ProcedureExecution
-//     ])
-//     .applyLabelVariants([
-//         [Area.Addition],
-//         [Area.Subtraction]
-//     ])
-//     .applyLabelVariants([
-//         [Scope.NumbersWithZero],
-//         [Scope.NumbersWithoutZero]
-//     ]);
+const representOperationsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller10,
+        Scope.PhysicalNumbers,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Area.Addition],
+        [Area.Subtraction]
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersWithZero],
+        [Scope.NumbersWithoutZero]
+    ]);
 
 // --- K.OA.A.2: Solve addition and subtraction word problems within 10 ---
 const wordProblemsBuilder = new DatasetPermutationBuilder()
@@ -265,8 +266,6 @@ const makeTenBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- K.OA.A.5: Fluently add and subtract within 5 ---
-// TODO [K.OA.A.5]: The ontology has no Scope.NumbersSmaller5, so the "within 5"
-// restriction cannot be expressed; permutations use Scope.NumbersSmaller10 instead.
 const fluencyBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ArabicNumerals,
@@ -288,9 +287,7 @@ const fluencyBuilder = new DatasetPermutationBuilder()
 // 3. Number and Operations in Base Ten (K.NBT)
 // ==========================================
 
-// --- K.NBT.A.1: Compose and decompose numbers 11-19 into ten ones and further ones
-//     (composition and decomposition are covered by the two teen place-value views
-//     matching the same permutation) ---
+// --- K.NBT.A.1: Teen numbers ---
 const teenNumbersBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Difference,
@@ -308,7 +305,7 @@ const teenNumbersBuilder = new DatasetPermutationBuilder()
 // 4. Measurement and Data (K.MD)
 // ==========================================
 
-// --- K.MD.A.1: Describe measurable attributes of objects (length, weight) ---
+// --- K.MD.A.1: Describe measurable attributes of objects ---
 const measurableAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringObjects,
@@ -335,7 +332,7 @@ const compareAttributesBuilder = new DatasetPermutationBuilder()
         [Scope.Less]
     ]);
 
-// --- K.MD.B.3: Classify objects into categories and count them (counts <= 10) ---
+// --- K.MD.B.3: Classify objects into categories and count them ---
 const classifyCountBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Numeration,
@@ -352,7 +349,7 @@ const classifyCountBuilder = new DatasetPermutationBuilder()
         []
     ]);
 
-// --- K.MD.B.3: Sort the categories by count (counts <= 10) ---
+// --- K.MD.B.3: Sort the categories by count ---
 const sortByCountBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
@@ -377,9 +374,6 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
 // ==========================================
 
 // --- K.G.A.1: Describe objects in the environment using names of shapes ---
-// TODO [K.G.A.1]: The shape-env-shapes generator only supports circle, square and
-// rectangle; further environment shapes (e.g. Area.Triangle, Area.Hexagon) are not
-// supported yet.
 const envShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
@@ -391,9 +385,17 @@ const envShapesBuilder = new DatasetPermutationBuilder()
         [Area.Rectangle]
     ]);
 
-// --- K.G.A.1: Describe relative positions of objects (above, below, beside, behind) ---
-// TODO [K.G.A.1]: "in front of" and "next to" (e.g. Scope.Ahead) are not supported by
-// the shape-position generator (only Above/Below/Beside/Behind).
+const envShapesOtherBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Area.Triangle],
+        [Area.Hexagon]
+    ]);
+
+// --- K.G.A.1: Describe relative positions of objects ---
 const positionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.SpatialModelling,
@@ -406,7 +408,16 @@ const positionsBuilder = new DatasetPermutationBuilder()
         [Scope.Behind]
     ]);
 
-// --- K.G.A.2: Correctly name shapes regardless of orientation or size ---
+const positionsAheadBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.SpatialModelling,
+        Ability.SpatialInterpretation
+    ])
+    .applyLabelVariants([
+        [Scope.Ahead]
+    ]);
+
+// --- K.G.A.2: Correctly name shapes ---
 const shapeNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
@@ -424,7 +435,7 @@ const shapeNamingBuilder = new DatasetPermutationBuilder()
         [Area.Cylinder]
     ]);
 
-// --- K.G.A.3: Identify shapes as two-dimensional or three-dimensional ---
+// --- K.G.A.3: Identify shapes as 2D or 3D ---
 const classifyDimBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
@@ -443,7 +454,7 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
         [Area.Sphere]
     ]);
 
-// --- K.G.B.4: Analyze and compare shapes (number of sides/vertices) ---
+// --- K.G.B.4: Analyze and compare shapes ---
 const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
@@ -459,7 +470,7 @@ const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
         [Area.Circle]
     ]);
 
-// --- K.G.B.4: Find shapes sharing an attribute (informal similarities/differences) ---
+// --- K.G.B.4: Find shapes sharing an attribute ---
 const sameAttributeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ObjectSorting,
@@ -472,7 +483,7 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
         [Area.Rectangle]
     ]);
 
-// --- K.G.B.5: Model shapes by building them from components ---
+// --- K.G.B.5: Model shapes by building them ---
 const buildShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
@@ -499,10 +510,7 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
         [Area.Triangle]
     ]);
 
-// --- K.G.B.6: Compose simple shapes to form larger shapes ---
-// TODO [K.G.B.6]: The shapes-compose-shapes generator only supports rectangle and
-// square as composition targets (built from triangles); other target shapes
-// (e.g. [Area.Triangle], [Area.Hexagon]) are not supported.
+// --- K.G.B.6: Compose simple shapes ---
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,
@@ -513,7 +521,18 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
         [Area.Square]
     ]);
 
-export const KindergartenSpec: CompetencyTarget[] = [
+const composeShapesOtherBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeComposition,
+        Ability.ConceptComposition
+    ])
+    .applyLabelVariants([
+        [Area.Triangle],
+        [Area.Hexagon]
+    ]);
+
+// Standard exports following universal convention
+export const spec: CompetencyTarget[] = [
     // K.CC - Counting and Cardinality
     ...toTargets('K.CC.A.2-count-forward', countForwardBuilder),
     ...toTargets('K.CC.A.3-write-numerals', writeNumeralsBuilder),
@@ -548,3 +567,25 @@ export const KindergartenSpec: CompetencyTarget[] = [
     ...toTargets('K.G.B.5-draw-shapes', drawShapesBuilder),
     ...toTargets('K.G.B.6-compose-shapes', composeShapesBuilder)
 ];
+
+export const implementationTodos: CompetencyTarget[] = [
+    ...toTargets('K.CC.A.1-count-to-100', countTo100Builder, 'Counting generators cap at Scope.NumbersSmaller20 and there is no generator/view for the rote count sequence to 100 or for skip counting by tens (Scope.DerivedCount).'),
+    ...toTargets('K.CC.B.5-box-arrangement', boxArrangementBuilder, 'The rectangular array arrangement (Scope.BoxArrangement) is not supported by the counting views (only linear/circular/scattered arrangements).'),
+    ...toTargets('K.OA.A.1-represent-operations', representOperationsBuilder, 'The operations-representation view exists only as a checklist stub (no spec.ts/view.tsx), so there is no view rendering object/drawing representations of addition and subtraction.'),
+    ...toTargets('K.G.A.1-env-shapes-other', envShapesOtherBuilder, 'The shape-env-shapes generator only supports circle, square and rectangle; further environment shapes (e.g. Area.Triangle, Area.Hexagon) are not supported yet.'),
+    ...toTargets('K.G.A.1-positions-ahead', positionsAheadBuilder, '"in front of" and "next to" (e.g. Scope.Ahead) are not supported by the shape-position generator (only Above/Below/Beside/Behind).'),
+    ...toTargets('K.G.B.6-compose-shapes-other', composeShapesOtherBuilder, 'The shapes-compose-shapes generator only supports rectangle and square as composition targets (built from triangles); other target shapes (e.g. Area.Triangle, Area.Hexagon) are not supported.')
+];
+
+export const ontologyTodos: OntologyTodo[] = [
+    {
+        standardId: 'K.OA.A.5',
+        title: 'Scope.NumbersSmaller5',
+        description: 'The ontology has no Scope.NumbersSmaller5, so the "within 5" restriction cannot be expressed.'
+    }
+];
+
+// Backwards-compatibility aliases
+export const KindergartenSpec = spec;
+export const KindergartenImplementationTodos = implementationTodos;
+export const KindergartenOntologyTodos = ontologyTodos;

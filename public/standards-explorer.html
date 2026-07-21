@@ -257,6 +257,19 @@
               <span class="text-slate-400 italic text-[10px]">None</span>
             </div>
           </div>
+          <!-- Expandable Competencies Breakdown -->
+          <div class="border-t border-slate-800/80 pt-2.5 mt-1">
+            <button onclick="toggleCompetenciesBreakdown()" class="w-full text-left flex items-center justify-between text-slate-400 hover:text-white transition-colors py-1">
+              <span class="font-semibold text-[11px] flex items-center gap-1.5">
+                <i class="fa-solid fa-cubes-stacked text-indigo-400"></i>
+                Competency Permutations (<span id="detail-competencies-count">0</span>)
+              </span>
+              <i id="competencies-chevron" class="fa-solid fa-chevron-down text-[9px] transition-transform"></i>
+            </button>
+            <div id="detail-competencies-breakdown" class="hidden mt-2 space-y-2 max-h-60 overflow-y-auto pr-1">
+              <!-- Rendered per competency permutation -->
+            </div>
+          </div>
         </div>
       </div>
 
@@ -632,6 +645,14 @@
     function toggleModelingFilter() {
       requireModeling = document.getElementById('chk-filter-modeling').checked;
       runSearch();
+    }
+
+    // Toggle Competencies Breakdown
+    function toggleCompetenciesBreakdown() {
+      const breakdown = document.getElementById('detail-competencies-breakdown');
+      const chev = document.getElementById('competencies-chevron');
+      breakdown.classList.toggle('hidden');
+      chev.classList.toggle('rotate-180');
     }
 
     // Render grid tabs for grades
@@ -1020,6 +1041,75 @@
           });
         } else {
           abilsDiv.innerHTML = '<span class="text-slate-500 italic text-[10px]">None</span>';
+        }
+
+        // Render competencies permutations breakdown
+        const compBreakdown = document.getElementById('detail-competencies-breakdown');
+        const compCount = document.getElementById('detail-competencies-count');
+        compBreakdown.innerHTML = '';
+
+        if ((cov.competencies && cov.competencies.length > 0) || (cov.implementation_todos && cov.implementation_todos.length > 0) || (cov.ontology_todos && cov.ontology_todos.length > 0)) {
+          const totalPerms = (cov.competencies ? cov.competencies.length : 0) + (cov.implementation_todos ? cov.implementation_todos.length : 0);
+          compCount.textContent = totalPerms;
+
+          // Render active implemented permutations
+          if (cov.competencies) {
+            cov.competencies.forEach((perm, idx) => {
+              const permDiv = document.createElement('div');
+              permDiv.className = 'p-2 rounded bg-slate-950/80 border border-slate-800/80 space-y-1';
+              
+              let badgesHtml = '';
+              perm.forEach(iri => {
+                const shortName = iri.split('/').pop();
+                let badgeStyle = 'bg-slate-900 text-slate-300 border-slate-800';
+                if (cov.matched_areas && cov.matched_areas.includes(iri)) {
+                  badgeStyle = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30';
+                } else if (cov.matched_scopes && cov.matched_scopes.includes(iri)) {
+                  badgeStyle = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
+                } else if (cov.matched_abilities && cov.matched_abilities.includes(iri)) {
+                  badgeStyle = 'bg-amber-500/10 text-amber-300 border-amber-500/30';
+                }
+                badgesHtml += '<span title="' + iri + '" class="px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 ' + badgeStyle + '">' + shortName + '</span>';
+              });
+
+              permDiv.innerHTML = '<div class="text-[9px] font-mono text-emerald-400 font-semibold mb-1 flex items-center justify-between"><span>Permutation #' + (idx + 1) + '</span><span class="text-[8px] px-1 py-0.2 bg-emerald-500/10 border border-emerald-500/20 rounded">IMPLEMENTED</span></div>' +
+                '<div class="flex flex-wrap gap-0.5">' + badgesHtml + '</div>';
+              compBreakdown.appendChild(permDiv);
+            });
+          }
+
+          // Render implementation TODOs
+          if (cov.implementation_todos && cov.implementation_todos.length > 0) {
+            cov.implementation_todos.forEach((todo, idx) => {
+              const permDiv = document.createElement('div');
+              permDiv.className = 'p-2 rounded bg-orange-950/20 border border-orange-500/30 space-y-1';
+              
+              let badgesHtml = '';
+              todo.labels.forEach((iri) => {
+                const shortName = iri.split('/').pop();
+                badgesHtml += '<span title="' + iri + '" class="px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 bg-orange-500/10 text-orange-300 border-orange-500/30">' + shortName + '</span>';
+              });
+
+              permDiv.innerHTML = '<div class="text-[9px] font-mono text-orange-400 font-semibold mb-1 flex items-center justify-between"><span>Pending Permutation #' + (idx + 1) + '</span><span class="text-[8px] px-1 py-0.2 bg-orange-500/10 border border-orange-500/20 rounded">GEN/VIEW TODO</span></div>' +
+                '<div class="flex flex-wrap gap-0.5 mb-1">' + badgesHtml + '</div>' +
+                '<p class="text-[10px] text-orange-300/80 italic leading-snug">' + todo.explanation + '</p>';
+              compBreakdown.appendChild(permDiv);
+            });
+          }
+
+          // Render ontology TODOs
+          if (cov.ontology_todos && cov.ontology_todos.length > 0) {
+            cov.ontology_todos.forEach((todo) => {
+              const permDiv = document.createElement('div');
+              permDiv.className = 'p-2 rounded bg-red-950/20 border border-red-500/30 space-y-1';
+              permDiv.innerHTML = '<div class="text-[9px] font-mono text-red-400 font-semibold mb-1 flex items-center justify-between"><span>' + todo.title + '</span><span class="text-[8px] px-1 py-0.2 bg-red-500/10 border border-red-500/20 rounded">ONTOLOGY TODO</span></div>' +
+                '<p class="text-[10px] text-red-300/80 italic leading-snug">' + todo.description + '</p>';
+              compBreakdown.appendChild(permDiv);
+            });
+          }
+        } else {
+          compCount.textContent = '0';
+          compBreakdown.innerHTML = '<span class="text-slate-500 italic text-[10px]">No competency permutations defined</span>';
         }
       } else {
         mapSection.classList.add('hidden');

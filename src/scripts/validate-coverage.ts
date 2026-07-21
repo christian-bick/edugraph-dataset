@@ -134,7 +134,46 @@ function runValidation() {
       }
     }
 
-    // C. Verify cluster_id exists in standards.jsonl
+    // C. Verify competencies list of flat lists and their ontology URIs
+    if (std.competencies !== undefined) {
+      if (!Array.isArray(std.competencies)) {
+        result.errors.push(`[Competencies Error] Standard "${id}" competencies is not an array`);
+        result.passed = false;
+      } else {
+        for (let idx = 0; idx < std.competencies.length; idx++) {
+          const comp = std.competencies[idx];
+          if (!Array.isArray(comp)) {
+            result.errors.push(`[Competencies Error] Standard "${id}" competency at index ${idx} is not a flat list array`);
+            result.passed = false;
+          } else {
+            for (const labelIri of comp) {
+              if (typeof labelIri !== 'string' || !rdfNodes[labelIri]) {
+                result.errors.push(`[Ontology Error] Standard "${id}" competency at index ${idx} references invalid ontology URI: "${labelIri}"`);
+                result.passed = false;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // D. Verify implementation_todos structure
+    if (std.implementation_todos !== undefined) {
+      if (!Array.isArray(std.implementation_todos)) {
+        result.errors.push(`[Implementation Todos Error] Standard "${id}" implementation_todos is not an array`);
+        result.passed = false;
+      } else {
+        for (let idx = 0; idx < std.implementation_todos.length; idx++) {
+          const item = std.implementation_todos[idx];
+          if (!item || typeof item.id !== 'string' || !Array.isArray(item.labels)) {
+            result.errors.push(`[Implementation Todos Error] Standard "${id}" implementation_todo at index ${idx} is invalid`);
+            result.passed = false;
+          }
+        }
+      }
+    }
+
+    // E. Verify cluster_id exists in standards.jsonl
     const clusterId = std.cluster_id;
     if (clusterId && clusterId !== 'Other') {
       if (!standardsMap[clusterId]) {
@@ -176,8 +215,8 @@ function runValidation() {
       }
 
       // Verify task type matches the standard's coverage status
-      if (task.type === 'ONTOLOGY_EXTENSION' && covEntry.ontology_covered) {
-        result.errors.push(`[Task Logic Error] Standard "${stdId}" is included in ONTOLOGY_EXTENSION task "${task.id}", but is marked as ontology_covered: true`);
+      if (task.type === 'ONTOLOGY_EXTENSION' && covEntry.ontology_covered && (!covEntry.ontology_todos || covEntry.ontology_todos.length === 0)) {
+        result.errors.push(`[Task Logic Error] Standard "${stdId}" is included in ONTOLOGY_EXTENSION task "${task.id}", but is marked as ontology_covered: true with no ontology_todos`);
         result.passed = false;
       }
       if (task.type === 'DATASET_ENRICHMENT' && covEntry.dataset_covered) {
@@ -189,9 +228,9 @@ function runValidation() {
 
   // --- CHECK 5: Orphaning check (Are all uncovered standards assigned to a task?) ---
   for (const [id, std] of Object.entries(coverage) as any) {
-    if (!std.ontology_covered) {
+    if (!std.ontology_covered || (std.ontology_todos && std.ontology_todos.length > 0)) {
       if (!taskStandardIds.has(id)) {
-        result.errors.push(`[Orphaned Standard Error] Standard "${id}" is missing ontology coverage but has no associated task in the backlog`);
+        result.errors.push(`[Orphaned Standard Error] Standard "${id}" is missing ontology coverage (or has pending ontology tasks) but has no associated task in the backlog`);
         result.passed = false;
       }
     } else if (!std.dataset_covered) {
