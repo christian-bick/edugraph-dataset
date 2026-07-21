@@ -544,7 +544,7 @@ async function main() {
   const tasksByCluster: Record<string, any[]> = {};
   
   for (const [, data] of Object.entries(finalCoverageMap)) {
-    if (data.spec_covered && data.ontology_covered && data.dataset_covered && (!data.ontology_todos || data.ontology_todos.length === 0)) continue;
+    if (data.spec_covered && data.ontology_covered && data.dataset_covered && (!data.ontology_todos || data.ontology_todos.length === 0) && (!data.implementation_todos || data.implementation_todos.length === 0)) continue;
 
     const clusterId = data.cluster_id;
     if (!tasksByCluster[clusterId]) {
@@ -560,8 +560,11 @@ async function main() {
     const specCoveredStds = missingStds.filter(s => s.spec_covered);
     const uncoveredStds = missingStds.filter(s => !s.spec_covered);
 
-    const missingOntology = specCoveredStds.filter(s => !s.ontology_covered || (s.ontology_todos && s.ontology_todos.length > 0));
-    const missingGenerator = specCoveredStds.filter(s => s.ontology_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && !s.dataset_covered);
+    const missingOntology = specCoveredStds.filter(s => s.ontology_todos && s.ontology_todos.length > 0);
+    const missingGenerator = specCoveredStds.filter(s => 
+      (!s.ontology_todos || s.ontology_todos.length === 0) &&
+      ((s.implementation_todos && s.implementation_todos.length > 0) || !s.dataset_covered)
+    );
 
     if (missingOntology.length > 0) {
       const descriptions = missingOntology.map(s => {
@@ -621,8 +624,8 @@ async function main() {
       total_leaves_scanned: leafNodes.length,
       spec_covered_count: Object.values(finalCoverageMap).filter(s => s.spec_covered).length,
       covered_count: Object.values(finalCoverageMap).filter(s => s.dataset_covered).length,
-      missing_generator_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && s.ontology_covered && !s.dataset_covered).length,
-      missing_ontology_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (!s.ontology_covered || (s.ontology_todos && s.ontology_todos.length > 0))).length,
+      missing_generator_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && ((s.implementation_todos && s.implementation_todos.length > 0) || !s.dataset_covered)).length,
+      missing_ontology_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (s.ontology_todos && s.ontology_todos.length > 0)).length,
       analysis_needed_count: Object.values(finalCoverageMap).filter(s => !s.spec_covered).length
     },
     coverage: finalCoverageMap,

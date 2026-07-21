@@ -123,53 +123,33 @@
         </button>
       </div>
 
+      <!-- Grade Navigation Tabs (shared for both Explorer and Task Backlog) -->
+      <div id="grade-tabs-container" class="grid grid-cols-2 gap-2 p-3 bg-slate-950 border-b border-slate-800 shrink-0">
+        <!-- Grade tabs populated via JS -->
+      </div>
+
       <!-- Explorer Tab Content -->
       <div id="tab-content-explorer" class="flex-1 flex flex-col min-h-0">
-        <!-- Filters and Search -->
+        <!-- Search -->
         <div class="p-4 border-b border-slate-800 flex flex-col gap-3">
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
             <input type="text" id="search-input" placeholder="Search standard ID or description..." 
               class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
           </div>
-          
-
         </div>
 
-        <!-- Grade Navigation Tabs -->
-        <div id="grade-tabs-container" class="grid grid-cols-2 gap-2 p-3 bg-slate-950 border-b border-slate-800 shrink-0">
-          <!-- Grade tabs populated via JS -->
-        </div>
-
-        <!-- Accordion Tree Navigation -->
+        <!-- Filter by Domain Container -->
         <div id="tree-container" class="flex-1 overflow-y-auto p-4 space-y-3">
-          <!-- Accordion nodes loaded dynamically -->
+          <!-- Domain buttons loaded dynamically -->
         </div>
       </div>
 
       <!-- Backlog Tab Content -->
-      <div id="tab-content-backlog" class="hidden flex-1 flex flex-col min-h-0 bg-slate-955">
-        <!-- Backlog filters -->
-        <div class="p-4 border-b border-slate-800 flex flex-col gap-2">
-          <div class="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Filter Tasks</div>
-          <div class="flex gap-1.5">
-            <button onclick="filterTasks('ALL')" id="btn-task-all" class="flex-1 py-1 bg-indigo-600 border border-indigo-500 rounded text-[9px] text-white font-semibold transition-colors">
-              All
-            </button>
-            <button onclick="filterTasks('DATASET_ENRICHMENT')" id="btn-task-enrich" class="flex-1 py-1 bg-slate-900 border border-slate-800 rounded text-[9px] text-slate-400 hover:text-white transition-colors">
-              Implementation
-            </button>
-            <button onclick="filterTasks('ONTOLOGY_EXTENSION')" id="btn-task-onto" class="flex-1 py-1 bg-slate-900 border border-slate-800 rounded text-[9px] text-slate-400 hover:text-white transition-colors">
-              Ontology
-            </button>
-            <button onclick="filterTasks('ANALYSIS')" id="btn-task-analysis" class="flex-1 py-1 bg-slate-900 border border-slate-800 rounded text-[9px] text-slate-400 hover:text-white transition-colors">
-              Analysis
-            </button>
-          </div>
-        </div>
-        <!-- Backlog lists -->
-        <div id="backlog-tree-container" class="flex-1 overflow-y-auto p-4 space-y-3">
-          <!-- Populated via JS -->
+      <div id="tab-content-backlog" class="hidden flex-1 flex flex-col min-h-0 bg-slate-950">
+        <!-- Filter by Task Type Container -->
+        <div id="task-type-container" class="flex-1 overflow-y-auto p-4 space-y-3">
+          <!-- Task Type filter buttons loaded dynamically -->
         </div>
       </div>
     </div>
@@ -307,7 +287,7 @@
     
     // Backlog UI state
     let activeTab = 'explorer';
-    let activeTaskTypeFilter = 'ALL';
+    let activeTaskTypeFilter = null;
     let activeTaskId = null;
     
     // Filters
@@ -404,7 +384,7 @@
         explorerContent.classList.remove('hidden');
         backlogContent.classList.add('hidden');
         
-        // Restore standard panels
+        // Restore standard details panel
         document.getElementById('detail-card').classList.remove('hidden');
         document.getElementById('task-detail-card').classList.add('hidden');
         
@@ -414,92 +394,129 @@
           document.getElementById('detail-desc').textContent = 'Select a standard from the list to display details.';
         }
         
-        // Show main list again
-        if (activeCluster) {
-          selectCluster(activeGrade, activeDomainGroup, activeDomain, activeCluster);
-        } else {
-          loadGrade(activeGrade);
-        }
+        loadGrade(activeGrade);
       } else {
         backlogBtn.className = 'flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-indigo-500 bg-slate-900 text-white';
         explorerBtn.className = 'flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200';
         backlogContent.classList.remove('hidden');
         explorerContent.classList.add('hidden');
         
-        // Hide standard details, show task details
+        // Show task details panel
         document.getElementById('detail-card').classList.add('hidden');
         document.getElementById('task-detail-card').classList.remove('hidden');
         
-        renderBacklogList();
+        loadTaskBacklog();
       }
     }
 
-    function renderBacklogList() {
-      const container = document.getElementById('backlog-tree-container');
+    function loadTaskBacklog() {
+      const container = document.getElementById('task-type-container');
+      if (!container) return;
       container.innerHTML = '';
-      
-      if (!COVERAGE_DATA || !COVERAGE_DATA.tasks || COVERAGE_DATA.tasks.length === 0) {
-        container.innerHTML = '<div class="text-xs text-slate-500 italic text-center py-6">No tasks found.</div>';
-        return;
+
+      if (COVERAGE_DATA && COVERAGE_DATA.tasks) {
+        document.getElementById('backlog-count').textContent = COVERAGE_DATA.tasks.length;
       }
-      
-      const filteredTasks = COVERAGE_DATA.tasks.filter(t => {
-        if (activeTaskTypeFilter === 'ALL') return true;
-        return t.type === activeTaskTypeFilter;
-      });
-      
-      document.getElementById('backlog-count').textContent = COVERAGE_DATA.tasks.length;
-      
-      if (filteredTasks.length === 0) {
-        container.innerHTML = '<div class="text-xs text-slate-500 italic text-center py-6">No tasks matching filter.</div>';
-        return;
-      }
-      
-      // Render tasks in Left Panel
-      filteredTasks.forEach(task => {
-        const item = document.createElement('div');
-        item.className = `p-3 border rounded-lg bg-slate-950/60 hover:bg-slate-900/60 transition-all duration-150 cursor-pointer flex flex-col gap-1.5 border-slate-800/60 hover:border-slate-700 ${
-          activeTaskId === task.id ? 'border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5' : ''
+
+      const taskTypes = [
+        { id: 'DATASET_ENRICHMENT', name: 'Implementation Tasks', icon: 'fa-triangle-exclamation', color: 'orange' },
+        { id: 'ONTOLOGY_EXTENSION', name: 'Ontology Tasks', icon: 'fa-circle-xmark', color: 'red' },
+        { id: 'ANALYSIS', name: 'Analysis Tasks', icon: 'fa-magnifying-glass', color: 'sky' }
+      ];
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'text-[10px] uppercase font-semibold text-slate-500 tracking-wider mb-2 px-1 flex items-center justify-between';
+      titleEl.innerHTML = '<span>Filter by Task Type</span>' +
+        (activeTaskTypeFilter ? `<button onclick="clearTaskTypeFilter()" class="text-[9px] text-indigo-400 hover:underline font-mono normal-case">Clear Filter</button>` : '');
+      container.appendChild(titleEl);
+
+      const listWrap = document.createElement('div');
+      listWrap.className = 'space-y-1.5';
+
+      taskTypes.forEach(tt => {
+        const isSelected = activeTaskTypeFilter === tt.id;
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left px-3 py-2.5 text-xs rounded-lg border flex items-center justify-between transition-all duration-150 ${
+          isSelected 
+            ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300 font-semibold shadow-sm' 
+            : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700'
         }`;
-        
-        let typeBadge = task.type === 'ONTOLOGY_EXTENSION' 
-          ? '<span class="px-1.5 py-0.5 rounded text-[8px] bg-red-500/10 text-red-400 border border-red-500/20 font-bold shrink-0">ONTOLOGY</span>' 
-          : '<span class="px-1.5 py-0.5 rounded text-[8px] bg-orange-500/10 text-orange-400 border border-orange-500/20 font-bold shrink-0">GEN/VIEW</span>';
-          
-        item.innerHTML = `
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-[10px] font-mono font-bold text-slate-400">${task.cluster_id}</span>
-            ${typeBadge}
-          </div>
-          <h4 class="text-xs font-semibold text-slate-200 leading-snug">${task.title}</h4>
-          <span class="text-[9px] text-slate-500">${task.standards.length} standards affected</span>
-        `;
-        
-        item.onclick = (e) => {
-          e.stopPropagation();
-          selectTask(task.id);
+        btn.innerHTML = `<span class="flex items-center gap-2.5 font-medium"><i class="fa-solid ${tt.icon} text-${tt.color}-400"></i> ${tt.name}</span>` +
+          (isSelected ? '<i class="fa-solid fa-check text-indigo-400 text-[10px]"></i>' : '');
+
+        btn.onclick = () => {
+          if (activeTaskTypeFilter === tt.id) {
+            activeTaskTypeFilter = null; // Toggle OFF -> show all task types
+          } else {
+            activeTaskTypeFilter = tt.id; // Toggle ON -> filter by task type
+          }
+          loadTaskBacklog();
         };
-        
-        container.appendChild(item);
+
+        listWrap.appendChild(btn);
       });
-      
-      // Render center list
-      renderCenterTaskList(filteredTasks);
+
+      container.appendChild(listWrap);
+
+      renderCenterTaskList();
     }
 
-    function renderCenterTaskList(tasks) {
+    function clearTaskTypeFilter() {
+      activeTaskTypeFilter = null;
+      loadTaskBacklog();
+    }
+
+    function matchTaskGrade(task, gradeName) {
+      if (!gradeName) return true;
+      let gradeCode = gradeName;
+      if (gradeName === 'Kindergarten') gradeCode = 'K';
+      else if (gradeName.startsWith('Grade ')) gradeCode = gradeName.replace('Grade ', '').trim();
+      else if (gradeName === 'High School') gradeCode = 'HS';
+
+      return task.standards.some(stdId => {
+        const first = stdId.split('.')[0];
+        if (gradeCode === 'K') return first === 'K';
+        if (gradeCode === 'HS') return first.startsWith('HS') || /^[NAFGS]-/.test(first);
+        return first === gradeCode;
+      });
+    }
+
+    function renderCenterTaskList() {
       const listContainer = document.getElementById('standards-list');
       listContainer.innerHTML = '';
       
-      document.getElementById('breadcrumbs').textContent = 'TASK BACKLOG';
-      document.getElementById('cluster-title').textContent = 'Pedagogical Task Backlog';
+      const gradeLabel = activeGrade || 'All Grades';
+      document.getElementById('breadcrumbs').textContent = `TASK BACKLOG > ${gradeLabel.toUpperCase()}`;
+      document.getElementById('cluster-title').textContent = `${gradeLabel} Pedagogical Task Backlog`;
       document.getElementById('cluster-desc').textContent = 'Backlog of missing generators, views, ontology definitions, or domain analysis tasks grouped by Cluster.';
       
+      if (!COVERAGE_DATA || !COVERAGE_DATA.tasks || COVERAGE_DATA.tasks.length === 0) {
+        listContainer.innerHTML = '<div class="text-sm text-slate-500 italic text-center py-6">No tasks found.</div>';
+        return;
+      }
+
+      const tasks = COVERAGE_DATA.tasks.filter(task => {
+        if (!matchTaskGrade(task, activeGrade)) {
+          return false;
+        }
+
+        if (activeTaskTypeFilter && activeTaskTypeFilter !== 'ALL' && task.type !== activeTaskTypeFilter) {
+          return false;
+        }
+
+        return true;
+      });
+
+      if (tasks.length === 0) {
+        listContainer.innerHTML = '<div class="text-sm text-slate-500 italic text-center py-6">No tasks match the selected grade and task type filters.</div>';
+        return;
+      }
+
       tasks.forEach(task => {
         const card = document.createElement('div');
         card.id = `center-task-${task.id}`;
         card.className = `bg-slate-900/40 border rounded-xl p-5 space-y-4 shadow-sm transition-all hover:bg-slate-900/60 cursor-pointer ${
-          activeTaskId === task.id ? 'border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5' : 'border-slate-800/80'
+          activeTaskId === task.id ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5' : 'border-slate-800/80'
         }`;
         
         let typeBadge = '';
@@ -542,22 +559,18 @@
     function selectTask(taskId) {
       activeTaskId = taskId;
       
-      // Update styling in Left backlog list
-      document.querySelectorAll('#backlog-tree-container > div').forEach(el => {
-        el.className = el.className.replace('border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5', 'border-slate-800/60 hover:border-slate-700');
-      });
-      
       // Update center backlog list styling
       document.querySelectorAll('#standards-list > div').forEach(el => {
-        el.className = el.className.replace('border-orange-500/50 ring-1 ring-orange-500/30 bg-orange-500/5', 'border-slate-800/80');
+        el.className = el.className.replace('border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5', 'border-slate-800/80');
       });
       
-      // Find task data
+      const activeCard = document.getElementById('center-task-' + taskId);
+      if (activeCard) {
+        activeCard.className = activeCard.className.replace('border-slate-800/80', 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5');
+      }
+      
       const task = COVERAGE_DATA.tasks.find(t => t.id === taskId);
       if (!task) return;
-      
-      // Highlight left list item
-      renderBacklogList();
       
       // Show details in Right Panel
       const typeSpan = document.getElementById('task-detail-type');
@@ -582,30 +595,6 @@
         badge.textContent = std;
         stdsDiv.appendChild(badge);
       });
-    }
-
-    function filterTasks(type) {
-      activeTaskTypeFilter = type;
-      
-      const btnAll = document.getElementById('btn-task-all');
-      const btnEnrich = document.getElementById('btn-task-enrich');
-      const btnOnto = document.getElementById('btn-task-onto');
-      const btnAnalysis = document.getElementById('btn-task-analysis');
-      
-      const inactive = 'flex-1 py-1 bg-slate-900 border border-slate-800 rounded text-[9px] text-slate-400 hover:text-white transition-colors';
-      const active = 'flex-1 py-1 bg-indigo-600 border border-indigo-500 rounded text-[9px] text-white font-semibold transition-colors';
-
-      btnAll.className = inactive;
-      btnEnrich.className = inactive;
-      btnOnto.className = inactive;
-      if (btnAnalysis) btnAnalysis.className = inactive;
-      
-      if (type === 'ALL') btnAll.className = active;
-      else if (type === 'DATASET_ENRICHMENT') btnEnrich.className = active;
-      else if (type === 'ONTOLOGY_EXTENSION') btnOnto.className = active;
-      else if (type === 'ANALYSIS' && btnAnalysis) btnAnalysis.className = active;
-      
-      renderBacklogList();
     }
 
     // Toggle Filters panel
@@ -659,8 +648,13 @@
         }`;
         btn.onclick = () => {
           activeGrade = grade;
+          activeDomain = null;
           renderGradeTabs();
-          loadGrade(grade);
+          if (activeTab === 'explorer') {
+            loadGrade(grade);
+          } else {
+            loadTaskBacklog();
+          }
         };
         container.appendChild(btn);
       });

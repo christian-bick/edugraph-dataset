@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "generated_at": "2026-07-21T11:35:44.330Z",
+    "generated_at": "2026-07-21T11:49:50.308Z",
     "ontology_version": "v0.9.2",
     "total_leaves_scanned": 467,
     "spec_covered_count": 47,
     "covered_count": 36,
-    "missing_generator_count": 0,
-    "missing_ontology_count": 14,
+    "missing_generator_count": 18,
+    "missing_ontology_count": 4,
     "analysis_needed_count": 420
   },
   "coverage": {
@@ -11110,14 +11110,25 @@
   },
   "tasks": [
     {
-      "id": "task-ontology-K.CC.A",
-      "type": "ONTOLOGY_EXTENSION",
+      "id": "task-generator-K.CC.A",
+      "type": "DATASET_ENRICHMENT",
       "cluster_id": "K.CC.A",
       "cluster_description": "Know number names and the count sequence.",
-      "title": "Extend Ontology for K.CC.A",
-      "description": "Extend ontology to support: K.CC.A.1. Details:\n- K.CC.A.1: Extend ontology",
+      "title": "Generate Dataset for K.CC.A",
+      "description": "Implement/extend generators and views to cover: K.CC.A.1. Details:\n- K.CC.A.1: Counting generators cap at Scope.NumbersSmaller20 and there is no generator/view for the rote count sequence to 100 or for skip counting by tens (Scope.DerivedCount).",
       "standards": [
         "K.CC.A.1"
+      ]
+    },
+    {
+      "id": "task-generator-K.CC.B",
+      "type": "DATASET_ENRICHMENT",
+      "cluster_id": "K.CC.B",
+      "cluster_description": "Count to tell the number of objects.",
+      "title": "Generate Dataset for K.CC.B",
+      "description": "Implement/extend generators and views to cover: K.CC.B.5. Details:\n- K.CC.B.5: The rectangular array arrangement (Scope.BoxArrangement) is not supported by the counting views (only linear/circular/scattered arrangements).",
+      "standards": [
+        "K.CC.B.5"
       ]
     },
     {
@@ -11126,43 +11137,89 @@
       "cluster_id": "K.OA.A",
       "cluster_description": "Understand addition as putting together and adding to, and understand subtraction as taking apart and taking from.",
       "title": "Extend Ontology for K.OA.A",
-      "description": "Extend ontology to support: K.OA.A.1, K.OA.A.5. Details:\n- K.OA.A.1: Extend ontology\n- K.OA.A.5: Scope.NumbersSmaller5 (The ontology has no Scope.NumbersSmaller5, so the \"within 5\" restriction cannot be expressed.)",
+      "description": "Extend ontology to support: K.OA.A.5. Details:\n- K.OA.A.5: Scope.NumbersSmaller5 (The ontology has no Scope.NumbersSmaller5, so the \"within 5\" restriction cannot be expressed.)",
       "standards": [
-        "K.OA.A.1",
         "K.OA.A.5"
       ]
     },
     {
-      "id": "task-ontology-1.OA.A",
-      "type": "ONTOLOGY_EXTENSION",
+      "id": "task-generator-K.OA.A",
+      "type": "DATASET_ENRICHMENT",
+      "cluster_id": "K.OA.A",
+      "cluster_description": "Understand addition as putting together and adding to, and understand subtraction as taking apart and taking from.",
+      "title": "Generate Dataset for K.OA.A",
+      "description": "Implement/extend generators and views to cover: K.OA.A.1. Details:\n- K.OA.A.1: The operations-representation view exists only as a checklist stub (no spec.ts/view.tsx), so there is no view rendering object/drawing representations of addition and subtraction.",
+      "standards": [
+        "K.OA.A.1"
+      ]
+    },
+    {
+      "id": "task-generator-K.G.A",
+      "type": "DATASET_ENRICHMENT",
+      "cluster_id": "K.G.A",
+      "cluster_description": "Identify and describe shapes (squares, circles, triangles, rectangles, hexagons, cubes, cones, cylinders, and spheres).",
+      "title": "Generate Dataset for K.G.A",
+      "description": "Implement/extend generators and views to cover: K.G.A.1. Details:\n- K.G.A.1: The shape-env-shapes generator only supports circle, square and rectangle; further environment shapes (e.g. Area.Triangle, Area.Hexagon) are not supported yet.",
+      "standards": [
+        "K.G.A.1"
+      ]
+    },
+    {
+      "id": "task-generator-K.G.B",
+      "type": "DATASET_ENRICHMENT",
+      "cluster_id": "K.G.B",
+      "cluster_description": "Analyze, compare, create, and compose shapes.",
+      "title": "Generate Dataset for K.G.B",
+      "description": "Implement/extend generators and views to cover: K.G.B.6. Details:\n- K.G.B.6: The shapes-compose-shapes generator only supports rectangle and square as composition targets (built from triangles); other target shapes (e.g. Area.Triangle, Area.Hexagon) are not supported.",
+      "standards": [
+        "K.G.B.6"
+      ]
+    },
+    {
+      "id": "task-generator-1.OA.A",
+      "type": "DATASET_ENRICHMENT",
       "cluster_id": "1.OA.A",
       "cluster_description": "Represent and solve problems involving addition and subtraction.",
-      "title": "Extend Ontology for 1.OA.A",
-      "description": "Extend ontology to support: 1.OA.A.2. Details:\n- 1.OA.A.2: Extend ontology",
+      "title": "Generate Dataset for 1.OA.A",
+      "description": "Implement/extend generators and views to cover: 1.OA.A.1, 1.OA.A.2. Details:\n- 1.OA.A.1: Unknowns in all positions are not expressible; the arithmetic generator and word-problem view only produce result-unknown problems.\n- 1.OA.A.2: The arithmetic generator only produces binary operations; there is no support for three addends.",
       "standards": [
+        "1.OA.A.1",
         "1.OA.A.2"
       ]
     },
     {
-      "id": "task-ontology-1.OA.B",
-      "type": "ONTOLOGY_EXTENSION",
+      "id": "task-generator-1.OA.B",
+      "type": "DATASET_ENRICHMENT",
       "cluster_id": "1.OA.B",
       "cluster_description": "Understand and apply properties of operations and the relationship between addition and subtraction.",
-      "title": "Extend Ontology for 1.OA.B",
-      "description": "Extend ontology to support: 1.OA.B.3. Details:\n- 1.OA.B.3: Extend ontology",
+      "title": "Generate Dataset for 1.OA.B",
+      "description": "Implement/extend generators and views to cover: 1.OA.B.3, 1.OA.B.4. Details:\n- 1.OA.B.3: No generator/view exercises arithmetic laws (Area.CommutativeLaw / Area.AssociativeLaw).\n- 1.OA.B.4: Only the make-ten complement case (Area.Difference within 10) is covered; general unknown-addend problems within 20 have no generator support.",
       "standards": [
-        "1.OA.B.3"
+        "1.OA.B.3",
+        "1.OA.B.4"
       ]
     },
     {
-      "id": "task-ontology-1.OA.D",
-      "type": "ONTOLOGY_EXTENSION",
+      "id": "task-generator-1.OA.D",
+      "type": "DATASET_ENRICHMENT",
       "cluster_id": "1.OA.D",
       "cluster_description": "Work with addition and subtraction equations.",
-      "title": "Extend Ontology for 1.OA.D",
-      "description": "Extend ontology to support: 1.OA.D.7. Details:\n- 1.OA.D.7: Extend ontology",
+      "title": "Generate Dataset for 1.OA.D",
+      "description": "Implement/extend generators and views to cover: 1.OA.D.7, 1.OA.D.8. Details:\n- 1.OA.D.7: No generator/view produces true/false equation judgment tasks (Ability.PlausibilityEvaluation).\n- 1.OA.D.8: The operations-boxes view only leaves the result blank; unknowns in the first or second operand position are not supported.",
       "standards": [
-        "1.OA.D.7"
+        "1.OA.D.7",
+        "1.OA.D.8"
+      ]
+    },
+    {
+      "id": "task-generator-1.NBT.A",
+      "type": "DATASET_ENRICHMENT",
+      "cluster_id": "1.NBT.A",
+      "cluster_description": "Extend the counting sequence.",
+      "title": "Generate Dataset for 1.NBT.A",
+      "description": "Implement/extend generators and views to cover: 1.NBT.A.1. Details:\n- 1.NBT.A.1: The range 100-120 is not expressible (ordering/counting generators cap at Scope.NumbersSmaller100), so permutations stop below 100.",
+      "standards": [
+        "1.NBT.A.1"
       ]
     },
     {
@@ -11171,31 +11228,41 @@
       "cluster_id": "1.NBT.B",
       "cluster_description": "Understand place value.",
       "title": "Extend Ontology for 1.NBT.B",
-      "description": "Extend ontology to support: 1.NBT.B.2a, 1.NBT.B.2c. Details:\n- 1.NBT.B.2a: Extend ontology\n- 1.NBT.B.2c: Multiples of 10 Scope Label (No ontology Scope exists to express \"multiples of 10\" (e.g., 10, 20, 30, ... 90).)",
+      "description": "Extend ontology to support: 1.NBT.B.2c. Details:\n- 1.NBT.B.2c: Multiples of 10 Scope Label (No ontology Scope exists to express \"multiples of 10\" (e.g., 10, 20, 30, ... 90).)",
       "standards": [
-        "1.NBT.B.2a",
         "1.NBT.B.2c"
       ]
     },
     {
-      "id": "task-ontology-1.NBT.C",
-      "type": "ONTOLOGY_EXTENSION",
+      "id": "task-generator-1.NBT.B",
+      "type": "DATASET_ENRICHMENT",
+      "cluster_id": "1.NBT.B",
+      "cluster_description": "Understand place value.",
+      "title": "Generate Dataset for 1.NBT.B",
+      "description": "Implement/extend generators and views to cover: 1.NBT.B.2a. Details:\n- 1.NBT.B.2a: No generator/view exercises bundling ten ones into a \"ten\" (Area.PlaceValue with exactly 10).",
+      "standards": [
+        "1.NBT.B.2a"
+      ]
+    },
+    {
+      "id": "task-generator-1.NBT.C",
+      "type": "DATASET_ENRICHMENT",
       "cluster_id": "1.NBT.C",
       "cluster_description": "Use place value understanding and properties of operations to add and subtract.",
-      "title": "Extend Ontology for 1.NBT.C",
-      "description": "Extend ontology to support: 1.NBT.C.5, 1.NBT.C.6. Details:\n- 1.NBT.C.5: Extend ontology\n- 1.NBT.C.6: Extend ontology",
+      "title": "Generate Dataset for 1.NBT.C",
+      "description": "Implement/extend generators and views to cover: 1.NBT.C.5, 1.NBT.C.6. Details:\n- 1.NBT.C.5: The counting-inc-dec generator only steps by one and caps at Scope.NumbersSmaller20; ten-jumps within 100 are not supported.\n- 1.NBT.C.6: Multiples of 10 operands are not expressible via ontology labels and the arithmetic generator has no such constraint.",
       "standards": [
         "1.NBT.C.5",
         "1.NBT.C.6"
       ]
     },
     {
-      "id": "task-ontology-1.MD.A",
-      "type": "ONTOLOGY_EXTENSION",
+      "id": "task-generator-1.MD.A",
+      "type": "DATASET_ENRICHMENT",
       "cluster_id": "1.MD.A",
       "cluster_description": "Measure lengths indirectly and by iterating length units.",
-      "title": "Extend Ontology for 1.MD.A",
-      "description": "Extend ontology to support: 1.MD.A.1. Details:\n- 1.MD.A.1: Extend ontology",
+      "title": "Generate Dataset for 1.MD.A",
+      "description": "Implement/extend generators and views to cover: 1.MD.A.1. Details:\n- 1.MD.A.1: The measurement-compare generator only compares two objects; ordering three objects and indirect comparison are not supported.",
       "standards": [
         "1.MD.A.1"
       ]
@@ -11217,9 +11284,20 @@
       "cluster_id": "1.G.A",
       "cluster_description": "Reason with shapes and their attributes.",
       "title": "Extend Ontology for 1.G.A",
-      "description": "Extend ontology to support: 1.G.A.2, 1.G.A.3. Details:\n- 1.G.A.2: Half-Circle & Quarter-Circle Shapes (No ontology Area concepts exist for half-circles or quarter-circles.)\n- 1.G.A.3: Extend ontology",
+      "description": "Extend ontology to support: 1.G.A.2. Details:\n- 1.G.A.2: Half-Circle & Quarter-Circle Shapes (No ontology Area concepts exist for half-circles or quarter-circles.)",
       "standards": [
-        "1.G.A.2",
+        "1.G.A.2"
+      ]
+    },
+    {
+      "id": "task-generator-1.G.A",
+      "type": "DATASET_ENRICHMENT",
+      "cluster_id": "1.G.A",
+      "cluster_description": "Reason with shapes and their attributes.",
+      "title": "Generate Dataset for 1.G.A",
+      "description": "Implement/extend generators and views to cover: 1.G.A.1, 1.G.A.3. Details:\n- 1.G.A.1: Distinguishing defining vs. non-defining attributes (closed/three-sided vs. color/orientation/size) has no generator/view support.\n- 1.G.A.3: No generator/view supports partitioning shapes into equal shares (halves/fourths/quarters).",
+      "standards": [
+        "1.G.A.1",
         "1.G.A.3"
       ]
     },
