@@ -46,8 +46,8 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
     ]);
 
 // TODO: The geometry-compose-shapes generator only supports rectangle and square as
-// composition targets (built from triangles); a [Area.Triangle] variant returns null
-// despite the schema declaring it.
+// composition targets (built from triangles); a [Area.Triangle] variant is not
+// supported.
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,

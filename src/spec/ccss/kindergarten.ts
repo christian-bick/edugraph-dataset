@@ -78,8 +78,6 @@ const representCountsBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- K.CC.B.4a: One-to-one correspondence when counting objects ---
-// Note: no Scope.PhysicalNumbers here — the counting-objects-one-to-one view does not
-// declare it and would not match otherwise.
 const oneToOneBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Numeration,
@@ -87,6 +85,7 @@ const oneToOneBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.AdditiveCount,
+        Scope.PhysicalNumbers,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -510,8 +509,8 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
 
 // --- K.G.B.6: Compose simple shapes to form larger shapes ---
 // TODO [K.G.B.6]: The geometry-compose-shapes generator only supports rectangle and
-// square as composition targets (built from triangles); composing other target shapes
-// (e.g. [Area.Triangle], [Area.Hexagon]) returns null despite the schema declaring them.
+// square as composition targets (built from triangles); other target shapes
+// (e.g. [Area.Triangle], [Area.Hexagon]) are not supported.
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,

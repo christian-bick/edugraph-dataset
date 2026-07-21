@@ -16,8 +16,7 @@ export const GeometryComposeShapesGeneratorSchema = {
     classify: [
         [
             Area.Rectangle,
-            Area.Square,
-            Area.Triangle
+            Area.Square
         ],
         selectExactMatch
     ],

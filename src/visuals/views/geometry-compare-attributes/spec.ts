@@ -1,13 +1,11 @@
 import { ViewSpec } from '../../../types/view-spec.ts';
-import { Area, Ability } from 'edugraph-ts';
+import { Ability } from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-compare-attributes',
     generalLabels: [
-        Ability.VisualDecomposition,
-        Area.Circle,
-        Area.Hexagon
+        Ability.VisualDecomposition
     ],
 };
 

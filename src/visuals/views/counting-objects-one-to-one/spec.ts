@@ -6,6 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'counting-objects-one-to-one',
     generalLabels: [
         Area.Numeration,
+        Scope.PhysicalNumbers,
         Scope.NumbersWithoutZero,
         Scope.AdditiveCount,
         Scope.ArabicNumerals,
