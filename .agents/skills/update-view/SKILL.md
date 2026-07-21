@@ -1,12 +1,12 @@
 ---
 name: update-view
-description: "/update-view {viewName} - Update the visual view module src/visuals/views/{viewName} to match its spec, adopt producing generators, and validate."
+description: "/update-view {viewName} - Update the visual view module under src/visuals/views/[<category>/]{viewName} to match its spec, adopt producing generators, and validate."
 ---
 
-Update the visual view module "src/visuals/views/{viewName}" as follows: 
+Update the visual view module under `src/visuals/views/[<category>/]{viewName}` (identified by containing `spec.ts`) as follows: 
 
 - Consider spec.ts as the source of truth for the intended behavior
-- Ensure strict payload validation using `validateProblemData` from `../../helpers/validation.ts` at the beginning of the view component
+- Ensure strict payload validation using `validateProblemData` from `../../../helpers/validation.ts` (or `../../helpers/validation.ts` for top-level views) at the beginning of the view component
 - Ensure graceful validation error recovery by throwing `ViewValidationError` for invalid data or rendering bounds violations (caught by `ErrorBoundary` in `withConfig`)
 - Remove all local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`) and consume resolved `config` and `problem.data` directly
 - Maintain pure visual focus: views must not calculate mathematical properties or perform ontology resolution

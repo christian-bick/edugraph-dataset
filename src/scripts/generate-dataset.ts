@@ -5,6 +5,7 @@ import {appendFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileS
 import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
+import { findLeafModules, LeafModule } from '../lib/module-resolver.ts';
 import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 
@@ -69,7 +70,8 @@ async function renderDatasetSplit(
     splitName: string,
     moduleName: string,
     problems: AbstractProblem[],
-    concurrency: number
+    concurrency: number,
+    viewPathMap: Record<string, string> = {}
 ) {
     if (problems.length === 0) return 0;
     
@@ -114,7 +116,8 @@ async function renderDatasetSplit(
                 if (!task) break;
 
                 const { problem, blueprint, instance } = task;
-                const url = `${BASE_URL}/visuals/views/${blueprint.viewId}/view.html`;
+                const viewPath = viewPathMap[blueprint.viewId] || blueprint.viewId;
+                const url = `${BASE_URL}/visuals/views/${viewPath}/view.html`;
                 
                 if (currentViewUrl !== url) {
                     await page.goto(url, { waitUntil: 'networkidle' });
@@ -255,31 +258,28 @@ async function renderDatasetSplit(
 }
 
 async function runModulePipeline(
-    browser: Browser,
-    moduleName: string,
+    browser: any,
+    leafMod: LeafModule,
     trainingOnly: boolean,
     allTargets: any[],
     targetView?: string
 ) {
-    console.log(`\n--- Starting Pipeline for Module: ${moduleName} ---`);
+    const moduleName = leafMod.id;
+    console.log(`\n--- Starting Pipeline for Module: ${moduleName} (${leafMod.relativePath}) ---`);
     
-    const modulePath = resolve(PROJECT_ROOT, 'src', 'generators', moduleName);
-    if (!existsSync(modulePath)) {
-        throw new Error(`Generator folder not found: ${modulePath}`);
-    }
-
     // Dynamic import of spec.ts
-    const specPath = resolve(modulePath, 'spec.ts');
+    const specPath = resolve(leafMod.absolutePath, 'spec.ts');
     if (!existsSync(specPath)) {
-        throw new Error(`spec.ts not found in generator ${moduleName}`);
+        throw new Error(`spec.ts not found in generator ${moduleName} at ${leafMod.absolutePath}`);
     }
-    const specModule = await import(`../generators/${moduleName}/spec.ts`);
+    const specModule = await import(pathToFileURL(specPath).href);
     const generatorSpec = specModule.spec;
     const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
     const className = camelCase(moduleName[0].toUpperCase() + moduleName.slice(1)) + 'Generator';
     
     // Dynamic import of generator class
-    const generatorModule = await import(`../generators/${moduleName}/generator.ts`);
+    const generatorPath = resolve(leafMod.absolutePath, 'generator.ts');
+    const generatorModule = await import(pathToFileURL(generatorPath).href);
     const GeneratorClass = generatorModule[className];
     if (!GeneratorClass) {
         throw new Error(`Could not find generator class ${className} in ${moduleName}`);
@@ -310,30 +310,27 @@ async function runModulePipeline(
 
     // Scan src/visuals/views directory to dynamically load specs for ALL views
     const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-    const allViewDirs = readdirSync(viewsDir, { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name);
+    const allViewModules = findLeafModules(viewsDir);
     
     const compatibleViews = [];
     const viewGeneralLabelsMap: Record<string, string[]> = {};
+    const viewPathMap: Record<string, string> = {};
 
-    for (const viewId of allViewDirs) {
-        const viewSpecPath = resolve(viewsDir, viewId, 'spec.ts');
-        if (existsSync(viewSpecPath)) {
-            try {
-                const viewSpecModule = await import(`../visuals/views/${viewId}/spec.ts`);
-                compatibleViews.push(viewSpecModule.spec);
-                
-                const viewCamelCase = camelCase(viewId[0].toUpperCase() + viewId.slice(1));
-                const viewSchema = viewSpecModule[`${viewCamelCase}ViewSchema`];
-                const viewLabels = Array.from(new Set([
-                    ...(viewSpecModule.spec?.generalLabels || []),
-                    ...extractSchemaLabels(viewSchema)
-                ]));
-                viewGeneralLabelsMap[viewId] = viewLabels;
-            } catch (e) {
-                console.warn(`Could not import view spec for ${viewId}:`, e);
-            }
+    for (const vMod of allViewModules) {
+        try {
+            const viewSpecModule = await import(pathToFileURL(resolve(vMod.absolutePath, 'spec.ts')).href);
+            compatibleViews.push(viewSpecModule.spec);
+            viewPathMap[vMod.id] = vMod.relativePath;
+            
+            const viewCamelCase = camelCase(vMod.id[0].toUpperCase() + vMod.id.slice(1));
+            const viewSchema = viewSpecModule[`${viewCamelCase}ViewSchema`];
+            const viewLabels = Array.from(new Set([
+                ...(viewSpecModule.spec?.generalLabels || []),
+                ...extractSchemaLabels(viewSchema)
+            ]));
+            viewGeneralLabelsMap[vMod.id] = viewLabels;
+        } catch (e) {
+            console.warn(`Could not import view spec for ${vMod.id}:`, e);
         }
     }
 
@@ -483,10 +480,10 @@ async function runModulePipeline(
     console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);
 
     let moduleImages = 0;
-    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, DEFAULT_CONCURRENCY);
+    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, DEFAULT_CONCURRENCY, viewPathMap);
     
     if (!trainingOnly && valDataset.length > 0) {
-        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, DEFAULT_CONCURRENCY);
+        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, DEFAULT_CONCURRENCY, viewPathMap);
     }
     return moduleImages;
 }
@@ -580,17 +577,16 @@ async function main() {
     let totalImages = 0;
 
     const generatorsPath = resolve(PROJECT_ROOT, 'src', 'generators');
-    const allModules = readdirSync(generatorsPath, { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name);
+    const allModules = findLeafModules(generatorsPath);
+    const modulesToRun = targetModule
+        ? allModules.filter(m => m.id === targetModule || m.relativePath === targetModule)
+        : allModules;
 
-    const modulesToRun = targetModule ? [targetModule] : allModules;
-
-    for (const moduleName of modulesToRun) {
+    for (const leafMod of modulesToRun) {
         try {
-            totalImages += await runModulePipeline(browser, moduleName, trainingOnly, allTargets, targetView);
+            totalImages += await runModulePipeline(browser, leafMod, trainingOnly, allTargets, targetView);
         } catch (e) {
-            console.error(`Failed to run pipeline for ${moduleName}:`, e);
+            console.error(`Failed to run pipeline for ${leafMod.id}:`, e);
         }
     }
 

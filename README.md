@@ -49,7 +49,7 @@ npm run generate:dataset -- --spec=ccss
 npm run generate:dataset -- --spec=test
 ```
 *(Tip: You can filter the generation using optional parameters:
-*   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic`).
+*   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic-ops-pairs`).
 *   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
 *   `--training-only`: Skip validation set generation to speed up the process.)*
 

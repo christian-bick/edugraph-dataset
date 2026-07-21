@@ -1,8 +1,7 @@
 import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
-
+import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { findLeafModules } from './module-resolver.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,7 +30,13 @@ export function getViewToProblemTypeMap(): Record<string, string> {
 }
 
 export function getGeneratorProblemType(genId: string): string | null {
-    const genPath = resolve(PROJECT_ROOT, 'src', 'generators', genId, 'generator.ts');
+    const generatorsDir = resolve(PROJECT_ROOT, 'src', 'generators');
+    const leafModules = findLeafModules(generatorsDir);
+    const leaf = leafModules.find(m => m.id === genId || m.relativePath === genId);
+    if (!leaf) {
+        return null;
+    }
+    const genPath = resolve(leaf.absolutePath, 'generator.ts');
     if (!existsSync(genPath)) {
         return null;
     }

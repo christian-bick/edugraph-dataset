@@ -7,6 +7,7 @@ import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-pa
 import { Ability } from 'edugraph-ts';
 import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
 import { CompetencyTarget } from '../types/ml-engine.ts';
+import { findLeafModules } from '../lib/module-resolver.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -60,69 +61,58 @@ async function main() {
 
     // 1. Load all view specs
     const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-    const allViewDirs = readdirSync(viewsDir, { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name);
+    const allViewModules = findLeafModules(viewsDir);
 
     const allViewSpecs = [];
     const viewGeneralLabelsMap: Record<string, string[]> = {};
-    for (const viewId of allViewDirs) {
-        const viewSpecPath = resolve(viewsDir, viewId, 'spec.ts');
-        if (existsSync(viewSpecPath)) {
-            try {
-                const viewSpecModule = await import(`../visuals/views/${viewId}/spec.ts`);
-                allViewSpecs.push(viewSpecModule.spec);
+    for (const vMod of allViewModules) {
+        try {
+            const viewSpecModule = await import(pathToFileURL(resolve(vMod.absolutePath, 'spec.ts')).href);
+            allViewSpecs.push(viewSpecModule.spec);
 
-                const viewCamelCase = viewId.replace(/-([a-z])/g, g => g[1].toUpperCase());
-                const camelCaseName = viewCamelCase[0].toUpperCase() + viewCamelCase.slice(1);
-                const viewSchema = viewSpecModule[`${camelCaseName}ViewSchema`];
-                const viewLabels = Array.from(new Set([
-                    ...(viewSpecModule.spec?.generalLabels || []),
-                    ...extractSchemaLabels(viewSchema)
-                ]));
-                viewGeneralLabelsMap[viewId] = viewLabels;
-            } catch (e) {
-                // Ignore missing or invalid specs
-            }
+            const viewCamelCase = vMod.id.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            const camelCaseName = viewCamelCase[0].toUpperCase() + viewCamelCase.slice(1);
+            const viewSchema = viewSpecModule[`${camelCaseName}ViewSchema`];
+            const viewLabels = Array.from(new Set([
+                ...(viewSpecModule.spec?.generalLabels || []),
+                ...extractSchemaLabels(viewSchema)
+            ]));
+            viewGeneralLabelsMap[vMod.id] = viewLabels;
+        } catch (e) {
+            // Ignore missing or invalid specs
         }
     }
 
     // 2. Load all generator specs and classes
     const generatorsDir = resolve(PROJECT_ROOT, 'src', 'generators');
-    const allGenDirs = readdirSync(generatorsDir, { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name);
+    const allGenModules = findLeafModules(generatorsDir);
 
     const allGeneratorSpecs = [];
-    for (const genId of allGenDirs) {
-        const specPath = resolve(generatorsDir, genId, 'spec.ts');
-        const genPath = resolve(generatorsDir, genId, 'generator.ts');
-        if (existsSync(specPath) && existsSync(genPath)) {
-            try {
-                const specModule = await import(`../generators/${genId}/spec.ts`);
-                const generatorSpec = specModule.spec;
+    for (const gMod of allGenModules) {
+        try {
+            const specModule = await import(pathToFileURL(resolve(gMod.absolutePath, 'spec.ts')).href);
+            const generatorSpec = specModule.spec;
 
-                const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
-                const className = camelCase(genId[0].toUpperCase() + genId.slice(1)) + 'Generator';
-                const generatorModule = await import(`../generators/${genId}/generator.ts`);
-                const GeneratorClass = generatorModule[className];
-                
-                if (GeneratorClass) {
-                    const generator = new GeneratorClass();
-                    const generatorGeneralLabels = Array.from(new Set([
-                        ...(generatorSpec?.generalLabels || []),
-                        ...extractSchemaLabels(generator.schema)
-                    ]));
-                    allGeneratorSpecs.push({
-                        generatorId: genId,
-                        spec: generatorSpec,
-                        generatorGeneralLabels,
-                        generator
-                    });
-                }
-            } catch (e) {
-                // Ignore errors
+            const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            const className = camelCase(gMod.id[0].toUpperCase() + gMod.id.slice(1)) + 'Generator';
+            const generatorModule = await import(pathToFileURL(resolve(gMod.absolutePath, 'generator.ts')).href);
+            const GeneratorClass = generatorModule[className];
+            
+            if (GeneratorClass) {
+                const generator = new GeneratorClass();
+                const generatorGeneralLabels = Array.from(new Set([
+                    ...(generatorSpec?.generalLabels || []),
+                    ...extractSchemaLabels(generator.schema)
+                ]));
+                allGeneratorSpecs.push({
+                    generatorId: gMod.id,
+                    spec: generatorSpec,
+                    generatorGeneralLabels,
+                    generator
+                });
             }
+        } catch (e) {
+            // Ignore errors
         }
     }
 

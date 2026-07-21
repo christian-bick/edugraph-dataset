@@ -69,30 +69,34 @@ The primary pipeline orchestrator.
 
 ## 4. Module Structure Breakdown
 
-Adding content means creating two interconnected directories: a Generator and a Renderer. Both strictly decouple pedagogical label resolution from core business logic using schemas and resolvers.
+Adding content means creating two interconnected directories: a Generator and a Renderer. Generators and views are organized into a 1-level category sub-directory structure (e.g. `src/generators/arithmetic/arithmetic-ops-pairs` and `src/visuals/views/operations/operations-vertical`). A directory is considered a **leaf module** if and only if it contains a `spec.ts` file. Top-level single-purpose modules (such as `ordering` or `time`) reside directly at the top level of `src/generators/` or `src/visuals/views/`.
 
-### The Generator Module (`src/generators/<module>/`)
+Leaf module directory names retain their full module prefix (e.g., `arithmetic-ops-pairs`, `operations-vertical`). Generic module discovery is performed dynamically up to 1-level deep via `findLeafModules` in `src/lib/module-resolver.ts`.
+
+### The Generator Module (`src/generators/[<category>/]<module>/`)
 *   **`generator.ts`**: Implements `ProblemGenerator<TData, TConfig>`. It contains **no label parsing logic**. It is a pure mathematical function that takes a strongly-typed `config` object and returns a `ProblemStub` or `null`.
-    - **Configuration Validation**: Must import `validateConfigFields` from `../../lib/errors.ts` (with correct relative path) and call it at the beginning of `generate(config)` with the required configuration parameters. It must throw a `GeneratorValidationError` if executed with missing/empty configurations (do not use silent internal fallbacks).
+    - **Configuration Validation**: Must import `validateConfigFields` from `../../../lib/errors.ts` (with correct relative depth matching the sub-directory structure) and call it at the beginning of `generate(config)` with the required configuration parameters. It must throw a `GeneratorValidationError` if executed with missing/empty configurations (do not use silent internal fallbacks).
     - **Ontology Tag Propagation**: Any runtime choices representing competencies (e.g. specific shape chosen, relation chosen) must be returned in the `tags` array of `ProblemStub` so they are not lost. Do NOT duplicate any tags or parameters that are already provided as part of the configuration parameters (as those are automatically captured in `consumedLabels` by the ontology mapping layer).
 *   **`spec.ts`**: The bridge to pedagogy. Exports `spec: GeneratorSpec` (broad matching capabilities), `GeneratorSchema` (defining how to map ontology labels to the typed `config` object using functional resolvers), and `Config` (the extracted type of the schema).
+*   **Parent Category `helpers.ts`**: Shared mathematical helpers or data structures common to sibling generator modules within a category can be placed in `src/generators/<category>/helpers.ts` and imported relatively (`import { ... } from '../helpers.ts'`).
 *   **`generator.test.ts` / `spec.test.ts`**: Vitest suites to verify correctness.
     - `generator.test.ts` deeply tests edge cases of the generator by passing explicit `config` mocks. It must cover mathematical boundaries and edge-cases (e.g. division by zero, invalid target ranges, subtraction yielding negative/zero values under non-negative constraints).
-    - `spec.test.ts` verifies tag resolution using `generateWithLabels` from `../../lib/utils.ts`.
+    - `spec.test.ts` verifies tag resolution using `generateWithLabels` from `../../../lib/utils.ts`.
     - Both/either must include a test asserting that calling `generate` with an empty config throws an exception (e.g., `expect(() => generator.generate({})).toThrow()`).
 *   **`checklist.md`**: Pedagogical/Mathematical verification list. Acts as the validation criteria for the abstract mathematical data. It **must not** contain any visual layout, coordinates, styles, colors, or CSS parameters. See the Checklist Design Rules section below for detailed formatting constraints.
 
 ### The Visual Renderer (`src/visuals/`)
-*   **`src/visuals/views/<renderer>/`**:
+*   **`src/visuals/views/[<category>/]<renderer>/`**:
     - **`view.html`**: The base HTML template containing a mount point for React.
     - **`view.tsx`**: Exports the React component wrapped in `withConfig(ViewSchema, Component)`. The core component itself (`<Name>Core`) is a pure stateless function taking `{ config, payload }`. It does not parse labels.
-        - **Strict Payload Validation**: Must import `validateProblemData` from `../../helpers/validation.ts` (with correct relative path) and call it at the beginning of the view component with the specific list of required fields accessed from `problem.data`.
+        - **Strict Payload Validation**: Must import `validateProblemData` from `../../../helpers/validation.ts` (with correct relative depth matching the sub-directory structure) and call it at the beginning of the view component with the specific list of required fields accessed from `problem.data`.
         - **Graceful Error Recovery**: If validation or range checks fail (e.g. coordinates or dimensions exceed visual limits), the view must throw a `ViewValidationError`. This is caught by the `ErrorBoundary` in the `withConfig` wrapper to display a standardized error card, preventing browser crashes, hangs, or infinite rendering loops during headless generation.
         - **No Silent Fallbacks**: Remove all local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`). Consume resolved configuration parameters directly from the `config` prop and `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and correctly-typed values.
     - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
+    - **Parent Category `helpers.ts` / Components**: Shared visual helpers or sub-components common to sibling views within a category can be placed at the category level (e.g. `src/visuals/views/operations/helpers.ts`) and imported relatively.
     - **`checklist.md`**: Visual layout, rendering, and interaction verification list. Used by Visual QA to check for elements positioning, SVG structures, rendering overflows, and Question (`_mode-Q`) vs. Solution (`_mode-S`) mode styling. It **must not** contain abstract mathematical generation logic. See the Checklist Design Rules section below for detailed formatting constraints.
-*   **`src/visuals/components/`**: Reusable shared React elements (such as `TenFrame.tsx`).
-*   **`src/visuals/helpers/`**: Shared layout rendering calculations (such as `counting-helpers.ts`).
+*   **`src/visuals/components/`**: Reusable shared React elements across all view categories (such as `TenFrame.tsx`).
+*   **`src/visuals/helpers/`**: Shared layout rendering calculations across all view categories (such as `counting-helpers.ts`).
 
 ## 4b. Specification Design Rules & Validation Checks
 
@@ -111,18 +115,24 @@ When designing or updating `spec.ts` files, you must strictly follow these rules
 5. **Prefer Simple Arrays for Schemas**:
    - When mapping a parameter to a set of compatible standard labels (e.g. arrangements), prefer defining a simple array (e.g. `arrangement: [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement]`) over using resolvers. Fallbacks for missing labels are generated generically already and don't require specific resolvers.
 
-## 4c. Checklist Design Rules
+## 4c. Checklist Design Rules & Hierarchical Loading
 
 When writing or updating `checklist.md` files (which are used by the automated visual QA or manual checks), you must strictly follow these rules:
 
-1. **Separation of Concerns**:
+1. **Hierarchical Organization**:
+   Checklists are concatenated and evaluated across 3 levels:
+   - Level 1: `global-checklist.md` (applies to all modules in the codebase).
+   - Level 2: Parent Category `checklist.md` (e.g. `src/generators/arithmetic/checklist.md` - applies to all sub-modules under that category).
+   - Level 3: Leaf Module `checklist.md` (e.g. `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md` - applies specifically to that leaf module).
+   Shared rules across sibling modules should be generalized up to Level 2 parent category checklists to prevent duplication.
+2. **Separation of Concerns**:
    - **Generator Checklists**: Specify *only* abstract mathematical and logic rules. Remove all layout/visual criteria (e.g., coordinates, shapes, colors, SVGs, button states, ruler bands, CSS styling, or answer box highlights).
    - **View Checklists**: Specify *only* visual layout, rendering, and interaction rules. Remove all abstract logic criteria (e.g., mathematical generation algorithms, RNG selection logic, ontology/tag resolution).
-2. **Conciseness**:
+3. **Conciseness**:
    - Focus on the most important validation aspects. Do not include excessive edge cases.
-3. **Unaware of Parameterization**:
+4. **Unaware of Parameterization**:
    - Assume that the validation mechanism is unaware of parameterization. Do not include conditional validation aspects (e.g., "If configuration parameter X is true, then...").
-4. **Question Mode (`_mode-Q`) vs. Solution Mode (`_mode-S`)**:
+5. **Question Mode (`_mode-Q`) vs. Solution Mode (`_mode-S`)**:
    - View checklists must clearly distinguish between Question Mode (where answers are blank, inputs are empty, or elements are unselected) and Solution Mode (where correct answers are filled in, highlighted, or selected).
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)

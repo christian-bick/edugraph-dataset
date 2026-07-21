@@ -1,8 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import { pathToFileURL } from 'url';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { isCompatibleConcept } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
+import { findLeafModules } from '../lib/module-resolver.ts';
 
 const enums = { Area, Scope, Ability };
 
@@ -21,26 +23,26 @@ async function checkLabels() {
     const issues: { file: string, type: string, used: string, supported: string[], usedEnum: string }[] = [];
 
     async function checkDir(dir: string, type: 'generator' | 'view') {
-        const items = fs.readdirSync(dir);
-        for (const item of items) {
-            const itemPath = path.join(dir, item);
-            if (fs.statSync(itemPath).isDirectory()) {
-                const targetFile = type === 'generator' ? 'generator.ts' : 'view.tsx';
-                const targetPath = path.join(itemPath, targetFile);
-                const specPath = path.join(itemPath, 'spec.ts');
+        const leafModules = findLeafModules(dir);
+        for (const mod of leafModules) {
+            const item = mod.id;
+            const itemPath = mod.absolutePath;
+            const targetFile = type === 'generator' ? 'generator.ts' : 'view.tsx';
+            const targetPath = path.join(itemPath, targetFile);
+            const specPath = path.join(itemPath, 'spec.ts');
 
-                if (fs.existsSync(targetPath) && fs.existsSync(specPath)) {
-                    // Extract used labels
-                    const content = fs.readFileSync(targetPath, 'utf8');
-                    const regex = /(Area|Scope|Ability)\.[A-Za-z0-9]+/g;
-                    let matches = content.match(regex) || [];
-                    
-                    // Filter unique enum references
-                    const uniqueMatches = Array.from(new Set(matches));
+            if (fs.existsSync(targetPath) && fs.existsSync(specPath)) {
+                // Extract used labels
+                const content = fs.readFileSync(targetPath, 'utf8');
+                const regex = /(Area|Scope|Ability)\.[A-Za-z0-9]+/g;
+                let matches = content.match(regex) || [];
+                
+                // Filter unique enum references
+                const uniqueMatches = Array.from(new Set(matches));
 
-                    if (uniqueMatches.length > 0) {
-                        try {
-                            const specModule = await import(specPath);
+                if (uniqueMatches.length > 0) {
+                    try {
+                        const specModule = await import(pathToFileURL(specPath).href);
                             const spec = specModule.spec;
                             const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                             const schemaName = type === 'generator' ? `${modulePrefix}GeneratorSchema` : `${modulePrefix}ViewSchema`;
@@ -75,7 +77,6 @@ async function checkLabels() {
                         }
                     }
                 }
-            }
         }
     }
 

@@ -4,6 +4,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createHash } from 'crypto';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { findLeafModules } from '../lib/module-resolver.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -97,16 +98,30 @@ async function validateSample(entry: any, force: boolean) {
         return;
     }
 
-    // 2. Load checklists
-    const checklistPath = resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
+    // 2. Load checklists hierarchically (Global -> Parent Category -> Leaf Module)
     const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
-    
     let checklist = '';
+
     if (existsSync(globalChecklistPath)) {
         checklist += readFileSync(globalChecklistPath, 'utf-8') + '\n\n';
     }
-    if (existsSync(checklistPath)) {
-        checklist += readFileSync(checklistPath, 'utf-8');
+
+    const leafModules = findLeafModules(GENERATORS_ROOT);
+    const leafMod = leafModules.find(m => m.id === moduleName);
+
+    if (leafMod && leafMod.category) {
+        const categoryChecklistPath = resolve(GENERATORS_ROOT, leafMod.category, 'checklist.md');
+        if (existsSync(categoryChecklistPath)) {
+            checklist += readFileSync(categoryChecklistPath, 'utf-8') + '\n\n';
+        }
+    }
+
+    const leafChecklistPath = leafMod 
+        ? resolve(leafMod.absolutePath, 'checklist.md')
+        : resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
+        
+    if (existsSync(leafChecklistPath)) {
+        checklist += readFileSync(leafChecklistPath, 'utf-8');
     }
 
     // 3. Check image file existence

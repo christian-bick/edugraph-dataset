@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import { isSubConceptOf } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
+import { findLeafModules } from '../lib/module-resolver.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,20 +20,17 @@ async function validateSpecs() {
     const generatorsDir = path.resolve(PROJECT_ROOT, 'src/generators');
     const viewsDir = path.resolve(PROJECT_ROOT, 'src/visuals/views');
 
-    const generatorDirs = fs.existsSync(generatorsDir) 
-        ? fs.readdirSync(generatorsDir).filter(item => fs.statSync(path.join(generatorsDir, item)).isDirectory())
-        : [];
-    const viewDirs = fs.existsSync(viewsDir)
-        ? fs.readdirSync(viewsDir).filter(item => fs.statSync(path.join(viewsDir, item)).isDirectory())
-        : [];
+    const generatorModules = findLeafModules(generatorsDir);
+    const viewModules = findLeafModules(viewsDir);
 
     const generatorSchemas: Record<string, { schema: any; paramLabels: string[] }> = {};
     const generatorProblemTypes: Record<string, string> = {};
 
     // 1. Validate Generators & Collect Schemas/Problem Types
     console.log('\n--- Auditing Generators ---');
-    for (const item of generatorDirs) {
-        const specPath = path.join(generatorsDir, item, 'spec.ts');
+    for (const gMod of generatorModules) {
+        const item = gMod.id;
+        const specPath = path.join(gMod.absolutePath, 'spec.ts');
         if (fs.existsSync(specPath)) {
             try {
                 const fileUrl = pathToFileURL(specPath).href;
@@ -80,8 +78,9 @@ async function validateSpecs() {
     const viewToProblemType = getViewToProblemTypeMap();
     const viewSchemas: Record<string, { schema: any; paramLabels: string[] }> = {};
 
-    for (const item of viewDirs) {
-        const specPath = path.join(viewsDir, item, 'spec.ts');
+    for (const vMod of viewModules) {
+        const item = vMod.id;
+        const specPath = path.join(vMod.absolutePath, 'spec.ts');
         if (fs.existsSync(specPath)) {
             try {
                 const fileUrl = pathToFileURL(specPath).href;

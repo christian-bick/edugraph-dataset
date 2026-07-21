@@ -1,9 +1,9 @@
 ---
 name: update-gen
-description: "/update-gen {moduleName} - Update the generator module src/generators/{moduleName} to match its spec, create/update its spec.test.ts, adopt consuming views, and validate."
+description: "/update-gen {moduleName} - Update the generator module under src/generators/[<category>/]{moduleName} to match its spec, create/update its spec.test.ts, adopt consuming views, and validate."
 ---
 
-Update the generator module "src/generators/{moduleName}" as follows: 
+Update the generator module under `src/generators/[<category>/]{moduleName}` (identified by containing `spec.ts`) as follows: 
 
 - Consider spec.ts as the source of truth for the intended behavior
 - Add a spec.test.ts that makes use of "generateWithLabels" from "utils.ts" if missing
