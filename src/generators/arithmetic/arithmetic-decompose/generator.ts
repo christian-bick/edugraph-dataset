@@ -2,7 +2,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-
 import {ArithmeticDecomposeProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
 import {ArithmeticDecomposeGeneratorConfig, ArithmeticDecomposeGeneratorSchema} from "./spec.ts";
-import {validateConfigFields} from "../../../lib/errors.ts";
+import {GeneratorValidationError, validateConfigFields} from "../../../lib/errors.ts";
 
 export class ArithmeticDecomposeGenerator implements ProblemGenerator<ArithmeticDecomposeProblem, ArithmeticDecomposeGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -11,10 +11,15 @@ export class ArithmeticDecomposeGenerator implements ProblemGenerator<Arithmetic
     generate(config: ArithmeticDecomposeGeneratorConfig): ProblemStub | null {
         validateConfigFields('arithmetic-decompose', config, ['range']);
         const resolvedRange = config.range!;
+        if (resolvedRange.min > resolvedRange.max) {
+            throw new GeneratorValidationError('arithmetic-decompose', `Invalid range bounds: min (${resolvedRange.min}) exceeds max (${resolvedRange.max}).`);
+        }
         
         const minVal = Math.max(resolvedRange.min, 3);
         const maxVal = Math.min(resolvedRange.max, 99);
-        if (minVal > maxVal) return null;
+        if (minVal > maxVal) {
+            throw new GeneratorValidationError('arithmetic-decompose', `Effective range bounds invalid: minVal (${minVal}) exceeds maxVal (${maxVal}).`);
+        }
         const targetNumber = Math.floor(random() * (maxVal - minVal + 1)) + minVal;
         
         const pairs: [number, number][] = [];

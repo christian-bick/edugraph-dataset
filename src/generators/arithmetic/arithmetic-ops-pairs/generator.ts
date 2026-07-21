@@ -10,7 +10,7 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
     schema = ArithmeticOpsPairsGeneratorSchema;
 
     generate(config: ArithmeticOpsPairsGeneratorConfig): ProblemStub | null {
-        validateConfigFields('arithmetic-ops-pairs', config, ['range']);
+        validateConfigFields('arithmetic-ops-pairs', config, ['range', 'operation']);
 
         const operation = config.operation;
         const allowNegatives = config.allowNegatives;

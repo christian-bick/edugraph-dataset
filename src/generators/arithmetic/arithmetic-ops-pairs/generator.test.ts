@@ -15,8 +15,10 @@ describe('ArithmeticOpsPairsGenerator', () => {
         expect(generator.type).toBe('arithmetic');
     });
 
-    it('should throw validation error when range is missing', () => {
+    it('should throw validation error when range or operation is missing', () => {
         expect(() => generator.generate({} as any)).toThrow();
+        expect(() => generator.generate({ range: { min: 1, max: 10 } } as any)).toThrow();
+        expect(() => generator.generate({ operation: Area.Addition } as any)).toThrow();
     });
 
     it('should generate correct addition/subtraction/multiplication/division problems', () => {
