@@ -70,7 +70,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
 
   <!-- Header -->
   <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shrink-0">
@@ -169,10 +169,10 @@
     </div>
 
     <!-- Right Panel: Metadata & Interactive Graph Visualization -->
-    <div class="w-full lg:w-96 bg-slate-900/30 flex flex-col min-h-0 shrink-0">
+    <div class="w-full lg:w-96 bg-slate-900/30 border-l border-slate-800 flex flex-col min-h-0 shrink-0 overflow-hidden">
       
-      <!-- Selection Detail Card -->
-      <div id="detail-card" class="p-6 border-b border-slate-800 bg-slate-900/60 flex flex-col gap-4">
+      <!-- Selection Detail Card (Fixed at top of right column) -->
+      <div id="detail-card" class="shrink-0 p-6 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex flex-col gap-4 overflow-y-auto max-h-[55vh] shadow-md">
         <div class="flex items-start justify-between">
           <span class="px-2.5 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded text-[10px] font-mono font-bold tracking-wider" id="detail-level">STANDARD</span>
           <span class="text-xs text-slate-500 font-mono" id="detail-id">K.CC.A.1</span>
@@ -181,7 +181,19 @@
           <h3 class="text-base font-semibold text-white leading-snug" id="detail-desc">Select a standard from the list to display details.</h3>
         </div>
         
-
+        <!-- Rigor Aspects & Modeling Metadata -->
+        <div class="grid grid-cols-2 gap-3 text-xs border-t border-slate-800/80 pt-3">
+          <div>
+            <span class="text-slate-500 block mb-1">Rigor Aspects</span>
+            <div id="detail-aspects" class="flex flex-wrap gap-1">
+              <span class="text-slate-500 italic text-[10px]">None specified</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-slate-500 block mb-1">Modeling</span>
+            <span id="detail-modeling" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-500">FALSE</span>
+          </div>
+        </div>
 
         <!-- Mapping details -->
         <div id="detail-mapping-section" class="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs hidden">
@@ -218,15 +230,15 @@
               </span>
               <i id="competencies-chevron" class="fa-solid fa-chevron-down text-[9px] transition-transform"></i>
             </button>
-            <div id="detail-competencies-breakdown" class="hidden mt-2 space-y-2 max-h-60 overflow-y-auto pr-1">
+            <div id="detail-competencies-breakdown" class="hidden mt-2 space-y-2 max-h-48 overflow-y-auto pr-1">
               <!-- Rendered per competency permutation -->
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Task Detail Card (hidden by default) -->
-      <div id="task-detail-card" class="p-6 border-b border-slate-800 bg-slate-900/60 hidden flex-col gap-4">
+      <!-- Task Detail Card (Fixed at top of right column) -->
+      <div id="task-detail-card" class="shrink-0 p-6 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md hidden flex-col gap-4 overflow-y-auto max-h-[55vh] shadow-md">
         <div class="flex items-start justify-between">
           <span class="px-2.5 py-0.5 bg-orange-500/10 border border-orange-500/20 text-orange-300 rounded text-[10px] font-mono font-bold tracking-wider" id="task-detail-type">DATASET_ENRICHMENT</span>
           <span class="text-xs text-slate-500 font-mono" id="task-detail-id">task-generator-K.CC.B</span>
@@ -425,7 +437,7 @@
       ];
 
       const titleEl = document.createElement('div');
-      titleEl.className = 'text-[10px] uppercase font-semibold text-slate-500 tracking-wider mb-2 px-1 flex items-center justify-between';
+      titleEl.className = 'text-[10px] uppercase font-semibold text-slate-500 tracking-wider mb-2 px-1 py-1.5 bg-slate-950/90 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between border-b border-slate-800/40';
       titleEl.innerHTML = '<span>Filter by Task Type</span>' +
         (activeTaskTypeFilter ? `<button onclick="clearTaskTypeFilter()" class="text-[9px] text-indigo-400 hover:underline font-mono normal-case">Clear Filter</button>` : '');
       container.appendChild(titleEl);
@@ -684,7 +696,7 @@
         container.innerHTML = '<div class="text-xs text-slate-500 italic p-2">No domains found for this grade.</div>';
       } else {
         const titleEl = document.createElement('div');
-        titleEl.className = 'text-[10px] uppercase font-semibold text-slate-500 tracking-wider mb-2 px-1 flex items-center justify-between';
+        titleEl.className = 'text-[10px] uppercase font-semibold text-slate-500 tracking-wider mb-2 px-1 py-1.5 bg-slate-950/90 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between border-b border-slate-800/40';
         titleEl.innerHTML = '<span>Filter by Domain</span>' + 
           (activeDomain ? `<button onclick="clearDomainFilter('${gradeName}')" class="text-[9px] text-indigo-400 hover:underline font-mono normal-case">Clear Filter</button>` : '');
         container.appendChild(titleEl);
@@ -930,7 +942,7 @@
         el.classList.add('border-slate-800/60', 'hover:border-slate-700');
       });
 
-      const safeId = stdId.replace(/./g, '_');
+      const safeId = stdId.replace(/\./g, '_');
       const activeCard = document.getElementById('card-' + safeId);
       if (activeCard) {
         activeCard.classList.remove('border-slate-800/60', 'hover:border-slate-700');
