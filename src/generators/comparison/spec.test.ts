@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ComparisonGenerator } from './generator.ts';
 import { setSeed } from '../../lib/random.ts';
-import { Area, Scope } from 'edugraph-ts';
+import { Scope } from 'edugraph-ts';
 import { generateWithLabels } from '../../lib/utils.ts';
 
 describe('ComparisonGenerator Spec Integration', () => {

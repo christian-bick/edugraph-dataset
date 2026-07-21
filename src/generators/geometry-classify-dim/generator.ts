@@ -1,6 +1,5 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryClassifyDimProblem} from "../../types/problems.ts";
-import {random} from "../../lib/random.ts";
 import {GeometryClassifyDimGeneratorConfig, GeometryClassifyDimGeneratorSchema} from "./spec.ts";
 import {Area, Scope} from "edugraph-ts";
 import {validateConfigFields} from "../../lib/errors.ts";

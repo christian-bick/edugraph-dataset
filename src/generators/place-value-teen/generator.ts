@@ -10,7 +10,7 @@ export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenP
 
     generate(config: PlaceValueTeenGeneratorConfig): ProblemStub | null {
         validateConfigFields('place-value-teen', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
 
         const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;
         const resolvedMax = resolvedRange.max <= 20 ? resolvedRange.max : 19;

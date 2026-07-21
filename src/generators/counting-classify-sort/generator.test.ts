@@ -23,7 +23,7 @@ describe('CountingClassifySortGenerator', () => {
         const configMost = {
             range: { min: 1, max: 10 },
             relation: Scope.Most
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(configMost);
             if (stub) {
@@ -45,7 +45,7 @@ describe('CountingClassifySortGenerator', () => {
         const configLeast = {
             range: { min: 1, max: 10 },
             relation: Scope.Least
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(configLeast);
             if (stub) {

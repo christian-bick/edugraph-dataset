@@ -11,7 +11,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'place-value-make-ten'>;
 }
 
-const PlaceValueMakeTenCore = ({ config, payload }: CoreProps) => {
+const PlaceValueMakeTenCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('place-value-make-ten', data, ['givenNumber', 'missingNumber', 'target']);

@@ -19,7 +19,7 @@ export class OrderingGenerator implements ProblemGenerator<OrderingProblem, Orde
 
     generate(config: OrderingGeneratorConfig): ProblemStub | null {
         validateConfigFields('ordering', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
         const allowNegatives = config.allowNegatives;
         const includeZero = config.includeZero;
         

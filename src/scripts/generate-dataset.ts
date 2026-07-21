@@ -5,7 +5,7 @@ import {appendFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileS
 import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
-import { extractConfig, extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
+import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -84,7 +84,7 @@ async function renderDatasetSplit(
 
     
     const taskQueue: { problem: AbstractProblem, blueprint: any, instance: number }[] = [];
-    problems.forEach((problem, index) => {
+    problems.forEach((problem) => {
         const problemBlueprints = (problem as any).matchedBlueprints;
         if (problemBlueprints) {
             problemBlueprints.forEach((blueprint: any) => {
@@ -151,7 +151,7 @@ async function renderDatasetSplit(
                             
                             const isLeaf = el.children.length === 0;
                             const isRenderNode = ['IMG', 'SVG', 'INPUT', 'BUTTON', 'CANVAS'].includes(el.tagName);
-                            const hasDirectText = Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim().length > 0);
+                            const hasDirectText = Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && (node.textContent?.trim().length ?? 0) > 0);
                             
                             return isLeaf || isRenderNode || hasDirectText;
                         });
@@ -345,7 +345,7 @@ async function runModulePipeline(
         return filteredViews.some(viewSpec => {
             const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
             if (!viewLabels) return false;
-            return target.labels.every(compLabel => {
+            return target.labels.every((compLabel: string) => {
                 if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
                 if (abilitiesList.has(compLabel)) {
                     return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
@@ -377,7 +377,7 @@ async function runModulePipeline(
                 const matchedViews = filteredViews.filter(viewSpec => {
                     const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
                     if (!viewLabels || !generatorGeneralLabels) return false;
-                    const labelsMatch = target.labels.every(compLabel => {
+                    const labelsMatch = target.labels.every((compLabel: string) => {
                         if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
                         if (abilitiesList.has(compLabel)) {
                             return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
@@ -532,7 +532,7 @@ async function main() {
         for (const file of files) {
             const filePath = resolve(specDir, file);
             const module = await import(pathToFileURL(filePath).href);
-            for (const [key, value] of Object.entries(module)) {
+            for (const [, value] of Object.entries(module)) {
                 if (Array.isArray(value)) {
                     allTargets.push(...value);
                 }
@@ -540,7 +540,7 @@ async function main() {
         }
     } else if (specFile) {
         const module = await import(pathToFileURL(specFile).href);
-        for (const [key, value] of Object.entries(module)) {
+        for (const [, value] of Object.entries(module)) {
             if (Array.isArray(value)) {
                 allTargets.push(...value);
             }

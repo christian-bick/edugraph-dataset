@@ -1,6 +1,5 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryEnvShapesProblem} from "../../types/problems.ts";
-import {random} from "../../lib/random.ts";
 import {GeometryEnvShapesGeneratorConfig, GeometryEnvShapesGeneratorSchema} from "./spec.ts";
 import {Area} from "edugraph-ts";
 import {validateConfigFields} from "../../lib/errors.ts";

@@ -4,7 +4,6 @@ import path from 'path';
 import {fileURLToPath} from 'url';
 import {GoogleGenerativeAI, SchemaType} from '@google/generative-ai';
 import {Ability, Area, Scope} from 'edugraph-ts';
-import {isSubConceptOf} from '../lib/ontology.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -154,7 +153,7 @@ async function main() {
     model: 'gemini-3.5-flash',
     generationConfig: {
       responseMimeType: 'application/json',
-      responseSchema: responseSchema,
+      responseSchema: responseSchema as any,
       temperature: 0.1
     }
   });
@@ -191,8 +190,7 @@ async function main() {
     const prompt = `
 You are an expert curriculum mapper and ontologist. Your task is to map a batch of Common Core State Standards (CCSS) leaf nodes to the EduGraph mathematical ontology.
 
-Here is the context of the EduGraph Ontology (classes and properties):
-${ontologyRdf}
+Here is the context of the EduGraph Ontology:
 
 Valid Ontology Terms:
 - AREAS (Focus primary matching here):
@@ -263,7 +261,7 @@ ${JSON.stringify(batch.map(b => ({ id: b.id, description: b.description })), nul
   console.log('[Tasks] Grouping task backlog by Cluster ID...');
   const tasksByCluster: Record<string, any[]> = {};
   
-  for (const [stdId, data] of Object.entries(finalCoverageMap)) {
+  for (const [, data] of Object.entries(finalCoverageMap)) {
     if (data.ontology_covered) continue;
 
     const clusterId = data.cluster_id;

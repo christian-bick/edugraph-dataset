@@ -11,7 +11,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'place-value-decompose-teen'>;
 }
 
-const PlaceValueDecomposeTeenCore = ({ config, payload }: CoreProps) => {
+const PlaceValueDecomposeTeenCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('place-value-decompose-teen', data, ['ones', 'target']);

@@ -10,7 +10,7 @@ export class CountingClassifyCountGenerator implements ProblemGenerator<Counting
 
     generate(config: CountingClassifyCountGeneratorConfig): ProblemStub | null {
         validateConfigFields('counting-classify-count', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
 
         const minVal = Math.max(1, resolvedRange.min);
         if (minVal > resolvedRange.max) return null;

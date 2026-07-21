@@ -10,7 +10,7 @@ export class MeasurementGenerator implements ProblemGenerator<MeasurementStandar
 
     generate(config: MeasurementGeneratorConfig): ProblemStub | null {
         validateConfigFields('measurement', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
 
         const bandLength = resolvedRange.max;
         const minProblemLength = bandLength * 0.1;

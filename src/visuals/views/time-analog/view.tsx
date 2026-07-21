@@ -1,4 +1,3 @@
-import {Ability} from 'edugraph-ts';
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';

@@ -19,7 +19,7 @@ describe('MeasurementCompareGenerator', () => {
         const config = {
             attribute: Scope.LengthMeasurement,
             relation: Scope.Greater
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
@@ -41,7 +41,7 @@ describe('MeasurementCompareGenerator', () => {
         const config = {
             attribute: Scope.LengthMeasurement,
             relation: Scope.Less
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
@@ -63,7 +63,7 @@ describe('MeasurementCompareGenerator', () => {
         const config = {
             attribute: Scope.WeightMeasurement,
             relation: Scope.Greater
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();

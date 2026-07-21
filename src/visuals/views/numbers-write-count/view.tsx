@@ -36,7 +36,7 @@ function DoubleTenFrame({ number }: { number: number }) {
     );
 }
 
-export const NumbersWriteCountCore = ({ config, payload }: CoreProps) => {
+export const NumbersWriteCountCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('numbers-write-count', data, ['number']);

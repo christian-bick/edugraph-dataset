@@ -39,7 +39,7 @@ async function main() {
         for (const file of files) {
             const filePath = resolve(specDir, file);
             const module = await import(pathToFileURL(filePath).href);
-            for (const [key, value] of Object.entries(module)) {
+            for (const [, value] of Object.entries(module)) {
                 if (Array.isArray(value)) {
                     allTargets.push(...value);
                 }
@@ -47,7 +47,7 @@ async function main() {
         }
     } else if (specFile) {
         const module = await import(pathToFileURL(specFile).href);
-        for (const [key, value] of Object.entries(module)) {
+        for (const [, value] of Object.entries(module)) {
             if (Array.isArray(value)) {
                 allTargets.push(...value);
             }
@@ -187,7 +187,7 @@ async function main() {
                     const matchedViews = matchingViewsForTarget.filter(viewSpec => {
                         if (viewSpec.constraints) {
                             for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-                                const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints[key];
+                                const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints?.[key];
                                 if (val === undefined) {
                                     const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
                                     if (VISUAL_PARAMS.has(key)) {

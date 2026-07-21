@@ -94,7 +94,7 @@ export function generateWithLabels<TData = any, TConfig = any>(
         throw new Error('Generator is missing a schema!');
     }
     const { config, consumedLabels } = extractConfig(generator.schema, labels);
-    const problem = generator.generate(config);
+    const problem = generator.generate(config as TConfig);
     if (problem) {
         problem.tags = Array.from(new Set([...(problem.tags || []), ...consumedLabels]));
     }

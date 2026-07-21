@@ -10,7 +10,7 @@ export class ArithmeticDecomposeGenerator implements ProblemGenerator<Arithmetic
 
     generate(config: ArithmeticDecomposeGeneratorConfig): ProblemStub | null {
         validateConfigFields('arithmetic-decompose', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
         
         const minVal = Math.max(resolvedRange.min, 3);
         const maxVal = Math.min(resolvedRange.max, 99);

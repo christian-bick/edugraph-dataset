@@ -21,7 +21,7 @@ describe('TimeGenerator Spec Integration', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.interval).toBe(3600);
             
-            const [h, m, s] = stub!.data.time.split(':').map(Number);
+            const [, m, s] = stub!.data.time.split(':').map(Number);
             expect(m).toBe(0);
             expect(s).toBe(0);
         }
@@ -36,7 +36,7 @@ describe('TimeGenerator Spec Integration', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.interval).toBe(60);
             
-            const [h, m, s] = stub!.data.time.split(':').map(Number);
+            const [, , s] = stub!.data.time.split(':').map(Number);
             expect(s).toBe(0);
         }
     });

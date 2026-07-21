@@ -36,7 +36,7 @@ function DoubleTenFrame({ number }: { number: number }) {
     );
 }
 
-const NumbersWriteStandardCore = ({ config, payload }: CoreProps) => {
+const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('numbers-write-standard', data, ['number']);

@@ -1,7 +1,6 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryIdentityProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
-import {Area} from "edugraph-ts";
 import {GeometryIdentityGeneratorConfig, GeometryIdentityGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../lib/errors.ts";
 
@@ -11,7 +10,7 @@ export class GeometryIdentityGenerator implements ProblemGenerator<GeometryIdent
 
     generate(config: GeometryIdentityGeneratorConfig): ProblemStub | null {
         validateConfigFields('geometry-identity', config, ['shapes']);
-        const validShapes = config.shapes;
+        const validShapes = config.shapes!;
 
         const selectedArea = validShapes[Math.floor(random() * validShapes.length)];
         const shape = selectedArea.split('/').pop()!.toLowerCase();

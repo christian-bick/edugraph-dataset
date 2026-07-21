@@ -11,7 +11,7 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, 
 
     generate(config: ComparisonGeneratorConfig): ProblemStub<ComparisonProblem> | null {
         validateConfigFields('comparison', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
 
         const min = resolvedRange.min;
         const max = resolvedRange.max;

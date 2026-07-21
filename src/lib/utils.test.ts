@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { extractConfig, generateWithLabels } from './utils.ts';
 import { Area, Scope } from 'edugraph-ts';
-import { selectExactMatch, matchAllExactLabels } from './resolvers.ts';
+import { selectExactMatch } from './resolvers.ts';
 import { ProblemGenerator } from '../types/ml-engine.ts';
 
 describe('extractConfig & generateWithLabels', () => {

@@ -38,7 +38,7 @@ describe('ComparisonGenerator', () => {
         const config = {
             range: { min: 0, max: 20 },
             relation: Scope.Greater
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
@@ -51,7 +51,7 @@ describe('ComparisonGenerator', () => {
         const config = {
             range: { min: 0, max: 20 },
             relation: Scope.Less
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
@@ -64,7 +64,7 @@ describe('ComparisonGenerator', () => {
         const config = {
             range: { min: 0, max: 20 },
             relation: Scope.Equal
-        };
+        } as const;
         for (let i = 0; i < 50; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
@@ -78,7 +78,7 @@ describe('ComparisonGenerator', () => {
             range: { min: 0, max: 5 },
             includeZero: false,
             relation: Scope.Equal
-        };
+        } as const;
         for (let i = 0; i < 100; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
@@ -92,7 +92,7 @@ describe('ComparisonGenerator', () => {
             range: { min: 1, max: 5 },
             allowNegatives: true,
             relation: Scope.Less
-        };
+        } as const;
         let sawNegative = false;
         for (let i = 0; i < 200; i++) {
             const stub = generator.generate(config);

@@ -2,7 +2,6 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {GeometrySameAttributeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {GeometrySameAttributeGeneratorConfig, GeometrySameAttributeGeneratorSchema} from "./spec.ts";
-import {Area} from "edugraph-ts";
 import {validateConfigFields} from "../../lib/errors.ts";
 
 export class GeometrySameAttributeGenerator implements ProblemGenerator<GeometrySameAttributeProblem, GeometrySameAttributeGeneratorConfig> {
@@ -11,7 +10,7 @@ export class GeometrySameAttributeGenerator implements ProblemGenerator<Geometry
 
     generate(config: GeometrySameAttributeGeneratorConfig): ProblemStub | null {
         validateConfigFields('geometry-same-attribute', config, ['shapes']);
-        const shapes = config.shapes;
+        const shapes = config.shapes!;
 
         const selectedShape = shapes[Math.floor(random() * shapes.length)];
         const shape = selectedShape.split('/').pop()!.toLowerCase();

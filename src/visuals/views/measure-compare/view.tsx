@@ -85,7 +85,7 @@ function Illustration({ attribute, val1, val2, maxVal }: { attribute: string; va
     }
 }
 
-const MeasureCompareCore = ({ config, payload }: CoreProps) => {
+const MeasureCompareCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 

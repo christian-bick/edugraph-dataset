@@ -62,7 +62,7 @@ function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
     );
 }
 
-const OperationsDecomposeCore = ({ config, payload }: CoreProps) => {
+const OperationsDecomposeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('operations-decompose', data, ['targetNumber', 'pair1', 'pair2']);

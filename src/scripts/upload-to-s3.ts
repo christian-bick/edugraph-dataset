@@ -1,5 +1,5 @@
 import 'dotenv/config'; // Load .env file at the very top
-import { S3Client, PutObjectCommand, ListObjectsV2Command, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { readdir } from 'fs/promises';
 import { join, resolve, relative } from 'path';
 import { fileURLToPath } from 'url';

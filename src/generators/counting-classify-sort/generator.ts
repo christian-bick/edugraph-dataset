@@ -11,7 +11,7 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
 
     generate(config: CountingClassifySortGeneratorConfig): ProblemStub | null {
         validateConfigFields('counting-classify-sort', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
 
         const minVal = Math.max(1, resolvedRange.min);
         if (minVal > resolvedRange.max) return null;

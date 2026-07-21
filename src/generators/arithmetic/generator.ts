@@ -15,7 +15,7 @@ export class ArithmeticGenerator implements ProblemGenerator<ArithmeticProblem, 
         const operation = config.operation;
         const allowNegatives = config.allowNegatives;
         const includeZero = config.includeZero;
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
 
         // Fallbacks if schema parsing failed or got unhandled case
         if (!operation) return null;

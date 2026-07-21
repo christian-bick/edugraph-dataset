@@ -8,8 +8,9 @@ const enums = { Area, Scope, Ability };
 
 function getEnumString(match: string): string | null {
     const [prefix, key] = match.split('.');
-    if (enums[prefix as keyof typeof enums] && enums[prefix as keyof typeof enums][key as any]) {
-        return enums[prefix as keyof typeof enums][key as any] as unknown as string;
+    const targetEnum = enums[prefix as keyof typeof enums] as Record<string, string> | undefined;
+    if (targetEnum && targetEnum[key]) {
+        return targetEnum[key];
     }
     return null;
 }

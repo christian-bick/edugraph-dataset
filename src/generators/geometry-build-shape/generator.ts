@@ -1,6 +1,5 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {GeometryBuildShapeProblem} from "../../types/problems.ts";
-import {random} from "../../lib/random.ts";
 import {GeometryBuildShapeGeneratorConfig, GeometryBuildShapeGeneratorSchema} from "./spec.ts";
 import {Area} from 'edugraph-ts';
 import {validateConfigFields} from "../../lib/errors.ts";
@@ -11,7 +10,7 @@ export class GeometryBuildShapeGenerator implements ProblemGenerator<GeometryBui
 
     generate(config: GeometryBuildShapeGeneratorConfig): ProblemStub | null {
         validateConfigFields('geometry-build-shape', config, ['target']);
-        const targetLabel = config.target;
+        const targetLabel = config.target!;
         
         let target: string;
         let sides: number;

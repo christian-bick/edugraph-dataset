@@ -10,7 +10,7 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
 
     generate(config: WritingGeneratorConfig): ProblemStub | null {
         validateConfigFields('writing', config, ['range']);
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
 
         const includeZero = config.includeZero;
         const minNum = includeZero ? resolvedRange.min : Math.max(1, resolvedRange.min);

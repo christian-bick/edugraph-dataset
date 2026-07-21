@@ -122,11 +122,10 @@ async function main() {
     const domainGroups = JSON.parse(fs.readFileSync(DOMAINS_PATH, 'utf-8'));
     const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
 
-    let coverageData: any = null;
     const COVERAGE_PATH = path.resolve('./public/coverage/ccss-coverage.json');
     if (fs.existsSync(COVERAGE_PATH)) {
       try {
-        coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
+        JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
         console.log('Loaded standards coverage and tasks data.');
       } catch (e) {
         console.warn('Error reading coverage data:', e);

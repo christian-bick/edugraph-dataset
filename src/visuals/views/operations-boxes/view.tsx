@@ -18,7 +18,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-boxes'>;
 }
 
-const OperationsBoxesCore = ({ config, payload }: CoreProps) => {
+const OperationsBoxesCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
 
     const data = problem.data;

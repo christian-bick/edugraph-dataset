@@ -24,7 +24,7 @@ const wordProblemTemplates: Record<string, (num1: number, num2: number) => strin
     division: (num1, num2) => `If you share ${num1} apples equally among ${num2} friends, how many apples does each friend get?`
 };
 
-const OperationsWordProblemCore = ({ config, payload }: CoreProps) => {
+const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('operations-word-problem', data, ['num1', 'num2', 'operation', 'answer', 'type']);

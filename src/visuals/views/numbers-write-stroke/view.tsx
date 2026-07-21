@@ -87,7 +87,7 @@ function DoubleTenFrame({ number }: { number: number }) {
     );
 }
 
-const NumbersWriteStrokeCore = ({ config, payload }: CoreProps) => {
+const NumbersWriteStrokeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('numbers-write-stroke', data, ['number']);

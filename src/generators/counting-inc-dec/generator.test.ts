@@ -24,7 +24,7 @@ describe('CountingIncDecGenerator', () => {
         const config = { 
             range: { min: 0, max: 10 },
             direction: Scope.AdditiveCount
-        };
+        } as const;
         const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
@@ -35,7 +35,7 @@ describe('CountingIncDecGenerator', () => {
         const config = { 
             range: { min: 0, max: 10 },
             direction: Scope.SubtractiveCount
-        };
+        } as const;
         const stub = generator.generate(config);
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
@@ -66,7 +66,7 @@ describe('CountingIncDecGenerator', () => {
             const config = { 
                 range: { min: 0, max: 10 },
                 direction: Scope.SubtractiveCount
-            };
+            } as const;
             const stub = generator.generate(config);
             if (stub === null) {
                 foundNull = true;

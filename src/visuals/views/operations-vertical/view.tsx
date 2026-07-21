@@ -17,7 +17,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-vertical'>;
 }
 
-const OperationsVerticalCore = ({ config, payload }: CoreProps) => {
+const OperationsVerticalCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('operations-vertical', data, ['num1', 'num2', 'operation', 'answer']);

@@ -26,6 +26,7 @@ describe('OrderingGenerator Spec Integration', () => {
             
             // Check that we have at least some negative numbers
             const negatives = stub!.data.numbers.filter((n: number) => n < 0);
+            expect(negatives).toBeDefined();
             expect(stub!.data.numbers.every((n: number) => Math.abs(n) <= 100)).toBe(true);
         }
     });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isSubConceptOf, isCompatibleConcept, resolveRangeFromLabels } from './ontology.ts';
-import { Scope, Area, Ability } from 'edugraph-ts';
+import { isSubConceptOf, resolveRangeFromLabels } from './ontology.ts';
+import { Scope, Area } from 'edugraph-ts';
 
 describe('Ontology Helper', () => {
     describe('isSubConceptOf', () => {

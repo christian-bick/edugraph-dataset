@@ -82,7 +82,7 @@ function Illustration({ attribute }: { attribute: string }) {
     }
 }
 
-const MeasureAttributesCore = ({ config, payload }: CoreProps) => {
+const MeasureAttributesCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 

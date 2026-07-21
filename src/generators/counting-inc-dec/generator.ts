@@ -20,7 +20,7 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
             incDecType = random() > 0.5 ? 'inc' : 'dec';
         }
 
-        const resolvedRange = config.range;
+        const resolvedRange = config.range!;
         let maxCount = resolvedRange.max;
         let minCount = resolvedRange.min;
         if (minCount < 1) {

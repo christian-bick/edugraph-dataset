@@ -11,7 +11,7 @@ export class GeometryPositionGenerator implements ProblemGenerator<GeometryPosit
 
     generate(config: GeometryPositionGeneratorConfig): ProblemStub | null {
         validateConfigFields('geometry-position', config, ['relations']);
-        const relations = config.relations;
+        const relations = config.relations!;
 
         const possible: string[] = [];
         if (relations.includes(Scope.Above)) possible.push('above');
