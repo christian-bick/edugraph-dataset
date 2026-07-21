@@ -88,32 +88,30 @@ export type TimeProblem = {
     interval: number;
 };
 
-// --- Geometry Split Problem Types ---
+// --- Shape Split Problem Types ---
 
-export type GeometryIdentityProblem = {
+export type ShapeIdentityProblem = {
     shape: string;
     answer: string;
 };
 
-export type GeometryPositionProblem = {
+export type ShapePositionProblem = {
     relation: 'above' | 'below' | 'beside' | 'nextTo';
     answer: string;
 };
 
-export type GeometryEnvShapesProblem = {
+export type ShapeEnvShapesProblem = {
     target: string;
     answer: string;
 };
 
-
-
-export type GeometryClassifyDimProblem = {
+export type ShapeClassifyDimProblem = {
     shapeType: '2d' | '3d';
     shape: string;
     answer: '2d' | '3d';
 };
 
-export type GeometryCompareAttributesProblem = {
+export type ShapeCompareAttributesProblem = {
     attribute: 'sides' | 'corners';
     shape1: string;
     shape2: string;
@@ -122,20 +120,18 @@ export type GeometryCompareAttributesProblem = {
     answer: string;
 };
 
-export type GeometrySameAttributeProblem = {
+export type ShapeSameAttributeProblem = {
     attribute: 'rollable' | 'stackable' | 'foldable';
     answer: string;
 };
 
-export type GeometryBuildShapeProblem = {
+export type ShapeBuildShapeProblem = {
     target: string;
     sides: number;
     corners: number;
 };
 
-
-
-export type GeometryComposeShapesProblem = {
+export type ShapeComposeShapesProblem = {
     target: string;
     components: string[];
     answer: string;
@@ -179,13 +175,13 @@ export interface ViewTypeMap {
     'numbers-write-count': WritingProblem;
     'time-analog': TimeProblem;
 
-    'geometry-naming': GeometryIdentityProblem;
-    'geometry-position': GeometryPositionProblem;
-    'geometry-env-shapes': GeometryEnvShapesProblem;
-    'geometry-classify-dim': GeometryClassifyDimProblem;
-    'geometry-compare-attributes': GeometryCompareAttributesProblem;
-    'geometry-same-attribute': GeometrySameAttributeProblem;
-    'geometry-build-shape': GeometryBuildShapeProblem;
-    'geometry-compose-shapes': GeometryComposeShapesProblem;
-    'geometry-draw-shape': GeometryIdentityProblem;
+    'shape-naming': ShapeIdentityProblem;
+    'shape-position': ShapePositionProblem;
+    'shape-env-shapes': ShapeEnvShapesProblem;
+    'shape-classify-dim': ShapeClassifyDimProblem;
+    'shape-compare-attributes': ShapeCompareAttributesProblem;
+    'shape-same-attribute': ShapeSameAttributeProblem;
+    'shape-build-shape': ShapeBuildShapeProblem;
+    'shape-compose-shapes': ShapeComposeShapesProblem;
+    'shape-draw-shape': ShapeIdentityProblem;
 }
