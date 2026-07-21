@@ -1,7 +1,6 @@
 import {ViewSpec} from '../../../types/view-spec.ts';
-import {Ability, Area, Scope, deductCompatible, CompetencyDescriptor} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-conservation',

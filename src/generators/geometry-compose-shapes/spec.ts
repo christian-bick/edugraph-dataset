@@ -1,5 +1,5 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Area} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
 import {selectExactMatch} from '../../lib/resolvers.ts';
 
