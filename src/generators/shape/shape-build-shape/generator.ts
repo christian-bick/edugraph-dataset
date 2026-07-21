@@ -5,7 +5,7 @@ import {Area} from 'edugraph-ts';
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShapeProblem, ShapeBuildShapeGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapeBuildShapeGeneratorSchema;
 
     generate(config: ShapeBuildShapeGeneratorConfig): ProblemStub | null {
@@ -35,7 +35,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         }
 
         return {
-            id: `geometry-build-${target}`,
+            id: `shape-build-${target}`,
             data: {
                 target,
                 sides,

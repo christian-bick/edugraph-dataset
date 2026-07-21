@@ -1,4 +1,4 @@
-### Geometry Position Visual Checklist
+### Shape Position Visual Checklist
 
 ## Rendering Requirements
 - **Clear Prompt**: The instruction prompt must ask "Where is the ball relative to the box?".

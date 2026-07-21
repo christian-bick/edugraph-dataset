@@ -1,4 +1,4 @@
-# Geometry Classify Dim - Pedagogical Logic Checklist
+# Shape Classify Dim - Pedagogical Logic Checklist
 
 - Verify that the shape classification corresponds to the correct dimension:
   - 2D shapes (circle, square, triangle, rectangle, hexagon) must map to `shapeType` '2d' and `answer` '2d'.

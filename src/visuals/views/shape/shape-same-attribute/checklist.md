@@ -1,4 +1,4 @@
-### Geometry Same Attribute Visual Checklist
+### Shape Same Attribute Visual Checklist
 
 ## Rendering Requirements
 - **Prompt Text**: The prompt must correspond to the target attribute:

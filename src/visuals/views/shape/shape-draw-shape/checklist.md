@@ -1,4 +1,4 @@
-### Geometry Draw Shape Visual Checklist
+### Shape Draw Shape Visual Checklist
 
 ## Rendering Requirements
 - **Clear Prompt**: The instruction prompt must ask to "Trace the {shape}." (e.g. "Trace the circle.").

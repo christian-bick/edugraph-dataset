@@ -377,7 +377,7 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
 // ==========================================
 
 // --- K.G.A.1: Describe objects in the environment using names of shapes ---
-// TODO [K.G.A.1]: The shapes-env-shapes generator only supports circle, square and
+// TODO [K.G.A.1]: The shape-env-shapes generator only supports circle, square and
 // rectangle; further environment shapes (e.g. Area.Triangle, Area.Hexagon) are not
 // supported yet.
 const envShapesBuilder = new DatasetPermutationBuilder()
@@ -393,7 +393,7 @@ const envShapesBuilder = new DatasetPermutationBuilder()
 
 // --- K.G.A.1: Describe relative positions of objects (above, below, beside, behind) ---
 // TODO [K.G.A.1]: "in front of" and "next to" (e.g. Scope.Ahead) are not supported by
-// the geometry-position generator (only Above/Below/Beside/Behind).
+// the shape-position generator (only Above/Below/Beside/Behind).
 const positionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.SpatialModelling,

@@ -31,7 +31,7 @@ For the checklists.md:
 Reference examples: 
 
 - You can visit the neighboring "arithmetic" module for guidance on numeric aspects
-- You can visit the neighboring "geometry-build-shape" for guidance on geometric aspects
+- You can visit the neighboring "shape-build-shape" for guidance on geometric aspects
 
 IMPORTANT: 
 

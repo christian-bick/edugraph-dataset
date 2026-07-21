@@ -6,7 +6,7 @@ import {ShapePositionGeneratorConfig, ShapePositionGeneratorSchema} from "./spec
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapePositionGenerator implements ProblemGenerator<ShapePositionProblem, ShapePositionGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapePositionGeneratorSchema;
 
     generate(config: ShapePositionGeneratorConfig): ProblemStub | null {
@@ -34,7 +34,7 @@ export class ShapePositionGenerator implements ProblemGenerator<ShapePositionPro
         };
 
         return {
-            id: `geometry-position-${relation}`,
+            id: `shape-position-${relation}`,
             data: {
                 relation,
                 answer

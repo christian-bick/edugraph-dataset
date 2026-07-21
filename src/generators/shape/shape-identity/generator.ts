@@ -5,7 +5,7 @@ import {ShapeIdentityGeneratorConfig, ShapeIdentityGeneratorSchema} from "./spec
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapeIdentityGenerator implements ProblemGenerator<ShapeIdentityProblem, ShapeIdentityGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapeIdentityGeneratorSchema;
 
     generate(config: ShapeIdentityGeneratorConfig): ProblemStub | null {
@@ -16,7 +16,7 @@ export class ShapeIdentityGenerator implements ProblemGenerator<ShapeIdentityPro
         const shape = selectedArea.split('/').pop()!.toLowerCase();
 
         return {
-            id: `geometry-identity-${shape}`,
+            id: `shape-identity-${shape}`,
             data: {
                 shape,
                 answer: shape

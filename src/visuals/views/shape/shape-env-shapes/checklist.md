@@ -1,4 +1,4 @@
-# Geometry Env Shapes - Visual & Rendering Checklist
+# Shape Env Shapes - Visual & Rendering Checklist
 
 - Verify that a representation of the real-world object (clock, window, or table) is rendered centered inside the container.
 - Verify that the prompt text is correct: "What shape is this [target]?" (e.g. "What shape is this clock?")

@@ -12,7 +12,7 @@ describe('ShapeClassifyDimGenerator', () => {
     });
 
     it('should have the correct type', () => {
-        expect(generator.type).toBe('geometry');
+        expect(generator.type).toBe('shape');
     });
 
     it('should throw GeneratorValidationError when config is empty', () => {

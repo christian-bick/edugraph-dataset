@@ -1,4 +1,4 @@
-### Geometry Naming Visual Checklist
+### Shape Naming Visual Checklist
 
 ## Rendering Requirements
 - **Clear Prompt**: The instruction prompt must ask "What shape is this?".

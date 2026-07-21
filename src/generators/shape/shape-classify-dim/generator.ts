@@ -5,7 +5,7 @@ import {Area, Scope} from "edugraph-ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapeClassifyDimGenerator implements ProblemGenerator<ShapeClassifyDimProblem, ShapeClassifyDimGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapeClassifyDimGeneratorSchema;
 
     generate(config: ShapeClassifyDimGeneratorConfig): ProblemStub | null {
@@ -59,7 +59,7 @@ export class ShapeClassifyDimGenerator implements ProblemGenerator<ShapeClassify
         const dimLabel = shapeType === '2d' ? Scope.TwoDimensional : Scope.ThreeDimensional;
 
         return {
-            id: `geometry-classify-dim-${shapeType}-${shape}`,
+            id: `shape-classify-dim-${shapeType}-${shape}`,
             data: {
                 shapeType,
                 shape,

@@ -13,7 +13,7 @@ describe('ShapeBuildShapeGenerator', () => {
     });
 
     it('should have the correct type', () => {
-        expect(generator.type).toBe('geometry');
+        expect(generator.type).toBe('shape');
     });
 
     it('should generate triangle details correctly', () => {

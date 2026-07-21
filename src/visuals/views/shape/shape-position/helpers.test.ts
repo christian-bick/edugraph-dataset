@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {getBallPosition} from './helpers.ts';
 
-describe('geometry-position helpers', () => {
+describe('shape-position helpers', () => {
     it('returns correct ball position for relation', () => {
         expect(getBallPosition('above')).toEqual({ x: 130, y: 25 });
         expect(getBallPosition('below')).toEqual({ x: 130, y: 150 });

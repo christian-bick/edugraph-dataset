@@ -1,4 +1,4 @@
-# Geometry Compare Attributes - Visual & Rendering Checklist
+# Shape Compare Attributes - Visual & Rendering Checklist
 
 - Verify that two shape SVGs are rendered side by side inside the gray container, with their respective uppercase names displayed directly below each shape.
 - Verify that the question prompt is clear: "Which shape has more [sides/corners]?"

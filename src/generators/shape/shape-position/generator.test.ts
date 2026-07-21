@@ -13,7 +13,7 @@ describe('ShapePositionGenerator', () => {
     });
 
     it('should have the correct type', () => {
-        expect(generator.type).toBe('geometry');
+        expect(generator.type).toBe('shape');
     });
 
     it('should throw validation error when relations is missing or empty', () => {
@@ -28,6 +28,6 @@ describe('ShapePositionGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('below');
         expect(stub!.data.answer).toBe('below');
-        expect(stub!.id).toBe('geometry-position-below');
+        expect(stub!.id).toBe('shape-position-below');
     });
 });

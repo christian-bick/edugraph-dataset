@@ -5,7 +5,7 @@ import {Area} from "edugraph-ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapeEnvShapesGenerator implements ProblemGenerator<ShapeEnvShapesProblem, ShapeEnvShapesGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapeEnvShapesGeneratorSchema;
 
     generate(config: ShapeEnvShapesGeneratorConfig): ProblemStub | null {
@@ -32,7 +32,7 @@ export class ShapeEnvShapesGenerator implements ProblemGenerator<ShapeEnvShapesP
         const target = envMap[answer];
 
         return {
-            id: `geometry-env-shapes-${target}`,
+            id: `shape-env-shapes-${target}`,
             data: {
                 target,
                 answer

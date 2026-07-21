@@ -5,7 +5,7 @@ import {ShapeSameAttributeGeneratorConfig, ShapeSameAttributeGeneratorSchema} fr
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAttributeProblem, ShapeSameAttributeGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapeSameAttributeGeneratorSchema;
 
     generate(config: ShapeSameAttributeGeneratorConfig): ProblemStub | null {
@@ -27,7 +27,7 @@ export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAt
         const answer = shape;
 
         return {
-            id: `geometry-same-attr-${attribute}-${answer}`,
+            id: `shape-same-attr-${attribute}-${answer}`,
             data: {
                 attribute,
                 answer

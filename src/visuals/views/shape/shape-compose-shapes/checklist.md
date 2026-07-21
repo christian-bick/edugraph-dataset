@@ -1,4 +1,4 @@
-# Geometry Compose Shapes - Visual & Rendering Checklist
+# Shape Compose Shapes - Visual & Rendering Checklist
 
 - Verify that a dashed border target shape container is rendered with the label "Target: [RECTANGLE/SQUARE]".
 - Verify that the prompt text is correct: "Which two shapes can you join to make a [target]?"

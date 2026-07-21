@@ -13,7 +13,7 @@ describe('ShapeIdentityGenerator', () => {
     });
 
     it('should have the correct type', () => {
-        expect(generator.type).toBe('geometry');
+        expect(generator.type).toBe('shape');
     });
 
     it('should throw validation error if no shapes provided or config is empty', () => {
@@ -26,6 +26,6 @@ describe('ShapeIdentityGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shape).toBe('hexagon');
         expect(stub!.data.answer).toBe('hexagon');
-        expect(stub!.id).toBe('geometry-identity-hexagon');
+        expect(stub!.id).toBe('shape-identity-hexagon');
     });
 });

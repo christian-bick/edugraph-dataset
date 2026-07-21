@@ -1,4 +1,4 @@
-# Geometry Classify Dim - Visual & Rendering Checklist
+# Shape Classify Dim - Visual & Rendering Checklist
 
 - Verify that the shape SVG is correctly centered inside its gray container.
 - Verify that two option buttons are rendered below the shape container: "Flat (2D)" and "Solid (3D)".

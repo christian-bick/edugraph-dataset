@@ -59,17 +59,17 @@ Generator specs reside under `src/generators/<moduleName>/spec.ts`. Their schema
   };
   ```
 
-#### Example 2: Shape Classification (Geometry)
+#### Example 2: Shape Classification (Shape)
 - 🛑 **Bad (Visual parameter in generator spec):**
   ```typescript
-  export const GeometryIdentitySchema = {
+  export const ShapeIdentitySchema = {
       useColor: [ [Scope.ColoredShapes], hasLabel(Scope.ColoredShapes) ], // Visual styling like color belongs in the view spec!
       shapeType: [ [Scope.Triangle, Scope.Square], selectExactMatch ]
   };
   ```
 - 🟢 **Good (Strictly mathematical shape properties):**
   ```typescript
-  export const GeometryIdentitySchema = {
+  export const ShapeIdentitySchema = {
       shapeType: [ [Scope.Triangle, Scope.Square], selectExactMatch ]
   };
   ```
@@ -104,17 +104,17 @@ View specs reside under `src/visuals/views/<viewName>/spec.ts`. Their schema mus
   };
   ```
 
-#### Example 2: Shape Classification View (Geometry)
+#### Example 2: Shape Classification View (Shape)
 - 🛑 **Bad (Shape type selectors in view spec):**
   ```typescript
-  export const GeometryIdentityViewSchema = {
+  export const ShapeIdentityViewSchema = {
       isReverse: [ ... ],
       shapeType: [ ... ] // Defining which shapes to generate belongs in the generator spec!
   };
   ```
 - 🟢 **Good (Strictly visual rendering parameters):**
   ```typescript
-  export const GeometryIdentityViewSchema = {
+  export const ShapeIdentityViewSchema = {
       isReverse: [ ... ] // Determines whether the student reads the label or draws/selects the shape
   };
   ```

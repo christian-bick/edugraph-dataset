@@ -6,7 +6,7 @@ import {Area} from "edugraph-ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCompareAttributesProblem, ShapeCompareAttributesGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapeCompareAttributesGeneratorSchema;
 
     generate(config: ShapeCompareAttributesGeneratorConfig): ProblemStub | null {
@@ -68,7 +68,7 @@ export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCo
         };
 
         return {
-            id: `geometry-compare-attr-${attribute}-${shape1}-${shape2}`,
+            id: `shape-compare-attr-${attribute}-${shape1}-${shape2}`,
             data: {
                 attribute: attribute as 'sides' | 'corners',
                 shape1,

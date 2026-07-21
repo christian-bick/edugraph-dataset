@@ -5,7 +5,7 @@ import {Area} from "edugraph-ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
 export class ShapeComposeShapesGenerator implements ProblemGenerator<ShapeComposeShapesProblem, ShapeComposeShapesGeneratorConfig> {
-    type: AbstractProblem['type'] = 'geometry';
+    type: AbstractProblem['type'] = 'shape';
     schema = ShapeComposeShapesGeneratorSchema;
 
     generate(config: ShapeComposeShapesGeneratorConfig): ProblemStub | null {
@@ -26,7 +26,7 @@ export class ShapeComposeShapesGenerator implements ProblemGenerator<ShapeCompos
         const answer = 'triangle';
 
         return {
-            id: `geometry-compose-${target}`,
+            id: `shape-compose-${target}`,
             data: {
                 target,
                 components,

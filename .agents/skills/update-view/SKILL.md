@@ -36,7 +36,7 @@ Reference examples:
 
 - You can take inspiration from the neighboring "operations-vertical" module for guidance on standard exercise layouts
 - You can take inspiration from the neighboring "counting-objects-simple" module for guidance on visual object arrangements
-- You can take inspiration from the neighboring "geometry-naming" module for guidance on geometric rendering
+- You can take inspiration from the neighboring "shape-naming" module for guidance on geometric rendering
 
 IMPORTANT: 
 

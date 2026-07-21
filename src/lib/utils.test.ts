@@ -45,7 +45,7 @@ describe('extractConfig & generateWithLabels', () => {
 
     it('should correctly tag the generated ProblemStub via generateWithLabels', () => {
         const mockGenerator: ProblemGenerator = {
-            type: 'shapes',
+            type: 'shape',
             schema: testSchema,
             generate: (config: any) => ({
                 id: `mock-id-${config.classify}`,
