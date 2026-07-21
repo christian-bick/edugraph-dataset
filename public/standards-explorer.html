@@ -168,11 +168,11 @@
       </div>
     </div>
 
-    <!-- Right Panel: Metadata & Interactive Graph Visualization -->
-    <div class="w-full lg:w-96 bg-slate-900/30 border-l border-slate-800 flex flex-col min-h-0 shrink-0 overflow-hidden">
+    <!-- Right Panel: Selection Metadata & Details -->
+    <div class="w-full lg:w-96 bg-slate-900/30 border-l border-slate-800 flex flex-col min-h-0 shrink-0 overflow-y-auto">
       
-      <!-- Selection Detail Card (Fixed at top of right column) -->
-      <div id="detail-card" class="shrink-0 p-6 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex flex-col gap-4 overflow-y-auto max-h-[55vh] shadow-md">
+      <!-- Selection Detail Card -->
+      <div id="detail-card" class="p-6 bg-slate-900/60 flex flex-col gap-4">
         <div class="flex items-start justify-between">
           <span class="px-2.5 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded text-[10px] font-mono font-bold tracking-wider" id="detail-level">STANDARD</span>
           <span class="text-xs text-slate-500 font-mono" id="detail-id">K.CC.A.1</span>
@@ -197,48 +197,22 @@
 
         <!-- Mapping details -->
         <div id="detail-mapping-section" class="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs hidden">
-          <span class="text-slate-500 block">Mapping Status</span>
+          <span class="text-slate-500 block font-semibold text-[11px]">Mapping Status</span>
           <div class="flex items-center gap-1.5">
             <span id="detail-coverage-badge" class="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400">UNMAPPED</span>
             <span id="detail-module-badge" class="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hidden"></span>
           </div>
           <div id="detail-todo-explanation" class="text-xs rounded-md p-2.5 leading-relaxed hidden"></div>
-          <div>
-            <span class="text-slate-500 block mb-1">Matched Areas</span>
-            <div id="detail-matched-areas" class="flex flex-wrap gap-1">
-              <span class="text-slate-400 italic text-[10px]">None</span>
-            </div>
-          </div>
-          <div>
-            <span class="text-slate-500 block mb-1">Matched Scopes</span>
-            <div id="detail-matched-scopes" class="flex flex-wrap gap-1">
-              <span class="text-slate-400 italic text-[10px]">None</span>
-            </div>
-          </div>
-          <div>
-            <span class="text-slate-500 block mb-1">Matched Abilities</span>
-            <div id="detail-matched-abilities" class="flex flex-wrap gap-1">
-              <span class="text-slate-400 italic text-[10px]">None</span>
-            </div>
-          </div>
-          <!-- Expandable Competencies Breakdown -->
-          <div class="border-t border-slate-800/80 pt-2.5 mt-1">
-            <button onclick="toggleCompetenciesBreakdown()" class="w-full text-left flex items-center justify-between text-slate-400 hover:text-white transition-colors py-1">
-              <span class="font-semibold text-[11px] flex items-center gap-1.5">
-                <i class="fa-solid fa-cubes-stacked text-indigo-400"></i>
-                Competency Permutations (<span id="detail-competencies-count">0</span>)
-              </span>
-              <i id="competencies-chevron" class="fa-solid fa-chevron-down text-[9px] transition-transform"></i>
-            </button>
-            <div id="detail-competencies-breakdown" class="hidden mt-2 space-y-2 max-h-48 overflow-y-auto pr-1">
-              <!-- Rendered per competency permutation -->
-            </div>
+
+          <!-- Direct Competency Permutations Breakdown -->
+          <div id="detail-competencies-breakdown" class="space-y-2 pt-1 border-t border-slate-800/80 mt-1">
+            <!-- Rendered per competency permutation -->
           </div>
         </div>
       </div>
 
-      <!-- Task Detail Card (Fixed at top of right column) -->
-      <div id="task-detail-card" class="shrink-0 p-6 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md hidden flex-col gap-4 overflow-y-auto max-h-[55vh] shadow-md">
+      <!-- Task Detail Card (hidden by default) -->
+      <div id="task-detail-card" class="p-6 bg-slate-900/60 hidden flex-col gap-4">
         <div class="flex items-start justify-between">
           <span class="px-2.5 py-0.5 bg-orange-500/10 border border-orange-500/20 text-orange-300 rounded text-[10px] font-mono font-bold tracking-wider" id="task-detail-type">DATASET_ENRICHMENT</span>
           <span class="text-xs text-slate-500 font-mono" id="task-detail-id">task-generator-K.CC.B</span>
@@ -252,33 +226,6 @@
           <div id="task-detail-standards" class="flex flex-wrap gap-1.5">
             <!-- Standards listed as badges -->
           </div>
-        </div>
-      </div>
-
-      <!-- Connection Graph Panel -->
-      <div class="flex-1 flex flex-col min-h-0 bg-slate-900/10">
-        <div class="px-6 py-3 border-b border-slate-800 flex items-center justify-between shrink-0">
-          <span class="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-            <i class="fa-solid fa-circle-nodes text-slate-500"></i> Prerequisite & Connection Graph
-          </span>
-          <span class="text-[10px] text-slate-500">Click node to navigate</span>
-        </div>
-        
-        <!-- SVG Container -->
-        <div class="flex-1 min-h-[300px] relative overflow-hidden">
-          <svg id="graph-svg" class="w-full h-full"></svg>
-          <div id="graph-empty" class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 bg-slate-950/20 text-xs">
-            <i class="fa-solid fa-spinner fa-spin text-lg mb-2 text-slate-500 hidden" id="graph-spinner"></i>
-            <span id="graph-empty-text">Select a standard with connections to display the graph</span>
-          </div>
-        </div>
-
-        <!-- Graph Legend -->
-        <div class="px-4 py-2 border-t border-slate-800 bg-slate-950/50 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-400 justify-center">
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#6366f1] border border-white/20"></span> Active</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#10b981] border border-white/20"></span> Prerequisite</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6] border border-white/20"></span> Leads to</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#eab308] border border-white/20"></span> Related</span>
         </div>
       </div>
     </div>
@@ -1025,116 +972,117 @@
           }
         }
 
-        const areasDiv = document.getElementById('detail-matched-areas');
-        areasDiv.innerHTML = '';
-        if (cov.matched_areas && cov.matched_areas.length > 0) {
-          cov.matched_areas.forEach(iri => {
-            const shortName = iri.split('/').pop();
-            areasDiv.innerHTML += '<span title="' + iri + '" class="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-300">' + shortName + '</span>';
-          });
-        } else {
-          areasDiv.innerHTML = '<span class="text-slate-500 italic text-[10px]">None</span>';
-        }
-        
-        const scopesDiv = document.getElementById('detail-matched-scopes');
-        scopesDiv.innerHTML = '';
-        if (cov.matched_scopes && cov.matched_scopes.length > 0) {
-          cov.matched_scopes.forEach(iri => {
-            const shortName = iri.split('/').pop();
-            scopesDiv.innerHTML += '<span title="' + iri + '" class="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-300">' + shortName + '</span>';
-          });
-        } else {
-          scopesDiv.innerHTML = '<span class="text-slate-500 italic text-[10px]">None</span>';
-        }
-        
-        const abilsDiv = document.getElementById('detail-matched-abilities');
-        abilsDiv.innerHTML = '';
-        if (cov.matched_abilities && cov.matched_abilities.length > 0) {
-          cov.matched_abilities.forEach(iri => {
-            const shortName = iri.split('/').pop();
-            abilsDiv.innerHTML += '<span title="' + iri + '" class="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-300">' + shortName + '</span>';
-          });
-        } else {
-          abilsDiv.innerHTML = '<span class="text-slate-500 italic text-[10px]">None</span>';
+        // Helper for concept badge color mapping: Yellow (Area), Green (Scope), Blue (Ability)
+        function getConceptBadgeStyle(iri) {
+          if (cov.matched_areas && cov.matched_areas.includes(iri)) {
+            return 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30';
+          }
+          if (cov.matched_scopes && cov.matched_scopes.includes(iri)) {
+            return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
+          }
+          if (cov.matched_abilities && cov.matched_abilities.includes(iri)) {
+            return 'bg-blue-500/10 text-blue-300 border-blue-500/30';
+          }
+          return 'bg-slate-900 text-slate-300 border-slate-800';
         }
 
-        // Render competencies permutations breakdown
+        // Render competencies breakdown (Intersection + Slim Disjunct Elements)
         const compBreakdown = document.getElementById('detail-competencies-breakdown');
-        const compCount = document.getElementById('detail-competencies-count');
         compBreakdown.innerHTML = '';
 
-        const hasPerms = (cov.competencies && cov.competencies.length > 0) || 
-                         (cov.implementation_todos && cov.implementation_todos.length > 0) || 
-                         (cov.ontology_todos && cov.ontology_todos.length > 0) ||
-                         (!cov.ontology_covered);
+        let allLabelSets = [];
+        if (cov.competencies && cov.competencies.length > 0) {
+          cov.competencies.forEach(perm => allLabelSets.push(perm));
+        }
+        if (cov.implementation_todos && cov.implementation_todos.length > 0) {
+          cov.implementation_todos.forEach(todo => {
+            if (todo.labels) allLabelSets.push(todo.labels);
+          });
+        }
 
-        if (hasPerms) {
-          const totalPerms = (cov.competencies ? cov.competencies.length : 0) + (cov.implementation_todos ? cov.implementation_todos.length : 0);
-          compCount.textContent = totalPerms;
+        const totalPerms = allLabelSets.length;
 
-          // Render active implemented permutations
-          if (cov.competencies) {
-            cov.competencies.forEach((perm, idx) => {
+        if (totalPerms > 0 || (cov.ontology_todos && cov.ontology_todos.length > 0)) {
+          // Calculate intersection across all permutations
+          let intersection = [];
+          if (allLabelSets.length > 0) {
+            intersection = allLabelSets[0].filter(iri => allLabelSets.every(set => set.includes(iri)));
+          }
+
+          // 1. Render Common Concepts (Intersection) if non-empty
+          if (intersection.length > 0) {
+            const commonDiv = document.createElement('div');
+            commonDiv.className = 'p-2 rounded bg-slate-950/80 border border-slate-800 space-y-1 mb-2';
+            
+            let commonBadges = '';
+            intersection.forEach(iri => {
+              const shortName = iri.split('/').pop();
+              const badgeStyle = getConceptBadgeStyle(iri);
+              commonBadges += '<span title="' + iri + '" class="px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 ' + badgeStyle + '">' + shortName + '</span>';
+            });
+
+            commonDiv.innerHTML = '<div class="text-[9px] font-mono text-slate-400 font-semibold uppercase tracking-wider mb-1 flex items-center justify-between"><span>Common Concepts</span><span class="text-[8px] px-1 py-0.2 bg-slate-800 text-slate-400 rounded">' + intersection.length + '</span></div>' +
+              '<div class="flex flex-wrap gap-0.5">' + commonBadges + '</div>';
+            compBreakdown.appendChild(commonDiv);
+          }
+
+          // 2. Render Slim Permutation Variations (Disjunct Elements) for active implemented competencies
+          if (cov.competencies && cov.competencies.length > 0) {
+            cov.competencies.forEach((perm) => {
+              const disjunct = perm.filter(iri => !intersection.includes(iri));
               const permDiv = document.createElement('div');
-              permDiv.className = 'p-2 rounded bg-slate-950/80 border border-slate-800/80 space-y-1';
+              permDiv.className = 'p-2 rounded bg-slate-950/60 border border-slate-800/60';
               
               let badgesHtml = '';
-              perm.forEach(iri => {
-                const shortName = iri.split('/').pop();
-                let badgeStyle = 'bg-slate-900 text-slate-300 border-slate-800';
-                if (cov.matched_areas && cov.matched_areas.includes(iri)) {
-                  badgeStyle = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30';
-                } else if (cov.matched_scopes && cov.matched_scopes.includes(iri)) {
-                  badgeStyle = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
-                } else if (cov.matched_abilities && cov.matched_abilities.includes(iri)) {
-                  badgeStyle = 'bg-amber-500/10 text-amber-300 border-amber-500/30';
-                }
-                badgesHtml += '<span title="' + iri + '" class="px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 ' + badgeStyle + '">' + shortName + '</span>';
-              });
+              if (disjunct.length > 0) {
+                disjunct.forEach(iri => {
+                  const shortName = iri.split('/').pop();
+                  const badgeStyle = getConceptBadgeStyle(iri);
+                  badgesHtml += '<span title="' + iri + '" class="px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 ' + badgeStyle + '">' + shortName + '</span>';
+                });
+              } else {
+                badgesHtml = '<span class="text-[9px] text-slate-500 italic">Identical to common concepts</span>';
+              }
 
-              permDiv.innerHTML = '<div class="text-[9px] font-mono text-emerald-400 font-semibold mb-1 flex items-center justify-between"><span>Permutation #' + (idx + 1) + '</span><span class="text-[8px] px-1 py-0.2 bg-emerald-500/10 border border-emerald-500/20 rounded">IMPLEMENTED</span></div>' +
-                '<div class="flex flex-wrap gap-0.5">' + badgesHtml + '</div>';
+              permDiv.innerHTML = '<div class="flex flex-wrap gap-0.5">' + badgesHtml + '</div>';
               compBreakdown.appendChild(permDiv);
             });
           }
 
-          // Render implementation TODOs
+          // 3. Render Slim Implementation TODOs (Disjunct Elements)
           if (cov.implementation_todos && cov.implementation_todos.length > 0) {
-            cov.implementation_todos.forEach((todo, idx) => {
+            cov.implementation_todos.forEach((todo) => {
+              const disjunct = todo.labels ? todo.labels.filter(iri => !intersection.includes(iri)) : [];
               const permDiv = document.createElement('div');
-              permDiv.className = 'p-2 rounded bg-orange-950/20 border border-orange-500/30 space-y-1';
+              permDiv.className = 'p-2 rounded bg-orange-950/10 border border-orange-500/20';
               
               let badgesHtml = '';
-              todo.labels.forEach((iri) => {
-                const shortName = iri.split('/').pop();
-                badgesHtml += '<span title="' + iri + '" class="px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 bg-orange-500/10 text-orange-300 border-orange-500/30">' + shortName + '</span>';
-              });
+              if (disjunct.length > 0) {
+                disjunct.forEach((iri) => {
+                  const shortName = iri.split('/').pop();
+                  const badgeStyle = getConceptBadgeStyle(iri);
+                  badgesHtml += '<span title="' + iri + '" class="px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 ' + badgeStyle + '">' + shortName + '</span>';
+                });
+              } else {
+                badgesHtml = '<span class="text-[9px] text-orange-300/60 italic">Identical to common concepts</span>';
+              }
 
-              permDiv.innerHTML = '<div class="text-[9px] font-mono text-orange-400 font-semibold mb-1 flex items-center justify-between"><span>Pending Permutation #' + (idx + 1) + '</span><span class="text-[8px] px-1 py-0.2 bg-orange-500/10 border border-orange-500/20 rounded">GEN/VIEW TODO</span></div>' +
-                '<div class="flex flex-wrap gap-0.5">' + badgesHtml + '</div>';
+              permDiv.innerHTML = '<div class="flex flex-wrap gap-0.5">' + badgesHtml + '</div>';
               compBreakdown.appendChild(permDiv);
             });
           }
 
-          // Render ontology TODOs
+          // 4. Render Ontology TODOs
           if (cov.ontology_todos && cov.ontology_todos.length > 0) {
             cov.ontology_todos.forEach((todo) => {
               const permDiv = document.createElement('div');
               permDiv.className = 'p-2 rounded bg-red-950/20 border border-red-500/30 space-y-1';
-              permDiv.innerHTML = '<div class="text-[9px] font-mono text-red-400 font-semibold mb-1 flex items-center justify-between"><span>' + todo.title + '</span><span class="text-[8px] px-1 py-0.2 bg-red-500/10 border border-red-500/20 rounded">ONTOLOGY TODO</span></div>' +
+              permDiv.innerHTML = '<div class="text-[9px] font-mono text-red-400 font-semibold flex items-center justify-between"><span>' + todo.title + '</span><span class="text-[8px] px-1 py-0.2 bg-red-500/10 border border-red-500/20 rounded">ONTOLOGY TODO</span></div>' +
                 '<p class="text-[10px] text-red-300/80 italic leading-snug">' + todo.description + '</p>';
               compBreakdown.appendChild(permDiv);
             });
-          } else if (!cov.ontology_covered) {
-            const permDiv = document.createElement('div');
-            permDiv.className = 'p-2 rounded bg-red-950/20 border border-red-500/30 space-y-1';
-            const desc = (cov.suggested_task && cov.suggested_task.description) || cov.reasoning || 'Ontology concepts need to be defined to cover this standard.';
-            permDiv.innerHTML = '<div class="text-[9px] font-mono text-red-400 font-semibold mb-1 flex items-center justify-between"><span>Ontology Extension Required</span><span class="text-[8px] px-1 py-0.2 bg-red-500/10 border border-red-500/20 rounded">ONTOLOGY TODO</span></div>' +
-              '<p class="text-[10px] text-red-300/80 italic leading-snug">' + desc + '</p>';
-            compBreakdown.appendChild(permDiv);
           }
         } else {
-          compCount.textContent = '0';
           compBreakdown.innerHTML = '<span class="text-slate-500 italic text-[10px]">No competency permutations defined</span>';
         }
       } else {
@@ -1238,6 +1186,7 @@
 
     // D3.js Connections Graph Rendering
     function updateGraph(centerId) {
+      if (!document.getElementById('graph-svg')) return;
       const centerNode = STANDARDS_MAP[centerId];
       const svg = d3.select("#graph-svg");
       const emptyEl = document.getElementById('graph-empty');
