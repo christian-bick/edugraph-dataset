@@ -1,11 +1,6 @@
 import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-
-export interface CompetencyTarget {
-    id: string;
-    labels: string[];
-    constraints?: Record<string, any>;
-}
+import { CompetencyTarget } from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Counting and Cardinality (K.CC)

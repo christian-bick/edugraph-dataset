@@ -6,6 +6,7 @@ import { setSeed } from '../lib/random.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { Ability } from 'edugraph-ts';
 import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
+import { CompetencyTarget } from '../types/ml-engine.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,12 +31,6 @@ async function main() {
     if (!specDir && !specFile) {
         console.error(`Error: Spec module not found at: ${specPath}`);
         process.exit(1);
-    }
-
-    interface CompetencyTarget {
-        id: string;
-        labels: string[];
-        constraints?: Record<string, any>;
     }
 
     const allTargets: CompetencyTarget[] = [];

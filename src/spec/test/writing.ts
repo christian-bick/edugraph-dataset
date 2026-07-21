@@ -1,6 +1,6 @@
 import DatasetPermutationBuilder from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { CompetencyTarget } from '../ccss/kindergarten.ts';
+import { CompetencyTarget } from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
