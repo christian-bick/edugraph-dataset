@@ -449,41 +449,17 @@ async function main() {
   const viewToType = getViewToProblemTypeMap();
   const abilitiesList = new Set<string>(Object.values(Ability));
 
-  // 4. Load existing coverage cache if it exists
-  const cache: Record<string, any> = {};
-  if (fs.existsSync(OUTPUT_PATH)) {
-    try {
-      const existing = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf-8'));
-      if (existing && existing.coverage) {
-        Object.assign(cache, existing.coverage);
-        console.log(`[Cache] Loaded existing mapping cache for ${Object.keys(cache).length} standards.`);
-      }
-    } catch (e) {
-      console.warn('[Cache] Could not parse existing coverage JSON.', e);
-    }
-  }
-
-  // 5. Programmatic Dataset, Permutations & Backlog Processing
-  console.log('[Coverage] Processing competencies and dataset matching...');
+  // 4. Programmatic Dataset, Permutations & Backlog Processing
+  console.log('[Coverage] Processing competencies and dataset matching from spec files...');
   const finalCoverageMap: Record<string, any> = {};
   const sortedLeafIds = leafNodes.map(l => l.id).sort((a, b) => b.length - a.length);
 
   for (const std of leafNodes) {
-    const evalObj = cache[std.id] || {
-      id: std.id,
-      ontology_covered: false,
-      matched_areas: [],
-      matched_scopes: [],
-      matched_abilities: [],
-      reasoning: 'Evaluation missing/failed.',
-      suggested_task: { title: 'Map Standard', description: 'Re-run evaluation for this standard.' }
-    };
-
-    // Match implemented target permutations
+    // Match implemented target permutations from spec files
     const matchedTargets = allSpecTargets.filter(t => findStandardIdForTarget(t.id, sortedLeafIds) === std.id);
     const competencies: string[][] = matchedTargets.map(t => t.labels);
 
-    // Match implementation TODOs
+    // Match implementation TODOs from spec files
     const matchedImplementationTodos = allImplementationTodos.filter(t => findStandardIdForTarget(t.id, sortedLeafIds) === std.id);
     const implementation_todos = matchedImplementationTodos.map(t => ({
       id: t.id,
@@ -491,29 +467,28 @@ async function main() {
       explanation: t.explanation || ''
     }));
 
-    // Match ontology TODOs
+    // Match ontology TODOs from spec files
     const matchedOntologyTodos = allOntologyTodos.filter(o => o.standardId === std.id);
     const ontology_todos = matchedOntologyTodos.map(o => ({
       title: o.title,
       description: o.description
     }));
 
+    const spec_covered = matchedTargets.length > 0 || matchedImplementationTodos.length > 0 || matchedOntologyTodos.length > 0;
+
     let matched_areas: string[] = [];
     let matched_scopes: string[] = [];
     let matched_abilities: string[] = [];
     let ontology_covered = false;
 
-    if (competencies.length > 0) {
-      ontology_covered = true;
-      const allLabelsUnion = Array.from(new Set(competencies.flat()));
-      matched_areas = allLabelsUnion.filter(l => allAreas.includes(l as any));
-      matched_scopes = allLabelsUnion.filter(l => allScopes.includes(l as any));
-      matched_abilities = allLabelsUnion.filter(l => allAbilities.includes(l as any));
-    } else {
-      ontology_covered = evalObj.ontology_covered ?? false;
-      matched_areas = evalObj.matched_areas || [];
-      matched_scopes = evalObj.matched_scopes || [];
-      matched_abilities = evalObj.matched_abilities || [];
+    if (spec_covered) {
+      if (competencies.length > 0) {
+        ontology_covered = true;
+        const allLabelsUnion = Array.from(new Set(competencies.flat()));
+        matched_areas = allLabelsUnion.filter(l => allAreas.includes(l as any));
+        matched_scopes = allLabelsUnion.filter(l => allScopes.includes(l as any));
+        matched_abilities = allLabelsUnion.filter(l => allAbilities.includes(l as any));
+      }
     }
 
     // Check dataset coverage for matchedTargets
@@ -544,13 +519,11 @@ async function main() {
         generator_module = Array.from(genModulesSet).join(', ');
         dataset_covered = allTargetsCovered;
       }
-    } else {
-      dataset_covered = evalObj.dataset_covered ?? false;
-      generator_module = evalObj.generator_module ?? null;
     }
 
     finalCoverageMap[std.id] = {
       id: std.id,
+      spec_covered,
       ontology_covered,
       competencies,
       implementation_todos,
@@ -558,20 +531,20 @@ async function main() {
       matched_areas,
       matched_scopes,
       matched_abilities,
-      reasoning: evalObj.reasoning || '',
-      suggested_task: evalObj.suggested_task || { title: '', description: '' },
+      reasoning: spec_covered ? '' : 'Spec file not yet created for this grade.',
+      suggested_task: spec_covered ? null : { title: 'Analyze Standard', description: 'Domain analysis required to define target competencies.' },
       dataset_covered,
       generator_module,
       cluster_id: findParentClusterId(std.id, standardsMap)
     };
   }
 
-  // 6. Consolidate Task Backlog from implementationTodos and ontologyTodos
-  console.log('[Tasks] Building task backlog from spec TODOs...');
+  // 5. Consolidate Task Backlog from spec TODOs and uncovered standards
+  console.log('[Tasks] Building task backlog...');
   const tasksByCluster: Record<string, any[]> = {};
   
   for (const [, data] of Object.entries(finalCoverageMap)) {
-    if (data.ontology_covered && data.dataset_covered && (!data.ontology_todos || data.ontology_todos.length === 0)) continue;
+    if (data.spec_covered && data.ontology_covered && data.dataset_covered && (!data.ontology_todos || data.ontology_todos.length === 0)) continue;
 
     const clusterId = data.cluster_id;
     if (!tasksByCluster[clusterId]) {
@@ -583,15 +556,19 @@ async function main() {
   const consolidatedTasks: any[] = [];
   for (const [clusterId, missingStds] of Object.entries(tasksByCluster)) {
     const parentCluster = standardsMap[clusterId] || { description: 'Other Math Concepts' };
-    const missingOntology = missingStds.filter(s => !s.ontology_covered || (s.ontology_todos && s.ontology_todos.length > 0));
-    const missingGenerator = missingStds.filter(s => s.ontology_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && !s.dataset_covered);
+    
+    const specCoveredStds = missingStds.filter(s => s.spec_covered);
+    const uncoveredStds = missingStds.filter(s => !s.spec_covered);
+
+    const missingOntology = specCoveredStds.filter(s => !s.ontology_covered || (s.ontology_todos && s.ontology_todos.length > 0));
+    const missingGenerator = specCoveredStds.filter(s => s.ontology_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && !s.dataset_covered);
 
     if (missingOntology.length > 0) {
       const descriptions = missingOntology.map(s => {
         if (s.ontology_todos && s.ontology_todos.length > 0) {
           return `- ${s.id}: ${s.ontology_todos.map((t: any) => `${t.title} (${t.description})`).join('; ')}`;
         }
-        return `- ${s.id}: ${s.suggested_task.description || 'Extend ontology'}`;
+        return `- ${s.id}: Extend ontology`;
       });
       consolidatedTasks.push({
         id: `task-ontology-${clusterId}`,
@@ -622,6 +599,18 @@ async function main() {
         standards: missingGenerator.map(s => s.id)
       });
     }
+
+    if (uncoveredStds.length > 0) {
+      consolidatedTasks.push({
+        id: `task-analysis-${clusterId}`,
+        type: 'ANALYSIS',
+        cluster_id: clusterId,
+        cluster_description: parentCluster.description,
+        title: `Perform Analysis for ${clusterId}`,
+        description: `Perform domain analysis and write spec file for: ${uncoveredStds.map(s => s.id).join(', ')}.`,
+        standards: uncoveredStds.map(s => s.id)
+      });
+    }
   }
 
   // Save outputs
@@ -630,9 +619,11 @@ async function main() {
       generated_at: new Date().toISOString(),
       ontology_version: version,
       total_leaves_scanned: leafNodes.length,
+      spec_covered_count: Object.values(finalCoverageMap).filter(s => s.spec_covered).length,
       covered_count: Object.values(finalCoverageMap).filter(s => s.dataset_covered).length,
-      missing_generator_count: Object.values(finalCoverageMap).filter(s => s.ontology_covered && !s.dataset_covered).length,
-      missing_ontology_count: Object.values(finalCoverageMap).filter(s => !s.ontology_covered).length,
+      missing_generator_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && s.ontology_covered && !s.dataset_covered).length,
+      missing_ontology_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (!s.ontology_covered || (s.ontology_todos && s.ontology_todos.length > 0))).length,
+      analysis_needed_count: Object.values(finalCoverageMap).filter(s => !s.spec_covered).length
     },
     coverage: finalCoverageMap,
     tasks: consolidatedTasks
