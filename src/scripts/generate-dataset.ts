@@ -6,7 +6,7 @@ import {AbstractProblem} from '../types/ml-engine.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { findLeafModules, LeafModule } from '../lib/module-resolver.ts';
-import { extractSchemaLabels, generateWithLabels, formatLabelsKey } from '../lib/utils.ts';
+import { extractSchemaLabels, generateWithLabels, formatLabelsKey, shortenLabel } from '../lib/utils.ts';
 import { Ability } from 'edugraph-ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -272,7 +272,7 @@ async function renderDatasetSplit(
                         mode: modeName,
                         target_key: (probObj as any).targetKey || '',
                         target_key_hash: (probObj as any).targetKeyHash || '',
-                        tags: probObj.tags,
+                        tags: (probObj.tags || []).map(shortenLabel).sort(),
                         parameters: {
                             ...cleanedData,
                             ...blueprint.constraints

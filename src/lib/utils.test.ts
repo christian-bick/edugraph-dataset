@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractConfig, generateWithLabels } from './utils.ts';
+import { extractConfig, generateWithLabels, shortenLabel, formatLabelsKey } from './utils.ts';
 import { Area, Scope } from 'edugraph-ts';
 import { selectExactMatch } from './resolvers.ts';
 import { ProblemGenerator } from '../types/ml-engine.ts';
@@ -60,7 +60,6 @@ describe('extractConfig & generateWithLabels', () => {
     });
 
     it('should strip http://edugraph.io/edu/ prefix via shortenLabel and formatLabelsKey', () => {
-        const { shortenLabel, formatLabelsKey } = require('./utils.ts');
         expect(shortenLabel('http://edugraph.io/edu/Numeration')).toBe('Numeration');
         expect(shortenLabel('CustomTag')).toBe('CustomTag');
 
