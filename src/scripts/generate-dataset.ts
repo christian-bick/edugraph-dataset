@@ -246,7 +246,7 @@ async function renderDatasetSplit(
 
                         return {
                             pass: errors.length === 0,
-                            errors
+                            errors: errors.sort()
                         };
                     });
 
