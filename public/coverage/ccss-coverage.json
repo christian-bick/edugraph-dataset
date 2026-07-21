@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-07-21T11:49:50.308Z",
+    "generated_at": "2026-07-21T12:25:56.435Z",
     "ontology_version": "v0.9.2",
     "total_leaves_scanned": 467,
     "spec_covered_count": 47,
@@ -13,7 +13,7 @@
     "K.CC.A.1": {
       "id": "K.CC.A.1",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -44,9 +44,20 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Numeration"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/NumbersSmaller100",
+        "http://edugraph.io/edu/NumbersWithoutZero",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/AdditiveCount",
+        "http://edugraph.io/edu/DerivedCount"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureExecution"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -417,7 +428,8 @@
         "http://edugraph.io/edu/NumbersSmaller20",
         "http://edugraph.io/edu/CircularArrangement",
         "http://edugraph.io/edu/ScatteredArrangement",
-        "http://edugraph.io/edu/NumbersSmaller10"
+        "http://edugraph.io/edu/NumbersSmaller10",
+        "http://edugraph.io/edu/BoxArrangement"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -555,7 +567,7 @@
     "K.OA.A.1": {
       "id": "K.OA.A.1",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -616,9 +628,22 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Addition",
+        "http://edugraph.io/edu/Subtraction"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller10",
+        "http://edugraph.io/edu/PhysicalNumbers",
+        "http://edugraph.io/edu/NumbersWithZero",
+        "http://edugraph.io/edu/NumbersWithoutZero"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureExecution"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -774,7 +799,7 @@
     "K.OA.A.5": {
       "id": "K.OA.A.5",
       "spec_covered": true,
-      "ontology_covered": true,
+      "ontology_covered": false,
       "competencies": [
         [
           "http://edugraph.io/edu/ArabicNumerals",
@@ -1143,13 +1168,16 @@
         "http://edugraph.io/edu/Circle",
         "http://edugraph.io/edu/Square",
         "http://edugraph.io/edu/Rectangle",
-        "http://edugraph.io/edu/SpatialModelling"
+        "http://edugraph.io/edu/SpatialModelling",
+        "http://edugraph.io/edu/Triangle",
+        "http://edugraph.io/edu/Hexagon"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/Above",
         "http://edugraph.io/edu/Below",
         "http://edugraph.io/edu/Beside",
-        "http://edugraph.io/edu/Behind"
+        "http://edugraph.io/edu/Behind",
+        "http://edugraph.io/edu/Ahead"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
@@ -1520,7 +1548,9 @@
       "matched_areas": [
         "http://edugraph.io/edu/ShapeComposition",
         "http://edugraph.io/edu/Rectangle",
-        "http://edugraph.io/edu/Square"
+        "http://edugraph.io/edu/Square",
+        "http://edugraph.io/edu/Triangle",
+        "http://edugraph.io/edu/Hexagon"
       ],
       "matched_scopes": [],
       "matched_abilities": [
@@ -1662,7 +1692,7 @@
     "1.OA.A.2": {
       "id": "1.OA.A.2",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -1681,9 +1711,20 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Addition",
+        "http://edugraph.io/edu/Sum"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller20",
+        "http://edugraph.io/edu/PhysicalNumbers"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/TextualReception"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -1693,7 +1734,7 @@
     "1.OA.B.3": {
       "id": "1.OA.B.3",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -1724,9 +1765,20 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Addition",
+        "http://edugraph.io/edu/CommutativeLaw",
+        "http://edugraph.io/edu/AssociativeLaw"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller20"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureUnderstanding"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -1961,7 +2013,7 @@
     "1.OA.D.7": {
       "id": "1.OA.D.7",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -1990,9 +2042,19 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Addition",
+        "http://edugraph.io/edu/Subtraction"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller20"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/PlausibilityEvaluation"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -2282,7 +2344,7 @@
     "1.NBT.B.2a": {
       "id": "1.NBT.B.2a",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -2300,9 +2362,19 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/PlaceValue"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller20",
+        "http://edugraph.io/edu/PhysicalNumbers"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureUnderstanding"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -2375,9 +2447,19 @@
           "description": "No ontology Scope exists to express \"multiples of 10\" (e.g., 10, 20, 30, ... 90)."
         }
       ],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/PlaceValue"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller100",
+        "http://edugraph.io/edu/PhysicalNumbers"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureUnderstanding"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -2497,7 +2579,7 @@
     "1.NBT.C.5": {
       "id": "1.NBT.C.5",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -2530,9 +2612,21 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Numeration",
+        "http://edugraph.io/edu/Increment",
+        "http://edugraph.io/edu/Decrement"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/NumbersWithoutZero",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller100",
+        "http://edugraph.io/edu/DerivedCount"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureExecution"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -2542,7 +2636,7 @@
     "1.NBT.C.6": {
       "id": "1.NBT.C.6",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -2560,9 +2654,19 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Subtraction"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersWithZero",
+        "http://edugraph.io/edu/NumbersSmaller100"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureExecution"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -2572,7 +2676,7 @@
     "1.MD.A.1": {
       "id": "1.MD.A.1",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -2599,9 +2703,18 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Measurement",
+        "http://edugraph.io/edu/ObjectSorting"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/LengthMeasurement",
+        "http://edugraph.io/edu/Least",
+        "http://edugraph.io/edu/Most"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ProcedureExecution"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,
@@ -2666,7 +2779,7 @@
     "1.MD.B.3": {
       "id": "1.MD.B.3",
       "spec_covered": true,
-      "ontology_covered": true,
+      "ontology_covered": false,
       "competencies": [
         [
           "http://edugraph.io/edu/MeasuringTime",
@@ -3036,7 +3149,7 @@
     "1.G.A.2": {
       "id": "1.G.A.2",
       "spec_covered": true,
-      "ontology_covered": true,
+      "ontology_covered": false,
       "competencies": [
         [
           "http://edugraph.io/edu/ShapeComposition",
@@ -3093,7 +3206,7 @@
     "1.G.A.3": {
       "id": "1.G.A.3",
       "spec_covered": true,
-      "ontology_covered": false,
+      "ontology_covered": true,
       "competencies": [],
       "implementation_todos": [
         {
@@ -3118,9 +3231,17 @@
         }
       ],
       "ontology_todos": [],
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/FractionNotation",
+        "http://edugraph.io/edu/Circle",
+        "http://edugraph.io/edu/Rectangle"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ShapeProperties"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/ConceptDerivation"
+      ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": false,

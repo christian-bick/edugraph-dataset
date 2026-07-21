@@ -181,19 +181,7 @@
           <h3 class="text-base font-semibold text-white leading-snug" id="detail-desc">Select a standard from the list to display details.</h3>
         </div>
         
-        <!-- Rigor Aspects & Modeling Metadata -->
-        <div class="grid grid-cols-2 gap-3 text-xs border-t border-slate-800/80 pt-3">
-          <div>
-            <span class="text-slate-500 block mb-1">Rigor Aspects</span>
-            <div id="detail-aspects" class="flex flex-wrap gap-1">
-              <span class="text-slate-500 italic text-[10px]">None specified</span>
-            </div>
-          </div>
-          <div>
-            <span class="text-slate-500 block mb-1">Modeling</span>
-            <span id="detail-modeling" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-500">FALSE</span>
-          </div>
-        </div>
+
 
         <!-- Mapping details -->
         <div id="detail-mapping-section" class="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs hidden">
@@ -901,27 +889,7 @@
       document.getElementById('detail-id').textContent = std.id;
       document.getElementById('detail-desc').textContent = std.description;
       
-      const aspectsDiv = document.getElementById('detail-aspects');
-      aspectsDiv.innerHTML = '';
-      if (std.aspects && std.aspects.length > 0) {
-        std.aspects.forEach(asp => {
-          const badge = document.createElement('span');
-          badge.className = 'px-2 py-0.5 rounded text-[10px] bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20';
-          badge.textContent = asp;
-          aspectsDiv.appendChild(badge);
-        });
-      } else {
-        aspectsDiv.innerHTML = '<span class="text-slate-500 italic">None specified</span>';
-      }
 
-      const modSpan = document.getElementById('detail-modeling');
-      if (std.modeling) {
-        modSpan.textContent = 'TRUE';
-        modSpan.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/20';
-      } else {
-        modSpan.textContent = 'FALSE';
-        modSpan.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-500';
-      }
 
       // Update mapping section in right detail card
       const mapSection = document.getElementById('detail-mapping-section');

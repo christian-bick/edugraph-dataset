@@ -482,13 +482,14 @@ async function main() {
     let ontology_covered = false;
 
     if (spec_covered) {
-      if (competencies.length > 0) {
-        ontology_covered = true;
-        const allLabelsUnion = Array.from(new Set(competencies.flat()));
+      const allLabels = [...competencies.flat(), ...implementation_todos.flatMap(t => t.labels)];
+      if (allLabels.length > 0) {
+        const allLabelsUnion = Array.from(new Set(allLabels));
         matched_areas = allLabelsUnion.filter(l => allAreas.includes(l as any));
         matched_scopes = allLabelsUnion.filter(l => allScopes.includes(l as any));
         matched_abilities = allLabelsUnion.filter(l => allAbilities.includes(l as any));
       }
+      ontology_covered = (competencies.length > 0 || implementation_todos.length > 0) && matchedOntologyTodos.length === 0;
     }
 
     // Check dataset coverage for matchedTargets
