@@ -315,14 +315,16 @@ async function runModulePipeline(
     const compatibleViews = [];
     const viewGeneralLabelsMap: Record<string, string[]> = {};
     const viewPathMap: Record<string, string> = {};
+    const viewCategoryMap: Record<string, string | null> = {};
 
     for (const vMod of allViewModules) {
         try {
             const viewSpecModule = await import(pathToFileURL(resolve(vMod.absolutePath, 'spec.ts')).href);
             compatibleViews.push(viewSpecModule.spec);
             viewPathMap[vMod.id] = vMod.relativePath;
+            viewCategoryMap[vMod.id] = vMod.category;
             
-            const viewCamelCase = camelCase(vMod.id[0].toUpperCase() + vMod.id.slice(1));
+            const viewCamelCase = vMod.id[0].toUpperCase() + vMod.id.slice(1);
             const viewSchema = viewSpecModule[`${viewCamelCase}ViewSchema`];
             const viewLabels = Array.from(new Set([
                 ...(viewSpecModule.spec?.generalLabels || []),
@@ -334,7 +336,7 @@ async function runModulePipeline(
         }
     }
 
-    const filteredViews = compatibleViews.filter(v => viewToType[v.viewId] === genTypeName && (!targetView || v.viewId === targetView));
+    const filteredViews = compatibleViews.filter(v => viewToType[v.viewId] === genTypeName && (!targetView || v.viewId === targetView || viewCategoryMap[v.viewId] === targetView));
 
     // Filter competency targets for this generator using union of labels
     const matchedTargets = allTargets.filter(target => {
@@ -579,7 +581,7 @@ async function main() {
     const generatorsPath = resolve(PROJECT_ROOT, 'src', 'generators');
     const allModules = findLeafModules(generatorsPath);
     const modulesToRun = targetModule
-        ? allModules.filter(m => m.id === targetModule || m.relativePath === targetModule)
+        ? allModules.filter(m => m.id === targetModule || m.relativePath === targetModule || m.category === targetModule)
         : allModules;
 
     for (const leafMod of modulesToRun) {

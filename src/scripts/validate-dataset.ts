@@ -223,10 +223,21 @@ async function main() {
     // Filter to Question mode entries matching target generator/view
     let filtered = entries.filter((e: any) => !e.solution_visible);
     if (targetGenerator) {
-        filtered = filtered.filter((e: any) => e.generator === targetGenerator);
+        const genLeafIds = new Set(
+            findLeafModules(GENERATORS_ROOT)
+                .filter(m => m.id === targetGenerator || m.relativePath === targetGenerator || m.category === targetGenerator)
+                .map(m => m.id)
+        );
+        filtered = filtered.filter((e: any) => genLeafIds.has(e.generator));
     }
     if (targetView) {
-        filtered = filtered.filter((e: any) => e.view === targetView);
+        const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
+        const viewLeafIds = new Set(
+            findLeafModules(viewsDir)
+                .filter(m => m.id === targetView || m.relativePath === targetView || m.category === targetView)
+                .map(m => m.id)
+        );
+        filtered = filtered.filter((e: any) => viewLeafIds.has(e.view));
     }
 
     if (filtered.length === 0) {
