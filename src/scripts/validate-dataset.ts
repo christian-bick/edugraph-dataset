@@ -6,7 +6,8 @@ import { findLeafModules } from "../lib/module-resolver.ts";
 import {
     computeChecklistHash,
     computeImageSha256,
-    computeVqaCacheKey,
+    computeValidationCacheKey,
+    computeInputCacheKey,
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 
@@ -131,8 +132,14 @@ async function validateSample(entry: any, force: boolean, datasetFolderName: str
     }
 
     const checklistHash = computeChecklistHash(checklistPaths);
-    const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
-    const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
+    const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
+    const inputCacheKey = computeInputCacheKey(
+        moduleName,
+        viewId,
+        modeName,
+        entry.tags || [],
+        entry.instance !== undefined ? entry.instance : 0
+    );
 
     const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
 
@@ -156,9 +163,9 @@ async function validateSample(entry: any, force: boolean, datasetFolderName: str
         };
 
         cacheManager.set({
-            cache_key: cacheKey,
+            validation_cache_key: valCacheKey,
+            input_cache_key: inputCacheKey,
             file_name: entry.file_name,
-            target_key_hash: targetKeyHash,
             image_sha256: imageSha256,
             checklist_hash: checklistHash,
             validated_at: new Date().toISOString(),
@@ -168,7 +175,7 @@ async function validateSample(entry: any, force: boolean, datasetFolderName: str
         return;
     }
 
-    const existingCache = cacheManager.get(cacheKey);
+    const existingCache = cacheManager.get(valCacheKey);
     if (existingCache && !force) {
         printValidationResult(existingCache.evaluation, true);
         return;
@@ -201,9 +208,9 @@ Respond only in the provided JSON schema.
         printValidationResult(parsed, false);
 
         cacheManager.set({
-            cache_key: cacheKey,
+            validation_cache_key: valCacheKey,
+            input_cache_key: inputCacheKey,
             file_name: entry.file_name,
-            target_key_hash: targetKeyHash,
             image_sha256: imageSha256,
             checklist_hash: checklistHash,
             validated_at: new Date().toISOString(),
@@ -294,13 +301,12 @@ async function main() {
 
         const checklistPaths = getChecklistPaths(moduleName, entry.view);
         const checklistHash = computeChecklistHash(checklistPaths);
-        const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
-        const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
+        const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
 
         if (!activeKeysPerModule.has(moduleName)) {
             activeKeysPerModule.set(moduleName, new Set());
         }
-        activeKeysPerModule.get(moduleName)!.add(cacheKey);
+        activeKeysPerModule.get(moduleName)!.add(valCacheKey);
     }
 
     // Perform automatic safe pruning of stale cache entries for this dataset folder
@@ -332,13 +338,12 @@ async function main() {
 
         const checklistPaths = getChecklistPaths(moduleName, viewId);
         const checklistHash = computeChecklistHash(checklistPaths);
-        const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
-        const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
+        const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
 
         const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
 
         if (auditMode) {
-            const existingCache = cacheManager.get(cacheKey);
+            const existingCache = cacheManager.get(valCacheKey);
             if (!existingCache) {
                 console.error(`❌ AUDIT FAILURE (Uncached): [${moduleName} : ${viewId}] ${entry.file_name}`);
                 uncachedCount++;

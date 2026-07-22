@@ -184,7 +184,6 @@ async function renderDatasetSplit(
                         problem: probObj,
                         viewId: blueprint.viewId,
                         labels: probObj.tags || [],
-                        constraints: blueprint.constraints,
                         isSolutionView
                     };
 
@@ -495,7 +494,6 @@ async function runModulePipeline(
                     type: generator.type,
                     tags: Array.from(new Set([...target.labels, ...(problemStub.tags || [])]))
                 };
-                problem.data._permutationParams = target.constraints;
                 (problem as any).targetKey = qTargetKey;
                 (problem as any).targetKeyHash = qHashHex;
 
@@ -505,7 +503,6 @@ async function runModulePipeline(
                     type: generator.type,
                     tags: Array.from(new Set([...target.labels, ...(solutionStub.tags || [])]))
                 };
-                solutionProblem.data._permutationParams = target.constraints;
                 (solutionProblem as any).targetKey = sTargetKey;
                 (solutionProblem as any).targetKeyHash = sHashHex;
 
@@ -556,7 +553,6 @@ async function runModulePipeline(
                                         type: generator.type,
                                         tags: Array.from(new Set([...target.labels, ...(valStub.tags || [])]))
                                     };
-                                    valProblem.data._permutationParams = target.constraints;
                                     (valProblem as any).targetKey = valQTargetKey;
                                     (valProblem as any).targetKeyHash = valQHashHex;
 
@@ -567,7 +563,6 @@ async function runModulePipeline(
                                         type: generator.type,
                                         tags: Array.from(new Set([...target.labels, ...(activeValSolStub.tags || [])]))
                                     };
-                                    valSolutionProblem.data._permutationParams = target.constraints;
                                     (valSolutionProblem as any).targetKey = valSTargetKey;
                                     (valSolutionProblem as any).targetKeyHash = valSHashHex;
 

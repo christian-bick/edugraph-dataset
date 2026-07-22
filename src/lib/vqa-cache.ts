@@ -3,9 +3,10 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { resolve } from 'path';
 
 export interface VqaCacheEntry {
-    cache_key: string;
+    validation_cache_key: string;
+    input_cache_key?: string;
     file_name: string;
-    target_key_hash: string;
+    target_key_hash?: string;
     image_sha256: string;
     checklist_hash: string;
     validated_at: string;
@@ -40,12 +41,32 @@ export function computeImageSha256(imageBufferOrPath: Buffer | string): string {
     return createHash('sha256').update(buffer).digest('hex');
 }
 
-export function computeVqaCacheKey(
-    targetKeyHash: string,
+export function computeValidationCacheKey(
     imageSha256: string,
     checklistHash: string
 ): string {
-    const rawKey = `${targetKeyHash}:${imageSha256}:${checklistHash}`;
+    const rawKey = `${imageSha256}:${checklistHash}`;
+    return createHash('sha256').update(rawKey).digest('hex');
+}
+
+/** Legacy alias for computeValidationCacheKey */
+export function computeVqaCacheKey(
+    _targetKeyHash: string,
+    imageSha256: string,
+    checklistHash: string
+): string {
+    return computeValidationCacheKey(imageSha256, checklistHash);
+}
+
+export function computeInputCacheKey(
+    generatorId: string,
+    viewId: string,
+    mode: string,
+    targetLabels: string[],
+    instance: number
+): string {
+    const sortedLabels = [...targetLabels].sort().join(',');
+    const rawKey = `${generatorId}#${viewId}#mode:${mode}#${sortedLabels}#inst:${instance}`;
     return createHash('sha256').update(rawKey).digest('hex');
 }
 
@@ -68,9 +89,11 @@ export class VqaCacheManager {
             const content = readFileSync(this.cacheFilePath, 'utf-8');
             const lines = content.split('\n').filter(l => l.trim().length > 0);
             for (const line of lines) {
-                const entry: VqaCacheEntry = JSON.parse(line);
-                if (entry && entry.cache_key) {
-                    this.cacheMap.set(entry.cache_key, entry);
+                const entry = JSON.parse(line);
+                const key = entry.validation_cache_key || entry.cache_key;
+                if (entry && key) {
+                    entry.validation_cache_key = key;
+                    this.cacheMap.set(key, entry);
                 }
             }
         } catch (err) {
@@ -83,10 +106,11 @@ export class VqaCacheManager {
     }
 
     public set(entry: VqaCacheEntry): void {
-        const isNewOrUpdated = !this.cacheMap.has(entry.cache_key) ||
-            JSON.stringify(this.cacheMap.get(entry.cache_key)) !== JSON.stringify(entry);
+        const key = entry.validation_cache_key;
+        const isNewOrUpdated = !this.cacheMap.has(key) ||
+            JSON.stringify(this.cacheMap.get(key)) !== JSON.stringify(entry);
 
-        this.cacheMap.set(entry.cache_key, entry);
+        this.cacheMap.set(key, entry);
 
         if (isNewOrUpdated) {
             appendFileSync(this.cacheFilePath, JSON.stringify(entry) + '\n', 'utf-8');
@@ -109,7 +133,7 @@ export class VqaCacheManager {
 
     public save(): void {
         const sortedEntries = Array.from(this.cacheMap.values()).sort((a, b) =>
-            a.cache_key.localeCompare(b.cache_key)
+            a.validation_cache_key.localeCompare(b.validation_cache_key)
         );
         const lines = sortedEntries.map(e => JSON.stringify(e)).join('\n') + (sortedEntries.length > 0 ? '\n' : '');
         writeFileSync(this.cacheFilePath, lines, 'utf-8');

@@ -22,7 +22,6 @@ export interface RenderPayload<TProblem extends AbstractProblem = AbstractProble
     problem: TProblem;
     viewId: string;
     labels: string[];
-    constraints?: Record<string, any>;
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
     isSolutionView: boolean;
 }
