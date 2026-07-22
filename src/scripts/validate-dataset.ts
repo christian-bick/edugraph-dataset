@@ -54,26 +54,6 @@ if (apiKey) {
     });
 }
 
-function printValidationResult(evaluation: any, cached: boolean) {
-    if (evaluation.pass) {
-        console.log(`✅ PASS ${cached ? '(cached)' : ''}`);
-    } else {
-        console.log(`❌ FAIL ${cached ? '(cached)' : ''}`);
-    }
-    if (evaluation.general_checks) {
-        console.log(`- Overlaps: ${evaluation.general_checks.no_overlaps ? 'None' : 'DETECTED'}`);
-        console.log(`- Placeholders: ${evaluation.general_checks.no_placeholders ? 'None' : 'DETECTED'}`);
-        console.log(`- Padding: ${evaluation.general_checks.sane_padding ? 'Good' : 'BAD'}`);
-    }
-    if (evaluation.coloring_pass !== undefined) {
-        console.log(`- Coloring: ${evaluation.coloring_pass ? 'Correct' : 'INCORRECT'}`);
-    }
-    if (evaluation.layout_pass !== undefined) {
-        console.log(`- Layout: ${evaluation.layout_pass ? 'Correct' : 'INCORRECT'}`);
-    }
-    console.log(`Reasoning: ${evaluation.reasoning}`);
-}
-
 function resolveTreeChecklists(rootDir: string, moduleId: string): string[] {
     const paths: string[] = [];
 
@@ -107,24 +87,38 @@ function getChecklistPaths(moduleName: string, viewId: string): string[] {
     ];
 }
 
-async function validateSample(entry: any, force: boolean, datasetFolderName: string) {
+function renderProgressBar(current: number, total: number, passed: number, failed: number) {
+    const width = 30;
+    const ratio = total > 0 ? current / total : 1;
+    const filled = Math.round(ratio * width);
+    const empty = width - filled;
+    const bar = '='.repeat(filled) + '-'.repeat(empty);
+    const pct = (ratio * 100).toFixed(1);
+    process.stdout.write(`\rProgress: [${bar}] ${current}/${total} (${pct}%) | ✅ Passed: ${passed} | ❌ Failed: ${failed}`);
+}
+
+async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {
+    let index = 0;
+    const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+        while (index < items.length) {
+            const currentIndex = index++;
+            await fn(items[currentIndex]);
+        }
+    });
+    await Promise.all(workers);
+}
+
+async function evaluateSingleSample(entry: any, datasetFolderName: string): Promise<any> {
     const moduleName = entry.generator;
     const viewId = entry.view;
     const modeName = entry.mode || (entry.solution_visible ? 'solution' : 'question');
     const isSolution = entry.solution_visible || modeName === 'solution';
-
-    console.log(`\nEvaluating [${moduleName} : ${viewId} (${modeName})] sample: ${entry.file_name}...`);
-
     const imagePath = resolve(DATASET_ROOT, entry.file_name);
 
-    if (!existsSync(imagePath)) {
-        console.error(`🚨 Image file not found for ${entry.file_name}`);
-        return;
-    }
+    if (!existsSync(imagePath)) return null;
 
     const imageBuffer = readFileSync(imagePath);
     const imageSha256 = computeImageSha256(imageBuffer);
-
     const checklistPaths = getChecklistPaths(moduleName, viewId);
 
     let checklistText = '';
@@ -142,19 +136,6 @@ async function validateSample(entry: any, force: boolean, datasetFolderName: str
         entry.instance !== undefined ? entry.instance : 0
     );
 
-    const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
-
-    const existingCache = cacheManager.get(valCacheKey);
-    if (existingCache && !force) {
-        printValidationResult(existingCache.evaluation, true);
-        return;
-    }
-
-    if (!model) {
-        console.log(`⚠️  LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
-        return;
-    }
-
     const prompt = `
 You are a senior Visual QA Engineer. Evaluate this math exercise image:
 Mode: "${isSolution ? 'Solution Mode (_mode-S)' : 'Question Mode (_mode-Q)'}"
@@ -164,30 +145,34 @@ View ID: "${viewId}"
 CHECKLIST:
 ${checklistText}
 
+IMPORTANT: If pass is true and all checks pass, set "reasoning" to "" (empty string). Only provide a non-empty reasoning string if pass is false or any check fails.
+
 Respond only in the provided JSON schema.
 `;
 
     try {
         const imagePart = { inlineData: { data: imageBuffer.toString("base64"), mimeType: "image/png" } };
-
         const result = await model.generateContent([prompt, imagePart]);
         const responseText = result.response.text();
         const parsed = JSON.parse(responseText);
 
-        printValidationResult(parsed, false);
+        if (parsed.pass && parsed.general_checks?.no_overlaps && parsed.general_checks?.no_placeholders && parsed.general_checks?.sane_padding) {
+            parsed.reasoning = "";
+        }
 
-        cacheManager.set({
+        return {
             validation_cache_key: valCacheKey,
             input_cache_key: inputCacheKey,
             file_name: entry.file_name,
             image_sha256: imageSha256,
             checklist_hash: checklistHash,
             validated_at: new Date().toISOString(),
-            evaluation: parsed
-        });
-        cacheManager.save();
+            evaluation: parsed,
+            moduleName
+        };
     } catch (error) {
-        console.error(`🚨 Error validating ${entry.file_name}:`, error);
+        console.error(`\n🚨 Error validating ${entry.file_name}:`, error);
+        return null;
     }
 }
 
@@ -291,28 +276,27 @@ async function main() {
     let failingCount = 0;
     let auditPassedCount = 0;
 
-    for (const entry of filtered) {
-        const moduleName = entry.generator;
-        const viewId = entry.view;
-        const imagePath = resolve(DATASET_ROOT, entry.file_name);
+    if (auditMode) {
+        for (const entry of filtered) {
+            const moduleName = entry.generator;
+            const viewId = entry.view;
+            const imagePath = resolve(DATASET_ROOT, entry.file_name);
 
-        if (!existsSync(imagePath)) {
-            console.error(`🚨 Image file not found for ${entry.file_name}`);
-            uncachedCount++;
-            continue;
-        }
+            if (!existsSync(imagePath)) {
+                console.error(`❌ AUDIT FAILURE (File missing): [${moduleName} : ${viewId}] ${entry.file_name}`);
+                uncachedCount++;
+                continue;
+            }
 
-        const imageBuffer = readFileSync(imagePath);
-        const imageSha256 = computeImageSha256(imageBuffer);
+            const imageBuffer = readFileSync(imagePath);
+            const imageSha256 = computeImageSha256(imageBuffer);
+            const checklistPaths = getChecklistPaths(moduleName, viewId);
+            const checklistHash = computeChecklistHash(checklistPaths);
+            const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
 
-        const checklistPaths = getChecklistPaths(moduleName, viewId);
-        const checklistHash = computeChecklistHash(checklistPaths);
-        const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
-
-        const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
-
-        if (auditMode) {
+            const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
             const existingCache = cacheManager.get(valCacheKey);
+
             if (!existingCache) {
                 console.error(`❌ AUDIT FAILURE (Uncached): [${moduleName} : ${viewId}] ${entry.file_name}`);
                 uncachedCount++;
@@ -322,8 +306,87 @@ async function main() {
             } else {
                 auditPassedCount++;
             }
-        } else {
-            await validateSample(entry, force, datasetFolderName);
+        }
+    } else {
+        const toEvaluate: any[] = [];
+        let cachedCount = 0;
+        let cachedPassed = 0;
+        let cachedFailed = 0;
+
+        for (const entry of filtered) {
+            const moduleName = entry.generator;
+            const viewId = entry.view;
+            const imagePath = resolve(DATASET_ROOT, entry.file_name);
+
+            if (!existsSync(imagePath)) continue;
+
+            const imageBuffer = readFileSync(imagePath);
+            const imageSha256 = computeImageSha256(imageBuffer);
+            const checklistPaths = getChecklistPaths(moduleName, viewId);
+            const checklistHash = computeChecklistHash(checklistPaths);
+            const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
+
+            const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
+            const existingCache = cacheManager.get(valCacheKey);
+
+            if (existingCache && !force) {
+                cachedCount++;
+                if (existingCache.evaluation.pass) cachedPassed++;
+                else cachedFailed++;
+            } else {
+                toEvaluate.push(entry);
+            }
+        }
+
+        if (cachedCount > 0) {
+            console.log(`ℹ️ Reused ${cachedCount} cached evaluation records (${cachedPassed} passed, ${cachedFailed} failed).`);
+        }
+
+        if (toEvaluate.length > 0) {
+            if (!model) {
+                console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
+            } else {
+                console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to 10 parallel requests)...`);
+                let processed = 0;
+                let evalPassed = cachedPassed;
+                let evalFailed = cachedFailed;
+
+                renderProgressBar(0, toEvaluate.length, evalPassed, evalFailed);
+
+                const cacheManagers = new Map<string, VqaCacheManager>();
+                const getMgr = (mod: string) => {
+                    if (!cacheManagers.has(mod)) {
+                        cacheManagers.set(mod, new VqaCacheManager(CACHE_DIR, datasetFolderName, mod));
+                    }
+                    return cacheManagers.get(mod)!;
+                };
+
+                await runPool(toEvaluate, 10, async (entry) => {
+                    const record = await evaluateSingleSample(entry, datasetFolderName);
+                    processed++;
+                    if (record) {
+                        const mgr = getMgr(record.moduleName);
+                        mgr.set({
+                            validation_cache_key: record.validation_cache_key,
+                            input_cache_key: record.input_cache_key,
+                            file_name: record.file_name,
+                            image_sha256: record.image_sha256,
+                            checklist_hash: record.checklist_hash,
+                            validated_at: record.validated_at,
+                            evaluation: record.evaluation
+                        });
+                        if (record.evaluation.pass) evalPassed++;
+                        else evalFailed++;
+                    }
+                    renderProgressBar(processed, toEvaluate.length, evalPassed, evalFailed);
+                });
+
+                // Save all updated cache files
+                for (const mgr of cacheManagers.values()) {
+                    mgr.save();
+                }
+                console.log('\n');
+            }
         }
     }
 
@@ -335,7 +398,7 @@ async function main() {
 
     // Generate Markdown report and failure TODO list
     const reportPath = generateValidationReport(datasetFolderName, filtered);
-    console.log(`\n📄 Validation report & TODO list generated: ${reportPath}`);
+    console.log(`📄 Validation report & TODO list generated: ${reportPath}`);
 
     if (auditMode) {
         const total = filtered.length;
