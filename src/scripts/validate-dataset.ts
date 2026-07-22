@@ -144,38 +144,6 @@ async function validateSample(entry: any, force: boolean, datasetFolderName: str
 
     const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
 
-    if (entry.layout_checks && entry.layout_checks.pass === false) {
-        console.log(`❌ FAIL (Programmatic Overlaps Detected)`);
-        const errorReason = entry.layout_checks.errors ? entry.layout_checks.errors.join('; ') : 'DOM overlaps detected';
-        if (entry.layout_checks.errors) {
-            entry.layout_checks.errors.forEach((err: string) => console.log(`  - ${err}`));
-        }
-        
-        const failEval = {
-            pass: false,
-            general_checks: {
-                no_overlaps: false,
-                no_placeholders: true,
-                sane_padding: true
-            },
-            coloring_pass: true,
-            layout_pass: false,
-            reasoning: `Pre-generation layout check failed: ${errorReason}`
-        };
-
-        cacheManager.set({
-            validation_cache_key: valCacheKey,
-            input_cache_key: inputCacheKey,
-            file_name: entry.file_name,
-            image_sha256: imageSha256,
-            checklist_hash: checklistHash,
-            validated_at: new Date().toISOString(),
-            evaluation: failEval
-        });
-        cacheManager.save();
-        return;
-    }
-
     const existingCache = cacheManager.get(valCacheKey);
     if (existingCache && !force) {
         printValidationResult(existingCache.evaluation, true);

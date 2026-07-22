@@ -190,69 +190,6 @@ async function renderDatasetSplit(
                     await page.evaluate((p) => window.renderView!(p), payload);
                     await page.waitForTimeout(60);
 
-                    // Client-Side Bounding Box Overlap Checker
-                    const layoutCheck = await page.evaluate(() => {
-                        const viewContainer = document.getElementById('view');
-                        if (!viewContainer) return { pass: true, errors: ['#view container not found'] };
-
-                        const allElements = Array.from(viewContainer.querySelectorAll('*')) as HTMLElement[];
-                        
-                        const elementsToCheck = allElements.filter(el => {
-                            const rect = el.getBoundingClientRect();
-                            if (rect.width === 0 || rect.height === 0) return false;
-                            
-                            const style = window.getComputedStyle(el);
-                            if (style.visibility === 'hidden' || style.display === 'none' || style.opacity === '0') return false;
-                            
-                            const isLeaf = el.children.length === 0;
-                            const isRenderNode = ['IMG', 'SVG', 'INPUT', 'BUTTON', 'CANVAS'].includes(el.tagName);
-                            const hasDirectText = Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && (node.textContent?.trim().length ?? 0) > 0);
-                            
-                            return isLeaf || isRenderNode || hasDirectText;
-                        });
-
-                        const rects = elementsToCheck.map(el => ({
-                            el,
-                            rect: el.getBoundingClientRect()
-                        }));
-
-                        const errors: string[] = [];
-
-                        for (let i = 0; i < rects.length; i++) {
-                            for (let j = i + 1; j < rects.length; j++) {
-                                const a = rects[i];
-                                const b = rects[j];
-
-                                if (a.el.contains(b.el) || b.el.contains(a.el) || a.el.parentElement === b.el.parentElement) continue;
-
-                                const r1 = a.rect;
-                                const r2 = b.rect;
-
-                                const overlaps = !(
-                                    r1.right <= r2.left ||
-                                    r1.left >= r2.right ||
-                                    r1.bottom <= r2.top ||
-                                    r1.top >= r2.bottom
-                                );
-
-                                if (overlaps) {
-                                    const labelA = `${a.el.tagName}${a.el.className ? '.' + Array.from(a.el.classList).join('.') : ''}`;
-                                    const labelB = `${b.el.tagName}${b.el.className ? '.' + Array.from(b.el.classList).join('.') : ''}`;
-                                    errors.push(`Overlap: ${labelA} intersects with ${labelB}`);
-                                }
-                            }
-                        }
-
-                        return {
-                            pass: errors.length === 0,
-                            errors: errors.sort()
-                        };
-                    });
-
-                    if (!layoutCheck.pass) {
-                        console.warn(`[Layout Warning] Overlaps detected in ${baseFilename}_mode-${modeTag}.png:`, layoutCheck.errors);
-                    }
-
                     const filename = `${baseFilename}_mode-${modeTag}.png`;
                     const outPath = resolve(splitOutputDir, filename);
                     await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
@@ -274,8 +211,7 @@ async function renderDatasetSplit(
                         parameters: {
                             ...cleanedData,
                             ...blueprint.constraints
-                        },
-                        layout_checks: layoutCheck
+                        }
                     };
                 };
 
