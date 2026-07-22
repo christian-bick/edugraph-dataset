@@ -17,6 +17,10 @@ const builder = new DatasetPermutationBuilder()
         [Scope.NumbersWithZero],
         [Scope.NumbersWithoutZero]
     ])
+    .applyLabelVariants([
+        [Ability.ProcedureInversion],
+        []
+    ])
     .addLabels([Scope.NumbersSmaller10]);
 
 export const ArithmeticOpsPairsTestSpec: CompetencyTarget[] = toTargets('test-arithmetic-ops-pairs', builder);

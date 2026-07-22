@@ -1,5 +1,5 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Ability, Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
@@ -27,6 +27,10 @@ export const ArithmeticOpsPairsGeneratorSchema = {
     includeZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
+    ],
+    invertProcedure: [
+        [Ability.ProcedureInversion],
+        hasLabel(Ability.ProcedureInversion)
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),

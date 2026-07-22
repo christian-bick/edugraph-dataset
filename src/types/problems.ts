@@ -3,6 +3,7 @@ export type ArithmeticProblem = {
     num2: number;
     operation: 'addition' | 'subtraction' | 'multiplication' | 'division';
     answer: number;
+    blankPart?: 'num1' | 'num2' | 'solution';
 };
 
 export type ArithmeticDecomposeProblem = {

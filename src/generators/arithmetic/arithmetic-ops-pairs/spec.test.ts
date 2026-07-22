@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ArithmeticOpsPairsGenerator } from './generator.ts';
 import { setSeed } from '../../../lib/random.ts';
-import { Area, Scope } from 'edugraph-ts';
+import { Area, Scope, Ability } from 'edugraph-ts';
 import { generateWithLabels } from '../../../lib/utils.ts';
 
 describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
@@ -180,5 +180,26 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             expect(num2).not.toBe(0);
             expect(answer).not.toBe(0);
         }
+    });
+
+    it('should set blankPart to num2 when Ability.ProcedureInversion is present', () => {
+        const invStub = generateWithLabels(generator, [
+            Area.Addition,
+            Ability.ProcedureInversion,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero,
+            Scope.NumbersSmaller10
+        ]);
+        expect(invStub).not.toBeNull();
+        expect(invStub!.data.blankPart).toBe('num2');
+
+        const stdStub = generateWithLabels(generator, [
+            Area.Addition,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero,
+            Scope.NumbersSmaller10
+        ]);
+        expect(stdStub).not.toBeNull();
+        expect(stdStub!.data.blankPart).toBeUndefined();
     });
 });
