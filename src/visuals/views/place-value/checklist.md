@@ -1,5 +1,5 @@
 ### Place Value Category Visual Checklist
 
-#### Mode Instruction Rules:
-- **Question Mode (`_mode-Q`):** Instruction headers (e.g. "How many dots are there in total?", "How many more dots to make 10?") must be displayed above the frames.
-- **Solution Mode (`_mode-S`):** Instruction text headers must **NOT** be displayed.
+#### Visual Quality Rules:
+- Ten-frame grids, dots, and place value blocks must be clearly rendered, distinct, and legible.
+- Solution numbers, answer boxes, and added dots must be clearly highlighted in green in Solution Mode (_mode-S).

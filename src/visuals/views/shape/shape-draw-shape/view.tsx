@@ -26,7 +26,7 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
     const pathD = getTracePath(shape);
 
     return (
-        <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
+        <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit mx-auto font-sans">
             <div className="flex flex-col items-center w-[480px]">
                 {!isSolutionView && (
                     <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-normal">

@@ -65,7 +65,7 @@ const ShapeComposeShapesCore = ({ config: _config, payload }: CoreProps) => {
                                 </svg>
                             )}
                         </div>
-                        <span className="font-bold text-slate-500 uppercase">{target}</span>
+                        <span className="font-bold text-slate-500 uppercase">Target: {target}</span>
                     </div>
                 </div>
 

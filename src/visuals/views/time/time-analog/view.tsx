@@ -40,9 +40,16 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
 
     const handColorClass = isClockSolution ? 'stroke-emerald-600' : 'stroke-neutral-800';
 
+    const promptText = isReverse ? 'What time should the clock show?' : 'What time is it?';
+
     return (
-        <div className="flex justify-center items-center p-5 bg-white w-fit">
-            <div className="flex flex-col items-center gap-5">
+        <div className="flex justify-center items-center p-5 bg-white w-full font-sans">
+            <div className="flex flex-col items-center gap-5 w-[480px]">
+                {!isSolutionView && (
+                    <div className="text-[1.4rem] font-bold text-slate-700 text-center leading-relaxed">
+                        {promptText}
+                    </div>
+                )}
                 <svg className="w-[200px] h-[200px]" viewBox="0 0 100 100">
                     <circle className="fill-none stroke-neutral-800 stroke-[2px]" cx="50" cy="50" r="45" />
                     {tickMarks.map((mark, i) => {

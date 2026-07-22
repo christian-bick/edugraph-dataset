@@ -1,5 +1,5 @@
 ### Operations Category Visual Checklist
 
-#### Mode Instruction Rules:
-- **Question Mode (`_mode-Q`):** Instruction headers (e.g. "Decompose N in two different ways.") must be displayed when needed for task clarity. Word problem scenario texts remain part of the problem statement.
-- **Solution Mode (`_mode-S`):** Instruction text headers must **NOT** be displayed.
+#### Visual Quality Rules:
+- All operation boxes, decomposed part circles, and equations must be clearly rendered, legible, and properly padded.
+- Solution values and filled operation boxes must be clearly highlighted in green in Solution Mode (_mode-S).

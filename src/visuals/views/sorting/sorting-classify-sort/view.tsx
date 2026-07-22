@@ -103,8 +103,8 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
         };
     }, [data.items, data.categories, problem.id, payload.labels]);
 
-    const positions = useMemo(() => {
-        return generateScatteredPositions(items.length, problem.id);
+    const { positions, itemSize } = useMemo(() => {
+        return generateScatteredPositions(items.length, problem.id, 450, 200, 32);
     }, [items.length, problem.id]);
 
     const resolvedAnswer = useMemo(() => {
@@ -116,20 +116,18 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="flex flex-col items-center w-[480px]">
-                {!isSolutionView && (
-                    <div className="text-[1.4rem] font-bold text-slate-700 mb-5 text-center leading-relaxed">
-                        {promptText}
-                    </div>
-                )}
+                <div className="text-[1.4rem] font-bold text-slate-700 mb-5 text-center leading-relaxed">
+                    {promptText}
+                </div>
                 
-                <div className="relative w-[450px] h-[160px] bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden mb-[25px]">
+                <div className="relative w-[450px] h-[200px] bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden mb-[25px]">
                     {positions.map((pos, i) => (
                         <div 
                             key={i}
-                            className="absolute w-10 h-10 flex justify-center items-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
-                            style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+                            className="absolute flex justify-center items-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
+                            style={{ left: `${pos.x}px`, top: `${pos.y}px`, width: `${itemSize}px`, height: `${itemSize}px` }}
                         >
-                            <ItemSVG item={items[i]} />
+                            <ItemSVG item={items[i]} size={itemSize} />
                         </div>
                     ))}
                 </div>
@@ -148,7 +146,7 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
                             <div 
                                 key={cat}
                                 className={`flex-1 py-3 px-2.5 border-2 rounded-lg flex flex-col items-center gap-2 font-semibold text-[0.95rem] transition-all duration-200 ${
-                                    (isCorrect && isSolutionView)
+                                    (isCorrect && isSolutionView === true)
                                         ? 'border-green-600 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(22,163,74,0.2)] font-bold'
                                         : 'border-slate-200 bg-white text-slate-600'
                                 }`}

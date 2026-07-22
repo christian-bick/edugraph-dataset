@@ -1,6 +1,6 @@
 - The problem must contain a collection of classified items, a record of their counts for each category, and a target relation (most or least).
 - The sum of the counts for all categories must exactly equal the total number of items in the collection.
-- The category counts must not have any duplicate values for the target relation (no ties for the maximum or minimum count).
+- The category counts must not have any duplicate values for the target relation (no ties for the maximum or minimum count). Note: For visual validation of large quantities (e.g. >15 items), rely on the underlying mathematical logic and do not attempt exact manual counting of scattered items to prevent miscounts.
 - The solution must correctly identify the category that satisfies the target relation.
 - All counts must be non-negative integers.
 - The problem identifier must uniquely map to the problem configuration.

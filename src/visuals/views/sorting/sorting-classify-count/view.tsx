@@ -101,8 +101,8 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
         };
     }, [data.items, data.categories, problem.id]);
 
-    const positions = useMemo(() => {
-        return generateScatteredPositions(items.length, problem.id);
+    const { positions, itemSize } = useMemo(() => {
+        return generateScatteredPositions(items.length, problem.id, 450, 160, 40);
     }, [items.length, problem.id]);
 
     const promptText = `Classify and count the objects by ${classifyType}.`;
@@ -120,10 +120,10 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
                     {positions.map((pos, i) => (
                         <div 
                             key={i}
-                            className="absolute w-10 h-10 flex justify-center items-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
-                            style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+                            className="absolute flex justify-center items-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
+                            style={{ left: `${pos.x}px`, top: `${pos.y}px`, width: `${itemSize}px`, height: `${itemSize}px` }}
                         >
-                            <ItemSVG item={items[i]} />
+                            <ItemSVG item={items[i]} size={itemSize} />
                         </div>
                     ))}
                 </div>
@@ -145,7 +145,7 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
                                     <span>{labelText}</span>
                                 </div>
                                 <div className={`w-[50px] h-[45px] border-2 rounded bg-white flex justify-center items-center text-[1.4rem] font-mono font-extrabold ${
-                                    isSolutionView 
+                                    isSolutionView === true
                                         ? 'text-green-600 border-green-600 bg-green-50' 
                                         : 'text-slate-800 border-slate-600'
                                 }`}>

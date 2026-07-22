@@ -42,7 +42,7 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
         : 'text-slate-500 border-slate-500 bg-white';
 
     return (
-        <div className="flex justify-center items-center p-[25px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit">
+        <div className="flex justify-center items-center p-[25px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit mx-auto font-sans">
             <div className="flex flex-col items-center w-[480px]">
                 {!isSolutionView && (
                     <div className="text-2xl font-bold text-slate-700 mb-5 text-center font-sans">
