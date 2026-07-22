@@ -56,8 +56,8 @@ The primary pipeline orchestrator.
 *   **Function**: Scans all `metadata.jsonl` files in the generated dataset. It outputs a markdown report (`out/dataset/coverage-report.md` or `out/dataset-test/coverage-report.md`) detailing absolute frequencies of individual labels and the percentage breakdown of unique label combinations.
 
 ### `src/scripts/validate-dataset.ts`
-*   **Execution**: `npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--spec=Z] [--force]`
-*   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze a representative random selection of Q/A image pairs from the dataset against rules defined in `global-checklist.md` and module-specific `checklist.md` files. It dynamically reads from `out/dataset-test/` when `--spec=test` is specified, or `out/dataset/` by default.
+*   **Execution**: `npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--dataset=Z] [--force]`
+*   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It dynamically reads from `out/dataset-test/` when `--dataset=test` is specified, or `out/dataset/` by default.
 
 ### `src/scripts/validate-specs.ts`
 *   **Execution**: `npm run check:specs`
@@ -120,11 +120,10 @@ When designing or updating `spec.ts` files, you must strictly follow these rules
 When writing or updating `checklist.md` files (which are used by the automated visual QA or manual checks), you must strictly follow these rules:
 
 1. **Hierarchical Organization**:
-   Checklists are concatenated and evaluated across 3 levels:
-   - Level 1: `global-checklist.md` (applies to all modules in the codebase).
-   - Level 2: Parent Category `checklist.md` (e.g. `src/generators/arithmetic/checklist.md` - applies to all sub-modules under that category).
-   - Level 3: Leaf Module `checklist.md` (e.g. `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md` - applies specifically to that leaf module).
-   Shared rules across sibling modules should be generalized up to Level 2 parent category checklists to prevent duplication.
+   Checklists are concatenated and evaluated across levels:
+   - Parent Category `checklist.md` (e.g. `src/generators/arithmetic/checklist.md` - applies to all sub-modules under that category).
+   - Leaf Module `checklist.md` (e.g. `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md` - applies specifically to that leaf module).
+   Shared rules across sibling modules should be generalized up to parent category checklists to prevent duplication.
 2. **Separation of Concerns**:
    - **Generator Checklists**: Specify *only* abstract mathematical and logic rules. Remove all layout/visual criteria (e.g., coordinates, shapes, colors, SVGs, button states, ruler bands, CSS styling, or answer box highlights).
    - **View Checklists**: Specify *only* visual layout, rendering, and interaction rules. Remove all abstract logic criteria (e.g., mathematical generation algorithms, RNG selection logic, ontology/tag resolution).

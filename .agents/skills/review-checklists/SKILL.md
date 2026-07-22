@@ -19,10 +19,9 @@ Follow these instructions strictly during the review:
 - **Do Not Touch What Is Not Broken:** Keep your edits minimal. Do not rewrite, restructure, or remove checklist items that already comply with these guidelines. Only touch items that violate the separation of concerns.
 - **Conciseness:** Focus on the most important logical or visual validation aspects. Do not include excessive edge cases.
 - **Unaware of Parameterization:** Assume that the validation mechanism is unaware of parameterization. Do NOT include conditional validation aspects (e.g., "If configuration parameter X is true, then...").
-- **Hierarchical Organization (Tree Generalization):** `checklist.md` files are loaded hierarchically across 3 levels:
-  1. `global-checklist.md` (applies to all modules).
-  2. Category `checklist.md` (e.g., `src/generators/arithmetic/checklist.md` - applies to all sub-modules under that category).
-  3. Leaf module `checklist.md` (e.g., `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md` - applies specifically to that leaf module).
+- **Hierarchical Organization (Tree Generalization):** `checklist.md` files are loaded hierarchically across levels:
+  1. Parent Category `checklist.md` (e.g., `src/generators/arithmetic/checklist.md` or `src/visuals/views/numbers/checklist.md` - applies to all sub-modules under that category).
+  2. Leaf Module `checklist.md` (e.g., `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md` or `src/visuals/views/numbers/numbers-compare/checklist.md` - applies specifically to that leaf module).
   When reviewing checklists, generalize shared rules up to parent category `checklist.md` files where applicable to eliminate redundancy across sibling modules.
 
 ---

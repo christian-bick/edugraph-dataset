@@ -72,6 +72,39 @@ function printValidationResult(evaluation: any, cached: boolean) {
     console.log(`Reasoning: ${evaluation.reasoning}`);
 }
 
+function resolveTreeChecklists(rootDir: string, moduleId: string): string[] {
+    const paths: string[] = [];
+
+    // 1. Root checklist.md
+    const rootChecklist = resolve(rootDir, 'checklist.md');
+    if (existsSync(rootChecklist)) paths.push(rootChecklist);
+
+    // 2. Discover leaf modules
+    const modules = findLeafModules(rootDir);
+    const mod = modules.find(m => m.id === moduleId);
+
+    // 3. Category checklist.md
+    if (mod && mod.category) {
+        const categoryChecklist = resolve(rootDir, mod.category, 'checklist.md');
+        if (existsSync(categoryChecklist)) paths.push(categoryChecklist);
+    }
+
+    // 4. Leaf checklist.md
+    const leafChecklist = mod
+        ? resolve(mod.absolutePath, 'checklist.md')
+        : resolve(rootDir, moduleId, 'checklist.md');
+    if (existsSync(leafChecklist)) paths.push(leafChecklist);
+
+    return paths;
+}
+
+function getChecklistPaths(moduleName: string, viewId: string): string[] {
+    return [
+        ...resolveTreeChecklists(GENERATORS_ROOT, moduleName),
+        ...resolveTreeChecklists(VIEWS_ROOT, viewId)
+    ];
+}
+
 async function validateSample(entry: any, force: boolean, datasetFolderName: string) {
     const moduleName = entry.generator;
     const viewId = entry.view;
@@ -90,29 +123,7 @@ async function validateSample(entry: any, force: boolean, datasetFolderName: str
     const imageBuffer = readFileSync(imagePath);
     const imageSha256 = computeImageSha256(imageBuffer);
 
-    const checklistPaths: string[] = [];
-    const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
-    if (existsSync(globalChecklistPath)) checklistPaths.push(globalChecklistPath);
-
-    const leafModules = findLeafModules(GENERATORS_ROOT);
-    const leafMod = leafModules.find(m => m.id === moduleName);
-
-    if (leafMod && leafMod.category) {
-        const categoryChecklistPath = resolve(GENERATORS_ROOT, leafMod.category, 'checklist.md');
-        if (existsSync(categoryChecklistPath)) checklistPaths.push(categoryChecklistPath);
-    }
-
-    const leafChecklistPath = leafMod 
-        ? resolve(leafMod.absolutePath, 'checklist.md')
-        : resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
-    if (existsSync(leafChecklistPath)) checklistPaths.push(leafChecklistPath);
-
-    const viewModules = findLeafModules(VIEWS_ROOT);
-    const viewMod = viewModules.find(v => v.id === viewId);
-    if (viewMod) {
-        const viewChecklistPath = resolve(viewMod.absolutePath, 'checklist.md');
-        if (existsSync(viewChecklistPath)) checklistPaths.push(viewChecklistPath);
-    }
+    const checklistPaths = getChecklistPaths(moduleName, viewId);
 
     let checklistText = '';
     for (const p of checklistPaths) {
@@ -174,13 +185,8 @@ Mode: "${isSolution ? 'Solution Mode (_mode-S)' : 'Question Mode (_mode-Q)'}"
 Module: "${moduleName}"
 View ID: "${viewId}"
 
-STRICT CHECKLIST:
+CHECKLIST:
 ${checklistText}
-
-EVALUATION GUIDELINES:
-1. Question Mode (_mode-Q) and Solution Mode (_mode-S) are generated independently under each competency target.
-2. In Question Mode (_mode-Q): verify that the problem is presented clearly, unsolved, and has minimal text instructions where appropriate.
-3. In Solution Mode (_mode-S): verify that the solution visual is clear (e.g. correct answers/coloring) and strictly NEVER contains instruction text headers.
 
 Respond only in the provided JSON schema.
 `;
@@ -286,29 +292,7 @@ async function main() {
         const imageBuffer = readFileSync(imagePath);
         const imageSha256 = computeImageSha256(imageBuffer);
 
-        const checklistPaths: string[] = [];
-        const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
-        if (existsSync(globalChecklistPath)) checklistPaths.push(globalChecklistPath);
-
-        const leafModules = findLeafModules(GENERATORS_ROOT);
-        const leafMod = leafModules.find(m => m.id === moduleName);
-        if (leafMod && leafMod.category) {
-            const categoryChecklistPath = resolve(GENERATORS_ROOT, leafMod.category, 'checklist.md');
-            if (existsSync(categoryChecklistPath)) checklistPaths.push(categoryChecklistPath);
-        }
-
-        const leafChecklistPath = leafMod 
-            ? resolve(leafMod.absolutePath, 'checklist.md')
-            : resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
-        if (existsSync(leafChecklistPath)) checklistPaths.push(leafChecklistPath);
-
-        const viewModules = findLeafModules(VIEWS_ROOT);
-        const viewMod = viewModules.find(v => v.id === entry.view);
-        if (viewMod) {
-            const viewChecklistPath = resolve(viewMod.absolutePath, 'checklist.md');
-            if (existsSync(viewChecklistPath)) checklistPaths.push(viewChecklistPath);
-        }
-
+        const checklistPaths = getChecklistPaths(moduleName, entry.view);
         const checklistHash = computeChecklistHash(checklistPaths);
         const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
         const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
@@ -346,29 +330,7 @@ async function main() {
         const imageBuffer = readFileSync(imagePath);
         const imageSha256 = computeImageSha256(imageBuffer);
 
-        const checklistPaths: string[] = [];
-        const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
-        if (existsSync(globalChecklistPath)) checklistPaths.push(globalChecklistPath);
-
-        const leafModules = findLeafModules(GENERATORS_ROOT);
-        const leafMod = leafModules.find(m => m.id === moduleName);
-        if (leafMod && leafMod.category) {
-            const categoryChecklistPath = resolve(GENERATORS_ROOT, leafMod.category, 'checklist.md');
-            if (existsSync(categoryChecklistPath)) checklistPaths.push(categoryChecklistPath);
-        }
-
-        const leafChecklistPath = leafMod 
-            ? resolve(leafMod.absolutePath, 'checklist.md')
-            : resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
-        if (existsSync(leafChecklistPath)) checklistPaths.push(leafChecklistPath);
-
-        const viewModules = findLeafModules(VIEWS_ROOT);
-        const viewMod = viewModules.find(v => v.id === viewId);
-        if (viewMod) {
-            const viewChecklistPath = resolve(viewMod.absolutePath, 'checklist.md');
-            if (existsSync(viewChecklistPath)) checklistPaths.push(viewChecklistPath);
-        }
-
+        const checklistPaths = getChecklistPaths(moduleName, viewId);
         const checklistHash = computeChecklistHash(checklistPaths);
         const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
         const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
