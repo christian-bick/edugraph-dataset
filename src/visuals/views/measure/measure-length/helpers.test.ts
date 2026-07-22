@@ -33,11 +33,11 @@ describe('measure-length helpers', () => {
     });
 
     it('generates ticks correctly for large band lengths (e.g. 100)', () => {
-        const ticks = getRulerTicks(100, 20, 7); // band length 100, labelInterval = 10, minorTickCount = 9 (subdivisions at 1 unit intervals)
-        // 101 major/unit ticks + 900 minor unit subdivision ticks = 1001 total ticks.
-        expect(ticks.length).toBe(1001);
+        const ticks = getRulerTicks(100, 20, 7); // band length 100, labelInterval = 10, minorTickCount = 1
+        // 101 major ticks + 100 minor half-unit ticks = 201 total ticks.
+        expect(ticks.length).toBe(201);
         expect(ticks[0].value).toBe(0);
-        expect(ticks[1].value).toBeUndefined(); // tick 1 has no label
-        expect(ticks[100].value).toBe(10); // tick 100 is labeled major tick 10
+        expect(ticks[1].value).toBeUndefined(); // tick at 5 has no label
+        expect(ticks[20].value).toBe(10); // tick 20 is labeled major tick 10
     });
 });

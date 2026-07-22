@@ -112,8 +112,8 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
         : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
 
     const hash = hashCode(problem.id);
-    const rotation = hash % 360;
-    const scale = parseFloat(((hash % 11) / 10 + 0.5).toFixed(1));
+    const rotation = is3D ? 0 : (hash % 360);
+    const scale = is3D ? 1 : parseFloat(((hash % 6) / 10 + 0.8).toFixed(1));
 
     const promptText = "What shape is this?";
 
