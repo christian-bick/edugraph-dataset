@@ -16,7 +16,7 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
     const data = problem.data;
     validateProblemData('shape-position', data, ['relation', 'answer']);
 
-    const relation = data.relation;
+    const relation = data.relation as string;
     const answer = data.answer;
 
     if (relation !== 'above' && relation !== 'below' && relation !== 'beside' && relation !== 'nextTo' && relation !== 'behind') {

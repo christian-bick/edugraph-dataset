@@ -162,7 +162,8 @@ export interface ViewTypeMap {
     'sorting-classify-count': CountingClassifyCountProblem;
     'sorting-classify-sort': CountingClassifySortProblem;
 
-    'measure-length': MeasurementStandardProblem;
+    'measure-length-integer': MeasurementStandardProblem;
+    'measure-length-decimal': MeasurementStandardProblem;
     'measure-attributes': MeasurementAttributeProblem;
     'measure-compare': MeasurementCompareProblem;
 

@@ -4,7 +4,7 @@ import path from 'path';
 import https from 'https';
 import { IncomingMessage } from 'http';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { Ability, Area, Scope } from 'edugraph-ts';
+import { Ability, Area, Scope, deductCompatible } from 'edugraph-ts';
 import { CompetencyTarget, OntologyTodo } from '../types/ml-engine.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
@@ -331,35 +331,30 @@ function findMatchingGeneratorForTarget(
     });
 
     if (matchingViewsForTarget.length > 0) {
-      let problemStub = null;
-      for (let seed = 42; seed < 52 && !problemStub; seed++) {
-        setSeed(seed);
-        problemStub = generateWithLabels(gen.generator, target.labels);
+      let anyMatched = false;
+      
+      for (const viewSpec of matchingViewsForTarget) {
+        if (viewSpec.rejectedLabels && target.labels.some((l: string) => viewSpec.rejectedLabels!.includes(l))) {
+            continue;
+        }
+
+        const combinedLabels = [...target.labels];
+
+        let problemStub = null;
+        
+        for (let seed = 42; seed < 52 && !problemStub; seed++) {
+          setSeed(seed);
+          problemStub = generateWithLabels(gen.generator, combinedLabels);
+        }
+        
+        if (problemStub) {
+          anyMatched = true;
+          break;
+        }
       }
 
-      if (problemStub) {
-        const matchedViews = matchingViewsForTarget.filter(viewSpec => {
-          if (viewSpec.constraints) {
-            for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-              const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints?.[key];
-              if (val === undefined) {
-                const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
-                if (VISUAL_PARAMS.has(key)) continue;
-                return false;
-              }
-              if (constraint.type === 'range') {
-                if (val < constraint.min || val > constraint.max) return false;
-              } else if (constraint.type === 'options') {
-                if (!constraint.values.includes(val)) return false;
-              }
-            }
-          }
-          return true;
-        });
-
-        if (matchedViews.length > 0) {
-          return gen.generatorId;
-        }
+      if (anyMatched) {
+        return gen.generatorId;
       }
     }
   }

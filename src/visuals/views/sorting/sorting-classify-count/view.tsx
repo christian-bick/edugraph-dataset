@@ -102,7 +102,7 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
     }, [data.items, data.categories, problem.id]);
 
     const { positions, itemSize } = useMemo(() => {
-        return generateScatteredPositions(items.length, problem.id, 450, 160, 40);
+        return generateScatteredPositions(items.length, 450, 160, 40);
     }, [items.length, problem.id]);
 
     const promptText = `Classify and count the objects by ${classifyType}.`;

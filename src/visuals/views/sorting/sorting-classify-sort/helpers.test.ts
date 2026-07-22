@@ -3,10 +3,10 @@ import { generateScatteredPositions, getRelationAnswer } from './helpers.ts';
 
 describe('sorting-classify-sort helpers', () => {
     it('generates scattered positions deterministically', () => {
-        const pos1 = generateScatteredPositions(5, 'test-seed-1');
-        const pos2 = generateScatteredPositions(5, 'test-seed-1');
-        expect(pos1.length).toBe(5);
-        expect(pos1).toEqual(pos2);
+        const pos1 = generateScatteredPositions(5);
+        const pos2 = generateScatteredPositions(5);
+        expect(pos1.positions.length).toBe(5);
+        expect(pos1.positions).toEqual(pos2.positions);
     });
 
     it('calculates relation answers correctly', () => {

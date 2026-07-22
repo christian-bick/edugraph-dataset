@@ -108,7 +108,7 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
     await Promise.all(workers);
 }
 
-async function evaluateSingleSample(entry: any, datasetFolderName: string): Promise<any> {
+async function evaluateSingleSample(entry: any, _datasetFolderName: string): Promise<any> {
     const moduleName = entry.generator;
     const viewId = entry.view;
     const modeName = entry.mode || (entry.solution_visible ? 'solution' : 'question');

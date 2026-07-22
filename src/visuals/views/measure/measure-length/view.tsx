@@ -1,18 +1,16 @@
 import React, {useMemo} from 'react';
-import {createRoot} from 'react-dom/client';
-import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {formatMeasureAnswer, getRulerTicks} from './helpers.ts';
-import {MeasureLengthViewConfig, MeasureLengthViewSchema} from './spec.ts';
+import {MeasureLengthViewConfig, MeasureLengthViewSchema} from './_spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
     config: MeasureLengthViewConfig;
-    payload: ViewRenderPayload<'measure-length'>;
+    payload: any;
 }
 
-const MeasureLengthCore = ({ config, payload }: CoreProps) => {
+export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -121,15 +119,3 @@ const MeasureLengthCore = ({ config, payload }: CoreProps) => {
 };
 
 export const MeasureLength = withConfig(MeasureLengthViewSchema, MeasureLengthCore);
-
-let root: ReturnType<typeof createRoot> | null = null;
-
-window.renderView = (payload: ViewRenderPayload<'measure-length'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
-        }
-        root.render(<MeasureLength payload={payload} />);
-    }
-};

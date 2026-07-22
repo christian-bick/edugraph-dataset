@@ -7,7 +7,7 @@ import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
 import { findLeafModules, LeafModule } from '../lib/module-resolver.ts';
 import { extractSchemaLabels, generateWithLabels, formatLabelsKey, shortenLabel } from '../lib/utils.ts';
-import { Ability } from 'edugraph-ts';
+import { Ability, deductCompatible, Scope } from 'edugraph-ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -352,141 +352,114 @@ async function runModulePipeline(
     const targetRegistry = new TargetInstanceRegistry();
 
     for (const target of matchedTargets) {
-        let countForThisTarget = 0;
-        let attempts = 0;
-        const countPerPermutation = 1;
-        const maxAttempts = 50;
+        for (const viewSpec of filteredViews) {
+            const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
+            if (!viewLabels || !generatorGeneralLabels) continue;
+            const labelsMatch = target.labels.every((compLabel: string) => {
+                if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
+                if (abilitiesList.has(compLabel)) {
+                    return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
+                }
+                const supportedByGen = generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
+                const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
+                return supportedByGen || supportedByView;
+            });
+            if (!labelsMatch) continue;
 
-        while (countForThisTarget < countPerPermutation && attempts < maxAttempts) {
-            attempts++;
-            
-            const qInstance = targetRegistry.getNextInstance(moduleName, 'train', target.labels, target.constraints || {});
-            const qTargetKey = computeTargetKey(moduleName, 'train', target.labels, target.constraints || {}, qInstance);
-            const { seed: qSeed, hashHex: qHashHex } = computeTargetSeed(qTargetKey, attempts);
-            setSeed(qSeed);
-            
-            const problemStub = generateWithLabels(generator, target.labels);
+            if (viewSpec.rejectedLabels && target.labels.some((l: string) => viewSpec.rejectedLabels!.includes(l))) {
+                continue;
+            }
 
-            if (problemStub) {
-                // Match views that support this problem
-                const matchedViews = filteredViews.filter(viewSpec => {
-                    const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
-                    if (!viewLabels || !generatorGeneralLabels) return false;
-                    const labelsMatch = target.labels.every((compLabel: string) => {
-                        if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
-                        if (abilitiesList.has(compLabel)) {
-                            return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-                        }
-                        const supportedByGen = generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
-                        const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-                        return supportedByGen || supportedByView;
-                    });
-                    if (!labelsMatch) return false;
+            const combinedLabels = [...target.labels];
+            let countForThisTarget = 0;
+            let attempts = 0;
+            const countPerPermutation = 1;
+            const maxAttempts = 50;
 
-                    // Check physical constraints
-                    if (viewSpec.constraints) {
-                        for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-                            const targetConstraints = target.constraints || {};
-                            const val = problemStub.data[key] !== undefined ? problemStub.data[key] : targetConstraints[key];
-                            if (val === undefined) {
-                                const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
-                                if (VISUAL_PARAMS.has(key)) {
-                                    continue;
-                                }
-                                return false;
-                            }
-                            if (constraint.type === 'range') {
-                                if (val < constraint.min || val > constraint.max) return false;
-                            } else if (constraint.type === 'options') {
-                                if (!constraint.values.includes(val)) return false;
-                            }
-                        }
-                        return true;
+            while (countForThisTarget < countPerPermutation && attempts < maxAttempts) {
+                attempts++;
+                
+                const qInstance = targetRegistry.getNextInstance(moduleName, 'train', combinedLabels, target.constraints || {});
+                const qTargetKey = computeTargetKey(moduleName, 'train', combinedLabels, target.constraints || {}, qInstance);
+                const { seed: qSeed, hashHex: qHashHex } = computeTargetSeed(qTargetKey, attempts);
+                setSeed(qSeed);
+                
+                const problemStub = generateWithLabels(generator, combinedLabels);
+
+                if (problemStub) {
+                    if (trainKeys.has(`${problemStub.id}-${viewSpec.viewId}`)) {
+                        continue;
                     }
-                    return true;
-                });
+                    trainKeys.add(`${problemStub.id}-${viewSpec.viewId}`);
+                    countForThisTarget++;
 
-                const newMatchedViews = matchedViews.filter(v => !trainKeys.has(`${problemStub.id}-${v.viewId}`));
+                    const sInstance = targetRegistry.getNextInstance(moduleName, 'train', combinedLabels, target.constraints || {});
+                    const sTargetKey = computeTargetKey(moduleName, 'train', combinedLabels, target.constraints || {}, sInstance);
+                    const { seed: sSeed, hashHex: sHashHex } = computeTargetSeed(sTargetKey, attempts);
+                    setSeed(sSeed);
+                    const solutionStub = generateWithLabels(generator, combinedLabels) || problemStub;
 
-                if (newMatchedViews.length === 0) {
-                    continue;
-                }
+                    const problem: AbstractProblem = {
+                        ...problemStub,
+                        id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
+                        type: generator.type,
+                        tags: Array.from(new Set([...combinedLabels, ...(problemStub.tags || [])]))
+                    };
+                    (problem as any).targetKey = qTargetKey;
+                    (problem as any).targetKeyHash = qHashHex;
 
-                for (const v of newMatchedViews) {
-                    trainKeys.add(`${problemStub.id}-${v.viewId}`);
-                }
-                countForThisTarget++;
+                    const solutionProblem: AbstractProblem = {
+                        ...solutionStub,
+                        id: `${moduleName}-train-sol-${trainDataset.length + 1}-${solutionStub.id}`,
+                        type: generator.type,
+                        tags: Array.from(new Set([...combinedLabels, ...(solutionStub.tags || [])]))
+                    };
+                    (solutionProblem as any).targetKey = sTargetKey;
+                    (solutionProblem as any).targetKeyHash = sHashHex;
 
-                const sInstance = targetRegistry.getNextInstance(moduleName, 'train', target.labels, target.constraints || {});
-                const sTargetKey = computeTargetKey(moduleName, 'train', target.labels, target.constraints || {}, sInstance);
-                const { seed: sSeed, hashHex: sHashHex } = computeTargetSeed(sTargetKey, attempts);
-                setSeed(sSeed);
-                const solutionStub = generateWithLabels(generator, target.labels) || problemStub;
+                    (problem as any).matchedBlueprints = [{
+                        viewId: viewSpec.viewId,
+                        constraints: {},
+                        instancesPerProblem: 1
+                    }];
+                    (problem as any).solutionProblem = solutionProblem;
+                    trainDataset.push(problem);
 
-                const problem: AbstractProblem = {
-                    ...problemStub,
-                    id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
-                    type: generator.type,
-                    tags: Array.from(new Set([...target.labels, ...(problemStub.tags || [])]))
-                };
-                (problem as any).targetKey = qTargetKey;
-                (problem as any).targetKeyHash = qHashHex;
+                    // Generate validation sample
+                    if (!trainingOnly) {
+                        const currentValCount = Math.floor(trainDataset.length * valRatio);
+                        const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
+                        
+                        if (currentValCount > prevValCount) {
+                            let valAttempts = 0;
+                            let valSuccess = false;
+                            while (!valSuccess && valAttempts < 50) {
+                                valAttempts++;
+                                const valQInstance = targetRegistry.getNextInstance(moduleName, 'val', combinedLabels, target.constraints || {});
+                                const valQTargetKey = computeTargetKey(moduleName, 'val', combinedLabels, target.constraints || {}, valQInstance);
+                                const { seed: valQSeed, hashHex: valQHashHex } = computeTargetSeed(valQTargetKey, valAttempts);
+                                setSeed(valQSeed);
+                                const valStub = generateWithLabels(generator, combinedLabels);
 
-                const solutionProblem: AbstractProblem = {
-                    ...solutionStub,
-                    id: `${moduleName}-train-sol-${trainDataset.length + 1}-${solutionStub.id}`,
-                    type: generator.type,
-                    tags: Array.from(new Set([...target.labels, ...(solutionStub.tags || [])]))
-                };
-                (solutionProblem as any).targetKey = sTargetKey;
-                (solutionProblem as any).targetKeyHash = sHashHex;
+                                const valSInstance = targetRegistry.getNextInstance(moduleName, 'val', combinedLabels, target.constraints || {});
+                                const valSTargetKey = computeTargetKey(moduleName, 'val', combinedLabels, target.constraints || {}, valSInstance);
+                                const { seed: valSSeed, hashHex: valSHashHex } = computeTargetSeed(valSTargetKey, valAttempts);
+                                setSeed(valSSeed);
+                                const valSolutionStub = generateWithLabels(generator, combinedLabels) || valStub;
 
-                (problem as any).matchedBlueprints = newMatchedViews.map(v => ({
-                    viewId: v.viewId,
-                    constraints: {},
-                    instancesPerProblem: 1
-                }));
-                (problem as any).solutionProblem = solutionProblem;
-                trainDataset.push(problem);
-
-                // Generate validation sample
-                if (!trainingOnly) {
-                    const currentValCount = Math.floor(trainDataset.length * valRatio);
-                    const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
-                    
-                    if (currentValCount > prevValCount) {
-                        let valAttempts = 0;
-                        let valSuccess = false;
-                        while (!valSuccess && valAttempts < 50) {
-                            valAttempts++;
-                            const valQInstance = targetRegistry.getNextInstance(moduleName, 'val', target.labels, target.constraints || {});
-                            const valQTargetKey = computeTargetKey(moduleName, 'val', target.labels, target.constraints || {}, valQInstance);
-                            const { seed: valQSeed, hashHex: valQHashHex } = computeTargetSeed(valQTargetKey, valAttempts);
-                            setSeed(valQSeed);
-                            const valStub = generateWithLabels(generator, target.labels);
-
-                            const valSInstance = targetRegistry.getNextInstance(moduleName, 'val', target.labels, target.constraints || {});
-                            const valSTargetKey = computeTargetKey(moduleName, 'val', target.labels, target.constraints || {}, valSInstance);
-                            const { seed: valSSeed, hashHex: valSHashHex } = computeTargetSeed(valSTargetKey, valAttempts);
-                            setSeed(valSSeed);
-                            const valSolutionStub = generateWithLabels(generator, target.labels) || valStub;
-
-                            if (valStub) {
-                                const valMatchedViews = newMatchedViews.filter(v => 
-                                    !valKeys.has(`${valStub.id}-${v.viewId}`) && 
-                                    !trainKeys.has(`${valStub.id}-${v.viewId}`)
-                                );
-                                if (valMatchedViews.length > 0) {
-                                    for (const v of valMatchedViews) {
-                                        valKeys.add(`${valStub.id}-${v.viewId}`);
+                                if (valStub) {
+                                    if (valKeys.has(`${valStub.id}-${viewSpec.viewId}`) || trainKeys.has(`${valStub.id}-${viewSpec.viewId}`)) {
+                                        continue;
                                     }
+                                    
+                                    valKeys.add(`${valStub.id}-${viewSpec.viewId}`);
                                     valSuccess = true;
 
                                     const valProblem: AbstractProblem = {
                                         ...valStub,
                                         id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
                                         type: generator.type,
-                                        tags: Array.from(new Set([...target.labels, ...(valStub.tags || [])]))
+                                        tags: Array.from(new Set([...combinedLabels, ...(valStub.tags || [])]))
                                     };
                                     (valProblem as any).targetKey = valQTargetKey;
                                     (valProblem as any).targetKeyHash = valQHashHex;
@@ -496,16 +469,16 @@ async function runModulePipeline(
                                         ...activeValSolStub,
                                         id: `${moduleName}-val-sol-${valDataset.length + 1}-${activeValSolStub.id}`,
                                         type: generator.type,
-                                        tags: Array.from(new Set([...target.labels, ...(activeValSolStub.tags || [])]))
+                                        tags: Array.from(new Set([...combinedLabels, ...(activeValSolStub.tags || [])]))
                                     };
                                     (valSolutionProblem as any).targetKey = valSTargetKey;
                                     (valSolutionProblem as any).targetKeyHash = valSHashHex;
 
-                                    (valProblem as any).matchedBlueprints = valMatchedViews.map(v => ({
-                                        viewId: v.viewId,
+                                    (valProblem as any).matchedBlueprints = [{
+                                        viewId: viewSpec.viewId,
                                         constraints: {},
                                         instancesPerProblem: 1
-                                    }));
+                                    }];
                                     (valProblem as any).solutionProblem = valSolutionProblem;
                                     valDataset.push(valProblem);
                                 }
@@ -517,7 +490,7 @@ async function runModulePipeline(
         }
     }
 
-    console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);
+    console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);    console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);
 
     let moduleImages = 0;
     moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, DEFAULT_CONCURRENCY, viewPathMap);

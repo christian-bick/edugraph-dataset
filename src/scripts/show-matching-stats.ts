@@ -163,46 +163,33 @@ async function main() {
             });
 
             if (matchingViewsForTarget.length > 0) {
-                // Generate a deterministic sample problem to test constraints. Retry over a
-                // few fixed seeds: generators may legitimately return null for an unlucky
-                // sample (e.g. tied category counts), which the dataset pipeline retries too.
-                let problemStub = null;
-                for (let seed = 42; seed < 52 && !problemStub; seed++) {
-                    setSeed(seed);
-                    problemStub = generateWithLabels(gen.generator, target.labels);
+                const matchedViews = [];
+                let anyStubReturnedNull = false;
+                
+                for (const viewSpec of matchingViewsForTarget) {
+                    const combinedLabels = [...target.labels, ...(viewSpec.restrictions || [])];
+                    let problemStub = null;
+                    
+                    for (let seed = 42; seed < 52 && !problemStub; seed++) {
+                        setSeed(seed);
+                        problemStub = generateWithLabels(gen.generator, combinedLabels);
+                    }
+                    
+                    if (problemStub) {
+                        matchedViews.push(viewSpec);
+                    } else {
+                        anyStubReturnedNull = true;
+                    }
                 }
 
-                if (problemStub) {
-                    const matchedViews = matchingViewsForTarget.filter(viewSpec => {
-                        if (viewSpec.constraints) {
-                            for (const [key, constraint] of Object.entries(viewSpec.constraints) as any) {
-                                const val = problemStub.data[key] !== undefined ? problemStub.data[key] : target.constraints?.[key];
-                                if (val === undefined) {
-                                    const VISUAL_PARAMS = new Set(['outline', 'reverse', 'decimal', 'desc', 'asc']);
-                                    if (VISUAL_PARAMS.has(key)) {
-                                        continue;
-                                    }
-                                    return false;
-                                }
-                                if (constraint.type === 'range') {
-                                    if (val < constraint.min || val > constraint.max) return false;
-                                } else if (constraint.type === 'options') {
-                                    if (!constraint.values.includes(val)) return false;
-                                }
-                            }
-                        }
-                        return true;
-                    });
+                if (matchedViews.length > 0) {
+                    targetHasMatch = true;
+                    generatorStats[gen.generatorId].targetMatches++;
+                    generatorStats[gen.generatorId].viewPairs += matchedViews.length;
 
-                    if (matchedViews.length > 0) {
-                        targetHasMatch = true;
-                        generatorStats[gen.generatorId].targetMatches++;
-                        generatorStats[gen.generatorId].viewPairs += matchedViews.length;
-
-                        console.log(`  └─► Generator: [${gen.generatorId}]`);
-                        console.log(`      └─► Compatible Views: [${matchedViews.map(v => v.viewId).join(', ')}]`);
-                    }
-                } else {
+                    console.log(`  └─► Generator: [${gen.generatorId}]`);
+                    console.log(`      └─► Compatible Views: [${matchedViews.map(v => v.viewId).join(', ')}]`);
+                } else if (anyStubReturnedNull) {
                     console.log(`  └─► Generator: [${gen.generatorId}] (Returned null stub)`);
                 }
             }

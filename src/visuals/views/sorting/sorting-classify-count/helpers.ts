@@ -1,5 +1,3 @@
-import { setSeed, random } from '../../../../lib/random.ts';
-
 export interface Position {
     x: number;
     y: number;
@@ -12,7 +10,6 @@ export interface LayoutResult {
 
 export function generateScatteredPositions(
     numItems: number,
-    problemId: string,
     width = 450,
     height = 200,
     maxItemSize = 40

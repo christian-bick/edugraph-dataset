@@ -104,7 +104,7 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
     }, [data.items, data.categories, problem.id, payload.labels]);
 
     const { positions, itemSize } = useMemo(() => {
-        return generateScatteredPositions(items.length, problem.id, 450, 200, 32);
+        return generateScatteredPositions(items.length, 450, 200, 32);
     }, [items.length, problem.id]);
 
     const resolvedAnswer = useMemo(() => {
