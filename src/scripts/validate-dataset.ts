@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname } from "path";
@@ -27,7 +28,7 @@ let model: any = null;
 if (apiKey) {
     genAI = new GoogleGenerativeAI(apiKey);
     model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-3.5-flash",
         generationConfig: {
             responseMimeType: "application/json",
             responseSchema: {
