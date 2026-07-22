@@ -1,0 +1,99 @@
+import { createHash } from 'crypto';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
+
+export interface VqaCacheEntry {
+    cache_key: string;
+    file_name: string;
+    target_key_hash: string;
+    image_sha256: string;
+    checklist_hash: string;
+    validated_at: string;
+    evaluation: {
+        pass: boolean;
+        reasoning: string;
+        general_checks?: {
+            no_overlaps: boolean;
+            no_placeholders: boolean;
+            sane_padding: boolean;
+        };
+        coloring_pass?: boolean;
+        layout_pass?: boolean;
+    };
+}
+
+export function computeChecklistHash(checklistPaths: string[]): string {
+    const hash = createHash('sha256');
+    for (const p of checklistPaths) {
+        if (existsSync(p)) {
+            hash.update(readFileSync(p, 'utf-8'));
+            hash.update('\n---\n');
+        }
+    }
+    return hash.digest('hex').slice(0, 16);
+}
+
+export function computeImageSha256(imageBufferOrPath: Buffer | string): string {
+    const buffer = typeof imageBufferOrPath === 'string'
+        ? readFileSync(imageBufferOrPath)
+        : imageBufferOrPath;
+    return createHash('sha256').update(buffer).digest('hex');
+}
+
+export function computeVqaCacheKey(
+    targetKeyHash: string,
+    imageSha256: string,
+    checklistHash: string
+): string {
+    const rawKey = `${targetKeyHash}:${imageSha256}:${checklistHash}`;
+    return createHash('sha256').update(rawKey).digest('hex');
+}
+
+export class VqaCacheManager {
+    private cacheMap = new Map<string, VqaCacheEntry>();
+    private cacheFilePath: string;
+
+    constructor(cacheDir: string, moduleName: string) {
+        if (!existsSync(cacheDir)) {
+            mkdirSync(cacheDir, { recursive: true });
+        }
+        this.cacheFilePath = resolve(cacheDir, `${moduleName}.jsonl`);
+        this.load();
+    }
+
+    private load() {
+        if (!existsSync(this.cacheFilePath)) return;
+        try {
+            const content = readFileSync(this.cacheFilePath, 'utf-8');
+            const lines = content.split('\n').filter(l => l.trim().length > 0);
+            for (const line of lines) {
+                const entry: VqaCacheEntry = JSON.parse(line);
+                if (entry && entry.cache_key) {
+                    this.cacheMap.set(entry.cache_key, entry);
+                }
+            }
+        } catch (err) {
+            console.warn(`Failed to load VQA cache from ${this.cacheFilePath}:`, err);
+        }
+    }
+
+    public get(cacheKey: string): VqaCacheEntry | undefined {
+        return this.cacheMap.get(cacheKey);
+    }
+
+    public set(entry: VqaCacheEntry): void {
+        this.cacheMap.set(entry.cache_key, entry);
+    }
+
+    public save(): void {
+        const sortedEntries = Array.from(this.cacheMap.values()).sort((a, b) =>
+            a.cache_key.localeCompare(b.cache_key)
+        );
+        const lines = sortedEntries.map(e => JSON.stringify(e)).join('\n') + (sortedEntries.length > 0 ? '\n' : '');
+        writeFileSync(this.cacheFilePath, lines, 'utf-8');
+    }
+
+    public get size(): number {
+        return this.cacheMap.size;
+    }
+}

@@ -1,17 +1,23 @@
 import 'dotenv/config';
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { createHash } from 'crypto';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { findLeafModules } from '../lib/module-resolver.ts';
+import {
+    computeChecklistHash,
+    computeImageSha256,
+    computeVqaCacheKey,
+    VqaCacheManager
+} from '../lib/vqa-cache.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 let DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset', 'train');
 const GENERATORS_ROOT = resolve(PROJECT_ROOT, 'src', 'generators');
-const CACHE_PATH = resolve(PROJECT_ROOT, 'temp', 'validation-cache.json');
+const VIEWS_ROOT = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
+const CACHE_DIR = resolve(PROJECT_ROOT, 'cache', 'vqa-validation');
 
 // 1. Setup Gemini API
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
@@ -43,113 +49,115 @@ const model = genAI ? genAI.getGenerativeModel({
     }
 }) : null;
 
-// 2. Load Caching
-let cache: Record<string, any> = {};
-if (existsSync(CACHE_PATH)) {
-    try {
-        cache = JSON.parse(readFileSync(CACHE_PATH, 'utf-8'));
-    } catch (e) {
-        console.warn('Failed to load validation cache, starting fresh.');
-    }
-}
-
-function saveCache() {
-    const cacheDir = dirname(CACHE_PATH);
-    if (!existsSync(cacheDir)) {
-        mkdirSync(cacheDir, { recursive: true });
-    }
-    writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), 'utf-8');
-}
-
-function computeCacheHash(qBuffer: Buffer, aBuffer: Buffer, checklist: string, prompt: string): string {
-    const hash = createHash('sha256');
-    hash.update(qBuffer);
-    hash.update(aBuffer);
-    hash.update(checklist);
-    hash.update(prompt);
-    return hash.digest('hex');
-}
-
-function printValidationResult(parsed: any, isCached: boolean) {
-    const status = parsed.pass ? '✅ PASS' : '❌ FAIL';
+function printValidationResult(evaluation: any, isCached: boolean) {
+    const status = evaluation.pass ? '✅ PASS' : '❌ FAIL';
     console.log(`${status}${isCached ? ' (cached)' : ''}`);
-    console.log(`- Overlaps: ${parsed.general_checks.no_overlaps ? 'None' : 'DETECTED'}`);
-    console.log(`- Placeholders: ${parsed.general_checks.no_placeholders ? 'None' : 'DETECTED'}`);
-    console.log(`- Padding: ${parsed.general_checks.sane_padding ? 'Good' : 'BAD'}`);
-    console.log(`- Coloring: ${parsed.coloring_pass ? 'Correct' : 'INCORRECT'}`);
-    console.log(`- Layout: ${parsed.layout_pass ? 'Correct' : 'INCORRECT'}`);
-    console.log(`Reasoning: ${parsed.reasoning}`);
+    if (evaluation.general_checks) {
+        console.log(`- Overlaps: ${evaluation.general_checks.no_overlaps ? 'None' : 'DETECTED'}`);
+        console.log(`- Placeholders: ${evaluation.general_checks.no_placeholders ? 'None' : 'DETECTED'}`);
+        console.log(`- Padding: ${evaluation.general_checks.sane_padding ? 'Good' : 'BAD'}`);
+    }
+    if (evaluation.coloring_pass !== undefined) {
+        console.log(`- Coloring: ${evaluation.coloring_pass ? 'Correct' : 'INCORRECT'}`);
+    }
+    if (evaluation.layout_pass !== undefined) {
+        console.log(`- Layout: ${evaluation.layout_pass ? 'Correct' : 'INCORRECT'}`);
+    }
+    console.log(`Reasoning: ${evaluation.reasoning}`);
 }
 
 async function validateSample(entry: any, force: boolean) {
     const moduleName = entry.generator;
     const viewId = entry.view;
-    console.log(`\nEvaluating [${moduleName} : ${viewId}] sample: ${entry.file_name}...`);
+    const modeName = entry.mode || (entry.solution_visible ? 'solution' : 'question');
+    const isSolution = entry.solution_visible || modeName === 'solution';
 
-    const qPath = resolve(DATASET_ROOT, entry.file_name);
-    const aPath = qPath.replace('_mode-Q.png', '_mode-S.png');
+    console.log(`\nEvaluating [${moduleName} : ${viewId} (${modeName})] sample: ${entry.file_name}...`);
 
-    // 1. Programmatic layout check verification
-    if (entry.layout_checks && entry.layout_checks.pass === false) {
-        console.log(`❌ FAIL (Programmatic Overlaps Detected)`);
-        if (entry.layout_checks.errors) {
-            entry.layout_checks.errors.forEach((err: string) => console.log(`  - ${err}`));
-        }
+    const imagePath = resolve(DATASET_ROOT, entry.file_name);
+
+    // 1. Check image file existence
+    if (!existsSync(imagePath)) {
+        console.error(`🚨 Image file not found for ${entry.file_name}`);
         return;
     }
 
-    // 2. Load checklists hierarchically (Global -> Parent Category -> Leaf Module)
-    const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
-    let checklist = '';
+    const imageBuffer = readFileSync(imagePath);
+    const imageSha256 = computeImageSha256(imageBuffer);
 
-    if (existsSync(globalChecklistPath)) {
-        checklist += readFileSync(globalChecklistPath, 'utf-8') + '\n\n';
-    }
+    // 2. Load checklists hierarchically (Global -> Parent Category -> Leaf Module -> View)
+    const checklistPaths: string[] = [];
+    const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
+    if (existsSync(globalChecklistPath)) checklistPaths.push(globalChecklistPath);
 
     const leafModules = findLeafModules(GENERATORS_ROOT);
     const leafMod = leafModules.find(m => m.id === moduleName);
 
     if (leafMod && leafMod.category) {
         const categoryChecklistPath = resolve(GENERATORS_ROOT, leafMod.category, 'checklist.md');
-        if (existsSync(categoryChecklistPath)) {
-            checklist += readFileSync(categoryChecklistPath, 'utf-8') + '\n\n';
-        }
+        if (existsSync(categoryChecklistPath)) checklistPaths.push(categoryChecklistPath);
     }
 
     const leafChecklistPath = leafMod 
         ? resolve(leafMod.absolutePath, 'checklist.md')
         : resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
-        
-    if (existsSync(leafChecklistPath)) {
-        checklist += readFileSync(leafChecklistPath, 'utf-8');
+    if (existsSync(leafChecklistPath)) checklistPaths.push(leafChecklistPath);
+
+    const viewModules = findLeafModules(VIEWS_ROOT);
+    const viewMod = viewModules.find(v => v.id === viewId);
+    if (viewMod) {
+        const viewChecklistPath = resolve(viewMod.absolutePath, 'checklist.md');
+        if (existsSync(viewChecklistPath)) checklistPaths.push(viewChecklistPath);
     }
 
-    // 3. Check image file existence
-    if (!existsSync(qPath) || !existsSync(aPath)) {
-        console.error(`🚨 Image file(s) not found for ${entry.file_name}`);
+    let checklistText = '';
+    for (const p of checklistPaths) {
+        checklistText += readFileSync(p, 'utf-8') + '\n\n';
+    }
+
+    const checklistHash = computeChecklistHash(checklistPaths);
+    const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
+    const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
+
+    const cacheManager = new VqaCacheManager(CACHE_DIR, moduleName);
+
+    // 3. Programmatic layout check verification short-circuit
+    if (entry.layout_checks && entry.layout_checks.pass === false) {
+        console.log(`❌ FAIL (Programmatic Overlaps Detected)`);
+        const errorReason = entry.layout_checks.errors ? entry.layout_checks.errors.join('; ') : 'DOM overlaps detected';
+        if (entry.layout_checks.errors) {
+            entry.layout_checks.errors.forEach((err: string) => console.log(`  - ${err}`));
+        }
+        
+        const failEval = {
+            pass: false,
+            general_checks: {
+                no_overlaps: false,
+                no_placeholders: true,
+                sane_padding: true
+            },
+            coloring_pass: true,
+            layout_pass: false,
+            reasoning: `Pre-generation layout check failed: ${errorReason}`
+        };
+
+        cacheManager.set({
+            cache_key: cacheKey,
+            file_name: entry.file_name,
+            target_key_hash: targetKeyHash,
+            image_sha256: imageSha256,
+            checklist_hash: checklistHash,
+            validated_at: new Date().toISOString(),
+            evaluation: failEval
+        });
+        cacheManager.save();
         return;
     }
 
-    const qImageBuffer = readFileSync(qPath);
-    const aImageBuffer = readFileSync(aPath);
-    const prompt = `
-You are a senior Visual QA Engineer. Evaluate these two math exercise images:
-Image 1: Question Mode (_mode-Q)
-Image 2: Solution Mode (_mode-S)
-Module: "${moduleName}"
-View ID: "${viewId}"
-
-STRICT CHECKLIST:
-${checklist}
-
-Respond only in the provided JSON schema.
-`;
-
-    const cacheKey = computeCacheHash(qImageBuffer, aImageBuffer, checklist, prompt);
-
-    if (cache[cacheKey] && !force) {
-        const parsed = cache[cacheKey];
-        printValidationResult(parsed, true);
+    // 4. Check cache hit
+    const existingCache = cacheManager.get(cacheKey);
+    if (existingCache && !force) {
+        printValidationResult(existingCache.evaluation, true);
         return;
     }
 
@@ -158,19 +166,43 @@ Respond only in the provided JSON schema.
         return;
     }
 
-    // 4. LLM QA call
-    try {
-        const qImagePart = { inlineData: { data: qImageBuffer.toString("base64"), mimeType: "image/png" } };
-        const aImagePart = { inlineData: { data: aImageBuffer.toString("base64"), mimeType: "image/png" } };
+    const prompt = `
+You are a senior Visual QA Engineer. Evaluate this math exercise image:
+Mode: "${isSolution ? 'Solution Mode (_mode-S)' : 'Question Mode (_mode-Q)'}"
+Module: "${moduleName}"
+View ID: "${viewId}"
 
-        const result = await model.generateContent([prompt, qImagePart, aImagePart]);
+STRICT CHECKLIST:
+${checklistText}
+
+EVALUATION GUIDELINES:
+1. Question Mode (_mode-Q) and Solution Mode (_mode-S) are generated independently under each competency target.
+2. In Question Mode (_mode-Q): verify that the problem is presented clearly, unsolved, and has minimal text instructions where appropriate.
+3. In Solution Mode (_mode-S): verify that the solution visual is clear (e.g. correct answers/coloring) and strictly NEVER contains instruction text headers.
+
+Respond only in the provided JSON schema.
+`;
+
+    // 5. LLM QA call
+    try {
+        const imagePart = { inlineData: { data: imageBuffer.toString("base64"), mimeType: "image/png" } };
+
+        const result = await model.generateContent([prompt, imagePart]);
         const responseText = result.response.text();
         const parsed = JSON.parse(responseText);
 
         printValidationResult(parsed, false);
 
-        cache[cacheKey] = parsed;
-        saveCache();
+        cacheManager.set({
+            cache_key: cacheKey,
+            file_name: entry.file_name,
+            target_key_hash: targetKeyHash,
+            image_sha256: imageSha256,
+            checklist_hash: checklistHash,
+            validated_at: new Date().toISOString(),
+            evaluation: parsed
+        });
+        cacheManager.save();
     } catch (error) {
         console.error(`🚨 Error validating ${entry.file_name}:`, error);
     }
@@ -220,8 +252,8 @@ async function main() {
     const metadataLines = readFileSync(rootMetaPath, 'utf-8').split('\n').filter(l => l.trim() !== '');
     const entries = metadataLines.map(l => JSON.parse(l));
 
-    // Filter to Question mode entries matching target generator/view
-    let filtered = entries.filter((e: any) => !e.solution_visible);
+    // Process both _mode-Q and _mode-S entries matching target generator/view
+    let filtered = [...entries];
     if (targetGenerator) {
         const genLeafIds = new Set(
             findLeafModules(GENERATORS_ROOT)
