@@ -600,25 +600,15 @@ async function runModulePipeline(
 
 async function main() {
     const args = process.argv.slice(2);
-    let targetModule: string | undefined = undefined;
 
-    // Check for positional arguments
-    const positionalArgs = args.filter(a => !a.startsWith('--'));
-    if (positionalArgs.length > 0) {
-        console.error('Error: Positional arguments are not allowed.');
-        console.error('Usage: npm run generate:dataset -- --spec=X [--generator=Y] [--view=Z] [--training-only]');
-        process.exit(1);
-    }
-
-    const specArg = args.find(a => a.startsWith('--spec='));
-    if (!specArg) {
+    const specName = process.env.npm_config_spec || (args.find(a => a.includes('spec='))?.split('spec=')[1]);
+    if (!specName) {
         console.error('Error: The --spec parameter is required.');
         console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only]');
         console.error('Example: npm run generate:dataset -- --spec=test');
         console.error('Example: npm run generate:dataset -- --spec=ccss');
         process.exit(1);
     }
-    const specName = specArg.split('=')[1];
 
     if (specName === 'test') {
         OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset-test');
@@ -654,15 +644,9 @@ async function main() {
         }
     }
 
-    const generatorArg = args.find(a => a.startsWith('--generator='));
-    if (generatorArg) {
-        targetModule = generatorArg.split('=')[1];
-    }
-
-    const viewArg = args.find(a => a.startsWith('--view='));
-    const targetView = viewArg ? viewArg.split('=')[1] : undefined;
-
-    const trainingOnly = args.includes('--training-only');
+    const targetModule = process.env.npm_config_generator || (args.find(a => a.includes('generator='))?.split('generator=')[1]);
+    const targetView = process.env.npm_config_view || (args.find(a => a.includes('view='))?.split('view=')[1]);
+    const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.some(a => a.includes('training-only'));
 
     if (!targetModule) {
         if (existsSync(OUT_DIR)) {

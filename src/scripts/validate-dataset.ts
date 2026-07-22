@@ -211,30 +211,22 @@ Respond only in the provided JSON schema.
 async function main() {
     const args = process.argv.slice(2);
 
-    // Check positional args
-    const positionalArgs = args.filter(a => !a.startsWith('--'));
-    if (positionalArgs.length > 0) {
-        console.error('Error: Positional arguments are not allowed.');
-        console.error('Usage: npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--spec=Z] [--force] [--audit]');
-        process.exit(1);
-    }
-
-    let targetGenerator: string | undefined = undefined;
-    let targetView: string | undefined = undefined;
-    let force = false;
-    let auditMode = false;
-    let specName = 'ccss';
+    let targetGenerator: string | undefined = process.env.npm_config_generator;
+    let targetView: string | undefined = process.env.npm_config_view;
+    let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
+    let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
+    let specName = process.env.npm_config_spec || 'ccss';
 
     for (const arg of args) {
-        if (arg.startsWith('--generator=')) {
-            targetGenerator = arg.split('=')[1];
-        } else if (arg.startsWith('--view=')) {
-            targetView = arg.split('=')[1];
-        } else if (arg.startsWith('--spec=')) {
-            specName = arg.split('=')[1];
-        } else if (arg === '--force' || arg === '--no-cache') {
+        if (arg.includes('generator=')) {
+            targetGenerator = arg.split('generator=')[1];
+        } else if (arg.includes('view=')) {
+            targetView = arg.split('view=')[1];
+        } else if (arg.includes('spec=')) {
+            specName = arg.split('spec=')[1];
+        } else if (arg.includes('force') || arg.includes('no-cache')) {
             force = true;
-        } else if (arg === '--audit' || arg === '--ci') {
+        } else if (arg.includes('audit') || arg.includes('ci')) {
             auditMode = true;
         }
     }
@@ -243,7 +235,7 @@ async function main() {
         DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset-test', 'train');
     }
 
-    console.log(`--- Starting Automated Modular VQA ${auditMode ? '(AUDIT MODE)' : ''} ---`);
+    console.log(`--- Starting Automated Modular VQA ${auditMode ? '(AUDIT MODE)' : ''} [Spec: ${specName}] ---`);
 
     const rootMetaPath = resolve(DATASET_ROOT, 'metadata.jsonl');
     if (!existsSync(rootMetaPath)) {
