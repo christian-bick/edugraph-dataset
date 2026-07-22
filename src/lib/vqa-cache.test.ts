@@ -91,6 +91,33 @@ describe('VQA Cache Module', () => {
         expect(manager2.get('a_key')?.evaluation.reasoning).toBe('Sample 1 failed');
     });
 
+    it('should append immediately to disk on set() call for crash resilience', () => {
+        const manager = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'crash-test');
+
+        const entry: VqaCacheEntry = {
+            cache_key: 'crash_key',
+            file_name: 'test/crash.png',
+            target_key_hash: 'target-crash',
+            image_sha256: 'img-crash',
+            checklist_hash: 'check-crash',
+            validated_at: '2026-07-22T00:00:00Z',
+            evaluation: { pass: true, reasoning: 'Crash test sample' }
+        };
+
+        // Call set() without explicit save()
+        manager.set(entry);
+
+        const savedFile = resolve(TEST_CACHE_DIR, 'dataset-test', 'crash-test.jsonl');
+        expect(existsSync(savedFile)).toBe(true);
+
+        const content = readFileSync(savedFile, 'utf-8');
+        expect(content).toContain('crash_key');
+
+        // New instance immediately sees crash_key from disk
+        const manager2 = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'crash-test');
+        expect(manager2.get('crash_key')).toBeDefined();
+    });
+
     it('should automatically prune stale keys not in active set', () => {
         const manager = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
 

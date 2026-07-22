@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 export interface VqaCacheEntry {
@@ -83,7 +83,14 @@ export class VqaCacheManager {
     }
 
     public set(entry: VqaCacheEntry): void {
+        const isNewOrUpdated = !this.cacheMap.has(entry.cache_key) ||
+            JSON.stringify(this.cacheMap.get(entry.cache_key)) !== JSON.stringify(entry);
+
         this.cacheMap.set(entry.cache_key, entry);
+
+        if (isNewOrUpdated) {
+            appendFileSync(this.cacheFilePath, JSON.stringify(entry) + '\n', 'utf-8');
+        }
     }
 
     public prune(activeCacheKeys: Set<string>): number {

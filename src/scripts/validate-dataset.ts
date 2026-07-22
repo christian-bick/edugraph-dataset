@@ -391,18 +391,27 @@ async function main() {
         }
     }
 
+    // Save and sort clean JSONL cache files for all active modules
+    for (const modName of activeKeysPerModule.keys()) {
+        const mgr = new VqaCacheManager(CACHE_DIR, datasetFolderName, modName);
+        mgr.save();
+    }
+
     if (auditMode) {
+        const total = filtered.length;
+        const passed = auditPassedCount;
+        const cached = total - uncachedCount;
+
         console.log(`\n--- VQA Cache Audit Summary [${datasetFolderName}] ---`);
-        console.log(`Passed (Cached): ${auditPassedCount}`);
-        console.log(`Uncached: ${uncachedCount}`);
-        console.log(`Failing: ${failingCount}`);
+        console.log(`Passed: ${passed}/${total}`);
+        console.log(`Cached: ${cached}/${total}`);
 
         if (uncachedCount > 0 || failingCount > 0) {
-            console.error(`\n🚨 AUDIT FAILED: ${uncachedCount} uncached samples, ${failingCount} failing samples.`);
+            console.error(`\n🚨 AUDIT FAILED: ${failingCount} failing samples.`);
             console.error(`Please run local validation using GEMINI_API_KEY, resolve failures, and commit updated cache files under cache/vqa-validation/${datasetFolderName}/.`);
             process.exit(1);
         } else {
-            console.log(`\n✅ AUDIT PASSED: All ${auditPassedCount} generated samples have valid, passing cache records.`);
+            console.log(`\n✅ AUDIT PASSED: All ${passed}/${total} generated samples have valid, passing cache records.`);
         }
     }
 
