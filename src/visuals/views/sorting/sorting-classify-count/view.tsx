@@ -144,10 +144,10 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
                                     <ItemSVG item={catItem} size={30} />
                                     <span>{labelText}</span>
                                 </div>
-                                <div className={`w-[50px] h-[45px] border-2 border-slate-600 rounded bg-white flex justify-center items-center text-[1.4rem] font-mono font-extrabold ${
+                                <div className={`w-[50px] h-[45px] border-2 rounded bg-white flex justify-center items-center text-[1.4rem] font-mono font-extrabold ${
                                     isSolutionView 
                                         ? 'text-green-600 border-green-600 bg-green-50' 
-                                        : 'text-slate-800'
+                                        : 'text-slate-800 border-slate-600'
                                 }`}>
                                     {isSolutionView ? count : ''}
                                 </div>

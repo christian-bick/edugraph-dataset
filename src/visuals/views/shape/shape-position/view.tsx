@@ -19,14 +19,15 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
     const relation = data.relation;
     const answer = data.answer;
 
-    if (relation !== 'above' && relation !== 'below' && relation !== 'beside' && relation !== 'nextTo') {
+    if (relation !== 'above' && relation !== 'below' && relation !== 'beside' && relation !== 'nextTo' && relation !== 'behind') {
         throw new ViewValidationError('shape-position', `Unsupported relation: ${relation}`);
     }
 
     const promptText = "Where is the ball relative to the box?";
-    const options = ['above', 'below', 'nextTo'];
+    const options = relation === 'behind' ? ['above', 'below', 'behind'] : ['above', 'below', 'nextTo'];
 
     const pos = getBallPosition(relation);
+    const isBehind = relation === 'behind';
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
@@ -44,6 +45,20 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
         return opt.charAt(0).toUpperCase() + opt.slice(1) + ' the box';
     };
 
+    const ballElement = (
+        <g key="ball">
+            <circle cx={pos.x} cy={pos.y} r="20" fill="#f43f5e" stroke="#be123c" strokeWidth="2" opacity={isBehind ? 0.85 : 1} />
+            <text x={pos.x} y={isBehind ? pos.y - 6 : pos.y + 4} fill="#ffffff" fontWeight="bold" fontSize="12" textAnchor="middle">Ball</text>
+        </g>
+    );
+
+    const boxElement = (
+        <g key="box">
+            <rect x="100" y="60" width="60" height="60" fill="#e2e8f0" stroke="#475569" strokeWidth="2" rx="4"/>
+            <text x="130" y="95" fill="#475569" fontWeight="bold" fontSize="14" textAnchor="middle">Box</text>
+        </g>
+    );
+
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="flex flex-col items-center w-[480px]">
@@ -55,12 +70,7 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
                 
                 <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
                     <svg width="300" height="180" className="overflow-visible">
-                        {/* Box */}
-                        <rect x="100" y="60" width="60" height="60" fill="#e2e8f0" stroke="#475569" strokeWidth="2" rx="4"/>
-                        <text x="130" y="95" fill="#475569" fontWeight="bold" fontSize="14" textAnchor="middle">Box</text>
-                        {/* Ball */}
-                        <circle cx={pos.x} cy={pos.y} r="20" fill="#f43f5e" stroke="#be123c" strokeWidth="2" />
-                        <text x={pos.x} y={pos.y + 4} fill="#ffffff" fontWeight="bold" fontSize="12" textAnchor="middle">Ball</text>
+                        {isBehind ? [ballElement, boxElement] : [boxElement, ballElement]}
                     </svg>
                 </div>
 

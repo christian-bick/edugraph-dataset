@@ -71,15 +71,33 @@ export function generatePositions(
             }
         }
     } else {
-        // line
-        const spacing = Math.min(55, (width - 60) / numObjects);
-        const startX = width / 2 - ((numObjects - 1) * spacing) / 2;
-        const y = height / 2 - 20;
-        for (let i = 0; i < numObjects; i++) {
-            positions.push({
-                x: startX + i * spacing,
-                y
-            });
+        // line (single line if <= 10, multiple rows if > 10)
+        if (numObjects <= 10) {
+            const spacing = Math.min(55, (width - 60) / numObjects);
+            const startX = width / 2 - ((numObjects - 1) * spacing) / 2;
+            const y = height / 2 - 20;
+            for (let i = 0; i < numObjects; i++) {
+                positions.push({
+                    x: startX + i * spacing,
+                    y
+                });
+            }
+        } else {
+            const rows = 2;
+            const cols = Math.ceil(numObjects / rows);
+            const colSpacing = Math.min(55, (width - 60) / cols);
+            const rowSpacing = 60;
+            const startY = height / 2 - ((rows - 1) * rowSpacing) / 2 - 20;
+            for (let i = 0; i < numObjects; i++) {
+                const r = Math.floor(i / cols);
+                const itemsInThisRow = (r === rows - 1 && numObjects % cols !== 0) ? (numObjects % cols) : cols;
+                const startX = width / 2 - ((itemsInThisRow - 1) * colSpacing) / 2;
+                const c = i % cols;
+                positions.push({
+                    x: startX + c * colSpacing,
+                    y: startY + r * rowSpacing
+                });
+            }
         }
     }
 

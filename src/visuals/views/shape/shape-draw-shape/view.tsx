@@ -18,7 +18,7 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
 
     const shape = data.shape;
 
-    if (shape !== 'circle' && shape !== 'triangle' && shape !== 'square') {
+    if (shape !== 'circle' && shape !== 'triangle' && shape !== 'square' && shape !== 'rectangle') {
         throw new ViewValidationError('shape-draw-shape', `Unsupported shape: ${shape}`);
     }
 

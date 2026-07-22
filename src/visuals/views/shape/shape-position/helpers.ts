@@ -13,6 +13,9 @@ export function getBallPosition(relation: string): BallPosition {
     } else if (relation === 'beside' || relation === 'nextTo') {
         ballY = 90;
         ballX = 200;
+    } else if (relation === 'behind') {
+        ballY = 55;
+        ballX = 145;
     }
     return { x: ballX, y: ballY };
 }

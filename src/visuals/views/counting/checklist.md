@@ -1,5 +1,5 @@
 ### Counting Category Visual Checklist
 
 #### Mode Instruction Rules:
-- **Question Mode (`_mode-Q`):** Instruction headers (e.g. "Count the objects", "Are there more items in Group A or Group B?") must be displayed above the canvas.
 - **Solution Mode (`_mode-S`):** Instruction text headers must **NOT** be displayed.
+- **Question Mode (`_mode-Q`):** Self-explaining visual exercise cards (e.g. counting increment/decrement equations) do not require text headers. Views that require prompt headers must specify them in their leaf checklist.

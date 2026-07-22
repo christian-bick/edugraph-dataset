@@ -6,39 +6,35 @@ import {validateProblemData, ViewValidationError} from '../../../helpers/validat
 import '../../../../tailwind.css';
 
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
-    const commonProps = {
-        width: size,
-        height: size,
-        viewBox: "0 0 100 100",
-        className: "overflow-visible"
-    };
+    let vertices: Array<{ x: number; y: number }> = [];
 
     if (shape === 'square') {
-        return (
-            <svg {...commonProps}>
-                <rect x="10" y="10" width="80" height="80" rx="4" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
-            </svg>
-        );
+        vertices = [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }];
     } else if (shape === 'rectangle') {
-        return (
-            <svg {...commonProps}>
-                <rect x="10" y="25" width="80" height="50" rx="4" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
-            </svg>
-        );
+        vertices = [{ x: 10, y: 25 }, { x: 90, y: 25 }, { x: 90, y: 75 }, { x: 10, y: 75 }];
     } else if (shape === 'triangle') {
-        return (
-            <svg {...commonProps}>
-                <polygon points="50,10 90,90 10,90" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
-            </svg>
-        );
+        vertices = [{ x: 50, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }];
     } else if (shape === 'hexagon') {
-        return (
-            <svg {...commonProps}>
-                <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
-            </svg>
-        );
+        vertices = [
+            { x: 50, y: 10 }, { x: 85, y: 30 }, { x: 85, y: 70 },
+            { x: 50, y: 90 }, { x: 15, y: 70 }, { x: 15, y: 30 }
+        ];
+    } else {
+        throw new ViewValidationError('shape-build-shape', `Unsupported shape: ${shape}`);
     }
-    throw new ViewValidationError('shape-build-shape', `Unsupported shape: ${shape}`);
+
+    const pointsStr = vertices.map(v => `${v.x},${v.y}`).join(' ');
+
+    return (
+        <svg width={size} height={size} viewBox="0 0 100 100" className="overflow-visible">
+            {/* Sticks (sides) */}
+            <polygon points={pointsStr} fill="none" stroke="#64748b" strokeWidth="5" strokeLinejoin="miter" />
+            {/* Clay balls (corners) */}
+            {vertices.map((v, i) => (
+                <circle key={i} cx={v.x} cy={v.y} r="7" fill="#e11d48" stroke="#be123c" strokeWidth="1.5" />
+            ))}
+        </svg>
+    );
 }
 
 interface CoreProps {

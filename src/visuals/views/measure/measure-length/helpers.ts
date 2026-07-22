@@ -13,10 +13,10 @@ export function getRulerTicks(bandLength: number, margin = 20, pxPerUnit = 30): 
     
     if (bandLength > 50) {
         labelInterval = 10;
-        minorTickCount = 0;
+        minorTickCount = 9;
     } else if (bandLength > 20) {
         labelInterval = 5;
-        minorTickCount = 0;
+        minorTickCount = 4;
     } else if (bandLength > 12) {
         labelInterval = 1;
         minorTickCount = 1; 

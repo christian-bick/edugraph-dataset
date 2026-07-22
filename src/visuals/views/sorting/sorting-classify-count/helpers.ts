@@ -9,11 +9,14 @@ export function generateScatteredPositions(
     numItems: number,
     problemId: string,
     width = 450,
-    height = 160,
-    minDistance = 45
+    height = 160
 ): Position[] {
     setSeed(problemId);
     const positions: Position[] = [];
+
+    const effectiveMinDist = numItems > 15 ? 36 : (numItems > 10 ? 38 : 42);
+    const maxTopLeftX = width - 55;
+    const maxTopLeftY = height - 55;
 
     for (let i = 0; i < numItems; i++) {
         let attempts = 0;
@@ -21,12 +24,12 @@ export function generateScatteredPositions(
         let x = 0, y = 0;
         while (attempts < 300 && !found) {
             attempts++;
-            x = Math.floor(random() * (width - 70)) + 15;
-            y = Math.floor(random() * (height - 70)) + 15;
+            x = Math.floor(random() * (maxTopLeftX - 15)) + 15;
+            y = Math.floor(random() * (maxTopLeftY - 10)) + 10;
             const tooClose = positions.some(p => {
                 const dx = p.x - x;
                 const dy = p.y - y;
-                return Math.sqrt(dx * dx + dy * dy) < minDistance;
+                return Math.sqrt(dx * dx + dy * dy) < effectiveMinDist;
             });
             if (!tooClose) {
                 positions.push({ x, y });
@@ -34,9 +37,12 @@ export function generateScatteredPositions(
             }
         }
         if (!found) {
+            const cols = 7;
+            const c = i % cols;
+            const r = Math.floor(i / cols);
             positions.push({
-                x: 15 + (i % 6) * 65,
-                y: 15 + Math.floor(i / 6) * 45
+                x: 15 + c * 58,
+                y: 10 + r * 38
             });
         }
     }
