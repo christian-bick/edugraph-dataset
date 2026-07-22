@@ -4,9 +4,8 @@ import { resolve } from 'path';
 
 export interface VqaCacheEntry {
     validation_cache_key: string;
-    input_cache_key?: string;
+    input_cache_key: string;
     file_name: string;
-    target_key_hash?: string;
     image_sha256: string;
     checklist_hash: string;
     validated_at: string;
@@ -49,14 +48,7 @@ export function computeValidationCacheKey(
     return createHash('sha256').update(rawKey).digest('hex');
 }
 
-/** Legacy alias for computeValidationCacheKey */
-export function computeVqaCacheKey(
-    _targetKeyHash: string,
-    imageSha256: string,
-    checklistHash: string
-): string {
-    return computeValidationCacheKey(imageSha256, checklistHash);
-}
+
 
 export function computeInputCacheKey(
     generatorId: string,
@@ -89,11 +81,9 @@ export class VqaCacheManager {
             const content = readFileSync(this.cacheFilePath, 'utf-8');
             const lines = content.split('\n').filter(l => l.trim().length > 0);
             for (const line of lines) {
-                const entry = JSON.parse(line);
-                const key = entry.validation_cache_key || entry.cache_key;
-                if (entry && key) {
-                    entry.validation_cache_key = key;
-                    this.cacheMap.set(key, entry);
+                const entry: VqaCacheEntry = JSON.parse(line);
+                if (entry && entry.validation_cache_key) {
+                    this.cacheMap.set(entry.validation_cache_key, entry);
                 }
             }
         } catch (err) {

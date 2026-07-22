@@ -270,7 +270,6 @@ async function renderDatasetSplit(
                         solution_visible: isSolutionView,
                         mode: modeName,
                         target_key: (probObj as any).targetKey || '',
-                        target_key_hash: (probObj as any).targetKeyHash || '',
                         tags: (probObj.tags || []).map(shortenLabel).sort(),
                         parameters: {
                             ...cleanedData,

@@ -131,6 +131,7 @@ describe('VQA Cache Module', () => {
 
         const entry1: VqaCacheEntry = {
             validation_cache_key: 'active_val_key',
+            input_cache_key: 'active_input_key',
             file_name: 'test/sample1.png',
             image_sha256: 'img-a',
             checklist_hash: 'check-a',
@@ -140,6 +141,7 @@ describe('VQA Cache Module', () => {
 
         const entry2: VqaCacheEntry = {
             validation_cache_key: 'stale_val_key',
+            input_cache_key: 'stale_input_key',
             file_name: 'test/sample2.png',
             image_sha256: 'img-b',
             checklist_hash: 'check-b',
