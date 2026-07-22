@@ -6,8 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const args = process.argv.slice(2);
-const specArg = args.find(a => a.startsWith('--spec='));
-const specName = specArg ? specArg.split('=')[1] : 'ccss';
+const specName = process.env.npm_config_spec || (args.find(a => a.includes('spec='))?.split('spec=')[1]) || 'ccss';
 
 let OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
 if (specName === 'test') {

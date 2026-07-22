@@ -15,15 +15,14 @@ const PROJECT_ROOT = resolve(__dirname, '..', '..');
 
 async function main() {
     const args = process.argv.slice(2);
-    const specArg = args.find(a => a.startsWith('--spec='));
-    if (!specArg) {
+    const specName = process.env.npm_config_spec || (args.find(a => a.includes('spec='))?.split('spec=')[1]);
+    if (!specName) {
         console.error('Error: The --spec parameter is required.');
         console.error('Usage: npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>');
         console.error('Example: npx vite-node src/scripts/show-matching-stats.ts --spec=test');
         console.error('Example: npx vite-node src/scripts/show-matching-stats.ts --spec=ccss');
         process.exit(1);
     }
-    const specName = specArg.split('=')[1];
 
     const specPath = resolve(PROJECT_ROOT, 'src', 'spec', specName);
     const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
