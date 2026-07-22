@@ -13,6 +13,7 @@
     "check:specs": "npx vite-node src/scripts/validate-specs.ts",
     "check:types": "tsc --noEmit",
     "generate:dataset": "npx vite-node src/scripts/generate-dataset.ts",
+    "validate:dataset": "npx vite-node src/scripts/validate-dataset.ts",
     "test:vqa": "npx vite-node src/scripts/validate-dataset.ts",
     "report:coverage": "npx vite-node src/scripts/generate-coverage-report.ts",
     "generate:standards-explorer": "npm run map:standards",

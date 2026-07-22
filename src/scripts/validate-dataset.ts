@@ -215,13 +215,14 @@ async function main() {
     const positionalArgs = args.filter(a => !a.startsWith('--'));
     if (positionalArgs.length > 0) {
         console.error('Error: Positional arguments are not allowed.');
-        console.error('Usage: npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--spec=Z] [--force]');
+        console.error('Usage: npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--spec=Z] [--force] [--audit]');
         process.exit(1);
     }
 
     let targetGenerator: string | undefined = undefined;
     let targetView: string | undefined = undefined;
     let force = false;
+    let auditMode = false;
     let specName = 'ccss';
 
     for (const arg of args) {
@@ -233,6 +234,8 @@ async function main() {
             specName = arg.split('=')[1];
         } else if (arg === '--force' || arg === '--no-cache') {
             force = true;
+        } else if (arg === '--audit' || arg === '--ci') {
+            auditMode = true;
         }
     }
 
@@ -240,7 +243,7 @@ async function main() {
         DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset-test', 'train');
     }
 
-    console.log('--- Starting Automated Modular VQA ---');
+    console.log(`--- Starting Automated Modular VQA ${auditMode ? '(AUDIT MODE)' : ''} ---`);
 
     const rootMetaPath = resolve(DATASET_ROOT, 'metadata.jsonl');
     if (!existsSync(rootMetaPath)) {
@@ -277,20 +280,82 @@ async function main() {
         return;
     }
 
-    // Group entries by (generator, view) combination
-    const groups: Record<string, any[]> = {};
+    let uncachedCount = 0;
+    let failingCount = 0;
+    let auditPassedCount = 0;
+
     for (const entry of filtered) {
-        const key = `${entry.generator}:${entry.view}`;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(entry);
+        const moduleName = entry.generator;
+        const viewId = entry.view;
+        const imagePath = resolve(DATASET_ROOT, entry.file_name);
+
+        if (!existsSync(imagePath)) {
+            console.error(`🚨 Image file not found for ${entry.file_name}`);
+            uncachedCount++;
+            continue;
+        }
+
+        const imageBuffer = readFileSync(imagePath);
+        const imageSha256 = computeImageSha256(imageBuffer);
+
+        const checklistPaths: string[] = [];
+        const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
+        if (existsSync(globalChecklistPath)) checklistPaths.push(globalChecklistPath);
+
+        const leafModules = findLeafModules(GENERATORS_ROOT);
+        const leafMod = leafModules.find(m => m.id === moduleName);
+        if (leafMod && leafMod.category) {
+            const categoryChecklistPath = resolve(GENERATORS_ROOT, leafMod.category, 'checklist.md');
+            if (existsSync(categoryChecklistPath)) checklistPaths.push(categoryChecklistPath);
+        }
+
+        const leafChecklistPath = leafMod 
+            ? resolve(leafMod.absolutePath, 'checklist.md')
+            : resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
+        if (existsSync(leafChecklistPath)) checklistPaths.push(leafChecklistPath);
+
+        const viewModules = findLeafModules(VIEWS_ROOT);
+        const viewMod = viewModules.find(v => v.id === viewId);
+        if (viewMod) {
+            const viewChecklistPath = resolve(viewMod.absolutePath, 'checklist.md');
+            if (existsSync(viewChecklistPath)) checklistPaths.push(viewChecklistPath);
+        }
+
+        const checklistHash = computeChecklistHash(checklistPaths);
+        const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
+        const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
+
+        const cacheManager = new VqaCacheManager(CACHE_DIR, moduleName);
+
+        if (auditMode) {
+            const existingCache = cacheManager.get(cacheKey);
+            if (!existingCache) {
+                console.error(`❌ AUDIT FAILURE (Uncached): [${moduleName} : ${viewId}] ${entry.file_name}`);
+                uncachedCount++;
+            } else if (!existingCache.evaluation.pass) {
+                console.error(`❌ AUDIT FAILURE (Failing evaluation): [${moduleName} : ${viewId}] ${entry.file_name} -> ${existingCache.evaluation.reasoning}`);
+                failingCount++;
+            } else {
+                auditPassedCount++;
+            }
+        } else {
+            await validateSample(entry, force);
+        }
     }
 
-    // Deterministically pick the first alphabetical image in each group and validate it
-    for (const key of Object.keys(groups)) {
-        const groupEntries = groups[key];
-        groupEntries.sort((a, b) => a.file_name.localeCompare(b.file_name));
-        const deterministicSample = groupEntries[0];
-        await validateSample(deterministicSample, force);
+    if (auditMode) {
+        console.log(`\n--- VQA Cache Audit Summary ---`);
+        console.log(`Passed (Cached): ${auditPassedCount}`);
+        console.log(`Uncached: ${uncachedCount}`);
+        console.log(`Failing: ${failingCount}`);
+
+        if (uncachedCount > 0 || failingCount > 0) {
+            console.error(`\n🚨 AUDIT FAILED: ${uncachedCount} uncached samples, ${failingCount} failing samples.`);
+            console.error(`Please run local validation using GEMINI_API_KEY, resolve failures, and commit updated cache files under cache/vqa-validation/.`);
+            process.exit(1);
+        } else {
+            console.log(`\n✅ AUDIT PASSED: All ${auditPassedCount} generated samples have valid, passing cache records.`);
+        }
     }
 
     console.log('\nValidation Complete.');
