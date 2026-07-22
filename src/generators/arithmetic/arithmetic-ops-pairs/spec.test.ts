@@ -200,6 +200,6 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             Scope.NumbersSmaller10
         ]);
         expect(stdStub).not.toBeNull();
-        expect(stdStub!.data.blankPart).toBeUndefined();
+        expect(stdStub!.data.blankPart).toBe('solution');
     });
 });

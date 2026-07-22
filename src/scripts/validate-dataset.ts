@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { findLeafModules } from "../lib/module-resolver.ts";
@@ -365,6 +365,10 @@ async function main() {
         mgr.save();
     }
 
+    // Generate Markdown report and failure TODO list
+    const reportPath = generateValidationReport(datasetFolderName, filtered);
+    console.log(`\n📄 Validation report & TODO list generated: ${reportPath}`);
+
     if (auditMode) {
         const total = filtered.length;
         const passed = auditPassedCount;
@@ -384,6 +388,117 @@ async function main() {
     }
 
     console.log('\nValidation Complete.');
+}
+
+function generateValidationReport(
+    datasetFolderName: string,
+    filteredEntries: any[]
+): string {
+    const reportPath = resolve(PROJECT_ROOT, 'out', datasetFolderName, 'validation-report.md');
+    const outDir = dirname(reportPath);
+    if (!existsSync(outDir)) {
+        mkdirSync(outDir, { recursive: true });
+    }
+
+    let passedCount = 0;
+    let failedCount = 0;
+    let uncachedCount = 0;
+    const failedItems: Array<{
+        entry: any;
+        evaluation: any;
+    }> = [];
+
+    for (const entry of filteredEntries) {
+        const moduleName = entry.generator;
+        const viewId = entry.view;
+        const imagePath = resolve(DATASET_ROOT, entry.file_name);
+
+        if (!existsSync(imagePath)) {
+            uncachedCount++;
+            continue;
+        }
+
+        const imageBuffer = readFileSync(imagePath);
+        const imageSha256 = computeImageSha256(imageBuffer);
+        const checklistPaths = getChecklistPaths(moduleName, viewId);
+        const checklistHash = computeChecklistHash(checklistPaths);
+        const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
+
+        const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
+        const cache = cacheManager.get(valCacheKey);
+
+        if (!cache) {
+            uncachedCount++;
+        } else if (cache.evaluation.pass) {
+            passedCount++;
+        } else {
+            failedCount++;
+            failedItems.push({
+                entry,
+                evaluation: cache.evaluation
+            });
+        }
+    }
+
+    const total = filteredEntries.length;
+    const passedPct = total > 0 ? ((passedCount / total) * 100).toFixed(1) : '0.0';
+    const failedPct = total > 0 ? ((failedCount / total) * 100).toFixed(1) : '0.0';
+    const uncachedPct = total > 0 ? ((uncachedCount / total) * 100).toFixed(1) : '0.0';
+
+    let md = `# VQA Dataset Validation Report - \`${datasetFolderName}\`
+
+**Generated At:** \`${new Date().toISOString()}\`  
+**Dataset Path:** \`out/${datasetFolderName}/\`
+
+## Overview
+
+| Metric | Count | Percentage |
+| :--- | :--- | :--- |
+| **Total Evaluated Samples** | ${total} | 100% |
+| **Passed** | ${passedCount} | ${passedPct}% |
+| **Failed** | ${failedCount} | ${failedPct}% |
+| **Uncached / Skipped** | ${uncachedCount} | ${uncachedPct}% |
+
+---
+
+## Failure TODO List
+
+`;
+
+    if (failedItems.length === 0) {
+        md += `🎉 **No failures detected! All evaluated samples passed Visual QA.**\n`;
+    } else {
+        md += `Below is the list of failed exercise samples requiring visual or logical fixes:\n\n`;
+        for (const item of failedItems) {
+            const entry = item.entry;
+            const evalObj = item.evaluation;
+            const modeStr = entry.mode || (entry.solution_visible ? 'solution' : 'question');
+            
+            const checks: string[] = [];
+            if (evalObj.general_checks) {
+                checks.push(`Overlaps: ${evalObj.general_checks.no_overlaps ? 'Pass' : 'FAIL'}`);
+                checks.push(`Placeholders: ${evalObj.general_checks.no_placeholders ? 'Pass' : 'FAIL'}`);
+                checks.push(`Padding: ${evalObj.general_checks.sane_padding ? 'Pass' : 'FAIL'}`);
+            }
+            if (evalObj.coloring_pass !== undefined) {
+                checks.push(`Coloring: ${evalObj.coloring_pass ? 'Pass' : 'FAIL'}`);
+            }
+            if (evalObj.layout_pass !== undefined) {
+                checks.push(`Layout: ${evalObj.layout_pass ? 'Pass' : 'FAIL'}`);
+            }
+
+            md += `- [ ] **\`${entry.file_name}\`**\n`;
+            md += `  - **Module / View:** \`${entry.generator}\` : \`${entry.view}\` (${modeStr} mode)\n`;
+            md += `  - **Reason:** ${evalObj.reasoning}\n`;
+            if (checks.length > 0) {
+                md += `  - **Checks:** ${checks.join(' | ')}\n`;
+            }
+            md += `\n`;
+        }
+    }
+
+    writeFileSync(reportPath, md, 'utf-8');
+    return reportPath;
 }
 
 main().catch(console.error);
