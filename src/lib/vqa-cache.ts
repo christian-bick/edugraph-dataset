@@ -53,7 +53,8 @@ export class VqaCacheManager {
     private cacheMap = new Map<string, VqaCacheEntry>();
     private cacheFilePath: string;
 
-    constructor(cacheDir: string, moduleName: string) {
+    constructor(baseCacheDir: string, datasetFolderName: string, moduleName: string) {
+        const cacheDir = resolve(baseCacheDir, datasetFolderName);
         if (!existsSync(cacheDir)) {
             mkdirSync(cacheDir, { recursive: true });
         }
@@ -83,6 +84,20 @@ export class VqaCacheManager {
 
     public set(entry: VqaCacheEntry): void {
         this.cacheMap.set(entry.cache_key, entry);
+    }
+
+    public prune(activeCacheKeys: Set<string>): number {
+        let prunedCount = 0;
+        for (const key of Array.from(this.cacheMap.keys())) {
+            if (!activeCacheKeys.has(key)) {
+                this.cacheMap.delete(key);
+                prunedCount++;
+            }
+        }
+        if (prunedCount > 0) {
+            this.save();
+        }
+        return prunedCount;
     }
 
     public save(): void {

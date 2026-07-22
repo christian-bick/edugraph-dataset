@@ -1,57 +1,63 @@
-import 'dotenv/config';
-import { existsSync, readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
-import { findLeafModules } from '../lib/module-resolver.ts';
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { existsSync, readFileSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+import { findLeafModules } from "../lib/module-resolver.ts";
 import {
     computeChecklistHash,
     computeImageSha256,
     computeVqaCacheKey,
     VqaCacheManager
-} from '../lib/vqa-cache.ts';
+} from "../lib/vqa-cache.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const PROJECT_ROOT = resolve(__dirname, '..', '..');
-let DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset', 'train');
-const GENERATORS_ROOT = resolve(PROJECT_ROOT, 'src', 'generators');
-const VIEWS_ROOT = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-const CACHE_DIR = resolve(PROJECT_ROOT, 'cache', 'vqa-validation');
+const PROJECT_ROOT = resolve(__dirname, "..", "..");
+const GENERATORS_ROOT = resolve(PROJECT_ROOT, "src", "generators");
+const VIEWS_ROOT = resolve(PROJECT_ROOT, "src", "visuals", "views");
+const CACHE_DIR = resolve(PROJECT_ROOT, "cache", "vqa-validation");
 
-// 1. Setup Gemini API
-const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
-const responseSchema = {
-    type: SchemaType.OBJECT,
-    properties: {
-        pass: { type: SchemaType.BOOLEAN },
-        general_checks: {
-            type: SchemaType.OBJECT,
-            properties: {
-                no_overlaps: { type: SchemaType.BOOLEAN },
-                no_placeholders: { type: SchemaType.BOOLEAN },
-                sane_padding: { type: SchemaType.BOOLEAN },
-            },
-            required: ["no_overlaps", "no_placeholders", "sane_padding"]
-        },
-        coloring_pass: { type: SchemaType.BOOLEAN },
-        layout_pass: { type: SchemaType.BOOLEAN },
-        reasoning: { type: SchemaType.STRING },
-    },
-    required: ["pass", "general_checks", "coloring_pass", "layout_pass", "reasoning"]
-};
+let DATASET_ROOT = resolve(PROJECT_ROOT, "out", "dataset", "train");
 
-const model = genAI ? genAI.getGenerativeModel({ 
-    model: "gemini-3.5-flash",
-    generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema as any,
+const apiKey = process.env.GEMINI_API_KEY;
+let genAI: GoogleGenerativeAI | null = null;
+let model: any = null;
+
+if (apiKey) {
+    genAI = new GoogleGenerativeAI(apiKey);
+    model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: SchemaType.OBJECT,
+                properties: {
+                    pass: { type: SchemaType.BOOLEAN },
+                    general_checks: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            no_overlaps: { type: SchemaType.BOOLEAN },
+                            no_placeholders: { type: SchemaType.BOOLEAN },
+                            sane_padding: { type: SchemaType.BOOLEAN }
+                        },
+                        required: ["no_overlaps", "no_placeholders", "sane_padding"]
+                    },
+                    coloring_pass: { type: SchemaType.BOOLEAN },
+                    layout_pass: { type: SchemaType.BOOLEAN },
+                    reasoning: { type: SchemaType.STRING }
+                },
+                required: ["pass", "general_checks", "reasoning"]
+            }
+        }
+    });
+}
+
+function printValidationResult(evaluation: any, cached: boolean) {
+    if (evaluation.pass) {
+        console.log(`✅ PASS ${cached ? '(cached)' : ''}`);
+    } else {
+        console.log(`❌ FAIL ${cached ? '(cached)' : ''}`);
     }
-}) : null;
-
-function printValidationResult(evaluation: any, isCached: boolean) {
-    const status = evaluation.pass ? '✅ PASS' : '❌ FAIL';
-    console.log(`${status}${isCached ? ' (cached)' : ''}`);
     if (evaluation.general_checks) {
         console.log(`- Overlaps: ${evaluation.general_checks.no_overlaps ? 'None' : 'DETECTED'}`);
         console.log(`- Placeholders: ${evaluation.general_checks.no_placeholders ? 'None' : 'DETECTED'}`);
@@ -66,7 +72,7 @@ function printValidationResult(evaluation: any, isCached: boolean) {
     console.log(`Reasoning: ${evaluation.reasoning}`);
 }
 
-async function validateSample(entry: any, force: boolean) {
+async function validateSample(entry: any, force: boolean, datasetFolderName: string) {
     const moduleName = entry.generator;
     const viewId = entry.view;
     const modeName = entry.mode || (entry.solution_visible ? 'solution' : 'question');
@@ -76,7 +82,6 @@ async function validateSample(entry: any, force: boolean) {
 
     const imagePath = resolve(DATASET_ROOT, entry.file_name);
 
-    // 1. Check image file existence
     if (!existsSync(imagePath)) {
         console.error(`🚨 Image file not found for ${entry.file_name}`);
         return;
@@ -85,7 +90,6 @@ async function validateSample(entry: any, force: boolean) {
     const imageBuffer = readFileSync(imagePath);
     const imageSha256 = computeImageSha256(imageBuffer);
 
-    // 2. Load checklists hierarchically (Global -> Parent Category -> Leaf Module -> View)
     const checklistPaths: string[] = [];
     const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
     if (existsSync(globalChecklistPath)) checklistPaths.push(globalChecklistPath);
@@ -119,9 +123,8 @@ async function validateSample(entry: any, force: boolean) {
     const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
     const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
 
-    const cacheManager = new VqaCacheManager(CACHE_DIR, moduleName);
+    const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
 
-    // 3. Programmatic layout check verification short-circuit
     if (entry.layout_checks && entry.layout_checks.pass === false) {
         console.log(`❌ FAIL (Programmatic Overlaps Detected)`);
         const errorReason = entry.layout_checks.errors ? entry.layout_checks.errors.join('; ') : 'DOM overlaps detected';
@@ -154,7 +157,6 @@ async function validateSample(entry: any, force: boolean) {
         return;
     }
 
-    // 4. Check cache hit
     const existingCache = cacheManager.get(cacheKey);
     if (existingCache && !force) {
         printValidationResult(existingCache.evaluation, true);
@@ -183,7 +185,6 @@ EVALUATION GUIDELINES:
 Respond only in the provided JSON schema.
 `;
 
-    // 5. LLM QA call
     try {
         const imagePart = { inlineData: { data: imageBuffer.toString("base64"), mimeType: "image/png" } };
 
@@ -215,15 +216,21 @@ async function main() {
     let targetView: string | undefined = process.env.npm_config_view;
     let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
-    let specName = process.env.npm_config_spec || 'ccss';
+    
+    let datasetParam = process.env.npm_config_dataset || (args.find(a => a.includes('dataset='))?.split('dataset=')[1]) || (args.find(a => a.includes('spec='))?.split('spec=')[1]);
+    let datasetFolderName = 'dataset';
+    if (datasetParam) {
+        datasetFolderName = datasetParam.startsWith('dataset-') ? datasetParam : `dataset-${datasetParam}`;
+        if (datasetParam === 'default' || datasetParam === 'dataset') {
+            datasetFolderName = 'dataset';
+        }
+    }
 
     for (const arg of args) {
         if (arg.includes('generator=')) {
             targetGenerator = arg.split('generator=')[1];
         } else if (arg.includes('view=')) {
             targetView = arg.split('view=')[1];
-        } else if (arg.includes('spec=')) {
-            specName = arg.split('spec=')[1];
         } else if (arg.includes('force') || arg.includes('no-cache')) {
             force = true;
         } else if (arg.includes('audit') || arg.includes('ci')) {
@@ -231,11 +238,9 @@ async function main() {
         }
     }
 
-    if (specName === 'test') {
-        DATASET_ROOT = resolve(PROJECT_ROOT, 'out', 'dataset-test', 'train');
-    }
+    DATASET_ROOT = resolve(PROJECT_ROOT, 'out', datasetFolderName, 'train');
 
-    console.log(`--- Starting Automated Modular VQA ${auditMode ? '(AUDIT MODE)' : ''} [Spec: ${specName}] ---`);
+    console.log(`--- Starting Automated Modular VQA ${auditMode ? '(AUDIT MODE)' : ''} [Dataset: ${datasetFolderName}] ---`);
 
     const rootMetaPath = resolve(DATASET_ROOT, 'metadata.jsonl');
     if (!existsSync(rootMetaPath)) {
@@ -243,11 +248,9 @@ async function main() {
         process.exit(1);
     }
 
-    // Read metadata entries
     const metadataLines = readFileSync(rootMetaPath, 'utf-8').split('\n').filter(l => l.trim() !== '');
     const entries = metadataLines.map(l => JSON.parse(l));
 
-    // Process both _mode-Q and _mode-S entries matching target generator/view
     let filtered = [...entries];
     if (targetGenerator) {
         const genLeafIds = new Set(
@@ -270,6 +273,59 @@ async function main() {
     if (filtered.length === 0) {
         console.log('No matching dataset images found to validate.');
         return;
+    }
+
+    // Collect active cache keys per module for auto-pruning
+    const activeKeysPerModule = new Map<string, Set<string>>();
+
+    for (const entry of filtered) {
+        const moduleName = entry.generator;
+        const imagePath = resolve(DATASET_ROOT, entry.file_name);
+        if (!existsSync(imagePath)) continue;
+
+        const imageBuffer = readFileSync(imagePath);
+        const imageSha256 = computeImageSha256(imageBuffer);
+
+        const checklistPaths: string[] = [];
+        const globalChecklistPath = resolve(GENERATORS_ROOT, 'global-checklist.md');
+        if (existsSync(globalChecklistPath)) checklistPaths.push(globalChecklistPath);
+
+        const leafModules = findLeafModules(GENERATORS_ROOT);
+        const leafMod = leafModules.find(m => m.id === moduleName);
+        if (leafMod && leafMod.category) {
+            const categoryChecklistPath = resolve(GENERATORS_ROOT, leafMod.category, 'checklist.md');
+            if (existsSync(categoryChecklistPath)) checklistPaths.push(categoryChecklistPath);
+        }
+
+        const leafChecklistPath = leafMod 
+            ? resolve(leafMod.absolutePath, 'checklist.md')
+            : resolve(GENERATORS_ROOT, moduleName, 'checklist.md');
+        if (existsSync(leafChecklistPath)) checklistPaths.push(leafChecklistPath);
+
+        const viewModules = findLeafModules(VIEWS_ROOT);
+        const viewMod = viewModules.find(v => v.id === entry.view);
+        if (viewMod) {
+            const viewChecklistPath = resolve(viewMod.absolutePath, 'checklist.md');
+            if (existsSync(viewChecklistPath)) checklistPaths.push(viewChecklistPath);
+        }
+
+        const checklistHash = computeChecklistHash(checklistPaths);
+        const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
+        const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
+
+        if (!activeKeysPerModule.has(moduleName)) {
+            activeKeysPerModule.set(moduleName, new Set());
+        }
+        activeKeysPerModule.get(moduleName)!.add(cacheKey);
+    }
+
+    // Perform automatic safe pruning of stale cache entries for this dataset folder
+    for (const [modName, activeKeys] of activeKeysPerModule.entries()) {
+        const mgr = new VqaCacheManager(CACHE_DIR, datasetFolderName, modName);
+        const pruned = mgr.prune(activeKeys);
+        if (pruned > 0) {
+            console.log(`🧹 Auto-pruned ${pruned} stale cache entries for [${modName}] in cache/vqa-validation/${datasetFolderName}/`);
+        }
     }
 
     let uncachedCount = 0;
@@ -317,7 +373,7 @@ async function main() {
         const targetKeyHash = entry.target_key_hash || entry.problem_id || '';
         const cacheKey = computeVqaCacheKey(targetKeyHash, imageSha256, checklistHash);
 
-        const cacheManager = new VqaCacheManager(CACHE_DIR, moduleName);
+        const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
 
         if (auditMode) {
             const existingCache = cacheManager.get(cacheKey);
@@ -331,19 +387,19 @@ async function main() {
                 auditPassedCount++;
             }
         } else {
-            await validateSample(entry, force);
+            await validateSample(entry, force, datasetFolderName);
         }
     }
 
     if (auditMode) {
-        console.log(`\n--- VQA Cache Audit Summary ---`);
+        console.log(`\n--- VQA Cache Audit Summary [${datasetFolderName}] ---`);
         console.log(`Passed (Cached): ${auditPassedCount}`);
         console.log(`Uncached: ${uncachedCount}`);
         console.log(`Failing: ${failingCount}`);
 
         if (uncachedCount > 0 || failingCount > 0) {
             console.error(`\n🚨 AUDIT FAILED: ${uncachedCount} uncached samples, ${failingCount} failing samples.`);
-            console.error(`Please run local validation using GEMINI_API_KEY, resolve failures, and commit updated cache files under cache/vqa-validation/.`);
+            console.error(`Please run local validation using GEMINI_API_KEY, resolve failures, and commit updated cache files under cache/vqa-validation/${datasetFolderName}/.`);
             process.exit(1);
         } else {
             console.log(`\n✅ AUDIT PASSED: All ${auditPassedCount} generated samples have valid, passing cache records.`);

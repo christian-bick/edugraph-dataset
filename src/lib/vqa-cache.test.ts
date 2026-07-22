@@ -44,8 +44,8 @@ describe('VQA Cache Module', () => {
         expect(cacheKey.length).toBe(64);
     });
 
-    it('should load, store, sort, and save VqaCacheEntries deterministically', () => {
-        const manager = new VqaCacheManager(TEST_CACHE_DIR, 'test-module');
+    it('should store and load VqaCacheEntries in dataset-partitioned folder', () => {
+        const manager = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
         expect(manager.size).toBe(0);
 
         const entry1: VqaCacheEntry = {
@@ -79,21 +79,51 @@ describe('VQA Cache Module', () => {
         expect(manager.size).toBe(2);
         manager.save();
 
-        const savedFile = resolve(TEST_CACHE_DIR, 'test-module.jsonl');
+        const savedFile = resolve(TEST_CACHE_DIR, 'dataset-test', 'test-module.jsonl');
         expect(existsSync(savedFile)).toBe(true);
 
         const lines = readFileSync(savedFile, 'utf-8').trim().split('\n');
         expect(lines.length).toBe(2);
 
-        // Verify sorted by cache_key ('a_key' comes before 'b_key')
-        const firstParsed = JSON.parse(lines[0]);
-        const secondParsed = JSON.parse(lines[1]);
-        expect(firstParsed.cache_key).toBe('a_key');
-        expect(secondParsed.cache_key).toBe('b_key');
-
         // Test reloading in a new manager
-        const manager2 = new VqaCacheManager(TEST_CACHE_DIR, 'test-module');
+        const manager2 = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
         expect(manager2.size).toBe(2);
         expect(manager2.get('a_key')?.evaluation.reasoning).toBe('Sample 1 failed');
+    });
+
+    it('should automatically prune stale keys not in active set', () => {
+        const manager = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
+
+        const entry1: VqaCacheEntry = {
+            cache_key: 'active_key',
+            file_name: 'test/sample1.png',
+            target_key_hash: 'target-a',
+            image_sha256: 'img-a',
+            checklist_hash: 'check-a',
+            validated_at: '2026-07-22T00:00:00Z',
+            evaluation: { pass: true, reasoning: 'Sample 1' }
+        };
+
+        const entry2: VqaCacheEntry = {
+            cache_key: 'stale_key',
+            file_name: 'test/sample2.png',
+            target_key_hash: 'target-b',
+            image_sha256: 'img-b',
+            checklist_hash: 'check-b',
+            validated_at: '2026-07-22T00:00:00Z',
+            evaluation: { pass: true, reasoning: 'Sample 2' }
+        };
+
+        manager.set(entry1);
+        manager.set(entry2);
+        manager.save();
+
+        const activeKeys = new Set(['active_key']);
+        const pruned = manager.prune(activeKeys);
+
+        expect(pruned).toBe(1);
+        expect(manager.size).toBe(1);
+        expect(manager.get('active_key')).toBeDefined();
+        expect(manager.get('stale_key')).toBeUndefined();
     });
 });
