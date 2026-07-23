@@ -28,7 +28,7 @@ const OperationsBoxesCore = ({ config: _config, payload }: CoreProps) => {
         throw new ViewValidationError('operations-boxes', `Unsupported operation: ${data.operation}`);
     }
 
-    const blankPart = getBlankPart(payload.seed ?? 42, 'solution');
+    const blankPart = getBlankPart(payload.seed, 'solution');
 
     const isBlanked = (part: string) => {
         return !isSolutionView && blankPart === part;

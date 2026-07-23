@@ -15,7 +15,7 @@ interface CoreProps {
 
 const CountingIncDecCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
-    const seed = payload.seed ?? 42;
+    const seed = payload.seed;
     const data = problem.data;
 
     validateProblemData('counting-inc-dec', data, ['numObjects', 'incDecType', 'incDecAnswer']);

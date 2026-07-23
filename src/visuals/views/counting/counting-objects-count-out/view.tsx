@@ -17,7 +17,7 @@ interface CoreProps {
 
 const CountingObjectsCountOutCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
-    const seed = payload.seed ?? 42;
+    const seed = payload.seed;
     const data = problem.data;
 
     validateProblemData('counting-objects-count-out', data, ['numObjects']);

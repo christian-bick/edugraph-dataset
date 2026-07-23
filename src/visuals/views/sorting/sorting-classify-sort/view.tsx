@@ -63,7 +63,7 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
         const categoriesMap = data.categories;
 
         // View logic: Randomly decide how to represent the abstract groups visually
-        let seed = payload.seed ?? 42;
+        let seed = payload.seed;
         const nextRand = () => {
             const x = Math.sin(seed++) * 10000;
             return x - Math.floor(x);

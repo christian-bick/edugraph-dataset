@@ -102,7 +102,7 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
         ? ['cube', 'cone', 'cylinder', 'sphere']
         : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
 
-    const seed = payload.seed ?? 42;
+    const seed = payload.seed;
     const rotation = is3D ? 0 : (seed % 360);
     const scale = is3D ? 1 : parseFloat(((seed % 6) / 10 + 0.8).toFixed(1));
 

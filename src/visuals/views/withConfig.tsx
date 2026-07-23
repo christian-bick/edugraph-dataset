@@ -13,7 +13,7 @@ export function withConfig<T extends ConfigSchema>(
     return function ConfigWrapper(props: { payload: ViewRenderPayload<any> }) {
         // Reset the global PRNG from the sample's render seed so config
         // resolution (and any downstream draws) never depend on render order
-        setSeed(props.payload.seed ?? 42);
+        setSeed(props.payload.seed);
         const { config } = extractConfig(Schema, props.payload.labels || []);
         const viewId = props.payload.viewId || 'unknown-view';
 

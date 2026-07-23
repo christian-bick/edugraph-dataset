@@ -24,26 +24,21 @@ interface ChurnStats {
     seedSchemeChanged: string[];
     added: number;
     removed: number;
-    legacy: number;
 }
 
 function parseEntries(content: string): Map<string, VqaCacheEntry> {
     const map = new Map<string, VqaCacheEntry>();
-    let legacy = 0;
     for (const line of content.split('\n')) {
         if (!line.trim()) continue;
         try {
             const entry: VqaCacheEntry = JSON.parse(line);
             if (entry.sample_key) {
                 map.set(entry.sample_key, entry);
-            } else {
-                legacy++;
             }
         } catch {
             // Ignore malformed lines
         }
     }
-    (map as any).legacyCount = legacy;
     return map;
 }
 
@@ -102,7 +97,7 @@ function main() {
         return;
     }
 
-    const totals: ChurnStats = { stable: 0, renderChanged: [], attemptShifted: [], seedSchemeChanged: [], added: 0, removed: 0, legacy: 0 };
+    const totals: ChurnStats = { stable: 0, renderChanged: [], attemptShifted: [], seedSchemeChanged: [], added: 0, removed: 0 };
 
     for (const relPath of allFiles) {
         const moduleName = relPath.split('/').pop()!.replace('.jsonl', '');
@@ -112,10 +107,8 @@ function main() {
 
         const current = parseEntries(currentContent);
         const previous = parseEntries(refContent);
-        const legacy = ((current as any).legacyCount || 0) + ((previous as any).legacyCount || 0);
-        totals.legacy += legacy;
 
-        const stats: ChurnStats = { stable: 0, renderChanged: [], attemptShifted: [], seedSchemeChanged: [], added: 0, removed: 0, legacy };
+        const stats: ChurnStats = { stable: 0, renderChanged: [], attemptShifted: [], seedSchemeChanged: [], added: 0, removed: 0 };
 
         for (const [sampleKey, entry] of current.entries()) {
             const prev = previous.get(sampleKey);
@@ -168,9 +161,6 @@ function main() {
     console.log(`  of which seed scheme changes:      ${totals.seedSchemeChanged.length}`);
     console.log(`Added identities:                    ${totals.added}`);
     console.log(`Removed identities:                  ${totals.removed}`);
-    if (totals.legacy > 0) {
-        console.log(`Legacy entries without sample_key:   ${totals.legacy} (not comparable)`);
-    }
     if (totalChurn === 0) {
         console.log(`\n✅ No identity-preserving image churn detected.`);
     } else {

@@ -17,7 +17,7 @@ interface CoreProps {
 
 const CountingObjectsCardinalityCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
-    const seed = payload.seed ?? 42;
+    const seed = payload.seed;
 
     validateProblemData('counting-objects-cardinality', problem.data, ['numObjects']);
 

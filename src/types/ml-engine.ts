@@ -25,7 +25,7 @@ export interface RenderPayload<TProblem extends AbstractProblem = AbstractProble
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
     isSolutionView: boolean;
     /** Deterministic render seed derived from the sample identity; views must draw all entropy from it */
-    seed?: number;
+    seed: number;
 }
 
 /**

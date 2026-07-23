@@ -110,8 +110,8 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
 async function evaluateSingleSample(entry: any, _datasetFolderName: string): Promise<any> {
     const moduleName = entry.generator;
     const viewId = entry.view;
-    const modeName = entry.mode || (entry.solution_visible ? 'solution' : 'question');
-    const isSolution = entry.solution_visible || modeName === 'solution';
+    const modeName = entry.mode;
+    const isSolution = modeName === 'solution';
     const imagePath = resolve(DATASET_ROOT, entry.file_name);
 
     if (!existsSync(imagePath)) return null;
@@ -154,14 +154,14 @@ Respond only in the provided JSON schema.
 
         return {
             validation_cache_key: valCacheKey,
-            sample_key: entry.sample_key || '',
-            target_id: entry.target_id || '',
+            sample_key: entry.sample_key,
+            target_id: entry.target_id,
             generator: moduleName,
             view: viewId,
             mode: modeName,
-            instance: entry.instance ?? 0,
-            attempt: entry.attempt ?? 0,
-            seed: entry.seed ?? 0,
+            instance: entry.instance,
+            attempt: entry.attempt,
+            seed: entry.seed,
             file_name: entry.file_name,
             image_sha256: imageSha256,
             checklist_hash: checklistHash,
@@ -509,7 +509,7 @@ function generateValidationReport(
         for (const item of failedItems) {
             const entry = item.entry;
             const evalObj = item.evaluation;
-            const modeStr = entry.mode || (entry.solution_visible ? 'solution' : 'question');
+            const modeStr = entry.mode;
             
             const checks: string[] = [];
             if (evalObj.general_checks) {
@@ -530,10 +530,8 @@ function generateValidationReport(
             if (checks.length > 0) {
                 md += `  - **Checks:** ${checks.join(' | ')}\n`;
             }
-            if (entry.sample_key) {
-                md += `  - **Sample:** \`${entry.sample_key}\` (target \`${entry.target_id}\`, attempt ${entry.attempt}, seed ${entry.seed})\n`;
-                md += `  - **Retest:** \`npm run retest:sample -- --key="${entry.sample_key}" --attempt=${entry.attempt}${entry.spec ? ` --spec=${entry.spec}` : ''}\`\n`;
-            }
+            md += `  - **Sample:** \`${entry.sample_key}\` (target \`${entry.target_id}\`, attempt ${entry.attempt}, seed ${entry.seed})\n`;
+            md += `  - **Retest:** \`npm run retest:sample -- --key="${entry.sample_key}" --attempt=${entry.attempt} --spec=${entry.spec}\`\n`;
             md += `\n`;
         }
     }
