@@ -1,4 +1,4 @@
 - The rendered canvas must show a stick-and-ball representation of the target shape.
-- The prompt text must ask for the correct shape name.
+- In Question Mode, the prompt text must ask for the correct shape name. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
 - In solution mode, the correct answer choice representing the exact count of sticks and clay balls must be highlighted in green.
 - In normal mode, no answer choices must be highlighted.

@@ -2,7 +2,7 @@
 
 #### Visual and Layout Requirements
 1. **Interactive and Static Elements:**
-   - Display a prompt question text header (e.g. "Which shape has the most number of items?") in both Question Mode (_mode-Q) and Solution Mode (_mode-S) so question context is clear.
+   - Display a prompt question text header (e.g. "Which shape has the most number of items?") in both Question Mode (_mode-Q) and Solution Mode (_mode-S) so question context is clear. This is a documented exception to the global Instruction & Mode Rules: the highlighted answer box alone does not convey which attribute or relation ("most"/"least") was asked, so the prompt is required in both modes.
    - Render a container displaying scattered shapes of different shapes/colors.
    - Objects must be spaced appropriately using deterministic positions so they do not overlap.
 2. **Options and Selection Layout:**

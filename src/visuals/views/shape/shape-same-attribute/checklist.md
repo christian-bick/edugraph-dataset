@@ -1,10 +1,11 @@
 ### Shape Same Attribute Visual Checklist
 
 ## Rendering Requirements
-- **Prompt Text**: The prompt must correspond to the target attribute:
+- **Prompt Text**: In Question Mode, the prompt must correspond to the target attribute:
   - `'rollable'`: "Which of these shapes rolls easily?"
   - `'stackable'`: "Which of these shapes is best for stacking?"
   - `'foldable'`: "Which of these shapes can be folded?"
+  - Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
 - **Visual Options**: The SVG container must display three shapes: Sphere, Cube, and Rectangle, each with their corresponding label text beneath them.
 
 ## Layout & Styling

@@ -1,7 +1,7 @@
 ### Shape Position Visual Checklist
 
 ## Rendering Requirements
-- **Clear Prompt**: The instruction prompt must ask "Where is the ball relative to the box?".
+- **Clear Prompt**: In Question Mode, the instruction prompt must ask "Where is the ball relative to the box?". Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
 - **SVG Scene**: A slate box labelled "Box" must be rendered along with a rose/red ball labelled "Ball".
 - **Positioning**: The ball's location (above, below, nextTo) relative to the box must correspond to the problem's relation parameter.
 

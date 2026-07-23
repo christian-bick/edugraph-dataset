@@ -7,10 +7,9 @@
 
 #### 2. Instruction & Mode Rules:
 - **Question Mode (`_mode-Q`) (`isSolutionView: false`):**
-  - Must display an instruction text header when necessary for task clarity (e.g. specifying ordering direction like ascending/descending, target comparison attribute, shape naming, or sorting rule).
-  - For visually self-contained arithmetic (e.g. vertical column addition/subtraction or standard equation boxes), instruction headers should be omitted or kept minimal.
+  - Must display an instruction text header when necessary for task clarity. Self-explaining exercises may omit the header or keep it minimal. Whether a specific view requires a header, and its exact wording, is defined in that view's leaf checklist.
   - MUST NOT contain any green text, borders, or solution backgrounds.
 
 - **Solution Mode (`_mode-S`) (`isSolutionView: true`):**
-  - **MUST NEVER contain instruction text headers.**
+  - **MUST NEVER contain instruction text headers**, regardless of what Question Mode requires for the same view — unless a view's leaf checklist explicitly documents an exception (e.g. because the solution is ambiguous without restating the question).
   - Must render only the visual problem elements and solution highlights/answers in forestgreen/emerald green.

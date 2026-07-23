@@ -2,7 +2,7 @@
 
 #### Visual Layout & Rendering Requirements
 1. **Instruction:**
-   - The question text must be clearly visible. It must say "Which group has fewer items?" if the relation is `'less'`, and "Which group has more items?" otherwise.
+   - In Question Mode, the question text must be clearly visible. It must say "Which group has fewer items?" if the relation is `'less'`, and "Which group has more items?" otherwise. Per the global Instruction & Mode Rules, this text must be absent in Solution Mode.
 2. **Object Representation & Matching Lines:**
    - Two columns labeled "Group A" and "Group B" must display the correct number of items.
    - SVG icons must be aligned horizontally so that the matching relationship between items of Group A and Group B is clear.

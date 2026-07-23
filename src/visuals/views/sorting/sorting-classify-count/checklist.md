@@ -1,7 +1,7 @@
 # Sorting Classify Count Visual Checklist
 
 ## Rendering Requirements
-- **Clear Prompt**: The instruction prompt must specify the classification trait (e.g., "Classify and count the objects by shape" or "Classify and count the objects by color").
+- **Clear Prompt**: In Question Mode, the instruction prompt must specify the classification trait (e.g., "Classify and count the objects by shape" or "Classify and count the objects by color"). Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
 - **SVG Items**: Objects (circles, squares, triangles) are rendered clearly with correct shapes and corresponding fill colors (red, blue, green).
 - **Physical Scattering**: Objects are scattered within the canvas container using seeded deterministic coordinates without clipping or going outside container bounds.
 

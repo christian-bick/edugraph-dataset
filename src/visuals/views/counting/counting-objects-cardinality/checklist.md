@@ -2,7 +2,7 @@
 
 #### Visual Layout & Rendering Requirements
 1. **Instruction:**
-   - The question text "Count the objects. What is the total number?" must be clearly visible above the canvas.
+   - In Question Mode, the question text "Count the objects. What is the total number?" must be clearly visible above the canvas. Per the global Instruction & Mode Rules, this text must be absent in Solution Mode.
 2. **Cardinality & Highlighting:**
    - In **Question Mode (`_mode-Q`)**, no counting badges should be rendered on the objects.
    - In **Solution Mode (`_mode-S`)**, counting badges (1 to `numObjects`) must be displayed on top of each object.

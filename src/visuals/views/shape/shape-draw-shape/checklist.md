@@ -1,7 +1,7 @@
 ### Shape Draw Shape Visual Checklist
 
 ## Rendering Requirements
-- **Clear Prompt**: The instruction prompt must ask to "Trace the {shape}." (e.g. "Trace the circle.").
+- **Clear Prompt**: In Question Mode, the instruction prompt must ask to "Trace the {shape}." (e.g. "Trace the circle."). Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
 - **SVG Canvas**: The outline of the shape (circle, triangle, or square) must be rendered clearly inside the drawing canvas.
 
 ## Layout & Styling

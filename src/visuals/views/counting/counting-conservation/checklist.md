@@ -2,7 +2,7 @@
 
 #### Visual Layout & Rendering Requirements
 1. **Instruction:**
-   - The question text "Are there more items in Group A, Group B, or are they the same?" must be clearly visible above the groups.
+   - In Question Mode, the question text "Are there more items in Group A, Group B, or are they the same?" must be clearly visible above the groups. Per the global Instruction & Mode Rules, this text must be absent in Solution Mode.
 2. **Conservation of Number Representation:**
    - Group A (close spacing) and Group B (wide spacing) must display the exact same number of items (`numObjects`).
    - The same SVG icon must be used for both groups.
