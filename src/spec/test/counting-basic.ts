@@ -76,7 +76,7 @@ const incDecBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
-export const CountingBasicTestSpec: CompetencyTarget[] = [
+export const spec: CompetencyTarget[] = [
     ...toTargets('test-counting-basic', builder),
     ...toTargets('test-counting-inc-dec', incDecBuilder),
     ...toTargets('test-classify-count', classifyBuilder),

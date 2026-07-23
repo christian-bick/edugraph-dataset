@@ -17,4 +17,4 @@ const builder = new DatasetPermutationBuilder()
         [Ability.VisualArticulation]
     ]);
 
-export const TimeTestSpec: CompetencyTarget[] = toTargets('test-time', builder);
+export const spec: CompetencyTarget[] = toTargets('test-time', builder);

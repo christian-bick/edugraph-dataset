@@ -49,8 +49,9 @@ The consequence: a code change only invalidates the samples whose identity input
 ## 3. Directory & Script Reference
 
 #### `src/lib/generation.ts`
-The shared generation library — the single source of truth for target loading, generator/view catalog loading, matching, sample identity, seeding and content generation. Both the pipeline and all diagnostic scripts import from it, so matching and seeding can never drift between tools. Key entry points:
+The shared generation library — the single source of truth for target loading, generator/view catalog loading, matching, sample identity, seeding and content generation. Every script that touches spec modules or matching (the dataset pipeline, `show-matching-stats.ts`, the debug scripts, and `map-standards.ts`'s standards coverage report) imports from it, so matching, seeding, and the spec export contract can never drift between tools. Key entry points:
 *   `loadTargets(specName)` / `loadGeneratorCatalog()` / `loadViewCatalog()` — deterministic catalog loading.
+*   `loadSpecTodos(specName)` — loads a spec module's `implementationTodos` / `ontologyTodos` exports (see Step 1 below). Only `map-standards.ts` calls this; the dataset pipeline never does.
 *   `matchesTarget(targetLabels, generatorInfo, viewInfo)` — the single matching predicate. Returns a verdict (`matched` or `reason: 'incompatible-type' | 'unsupported-label' | 'rejected-label'` with the offending label), so diagnostics come for free and no caller can apply a partial rule set.
 *   `matchTargets(targets, generators, views)` — the full `(target, generator, view)` tuple list the pipeline generates from.
 *   `computeSampleKey` / `computeSampleSeed` / `computeSampleFilename` — the identity functions (see *Sample Identity & Determinism*).
@@ -174,9 +175,11 @@ To add a new mathematical concept or visual style to the dataset, follow this st
 ### Step 1: Define the Pedagogy
 Declare the target specifications in the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`) using the `DatasetPermutationBuilder`:
 
+**The spec module export contract**: every file under `src/spec/<module>/` must export its competency targets as `export const spec: CompetencyTarget[] = [...]` — this is the *only* export `loadTargets` (`src/lib/generation.ts`) reads, by fixed name, no scanning or filtering. Do not export additional aliases of `spec` under other names (e.g. a grade-prefixed const) — dead aliases have caused duplicate-target bugs before; a target must be reachable via `spec` and nothing else.
+
 - Work from the **leaf nodes** of the CCSS tree (`public/coverage/ccss-tree.json`). A single leaf standard often bundles several competencies — create one builder per competency.
 - Use `.addLabels([...])` for the label set shared by all permutations of a competency and `.applyLabelVariants([...])` for orthogonal dimensions (e.g. number ranges, `Scope.NumbersWithZero` vs. `Scope.NumbersWithoutZero`, shapes, relations). Map the builder to targets with the shared `toTargets('<CCSS-id>-<slug>', builder)` helper from `src/lib/dataset-permutation-builder.ts`, so ids read like `K.CC.B.5-how-many-0`.
-- If a competency cannot be expressed (missing ontology label) or has no generator/view support, **do not stretch labels to force a match**. Instead, leave a `// TODO [<CCSS-id>]:` comment describing the gap together with a commented-out reference builder/permutation. See `src/spec/ccss/kindergarten.ts` for examples.
+- If a competency cannot be expressed (missing ontology label) or has no generator/view support, **do not stretch labels to force a match**. Instead, leave a `// TODO [<CCSS-id>]:` comment describing the gap together with a commented-out reference builder/permutation, or collect the parked targets in the sibling `implementationTodos: CompetencyTarget[]` / `ontologyTodos: OntologyTodo[]` exports (same file, kept alongside `spec` so agents can work through gaps in context). These two exports are for `map-standards.ts`'s coverage report only — `loadTargets` never reads them, so a todo target can never enter the pipeline, regardless of whether its labels would happen to match a generator/view pair. See `src/spec/ccss/kindergarten.ts` for examples.
 
 ### Step 2: Analyze Matchings
 Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` to see if the new targets map to any existing generator or views.
@@ -210,7 +213,7 @@ Write robust unit tests verifying that the generator outputs correct math and re
 
 ### Step 7b: Targeted Testing via Test Specs
 To visually verify and test both your generator and view modules without overwriting the main dataset, you should use the `test` specs module:
-1. **Extend Test Specs**: Add minimal test permutations for your module to the `test` specs directory (`src/spec/test/`). Use `DatasetPermutationBuilder` to build these permutations programmatically rather than manually writing static arrays.
+1. **Extend Test Specs**: Add minimal test permutations for your module to the `test` specs directory (`src/spec/test/`). Use `DatasetPermutationBuilder` to build these permutations programmatically rather than manually writing static arrays. Export the result as `export const spec: CompetencyTarget[] = ...` — the same fixed contract as `src/spec/ccss/` (see Step 1).
 2. **Run Targeted Dataset Generation**: Generate a smaller slice of the dataset exclusively to a `dataset-test` directory:
    ```bash
    npm run generate:dataset -- --generator=X --view=Y --spec=test

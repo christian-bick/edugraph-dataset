@@ -21,4 +21,4 @@ const builder = new DatasetPermutationBuilder()
     ])
     .addLabels([Scope.NumbersSmaller100]);
 
-export const OrderingTestSpec: CompetencyTarget[] = toTargets('test-ordering', builder);
+export const spec: CompetencyTarget[] = toTargets('test-ordering', builder);

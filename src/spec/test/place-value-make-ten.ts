@@ -12,4 +12,4 @@ const builder = new DatasetPermutationBuilder()
         [Scope.NumbersWithoutZero]
     ]);
 
-export const PlaceValueMakeTenTestSpec: CompetencyTarget[] = toTargets('test-place-value-make-ten', builder);
+export const spec: CompetencyTarget[] = toTargets('test-place-value-make-ten', builder);

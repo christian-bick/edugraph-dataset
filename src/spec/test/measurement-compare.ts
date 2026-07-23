@@ -17,4 +17,4 @@ const builder = new DatasetPermutationBuilder()
         [Scope.Less]
     ]);
 
-export const MeasurementCompareTestSpec: CompetencyTarget[] = toTargets('test-measurement-compare', builder);
+export const spec: CompetencyTarget[] = toTargets('test-measurement-compare', builder);

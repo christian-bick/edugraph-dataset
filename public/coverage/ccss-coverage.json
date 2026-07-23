@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "generated_at": "2026-07-21T12:25:56.435Z",
-    "ontology_version": "v0.9.2",
+    "generated_at": "2026-07-23T22:25:43.985Z",
+    "ontology_version": "v0.9.4",
     "total_leaves_scanned": 467,
     "spec_covered_count": 47,
     "covered_count": 36,
@@ -19,7 +19,7 @@
         {
           "id": "K.CC.A.1-count-to-100-0",
           "labels": [
-            "http://edugraph.io/edu/Numeration",
+            "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/NumbersSmaller100",
             "http://edugraph.io/edu/NumbersWithoutZero",
@@ -32,7 +32,7 @@
         {
           "id": "K.CC.A.1-count-to-100-1",
           "labels": [
-            "http://edugraph.io/edu/Numeration",
+            "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/NumbersSmaller100",
             "http://edugraph.io/edu/NumbersWithoutZero",
@@ -45,7 +45,7 @@
       ],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -70,7 +70,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -80,7 +80,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -93,7 +93,7 @@
       "implementation_todos": [],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -133,7 +133,7 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithZero",
           "http://edugraph.io/edu/PhysicalNumbers",
@@ -141,7 +141,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithZero",
           "http://edugraph.io/edu/PhysicalNumbers",
@@ -153,7 +153,7 @@
       "ontology_todos": [],
       "matched_areas": [
         "http://edugraph.io/edu/DigitNotation",
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -177,7 +177,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -187,7 +187,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -200,7 +200,7 @@
       "implementation_todos": [],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -226,7 +226,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -236,7 +236,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -246,24 +246,22 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/NumericIdentity",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
           "http://edugraph.io/edu/AdditiveCount",
-          "http://edugraph.io/edu/NumericRange",
           "http://edugraph.io/edu/DirectUnderstanding",
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/NumericIdentity",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
           "http://edugraph.io/edu/AdditiveCount",
-          "http://edugraph.io/edu/NumericRange",
           "http://edugraph.io/edu/DirectUnderstanding",
           "http://edugraph.io/edu/NumbersSmaller20"
         ]
@@ -271,7 +269,7 @@
       "implementation_todos": [],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration",
+        "http://edugraph.io/edu/NumerationWithIntegers",
         "http://edugraph.io/edu/NumericIdentity"
       ],
       "matched_scopes": [
@@ -281,8 +279,7 @@
         "http://edugraph.io/edu/AdditiveCount",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/NumbersSmaller10",
-        "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/NumericRange"
+        "http://edugraph.io/edu/NumbersSmaller20"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureUnderstanding",
@@ -300,7 +297,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -310,7 +307,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -323,7 +320,7 @@
       "implementation_todos": [],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -349,7 +346,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -360,7 +357,7 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -371,7 +368,7 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -386,7 +383,7 @@
         {
           "id": "K.CC.B.5-box-arrangement-0",
           "labels": [
-            "http://edugraph.io/edu/Numeration",
+            "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -401,7 +398,7 @@
         {
           "id": "K.CC.B.5-box-arrangement-1",
           "labels": [
-            "http://edugraph.io/edu/Numeration",
+            "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -416,7 +413,7 @@
       ],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -903,7 +900,7 @@
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": true,
-      "generator_module": "place-value-make-ten",
+      "generator_module": "place-value-teen",
       "cluster_id": "K.NBT.A"
     },
     "K.MD.A.1": {
@@ -1001,7 +998,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ObjectSorting",
           "http://edugraph.io/edu/CollectionSense",
           "http://edugraph.io/edu/ArabicNumerals",
@@ -1012,7 +1009,7 @@
           "http://edugraph.io/edu/ShapeProperties"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ObjectSorting",
           "http://edugraph.io/edu/CollectionSense",
           "http://edugraph.io/edu/ArabicNumerals",
@@ -1067,10 +1064,9 @@
       "implementation_todos": [],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration",
+        "http://edugraph.io/edu/NumerationWithIntegers",
         "http://edugraph.io/edu/ObjectSorting",
         "http://edugraph.io/edu/CollectionSense",
-        "http://edugraph.io/edu/NumerationWithIntegers",
         "http://edugraph.io/edu/NumericOrder"
       ],
       "matched_scopes": [
@@ -1844,7 +1840,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1854,7 +1850,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1864,7 +1860,7 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1874,7 +1870,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1887,7 +1883,7 @@
       "implementation_todos": [],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -2239,7 +2235,7 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithZero",
           "http://edugraph.io/edu/PhysicalNumbers",
@@ -2247,7 +2243,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/NumbersWithZero",
           "http://edugraph.io/edu/PhysicalNumbers",
@@ -2317,7 +2313,7 @@
       "matched_areas": [
         "http://edugraph.io/edu/NumericOrder",
         "http://edugraph.io/edu/DigitNotation",
-        "http://edugraph.io/edu/Numeration"
+        "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/ArabicNumerals",
@@ -2418,7 +2414,7 @@
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": true,
-      "generator_module": "place-value-make-ten",
+      "generator_module": "place-value-teen",
       "cluster_id": "1.NBT.B"
     },
     "1.NBT.B.2c": {
@@ -2585,7 +2581,7 @@
         {
           "id": "1.NBT.C.5-ten-more-less-0",
           "labels": [
-            "http://edugraph.io/edu/Numeration",
+            "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -2599,7 +2595,7 @@
         {
           "id": "1.NBT.C.5-ten-more-less-1",
           "labels": [
-            "http://edugraph.io/edu/Numeration",
+            "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -2613,7 +2609,7 @@
       ],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration",
+        "http://edugraph.io/edu/NumerationWithIntegers",
         "http://edugraph.io/edu/Increment",
         "http://edugraph.io/edu/Decrement"
       ],
@@ -2878,7 +2874,7 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ObjectSorting",
           "http://edugraph.io/edu/CollectionSense",
           "http://edugraph.io/edu/ArabicNumerals",
@@ -2889,7 +2885,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ObjectSorting",
           "http://edugraph.io/edu/CollectionSense",
           "http://edugraph.io/edu/ArabicNumerals",
@@ -2900,7 +2896,7 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ObjectSorting",
           "http://edugraph.io/edu/CollectionSense",
           "http://edugraph.io/edu/ArabicNumerals",
@@ -2910,7 +2906,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
-          "http://edugraph.io/edu/Numeration",
+          "http://edugraph.io/edu/NumerationWithIntegers",
           "http://edugraph.io/edu/ObjectSorting",
           "http://edugraph.io/edu/CollectionSense",
           "http://edugraph.io/edu/ArabicNumerals",
@@ -3007,10 +3003,9 @@
       "implementation_todos": [],
       "ontology_todos": [],
       "matched_areas": [
-        "http://edugraph.io/edu/Numeration",
+        "http://edugraph.io/edu/NumerationWithIntegers",
         "http://edugraph.io/edu/ObjectSorting",
         "http://edugraph.io/edu/CollectionSense",
-        "http://edugraph.io/edu/NumerationWithIntegers",
         "http://edugraph.io/edu/NumericOrder"
       ],
       "matched_scopes": [

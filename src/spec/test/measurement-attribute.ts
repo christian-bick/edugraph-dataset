@@ -12,4 +12,4 @@ const builder = new DatasetPermutationBuilder()
         [Scope.WeightMeasurement]
     ]);
 
-export const MeasurementAttributeTestSpec: CompetencyTarget[] = toTargets('test-measurement-attribute', builder);
+export const spec: CompetencyTarget[] = toTargets('test-measurement-attribute', builder);

@@ -494,7 +494,3 @@ export const ontologyTodos: OntologyTodo[] = [
     }
 ];
 
-// Backwards-compatibility aliases
-export const Grade1Spec = spec;
-export const Grade1ImplementationTodos = implementationTodos;
-export const Grade1OntologyTodos = ontologyTodos;

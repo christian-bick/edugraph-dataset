@@ -122,7 +122,7 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
         [Area.Rectangle]
     ]);
 
-export const ShapeTestSpec: CompetencyTarget[] = [
+export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-build-shape', builder),
     ...toTargets('test-shape-classify-dim', classifyDimBuilder),
     ...toTargets('test-shape-compare-attributes', compareAttrBuilder),

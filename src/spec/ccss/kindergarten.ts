@@ -584,7 +584,3 @@ export const ontologyTodos: OntologyTodo[] = [
     }
 ];
 
-// Backwards-compatibility aliases
-export const KindergartenSpec = spec;
-export const KindergartenImplementationTodos = implementationTodos;
-export const KindergartenOntologyTodos = ontologyTodos;

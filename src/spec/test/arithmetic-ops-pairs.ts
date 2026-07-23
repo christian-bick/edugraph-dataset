@@ -23,4 +23,4 @@ const builder = new DatasetPermutationBuilder()
     ])
     .addLabels([Scope.NumbersSmaller10]);
 
-export const ArithmeticOpsPairsTestSpec: CompetencyTarget[] = toTargets('test-arithmetic-ops-pairs', builder);
+export const spec: CompetencyTarget[] = toTargets('test-arithmetic-ops-pairs', builder);

@@ -8,7 +8,7 @@ import { findLeafModules, LeafModule } from './module-resolver.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from './type-parser.ts';
 import { extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
+import { CompetencyTarget, OntologyTodo, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ViewSpec } from '../types/view-spec.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -300,14 +300,11 @@ export async function loadViewCatalog(
 }
 
 /**
- * Loads all competency targets from a spec module (a directory of .ts files
- * or a single .ts file under src/spec). Files are visited in sorted order so
- * the resulting target order is deterministic.
+ * Resolves the .ts files belonging to a spec module (either a directory of
+ * files or a single file) under specRoot, in sorted order so downstream
+ * processing is deterministic. Shared by every spec-module loader below.
  */
-export async function loadTargets(
-    specName: string,
-    specRoot: string = resolve(PROJECT_ROOT, 'src', 'spec')
-): Promise<CompetencyTarget[]> {
+function resolveSpecFiles(specName: string, specRoot: string): string[] {
     const specPath = resolve(specRoot, specName);
     const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
     const specFile = !specDir && existsSync(`${specPath}.ts`) ? `${specPath}.ts` : null;
@@ -316,24 +313,78 @@ export async function loadTargets(
         throw new Error(`Spec module not found at: ${specPath}`);
     }
 
-    const files = specDir
+    return specDir
         ? readdirSync(specDir).filter(f => f.endsWith('.ts')).sort().map(f => resolve(specDir, f))
         : [specFile!];
+}
+
+const DEFAULT_SPEC_ROOT = () => resolve(PROJECT_ROOT, 'src', 'spec');
+
+/**
+ * Loads all competency targets from a spec module. Files are visited in
+ * sorted order so the resulting target order is deterministic.
+ *
+ * Contract: every spec file exports its competency targets as `spec:
+ * CompetencyTarget[]` — the sole export this function reads. Unsupported
+ * competencies belong in the sibling `implementationTodos` / `ontologyTodos`
+ * exports (see DOCS.md and `loadSpecTodos`), which are never touched here —
+ * a todo target can never enter the pipeline.
+ */
+export async function loadTargets(
+    specName: string,
+    specRoot: string = DEFAULT_SPEC_ROOT()
+): Promise<CompetencyTarget[]> {
+    const files = resolveSpecFiles(specName, specRoot);
 
     const targets: CompetencyTarget[] = [];
+    const seenIds = new Set<string>();
     for (const filePath of files) {
         const module = await import(pathToFileURL(filePath).href);
-        for (const [, value] of Object.entries(module)) {
-            if (Array.isArray(value)) {
-                // Spec files may export other arrays (e.g. ontology TODOs) —
-                // only collect entries that are actual competency targets
-                targets.push(...(value as CompetencyTarget[]).filter(
-                    t => t && typeof t.id === 'string' && Array.isArray(t.labels)
-                ));
+        if (!Array.isArray(module.spec)) {
+            throw new Error(`Spec file "${filePath}" does not export a "spec" array of CompetencyTarget.`);
+        }
+        for (const target of module.spec as CompetencyTarget[]) {
+            if (seenIds.has(target.id)) {
+                throw new Error(`Duplicate target id "${target.id}" in spec module "${specName}" (file: ${filePath}).`);
             }
+            seenIds.add(target.id);
+            targets.push(target);
         }
     }
     return targets;
+}
+
+export interface SpecTodos {
+    implementationTodos: CompetencyTarget[];
+    ontologyTodos: OntologyTodo[];
+}
+
+/**
+ * Loads the documented gaps of a spec module: competencies whose labels are
+ * expressible but have no generator/view support yet (`implementationTodos`),
+ * and competencies that cannot be expressed because the ontology is missing
+ * a label (`ontologyTodos`). Both exports are optional per file. This is the
+ * counterpart to `loadTargets` for tooling that reports on gaps (currently
+ * only `map-standards.ts`) — the dataset pipeline never calls this.
+ */
+export async function loadSpecTodos(
+    specName: string,
+    specRoot: string = DEFAULT_SPEC_ROOT()
+): Promise<SpecTodos> {
+    const files = resolveSpecFiles(specName, specRoot);
+
+    const implementationTodos: CompetencyTarget[] = [];
+    const ontologyTodos: OntologyTodo[] = [];
+    for (const filePath of files) {
+        const module = await import(pathToFileURL(filePath).href);
+        if (Array.isArray(module.implementationTodos)) {
+            implementationTodos.push(...(module.implementationTodos as CompetencyTarget[]));
+        }
+        if (Array.isArray(module.ontologyTodos)) {
+            ontologyTodos.push(...(module.ontologyTodos as OntologyTodo[]));
+        }
+    }
+    return { implementationTodos, ontologyTodos };
 }
 
 // ---------------------------------------------------------------------------

@@ -21,4 +21,4 @@ const builder = new DatasetPermutationBuilder()
     ])
     .addLabels([Scope.NumbersSmaller10]);
 
-export const ComparisonTestSpec: CompetencyTarget[] = toTargets('test-comparison', builder);
+export const spec: CompetencyTarget[] = toTargets('test-comparison', builder);

@@ -1,4 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     computeSampleKey,
@@ -340,6 +342,59 @@ describe('buildRenderPayload', () => {
         const s = buildRenderPayload({ problem, viewId: 'v', labels: ['l'], mode: 'solution', seed: 7 });
         expect(s.isSolutionView).toBe(true);
     });
+});
+
+describe('loadTargets', () => {
+    const FIXTURE_ROOT = resolve(__dirname, '../../temp/test-load-targets');
+
+    afterEach(() => {
+        if (existsSync(FIXTURE_ROOT)) rmSync(FIXTURE_ROOT, { recursive: true, force: true });
+    });
+
+    function writeFixture(moduleDir: string, fileName: string, contents: string) {
+        const dir = resolve(FIXTURE_ROOT, moduleDir);
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(resolve(dir, fileName), contents, 'utf-8');
+        return dir;
+    }
+
+    it('ignores implementationTodos/ontologyTodos — only the spec export feeds the pipeline', async () => {
+        const dir = writeFixture('with-todos', 'a.ts', `
+            export const spec = [{ id: 'real-target', labels: [] }];
+            export const implementationTodos = [{ id: 'todo-target', labels: [], explanation: 'not supported yet' }];
+            export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x' }];
+        `);
+        const targets = await loadTargets('with-todos', FIXTURE_ROOT);
+        expect(targets.map(t => t.id)).toEqual(['real-target']);
+        void dir;
+    });
+
+    it('merges the spec export of every file in a spec directory, in sorted file order', async () => {
+        writeFixture('multi-file', 'b.ts', `export const spec = [{ id: 'from-b', labels: [] }];`);
+        writeFixture('multi-file', 'a.ts', `export const spec = [{ id: 'from-a', labels: [] }];`);
+        const targets = await loadTargets('multi-file', FIXTURE_ROOT);
+        expect(targets.map(t => t.id)).toEqual(['from-a', 'from-b']);
+    });
+
+    it('throws when a spec file has no "spec" export', async () => {
+        writeFixture('no-spec-export', 'a.ts', `export const notSpec = [{ id: 'x', labels: [] }];`);
+        await expect(loadTargets('no-spec-export', FIXTURE_ROOT)).rejects.toThrow(/does not export a "spec"/);
+    });
+
+    it('throws on duplicate target ids across the spec module', async () => {
+        writeFixture('dup-ids', 'a.ts', `export const spec = [{ id: 'dup', labels: [] }];`);
+        writeFixture('dup-ids', 'b.ts', `export const spec = [{ id: 'dup', labels: [] }];`);
+        await expect(loadTargets('dup-ids', FIXTURE_ROOT)).rejects.toThrow(/Duplicate target id "dup"/);
+    });
+
+    it('loads real ccss targets and excludes their implementationTodos entries', async () => {
+        const targets = await loadTargets('ccss');
+        expect(targets.length).toBeGreaterThan(0);
+        expect(targets.some(t => t.id.startsWith('K.CC.A.1-count-to-100'))).toBe(false);
+        expect(targets.some(t => t.id.startsWith('K.OA.A.4-make-ten'))).toBe(true);
+        const ids = targets.map(t => t.id);
+        expect(new Set(ids).size).toBe(ids.length);
+    }, 30000);
 });
 
 describe('catalogs and end-to-end matching (integration)', () => {

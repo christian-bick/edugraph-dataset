@@ -3,14 +3,20 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import { IncomingMessage } from 'http';
-import { fileURLToPath, pathToFileURL } from 'url';
-import { Ability, Area, Scope } from 'edugraph-ts';
-import { CompetencyTarget, OntologyTodo } from '../types/ml-engine.ts';
-import { findLeafModules } from '../lib/module-resolver.ts';
-import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
-import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
-import { setSeed } from '../lib/random.ts';
+import { fileURLToPath } from 'url';
+import { Area, Scope, Ability } from 'edugraph-ts';
+import {
+    loadTargets,
+    loadSpecTodos,
+    loadGeneratorCatalog,
+    loadViewCatalog,
+    matchTargets,
+    computeSampleKey,
+    generateSampleWithRetry,
+    GeneratorCatalogEntry,
+    ViewCatalogEntry
+} from '../lib/generation.ts';
+import { CompetencyTarget } from '../types/ml-engine.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -243,119 +249,35 @@ function findStandardIdForTarget(targetId: string, sortedLeafIds: string[]): str
   return null;
 }
 
-async function loadGeneratorAndViewSpecs() {
-  const viewsDir = path.resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-  const allViewModules = findLeafModules(viewsDir);
-  const allViewSpecs: any[] = [];
-  const viewGeneralLabelsMap: Record<string, string[]> = {};
-
-  for (const vMod of allViewModules) {
-    try {
-      const viewSpecModule = await import(pathToFileURL(path.resolve(vMod.absolutePath, 'spec.ts')).href);
-      allViewSpecs.push(viewSpecModule.spec);
-      const viewCamelCase = vMod.id.replace(/-([a-z])/g, g => g[1].toUpperCase());
-      const camelCaseName = viewCamelCase[0].toUpperCase() + viewCamelCase.slice(1);
-      const viewSchema = viewSpecModule[`${camelCaseName}ViewSchema`];
-      const viewLabels = Array.from(new Set([
-        ...(viewSpecModule.spec?.generalLabels || []),
-        ...extractSchemaLabels(viewSchema)
-      ]));
-      viewGeneralLabelsMap[vMod.id] = viewLabels;
-    } catch (e) {
-      // Ignore
-    }
-  }
-
-  const generatorsDir = path.resolve(PROJECT_ROOT, 'src', 'generators');
-  const allGenModules = findLeafModules(generatorsDir);
-  const allGeneratorSpecs: any[] = [];
-
-  for (const gMod of allGenModules) {
-    try {
-      const specModule = await import(pathToFileURL(path.resolve(gMod.absolutePath, 'spec.ts')).href);
-      const generatorSpec = specModule.spec;
-      const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
-      const className = camelCase(gMod.id[0].toUpperCase() + gMod.id.slice(1)) + 'Generator';
-      const generatorModule = await import(pathToFileURL(path.resolve(gMod.absolutePath, 'generator.ts')).href);
-      const GeneratorClass = generatorModule[className];
-
-      if (GeneratorClass) {
-        const generator = new GeneratorClass();
-        const generatorGeneralLabels = Array.from(new Set([
-          ...(generatorSpec?.generalLabels || []),
-          ...extractSchemaLabels(generator.schema)
-        ]));
-        allGeneratorSpecs.push({
-          generatorId: gMod.id,
-          spec: generatorSpec,
-          generatorGeneralLabels,
-          generator
-        });
-      }
-    } catch (e) {
-      // Ignore
-    }
-  }
-
-  return { allViewSpecs, viewGeneralLabelsMap, allGeneratorSpecs };
-}
-
-function findMatchingGeneratorForTarget(
+/**
+ * Finds the first generator (in catalog order) with at least one matching
+ * view that actually produces a stub for this target — mirroring what the
+ * dataset pipeline would generate, not just label-level compatibility.
+ * Reuses the shared matching (`matchTargets`) and generation
+ * (`generateSampleWithRetry`, keyed like a real train/question sample) so
+ * this report can never drift from what `generate-dataset.ts` does.
+ */
+function findGeneratorForTarget(
   target: CompetencyTarget,
-  viewToType: any,
-  abilitiesList: Set<string>,
-  allViewSpecs: any[],
-  viewGeneralLabelsMap: Record<string, string[]>,
-  allGeneratorSpecs: any[]
+  generatorCatalog: GeneratorCatalogEntry[],
+  viewCatalog: ViewCatalogEntry[]
 ): string | null {
-  for (const gen of allGeneratorSpecs) {
-    const genTypeName = getGeneratorProblemType(gen.generatorId);
-    if (!genTypeName) continue;
-
-    const compatibleViews = allViewSpecs.filter(v => viewToType[v.viewId] === genTypeName);
-    if (compatibleViews.length === 0) continue;
-    if (!gen.generatorGeneralLabels) continue;
-
-    const matchingViewsForTarget = compatibleViews.filter(viewSpec => {
-      const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
-      if (!viewLabels) return false;
-      return target.labels.every(compLabel => {
-        if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
-        if (abilitiesList.has(compLabel)) {
-          return viewLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
-        }
-        const supportedByGen = gen.generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
-        const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-        return supportedByGen || supportedByView;
-      });
+  const { tuples } = matchTargets([target], generatorCatalog, viewCatalog);
+  for (const tuple of tuples) {
+    const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
+    const sampleKey = computeSampleKey({
+      targetId: target.id,
+      generatorId: tuple.generatorId,
+      viewId: tuple.viewId,
+      split: 'train',
+      mode: 'question',
+      instanceIdx: 0
     });
-
-    if (matchingViewsForTarget.length > 0) {
-      let anyMatched = false;
-      
-      for (const viewSpec of matchingViewsForTarget) {
-        if (viewSpec.rejectedLabels && target.labels.some((l: string) => viewSpec.rejectedLabels!.includes(l))) {
-            continue;
-        }
-
-        const combinedLabels = [...target.labels];
-
-        let problemStub = null;
-        
-        for (let seed = 42; seed < 52 && !problemStub; seed++) {
-          setSeed(seed);
-          problemStub = generateWithLabels(gen.generator, combinedLabels);
-        }
-        
-        if (problemStub) {
-          anyMatched = true;
-          break;
-        }
-      }
-
-      if (anyMatched) {
-        return gen.generatorId;
-      }
+    try {
+      const { stub } = generateSampleWithRetry({ generator, labels: [...target.labels], sampleKey, maxAttempts: 10 });
+      if (stub) return tuple.generatorId;
+    } catch {
+      // Generation failed for this pairing — try the next matched tuple
     }
   }
   return null;
@@ -415,34 +337,18 @@ async function main() {
     console.log(`[CCSS] Found ${targetLeaves.length} total leaf nodes to evaluate.`);
   }
 
-  // 3. Load spec module generic exports (spec, implementationTodos, ontologyTodos)
-  const specDir = path.resolve(PROJECT_ROOT, 'src', 'spec', 'ccss');
-  const allSpecTargets: CompetencyTarget[] = [];
-  const allImplementationTodos: CompetencyTarget[] = [];
-  const allOntologyTodos: OntologyTodo[] = [];
-
-  if (fs.existsSync(specDir) && fs.lstatSync(specDir).isDirectory()) {
-    const files = fs.readdirSync(specDir).filter(f => f.endsWith('.ts'));
-    for (const file of files) {
-      const filePath = path.resolve(specDir, file);
-      const mod = await import(pathToFileURL(filePath).href);
-      if (Array.isArray(mod.spec)) {
-        allSpecTargets.push(...mod.spec);
-      }
-      if (Array.isArray(mod.implementationTodos)) {
-        allImplementationTodos.push(...mod.implementationTodos);
-      }
-      if (Array.isArray(mod.ontologyTodos)) {
-        allOntologyTodos.push(...mod.ontologyTodos);
-      }
-    }
-  }
+  // 3. Load spec module targets and their documented gaps
+  const [allSpecTargets, { implementationTodos: allImplementationTodos, ontologyTodos: allOntologyTodos }] = await Promise.all([
+    loadTargets('ccss'),
+    loadSpecTodos('ccss')
+  ]);
   console.log(`[CCSS Spec] Loaded ${allSpecTargets.length} implemented targets, ${allImplementationTodos.length} implementation TODOs, and ${allOntologyTodos.length} ontology TODOs.`);
 
   // Load view & generator specs for matching
-  const { allViewSpecs, viewGeneralLabelsMap, allGeneratorSpecs } = await loadGeneratorAndViewSpecs();
-  const viewToType = getViewToProblemTypeMap();
-  const abilitiesList = new Set<string>(Object.values(Ability));
+  const [generatorCatalog, viewCatalog] = await Promise.all([
+    loadGeneratorCatalog(),
+    loadViewCatalog()
+  ]);
 
   // 4. Programmatic Dataset, Permutations & Backlog Processing
   console.log('[Coverage] Processing competencies and dataset matching from spec files...');
@@ -496,14 +402,7 @@ async function main() {
       let allTargetsCovered = true;
 
       for (const target of matchedTargets) {
-        const genId = findMatchingGeneratorForTarget(
-          target,
-          viewToType,
-          abilitiesList,
-          allViewSpecs,
-          viewGeneralLabelsMap,
-          allGeneratorSpecs
-        );
+        const genId = findGeneratorForTarget(target, generatorCatalog, viewCatalog);
         if (genId) {
           genModulesSet.add(genId);
         } else {

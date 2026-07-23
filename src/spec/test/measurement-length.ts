@@ -18,4 +18,4 @@ const builder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller100]
     ]);
 
-export const MeasurementLengthTestSpec: CompetencyTarget[] = toTargets('test-measurement-length', builder);
+export const spec: CompetencyTarget[] = toTargets('test-measurement-length', builder);

@@ -9,4 +9,4 @@ const builder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller10
     ]);
 
-export const WritingTestSpec: CompetencyTarget[] = toTargets('test-writing', builder);
+export const spec: CompetencyTarget[] = toTargets('test-writing', builder);

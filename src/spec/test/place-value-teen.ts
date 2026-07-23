@@ -9,4 +9,4 @@ const builder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller20
     ]);
 
-export const PlaceValueTeenTestSpec: CompetencyTarget[] = toTargets('test-place-value-teen', builder);
+export const spec: CompetencyTarget[] = toTargets('test-place-value-teen', builder);
