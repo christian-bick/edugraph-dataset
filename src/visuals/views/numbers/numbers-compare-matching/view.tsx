@@ -27,9 +27,9 @@ const NumbersCompareMatchingCore = ({ payload }: CoreProps) => {
     const promptText = isFewerQuestion ? "Which group has fewer items?" : "Which group has more items?";
 
     const { iconA, iconB } = useMemo(() => {
-        const { iconAIndex, iconBIndex } = getIconIndexes(problem.id, ICONS.length);
+        const { iconAIndex, iconBIndex } = getIconIndexes(payload.seed ?? 42, ICONS.length);
         return { iconA: ICONS[iconAIndex], iconB: ICONS[iconBIndex] };
-    }, [problem.id]);
+    }, [payload.seed]);
 
     const maxCount = Math.max(num1, num2);
     const spacing = 42;

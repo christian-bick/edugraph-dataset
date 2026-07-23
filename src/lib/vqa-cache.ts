@@ -4,7 +4,16 @@ import { resolve } from 'path';
 
 export interface VqaCacheEntry {
     validation_cache_key: string;
-    input_cache_key: string;
+    /** Structural sample identity: targetId#generatorId#viewId#split#mode#inst:N */
+    sample_key: string;
+    target_id: string;
+    generator: string;
+    view: string;
+    mode: string;
+    instance: number;
+    /** The winning generation attempt — together with sample_key it determines the seed */
+    attempt: number;
+    seed: number;
     file_name: string;
     image_sha256: string;
     checklist_hash: string;
@@ -45,20 +54,6 @@ export function computeValidationCacheKey(
     checklistHash: string
 ): string {
     const rawKey = `${imageSha256}:${checklistHash}`;
-    return createHash('sha256').update(rawKey).digest('hex');
-}
-
-
-
-export function computeInputCacheKey(
-    generatorId: string,
-    viewId: string,
-    mode: string,
-    targetLabels: string[],
-    instance: number
-): string {
-    const sortedLabels = [...targetLabels].sort().join(',');
-    const rawKey = `${generatorId}#${viewId}#mode:${mode}#${sortedLabels}#inst:${instance}`;
     return createHash('sha256').update(rawKey).digest('hex');
 }
 
@@ -131,5 +126,9 @@ export class VqaCacheManager {
 
     public get size(): number {
         return this.cacheMap.size;
+    }
+
+    public entries(): VqaCacheEntry[] {
+        return Array.from(this.cacheMap.values());
     }
 }

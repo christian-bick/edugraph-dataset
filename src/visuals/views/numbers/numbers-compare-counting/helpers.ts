@@ -1,5 +1,5 @@
-export function getIconIndexes(problemId: string, iconsCount: number): { iconAIndex: number; iconBIndex: number } {
-    const iconAIndex = Array.from(problemId).reduce((acc, char) => acc + char.charCodeAt(0), 0) % iconsCount;
+export function getIconIndexes(seed: number, iconsCount: number): { iconAIndex: number; iconBIndex: number } {
+    const iconAIndex = seed % iconsCount;
     const iconBIndex = (iconAIndex + 3) % iconsCount;
     return { iconAIndex, iconBIndex };
 }

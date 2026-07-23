@@ -8,7 +8,6 @@ import {
     computeChecklistHash,
     computeImageSha256,
     computeValidationCacheKey,
-    computeInputCacheKey,
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 
@@ -128,13 +127,6 @@ async function evaluateSingleSample(entry: any, _datasetFolderName: string): Pro
 
     const checklistHash = computeChecklistHash(checklistPaths);
     const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
-    const inputCacheKey = computeInputCacheKey(
-        moduleName,
-        viewId,
-        modeName,
-        entry.tags || [],
-        entry.instance !== undefined ? entry.instance : 0
-    );
 
     const prompt = `
 You are a senior Visual QA Engineer. Evaluate this math exercise image:
@@ -162,7 +154,14 @@ Respond only in the provided JSON schema.
 
         return {
             validation_cache_key: valCacheKey,
-            input_cache_key: inputCacheKey,
+            sample_key: entry.sample_key || '',
+            target_id: entry.target_id || '',
+            generator: moduleName,
+            view: viewId,
+            mode: modeName,
+            instance: entry.instance ?? 0,
+            attempt: entry.attempt ?? 0,
+            seed: entry.seed ?? 0,
             file_name: entry.file_name,
             image_sha256: imageSha256,
             checklist_hash: checklistHash,
@@ -368,7 +367,14 @@ async function main() {
                         const mgr = getMgr(record.moduleName);
                         mgr.set({
                             validation_cache_key: record.validation_cache_key,
-                            input_cache_key: record.input_cache_key,
+                            sample_key: record.sample_key,
+                            target_id: record.target_id,
+                            generator: record.generator,
+                            view: record.view,
+                            mode: record.mode,
+                            instance: record.instance,
+                            attempt: record.attempt,
+                            seed: record.seed,
                             file_name: record.file_name,
                             image_sha256: record.image_sha256,
                             checklist_hash: record.checklist_hash,
@@ -523,6 +529,10 @@ function generateValidationReport(
             md += `  - **Reason:** ${evalObj.reasoning}\n`;
             if (checks.length > 0) {
                 md += `  - **Checks:** ${checks.join(' | ')}\n`;
+            }
+            if (entry.sample_key) {
+                md += `  - **Sample:** \`${entry.sample_key}\` (target \`${entry.target_id}\`, attempt ${entry.attempt}, seed ${entry.seed})\n`;
+                md += `  - **Retest:** \`npm run retest:sample -- --key="${entry.sample_key}" --attempt=${entry.attempt}${entry.spec ? ` --spec=${entry.spec}` : ''}\`\n`;
             }
             md += `\n`;
         }

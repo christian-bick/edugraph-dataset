@@ -63,8 +63,7 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
         const categoriesMap = data.categories;
 
         // View logic: Randomly decide how to represent the abstract groups visually
-        const seedStr = problem.id + itemsList.join('');
-        let seed = Array.from(seedStr).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        let seed = payload.seed ?? 42;
         const nextRand = () => {
             const x = Math.sin(seed++) * 10000;
             return x - Math.floor(x);
@@ -101,11 +100,11 @@ const SortingClassifySortCore = ({ payload }: CoreProps) => {
             classifyType: chosenClassifyType,
             mappedCategories 
         };
-    }, [data.items, data.categories, problem.id, payload.labels]);
+    }, [data.items, data.categories, payload.seed, payload.labels]);
 
     const { positions, itemSize } = useMemo(() => {
         return generateScatteredPositions(items.length, 450, 200, 32);
-    }, [items.length, problem.id]);
+    }, [items.length]);
 
     const resolvedAnswer = useMemo(() => {
         return mappedCategories[data.answer];

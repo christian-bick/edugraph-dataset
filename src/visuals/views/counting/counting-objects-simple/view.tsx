@@ -17,6 +17,7 @@ interface CoreProps {
 
 const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
+    const seed = payload.seed ?? 42;
     const data = problem.data;
 
     validateProblemData('counting-objects-simple', data, ['numObjects']);
@@ -29,13 +30,12 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
     else if (config.arrangement === Scope.ScatteredArrangement) arrangement = 'scattered';
 
     const icon = useMemo(() => {
-        const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
-        return ICONS[iconIndex];
-    }, [problem.id]);
+        return ICONS[seed % ICONS.length];
+    }, [seed]);
 
     const positions = useMemo(() => {
-        return generatePositions(numObjects, arrangement, problem.id);
-    }, [numObjects, arrangement, problem.id]);
+        return generatePositions(numObjects, arrangement, seed);
+    }, [numObjects, arrangement, seed]);
 
     const solClass = isSolutionView 
         ? 'text-green-600 border-green-600 bg-green-50' 

@@ -17,20 +17,17 @@ interface CoreProps {
 
 const CountingObjectsCountOutCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
+    const seed = payload.seed ?? 42;
     const data = problem.data;
 
     validateProblemData('counting-objects-count-out', data, ['numObjects']);
 
     const { numObjects } = data;
-    
+
     const totalCount = useMemo(() => {
-        let hash = 0;
-        for (let i = 0; i < problem.id.length; i++) {
-            hash = problem.id.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const extra = (Math.abs(hash) % 5) + 2; // +2 to +6 extra objects
+        const extra = (seed % 5) + 2; // +2 to +6 extra objects
         return numObjects + extra;
-    }, [problem.id, numObjects]);
+    }, [seed, numObjects]);
 
     let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
     if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';
@@ -38,13 +35,12 @@ const CountingObjectsCountOutCore = ({ config, payload }: CoreProps) => {
     else if (config.arrangement === Scope.ScatteredArrangement) arrangement = 'scattered';
 
     const icon = useMemo(() => {
-        const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
-        return ICONS[iconIndex];
-    }, [problem.id]);
+        return ICONS[seed % ICONS.length];
+    }, [seed]);
 
     const positions = useMemo(() => {
-        return generatePositions(totalCount, arrangement, problem.id);
-    }, [totalCount, arrangement, problem.id]);
+        return generatePositions(totalCount, arrangement, seed);
+    }, [totalCount, arrangement, seed]);
 
     const solClass = isSolutionView 
         ? 'text-green-600 border-green-600 bg-green-50' 

@@ -25,8 +25,8 @@ The data contract passed from the Playwright orchestrator into the browser's `wi
 *   `problem`: The `AbstractProblem`.
 *   `viewId`: The string identifier of the view.
 *   `labels`: Raw pedagogical tags (used by the HOC wrapper, not the pure view).
-*   `constraints`: Raw configuration constraints.
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
+*   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy (icon choices, scatter positions, shuffles, rotations) from this seed — never from `problem.id`, `Math.random()`, or any other source.
 
 To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
 1. **`ViewTypeMap`** (defined in [problems.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/types/problems.ts)): A central contract mapping visual view identifiers (like `'operations-vertical'`) to their expected mathematical data structure (like `ArithmeticStandardProblem`).
@@ -35,20 +35,35 @@ To ensure end-to-end type safety between problem generators (which run in Node.j
 **Environment Separation & Mapping:**
 Because the Node orchestrator and generator configurations do not statically import the React view files (which are dynamically bundled by Vite and loaded headlessly inside Playwright via URLs), TypeScript cannot automatically inspect `window.renderView` in the browser code from the Node side. `ViewTypeMap` serves as a shared bridge, allowing the compiler to statically verify that generators specify view names compatible with the data structures the views expect to render.
 
-### Determinism
-To ensure that the Question (`_mode-Q`) and Solution (`_mode-S`) renderings match exactly (especially when visual parameters dictate randomized placement, like scattering counting objects), the system relies on global seeded randomness via `src/lib/random.ts`. The renderer typically seeds the RNG using the `problem.id`.
+### Sample Identity & Determinism
+Every dataset sample has a **structural identity**: the tuple `(target.id, generatorId, viewId, split, mode, instanceIdx)`, canonicalized as a *sample key* (e.g. `test-writing-0#writing#numbers-write-standard#train#question#inst:0`). Everything entropy-related is a pure function of this identity, implemented in `src/lib/generation.ts`:
+
+*   **Generation seed**: `computeSampleSeed(sampleKey, attempt)`. The `attempt` counter is a retry salt — when a generator returns `null` or produces duplicate content, the pipeline retries with the next attempt, which deterministically yields a different draw. The *winning* attempt is recorded in metadata and the VQA cache, so any sample can be replayed in isolation.
+*   **Render seed**: passed to the browser as `payload.seed`. The `withConfig` wrapper calls `setSeed(payload.seed)` before resolving the view config, and views derive all visual randomness from it.
+*   **Filenames**: `computeSampleFilename(identity)` — stable and unique by construction, so filenames never shift when unrelated samples change.
+*   **Content fingerprint**: `computeContentFingerprint(problem.data)` — an order-independent hash used for dedup instead of generator-authored id strings.
+*   **Val split membership**: `isValTarget(target.id, ratio)` — a pure function of the target id, so val membership survives unrelated reorderings.
+
+The consequence: a code change only invalidates the samples whose identity inputs it actually touches. `problem.id` carries the sample key for reference but has **no functional role** — do not derive anything from it.
 
 ## 3. Directory & Script Reference
+
+#### `src/lib/generation.ts`
+The shared generation library — the single source of truth for target loading, generator/view catalog loading, matching, sample identity, seeding and content generation. Both the pipeline and all diagnostic scripts import from it, so matching and seeding can never drift between tools. Key entry points:
+*   `loadTargets(specName)` / `loadGeneratorCatalog()` / `loadViewCatalog()` — deterministic catalog loading.
+*   `matchesTarget(targetLabels, generatorInfo, viewInfo)` — the single matching predicate. Returns a verdict (`matched` or `reason: 'incompatible-type' | 'unsupported-label' | 'rejected-label'` with the offending label), so diagnostics come for free and no caller can apply a partial rule set.
+*   `matchTargets(targets, generators, views)` — the full `(target, generator, view)` tuple list the pipeline generates from.
+*   `computeSampleKey` / `computeSampleSeed` / `computeSampleFilename` — the identity functions (see *Sample Identity & Determinism*).
+*   `generateSample({generator, labels, seed})` — pure single-draw primitive; `generateSampleWithRetry` adds the attempt loop; `generateSampleByKey({sampleKey, attempt, specName})` replays any recorded sample in isolation; `generateTargetSamples(target, ...)` produces everything one target yields.
 
 #### `src/scripts/generate-dataset.ts`
 The primary pipeline orchestrator.
 *   **Execution**: `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only]`
-*   **Function**: Bootstraps Playwright, dynamically loads all generators and views by scanning their directories, loads target specifications from the spec module (e.g. `src/spec/ccss/` or `src/spec/test/`), filters compatible targets using the ontology solver (`doesGeneratorSupportCompetency`), and captures screenshots headlessly.
-*   **Decoupled Seeding & Proportional Split**: 
-    - **Training Set**: Uses the base random seed (`seed`) to generate problems.
-    - **Validation Set**: Generates validation problems proportionally based on the split ratio (using a validation seed offset).
-    - **Dynamic View Matching**: Automatically queries compatible views for each problem by matching standard targets and generated problem dimensions using view spec constraints and label taxonomy.
-*   **`--training-only` Flag**: If specified, skips validation problem generation, validation image rendering, and validation metadata writing.
+*   **Function**: Loads targets and catalogs via `src/lib/generation.ts`, computes the matched `(target, generator, view)` tuples, generates one question and one solution sample per tuple with structural seeds, and renders them headlessly via Playwright (requires the vite dev server, `npm run dev`).
+*   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of targets selected by `isValTarget`. Both use the same identity-based seeding with the split as a key component.
+*   **Dedup**: Content fingerprints per (split, view); a collision triggers a deterministic retry on the next attempt. The winning attempt is recorded.
+*   **Metadata**: Each image row records its full identity: `sample_key`, `spec`, `target_id`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, plus `problem_summary` (the generator-authored stub id, informational only), `tags` and `parameters`.
+*   **`--training-only` Flag**: If specified, skips validation sample generation, rendering, and metadata writing.
 *   **Clearing Logic**: If no module is specified, it wipes the entire `out/dataset/` directory. If a specific module is provided, it clears only `out/dataset/train/<module>` and `out/dataset/validation/<module>`.
 
 ### `src/scripts/generate-coverage-report.ts`
@@ -58,6 +73,23 @@ The primary pipeline orchestrator.
 ### `src/scripts/validate-dataset.ts`
 *   **Execution**: `npm run validate:dataset -- --generator=X --view=Y [--dataset=Z] [--force]`
 *   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It defaults to reading from `out/dataset/`, but you can target smaller test runs by specifying `--dataset=test` (which dynamically reads from `out/dataset-test/`).
+*   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : checklist hash)` — an image is only re-validated when its pixels or its applicable checklists change. Each cache entry also records the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `retest:sample` command.
+
+### `src/scripts/report-cache-churn.ts`
+*   **Execution**: `npm run report:churn -- [--dataset=test] [--ref=<git-ref>]`
+*   **Function**: Compares the working-tree VQA cache against a git ref (default `HEAD`) by joining entries on their `sample_key`. Reports identities whose image hash changed, classified as *render/code change* (same seed and attempt), *attempt shift* (collision elsewhere or generator behavior change), or *seed scheme change* (should never happen). **Run this after every regeneration**: churn in samples your change should not have affected is a determinism regression.
+
+### `src/scripts/retest-sample.ts`
+*   **Execution**: `npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=<spec_module> [--no-render]`
+*   **Function**: Replays one exact sample draw from its identity, renders it to `out/retest/` (requires `npm run dev`), and compares the image hash against the committed VQA cache. This is the fix-verification loop for failed validations — the exact command for each failure is printed in `validation-report.md`.
+
+### `src/scripts/test-target.ts`
+*   **Execution**: `npm run test:target -- --target=<target.id> --spec=<spec_module> [--render]`
+*   **Function**: Inspects one competency target end to end: which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — the actual images in `out/target-test/`. Use it to debug new targets, matching behavior and cache issues.
+
+### `src/scripts/show-matching-stats.ts`
+*   **Execution**: `npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>`
+*   **Function**: Prints the matched `(generator, view)` pairs for every target of a spec, probes actual generation with production sample keys, surfaces generation failures and `rejectedLabels` boundaries, and summarizes per-generator coverage. Shares its matching logic with the pipeline via `src/lib/generation.ts`.
 
 ### `src/scripts/validate-specs.ts`
 *   **Execution**: `npm run check:specs`
@@ -171,7 +203,7 @@ Create or update the `spec.ts` files for both your generator and visual view:
 - **View (`view.tsx` / components)**: Implement the visual component logic in `src/visuals/views/<renderer>/view.tsx`.
   - Ensure that `isSolutionView: false` visually hides the answer (or renders an empty box/placeholder).
   - Ensure that `isSolutionView: true` renders the exact same layout but with the answer visible.
-  - Use `setSeed(problem.id)` before making randomized layout decisions.
+  - Derive **all** randomized visual decisions from `payload.seed` (e.g. `payload.seed % ICONS.length`, or pass the seed into a helper that calls `setSeed(seed)` before drawing). Never derive entropy from `problem.id`, `Math.random()`, or unseeded `random()` calls — the `withConfig` wrapper seeds the global PRNG from `payload.seed` before config resolution, and any other entropy source breaks render determinism and invalidates the VQA cache.
 
 ### Step 7: Tests (`generator.test.ts`)
 Write robust unit tests verifying that the generator outputs correct math and respects bounds. Run `npm run test` to verify.
@@ -193,3 +225,34 @@ To visually verify and test both your generator and view modules without overwri
 1. Run `npm run check:types` (or `npx tsc --noEmit`) to verify zero TypeScript typing errors across all generators, views, and scripts.
 2. Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` (or `--spec=test`) to confirm that the ontology dynamically binds your targets to your generator and views.
 3. Run `npm run generate:dataset -- --spec=ccss --generator=[moduleName]` to test local dataset generation.
+
+## 6. Efficient Development & Debugging Iteration
+
+The pipeline is built so that a code change only invalidates the samples it actually touches, and every sample can be reproduced in isolation. Use these workflows to keep iteration cheap:
+
+### Debugging one target (new targets, matching issues, cache questions)
+```bash
+npm run test:target -- --target=K.CC.B.5-how-many-0 --spec=ccss --render
+```
+Shows the matched tuples, why near-miss pairs were rejected (`unsupported-label` / `rejected-label` with the offending label), the exact sample keys/seeds/data the pipeline would produce, their status in the VQA cache, and (with `--render` and `npm run dev` running) the rendered images in `out/target-test/`.
+
+### Fixing a failed validation
+Every failure in `validation-report.md` includes its sample identity and a ready-to-run command:
+```bash
+npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=<spec>
+```
+After changing the generator or view, rerun it: if the rendered image is byte-identical to the cached one, the cached validation still applies; if it differs, your fix took effect and only that module needs re-validation (`npm run validate:dataset -- --generator=<module> [--dataset=test]`).
+
+### Checking cache health after a regeneration
+```bash
+npm run report:churn -- --dataset=test        # compares working tree vs HEAD
+```
+The report joins old and new cache entries on `sample_key` and flags identities whose image changed. Expected: churn only in the modules/views you touched. **Churn in unrelated samples is a determinism regression** — the classification (render change vs. attempt shift vs. seed scheme change) tells you where to look.
+
+### Rules that keep invalidation minimal
+- **Batch pixel-affecting changes** (view code, shared components, checklists) and regenerate once — every regeneration+validation cycle costs LLM calls for all changed images.
+- **Checklist edits cascade**: the checklist hash covers root + category + leaf `checklist.md` files, so editing a category checklist re-validates the whole category (images are unaffected, but all their cache keys change). Batch shared-checklist edits.
+- **All view entropy comes from `payload.seed`** — an unseeded `random()` or `Math.random()` in a view makes renders order-dependent under the concurrent worker pool and poisons the cache non-deterministically.
+- **No timing-dependent pixels**: the render harness disables CSS transitions/animations and waits for fonts and images before screenshotting (pages are reused across renders, so mid-transition captures and image-cache warmth would otherwise make pixels depend on render order). Don't rely on animation states in views, and keep new async resources (fonts, images) loadable — a broken image URL now fails the render wait instead of silently screenshotting a blank box.
+- **Pin the Playwright/Chromium version**: cache keys are pixel hashes, so a browser upgrade re-rasterizes everything. Treat browser bumps as deliberate full-invalidation events.
+- **Spec edits renumber targets**: `target.id` embeds the permutation index within its builder, so inserting a variant mid-list shifts the ids (and thus seeds) of subsequent targets in that spec. Append new variants at the end when possible.

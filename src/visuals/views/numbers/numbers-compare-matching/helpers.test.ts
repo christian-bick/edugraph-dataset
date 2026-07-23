@@ -3,7 +3,7 @@ import { getIconIndexes, getCorrectChoice } from './helpers.ts';
 
 describe('numbers-compare-matching helpers', () => {
     it('generates two distinct icon indexes deterministically', () => {
-        const { iconAIndex, iconBIndex } = getIconIndexes('some-problem-id', 8);
+        const { iconAIndex, iconBIndex } = getIconIndexes(1234, 8);
         expect(iconAIndex).not.toBe(iconBIndex);
         expect(iconAIndex).toBeGreaterThanOrEqual(0);
         expect(iconAIndex).toBeLessThan(8);

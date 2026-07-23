@@ -10,15 +10,6 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-naming'>;
 }
 
-function hashCode(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = (hash << 5) - hash + str.charCodeAt(i);
-        hash |= 0;
-    }
-    return Math.abs(hash);
-}
-
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     const commonProps = {
         width: size,
@@ -111,9 +102,9 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
         ? ['cube', 'cone', 'cylinder', 'sphere']
         : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
 
-    const hash = hashCode(problem.id);
-    const rotation = is3D ? 0 : (hash % 360);
-    const scale = is3D ? 1 : parseFloat(((hash % 6) / 10 + 0.8).toFixed(1));
+    const seed = payload.seed ?? 42;
+    const rotation = is3D ? 0 : (seed % 360);
+    const scale = is3D ? 1 : parseFloat(((seed % 6) / 10 + 0.8).toFixed(1));
 
     const promptText = "What shape is this?";
 

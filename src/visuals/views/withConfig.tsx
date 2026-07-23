@@ -1,6 +1,7 @@
 import React from 'react';
 import { ViewRenderPayload } from '../../types/ml-engine.ts';
 import { extractConfig } from '../../lib/utils.ts';
+import { setSeed } from '../../lib/random.ts';
 import { ConfigSchema, ConfigFromSchema } from '../../types/schema.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { ViewValidationError } from '../helpers/validation.ts';
@@ -10,6 +11,9 @@ export function withConfig<T extends ConfigSchema>(
     Component: React.ComponentType<{ config: ConfigFromSchema<T>, payload: ViewRenderPayload<any> }>
 ) {
     return function ConfigWrapper(props: { payload: ViewRenderPayload<any> }) {
+        // Reset the global PRNG from the sample's render seed so config
+        // resolution (and any downstream draws) never depend on render order
+        setSeed(props.payload.seed ?? 42);
         const { config } = extractConfig(Schema, props.payload.labels || []);
         const viewId = props.payload.viewId || 'unknown-view';
 

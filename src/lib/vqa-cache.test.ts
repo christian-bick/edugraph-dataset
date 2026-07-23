@@ -5,12 +5,31 @@ import {
     computeChecklistHash,
     computeImageSha256,
     computeValidationCacheKey,
-    computeInputCacheKey,
     VqaCacheManager,
     VqaCacheEntry
 } from './vqa-cache.ts';
 
 const TEST_CACHE_DIR = resolve(__dirname, '../../temp/test-vqa-cache');
+
+function makeEntry(overrides: Partial<VqaCacheEntry>): VqaCacheEntry {
+    return {
+        validation_cache_key: 'val_key',
+        sample_key: 'test-target-0#test-module#test-view#train#question#inst:0',
+        target_id: 'test-target-0',
+        generator: 'test-module',
+        view: 'test-view',
+        mode: 'question',
+        instance: 0,
+        attempt: 1,
+        seed: 12345,
+        file_name: 'test/sample.png',
+        image_sha256: 'img',
+        checklist_hash: 'check',
+        validated_at: '2026-07-22T00:00:00Z',
+        evaluation: { pass: true, reasoning: '' },
+        ...overrides
+    };
+}
 
 describe('VQA Cache Module', () => {
     beforeEach(() => {
@@ -26,7 +45,7 @@ describe('VQA Cache Module', () => {
         }
     });
 
-    it('should compute deterministic validation and input cache keys', () => {
+    it('should compute deterministic validation cache keys', () => {
         const fileA = resolve(TEST_CACHE_DIR, 'a.md');
         const fileB = resolve(TEST_CACHE_DIR, 'b.md');
         writeFileSync(fileA, '# Checklist A\n- check 1');
@@ -41,46 +60,23 @@ describe('VQA Cache Module', () => {
 
         const valKey = computeValidationCacheKey(imgHash, checklistHash);
         expect(valKey.length).toBe(64);
-
-        const inputKey = computeInputCacheKey(
-            'arithmetic-ops-pairs',
-            'operations-vertical',
-            'question',
-            ['http://edugraph.io/edu/Scope.Addition'],
-            0
-        );
-        expect(inputKey.length).toBe(64);
+        expect(computeValidationCacheKey(imgHash, checklistHash)).toBe(valKey);
     });
 
     it('should store and load VqaCacheEntries in dataset-partitioned folder', () => {
         const manager = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
         expect(manager.size).toBe(0);
 
-        const entry1: VqaCacheEntry = {
+        const entry1 = makeEntry({
             validation_cache_key: 'b_val_key',
-            input_cache_key: 'b_input_key',
             file_name: 'test/sample2.png',
-            image_sha256: 'img-b',
-            checklist_hash: 'check-b',
-            validated_at: '2026-07-22T00:00:00Z',
-            evaluation: {
-                pass: true,
-                reasoning: 'Sample 2 passed'
-            }
-        };
-
-        const entry2: VqaCacheEntry = {
+            evaluation: { pass: true, reasoning: 'Sample 2 passed' }
+        });
+        const entry2 = makeEntry({
             validation_cache_key: 'a_val_key',
-            input_cache_key: 'a_input_key',
             file_name: 'test/sample1.png',
-            image_sha256: 'img-a',
-            checklist_hash: 'check-a',
-            validated_at: '2026-07-22T00:00:00Z',
-            evaluation: {
-                pass: false,
-                reasoning: 'Sample 1 failed'
-            }
-        };
+            evaluation: { pass: false, reasoning: 'Sample 1 failed' }
+        });
 
         manager.set(entry1);
         manager.set(entry2);
@@ -97,20 +93,17 @@ describe('VQA Cache Module', () => {
         const manager2 = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
         expect(manager2.size).toBe(2);
         expect(manager2.get('a_val_key')?.evaluation.reasoning).toBe('Sample 1 failed');
+        expect(manager2.get('a_val_key')?.sample_key).toBe(entry2.sample_key);
+        expect(manager2.get('a_val_key')?.attempt).toBe(1);
     });
 
     it('should append immediately to disk on set() call for crash resilience', () => {
         const manager = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'crash-test');
 
-        const entry: VqaCacheEntry = {
+        const entry = makeEntry({
             validation_cache_key: 'crash_val_key',
-            input_cache_key: 'crash_input_key',
-            file_name: 'test/crash.png',
-            image_sha256: 'img-crash',
-            checklist_hash: 'check-crash',
-            validated_at: '2026-07-22T00:00:00Z',
-            evaluation: { pass: true, reasoning: 'Crash test sample' }
-        };
+            file_name: 'test/crash.png'
+        });
 
         // Call set() without explicit save()
         manager.set(entry);
@@ -129,28 +122,8 @@ describe('VQA Cache Module', () => {
     it('should automatically prune stale keys not in active set', () => {
         const manager = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
 
-        const entry1: VqaCacheEntry = {
-            validation_cache_key: 'active_val_key',
-            input_cache_key: 'active_input_key',
-            file_name: 'test/sample1.png',
-            image_sha256: 'img-a',
-            checklist_hash: 'check-a',
-            validated_at: '2026-07-22T00:00:00Z',
-            evaluation: { pass: true, reasoning: 'Sample 1' }
-        };
-
-        const entry2: VqaCacheEntry = {
-            validation_cache_key: 'stale_val_key',
-            input_cache_key: 'stale_input_key',
-            file_name: 'test/sample2.png',
-            image_sha256: 'img-b',
-            checklist_hash: 'check-b',
-            validated_at: '2026-07-22T00:00:00Z',
-            evaluation: { pass: true, reasoning: 'Sample 2' }
-        };
-
-        manager.set(entry1);
-        manager.set(entry2);
+        manager.set(makeEntry({ validation_cache_key: 'active_val_key', file_name: 'test/sample1.png' }));
+        manager.set(makeEntry({ validation_cache_key: 'stale_val_key', file_name: 'test/sample2.png' }));
         manager.save();
 
         const activeKeys = new Set(['active_val_key']);

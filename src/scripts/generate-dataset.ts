@@ -1,42 +1,67 @@
-import {Browser, chromium} from 'playwright';
-import {dirname, resolve} from 'path';
-import {fileURLToPath, pathToFileURL} from 'url';
-import {appendFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'fs';
-import {AbstractProblem} from '../types/ml-engine.ts';
-import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
-import { findLeafModules, LeafModule } from '../lib/module-resolver.ts';
-import { extractSchemaLabels, generateWithLabels, formatLabelsKey, shortenLabel } from '../lib/utils.ts';
-import { Ability, deductCompatible, Scope } from 'edugraph-ts';
+import { Browser, chromium } from 'playwright';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { AbstractProblem, ProblemStub } from '../types/ml-engine.ts';
+import { shortenLabel } from '../lib/utils.ts';
+import {
+    loadTargets,
+    loadGeneratorCatalog,
+    loadViewCatalog,
+    matchTargets,
+    computeSampleKey,
+    computeSampleFilename,
+    computeSampleSeed,
+    computeContentFingerprint,
+    generateSampleWithRetry,
+    isValTarget,
+    buildProblem,
+    buildRenderPayload,
+    GeneratorCatalogEntry,
+    ViewCatalogEntry,
+    SampleIdentity,
+    SampleMode,
+    SampleSplit
+} from '../lib/generation.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 let OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
+let SPEC_NAME = '';
 const BASE_URL = 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
+const MAX_ATTEMPTS = 50;
+const VAL_RATIO = 0.25;
 
-function createSafeFilename(problemId: string, rendererId: string, params: any, instance: number): string {
-    const safeId = problemId.replace(/[^a-zA-Z0-9-]/g, '-');
-    const paramStrings = Object.keys(params || {})
-        .sort()
-        .map((k) => `${k}-${params[k]}`)
-        .join('_')
-        .replace(/[^a-zA-Z0-9-_]/g, '');
-    
-    const paramPart = paramStrings ? `_${paramStrings}` : '';
-    return `${safeId}_${rendererId}${paramPart}_inst-${instance}`;
+const SPLIT_DIRS: Record<SampleSplit, string> = { train: 'train', val: 'validation' };
+
+/**
+ * One fully specified image to render: the sample identity plus everything
+ * derived from it. All fields are pure functions of (identity, attempt), so
+ * the same tuple always produces the same image regardless of what else is
+ * in the dataset.
+ */
+interface RenderSample {
+    identity: SampleIdentity;
+    sampleKey: string;
+    fileName: string;
+    seed: number;
+    attempt: number;
+    fingerprint: string;
+    problemSummary: string;
+    problem: AbstractProblem;
 }
 
 /**
  * Merges hidden .metadata.jsonl files from module subdirectories into a single root metadata.jsonl
  */
-function finalizeMetadata(splitName: string) {
-    const splitDir = resolve(OUT_DIR, splitName);
+function finalizeMetadata(splitDirName: string) {
+    const splitDir = resolve(OUT_DIR, splitDirName);
     if (!existsSync(splitDir)) return;
 
     const rootMetaPath = resolve(splitDir, 'metadata.jsonl');
-    
+
     // We start fresh for the root metadata.jsonl
     writeFileSync(rootMetaPath, '');
 
@@ -50,7 +75,7 @@ function finalizeMetadata(splitName: string) {
         if (existsSync(moduleMetaPath)) {
             const content = readFileSync(moduleMetaPath, 'utf-8');
             const lines = content.split('\n').filter(l => l.trim() !== '');
-            
+
             const adjustedLines = lines.map(line => {
                 const entry = JSON.parse(line);
                 // Adjust file_name to be relative to the split root
@@ -63,99 +88,141 @@ function finalizeMetadata(splitName: string) {
             }
         }
     }
-    
-    console.log(`[${splitName}] Finalized root metadata.jsonl`);
+
+    console.log(`[${splitDirName}] Finalized root metadata.jsonl`);
 }
 
-class TargetInstanceRegistry {
-    private registry = new Map<string, number>();
+/**
+ * Generates all samples of one module (generator) for one split. Dedup is
+ * scoped per (split, view) via content fingerprints; the val split also
+ * rejects content already present in the train split.
+ */
+function generateModuleSamples(
+    genEntry: GeneratorCatalogEntry,
+    viewCatalog: ViewCatalogEntry[],
+    targets: any[],
+    split: SampleSplit,
+    fingerprintsByView: Map<string, Set<string>>,
+    trainFingerprintsByView?: Map<string, Set<string>>
+): RenderSample[] {
+    const moduleName = genEntry.generatorId;
+    const { tuples } = matchTargets(targets, [genEntry], viewCatalog);
+    const samples: RenderSample[] = [];
 
-    public getNextInstance(
-        moduleName: string,
-        splitName: string,
-        targetLabels: string[],
-        targetConstraints: Record<string, any>
-    ): number {
-        const sortedLabels = formatLabelsKey(targetLabels);
-        const sortedConstraintsKeys = Object.keys(targetConstraints || {}).sort();
-        const sortedConstraints = sortedConstraintsKeys.map(k => `${k}:${targetConstraints[k]}`).join('|');
-        const targetKey = `${moduleName}#${splitName}#${sortedLabels}#${sortedConstraints}`;
+    for (const tuple of tuples) {
+        const target = tuple.target;
+        if (split === 'val' && !isValTarget(target.id, VAL_RATIO)) continue;
 
-        const current = this.registry.get(targetKey) || 0;
-        this.registry.set(targetKey, current + 1);
-        return current;
+        const labels = [...target.labels];
+        const instanceIdx = 0;
+
+        const makeIdentity = (mode: SampleMode): SampleIdentity => ({
+            targetId: target.id,
+            generatorId: moduleName,
+            viewId: tuple.viewId,
+            split,
+            mode,
+            instanceIdx
+        });
+
+        if (!fingerprintsByView.has(tuple.viewId)) {
+            fingerprintsByView.set(tuple.viewId, new Set());
+        }
+        const seenFingerprints = fingerprintsByView.get(tuple.viewId)!;
+        const trainFingerprints = trainFingerprintsByView?.get(tuple.viewId);
+
+        const questionIdentity = makeIdentity('question');
+        const questionKey = computeSampleKey(questionIdentity);
+
+        let question: { stub: ProblemStub | null; attempt: number; seed: number };
+        try {
+            question = generateSampleWithRetry({
+                generator: genEntry.generator,
+                labels,
+                sampleKey: questionKey,
+                maxAttempts: MAX_ATTEMPTS,
+                isDuplicate: (stub) => {
+                    const fingerprint = computeContentFingerprint(stub.data);
+                    return seenFingerprints.has(fingerprint) || (trainFingerprints?.has(fingerprint) ?? false);
+                }
+            });
+        } catch (e) {
+            console.warn(`[${moduleName}] Skipping ${questionKey}: generator error: ${e instanceof Error ? e.message : e}`);
+            continue;
+        }
+        if (!question.stub) {
+            console.warn(`[${moduleName}] Skipping ${questionKey}: no unique stub after ${MAX_ATTEMPTS} attempts`);
+            continue;
+        }
+        seenFingerprints.add(computeContentFingerprint(question.stub.data));
+
+        const solutionIdentity = makeIdentity('solution');
+        const solutionKey = computeSampleKey(solutionIdentity);
+        let solution: { stub: ProblemStub | null; attempt: number; seed: number };
+        try {
+            solution = generateSampleWithRetry({
+                generator: genEntry.generator,
+                labels,
+                sampleKey: solutionKey,
+                maxAttempts: MAX_ATTEMPTS
+            });
+        } catch (e) {
+            solution = { stub: null, attempt: 1, seed: computeSampleSeed(solutionKey, 1) };
+        }
+        // Fall back to the question stub when no independent solution draw succeeded
+        const solutionStub = solution.stub || question.stub;
+
+        samples.push({
+            identity: questionIdentity,
+            sampleKey: questionKey,
+            fileName: computeSampleFilename(questionIdentity),
+            seed: question.seed,
+            attempt: question.attempt,
+            fingerprint: computeContentFingerprint(question.stub.data),
+            problemSummary: question.stub.id,
+            problem: buildProblem({ stub: question.stub, sampleKey: questionKey, type: genEntry.generator.type, labels })
+        });
+        samples.push({
+            identity: solutionIdentity,
+            sampleKey: solutionKey,
+            fileName: computeSampleFilename(solutionIdentity),
+            seed: solution.stub ? solution.seed : question.seed,
+            attempt: solution.stub ? solution.attempt : question.attempt,
+            fingerprint: computeContentFingerprint(solutionStub.data),
+            problemSummary: solutionStub.id,
+            problem: buildProblem({ stub: solutionStub, sampleKey: solutionKey, type: genEntry.generator.type, labels })
+        });
     }
+
+    return samples;
 }
 
-function computeTargetKey(
-    moduleName: string,
-    splitName: string,
-    targetLabels: string[],
-    targetConstraints: Record<string, any>,
-    instance: number
-): string {
-    const sortedLabels = formatLabelsKey(targetLabels);
-    const sortedConstraintsKeys = Object.keys(targetConstraints || {}).sort();
-    const sortedConstraints = sortedConstraintsKeys.map(k => `${k}:${targetConstraints[k]}`).join('|');
-    return `${moduleName}#${splitName}#${sortedLabels}#${sortedConstraints}#inst:${instance}`;
-}
-
-function computeTargetSeed(
-    targetKey: string,
-    attempt: number
-): { seed: number; hashHex: string } {
-    const rawKey = `${targetKey}#att:${attempt}`;
-
-    let hash = 0x811c9dc5;
-    for (let i = 0; i < rawKey.length; i++) {
-        hash ^= rawKey.charCodeAt(i);
-        hash = Math.imul(hash, 0x01000193);
-    }
-    const positiveHash = Math.abs(hash);
-    const seed = positiveHash % 2147483647;
-    const hashHex = positiveHash.toString(16).padStart(8, '0');
-    return { seed, hashHex };
-}
-
-async function renderDatasetSplit(
+async function renderSamples(
     browser: Browser,
-    splitName: string,
+    split: SampleSplit,
     moduleName: string,
-    problems: AbstractProblem[],
+    samples: RenderSample[],
     concurrency: number,
-    viewPathMap: Record<string, string> = {}
-) {
-    if (problems.length === 0) return 0;
-    
-    console.log(`\n--- Rendering [${moduleName}] Split: ${splitName} (${problems.length} abstract problems) ---`);
-    const splitOutputDir = resolve(OUT_DIR, splitName, moduleName);
+    viewPathMap: Record<string, string>
+): Promise<number> {
+    if (samples.length === 0) return 0;
+
+    const splitDirName = SPLIT_DIRS[split];
+    console.log(`\n--- Rendering [${moduleName}] Split: ${splitDirName} (${samples.length} samples) ---`);
+    const splitOutputDir = resolve(OUT_DIR, splitDirName, moduleName);
     if (!existsSync(splitOutputDir)) {
         mkdirSync(splitOutputDir, { recursive: true });
     }
 
-    let totalImages = 0;
-    const metadata: any[] = [];
-
-    
-    const taskQueue: { problem: AbstractProblem, blueprint: any, instance: number }[] = [];
-    problems.forEach((problem) => {
-        const problemBlueprints = (problem as any).matchedBlueprints;
-        if (problemBlueprints) {
-            problemBlueprints.forEach((blueprint: any) => {
-                const mergedConstraints = { 
-                    ...blueprint.constraints, 
-                    ...(problem.data._permutationParams || {}) 
-                };
-                const specificBlueprint = { ...blueprint, constraints: mergedConstraints };
-                for (let i = 0; i < blueprint.instancesPerProblem; i++) {
-                    taskQueue.push({ problem, blueprint: specificBlueprint, instance: i });
-                }
-            });
-        }
-    });
-
+    // Order by view to minimize page navigations; workers pull from a shared
+    // queue, which is safe because every render is fully self-seeded.
+    const taskQueue = [...samples].sort((a, b) =>
+        a.identity.viewId.localeCompare(b.identity.viewId) || a.fileName.localeCompare(b.fileName)
+    );
     const totalTasks = taskQueue.length;
     let completedTasks = 0;
+    let totalImages = 0;
+    const metadata: any[] = [];
 
     const processQueue = async () => {
         const context = await browser.newContext();
@@ -164,65 +231,66 @@ async function renderDatasetSplit(
 
         try {
             while (true) {
-                const task = taskQueue.shift();
-                if (!task) break;
+                const sample = taskQueue.shift();
+                if (!sample) break;
 
-                const { problem, blueprint, instance } = task;
-                const viewPath = viewPathMap[blueprint.viewId] || blueprint.viewId;
+                const { identity } = sample;
+                const viewPath = viewPathMap[identity.viewId] || identity.viewId;
                 const url = `${BASE_URL}/visuals/views/${viewPath}/view.html`;
 
                 if (currentViewUrl !== url) {
                     await page.goto(url, { waitUntil: 'networkidle' });
                     await page.waitForFunction(() => typeof (window as any).renderView === 'function');
+                    // CSS transitions/animations make pixels depend on screenshot
+                    // timing and on the previous render of the reused page —
+                    // disable them so every render settles instantly.
+                    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
                     currentViewUrl = url;
                 }
 
-                const baseFilename = createSafeFilename(problem.id, blueprint.viewId, blueprint.constraints, instance);
+                const payload = buildRenderPayload({
+                    problem: sample.problem,
+                    viewId: identity.viewId,
+                    labels: sample.problem.tags || [],
+                    mode: identity.mode,
+                    seed: sample.seed
+                });
 
-                const renderAndRecord = async (probObj: AbstractProblem, isSolutionView: boolean, modeTag: string, modeName: string) => {
-                    const payload: any = {
-                        problem: probObj,
-                        viewId: blueprint.viewId,
-                        labels: probObj.tags || [],
-                        isSolutionView
-                    };
+                await page.evaluate((p) => window.renderView!(p), payload);
+                // Wait for fonts and images to be fully loaded so pixel output
+                // does not depend on cache warmth of the reused page.
+                await page.waitForFunction(() =>
+                    document.fonts.status === 'loaded'
+                    && Array.from(document.images).every(img => img.complete && img.naturalWidth > 0)
+                );
+                await page.waitForTimeout(60);
 
-                    await page.evaluate((p) => window.renderView!(p), payload);
-                    await page.waitForTimeout(60);
+                const outPath = resolve(splitOutputDir, sample.fileName);
+                await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
+                totalImages++;
 
-                    const filename = `${baseFilename}_mode-${modeTag}.png`;
-                    const outPath = resolve(splitOutputDir, filename);
-                    await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
-                    
-                    totalImages++;
-
-                    const { _permutationParams, ...cleanedData } = probObj.data;
-
-                    return {
-                        file_name: filename,
-                        problem_id: probObj.id,
-                        generator: moduleName,
-                        view: blueprint.viewId,
-                        type: probObj.type,
-                        solution_visible: isSolutionView,
-                        mode: modeName,
-                        target_key: (probObj as any).targetKey || '',
-                        tags: (probObj.tags || []).map(shortenLabel).sort(),
-                        parameters: {
-                            ...cleanedData,
-                            ...blueprint.constraints
-                        }
-                    };
-                };
-
-                const qMeta = await renderAndRecord(problem, false, 'Q', 'question');
-                const solProblem = (problem as any).solutionProblem || problem;
-                const aMeta = await renderAndRecord(solProblem, true, 'S', 'solution');
-                metadata.push(qMeta, aMeta);
+                metadata.push({
+                    file_name: sample.fileName,
+                    sample_key: sample.sampleKey,
+                    spec: SPEC_NAME,
+                    target_id: identity.targetId,
+                    generator: identity.generatorId,
+                    view: identity.viewId,
+                    mode: identity.mode,
+                    instance: identity.instanceIdx,
+                    attempt: sample.attempt,
+                    seed: sample.seed,
+                    content_fingerprint: sample.fingerprint,
+                    problem_summary: sample.problemSummary,
+                    type: sample.problem.type,
+                    solution_visible: identity.mode === 'solution',
+                    tags: (sample.problem.tags || []).map(shortenLabel).sort(),
+                    parameters: sample.problem.data
+                });
 
                 completedTasks++;
                 if (completedTasks % Math.max(1, Math.floor(totalTasks / 10)) === 0) {
-                    console.log(`[${moduleName}:${splitName}] Progress: ${Math.floor((completedTasks / totalTasks) * 100)}%`);
+                    console.log(`[${moduleName}:${splitDirName}] Progress: ${Math.floor((completedTasks / totalTasks) * 100)}%`);
                 }
             }
         } catch (err) {
@@ -236,267 +304,47 @@ async function renderDatasetSplit(
     for (let i = 0; i < Math.min(concurrency, taskQueue.length); i++) {
         workers.push(processQueue());
     }
-
     await Promise.allSettled(workers);
-    
+
     metadata.sort((a, b) => a.file_name.localeCompare(b.file_name));
     const metaPath = resolve(splitOutputDir, '.metadata.jsonl');
     const jsonlContent = metadata.map(entry => JSON.stringify(entry)).join('\n') + '\n';
     writeFileSync(metaPath, jsonlContent);
-    console.log(`[${moduleName}:${splitName}] Wrote modular metadata to .metadata.jsonl`);
-    
+    console.log(`[${moduleName}:${splitDirName}] Wrote modular metadata to .metadata.jsonl`);
+
     return totalImages;
 }
 
 async function runModulePipeline(
-    browser: any,
-    leafMod: LeafModule,
-    trainingOnly: boolean,
+    browser: Browser,
+    genEntry: GeneratorCatalogEntry,
+    viewCatalog: ViewCatalogEntry[],
     allTargets: any[],
-    targetView?: string
-) {
-    const moduleName = leafMod.id;
-    console.log(`\n--- Starting Pipeline for Module: ${moduleName} (${leafMod.relativePath}) ---`);
-    
-    // Dynamic import of spec.ts
-    const specPath = resolve(leafMod.absolutePath, 'spec.ts');
-    if (!existsSync(specPath)) {
-        throw new Error(`spec.ts not found in generator ${moduleName} at ${leafMod.absolutePath}`);
-    }
-    const specModule = await import(pathToFileURL(specPath).href);
-    const generatorSpec = specModule.spec;
-    const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
-    const className = camelCase(moduleName[0].toUpperCase() + moduleName.slice(1)) + 'Generator';
-    
-    // Dynamic import of generator class
-    const generatorPath = resolve(leafMod.absolutePath, 'generator.ts');
-    const generatorModule = await import(pathToFileURL(generatorPath).href);
-    const GeneratorClass = generatorModule[className];
-    if (!GeneratorClass) {
-        throw new Error(`Could not find generator class ${className} in ${moduleName}`);
-    }
-    const generator = new GeneratorClass();
-    
-    // Combine base supported labels with dynamically extracted schema labels
-    const generatorGeneralLabels = Array.from(new Set([
-        ...(generatorSpec?.generalLabels || []),
-        ...extractSchemaLabels(generator.schema)
-    ]));
+    trainingOnly: boolean
+): Promise<number> {
+    const moduleName = genEntry.generatorId;
+    console.log(`\n--- Starting Pipeline for Module: ${moduleName} (${genEntry.module.relativePath}) ---`);
 
-    const { setSeed } = await import(`../lib/random.ts`);
-
-    const trainDataset: AbstractProblem[] = [];
-    const valDataset: AbstractProblem[] = [];
-    
-    const trainKeys = new Set<string>();
-    const valKeys = new Set<string>();
-
-    const valRatio = 0.25; // Default 80/20 train/val split
-
-    console.log(`Using decoupled ontology-driven matching for ${moduleName}...`);
-    
-    const viewToType = getViewToProblemTypeMap();
-    const abilitiesList = new Set<string>(Object.values(Ability));
-    const genTypeName = getGeneratorProblemType(moduleName);
-
-    // Scan src/visuals/views directory to dynamically load specs for ALL views
-    const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-    const allViewModules = findLeafModules(viewsDir);
-    
-    const compatibleViews = [];
-    const viewGeneralLabelsMap: Record<string, string[]> = {};
     const viewPathMap: Record<string, string> = {};
-    const viewCategoryMap: Record<string, string | null> = {};
-
-    for (const vMod of allViewModules) {
-        try {
-            const viewSpecModule = await import(pathToFileURL(resolve(vMod.absolutePath, 'spec.ts')).href);
-            compatibleViews.push(viewSpecModule.spec);
-            viewPathMap[vMod.id] = vMod.relativePath;
-            viewCategoryMap[vMod.id] = vMod.category;
-            
-            const viewCamelCase = vMod.id[0].toUpperCase() + vMod.id.slice(1);
-            const viewSchema = viewSpecModule[`${viewCamelCase}ViewSchema`];
-            const viewLabels = Array.from(new Set([
-                ...(viewSpecModule.spec?.generalLabels || []),
-                ...extractSchemaLabels(viewSchema)
-            ]));
-            viewGeneralLabelsMap[vMod.id] = viewLabels;
-        } catch (e) {
-            console.warn(`Could not import view spec for ${vMod.id}:`, e);
-        }
+    for (const view of viewCatalog) {
+        viewPathMap[view.viewId] = view.module.relativePath;
     }
 
-    const filteredViews = compatibleViews.filter(v => viewToType[v.viewId] === genTypeName && (!targetView || v.viewId === targetView || viewCategoryMap[v.viewId] === targetView));
+    const trainFingerprints = new Map<string, Set<string>>();
+    const trainSamples = generateModuleSamples(genEntry, viewCatalog, allTargets, 'train', trainFingerprints);
 
-    // Filter competency targets for this generator using union of labels
-    const matchedTargets = allTargets.filter(target => {
-        if (!generatorGeneralLabels) return false;
-        return filteredViews.some(viewSpec => {
-            const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
-            if (!viewLabels) return false;
-            return target.labels.every((compLabel: string) => {
-                if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
-                if (abilitiesList.has(compLabel)) {
-                    return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-                }
-                const supportedByGen = generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
-                const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-                return supportedByGen || supportedByView;
-            });
-        });
-    });
-
-    console.log(`Found ${matchedTargets.length} matched competency targets for generator [${moduleName}]`);
-
-    const targetRegistry = new TargetInstanceRegistry();
-
-    for (const target of matchedTargets) {
-        for (const viewSpec of filteredViews) {
-            const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
-            if (!viewLabels || !generatorGeneralLabels) continue;
-            const labelsMatch = target.labels.every((compLabel: string) => {
-                if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
-                if (abilitiesList.has(compLabel)) {
-                    return viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-                }
-                const supportedByGen = generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
-                const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-                return supportedByGen || supportedByView;
-            });
-            if (!labelsMatch) continue;
-
-            if (viewSpec.rejectedLabels && target.labels.some((l: string) => viewSpec.rejectedLabels!.includes(l))) {
-                continue;
-            }
-
-            const combinedLabels = [...target.labels];
-            let countForThisTarget = 0;
-            let attempts = 0;
-            const countPerPermutation = 1;
-            const maxAttempts = 50;
-
-            while (countForThisTarget < countPerPermutation && attempts < maxAttempts) {
-                attempts++;
-                
-                const qInstance = targetRegistry.getNextInstance(moduleName, 'train', combinedLabels, target.constraints || {});
-                const qTargetKey = computeTargetKey(moduleName, 'train', combinedLabels, target.constraints || {}, qInstance);
-                const { seed: qSeed, hashHex: qHashHex } = computeTargetSeed(qTargetKey, attempts);
-                setSeed(qSeed);
-                
-                const problemStub = generateWithLabels(generator, combinedLabels);
-
-                if (problemStub) {
-                    if (trainKeys.has(`${problemStub.id}-${viewSpec.viewId}`)) {
-                        continue;
-                    }
-                    trainKeys.add(`${problemStub.id}-${viewSpec.viewId}`);
-                    countForThisTarget++;
-
-                    const sInstance = targetRegistry.getNextInstance(moduleName, 'train', combinedLabels, target.constraints || {});
-                    const sTargetKey = computeTargetKey(moduleName, 'train', combinedLabels, target.constraints || {}, sInstance);
-                    const { seed: sSeed, hashHex: sHashHex } = computeTargetSeed(sTargetKey, attempts);
-                    setSeed(sSeed);
-                    const solutionStub = generateWithLabels(generator, combinedLabels) || problemStub;
-
-                    const problem: AbstractProblem = {
-                        ...problemStub,
-                        id: `${moduleName}-train-${trainDataset.length + 1}-${problemStub.id}`,
-                        type: generator.type,
-                        tags: Array.from(new Set([...combinedLabels, ...(problemStub.tags || [])]))
-                    };
-                    (problem as any).targetKey = qTargetKey;
-                    (problem as any).targetKeyHash = qHashHex;
-
-                    const solutionProblem: AbstractProblem = {
-                        ...solutionStub,
-                        id: `${moduleName}-train-sol-${trainDataset.length + 1}-${solutionStub.id}`,
-                        type: generator.type,
-                        tags: Array.from(new Set([...combinedLabels, ...(solutionStub.tags || [])]))
-                    };
-                    (solutionProblem as any).targetKey = sTargetKey;
-                    (solutionProblem as any).targetKeyHash = sHashHex;
-
-                    (problem as any).matchedBlueprints = [{
-                        viewId: viewSpec.viewId,
-                        constraints: {},
-                        instancesPerProblem: 1
-                    }];
-                    (problem as any).solutionProblem = solutionProblem;
-                    trainDataset.push(problem);
-
-                    // Generate validation sample
-                    if (!trainingOnly) {
-                        const currentValCount = Math.floor(trainDataset.length * valRatio);
-                        const prevValCount = Math.floor((trainDataset.length - 1) * valRatio);
-                        
-                        if (currentValCount > prevValCount) {
-                            let valAttempts = 0;
-                            let valSuccess = false;
-                            while (!valSuccess && valAttempts < 50) {
-                                valAttempts++;
-                                const valQInstance = targetRegistry.getNextInstance(moduleName, 'val', combinedLabels, target.constraints || {});
-                                const valQTargetKey = computeTargetKey(moduleName, 'val', combinedLabels, target.constraints || {}, valQInstance);
-                                const { seed: valQSeed, hashHex: valQHashHex } = computeTargetSeed(valQTargetKey, valAttempts);
-                                setSeed(valQSeed);
-                                const valStub = generateWithLabels(generator, combinedLabels);
-
-                                const valSInstance = targetRegistry.getNextInstance(moduleName, 'val', combinedLabels, target.constraints || {});
-                                const valSTargetKey = computeTargetKey(moduleName, 'val', combinedLabels, target.constraints || {}, valSInstance);
-                                const { seed: valSSeed, hashHex: valSHashHex } = computeTargetSeed(valSTargetKey, valAttempts);
-                                setSeed(valSSeed);
-                                const valSolutionStub = generateWithLabels(generator, combinedLabels) || valStub;
-
-                                if (valStub) {
-                                    if (valKeys.has(`${valStub.id}-${viewSpec.viewId}`) || trainKeys.has(`${valStub.id}-${viewSpec.viewId}`)) {
-                                        continue;
-                                    }
-                                    
-                                    valKeys.add(`${valStub.id}-${viewSpec.viewId}`);
-                                    valSuccess = true;
-
-                                    const valProblem: AbstractProblem = {
-                                        ...valStub,
-                                        id: `${moduleName}-val-${valDataset.length + 1}-${valStub.id}`,
-                                        type: generator.type,
-                                        tags: Array.from(new Set([...combinedLabels, ...(valStub.tags || [])]))
-                                    };
-                                    (valProblem as any).targetKey = valQTargetKey;
-                                    (valProblem as any).targetKeyHash = valQHashHex;
-
-                                    const activeValSolStub = valSolutionStub || valStub;
-                                    const valSolutionProblem: AbstractProblem = {
-                                        ...activeValSolStub,
-                                        id: `${moduleName}-val-sol-${valDataset.length + 1}-${activeValSolStub.id}`,
-                                        type: generator.type,
-                                        tags: Array.from(new Set([...combinedLabels, ...(activeValSolStub.tags || [])]))
-                                    };
-                                    (valSolutionProblem as any).targetKey = valSTargetKey;
-                                    (valSolutionProblem as any).targetKeyHash = valSHashHex;
-
-                                    (valProblem as any).matchedBlueprints = [{
-                                        viewId: viewSpec.viewId,
-                                        constraints: {},
-                                        instancesPerProblem: 1
-                                    }];
-                                    (valProblem as any).solutionProblem = valSolutionProblem;
-                                    valDataset.push(valProblem);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    let valSamples: RenderSample[] = [];
+    if (!trainingOnly) {
+        const valFingerprints = new Map<string, Set<string>>();
+        valSamples = generateModuleSamples(genEntry, viewCatalog, allTargets, 'val', valFingerprints, trainFingerprints);
     }
 
-    console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);    console.log(`[${moduleName}] Generated problems. Train (${trainDataset.length}), Validation (${valDataset.length})`);
+    console.log(`[${moduleName}] Generated samples. Train (${trainSamples.length}), Validation (${valSamples.length})`);
 
     let moduleImages = 0;
-    moduleImages += await renderDatasetSplit(browser, 'train', moduleName, trainDataset, DEFAULT_CONCURRENCY, viewPathMap);
-    
-    if (!trainingOnly && valDataset.length > 0) {
-        moduleImages += await renderDatasetSplit(browser, 'validation', moduleName, valDataset, DEFAULT_CONCURRENCY, viewPathMap);
+    moduleImages += await renderSamples(browser, 'train', moduleName, trainSamples, DEFAULT_CONCURRENCY, viewPathMap);
+    if (valSamples.length > 0) {
+        moduleImages += await renderSamples(browser, 'val', moduleName, valSamples, DEFAULT_CONCURRENCY, viewPathMap);
     }
     return moduleImages;
 }
@@ -516,36 +364,9 @@ async function main() {
     if (specName === 'test') {
         OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset-test');
     }
+    SPEC_NAME = specName;
 
-    const specPath = resolve(PROJECT_ROOT, 'src', 'spec', specName);
-    const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
-    const specFile = !specDir && existsSync(`${specPath}.ts`) ? `${specPath}.ts` : null;
-
-    if (!specDir && !specFile) {
-        console.error(`Error: Spec module not found at: ${specPath}`);
-        process.exit(1);
-    }
-
-    const allTargets: any[] = [];
-    if (specDir) {
-        const files = readdirSync(specDir).filter(f => f.endsWith('.ts')).sort();
-        for (const file of files) {
-            const filePath = resolve(specDir, file);
-            const module = await import(pathToFileURL(filePath).href);
-            for (const [, value] of Object.entries(module)) {
-                if (Array.isArray(value)) {
-                    allTargets.push(...value);
-                }
-            }
-        }
-    } else if (specFile) {
-        const module = await import(pathToFileURL(specFile).href);
-        for (const [, value] of Object.entries(module)) {
-            if (Array.isArray(value)) {
-                allTargets.push(...value);
-            }
-        }
-    }
+    const allTargets = await loadTargets(specName);
 
     const targetModule = process.env.npm_config_generator || (args.find(a => a.includes('generator='))?.split('generator=')[1]);
     const targetView = process.env.npm_config_view || (args.find(a => a.includes('view='))?.split('view=')[1]);
@@ -559,40 +380,47 @@ async function main() {
         mkdirSync(OUT_DIR, { recursive: true });
     } else {
         // Clear specific module in both splits
-        ['train', 'validation'].forEach(split => {
-            const moduleDir = resolve(OUT_DIR, split, targetModule!);
+        Object.values(SPLIT_DIRS).forEach(splitDirName => {
+            const moduleDir = resolve(OUT_DIR, splitDirName, targetModule!);
             if (existsSync(moduleDir)) {
-                console.log(`Cleaning target directory for module [${targetModule}] in split [${split}]...`);
+                console.log(`Cleaning target directory for module [${targetModule}] in split [${splitDirName}]...`);
                 rmSync(moduleDir, { recursive: true, force: true });
             }
         });
         if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
     }
 
+    const generatorCatalog = await loadGeneratorCatalog();
+    const fullViewCatalog = await loadViewCatalog();
+
+    const modulesToRun = targetModule
+        ? generatorCatalog.filter(g =>
+            g.generatorId === targetModule || g.module.relativePath === targetModule || g.module.category === targetModule)
+        : generatorCatalog;
+
+    const viewCatalog = targetView
+        ? fullViewCatalog.filter(v =>
+            v.viewId === targetView || v.module.relativePath === targetView || v.module.category === targetView)
+        : fullViewCatalog;
+
     const browser = await chromium.launch({ headless: true });
     const startTime = performance.now();
     let totalImages = 0;
 
-    const generatorsPath = resolve(PROJECT_ROOT, 'src', 'generators');
-    const allModules = findLeafModules(generatorsPath);
-    const modulesToRun = targetModule
-        ? allModules.filter(m => m.id === targetModule || m.relativePath === targetModule || m.category === targetModule)
-        : allModules;
-
-    for (const leafMod of modulesToRun) {
+    for (const genEntry of modulesToRun) {
         try {
-            totalImages += await runModulePipeline(browser, leafMod, trainingOnly, allTargets, targetView);
+            totalImages += await runModulePipeline(browser, genEntry, viewCatalog, allTargets, trainingOnly);
         } catch (e) {
-            console.error(`Failed to run pipeline for ${leafMod.id}:`, e);
+            console.error(`Failed to run pipeline for ${genEntry.generatorId}:`, e);
         }
     }
 
     await browser.close();
 
     // Finalization step: Merge metadata
-    finalizeMetadata('train');
+    finalizeMetadata(SPLIT_DIRS.train);
     if (!trainingOnly) {
-        finalizeMetadata('validation');
+        finalizeMetadata(SPLIT_DIRS.val);
     }
 
     const duration = ((performance.now() - startTime) / 1000).toFixed(2);

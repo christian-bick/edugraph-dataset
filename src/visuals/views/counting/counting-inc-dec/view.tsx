@@ -15,14 +15,14 @@ interface CoreProps {
 
 const CountingIncDecCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
+    const seed = payload.seed ?? 42;
     const data = problem.data;
 
     validateProblemData('counting-inc-dec', data, ['numObjects', 'incDecType', 'incDecAnswer']);
 
     const icon = useMemo(() => {
-        const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
-        return ICONS[iconIndex];
-    }, [problem.id]);
+        return ICONS[seed % ICONS.length];
+    }, [seed]);
 
     const isInc = data.incDecType === 'inc';
     const isDec = data.incDecType === 'dec';

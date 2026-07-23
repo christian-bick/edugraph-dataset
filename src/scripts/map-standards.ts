@@ -4,7 +4,7 @@ import path from 'path';
 import https from 'https';
 import { IncomingMessage } from 'http';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { Ability, Area, Scope, deductCompatible } from 'edugraph-ts';
+import { Ability, Area, Scope } from 'edugraph-ts';
 import { CompetencyTarget, OntologyTodo } from '../types/ml-engine.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
 import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';

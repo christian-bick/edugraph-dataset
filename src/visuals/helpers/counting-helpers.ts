@@ -8,9 +8,9 @@ export interface Position {
 export function generatePositions(
     numObjects: number,
     arrangement: string,
-    problemId: string
+    seed: number
 ): Position[] {
-    setSeed(problemId);
+    setSeed(seed);
     const positions: Position[] = [];
     const width = 450;
     const height = 300;

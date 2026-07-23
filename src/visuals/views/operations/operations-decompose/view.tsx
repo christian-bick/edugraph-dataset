@@ -64,6 +64,7 @@ function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
 
 const OperationsDecomposeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
+    const seed = payload.seed ?? 42;
     const data = problem.data;
     validateProblemData('operations-decompose', data, ['targetNumber', 'pair1', 'pair2']);
 
@@ -72,9 +73,8 @@ const OperationsDecomposeCore = ({ config: _config, payload }: CoreProps) => {
     const pair2 = data.pair2;
 
     const icon = useMemo(() => {
-        const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
-        return ICONS[iconIndex];
-    }, [problem.id]);
+        return ICONS[seed % ICONS.length];
+    }, [seed]);
 
     const box1_p1 = isSolutionView ? pair1[0] : '';
     const box2_p1 = isSolutionView ? pair1[1] : '';

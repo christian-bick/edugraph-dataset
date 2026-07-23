@@ -88,7 +88,7 @@ export function computeSampleSeed(sampleKey: string, attempt: number): number {
     return fnv1a(`${sampleKey}${KEY_SEPARATOR}att:${attempt}`) % 2147483647;
 }
 
-function sanitizeFilePart(part: string): string {
+export function sanitizeFilePart(part: string): string {
     return part.replace(/[^a-zA-Z0-9-]/g, '-');
 }
 
@@ -552,6 +552,27 @@ export function isValTarget(targetId: string, ratio: number): boolean {
     if (ratio <= 0) return false;
     if (ratio >= 1) return true;
     return fnv1a(`val-split${KEY_SEPARATOR}${targetId}`) % 10000 < ratio * 10000;
+}
+
+export interface BuildProblemInput {
+    stub: ProblemStub;
+    sampleKey: string;
+    type: AbstractProblem['type'];
+    labels: string[];
+}
+
+/**
+ * Wraps a generated stub into the AbstractProblem sent to the renderer. The
+ * problem id is the sample key — stable, unique and carrying no entropy role
+ * (views draw all randomness from the render seed).
+ */
+export function buildProblem({ stub, sampleKey, type, labels }: BuildProblemInput): AbstractProblem {
+    return {
+        id: sampleKey,
+        type,
+        data: stub.data,
+        tags: Array.from(new Set([...labels, ...(stub.tags || [])]))
+    };
 }
 
 export interface BuildRenderPayloadInput {

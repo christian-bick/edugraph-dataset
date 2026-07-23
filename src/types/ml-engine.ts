@@ -80,13 +80,11 @@ export interface ProblemGenerator<TData = any, TConfig = any> {
 }
 
 /**
- * A single label/constraint permutation produced by the DatasetPermutationBuilder.
+ * A single label permutation produced by the DatasetPermutationBuilder.
  */
 export interface GeneratorInput {
     /** Pedagogical ontology labels (Area/Scope/Ability IRIs) */
     labels: string[];
-    /** Technical constraints that are not expressible via ontology labels */
-    constraints: Record<string, any>;
 }
 
 /**
@@ -96,7 +94,6 @@ export interface GeneratorInput {
 export interface CompetencyTarget {
     id: string;
     labels: string[];
-    constraints?: Record<string, any>;
     explanation?: string;
 }
 

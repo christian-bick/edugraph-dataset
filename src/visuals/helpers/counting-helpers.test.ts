@@ -3,7 +3,7 @@ import { generatePositions } from './counting-helpers.ts';
 
 describe('counting-helpers', () => {
     it('returns correct number of positions for line layout', () => {
-        const pos = generatePositions(5, 'line', 'test-1');
+        const pos = generatePositions(5, 'line', 101);
         expect(pos.length).toBe(5);
         // All y coordinates should be equal for a horizontal line
         const yCoord = pos[0].y;
@@ -11,17 +11,17 @@ describe('counting-helpers', () => {
     });
 
     it('returns correct number of positions for circle layout', () => {
-        const pos = generatePositions(6, 'circle', 'test-2');
+        const pos = generatePositions(6, 'circle', 102);
         expect(pos.length).toBe(6);
     });
 
     it('returns correct number of positions for array layout', () => {
-        const pos = generatePositions(8, 'array', 'test-3');
+        const pos = generatePositions(8, 'array', 103);
         expect(pos.length).toBe(8);
     });
 
     it('returns correct number of positions for scattered layout', () => {
-        const pos = generatePositions(10, 'scattered', 'test-4');
+        const pos = generatePositions(10, 'scattered', 104);
         expect(pos.length).toBe(10);
     });
 });

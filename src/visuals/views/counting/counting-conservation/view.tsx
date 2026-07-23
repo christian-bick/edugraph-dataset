@@ -16,6 +16,7 @@ interface CoreProps {
 
 const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
+    const seed = payload.seed ?? 42;
     const data = problem.data;
 
     validateProblemData('counting-conservation', data, ['numObjects']);
@@ -23,9 +24,8 @@ const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
     const number = data.numObjects;
 
     const icon = useMemo(() => {
-        const iconIndex = Array.from(problem.id).reduce((acc, char) => acc + char.charCodeAt(0), 0) % ICONS.length;
-        return ICONS[iconIndex];
-    }, [problem.id]);
+        return ICONS[seed % ICONS.length];
+    }, [seed]);
 
     const closePositions = useMemo(() => getClosePositions(number), [number]);
     const farPositions = useMemo(() => getFarPositions(number), [number]);

@@ -1,7 +1,7 @@
 import {random, setSeed} from '../../../../lib/random.ts';
 
-export function getBlankPart(problemId: string, requestedBlank: string): string {
-    setSeed(problemId);
+export function getBlankPart(seed: number, requestedBlank: string): string {
+    setSeed(seed);
     
     switch (requestedBlank) {
         case 'problem': {
