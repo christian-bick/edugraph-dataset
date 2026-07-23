@@ -1,17 +1,12 @@
-import { resolve, dirname } from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
-import { existsSync, lstatSync, readdirSync } from 'fs';
-import { isSubConceptOf, isCompatibleConcept } from '../lib/ontology.ts';
-import { setSeed } from '../lib/random.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
-import { Ability } from 'edugraph-ts';
-import { extractSchemaLabels, generateWithLabels } from '../lib/utils.ts';
-import { CompetencyTarget } from '../types/ml-engine.ts';
-import { findLeafModules } from '../lib/module-resolver.ts';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PROJECT_ROOT = resolve(__dirname, '..', '..');
+import {
+    loadTargets,
+    loadGeneratorCatalog,
+    loadViewCatalog,
+    matchTargets,
+    computeSampleKey,
+    generateSampleWithRetry
+} from '../lib/generation.ts';
+import { shortenLabel } from '../lib/utils.ts';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -24,107 +19,23 @@ async function main() {
         process.exit(1);
     }
 
-    const specPath = resolve(PROJECT_ROOT, 'src', 'spec', specName);
-    const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
-    const specFile = !specDir && existsSync(`${specPath}.ts`) ? `${specPath}.ts` : null;
-
-    if (!specDir && !specFile) {
-        console.error(`Error: Spec module not found at: ${specPath}`);
-        process.exit(1);
-    }
-
-    const allTargets: CompetencyTarget[] = [];
-    if (specDir) {
-        const files = readdirSync(specDir).filter(f => f.endsWith('.ts'));
-        for (const file of files) {
-            const filePath = resolve(specDir, file);
-            const module = await import(pathToFileURL(filePath).href);
-            for (const [, value] of Object.entries(module)) {
-                if (Array.isArray(value)) {
-                    allTargets.push(...value);
-                }
-            }
-        }
-    } else if (specFile) {
-        const module = await import(pathToFileURL(specFile).href);
-        for (const [, value] of Object.entries(module)) {
-            if (Array.isArray(value)) {
-                allTargets.push(...value);
-            }
-        }
-    }
+    const [allTargets, generatorCatalog, viewCatalog] = await Promise.all([
+        loadTargets(specName),
+        loadGeneratorCatalog(),
+        loadViewCatalog()
+    ]);
 
     console.log('========================================================================');
     console.log('                 EduGraph Competency Matching Statistics                ');
     console.log('========================================================================\n');
 
-    // 1. Load all view specs
-    const viewsDir = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-    const allViewModules = findLeafModules(viewsDir);
-
-    const allViewSpecs = [];
-    const viewGeneralLabelsMap: Record<string, string[]> = {};
-    for (const vMod of allViewModules) {
-        try {
-            const viewSpecModule = await import(pathToFileURL(resolve(vMod.absolutePath, 'spec.ts')).href);
-            allViewSpecs.push(viewSpecModule.spec);
-
-            const viewCamelCase = vMod.id.replace(/-([a-z])/g, g => g[1].toUpperCase());
-            const camelCaseName = viewCamelCase[0].toUpperCase() + viewCamelCase.slice(1);
-            const viewSchema = viewSpecModule[`${camelCaseName}ViewSchema`];
-            const viewLabels = Array.from(new Set([
-                ...(viewSpecModule.spec?.generalLabels || []),
-                ...extractSchemaLabels(viewSchema)
-            ]));
-            viewGeneralLabelsMap[vMod.id] = viewLabels;
-        } catch (e) {
-            // Ignore missing or invalid specs
-        }
-    }
-
-    // 2. Load all generator specs and classes
-    const generatorsDir = resolve(PROJECT_ROOT, 'src', 'generators');
-    const allGenModules = findLeafModules(generatorsDir);
-
-    const allGeneratorSpecs = [];
-    for (const gMod of allGenModules) {
-        try {
-            const specModule = await import(pathToFileURL(resolve(gMod.absolutePath, 'spec.ts')).href);
-            const generatorSpec = specModule.spec;
-
-            const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
-            const className = camelCase(gMod.id[0].toUpperCase() + gMod.id.slice(1)) + 'Generator';
-            const generatorModule = await import(pathToFileURL(resolve(gMod.absolutePath, 'generator.ts')).href);
-            const GeneratorClass = generatorModule[className];
-            
-            if (GeneratorClass) {
-                const generator = new GeneratorClass();
-                const generatorGeneralLabels = Array.from(new Set([
-                    ...(generatorSpec?.generalLabels || []),
-                    ...extractSchemaLabels(generator.schema)
-                ]));
-                allGeneratorSpecs.push({
-                    generatorId: gMod.id,
-                    spec: generatorSpec,
-                    generatorGeneralLabels,
-                    generator
-                });
-            }
-        } catch (e) {
-            // Ignore errors
-        }
-    }
-
-    console.log(`Loaded ${allViewSpecs.length} View Specifications.`);
-    console.log(`Loaded ${allGeneratorSpecs.length} Generator Specifications.`);
+    console.log(`Loaded ${viewCatalog.length} View Specifications.`);
+    console.log(`Loaded ${generatorCatalog.length} Generator Specifications.`);
     console.log(`Loaded ${allTargets.length} targets from spec module "${specName}".\n`);
-
-    const viewToType = getViewToProblemTypeMap();
-    const abilitiesList = new Set<string>(Object.values(Ability));
 
     let targetCount = 0;
     const generatorStats: Record<string, { targetMatches: number; viewPairs: number }> = {};
-    for (const gen of allGeneratorSpecs) {
+    for (const gen of generatorCatalog) {
         generatorStats[gen.generatorId] = { targetMatches: 0, viewPairs: 0 };
     }
 
@@ -133,70 +44,83 @@ async function main() {
         console.log(`------------------------------------------------------------------------`);
         console.log(`Target ${targetCount}/${allTargets.length}: ${target.id}`);
         console.log(`Labels: ${target.labels.map(l => l.split('/').pop()).join(', ')}`);
-        
+
+        const { tuples, rejections } = matchTargets([target], generatorCatalog, viewCatalog);
+
+        // Group matched tuples per generator and probe actual generation using
+        // the production sample keys, so the stats reflect what the pipeline
+        // would really produce.
+        const viewsByGenerator = new Map<string, string[]>();
+        for (const tuple of tuples) {
+            if (!viewsByGenerator.has(tuple.generatorId)) {
+                viewsByGenerator.set(tuple.generatorId, []);
+            }
+            viewsByGenerator.get(tuple.generatorId)!.push(tuple.viewId);
+        }
+
         let targetHasMatch = false;
 
-        for (const gen of allGeneratorSpecs) {
-            const genTypeName = getGeneratorProblemType(gen.generatorId);
-            if (!genTypeName) continue;
+        for (const [generatorId, viewIds] of viewsByGenerator.entries()) {
+            const generator = generatorCatalog.find(g => g.generatorId === generatorId)!.generator;
+            const generatingViews: string[] = [];
+            const failingViews: string[] = [];
 
-            const compatibleViews = allViewSpecs.filter(v => viewToType[v.viewId] === genTypeName);
-            if (compatibleViews.length === 0) continue;
-
-            if (!gen.generatorGeneralLabels) {
-                continue;
-            }
-
-            // Check if union of labels supports target labels
-            const matchingViewsForTarget = compatibleViews.filter(viewSpec => {
-                const viewLabels = viewGeneralLabelsMap[viewSpec.viewId];
-                if (!viewLabels) return false;
-                return target.labels.every(compLabel => {
-                    if (!compLabel.startsWith('http://edugraph.io/edu/')) return true;
-                    if (abilitiesList.has(compLabel)) {
-                        return viewLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
-                    }
-                    const supportedByGen = gen.generatorGeneralLabels.some((genLabel: string) => isSubConceptOf(compLabel, genLabel));
-                    const supportedByView = viewLabels.some((viewLabel: string) => isCompatibleConcept(compLabel, viewLabel));
-                    return supportedByGen || supportedByView;
+            for (const viewId of viewIds) {
+                const sampleKey = computeSampleKey({
+                    targetId: target.id,
+                    generatorId,
+                    viewId,
+                    split: 'train',
+                    mode: 'question',
+                    instanceIdx: 0
                 });
-            });
-
-            if (matchingViewsForTarget.length > 0) {
-                const matchedViews = [];
-                let anyStubReturnedNull = false;
-                
-                for (const viewSpec of matchingViewsForTarget) {
-                    const combinedLabels = [...target.labels, ...(viewSpec.restrictions || [])];
-                    let problemStub = null;
-                    
-                    for (let seed = 42; seed < 52 && !problemStub; seed++) {
-                        setSeed(seed);
-                        problemStub = generateWithLabels(gen.generator, combinedLabels);
-                    }
-                    
-                    if (problemStub) {
-                        matchedViews.push(viewSpec);
+                try {
+                    const { stub } = generateSampleWithRetry({
+                        generator,
+                        labels: [...target.labels],
+                        sampleKey,
+                        maxAttempts: 10
+                    });
+                    if (stub) {
+                        generatingViews.push(viewId);
                     } else {
-                        anyStubReturnedNull = true;
+                        failingViews.push(`${viewId} (null stub)`);
                     }
-                }
-
-                if (matchedViews.length > 0) {
-                    targetHasMatch = true;
-                    generatorStats[gen.generatorId].targetMatches++;
-                    generatorStats[gen.generatorId].viewPairs += matchedViews.length;
-
-                    console.log(`  └─► Generator: [${gen.generatorId}]`);
-                    console.log(`      └─► Compatible Views: [${matchedViews.map(v => v.viewId).join(', ')}]`);
-                } else if (anyStubReturnedNull) {
-                    console.log(`  └─► Generator: [${gen.generatorId}] (Returned null stub)`);
+                } catch (e) {
+                    failingViews.push(`${viewId} (${e instanceof Error ? e.message : String(e)})`);
                 }
             }
+
+            if (generatingViews.length > 0) {
+                targetHasMatch = true;
+                generatorStats[generatorId].targetMatches++;
+                generatorStats[generatorId].viewPairs += generatingViews.length;
+
+                console.log(`  └─► Generator: [${generatorId}]`);
+                console.log(`      └─► Compatible Views: [${generatingViews.join(', ')}]`);
+            }
+            for (const failure of failingViews) {
+                console.log(`  └─► Generator: [${generatorId}] failed generation for: ${failure}`);
+            }
+        }
+
+        // Rejected-label verdicts are deliberate view boundaries worth surfacing
+        const rejectedByView = rejections.filter(r => r.verdict.reason === 'rejected-label');
+        for (const rejection of rejectedByView) {
+            console.log(`  └─► View [${rejection.viewId}] rejects ${shortenLabel(rejection.verdict.label!)} (via ${rejection.generatorId})`);
         }
 
         if (!targetHasMatch) {
             console.log(`  └─► Compatible Generator: NONE (Legacy or Unmatched)`);
+            const unsupported = rejections.filter(r => r.verdict.reason === 'unsupported-label');
+            const labelCounts = new Map<string, number>();
+            for (const rejection of unsupported) {
+                const label = shortenLabel(rejection.verdict.label || 'unknown');
+                labelCounts.set(label, (labelCounts.get(label) || 0) + 1);
+            }
+            for (const [label, count] of labelCounts.entries()) {
+                console.log(`      └─► Unsupported label across ${count} pair(s): ${label}`);
+            }
         }
     }
 
@@ -205,7 +129,7 @@ async function main() {
     console.log('========================================================================');
     console.table(Object.entries(generatorStats).map(([genId, stats]) => ({
         'Generator ID': genId,
-        'Matched CCSS Targets': stats.targetMatches,
+        'Matched Targets': stats.targetMatches,
         'Total Generator-View Pairs': stats.viewPairs
     })));
     console.log('========================================================================\n');
