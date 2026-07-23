@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
@@ -7,7 +7,7 @@ export const spec: ViewSpec = {
     // The ten frames render at most 10 dots per side, so any content
     // requiring numbers beyond 10 is out of this view's physical capacity
     rejectedLabels: [
-        ...deductCompatible([Scope.NumbersLarger10, Scope.NumbersSmaller1000000])
+        ...deductAdmitting([Scope.NumbersLarger10])
     ],
     generalLabels: [
         Area.BaseOperations,
