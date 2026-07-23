@@ -9,7 +9,7 @@ import { CompetencyTarget, OntologyTodo } from '../../types/ml-engine.ts';
 // --- K.CC.A.1: Count to 100 by ones and by tens ---
 const countTo100Builder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersSmaller100,
         Scope.NumbersWithoutZero,
@@ -24,7 +24,7 @@ const countTo100Builder = new DatasetPermutationBuilder()
 // --- K.CC.A.2: Count forward beginning from a given number ---
 const countForwardBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -53,7 +53,7 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
 // --- K.CC.A.3: Represent a number of objects with a written numeral 0-20 ---
 const representCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithZero,
         Scope.PhysicalNumbers,
@@ -67,7 +67,7 @@ const representCountsBuilder = new DatasetPermutationBuilder()
 // --- K.CC.B.4a: One-to-one correspondence when counting objects ---
 const oneToOneBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -83,7 +83,7 @@ const oneToOneBuilder = new DatasetPermutationBuilder()
 // --- K.CC.B.4b: Cardinality (last number name tells the count) ---
 const cardinalityBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -99,13 +99,12 @@ const cardinalityBuilder = new DatasetPermutationBuilder()
 // --- K.CC.B.4b: Conservation (count is independent of arrangement/order) ---
 const conservationBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Area.NumericIdentity,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.AdditiveCount,
-        Scope.NumericRange,
         Ability.DirectUnderstanding
     ])
     .applyLabelVariants([
@@ -116,7 +115,7 @@ const conservationBuilder = new DatasetPermutationBuilder()
 // --- K.CC.B.4c: Each successive number name refers to a quantity one larger ---
 const oneLargerBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -132,7 +131,7 @@ const oneLargerBuilder = new DatasetPermutationBuilder()
 // --- K.CC.B.5: Count to answer "how many?" ---
 const howManyBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -148,7 +147,7 @@ const howManyBuilder = new DatasetPermutationBuilder()
 
 const boxArrangementBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -335,7 +334,7 @@ const compareAttributesBuilder = new DatasetPermutationBuilder()
 // --- K.MD.B.3: Classify objects into categories and count them ---
 const classifyCountBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Area.ObjectSorting,
         Area.CollectionSense,
         Scope.ArabicNumerals,

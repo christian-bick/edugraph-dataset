@@ -1,5 +1,5 @@
 import { ViewSpec } from '../../../../types/view-spec.ts';
-import { Ability, Scope } from 'edugraph-ts';
+import { Ability } from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
@@ -7,7 +7,6 @@ export const spec: ViewSpec = {
     generalLabels: [
         Ability.VisualRecognition,
         Ability.InductiveReasoning,
-        Scope.ShapeProperties
     ],
 };
 

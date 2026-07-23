@@ -4,7 +4,7 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -19,7 +19,7 @@ const builder = new DatasetPermutationBuilder()
 
 const classifyBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Area.ObjectSorting,
         Area.CollectionSense,
         Scope.ArabicNumerals,
@@ -60,7 +60,7 @@ const sortBuilder = new DatasetPermutationBuilder()
 
 const incDecBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,

@@ -7,9 +7,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'shape-same-attribute',
     generalLabels: [
         Area.ObjectSorting,
-        Scope.Foldable,
-        Scope.Rollable,
-        Scope.Stackable
+        Scope.ShapeProperties,
     ]
 };
 

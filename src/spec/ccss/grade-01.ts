@@ -69,7 +69,7 @@ const unknownAddendBuilder = new DatasetPermutationBuilder()
 // --- 1.OA.C.5: Relate counting to addition and subtraction ---
 const relateCountingBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -177,7 +177,7 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
 // --- 1.NBT.A.1: Represent a number of objects with a written numeral ---
 const representCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithZero,
         Scope.PhysicalNumbers,
@@ -262,7 +262,7 @@ const addWithin100Builder = new DatasetPermutationBuilder()
 // --- 1.NBT.C.5: Mentally find 10 more or 10 less ---
 const tenMoreLessBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -338,7 +338,7 @@ const timeBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.C.4: Organize, represent and interpret data ---
 const interpretDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Area.ObjectSorting,
         Area.CollectionSense,
         Scope.ArabicNumerals,

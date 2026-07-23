@@ -14,7 +14,7 @@ describe('CountingIncDecGenerator Spec Integration', () => {
 
     it('should generate correct increment problems using labels', () => {
         const stub = generateWithLabels(generator, [
-            Area.Numeration,
+            Area.NumerationWithIntegers,
             Scope.NumbersWithoutZero,
             Scope.NumbersWithoutNegatives,
             Scope.NumbersSmaller10,
@@ -27,7 +27,7 @@ describe('CountingIncDecGenerator Spec Integration', () => {
 
     it('should generate correct decrement problems using labels', () => {
         const stub = generateWithLabels(generator, [
-            Area.Numeration,
+            Area.NumerationWithIntegers,
             Scope.NumbersWithoutZero,
             Scope.NumbersWithoutNegatives,
             Scope.NumbersSmaller10,
@@ -42,7 +42,7 @@ describe('CountingIncDecGenerator Spec Integration', () => {
         for (let i = 0; i < 50; i++) {
             setSeed(i);
             const stub = generateWithLabels(generator, [
-                Area.Numeration,
+                Area.NumerationWithIntegers,
                 Scope.NumbersWithoutZero,
                 Scope.NumbersWithoutNegatives,
                 Scope.NumbersSmaller10,

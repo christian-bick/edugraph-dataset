@@ -1,14 +1,12 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, Ability} from 'edugraph-ts';
+import {Area} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {matchAllExactLabels} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'shape-identity',
     generalLabels: [
-        Area.ShapeIdentity,
-        Ability.VisualRecognition,
-        Ability.VisualArticulation
+        Area.ShapeIdentity
     ]
 };
 

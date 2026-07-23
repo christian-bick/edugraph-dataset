@@ -7,7 +7,6 @@ export const spec: ViewSpec = {
     generalLabels: [
         Area.BaseOperations,
         Scope.PhysicalNumbers,
-        Scope.NumericRange,
         Scope.NumbersWithZero,
         Ability.ProcedureExecution,
         Scope.ArabicNumerals

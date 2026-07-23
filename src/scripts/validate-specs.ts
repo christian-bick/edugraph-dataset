@@ -12,6 +12,25 @@ const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
 const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
 
+/**
+ * A generalLabels list must not contain a label together with one of its
+ * taxonomic ancestors: the ancestor already covers every target label the
+ * specialization covers, so the pair is either redundant or (worse) an
+ * over-claim smuggled in via the broad label.
+ */
+function checkRedundantGeneralLabels(kind: string, item: string, generalLabels: string[]): boolean {
+    let hasError = false;
+    for (const a of generalLabels) {
+        for (const b of generalLabels) {
+            if (a !== b && isSubConceptOf(a, b)) {
+                console.error(`❌ [${kind}:${item}] Redundant declaration: general label '${a}' is a specialization of general label '${b}' — declare only one of them`);
+                hasError = true;
+            }
+        }
+    }
+    return hasError;
+}
+
 async function validateSpecs() {
     let hasError = false;
 
@@ -24,6 +43,7 @@ async function validateSpecs() {
     const viewModules = findLeafModules(viewsDir);
 
     const generatorSchemas: Record<string, { schema: any; paramLabels: string[] }> = {};
+    const generatorGeneralLabels: Record<string, string[]> = {};
     const generatorProblemTypes: Record<string, string> = {};
 
     // 1. Validate Generators & Collect Schemas/Problem Types
@@ -43,6 +63,10 @@ async function validateSpecs() {
                 }
 
                 const generalLabels = spec.generalLabels || [];
+                generatorGeneralLabels[item] = generalLabels;
+                if (checkRedundantGeneralLabels('generator', item, generalLabels)) {
+                    hasError = true;
+                }
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                 const schemaName = `${modulePrefix}GeneratorSchema`;
                 const schema = specModule[schemaName];
@@ -93,6 +117,9 @@ async function validateSpecs() {
                 }
 
                 const generalLabels = spec.generalLabels || [];
+                if (checkRedundantGeneralLabels('view', item, generalLabels)) {
+                    hasError = true;
+                }
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                 const schemaName = `${modulePrefix}ViewSchema`;
                 const schema = specModule[schemaName];
@@ -129,6 +156,32 @@ async function validateSpecs() {
                                             hasError = true;
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Double Declaration Check: a view generalLabel that overlaps any
+                // label of a same-problem-type generator (generalLabels or schema)
+                // re-declares generator-owned capability. Since matching accepts a
+                // target label when the generator OR the view supports it, such a
+                // label lets the pair match targets the generator cannot satisfy.
+                const problemType = viewToProblemType[item];
+                if (problemType) {
+                    const matchingGenIds = Object.keys(generatorProblemTypes).filter(
+                        genId => generatorProblemTypes[genId] === problemType
+                    );
+                    for (const genId of matchingGenIds) {
+                        const genLabels = [
+                            ...(generatorGeneralLabels[genId] || []),
+                            ...(generatorSchemas[genId]?.paramLabels || [])
+                        ];
+                        for (const v of generalLabels) {
+                            for (const g of genLabels) {
+                                if (isSubConceptOf(v, g) || isSubConceptOf(g, v)) {
+                                    console.error(`❌ [view:${item}] Double declaration: View general label '${v}' overlaps label '${g}' of matching generator '${genId}' (ancestor relationship exists)`);
+                                    hasError = true;
                                 }
                             }
                         }

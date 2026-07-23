@@ -325,7 +325,11 @@ export async function loadTargets(
         const module = await import(pathToFileURL(filePath).href);
         for (const [, value] of Object.entries(module)) {
             if (Array.isArray(value)) {
-                targets.push(...(value as CompetencyTarget[]));
+                // Spec files may export other arrays (e.g. ontology TODOs) —
+                // only collect entries that are actual competency targets
+                targets.push(...(value as CompetencyTarget[]).filter(
+                    t => t && typeof t.id === 'string' && Array.isArray(t.labels)
+                ));
             }
         }
     }

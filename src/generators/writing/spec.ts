@@ -8,7 +8,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'writing',
     generalLabels: [
         Area.DigitNotation,
-        Area.Numeration,
+        Area.NumerationWithIntegers,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -22,7 +22,7 @@ export const WritingGeneratorSchema = {
         hasLabel(Scope.NumbersWithZero)
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller10]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ]
 } as const;

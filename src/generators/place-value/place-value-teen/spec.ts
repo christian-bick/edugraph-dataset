@@ -16,7 +16,7 @@ export const spec: GeneratorSpec = {
 
 export const PlaceValueTeenGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
+        deductCompatible([Scope.NumbersLarger10, Scope.NumbersSmaller20]),
         resolveRangeFromLabels
     ]
 } as const;

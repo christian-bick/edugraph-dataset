@@ -7,7 +7,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'counting-classify-count',
     generalLabels: [
         Area.NumerationWithIntegers,
-        Area.ObjectSorting,
         Area.CollectionSense,
         Scope.IntegerNumbers,
         Scope.Base10,

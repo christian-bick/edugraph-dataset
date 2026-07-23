@@ -1,12 +1,11 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Area, Scope, deductCompatible} from 'edugraph-ts';
+import {Ability, Scope, deductCompatible} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 import { hasLabel } from '../../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-length-integer',
     generalLabels: [
-        Area.Measurement,
         Scope.ArabicNumerals,
         Ability.VisualReception,
         Ability.VisualArticulation,

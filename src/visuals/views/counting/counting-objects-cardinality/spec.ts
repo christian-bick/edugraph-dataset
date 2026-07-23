@@ -5,10 +5,8 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'counting-objects-cardinality',
     generalLabels: [
-        Area.Numeration,
         Area.NumericIdentity,
         Scope.PhysicalNumbers,
-        Scope.AdditiveCount,
         Scope.ArabicNumerals,
         Ability.ProcedureUnderstanding
     ]
