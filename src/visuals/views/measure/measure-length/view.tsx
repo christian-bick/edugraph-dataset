@@ -61,7 +61,7 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     }, [bandLength, pxPerUnit]);
 
     return (
-        <div className="flex justify-center items-center p-5 bg-white w-fit">
+        <div className="flex justify-center items-center p-5 bg-white w-full">
             <div className="flex flex-col items-start gap-5">
                 <div className="flex flex-col items-start">
                     {/* Measured Rectangle */}
@@ -75,7 +75,7 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
 
                     {/* Measure Band (Ruler) */}
                     <svg className="h-[50px] overflow-visible" width={bandWidth} height="50">
-                        <rect x={margin} y="0" width={data.bandLength * 30} height="20" fill="#f0f0f0" stroke="black" strokeWidth="1" />
+                        <rect x={margin} y="0" width={data.bandLength * pxPerUnit} height="20" fill="#f0f0f0" stroke="black" strokeWidth="1" />
                         {ticks.map((tick, i) => (
                             <React.Fragment key={i}>
                                 <line 

@@ -58,7 +58,7 @@ const CountingObjectsOneToOneCore = ({ config, payload }: CoreProps) => {
                             style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
                         >
                             <img className="w-8 h-8 transition-all duration-300" src={`/icons/counting/${icon}`} alt="counting object" />
-                            <div className={`absolute -bottom-[10px] bg-white border-[1.5px] rounded-full w-5 h-5 text-[0.8rem] font-bold flex justify-center items-center shadow-[0_2px_4px_rgba(0,0,0,0.05)] ${
+                            <div className={`absolute -bottom-[16px] bg-white border-[1.5px] rounded-full w-5 h-5 text-[0.8rem] font-bold flex justify-center items-center shadow-[0_2px_4px_rgba(0,0,0,0.05)] ${
                                 isSolutionView ? 'bg-green-100 border-green-600 text-green-700' : 'border-slate-400 text-slate-400'
                             }`}>
                                 {isSolutionView ? `${i + 1}` : ''}
