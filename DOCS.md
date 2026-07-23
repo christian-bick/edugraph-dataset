@@ -56,8 +56,8 @@ The primary pipeline orchestrator.
 *   **Function**: Scans all `metadata.jsonl` files in the generated dataset. It outputs a markdown report (`out/dataset/coverage-report.md` or `out/dataset-test/coverage-report.md`) detailing absolute frequencies of individual labels and the percentage breakdown of unique label combinations.
 
 ### `src/scripts/validate-dataset.ts`
-*   **Execution**: `npx vite-node src/scripts/validate-dataset.ts --generator=X --view=Y [--dataset=Z] [--force]`
-*   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It dynamically reads from `out/dataset-test/` when `--dataset=test` is specified, or `out/dataset/` by default.
+*   **Execution**: `npm run validate:dataset -- --generator=X --view=Y [--dataset=Z] [--force]`
+*   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It defaults to reading from `out/dataset/`, but you can target smaller test runs by specifying `--dataset=test` (which dynamically reads from `out/dataset-test/`).
 
 ### `src/scripts/validate-specs.ts`
 *   **Execution**: `npm run check:specs`
@@ -93,6 +93,7 @@ Leaf module directory names retain their full module prefix (e.g., `arithmetic-o
         - **Graceful Error Recovery**: If validation or range checks fail (e.g. coordinates or dimensions exceed visual limits), the view must throw a `ViewValidationError`. This is caught by the `ErrorBoundary` in the `withConfig` wrapper to display a standardized error card, preventing browser crashes, hangs, or infinite rendering loops during headless generation.
         - **No Silent Fallbacks**: Remove all local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`). Consume resolved configuration parameters directly from the `config` prop and `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and correctly-typed values.
     - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
+        - **`rejectedLabels`**: Instead of declaring what a view *can* handle, view specs must use `rejectedLabels` to explicitly list the labels (or label arrays) they *cannot* handle. This is the primary gatekeeping mechanism to prevent views from receiving unsupported problems (e.g., rejecting `Scope.DecimalNumbers`, or utilizing `...deductCompatible([Scope.NumbersLarger20, Scope.NumbersLarger1000000])` to automatically reject all targets that allow numbers larger than the physical rendering capacity of the view).
     - **Parent Category `helpers.ts` / Components**: Shared visual helpers or sub-components common to sibling views within a category can be placed at the category level (e.g. `src/visuals/views/operations/helpers.ts`) and imported relatively.
     - **`checklist.md`**: Visual layout, rendering, and interaction verification list. Used by Visual QA to check for elements positioning, SVG structures, rendering overflows, and Question (`_mode-Q`) vs. Solution (`_mode-S`) mode styling. It **must not** contain abstract mathematical generation logic. See the Checklist Design Rules section below for detailed formatting constraints.
 *   **`src/visuals/components/`**: Reusable shared React elements across all view categories (such as `TenFrame.tsx`).
@@ -162,8 +163,8 @@ If a new generator or view is required:
 
 ### Step 5: Declaring Capabilities (`spec.ts`)
 Create or update the `spec.ts` files for both your generator and visual view:
-- The generator spec declares the broader labels and scopes it is capable of satisfying.
-- The view spec declares the layout labels it supports, its physical bounds (like standard coordinate range constraints), and its zero behavior (`Scope.NumbersWithZero` vs. `Scope.NumbersWithoutZero`).
+- The generator spec declares the broader labels and scopes it is capable of satisfying mathematically.
+- The view spec declares the layout labels it supports in `generalLabels`. Crucially, it must explicitly reject unsupportable targets (like physical coordinate bounds or unsupported number formats) in `rejectedLabels`. Use `...deductCompatible([...])` in the rejected list to logically expand rejected boundaries (e.g. rejecting numbers larger than the view's physical capacity).
 
 ### Step 6: Implementation
 - **Generator (`generator.ts`)**: Implement the mathematical logic. Ensure that the properties of the generated problem strictly adhere to the requested labels. If a label requests `Area.Addition`, the problem must use addition.
@@ -176,13 +177,17 @@ Create or update the `spec.ts` files for both your generator and visual view:
 Write robust unit tests verifying that the generator outputs correct math and respects bounds. Run `npm run test` to verify.
 
 ### Step 7b: Targeted Testing via Test Specs
-To visually verify and test both your generator and view modules through the actual image-generation pipeline, you should use the `test` specs module:
+To visually verify and test both your generator and view modules without overwriting the main dataset, you should use the `test` specs module:
 1. **Extend Test Specs**: Add minimal test permutations for your module to the `test` specs directory (`src/spec/test/`). Use `DatasetPermutationBuilder` to build these permutations programmatically rather than manually writing static arrays.
-2. **Run Targeted Dataset Generation**: Test combinations of `--spec`, `--generator`, and `--view` to generate and render only the specific views and problems you want to check:
+2. **Run Targeted Dataset Generation**: Generate a smaller slice of the dataset exclusively to a `dataset-test` directory:
    ```bash
-   npm run generate:dataset -- --spec=test --generator=arithmetic --view=operations-vertical --training-only
+   npm run generate:dataset -- --generator=X --view=Y --spec=test
    ```
-   This allows you to quickly inspect the generated output under `out/dataset/train/` without running the entire dataset generation.
+   This allows you to quickly inspect the generated output under `out/dataset-test/` without running the entire dataset generation pipeline.
+3. **Run Targeted Validation**: Run automated Visual QA against your small test output:
+   ```bash
+   npm run validate:dataset -- --generator=X --view=Y --dataset=test
+   ```
 
 ### Step 8: Final Verification
 1. Run `npm run check:types` (or `npx tsc --noEmit`) to verify zero TypeScript typing errors across all generators, views, and scripts.
