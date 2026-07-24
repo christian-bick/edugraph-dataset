@@ -26,7 +26,7 @@ The data contract passed from the Playwright orchestrator into the browser's `wi
 *   `viewId`: The string identifier of the view.
 *   `labels`: Raw pedagogical tags (used by the HOC wrapper, not the pure view).
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
-*   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy (icon choices, scatter positions, shuffles, rotations) from this seed — never from `problem.id`, `Math.random()`, or any other source.
+*   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy (icon choices, scatter positions, shuffles, rotations) from this seed — never from `Math.random()` or any other source. `problem.id` is present on the payload but is dead: no view reads it (see *Sample Identity & Determinism* below).
 
 To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
 1. **`ViewTypeMap`** (defined in [problems.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/types/problems.ts)): A central contract mapping visual view identifiers (like `'operations-vertical'`) to their expected mathematical data structure (like `ArithmeticStandardProblem`).
@@ -124,7 +124,7 @@ Leaf module directory names retain their full module prefix (e.g., `arithmetic-o
     - **`view.tsx`**: Exports the React component wrapped in `withConfig(ViewSchema, Component)`. The core component itself (`<Name>Core`) is a pure stateless function taking `{ config, payload }`. It does not parse labels.
         - **Strict Payload Validation**: Must import `validateProblemData` from `../../../helpers/validation.ts` (with correct relative depth matching the sub-directory structure) and call it at the beginning of the view component with the specific list of required fields accessed from `problem.data`.
         - **Graceful Error Recovery**: If validation or range checks fail (e.g. coordinates or dimensions exceed visual limits), the view must throw a `ViewValidationError`. This is caught by the `ErrorBoundary` in the `withConfig` wrapper to display a standardized error card, preventing browser crashes, hangs, or infinite rendering loops during headless generation.
-        - **No Silent Fallbacks**: Remove all local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`). Consume resolved configuration parameters directly from the `config` prop and `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and correctly-typed values.
+        - **No Silent Fallbacks**: Must not use local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`). Consume resolved configuration parameters directly from the `config` prop and `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and correctly-typed values.
     - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
         - **`rejectedLabels`**: Instead of declaring what a view *can* handle, view specs must use `rejectedLabels` to explicitly list the labels (or label arrays) they *cannot* handle. This is the primary gatekeeping mechanism to prevent views from receiving unsupported problems (e.g., rejecting `Scope.NumbersWithZero`, or utilizing `...deductAdmitting([Scope.NumbersLarger20])` to automatically reject all targets that allow numbers larger than the physical rendering capacity of the view). Rule of thumb: capabilities are declared with `deductCompatible` (generator/view schemas), boundaries with `deductAdmitting` (rejection lists).
     - **Parent Category `helpers.ts` / Components**: Shared visual helpers or sub-components common to sibling views within a category can be placed at the category level (e.g. `src/visuals/views/operations/helpers.ts`) and imported relatively.
@@ -154,19 +154,26 @@ When designing or updating `spec.ts` files, you must strictly follow these rules
 When writing or updating `checklist.md` files (which are used by the automated visual QA or manual checks), you must strictly follow these rules:
 
 1. **Hierarchical Organization**:
-   Checklists are concatenated and evaluated across levels:
-   - Parent Category `checklist.md` (e.g. `src/generators/arithmetic/checklist.md` - applies to all sub-modules under that category).
-   - Leaf Module `checklist.md` (e.g. `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md` - applies specifically to that leaf module).
-   Shared rules across sibling modules should be generalized up to parent category checklists to prevent duplication.
+   Checklists are concatenated as one flat text block and evaluated together, across **three** levels, in this order:
+   - **Root `checklist.md`** (`src/generators/checklist.md` / `src/visuals/views/checklist.md`) — applies to **every** generator or view unconditionally. In particular, `src/visuals/views/checklist.md` already states the global Question/Solution Mode instruction rules (see point 5) — do not restate them anywhere else.
+   - **Parent Category `checklist.md`** (e.g. `src/generators/arithmetic/checklist.md`) — applies to all sub-modules under that category.
+   - **Leaf Module `checklist.md`** (e.g. `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md`) — applies specifically to that leaf module.
+
+   Because the LLM validator sees root + category + leaf as one undifferentiated block, a leaf (or category) rule that doesn't scope itself reads as a specific override of a general rule, not an addition to it — this is a real, previously-shipped bug class (see point 6), not a theoretical risk. Before adding a rule anywhere, check whether root or the category checklist already states it; a rule repeated verbatim at a lower level with different nouns substituted in is redundant and should be deleted, not kept "for clarity."
 2. **Separation of Concerns**:
    - **Generator Checklists**: Specify *only* abstract mathematical and logic rules. Remove all layout/visual criteria (e.g., coordinates, shapes, colors, SVGs, button states, ruler bands, CSS styling, or answer box highlights).
    - **View Checklists**: Specify *only* visual layout, rendering, and interaction rules. Remove all abstract logic criteria (e.g., mathematical generation algorithms, RNG selection logic, ontology/tag resolution).
-3. **Conciseness**:
+3. **Conciseness, and No Concrete Examples in General Checklists**:
    - Focus on the most important validation aspects. Do not include excessive edge cases.
+   - Root and category checklists must state only abstract principles — never bake in concrete examples (e.g. "(e.g. ordering direction, shape naming, or sorting rule)"). A concrete example at a general level is a specific claim that can silently drift out of sync with, or contradict, what an actual leaf checklist later requires for a similarly-shaped view. Concrete specifics belong exclusively in leaf checklists, where they describe one real, verifiable view.
 4. **Unaware of Parameterization**:
-   - Assume that the validation mechanism is unaware of parameterization. Do not include conditional validation aspects (e.g., "If configuration parameter X is true, then...").
+   - Assume that the validation mechanism is unaware of parameterization (internal config flags, e.g. `isReverse`, are invisible to it) and do not phrase rules conditionally on them (e.g. "If `config.isReverse` is true, then..."). Mode is the one exception: `_mode-Q` / `_mode-S` is given to the validator explicitly as context, so rules may condition on Question vs. Solution Mode.
+   - If a view has multiple valid internal configurations, describe them as alternative *observable* layouts the rendered image can match (e.g. "Layout A: ... Layout B: ...; exactly one applies per image"), not as branches on the config value driving them. See `time-analog/checklist.md` for a worked example.
 5. **Question Mode (`_mode-Q`) vs. Solution Mode (`_mode-S`)**:
    - View checklists must clearly distinguish between Question Mode (where answers are blank, inputs are empty, or elements are unselected) and Solution Mode (where correct answers are filled in, highlighted, or selected).
+   - The root checklist already states the global rule: Solution Mode must never display instruction text headers, and Question Mode may omit the header for self-explaining exercises. **Any leaf rule that requires prompt/instruction text must explicitly scope it to Question Mode** (e.g. "In Question Mode, the prompt must read X. Per the global Instruction & Mode Rules, this text is absent in Solution Mode."). An unscoped requirement ("the prompt text must read X") reads as an unconditional override of the global rule and will cause the validator to fail correctly-implemented views that hide the prompt in Solution Mode as intended — this exact bug shipped in over a dozen leaf checklists before being caught.
+6. **Documented Exceptions to Global Rules**:
+   - A view may legitimately need to violate a global rule (e.g. a view where the Solution image is ambiguous without repeating the question, so the prompt must stay visible in both modes — see `sorting-classify-sort/checklist.md`). State the exception explicitly in the leaf checklist, name the global rule it deviates from, and give the concrete reason. An undocumented deviation is indistinguishable from a bug to both the validator and the next person reading the checklist.
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)
 
@@ -206,7 +213,7 @@ Create or update the `spec.ts` files for both your generator and visual view:
 - **View (`view.tsx` / components)**: Implement the visual component logic in `src/visuals/views/<renderer>/view.tsx`.
   - Ensure that `isSolutionView: false` visually hides the answer (or renders an empty box/placeholder).
   - Ensure that `isSolutionView: true` renders the exact same layout but with the answer visible.
-  - Derive **all** randomized visual decisions from `payload.seed` (e.g. `payload.seed % ICONS.length`, or pass the seed into a helper that calls `setSeed(seed)` before drawing). Never derive entropy from `problem.id`, `Math.random()`, or unseeded `random()` calls — the `withConfig` wrapper seeds the global PRNG from `payload.seed` before config resolution, and any other entropy source breaks render determinism and invalidates the VQA cache.
+  - Derive **all** randomized visual decisions from `payload.seed` (e.g. `payload.seed % ICONS.length`, or pass the seed into a helper that calls `setSeed(seed)` before drawing). Never derive anything from `problem.id` — it is dead, unread by any view — and never from `Math.random()` or unseeded `random()` calls. The `withConfig` wrapper seeds the global PRNG from `payload.seed` before config resolution; any other entropy source breaks render determinism and invalidates the VQA cache.
 
 ### Step 7: Tests (`generator.test.ts`)
 Write robust unit tests verifying that the generator outputs correct math and respects bounds. Run `npm run test` to verify.

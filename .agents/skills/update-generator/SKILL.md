@@ -13,18 +13,23 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
 
 If the interface for the generated problem needed to be changed to fulfill the generator requirements then:
 
-- find views that consume that generator's problems
-- adopt them to properly render these new problems
+- Run `npx vite-node src/scripts/show-matching-stats.ts --spec=test` (or `--spec=ccss`) to find which views currently match and successfully consume this generator's problems, including rejection reasons for near-misses
+- adopt the matched views to properly render these new problems
 
 For validation:
 
-- review and update the "/src/specs/test" spec module if needed to ensure you will have generation examples
-- run the "src/scripts/generate-dataset.ts" script using the respective "--spec", "--generator" and "--view" settings
-- review the generation results and fix remaining issues if needed
+- Review and update the `src/spec/test` spec module if needed to ensure you will have generation examples. Every spec file must export its targets as `export const spec: CompetencyTarget[] = [...]` — this is the only export the pipeline reads; do not invent a different export name or add alias exports
+- Ensure the vite dev server is running (`npm run dev`) — the dataset pipeline and the debug scripts below render views headlessly via Playwright against it
+- For a quick check of one target without touching the dataset: `npm run test:target -- --target=<target.id> --spec=test --render`, which reports matching, generates the sample data, and (with `--render`) writes images to `out/target-test/`
+- For a full local slice: run `npm run generate:dataset -- --spec=test --generator=<generator> --view=<view>`
+- Review the generation results (verifying both Question `_mode-Q` and Solution `_mode-S` modes) and fix remaining issues if needed
+- Run `npm run validate:dataset -- --generator=<generator> --dataset=test` to catch checklist/rendering mismatches via the automated VQA check. If a sample fails after a fix, `npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=test` (the exact command is printed for every failure in `out/dataset-test/validation-report.md`) replays just that one sample instead of regenerating the whole module
+- run vitest via `npm run test`
 
 For the checklists.md:
 
 - Only include use abstract mathematical criteria - do NOT include any visual aspects
+- Check `src/generators/checklist.md` (root) and the category `checklist.md` before writing anything — they are concatenated together with the leaf checklist for validation, so do NOT restate a rule they already cover
 - Assume that the validation mechanism is unaware of parameterization - do NOT include conditional validation aspects
 - Be concise and focus on the most important logical validation aspects - do NOT include edge cases
 
