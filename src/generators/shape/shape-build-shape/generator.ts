@@ -35,7 +35,6 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         }
 
         return {
-            id: `shape-build-${target}`,
             data: {
                 target,
                 sides,

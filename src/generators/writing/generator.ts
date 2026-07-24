@@ -21,7 +21,6 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
         const currentNum = Math.floor(random() * (maxNum - minNum + 1)) + minNum;
         
         return {
-            id: `writing-${currentNum}`,
             data: {
                 number: currentNum
             }

@@ -239,7 +239,7 @@ describe('generateSampleWithRetry', () => {
     const sampleKey = computeSampleKey(IDENTITY);
 
     it('returns the first successful draw with attempt 1', () => {
-        const generator = makeStubGenerator(() => ({ id: 'ok', data: { value: Math.floor(random() * 100) } }));
+        const generator = makeStubGenerator(() => ({ data: { value: Math.floor(random() * 100) } }));
         const result = generateSampleWithRetry({ generator, labels: [], sampleKey });
         expect(result.stub).not.toBeNull();
         expect(result.attempt).toBe(1);
@@ -249,12 +249,12 @@ describe('generateSampleWithRetry', () => {
     it('salts the seed per attempt to escape null draws', () => {
         // Deterministically fails on the attempt-1 seed and succeeds afterwards
         const firstSeedValue = (() => {
-            const probe = makeStubGenerator(() => ({ id: 'p', data: { value: random() } }));
+            const probe = makeStubGenerator(() => ({ data: { value: random() } }));
             return generateSample({ generator: probe, labels: [], seed: computeSampleSeed(sampleKey, 1) })!.data.value;
         })();
         const generator = makeStubGenerator(() => {
             const value = random();
-            return value === firstSeedValue ? null : { id: 'ok', data: { value } };
+            return value === firstSeedValue ? null : { data: { value } };
         });
         const result = generateSampleWithRetry({ generator, labels: [], sampleKey });
         expect(result.stub).not.toBeNull();
@@ -264,7 +264,7 @@ describe('generateSampleWithRetry', () => {
 
     it('retries on caller-defined duplicates', () => {
         const seen = new Set<string>();
-        const generator = makeStubGenerator(() => ({ id: 'ok', data: { value: Math.floor(random() * 100) } }));
+        const generator = makeStubGenerator(() => ({ data: { value: Math.floor(random() * 100) } }));
 
         const first = generateSampleWithRetry({
             generator,
@@ -335,7 +335,7 @@ describe('isValTarget', () => {
 
 describe('buildRenderPayload', () => {
     it('maps mode to isSolutionView and carries the seed', () => {
-        const problem = { id: 'p', type: 'writing' as const, data: {} };
+        const problem = { type: 'writing' as const, data: {} };
         const q = buildRenderPayload({ problem, viewId: 'v', labels: ['l'], mode: 'question', seed: 7 });
         expect(q.isSolutionView).toBe(false);
         expect(q.seed).toBe(7);

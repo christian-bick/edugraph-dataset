@@ -26,7 +26,6 @@ export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMa
         const missingNumber = target - givenNumber;
 
         return {
-            id: `make-ten-${givenNumber}`,
             data: {
                 givenNumber,
                 missingNumber,

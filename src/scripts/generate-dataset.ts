@@ -49,7 +49,6 @@ interface RenderSample {
     seed: number;
     attempt: number;
     fingerprint: string;
-    problemSummary: string;
     problem: AbstractProblem;
 }
 
@@ -179,8 +178,7 @@ function generateModuleSamples(
             seed: question.seed,
             attempt: question.attempt,
             fingerprint: computeContentFingerprint(question.stub.data),
-            problemSummary: question.stub.id,
-            problem: buildProblem({ stub: question.stub, sampleKey: questionKey, type: genEntry.generator.type, labels })
+            problem: buildProblem({ stub: question.stub, type: genEntry.generator.type, labels })
         });
         samples.push({
             identity: solutionIdentity,
@@ -189,8 +187,7 @@ function generateModuleSamples(
             seed: solution.stub ? solution.seed : question.seed,
             attempt: solution.stub ? solution.attempt : question.attempt,
             fingerprint: computeContentFingerprint(solutionStub.data),
-            problemSummary: solutionStub.id,
-            problem: buildProblem({ stub: solutionStub, sampleKey: solutionKey, type: genEntry.generator.type, labels })
+            problem: buildProblem({ stub: solutionStub, type: genEntry.generator.type, labels })
         });
     }
 
@@ -281,7 +278,6 @@ async function renderSamples(
                     attempt: sample.attempt,
                     seed: sample.seed,
                     content_fingerprint: sample.fingerprint,
-                    problem_summary: sample.problemSummary,
                     type: sample.problem.type,
                     solution_visible: identity.mode === 'solution',
                     tags: (sample.problem.tags || []).map(shortenLabel).sort(),

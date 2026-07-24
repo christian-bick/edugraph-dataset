@@ -50,7 +50,6 @@ export class ArithmeticDecomposeGenerator implements ProblemGenerator<Arithmetic
         }
 
         return {
-            id: `decompose-${targetNumber}-${pair1[0]}-${pair2[0]}`,
             data: {
                 targetNumber,
                 pair1,

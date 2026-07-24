@@ -32,12 +32,7 @@ export class MeasurementLengthGenerator implements ProblemGenerator<MeasurementS
         else if (problemLength <= 50) bandLength = 50;
         else bandLength = 100;
 
-        
-
-        const problemKey = `${bandLength}_${problemLength}`;
-        
         return {
-            id: problemKey.replace('.', '-'),
             data: {
                 bandLength: bandLength,
                 problemLength: problemLength,

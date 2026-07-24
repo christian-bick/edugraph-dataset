@@ -611,19 +611,17 @@ export function isValTarget(targetId: string, ratio: number): boolean {
 
 export interface BuildProblemInput {
     stub: ProblemStub;
-    sampleKey: string;
     type: AbstractProblem['type'];
     labels: string[];
 }
 
 /**
- * Wraps a generated stub into the AbstractProblem sent to the renderer. The
- * problem id is the sample key — stable, unique and carrying no entropy role
- * (views draw all randomness from the render seed).
+ * Wraps a generated stub into the AbstractProblem sent to the renderer.
+ * The stub's own `id` is intentionally dropped here — it is informational
+ * only (see `ProblemStub.id`) and has no place on the render payload.
  */
-export function buildProblem({ stub, sampleKey, type, labels }: BuildProblemInput): AbstractProblem {
+export function buildProblem({ stub, type, labels }: BuildProblemInput): AbstractProblem {
     return {
-        id: sampleKey,
         type,
         data: stub.data,
         tags: Array.from(new Set([...labels, ...(stub.tags || [])]))

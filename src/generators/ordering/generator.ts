@@ -47,10 +47,8 @@ export class OrderingGenerator implements ProblemGenerator<OrderingProblem, Orde
         }
 
         const selectedNumbers = shuffleArray(Array.from(numberSet)).slice(0, 5);
-        const problemKey = selectedNumbers.join('-');
 
         return {
-            id: problemKey,
             data: {
                 numbers: selectedNumbers
             }

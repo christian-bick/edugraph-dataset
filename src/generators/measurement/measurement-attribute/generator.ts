@@ -21,7 +21,6 @@ export class MeasurementAttributeGenerator implements ProblemGenerator<Measureme
         }
 
         return {
-            id: `measurement-attribute-${attribute}`,
             data: {
                 attribute: attribute
             }

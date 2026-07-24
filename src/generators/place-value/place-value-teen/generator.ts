@@ -26,7 +26,6 @@ export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenP
         const target = 10 + ones;
 
         return {
-            id: `place-value-teen-${target}`,
             data: {
                 ones,
                 target

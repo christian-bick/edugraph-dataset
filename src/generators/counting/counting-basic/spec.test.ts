@@ -20,7 +20,6 @@ describe('CountingBasicGenerator Spec Integration', () => {
         expect(stub!.data.numObjects).toBeGreaterThanOrEqual(1);
         expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
         expect(stub!.data.simpleAnswer).toBe(stub!.data.numObjects);
-        expect(stub!.id).toBe(`count-${stub!.data.numObjects}`);
     });
 
     it('should respect range boundaries from labels', () => {

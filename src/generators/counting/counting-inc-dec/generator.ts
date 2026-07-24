@@ -38,7 +38,6 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
         if (incDecType === 'dec') incDecAnswer = numObjects - 1;
 
         return {
-            id: `simple-${numObjects}-${incDecType}`,
             data: {
                 numObjects: numObjects,
                 incDecType: incDecType as 'inc' | 'dec',

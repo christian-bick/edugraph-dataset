@@ -48,14 +48,12 @@ describe('extractConfig & generateWithLabels', () => {
             type: 'shape',
             schema: testSchema,
             generate: (config: any) => ({
-                id: `mock-id-${config.classify}`,
                 data: { shape: config.classify }
             })
         };
 
         const result = generateWithLabels(mockGenerator, [Scope.ThreeDimensional]);
         expect(result).not.toBeNull();
-        expect(result!.id).toContain('mock-id-');
         expect(result!.tags).toContain(result!.data.shape);
     });
 

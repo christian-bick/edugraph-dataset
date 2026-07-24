@@ -24,7 +24,6 @@ describe('OrderingGenerator', () => {
             configs.forEach(config => {
                 const stub = generator.generate(config);
                 expect(stub).not.toBeNull();
-                expect(stub!.id).toBeDefined();
                 expect(stub!.data.numbers).toBeInstanceOf(Array);
                 expect(stub!.data.numbers.length).toBe(5);
                 

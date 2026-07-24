@@ -39,7 +39,6 @@ export class CountingClassifyCountGenerator implements ProblemGenerator<Counting
         }
 
         return {
-            id: `classify-count-${total}`,
             data: {
                 items,
                 categories: counts,

@@ -26,6 +26,5 @@ describe('ShapeIdentityGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shape).toBe('hexagon');
         expect(stub!.data.answer).toBe('hexagon');
-        expect(stub!.id).toBe('shape-identity-hexagon');
     });
 });

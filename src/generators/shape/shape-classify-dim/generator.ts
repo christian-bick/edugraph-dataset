@@ -59,7 +59,6 @@ export class ShapeClassifyDimGenerator implements ProblemGenerator<ShapeClassify
         const dimLabel = shapeType === '2d' ? Scope.TwoDimensional : Scope.ThreeDimensional;
 
         return {
-            id: `shape-classify-dim-${shapeType}-${shape}`,
             data: {
                 shapeType,
                 shape,

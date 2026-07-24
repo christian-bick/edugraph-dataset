@@ -32,7 +32,6 @@ export class ShapeEnvShapesGenerator implements ProblemGenerator<ShapeEnvShapesP
         const target = envMap[answer];
 
         return {
-            id: `shape-env-shapes-${target}`,
             data: {
                 target,
                 answer

@@ -34,7 +34,6 @@ export class ShapePositionGenerator implements ProblemGenerator<ShapePositionPro
         };
 
         return {
-            id: `shape-position-${relation}`,
             data: {
                 relation,
                 answer

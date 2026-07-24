@@ -16,7 +16,6 @@ export class ShapeIdentityGenerator implements ProblemGenerator<ShapeIdentityPro
         const shape = selectedArea.split('/').pop()!.toLowerCase();
 
         return {
-            id: `shape-identity-${shape}`,
             data: {
                 shape,
                 answer: shape

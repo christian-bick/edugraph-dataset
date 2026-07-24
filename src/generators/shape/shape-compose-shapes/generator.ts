@@ -26,7 +26,6 @@ export class ShapeComposeShapesGenerator implements ProblemGenerator<ShapeCompos
         const answer = 'triangle';
 
         return {
-            id: `shape-compose-${target}`,
             data: {
                 target,
                 components,

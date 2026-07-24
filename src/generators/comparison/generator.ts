@@ -85,7 +85,6 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, 
         }
 
         return {
-            id: `compare-${num1}-${num2}-${resolvedRelation}`,
             data: {
                 num1,
                 num2,

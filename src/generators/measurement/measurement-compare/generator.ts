@@ -54,7 +54,6 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
         }
 
         return {
-            id: `measurement-compare-${attribute}-${relation}-${answer}-${val1}-${val2}`,
             data: {
                 attribute: attribute as 'length' | 'weight',
                 relation,

@@ -27,7 +27,6 @@ describe('ShapeSameAttributeGenerator', () => {
         expect(stubRoll).not.toBeNull();
         expect(stubRoll!.data.answer).toBe('sphere');
         expect(stubRoll!.data.attribute).toBe('rollable');
-        expect(stubRoll!.id).toBe('shape-same-attr-rollable-sphere');
 
         const stubStack = generator.generate({
             shapes: ['cube']
@@ -35,7 +34,6 @@ describe('ShapeSameAttributeGenerator', () => {
         expect(stubStack).not.toBeNull();
         expect(stubStack!.data.answer).toBe('cube');
         expect(stubStack!.data.attribute).toBe('stackable');
-        expect(stubStack!.id).toBe('shape-same-attr-stackable-cube');
 
         const stubFold = generator.generate({
             shapes: ['rectangle']
@@ -43,6 +41,5 @@ describe('ShapeSameAttributeGenerator', () => {
         expect(stubFold).not.toBeNull();
         expect(stubFold!.data.answer).toBe('rectangle');
         expect(stubFold!.data.attribute).toBe('foldable');
-        expect(stubFold!.id).toBe('shape-same-attr-foldable-rectangle');
     });
 });

@@ -28,7 +28,6 @@ export class CountingBasicGenerator implements ProblemGenerator<CountingProblem,
         };
 
         return {
-            id: `count-${numObjects}`,
             data
         };
     }

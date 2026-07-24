@@ -110,7 +110,6 @@ async function main() {
             continue;
         }
         console.log(`    fingerprint: ${sample.fingerprint}`);
-        console.log(`    summary:     ${sample.stub.id}`);
         console.log(`    data:        ${JSON.stringify(sample.stub.data)}`);
 
         const cached = getCache(sample.identity.generatorId).entries().find(e => e.sample_key === sample.sampleKey);
@@ -137,7 +136,6 @@ async function main() {
             const generatorType = generatorCatalog.find(g => g.generatorId === sample.identity.generatorId)!.generator.type;
             const problem = buildProblem({
                 stub: sample.stub,
-                sampleKey: sample.sampleKey,
                 type: generatorType,
                 labels: [...target.labels]
             });

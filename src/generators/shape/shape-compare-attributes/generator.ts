@@ -68,7 +68,6 @@ export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCo
         };
 
         return {
-            id: `shape-compare-attr-${attribute}-${shape1}-${shape2}`,
             data: {
                 attribute: attribute as 'sides' | 'corners',
                 shape1,

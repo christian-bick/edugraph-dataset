@@ -121,7 +121,6 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         const blankPart = config.invertProcedure ? 'num2' : 'solution';
 
         return {
-            id: `${num1}_${strOp}_${num2}${blankPart ? `_blank_${blankPart}` : ''}`,
             data: {
                 num1,
                 num2,

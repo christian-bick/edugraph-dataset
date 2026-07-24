@@ -5,8 +5,6 @@ import { ViewTypeMap } from './problems.ts';
  * This is completely independent of how it will be visually represented.
  */
 export interface AbstractProblem<TData = any> {
-    /** A unique identifier representing the underlying problem (e.g., '15-subtract-7') */
-    id: string;
     /** The type of problem to route it to compatible renderers */
     type: 'arithmetic' | 'counting' | 'measurement' | 'time' | 'ordering' | 'comparison' | 'writing' | 'shape';
     /** The core mathematical data. e.g. { num1: 15, num2: 7, operator: 'subtract', answer: 8 } */
@@ -56,11 +54,17 @@ declare global {
 
 // --- Generator Interfaces ---
 
-/** 
- * A partial problem returned by generators, containing only the identity and raw data.
- * type and tags are filled in by the orchestrator.
+/**
+ * A partial problem returned by generators, containing only the raw data.
+ * type is filled in by the orchestrator; identity is entirely structural
+ * (target.id, generatorId, viewId, mode, instance — see src/lib/generation.ts),
+ * so generators do not author an id of their own.
  */
-export type ProblemStub<TData = any> = Pick<AbstractProblem<TData>, 'id' | 'data' | 'tags'>;
+export interface ProblemStub<TData = any> {
+    data: TData;
+    /** Pedagogical tags for dataset balancing (e.g., ['has_zero', 'requires_carry', 'negative_result']) */
+    tags?: string[];
+}
 
 
 

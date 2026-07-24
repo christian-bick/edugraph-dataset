@@ -63,7 +63,7 @@ The primary pipeline orchestrator.
 *   **Function**: Loads targets and catalogs via `src/lib/generation.ts`, computes the matched `(target, generator, view)` tuples, generates one question and one solution sample per tuple with structural seeds, and renders them headlessly via Playwright (requires the vite dev server, `npm run dev`).
 *   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of targets selected by `isValTarget`. Both use the same identity-based seeding with the split as a key component.
 *   **Dedup**: Content fingerprints per (split, view); a collision triggers a deterministic retry on the next attempt. The winning attempt is recorded.
-*   **Metadata**: Each image row records its full identity: `sample_key`, `spec`, `target_id`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, plus `problem_summary` (the generator-authored stub id, informational only), `tags` and `parameters`.
+*   **Metadata**: Each image row records its full identity: `sample_key`, `spec`, `target_id`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, plus `tags` and `parameters` (the full problem data — generators no longer author a separate descriptive id; identity is entirely structural).
 *   **`--training-only` Flag**: If specified, skips validation sample generation, rendering, and metadata writing.
 *   **Clearing Logic**: If no module is specified, it wipes the entire `out/dataset/` directory. If a specific module is provided, it clears only `out/dataset/train/<module>` and `out/dataset/validation/<module>`.
 

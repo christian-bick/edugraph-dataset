@@ -25,7 +25,6 @@ describe('TimeGenerator', () => {
             configs.forEach(config => {
                 const stub = generator.generate(config);
                 expect(stub).not.toBeNull();
-                expect(stub!.id).toBeDefined();
                 expect(stub!.data.time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
                 let expectedInterval = 3600;
                 if (config.intervalLabel === Scope.SecondIntervals) expectedInterval = 1;

@@ -27,7 +27,6 @@ export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAt
         const answer = shape;
 
         return {
-            id: `shape-same-attr-${attribute}-${answer}`,
             data: {
                 attribute,
                 answer

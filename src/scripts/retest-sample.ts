@@ -58,14 +58,13 @@ async function main() {
     }
 
     console.log(`\nGenerated stub:`);
-    console.log(JSON.stringify({ id: stub.id, data: stub.data, tags: stub.tags }, null, 2));
+    console.log(JSON.stringify({ data: stub.data, tags: stub.tags }, null, 2));
     console.log(`Content fingerprint: ${computeContentFingerprint(stub.data)}`);
 
     if (skipRender) return;
 
     const problem = buildProblem({
         stub,
-        sampleKey,
         type: (await loadGeneratorCatalog()).find(g => g.generatorId === identity.generatorId)!.generator.type,
         labels
     });

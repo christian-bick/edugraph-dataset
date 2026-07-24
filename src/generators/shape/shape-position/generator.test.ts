@@ -28,6 +28,5 @@ describe('ShapePositionGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('below');
         expect(stub!.data.answer).toBe('below');
-        expect(stub!.id).toBe('shape-position-below');
     });
 });

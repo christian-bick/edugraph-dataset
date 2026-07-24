@@ -59,7 +59,6 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
         }
 
         return {
-            id: `classify-sort-${relation}-${total}`,
             data: {
                 items,
                 categories: counts,
