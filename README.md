@@ -64,13 +64,23 @@ npm run report:coverage -- --spec=test
 ```
 *(Tip: You can pass `--spec` to analyze different datasets; it defaults to `ccss`.)*
 
-**3. Run Tests**
-Validate the mathematical logic, constraints, and edge cases of the generators.
+**3. Run Repository Checks**
+Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
+```bash
+# Run all repository checks across all specs
+npm run check
+
+# Run checks targeting a specific spec
+npm run check -- --spec=ccss
+```
+
+**4. Run Tests**
+Validate the mathematical logic, constraints, and edge cases of the generators and library modules.
 ```bash
 npm run test
 ```
 
-**4. Development / Debugging**
+**5. Development / Debugging**
 Start the local Vite server to interactively preview the HTML/CSS rendering of the views.
 ```bash
 npm run dev

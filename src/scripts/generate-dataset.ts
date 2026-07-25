@@ -5,7 +5,6 @@ import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSyn
 import { AbstractProblem, ProblemStub } from '../types/ml-engine.ts';
 import { shortenLabel } from '../lib/utils.ts';
 import {
-    loadTargets,
     loadGeneratorCatalog,
     loadViewCatalog,
     matchTargets,
@@ -23,6 +22,7 @@ import {
     SampleMode,
     SampleSplit
 } from '../lib/generation.ts';
+import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -362,7 +362,17 @@ async function main() {
     }
     SPEC_NAME = specName;
 
-    const allTargets = await loadTargets(specName);
+    const validationResult = await normalizeAndValidateSpec(specName);
+    if (validationResult.errors.length > 0) {
+        console.error(`❌ Spec validation failed for "${specName}" with ${validationResult.errors.length} error(s):`);
+        for (const err of validationResult.errors) {
+            console.error(`- ${err}`);
+        }
+        throw new Error(`Spec validation failed for "${specName}". Aborting dataset generation.`);
+    }
+
+    const allTargets = validationResult.targets;
+    console.log(`Loaded ${allTargets.length} normalized & deduplicated targets for spec "${specName}" (${validationResult.stats.deduplicatedCount} deduplicated).`);
 
     const targetModule = process.env.npm_config_generator || (args.find(a => a.includes('generator='))?.split('generator=')[1]);
     const targetView = process.env.npm_config_view || (args.find(a => a.includes('view='))?.split('view=')[1]);

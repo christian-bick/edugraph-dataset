@@ -92,9 +92,17 @@ The primary pipeline orchestrator.
 *   **Execution**: `npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>`
 *   **Function**: Prints the matched `(generator, view)` pairs for every target of a spec, probes actual generation with production sample keys, surfaces generation failures and `rejectedLabels` boundaries, and summarizes per-generator coverage. Shares its matching logic with the pipeline via `src/lib/generation.ts`.
 
-### `src/scripts/validate-specs.ts`
-*   **Execution**: `npm run check:specs`
-*   **Function**: An automated spec validation script. It checks all `spec.ts` files across both generators and views, flagging (1) overlapping General Labels / parameter queries, and (2) duplicate parameterizations where a view re-specifies variables already computed by its matching generator. Detailed logs are outputted to `temp/check_output.txt`.
+### `src/scripts/check-all.ts`
+*   **Execution**: `npm run check [-- --spec=<spec_module>]`
+*   **Function**: The unified repository check script. Orchestrates TypeScript type checking (`tsc --noEmit`), generator/view spec audits (`validate-generator-view-specs.ts`), label usage audits (`check-labels.ts`), and competency standard spec validations (`normalizeAndValidateSpec`). If `--spec` is specified, restricts target spec validation to that module; otherwise validates all available specs (`test`, `ccss`).
+
+### `src/scripts/validate-generator-view-specs.ts`
+*   **Execution**: `npm run check:generator-view-specs`
+*   **Function**: An automated generator and view spec validation script. It checks companion `spec.ts` files across both generators and views, flagging (1) overlapping General Labels / parameter queries, and (2) duplicate parameterizations where a view re-specifies variables already computed by its matching generator. Detailed logs are outputted to `temp/check_output.txt`.
+
+### `src/scripts/validate-standards-spec.ts`
+*   **Execution**: `npm run check:standards-spec -- --spec=<spec_module>`
+*   **Function**: Validates competency target standard specs (e.g. `test`, `ccss`) using `normalizeAndValidateSpec` from `src/lib/spec-validator.ts`. Validates target ID uniqueness, normalizes label sets, checks intra-target permutation uniqueness, and deduplicates cross-target label permutations.
 
 ### Type Checking (`npm run check:types`)
 *   **Execution**: `npm run check:types` (or `npx tsc --noEmit`)
@@ -232,7 +240,7 @@ To visually verify and test both your generator and view modules without overwri
    ```
 
 ### Step 8: Final Verification
-1. Run `npm run check:types` (or `npx tsc --noEmit`) to verify zero TypeScript typing errors across all generators, views, and scripts.
+1. Run `npm run check` (or `npm run check:types`, `npm run check:generator-view-specs`, `npm run check:standards-spec`) to verify type safety, spec constraints, label usage, and target standard specs.
 2. Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` (or `--spec=test`) to confirm that the ontology dynamically binds your targets to your generator and views.
 3. Run `npm run generate:dataset -- --spec=ccss --generator=[moduleName]` to test local dataset generation.
 

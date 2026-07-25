@@ -13,7 +13,7 @@ Review the `spec.ts` files for the specified generator or view module (or across
 - **All Modules**: If `{moduleName}` is omitted (e.g., `/review-specs`), discover and review all spec files across `src/generators/` and `src/visuals/views/`.
 
 Spec validation (including parameter label vs. `generalLabels` overlap checking and duplicate parameterization checking) can be automatically executed by running the spec validation script:
-`npm run check:specs` (running [validate-specs.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/scripts/validate-specs.ts), which dumps validation logs to the ignored file `temp/check_output.txt`).
+`npm run check:generator-view-specs` (running [validate-generator-view-specs.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/scripts/validate-generator-view-specs.ts), which dumps validation logs to the ignored file `temp/check_output.txt`).
 
 Follow these instructions strictly during the review:
 
