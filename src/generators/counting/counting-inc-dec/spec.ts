@@ -7,6 +7,8 @@ export const spec: GeneratorSpec = {
     generatorId: 'counting-inc-dec',
     generalLabels: [
         Area.NumerationWithIntegers,
+        Area.Increment,
+        Area.Decrement,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutZero,

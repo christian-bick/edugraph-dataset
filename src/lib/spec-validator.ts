@@ -1,5 +1,5 @@
-import { CompetencyTarget } from '../types/ml-engine.ts';
-import { loadTargets } from './generation.ts';
+import { CompetencyTarget, TargetEquivalence } from '../types/ml-engine.ts';
+import { loadTargets, loadSpecEquivalences } from './generation.ts';
 import { shortenLabel, labelSetKey } from './utils.ts';
 
 export { labelSetKey };
@@ -15,6 +15,8 @@ export interface SpecValidationResult {
     errors: string[];
     warnings: string[];
     stats: SpecValidationStats;
+    /** Deliberate cross-definition equivalences honored during validation. */
+    equivalences: TargetEquivalence[];
 }
 
 /**
@@ -104,17 +106,41 @@ export function validateUniquePermutationsPerTarget(targets: CompetencyTarget[])
  * expected between related standards and is handled by
  * `deduplicateTargetPermutations` — but fully identical permutation sets
  * make the definitions indistinguishable and are errors.
+ *
+ * A collision is *not* an error when both definitions are declared members of
+ * the same `equivalentGroups` entry: such identity is a deliberate,
+ * documented decision (see `TargetEquivalence`) rather than a modelling
+ * mistake. The first definition of each identical set is kept as the
+ * representative, exactly as the generation pipeline's dedup already does.
  */
-export function validateUniqueTargetPermutations(targets: CompetencyTarget[]): string[] {
+export function validateUniqueTargetPermutations(
+    targets: CompetencyTarget[],
+    equivalentGroups: readonly (readonly string[])[] = []
+): string[] {
     const errors: string[] = [];
     const seenSetKeys = new Map<string, string>();
+
+    const groupOfPrefix = new Map<string, number>();
+    equivalentGroups.forEach((group, idx) => {
+        for (const prefix of group) {
+            if (!groupOfPrefix.has(prefix)) groupOfPrefix.set(prefix, idx);
+        }
+    });
+    const areDeclaredEquivalent = (a: string, b: string): boolean => {
+        const groupA = groupOfPrefix.get(a);
+        return groupA !== undefined && groupA === groupOfPrefix.get(b);
+    };
 
     for (const [prefix, group] of groupTargetsByPrefix(targets).entries()) {
         const permutationKeys = Array.from(new Set(group.map(t => labelSetKey(t.labels)))).sort();
         const setKey = JSON.stringify(permutationKeys);
-        if (seenSetKeys.has(setKey)) {
+        const seenPrefix = seenSetKeys.get(setKey);
+        if (seenPrefix !== undefined) {
+            if (areDeclaredEquivalent(seenPrefix, prefix)) {
+                continue;
+            }
             errors.push(
-                `Target definitions "${seenSetKeys.get(setKey)}" and "${prefix}" define identical permutation sets ` +
+                `Target definitions "${seenPrefix}" and "${prefix}" define identical permutation sets ` +
                 `(${permutationKeys.length} permutation(s)) — they are not distinguishable by the ontology.`
             );
         } else {
@@ -123,6 +149,42 @@ export function validateUniqueTargetPermutations(targets: CompetencyTarget[]): s
     }
 
     return errors;
+}
+
+/**
+ * Cross-checks declared target equivalences against the actual normalized
+ * targets, returning warnings for declarations that are stale (the definitions
+ * no longer share an identical permutation set) or that reference unknown
+ * definition prefixes. This keeps an equivalence declaration from silently
+ * masking a genuine divergence introduced by a later spec edit.
+ */
+export function validateDeclaredEquivalences(
+    targets: CompetencyTarget[],
+    equivalences: readonly TargetEquivalence[]
+): string[] {
+    const setKeyByPrefix = new Map<string, string>();
+    for (const [prefix, group] of groupTargetsByPrefix(targets).entries()) {
+        const permutationKeys = Array.from(new Set(group.map(t => labelSetKey(t.labels)))).sort();
+        setKeyByPrefix.set(prefix, JSON.stringify(permutationKeys));
+    }
+
+    const warnings: string[] = [];
+    for (const eq of equivalences) {
+        const missing = eq.targets.filter(prefix => !setKeyByPrefix.has(prefix));
+        if (missing.length > 0) {
+            warnings.push(
+                `Declared equivalence [${eq.targets.join(', ')}] references unknown target definition(s): ${missing.join(', ')}.`
+            );
+            continue;
+        }
+        const distinctSetKeys = new Set(eq.targets.map(prefix => setKeyByPrefix.get(prefix)));
+        if (distinctSetKeys.size > 1) {
+            warnings.push(
+                `Declared equivalence [${eq.targets.join(', ')}] is stale: the definitions no longer share an identical permutation set.`
+            );
+        }
+    }
+    return warnings;
 }
 
 /**
@@ -172,10 +234,14 @@ export async function normalizeAndValidateSpec(
     specName: string,
     specRoot?: string
 ): Promise<SpecValidationResult> {
-    const rawTargets = await loadTargets(specName, specRoot);
+    const [rawTargets, equivalences] = await Promise.all([
+        loadTargets(specName, specRoot),
+        loadSpecEquivalences(specName, specRoot)
+    ]);
     const totalTargets = rawTargets.length;
 
     const errors: string[] = [];
+    const warnings: string[] = [];
 
     // 1. Validate Target ID uniqueness
     errors.push(...validateUniqueTargetIds(rawTargets));
@@ -186,11 +252,16 @@ export async function normalizeAndValidateSpec(
     // 3. Validate unique permutations per target definition
     errors.push(...validateUniquePermutationsPerTarget(normalizedTargets));
 
-    // 4. Validate that no two target definitions share an identical permutation set
-    errors.push(...validateUniqueTargetPermutations(normalizedTargets));
+    // 4. Validate that no two target definitions share an identical permutation
+    //    set, except where a deliberate equivalence is declared.
+    errors.push(...validateUniqueTargetPermutations(normalizedTargets, equivalences.map(e => e.targets)));
+
+    // 4b. Flag equivalence declarations that no longer hold (stale/unknown).
+    warnings.push(...validateDeclaredEquivalences(normalizedTargets, equivalences));
 
     // 5. Deduplicate overlapping permutations across targets (warnings, not errors)
-    const { deduplicatedTargets, warnings } = deduplicateTargetPermutations(normalizedTargets);
+    const { deduplicatedTargets, warnings: dedupWarnings } = deduplicateTargetPermutations(normalizedTargets);
+    warnings.push(...dedupWarnings);
 
     const stats: SpecValidationStats = {
         totalTargets,
@@ -202,6 +273,7 @@ export async function normalizeAndValidateSpec(
         targets: deduplicatedTargets,
         errors,
         warnings,
-        stats
+        stats,
+        equivalences
     };
 }

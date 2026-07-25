@@ -75,6 +75,13 @@ async function main() {
 
             console.log(`  Targets: ${result.stats.totalTargets} total | ${result.stats.uniqueTargets} unique | ${result.stats.deduplicatedCount} deduplicated`);
 
+            if (result.equivalences.length > 0) {
+                console.log(`  Intentional equivalences: ${result.equivalences.length}`);
+                for (const eq of result.equivalences) {
+                    console.log(`🔗 [${eq.targets.join(' ≡ ')}]`);
+                }
+            }
+
             if (result.warnings.length > 0) {
                 console.log(`  Warnings: ${result.warnings.length}`);
                 for (const warning of result.warnings) {

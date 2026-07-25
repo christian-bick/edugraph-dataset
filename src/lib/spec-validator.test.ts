@@ -8,6 +8,7 @@ import {
     normalizeTargetLabels,
     validateUniquePermutationsPerTarget,
     validateUniqueTargetPermutations,
+    validateDeclaredEquivalences,
     deduplicateTargetPermutations,
     normalizeAndValidateSpec
 } from './spec-validator.ts';
@@ -235,6 +236,81 @@ describe('spec-validator', () => {
             ];
             expect(validateUniqueTargetPermutations(targets)).toHaveLength(2);
         });
+
+        it('suppresses the error when the colliding definitions are declared equivalent', () => {
+            const targets: CompetencyTarget[] = [
+                { id: 'defA~a', labels: ['L1', 'L2'] },
+                { id: 'defB~a', labels: ['L2', 'L1'] }
+            ];
+            expect(validateUniqueTargetPermutations(targets, [['defA', 'defB']])).toHaveLength(0);
+        });
+
+        it('still errors for an undeclared duplicate outside the equivalence group', () => {
+            const targets: CompetencyTarget[] = [
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defB~a', labels: ['L1'] },
+                { id: 'defC~a', labels: ['L1'] }
+            ];
+            // Only defA/defB are declared equivalent; defC is an undeclared duplicate.
+            const errors = validateUniqueTargetPermutations(targets, [['defA', 'defB']]);
+            expect(errors).toHaveLength(1);
+            expect(errors[0]).toContain('"defA" and "defC"');
+        });
+
+        it('suppresses all pairwise collisions within a 3-member equivalence group', () => {
+            const targets: CompetencyTarget[] = [
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defB~a', labels: ['L1'] },
+                { id: 'defC~a', labels: ['L1'] }
+            ];
+            expect(validateUniqueTargetPermutations(targets, [['defA', 'defB', 'defC']])).toHaveLength(0);
+        });
+
+        it('does not treat membership in different equivalence groups as equivalent', () => {
+            const targets: CompetencyTarget[] = [
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defB~a', labels: ['L1'] }
+            ];
+            // defA and defB are each declared, but in separate groups -> not equivalent.
+            expect(validateUniqueTargetPermutations(targets, [['defA'], ['defB']])).toHaveLength(1);
+        });
+    });
+
+    describe('validateDeclaredEquivalences', () => {
+        it('returns no warnings for a declaration whose definitions are genuinely identical', () => {
+            const targets: CompetencyTarget[] = [
+                { id: 'defA~a', labels: ['L1', 'L2'] },
+                { id: 'defB~a', labels: ['L2', 'L1'] }
+            ];
+            const warnings = validateDeclaredEquivalences(targets, [
+                { targets: ['defA', 'defB'], reason: 'same competency' }
+            ]);
+            expect(warnings).toHaveLength(0);
+        });
+
+        it('warns when a declared equivalence is stale (definitions no longer identical)', () => {
+            const targets: CompetencyTarget[] = [
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defB~a', labels: ['L2'] }
+            ];
+            const warnings = validateDeclaredEquivalences(targets, [
+                { targets: ['defA', 'defB'], reason: 'drifted apart' }
+            ]);
+            expect(warnings).toHaveLength(1);
+            expect(warnings[0]).toContain('stale');
+        });
+
+        it('warns when a declared equivalence references an unknown definition prefix', () => {
+            const targets: CompetencyTarget[] = [
+                { id: 'defA~a', labels: ['L1'] }
+            ];
+            const warnings = validateDeclaredEquivalences(targets, [
+                { targets: ['defA', 'defGhost'], reason: 'typo' }
+            ]);
+            expect(warnings).toHaveLength(1);
+            expect(warnings[0]).toContain('unknown target definition');
+            expect(warnings[0]).toContain('defGhost');
+        });
     });
 
     describe('deduplicateTargetPermutations', () => {
@@ -345,6 +421,33 @@ describe('spec-validator', () => {
             const result = await normalizeAndValidateSpec('identical-defs', FIXTURE_ROOT);
             expect(result.errors).toHaveLength(1);
             expect(result.errors[0]).toContain('identical permutation sets');
+        });
+
+        it('honors a declared equivalence: no error, surfaced in result.equivalences', async () => {
+            writeFixture('declared-equiv', 'a.ts', `export const spec = [
+                { id: 'defA~a', labels: ['A'] },
+                { id: 'defB~a', labels: ['A'] }
+            ];
+            export const equivalentTargets = [
+                { targets: ['defA', 'defB'], reason: 'same competency across grades' }
+            ];`);
+            const result = await normalizeAndValidateSpec('declared-equiv', FIXTURE_ROOT);
+            expect(result.errors).toHaveLength(0);
+            expect(result.equivalences).toHaveLength(1);
+            expect(result.equivalences[0].targets).toEqual(['defA', 'defB']);
+        });
+
+        it('warns (but does not error) when a declared equivalence has gone stale', async () => {
+            writeFixture('stale-equiv', 'a.ts', `export const spec = [
+                { id: 'defA~a', labels: ['A'] },
+                { id: 'defB~a', labels: ['B'] }
+            ];
+            export const equivalentTargets = [
+                { targets: ['defA', 'defB'], reason: 'used to match' }
+            ];`);
+            const result = await normalizeAndValidateSpec('stale-equiv', FIXTURE_ROOT);
+            expect(result.errors).toHaveLength(0);
+            expect(result.warnings.some(w => w.includes('stale'))).toBe(true);
         });
 
         it('rejects when the spec module does not exist', async () => {

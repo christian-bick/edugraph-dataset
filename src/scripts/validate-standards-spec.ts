@@ -23,6 +23,13 @@ async function main() {
         console.log(`Unique Target Label Sets:   ${result.stats.uniqueTargets}`);
         console.log(`Deduplicated Target Count:  ${result.stats.deduplicatedCount}`);
 
+        if (result.equivalences.length > 0) {
+            console.log(`\n--- Intentional Equivalences (${result.equivalences.length}) ---`);
+            for (const eq of result.equivalences) {
+                console.log(`🔗 [${eq.targets.join(' ≡ ')}] — ${eq.reason}`);
+            }
+        }
+
         if (result.warnings.length > 0) {
             console.log(`\n--- Warnings (${result.warnings.length}) ---`);
             for (const warning of result.warnings) {

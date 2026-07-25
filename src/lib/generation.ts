@@ -8,7 +8,7 @@ import { findLeafModules, LeafModule } from './module-resolver.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from './type-parser.ts';
 import { extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, OntologyTodo, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
+import { CompetencyTarget, OntologyTodo, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ViewSpec } from '../types/view-spec.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -382,6 +382,29 @@ export async function loadSpecTodos(
         }
     }
     return { implementationTodos, ontologyTodos };
+}
+
+/**
+ * Loads the deliberate target-equivalence declarations of a spec module (the
+ * optional `equivalentTargets` export per file, merged in sorted file order).
+ * These tell spec validation that specific identical-permutation-set collisions
+ * are intentional (see `TargetEquivalence`). Like `loadSpecTodos`, the dataset
+ * pipeline never reads this — it only informs validation and reporting.
+ */
+export async function loadSpecEquivalences(
+    specName: string,
+    specRoot: string = DEFAULT_SPEC_ROOT()
+): Promise<TargetEquivalence[]> {
+    const files = resolveSpecFiles(specName, specRoot);
+
+    const equivalences: TargetEquivalence[] = [];
+    for (const filePath of files) {
+        const module = await import(pathToFileURL(filePath).href);
+        if (Array.isArray(module.equivalentTargets)) {
+            equivalences.push(...(module.equivalentTargets as TargetEquivalence[]));
+        }
+    }
+    return equivalences;
 }
 
 // ---------------------------------------------------------------------------

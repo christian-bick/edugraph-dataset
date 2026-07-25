@@ -22,6 +22,13 @@ const countTo100Builder = new DatasetPermutationBuilder()
     ]);
 
 // --- K.CC.A.2: Count forward beginning from a given number ---
+// Continuing the count from a given start is a distinct competency from
+// one-to-one counting (K.CC.B.4a), but the distinguishing element — recalling
+// the forward number sequence — is intrinsic to executing the counting
+// procedure, not a separately renderable view-level ability. With no honest
+// ontological differentiator and no dedicated count-on view, this is parked in
+// implementationTodos rather than kept active, where its labels would collide
+// with K.CC.B.4a / K.CC.B.4c.
 const countForwardBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
@@ -113,9 +120,14 @@ const conservationBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- K.CC.B.4c: Each successive number name refers to a quantity one larger ---
+// The successor principle (the next number is exactly one more) is the
+// increment operation (Area.Increment), which both distinguishes it from
+// one-to-one counting (K.CC.B.4a) and routes it to the counting-inc-dec view
+// that renders the +1 step.
 const oneLargerBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
+        Area.Increment,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -533,7 +545,6 @@ const composeShapesOtherBuilder = new DatasetPermutationBuilder()
 // Standard exports following universal convention
 export const spec: CompetencyTarget[] = [
     // K.CC - Counting and Cardinality
-    ...toTargets('K.CC.A.2-count-forward', countForwardBuilder),
     ...toTargets('K.CC.A.3-write-numerals', writeNumeralsBuilder),
     ...toTargets('K.CC.A.3-represent-counts', representCountsBuilder),
     ...toTargets('K.CC.B.4a-one-to-one', oneToOneBuilder),
@@ -569,6 +580,7 @@ export const spec: CompetencyTarget[] = [
 
 export const implementationTodos: CompetencyTarget[] = [
     ...toTargets('K.CC.A.1-count-to-100', countTo100Builder, 'Counting generators cap at Scope.NumbersSmaller20 and there is no generator/view for the rote count sequence to 100 or for skip counting by tens (Scope.DerivedCount).'),
+    ...toTargets('K.CC.A.2-count-forward', countForwardBuilder, 'Counting forward from a given number is indistinguishable by the ontology from one-to-one counting (K.CC.B.4a): the distinguishing skill — recalling the forward number sequence — is part of procedure execution, not a renderable view-level ability. Needs a dedicated count-on / number-sequence view.'),
     ...toTargets('K.CC.B.5-box-arrangement', boxArrangementBuilder, 'The rectangular array arrangement (Scope.BoxArrangement) is not supported by the counting views (only linear/circular/scattered arrangements).'),
     ...toTargets('K.OA.A.1-represent-operations', representOperationsBuilder, 'The operations-representation view exists only as a checklist stub (no spec.ts/view.tsx), so there is no view rendering object/drawing representations of addition and subtraction.'),
     ...toTargets('K.G.A.1-env-shapes-other', envShapesOtherBuilder, 'The shape-env-shapes generator only supports circle, square and rectangle; further environment shapes (e.g. Area.Triangle, Area.Hexagon) are not supported yet.'),

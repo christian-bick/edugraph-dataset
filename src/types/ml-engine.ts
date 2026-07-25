@@ -111,6 +111,28 @@ export interface OntologyTodo {
 }
 
 /**
+ * A deliberate declaration that two or more target definitions (their
+ * `toTargets` id prefixes, e.g. 'K.CC.A.3-write-numerals') describe the same
+ * competency and are therefore expected to produce identical permutation sets.
+ *
+ * Some CCSS standards restate a competency across grades whose grade-level
+ * distinction the pipeline cannot yet express (e.g. K vs grade-1 numeral
+ * writing, which only differ above the supported number range). Declaring the
+ * equivalence keeps every standard id visible in the coverage visualization
+ * (map-standards reads the raw targets) while telling the validator the
+ * identity is intentional, not a modelling mistake. It is never read by the
+ * generation pipeline: identical permutations already collapse to one
+ * representative via `deduplicateTargetPermutations`, so there is no
+ * downstream special-casing.
+ */
+export interface TargetEquivalence {
+    /** Definition prefixes that are intentionally indistinguishable. */
+    targets: string[];
+    /** Why the identity is deliberate (documented for reviewers and reports). */
+    reason: string;
+}
+
+/**
  * Configuration for the ML Orchestrator to build the final dataset.
  */
 export interface MLDatasetPipelineConfig {
