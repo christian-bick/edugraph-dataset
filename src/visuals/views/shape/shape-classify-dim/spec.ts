@@ -13,11 +13,11 @@ export const spec: ViewSpec = {
 
 export const ShapeClassifyDimViewSchema = {
     wants2D: [
-        [Scope.TwoDimensional], // TODO: Consider ontological relations if applicable
+        [Scope.TwoDimensional],
         hasSubConcept(Scope.TwoDimensional)
     ],
     wants3D: [
-        [Scope.ThreeDimensional], // TODO: Consider ontological relations if applicable
+        [Scope.ThreeDimensional],
         hasSubConcept(Scope.ThreeDimensional)
     ]
 } as const;

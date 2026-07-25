@@ -15,7 +15,6 @@ export const spec: ViewSpec = {
 
 
 export const TimeAnalogViewSchema = {
-    // TODO: Consider ontological relations for time intervals
     isReverse: [
         [Ability.VisualArticulation],
         hasLabel(Ability.VisualArticulation)

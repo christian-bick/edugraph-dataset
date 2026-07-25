@@ -9,8 +9,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-
-// TODO: Ontological relations between shapes could allow us to deduct what can be composed into what.
 export const ShapeComposeShapesViewSchema = {} as const;
 
 export type ShapeComposeShapesViewConfig = ConfigFromSchema<typeof ShapeComposeShapesViewSchema>;

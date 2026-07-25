@@ -45,9 +45,6 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
         [Area.Circle]
     ]);
 
-// TODO: The shape-compose-shapes generator only supports rectangle and square as
-// composition targets (built from triangles); a [Area.Triangle] variant is not
-// supported.
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,

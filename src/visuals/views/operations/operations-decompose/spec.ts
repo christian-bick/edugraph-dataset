@@ -14,7 +14,6 @@ export const spec: ViewSpec = {
 
 
 export const OperationsDecomposeViewSchema = {
-    // TODO: add ontological relations where beneficial
 } as const;
 
 export type OperationsDecomposeViewConfig = ConfigFromSchema<typeof OperationsDecomposeViewSchema>;

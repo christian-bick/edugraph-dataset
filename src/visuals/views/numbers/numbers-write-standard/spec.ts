@@ -12,7 +12,6 @@ export const spec: ViewSpec = {
 
 
 export const NumbersWriteStandardViewSchema = {
-    // TODO: add ontological relations where beneficial
 } as const;
 
 export type NumbersWriteStandardViewConfig = ConfigFromSchema<typeof NumbersWriteStandardViewSchema>;

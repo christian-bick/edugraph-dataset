@@ -13,7 +13,6 @@ export const spec: ViewSpec = {
 
 
 export const NumbersCompareMatchingViewSchema = {
-    // TODO: add ontological relations where beneficial
 } as const;
 
 export type NumbersCompareMatchingViewConfig = ConfigFromSchema<typeof NumbersCompareMatchingViewSchema>;
