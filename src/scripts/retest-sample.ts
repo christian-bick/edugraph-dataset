@@ -35,7 +35,7 @@ async function main() {
 
     if (!sampleKey || !specName) {
         console.error('Usage: npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=<spec_module> [--no-render]');
-        console.error('Example: npm run retest:sample -- --key="test-writing-0#writing#numbers-write-standard#train#question#inst:0" --attempt=1 --spec=test');
+        console.error('Example: npm run retest:sample -- --key="test-writing~fe4336da#writing#numbers-write-standard#train#question#inst:0" --attempt=1 --spec=test');
         process.exit(1);
     }
 

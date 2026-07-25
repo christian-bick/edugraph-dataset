@@ -110,3 +110,32 @@ export function formatLabelsKey(labels: string[]): string {
     return labels.map(shortenLabel).sort().join('|');
 }
 
+/**
+ * Canonical, collision-free key for a label set: labels are deduplicated,
+ * sorted and JSON-encoded. JSON encoding (rather than joining on a delimiter
+ * character) guarantees that two different label sets can never map to the
+ * same key, regardless of the characters a label contains.
+ */
+export function labelSetKey(labels: string[]): string {
+    return JSON.stringify(Array.from(new Set(labels)).sort());
+}
+
+function fnv1aHex(str: string): string {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193);
+    }
+    return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
+/**
+ * Stable 8-hex-char content hash of a label set (FNV-1a over `labelSetKey`).
+ * Used by `toTargets` as the permutation suffix in target ids, so a
+ * permutation's id — and with it its sample seeds and cached images —
+ * depends only on its own label set, never on its position in the builder.
+ */
+export function labelSetHash(labels: string[]): string {
+    return fnv1aHex(labelSetKey(labels));
+}
+

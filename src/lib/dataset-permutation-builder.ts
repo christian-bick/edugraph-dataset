@@ -1,12 +1,18 @@
 import { CompetencyTarget, GeneratorInput } from "../types/ml-engine.ts";
+import { labelSetHash } from "./utils.ts";
 
 /**
- * Maps a builder's permutations to competency targets with indexed ids
- * (e.g. `K.CC.B.5-how-many-0`, `K.CC.B.5-how-many-1`, ...).
+ * Maps a builder's permutations to competency targets with content-derived
+ * ids: `<idPrefix>~<labelSetHash>` (e.g. `K.CC.B.5-how-many~a3f91c2e`).
+ * Because the suffix hashes the permutation's own label set instead of its
+ * position, inserting, reordering or removing variants in a builder never
+ * changes the id — and thus the seeds and cached samples — of the untouched
+ * permutations. Two permutations with identical label sets would collide on
+ * the same id; spec validation flags that as a duplicate-ID error.
  */
 export function toTargets(idPrefix: string, builder: DatasetPermutationBuilder, explanation?: string): CompetencyTarget[] {
-    return builder.build().map((p, i) => ({
-        id: `${idPrefix}-${i}`,
+    return builder.build().map(p => ({
+        id: `${idPrefix}~${labelSetHash(p.labels)}`,
         labels: p.labels,
         ...(explanation ? { explanation } : {})
     }));

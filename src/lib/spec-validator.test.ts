@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+﻿import { describe, it, expect, afterEach } from 'vitest';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import {
@@ -34,29 +34,25 @@ describe('spec-validator', () => {
     });
 
     describe('getTargetPrefix', () => {
-        it('strips the trailing permutation counter', () => {
-            expect(getTargetPrefix('K.CC.B.5-how-many-0')).toBe('K.CC.B.5-how-many');
+        it('strips the ~<hash> permutation suffix', () => {
+            expect(getTargetPrefix('K.CC.B.5-how-many~a3f91c2e')).toBe('K.CC.B.5-how-many');
         });
 
-        it('strips multi-digit counters', () => {
-            expect(getTargetPrefix('prefix-12')).toBe('prefix');
+        it('strips only the last ~ segment', () => {
+            expect(getTargetPrefix('a~b~c')).toBe('a~b');
         });
 
-        it('strips only the final counter when the definition name itself ends in digits', () => {
-            expect(getTargetPrefix('1.NBT.C.4-add-within-100-3')).toBe('1.NBT.C.4-add-within-100');
-        });
-
-        it('returns the full ID when there is no dash', () => {
+        it('returns the full ID when there is no ~ separator', () => {
             expect(getTargetPrefix('standalone')).toBe('standalone');
         });
 
-        it('returns the full ID when the suffix is not numeric', () => {
-            expect(getTargetPrefix('prefix-abc')).toBe('prefix-abc');
-            expect(getTargetPrefix('prefix-1a')).toBe('prefix-1a');
+        it('treats dash-suffixed IDs as their own definitions', () => {
+            expect(getTargetPrefix('prefix-0')).toBe('prefix-0');
+            expect(getTargetPrefix('1.NBT.C.4-add-within-100')).toBe('1.NBT.C.4-add-within-100');
         });
 
-        it('does not treat a leading dash as a counter separator', () => {
-            expect(getTargetPrefix('-1')).toBe('-1');
+        it('does not treat a leading ~ as a separator', () => {
+            expect(getTargetPrefix('~abc')).toBe('~abc');
         });
     });
 
@@ -119,48 +115,48 @@ describe('spec-validator', () => {
     describe('validateUniquePermutationsPerTarget', () => {
         it('returns no errors when permutations within a target definition are unique', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'prefix-0', labels: ['L1', 'L2'] },
-                { id: 'prefix-1', labels: ['L1', 'L3'] }
+                { id: 'prefix~a', labels: ['L1', 'L2'] },
+                { id: 'prefix~b', labels: ['L1', 'L3'] }
             ];
             expect(validateUniquePermutationsPerTarget(targets)).toHaveLength(0);
         });
 
         it('returns an error when a target definition generates duplicate permutations', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'prefix-0', labels: ['L1', 'L2'] },
-                { id: 'prefix-1', labels: ['L1', 'L2'] }
+                { id: 'prefix~a', labels: ['L1', 'L2'] },
+                { id: 'prefix~b', labels: ['L1', 'L2'] }
             ];
             const errors = validateUniquePermutationsPerTarget(targets);
             expect(errors).toHaveLength(1);
-            expect(errors[0]).toContain('Target "prefix": duplicate permutations in "prefix-1" and "prefix-0"');
+            expect(errors[0]).toContain('Target "prefix": duplicate permutations in "prefix~b" and "prefix~a"');
         });
 
         it('detects duplicates regardless of label order', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'prefix-0', labels: ['L2', 'L1'] },
-                { id: 'prefix-1', labels: ['L1', 'L2'] }
+                { id: 'prefix~a', labels: ['L2', 'L1'] },
+                { id: 'prefix~b', labels: ['L1', 'L2'] }
             ];
             expect(validateUniquePermutationsPerTarget(targets)).toHaveLength(1);
         });
 
         it('reports every repeated permutation in a definition', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'prefix-0', labels: ['L1'] },
-                { id: 'prefix-1', labels: ['L1'] },
-                { id: 'prefix-2', labels: ['L1'] }
+                { id: 'prefix~a', labels: ['L1'] },
+                { id: 'prefix~b', labels: ['L1'] },
+                { id: 'prefix~c', labels: ['L1'] }
             ];
             expect(validateUniquePermutationsPerTarget(targets)).toHaveLength(2);
         });
 
         it('does not flag identical permutations across different target definitions', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'prefixA-0', labels: ['L1', 'L2'] },
-                { id: 'prefixB-0', labels: ['L1', 'L2'] }
+                { id: 'prefixA~a', labels: ['L1', 'L2'] },
+                { id: 'prefixB~a', labels: ['L1', 'L2'] }
             ];
             expect(validateUniquePermutationsPerTarget(targets)).toHaveLength(0);
         });
 
-        it('treats IDs without a numeric suffix as their own definitions', () => {
+        it('treats IDs without a ~ separator as their own definitions', () => {
             const targets: CompetencyTarget[] = [
                 { id: 'alpha', labels: ['L1'] },
                 { id: 'beta', labels: ['L1'] }
@@ -173,20 +169,20 @@ describe('spec-validator', () => {
         it('returns no errors when definitions merely overlap in some permutations', () => {
             // Shared permutation L1|L2, but each definition also has a unique one
             const targets: CompetencyTarget[] = [
-                { id: 'defA-0', labels: ['L1', 'L2'] },
-                { id: 'defA-1', labels: ['L1', 'L3'] },
-                { id: 'defB-0', labels: ['L1', 'L2'] },
-                { id: 'defB-1', labels: ['L1', 'L4'] }
+                { id: 'defA~a', labels: ['L1', 'L2'] },
+                { id: 'defA~b', labels: ['L1', 'L3'] },
+                { id: 'defB~a', labels: ['L1', 'L2'] },
+                { id: 'defB~b', labels: ['L1', 'L4'] }
             ];
             expect(validateUniqueTargetPermutations(targets)).toHaveLength(0);
         });
 
         it('returns an error when two definitions define identical permutation sets', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'defA-0', labels: ['L1', 'L2'] },
-                { id: 'defA-1', labels: ['L1', 'L3'] },
-                { id: 'defB-0', labels: ['L1', 'L2'] },
-                { id: 'defB-1', labels: ['L1', 'L3'] }
+                { id: 'defA~a', labels: ['L1', 'L2'] },
+                { id: 'defA~b', labels: ['L1', 'L3'] },
+                { id: 'defB~a', labels: ['L1', 'L2'] },
+                { id: 'defB~b', labels: ['L1', 'L3'] }
             ];
             const errors = validateUniqueTargetPermutations(targets);
             expect(errors).toHaveLength(1);
@@ -196,36 +192,36 @@ describe('spec-validator', () => {
 
         it('compares permutation sets regardless of permutation order within a definition', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'defA-0', labels: ['L1'] },
-                { id: 'defA-1', labels: ['L2'] },
-                { id: 'defB-0', labels: ['L2'] },
-                { id: 'defB-1', labels: ['L1'] }
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defA~b', labels: ['L2'] },
+                { id: 'defB~a', labels: ['L2'] },
+                { id: 'defB~b', labels: ['L1'] }
             ];
             expect(validateUniqueTargetPermutations(targets)).toHaveLength(1);
         });
 
         it('flags single-permutation definitions with the same label set', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'defA-0', labels: ['L1', 'L2'] },
-                { id: 'defB-0', labels: ['L2', 'L1'] }
+                { id: 'defA~a', labels: ['L1', 'L2'] },
+                { id: 'defB~a', labels: ['L2', 'L1'] }
             ];
             expect(validateUniqueTargetPermutations(targets)).toHaveLength(1);
         });
 
         it('does not flag a definition whose permutation set is a strict subset of another', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'defA-0', labels: ['L1'] },
-                { id: 'defB-0', labels: ['L1'] },
-                { id: 'defB-1', labels: ['L2'] }
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defB~a', labels: ['L1'] },
+                { id: 'defB~b', labels: ['L2'] }
             ];
             expect(validateUniqueTargetPermutations(targets)).toHaveLength(0);
         });
 
         it('compares definitions as sets: internal duplicate permutations collapse', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'defA-0', labels: ['L1'] },
-                { id: 'defA-1', labels: ['L1'] },
-                { id: 'defB-0', labels: ['L1'] }
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defA~b', labels: ['L1'] },
+                { id: 'defB~a', labels: ['L1'] }
             ];
             // defA = {L1, L1} collapses to {L1} = defB
             expect(validateUniqueTargetPermutations(targets)).toHaveLength(1);
@@ -233,9 +229,9 @@ describe('spec-validator', () => {
 
         it('reports every additional definition sharing an already-seen permutation set', () => {
             const targets: CompetencyTarget[] = [
-                { id: 'defA-0', labels: ['L1'] },
-                { id: 'defB-0', labels: ['L1'] },
-                { id: 'defC-0', labels: ['L1'] }
+                { id: 'defA~a', labels: ['L1'] },
+                { id: 'defB~a', labels: ['L1'] },
+                { id: 'defC~a', labels: ['L1'] }
             ];
             expect(validateUniqueTargetPermutations(targets)).toHaveLength(2);
         });
@@ -306,33 +302,33 @@ describe('spec-validator', () => {
 
         it('normalizes labels, deduplicates overlap and computes stats for a valid module', async () => {
             writeFixture('valid', 'a.ts', `export const spec = [
-                { id: 'defA-0', labels: ['Z', 'A', 'Z'] },
-                { id: 'defA-1', labels: ['B'] },
-                { id: 'defB-0', labels: ['A', 'Z'] },
-                { id: 'defB-1', labels: ['C'] }
+                { id: 'defA~a', labels: ['Z', 'A', 'Z'] },
+                { id: 'defA~b', labels: ['B'] },
+                { id: 'defB~a', labels: ['A', 'Z'] },
+                { id: 'defB~b', labels: ['C'] }
             ];`);
             const result = await normalizeAndValidateSpec('valid', FIXTURE_ROOT);
             expect(result.errors).toHaveLength(0);
-            // defA-0 ({A,Z} after normalization) and defB-0 overlap -> deduplicated
+            // defA~a ({A,Z} after normalization) and defB~a overlap -> deduplicated
             expect(result.stats).toEqual({ totalTargets: 4, uniqueTargets: 3, deduplicatedCount: 1 });
-            expect(result.targets.map(t => t.id)).toEqual(['defA-0', 'defA-1', 'defB-1']);
+            expect(result.targets.map(t => t.id)).toEqual(['defA~a', 'defA~b', 'defB~b']);
             expect(result.targets[0].labels).toEqual(['A', 'Z']);
             expect(result.warnings).toHaveLength(1);
-            expect(result.warnings[0]).toContain('defA-0, defB-0');
+            expect(result.warnings[0]).toContain('defA~a, defB~a');
         });
 
         it('reports duplicate target IDs as validation errors (gatekeeper moved out of loadTargets)', async () => {
-            writeFixture('dup-ids', 'a.ts', `export const spec = [{ id: 'dup-0', labels: ['A'] }];`);
-            writeFixture('dup-ids', 'b.ts', `export const spec = [{ id: 'dup-0', labels: ['B'] }];`);
+            writeFixture('dup-ids', 'a.ts', `export const spec = [{ id: 'dup~a', labels: ['A'] }];`);
+            writeFixture('dup-ids', 'b.ts', `export const spec = [{ id: 'dup~a', labels: ['B'] }];`);
             const result = await normalizeAndValidateSpec('dup-ids', FIXTURE_ROOT);
             expect(result.errors).toHaveLength(1);
-            expect(result.errors[0]).toContain('Duplicate target ID "dup-0"');
+            expect(result.errors[0]).toContain('Duplicate target ID "dup~a"');
         });
 
         it('reports duplicate permutations within a definition as errors', async () => {
             writeFixture('intra-dup', 'a.ts', `export const spec = [
-                { id: 'def-0', labels: ['B', 'A'] },
-                { id: 'def-1', labels: ['A', 'B', 'A'] }
+                { id: 'def~a', labels: ['B', 'A'] },
+                { id: 'def~b', labels: ['A', 'B', 'A'] }
             ];`);
             const result = await normalizeAndValidateSpec('intra-dup', FIXTURE_ROOT);
             expect(result.errors).toHaveLength(1);
@@ -341,10 +337,10 @@ describe('spec-validator', () => {
 
         it('reports definitions with identical permutation sets as errors', async () => {
             writeFixture('identical-defs', 'a.ts', `export const spec = [
-                { id: 'defA-0', labels: ['A'] },
-                { id: 'defA-1', labels: ['B'] },
-                { id: 'defB-0', labels: ['B'] },
-                { id: 'defB-1', labels: ['A'] }
+                { id: 'defA~a', labels: ['A'] },
+                { id: 'defA~b', labels: ['B'] },
+                { id: 'defB~a', labels: ['B'] },
+                { id: 'defB~b', labels: ['A'] }
             ];`);
             const result = await normalizeAndValidateSpec('identical-defs', FIXTURE_ROOT);
             expect(result.errors).toHaveLength(1);

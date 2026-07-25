@@ -35,7 +35,7 @@ async function main() {
 
     if (!targetId || !specName) {
         console.error('Usage: npm run test:target -- --target=<target.id> --spec=<spec_module> [--render]');
-        console.error('Example: npm run test:target -- --target=test-writing-0 --spec=test');
+        console.error('Example: npm run test:target -- --target=test-writing~fe4336da --spec=test');
         process.exit(1);
     }
 

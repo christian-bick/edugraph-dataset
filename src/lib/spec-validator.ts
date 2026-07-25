@@ -1,6 +1,8 @@
 import { CompetencyTarget } from '../types/ml-engine.ts';
 import { loadTargets } from './generation.ts';
-import { shortenLabel } from './utils.ts';
+import { shortenLabel, labelSetKey } from './utils.ts';
+
+export { labelSetKey };
 
 export interface SpecValidationStats {
     totalTargets: number;
@@ -16,27 +18,14 @@ export interface SpecValidationResult {
 }
 
 /**
- * Canonical, collision-free key for a label set: labels are deduplicated,
- * sorted and JSON-encoded. JSON encoding (rather than joining on a delimiter
- * character) guarantees that two different label sets can never map to the
- * same key, regardless of the characters a label contains.
- */
-export function labelSetKey(labels: string[]): string {
-    return JSON.stringify(Array.from(new Set(labels)).sort());
-}
-
-/**
  * Extracts the target definition prefix from a target ID by stripping the
- * trailing permutation counter that `toTargets` appends (e.g.
- * "K.CC.B.5-how-many-0" -> "K.CC.B.5-how-many"). An ID without a numeric
- * suffix is treated as its own definition.
+ * `~<labelSetHash>` permutation suffix that `toTargets` appends (e.g.
+ * "K.CC.B.5-how-many~a3f91c2e" -> "K.CC.B.5-how-many"). An ID without a
+ * `~` separator is treated as its own definition.
  */
 export function getTargetPrefix(targetId: string): string {
-    const lastDashIdx = targetId.lastIndexOf('-');
-    if (lastDashIdx > 0 && /^\d+$/.test(targetId.slice(lastDashIdx + 1))) {
-        return targetId.slice(0, lastDashIdx);
-    }
-    return targetId;
+    const sepIdx = targetId.lastIndexOf('~');
+    return sepIdx > 0 ? targetId.slice(0, sepIdx) : targetId;
 }
 
 function groupTargetsByPrefix(targets: CompetencyTarget[]): Map<string, CompetencyTarget[]> {
