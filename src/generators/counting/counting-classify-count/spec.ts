@@ -8,7 +8,6 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.NumerationWithIntegers,
         Area.ObjectSorting,
-        Area.CollectionSense,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutZero,

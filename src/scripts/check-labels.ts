@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { isCompatibleConcept } from '../lib/ontology.ts';
+import { isSubConceptOf } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
 
@@ -58,8 +58,8 @@ async function checkLabels() {
                                 const used = getEnumString(usedEnumName);
                                 if (!used) continue;
 
-                                const isSupported = generalLabels.some((supported: string) => 
-                                    isCompatibleConcept(used, supported)
+                                const isSupported = generalLabels.some((supported: string) =>
+                                    isSubConceptOf(supported, used)
                                 );
 
                                 if (!isSupported) {

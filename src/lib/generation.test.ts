@@ -167,6 +167,52 @@ describe('matchesTarget', () => {
         });
     });
 
+    it('matches a broad target label with a more specific view/generator capability', () => {
+        // A broad standard (ProcedureUnderstanding) is satisfied by a view that
+        // exercises a specialization of it (ProcedureInversion partOf ProcedureUnderstanding).
+        const abilityVerdict = matchesTarget(
+            [Ability.ProcedureUnderstanding],
+            gen([]),
+            view([Ability.ProcedureInversion])
+        );
+        expect(abilityVerdict).toEqual({ matched: true });
+
+        // Same directionality for Area (ObjectSorting partOf CollectionSense).
+        const areaVerdict = matchesTarget(
+            [Area.CollectionSense],
+            gen([Area.ObjectSorting]),
+            view([])
+        );
+        expect(areaVerdict).toEqual({ matched: true });
+    });
+
+    it('does NOT match a specific target label with only a more general capability', () => {
+        // A specific requirement (ProcedureInversion) is not satisfied by a view
+        // that only promises the general ancestor (ProcedureUnderstanding).
+        const abilityVerdict = matchesTarget(
+            [Ability.ProcedureInversion],
+            gen([]),
+            view([Ability.ProcedureUnderstanding])
+        );
+        expect(abilityVerdict).toEqual({
+            matched: false,
+            reason: 'unsupported-label',
+            label: Ability.ProcedureInversion
+        });
+
+        // Same directionality for Area: specific target, general generator.
+        const areaVerdict = matchesTarget(
+            [Area.ObjectSorting],
+            gen([Area.CollectionSense]),
+            view([])
+        );
+        expect(areaVerdict).toEqual({
+            matched: false,
+            reason: 'unsupported-label',
+            label: Area.ObjectSorting
+        });
+    });
+
     it('reports the offending unsupported label', () => {
         const unknownLabel = 'http://edugraph.io/edu/Area.DoesNotExist';
         const verdict = matchesTarget(
