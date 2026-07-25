@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
@@ -14,6 +15,7 @@ import { shortenLabel } from '../lib/utils.ts';
 import { renderTasks, RenderTask } from '../lib/render.ts';
 import { VqaCacheManager } from '../lib/vqa-cache.ts';
 import { getCliOption } from '../lib/cli.ts';
+import { evaluateSampleVqa } from '../lib/vqa-evaluator.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,9 +34,10 @@ async function main() {
     const targetId = getCliOption(args, 'target');
     const specName = getCliOption(args, 'spec');
     const shouldRender = args.includes('--render') || process.env.npm_config_render !== undefined;
+    const shouldValidate = args.includes('--validate') || process.env.npm_config_validate !== undefined;
 
     if (!targetId || !specName) {
-        console.error('Usage: npm run test:target -- --target=<target.id> --spec=<spec_module> [--render]');
+        console.error('Usage: npm run test:target -- --target=<target.id> --spec=<spec_module> [--render] [--validate]');
         console.error('Example: npm run test:target -- --target=test-writing~fe4336da --spec=test');
         process.exit(1);
     }
@@ -139,6 +142,7 @@ async function main() {
             viewPathMap[view.viewId] = view.module.relativePath;
         }
         const tasks: RenderTask[] = [];
+        const validableSamples: typeof samples = [];
         for (const sample of samples) {
             if (!sample.stub) continue;
             const generatorType = generatorCatalog.find(g => g.generatorId === sample.identity.generatorId)!.generator.type;
@@ -158,10 +162,43 @@ async function main() {
                     seed: sample.seed
                 })
             });
+            validableSamples.push(sample);
         }
         const outDir = resolve(PROJECT_ROOT, 'out', 'target-test', sanitizeFilePart(target.id));
         const written = await renderTasks(tasks, outDir, viewPathMap);
         console.log(`\n🖼️ Rendered ${written.length} images to ${outDir}`);
+
+        if (shouldValidate) {
+            const apiKey = process.env.GEMINI_API_KEY;
+            if (!apiKey) {
+                console.log(`\nℹ️ GEMINI_API_KEY not set — skipping live VQA validation.`);
+            } else {
+                console.log(`\n🤖 Running live VQA validation for rendered target samples...`);
+                for (let i = 0; i < written.length; i++) {
+                    const sample = validableSamples[i];
+                    const imagePath = written[i];
+                    const cacheMgr = getCache(sample.identity.generatorId);
+                    const vqaResult = await evaluateSampleVqa({
+                        imagePath,
+                        sampleKey: sample.sampleKey,
+                        targetId: target.id,
+                        generatorId: sample.identity.generatorId,
+                        viewId: sample.identity.viewId,
+                        modeName: sample.identity.mode,
+                        instanceIdx: sample.identity.instanceIdx,
+                        attempt: sample.attempt,
+                        seed: sample.seed,
+                        fileName: sample.fileName,
+                        apiKey,
+                        cacheManager: cacheMgr
+                    });
+                    if (vqaResult && vqaResult.isLiveEvaluated) {
+                        const status = vqaResult.entry.evaluation.pass ? '✅ PASS' : `❌ FAIL: ${vqaResult.entry.evaluation.reasoning}`;
+                        console.log(`  - ${sample.sampleKey}: ${status}`);
+                    }
+                }
+            }
+        }
     } else {
         console.log(`\nTip: add --render (with the vite dev server running) to render these samples to out/target-test/.`);
     }

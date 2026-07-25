@@ -46,16 +46,7 @@ Every dataset sample has a **structural identity**: the tuple `(target.id, gener
 
 The consequence: a code change only invalidates the samples whose identity inputs it actually touches. `problem.id` carries the sample key for reference but has **no functional role** — do not derive anything from it.
 
-## 3. Directory & Script Reference
-
-#### `src/lib/generation.ts`
-The shared generation library — the single source of truth for target loading, generator/view catalog loading, matching, sample identity, seeding and content generation. Every script that touches spec modules or matching (the dataset pipeline, `show-matching-stats.ts`, the debug scripts, and `map-standards.ts`'s standards coverage report) imports from it, so matching, seeding, and the spec export contract can never drift between tools. Key entry points:
-*   `loadTargets(specName)` / `loadGeneratorCatalog()` / `loadViewCatalog()` — deterministic catalog loading.
-*   `loadSpecTodos(specName)` — loads a spec module's `implementationTodos` / `ontologyTodos` exports (see Step 1 below). Only `map-standards.ts` calls this; the dataset pipeline never does.
-*   `matchesTarget(targetLabels, generatorInfo, viewInfo)` — the single matching predicate. Returns a verdict (`matched` or `reason: 'incompatible-type' | 'unsupported-label' | 'rejected-label'` with the offending label), so diagnostics come for free and no caller can apply a partial rule set.
-*   `matchTargets(targets, generators, views)` — the full `(target, generator, view)` tuple list the pipeline generates from.
-*   `computeSampleKey` / `computeSampleSeed` / `computeSampleFilename` — the identity functions (see *Sample Identity & Determinism*).
-*   `generateSample({generator, labels, seed})` — pure single-draw primitive; `generateSampleWithRetry` adds the attempt loop; `generateSampleByKey({sampleKey, attempt, specName})` replays any recorded sample in isolation; `generateTargetSamples(target, ...)` produces everything one target yields.
+## 3. Script Reference
 
 #### `src/scripts/generate-dataset.ts`
 The primary pipeline orchestrator.
@@ -73,7 +64,7 @@ The primary pipeline orchestrator.
 
 ### `src/scripts/validate-dataset.ts`
 *   **Execution**: `npm run validate:dataset -- --generator=X --view=Y [--dataset=Z] [--force]`
-*   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It defaults to reading from `out/dataset/`, but you can target smaller test runs by specifying `--dataset=test` (which dynamically reads from `out/dataset-test/`).
+*   **Function**: An automated Visual QA pipeline. It uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It defaults to reading from `out/dataset/`, but you can target smaller test runs by specifying `--dataset=test` (which dynamically reads from `out/dataset-test/`).
 *   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : checklist hash)` — an image is only re-validated when its pixels or its applicable checklists change. Each cache entry also records the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
 
 ### `src/scripts/report-cache-churn.ts`
@@ -81,12 +72,12 @@ The primary pipeline orchestrator.
 *   **Function**: Compares the working-tree VQA cache against a git ref (default `HEAD`) by joining entries on their `sample_key`. Reports identities whose image hash changed, classified as *render/code change* (same seed and attempt), *attempt shift* (collision elsewhere or generator behavior change), or *seed scheme change* (should never happen). **Run this after every regeneration**: churn in samples your change should not have affected is a determinism regression.
 
 ### `src/scripts/test-sample.ts`
-*   **Execution**: `npm run test:sample -- --sample="<sample_key>" --attempt=<n> --spec=<spec_module> [--no-render]`
-*   **Function**: Replays one exact sample draw from its identity, renders it to `out/retest/` (requires `npm run dev`), and compares the image hash against the committed VQA cache. This is the fix-verification loop for failed validations — the exact command for each failure is printed in `validation-report.md`.
+*   **Execution**: `npm run test:sample -- --sample="<sample_key>" --spec=<spec_module> [--no-render] [--no-validate]`
+*   **Function**: Replays one exact sample draw from its identity, renders it to `out/retest/` (requires `npm run dev`), compares the image hash against the committed VQA cache, and performs live Gemini VQA validation by default (when `GEMINI_API_KEY` is present), automatically updating the local VQA cache on pass. Pass `--no-validate` to skip live VQA API calls, or `--no-render` to skip image rendering.
 
 ### `src/scripts/test-target.ts`
-*   **Execution**: `npm run test:target -- --target=<target.id> --spec=<spec_module> [--render]`
-*   **Function**: Inspects one competency target end to end: which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — the actual images in `out/target-test/`. Use it to debug new targets, matching behavior and cache issues.
+*   **Execution**: `npm run test:target -- --target=<target.id_or_prefix> --spec=<spec_module> [--render] [--validate]`
+*   **Function**: Inspects one competency target end to end: supports full or prefix target IDs (e.g. `--target=test-writing`), which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — the actual images in `out/target-test/`. Pass `--validate` to run live Gemini VQA validation on rendered samples.
 
 ### `src/scripts/show-matching-stats.ts`
 *   **Execution**: `npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>`
@@ -257,9 +248,9 @@ Shows the matched tuples, why near-miss pairs were rejected (`unsupported-label`
 ### Fixing a failed validation
 Every failure in `validation-report.md` includes its sample identity and a ready-to-run command:
 ```bash
-npm run test:sample -- --sample="<sample_key>" --attempt=<n> --spec=<spec>
+npm run test:sample -- --sample="<sample_key>" --spec=<spec>
 ```
-After changing the generator or view, rerun it: if the rendered image is byte-identical to the cached one, the cached validation still applies; if it differs, your fix took effect and only that module needs re-validation (`npm run validate:dataset -- --generator=<module> [--dataset=test]`).
+After changing the generator or view, rerun it: `test:sample` re-renders the image and performs live Gemini VQA validation by default (updating the cache automatically on pass). If you only want an offline pixel/SHA256 check, pass `--no-validate`.
 
 ### Checking cache health after a regeneration
 ```bash

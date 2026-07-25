@@ -11,6 +11,7 @@ import {
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
+import { evaluateSampleVqa } from "../lib/vqa-evaluator.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -109,71 +110,23 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
 }
 
 async function evaluateSingleSample(entry: any, _datasetFolderName: string): Promise<any> {
-    const moduleName = entry.generator;
-    const viewId = entry.view;
-    const modeName = entry.mode;
-    const isSolution = modeName === 'solution';
     const imagePath = resolve(DATASET_ROOT, entry.file_name);
+    const result = await evaluateSampleVqa({
+        imagePath,
+        sampleKey: entry.sample_key,
+        targetId: entry.target_id,
+        generatorId: entry.generator,
+        viewId: entry.view,
+        modeName: entry.mode,
+        instanceIdx: entry.instance,
+        attempt: entry.attempt,
+        seed: entry.seed,
+        fileName: entry.file_name,
+        apiKey
+    });
 
-    if (!existsSync(imagePath)) return null;
-
-    const imageBuffer = readFileSync(imagePath);
-    const imageSha256 = computeImageSha256(imageBuffer);
-    const checklistPaths = getChecklistPaths(moduleName, viewId);
-
-    let checklistText = '';
-    for (const p of checklistPaths) {
-        checklistText += readFileSync(p, 'utf-8') + '\n\n';
-    }
-
-    const checklistHash = computeChecklistHash(checklistPaths);
-    const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
-
-    const prompt = `
-You are a senior Visual QA Engineer. Evaluate this math exercise image:
-Mode: "${isSolution ? 'Solution Mode (_mode-S)' : 'Question Mode (_mode-Q)'}"
-Module: "${moduleName}"
-View ID: "${viewId}"
-
-CHECKLIST:
-${checklistText}
-
-IMPORTANT: If pass is true and all checks pass, set "reasoning" to "" (empty string). Only provide a non-empty reasoning string if pass is false or any check fails.
-
-Respond only in the provided JSON schema.
-`;
-
-    try {
-        const imagePart = { inlineData: { data: imageBuffer.toString("base64"), mimeType: "image/png" } };
-        const result = await model.generateContent([prompt, imagePart]);
-        const responseText = result.response.text();
-        const parsed = JSON.parse(responseText);
-
-        if (parsed.pass && parsed.general_checks?.no_overlaps && parsed.general_checks?.no_placeholders && parsed.general_checks?.sane_padding) {
-            parsed.reasoning = "";
-        }
-
-        return {
-            validation_cache_key: valCacheKey,
-            sample_key: entry.sample_key,
-            target_id: entry.target_id,
-            generator: moduleName,
-            view: viewId,
-            mode: modeName,
-            instance: entry.instance,
-            attempt: entry.attempt,
-            seed: entry.seed,
-            file_name: entry.file_name,
-            image_sha256: imageSha256,
-            checklist_hash: checklistHash,
-            validated_at: new Date().toISOString(),
-            evaluation: parsed,
-            moduleName
-        };
-    } catch (error) {
-        console.error(`\n🚨 Error validating ${entry.file_name}:`, error);
-        return null;
-    }
+    if (!result) return null;
+    return { ...result.entry, moduleName: entry.generator };
 }
 
 async function main() {
@@ -532,7 +485,7 @@ function generateValidationReport(
                 md += `  - **Checks:** ${checks.join(' | ')}\n`;
             }
             md += `  - **Sample:** \`${entry.sample_key}\` (target \`${entry.target_id}\`, attempt ${entry.attempt}, seed ${entry.seed})\n`;
-            md += `  - **Retest:** \`npm run test:sample -- --sample="${entry.sample_key}" --attempt=${entry.attempt} --spec=${entry.spec}\`\n`;
+            md += `  - **Retest:** \`npm run test:sample -- --sample="${entry.sample_key}" --spec=${entry.spec}\`\n`;
             md += `\n`;
         }
     }
