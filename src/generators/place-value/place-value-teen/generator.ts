@@ -16,8 +16,11 @@ export class PlaceValueTeenGenerator implements ProblemGenerator<PlaceValueTeenP
             throw new GeneratorValidationError('place-value-teen', `Invalid range bounds: min (${resolvedRange.min}) exceeds max (${resolvedRange.max}).`);
         }
 
-        const resolvedMin = resolvedRange.min >= 10 ? resolvedRange.min : 11;
-        const resolvedMax = resolvedRange.max <= 20 ? resolvedRange.max : 19;
+        // Teens are strictly 11-19. NumbersLarger10 / NumbersSmaller20 are
+        // intentionally vague about inclusivity (resolveRangeFromLabels yields
+        // min=10, max=20), so the generator must enforce the teen range itself.
+        const resolvedMin = Math.max(11, resolvedRange.min);
+        const resolvedMax = Math.min(19, resolvedRange.max);
 
         if (resolvedMin > resolvedMax) {
             throw new GeneratorValidationError('place-value-teen', `Effective range bounds invalid: resolvedMin (${resolvedMin}) exceeds resolvedMax (${resolvedMax}).`);

@@ -27,7 +27,7 @@ const wordProblemTemplates: Record<string, (num1: number, num2: number) => strin
 const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    validateProblemData('operations-word-problem', data, ['num1', 'num2', 'operation', 'answer', 'type']);
+    validateProblemData('operations-word-problem', data, ['num1', 'num2', 'operation', 'answer']);
 
     const operation = data.operation;
     const symbol = operatorSymbols[operation];

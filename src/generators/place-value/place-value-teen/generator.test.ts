@@ -34,6 +34,20 @@ describe('PlaceValueTeenGenerator', () => {
         expect(stub!.data.target).toBe(10 + stub!.data.ones);
     });
 
+    it('never emits 10 or 20 for the NumbersLarger10/NumbersSmaller20 range (min=10, max=20)', () => {
+        // resolveRangeFromLabels yields min=10, max=20 for a teen target; the
+        // generator must still stay strictly within 11-19 for every seed.
+        for (let s = 0; s < 50; s++) {
+            setSeed(s);
+            const stub = generator.generate({ range: { min: 10, max: 20 } });
+            expect(stub).not.toBeNull();
+            expect(stub!.data.ones).toBeGreaterThanOrEqual(1);
+            expect(stub!.data.ones).toBeLessThanOrEqual(9);
+            expect(stub!.data.target).toBeGreaterThanOrEqual(11);
+            expect(stub!.data.target).toBeLessThanOrEqual(19);
+        }
+    });
+
     it('should throw validation error if range configuration is missing', () => {
         expect(() => generator.generate({} as any)).toThrow();
     });
