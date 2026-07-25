@@ -125,7 +125,7 @@ Leaf module directory names retain their full module prefix (e.g., `arithmetic-o
         - **Graceful Error Recovery**: If validation or range checks fail (e.g. coordinates or dimensions exceed visual limits), the view must throw a `ViewValidationError`. This is caught by the `ErrorBoundary` in the `withConfig` wrapper to display a standardized error card, preventing browser crashes, hangs, or infinite rendering loops during headless generation.
         - **No Silent Fallbacks**: Must not use local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`). Consume resolved configuration parameters directly from the `config` prop and `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and correctly-typed values.
     - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
-        - **`rejectedLabels`**: Instead of declaring what a view *can* handle, view specs must use `rejectedLabels` to explicitly list the labels (or label arrays) they *cannot* handle. This is the primary gatekeeping mechanism to prevent views from receiving unsupported problems (e.g., rejecting `Scope.NumbersWithZero`, or utilizing `...deductAdmitting([Scope.NumbersLarger20])` to automatically reject all targets that allow numbers larger than the physical rendering capacity of the view). Rule of thumb: capabilities are declared with `deductCompatible` (generator/view schemas), boundaries with `deductAdmitting` (rejection lists).
+        - **`rejectedLabels`**: Instead of declaring what a view *can* handle, view specs must use `rejectedLabels` to explicitly list the labels (or label arrays) they *cannot* handle. Its purpose is to narrow a view to a **subset of the problems its matched generator can produce** — the cases the view's layout physically cannot render (e.g., rejecting `Scope.NumbersWithZero`, or utilizing `...deductAdmitting([Scope.NumbersLarger20])` to automatically reject all targets that allow numbers larger than the physical rendering capacity of the view). It is **not** a general competency filter: do not use it to exclude abilities or to work around the matching direction — what a view *supports* belongs in the positive `generalLabels`/schema declarations (see §4b rule 1). Rule of thumb: capabilities are declared with `deductCompatible` (generator/view schemas), boundaries with `deductAdmitting` (rejection lists).
     - **Parent Category `helpers.ts` / Components**: Shared visual helpers or sub-components common to sibling views within a category can be placed at the category level (e.g. `src/visuals/views/operations/helpers.ts`) and imported relatively.
     - **`checklist.md`**: Visual layout, rendering, and interaction verification list. Used by Visual QA to check for elements positioning, SVG structures, rendering overflows, and Question (`_mode-Q`) vs. Solution (`_mode-S`) mode styling. It **must not** contain abstract mathematical generation logic. See the Checklist Design Rules section below for detailed formatting constraints.
 *   **`src/visuals/components/`**: Reusable shared React elements across all view categories (such as `TenFrame.tsx`).
@@ -135,17 +135,20 @@ Leaf module directory names retain their full module prefix (e.g., `arithmetic-o
 
 When designing or updating `spec.ts` files, you must strictly follow these rules:
 
-1. **Separation of Concerns**:
+1. **Declare the Most Specific Labels (Matching Direction)**:
+   - Standards/targets (`src/spec/`) are deliberately broad; generators and views are **specific**. The matching predicate (`matchesTarget` in `src/lib/generation.ts`) satisfies a target label `T` with a generator/view capability label `L` **only when `L` is equal to or more specific than `T`** — `isSubConceptOf(L, T)`, i.e. `L partOf* T`. The reverse never matches: a specific target is *not* satisfied by a merely more-general capability. This one directionality holds for Area, Scope **and** Ability (abilities are matched against the view only — generators are pure math).
+   - Therefore declare the **most specific (leaf) ontology label** the module actually produces or renders. A specific label automatically matches every broader standard that subsumes it, so **never also declare an ancestor** of a label you already declare: it cannot add any match and `validate-generator-view-specs` flags it as a redundant declaration. Conversely, declaring only an ancestor of what a target needs will silently fail to match it.
+2. **Separation of Concerns**:
    - **Generator Specs**: Map ontology labels **only** to abstract mathematical configurations (e.g. `range`, `includeZero`, `allowNegatives`, `useDecimals`, `attribute`, `relation`).
    - **View Specs**: Map ontology labels **only** to visual/layout configurations (e.g. `isReverse`, `arrangement`, `showTenFrame`).
-2. **Resolver Reusability**:
+3. **Resolver Reusability**:
    - All general resolver functions (such as `hasLabel`, `selectExactMatch`, `extractFirstMatch`) must be imported and reused from `src/lib/resolvers.ts`. Do not define custom resolvers inline.
    - Resolver functions must be passed as references (or output of curried factory functions) to the schema arrays, and not executed prematurely.
-3. **General Labels vs. Parameter Labels Overlap**:
+4. **General Labels vs. Parameter Labels Overlap**:
    - There must be zero overlap (including taxonomic ancestors via `partOf`) between the labels checked inside schema parameters and the spec's `generalLabels`. Specifically, when a label is declared as part of a schema parameter, it (and none of its ancestors) should appear in `generalLabels`.
-4. **No Duplicate Parameterization**:
+5. **No Duplicate Parameterization**:
    - When a generator maps a label to configure the mathematical properties of a problem payload, that label (and none of its ancestors/descendants) should be queried in the schema of the matching view. The view must rely purely on the generated problem payload (e.g. `problem.data`) rather than querying the ontology itself.
-5. **Prefer Simple Arrays for Schemas**:
+6. **Prefer Simple Arrays for Schemas**:
    - When mapping a parameter to a set of compatible standard labels (e.g. arrangements), prefer defining a simple array (e.g. `arrangement: [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement]`) over using resolvers. Fallbacks for missing labels are generated generically already and don't require specific resolvers.
 
 ## 4c. Checklist Design Rules & Hierarchical Loading
@@ -204,7 +207,7 @@ If a new generator or view is required:
 
 ### Step 5: Declaring Capabilities (`spec.ts`)
 Create or update the `spec.ts` files for both your generator and visual view:
-- The generator spec declares the broader labels and scopes it is capable of satisfying mathematically.
+- The generator spec declares the **specific (leaf) labels and scopes** it produces mathematically. A specific capability matches every broader standard that subsumes it (see §4b rule 1), so declare the most specific label you actually satisfy, never an ancestor of it.
 - The view spec declares the layout labels it supports in `generalLabels`. Crucially, it must explicitly reject unsupportable targets (like physical coordinate bounds or unsupported number formats) in `rejectedLabels`. Use `...deductAdmitting([<boundary>])` in the rejected list to logically expand a rejection boundary (e.g. `...deductAdmitting([Scope.NumbersLarger10])` rejects every scope admitting numbers beyond the view's physical capacity of 10). Never use `deductCompatible` for rejection lists — it is the dual operator for declaring capabilities in schemas.
 
 ### Step 6: Implementation
