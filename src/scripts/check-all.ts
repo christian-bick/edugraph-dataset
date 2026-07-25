@@ -3,6 +3,7 @@ import { readdirSync, existsSync, lstatSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
+import { getCliOption } from '../lib/cli.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,7 +11,7 @@ const PROJECT_ROOT = resolve(__dirname, '..', '..');
 
 async function main() {
     const args = process.argv.slice(2);
-    const requestedSpec = process.env.npm_config_spec || (args.find(a => a.includes('spec='))?.split('spec=')[1]);
+    const requestedSpec = getCliOption(args, 'spec');
 
     let hasError = false;
 

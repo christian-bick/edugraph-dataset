@@ -13,16 +13,12 @@ import {
 import { shortenLabel } from '../lib/utils.ts';
 import { renderTasks, RenderTask } from '../lib/render.ts';
 import { VqaCacheManager } from '../lib/vqa-cache.ts';
+import { getCliOption } from '../lib/cli.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const CACHE_DIR = resolve(PROJECT_ROOT, 'cache', 'vqa-validation');
-
-function getArg(args: string[], name: string): string | undefined {
-    return process.env[`npm_config_${name.replace(/-/g, '_')}`]
-        || args.find(a => a.includes(`${name}=`))?.split(`${name}=`)[1];
-}
 
 /**
  * Inspects one competency target end to end: which (generator, view) tuples
@@ -33,8 +29,8 @@ function getArg(args: string[], name: string): string | undefined {
  */
 async function main() {
     const args = process.argv.slice(2);
-    const targetId = getArg(args, 'target');
-    const specName = getArg(args, 'spec');
+    const targetId = getCliOption(args, 'target');
+    const specName = getCliOption(args, 'spec');
     const shouldRender = args.includes('--render') || process.env.npm_config_render !== undefined;
 
     if (!targetId || !specName) {

@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { VqaCacheEntry } from '../lib/vqa-cache.ts';
+import { getCliOption } from '../lib/cli.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -70,8 +71,8 @@ function gitListCacheFiles(ref: string, relDir: string): string[] {
 
 function main() {
     const args = process.argv.slice(2);
-    let datasetParam = process.env.npm_config_dataset || (args.find(a => a.includes('dataset='))?.split('dataset=')[1]);
-    let ref = process.env.npm_config_ref || (args.find(a => a.includes('ref='))?.split('ref=')[1]) || 'HEAD';
+    let datasetParam = getCliOption(args, 'dataset');
+    let ref = getCliOption(args, 'ref') || 'HEAD';
 
     let datasetFolderName = 'dataset';
     if (datasetParam) {

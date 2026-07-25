@@ -11,16 +11,13 @@ import {
 } from '../lib/generation.ts';
 import { renderTasks } from '../lib/render.ts';
 import { computeImageSha256, VqaCacheManager } from '../lib/vqa-cache.ts';
+import { getCliOption } from '../lib/cli.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const CACHE_DIR = resolve(PROJECT_ROOT, 'cache', 'vqa-validation');
 
-function getArg(args: string[], name: string): string | undefined {
-    return process.env[`npm_config_${name.replace(/-/g, '_')}`]
-        || args.find(a => a.includes(`${name}=`))?.split(`${name}=`)[1];
-}
 
 /**
  * Replays one exact sample draw from its sample key, renders it to
@@ -31,9 +28,9 @@ function getArg(args: string[], name: string): string | undefined {
  */
 async function main() {
     const args = process.argv.slice(2);
-    const sampleKey = getArg(args, 'key');
-    const attempt = parseInt(getArg(args, 'attempt') || '1', 10);
-    const specName = getArg(args, 'spec');
+    const sampleKey = getCliOption(args, 'key');
+    const attempt = parseInt(getCliOption(args, 'attempt') || '1', 10);
+    const specName = getCliOption(args, 'spec');
     const skipRender = args.includes('--no-render') || process.env.npm_config_no_render !== undefined;
 
     if (!sampleKey || !specName) {

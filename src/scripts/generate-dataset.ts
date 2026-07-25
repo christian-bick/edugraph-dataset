@@ -23,6 +23,7 @@ import {
     SampleSplit
 } from '../lib/generation.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
+import { getCliOption } from '../lib/cli.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -348,7 +349,7 @@ async function runModulePipeline(
 async function main() {
     const args = process.argv.slice(2);
 
-    const specName = process.env.npm_config_spec || (args.find(a => a.includes('spec='))?.split('spec=')[1]);
+    const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('Error: The --spec parameter is required.');
         console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only]');
@@ -374,9 +375,9 @@ async function main() {
     const allTargets = validationResult.targets;
     console.log(`Loaded ${allTargets.length} normalized & deduplicated targets for spec "${specName}" (${validationResult.stats.deduplicatedCount} deduplicated).`);
 
-    const targetModule = process.env.npm_config_generator || (args.find(a => a.includes('generator='))?.split('generator=')[1]);
-    const targetView = process.env.npm_config_view || (args.find(a => a.includes('view='))?.split('view=')[1]);
-    const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.some(a => a.includes('training-only'));
+    const targetModule = getCliOption(args, 'generator');
+    const targetView = getCliOption(args, 'view');
+    const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.includes('--training-only');
 
     if (!targetModule) {
         if (existsSync(OUT_DIR)) {

@@ -10,6 +10,7 @@ import {
     computeValidationCacheKey,
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
+import { getCliOption } from "../lib/cli.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -183,7 +184,7 @@ async function main() {
     let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
     
-    let datasetParam = process.env.npm_config_dataset || (args.find(a => a.includes('dataset='))?.split('dataset=')[1]) || (args.find(a => a.includes('spec='))?.split('spec=')[1]);
+    let datasetParam = getCliOption(args, 'dataset') || getCliOption(args, 'spec');
     let datasetFolderName = 'dataset';
     if (datasetParam) {
         datasetFolderName = datasetParam.startsWith('dataset-') ? datasetParam : `dataset-${datasetParam}`;

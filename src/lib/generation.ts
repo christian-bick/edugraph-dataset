@@ -329,6 +329,10 @@ const DEFAULT_SPEC_ROOT = () => resolve(PROJECT_ROOT, 'src', 'spec');
  * competencies belong in the sibling `implementationTodos` / `ontologyTodos`
  * exports (see DOCS.md and `loadSpecTodos`), which are never touched here —
  * a todo target can never enter the pipeline.
+ *
+ * Loading is permissive: target ID uniqueness is enforced by
+ * `validateUniqueTargetIds` via `normalizeAndValidateSpec`
+ * (src/lib/spec-validator.ts), which gates every dataset generation.
  */
 export async function loadTargets(
     specName: string,
@@ -337,19 +341,12 @@ export async function loadTargets(
     const files = resolveSpecFiles(specName, specRoot);
 
     const targets: CompetencyTarget[] = [];
-    const seenIds = new Set<string>();
     for (const filePath of files) {
         const module = await import(pathToFileURL(filePath).href);
         if (!Array.isArray(module.spec)) {
             throw new Error(`Spec file "${filePath}" does not export a "spec" array of CompetencyTarget.`);
         }
-        for (const target of module.spec as CompetencyTarget[]) {
-            if (seenIds.has(target.id)) {
-                throw new Error(`Duplicate target id "${target.id}" in spec module "${specName}" (file: ${filePath}).`);
-            }
-            seenIds.add(target.id);
-            targets.push(target);
-        }
+        targets.push(...(module.spec as CompetencyTarget[]));
     }
     return targets;
 }

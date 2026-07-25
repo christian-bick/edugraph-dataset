@@ -16,8 +16,46 @@ export interface SpecValidationResult {
 }
 
 /**
+ * Canonical, collision-free key for a label set: labels are deduplicated,
+ * sorted and JSON-encoded. JSON encoding (rather than joining on a delimiter
+ * character) guarantees that two different label sets can never map to the
+ * same key, regardless of the characters a label contains.
+ */
+export function labelSetKey(labels: string[]): string {
+    return JSON.stringify(Array.from(new Set(labels)).sort());
+}
+
+/**
+ * Extracts the target definition prefix from a target ID by stripping the
+ * trailing permutation counter that `toTargets` appends (e.g.
+ * "K.CC.B.5-how-many-0" -> "K.CC.B.5-how-many"). An ID without a numeric
+ * suffix is treated as its own definition.
+ */
+export function getTargetPrefix(targetId: string): string {
+    const lastDashIdx = targetId.lastIndexOf('-');
+    if (lastDashIdx > 0 && /^\d+$/.test(targetId.slice(lastDashIdx + 1))) {
+        return targetId.slice(0, lastDashIdx);
+    }
+    return targetId;
+}
+
+function groupTargetsByPrefix(targets: CompetencyTarget[]): Map<string, CompetencyTarget[]> {
+    const targetsByPrefix = new Map<string, CompetencyTarget[]>();
+    for (const target of targets) {
+        const prefix = getTargetPrefix(target.id);
+        if (!targetsByPrefix.has(prefix)) {
+            targetsByPrefix.set(prefix, []);
+        }
+        targetsByPrefix.get(prefix)!.push(target);
+    }
+    return targetsByPrefix;
+}
+
+/**
  * Validates that all target IDs in the given target list are unique.
  * Returns an array of error messages for any duplicate IDs found.
+ * This is the sole gatekeeper for target ID uniqueness — `loadTargets`
+ * itself is permissive.
  */
 export function validateUniqueTargetIds(targets: CompetencyTarget[]): string[] {
     const errors: string[] = [];
@@ -35,6 +73,7 @@ export function validateUniqueTargetIds(targets: CompetencyTarget[]): string[] {
 
 /**
  * Normalizes label arrays for every target by sorting and deduplicating labels.
+ * Returns new target objects; the input targets are not mutated.
  */
 export function normalizeTargetLabels(targets: CompetencyTarget[]): CompetencyTarget[] {
     return targets.map(target => ({
@@ -44,40 +83,17 @@ export function normalizeTargetLabels(targets: CompetencyTarget[]): CompetencyTa
 }
 
 /**
- * Helper to extract the prefix from a target ID (e.g. "K.CC.B.5-how-many" from "K.CC.B.5-how-many-0").
- * If no numeric suffix exists, returns the full target ID.
- */
-function getTargetPrefix(targetId: string): string {
-    const lastDashIdx = targetId.lastIndexOf('-');
-    if (lastDashIdx > 0 && /^\d+$/.test(targetId.slice(lastDashIdx + 1))) {
-        return targetId.slice(0, lastDashIdx);
-    }
-    return targetId;
-}
-
-/**
- * Validates that permutations within a single target definition/prefix
- * (e.g. `K.CC.B.5-how-many-*`) have unique normalized label sets within itself.
+ * Validates that permutations within a single target definition
+ * (e.g. `K.CC.B.5-how-many-*`) have unique label sets within itself.
  * Returns error strings if a single target definition generates duplicate permutations.
  */
 export function validateUniquePermutationsPerTarget(targets: CompetencyTarget[]): string[] {
     const errors: string[] = [];
 
-    // Group targets by prefix
-    const targetsByPrefix = new Map<string, CompetencyTarget[]>();
-    for (const target of targets) {
-        const prefix = getTargetPrefix(target.id);
-        if (!targetsByPrefix.has(prefix)) {
-            targetsByPrefix.set(prefix, []);
-        }
-        targetsByPrefix.get(prefix)!.push(target);
-    }
-
-    // Check for duplicate permutations within each prefix group
-    for (const [prefix, group] of targetsByPrefix.entries()) {
+    for (const [prefix, group] of groupTargetsByPrefix(targets).entries()) {
         const seenSignatures = new Map<string, string>();
         for (const target of group) {
-            const signature = target.labels.join('|');
+            const signature = labelSetKey(target.labels);
             if (seenSignatures.has(signature)) {
                 const shortenedLabels = target.labels.map(shortenLabel).join(', ');
                 errors.push(
@@ -93,22 +109,27 @@ export function validateUniquePermutationsPerTarget(targets: CompetencyTarget[])
 }
 
 /**
- * Validates that after label normalization, no two targets across the entire spec
- * have identical label permutations. Returns error strings if duplicate target permutations exist.
+ * Validates that every target definition is distinctly described by the
+ * ontology: no two definitions may define the exact same *set* of label
+ * permutations. Definitions may overlap in individual permutations — that is
+ * expected between related standards and is handled by
+ * `deduplicateTargetPermutations` — but fully identical permutation sets
+ * make the definitions indistinguishable and are errors.
  */
 export function validateUniqueTargetPermutations(targets: CompetencyTarget[]): string[] {
     const errors: string[] = [];
-    const seenSignatures = new Map<string, string>();
+    const seenSetKeys = new Map<string, string>();
 
-    for (const target of targets) {
-        const signature = target.labels.join('|');
-        if (seenSignatures.has(signature)) {
-            const shortenedLabels = target.labels.map(shortenLabel).join(', ');
+    for (const [prefix, group] of groupTargetsByPrefix(targets).entries()) {
+        const permutationKeys = Array.from(new Set(group.map(t => labelSetKey(t.labels)))).sort();
+        const setKey = JSON.stringify(permutationKeys);
+        if (seenSetKeys.has(setKey)) {
             errors.push(
-                `Duplicate permutation: "${target.id}" matches "${seenSignatures.get(signature)}". Labels: [${shortenedLabels}]`
+                `Target definitions "${seenSetKeys.get(setKey)}" and "${prefix}" define identical permutation sets ` +
+                `(${permutationKeys.length} permutation(s)) — they are not distinguishable by the ontology.`
             );
         } else {
-            seenSignatures.set(signature, target.id);
+            seenSetKeys.set(setKey, prefix);
         }
     }
 
@@ -116,7 +137,7 @@ export function validateUniqueTargetPermutations(targets: CompetencyTarget[]): s
 }
 
 /**
- * Deduplicates identical normalized label permutations across targets, keeping 1 representative target per label set.
+ * Deduplicates identical label permutations across targets, keeping 1 representative target per label set.
  * Returns the deduplicated targets and warning strings detailing which targets were deduplicated.
  */
 export function deduplicateTargetPermutations(targets: CompetencyTarget[]): {
@@ -127,7 +148,7 @@ export function deduplicateTargetPermutations(targets: CompetencyTarget[]): {
     const signatureToGroup = new Map<string, CompetencyTarget[]>();
 
     for (const target of targets) {
-        const signature = target.labels.join('|');
+        const signature = labelSetKey(target.labels);
         if (!signatureToGroup.has(signature)) {
             signatureToGroup.set(signature, []);
         }
@@ -153,21 +174,15 @@ export function deduplicateTargetPermutations(targets: CompetencyTarget[]): {
     return { deduplicatedTargets, warnings };
 }
 
-export interface NormalizeAndValidateSpecOptions {
-    specRoot?: string;
-    /** If true, treats cross-target duplicate permutations as errors instead of warnings */
-    failOnDuplicateTargetPermutations?: boolean;
-}
-
 /**
- * Loads, normalizes, validates, and deduplicates competency targets for a given spec module.
+ * Loads, normalizes, validates, and deduplicates competency targets for a
+ * given spec module. Every validation always runs; there are no opt-in
+ * strictness flags.
  */
 export async function normalizeAndValidateSpec(
     specName: string,
-    options: NormalizeAndValidateSpecOptions = {}
+    specRoot?: string
 ): Promise<SpecValidationResult> {
-    const { specRoot, failOnDuplicateTargetPermutations = false } = options;
-
     const rawTargets = await loadTargets(specName, specRoot);
     const totalTargets = rawTargets.length;
 
@@ -179,15 +194,13 @@ export async function normalizeAndValidateSpec(
     // 2. Normalize target label sets
     const normalizedTargets = normalizeTargetLabels(rawTargets);
 
-    // 3. Validate unique permutations per target definition prefix
+    // 3. Validate unique permutations per target definition
     errors.push(...validateUniquePermutationsPerTarget(normalizedTargets));
 
-    // 4. Validate unique target permutations across spec (if configured as error)
-    if (failOnDuplicateTargetPermutations) {
-        errors.push(...validateUniqueTargetPermutations(normalizedTargets));
-    }
+    // 4. Validate that no two target definitions share an identical permutation set
+    errors.push(...validateUniqueTargetPermutations(normalizedTargets));
 
-    // 5. Deduplicate target permutations (collapsing identical label sets and logging warnings)
+    // 5. Deduplicate overlapping permutations across targets (warnings, not errors)
     const { deduplicatedTargets, warnings } = deduplicateTargetPermutations(normalizedTargets);
 
     const stats: SpecValidationStats = {

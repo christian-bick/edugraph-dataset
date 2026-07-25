@@ -1,8 +1,9 @@
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
+import { getCliOption } from '../lib/cli.ts';
 
 async function main() {
     const args = process.argv.slice(2);
-    const specName = process.env.npm_config_spec || (args.find(a => a.includes('spec='))?.split('spec=')[1]);
+    const specName = getCliOption(args, 'spec');
 
     if (!specName) {
         console.error('❌ Error: The --spec parameter is required.');

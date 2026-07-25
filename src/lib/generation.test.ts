@@ -381,10 +381,11 @@ describe('loadTargets', () => {
         await expect(loadTargets('no-spec-export', FIXTURE_ROOT)).rejects.toThrow(/does not export a "spec"/);
     });
 
-    it('throws on duplicate target ids across the spec module', async () => {
+    it('loads duplicate target ids untouched — spec-validator is the uniqueness gatekeeper', async () => {
         writeFixture('dup-ids', 'a.ts', `export const spec = [{ id: 'dup', labels: [] }];`);
         writeFixture('dup-ids', 'b.ts', `export const spec = [{ id: 'dup', labels: [] }];`);
-        await expect(loadTargets('dup-ids', FIXTURE_ROOT)).rejects.toThrow(/Duplicate target id "dup"/);
+        const targets = await loadTargets('dup-ids', FIXTURE_ROOT);
+        expect(targets.map(t => t.id)).toEqual(['dup', 'dup']);
     });
 
     it('loads real ccss targets and excludes their implementationTodos entries', async () => {
