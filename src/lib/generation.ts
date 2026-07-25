@@ -3,7 +3,7 @@ import { existsSync, lstatSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { Ability } from 'edugraph-ts';
-import { isSubConceptOf, isCompatibleConcept } from './ontology.ts';
+import { isSubConceptOf } from './ontology.ts';
 import { findLeafModules, LeafModule } from './module-resolver.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType } from './type-parser.ts';
 import { extractSchemaLabels, generateWithLabels } from './utils.ts';
@@ -142,16 +142,24 @@ export function matchesTarget(
         return { matched: false, reason: 'incompatible-type' };
     }
 
+    // A target (competency/standard) is legitimately broad. It is satisfied by a
+    // generator/view capability that is EQUAL TO or MORE SPECIFIC THAN the target
+    // label — i.e. the capability specializes the broad competency:
+    // `isSubConceptOf(capabilityLabel, targetLabel)`. The reverse (a specific
+    // target met only by a more general capability) must NOT match, because the
+    // general capability may specialize some other way. This is the same
+    // directionality for Area, Scope and Ability. Abilities are matched against
+    // the view only — generators are pure math and do not gate on abilities.
     for (const compLabel of targetLabels) {
         if (!compLabel.startsWith(EDU_PREFIX)) continue;
         if (ABILITIES.has(compLabel)) {
-            if (!viewInfo.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel))) {
+            if (!viewInfo.supportedLabels.some(viewLabel => isSubConceptOf(viewLabel, compLabel))) {
                 return { matched: false, reason: 'unsupported-label', label: compLabel };
             }
             continue;
         }
-        const supportedByGen = generatorInfo.labels.some(genLabel => isSubConceptOf(compLabel, genLabel));
-        const supportedByView = viewInfo.supportedLabels.some(viewLabel => isCompatibleConcept(compLabel, viewLabel));
+        const supportedByGen = generatorInfo.labels.some(genLabel => isSubConceptOf(genLabel, compLabel));
+        const supportedByView = viewInfo.supportedLabels.some(viewLabel => isSubConceptOf(viewLabel, compLabel));
         if (!supportedByGen && !supportedByView) {
             return { matched: false, reason: 'unsupported-label', label: compLabel };
         }
