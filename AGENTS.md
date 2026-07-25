@@ -1,27 +1,24 @@
 # Instructions for Coding Agents
 
-When starting a new session, confirm that you have read this document as well as all other documents named here.
-
-## 1. Interactions
+## 1. Interaction with the User
 
 - **Respect Questions:** When asked questions, answer the question and make helpful suggestions. Never start coding without explicit confirmation when asked questions.
 - **Provide Summaries:** When performing coding tasks, always provide a brief summary and explanation of your changes. Highlight key findings and decisions you have made autonomously on the way.
-- **Ask for Help:** When you keep failing on a task, stop and explain your issue. Ask for human expert opinion to collaboratively solve particularly hard tasks.
+- **Ask for Help:** When you keep failing on a task, stop and explain the issue. Ask for human expert opinion and collaboratively solve particularly hard tasks.
 
-## 2. Coding
+## 2. General Coding Instructions
 
 - **Planning:** Make a plan and weigh options before starting larger codings tasks.
-- **Design Principles:** Prefer loose coupling, high composability and statelessness. 
-- **Refactoring:** When encountering large code blocks, split them into small chainable functions before touching the existing code.
-- **Tests:** Generate and execute unit tests for all code in `scripts`, `lib`, and generator modules using the `{filename}.tests.js` (or `{filename}.test.ts`) convention in the same directory. Unit tests must achieve high coverage, which should be verified by running `npm run test:coverage`.
-- **Validation Checklists:** A `checklist.md` for visual and structural validation must be added for every generator module (detailing abstract pedagogical requirements) and view module (detailing visual layout, interactive, and rendering requirements).
-- **Visual Dataset Validation:** Perform visual and schema dataset validation for each touched module by running: `npx vite-node src/scripts/validate-dataset.ts {module_name}`.
+- **Code Organization:** Prefer loose coupling, high composability and clear separation of concerns.
+- **Functional Style:** Prefer short, chainable and pure functions with well-scoped responsibilities.
+- **Naming:** Prefer self-explaining and concise names. Add code docs to inherently complex functions and classes.
+- **Tests:** Generate and execute unit tests for all code in `lib`, and generator modules using the `{filename}.test.ts` convention in the same directory. Unit tests must achieve high coverage, which should be verified by running `npm run test:coverage`.
 
-## 3. Project Context
+## 3. Specific Project and Coding Documentation
 
 Before executing any tasks always make yourself familiar with the project:
 
-- **Read the README.md** to make yourself familiar with the usage and general project structure
-- **Read the DOCS.md** to make yourself familiar with the technical documentation
+- **ALWAYS read the README.md** to make yourself familiar with the artifact usage and general project context
+- **ALWAYS read the DOCS.md** to make yourself familiar with the tools and guidelines for generating and verifying code
 
 Update these documents after making larger changes to the project.
