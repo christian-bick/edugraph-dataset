@@ -45,14 +45,26 @@ async function main() {
         loadViewCatalog()
     ]);
 
-    const target = targets.find(t => t.id === targetId);
+    let target = targets.find(t => t.id === targetId);
     if (!target) {
-        console.error(`Target "${targetId}" not found in spec module "${specName}".`);
-        const candidates = targets.filter(t => t.id.includes(targetId)).slice(0, 10);
-        if (candidates.length > 0) {
-            console.error(`Did you mean: ${candidates.map(t => t.id).join(', ')}`);
+        const prefixMatches = targets.filter(t => t.id.startsWith(`${targetId}~`) || t.id.startsWith(targetId));
+        if (prefixMatches.length === 1) {
+            target = prefixMatches[0];
+            console.log(`ℹ️ Resolved target prefix "${targetId}" to "${target.id}"`);
+        } else if (prefixMatches.length > 1) {
+            console.error(`Target "${targetId}" is ambiguous. Matching targets:`);
+            for (const candidate of prefixMatches.slice(0, 10)) {
+                console.error(`  - ${candidate.id}`);
+            }
+            process.exit(1);
+        } else {
+            console.error(`Target "${targetId}" not found in spec module "${specName}".`);
+            const candidates = targets.filter(t => t.id.includes(targetId)).slice(0, 10);
+            if (candidates.length > 0) {
+                console.error(`Did you mean: ${candidates.map(t => t.id).join(', ')}`);
+            }
+            process.exit(1);
         }
-        process.exit(1);
     }
 
     console.log(`--- Target ${target.id} [spec: ${specName}] ---`);

@@ -28,14 +28,14 @@ const CACHE_DIR = resolve(PROJECT_ROOT, 'cache', 'vqa-validation');
  */
 async function main() {
     const args = process.argv.slice(2);
-    const sampleKey = getCliOption(args, 'key');
+    const sampleKey = getCliOption(args, 'sample') || getCliOption(args, 'sample-key') || getCliOption(args, 'key');
     const attempt = parseInt(getCliOption(args, 'attempt') || '1', 10);
     const specName = getCliOption(args, 'spec');
     const skipRender = args.includes('--no-render') || process.env.npm_config_no_render !== undefined;
 
     if (!sampleKey || !specName) {
-        console.error('Usage: npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=<spec_module> [--no-render]');
-        console.error('Example: npm run retest:sample -- --key="test-writing~fe4336da#writing#numbers-write-standard#train#question#inst:0" --attempt=1 --spec=test');
+        console.error('Usage: npm run test:sample -- --sample="<sample_key>" --attempt=<n> --spec=<spec_module> [--no-render]');
+        console.error('Example: npm run test:sample -- --sample="test-writing~fe4336da#writing#numbers-write-standard#train#question#inst:0" --attempt=1 --spec=test');
         process.exit(1);
     }
 

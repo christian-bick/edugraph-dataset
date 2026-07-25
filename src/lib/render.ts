@@ -12,7 +12,7 @@ export interface RenderTask {
 }
 
 /**
- * Minimal sequential renderer for debug scripts (retest:sample, test:target).
+ * Minimal sequential renderer for debug scripts (test:sample, test:target).
  * Requires the vite dev server (`npm run dev`) to be running. The main
  * pipeline in generate-dataset.ts keeps its own concurrent worker pool.
  */

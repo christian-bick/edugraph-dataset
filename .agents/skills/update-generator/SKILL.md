@@ -23,7 +23,7 @@ For validation:
 - For a quick check of one target without touching the dataset: `npm run test:target -- --target=<target.id> --spec=test --render`, which reports matching, generates the sample data, and (with `--render`) writes images to `out/target-test/`
 - For a full local slice: run `npm run generate:dataset -- --spec=test --generator=<generator> --view=<view>`
 - Review the generation results (verifying both Question `_mode-Q` and Solution `_mode-S` modes) and fix remaining issues if needed
-- Run `npm run validate:dataset -- --generator=<generator> --dataset=test` to catch checklist/rendering mismatches via the automated VQA check. If a sample fails after a fix, `npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=test` (the exact command is printed for every failure in `out/dataset-test/validation-report.md`) replays just that one sample instead of regenerating the whole module
+- Run `npm run validate:dataset -- --generator=<generator> --dataset=test` to catch checklist/rendering mismatches via the automated VQA check. If a sample fails after a fix, `npm run test:sample -- --sample="<sample_key>" --attempt=<n> --spec=test` (the exact command is printed for every failure in `out/dataset-test/validation-report.md`) replays just that one sample instead of regenerating the whole module
 - run vitest via `npm run test`
 
 For the checklists.md:

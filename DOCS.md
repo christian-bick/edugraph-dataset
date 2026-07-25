@@ -74,14 +74,14 @@ The primary pipeline orchestrator.
 ### `src/scripts/validate-dataset.ts`
 *   **Execution**: `npm run validate:dataset -- --generator=X --view=Y [--dataset=Z] [--force]`
 *   **Function**: An automated Visual QA pipeline. It uses the Gemini API to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It defaults to reading from `out/dataset/`, but you can target smaller test runs by specifying `--dataset=test` (which dynamically reads from `out/dataset-test/`).
-*   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : checklist hash)` — an image is only re-validated when its pixels or its applicable checklists change. Each cache entry also records the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `retest:sample` command.
+*   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : checklist hash)` — an image is only re-validated when its pixels or its applicable checklists change. Each cache entry also records the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
 
 ### `src/scripts/report-cache-churn.ts`
 *   **Execution**: `npm run report:churn -- [--dataset=test] [--ref=<git-ref>]`
 *   **Function**: Compares the working-tree VQA cache against a git ref (default `HEAD`) by joining entries on their `sample_key`. Reports identities whose image hash changed, classified as *render/code change* (same seed and attempt), *attempt shift* (collision elsewhere or generator behavior change), or *seed scheme change* (should never happen). **Run this after every regeneration**: churn in samples your change should not have affected is a determinism regression.
 
-### `src/scripts/retest-sample.ts`
-*   **Execution**: `npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=<spec_module> [--no-render]`
+### `src/scripts/test-sample.ts`
+*   **Execution**: `npm run test:sample -- --sample="<sample_key>" --attempt=<n> --spec=<spec_module> [--no-render]`
 *   **Function**: Replays one exact sample draw from its identity, renders it to `out/retest/` (requires `npm run dev`), and compares the image hash against the committed VQA cache. This is the fix-verification loop for failed validations — the exact command for each failure is printed in `validation-report.md`.
 
 ### `src/scripts/test-target.ts`
@@ -257,7 +257,7 @@ Shows the matched tuples, why near-miss pairs were rejected (`unsupported-label`
 ### Fixing a failed validation
 Every failure in `validation-report.md` includes its sample identity and a ready-to-run command:
 ```bash
-npm run retest:sample -- --key="<sample_key>" --attempt=<n> --spec=<spec>
+npm run test:sample -- --sample="<sample_key>" --attempt=<n> --spec=<spec>
 ```
 After changing the generator or view, rerun it: if the rendered image is byte-identical to the cached one, the cached validation still applies; if it differs, your fix took effect and only that module needs re-validation (`npm run validate:dataset -- --generator=<module> [--dataset=test]`).
 

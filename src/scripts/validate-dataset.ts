@@ -532,7 +532,7 @@ function generateValidationReport(
                 md += `  - **Checks:** ${checks.join(' | ')}\n`;
             }
             md += `  - **Sample:** \`${entry.sample_key}\` (target \`${entry.target_id}\`, attempt ${entry.attempt}, seed ${entry.seed})\n`;
-            md += `  - **Retest:** \`npm run retest:sample -- --key="${entry.sample_key}" --attempt=${entry.attempt} --spec=${entry.spec}\`\n`;
+            md += `  - **Retest:** \`npm run test:sample -- --sample="${entry.sample_key}" --attempt=${entry.attempt} --spec=${entry.spec}\`\n`;
             md += `\n`;
         }
     }
