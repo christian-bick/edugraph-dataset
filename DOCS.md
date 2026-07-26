@@ -135,9 +135,11 @@ Leaf module directory names retain their full module prefix (e.g., `arithmetic-o
 
 When designing or updating `spec.ts` files, you must strictly follow these rules:
 
-1. **Declare the Most Specific Labels (Matching Direction)**:
+1. **Declare the Most Specific *True* Label (Matching Direction)**:
    - Standards/targets (`src/spec/`) are deliberately broad; generators and views are **specific**. The matching predicate (`matchesTarget` in `src/lib/generation.ts`) satisfies a target label `T` with a generator/view capability label `L` **only when `L` is equal to or more specific than `T`** — `isSubConceptOf(L, T)`, i.e. `L partOf* T`. The reverse never matches: a specific target is *not* satisfied by a merely more-general capability. This one directionality holds for Area, Scope **and** Ability (abilities are matched against the view only — generators are pure math).
-   - Therefore declare the **most specific (leaf) ontology label** the module actually produces or renders. A specific label automatically matches every broader standard that subsumes it, so **never also declare an ancestor** of a label you already declare: it cannot add any match and `validate-generator-view-specs` flags it as a redundant declaration. Conversely, declaring only an ancestor of what a target needs will silently fail to match it.
+   - Therefore declare the **most specific ontology label that is still a true statement** about what the module produces or renders. A specific label automatically matches every broader standard that subsumes it, so **never also declare an ancestor** of a label you already declare: it cannot add any match and `validate-generator-view-specs` flags it as a redundant declaration. Conversely, declaring only an ancestor of what a target needs will silently fail to match it.
+   - **"Most specific" does not mean "leaf."** Several ontology branches bottom out in *instruments* or *subtypes* rather than in refinements of the same claim — e.g. the only leaf under `Area.Rectangle` is `Area.Square`. A generator emitting rectangles must **not** claim `Square`.
+   - Conversely, do not declare a capability **broader than what the module can do** (e.g. a generator specifically supporting Multiplication, Division and Modulo should not `Area.BaseOperations`). And even if a generator would support all members (e.g. all base arithmetic operations), as long as they are distinguishable through parameterization, we'd still list every single member.
 2. **Separation of Concerns**:
    - **Generator Specs**: Map ontology labels **only** to abstract mathematical configurations (e.g. `range`, `includeZero`, `allowNegatives`, `useDecimals`, `attribute`, `relation`).
    - **View Specs**: Map ontology labels **only** to visual/layout configurations (e.g. `isReverse`, `arrangement`, `showTenFrame`).
@@ -207,7 +209,7 @@ If a new generator or view is required:
 
 ### Step 5: Declaring Capabilities (`spec.ts`)
 Create or update the `spec.ts` files for both your generator and visual view:
-- The generator spec declares the **specific (leaf) labels and scopes** it produces mathematically. A specific capability matches every broader standard that subsumes it (see §4b rule 1), so declare the most specific label you actually satisfy, never an ancestor of it.
+- The generator spec declares the **specific labels and scopes** it produces mathematically. A specific capability matches every broader standard that subsumes it (see §4b rule 1), so declare the most specific label that is *actually true* of your output — never an ancestor of it, and never a leaf you do not really satisfy (ontology leaves are often instruments or subtypes; see §4b rule 1).
 - The view spec declares the layout labels it supports in `generalLabels`. Crucially, it must explicitly reject unsupportable targets (like physical coordinate bounds or unsupported number formats) in `rejectedLabels`. Use `...deductAdmitting([<boundary>])` in the rejected list to logically expand a rejection boundary (e.g. `...deductAdmitting([Scope.NumbersLarger10])` rejects every scope admitting numbers beyond the view's physical capacity of 10). Never use `deductCompatible` for rejection lists — it is the dual operator for declaring capabilities in schemas.
 
 ### Step 6: Implementation
