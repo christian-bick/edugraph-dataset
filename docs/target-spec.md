@@ -151,9 +151,10 @@ contribution.
 id, which is what keeps sample keys from colliding when standards are merged. Choose id
 prefixes that no other standard could produce.
 
-**Note:** `check:standards-spec` validates uniqueness *within* a spec module only. Nothing
-currently compares prefixes across standards, so this rule is on the author until
-union-level validation exists.
+**Note:** `check:standards-spec` validates uniqueness *within* a spec module only, and the
+same is true of the deduplication that collapses identical label sets to one representative
+target. Nothing yet compares targets across standards, so this rule is on the author — see
+the known limitation under *Specs and the Union Dataset* in [DOCS.md](../DOCS.md).
 
 ### TSPEC-9 — Validation
 
