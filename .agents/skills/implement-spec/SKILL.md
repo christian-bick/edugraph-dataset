@@ -17,10 +17,7 @@ Orchestrate implementing the target gaps in `implementationTodos` for a spec mod
 - Analyze the output. **Merge logically related implementation TODOs** (e.g. multiple targets needing the same generator extension or view arrangement) so they are tackled efficiently together.
 
 #### Step 2: Determine Extension vs. Creation Strategy
-For each target group, evaluate the cleanest implementation path adhering to `DOCS.md § 4` (Module Structure Breakdown):
-- **Extend existing generator**: Keep problem payload contracts stable where possible. Add parameters to `spec.ts` schema and handling in `generator.ts`.
-- **Extend existing view**: Keep existing renderings stable where possible. Add layout properties to `spec.ts` schema and `view.tsx`. Declare physical capacity limits in `spec.ts` `rejectedLabels` (using `...deductAdmitting(...)`).
-- **Create new generator or view**: Create a new leaf module under `src/generators/[<category>/]<module>` or `src/visuals/views/[<category>/]<module>` **ONLY when extending the supported ontological space**.
+For each target group, choose the cleanest implementation path per `IMPL-7` in `docs/implementation-general.md`: extend an existing generator, extend an existing view, and only create a new leaf module when doing so extends the supported ontological space.
 
 #### Step 3: Delegate Module-Level Tasks & Reviews
 Delegate component updates and audits to specialized skills:
@@ -55,7 +52,7 @@ Keep iteration loops fast (<5 seconds) during active development:
   npm run report:churn -- --dataset=test
   ```
   *(Verify zero unexpected image churn in unrelated modules).*
-- Once clean and verified, **promote completed targets from `implementationTodos` to `spec`** in `src/spec/<spec>/`.
+- Once clean and verified, **promote completed targets from `implementationTodos` to `spec`** in `src/spec/<spec>/`, per the export contract in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`).
 
 #### Step 6: Final Full Dataset Validation Gate (Completion Gate)
 Once ALL `implementationTodos` in the spec module are resolved and promoted to `spec`, execute the final full verification gate across the entire spec:

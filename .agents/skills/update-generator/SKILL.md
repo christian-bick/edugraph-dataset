@@ -7,16 +7,13 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
 
 1. **Review Module Integrity**:
    - Audit module structure, `spec.ts`, `checklist.md`, and `generator.ts` by invoking `/review-gen {moduleName}`.
-   - Refer to `DOCS.md § 4` (Module Structure Breakdown) for core generator requirements.
+   - Core requirements: `docs/implementation-general.md` + `docs/implementation-generator.md`.
 
 2. **Tests & Specifications**:
-   - Add/update `spec.test.ts` using `generateWithLabels` from `utils.ts`.
-   - Update `generator.test.ts` to cover mathematical edge cases and verify that empty config throws `GeneratorValidationError`.
+   - Add/update `generator.test.ts` and `spec.test.ts` per `IMPL-G5` in `docs/implementation-generator.md`.
 
 3. **Consuming View Alignment**:
-   - If the returned problem payload contract needed modification:
-     - Run `npm run show:matching -- --spec=test` (or `--spec=ccss`) to find consuming views and inspect rejection reasons.
-     - Adopt matched views to properly render updated payload fields.
+   - If the returned problem payload contract needed modification, follow `IMPL-G6` in `docs/implementation-generator.md`: run `npm run show:matching -- --spec=test` (or `--spec=ccss`) to find consuming views and inspect rejection reasons, then adopt each matched view to render the updated payload fields.
 
 4. **Validation Workflow**:
    - Follow the targeted debugging & fast-iteration workflows documented in `DOCS.md § 6` (Efficient Development & Debugging Iteration):

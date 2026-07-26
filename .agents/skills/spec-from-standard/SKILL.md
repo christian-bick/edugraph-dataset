@@ -19,7 +19,7 @@ Study existing grade target specs in `src/spec/ccss/` (such as `kindergarten.ts`
 
 #### Step 2: Express Competencies via Ontology Labels
 - Translate each competency's requirements into EduGraph ontology labels (`edugraph-ts` `Area`, `Scope`, `Ability`).
-- **Leaf Node Matching Rule**: Declare the most specific ontology label that is a *true statement* about what the standard demands. Never stretch or invent fake label combinations to force a match with existing generators/views.
+- Follow `TSPEC-6` in `docs/target-spec.md`: declare the most specific ontology label that is a *true statement* about what the standard demands, and never stretch or invent label combinations to force a match with existing generators/views.
 
 #### Step 3: Run Matching Probes
 - Run matching probe using the pre-approved npm script:
@@ -29,22 +29,12 @@ Study existing grade target specs in `src/spec/ccss/` (such as `kindergarten.ts`
 - Evaluate how the proposed permutations map against current generator and view catalogs.
 
 #### Step 4: Categorize Targets into Exports
-Every spec file must export three arrays following the universal contract:
+Sort every competency into exactly one export, following the export contract and the decision table in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`): `spec` for permutations with both a matching generator and a compatible view, `implementationTodos` for those expressible in the ontology but lacking module support, `ontologyTodos` for those the ontology cannot express at all.
 
-1. **`export const spec: CompetencyTarget[] = [...]`**
-   - Targets whose permutations have **both a matching generator and a compatible view**.
-   - Built using `toTargets('<CCSS-id>-<slug>', builder)`.
-
-2. **`export const implementationTodos: CompetencyTarget[] = [...]`**
-   - Targets whose permutations are **fully expressible in the ontology**, but currently lack a matching generator, a matching view, or specific parameter capabilities.
-   - Built using `toTargets('<CCSS-id>-<slug>', builder, 'Description of what generator or view functionality is missing')`.
-
-3. **`export const ontologyTodos: OntologyTodo[] = [...]`**
-   - Competency requirements that **cannot be expressed in the ontology** due to missing `Area`, `Scope`, or `Ability` concepts.
-   - Array of objects: `{ standardId: string, title: string, description: string }`.
+Build all of them per `TSPEC-3`/`TSPEC-4` (one builder per competency, mapped through `toTargets`). If two definitions turn out to be deliberately indistinguishable, declare it in `equivalentTargets` per `TSPEC-8`.
 
 #### Step 5: Validate Target Specs
-Run automated standard spec validation to enforce target ID uniqueness, label normalization, intra-target permutation uniqueness, and definition distinctness:
+Run the validation gate from `TSPEC-9`:
 ```bash
 npm run check:standards-spec -- --spec=<specModule>
 ```

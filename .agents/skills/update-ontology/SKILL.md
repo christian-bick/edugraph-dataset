@@ -33,6 +33,7 @@ Before performing any analysis or issue generation, execute these two checks:
   npm run show:ont-todos -- --spec=<specModule>
   ```
 - Analyze the output. **Group logically related ontology TODOs** (e.g. missing numerical range scopes, missing operations, missing shape concepts) so they can be proposed as cohesive GitHub issues.
+- For what belongs in `ontologyTodos` versus `implementationTodos`, see the decision table in `docs/target-spec.md` (`TSPEC-7`).
 
 #### Step 3: Inspect Sibling Ontology Repository (`../edugraph-ontology`)
 - Search `../edugraph-ontology` for existing definitions in `Area`, `Scope`, and `Ability` Enums.

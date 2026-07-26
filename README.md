@@ -88,7 +88,7 @@ npm run dev
 
 ## Contributing
 
-Contributions are welcome! Adding new generators and views is a great way to help grow the available labeled training data for open-source AI education models. Please read `DOCS.md` to understand how to scaffold and register a new dataset module.
+Contributions are welcome! Adding new generators and views is a great way to help grow the available labeled training data for open-source AI education models. Read [DOCS.md](./DOCS.md) to understand how to scaffold and register a new dataset module, and the reference library in [docs/](./docs/README.md) for the rules each module file must follow.
 
 ## License & Attributions
 

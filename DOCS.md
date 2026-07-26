@@ -2,6 +2,8 @@
 
 This document provides a comprehensive technical overview of the EduGraph Content ML Dataset Generator. It is designed to guide developers and AI agents in understanding the system architecture, script orchestration, and the process for adding new educational content modules.
 
+> **Authoring rules live in [`docs/`](docs/README.md)** — the reference library covering `spec.ts`, `checklist.md`, and module implementation for generators and views, plus competency target specs. This document covers architecture, scripts and workflows, and links into that library rather than restating it.
+
 ## 1. Architecture Overview
 
 ### Label-Driven Generation
@@ -26,7 +28,7 @@ The data contract passed from the Playwright orchestrator into the browser's `wi
 *   `viewId`: The string identifier of the view.
 *   `labels`: Raw pedagogical tags (used by the HOC wrapper, not the pure view).
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
-*   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy (icon choices, scatter positions, shuffles, rotations) from this seed — never from `Math.random()` or any other source. `problem.id` is present on the payload but is dead: no view reads it (see *Sample Identity & Determinism* below).
+*   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy from it — see `IMPL-V6` in [docs/implementation-view.md](docs/implementation-view.md). `problem.id` is present on the payload but is dead: no view reads it (see *Sample Identity & Determinism* below).
 
 To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
 1. **`ViewTypeMap`** (defined in [problems.ts](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/src/types/problems.ts)): A central contract mapping visual view identifiers (like `'operations-vertical'`) to their expected mathematical data structure (like `ArithmeticStandardProblem`).
@@ -107,98 +109,35 @@ The primary pipeline orchestrator.
 *   **Execution**: `npm run check:types` (or `npx tsc --noEmit`)
 *   **Function**: Runs the TypeScript compiler in non-emitting mode (`tsc --noEmit`) to find and report type errors across all generators, renderers, scripts, schemas, and test suites.
 
-## 4. Module Structure Breakdown
+## 4. Module Structure & Authoring Rules
 
-Adding content means creating two interconnected directories: a Generator and a Renderer. Generators and views are organized into a 1-level category sub-directory structure (e.g. `src/generators/arithmetic/arithmetic-ops-pairs` and `src/visuals/views/operations/operations-vertical`). A directory is considered a **leaf module** if and only if it contains a `spec.ts` file. Top-level single-purpose modules (such as `ordering` or `time`) reside directly at the top level of `src/generators/` or `src/visuals/views/`.
+Adding content means creating two interconnected directories: a **Generator** (abstract
+math, `src/generators/`) and a **View** (visual renderer, `src/visuals/views/`). Both are
+organized into a 1-level category sub-directory structure — e.g.
+`src/generators/arithmetic/arithmetic-ops-pairs` and
+`src/visuals/views/operations/operations-vertical`.
 
-Leaf module directory names retain their full module prefix (e.g., `arithmetic-ops-pairs`, `operations-vertical`). Generic module discovery is performed dynamically up to 1-level deep via `findLeafModules` in `src/lib/module-resolver.ts`.
+The rules for authoring each file live in the reference library under
+[`docs/`](docs/README.md), which is their single source of truth. Every rule carries a
+stable ID — `SPEC-3`, `CHK-V4`, `IMPL-G2` — so skills and reviews cite one rule rather than
+a section number.
 
-### The Generator Module (`src/generators/[<category>/]<module>/`)
-*   **`generator.ts`**: Implements `ProblemGenerator<TData, TConfig>`. It contains **no label parsing logic**. It is a pure mathematical function that takes a strongly-typed `config` object and returns a `ProblemStub` or `null`.
-    - **Configuration Validation**: Must import `validateConfigFields` from `../../../lib/errors.ts` (with correct relative depth matching the sub-directory structure) and call it at the beginning of `generate(config)` with the required configuration parameters. It must throw a `GeneratorValidationError` if executed with missing/empty configurations (do not use silent internal fallbacks).
-    - **Ontology Tag Propagation**: Any runtime choices representing competencies (e.g. specific shape chosen, relation chosen) must be returned in the `tags` array of `ProblemStub` so they are not lost. Do NOT duplicate any tags or parameters that are already provided as part of the configuration parameters (as those are automatically captured in `consumedLabels` by the ontology mapping layer).
-*   **`spec.ts`**: The bridge to pedagogy. Exports `spec: GeneratorSpec` (broad matching capabilities), `GeneratorSchema` (defining how to map ontology labels to the typed `config` object using functional resolvers), and `Config` (the extracted type of the schema).
-*   **Parent Category `helpers.ts`**: Shared mathematical helpers or data structures common to sibling generator modules within a category can be placed in `src/generators/<category>/helpers.ts` and imported relatively (`import { ... } from '../helpers.ts'`).
-*   **`generator.test.ts` / `spec.test.ts`**: Vitest suites to verify correctness.
-    - `generator.test.ts` deeply tests edge cases of the generator by passing explicit `config` mocks. It must cover mathematical boundaries and edge-cases (e.g. division by zero, invalid target ranges, subtraction yielding negative/zero values under non-negative constraints).
-    - `spec.test.ts` verifies tag resolution using `generateWithLabels` from `../../../lib/utils.ts`.
-    - Both/either must include a test asserting that calling `generate` with an empty config throws an exception (e.g., `expect(() => generator.generate({})).toThrow()`).
-*   **`checklist.md`**: Pedagogical/Mathematical verification list. Acts as the validation criteria for the abstract mathematical data. It **must not** contain any visual layout, coordinates, styles, colors, or CSS parameters. See the Checklist Design Rules section below for detailed formatting constraints.
+| Artifact                    | Shared rules                                                | Generator                                                       | View                                                  |
+|-----------------------------|-------------------------------------------------------------|-----------------------------------------------------------------|-------------------------------------------------------|
+| `spec.ts`                   | [spec-general.md](docs/spec-general.md)                     | [spec-generator.md](docs/spec-generator.md)                     | [spec-view.md](docs/spec-view.md)                     |
+| `checklist.md`              | [checklist-general.md](docs/checklist-general.md)           | [checklist-generator.md](docs/checklist-generator.md)           | [checklist-view.md](docs/checklist-view.md)           |
+| `generator.ts` / `view.tsx` | [implementation-general.md](docs/implementation-general.md) | [implementation-generator.md](docs/implementation-generator.md) | [implementation-view.md](docs/implementation-view.md) |
 
-### The Visual Renderer (`src/visuals/`)
-*   **`src/visuals/views/[<category>/]<renderer>/`**:
-    - **`view.html`**: The base HTML template containing a mount point for React.
-    - **`view.tsx`**: Exports the React component wrapped in `withConfig(ViewSchema, Component)`. The core component itself (`<Name>Core`) is a pure stateless function taking `{ config, payload }`. It does not parse labels.
-        - **Strict Payload Validation**: Must import `validateProblemData` from `../../../helpers/validation.ts` (with correct relative depth matching the sub-directory structure) and call it at the beginning of the view component with the specific list of required fields accessed from `problem.data`.
-        - **Graceful Error Recovery**: If validation or range checks fail (e.g. coordinates or dimensions exceed visual limits), the view must throw a `ViewValidationError`. This is caught by the `ErrorBoundary` in the `withConfig` wrapper to display a standardized error card, preventing browser crashes, hangs, or infinite rendering loops during headless generation.
-        - **No Silent Fallbacks**: Must not use local silent fallbacks (e.g. `data.shape || 'circle'`, `config.arrangement || 'scattered'`). Consume resolved configuration parameters directly from the `config` prop and `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and correctly-typed values.
-    - **`spec.ts`**: Exports `spec: ViewSpec` (matching capabilities), `ViewSchema` (defining mapping to visual config), and `ViewConfig`.
-        - **`rejectedLabels`**: Instead of declaring what a view *can* handle, view specs must use `rejectedLabels` to explicitly list the labels (or label arrays) they *cannot* handle. Its purpose is to narrow a view to a **subset of the problems its matched generator can produce** — the cases the view's layout physically cannot render (e.g., rejecting `Scope.NumbersWithZero`, or utilizing `...deductAdmitting([Scope.NumbersLarger20])` to automatically reject all targets that allow numbers larger than the physical rendering capacity of the view). It is **not** a general competency filter: do not use it to exclude abilities or to work around the matching direction — what a view *supports* belongs in the positive `generalLabels`/schema declarations (see §4b rule 1). Rule of thumb: capabilities are declared with `deductCompatible` (generator/view schemas), boundaries with `deductAdmitting` (rejection lists).
-    - **Parent Category `helpers.ts` / Components**: Shared visual helpers or sub-components common to sibling views within a category can be placed at the category level (e.g. `src/visuals/views/operations/helpers.ts`) and imported relatively.
-    - **`checklist.md`**: Visual layout, rendering, and interaction verification list. Used by Visual QA to check for elements positioning, SVG structures, rendering overflows, and Question (`_mode-Q`) vs. Solution (`_mode-S`) mode styling. It **must not** contain abstract mathematical generation logic. See the Checklist Design Rules section below for detailed formatting constraints.
-*   **`src/visuals/components/`**: Reusable shared React elements across all view categories (such as `TenFrame.tsx`).
-*   **`src/visuals/helpers/`**: Shared layout rendering calculations across all view categories (such as `counting-helpers.ts`).
-
-## 4b. Specification Design Rules & Validation Checks
-
-When designing or updating `spec.ts` files, you must strictly follow these rules:
-
-1. **Declare the Most Specific *True* Label (Matching Direction)**:
-   - Standards/targets (`src/spec/`) are deliberately broad; generators and views are **specific**. The matching predicate (`matchesTarget` in `src/lib/generation.ts`) satisfies a target label `T` with a generator/view capability label `L` **only when `L` is equal to or more specific than `T`** — `isSubConceptOf(L, T)`, i.e. `L partOf* T`. The reverse never matches: a specific target is *not* satisfied by a merely more-general capability. This one directionality holds for Area, Scope **and** Ability (abilities are matched against the view only — generators are pure math).
-   - Therefore declare the **most specific ontology label that is still a true statement** about what the module produces or renders. A specific label automatically matches every broader standard that subsumes it, so **never also declare an ancestor** of a label you already declare: it cannot add any match and `validate-generator-view-specs` flags it as a redundant declaration. Conversely, declaring only an ancestor of what a target needs will silently fail to match it.
-   - **"Most specific" does not mean "leaf."** Several ontology branches bottom out in *instruments* or *subtypes* rather than in refinements of the same claim — e.g. the only leaf under `Area.Rectangle` is `Area.Square`. A generator emitting rectangles must **not** claim `Square`.
-   - Conversely, do not declare a capability **broader than what the module can do** (e.g. a generator specifically supporting Multiplication, Division and Modulo should not `Area.BaseOperations`). And even if a generator would support all members (e.g. all base arithmetic operations), as long as they are distinguishable through parameterization, we'd still list every single member.
-2. **Separation of Concerns**:
-   - **Generator Specs**: Map ontology labels **only** to abstract mathematical configurations (e.g. `range`, `includeZero`, `allowNegatives`, `useDecimals`, `attribute`, `relation`).
-   - **View Specs**: Map ontology labels **only** to visual/layout configurations (e.g. `isReverse`, `arrangement`, `showTenFrame`).
-3. **Resolver Reusability**:
-   - All general resolver functions (such as `hasLabel`, `selectExactMatch`, `extractFirstMatch`) must be imported and reused from `src/lib/resolvers.ts`. Do not define custom resolvers inline.
-   - Resolver functions must be passed as references (or output of curried factory functions) to the schema arrays, and not executed prematurely.
-4. **General Labels vs. Parameter Labels Overlap**:
-   - There must be zero overlap (including taxonomic ancestors via `partOf`) between the labels checked inside schema parameters and the spec's `generalLabels`. Specifically, when a label is declared as part of a schema parameter, it (and none of its ancestors) should appear in `generalLabels`.
-5. **No Duplicate Parameterization**:
-   - When a generator maps a label to configure the mathematical properties of a problem payload, that label (and none of its ancestors/descendants) should be queried in the schema of the matching view. The view must rely purely on the generated problem payload (e.g. `problem.data`) rather than querying the ontology itself.
-6. **Prefer Simple Arrays for Schemas**:
-   - When mapping a parameter to a set of compatible standard labels (e.g. arrangements), prefer defining a simple array (e.g. `arrangement: [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement]`) over using resolvers. Fallbacks for missing labels are generated generically already and don't require specific resolvers.
-
-## 4c. Checklist Design Rules & Hierarchical Loading
-
-When writing or updating `checklist.md` files (which are used by the automated visual QA or manual checks), you must strictly follow these rules:
-
-1. **Hierarchical Organization**:
-   Checklists are concatenated as one flat text block and evaluated together, across **three** levels, in this order:
-   - **Root `checklist.md`** (`src/generators/checklist.md` / `src/visuals/views/checklist.md`) — applies to **every** generator or view unconditionally. In particular, `src/visuals/views/checklist.md` already states the global Question/Solution Mode instruction rules (see point 5) — do not restate them anywhere else.
-   - **Parent Category `checklist.md`** (e.g. `src/generators/arithmetic/checklist.md`) — applies to all sub-modules under that category.
-   - **Leaf Module `checklist.md`** (e.g. `src/generators/arithmetic/arithmetic-ops-pairs/checklist.md`) — applies specifically to that leaf module.
-
-   Because the LLM validator sees root + category + leaf as one undifferentiated block, a leaf (or category) rule that doesn't scope itself reads as a specific override of a general rule, not an addition to it — this is a real, previously-shipped bug class (see point 6), not a theoretical risk. Before adding a rule anywhere, check whether root or the category checklist already states it; a rule repeated verbatim at a lower level with different nouns substituted in is redundant and should be deleted, not kept "for clarity."
-2. **Separation of Concerns**:
-   - **Generator Checklists**: Specify *only* abstract mathematical and logic rules. Remove all layout/visual criteria (e.g., coordinates, shapes, colors, SVGs, button states, ruler bands, CSS styling, or answer box highlights).
-   - **View Checklists**: Specify *only* visual layout, rendering, and interaction rules. Remove all abstract logic criteria (e.g., mathematical generation algorithms, RNG selection logic, ontology/tag resolution).
-3. **Conciseness, and No Concrete Examples in General Checklists**:
-   - Focus on the most important validation aspects. Do not include excessive edge cases.
-   - Root and category checklists must state only abstract principles — never bake in concrete examples (e.g. "(e.g. ordering direction, shape naming, or sorting rule)"). A concrete example at a general level is a specific claim that can silently drift out of sync with, or contradict, what an actual leaf checklist later requires for a similarly-shaped view. Concrete specifics belong exclusively in leaf checklists, where they describe one real, verifiable view.
-4. **Unaware of Parameterization**:
-   - Assume that the validation mechanism is unaware of parameterization (internal config flags, e.g. `isReverse`, are invisible to it) and do not phrase rules conditionally on them (e.g. "If `config.isReverse` is true, then..."). Mode is the one exception: `_mode-Q` / `_mode-S` is given to the validator explicitly as context, so rules may condition on Question vs. Solution Mode.
-   - If a view has multiple valid internal configurations, describe them as alternative *observable* layouts the rendered image can match (e.g. "Layout A: ... Layout B: ...; exactly one applies per image"), not as branches on the config value driving them. See `time-analog/checklist.md` for a worked example.
-5. **Question Mode (`_mode-Q`) vs. Solution Mode (`_mode-S`)**:
-   - View checklists must clearly distinguish between Question Mode (where answers are blank, inputs are empty, or elements are unselected) and Solution Mode (where correct answers are filled in, highlighted, or selected).
-   - The root checklist already states the global rule: Solution Mode must never display instruction text headers, and Question Mode may omit the header for self-explaining exercises. **Any leaf rule that requires prompt/instruction text must explicitly scope it to Question Mode** (e.g. "In Question Mode, the prompt must read X. Per the global Instruction & Mode Rules, this text is absent in Solution Mode."). An unscoped requirement ("the prompt text must read X") reads as an unconditional override of the global rule and will cause the validator to fail correctly-implemented views that hide the prompt in Solution Mode as intended — this exact bug shipped in over a dozen leaf checklists before being caught.
-6. **Documented Exceptions to Global Rules**:
-   - A view may legitimately need to violate a global rule (e.g. a view where the Solution image is ambiguous without repeating the question, so the prompt must stay visible in both modes — see `sorting-classify-sort/checklist.md`). State the exception explicitly in the leaf checklist, name the global rule it deviates from, and give the concrete reason. An undocumented deviation is indistinguishable from a bug to both the validator and the next person reading the checklist.
+Competency target specs under `src/spec/` follow [target-spec.md](docs/target-spec.md).
 
 ## 5. How to Enrich the Dataset (Step-by-Step Guide)
 
 To add a new mathematical concept or visual style to the dataset, follow this step-by-step workflow:
 
 ### Step 1: Define the Pedagogy
-Declare the target specifications in the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`) using the `DatasetPermutationBuilder`:
+Declare the target specifications in the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`), building permutations with the `DatasetPermutationBuilder`. See `src/spec/ccss/kindergarten.ts` for worked examples.
 
-**The spec module export contract**: every file under `src/spec/<module>/` must export its competency targets as `export const spec: CompetencyTarget[] = [...]` — this is the *only* export `loadTargets` (`src/lib/generation.ts`) reads, by fixed name, no scanning or filtering. Do not export additional aliases of `spec` under other names (e.g. a grade-prefixed const) — dead aliases have caused duplicate-target bugs before; a target must be reachable via `spec` and nothing else.
-
-- Work from the **leaf nodes** of the CCSS tree (`public/coverage/ccss-tree.json`). A single leaf standard often bundles several competencies — create one builder per competency.
-- Use `.addLabels([...])` for the label set shared by all permutations of a competency and `.applyLabelVariants([...])` for orthogonal dimensions (e.g. number ranges, `Scope.NumbersWithZero` vs. `Scope.NumbersWithoutZero`, shapes, relations). Map the builder to targets with the shared `toTargets('<CCSS-id>-<slug>', builder)` helper from `src/lib/dataset-permutation-builder.ts`, so ids read like `K.CC.B.5-how-many~a3f91c2e` — the suffix after `~` is a content hash of the permutation's label set (`labelSetHash` in `src/lib/utils.ts`), not a position index.
-- If a competency cannot be expressed (missing ontology label) or has no generator/view support, **do not stretch labels to force a match**. Instead, leave a `// TODO [<CCSS-id>]:` comment describing the gap together with a commented-out reference builder/permutation, or collect the parked targets in the sibling `implementationTodos: CompetencyTarget[]` / `ontologyTodos: OntologyTodo[]` exports (same file, kept alongside `spec` so agents can work through gaps in context). These two exports are for `map-standards.ts`'s coverage report only — `loadTargets` never reads them, so a todo target can never enter the pipeline, regardless of whether its labels would happen to match a generator/view pair. See `src/spec/ccss/kindergarten.ts` for examples.
+The export contract, the content-hash id semantics, how to categorize gaps into `implementationTodos` / `ontologyTodos`, and the rule against stretching labels to force a match are all specified in [docs/target-spec.md](docs/target-spec.md).
 
 ### Step 2: Analyze Matchings
 Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` to see if the new targets map to any existing generator or views.
@@ -210,29 +149,24 @@ Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` to see if the
 - **Case D: Matches Exist but Lacks Capabilities:** If matching modules exist but do not support the target's specific labels, you must extend their `spec.ts` (supportedLabels/constraints) and logic to support them.
 
 ### Step 4: Scaffolding (If Needed)
-If a new generator or view is required:
-1. Create a directory in `src/generators/` (e.g., `src/generators/fractions`).
-2. Create a corresponding renderer directory in `src/visuals/views/` (e.g., `src/visuals/views/fractions-pie`).
-3. Add a link to your new renderer in `src/index.html` for easy browser preview.
+Follow `IMPL-6` and `IMPL-7` in [docs/implementation-general.md](docs/implementation-general.md) — including the rule that a new leaf module is created only when it extends the supported ontological space, rather than to avoid touching an existing one.
 
 ### Step 5: Declaring Capabilities (`spec.ts`)
-Create or update the `spec.ts` files for both your generator and visual view:
-- The generator spec declares the **specific labels and scopes** it produces mathematically. A specific capability matches every broader standard that subsumes it (see §4b rule 1), so declare the most specific label that is *actually true* of your output — never an ancestor of it, and never a leaf you do not really satisfy (ontology leaves are often instruments or subtypes; see §4b rule 1).
-- The view spec declares the layout labels it supports in `generalLabels`. Crucially, it must explicitly reject unsupportable targets (like physical coordinate bounds or unsupported number formats) in `rejectedLabels`. Use `...deductAdmitting([<boundary>])` in the rejected list to logically expand a rejection boundary (e.g. `...deductAdmitting([Scope.NumbersLarger10])` rejects every scope admitting numbers beyond the view's physical capacity of 10). Never use `deductCompatible` for rejection lists — it is the dual operator for declaring capabilities in schemas.
+Create or update the `spec.ts` files for both your generator and visual view, per [docs/spec-generator.md](docs/spec-generator.md) and [docs/spec-view.md](docs/spec-view.md), with the shared rules in [docs/spec-general.md](docs/spec-general.md).
+
+The two decisions that most often go wrong: declaring the most specific label that is *actually true* of your output (`SPEC-2`, `SPEC-3`), and expressing a view's physical limits as rejection boundaries rather than as absent capabilities (`SPEC-V3`, `SPEC-V4`).
 
 ### Step 6: Implementation
-- **Generator (`generator.ts`)**: Implement the mathematical logic. Ensure that the properties of the generated problem strictly adhere to the requested labels. If a label requests `Area.Addition`, the problem must use addition.
-- **View (`view.tsx` / components)**: Implement the visual component logic in `src/visuals/views/<renderer>/view.tsx`.
-  - Ensure that `isSolutionView: false` visually hides the answer (or renders an empty box/placeholder).
-  - Ensure that `isSolutionView: true` renders the exact same layout but with the answer visible.
-  - Derive **all** randomized visual decisions from `payload.seed` (e.g. `payload.seed % ICONS.length`, or pass the seed into a helper that calls `setSeed(seed)` before drawing). Never derive anything from `problem.id` — it is dead, unread by any view — and never from `Math.random()` or unseeded `random()` calls. The `withConfig` wrapper seeds the global PRNG from `payload.seed` before config resolution; any other entropy source breaks render determinism and invalidates the VQA cache.
+Implement `generator.ts` per [docs/implementation-generator.md](docs/implementation-generator.md) and `view.tsx` per [docs/implementation-view.md](docs/implementation-view.md).
+
+The rule that breaks things silently is `IMPL-V6`: every randomized visual decision must derive from `payload.seed`. Any other entropy source invalidates the VQA cache without failing a check.
 
 ### Step 7: Tests (`generator.test.ts`)
-Write robust unit tests verifying that the generator outputs correct math and respects bounds. Run `npm run test` to verify.
+Write unit tests per `IMPL-G5` in [docs/implementation-generator.md](docs/implementation-generator.md), then run `npm run test` to verify.
 
 ### Step 7b: Targeted Testing via Test Specs
 To visually verify and test both your generator and view modules without overwriting the main dataset, you should use the `test` specs module:
-1. **Extend Test Specs**: Add minimal test permutations for your module to the `test` specs directory (`src/spec/test/`). Use `DatasetPermutationBuilder` to build these permutations programmatically rather than manually writing static arrays. Export the result as `export const spec: CompetencyTarget[] = ...` — the same fixed contract as `src/spec/ccss/` (see Step 1).
+1. **Extend Test Specs**: Add minimal test permutations for your module to the `test` specs directory (`src/spec/test/`). The `test` module follows the same contract as `src/spec/ccss/` — see [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-4`).
 2. **Run Targeted Dataset Generation**: Generate a smaller slice of the dataset exclusively to a `dataset-test` directory:
    ```bash
    npm run generate:dataset -- --generator=X --view=Y --spec=test
@@ -274,23 +208,21 @@ The report joins old and new cache entries on `sample_key` and flags identities 
 ### Rules that keep invalidation minimal
 - **Batch pixel-affecting changes** (view code, shared components, checklists) and regenerate once — every regeneration+validation cycle costs LLM calls for all changed images.
 - **Checklist edits cascade**: the checklist hash covers root + category + leaf `checklist.md` files, so editing a category checklist re-validates the whole category (images are unaffected, but all their cache keys change). Batch shared-checklist edits.
-- **All view entropy comes from `payload.seed`** — an unseeded `random()` or `Math.random()` in a view makes renders order-dependent under the concurrent worker pool and poisons the cache non-deterministically.
-- **No timing-dependent pixels**: the render harness disables CSS transitions/animations and waits for fonts and images before screenshotting (pages are reused across renders, so mid-transition captures and image-cache warmth would otherwise make pixels depend on render order). Don't rely on animation states in views, and keep new async resources (fonts, images) loadable — a broken image URL now fails the render wait instead of silently screenshotting a blank box.
+- **All view entropy comes from `payload.seed`** (`IMPL-V6`) — breaking this makes renders order-dependent under the concurrent worker pool and poisons the cache non-deterministically.
+- **No timing-dependent pixels** (`IMPL-V7`) — pages are reused across renders, so an animation state or an unloadable async resource makes pixels depend on render order.
 - **Pin the Playwright/Chromium version**: cache keys are pixel hashes, so a browser upgrade re-rasterizes everything. Treat browser bumps as deliberate full-invalidation events.
-- **Spec edits invalidate only what they change**: `target.id` embeds a content hash of the permutation's label set (`<prefix>~<labelSetHash>`), so inserting, reordering or removing variants in a builder never touches the ids — or seeds, or cached samples — of the other permutations. Changing a permutation's labels changes its id and regenerates exactly that permutation, which is correct: the competency itself changed. (Val-split membership is also id-derived, so a changed permutation may switch splits.)
+- **Spec edits invalidate only what they change** (`TSPEC-5`) — target ids are content hashes of their label set, so editing one permutation regenerates exactly that permutation and leaves every other id, seed and cached sample untouched. (Val-split membership is also id-derived, so a changed permutation may switch splits.)
 
 ## 7. Autonomous Agentic Loops & Orchestration Workflows
 
-To support automated end-to-end dataset development, the repository provides three high-level **orchestrator skills** located in `.agents/skills/`:
+To support automated end-to-end dataset development, the repository provides seven **skills** in `.agents/skills/`: three orchestrator loops, two module update skills, and two module review skills. All of them defer to the reference library in [`docs/`](docs/README.md) for authoring rules, citing rule IDs rather than restating them.
+
+Note that a skill's directory name is not always its command name (e.g. `spec-from-standard/` provides `/create-spec-from-standard`); the command is the `name:` field in its `SKILL.md` frontmatter.
 
 ### Loop 1: Standard Spec Generation (`/create-spec-from-standard`)
-- **Skill**: `.agents/skills/create-spec-from-standard/SKILL.md`
+- **Skill**: `.agents/skills/spec-from-standard/SKILL.md`
 - **Command**: `/create-spec-from-standard {standardId|gradeFile}`
-- **Function**: Translates educational standard leaf nodes (`public/coverage/ccss-tree.json`) into `DatasetPermutationBuilder` target specs in `src/spec/<module>/<gradeFile>.ts`.
-- **Tri-Export Contract**: Categorizes standard permutations into:
-  1. `export const spec: CompetencyTarget[] = [...]`: Matched by existing generator AND view.
-  2. `export const implementationTodos: CompetencyTarget[] = [...]`: Expressible in ontology, missing generator/view.
-  3. `export const ontologyTodos: OntologyTodo[] = [...]`: Inexpressible due to missing ontology labels (`edugraph-ts`).
+- **Function**: Translates educational standard leaf nodes (`public/coverage/ccss-tree.json`) into `DatasetPermutationBuilder` target specs in `src/spec/<module>/<gradeFile>.ts`, categorized across the export contract in [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-7`).
 - **Validation**: Runs `npm run check:standards-spec -- --spec=<module>` and `npm run check`. Finishes by presenting matching statistics to the user (allowing manual trigger of follow-up loops).
 
 ### Loop 2: Spec Implementation & Error-Free Generation (`/implement-spec`)
@@ -311,7 +243,13 @@ To support automated end-to-end dataset development, the repository provides thr
   2. **GitHub CLI Auth**: Checks `gh auth status`. If missing/unauthenticated, prints `gh auth login` instructions and aborts.
 - **Issue Creation**: Formulates structured issue titles, standard contexts, proposed Enum additions, `partOf` taxonomic relations, and TypeScript diffs, submitting them via `gh issue create`.
 
-### Consolidated Module Review Skills
-- **`/review-gen {moduleName}`** (`.agents/skills/review-generator/SKILL.md`): Audits all three generator module files (`spec.ts`, `checklist.md`, `generator.ts`) against a single unified checklist.
-- **`/review-view {viewName}`** (`.agents/skills/review-view/SKILL.md`): Audits all three view module files (`spec.ts`, `checklist.md`, `view.tsx`) against a single unified checklist.
+### Module Update Skills
+- **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews it, updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.
+- **`/update-view {viewName}`** (`.agents/skills/update-view/SKILL.md`): The same for one view module, adopting producing generators when the view needs a payload field it does not have (`IMPL-V8`).
+
+### Module Review Skills
+- **`/review-gen {moduleName}`** (`.agents/skills/review-generator/SKILL.md`): Audits all three generator module files (`spec.ts`, `checklist.md`, `generator.ts`) against the Audit sections of the generator references.
+- **`/review-view {viewName}`** (`.agents/skills/review-view/SKILL.md`): Audits all three view module files (`spec.ts`, `checklist.md`, `view.tsx`) against the Audit sections of the view references.
+
+Both accept an optional `--file=spec|checklist|code` filter, and both resolve `{moduleName}` as a leaf module, a category (all leaves beneath it), or — when omitted — every module.
 

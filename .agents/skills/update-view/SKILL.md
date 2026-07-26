@@ -7,12 +7,10 @@ Update the visual view module under `src/visuals/views/[<category>/]{viewName}` 
 
 1. **Review Module Integrity**:
    - Audit module structure, `spec.ts`, `checklist.md`, and `view.tsx` by invoking `/review-view {viewName}`.
-   - Refer to `DOCS.md § 4` (Module Structure Breakdown) for core visual view requirements.
+   - Core requirements: `docs/implementation-general.md` + `docs/implementation-view.md`.
 
 2. **Producing Generator Alignment**:
-   - If the problem payload contract needed modification:
-     - Run `npm run show:matching -- --spec=test` (or `--spec=ccss`) to find producing generators and inspect rejection reasons.
-     - Adopt matched generators to supply required problem data fields.
+   - If the view needs payload data it does not have, follow `IMPL-V8` in `docs/implementation-view.md`: run `npm run show:matching -- --spec=test` (or `--spec=ccss`) to find producing generators and inspect rejection reasons, then adopt each matched generator to supply the required fields. Never derive the missing mathematics inside the view.
 
 3. **Validation Workflow**:
    - Follow the targeted debugging & fast-iteration workflows documented in `DOCS.md § 6` (Efficient Development & Debugging Iteration):
