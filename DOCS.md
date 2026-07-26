@@ -80,8 +80,16 @@ The primary pipeline orchestrator.
 *   **Function**: Inspects one competency target end to end: supports full or prefix target IDs (e.g. `--target=test-writing`), which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — the actual images in `out/target-test/`. Pass `--validate` to run live Gemini VQA validation on rendered samples.
 
 ### `src/scripts/show-matching-stats.ts`
-*   **Execution**: `npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>`
+*   **Execution**: `npm run show:matching -- --spec=<spec_module>` (or `npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>`)
 *   **Function**: Prints the matched `(generator, view)` pairs for every target of a spec, probes actual generation with production sample keys, surfaces generation failures and `rejectedLabels` boundaries, and summarizes per-generator coverage. Shares its matching logic with the pipeline via `src/lib/generation.ts`.
+
+### `src/scripts/show-implementation-todos.ts`
+*   **Execution**: `npm run show:imp-todos -- [--spec=<spec_module>]`
+*   **Function**: Inspects `implementationTodos` across target spec files. Groups missing capabilities by standard definition prefix and details missing generator or view functionality.
+
+### `src/scripts/show-ontology-todos.ts`
+*   **Execution**: `npm run show:ont-todos -- [--spec=<spec_module>]`
+*   **Function**: Inspects `ontologyTodos` across target spec files. Groups missing ontological concepts, listing standard IDs, missing labels, and detailed descriptions.
 
 ### `src/scripts/check-all.ts`
 *   **Execution**: `npm run check [-- --spec=<spec_module>]`
@@ -270,3 +278,40 @@ The report joins old and new cache entries on `sample_key` and flags identities 
 - **No timing-dependent pixels**: the render harness disables CSS transitions/animations and waits for fonts and images before screenshotting (pages are reused across renders, so mid-transition captures and image-cache warmth would otherwise make pixels depend on render order). Don't rely on animation states in views, and keep new async resources (fonts, images) loadable — a broken image URL now fails the render wait instead of silently screenshotting a blank box.
 - **Pin the Playwright/Chromium version**: cache keys are pixel hashes, so a browser upgrade re-rasterizes everything. Treat browser bumps as deliberate full-invalidation events.
 - **Spec edits invalidate only what they change**: `target.id` embeds a content hash of the permutation's label set (`<prefix>~<labelSetHash>`), so inserting, reordering or removing variants in a builder never touches the ids — or seeds, or cached samples — of the other permutations. Changing a permutation's labels changes its id and regenerates exactly that permutation, which is correct: the competency itself changed. (Val-split membership is also id-derived, so a changed permutation may switch splits.)
+
+## 7. Autonomous Agentic Loops & Orchestration Workflows
+
+To support automated end-to-end dataset development, the repository provides three high-level **orchestrator skills** located in `.agents/skills/`:
+
+### Loop 1: Standard Spec Generation (`/create-spec-from-standard`)
+- **Skill**: `.agents/skills/create-spec-from-standard/SKILL.md`
+- **Command**: `/create-spec-from-standard {standardId|gradeFile}`
+- **Function**: Translates educational standard leaf nodes (`public/coverage/ccss-tree.json`) into `DatasetPermutationBuilder` target specs in `src/spec/<module>/<gradeFile>.ts`.
+- **Tri-Export Contract**: Categorizes standard permutations into:
+  1. `export const spec: CompetencyTarget[] = [...]`: Matched by existing generator AND view.
+  2. `export const implementationTodos: CompetencyTarget[] = [...]`: Expressible in ontology, missing generator/view.
+  3. `export const ontologyTodos: OntologyTodo[] = [...]`: Inexpressible due to missing ontology labels (`edugraph-ts`).
+- **Validation**: Runs `npm run check:standards-spec -- --spec=<module>` and `npm run check`. Finishes by presenting matching statistics to the user (allowing manual trigger of follow-up loops).
+
+### Loop 2: Spec Implementation & Error-Free Generation (`/implement-spec`)
+- **Skill**: `.agents/skills/implement-spec/SKILL.md`
+- **Command**: `/implement-spec [{specModule}]`
+- **Function**: Resolves `implementationTodos` step-by-step to achieve 100% error-free problem generation and rendering.
+- **Delegation & Module Reviews**: Delegates module-level implementation to `/update-gen {moduleName}` and `/update-view {viewName}`, and targeted audits to `/review-gen {moduleName}` and `/review-view {viewName}`.
+- **Isolated Debugging**: Uses `npm run test:target -- --target=<id> --spec=test --render` and `npm run test:sample -- --sample="<sampleKey>" --spec=test` to isolate and fix failing samples.
+- **Fast Scoped Regeneration**: Uses `npm run generate:dataset -- --spec=test --generator=<gen> --view=<view> [--training-only]` during iteration.
+- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full regeneration (`npm run generate:dataset -- --spec=<spec>`), full VQA validation (`npm run validate:dataset -- --spec=<spec>`), VQA cache churn check (`npm run report:churn -- --dataset=<spec>`), and full checks (`npm run check`).
+
+### Loop 3: Ontological Todo Resolution (`/update-ontology`)
+- **Skill**: `.agents/skills/update-ontology/SKILL.md`
+- **Command**: `/update-ontology [{specModule}]`
+- **Function**: Groups `ontologyTodos` and creates formal GitHub issues in `christian-bick/edugraph-ontology`.
+- **Upfront Prerequisite Checks**:
+  1. **Sibling Repository**: Checks presence of `../edugraph-ontology`. If missing, prints clone instructions and aborts.
+  2. **GitHub CLI Auth**: Checks `gh auth status`. If missing/unauthenticated, prints `gh auth login` instructions and aborts.
+- **Issue Creation**: Formulates structured issue titles, standard contexts, proposed Enum additions, `partOf` taxonomic relations, and TypeScript diffs, submitting them via `gh issue create`.
+
+### Consolidated Module Review Skills
+- **`/review-gen {moduleName}`** (`.agents/skills/review-generator/SKILL.md`): Audits all three generator module files (`spec.ts`, `checklist.md`, `generator.ts`) against a single unified checklist.
+- **`/review-view {viewName}`** (`.agents/skills/review-view/SKILL.md`): Audits all three view module files (`spec.ts`, `checklist.md`, `view.tsx`) against a single unified checklist.
+

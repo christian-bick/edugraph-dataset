@@ -106,12 +106,8 @@ async function main() {
     console.log(`\n🖼️ Rendered: ${imagePath}`);
 
     // Compare against the committed VQA cache
-    const datasetFolderName = specName === 'test' ? 'dataset-test' : 'dataset';
     const imageSha256 = computeImageSha256(imagePath);
     console.log(`Image sha256: ${imageSha256}`);
-
-    const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, identity.generatorId);
-    const cachedByIdentity = cacheManager.entries().find(e => e.sample_key === sampleKey);
 
     if (cachedByIdentity) {
         console.log(`\nCached entry: image ${cachedByIdentity.image_sha256.slice(0, 12)}…, attempt ${cachedByIdentity.attempt}, pass=${cachedByIdentity.evaluation.pass}`);
