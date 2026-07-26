@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
+import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
@@ -10,10 +10,9 @@ export const spec: ViewSpec = {
         ...deductAdmitting([Scope.NumbersLarger10])
     ],
     generalLabels: [
-        Area.BaseOperations,
         Scope.PhysicalNumbers,
-        Ability.ProcedureExecution,
-        Scope.ArabicNumerals
+        Scope.ArabicNumerals,
+        Ability.ProcedureExecution
     ]
 };
 
