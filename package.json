@@ -13,6 +13,7 @@
     "check:labels": "vite-node src/scripts/check-labels.ts",
     "check:generator-view-specs": "vite-node src/scripts/validate-generator-view-specs.ts",
     "check:standards-spec": "vite-node src/scripts/validate-standards-spec.ts",
+    "check:docs": "vite-node src/scripts/validate-docs.ts",
     "check:types": "tsc --noEmit",
     "generate:dataset": "vite-node src/scripts/generate-dataset.ts",
     "validate:dataset": "vite-node src/scripts/validate-dataset.ts",

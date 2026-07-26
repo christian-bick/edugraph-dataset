@@ -92,7 +92,7 @@ Contributions are welcome! Adding new generators and views is a great way to hel
 
 ## License & Attributions
 
-This project is licensed under the Apache 2.0 License. See the [LICENSE](file:///c:/Users/silen/Documents/EduGraph/edugraph-content/LICENSE) file for details.
+This project is licensed under the Apache 2.0 License. See the [LICENSE](./LICENSE) file for details.
 
 ### Third-Party Data Attributions
 

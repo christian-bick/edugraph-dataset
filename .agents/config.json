@@ -10,6 +10,7 @@
       "command(npm run check:labels)",
       "command(npm run check:generator-view-specs)",
       "command(npm run check:standards-spec)",
+      "command(npm run check:docs)",
       "command(npm run check:types)",
       "command(npm run generate:dataset)",
       "command(npm run validate:dataset)",

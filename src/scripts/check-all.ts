@@ -20,7 +20,7 @@ async function main() {
     console.log(`========================================`);
 
     // 1. TypeScript Type Check
-    console.log(`\n--- [1/4] TypeScript Type Check ---`);
+    console.log(`\n--- [1/5] TypeScript Type Check ---`);
     try {
         execSync('npx tsc --noEmit', { cwd: PROJECT_ROOT, stdio: 'inherit' });
         console.log(`✅ Type check passed.`);
@@ -30,7 +30,7 @@ async function main() {
     }
 
     // 2. Generator & View Spec Audit
-    console.log(`\n--- [2/4] Generator & View Spec Audit ---`);
+    console.log(`\n--- [2/5] Generator & View Spec Audit ---`);
     try {
         execSync('npx vite-node src/scripts/validate-generator-view-specs.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -39,7 +39,7 @@ async function main() {
     }
 
     // 3. Label Usage Audit
-    console.log(`\n--- [3/4] Label Usage Audit ---`);
+    console.log(`\n--- [3/5] Label Usage Audit ---`);
     try {
         execSync('npx vite-node src/scripts/check-labels.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -47,8 +47,17 @@ async function main() {
         hasError = true;
     }
 
-    // 4. Standards Spec Validation
-    console.log(`\n--- [4/4] Standards Spec Validation ---`);
+    // 4. Documentation Reference Validation
+    console.log(`\n--- [4/5] Documentation Reference Validation ---`);
+    try {
+        execSync('npx vite-node src/scripts/validate-docs.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
+    } catch {
+        console.error(`❌ Documentation reference validation failed.`);
+        hasError = true;
+    }
+
+    // 5. Standards Spec Validation
+    console.log(`\n--- [5/5] Standards Spec Validation ---`);
     const specDir = resolve(PROJECT_ROOT, 'src', 'spec');
     let specsToValidate: string[] = [];
 
