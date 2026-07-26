@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "command(npm run dev)",
+      "command(npm run build)",
+      "command(npm run preview)",
+      "command(npm run test)",
+      "command(npm run test:coverage)",
+      "command(npm run check)",
+      "command(npm run check:labels)",
+      "command(npm run check:generator-view-specs)",
+      "command(npm run check:standards-spec)",
+      "command(npm run check:types)",
+      "command(npm run generate:dataset)",
+      "command(npm run validate:dataset)",
+      "command(npm run test:vqa)",
+      "command(npm run report:coverage)",
+      "command(npm run report:churn)",
+      "command(npm run test:sample)",
+      "command(npm run test:target)",
+      "command(npm run show:imp-todos)",
+      "command(npm run show:ont-todos)",
+      "command(npm run show:matching)",
+      "command(npm run generate:standards-explorer)",
+      "command(npm run map:standards)",
+      "command(npm run validate:coverage)",
+      "command(npm run upload:gcs)",
+      "command(npm run sync:gcs)",
+      "command(npm run sync:gcs:dry)",
+      "command(npm run upload:s3)",
+      "command(npm run sync:s3)",
+      "command(npm run sync:s3:dry)"
+    ]
+  }
+}
