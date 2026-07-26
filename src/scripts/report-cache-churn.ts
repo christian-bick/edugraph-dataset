@@ -4,6 +4,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { VqaCacheEntry } from '../lib/vqa-cache.ts';
 import { getCliOption } from '../lib/cli.ts';
+import { isUnionSpec, resolveDatasetDir } from '../lib/dataset-paths.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -71,16 +72,20 @@ function gitListCacheFiles(ref: string, relDir: string): string[] {
 
 function main() {
     const args = process.argv.slice(2);
-    let datasetParam = getCliOption(args, 'dataset');
-    let ref = getCliOption(args, 'ref') || 'HEAD';
+    const ref = getCliOption(args, 'ref') || 'HEAD';
 
-    let datasetFolderName = 'dataset';
-    if (datasetParam) {
-        datasetFolderName = datasetParam.startsWith('dataset-') ? datasetParam : `dataset-${datasetParam}`;
-        if (datasetParam === 'default' || datasetParam === 'dataset') {
-            datasetFolderName = 'dataset';
-        }
+    const specName = getCliOption(args, 'spec');
+    if (!specName) {
+        console.error('❌ Error: The --spec parameter is required.');
+        console.error('Usage: npm run report:churn -- --spec=<spec_module> [--ref=<git-ref>]');
+        process.exit(1);
     }
+    if (isUnionSpec(specName)) {
+        console.error('❌ Error: the union dataset has no VQA cache of its own.');
+        console.error('Churn is tracked per standard — e.g. npm run report:churn -- --spec=ccss');
+        process.exit(1);
+    }
+    const datasetFolderName = resolveDatasetDir(specName);
 
     const relDir = `cache/vqa-validation/${datasetFolderName}`;
     const absDir = resolve(PROJECT_ROOT, relDir);

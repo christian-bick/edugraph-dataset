@@ -1,8 +1,8 @@
 import { execSync } from 'child_process';
-import { readdirSync, existsSync, lstatSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
+import { listSpecModules } from '../lib/generation.ts';
 import { getCliOption } from '../lib/cli.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -61,19 +61,7 @@ async function main() {
     const specDir = resolve(PROJECT_ROOT, 'src', 'spec');
     let specsToValidate: string[] = [];
 
-    if (requestedSpec) {
-        specsToValidate = [requestedSpec];
-    } else {
-        if (existsSync(specDir)) {
-            specsToValidate = readdirSync(specDir)
-                .filter(item => {
-                    const itemPath = resolve(specDir, item);
-                    return lstatSync(itemPath).isDirectory() || item.endsWith('.ts');
-                })
-                .map(item => item.replace(/\.ts$/, ''))
-                .sort();
-        }
-    }
+    specsToValidate = requestedSpec ? [requestedSpec] : listSpecModules(specDir);
 
     console.log(`Validating spec(s): [${specsToValidate.join(', ')}]`);
 

@@ -13,6 +13,7 @@
       "command(npm run check:docs)",
       "command(npm run check:types)",
       "command(npm run generate:dataset)",
+      "command(npm run merge:dataset)",
       "command(npm run validate:dataset)",
       "command(npm run test:vqa)",
       "command(npm run report:coverage)",

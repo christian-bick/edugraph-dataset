@@ -5,7 +5,7 @@ mathematical data.
 
 **Applies to:** every `checklist.md` under `src/generators/` — root, category and leaf.
 **Read with:** [checklist-general.md](checklist-general.md) — all `CHK-n` rules apply here too.
-**Verify with:** `npm run validate:dataset -- --generator=X --dataset=test`
+**Verify with:** `npm run validate:dataset -- --generator=X --spec=test`
 
 ---
 

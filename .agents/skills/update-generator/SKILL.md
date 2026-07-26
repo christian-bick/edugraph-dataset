@@ -20,8 +20,8 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
      - **Isolated Target Debugging**: `npm run test:target -- --target=<target.id> --spec=test --render`
      - **Isolated Sample Debugging**: `npm run test:sample -- --sample="<sample_key>" --spec=test`
      - **Fast Scoped Regeneration**: `npm run generate:dataset -- --spec=test --generator=<moduleName> --view=<viewName> [--training-only]`
-     - **VQA Validation**: `npm run validate:dataset -- --generator=<moduleName> --dataset=test`
-     - **Cache Churn Check**: `npm run report:churn -- --dataset=test`
+     - **VQA Validation**: `npm run validate:dataset -- --generator=<moduleName> --spec=test`
+     - **Cache Churn Check**: `npm run report:churn -- --spec=test`
      - **Vitest Unit Tests**: `npm run test`
 
 IMPORTANT:

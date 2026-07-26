@@ -39,14 +39,20 @@ npx playwright install --with-deps chromium
 ### Usage
 
 **1. Generate the Dataset**
-Generate the ML dataset (images + `meta.json`). The output will be saved in `out/dataset/`.
+Generate the ML dataset (images + `meta.json`). Each education standard generates into its own folder — `out/dataset-<spec>/` — so standards can be regenerated independently.
 The `--spec` parameter must be specified to select the spec module.
 ```bash
-# Generate using curriculum standards
+# Generate using curriculum standards -> out/dataset-ccss/
 npm run generate:dataset -- --spec=ccss
 
-# Generate using test specifications
+# Generate using test specifications -> out/dataset-test/
 npm run generate:dataset -- --spec=test
+```
+
+**1b. Merge the Union Dataset**
+The released dataset at `out/dataset/` is the **union** of every education standard, deduplicated across them. Standards overlap heavily, so each one added contributes a shrinking delta — which the merge reports per standard.
+```bash
+npm run merge:dataset
 ```
 *(Tip: You can filter the generation using optional parameters:
 *   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic-ops-pairs`).

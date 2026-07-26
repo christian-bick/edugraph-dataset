@@ -14,6 +14,7 @@ import { renderTasks } from '../lib/render.ts';
 import { computeImageSha256, VqaCacheManager } from '../lib/vqa-cache.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { evaluateSampleVqa } from '../lib/vqa-evaluator.ts';
+import { datasetDirForSpec } from '../lib/dataset-paths.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,7 +45,7 @@ async function main() {
 
     const { parseSampleKey } = await import('../lib/generation.ts');
     const identity = parseSampleKey(sampleKey);
-    const datasetFolderName = specName === 'test' ? 'dataset-test' : 'dataset';
+    const datasetFolderName = datasetDirForSpec(specName);
     const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, identity.generatorId);
     const cachedByIdentity = cacheManager.entries().find(e => e.sample_key === sampleKey);
 

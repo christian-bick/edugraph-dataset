@@ -11,6 +11,7 @@ import {
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
+import { isUnionSpec, resolveDatasetDir } from "../lib/dataset-paths.ts";
 import { evaluateSampleVqa } from "../lib/vqa-evaluator.ts";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -137,14 +138,19 @@ async function main() {
     let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
     
-    let datasetParam = getCliOption(args, 'dataset') || getCliOption(args, 'spec');
-    let datasetFolderName = 'dataset';
-    if (datasetParam) {
-        datasetFolderName = datasetParam.startsWith('dataset-') ? datasetParam : `dataset-${datasetParam}`;
-        if (datasetParam === 'default' || datasetParam === 'dataset') {
-            datasetFolderName = 'dataset';
-        }
+    const specName = getCliOption(args, 'spec');
+    if (!specName) {
+        console.error('❌ Error: The --spec parameter is required.');
+        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force]');
+        process.exit(1);
     }
+    if (isUnionSpec(specName)) {
+        console.error(`❌ Error: the union dataset is not validated directly.`);
+        console.error('Every sample in it was already validated in its own standard — validate those instead,');
+        console.error('e.g. npm run validate:dataset -- --spec=ccss');
+        process.exit(1);
+    }
+    const datasetFolderName = resolveDatasetDir(specName);
 
     for (const arg of args) {
         if (arg.includes('generator=')) {

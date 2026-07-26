@@ -16,6 +16,7 @@ import { renderTasks, RenderTask } from '../lib/render.ts';
 import { VqaCacheManager } from '../lib/vqa-cache.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { evaluateSampleVqa } from '../lib/vqa-evaluator.ts';
+import { datasetDirForSpec } from '../lib/dataset-paths.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -98,7 +99,7 @@ async function main() {
         return;
     }
 
-    const datasetFolderName = specName === 'test' ? 'dataset-test' : 'dataset';
+    const datasetFolderName = datasetDirForSpec(specName);
     const cacheManagers = new Map<string, VqaCacheManager>();
     const getCache = (generatorId: string) => {
         if (!cacheManagers.has(generatorId)) {

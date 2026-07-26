@@ -37,6 +37,18 @@ To ensure end-to-end type safety between problem generators (which run in Node.j
 **Environment Separation & Mapping:**
 Because the Node orchestrator and generator configurations do not statically import the React view files (which are dynamically bundled by Vite and loaded headlessly inside Playwright via URLs), TypeScript cannot automatically inspect `window.renderView` in the browser code from the Node side. `ViewTypeMap` serves as a shared bridge, allowing the compiler to statically verify that generators specify view names compatible with the data structures the views expect to render.
 
+### Specs and the Union Dataset
+
+A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
+
+*   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples.
+*   **The union dataset (`out/dataset/`) is derived**, built by `npm run merge:dataset` from every non-isolated standard in precedence order. It is the released artifact; treat it as a build output, never as a source of truth — the merge replaces it wholesale.
+*   **The merge deduplicates across standards.** Two standards demanding the same competency produce the same content; the first standard in merge order keeps the exercise and later ones report it as their duplicate overlap. Dedup is scoped per (split, view) by content fingerprint, and the validation split additionally excludes content already in train — the same rules generation applies within a single standard, extended across them.
+*   **Isolated specs never merge.** `test` declares `isolated = true` in `src/spec/test/_module.ts`; it exists to exercise generators and views in a fast, small slice. Files prefixed with `_` describe the module rather than contributing targets, so the target loaders skip them.
+*   **Merge precedence** is ascending `unionOrder` (default 100), ties broken by name. Declare a higher `unionOrder` when adding a standard so established ones keep their samples and the newcomer contributes only its delta.
+
+This works because sample identity is content-derived: `target.id` embeds the standard's own id prefix, so keys never collide across standards, and val-split membership is a pure function of `target.id`, so a target lands in the same split regardless of what else was generated.
+
 ### Sample Identity & Determinism
 Every dataset sample has a **structural identity**: the tuple `(target.id, generatorId, viewId, split, mode, instanceIdx)`, canonicalized as a *sample key* (e.g. `test-writing~fe4336da#writing#numbers-write-standard#train#question#inst:0`). Everything entropy-related is a pure function of this identity, implemented in `src/lib/generation.ts`:
 
@@ -58,19 +70,25 @@ The primary pipeline orchestrator.
 *   **Dedup**: Content fingerprints per (split, view); a collision triggers a deterministic retry on the next attempt. The winning attempt is recorded.
 *   **Metadata**: Each image row records its full identity: `sample_key`, `spec`, `target_id`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, plus `tags` and `parameters` (the full problem data — generators no longer author a separate descriptive id; identity is entirely structural).
 *   **`--training-only` Flag**: If specified, skips validation sample generation, rendering, and metadata writing.
-*   **Clearing Logic**: If no module is specified, it wipes the entire `out/dataset/` directory. If a specific module is provided, it clears only `out/dataset/train/<module>` and `out/dataset/validation/<module>`.
+*   **Output**: `out/dataset-<spec>/` — every spec owns its folder (see *Specs and the Union Dataset*). The released `out/dataset/` is produced by `merge-dataset.ts`, not by this script.
+*   **Clearing Logic**: Scoped to the spec's own folder. If no module is specified, it wipes `out/dataset-<spec>/`. If a specific module is provided, it clears only `out/dataset-<spec>/train/<module>` and `.../validation/<module>`.
+
+### `src/scripts/merge-dataset.ts`
+*   **Execution**: `npm run merge:dataset`
+*   **Function**: Builds the union dataset at `out/dataset/` from every non-isolated spec's folder, in `unionOrder` precedence (see *Specs and the Union Dataset*). Deduplicates exercises across standards per (split, view) by content fingerprint — keeping question and solution together, since they are independent draws of one exercise — and excludes from validation any content already merged into train. Reports each standard's offered / merged / duplicate counts, which is the delta a newly added standard actually contributes. Requires every union spec to have been generated first; the union is replaced wholesale on each run.
 
 ### `src/scripts/generate-coverage-report.ts`
-*   **Execution**: `npm run report:coverage -- [--spec=Z]`
-*   **Function**: Scans all `metadata.jsonl` files in the generated dataset. It outputs a markdown report (`out/dataset/coverage-report.md` or `out/dataset-test/coverage-report.md`) detailing absolute frequencies of individual labels and the percentage breakdown of unique label combinations.
+*   **Execution**: `npm run report:coverage -- --spec=<spec_module|union>`
+*   **Function**: Scans all `metadata.jsonl` files in the selected dataset and outputs a markdown report (`out/dataset-<spec>/coverage-report.md`) detailing absolute frequencies of individual labels and the percentage breakdown of unique label combinations. Pass `--spec=union` for the released dataset's coverage — the deduplicated merge across all standards, which is usually the number that matters.
 
 ### `src/scripts/validate-dataset.ts`
-*   **Execution**: `npm run validate:dataset -- --generator=X --view=Y [--dataset=Z] [--force]`
-*   **Function**: An automated Visual QA pipeline. It uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. It defaults to reading from `out/dataset/`, but you can target smaller test runs by specifying `--dataset=test` (which dynamically reads from `out/dataset-test/`).
+*   **Execution**: `npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force]`
+*   **Dataset selection**: every script that reads a dataset takes `--spec=<module>` and nothing else, resolved by `resolveDatasetDir` in `src/lib/dataset-paths.ts` (`--spec=ccss` → `out/dataset-ccss/`). The reserved `--spec=union` addresses the merged `out/dataset/`, and is accepted only by `report:coverage` — validation and churn are per standard, and reject it with an explanation. `--spec` is required; there is no default.
+*   **Function**: An automated Visual QA pipeline. It uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. Validation runs per standard — `--spec=test` targets the small `out/dataset-test/` slice for fast iteration.
 *   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : checklist hash)` — an image is only re-validated when its pixels or its applicable checklists change. Each cache entry also records the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
 
 ### `src/scripts/report-cache-churn.ts`
-*   **Execution**: `npm run report:churn -- [--dataset=test] [--ref=<git-ref>]`
+*   **Execution**: `npm run report:churn -- --spec=<spec_module> [--ref=<git-ref>]`
 *   **Function**: Compares the working-tree VQA cache against a git ref (default `HEAD`) by joining entries on their `sample_key`. Reports identities whose image hash changed, classified as *render/code change* (same seed and attempt), *attempt shift* (collision elsewhere or generator behavior change), or *seed scheme change* (should never happen). **Run this after every regeneration**: churn in samples your change should not have affected is a determinism regression.
 
 ### `src/scripts/test-sample.ts`
@@ -178,7 +196,7 @@ To visually verify and test both your generator and view modules without overwri
    This allows you to quickly inspect the generated output under `out/dataset-test/` without running the entire dataset generation pipeline.
 3. **Run Targeted Validation**: Run automated Visual QA against your small test output:
    ```bash
-   npm run validate:dataset -- --generator=X --view=Y --dataset=test
+   npm run validate:dataset -- --generator=X --view=Y --spec=test
    ```
 
 ### Step 8: Final Verification
@@ -205,7 +223,7 @@ After changing the generator or view, rerun it: `test:sample` re-renders the ima
 
 ### Checking cache health after a regeneration
 ```bash
-npm run report:churn -- --dataset=test        # compares working tree vs HEAD
+npm run report:churn -- --spec=test        # compares working tree vs HEAD
 ```
 The report joins old and new cache entries on `sample_key` and flags identities whose image changed. Expected: churn only in the modules/views you touched. **Churn in unrelated samples is a determinism regression** — the classification (render change vs. attempt shift vs. seed scheme change) tells you where to look.
 
@@ -219,7 +237,7 @@ The report joins old and new cache entries on `sample_key` and flags identities 
 
 ## 7. Autonomous Agentic Loops & Orchestration Workflows
 
-To support automated end-to-end dataset development, the repository provides seven **skills** in `.agents/skills/`: three orchestrator loops, two module update skills, and two module review skills. All of them defer to the reference library in [`docs/`](docs/README.md) for authoring rules, citing rule IDs rather than restating them.
+To support automated end-to-end dataset development, the repository provides eight **skills** in `.agents/skills/`: four orchestrator loops, two module update skills, and two module review skills. All of them defer to the reference library in [`docs/`](docs/README.md) for authoring rules, citing rule IDs rather than restating them.
 
 Note that a skill's directory name is not always its command name (e.g. `spec-from-standard/` provides `/create-spec-from-standard`); the command is the `name:` field in its `SKILL.md` frontmatter.
 
@@ -236,7 +254,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Delegation & Module Reviews**: Delegates module-level implementation to `/update-gen {moduleName}` and `/update-view {viewName}`, and targeted audits to `/review-gen {moduleName}` and `/review-view {viewName}`.
 - **Isolated Debugging**: Uses `npm run test:target -- --target=<id> --spec=test --render` and `npm run test:sample -- --sample="<sampleKey>" --spec=test` to isolate and fix failing samples.
 - **Fast Scoped Regeneration**: Uses `npm run generate:dataset -- --spec=test --generator=<gen> --view=<view> [--training-only]` during iteration.
-- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full regeneration (`npm run generate:dataset -- --spec=<spec>`), full VQA validation (`npm run validate:dataset -- --spec=<spec>`), VQA cache churn check (`npm run report:churn -- --dataset=<spec>`), and full checks (`npm run check`).
+- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full regeneration (`npm run generate:dataset -- --spec=<spec>`), full VQA validation (`npm run validate:dataset`), VQA cache churn check (`npm run report:churn`), and full checks (`npm run check`). Note that the last two select a dataset *folder*, not a spec — see the dataset folder rule in §3.
 
 ### Loop 3: Ontological Todo Resolution (`/update-ontology`)
 - **Skill**: `.agents/skills/update-ontology/SKILL.md`
@@ -246,6 +264,13 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
   1. **Sibling Repository**: Checks presence of `../edugraph-ontology`. If missing, prints clone instructions and aborts.
   2. **GitHub CLI Auth**: Checks `gh auth status`. If missing/unauthenticated, prints `gh auth login` instructions and aborts.
 - **Issue Creation**: Formulates structured issue titles, standard contexts, proposed Enum additions, `partOf` taxonomic relations, and TypeScript diffs, submitting them via `gh issue create`.
+
+### Loop 4: Failure Resolution (`/fix-spec`)
+- **Skill**: `.agents/skills/fix-spec/SKILL.md`
+- **Command**: `/fix-spec [{specModule}] [--generator=X] [--view=Y]`
+- **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in `validation-report.md`), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
+- **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a `spec.ts` declaration or a competency target (`TSPEC-6`, `SPEC-V3`).
+- **Triage note**: A VQA failure is not proof of a code bug. An unscoped prompt-text rule in a leaf checklist (`CHK-V4`) fails views that correctly hide the prompt in Solution Mode; the checklist is verified before the view is changed.
 
 ### Module Update Skills
 - **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews it, updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.

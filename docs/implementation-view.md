@@ -108,4 +108,4 @@ npm run test -- src/visuals/views/[<category>/]<view>/
 - [ ] **IMPL-V6** — grep the view for `Math.random`, unseeded `random(`, and `problem.id`: all three must be absent. Every visual random decision traces back to `payload.seed`.
 - [ ] **IMPL-V7** — no reliance on animation state; every async resource the view loads resolves.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.
-- [ ] `npm run report:churn -- --dataset=test` shows churn only in the views actually touched.
+- [ ] `npm run report:churn -- --spec=test` shows churn only in the views actually touched.

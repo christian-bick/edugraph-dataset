@@ -16,6 +16,7 @@
     "check:docs": "vite-node src/scripts/validate-docs.ts",
     "check:types": "tsc --noEmit",
     "generate:dataset": "vite-node src/scripts/generate-dataset.ts",
+    "merge:dataset": "vite-node src/scripts/merge-dataset.ts",
     "validate:dataset": "vite-node src/scripts/validate-dataset.ts",
     "test:vqa": "vite-node src/scripts/validate-dataset.ts",
     "report:coverage": "vite-node src/scripts/generate-coverage-report.ts",

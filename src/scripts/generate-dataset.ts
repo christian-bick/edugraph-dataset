@@ -24,6 +24,7 @@ import {
 } from '../lib/generation.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { getCliOption } from '../lib/cli.ts';
+import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -358,9 +359,10 @@ async function main() {
         process.exit(1);
     }
 
-    if (specName === 'test') {
-        OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset-test');
-    }
+    // Every spec owns its dataset folder; the union at out/dataset/ is built
+    // from them by merge-dataset.ts, so regenerating one standard never
+    // disturbs another's samples.
+    OUT_DIR = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
     SPEC_NAME = specName;
 
     const validationResult = await normalizeAndValidateSpec(specName);

@@ -45,30 +45,25 @@ Keep iteration loops fast (<5 seconds) during active development:
   ```
 - Run **scoped VQA validation**:
   ```bash
-  npm run validate:dataset -- --generator=<generator> --view=<view> --dataset=test
+  npm run validate:dataset -- --generator=<generator> --view=<view> --spec=test
   ```
 - Run **cache churn report**:
   ```bash
-  npm run report:churn -- --dataset=test
+  npm run report:churn -- --spec=test
   ```
   *(Verify zero unexpected image churn in unrelated modules).*
 - Once clean and verified, **promote completed targets from `implementationTodos` to `spec`** in `src/spec/<spec>/`, per the export contract in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`).
 
 #### Step 6: Final Full Dataset Validation Gate (Completion Gate)
-Once ALL `implementationTodos` in the spec module are resolved and promoted to `spec`, execute the final full verification gate across the entire spec:
-1. Regenerate full spec dataset:
-   ```bash
-   npm run generate:dataset -- --spec=<specModule>
-   ```
-2. Run full VQA validation (leveraging the VQA cache):
-   ```bash
-   npm run validate:dataset -- --spec=<specModule>
-   ```
-3. Run full VQA cache churn report:
-   ```bash
-   npm run report:churn -- --dataset=<specModule>
-   ```
-4. Run full repository checks:
-   ```bash
-   npm run check -- --spec=<specModule>
-   ```
+Once ALL `implementationTodos` in the spec module are resolved and promoted to `spec`, execute the final full verification gate across the entire spec.
+
+Every spec owns its dataset folder, so `--spec=<specModule>` is passed consistently to every script:
+```bash
+npm run generate:dataset -- --spec=<specModule>
+npm run validate:dataset -- --spec=<specModule>
+npm run report:churn -- --spec=<specModule>
+npm run check -- --spec=<specModule>
+npm run merge:dataset
+```
+
+`merge:dataset` rebuilds the union dataset at `out/dataset/` from every non-isolated standard. Skip it for an isolated spec such as `test` (`TSPEC-10` in `docs/target-spec.md`).

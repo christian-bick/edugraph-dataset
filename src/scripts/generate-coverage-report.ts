@@ -2,17 +2,22 @@ import { readFileSync, readdirSync, existsSync, writeFileSync } from 'fs';
 import { resolve, join } from 'path';
 import { fileURLToPath } from 'url';
 import { getCliOption } from '../lib/cli.ts';
+import { datasetOutDir, resolveDatasetDir } from '../lib/dataset-paths.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const args = process.argv.slice(2);
-const specName = getCliOption(args, 'spec') || 'ccss';
-
-let OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
-if (specName === 'test') {
-    OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset-test');
+const specName = getCliOption(args, 'spec');
+if (!specName) {
+    console.error('❌ Error: The --spec parameter is required.');
+    console.error('Usage: npm run report:coverage -- --spec=<spec_module>');
+    console.error('Pass --spec=union for the merged dataset across all standards.');
+    process.exit(1);
 }
+
+// A standard's own coverage, or --spec=union for the released dataset's.
+const OUT_DIR = datasetOutDir(PROJECT_ROOT, resolveDatasetDir(specName));
 
 interface MetaEntry {
     tags: string[];

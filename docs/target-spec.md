@@ -122,6 +122,39 @@ the validator the identity is intentional. It is cross-checked: an equivalence n
 unknown definition, or one whose definitions no longer share an identical permutation set,
 is reported as stale.
 
+### TSPEC-10 — Union membership is declared, not hardcoded
+
+Every spec module is one education standard that contributes to the **union dataset**
+(`out/dataset/`), unless it declares otherwise in a `_module.ts` file:
+
+```typescript
+export const isolated = true;    // never merges into the union
+export const unionOrder = 200;   // merge precedence; lower merges first
+```
+
+Files prefixed with `_` describe the module rather than contributing targets, so the
+target-bearing loaders skip them — a `_module.ts` must **not** export `spec`.
+
+- **`isolated`** — only `src/spec/test/` sets this. An isolated spec exists to exercise
+  generators and views, and its samples never reach released data.
+- **`unionOrder`** — defaults to 100, ties broken by module name. When adding a standard,
+  declare a **higher** value than the established ones, so they keep their samples and the
+  newcomer contributes only its delta.
+
+**Why:** standards overlap heavily. Precedence decides which standard keeps a shared
+exercise, so leaving it implicit would let adding one standard silently reshuffle another's
+contribution.
+
+### TSPEC-11 — Target id prefixes must be unique across all standards, not just within one
+
+`toTargets('<standard-id>-<slug>', builder)` embeds the standard's own id in every target
+id, which is what keeps sample keys from colliding when standards are merged. Choose id
+prefixes that no other standard could produce.
+
+**Note:** `check:standards-spec` validates uniqueness *within* a spec module only. Nothing
+currently compares prefixes across standards, so this rule is on the author until
+union-level validation exists.
+
 ### TSPEC-9 — Validation
 
 `npm run check:standards-spec -- --spec=<module>` always runs every check: target ID
@@ -143,3 +176,5 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-7** — every competency sits in exactly one of the three arrays, with matching confirmed via `npm run show:matching`.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless declared in `equivalentTargets` with a reason.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
+- [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
+- [ ] **TSPEC-11** — every target id prefix is unmistakably this standard's, and collides with no other standard's.

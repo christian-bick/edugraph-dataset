@@ -17,8 +17,8 @@ Update the visual view module under `src/visuals/views/[<category>/]{viewName}` 
      - **Isolated Target Debugging**: `npm run test:target -- --target=<target.id> --spec=test --render`
      - **Isolated Sample Debugging**: `npm run test:sample -- --sample="<sample_key>" --spec=test`
      - **Fast Scoped Regeneration**: `npm run generate:dataset -- --spec=test --generator=<generator> --view=<viewName> [--training-only]`
-     - **VQA Validation**: `npm run validate:dataset -- --view=<viewName> --dataset=test`
-     - **Cache Churn Check**: `npm run report:churn -- --dataset=test`
+     - **VQA Validation**: `npm run validate:dataset -- --view=<viewName> --spec=test`
+     - **Cache Churn Check**: `npm run report:churn -- --spec=test`
      - **Vitest Unit Tests**: `npm run test`
 
 IMPORTANT:

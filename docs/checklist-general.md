@@ -6,7 +6,7 @@ manual checks.
 
 **Applies to:** every `checklist.md` under `src/generators/` and `src/visuals/views/` — root, category and leaf.
 **Read with:** [checklist-generator.md](checklist-generator.md), [checklist-view.md](checklist-view.md)
-**Verify with:** `npm run validate:dataset -- --generator=X --view=Y --dataset=test`
+**Verify with:** `npm run validate:dataset -- --generator=X --view=Y --spec=test`
 
 ---
 

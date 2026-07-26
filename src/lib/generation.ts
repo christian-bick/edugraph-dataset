@@ -312,6 +312,15 @@ export async function loadViewCatalog(
  * files or a single file) under specRoot, in sorted order so downstream
  * processing is deterministic. Shared by every spec-module loader below.
  */
+/**
+ * Reserved filename prefix for spec module metadata. Files starting with `_`
+ * describe the module itself rather than contributing targets, so they are
+ * excluded from every target-bearing loader — which would otherwise reject
+ * them for not exporting `spec`.
+ */
+const MODULE_META_PREFIX = '_';
+const MODULE_META_FILE = '_module.ts';
+
 function resolveSpecFiles(specName: string, specRoot: string): string[] {
     const specPath = resolve(specRoot, specName);
     const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
@@ -322,11 +331,79 @@ function resolveSpecFiles(specName: string, specRoot: string): string[] {
     }
 
     return specDir
-        ? readdirSync(specDir).filter(f => f.endsWith('.ts')).sort().map(f => resolve(specDir, f))
+        ? readdirSync(specDir)
+            .filter(f => f.endsWith('.ts') && !f.startsWith(MODULE_META_PREFIX))
+            .sort()
+            .map(f => resolve(specDir, f))
         : [specFile!];
 }
 
 const DEFAULT_SPEC_ROOT = () => resolve(PROJECT_ROOT, 'src', 'spec');
+
+export interface SpecModuleMetadata {
+    /**
+     * An isolated spec never merges into the union dataset. It exists for
+     * development and targeted testing only (`test`), so its targets and
+     * samples stay out of the released data.
+     */
+    isolated: boolean;
+    /**
+     * Merge precedence in the union: lower merges first and therefore wins
+     * when two standards produce identical content. Declare an explicit,
+     * higher value when adding a standard so the established ones keep their
+     * samples and the newcomer contributes only its delta.
+     */
+    unionOrder: number;
+}
+
+const DEFAULT_UNION_ORDER = 100;
+
+/**
+ * Loads a spec module's `_module.ts` metadata. Modules without one are
+ * ordinary education standards that contribute to the union dataset.
+ */
+export async function loadSpecMetadata(
+    specName: string,
+    specRoot: string = DEFAULT_SPEC_ROOT()
+): Promise<SpecModuleMetadata> {
+    const metaPath = resolve(specRoot, specName, MODULE_META_FILE);
+    if (!existsSync(metaPath)) {
+        return { isolated: false, unionOrder: DEFAULT_UNION_ORDER };
+    }
+    const module = await import(pathToFileURL(metaPath).href);
+    return {
+        isolated: module.isolated === true,
+        unionOrder: typeof module.unionOrder === 'number' ? module.unionOrder : DEFAULT_UNION_ORDER,
+    };
+}
+
+/** Every spec module under the spec root, as directories or bare `.ts` files. */
+export function listSpecModules(specRoot: string = DEFAULT_SPEC_ROOT()): string[] {
+    if (!existsSync(specRoot)) return [];
+    return readdirSync(specRoot)
+        .filter(entry => {
+            const entryPath = resolve(specRoot, entry);
+            return lstatSync(entryPath).isDirectory() || entry.endsWith('.ts');
+        })
+        .map(entry => entry.replace(/\.ts$/, ''))
+        .sort();
+}
+
+/**
+ * The spec modules that make up the union dataset, in merge order: ascending
+ * `unionOrder`, ties broken by name. Isolated modules are excluded, so adding
+ * one never changes released data.
+ */
+export async function listUnionSpecs(specRoot: string = DEFAULT_SPEC_ROOT()): Promise<string[]> {
+    const entries: { specName: string; unionOrder: number }[] = [];
+    for (const specName of listSpecModules(specRoot)) {
+        const { isolated, unionOrder } = await loadSpecMetadata(specName, specRoot);
+        if (!isolated) entries.push({ specName, unionOrder });
+    }
+    return entries
+        .sort((a, b) => a.unionOrder - b.unionOrder || a.specName.localeCompare(b.specName))
+        .map(entry => entry.specName);
+}
 
 /**
  * Loads all competency targets from a spec module. Files are visited in

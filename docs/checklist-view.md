@@ -5,7 +5,7 @@ image, consumed by the automated Visual QA pipeline.
 
 **Applies to:** every `checklist.md` under `src/visuals/views/` — root, category and leaf.
 **Read with:** [checklist-general.md](checklist-general.md) — all `CHK-n` rules apply here too.
-**Verify with:** `npm run validate:dataset -- --view=Y --dataset=test`
+**Verify with:** `npm run validate:dataset -- --view=Y --spec=test`
 
 ---
 
