@@ -15,7 +15,7 @@ interface CoreProps {
 function DigitSVG({ digit, isSingle }: { digit: string; isSingle: boolean }) {
     const width = isSingle ? 60 : 30;
     const height = 60;
-    const fontSize = isSingle ? 50 : 35;
+    const fontSize = isSingle ? 50 : 30;
     const yPos = isSingle ? 48 : 42;
     const xPos = width / 2;
 
@@ -54,7 +54,7 @@ function TracingHelper({ number }: { number: number }) {
     }
 
     return (
-        <div className="flex justify-center items-center w-full h-full">
+        <div className="flex justify-center items-center w-full h-full gap-1">
             <DigitSVG digit={digits[0]} isSingle={false} />
             <DigitSVG digit={digits[1]} isSingle={false} />
         </div>

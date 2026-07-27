@@ -63,6 +63,11 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-5 bg-white w-full">
             <div className="flex flex-col items-start gap-5">
+                {!isSolutionView && isReverse && (
+                    <div className="text-xl font-bold text-slate-700 font-sans mb-2">
+                        Draw an object of the given length on the ruler:
+                    </div>
+                )}
                 <div className="flex flex-col items-start">
                     {/* Measured Rectangle */}
                     {showRectangle ? (

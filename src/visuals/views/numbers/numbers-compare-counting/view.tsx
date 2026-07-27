@@ -31,9 +31,6 @@ const NumbersCompareCountingCore = ({ payload }: CoreProps) => {
         return { iconA: ICONS[iconAIndex], iconB: ICONS[iconBIndex] };
     }, [payload.seed]);
 
-    const maxCount = Math.max(num1, num2);
-    const spacing = 42;
-    const startY = 20;
 
     const correctChoice = useMemo(() => {
         return getCorrectChoice(num1, num2, isFewerQuestion);
@@ -59,40 +56,29 @@ const NumbersCompareCountingCore = ({ payload }: CoreProps) => {
                 )}
                 
                 <div 
-                    className="relative w-[360px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-5"
-                    style={{ height: `${Math.max(220, (maxCount * spacing) + 80)}px` }}
+                    className="relative w-[500px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-5 flex flex-row gap-4"
                 >
-                    <div className="absolute top-2 text-[0.95rem] font-extrabold text-slate-400 uppercase tracking-[0.5px] left-[45px]">Group A</div>
-                    <div className="absolute top-2 text-[0.95rem] font-extrabold text-slate-400 uppercase tracking-[0.5px] left-[225px]">Group B</div>
-                    
-                    <div className="relative w-full h-full mt-[25px]">
-                        {/* Group A Items */}
-                        {Array.from({ length: num1 }).map((_, i) => {
-                            const y = startY + i * spacing;
-                            return (
-                                <div 
-                                    key={`a-${i}`}
-                                    className="absolute w-[35px] h-[35px] flex justify-center items-center z-10"
-                                    style={{ top: `${y}px`, left: '60px' }}
-                                >
-                                    <img src={`/icons/counting/${iconA}`} alt="Group A object" className="w-[35px] h-[35px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.08)]" />
-                                </div>
-                            );
-                        })}
+                    {/* Group A */}
+                    <div className="flex-1 flex flex-col items-center">
+                        <div className="text-[0.95rem] font-extrabold text-slate-400 uppercase tracking-[0.5px] mb-4">Group A</div>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {Array.from({ length: num1 }).map((_, i) => (
+                                <img key={`a-${i}`} src={`/icons/counting/${iconA}`} alt="Group A object" className="w-[30px] h-[30px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.08)]" />
+                            ))}
+                        </div>
+                    </div>
 
-                        {/* Group B Items */}
-                        {Array.from({ length: num2 }).map((_, i) => {
-                            const y = startY + i * spacing;
-                            return (
-                                <div 
-                                    key={`b-${i}`}
-                                    className="absolute w-[35px] h-[35px] flex justify-center items-center z-10"
-                                    style={{ top: `${y}px`, left: '240px' }}
-                                >
-                                    <img src={`/icons/counting/${iconB}`} alt="Group B object" className="w-[35px] h-[35px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.08)]" />
-                                </div>
-                            );
-                        })}
+                    {/* Divider */}
+                    <div className="w-[2px] bg-slate-200 rounded-full"></div>
+
+                    {/* Group B */}
+                    <div className="flex-1 flex flex-col items-center">
+                        <div className="text-[0.95rem] font-extrabold text-slate-400 uppercase tracking-[0.5px] mb-4">Group B</div>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {Array.from({ length: num2 }).map((_, i) => (
+                                <img key={`b-${i}`} src={`/icons/counting/${iconB}`} alt="Group B object" className="w-[30px] h-[30px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.08)]" />
+                            ))}
+                        </div>
                     </div>
                 </div>
 
