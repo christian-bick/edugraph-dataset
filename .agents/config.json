@@ -18,6 +18,7 @@
       "command(npm run test:vqa)",
       "command(npm run report:coverage)",
       "command(npm run report:churn)",
+      "command(npm run report:splits)",
       "command(npm run test:sample)",
       "command(npm run test:target)",
       "command(npm run show:imp-todos)",
