@@ -13,6 +13,7 @@
 - **Functional Style:** Prefer short, chainable and pure functions with well-scoped responsibilities.
 - **Naming:** Prefer self-explaining and concise names. Add code docs to inherently complex functions and classes.
 - **Tests:** Generate and execute unit tests for all code in `lib`, and generator modules using the `{filename}.test.ts` convention in the same directory. Unit tests must achieve high coverage, which should be verified by running `npm run test:coverage`.
+- **Temporary Files:** Never write scratch files to the repository root. Captured command output, logs, intermediate data and any other throwaway artifact belongs in `./temp/` (gitignored) — e.g. `npm run check > temp/check-output.txt`, not `> check_output.txt`. Generated dataset artifacts are the exception and belong in `./out/`, written by the pipeline scripts rather than by hand. Clean up scratch files you no longer need.
 
 ## 3. Specific Project and Coding Documentation
 

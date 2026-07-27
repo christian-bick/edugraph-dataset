@@ -130,7 +130,7 @@ The primary pipeline orchestrator.
 
 ### `src/scripts/validate-generator-view-specs.ts`
 *   **Execution**: `npm run check:generator-view-specs`
-*   **Function**: An automated generator and view spec validation script. It checks companion `spec.ts` files across both generators and views, flagging (1) overlapping General Labels / parameter queries, and (2) duplicate parameterizations where a view re-specifies variables already computed by its matching generator. Detailed logs are outputted to `temp/check_output.txt`.
+*   **Function**: An automated generator and view spec validation script. It checks companion `spec.ts` files across both generators and views, flagging (1) overlapping General Labels / parameter queries, and (2) duplicate parameterizations where a view re-specifies variables already computed by its matching generator. Output goes to the console; redirect it to `temp/` if you need to keep it.
 
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<spec_module>`
