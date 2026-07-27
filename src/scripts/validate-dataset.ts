@@ -13,6 +13,7 @@ import {
 import { getCliOption } from "../lib/cli.ts";
 import { isUnionSpec, resolveDatasetDir } from "../lib/dataset-paths.ts";
 import { evaluateSampleVqa } from "../lib/vqa-evaluator.ts";
+import { parseSampleKey, SampleSplit, SPLIT_DIRS } from "../lib/generation.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,7 +22,30 @@ const GENERATORS_ROOT = resolve(PROJECT_ROOT, "src", "generators");
 const VIEWS_ROOT = resolve(PROJECT_ROOT, "src", "visuals", "views");
 const CACHE_DIR = resolve(PROJECT_ROOT, "cache", "vqa-validation");
 
-let DATASET_ROOT = resolve(PROJECT_ROOT, "out", "dataset", "train");
+/** The dataset's root — every split folder hangs off it. */
+let DATASET_DIR = resolve(PROJECT_ROOT, "out", "dataset");
+
+/**
+ * Both splits are validated. The split is not in the filename, so an image is
+ * located by reading it back out of the sample key, which is the authoritative
+ * record of a sample's identity.
+ */
+function splitDirOf(entry: any): string {
+    return SPLIT_DIRS[parseSampleKey(entry.sample_key).split];
+}
+
+function imagePathFor(entry: any): string {
+    return resolve(DATASET_DIR, splitDirOf(entry), entry.file_name);
+}
+
+/**
+ * Display path. `file_name` is relative to its split root and does not encode
+ * the split, so the same tuple's train and validation images share it — always
+ * qualify it before showing it to a human.
+ */
+function displayPathOf(entry: any): string {
+    return `${splitDirOf(entry)}/${entry.file_name}`;
+}
 
 const apiKey = process.env.GEMINI_API_KEY;
 let genAI: GoogleGenerativeAI | null = null;
@@ -111,7 +135,7 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
 }
 
 async function evaluateSingleSample(entry: any, _datasetFolderName: string): Promise<any> {
-    const imagePath = resolve(DATASET_ROOT, entry.file_name);
+    const imagePath = imagePathFor(entry);
     const result = await evaluateSampleVqa({
         imagePath,
         sampleKey: entry.sample_key,
@@ -164,18 +188,28 @@ async function main() {
         }
     }
 
-    DATASET_ROOT = resolve(PROJECT_ROOT, 'out', datasetFolderName, 'train');
+    DATASET_DIR = resolve(PROJECT_ROOT, 'out', datasetFolderName);
 
     console.log(`--- Starting Automated Modular VQA ${auditMode ? '(AUDIT MODE)' : ''} [Dataset: ${datasetFolderName}] ---`);
 
-    const rootMetaPath = resolve(DATASET_ROOT, 'metadata.jsonl');
-    if (!existsSync(rootMetaPath)) {
-        console.error(`Error: Root metadata file not found at ${rootMetaPath}. Please generate the dataset first.`);
-        process.exit(1);
+    // Both splits are validated: validation images ship in the released dataset
+    // and are subject to the same checklists as train images.
+    const entries: any[] = [];
+    const presentSplits: SampleSplit[] = [];
+    for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
+        const metaPath = resolve(DATASET_DIR, SPLIT_DIRS[split], 'metadata.jsonl');
+        if (!existsSync(metaPath)) continue;
+        const lines = readFileSync(metaPath, 'utf-8').split('\n').filter(l => l.trim() !== '');
+        entries.push(...lines.map(l => JSON.parse(l)));
+        presentSplits.push(split);
     }
 
-    const metadataLines = readFileSync(rootMetaPath, 'utf-8').split('\n').filter(l => l.trim() !== '');
-    const entries = metadataLines.map(l => JSON.parse(l));
+    if (presentSplits.length === 0) {
+        console.error(`Error: No split metadata found under ${DATASET_DIR}. Please generate the dataset first.`);
+        process.exit(1);
+    }
+    const missingSplits = (Object.keys(SPLIT_DIRS) as SampleSplit[]).filter(s => !presentSplits.includes(s));
+    console.log(`Validating split(s): [${presentSplits.map(s => SPLIT_DIRS[s]).join(', ')}] — ${entries.length} samples.`);
 
     let filtered = [...entries];
     if (targetGenerator) {
@@ -206,7 +240,7 @@ async function main() {
 
     for (const entry of filtered) {
         const moduleName = entry.generator;
-        const imagePath = resolve(DATASET_ROOT, entry.file_name);
+        const imagePath = imagePathFor(entry);
         if (!existsSync(imagePath)) continue;
 
         const imageBuffer = readFileSync(imagePath);
@@ -222,12 +256,26 @@ async function main() {
         activeKeysPerModule.get(moduleName)!.add(valCacheKey);
     }
 
-    // Perform automatic safe pruning of stale cache entries for this dataset folder
-    for (const [modName, activeKeys] of activeKeysPerModule.entries()) {
-        const mgr = new VqaCacheManager(CACHE_DIR, datasetFolderName, modName);
-        const pruned = mgr.prune(activeKeys);
-        if (pruned > 0) {
-            console.log(`🧹 Auto-pruned ${pruned} stale cache entries for [${modName}] in cache/vqa-validation/${datasetFolderName}/`);
+    // Perform automatic safe pruning of stale cache entries for this dataset
+    // folder. Pruning is only safe when every split is on disk: a dataset built
+    // with --training-only has no validation images, and pruning against it
+    // would discard paid-for validation records that are not actually stale.
+    // The same reasoning applies to --generator/--view filters.
+    const isFullDataset = missingSplits.length === 0 && !targetGenerator && !targetView;
+    if (!isFullDataset) {
+        const reasons = [
+            ...missingSplits.map(s => `split "${SPLIT_DIRS[s]}" not generated`),
+            ...(targetGenerator ? [`--generator=${targetGenerator}`] : []),
+            ...(targetView ? [`--view=${targetView}`] : [])
+        ];
+        console.log(`ℹ️ Skipping cache pruning (${reasons.join(', ')}) — entries outside this run cannot be confirmed stale.`);
+    } else {
+        for (const [modName, activeKeys] of activeKeysPerModule.entries()) {
+            const mgr = new VqaCacheManager(CACHE_DIR, datasetFolderName, modName);
+            const pruned = mgr.prune(activeKeys);
+            if (pruned > 0) {
+                console.log(`🧹 Auto-pruned ${pruned} stale cache entries for [${modName}] in cache/vqa-validation/${datasetFolderName}/`);
+            }
         }
     }
 
@@ -239,10 +287,10 @@ async function main() {
         for (const entry of filtered) {
             const moduleName = entry.generator;
             const viewId = entry.view;
-            const imagePath = resolve(DATASET_ROOT, entry.file_name);
+            const imagePath = imagePathFor(entry);
 
             if (!existsSync(imagePath)) {
-                console.error(`❌ AUDIT FAILURE (File missing): [${moduleName} : ${viewId}] ${entry.file_name}`);
+                console.error(`❌ AUDIT FAILURE (File missing): [${moduleName} : ${viewId}] ${displayPathOf(entry)}`);
                 uncachedCount++;
                 continue;
             }
@@ -257,10 +305,10 @@ async function main() {
             const existingCache = cacheManager.get(valCacheKey);
 
             if (!existingCache) {
-                console.error(`❌ AUDIT FAILURE (Uncached): [${moduleName} : ${viewId}] ${entry.file_name}`);
+                console.error(`❌ AUDIT FAILURE (Uncached): [${moduleName} : ${viewId}] ${displayPathOf(entry)}`);
                 uncachedCount++;
             } else if (!existingCache.evaluation.pass) {
-                console.error(`❌ AUDIT FAILURE (Failing evaluation): [${moduleName} : ${viewId}] ${entry.file_name} -> ${existingCache.evaluation.reasoning}`);
+                console.error(`❌ AUDIT FAILURE (Failing evaluation): [${moduleName} : ${viewId}] ${displayPathOf(entry)} -> ${existingCache.evaluation.reasoning}`);
                 failingCount++;
             } else {
                 auditPassedCount++;
@@ -275,7 +323,7 @@ async function main() {
         for (const entry of filtered) {
             const moduleName = entry.generator;
             const viewId = entry.view;
-            const imagePath = resolve(DATASET_ROOT, entry.file_name);
+            const imagePath = imagePathFor(entry);
 
             if (!existsSync(imagePath)) continue;
 
@@ -404,14 +452,24 @@ function generateValidationReport(
         entry: any;
         evaluation: any;
     }> = [];
+    type SplitTally = { total: number; passed: number; failed: number; uncached: number };
+    const perSplit = new Map<string, SplitTally>();
+    const tallyFor = (entry: any): SplitTally => {
+        const splitDir = SPLIT_DIRS[parseSampleKey(entry.sample_key).split];
+        if (!perSplit.has(splitDir)) perSplit.set(splitDir, { total: 0, passed: 0, failed: 0, uncached: 0 });
+        return perSplit.get(splitDir)!;
+    };
 
     for (const entry of filteredEntries) {
         const moduleName = entry.generator;
         const viewId = entry.view;
-        const imagePath = resolve(DATASET_ROOT, entry.file_name);
+        const imagePath = imagePathFor(entry);
+        const tally = tallyFor(entry);
+        tally.total++;
 
         if (!existsSync(imagePath)) {
             uncachedCount++;
+            tally.uncached++;
             continue;
         }
 
@@ -426,10 +484,13 @@ function generateValidationReport(
 
         if (!cache) {
             uncachedCount++;
+            tally.uncached++;
         } else if (cache.evaluation.pass) {
             passedCount++;
+            tally.passed++;
         } else {
             failedCount++;
+            tally.failed++;
             failedItems.push({
                 entry,
                 evaluation: cache.evaluation
@@ -455,6 +516,15 @@ function generateValidationReport(
 | **Passed** | ${passedCount} | ${passedPct}% |
 | **Failed** | ${failedCount} | ${failedPct}% |
 | **Uncached / Skipped** | ${uncachedCount} | ${uncachedPct}% |
+
+## By Split
+
+| Split | Total | Passed | Failed | Uncached |
+| :--- | :--- | :--- | :--- | :--- |
+${[...perSplit.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([split, t]) => `| \`${split}\` | ${t.total} | ${t.passed} | ${t.failed} | ${t.uncached} |`)
+        .join('\n')}
 
 ---
 
@@ -484,7 +554,7 @@ function generateValidationReport(
                 checks.push(`Layout: ${evalObj.layout_pass ? 'Pass' : 'FAIL'}`);
             }
 
-            md += `- [ ] **\`${entry.file_name}\`**\n`;
+            md += `- [ ] **\`${displayPathOf(entry)}\`**\n`;
             md += `  - **Module / View:** \`${entry.generator}\` : \`${entry.view}\` (${modeStr} mode)\n`;
             md += `  - **Reason:** ${evalObj.reasoning}\n`;
             if (checks.length > 0) {

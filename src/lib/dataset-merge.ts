@@ -7,9 +7,11 @@
  * contribute a given exercise keeps it, and later standards add only their
  * delta.
  *
- * Dedup mirrors the generation-time rule (`generateModuleSamples`): scoped per
- * (split, view) by content fingerprint, with the validation split additionally
- * rejecting content already present in train.
+ * Dedup extends the generation-time rule (`generateModuleSamples`) across
+ * standards: by content fingerprint per (split, view), with the validation
+ * split additionally rejecting content already present in train. Generation
+ * scopes the same rule per module, since a view has only one generator; the
+ * merge spans whole standards and so scopes per (split, view).
  */
 
 export interface MetadataRow {
@@ -22,6 +24,8 @@ export interface MetadataRow {
     mode: string;
     instance: number;
     content_fingerprint: string;
+    /** Shortened ontology labels, as written by the pipeline. */
+    tags?: string[];
     [key: string]: unknown;
 }
 

@@ -30,6 +30,14 @@ const ABILITIES = new Set<string>(Object.values(Ability));
 export type SampleSplit = 'train' | 'val';
 export type SampleMode = 'question' | 'solution';
 
+/**
+ * On-disk folder of each split, under a dataset's root. The split is part of
+ * sample identity but is not encoded in the filename — it *is* the parent
+ * directory — so every reader and writer of dataset images resolves paths
+ * through this map.
+ */
+export const SPLIT_DIRS: Record<SampleSplit, string> = { train: 'train', val: 'validation' };
+
 export interface SampleIdentity {
     targetId: string;
     generatorId: string;
@@ -618,7 +626,7 @@ export interface GenerateTargetSamplesOptions {
 /**
  * Generates every sample belonging to one target across all matching
  * (generator, view) tuples: question and solution modes, all instances, and
- * the val split when the target is val-allocated. No cross-target dedup is
+ * the val split for each val-allocated tuple. No cross-target dedup is
  * applied, so a sample's attempt here can differ from the pipeline's when the
  * pipeline retried due to a content collision with another target — comparing
  * the two attempts is itself a useful diagnostic.
@@ -629,14 +637,16 @@ export function generateTargetSamples(
     viewCatalog: ViewCatalogEntry[],
     options: GenerateTargetSamplesOptions = {}
 ): TargetSample[] {
-    const { instancesPerTuple = 1, valRatio = 0.25, maxAttempts = 50 } = options;
+    const { instancesPerTuple = 1, valRatio = DEFAULT_VAL_RATIO, maxAttempts = 50 } = options;
     const { tuples } = matchTargets([target], generatorCatalog, viewCatalog);
-    const splits: SampleSplit[] = isValTarget(target.id, valRatio) ? ['train', 'val'] : ['train'];
     const modes: SampleMode[] = ['question', 'solution'];
 
     const samples: TargetSample[] = [];
     for (const tuple of tuples) {
         const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
+        const splits: SampleSplit[] = isValTuple(target.id, tuple.generatorId, tuple.viewId, valRatio)
+            ? ['train', 'val']
+            : ['train'];
         for (const split of splits) {
             for (let instanceIdx = 0; instanceIdx < instancesPerTuple; instanceIdx++) {
                 for (const mode of modes) {
@@ -703,15 +713,29 @@ export function computeContentFingerprint(data: any): string {
     return createHash('sha256').update(canonicalJson(data)).digest('hex').slice(0, 16);
 }
 
+/** Share of matched tuples allocated to the validation split. */
+export const DEFAULT_VAL_RATIO = 0.25;
+
 /**
- * Deterministic, order-independent val-split allocation: a target is
- * val-allocated purely as a function of its id, so val membership survives
- * unrelated reorderings. Salted so it does not correlate with sample seeds.
+ * Deterministic, order-independent val-split allocation, decided per matched
+ * (target, generator, view) tuple — the unit the pipeline generates an
+ * exercise for.
+ *
+ * Allocation is per tuple rather than per target because targets differ by an
+ * order of magnitude in how many tuples they match: allocating whole targets
+ * made the realized split both far smaller than the requested ratio and wildly
+ * uneven across views, leaving most views with no validation samples at all.
+ * Per-tuple allocation gives every view val coverage proportional to its train
+ * mass.
+ *
+ * Salted so it does not correlate with sample seeds, and a pure function of the
+ * tuple, so membership survives unrelated reorderings of specs or catalogs.
  */
-export function isValTarget(targetId: string, ratio: number): boolean {
+export function isValTuple(targetId: string, generatorId: string, viewId: string, ratio: number): boolean {
     if (ratio <= 0) return false;
     if (ratio >= 1) return true;
-    return fnv1a(`val-split${KEY_SEPARATOR}${targetId}`) % 10000 < ratio * 10000;
+    const tupleKey = ['val-split', targetId, generatorId, viewId].join(KEY_SEPARATOR);
+    return fnv1a(tupleKey) % 10000 < ratio * 10000;
 }
 
 export interface BuildProblemInput {

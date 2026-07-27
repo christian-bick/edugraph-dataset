@@ -1,9 +1,11 @@
 import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { listSpecModules } from '../lib/generation.ts';
 import { getCliOption } from '../lib/cli.ts';
+import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,7 +22,7 @@ async function main() {
     console.log(`========================================`);
 
     // 1. TypeScript Type Check
-    console.log(`\n--- [1/5] TypeScript Type Check ---`);
+    console.log(`\n--- [1/6] TypeScript Type Check ---`);
     try {
         execSync('npx tsc --noEmit', { cwd: PROJECT_ROOT, stdio: 'inherit' });
         console.log(`✅ Type check passed.`);
@@ -30,7 +32,7 @@ async function main() {
     }
 
     // 2. Generator & View Spec Audit
-    console.log(`\n--- [2/5] Generator & View Spec Audit ---`);
+    console.log(`\n--- [2/6] Generator & View Spec Audit ---`);
     try {
         execSync('npx vite-node src/scripts/validate-generator-view-specs.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -39,7 +41,7 @@ async function main() {
     }
 
     // 3. Label Usage Audit
-    console.log(`\n--- [3/5] Label Usage Audit ---`);
+    console.log(`\n--- [3/6] Label Usage Audit ---`);
     try {
         execSync('npx vite-node src/scripts/check-labels.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -48,7 +50,7 @@ async function main() {
     }
 
     // 4. Documentation Reference Validation
-    console.log(`\n--- [4/5] Documentation Reference Validation ---`);
+    console.log(`\n--- [4/6] Documentation Reference Validation ---`);
     try {
         execSync('npx vite-node src/scripts/validate-docs.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -57,7 +59,7 @@ async function main() {
     }
 
     // 5. Standards Spec Validation
-    console.log(`\n--- [5/5] Standards Spec Validation ---`);
+    console.log(`\n--- [5/6] Standards Spec Validation ---`);
     const specDir = resolve(PROJECT_ROOT, 'src', 'spec');
     let specsToValidate: string[] = [];
 
@@ -97,6 +99,24 @@ async function main() {
             }
         } catch (e) {
             console.error(`❌ Failed to validate spec "${specName}":`, e instanceof Error ? e.message : e);
+            hasError = true;
+        }
+    }
+
+    // 6. Split Integrity — only for specs whose dataset has been generated,
+    // so a fresh clone still passes every static check.
+    console.log(`\n--- [6/6] Dataset Split Integrity ---`);
+    const generatedSpecs = specsToValidate.filter(specName =>
+        existsSync(resolve(datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName)), 'train', 'metadata.jsonl')));
+
+    if (generatedSpecs.length === 0) {
+        console.log(`ℹ️ No generated dataset found for [${specsToValidate.join(', ')}] — skipping.`);
+    }
+    for (const specName of generatedSpecs) {
+        try {
+            execSync(`npx vite-node src/scripts/report-splits.ts --spec=${specName}`, { cwd: PROJECT_ROOT, stdio: 'inherit' });
+        } catch {
+            console.error(`❌ Split integrity failed for "${specName}".`);
             hasError = true;
         }
     }

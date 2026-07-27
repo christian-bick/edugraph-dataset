@@ -17,7 +17,8 @@ import {
     generateSampleByKey,
     generateTargetSamples,
     computeContentFingerprint,
-    isValTarget,
+    isValTuple,
+    DEFAULT_VAL_RATIO,
     buildRenderPayload,
     SampleIdentity,
     GeneratorMatchInfo,
@@ -356,26 +357,55 @@ describe('computeContentFingerprint', () => {
     });
 });
 
-describe('isValTarget', () => {
+describe('isValTuple', () => {
     it('handles ratio edge cases', () => {
-        expect(isValTarget('anything', 0)).toBe(false);
-        expect(isValTarget('anything', 1)).toBe(true);
+        expect(isValTuple('t', 'g', 'v', 0)).toBe(false);
+        expect(isValTuple('t', 'g', 'v', 1)).toBe(true);
     });
 
-    it('is deterministic per target id', () => {
+    it('is deterministic per tuple', () => {
         for (let i = 0; i < 20; i++) {
-            expect(isValTarget(`t-${i}`, 0.25)).toBe(isValTarget(`t-${i}`, 0.25));
+            expect(isValTuple(`t-${i}`, 'g', 'v', DEFAULT_VAL_RATIO))
+                .toBe(isValTuple(`t-${i}`, 'g', 'v', DEFAULT_VAL_RATIO));
         }
     });
 
-    it('approximates the requested ratio over many targets', () => {
+    it('allocates per tuple, not per target — one target can split across views', () => {
+        const views = Array.from({ length: 40 }, (_, i) => `view-${i}`);
+        const allocated = views.filter(v => isValTuple('one-target', 'gen', v, DEFAULT_VAL_RATIO));
+        expect(allocated.length).toBeGreaterThan(0);
+        expect(allocated.length).toBeLessThan(views.length);
+    });
+
+    it('distinguishes generator and view, not just their concatenation', () => {
+        // Without a separator, ("ab","c") and ("a","bc") would hash identically.
+        expect(isValTuple('t', 'ab', 'c', 0.5)).not.toBe(isValTuple('t', 'a', 'bc', 0.5));
+    });
+
+    it('approximates the requested ratio over many tuples', () => {
         let count = 0;
         const total = 10000;
         for (let i = 0; i < total; i++) {
-            if (isValTarget(`target-${i}`, 0.25)) count++;
+            if (isValTuple(`target-${i % 250}`, 'gen', `view-${i % 40}`, DEFAULT_VAL_RATIO)) count++;
         }
         expect(count / total).toBeGreaterThan(0.22);
         expect(count / total).toBeLessThan(0.28);
+    });
+
+    it('does not correlate with the sample seed of the same tuple', () => {
+        // Both hash the same parts with the same function; the salt must keep
+        // val membership independent of the draw it would produce.
+        const agreements = Array.from({ length: 500 }, (_, i) => {
+            const key = computeSampleKey({
+                targetId: `t-${i}`, generatorId: 'g', viewId: 'v',
+                split: 'train', mode: 'question', instanceIdx: 0
+            });
+            const seedIsLow = computeSampleSeed(key, 1) % 10000 < DEFAULT_VAL_RATIO * 10000;
+            return seedIsLow === isValTuple(`t-${i}`, 'g', 'v', DEFAULT_VAL_RATIO);
+        }).filter(Boolean).length;
+        // Independent predicates agree on ~62.5% of draws (0.25² + 0.75²)
+        expect(agreements / 500).toBeGreaterThan(0.55);
+        expect(agreements / 500).toBeLessThan(0.70);
     });
 });
 

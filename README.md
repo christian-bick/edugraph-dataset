@@ -70,6 +70,12 @@ npm run report:coverage -- --spec=test
 ```
 *(Tip: You can pass `--spec` to analyze different datasets; it defaults to `ccss`.)*
 
+**2b. Audit the Train/Validation Split**
+Check that validation content is disjoint from train, free of duplicates, and covers the views and labels that training does.
+```bash
+npm run report:splits -- --spec=ccss
+```
+
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
 ```bash

@@ -13,14 +13,16 @@ import {
     computeSampleSeed,
     computeContentFingerprint,
     generateSampleWithRetry,
-    isValTarget,
+    isValTuple,
+    DEFAULT_VAL_RATIO,
     buildProblem,
     buildRenderPayload,
     GeneratorCatalogEntry,
     ViewCatalogEntry,
     SampleIdentity,
     SampleMode,
-    SampleSplit
+    SampleSplit,
+    SPLIT_DIRS
 } from '../lib/generation.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { getCliOption } from '../lib/cli.ts';
@@ -34,9 +36,6 @@ let SPEC_NAME = '';
 const BASE_URL = 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
 const MAX_ATTEMPTS = 50;
-const VAL_RATIO = 0.25;
-
-const SPLIT_DIRS: Record<SampleSplit, string> = { train: 'train', val: 'validation' };
 
 /**
  * One fully specified image to render: the sample identity plus everything
@@ -94,9 +93,17 @@ function finalizeMetadata(splitDirName: string) {
 }
 
 /**
- * Generates all samples of one module (generator) for one split. Dedup is
- * scoped per (split, view) via content fingerprints; the val split also
- * rejects content already present in the train split.
+ * Generates all samples of one module (generator) for one split.
+ *
+ * Dedup is scoped per (module, split, view) via content fingerprints, and
+ * covers both modes: every drawn content item is claimed for its view, so a
+ * question never repeats a solution's content or vice versa. The val split
+ * additionally rejects content already claimed by the module's train split.
+ *
+ * The module scope is deliberate — it keeps `--generator=X` reproducing exactly
+ * what a full run produces for that module. It costs nothing in practice
+ * because no view is rendered by more than one generator, so cross-module
+ * collisions within a view cannot occur.
  */
 function generateModuleSamples(
     genEntry: GeneratorCatalogEntry,
@@ -112,7 +119,7 @@ function generateModuleSamples(
 
     for (const tuple of tuples) {
         const target = tuple.target;
-        if (split === 'val' && !isValTarget(target.id, VAL_RATIO)) continue;
+        if (split === 'val' && !isValTuple(target.id, moduleName, tuple.viewId, DEFAULT_VAL_RATIO)) continue;
 
         const labels = [...target.labels];
         const instanceIdx = 0;
@@ -132,6 +139,14 @@ function generateModuleSamples(
         const seenFingerprints = fingerprintsByView.get(tuple.viewId)!;
         const trainFingerprints = trainFingerprintsByView?.get(tuple.viewId);
 
+        // Applied to both modes: content already claimed for this view — in
+        // either mode, and in train when drawing val — is rejected, so no two
+        // images of a view ever show the same problem across a split boundary.
+        const isDuplicate = (stub: ProblemStub) => {
+            const fingerprint = computeContentFingerprint(stub.data);
+            return seenFingerprints.has(fingerprint) || (trainFingerprints?.has(fingerprint) ?? false);
+        };
+
         const questionIdentity = makeIdentity('question');
         const questionKey = computeSampleKey(questionIdentity);
 
@@ -142,10 +157,7 @@ function generateModuleSamples(
                 labels,
                 sampleKey: questionKey,
                 maxAttempts: MAX_ATTEMPTS,
-                isDuplicate: (stub) => {
-                    const fingerprint = computeContentFingerprint(stub.data);
-                    return seenFingerprints.has(fingerprint) || (trainFingerprints?.has(fingerprint) ?? false);
-                }
+                isDuplicate
             });
         } catch (e) {
             console.warn(`[${moduleName}] Skipping ${questionKey}: generator error: ${e instanceof Error ? e.message : e}`);
@@ -165,13 +177,19 @@ function generateModuleSamples(
                 generator: genEntry.generator,
                 labels,
                 sampleKey: solutionKey,
-                maxAttempts: MAX_ATTEMPTS
+                maxAttempts: MAX_ATTEMPTS,
+                isDuplicate
             });
         } catch (e) {
             solution = { stub: null, attempt: 1, seed: computeSampleSeed(solutionKey, 1) };
         }
-        // Fall back to the question stub when no independent solution draw succeeded
+        // A view whose content space is too small to offer a second distinct
+        // problem falls back to showing the question's content solved. That is
+        // the same exercise in the same split — never a cross-split leak.
         const solutionStub = solution.stub || question.stub;
+        if (solution.stub) {
+            seenFingerprints.add(computeContentFingerprint(solution.stub.data));
+        }
 
         samples.push({
             identity: questionIdentity,
@@ -328,6 +346,13 @@ async function runModulePipeline(
         viewPathMap[view.viewId] = view.module.relativePath;
     }
 
+    // Train is generated first, into its own index, and val only ever *reads*
+    // that index. This asymmetry is deliberate and must be preserved: train is
+    // the primary artifact and may not depend on whether val was generated at
+    // all, while val is derived and necessarily depends on train — disjointness
+    // cannot be had otherwise. Verify with:
+    //   generate --spec=test, then generate --spec=test --training-only
+    //   → the train split must be byte-identical.
     const trainFingerprints = new Map<string, Set<string>>();
     const trainSamples = generateModuleSamples(genEntry, viewCatalog, allTargets, 'train', trainFingerprints);
 

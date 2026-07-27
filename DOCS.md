@@ -43,7 +43,7 @@ A **spec module** (`src/spec/<module>/`) is one education standard's competency 
 
 *   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples.
 *   **The union dataset (`out/dataset/`) is derived**, built by `npm run merge:dataset` from every non-isolated standard in precedence order. It is the released artifact; treat it as a build output, never as a source of truth — the merge replaces it wholesale.
-*   **The merge deduplicates identical content across standards.** The first standard in merge order keeps the exercise and later ones report it as duplicate overlap. Dedup is scoped per (split, view) by content fingerprint, with the validation split additionally excluding content already in train — the same rules generation applies within a single standard, extended across them. Question and solution are independent draws of one exercise, so exercises are kept or dropped whole.
+*   **The merge deduplicates identical content across standards.** The first standard in merge order keeps the exercise and later ones report it as duplicate overlap. Dedup is scoped per (split, view) by content fingerprint, with the validation split additionally excluding content already in train — the same rules generation applies within a single standard (where the scope is per module, since a view has only one generator), extended across them. Question and solution are independent draws of one exercise, so exercises are kept or dropped whole.
 *   **Isolated specs never merge.** `test` declares `isolated = true` in `src/spec/test/_module.ts`; it exists to exercise generators and views in a fast, small slice. Files prefixed with `_` describe the module rather than contributing targets, so the target loaders skip them.
 *   **Merge precedence** is ascending `unionOrder` (default 100), ties broken by name. Declare a higher `unionOrder` when adding a standard so established ones keep their samples and the newcomer contributes only its delta.
 
@@ -58,7 +58,7 @@ Every dataset sample has a **structural identity**: the tuple `(target.id, gener
 *   **Render seed**: passed to the browser as `payload.seed`. The `withConfig` wrapper calls `setSeed(payload.seed)` before resolving the view config, and views derive all visual randomness from it.
 *   **Filenames**: `computeSampleFilename(identity)` — stable and unique by construction, so filenames never shift when unrelated samples change.
 *   **Content fingerprint**: `computeContentFingerprint(problem.data)` — an order-independent hash used for dedup instead of generator-authored id strings.
-*   **Val split membership**: `isValTarget(target.id, ratio)` — a pure function of the target id, so val membership survives unrelated reorderings.
+*   **Val split membership**: `isValTuple(target.id, generatorId, viewId, ratio)` — a pure function of the matched tuple, so val membership survives unrelated reorderings. Allocation is per tuple, not per target: targets differ by an order of magnitude in how many tuples they match, so target-level allocation produced a split far below the requested ratio and left most views with no validation samples at all.
 
 The consequence: a code change only invalidates the samples whose identity inputs it actually touches. `problem.id` carries the sample key for reference but has **no functional role** — do not derive anything from it.
 
@@ -68,8 +68,9 @@ The consequence: a code change only invalidates the samples whose identity input
 The primary pipeline orchestrator.
 *   **Execution**: `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only]`
 *   **Function**: Loads targets and catalogs via `src/lib/generation.ts`, computes the matched `(target, generator, view)` tuples, generates one question and one solution sample per tuple with structural seeds, and renders them headlessly via Playwright (requires the vite dev server, `npm run dev`).
-*   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of targets selected by `isValTarget`. Both use the same identity-based seeding with the split as a key component.
-*   **Dedup**: Content fingerprints per (split, view); a collision triggers a deterministic retry on the next attempt. The winning attempt is recorded.
+*   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of tuples selected by `isValTuple`. Both use the same identity-based seeding with the split as a key component. Audit the result with `report:splits` — a tuple whose content space is too small to yield a draw disjoint from train produces no validation sample, which that report surfaces.
+*   **Split dependency direction (invariant)**: **train generation never depends on validation generation; validation always depends on train.** Train is generated first into its own fingerprint index, and the val pass only reads that index. The asymmetry is required, not incidental: train is the primary artifact and must be reproducible on its own, while validation cannot be disjoint from train without being constrained by it. Verify with `generate:dataset --spec=test` followed by `generate:dataset --spec=test --training-only` — the train split must come out byte-identical. The practical consequence is that a generator change shifts train content, which can change which validation draws survive dedup; `report:churn` classifies that as an *attempt shift* and it is expected, not a determinism regression.
+*   **Dedup**: Content fingerprints per (module, split, view), covering **both modes** — every drawn content item is claimed for its view, so a question never repeats a solution's content or vice versa, and no val draw repeats content already in train. A collision triggers a deterministic retry on the next attempt; the winning attempt is recorded. A solution that exhausts its retries falls back to the question's content shown solved. The module scope keeps `--generator=X` reproducing exactly what a full run produces for that module, and costs nothing because no view is rendered by more than one generator.
 *   **Metadata**: Each image row records its full identity: `sample_key`, `spec`, `target_id`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, plus `tags` and `parameters` (the full problem data — generators no longer author a separate descriptive id; identity is entirely structural).
 *   **`--training-only` Flag**: If specified, skips validation sample generation, rendering, and metadata writing.
 *   **Output**: `out/dataset-<spec>/` — every spec owns its folder (see *Specs and the Union Dataset*). The released `out/dataset/` is produced by `merge-dataset.ts`, not by this script.
@@ -87,11 +88,17 @@ The primary pipeline orchestrator.
 *   **Execution**: `npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force]`
 *   **Dataset selection**: every script that reads a dataset takes `--spec=<module>` and nothing else, resolved by `resolveDatasetDir` in `src/lib/dataset-paths.ts` (`--spec=ccss` → `out/dataset-ccss/`). The reserved `--spec=union` addresses the merged `out/dataset/`, and is accepted only by `report:coverage` — validation and churn are per standard, and reject it with an explanation. `--spec` is required; there is no default.
 *   **Function**: An automated Visual QA pipeline. It uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze Q/A image pairs from the dataset against rules defined in cascading `checklist.md` files across generator and view module directories. Validation runs per standard — `--spec=test` targets the small `out/dataset-test/` slice for fast iteration.
+*   **Splits**: **Both `train` and `validation` are validated.** Validation images ship in the released dataset and are subject to the same checklists, so exempting them would let unchecked images reach consumers. Images are located by reading the split back out of the `sample_key` (`SPLIT_DIRS` in `src/lib/generation.ts`) — `file_name` is relative to its split root and does not encode the split, so **the same tuple's train and validation images share a filename**; every human-facing path is qualified with its split. The report breaks results down per split.
 *   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : checklist hash)` — an image is only re-validated when its pixels or its applicable checklists change. Each cache entry also records the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
+*   **Pruning**: Stale cache entries are auto-pruned, but **only when the run covers the whole dataset**. A run narrowed by `--generator`/`--view`, or one against a dataset generated with `--training-only`, skips pruning and says so: entries outside its scope are not stale, and discarding them would throw away paid-for evaluations.
 
 ### `src/scripts/report-cache-churn.ts`
 *   **Execution**: `npm run report:churn -- --spec=<spec_module> [--ref=<git-ref>]`
 *   **Function**: Compares the working-tree VQA cache against a git ref (default `HEAD`) by joining entries on their `sample_key`. Reports identities whose image hash changed, classified as *render/code change* (same seed and attempt), *attempt shift* (collision elsewhere or generator behavior change), or *seed scheme change* (should never happen). **Run this after every regeneration**: churn in samples your change should not have affected is a determinism regression.
+
+### `src/scripts/report-splits.ts`
+*   **Execution**: `npm run report:splits -- --spec=<spec_module|union>`
+*   **Function**: Audits the train/validation split of a generated dataset, using `src/lib/split-report.ts`. Reports **cross-split leakage** (validation content already present in train for the same view), **within-split redundancy** (one view's content shown by two different exercises — a question and its own solution sharing content is the documented small-space fallback, not redundancy), the **realized val ratio** against the allocator's target, and **per-view / per-label validation coverage**. Leakage and redundancy exit non-zero: they make validation metrics optimistic rather than merely thin. Coverage gaps are warnings, since a view whose content space is too small to split legitimately yields no validation sample. Run it after every regeneration — nothing else asserts these properties, which is how 14% cross-split leakage and 21 uncovered views went unnoticed before it existed.
 
 ### `src/scripts/test-sample.ts`
 *   **Execution**: `npm run test:sample -- --sample="<sample_key>" --spec=<spec_module> [--no-render] [--no-validate]`
@@ -115,7 +122,7 @@ The primary pipeline orchestrator.
 
 ### `src/scripts/check-all.ts`
 *   **Execution**: `npm run check [-- --spec=<spec_module>]`
-*   **Function**: The unified repository check script. Orchestrates TypeScript type checking (`tsc --noEmit`), generator/view spec audits (`validate-generator-view-specs.ts`), label usage audits (`check-labels.ts`), documentation reference validation (`validate-docs.ts`), and competency standard spec validations (`normalizeAndValidateSpec`). If `--spec` is specified, restricts target spec validation to that module; otherwise validates all available specs (`test`, `ccss`).
+*   **Function**: The unified repository check script. Orchestrates TypeScript type checking (`tsc --noEmit`), generator/view spec audits (`validate-generator-view-specs.ts`), label usage audits (`check-labels.ts`), documentation reference validation (`validate-docs.ts`), competency standard spec validations (`normalizeAndValidateSpec`), and dataset split integrity (`report-splits.ts`). If `--spec` is specified, restricts target spec validation to that module; otherwise validates all available specs (`test`, `ccss`). Split integrity runs only for specs whose dataset has been generated, so a fresh clone still passes every static check.
 
 ### `src/scripts/validate-docs.ts`
 *   **Execution**: `npm run check:docs`
@@ -228,6 +235,12 @@ After changing the generator or view, rerun it: `test:sample` re-renders the ima
 npm run report:churn -- --spec=test        # compares working tree vs HEAD
 ```
 The report joins old and new cache entries on `sample_key` and flags identities whose image changed. Expected: churn only in the modules/views you touched. **Churn in unrelated samples is a determinism regression** — the classification (render change vs. attempt shift vs. seed scheme change) tells you where to look.
+
+### Checking split integrity after a regeneration
+```bash
+npm run report:splits -- --spec=test
+```
+Churn tells you whether the *images* moved; this tells you whether the *split* is still sound. Cross-split leakage and within-split redundancy fail the run — they make validation metrics optimistic. Coverage warnings are informational: a view whose content space is too small to yield a second distinct problem legitimately has no validation sample. Also runs as step 6 of `npm run check` for every spec that has a generated dataset.
 
 ### Rules that keep invalidation minimal
 - **Batch pixel-affecting changes** (view code, shared components, checklists) and regenerate once — every regeneration+validation cycle costs LLM calls for all changed images.

@@ -21,6 +21,7 @@
     "test:vqa": "vite-node src/scripts/validate-dataset.ts",
     "report:coverage": "vite-node src/scripts/generate-coverage-report.ts",
     "report:churn": "vite-node src/scripts/report-cache-churn.ts",
+    "report:splits": "vite-node src/scripts/report-splits.ts",
     "test:sample": "vite-node src/scripts/test-sample.ts",
     "test:target": "vite-node src/scripts/test-target.ts",
     "show:imp-todos": "vite-node src/scripts/show-implementation-todos.ts",
