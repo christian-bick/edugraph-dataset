@@ -1,13 +1,11 @@
 import 'dotenv/config';
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { findLeafModules } from "../lib/module-resolver.ts";
 import {
-    computeChecklistHash,
+    buildVqaValidationContext,
     computeImageSha256,
-    computeValidationCacheKey,
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
@@ -48,37 +46,6 @@ function displayPathOf(entry: any): string {
 }
 
 const apiKey = process.env.GEMINI_API_KEY;
-let genAI: GoogleGenerativeAI | null = null;
-let model: any = null;
-
-if (apiKey) {
-    genAI = new GoogleGenerativeAI(apiKey);
-    model = genAI.getGenerativeModel({
-        model: "gemini-3.5-flash",
-        generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: SchemaType.OBJECT,
-                properties: {
-                    pass: { type: SchemaType.BOOLEAN },
-                    general_checks: {
-                        type: SchemaType.OBJECT,
-                        properties: {
-                            no_overlaps: { type: SchemaType.BOOLEAN },
-                            no_placeholders: { type: SchemaType.BOOLEAN },
-                            sane_padding: { type: SchemaType.BOOLEAN }
-                        },
-                        required: ["no_overlaps", "no_placeholders", "sane_padding"]
-                    },
-                    coloring_pass: { type: SchemaType.BOOLEAN },
-                    layout_pass: { type: SchemaType.BOOLEAN },
-                    reasoning: { type: SchemaType.STRING }
-                },
-                required: ["pass", "general_checks", "reasoning"]
-            }
-        }
-    });
-}
 
 function resolveTreeChecklists(rootDir: string, moduleId: string): string[] {
     const paths: string[] = [];
@@ -147,6 +114,7 @@ async function evaluateSingleSample(entry: any, _datasetFolderName: string): Pro
         attempt: entry.attempt,
         seed: entry.seed,
         fileName: entry.file_name,
+        labels: entry.tags,
         apiKey
     });
 
@@ -247,8 +215,7 @@ async function main() {
         const imageSha256 = computeImageSha256(imageBuffer);
 
         const checklistPaths = getChecklistPaths(moduleName, entry.view);
-        const checklistHash = computeChecklistHash(checklistPaths);
-        const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
+        const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
 
         if (!activeKeysPerModule.has(moduleName)) {
             activeKeysPerModule.set(moduleName, new Set());
@@ -298,8 +265,7 @@ async function main() {
             const imageBuffer = readFileSync(imagePath);
             const imageSha256 = computeImageSha256(imageBuffer);
             const checklistPaths = getChecklistPaths(moduleName, viewId);
-            const checklistHash = computeChecklistHash(checklistPaths);
-            const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
+            const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
 
             const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
             const existingCache = cacheManager.get(valCacheKey);
@@ -330,8 +296,7 @@ async function main() {
             const imageBuffer = readFileSync(imagePath);
             const imageSha256 = computeImageSha256(imageBuffer);
             const checklistPaths = getChecklistPaths(moduleName, viewId);
-            const checklistHash = computeChecklistHash(checklistPaths);
-            const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
+            const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
 
             const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
             const existingCache = cacheManager.get(valCacheKey);
@@ -350,7 +315,7 @@ async function main() {
         }
 
         if (toEvaluate.length > 0) {
-            if (!model) {
+            if (!apiKey) {
                 console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
             } else {
                 console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to 10 parallel requests)...`);
@@ -386,6 +351,8 @@ async function main() {
                             file_name: record.file_name,
                             image_sha256: record.image_sha256,
                             checklist_hash: record.checklist_hash,
+                            label_context_hash: record.label_context_hash,
+                            validation_context_hash: record.validation_context_hash,
                             validated_at: record.validated_at,
                             evaluation: record.evaluation
                         });
@@ -476,8 +443,7 @@ function generateValidationReport(
         const imageBuffer = readFileSync(imagePath);
         const imageSha256 = computeImageSha256(imageBuffer);
         const checklistPaths = getChecklistPaths(moduleName, viewId);
-        const checklistHash = computeChecklistHash(checklistPaths);
-        const valCacheKey = computeValidationCacheKey(imageSha256, checklistHash);
+        const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
 
         const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
         const cache = cacheManager.get(valCacheKey);
@@ -552,6 +518,11 @@ ${[...perSplit.entries()]
             }
             if (evalObj.layout_pass !== undefined) {
                 checks.push(`Layout: ${evalObj.layout_pass ? 'Pass' : 'FAIL'}`);
+            }
+            for (const labelCheck of evalObj.label_checks || []) {
+                if (labelCheck.verdict === 'not_defendable') {
+                    checks.push(`Label ${labelCheck.label}: NOT DEFENDABLE — ${labelCheck.evidence}`);
+                }
             }
 
             md += `- [ ] **\`${displayPathOf(entry)}\`**\n`;

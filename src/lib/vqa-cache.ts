@@ -1,6 +1,31 @@
 import { createHash } from 'crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
+import { definition, type CompetencyDescriptor } from 'edugraph-ts';
+
+const EDUGRAPH_NAMESPACE = 'http://edugraph.io/edu/';
+
+export type VqaLabelVerdict = 'defendable' | 'uncertain' | 'not_defendable';
+
+export interface VqaLabelDefinition {
+    iri: string;
+    label: string;
+    definition: string;
+}
+
+export interface VqaLabelCheck {
+    label: string;
+    verdict: VqaLabelVerdict;
+    evidence: string;
+}
+
+export interface VqaValidationContext {
+    checklistHash: string;
+    labelContextHash: string;
+    validationContextHash: string;
+    validationCacheKey: string;
+    labelDefinitions: VqaLabelDefinition[];
+}
 
 export interface VqaCacheEntry {
     validation_cache_key: string;
@@ -17,10 +42,13 @@ export interface VqaCacheEntry {
     file_name: string;
     image_sha256: string;
     checklist_hash: string;
+    label_context_hash: string;
+    validation_context_hash: string;
     validated_at: string;
     evaluation: {
         pass: boolean;
         reasoning: string;
+        label_checks: VqaLabelCheck[];
         general_checks?: {
             no_overlaps: boolean;
             no_placeholders: boolean;
@@ -42,6 +70,39 @@ export function computeChecklistHash(checklistPaths: string[]): string {
     return hash.digest('hex').slice(0, 16);
 }
 
+export function resolveVqaLabelDefinitions(labels: readonly string[]): VqaLabelDefinition[] {
+    const byIri = new Map<string, VqaLabelDefinition>();
+    for (const rawLabel of labels) {
+        const iri = rawLabel.startsWith(EDUGRAPH_NAMESPACE)
+            ? rawLabel
+            : `${EDUGRAPH_NAMESPACE}${rawLabel}`;
+        const labelDefinition = definition(iri as CompetencyDescriptor);
+        if (!labelDefinition) {
+            throw new Error(`Cannot visually validate ontology label without a definition: "${rawLabel}"`);
+        }
+        byIri.set(iri, {
+            iri,
+            label: iri.slice(EDUGRAPH_NAMESPACE.length),
+            definition: labelDefinition
+        });
+    }
+    return [...byIri.values()].sort((a, b) => a.iri.localeCompare(b.iri));
+}
+
+export function computeLabelContextHash(labelDefinitions: readonly VqaLabelDefinition[]): string {
+    const canonical = labelDefinitions
+        .map(({ iri, definition: labelDefinition }) => ({ iri, definition: labelDefinition }))
+        .sort((a, b) => a.iri.localeCompare(b.iri));
+    return createHash('sha256').update(JSON.stringify(canonical)).digest('hex').slice(0, 16);
+}
+
+export function computeValidationContextHash(checklistHash: string, labelContextHash: string): string {
+    return createHash('sha256')
+        .update(JSON.stringify({ checklistHash, labelContextHash }))
+        .digest('hex')
+        .slice(0, 16);
+}
+
 export function computeImageSha256(imageBufferOrPath: Buffer | string): string {
     const buffer = typeof imageBufferOrPath === 'string'
         ? readFileSync(imageBufferOrPath)
@@ -51,10 +112,29 @@ export function computeImageSha256(imageBufferOrPath: Buffer | string): string {
 
 export function computeValidationCacheKey(
     imageSha256: string,
-    checklistHash: string
+    validationContextHash: string
 ): string {
-    const rawKey = `${imageSha256}:${checklistHash}`;
+    const rawKey = `${imageSha256}:${validationContextHash}`;
     return createHash('sha256').update(rawKey).digest('hex');
+}
+
+export function buildVqaValidationContext(
+    imageSha256: string,
+    checklistPaths: string[],
+    labels: readonly string[]
+): VqaValidationContext {
+    const checklistHash = computeChecklistHash(checklistPaths);
+    const labelDefinitions = resolveVqaLabelDefinitions(labels);
+    const labelContextHash = computeLabelContextHash(labelDefinitions);
+    const validationContextHash = computeValidationContextHash(checklistHash, labelContextHash);
+    const validationCacheKey = computeValidationCacheKey(imageSha256, validationContextHash);
+    return {
+        checklistHash,
+        labelContextHash,
+        validationContextHash,
+        validationCacheKey,
+        labelDefinitions
+    };
 }
 
 export class VqaCacheManager {

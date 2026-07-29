@@ -3,8 +3,12 @@ import { existsSync, rmSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import {
     computeChecklistHash,
+    computeLabelContextHash,
+    computeValidationContextHash,
     computeImageSha256,
     computeValidationCacheKey,
+    buildVqaValidationContext,
+    resolveVqaLabelDefinitions,
     VqaCacheManager,
     VqaCacheEntry
 } from './vqa-cache.ts';
@@ -25,8 +29,10 @@ function makeEntry(overrides: Partial<VqaCacheEntry>): VqaCacheEntry {
         file_name: 'test/sample.png',
         image_sha256: 'img',
         checklist_hash: 'check',
+        label_context_hash: 'labels',
+        validation_context_hash: 'context',
         validated_at: '2026-07-22T00:00:00Z',
-        evaluation: { pass: true, reasoning: '' },
+        evaluation: { pass: true, reasoning: '', label_checks: [] },
         ...overrides
     };
 }
@@ -58,9 +64,46 @@ describe('VQA Cache Module', () => {
         const imgHash = computeImageSha256(imgBuffer);
         expect(imgHash.length).toBe(64);
 
-        const valKey = computeValidationCacheKey(imgHash, checklistHash);
+        const labelDefinitions = resolveVqaLabelDefinitions(['NumbersWithZero']);
+        const labelContextHash = computeLabelContextHash(labelDefinitions);
+        const validationContextHash = computeValidationContextHash(checklistHash, labelContextHash);
+        const valKey = computeValidationCacheKey(imgHash, validationContextHash);
         expect(valKey.length).toBe(64);
-        expect(computeValidationCacheKey(imgHash, checklistHash)).toBe(valKey);
+        expect(computeValidationCacheKey(imgHash, validationContextHash)).toBe(valKey);
+
+        const context = buildVqaValidationContext(imgHash, [fileA, fileB], ['NumbersWithZero']);
+        expect(context.validationCacheKey).toBe(valKey);
+        expect(context.labelDefinitions).toEqual([{
+            iri: 'http://edugraph.io/edu/NumbersWithZero',
+            label: 'NumbersWithZero',
+            definition: 'Involves zero as a number.'
+        }]);
+    });
+
+    it('should normalize, deduplicate, and sort label definitions', () => {
+        const definitions = resolveVqaLabelDefinitions([
+            'NumbersWithoutZero',
+            'http://edugraph.io/edu/NumbersWithZero',
+            'NumbersWithoutZero'
+        ]);
+
+        expect(definitions.map(item => item.label)).toEqual(['NumbersWithoutZero', 'NumbersWithZero']);
+        expect(definitions[0].definition).toBe('Does not involve zero as a number.');
+    });
+
+    it('should reject ontology labels without definitions', () => {
+        expect(() => resolveVqaLabelDefinitions(['NotAnOntologyLabel']))
+            .toThrow('Cannot visually validate ontology label without a definition');
+    });
+
+    it('should invalidate the context when labels or definitions change', () => {
+        const withZero = resolveVqaLabelDefinitions(['NumbersWithZero']);
+        const withoutZero = resolveVqaLabelDefinitions(['NumbersWithoutZero']);
+
+        expect(computeLabelContextHash(withZero)).not.toBe(computeLabelContextHash(withoutZero));
+        expect(computeLabelContextHash(withZero)).not.toBe(computeLabelContextHash([
+            { ...withZero[0], definition: 'Changed definition.' }
+        ]));
     });
 
     it('should store and load VqaCacheEntries in dataset-partitioned folder', () => {
@@ -70,12 +113,12 @@ describe('VQA Cache Module', () => {
         const entry1 = makeEntry({
             validation_cache_key: 'b_val_key',
             file_name: 'test/sample2.png',
-            evaluation: { pass: true, reasoning: 'Sample 2 passed' }
+            evaluation: { pass: true, reasoning: 'Sample 2 passed', label_checks: [] }
         });
         const entry2 = makeEntry({
             validation_cache_key: 'a_val_key',
             file_name: 'test/sample1.png',
-            evaluation: { pass: false, reasoning: 'Sample 1 failed' }
+            evaluation: { pass: false, reasoning: 'Sample 1 failed', label_checks: [] }
         });
 
         manager.set(entry1);

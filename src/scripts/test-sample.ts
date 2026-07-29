@@ -147,6 +147,7 @@ async function main() {
             attempt,
             seed,
             fileName,
+            labels: problem.tags || [],
             apiKey,
             cacheManager
         });

@@ -190,6 +190,10 @@ async function main() {
                         attempt: sample.attempt,
                         seed: sample.seed,
                         fileName: sample.fileName,
+                        labels: Array.from(new Set([
+                            ...target.labels,
+                            ...(sample.stub?.tags || [])
+                        ])),
                         apiKey,
                         cacheManager: cacheMgr
                     });
