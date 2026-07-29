@@ -27,8 +27,8 @@ Map ontology labels **only** to abstract mathematical configuration. Typical par
 | Parameter        | Typically resolved via                            |
 |------------------|---------------------------------------------------|
 | `range`          | `resolveRangeFromLabels` (`src/lib/ontology.ts`)  |
-| `includeZero`    | `hasLabel(Scope.NumbersWithZero)`                 |
-| `allowNegatives` | `hasLabel(Scope.NumbersWithNegatives)`            |
+| `requireZero`    | `hasLabel(Scope.NumbersWithZero)`                 |
+| `requireNegative` | `hasLabel(Scope.NumbersWithNegatives)`           |
 | `useDecimals`    | `hasLabel(Scope.NumbersWithDecimals)`             |
 | `attribute`, `relation` | `selectExactMatch`                         |
 

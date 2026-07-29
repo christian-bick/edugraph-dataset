@@ -17,7 +17,7 @@ export const spec: GeneratorSpec = {
 
 
 export const WritingGeneratorSchema = {
-    includeZero: [
+    requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
     ],

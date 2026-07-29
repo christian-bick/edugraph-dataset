@@ -9,12 +9,16 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
     schema = WritingGeneratorSchema;
 
     generate(config: WritingGeneratorConfig): ProblemStub | null {
-        validateConfigFields('writing', config, ['range']);
+        validateConfigFields('writing', config, ['range', 'requireZero']);
         const resolvedRange = config.range!;
 
-        const includeZero = config.includeZero;
-        const minNum = includeZero ? resolvedRange.min : Math.max(1, resolvedRange.min);
-        const maxNum = resolvedRange.max;
+        if (config.requireZero) {
+            if (resolvedRange.min > 0 || resolvedRange.max < 0) return null;
+            return {data: {number: 0}};
+        }
+
+        const minNum = Math.max(1, Math.ceil(resolvedRange.min));
+        const maxNum = Math.floor(resolvedRange.max);
         
         if (maxNum - minNum < 0) return null;
 

@@ -10,7 +10,7 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
     schema = TimeGeneratorSchema;
 
     generate(config: TimeGeneratorConfig): ProblemStub | null {
-        validateConfigFields('time', config, ['intervalLabel']);
+        validateConfigFields('time', config, ['intervalLabel', 'requireZero']);
         let interval = 3600; // default HourIntervals
         if (config.intervalLabel === Scope.SecondIntervals) {
             interval = 1;
@@ -24,7 +24,11 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
 
         const maxIntervals = Math.floor(dayInSeconds / interval);
         const randomInterval = Math.floor(random() * maxIntervals);
-        const totalSeconds = randomInterval * interval;
+        let totalSeconds = randomInterval * interval;
+
+        if (config.requireZero && interval === 1) {
+            totalSeconds -= totalSeconds % 60;
+        }
 
         const hour = Math.floor(totalSeconds / 3600);
         const remainingSeconds = totalSeconds % 3600;

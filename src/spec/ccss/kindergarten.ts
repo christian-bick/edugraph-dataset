@@ -49,12 +49,12 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
         Scope.ArabicNumerals,
-        Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
+        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- K.CC.A.3: Represent a number of objects with a written numeral 0-20 ---
@@ -62,13 +62,13 @@ const representCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
-        Scope.NumbersWithZero,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
+        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- K.CC.B.4a: One-to-one correspondence when counting objects ---
@@ -218,6 +218,7 @@ const representOperationsBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
         Scope.NumbersSmaller10,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
@@ -225,10 +226,6 @@ const representOperationsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
     ]);
 
 // --- K.OA.A.2: Solve addition and subtraction word problems within 10 ---
@@ -237,6 +234,7 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
         Scope.NumbersSmaller10,
         Scope.PhysicalNumbers,
         Ability.TextualReception
@@ -244,10 +242,6 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
     ]);
 
 // --- K.OA.A.3: Decompose numbers less than or equal to 10 into pairs ---
@@ -257,7 +251,7 @@ const decomposeBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersWithZero,
+        Scope.NumbersWithoutZero,
         Scope.NumbersSmaller10,
         Scope.PhysicalNumbers,
         Ability.ProcedureUnderstanding
@@ -282,16 +276,13 @@ const fluencyBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
         Scope.NumbersSmaller10,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
     ]);
 
 // ==========================================
@@ -595,4 +586,3 @@ export const ontologyTodos: OntologyTodo[] = [
         description: 'The ontology has no Scope.NumbersSmaller5, so the "within 5" restriction cannot be expressed.'
     }
 ];
-

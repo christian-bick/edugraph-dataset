@@ -15,11 +15,11 @@ export const spec: GeneratorSpec = {
 
 
 export const OrderingGeneratorSchema = {
-    allowNegatives: [
+    requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
         hasLabel(Scope.NumbersWithNegatives)
     ],
-    includeZero: [
+    requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
     ],

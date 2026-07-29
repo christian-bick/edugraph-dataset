@@ -51,4 +51,20 @@ describe('TimeGenerator Spec Integration', () => {
             expect(stub!.data.interval).toBe(1);
         }
     });
+
+    it('should resolve NumbersWithZero into an observable zero-valued time component', () => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [
+                Area.MeasuringTime,
+                Scope.SecondIntervals,
+                Scope.NumbersWithZero
+            ]);
+            const components = stub!.data.time.split(':').map(Number);
+
+            expect(stub).not.toBeNull();
+            expect(stub!.tags).toContain(Scope.NumbersWithZero);
+            expect(components.some((component: number) => component === 0)).toBe(true);
+        }
+    });
 });

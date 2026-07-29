@@ -20,11 +20,11 @@ export const ArithmeticOpsPairsGeneratorSchema = {
         Area.Multiplication,
         Area.Division
     ],
-    allowNegatives: [
+    requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
         hasLabel(Scope.NumbersWithNegatives)
     ],
-    includeZero: [
+    requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
     ],

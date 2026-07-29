@@ -16,11 +16,11 @@ export const spec: GeneratorSpec = {
 
 export const ComparisonGeneratorSchema = {
     relation: [Scope.Less, Scope.Equal, Scope.Greater],
-    allowNegatives: [
+    requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
         hasLabel(Scope.NumbersWithNegatives)
     ],
-    includeZero: [
+    requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
     ],

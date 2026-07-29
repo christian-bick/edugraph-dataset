@@ -12,6 +12,7 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
         Scope.NumbersSmaller20,
         Scope.PhysicalNumbers,
         Ability.TextualReception
@@ -19,10 +20,6 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
     ]);
 
 // --- 1.OA.A.2: Word problems with three addends (sum <= 20) ---
@@ -97,15 +94,12 @@ const fluencyBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
     ])
     .applyLabelVariants([
         [Scope.NumbersSmaller10],
@@ -132,16 +126,13 @@ const unknownNumberBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
         Scope.NumbersSmaller20,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
     ]);
 
 // ==========================================
@@ -159,12 +150,9 @@ const orderNumbersBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
-    ])
-    .applyLabelVariants([
-        [Scope.Most],
-        [Scope.Least]
+        [Scope.NumbersWithoutZero, Scope.Most],
+        [Scope.NumbersWithoutZero, Scope.Least],
+        [Scope.NumbersWithZero, Scope.Least]
     ]);
 
 // --- 1.NBT.A.1: Read and write numerals ---
@@ -172,12 +160,12 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
         Scope.ArabicNumerals,
-        Scope.NumbersWithZero,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
+        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.A.1: Represent a number of objects with a written numeral ---
@@ -185,13 +173,13 @@ const representCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
-        Scope.NumbersWithZero,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
+        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.B.2a: 10 as a bundle of ten ones ---
@@ -262,12 +250,9 @@ const addWithin100Builder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
         Scope.NumbersSmaller100,
         Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithZero],
-        [Scope.NumbersWithoutZero]
     ]);
 
 // --- 1.NBT.C.5: Mentally find 10 more or 10 less ---
@@ -293,9 +278,12 @@ const subtractTensBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersWithZero,
         Scope.NumbersSmaller100,
         Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersWithoutZero],
+        [Scope.NumbersWithZero]
     ]);
 
 // ==========================================
@@ -506,4 +494,3 @@ export const ontologyTodos: OntologyTodo[] = [
         description: 'No ontology Area concepts exist for half-circles or quarter-circles.'
     }
 ];
-

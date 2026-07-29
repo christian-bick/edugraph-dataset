@@ -10,69 +10,47 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, 
     schema = ComparisonGeneratorSchema;
 
     generate(config: ComparisonGeneratorConfig): ProblemStub<ComparisonProblem> | null {
-        validateConfigFields('comparison', config, ['range']);
+        validateConfigFields('comparison', config, ['range', 'relation', 'requireNegative', 'requireZero']);
         const resolvedRange = config.range!;
+        const minMagnitude = Math.max(1, Math.ceil(resolvedRange.min));
+        const maxMagnitude = Math.floor(resolvedRange.max);
+        if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
 
-        const min = resolvedRange.min;
-        const max = resolvedRange.max;
-
-        const allowNegatives = config.allowNegatives ?? false;
-        const includeZero = config.includeZero ?? false;
-
-        const generateNumber = (): number => {
-            let n = Math.floor(random() * (max - min + 1)) + min;
-            if (allowNegatives && random() > 0.5) {
-                n = -n;
-            }
-            if (!includeZero && n === 0) {
-                n = (allowNegatives && random() > 0.5) ? -1 : 1;
-            }
-            return n;
-        };
-
-        const relation = config.relation;
-        let comparisonType: 'greater' | 'less' | 'equal' | 'random' = 'random';
-        if (relation === Scope.Greater) {
-            comparisonType = 'greater';
-        } else if (relation === Scope.Less) {
-            comparisonType = 'less';
-        } else if (relation === Scope.Equal) {
-            comparisonType = 'equal';
-        }
-
-        if (comparisonType === 'random') {
-            const possible: ('greater' | 'less' | 'equal')[] = ['greater', 'less', 'equal'];
-            comparisonType = possible[Math.floor(random() * possible.length)];
-        }
+        const requireNegative = config.requireNegative!;
+        const requireZero = config.requireZero!;
+        const magnitude = Math.floor(random() * (maxMagnitude - minMagnitude + 1)) + minMagnitude;
 
         let num1 = 0;
         let num2 = 0;
 
-        if (comparisonType === 'equal') {
-            num1 = generateNumber();
+        if (config.relation === Scope.Equal) {
+            if (requireZero && requireNegative) return null;
+            num1 = requireZero ? 0 : requireNegative ? -magnitude : magnitude;
             num2 = num1;
-        } else if (comparisonType === 'greater') {
-            let success = false;
-            for (let i = 0; i < 100; i++) {
-                num1 = generateNumber();
-                num2 = generateNumber();
-                if (num1 > num2) {
-                    success = true;
-                    break;
-                }
+        } else if (config.relation === Scope.Less) {
+            if (requireZero && requireNegative) {
+                [num1, num2] = [-magnitude, 0];
+            } else if (requireZero) {
+                [num1, num2] = [0, magnitude];
+            } else if (requireNegative) {
+                [num1, num2] = [-magnitude, magnitude];
+            } else {
+                if (minMagnitude === maxMagnitude) return null;
+                [num1, num2] = [minMagnitude, maxMagnitude];
             }
-            if (!success) return null;
-        } else if (comparisonType === 'less') {
-            let success = false;
-            for (let i = 0; i < 100; i++) {
-                num1 = generateNumber();
-                num2 = generateNumber();
-                if (num1 < num2) {
-                    success = true;
-                    break;
-                }
+        } else if (config.relation === Scope.Greater) {
+            if (requireZero && requireNegative) {
+                [num1, num2] = [0, -magnitude];
+            } else if (requireZero) {
+                [num1, num2] = [magnitude, 0];
+            } else if (requireNegative) {
+                [num1, num2] = [magnitude, -magnitude];
+            } else {
+                if (minMagnitude === maxMagnitude) return null;
+                [num1, num2] = [maxMagnitude, minMagnitude];
             }
-            if (!success) return null;
+        } else {
+            return null;
         }
 
         let resolvedRelation: 'less' | 'greater' | 'equal';

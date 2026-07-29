@@ -16,7 +16,7 @@ export const spec: GeneratorSpec = {
 
 
 export const PlaceValueMakeTenGeneratorSchema = {
-    includeZero: [
+    requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
     ],

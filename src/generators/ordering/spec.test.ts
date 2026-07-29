@@ -24,10 +24,12 @@ describe('OrderingGenerator Spec Integration', () => {
             expect(stub!.data.numbers.length).toBe(5);
             expect(stub!.data.numbers).toContain(0);
             
-            // Check that we have at least some negative numbers
-            const negatives = stub!.data.numbers.filter((n: number) => n < 0);
-            expect(negatives).toBeDefined();
+            expect(stub!.data.numbers.some((n: number) => n < 0)).toBe(true);
             expect(stub!.data.numbers.every((n: number) => Math.abs(n) <= 100)).toBe(true);
+            expect(stub!.tags).toEqual(expect.arrayContaining([
+                Scope.NumbersWithZero,
+                Scope.NumbersWithNegatives
+            ]));
         }
     });
 
@@ -46,6 +48,10 @@ describe('OrderingGenerator Spec Integration', () => {
                 expect(n).toBeGreaterThan(0);
                 expect(n).toBeLessThanOrEqual(100);
             });
+            expect(stub!.tags).toEqual(expect.arrayContaining([
+                Scope.NumbersWithoutZero,
+                Scope.NumbersWithoutNegatives
+            ]));
         }
     });
 });

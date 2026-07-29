@@ -1,46 +1,30 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {PlaceValueMakeTenGenerator} from './generator.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
+import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {PlaceValueMakeTenGenerator} from './generator.ts';
 
 describe('PlaceValueMakeTenGenerator Spec Integration', () => {
-    let generator: PlaceValueMakeTenGenerator;
+    const generator = new PlaceValueMakeTenGenerator();
 
-    beforeEach(() => {
-        generator = new PlaceValueMakeTenGenerator();
-        setSeed(42);
-    });
-
-    it('should generate make-ten problems with zero when requested', () => {
-        let hasZero = false;
-        let hasNine = false;
-
-        for (let i = 0; i < 50; i++) {
-            const stub = generateWithLabels(generator, [
-                Area.Difference,
-                Scope.NumbersWithZero
-            ]);
+    it('should resolve NumbersWithZero into a zero addend every time', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [Area.Difference, Scope.NumbersWithZero]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.givenNumber).toBeGreaterThanOrEqual(0);
-            expect(stub!.data.givenNumber).toBeLessThanOrEqual(10);
-            if (stub!.data.givenNumber === 0) hasZero = true;
-            if (stub!.data.givenNumber === 9) hasNine = true;
+            expect([stub!.data.givenNumber, stub!.data.missingNumber]).toContain(0);
+            expect(stub!.tags).toContain(Scope.NumbersWithZero);
         }
-
-        expect(hasZero).toBe(true);
-        expect(hasNine).toBe(true);
     });
 
-    it('should generate make-ten problems without zero when requested', () => {
-        for (let i = 0; i < 50; i++) {
-            const stub = generateWithLabels(generator, [
-                Area.Difference,
-                Scope.NumbersWithoutZero
-            ]);
+    it('should resolve NumbersWithoutZero into nonzero addends every time', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [Area.Difference, Scope.NumbersWithoutZero]);
             expect(stub).not.toBeNull();
             expect(stub!.data.givenNumber).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.givenNumber).toBeLessThanOrEqual(9);
+            expect(stub!.data.missingNumber).toBeGreaterThanOrEqual(1);
+            expect(stub!.tags).toContain(Scope.NumbersWithoutZero);
         }
     });
 });

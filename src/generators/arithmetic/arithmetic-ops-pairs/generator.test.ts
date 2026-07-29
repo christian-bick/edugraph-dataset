@@ -1,99 +1,78 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {ArithmeticOpsPairsGenerator} from './generator.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {describe, expect, it} from 'vitest';
 import {Area} from 'edugraph-ts';
+import {setSeed} from '../../../lib/random.ts';
+import {ArithmeticProblem} from '../../../types/problems.ts';
+import {ArithmeticOpsPairsGenerator} from './generator.ts';
+
+const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const;
+
+function expectValidEquation(problem: ArithmeticProblem) {
+    if (problem.operation === 'addition') expect(problem.num1 + problem.num2).toBe(problem.answer);
+    if (problem.operation === 'subtraction') expect(problem.num1 - problem.num2).toBe(problem.answer);
+    if (problem.operation === 'multiplication') expect(problem.num1 * problem.num2).toBeCloseTo(problem.answer);
+    if (problem.operation === 'division') {
+        expect(problem.num2).not.toBe(0);
+        expect(problem.num1 / problem.num2).toBeCloseTo(problem.answer);
+    }
+}
 
 describe('ArithmeticOpsPairsGenerator', () => {
-    let generator: ArithmeticOpsPairsGenerator;
-
-    beforeEach(() => {
-        generator = new ArithmeticOpsPairsGenerator();
-        setSeed(42);
-    });
+    const generator = new ArithmeticOpsPairsGenerator();
 
     it('should have the correct type', () => {
         expect(generator.type).toBe('arithmetic');
     });
 
-    it('should throw validation error when range or operation is missing', () => {
+    it('should strictly validate every required config field', () => {
         expect(() => generator.generate({} as any)).toThrow();
-        expect(() => generator.generate({ range: { min: 1, max: 10 } } as any)).toThrow();
-        expect(() => generator.generate({ operation: Area.Addition } as any)).toThrow();
+        expect(() => generator.generate({
+            operation: Area.Addition,
+            requireNegative: false,
+            requireZero: false,
+            invertProcedure: false
+        } as any)).toThrow();
+        expect(() => generator.generate({
+            operation: Area.Addition,
+            range: {min: 1, max: 10},
+            requireZero: false,
+            invertProcedure: false
+        } as any)).toThrow();
     });
 
-    it('should generate correct addition/subtraction/multiplication/division problems', () => {
-        const addStub = generator.generate({
-            operation: Area.Addition,
-            allowNegatives: false,
-            includeZero: false,
-            range: { min: 1, max: 10 }
-        });
-        expect(addStub).not.toBeNull();
-        expect(addStub!.data.operation).toBe('addition');
-
-        const subStub = generator.generate({
-            operation: Area.Subtraction,
-            allowNegatives: false,
-            includeZero: false,
-            range: { min: 1, max: 10 }
-        });
-        expect(subStub).not.toBeNull();
-        expect(subStub!.data.operation).toBe('subtraction');
-
-        const mulStub = generator.generate({
-            operation: Area.Multiplication,
-            allowNegatives: false,
-            includeZero: false,
-            range: { min: 1, max: 10 }
-        });
-        expect(mulStub).not.toBeNull();
-        expect(mulStub!.data.operation).toBe('multiplication');
-
-        const divStub = generator.generate({
-            operation: Area.Division,
-            allowNegatives: false,
-            includeZero: false,
-            range: { min: 1, max: 10 }
-        });
-        expect(divStub).not.toBeNull();
-        expect(divStub!.data.operation).toBe('division');
-        expect(divStub!.data.num1).toBe(divStub!.data.answer * divStub!.data.num2);
-        
-        const zeroNegStub = generator.generate({
-            operation: Area.Addition,
-            allowNegatives: true,
-            includeZero: true,
-            range: { min: 0, max: 10 }
-        });
-        expect(zeroNegStub).not.toBeNull();
+    it('should prove zero and negative scope requirements for every operation and seed', () => {
+        for (const operation of operations) {
+            for (const requireZero of [false, true]) {
+                for (const requireNegative of [false, true]) {
+                    for (let seed = 0; seed < 25; seed++) {
+                        setSeed(seed);
+                        const stub = generator.generate({
+                            operation,
+                            requireNegative,
+                            requireZero,
+                            invertProcedure: false,
+                            range: {min: 1, max: 10}
+                        });
+                        expect(stub).not.toBeNull();
+                        const values = [stub!.data.num1, stub!.data.num2, stub!.data.answer];
+                        expectValidEquation(stub!.data);
+                        expect(values.every(value => Math.abs(value) <= 10)).toBe(true);
+                        expect(values.includes(0)).toBe(requireZero);
+                        expect(values.some(value => value < 0)).toBe(requireNegative);
+                    }
+                }
+            }
+        }
     });
 
-    it('should generate correct physical arithmetic problems', () => {
-        const addStub = generator.generate({
+    it('should expose the second operand for procedure inversion', () => {
+        const baseConfig = {
             operation: Area.Addition,
-            allowNegatives: false,
-            includeZero: false,
-            range: { min: 1, max: 10 }
-        });
-        expect(addStub).not.toBeNull();
-        expect(addStub!.data.operation).toBe('addition');
-        expect(addStub!.data.num1).toBeGreaterThanOrEqual(1);
-        expect(addStub!.data.num2).toBeGreaterThanOrEqual(1);
-        expect(addStub!.data.answer).toBeLessThanOrEqual(10);
-        expect(addStub!.data.num1 + addStub!.data.num2).toBe(addStub!.data.answer);
+            requireNegative: false,
+            requireZero: false,
+            range: {min: 1, max: 10}
+        } as const;
 
-        const subStub = generator.generate({
-            operation: Area.Subtraction,
-            allowNegatives: false,
-            includeZero: true, // Physical numbers subtraction might allow zero answer
-            range: { min: 1, max: 10 }
-        });
-        expect(subStub).not.toBeNull();
-        expect(subStub!.data.operation).toBe('subtraction');
-        expect(subStub!.data.num1).toBeLessThanOrEqual(10);
-        expect(subStub!.data.num1).toBeGreaterThan(subStub!.data.num2);
-        expect(subStub!.data.answer).toBeGreaterThanOrEqual(0);
-        expect(subStub!.data.num1 - subStub!.data.num2).toBe(subStub!.data.answer);
+        expect(generator.generate({...baseConfig, invertProcedure: true})!.data.blankPart).toBe('num2');
+        expect(generator.generate({...baseConfig, invertProcedure: false})!.data.blankPart).toBe('solution');
     });
-
 });

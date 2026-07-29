@@ -6,7 +6,6 @@ export const spec: ViewSpec = {
     viewId: 'operations-decompose',
     generalLabels: [
         Scope.PhysicalNumbers,
-        Scope.NumbersWithZero,
         Scope.ArabicNumerals,
         Ability.ProcedureUnderstanding
     ]

@@ -30,7 +30,7 @@ Map ontology labels **only** to visual/layout configuration:
 - `arrangement`, `showTenFrame` — layout formats, styling modes, button configurations.
 
 The schema must contain **zero** abstract mathematical parameters — no `range`,
-`useDecimals`, `includeZero`, or mathematical operation selectors; those belong to the
+`useDecimals`, `requireZero`, or mathematical operation selectors; those belong to the
 generator ([spec-generator.md](spec-generator.md)).
 
 The view must also rely purely on the generated problem payload (`problem.data`) for
@@ -107,7 +107,7 @@ matches ([SPEC-11](spec-general.md#spec-11--abilities-matched-on-the-view-mappab
 ## Audit
 
 - [ ] **SPEC-V1** — `spec`, `ViewSchema` and `ViewConfig` are all exported, with `ViewConfig` extracted from the schema.
-- [ ] **SPEC-V2** — every schema parameter is visual/layout; no `range`, `includeZero`, `useDecimals`, `shapeType`, or comparable math parameter.
+- [ ] **SPEC-V2** — every schema parameter is visual/layout; no `range`, `requireZero`, `useDecimals`, `shapeType`, or comparable math parameter.
 - [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, not a competency the view merely does not want.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — abilities the view supports are declared positively in `generalLabels`, not handled by rejection, and include every ability its paired generator branches on.

@@ -1,70 +1,52 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { ComparisonGenerator } from './generator.ts';
-import { setSeed } from '../../lib/random.ts';
-import { Scope } from 'edugraph-ts';
-import { generateWithLabels } from '../../lib/utils.ts';
+import {describe, expect, it} from 'vitest';
+import {Scope} from 'edugraph-ts';
+import {setSeed} from '../../lib/random.ts';
+import {generateWithLabels} from '../../lib/utils.ts';
+import {ComparisonGenerator} from './generator.ts';
 
 describe('ComparisonGenerator Spec Integration', () => {
-    let generator: ComparisonGenerator;
+    const generator = new ComparisonGenerator();
 
-    beforeEach(() => {
-        generator = new ComparisonGenerator();
-        setSeed(42);
-    });
-
-    it('should generate correct comparison problems based on relation labels', () => {
-        const lessStub = generateWithLabels(generator, [
-            Scope.Less,
-            Scope.NumbersSmaller10
-        ]);
-        expect(lessStub).not.toBeNull();
-        expect(lessStub!.data.relation).toBe('less');
-        expect(lessStub!.data.num1).toBeLessThan(lessStub!.data.num2);
-
-        const greaterStub = generateWithLabels(generator, [
-            Scope.Greater,
-            Scope.NumbersSmaller10
-        ]);
-        expect(greaterStub).not.toBeNull();
-        expect(greaterStub!.data.relation).toBe('greater');
-        expect(greaterStub!.data.num1).toBeGreaterThan(greaterStub!.data.num2);
-
-        const equalStub = generateWithLabels(generator, [
-            Scope.Equal,
-            Scope.NumbersSmaller10
-        ]);
-        expect(equalStub).not.toBeNull();
-        expect(equalStub!.data.relation).toBe('equal');
-        expect(equalStub!.data.num1).toBe(equalStub!.data.num2);
-    });
-
-    it('should respect range boundaries from labels', () => {
-        for (let i = 0; i < 20; i++) {
-            const stub = generateWithLabels(generator, [
-                Scope.NumbersSmaller20,
-                Scope.NumbersWithoutZero,
-                Scope.Less
-            ]);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.num1).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.num1).toBeLessThanOrEqual(20);
-            expect(stub!.data.num2).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.num2).toBeLessThanOrEqual(20);
+    it('should resolve relation and nonzero labels into valid samples', () => {
+        for (const relation of [Scope.Less, Scope.Equal, Scope.Greater]) {
+            for (let seed = 0; seed < 20; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(generator, [
+                    relation,
+                    Scope.NumbersSmaller20,
+                    Scope.NumbersWithoutNegatives,
+                    Scope.NumbersWithoutZero
+                ]);
+                expect(stub).not.toBeNull();
+                expect([stub!.data.num1, stub!.data.num2]).not.toContain(0);
+                expect(stub!.tags).toEqual(expect.arrayContaining([
+                    relation,
+                    Scope.NumbersWithoutNegatives,
+                    Scope.NumbersWithoutZero
+                ]));
+            }
         }
     });
 
-    it('should respect negative numbers and zero constraints', () => {
-        const stubWithZero = generateWithLabels(generator, [
-            Scope.NumbersWithZero,
-            Scope.NumbersSmaller10,
-            Scope.Equal
-        ]);
-        expect(stubWithZero).not.toBeNull();
-
-        const stubWithNegatives = generateWithLabels(generator, [
-            Scope.NumbersWithNegatives,
-            Scope.NumbersSmaller10
-        ]);
-        expect(stubWithNegatives).not.toBeNull();
+    it('should resolve zero and negative labels into observable witnesses', () => {
+        for (const relation of [Scope.Less, Scope.Greater]) {
+            for (let seed = 0; seed < 20; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(generator, [
+                    relation,
+                    Scope.NumbersWithZero,
+                    Scope.NumbersWithNegatives,
+                    Scope.NumbersSmaller10
+                ]);
+                expect(stub).not.toBeNull();
+                const values = [stub!.data.num1, stub!.data.num2];
+                expect(values).toContain(0);
+                expect(values.some(value => value < 0)).toBe(true);
+                expect(stub!.tags).toEqual(expect.arrayContaining([
+                    Scope.NumbersWithZero,
+                    Scope.NumbersWithNegatives
+                ]));
+            }
+        }
     });
 });

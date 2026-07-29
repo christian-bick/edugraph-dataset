@@ -1,62 +1,41 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {WritingGenerator} from './generator.ts';
+import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../lib/random.ts';
+import {WritingGenerator} from './generator.ts';
 
 describe('WritingGenerator', () => {
-    let generator: WritingGenerator;
-
-    beforeEach(() => {
-        generator = new WritingGenerator();
-        setSeed(42);
-    });
+    const generator = new WritingGenerator();
 
     it('should have the correct type', () => {
         expect(generator.type).toBe('writing');
     });
 
-    it('should default min to 1 and max to 9 if labels are empty', () => {
-        const config = { range: { min: 1, max: 9 } };
-        for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(config);
+    it('should produce zero for every sample that requires zero', () => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({range: {min: 0, max: 20}, requireZero: true});
+            expect(stub).not.toBeNull();
+            expect(stub!.data.number).toBe(0);
+        }
+    });
+
+    it('should exclude zero for every sample that does not require zero', () => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({range: {min: 0, max: 20}, requireZero: false});
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.number).toBeLessThanOrEqual(9);
+            expect(stub!.data.number).toBeLessThanOrEqual(20);
         }
     });
 
-    it('should respect custom min/max bounds including zero and twenty when includeZero is true', () => {
-        const config = { range: { min: 0, max: 20 }, includeZero: true };
-        let zeroFound = false;
-        let twentyFound = false;
-        for (let i = 0; i < 100; i++) {
-            const stub = generator.generate(config);
-            expect(stub).not.toBeNull();
-            const num = stub!.data.number;
-            expect(num).toBeGreaterThanOrEqual(0);
-            expect(num).toBeLessThanOrEqual(20);
-            if (num === 0) zeroFound = true;
-            if (num === 20) twentyFound = true;
-        }
-        expect(zeroFound).toBe(true);
-        expect(twentyFound).toBe(true);
+    it('should return null for invalid or zero-incompatible ranges', () => {
+        expect(generator.generate({range: {min: 5, max: 2}, requireZero: false})).toBeNull();
+        expect(generator.generate({range: {min: 1, max: 20}, requireZero: true})).toBeNull();
     });
 
-    it('should clamp min to 1 when includeZero is false', () => {
-        const config = { range: { min: 0, max: 20 }, includeZero: false };
-        for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(config);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.number).toBeGreaterThanOrEqual(1);
-        }
-    });
-
-    it('should return null if range is invalid', () => {
-        const config = { range: { min: 5, max: 2 }, includeZero: false };
-        const stub = generator.generate(config);
-        expect(stub).toBeNull();
-    });
-
-    it('should throw an error if range configuration is missing', () => {
+    it('should strictly validate every required config field', () => {
         expect(() => generator.generate({} as any)).toThrow();
+        expect(() => generator.generate({range: {min: 0, max: 20}} as any)).toThrow();
+        expect(() => generator.generate({requireZero: false} as any)).toThrow();
     });
 });

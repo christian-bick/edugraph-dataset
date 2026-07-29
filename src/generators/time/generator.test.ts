@@ -18,9 +18,9 @@ describe('TimeGenerator', () => {
     describe('generate', () => {
         it('should generate valid problem stubs', () => {
             const configs = [
-                { intervalLabel: Scope.HourIntervals },
-                { intervalLabel: Scope.MinuteIntervals },
-                { intervalLabel: Scope.SecondIntervals }
+                { intervalLabel: Scope.HourIntervals, requireZero: false },
+                { intervalLabel: Scope.MinuteIntervals, requireZero: false },
+                { intervalLabel: Scope.SecondIntervals, requireZero: false }
             ];
             configs.forEach(config => {
                 const stub = generator.generate(config);
@@ -34,7 +34,7 @@ describe('TimeGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const config = { intervalLabel: Scope.HourIntervals };
+            const config = { intervalLabel: Scope.HourIntervals, requireZero: false };
             setSeed(123);
             const stub1 = generator.generate(config);
             setSeed(123);
@@ -46,7 +46,8 @@ describe('TimeGenerator', () => {
     describe('generate edge cases', () => {
         it('should align time with the requested interval (1 hour)', () => {
             const config = { 
-                intervalLabel: Scope.HourIntervals 
+                intervalLabel: Scope.HourIntervals,
+                requireZero: false
             };
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(config);
@@ -61,7 +62,8 @@ describe('TimeGenerator', () => {
 
         it('should align time with the requested interval (15 minutes)', () => {
             const config = { 
-                intervalLabel: Scope.HourIntervals 
+                intervalLabel: Scope.HourIntervals,
+                requireZero: false
             };
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(config);
@@ -75,7 +77,8 @@ describe('TimeGenerator', () => {
 
         it('should never exceed 23:59:59', () => {
             const config = { 
-                intervalLabel: Scope.HourIntervals 
+                intervalLabel: Scope.HourIntervals,
+                requireZero: false
             };
             for (let i = 0; i < 100; i++) {
                 const stub = generator.generate(config);
@@ -87,11 +90,29 @@ describe('TimeGenerator', () => {
                 }
             }
         });
+
+        it.each([
+            Scope.HourIntervals,
+            Scope.MinuteIntervals,
+            Scope.SecondIntervals
+        ])('should guarantee an observable zero for %s', intervalLabel => {
+            for (let seed = 0; seed < 50; seed++) {
+                setSeed(seed);
+                const stub = generator.generate({intervalLabel, requireZero: true});
+                const components = stub!.data.time.split(':').map(Number);
+
+                expect(components.some((component: number) => component === 0)).toBe(true);
+            }
+        });
     });
 
     describe('validation', () => {
         it('should throw an error if intervalLabel is missing', () => {
             expect(() => generator.generate({} as any)).toThrow();
+        });
+
+        it('should throw an error if requireZero is missing', () => {
+            expect(() => generator.generate({intervalLabel: Scope.HourIntervals} as any)).toThrow();
         });
     });
 });

@@ -1,26 +1,38 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {WritingGenerator} from './generator.ts';
-import {setSeed} from '../../lib/random.ts';
+import {describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
+import {setSeed} from '../../lib/random.ts';
 import {generateWithLabels} from '../../lib/utils.ts';
+import {WritingGenerator} from './generator.ts';
 
 describe('WritingGenerator Spec Integration', () => {
-    let generator: WritingGenerator;
+    const generator = new WritingGenerator();
 
-    beforeEach(() => {
-        generator = new WritingGenerator();
-        setSeed(42);
-    });
-
-    it('should generate writing problems matching general labels and spec ranges', () => {
-        for (let i = 0; i < 20; i++) {
+    it('should resolve NumbersWithZero into a zero numeral every time', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
             const stub = generateWithLabels(generator, [
                 Area.DigitNotation,
-                Scope.NumbersSmaller10
+                Scope.NumbersWithZero,
+                Scope.NumbersSmaller20
+            ]);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.number).toBe(0);
+            expect(stub!.tags).toContain(Scope.NumbersWithZero);
+        }
+    });
+
+    it('should resolve NumbersWithoutZero into a nonzero numeral every time', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [
+                Area.DigitNotation,
+                Scope.NumbersWithoutZero,
+                Scope.NumbersSmaller20
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.number).toBeLessThanOrEqual(9);
+            expect(stub!.data.number).toBeLessThanOrEqual(20);
+            expect(stub!.tags).toContain(Scope.NumbersWithoutZero);
         }
     });
 });

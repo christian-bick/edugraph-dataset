@@ -1,106 +1,67 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {ComparisonGenerator} from './generator.ts';
-import {setSeed} from '../../lib/random.ts';
+import {describe, expect, it} from 'vitest';
 import {Scope} from 'edugraph-ts';
+import {setSeed} from '../../lib/random.ts';
+import {ComparisonGenerator} from './generator.ts';
+
+const relations = [Scope.Less, Scope.Equal, Scope.Greater] as const;
 
 describe('ComparisonGenerator', () => {
-    let generator: ComparisonGenerator;
-
-    beforeEach(() => {
-        generator = new ComparisonGenerator();
-        setSeed(42);
-    });
+    const generator = new ComparisonGenerator();
 
     it('should have the correct type', () => {
         expect(generator.type).toBe('comparison');
     });
 
-    it('should throw validation error when range is missing', () => {
+    it('should strictly validate every required config field', () => {
         expect(() => generator.generate({} as any)).toThrow();
+        expect(() => generator.generate({
+            relation: Scope.Less,
+            requireNegative: false,
+            requireZero: false
+        } as any)).toThrow();
+        expect(() => generator.generate({
+            range: {min: 1, max: 10},
+            relation: Scope.Less,
+            requireZero: false
+        } as any)).toThrow();
     });
 
-    it('should respect resolved ranges', () => {
-        for (let i = 0; i < 100; i++) {
-            const stub = generator.generate({ 
-                range: { min: 0, max: 10 }
-            });
-            if (stub) {
-                expect(stub.data.num1).toBeGreaterThanOrEqual(0);
-                expect(stub.data.num1).toBeLessThanOrEqual(10);
-                expect(stub.data.num2).toBeGreaterThanOrEqual(0);
-                expect(stub.data.num2).toBeLessThanOrEqual(10);
-                expect(['less', 'greater', 'equal']).toContain(stub.data.relation);
+    it('should prove zero and negative scope requirements for every compatible relation and seed', () => {
+        for (const relation of relations) {
+            for (const requireZero of [false, true]) {
+                for (const requireNegative of [false, true]) {
+                    if (relation === Scope.Equal && requireZero && requireNegative) continue;
+
+                    for (let seed = 0; seed < 25; seed++) {
+                        setSeed(seed);
+                        const stub = generator.generate({
+                            range: {min: 1, max: 10},
+                            relation,
+                            requireNegative,
+                            requireZero
+                        });
+                        expect(stub).not.toBeNull();
+
+                        const {num1, num2, relation: resolvedRelation} = stub!.data;
+                        const values = [num1, num2];
+                        expect(values.includes(0)).toBe(requireZero);
+                        expect(values.some(value => value < 0)).toBe(requireNegative);
+                        expect(values.every(value => Math.abs(value) <= 10)).toBe(true);
+                        if (resolvedRelation === 'less') expect(num1).toBeLessThan(num2);
+                        if (resolvedRelation === 'greater') expect(num1).toBeGreaterThan(num2);
+                        if (resolvedRelation === 'equal') expect(num1).toBe(num2);
+                    }
+                }
             }
         }
     });
 
-    it('should respect greater relation constraint', () => {
-        const config = {
-            range: { min: 0, max: 20 },
-            relation: Scope.Greater
-        } as const;
-        for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(config);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
-            expect(stub!.data.relation).toBe('greater');
-        }
-    });
-
-    it('should respect less relation constraint', () => {
-        const config = {
-            range: { min: 0, max: 20 },
-            relation: Scope.Less
-        } as const;
-        for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(config);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.num1).toBeLessThan(stub!.data.num2);
-            expect(stub!.data.relation).toBe('less');
-        }
-    });
-
-    it('should respect equal relation constraint', () => {
-        const config = {
-            range: { min: 0, max: 20 },
-            relation: Scope.Equal
-        } as const;
-        for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(config);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.num1).toEqual(stub!.data.num2);
-            expect(stub!.data.relation).toBe('equal');
-        }
-    });
-
-    it('should respect includeZero: false', () => {
-        const config = {
-            range: { min: 0, max: 5 },
-            includeZero: false,
-            relation: Scope.Equal
-        } as const;
-        for (let i = 0; i < 100; i++) {
-            const stub = generator.generate(config);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.num1).not.toBe(0);
-            expect(stub!.data.num2).not.toBe(0);
-        }
-    });
-
-    it('should respect allowNegatives: true', () => {
-        const config = {
-            range: { min: 1, max: 5 },
-            allowNegatives: true,
-            relation: Scope.Less
-        } as const;
-        let sawNegative = false;
-        for (let i = 0; i < 200; i++) {
-            const stub = generator.generate(config);
-            expect(stub).not.toBeNull();
-            if (stub!.data.num1 < 0 || stub!.data.num2 < 0) {
-                sawNegative = true;
-            }
-        }
-        expect(sawNegative).toBe(true);
+    it('should reject an equal pair that cannot simultaneously witness zero and a negative', () => {
+        expect(generator.generate({
+            range: {min: 1, max: 10},
+            relation: Scope.Equal,
+            requireNegative: true,
+            requireZero: true
+        })).toBeNull();
     });
 });

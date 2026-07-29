@@ -10,22 +10,34 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
     schema = ArithmeticOpsPairsGeneratorSchema;
 
     generate(config: ArithmeticOpsPairsGeneratorConfig): ProblemStub | null {
-        validateConfigFields('arithmetic-ops-pairs', config, ['range', 'operation']);
+        validateConfigFields('arithmetic-ops-pairs', config, [
+            'range',
+            'operation',
+            'requireNegative',
+            'requireZero',
+            'invertProcedure'
+        ]);
 
         const operation = config.operation;
-        const allowNegatives = config.allowNegatives;
-        const includeZero = config.includeZero;
+        const requireNegative = config.requireNegative!;
+        const requireZero = config.requireZero!;
         const resolvedRange = config.range!;
+        const minMagnitude = Math.max(1, Math.ceil(resolvedRange.min));
+        const maxMagnitude = Math.floor(resolvedRange.max);
+        if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
 
-        // Fallbacks if schema parsing failed or got unhandled case
-        if (!operation) return null;
-        
-        const generateFromRange = (forceZero = false) => {
-            if (forceZero) return 0;
-            let n = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
-            if (allowNegatives && random() > 0.5) n = -n;
-            if (!includeZero && n === 0) return random() > 0.5 ? 1 : -1;
-            return n;
+        const randomInteger = (min: number, max: number): number | null => {
+            if (min > max) return null;
+            return Math.floor(random() * (max - min + 1)) + min;
+        };
+
+        const randomMagnitude = (max = maxMagnitude) => randomInteger(minMagnitude, max);
+        const randomFactorPair = (): [number, number] | null => {
+            const maxFirst = Math.floor(maxMagnitude / minMagnitude);
+            const first = randomInteger(minMagnitude, maxFirst);
+            if (first === null) return null;
+            const second = randomInteger(minMagnitude, Math.floor(maxMagnitude / first));
+            return second === null ? null : [first, second];
         };
 
         let num1 = 0;
@@ -33,75 +45,78 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         let answer = 0;
 
         if (operation === Area.Addition) {
-            if (allowNegatives) {
-                let success = false;
-                let attempts = 0;
-                const maxVal = resolvedRange.max;
-                const minVal = -maxVal;
-                
-                while (!success && attempts < 100) {
-                    attempts++;
-                    num1 = generateFromRange();
-                    answer = generateFromRange();
-                    num2 = answer - num1;
-                    
-                    if (num2 >= minVal && num2 <= maxVal) {
-                        if (includeZero || num2 !== 0) {
-                            success = true;
-                        }
-                    }
-                }
-                if (!success) return null;
+            if (requireZero) {
+                const magnitude = randomMagnitude();
+                if (magnitude === null) return null;
+                num1 = requireNegative ? -magnitude : 0;
+                num2 = magnitude;
+                answer = requireNegative ? 0 : magnitude;
+            } else if (requireNegative) {
+                const magnitude = randomMagnitude(Math.floor(maxMagnitude / 2));
+                if (magnitude === null) return null;
+                num1 = -magnitude;
+                num2 = -magnitude;
+                answer = -2 * magnitude;
             } else {
-                const minVal = includeZero ? 0 : 1;
-                const effectiveMax = resolvedRange.max;
-                
-                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal;
-                num2 = Math.floor(random() * (effectiveMax - num1 - minVal + 1)) + minVal;
+                const first = randomInteger(minMagnitude, maxMagnitude - minMagnitude);
+                if (first === null) return null;
+                const second = randomInteger(minMagnitude, maxMagnitude - first);
+                if (second === null) return null;
+                num1 = first;
+                num2 = second;
                 answer = num1 + num2;
             }
         } else if (operation === Area.Subtraction) {
-            if (allowNegatives) {
-                let success = false;
-                let attempts = 0;
-                const maxVal = resolvedRange.max;
-                const minVal = -maxVal;
-                
-                while (!success && attempts < 100) {
-                    attempts++;
-                    num1 = generateFromRange();
-                    num2 = generateFromRange();
-                    answer = num1 - num2;
-                    
-                    if (answer >= minVal && answer <= maxVal) {
-                        if (includeZero || answer !== 0) {
-                            success = true;
-                        }
-                    }
-                }
-                if (!success) return null;
+            if (requireZero) {
+                const magnitude = randomMagnitude();
+                if (magnitude === null) return null;
+                num1 = requireNegative ? 0 : magnitude;
+                num2 = magnitude;
+                answer = requireNegative ? -magnitude : 0;
+            } else if (requireNegative) {
+                const magnitude = randomMagnitude(Math.floor(maxMagnitude / 2));
+                if (magnitude === null) return null;
+                num1 = magnitude;
+                num2 = 2 * magnitude;
+                answer = -magnitude;
             } else {
-                const minVal = includeZero ? 0 : 1;
-                const effectiveMax = resolvedRange.max;
-                
-                num1 = Math.floor(random() * (effectiveMax - minVal * 2 + 1)) + minVal * 2;
-                num2 = Math.floor(random() * (num1 - minVal + 1)) + minVal;
-                if (num2 > num1 - minVal) num2 = num1 - minVal;
-                answer = num1 - num2;
+                const subtrahend = randomInteger(minMagnitude, maxMagnitude - minMagnitude);
+                if (subtrahend === null) return null;
+                const difference = randomInteger(minMagnitude, maxMagnitude - subtrahend);
+                if (difference === null) return null;
+                num2 = subtrahend;
+                answer = difference;
+                num1 = num2 + answer;
             }
         } else if (operation === Area.Multiplication) {
-            num1 = generateFromRange();
-            num2 = generateFromRange();
-            if (includeZero && num1 !== 0 && num2 !== 0) {
-                if (random() > 0.5) num1 = 0; else num2 = 0;
+            if (requireZero) {
+                const magnitude = randomMagnitude();
+                if (magnitude === null) return null;
+                num1 = 0;
+                num2 = requireNegative ? -magnitude : magnitude;
+            } else {
+                const factors = randomFactorPair();
+                if (!factors) return null;
+                num1 = requireNegative ? -factors[0] : factors[0];
+                num2 = factors[1];
             }
             answer = num1 * num2;
+        } else if (operation === Area.Division) {
+            if (requireZero) {
+                const magnitude = randomMagnitude();
+                if (magnitude === null) return null;
+                num1 = 0;
+                num2 = requireNegative ? -magnitude : magnitude;
+                answer = 0;
+            } else {
+                const factors = randomFactorPair();
+                if (!factors) return null;
+                num2 = factors[0];
+                answer = requireNegative ? -factors[1] : factors[1];
+                num1 = answer * num2;
+            }
         } else {
-            num2 = generateFromRange();
-            if (num2 === 0) num2 = (random() > 0.5 ? 1 : 2) * (allowNegatives && random() > 0.5 ? -1 : 1);
-            answer = generateFromRange();
-            num1 = answer * num2;
-            if (includeZero && random() > 0.7) { num1 = 0; answer = 0; }
+            return null;
         }
 
         const opMap: Record<string, string> = {

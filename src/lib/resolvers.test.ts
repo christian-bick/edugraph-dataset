@@ -42,7 +42,7 @@ describe('Resolvers & Utilities', () => {
 
     describe('extractConfig Fallback Logic', () => {
         const MockSchema = {
-            allowNegatives: [
+            requireNegative: [
                 [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
                 hasLabel(Scope.NumbersWithNegatives)
             ],
@@ -54,13 +54,13 @@ describe('Resolvers & Utilities', () => {
 
         it('uses specific matches if provided', () => {
             const { config } = extractConfig(MockSchema, [Scope.NumbersWithNegatives, Area.Subtraction]);
-            expect(config.allowNegatives).toBe(true);
+            expect(config.requireNegative).toBe(true);
             expect(config.operation).toBe(Area.Subtraction);
         });
 
         it('uses random fallback if no matches provided', () => {
             const { config } = extractConfig(MockSchema, []);
-            expect(config.allowNegatives).toBeTypeOf('boolean');
+            expect(config.requireNegative).toBeTypeOf('boolean');
             expect([Area.Addition, Area.Subtraction]).toContain(config.operation);
         });
 

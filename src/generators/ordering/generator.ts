@@ -18,35 +18,35 @@ export class OrderingGenerator implements ProblemGenerator<OrderingProblem, Orde
     schema = OrderingGeneratorSchema;
 
     generate(config: OrderingGeneratorConfig): ProblemStub | null {
-        validateConfigFields('ordering', config, ['range']);
+        validateConfigFields('ordering', config, ['range', 'requireNegative', 'requireZero']);
         const resolvedRange = config.range!;
-        const allowNegatives = config.allowNegatives;
-        const includeZero = config.includeZero;
-        
-        const generateFromRange = (forceZero = false) => {
-            if (forceZero) return 0;
-            let n = Math.floor(random() * (resolvedRange.max - resolvedRange.min + 1)) + resolvedRange.min;
-            if (allowNegatives && random() > 0.5) n = -n;
-            if (!includeZero && n === 0) {
-                return (allowNegatives && random() > 0.5) ? -1 : 1;
-            }
-            return n;
-        };
+        const minMagnitude = Math.max(1, Math.ceil(resolvedRange.min));
+        const maxMagnitude = Math.floor(resolvedRange.max);
+        if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
 
-        const numberSet = new Set<number>();
-        if (includeZero) {
-            numberSet.add(0);
-        }
-        const maxAttempts = 100;
-        let attempts = 0;
-        
-        while (numberSet.size < 5 && attempts < maxAttempts) {
-            const num = generateFromRange();
-            numberSet.add(num);
-            attempts++;
+        const magnitudes = Array.from(
+            {length: maxMagnitude - minMagnitude + 1},
+            (_, index) => minMagnitude + index
+        );
+        const pool = [
+            ...magnitudes,
+            ...(config.requireNegative ? magnitudes.map(value => -value) : []),
+            ...(config.requireZero ? [0] : [])
+        ];
+        if (pool.length < 5) return null;
+
+        const required = new Set<number>();
+        if (config.requireZero) required.add(0);
+        if (config.requireNegative) {
+            const magnitude = magnitudes[Math.floor(random() * magnitudes.length)];
+            required.add(-magnitude);
         }
 
-        const selectedNumbers = shuffleArray(Array.from(numberSet)).slice(0, 5);
+        const remaining = shuffleArray(pool.filter(value => !required.has(value)));
+        const selectedNumbers = shuffleArray([
+            ...required,
+            ...remaining.slice(0, 5 - required.size)
+        ]);
 
         return {
             data: {

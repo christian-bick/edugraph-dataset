@@ -9,15 +9,32 @@ export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMa
     schema = PlaceValueMakeTenGeneratorSchema;
 
     generate(config: PlaceValueMakeTenGeneratorConfig): ProblemStub | null {
-        validateConfigFields('place-value-make-ten', config, ['includeZero', 'range']);
-        const includeZero = config.includeZero;
+        validateConfigFields('place-value-make-ten', config, ['requireZero', 'range']);
         const resolvedRange = config.range!;
 
         const target = 10;
-        // The given number is bounded by the make-ten domain intersected with
-        // the requested range (missing = target - given stays within 0..10)
-        const minGiven = Math.max(includeZero ? 0 : 1, resolvedRange.min);
-        const maxGiven = Math.min(includeZero ? target : target - 1, resolvedRange.max);
+        if (config.requireZero) {
+            const zeroWitnesses = [0, target].filter(
+                given => given >= resolvedRange.min && given <= resolvedRange.max
+            );
+            if (zeroWitnesses.length === 0) {
+                throw new GeneratorValidationError(
+                    'place-value-make-ten',
+                    'The requested range excludes both make-ten zero witnesses (0 and 10).'
+                );
+            }
+            const givenNumber = zeroWitnesses[Math.floor(random() * zeroWitnesses.length)];
+            return {
+                data: {
+                    givenNumber,
+                    missingNumber: target - givenNumber,
+                    target
+                }
+            };
+        }
+
+        const minGiven = Math.max(1, resolvedRange.min);
+        const maxGiven = Math.min(target - 1, resolvedRange.max);
         if (minGiven > maxGiven) {
             throw new GeneratorValidationError('place-value-make-ten', `Effective range bounds invalid: resolvedMin (${minGiven}) exceeds resolvedMax (${maxGiven}).`);
         }
