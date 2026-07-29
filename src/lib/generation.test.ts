@@ -475,6 +475,31 @@ describe('loadTargets', () => {
 });
 
 describe('catalogs and end-to-end matching (integration)', () => {
+    it('routes CCSS comparison targets to representation-compatible views', async () => {
+        const [generatorCatalog, viewCatalog, targets] = await Promise.all([
+            loadGeneratorCatalog(),
+            loadViewCatalog(),
+            loadTargets('ccss')
+        ]);
+        const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
+        const viewsFor = (targetPrefix: string) => new Set(
+            tuples
+                .filter(tuple => tuple.target.id.startsWith(targetPrefix))
+                .map(tuple => tuple.viewId)
+        );
+
+        expect(viewsFor('K.CC.C.6-compare-groups')).toEqual(new Set([
+            'numbers-compare-counting',
+            'numbers-compare-matching'
+        ]));
+        expect(viewsFor('K.CC.C.7-compare-numerals')).toEqual(new Set([
+            'numbers-compare'
+        ]));
+        expect(viewsFor('1.NBT.B.3-compare-two-digit')).toEqual(new Set([
+            'numbers-compare'
+        ]));
+    }, 30000);
+
     it('loads catalogs, matches the test spec and replays a sample by key', async () => {
         const [generatorCatalog, viewCatalog, targets] = await Promise.all([
             loadGeneratorCatalog(),

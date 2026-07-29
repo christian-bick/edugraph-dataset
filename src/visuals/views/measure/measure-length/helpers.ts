@@ -55,8 +55,9 @@ export function getRulerTicks(bandLength: number, margin = 20, pxPerUnit = 30): 
     return ticks;
 }
 
-export function formatMeasureAnswer(problemLength: number, isDecimal: boolean): { answer: string; unit: string } {
-    const answer = isDecimal ? problemLength.toFixed(1) : (problemLength * 10).toFixed(0);
-    const unit = isDecimal ? 'cm' : 'mm';
-    return { answer, unit };
+export function formatMeasureAnswer(problemLength: number): { answer: string; unit: string } {
+    return {
+        answer: problemLength.toString(),
+        unit: 'cm'
+    };
 }

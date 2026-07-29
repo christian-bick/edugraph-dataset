@@ -1,13 +1,16 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-compare-counting',
+    rejectedLabels: [
+        ...deductAdmitting([Scope.NumbersLarger10])
+    ],
     generalLabels: [
+        Area.SetComparison,
         Scope.PhysicalNumbers,
-        Ability.ProcedureExecution,
-        Scope.ArabicNumerals
+        Ability.ProcedureExecution
     ]
 };
 

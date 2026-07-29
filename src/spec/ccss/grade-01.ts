@@ -14,7 +14,6 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller20,
-        Scope.PhysicalNumbers,
         Ability.TextualReception
     ])
     .applyLabelVariants([
@@ -201,13 +200,12 @@ const tenBundleBuilder = new DatasetPermutationBuilder()
 // carries that distinction and keeps the two teen definitions distinguishable.
 const teenNumbersBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Difference,
+        Area.Sum,
         Area.PlaceValue,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersLarger10,
         Scope.NumbersSmaller20,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
@@ -398,13 +396,12 @@ const buildShapesBuilder = new DatasetPermutationBuilder()
 const drawShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
-        Area.ShapePlotting,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
-        [Area.Circle],
-        [Area.Square],
-        [Area.Triangle]
+        [Area.Circle, Area.CircularShapeDrawing],
+        [Area.Square, Area.LinearShapeDrawing],
+        [Area.Triangle, Area.LinearShapeDrawing]
     ]);
 
 // --- 1.G.A.2: Compose two-dimensional shapes into composite shapes ---

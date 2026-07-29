@@ -2,14 +2,18 @@ import {describe, expect, it} from 'vitest';
 import {formatMeasureAnswer, getRulerTicks} from './helpers.ts';
 
 describe('measure-length helpers', () => {
-    it('formats answer correctly', () => {
-        const decimalResult = formatMeasureAnswer(5.4, true);
-        expect(decimalResult.answer).toBe('5.4');
-        expect(decimalResult.unit).toBe('cm');
+    it.each([1, 5, 10, 5.4, 19.9, 100])(
+        'preserves the generated length %s in the displayed answer',
+        (problemLength) => {
+            const result = formatMeasureAnswer(problemLength);
 
-        const integerResult = formatMeasureAnswer(5.4, false);
-        expect(integerResult.answer).toBe('54');
-        expect(integerResult.unit).toBe('mm');
+            expect(Number(result.answer)).toBe(problemLength);
+            expect(result.unit).toBe('cm');
+        }
+    );
+
+    it('does not scale integer answers into millimeters', () => {
+        expect(formatMeasureAnswer(8)).toEqual({answer: '8', unit: 'cm'});
     });
 
     it('generates ticks correctly for small band lengths', () => {

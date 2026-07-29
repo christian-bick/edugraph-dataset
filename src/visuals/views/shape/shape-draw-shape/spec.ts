@@ -5,7 +5,8 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'shape-draw-shape',
     generalLabels: [
-        Area.ShapePlotting,
+        Area.LinearShapeDrawing,
+        Area.CircularShapeDrawing,
         Ability.VisualArticulation
     ],
 };

@@ -6,7 +6,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement-compare',
     generalLabels: [
         Area.Measurement,
-        Area.ObjectSorting,
     ]
 };
 

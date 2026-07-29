@@ -108,7 +108,7 @@ const conservationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Area.NumericIdentity,
-        Scope.ArabicNumerals,
+        Scope.PhysicalNumbers,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.AdditiveCount,
@@ -176,9 +176,7 @@ const boxArrangementBuilder = new DatasetPermutationBuilder()
 // --- K.CC.C.6: Compare the number of objects in two groups (up to 10 objects) ---
 const compareGroupsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
-        Scope.ArabicNumerals,
-        Scope.Base10,
+        Area.SetComparison,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller10,
@@ -236,7 +234,6 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller10,
-        Scope.PhysicalNumbers,
         Ability.TextualReception
     ])
     .applyLabelVariants([
@@ -292,12 +289,11 @@ const fluencyBuilder = new DatasetPermutationBuilder()
 // --- K.NBT.A.1: Teen numbers ---
 const teenNumbersBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Difference,
+        Area.Sum,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersLarger10,
         Scope.NumbersSmaller20,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
@@ -322,7 +318,6 @@ const measurableAttributesBuilder = new DatasetPermutationBuilder()
 const compareAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Measurement,
-        Area.ObjectSorting,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -503,13 +498,12 @@ const buildShapesBuilder = new DatasetPermutationBuilder()
 const drawShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
-        Area.ShapePlotting,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
-        [Area.Circle],
-        [Area.Square],
-        [Area.Triangle]
+        [Area.Circle, Area.CircularShapeDrawing],
+        [Area.Square, Area.LinearShapeDrawing],
+        [Area.Triangle, Area.LinearShapeDrawing]
     ]);
 
 // --- K.G.B.6: Compose simple shapes ---

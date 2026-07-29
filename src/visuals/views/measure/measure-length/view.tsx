@@ -29,18 +29,14 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     const bandLength = data.bandLength;
     const problemLength = data.problemLength;
 
-    const isDecimal = data.useDecimals !== undefined 
-        ? data.useDecimals 
-        : (data.problemLength % 1 !== 0);
-
     const showRectangle = !isReverse || isSolutionView;
     const showAnswerInBox = isReverse || isSolutionView;
     const isTextSolution = !isReverse && isSolutionView;
 
     const rectColor = isReverse ? 'forestgreen' : color;
     const { answer, unit } = useMemo(() => {
-        return formatMeasureAnswer(problemLength, isDecimal);
-    }, [problemLength, isDecimal]);
+        return formatMeasureAnswer(problemLength);
+    }, [problemLength]);
 
     let pxPerUnit = 30;
     if (bandLength > 50) {

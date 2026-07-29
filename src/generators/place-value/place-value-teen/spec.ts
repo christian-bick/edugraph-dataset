@@ -6,7 +6,7 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-teen',
     generalLabels: [
-        Area.Difference,
+        Area.Sum,
         Area.PlaceValue,
         Scope.IntegerNumbers,
         Scope.Base10,

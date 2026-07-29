@@ -19,6 +19,6 @@ export const selectExactMatch = (labels: string[], supportedLabels?: readonly st
 
 export const matchAllExactLabels = (labels: string[], supportedLabels?: readonly string[]): string[] => {
     if (!supportedLabels) return [];
-    return supportedLabels.filter(s => labels.some(l => isSubConceptOf(l, s)));
+    return supportedLabels.filter(s => labels.includes(s));
 };
 

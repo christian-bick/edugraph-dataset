@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hasLabel, hasSubConcept, matchAllLabels } from './resolvers.ts';
+import { hasLabel, hasSubConcept, matchAllExactLabels, matchAllLabels } from './resolvers.ts';
 import { extractConfig } from './utils.ts';
 import { Scope, Area } from 'edugraph-ts';
 
@@ -37,6 +37,18 @@ describe('Resolvers & Utilities', () => {
             expect(result).not.toContain(Scope.NumbersSmaller20);
             expect(result).not.toContain(Scope.NumbersLarger10);
             expect(result).not.toContain(Scope.NumbersLarger100);
+        });
+    });
+
+    describe('matchAllExactLabels', () => {
+        const supportedShapes = [Area.Square, Area.Rectangle] as const;
+
+        it('does not admit a supported ancestor that is absent from the labels', () => {
+            expect(matchAllExactLabels([Area.Square], supportedShapes)).toEqual([Area.Square]);
+        });
+
+        it('returns every explicitly present supported label', () => {
+            expect(matchAllExactLabels([Area.Square, Area.Rectangle], supportedShapes)).toEqual(supportedShapes);
         });
     });
 

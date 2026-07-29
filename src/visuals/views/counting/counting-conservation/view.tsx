@@ -4,6 +4,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {CountingConservationViewConfig, CountingConservationViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData} from '../../../helpers/validation.ts';
+import {CONSERVATION_ROW_WIDTH, getConservationLayout} from './helpers.ts';
 import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -21,6 +22,7 @@ const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
     validateProblemData('counting-conservation', data, ['numObjects']);
 
     const number = data.numObjects;
+    const layout = getConservationLayout(number);
 
     const icon = useMemo(() => {
         return ICONS[seed % ICONS.length];
@@ -47,12 +49,15 @@ const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
                 <div className="w-full flex flex-col gap-[25px] bg-slate-50 p-5 rounded-xl border-[1.5px] border-slate-200 mb-[25px] overflow-hidden">
                     <div className="flex items-center min-h-[50px]">
                         <span className="text-[1.1rem] font-bold text-slate-600 w-[90px] shrink-0">Group A:</span>
-                        <div className="flex-grow flex flex-wrap justify-center gap-[4px] py-2">
+                        <div
+                            className="flex flex-nowrap justify-center py-2 min-w-0"
+                            style={{width: `${CONSERVATION_ROW_WIDTH}px`, gap: `${layout.closeGap}px`}}
+                        >
                             {Array.from({ length: number }).map((_, i) => (
                                 <img 
                                     key={i} 
                                     src={`/icons/counting/${icon}`} 
-                                    className="w-[35px] h-[35px]" 
+                                    style={{width: `${layout.iconSize}px`, height: `${layout.iconSize}px`}}
                                     alt="object A" 
                                 />
                             ))}
@@ -60,12 +65,15 @@ const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
                     </div>
                     <div className="flex items-center min-h-[50px]">
                         <span className="text-[1.1rem] font-bold text-slate-600 w-[90px] shrink-0">Group B:</span>
-                        <div className="flex-grow flex flex-wrap justify-center gap-[24px] py-2">
+                        <div
+                            className="flex flex-nowrap justify-center py-2 min-w-0"
+                            style={{width: `${CONSERVATION_ROW_WIDTH}px`, gap: `${layout.farGap}px`}}
+                        >
                             {Array.from({ length: number }).map((_, i) => (
                                 <img 
                                     key={i} 
                                     src={`/icons/counting/${icon}`} 
-                                    className="w-[35px] h-[35px]" 
+                                    style={{width: `${layout.iconSize}px`, height: `${layout.iconSize}px`}}
                                     alt="object B" 
                                 />
                             ))}

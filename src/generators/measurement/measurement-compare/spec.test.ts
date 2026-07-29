@@ -3,6 +3,7 @@ import {MeasurementCompareGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {spec} from './spec.ts';
 
 describe('MeasurementCompareGenerator Spec Integration', () => {
     let generator: MeasurementCompareGenerator;
@@ -10,6 +11,11 @@ describe('MeasurementCompareGenerator Spec Integration', () => {
     beforeEach(() => {
         generator = new MeasurementCompareGenerator();
         setSeed(42);
+    });
+
+    it('declares direct measurement comparison without object sorting', () => {
+        expect(spec.generalLabels).toContain(Area.Measurement);
+        expect(spec.generalLabels).not.toContain(Area.ObjectSorting);
     });
 
     it('should generate correct length/longer comparison problems', () => {

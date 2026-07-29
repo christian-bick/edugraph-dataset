@@ -5,7 +5,6 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'operations-word-problem',
     generalLabels: [
-        Scope.PhysicalNumbers,
         Ability.TextualReception,
         Scope.ArabicNumerals
     ]

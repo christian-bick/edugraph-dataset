@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { getIconIndexes, getCorrectChoice } from './helpers.ts';
+import {validatePictorialComparisonCounts} from '../helpers.ts';
 import { NumbersCompareCountingViewConfig, NumbersCompareCountingViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
@@ -22,6 +23,7 @@ const NumbersCompareCountingCore = ({ payload }: CoreProps) => {
     const num1 = data.num1;
     const num2 = data.num2;
     const relation = data.relation;
+    validatePictorialComparisonCounts('numbers-compare-counting', num1, num2);
 
     const isFewerQuestion = relation === 'less';
     const promptText = isFewerQuestion ? "Which group has fewer items?" : "Which group has more items?";
