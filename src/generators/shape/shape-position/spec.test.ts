@@ -38,4 +38,10 @@ describe('ShapePositionGenerator Spec Integration', () => {
         expect(stub!.data.relation).toBe('beside');
         expect(stub!.data.answer).toBe('beside');
     });
+
+    it('should generate an in-front-of problem from Scope.Ahead label', () => {
+        const stub = generateWithLabels(generator, [Scope.Ahead]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data).toEqual({ relation: 'ahead', answer: 'ahead' });
+    });
 });

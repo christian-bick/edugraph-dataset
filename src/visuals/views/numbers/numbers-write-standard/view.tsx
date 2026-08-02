@@ -45,7 +45,7 @@ const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] w-fit">
             <div className="flex items-center gap-[30px] flex-wrap font-sans">
-                <DoubleTenFrame number={number} />
+                {number <= 20 && <DoubleTenFrame number={number} />}
                 <div className="text-[3.5rem] font-extrabold text-slate-800 min-w-[80px] text-center">
                     {number}
                 </div>

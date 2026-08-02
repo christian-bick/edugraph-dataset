@@ -17,4 +17,33 @@ const builder = new DatasetPermutationBuilder()
         [Ability.VisualArticulation]
     ]);
 
-export const spec: CompetencyTarget[] = toTargets('test-time', builder);
+const halfHourBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.MeasuringTime,
+        Scope.AnalogClock,
+        Scope.HalfHourIntervals
+    ])
+    .applyLabelVariants([
+        [Ability.ProcedureExecution],
+        [Ability.VisualArticulation]
+    ]);
+
+const digitalBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.MeasuringTime,
+        Scope.DigitalClock
+    ])
+    .applyLabelVariants([
+        [Scope.HourIntervals],
+        [Scope.HalfHourIntervals]
+    ])
+    .applyLabelVariants([
+        [Ability.ProcedureExecution],
+        [Ability.VisualArticulation]
+    ]);
+
+export const spec: CompetencyTarget[] = [
+    ...toTargets('test-time', builder),
+    ...toTargets('test-time-half-hour', halfHourBuilder),
+    ...toTargets('test-time-digital', digitalBuilder)
+];

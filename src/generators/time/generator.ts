@@ -3,7 +3,22 @@ import {TimeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
 import {TimeGeneratorConfig, TimeGeneratorSchema} from "./spec.ts";
-import {validateConfigFields} from "../../lib/errors.ts";
+import {GeneratorValidationError, validateConfigFields} from "../../lib/errors.ts";
+
+function resolveInterval(intervalLabel: TimeGeneratorConfig['intervalLabel']): number {
+    switch (intervalLabel) {
+        case Scope.SecondIntervals:
+            return 1;
+        case Scope.MinuteIntervals:
+            return 60;
+        case Scope.HalfHourIntervals:
+            return 30 * 60;
+        case Scope.HourIntervals:
+            return 60 * 60;
+        default:
+            throw new GeneratorValidationError('time', `Unsupported interval label: ${intervalLabel}`);
+    }
+}
 
 export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGeneratorConfig> {
     type: AbstractProblem['type'] = 'time';
@@ -11,14 +26,7 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
 
     generate(config: TimeGeneratorConfig): ProblemStub | null {
         validateConfigFields('time', config, ['intervalLabel', 'requireZero']);
-        let interval = 3600; // default HourIntervals
-        if (config.intervalLabel === Scope.SecondIntervals) {
-            interval = 1;
-        } else if (config.intervalLabel === Scope.MinuteIntervals) {
-            interval = 60;
-        } else if (config.intervalLabel === Scope.HourIntervals) {
-            interval = 3600;
-        }
+        const interval = resolveInterval(config.intervalLabel);
 
         const dayInSeconds = 24 * 3600;
 

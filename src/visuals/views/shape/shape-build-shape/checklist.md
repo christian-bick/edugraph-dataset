@@ -1,4 +1,5 @@
 - The rendered canvas must show a stick-and-ball representation of the target shape.
-- In Question Mode, the prompt text must ask for the correct shape name. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- In solution mode, the correct answer choice representing the exact count of sticks and clay balls must be highlighted in green.
-- In normal mode, no answer choices must be highlighted.
+- In Question Mode, the prompt must ask which facts must stay the same for the target to remain that shape. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
+- The attribute choices must mix structural facts with color, size, and orientation choices so defining and non-defining properties are directly observable.
+- In Solution Mode, every defining structural attribute must be highlighted in green while non-defining appearance attributes remain neutral.
+- In Question Mode, all attribute choices must remain neutral and visually unselected.

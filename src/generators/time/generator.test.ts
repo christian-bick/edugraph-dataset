@@ -19,6 +19,7 @@ describe('TimeGenerator', () => {
         it('should generate valid problem stubs', () => {
             const configs = [
                 { intervalLabel: Scope.HourIntervals, requireZero: false },
+                { intervalLabel: Scope.HalfHourIntervals, requireZero: false },
                 { intervalLabel: Scope.MinuteIntervals, requireZero: false },
                 { intervalLabel: Scope.SecondIntervals, requireZero: false }
             ];
@@ -29,6 +30,7 @@ describe('TimeGenerator', () => {
                 let expectedInterval = 3600;
                 if (config.intervalLabel === Scope.SecondIntervals) expectedInterval = 1;
                 else if (config.intervalLabel === Scope.MinuteIntervals) expectedInterval = 60;
+                else if (config.intervalLabel === Scope.HalfHourIntervals) expectedInterval = 1800;
                 expect(stub!.data.interval).toBe(expectedInterval);
             });
         });
@@ -60,16 +62,16 @@ describe('TimeGenerator', () => {
             }
         });
 
-        it('should align time with the requested interval (15 minutes)', () => {
+        it('should align time with the requested interval (30 minutes)', () => {
             const config = { 
-                intervalLabel: Scope.HourIntervals,
+                intervalLabel: Scope.HalfHourIntervals,
                 requireZero: false
             };
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(config);
                 if (stub) {
                     const [, m, s] = stub.data.time.split(':').map(Number);
-                    expect(m % 15).toBe(0);
+                    expect(m % 30).toBe(0);
                     expect(s).toBe(0);
                 }
             }
@@ -93,6 +95,7 @@ describe('TimeGenerator', () => {
 
         it.each([
             Scope.HourIntervals,
+            Scope.HalfHourIntervals,
             Scope.MinuteIntervals,
             Scope.SecondIntervals
         ])('should guarantee an observable zero for %s', intervalLabel => {
@@ -113,6 +116,13 @@ describe('TimeGenerator', () => {
 
         it('should throw an error if requireZero is missing', () => {
             expect(() => generator.generate({intervalLabel: Scope.HourIntervals} as any)).toThrow();
+        });
+
+        it('should throw an error for an unsupported interval label', () => {
+            expect(() => generator.generate({
+                intervalLabel: Scope.DayIntervals,
+                requireZero: false
+            } as any)).toThrow('Unsupported interval label');
         });
     });
 });

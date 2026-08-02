@@ -1,0 +1,2 @@
+- The claimed equation must use the requested addition or subtraction operation.
+- The truth value must exactly state whether the claimed answer equals the operation's mathematical result.

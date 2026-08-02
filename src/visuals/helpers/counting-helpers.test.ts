@@ -15,9 +15,17 @@ describe('counting-helpers', () => {
         expect(pos.length).toBe(6);
     });
 
-    it('returns correct number of positions for array layout', () => {
+    it('places an array in bounded rows and columns', () => {
         const pos = generatePositions(8, 'array', 103);
         expect(pos.length).toBe(8);
+        expect(new Set(pos.map(({ x }) => x)).size).toBe(3);
+        expect(new Set(pos.map(({ y }) => y)).size).toBe(3);
+        pos.forEach(({ x, y }) => {
+            expect(x).toBeGreaterThanOrEqual(0);
+            expect(x + 40).toBeLessThanOrEqual(450);
+            expect(y).toBeGreaterThanOrEqual(0);
+            expect(y + 40).toBeLessThanOrEqual(300);
+        });
     });
 
     it('returns correct number of positions for scattered layout', () => {

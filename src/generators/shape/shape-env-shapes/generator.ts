@@ -20,6 +20,10 @@ export class ShapeEnvShapesGenerator implements ProblemGenerator<ShapeEnvShapesP
             answer = 'square';
         } else if (label === Area.Rectangle) {
             answer = 'rectangle';
+        } else if (label === Area.Triangle) {
+            answer = 'triangle';
+        } else if (label === Area.Hexagon) {
+            answer = 'hexagon';
         } else {
             return null;
         }
@@ -27,7 +31,9 @@ export class ShapeEnvShapesGenerator implements ProblemGenerator<ShapeEnvShapesP
         const envMap: Record<string, string> = {
             circle: 'clock',
             square: 'window',
-            rectangle: 'table'
+            rectangle: 'table',
+            triangle: 'pennant',
+            hexagon: 'honeycomb cell'
         };
         const target = envMap[answer];
 
@@ -35,8 +41,7 @@ export class ShapeEnvShapesGenerator implements ProblemGenerator<ShapeEnvShapesP
             data: {
                 target,
                 answer
-            },
-            tags: [label]
+            }
         };
     }
 }

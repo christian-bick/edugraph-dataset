@@ -22,7 +22,7 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
         throw new ViewValidationError('shape-draw-shape', `Unsupported shape: ${shape}`);
     }
 
-    const promptText = `Trace the ${shape}.`;
+    const promptText = `Draw the ${shape} by following the guide.`;
     const pathD = getTracePath(shape);
 
     return (

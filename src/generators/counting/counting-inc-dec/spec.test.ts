@@ -1,10 +1,10 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { CountingIncDecGenerator } from './generator.ts';
-import { setSeed } from '../../../lib/random.ts';
-import { Area, Scope } from 'edugraph-ts';
-import { generateWithLabels } from '../../../lib/utils.ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {Area, Scope} from 'edugraph-ts';
+import {generateWithLabels} from '../../../lib/utils.ts';
+import {setSeed} from '../../../lib/random.ts';
+import {CountingIncDecGenerator} from './generator.ts';
 
-describe('CountingIncDecGenerator Spec Integration', () => {
+describe('CountingIncDecGenerator spec integration', () => {
     let generator: CountingIncDecGenerator;
 
     beforeEach(() => {
@@ -12,45 +12,45 @@ describe('CountingIncDecGenerator Spec Integration', () => {
         setSeed(42);
     });
 
-    it('should generate correct increment problems using labels', () => {
+    it('resolves an increment-by-one problem', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,
-            Scope.NumbersWithoutZero,
-            Scope.NumbersWithoutNegatives,
+            Area.Increment,
             Scope.NumbersSmaller10,
             Scope.AdditiveCount
         ]);
+
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
-        expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
+        expect(stub!.data.stepSize).toBe(1);
+        expect(stub!.tags).toEqual(expect.arrayContaining([Area.Increment, Scope.AdditiveCount]));
     });
 
-    it('should generate correct decrement problems using labels', () => {
+    it('resolves a decrement-by-one problem', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,
-            Scope.NumbersWithoutZero,
-            Scope.NumbersWithoutNegatives,
-            Scope.NumbersSmaller10,
+            Area.Decrement,
+            Scope.NumbersSmaller20,
             Scope.SubtractiveCount
         ]);
+
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
-        expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
+        expect(stub!.data.stepSize).toBe(1);
     });
 
-    it('should respect physical range bounds when using labels', () => {
-        for (let i = 0; i < 50; i++) {
-            setSeed(i);
+    it('resolves increment and decrement by ten within 100', () => {
+        for (const direction of [Area.Increment, Area.Decrement]) {
             const stub = generateWithLabels(generator, [
                 Area.NumerationWithIntegers,
-                Scope.NumbersWithoutZero,
-                Scope.NumbersWithoutNegatives,
-                Scope.NumbersSmaller10,
-                Scope.AdditiveCount
+                direction,
+                Scope.NumbersSmaller100,
+                Scope.DerivedCount
             ]);
+
             expect(stub).not.toBeNull();
-            expect(stub!.data.numObjects).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
+            expect(stub!.data.stepSize).toBe(10);
+            expect(Math.abs(stub!.data.incDecAnswer - stub!.data.numObjects)).toBe(10);
         }
     });
 });

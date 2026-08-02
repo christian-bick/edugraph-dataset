@@ -1,2 +1,2 @@
-- The problem must specify a target spatial relation (above, below, beside, or behind).
+- The problem must specify a target spatial relation (above, below, beside, behind, or ahead/in front of).
 - The solution (answer) must match the spatial relation.

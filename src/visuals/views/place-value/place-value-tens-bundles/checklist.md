@@ -1,0 +1,3 @@
+- In Question Mode, the prompt asks for the quantity represented by the complete ten frames and the answer box is empty.
+- In Solution Mode, the prompt is absent and the answer box shows the represented multiple of ten.
+- Every displayed ten frame must be completely filled, with one frame per ten in the equation.

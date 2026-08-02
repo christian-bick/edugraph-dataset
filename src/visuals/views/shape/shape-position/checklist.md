@@ -3,8 +3,8 @@
 ## Rendering Requirements
 - **Clear Prompt**: In Question Mode, the instruction prompt must ask "Where is the ball relative to the box?". Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
 - **SVG Scene**: A slate box labelled "Box" must be rendered along with a rose/red ball labelled "Ball".
-- **Positioning**: The ball's location (above, below, nextTo) relative to the box must correspond to the problem's relation parameter.
+- **Positioning**: The ball must visibly occupy the requested position relative to the box: above, below, next to, behind, or in front. Behind places the ball beneath the box in the SVG layer order; in front places it over the box.
 
 ## Layout & Styling
-- **Multiple Choice Buttons**: Three options ('Above the box', 'Below the box', 'Next to the box') must be displayed below the scene.
+- **Multiple Choice Buttons**: Three position options must be displayed below the scene. They must include the requested answer; an ahead/in-front problem must label its answer "In front of the box".
 - **Solution Mode Visuals**: In solution mode (`isSolutionView: true`), the correct button must be highlighted with a green border, green background, and bold green text. In question mode, all option buttons must look identical and unselected.

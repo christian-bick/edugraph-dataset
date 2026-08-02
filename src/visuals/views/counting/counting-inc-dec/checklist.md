@@ -1,14 +1,13 @@
 ### Counting Increment/Decrement View Checklist
 
 #### Visual Layout & Rendering Requirements
-1. **Objects Grid/Row:**
-   - Displays `numObjects` count of objects of a random icon type.
-   - Objects are nicely spaced with padding and wrap as needed.
+1. **Starting Value:**
+   - Exactly one layout is visible: a bounded collection of countable objects, or a numeral card showing the starting integer.
+   - Objects, when present, are evenly spaced and do not overlap or clip.
 2. **Operation Arrow (Increment/Decrement Indicator):**
-   - Shows an arrow indicator if `incDecType` is `'inc'` or `'dec'`.
-   - If `'inc'`, the arrow points up with a small badge "1" indicating an increment.
-   - If `'dec'`, the arrow points down with a small badge "1" indicating a decrement.
+   - An upward or downward arrow indicates the direction of change.
+   - The arrow badge visibly shows a step of either 1 or 10.
 3. **Answer Box:**
    - A box representing the final count is positioned to the right of the objects/arrow.
    - In **Question Mode (`_mode-Q`)**, the answer box must be blank/empty.
-   - In **Solution Mode (`_mode-S`)**, the answer box must display the calculated correct answer (e.g. `incDecAnswer`) highlighted in emerald green.
+   - In **Solution Mode (`_mode-S`)**, the answer box must display the calculated correct answer with solution highlighting.

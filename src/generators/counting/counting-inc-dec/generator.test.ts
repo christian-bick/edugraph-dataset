@@ -1,8 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
-import {CountingIncDecGenerator} from './generator.ts';
-import {setSeed} from '../../../lib/random.ts';
-
 import {Scope} from 'edugraph-ts';
+import {setSeed} from '../../../lib/random.ts';
+import {CountingIncDecGenerator} from './generator.ts';
 
 describe('CountingIncDecGenerator', () => {
     let generator: CountingIncDecGenerator;
@@ -12,67 +11,74 @@ describe('CountingIncDecGenerator', () => {
         setSeed(42);
     });
 
-    it('should have the correct type', () => {
-         expect(generator.type).toBe('counting');
+    it('has the counting problem type', () => {
+        expect(generator.type).toBe('counting');
     });
 
-    it('should throw validation error when range is missing', () => {
-        expect(() => generator.generate({} as any)).toThrow();
+    it('throws when required configuration is missing', () => {
+        expect(() => generator.generate({})).toThrow();
     });
 
-    it('should generate valid inc stubs with AdditiveCount label', () => {
-        const config = { 
-            range: { min: 0, max: 10 },
-            direction: Scope.AdditiveCount
-        } as const;
-        const stub = generator.generate(config);
+    it('increments by one without exceeding the range', () => {
+        const stub = generator.generate({
+            range: {min: 1, max: 10},
+            isIncrement: true,
+            isDecrement: false,
+            countMode: Scope.AdditiveCount
+        });
+
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
+        expect(stub!.data.stepSize).toBe(1);
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
+        expect(stub!.data.incDecAnswer).toBeLessThanOrEqual(10);
     });
 
-    it('should generate valid dec stubs with SubtractiveCount label', () => {
-        const config = { 
-            range: { min: 0, max: 10 },
-            direction: Scope.SubtractiveCount
-        } as const;
-        const stub = generator.generate(config);
+    it('decrements by one without reaching zero', () => {
+        const stub = generator.generate({
+            range: {min: 1, max: 10},
+            isIncrement: false,
+            isDecrement: true,
+            countMode: Scope.SubtractiveCount
+        });
+
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
-        expect(stub!.data.numObjects).toBeGreaterThan(1);
+        expect(stub!.data.stepSize).toBe(1);
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
+        expect(stub!.data.incDecAnswer).toBeGreaterThanOrEqual(1);
     });
 
-    it('should fallback to random direction when direction is not specified', () => {
-        const config = { range: { min: 2, max: 10 } };
-        let hasInc = false;
-        let hasDec = false;
-        for (let i = 0; i < 20; i++) {
-            setSeed(i);
-            const stub = generator.generate(config);
-            if (stub?.data.incDecType === 'inc') hasInc = true;
-            if (stub?.data.incDecType === 'dec') hasDec = true;
-        }
-        expect(hasInc).toBe(true);
-        expect(hasDec).toBe(true);
+    it.each([true, false])('changes by ten for derived counting (increment: %s)', isIncrement => {
+        const stub = generator.generate({
+            range: {min: 1, max: 100},
+            isIncrement,
+            isDecrement: !isIncrement,
+            countMode: Scope.DerivedCount
+        });
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.stepSize).toBe(10);
+        expect(Math.abs(stub!.data.incDecAnswer - stub!.data.numObjects)).toBe(10);
+        expect(stub!.data.incDecAnswer).toBeGreaterThanOrEqual(1);
+        expect(stub!.data.incDecAnswer).toBeLessThanOrEqual(100);
     });
 
-    it('should return null when attempting to decrement 1 object', () => {
-        // If we set seed to a value that produces 0 or 1.
-        // Let's just find one dynamically
-        let foundNull = false;
-        for (let i = 0; i < 100; i++) {
-            setSeed(i);
-            const config = { 
-                range: { min: 0, max: 10 },
-                direction: Scope.SubtractiveCount
-            } as const;
-            const stub = generator.generate(config);
-            if (stub === null) {
-                foundNull = true;
-                break;
-            }
-        }
-        expect(foundNull).toBe(true);
+    it('returns null when the requested step cannot fit the range', () => {
+        expect(generator.generate({
+            range: {min: 1, max: 10},
+            isIncrement: true,
+            isDecrement: false,
+            countMode: Scope.DerivedCount
+        })).toBeNull();
+    });
+
+    it('returns null without one explicit direction', () => {
+        expect(generator.generate({
+            range: {min: 1, max: 100},
+            isIncrement: false,
+            isDecrement: false,
+            countMode: Scope.DerivedCount
+        })).toBeNull();
     });
 });

@@ -16,7 +16,9 @@ export const ShapeEnvShapesGeneratorSchema = {
         [
             Area.Circle,
             Area.Square,
-            Area.Rectangle
+            Area.Rectangle,
+            Area.Triangle,
+            Area.Hexagon
         ],
         selectExactMatch
     ],

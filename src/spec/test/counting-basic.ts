@@ -17,6 +17,22 @@ const builder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
+const boxArrangementBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumerationWithIntegers,
+        Scope.ArabicNumerals,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Scope.AdditiveCount,
+        Scope.PhysicalNumbers,
+        Scope.BoxArrangement,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersSmaller10],
+        [Scope.NumbersSmaller20]
+    ]);
+
 const classifyBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
@@ -68,19 +84,49 @@ const incDecBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.AdditiveCount],
-        [Scope.SubtractiveCount]
+        [Area.Increment, Scope.AdditiveCount],
+        [Area.Decrement, Scope.SubtractiveCount]
     ])
     .applyLabelVariants([
         [Scope.NumbersSmaller10],
         [Scope.NumbersSmaller20]
     ]);
 
+const tenMoreLessBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumerationWithIntegers,
+        Scope.ArabicNumerals,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller100,
+        Scope.DerivedCount,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Area.Increment],
+        [Area.Decrement]
+    ]);
+
+const countTo100Builder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumerationWithIntegers,
+        Scope.ArabicNumerals,
+        Scope.NumbersSmaller100,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.AdditiveCount],
+        [Scope.DerivedCount]
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-counting-basic', builder),
+    ...toTargets('test-counting-basic-box-arrangement', boxArrangementBuilder),
     ...toTargets('test-counting-inc-dec', incDecBuilder),
+    ...toTargets('test-counting-ten-more-less', tenMoreLessBuilder),
+    ...toTargets('test-counting-to-100', countTo100Builder),
     ...toTargets('test-classify-count', classifyBuilder),
     ...toTargets('test-classify-sort', sortBuilder)
 ];
-
-

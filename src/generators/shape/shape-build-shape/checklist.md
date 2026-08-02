@@ -1,3 +1,4 @@
 - The problem must specify a target shape (triangle, square, rectangle, or hexagon).
 - The number of sides (sticks) and corners (clay balls) must match the mathematical definition of the target shape.
-- The options must include the correct combination of sticks and clay balls for the target shape.
+- Defining attributes must state structural properties that every instance of the target shape retains.
+- Non-defining attributes must be limited to changeable appearance properties such as color, size, and orientation.

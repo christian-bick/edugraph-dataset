@@ -5,7 +5,7 @@ import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { generatePositions } from '../../../helpers/counting-helpers.ts';
 import { CountingObjectsSimpleViewConfig, CountingObjectsSimpleViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import { validateProblemData } from '../../../helpers/validation.ts';
+import { validateProblemData, ViewValidationError } from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -24,10 +24,12 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
 
     const { numObjects } = data;
     
-    let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
-    if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';
+    let arrangement: 'line' | 'circle' | 'scattered' | 'array';
+    if (config.isBoxArrangement) arrangement = 'array';
+    else if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';
     else if (config.arrangement === Scope.CircularArrangement) arrangement = 'circle';
     else if (config.arrangement === Scope.ScatteredArrangement) arrangement = 'scattered';
+    else throw new ViewValidationError('counting-objects-simple', 'Unsupported object arrangement.');
 
     const icon = useMemo(() => {
         return ICONS[seed % ICONS.length];

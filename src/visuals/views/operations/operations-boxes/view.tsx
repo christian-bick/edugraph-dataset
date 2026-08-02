@@ -18,7 +18,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-boxes'>;
 }
 
-const OperationsBoxesCore = ({ config: _config, payload }: CoreProps) => {
+const OperationsBoxesCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
 
     const data = problem.data;
@@ -28,7 +28,10 @@ const OperationsBoxesCore = ({ config: _config, payload }: CoreProps) => {
         throw new ViewValidationError('operations-boxes', `Unsupported operation: ${data.operation}`);
     }
 
-    const blankPart = getBlankPart(payload.seed, 'solution');
+    const blankPart = getBlankPart(
+        payload.seed,
+        config.invertProcedure || config.unknownAddendMode ? 'problem' : 'solution'
+    );
 
     const isBlanked = (part: string) => {
         return !isSolutionView && blankPart === part;
@@ -54,23 +57,38 @@ const OperationsBoxesCore = ({ config: _config, payload }: CoreProps) => {
         return cls;
     };
 
+    const equation = (
+        <div className="flex items-center text-[1.5rem]">
+            <div className={boxClass('num1')}>
+                {isBlanked('num1') ? '' : data.num1}
+            </div>
+            <div className={symbolClass('symbol')}>
+                {isBlanked('symbol') ? '' : symbol}
+            </div>
+            <div className={boxClass('num2')}>
+                {isBlanked('num2') ? '' : data.num2}
+            </div>
+            <div className="text-[1.8rem] font-bold w-[50px] text-center">=</div>
+            <div className={`${boxClass('solution')} font-mono tracking-wider`}>
+                {isBlanked('solution') ? '' : data.answer}
+            </div>
+        </div>
+    );
+
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">
-            <div className="flex items-center text-[1.5rem]">
-                <div className={boxClass('num1')}>
-                    {isBlanked('num1') ? '' : data.num1}
+            {config.unknownAddendMode ? (
+                <div className="flex flex-col items-center">
+                    <div className={`w-[430px] mb-3 py-2 rounded-xl text-center font-semibold font-sans ${
+                        isSolutionView
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'bg-indigo-50 text-indigo-700'
+                    }`}>
+                        {isSolutionView ? 'Missing addend found' : 'Find the missing addend'}
+                    </div>
+                    {equation}
                 </div>
-                <div className={symbolClass('symbol')}>
-                    {isBlanked('symbol') ? '' : symbol}
-                </div>
-                <div className={boxClass('num2')}>
-                    {isBlanked('num2') ? '' : data.num2}
-                </div>
-                <div className="text-[1.8rem] font-bold w-[50px] text-center">=</div>
-                <div className={`${boxClass('solution')} font-mono tracking-wider`}>
-                    {isBlanked('solution') ? '' : data.answer}
-                </div>
-            </div>
+            ) : equation}
         </div>
     );
 };

@@ -2,11 +2,44 @@ import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutat
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
-const builder = new DatasetPermutationBuilder()
+const teenBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Difference,
+        Area.Sum,
+        Area.PlaceValue,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.PhysicalNumbers,
         Ability.ProcedureExecution,
         Scope.NumbersSmaller20
     ]);
 
-export const spec: CompetencyTarget[] = toTargets('test-place-value-teen', builder);
+const oneTenBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PlaceValue,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller20,
+        Scope.PhysicalNumbers,
+        Ability.ProcedureUnderstanding
+    ]);
+
+const multipleTensBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PlaceValue,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.MultiplesOf10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller100,
+        Scope.PhysicalNumbers,
+        Ability.ProcedureUnderstanding
+    ]);
+
+export const spec: CompetencyTarget[] = [
+    ...toTargets('test-place-value-teen', teenBuilder),
+    ...toTargets('test-place-value-one-ten', oneTenBuilder),
+    ...toTargets('test-place-value-multiple-tens', multipleTensBuilder)
+];

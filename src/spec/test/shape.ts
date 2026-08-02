@@ -52,7 +52,16 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Area.Rectangle],
-        [Area.Square]
+        [Area.Square],
+        [Area.Triangle],
+        [Area.Hexagon],
+        [Area.Trapezoid],
+        [Area.HalfCircle],
+        [Area.QuarterCircle],
+        [Area.Cube],
+        [Area.RectangularPrism],
+        [Area.Cone],
+        [Area.Cylinder]
     ]);
 
 const envShapesBuilder = new DatasetPermutationBuilder()
@@ -63,7 +72,9 @@ const envShapesBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Circle],
         [Area.Square],
-        [Area.Rectangle]
+        [Area.Rectangle],
+        [Area.Triangle],
+        [Area.Hexagon]
     ]);
 
 const identityNamingBuilder = new DatasetPermutationBuilder()
@@ -86,13 +97,12 @@ const identityNamingBuilder = new DatasetPermutationBuilder()
 const identityDrawBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
-        Area.ShapePlotting,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
-        [Area.Circle],
-        [Area.Square],
-        [Area.Triangle]
+        [Area.Circle, Area.CircularShapeDrawing],
+        [Area.Square, Area.LinearShapeDrawing],
+        [Area.Triangle, Area.LinearShapeDrawing]
     ]);
 
 const identityPositionBuilder = new DatasetPermutationBuilder()
@@ -104,7 +114,8 @@ const identityPositionBuilder = new DatasetPermutationBuilder()
         [Scope.Above],
         [Scope.Below],
         [Scope.Beside],
-        [Scope.Behind]
+        [Scope.Behind],
+        [Scope.Ahead]
     ]);
 
 const sameAttributeBuilder = new DatasetPermutationBuilder()

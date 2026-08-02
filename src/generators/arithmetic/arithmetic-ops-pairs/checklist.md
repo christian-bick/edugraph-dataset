@@ -1,3 +1,5 @@
-- The problem must represent a valid arithmetic equation with two operands, an operator, and a correct solution.
-- The solution must be the exact mathematical result of applying the operator to the operands.
-- The problem identifier must uniquely represent the arithmetic expression to avoid duplicates.
+- A binary problem must contain exactly two operands; a target labeled `Sum` must contain exactly three addends and use addition.
+- In a three-addend problem, all three addends and their sum must remain inside the target number range.
+- When the target requires multiples of ten, every operand and the solution must be divisible by 10.
+- A commutative-law payload must preserve the same two addends when their order is reversed; an associative-law payload must provide exactly three addends with one invariant sum across both groupings.
+- Every rendered arithmetic sample must be driven by an explicit Addition, Subtraction, Multiplication, or Division label; related concepts such as Difference must never select an operation by fallback.

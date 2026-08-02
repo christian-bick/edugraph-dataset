@@ -22,3 +22,18 @@ const builder = new DatasetPermutationBuilder()
     .addLabels([Scope.NumbersSmaller100]);
 
 export const spec: CompetencyTarget[] = toTargets('test-ordering', builder);
+
+const gradeOneBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumericOrder,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersLarger100,
+        Scope.NumbersSmaller1000,
+        Scope.Least,
+        Ability.ProcedureExecution
+    ]);
+
+spec.push(...toTargets('test-ordering-to-120', gradeOneBuilder));

@@ -16,6 +16,9 @@ export function getBallPosition(relation: string): BallPosition {
     } else if (relation === 'behind') {
         ballY = 55;
         ballX = 145;
+    } else if (relation === 'ahead') {
+        ballY = 70;
+        ballX = 155;
     }
     return { x: ballX, y: ballY };
 }

@@ -40,4 +40,16 @@ describe('ShapeEnvShapesGenerator', () => {
         expect(stub!.data.answer).toBe('rectangle');
         expect(stub!.data.target).toBe('table');
     });
+
+    it('should generate pennant when Triangle is requested', () => {
+        const stub = generator.generate({ classify: Area.Triangle });
+        expect(stub).not.toBeNull();
+        expect(stub!.data).toEqual({ answer: 'triangle', target: 'pennant' });
+    });
+
+    it('should generate honeycomb cell when Hexagon is requested', () => {
+        const stub = generator.generate({ classify: Area.Hexagon });
+        expect(stub).not.toBeNull();
+        expect(stub!.data).toEqual({ answer: 'hexagon', target: 'honeycomb cell' });
+    });
 });

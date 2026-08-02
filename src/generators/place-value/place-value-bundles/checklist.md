@@ -1,0 +1,2 @@
+- The payload must represent one through nine tens with no leftover ones.
+- The target value must equal the number of tens multiplied by 10.

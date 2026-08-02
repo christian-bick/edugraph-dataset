@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
@@ -8,6 +8,7 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.ProcedureExecution
     ],
+    rejectedLabels: [Area.NumerationWithIntegers],
 };
 
 

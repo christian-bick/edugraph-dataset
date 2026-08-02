@@ -18,12 +18,12 @@ const ShapeEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
     const target = data.target;
     const answer = data.answer;
 
-    if (target !== 'table' && target !== 'window' && target !== 'clock') {
+    if (target !== 'table' && target !== 'window' && target !== 'clock' && target !== 'pennant' && target !== 'honeycomb cell') {
         throw new ViewValidationError('shape-env-shapes', `Unsupported target environment shape: ${target}`);
     }
 
     const promptText = `What shape is the ${target}?`;
-    const options = ['circle', 'square', 'rectangle'];
+    const options = ['circle', 'square', 'rectangle', 'triangle', 'hexagon'];
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
@@ -49,6 +49,20 @@ const ShapeEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
                 )}
                 
                 <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
+                    {target === 'pennant' ? (
+                        <div className="relative w-[170px] h-[180px]">
+                            <div className="absolute left-[28px] top-[8px] w-[8px] h-[164px] bg-slate-600 rounded-full" />
+                            <div
+                                className="absolute left-[36px] top-[18px] w-[120px] h-[95px] bg-amber-400 border-2 border-amber-600"
+                                style={{ clipPath: 'polygon(0 0, 100% 50%, 0 100%)' }}
+                            />
+                        </div>
+                    ) : target === 'honeycomb cell' ? (
+                        <div
+                            className="w-[150px] h-[132px] bg-amber-300 border-[8px] border-amber-600"
+                            style={{ clipPath: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)' }}
+                        />
+                    ) : (
                     <div className="relative w-[320px] h-[180px] bg-sky-100 border-[2.5px] border-sky-600 rounded-lg overflow-hidden">
                         {/* Table */}
                         <div className="absolute bottom-0 left-[60px] width-[200px] height-[50px] bg-[#8b5a2b] border-2 border-[#5c3a21] rounded" style={{ width: '200px', height: '50px' }}></div>
@@ -62,6 +76,7 @@ const ShapeEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
                         {/* Clock */}
                         <div className="absolute top-[20px] right-[40px] w-[45px] h-[45px] rounded-full bg-white border-[3.5px] border-red-500 flex justify-center items-center font-bold text-[8px] text-slate-700">12</div>
                     </div>
+                    )}
                 </div>
 
                 <div className="flex flex-wrap gap-3 w-full justify-center">

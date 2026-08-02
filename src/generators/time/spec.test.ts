@@ -41,6 +41,21 @@ describe('TimeGenerator Spec Integration', () => {
         }
     });
 
+    it('should generate half-hour intervals when HalfHourIntervals is targeted', () => {
+        for (let i = 0; i < 20; i++) {
+            const stub = generateWithLabels(generator, [
+                Area.MeasuringTime,
+                Scope.HalfHourIntervals
+            ]);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.interval).toBe(1800);
+
+            const [, m, s] = stub!.data.time.split(':').map(Number);
+            expect([0, 30]).toContain(m);
+            expect(s).toBe(0);
+        }
+    });
+
     it('should generate second intervals when SecondIntervals is targeted', () => {
         for (let i = 0; i < 20; i++) {
             const stub = generateWithLabels(generator, [

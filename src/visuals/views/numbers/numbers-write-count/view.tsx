@@ -36,6 +36,42 @@ function DoubleTenFrame({ number }: { number: number }) {
     );
 }
 
+function BaseTenBlocks({number}: {number: number}) {
+    const hundreds = Math.floor(number / 100);
+    const tens = Math.floor((number % 100) / 10);
+    const ones = number % 10;
+    return (
+        <div className="flex items-end gap-5 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4">
+            <div className="flex flex-col items-center gap-2">
+                <div className="flex gap-2">
+                    {Array.from({length: hundreds}).map((_, index) => (
+                        <div key={index} className="grid h-[112px] w-[112px] grid-cols-10 grid-rows-10 border-2 border-sky-700 bg-sky-100">
+                            {Array.from({length: 100}).map((__, cell) => <span key={cell} className="border-[0.5px] border-sky-300" />)}
+                        </div>
+                    ))}
+                </div>
+                <span className="font-bold text-slate-600">{hundreds} hundred</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+                <div className="flex gap-1.5">
+                    {Array.from({length: tens}).map((_, index) => (
+                        <div key={index} className="grid h-[112px] w-[14px] grid-rows-10 border-2 border-amber-700 bg-amber-100">
+                            {Array.from({length: 10}).map((__, cell) => <span key={cell} className="border-[0.5px] border-amber-300" />)}
+                        </div>
+                    ))}
+                </div>
+                <span className="font-bold text-slate-600">{tens} tens</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+                <div className="grid grid-cols-5 gap-1.5">
+                    {Array.from({length: ones}).map((_, index) => <span key={index} className="h-[14px] w-[14px] border-2 border-emerald-700 bg-emerald-100" />)}
+                </div>
+                <span className="font-bold text-slate-600">{ones} ones</span>
+            </div>
+        </div>
+    );
+}
+
 export const NumbersWriteCountCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
@@ -47,7 +83,7 @@ export const NumbersWriteCountCore = ({ config: _config, payload }: CoreProps) =
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="flex items-center gap-[30px] flex-wrap">
-                <DoubleTenFrame number={number} />
+                {number <= 20 ? <DoubleTenFrame number={number} /> : <BaseTenBlocks number={number} />}
                 <div className="flex items-center gap-[15px]">
                     {!isSolutionView && <div className="text-[2rem] font-bold text-slate-700">Count:</div>}
                     <div className={`border-[2.5px] rounded-xl w-[75px] h-[75px] flex justify-center items-center text-[2.5rem] font-mono ${

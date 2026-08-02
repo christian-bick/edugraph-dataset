@@ -63,9 +63,12 @@ const unknownAddendBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersSmaller10,
-        Scope.PhysicalNumbers,
+        Scope.NumbersSmaller20,
         Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Area.Addition],
+        [Area.Subtraction]
     ]);
 
 // --- 1.OA.C.5: Relate counting to addition and subtraction ---
@@ -134,6 +137,20 @@ const unknownNumberBuilder = new DatasetPermutationBuilder()
         [Area.Subtraction]
     ]);
 
+const unknownOperandBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller20,
+        Ability.ProcedureInversion
+    ])
+    .applyLabelVariants([
+        [Area.Addition],
+        [Area.Subtraction]
+    ]);
+
 // ==========================================
 // 2. Number and Operations in Base Ten (1.NBT)
 // ==========================================
@@ -145,13 +162,13 @@ const orderNumbersBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller100,
+        Scope.NumbersLarger100,
+        Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.Most],
-        [Scope.NumbersWithoutZero, Scope.Least],
-        [Scope.NumbersWithZero, Scope.Least]
+        [Scope.NumbersWithoutZero, Scope.Least]
     ]);
 
 // --- 1.NBT.A.1: Read and write numerals ---
@@ -159,12 +176,10 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
         Scope.ArabicNumerals,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersLarger100,
+        Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
-        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.A.1: Represent a number of objects with a written numeral ---
@@ -173,12 +188,10 @@ const representCountsBuilder = new DatasetPermutationBuilder()
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.PhysicalNumbers,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersLarger100,
+        Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
-        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.B.2a: 10 as a bundle of ten ones ---
@@ -405,31 +418,6 @@ const compareDataBuilder = new DatasetPermutationBuilder()
 // 4. Geometry (1.G)
 // ==========================================
 
-// --- 1.G.A.1: Build and draw shapes possessing defining attributes ---
-const buildShapesBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.ShapeRecognition,
-        Scope.ShapeProperties,
-        Ability.VisualArticulation
-    ])
-    .applyLabelVariants([
-        [Area.Triangle],
-        [Area.Square],
-        [Area.Rectangle],
-        [Area.Hexagon]
-    ]);
-
-const drawShapesBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.ShapeIdentity,
-        Ability.VisualArticulation
-    ])
-    .applyLabelVariants([
-        [Area.Circle, Area.CircularShapeDrawing],
-        [Area.Square, Area.LinearShapeDrawing],
-        [Area.Triangle, Area.LinearShapeDrawing]
-    ]);
-
 // --- 1.G.A.2: Compose two-dimensional shapes into composite shapes ---
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -466,47 +454,43 @@ const partitionShapesBuilder = new DatasetPermutationBuilder()
 // at the supported level they reproduce a kindergarten competency and are
 // indistinguishable by the ontology, so they are parked in implementationTodos
 // (1.OA.B.4 unknown-addend, 1.NBT.A.1 write-numerals & represent-counts,
-// 1.G.A.1 build-shapes & draw-shapes, 1.G.A.2 compose-shapes) rather than
+// 1.G.A.1 build-shapes & draw-shapes) rather than
 // redeclared here — see those entries for the grade-1 elevation each awaits.
 export const spec: CompetencyTarget[] = [
     // 1.OA - Operations and Algebraic Thinking
     ...toTargets('1.OA.A.1-word-problems', wordProblemsBuilder),
+    ...toTargets('1.OA.A.2-three-addends', threeAddendsBuilder),
+    ...toTargets('1.OA.B.3-properties', propertiesBuilder),
+    ...toTargets('1.OA.B.4-unknown-addend', unknownAddendBuilder),
     ...toTargets('1.OA.C.5-relate-counting', relateCountingBuilder),
     ...toTargets('1.OA.C.6-fluency', fluencyBuilder),
+    ...toTargets('1.OA.D.7-equal-sign', equalSignBuilder),
     ...toTargets('1.OA.D.8-unknown-number', unknownNumberBuilder),
+    ...toTargets('1.OA.D.8-unknown-operand', unknownOperandBuilder),
     // 1.NBT - Number and Operations in Base Ten
-    ...toTargets('1.NBT.A.1-order-numbers', orderNumbersBuilder),
+    ...toTargets('1.NBT.A.1-count-to-120', orderNumbersBuilder),
+    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder),
+    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder),
+    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder),
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
+    ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('1.NBT.B.3-compare-two-digit', compareTwoDigitBuilder),
     ...toTargets('1.NBT.C.4-add-within-100', addWithin100Builder),
+    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder),
+    ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder),
     // 1.MD - Measurement and Data
+    ...toTargets('1.MD.A.1-order-lengths', orderLengthsBuilder),
     ...toTargets('1.MD.A.2-measure-length', measureLengthBuilder),
     ...toTargets('1.MD.B.3-time', hourTimeBuilder),
+    ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder),
+    ...toTargets('1.MD.B.3-digital-clocks', digitalTimeBuilder),
     ...toTargets('1.MD.C.4-interpret-data', interpretDataBuilder),
-    ...toTargets('1.MD.C.4-compare-data', compareDataBuilder)
+    ...toTargets('1.MD.C.4-compare-data', compareDataBuilder),
+    // 1.G - Geometry
+    ...toTargets('1.G.A.2-compose-other-shapes', composeShapesBuilder),
+    ...toTargets('1.G.A.3-partition-shapes', partitionShapesBuilder)
 ];
 
-export const implementationTodos: CompetencyTarget[] = [
-    ...toTargets('1.OA.A.1-word-problems-unknowns', wordProblemsBuilder, 'Unknowns in all positions are not expressible; the arithmetic generator and word-problem view only produce result-unknown problems.'),
-    ...toTargets('1.OA.A.2-three-addends', threeAddendsBuilder, 'The arithmetic generator only produces binary operations; there is no support for three addends.'),
-    ...toTargets('1.OA.B.3-properties', propertiesBuilder, 'No generator/view exercises arithmetic laws (Area.CommutativeLaw / Area.AssociativeLaw).'),
-    ...toTargets('1.OA.B.4-unknown-addend', unknownAddendBuilder, 'The supported within-10 case reproduces the K.OA.A.4 make-ten complement problem and is indistinguishable from it by the ontology; the distinct grade-1 competency — subtraction as an unknown addend (conceptually Ability.ProcedureInversion), unknown in any position within 20 — has no dedicated generator/view.'),
-    ...toTargets('1.OA.D.7-equal-sign', equalSignBuilder, 'No generator/view produces true/false equation judgment tasks (Ability.PlausibilityEvaluation).'),
-    ...toTargets('1.OA.D.8-unknown-operand', unknownNumberBuilder, 'The operations-boxes view only leaves the result blank; unknowns in the first or second operand position are not supported.'),
-    ...toTargets('1.NBT.A.1-count-to-120', orderNumbersBuilder, 'The range 100-120 is not expressible (ordering/counting generators cap at Scope.NumbersSmaller100), so permutations stop below 100.'),
-    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder, 'Writing numerals coincides with K.CC.A.3 within the supported range and is indistinguishable from it; the grade-1 extension to 120 is unsupported (see 1.NBT.A.1-count-to-120).'),
-    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder, 'Representing a count with a written numeral coincides with K.CC.A.3 within the supported range and is indistinguishable from it; the grade-1 extension to 120 is unsupported.'),
-    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder, 'No generator/view exercises bundling ten ones into a "ten" (Area.PlaceValue with exactly 10).'),
-    ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder, 'Scope.MultiplesOf10 now expresses the numeric restriction, but no generator produces tens-bundle decompositions of 10-90.'),
-    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'The counting-inc-dec generator only steps by one and caps at Scope.NumbersSmaller20; ten-jumps within 100 are not supported.'),
-    ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder, 'The arithmetic generator has no Scope.MultiplesOf10 constraint for its operands.'),
-    ...toTargets('1.MD.A.1-order-lengths', orderLengthsBuilder, 'The measurement-compare generator only compares two objects; ordering three objects and indirect comparison are not supported.'),
-    ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder, 'The time generator supports second, minute and hour intervals, but it cannot constrain generated clock times to Scope.HalfHourIntervals.'),
-    ...toTargets('1.MD.B.3-digital-clocks', digitalTimeBuilder, 'Digital clocks (Scope.DigitalClock) have no compatible view; half-hour granularity is now expressible with Scope.HalfHourIntervals.'),
-    ...toTargets('1.G.A.1-defining-attributes', buildShapesBuilder, 'Building shapes coincides with K.G.B.5 and is indistinguishable from it; the grade-1 elevation — distinguishing defining vs. non-defining attributes (closed/three-sided vs. color/orientation/size) — has no generator/view support.'),
-    ...toTargets('1.G.A.1-draw-shapes', drawShapesBuilder, 'Drawing shapes coincides with K.G.B.5 and is indistinguishable from it; the grade-1 defining-attribute elevation has no generator/view support (see 1.G.A.1-defining-attributes).'),
-    ...toTargets('1.G.A.2-compose-other-shapes', composeShapesBuilder, 'The standard is now ontologically expressible, including Area.HalfCircle and Area.QuarterCircle, but the composition generator/view cannot compose the full set of 2D and 3D target shapes or compose new shapes from an existing composite.'),
-    ...toTargets('1.G.A.3-partition-shapes', partitionShapesBuilder, 'No generator/view supports partitioning shapes into equal shares (halves/fourths/quarters).')
-];
+export const implementationTodos: CompetencyTarget[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];

@@ -17,7 +17,7 @@ export const spec: GeneratorSpec = {
 
 export const TimeGeneratorSchema = {
     intervalLabel: [
-        [Scope.SecondIntervals, Scope.MinuteIntervals, Scope.HourIntervals],
+        [Scope.SecondIntervals, Scope.MinuteIntervals, Scope.HalfHourIntervals, Scope.HourIntervals],
         selectExactMatch
     ],
     requireZero: [

@@ -19,8 +19,8 @@ describe('ShapeComposeShapesGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.target).toBe('rectangle');
-        expect(stub!.data.components).toEqual(['triangles']);
-        expect(stub!.data.answer).toBe('triangle');
+        expect(stub!.data.components).toEqual(['triangle', 'triangle']);
+        expect(stub!.data.answer).toBe('Two triangles');
     });
 
     it('should generate square compose problem from Area.Square label', () => {
@@ -30,7 +30,24 @@ describe('ShapeComposeShapesGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.target).toBe('square');
-        expect(stub!.data.components).toEqual(['triangles']);
-        expect(stub!.data.answer).toBe('triangle');
+        expect(stub!.data.components).toEqual(['triangle', 'triangle']);
+        expect(stub!.data.answer).toBe('Two triangles');
+    });
+
+    it.each([
+        [Area.Triangle, 'triangle'],
+        [Area.Hexagon, 'hexagon'],
+        [Area.Trapezoid, 'trapezoid'],
+        [Area.HalfCircle, 'half circle'],
+        [Area.QuarterCircle, 'quarter circle'],
+        [Area.Cube, 'cube'],
+        [Area.RectangularPrism, 'rectangular prism'],
+        [Area.Cone, 'cone'],
+        [Area.Cylinder, 'cylinder']
+    ])('should resolve %s into a %s composition', (label, target) => {
+        const stub = generateWithLabels(generator, [label, Scope.ShapeProperties]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.target).toBe(target);
+        expect(stub!.data.options).toContain(stub!.data.answer);
     });
 });

@@ -8,7 +8,7 @@ export class ShapeIdentityGenerator implements ProblemGenerator<ShapeIdentityPro
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeIdentityGeneratorSchema;
 
-    generate(config: ShapeIdentityGeneratorConfig): ProblemStub | null {
+    generate(config: ShapeIdentityGeneratorConfig): ProblemStub<ShapeIdentityProblem> | null {
         validateConfigFields('shape-identity', config, ['shapes']);
         const validShapes = config.shapes!;
 
@@ -19,9 +19,7 @@ export class ShapeIdentityGenerator implements ProblemGenerator<ShapeIdentityPro
             data: {
                 shape,
                 answer: shape
-            },
-            tags: [selectedArea]
+            }
         };
     }
 }
-

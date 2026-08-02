@@ -1,0 +1,3 @@
+- In Question Mode, the prompt asks whether the displayed equation is true or false and neither choice is selected.
+- In Solution Mode, the prompt is absent and exactly the mathematically correct True or False choice is highlighted.
+- The equation and both response choices must remain visible in the same positions in both modes.

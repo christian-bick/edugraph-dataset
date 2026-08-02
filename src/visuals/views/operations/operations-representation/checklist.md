@@ -1,1 +1,4 @@
-### Operations Representation Visual Checklist
+- In Question Mode, the prompt asks the learner to use the objects and the equation answer box is empty.
+- In Solution Mode, the prompt is absent and the equation answer is shown.
+- Addition must show two visibly distinct object groups separated by a plus sign.
+- Subtraction must show the subtracted objects crossed out while leaving the remainder unobscured.

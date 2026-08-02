@@ -18,6 +18,7 @@ export class ShapePositionGenerator implements ProblemGenerator<ShapePositionPro
         if (relations.includes(Scope.Below)) possible.push('below');
         if (relations.includes(Scope.Beside)) possible.push('beside');
         if (relations.includes(Scope.Behind)) possible.push('behind');
+        if (relations.includes(Scope.Ahead)) possible.push('ahead');
 
         if (possible.length === 0) {
             return null;
@@ -26,19 +27,11 @@ export class ShapePositionGenerator implements ProblemGenerator<ShapePositionPro
         const relation = possible[Math.floor(random() * possible.length)];
         const answer = relation;
 
-        const RELATION_MAP: Record<string, string> = {
-            above: Scope.Above,
-            below: Scope.Below,
-            beside: Scope.Beside,
-            behind: Scope.Behind
-        };
-
         return {
             data: {
                 relation,
                 answer
-            },
-            tags: [RELATION_MAP[relation]]
+            }
         };
     }
 }

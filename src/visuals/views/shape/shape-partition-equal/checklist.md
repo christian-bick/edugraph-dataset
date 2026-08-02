@@ -1,0 +1,3 @@
+- In Question Mode, the prompt names two or four equal parts and the shape has no visible partition lines.
+- In Solution Mode, the prompt is absent and green partition lines divide the shape into exactly the requested number of equal regions.
+- The equal-parts label remains visible below the shape in both modes.

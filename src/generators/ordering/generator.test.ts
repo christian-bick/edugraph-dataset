@@ -48,6 +48,19 @@ describe('OrderingGenerator', () => {
         })).toBeNull();
     });
 
+    it('caps grade-one high-range sequences at 120', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({
+                requireZero: false,
+                requireNegative: false,
+                range: {min: 101, max: 999}
+            });
+            expect(stub).not.toBeNull();
+            expect(stub!.data.numbers.every((number: number) => number >= 101 && number <= 120)).toBe(true);
+        }
+    });
+
     it('should be deterministic with the same seed', () => {
         const config = {
             requireZero: true,

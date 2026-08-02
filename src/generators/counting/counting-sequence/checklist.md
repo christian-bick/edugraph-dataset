@@ -1,0 +1,4 @@
+- The payload must contain an ordered sequence of at least two positive integers and exactly one missing position after the visible starting value.
+- Adjacent values must differ by exactly one for additive counting or exactly ten for derived counting.
+- The answer must equal the sequence value at the missing position.
+- Every sequence value must stay within the resolved numeric range.

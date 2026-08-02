@@ -16,15 +16,19 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
     const data = problem.data;
     validateProblemData('shape-position', data, ['relation', 'answer']);
 
-    const relation = data.relation as string;
+    const relation = data.relation;
     const answer = data.answer;
 
-    if (relation !== 'above' && relation !== 'below' && relation !== 'beside' && relation !== 'nextTo' && relation !== 'behind') {
+    if (relation !== 'above' && relation !== 'below' && relation !== 'beside' && relation !== 'nextTo' && relation !== 'behind' && relation !== 'ahead') {
         throw new ViewValidationError('shape-position', `Unsupported relation: ${relation}`);
     }
 
     const promptText = "Where is the ball relative to the box?";
-    const options = relation === 'behind' ? ['above', 'below', 'behind'] : ['above', 'below', 'nextTo'];
+    const options = relation === 'behind'
+        ? ['above', 'below', 'behind']
+        : relation === 'ahead'
+            ? ['behind', 'nextTo', 'ahead']
+            : ['above', 'below', 'nextTo'];
 
     const pos = getBallPosition(relation);
     const isBehind = relation === 'behind';
@@ -42,6 +46,7 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
 
     const getLabelText = (opt: string) => {
         if (opt === 'nextTo') return 'Next to the box';
+        if (opt === 'ahead') return 'In front of the box';
         return opt.charAt(0).toUpperCase() + opt.slice(1) + ' the box';
     };
 

@@ -464,10 +464,10 @@ describe('loadTargets', () => {
         expect(targets.map(t => t.id)).toEqual(['dup', 'dup']);
     });
 
-    it('loads real ccss targets and excludes their implementationTodos entries', async () => {
+    it('loads the completed real ccss target set without duplicate ids', async () => {
         const targets = await loadTargets('ccss');
         expect(targets.length).toBeGreaterThan(0);
-        expect(targets.some(t => t.id.startsWith('K.CC.A.1-count-to-100'))).toBe(false);
+        expect(targets.some(t => t.id.startsWith('K.CC.A.1-count-to-100'))).toBe(true);
         expect(targets.some(t => t.id.startsWith('K.OA.A.4-make-ten'))).toBe(true);
         const ids = targets.map(t => t.id);
         expect(new Set(ids).size).toBe(ids.length);

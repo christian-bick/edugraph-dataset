@@ -41,4 +41,22 @@ describe('ShapeEnvShapesGenerator Spec Integration', () => {
         expect(stub!.data.answer).toBe('rectangle');
         expect(stub!.data.target).toBe('table');
     });
+
+    it('should generate pennant env-shape from Area.Triangle label', () => {
+        const stub = generateWithLabels(generator, [
+            Area.Triangle,
+            Scope.ShapeProperties
+        ]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data).toEqual({ answer: 'triangle', target: 'pennant' });
+    });
+
+    it('should generate honeycomb env-shape from Area.Hexagon label', () => {
+        const stub = generateWithLabels(generator, [
+            Area.Hexagon,
+            Scope.ShapeProperties
+        ]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data).toEqual({ answer: 'hexagon', target: 'honeycomb cell' });
+    });
 });

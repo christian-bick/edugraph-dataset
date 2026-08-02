@@ -53,12 +53,9 @@ function TracingHelper({ number }: { number: number }) {
         return <DigitSVG digit={digits[0]} isSingle={true} />;
     }
 
-    return (
-        <div className="flex justify-center items-center w-full h-full gap-1">
-            <DigitSVG digit={digits[0]} isSingle={false} />
-            <DigitSVG digit={digits[1]} isSingle={false} />
-        </div>
-    );
+    return <div className="flex justify-center items-center w-full h-full gap-0.5">
+        {digits.map((digit, index) => <DigitSVG key={index} digit={digit} isSingle={false} />)}
+    </div>;
 }
 
 function DoubleTenFrame({ number }: { number: number }) {
@@ -96,14 +93,17 @@ const NumbersWriteStrokeCore = ({ config: _config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] w-fit">
             <div className="flex items-center gap-[30px] flex-wrap font-sans">
-                <DoubleTenFrame number={number} />
+                {number <= 20 && <DoubleTenFrame number={number} />}
                 <div className="text-[3.5rem] font-extrabold text-slate-800 min-w-[80px] text-center">
                     {number}
                 </div>
                 <div className="flex gap-3">
                     {/* Box 1: Tracing Guide */}
-                    <div className="border-2 border-slate-200 rounded-lg w-[70px] h-[70px] flex justify-center items-center bg-slate-50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden">
-                        <TracingHelper number={number} />
+                    <div className="flex flex-col items-center gap-1">
+                        <span className="text-sm font-bold text-slate-500">Trace</span>
+                        <div className="border-2 border-slate-200 rounded-lg w-[110px] h-[70px] flex justify-center items-center bg-slate-50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden">
+                            <TracingHelper number={number} />
+                        </div>
                     </div>
                     {/* Box 2 & 3: Interactive/Response Boxes */}
                     {Array.from({ length: 2 }).map((_, idx) => {
@@ -117,8 +117,11 @@ const NumbersWriteStrokeCore = ({ config: _config, payload }: CoreProps) => {
                         }
 
                         return (
-                            <div key={idx} className={cls}>
-                                {content}
+                            <div key={idx} className="flex flex-col items-center gap-1">
+                                <span className="text-sm font-bold text-slate-500">Write</span>
+                                <div className={cls}>
+                                    {content}
+                                </div>
                             </div>
                         );
                     })}

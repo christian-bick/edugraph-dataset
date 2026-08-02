@@ -4,4 +4,5 @@
   - 'clock' must map to `answer` 'circle'.
   - 'window' must map to `answer` 'square'.
   - 'table' must map to `answer` 'rectangle'.
-- Verify that the problem ID conforms to: `shape-env-shapes-[target]`.
+  - 'pennant' must map to `answer` 'triangle'.
+  - 'honeycomb cell' must map to `answer` 'hexagon'.

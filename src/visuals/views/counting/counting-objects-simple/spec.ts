@@ -1,6 +1,7 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
+import { hasLabel } from '../../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-objects-simple',
@@ -14,7 +15,8 @@ export const spec: ViewSpec = {
 
 
 export const CountingObjectsSimpleViewSchema = {
-    arrangement: [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement]
+    arrangement: [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement],
+    isBoxArrangement: [[Scope.BoxArrangement], hasLabel(Scope.BoxArrangement)]
 } as const;
 
 export type CountingObjectsSimpleViewConfig = ConfigFromSchema<typeof CountingObjectsSimpleViewSchema>;

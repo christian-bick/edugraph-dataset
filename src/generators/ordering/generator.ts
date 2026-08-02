@@ -20,8 +20,10 @@ export class OrderingGenerator implements ProblemGenerator<OrderingProblem, Orde
     generate(config: OrderingGeneratorConfig): ProblemStub | null {
         validateConfigFields('ordering', config, ['range', 'requireNegative', 'requireZero']);
         const resolvedRange = config.range!;
-        const minMagnitude = Math.max(1, Math.ceil(resolvedRange.min));
-        const maxMagnitude = Math.floor(resolvedRange.max);
+        const minMagnitude = resolvedRange.min >= 100
+            ? Math.max(101, Math.ceil(resolvedRange.min))
+            : Math.max(1, Math.ceil(resolvedRange.min));
+        const maxMagnitude = Math.min(120, Math.floor(resolvedRange.max));
         if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
 
         const magnitudes = Array.from(

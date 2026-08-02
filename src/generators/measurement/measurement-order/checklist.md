@@ -1,0 +1,2 @@
+- The payload must contain exactly three objects with distinct positive lengths.
+- The answer sequence must order every object once, shortest-first for Least and longest-first for Most.

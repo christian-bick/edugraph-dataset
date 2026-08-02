@@ -21,6 +21,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub!.data.target).toBe('triangle');
         expect(stub!.data.sides).toBe(3);
         expect(stub!.data.corners).toBe(3);
+        expect(stub!.data.attributes).toContainEqual({label: '3 straight sides', defining: true});
     });
 
     it('should generate square problem from Area.Square label', () => {
@@ -32,6 +33,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub!.data.target).toBe('square');
         expect(stub!.data.sides).toBe(4);
         expect(stub!.data.corners).toBe(4);
+        expect(stub!.data.attributes).toContainEqual({label: 'its color', defining: false});
     });
 
     it('should generate rectangle problem from Area.Rectangle label', () => {
@@ -43,6 +45,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub!.data.target).toBe('rectangle');
         expect(stub!.data.sides).toBe(4);
         expect(stub!.data.corners).toBe(4);
+        expect(stub!.data.attributes).toContainEqual({label: 'opposite sides equal', defining: true});
     });
 
     it('should generate hexagon problem from Area.Hexagon label', () => {
@@ -54,5 +57,6 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub!.data.target).toBe('hexagon');
         expect(stub!.data.sides).toBe(6);
         expect(stub!.data.corners).toBe(6);
+        expect(stub!.data.attributes).toContainEqual({label: 'the direction it points', defining: false});
     });
 });

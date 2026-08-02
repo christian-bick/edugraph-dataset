@@ -13,7 +13,7 @@ export const spec: GeneratorSpec = {
 
 export const ShapePositionGeneratorSchema = {
     relations: [
-        [Scope.Above, Scope.Below, Scope.Beside, Scope.Behind],
+        [Scope.Above, Scope.Below, Scope.Beside, Scope.Behind, Scope.Ahead],
         matchAllExactLabels
     ]
 } as const;

@@ -16,7 +16,15 @@ export const ShapeComposeShapesGeneratorSchema = {
         [
             Area.Rectangle,
             Area.Square,
-            Area.Triangle
+            Area.Triangle,
+            Area.Hexagon,
+            Area.Trapezoid,
+            Area.HalfCircle,
+            Area.QuarterCircle,
+            Area.Cube,
+            Area.RectangularPrism,
+            Area.Cone,
+            Area.Cylinder
         ],
         selectExactMatch
     ],

@@ -1,0 +1,1 @@
+- The payload must request partitioning a circle or rectangle into exactly two or four equal shares.

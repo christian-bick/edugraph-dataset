@@ -1,9 +1,10 @@
 export type ArithmeticProblem = {
     num1: number;
     num2: number;
+    num3?: number;
+    propertyLaw?: 'commutative' | 'associative';
     operation: 'addition' | 'subtraction' | 'multiplication' | 'division';
     answer: number;
-    blankPart?: 'num1' | 'num2' | 'solution';
 };
 
 export type ArithmeticDecomposeProblem = {
@@ -12,8 +13,22 @@ export type ArithmeticDecomposeProblem = {
     pair2: [number, number];
 };
 
+export type EquationJudgmentProblem = {
+    num1: number;
+    num2: number;
+    operation: 'addition' | 'subtraction';
+    claimedAnswer: number;
+    isTrue: boolean;
+};
+
 export type PlaceValueTeenProblem = {
     ones: number;
+    target: number;
+};
+
+export type PlaceValueBundlesProblem = {
+    tens: number;
+    ones: 0;
     target: number;
 };
 
@@ -31,8 +46,16 @@ export type CountingProblem = {
 export type CountingIncDecProblem = {
     numObjects: number;
     incDecType: 'inc' | 'dec';
+    stepSize: 1 | 10;
     incDecAnswer: number;
     simpleAnswer: number;
+};
+
+export type CountingSequenceProblem = {
+    sequence: number[];
+    missingIndex: number;
+    answer: number;
+    stepSize: 1 | 10;
 };
 
 
@@ -70,6 +93,12 @@ export type MeasurementCompareProblem = {
     maxVal?: number;
 };
 
+export type MeasurementOrderProblem = {
+    objects: Array<{id: string; length: number}>;
+    direction: 'ascending' | 'descending';
+    order: string[];
+};
+
 export type ComparisonProblem = {
     num1: number;
     num2: number;
@@ -97,7 +126,7 @@ export type ShapeIdentityProblem = {
 };
 
 export type ShapePositionProblem = {
-    relation: 'above' | 'below' | 'beside' | 'nextTo';
+    relation: 'above' | 'below' | 'beside' | 'nextTo' | 'behind' | 'ahead';
     answer: string;
 };
 
@@ -130,12 +159,22 @@ export type ShapeBuildShapeProblem = {
     target: string;
     sides: number;
     corners: number;
+    attributes: Array<{
+        label: string;
+        defining: boolean;
+    }>;
 };
 
 export type ShapeComposeShapesProblem = {
     target: string;
     components: string[];
+    options: string[];
     answer: string;
+};
+
+export type ShapePartitionProblem = {
+    shape: 'circle' | 'rectangle';
+    parts: 2 | 4;
 };
 
 
@@ -148,16 +187,20 @@ export interface ViewTypeMap {
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticProblem;
     'operations-word-problem': ArithmeticProblem;
+    'operations-properties': ArithmeticProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
+    'operations-equation-judgment': EquationJudgmentProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;
     'place-value-make-ten': PlaceValueMakeTenProblem;
+    'place-value-tens-bundles': PlaceValueBundlesProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;
     'counting-objects-cardinality': CountingProblem;
     'counting-objects-count-out': CountingProblem;
     'counting-inc-dec': CountingIncDecProblem;
+    'counting-number-sequence': CountingSequenceProblem;
     'counting-conservation': CountingProblem;
     'sorting-classify-count': CountingClassifyCountProblem;
     'sorting-classify-sort': CountingClassifySortProblem;
@@ -166,6 +209,7 @@ export interface ViewTypeMap {
     'measure-length-decimal': MeasurementStandardProblem;
     'measure-attributes': MeasurementAttributeProblem;
     'measure-compare': MeasurementCompareProblem;
+    'measure-order': MeasurementOrderProblem;
 
     'numbers-compare': ComparisonProblem;
     'numbers-compare-matching': ComparisonProblem;
@@ -176,6 +220,7 @@ export interface ViewTypeMap {
     'numbers-write-standard': WritingProblem;
     'numbers-write-count': WritingProblem;
     'time-analog': TimeProblem;
+    'time-digital': TimeProblem;
 
     'shape-naming': ShapeIdentityProblem;
     'shape-position': ShapePositionProblem;
@@ -185,5 +230,6 @@ export interface ViewTypeMap {
     'shape-same-attribute': ShapeSameAttributeProblem;
     'shape-build-shape': ShapeBuildShapeProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
+    'shape-partition-equal': ShapePartitionProblem;
     'shape-draw-shape': ShapeIdentityProblem;
 }
