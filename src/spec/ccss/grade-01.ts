@@ -217,6 +217,7 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
         Area.PlaceValue,
         Scope.ArabicNumerals,
         Scope.Base10,
+        Scope.MultiplesOf10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller100,
         Scope.PhysicalNumbers,
@@ -275,6 +276,7 @@ const subtractTensBuilder = new DatasetPermutationBuilder()
         Area.Subtraction,
         Scope.ArabicNumerals,
         Scope.Base10,
+        Scope.MultiplesOf10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller100,
         Ability.ProcedureExecution
@@ -317,15 +319,39 @@ const measureLengthBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
-// --- 1.MD.B.3: Tell and write time in hours and half-hours ---
-const timeBuilder = new DatasetPermutationBuilder()
+// --- 1.MD.B.3: Tell and write time in hours ---
+const hourTimeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringTime,
-        Scope.AnalogClock
+        Scope.AnalogClock,
+        Scope.HourIntervals
+    ])
+    .applyLabelVariants([
+        [Ability.ProcedureExecution],
+        [Ability.VisualArticulation]
+    ]);
+
+// --- 1.MD.B.3: Tell and write time in half-hours ---
+const halfHourTimeBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.MeasuringTime,
+        Scope.AnalogClock,
+        Scope.HalfHourIntervals
+    ])
+    .applyLabelVariants([
+        [Ability.ProcedureExecution],
+        [Ability.VisualArticulation]
+    ]);
+
+// --- 1.MD.B.3: Tell and write time using digital clocks ---
+const digitalTimeBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.MeasuringTime,
+        Scope.DigitalClock
     ])
     .applyLabelVariants([
         [Scope.HourIntervals],
-        [Scope.MinuteIntervals]
+        [Scope.HalfHourIntervals]
     ])
     .applyLabelVariants([
         [Ability.ProcedureExecution],
@@ -412,7 +438,15 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Area.Rectangle],
-        [Area.Square]
+        [Area.Square],
+        [Area.Triangle],
+        [Area.Trapezoid],
+        [Area.HalfCircle],
+        [Area.QuarterCircle],
+        [Area.Cube],
+        [Area.RectangularPrism],
+        [Area.Cone],
+        [Area.Cylinder]
     ]);
 
 // --- 1.G.A.3: Partition circles and rectangles into halves and fourths ---
@@ -447,7 +481,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.NBT.C.4-add-within-100', addWithin100Builder),
     // 1.MD - Measurement and Data
     ...toTargets('1.MD.A.2-measure-length', measureLengthBuilder),
-    ...toTargets('1.MD.B.3-time', timeBuilder),
+    ...toTargets('1.MD.B.3-time', hourTimeBuilder),
     ...toTargets('1.MD.C.4-interpret-data', interpretDataBuilder),
     ...toTargets('1.MD.C.4-compare-data', compareDataBuilder)
 ];
@@ -463,31 +497,16 @@ export const implementationTodos: CompetencyTarget[] = [
     ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder, 'Writing numerals coincides with K.CC.A.3 within the supported range and is indistinguishable from it; the grade-1 extension to 120 is unsupported (see 1.NBT.A.1-count-to-120).'),
     ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder, 'Representing a count with a written numeral coincides with K.CC.A.3 within the supported range and is indistinguishable from it; the grade-1 extension to 120 is unsupported.'),
     ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder, 'No generator/view exercises bundling ten ones into a "ten" (Area.PlaceValue with exactly 10).'),
-    ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder, 'There is no way to express "multiples of 10" via ontology labels and no generator producing tens-bundle decompositions of 10-90.'),
+    ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder, 'Scope.MultiplesOf10 now expresses the numeric restriction, but no generator produces tens-bundle decompositions of 10-90.'),
     ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'The counting-inc-dec generator only steps by one and caps at Scope.NumbersSmaller20; ten-jumps within 100 are not supported.'),
-    ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder, 'Multiples of 10 operands are not expressible via ontology labels and the arithmetic generator has no such constraint.'),
+    ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder, 'The arithmetic generator has no Scope.MultiplesOf10 constraint for its operands.'),
     ...toTargets('1.MD.A.1-order-lengths', orderLengthsBuilder, 'The measurement-compare generator only compares two objects; ordering three objects and indirect comparison are not supported.'),
-    ...toTargets('1.MD.B.3-digital-clocks', timeBuilder, 'Digital clocks (Scope.DigitalClock) have no view; and there is no scope label restricting minutes to half-hour granularity.'),
+    ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder, 'The time generator supports second, minute and hour intervals, but it cannot constrain generated clock times to Scope.HalfHourIntervals.'),
+    ...toTargets('1.MD.B.3-digital-clocks', digitalTimeBuilder, 'Digital clocks (Scope.DigitalClock) have no compatible view; half-hour granularity is now expressible with Scope.HalfHourIntervals.'),
     ...toTargets('1.G.A.1-defining-attributes', buildShapesBuilder, 'Building shapes coincides with K.G.B.5 and is indistinguishable from it; the grade-1 elevation — distinguishing defining vs. non-defining attributes (closed/three-sided vs. color/orientation/size) — has no generator/view support.'),
     ...toTargets('1.G.A.1-draw-shapes', drawShapesBuilder, 'Drawing shapes coincides with K.G.B.5 and is indistinguishable from it; the grade-1 defining-attribute elevation has no generator/view support (see 1.G.A.1-defining-attributes).'),
-    ...toTargets('1.G.A.2-compose-other-shapes', composeShapesBuilder, 'Composing shapes coincides with K.G.B.6 and is indistinguishable from it; the grade-1 elevation (composing new shapes from composite shapes; trapezoids, half-/quarter-circles, 3D compositions) is unsupported.'),
+    ...toTargets('1.G.A.2-compose-other-shapes', composeShapesBuilder, 'The standard is now ontologically expressible, including Area.HalfCircle and Area.QuarterCircle, but the composition generator/view cannot compose the full set of 2D and 3D target shapes or compose new shapes from an existing composite.'),
     ...toTargets('1.G.A.3-partition-shapes', partitionShapesBuilder, 'No generator/view supports partitioning shapes into equal shares (halves/fourths/quarters).')
 ];
 
-export const ontologyTodos: OntologyTodo[] = [
-    {
-        standardId: '1.NBT.B.2c',
-        title: 'Multiples of 10 Scope Label',
-        description: 'No ontology Scope exists to express "multiples of 10" (e.g., 10, 20, 30, ... 90).'
-    },
-    {
-        standardId: '1.MD.B.3',
-        title: 'Half-Hour Granularity Scope Label',
-        description: 'No ontology Scope exists to restrict minute clock times to half-hour granularity.'
-    },
-    {
-        standardId: '1.G.A.2',
-        title: 'Half-Circle & Quarter-Circle Shapes',
-        description: 'No ontology Area concepts exist for half-circles or quarter-circles.'
-    }
-];
+export const ontologyTodos: OntologyTodo[] = [];

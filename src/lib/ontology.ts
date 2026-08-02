@@ -41,7 +41,9 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
     let max = Number.MAX_SAFE_INTEGER;
 
     // 2. Resolve maximum boundary (SmallerThan scopes)
-    if (labels.includes(Scope.NumbersSmaller10)) {
+    if (labels.includes(Scope.NumbersSmaller5)) {
+        max = 5;
+    } else if (labels.includes(Scope.NumbersSmaller10)) {
         max = 10;
     } else if (labels.includes(Scope.NumbersSmaller20)) {
         max = 20;
@@ -73,6 +75,8 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
         min = 20;
     } else if (labels.includes(Scope.NumbersLarger10)) {
         min = 10;
+    } else if (labels.includes(Scope.NumbersLarger5)) {
+        min = 5;
     }
 
     return { min, max };

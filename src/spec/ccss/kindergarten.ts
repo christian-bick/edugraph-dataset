@@ -274,7 +274,7 @@ const fluencyBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersSmaller10,
+        Scope.NumbersSmaller5,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -573,10 +573,4 @@ export const implementationTodos: CompetencyTarget[] = [
     ...toTargets('K.G.B.6-compose-shapes-other', composeShapesOtherBuilder, 'The shapes-compose-shapes generator only supports rectangle and square as composition targets (built from triangles); other target shapes (e.g. Area.Triangle, Area.Hexagon) are not supported.')
 ];
 
-export const ontologyTodos: OntologyTodo[] = [
-    {
-        standardId: 'K.OA.A.5',
-        title: 'Scope.NumbersSmaller5',
-        description: 'The ontology has no Scope.NumbersSmaller5, so the "within 5" restriction cannot be expressed.'
-    }
-];
+export const ontologyTodos: OntologyTodo[] = [];

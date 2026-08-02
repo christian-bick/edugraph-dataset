@@ -33,8 +33,9 @@ describe('Ontology Helper', () => {
                 Scope.NumbersSmaller100,
                 Scope.NumbersSmaller10,
                 Scope.NumbersSmaller20,
+                Scope.NumbersSmaller5,
             ]);
-            expect(range.max).toBe(10);
+            expect(range.max).toBe(5);
         });
 
         it('should resolve to the tightest min boundary (LargerThan) when multiple largerThan labels exist', () => {
@@ -53,6 +54,15 @@ describe('Ontology Helper', () => {
             ]);
             expect(range.min).toBe(20);
             expect(range.max).toBe(100);
+        });
+
+        it('should resolve the five-value boundaries', () => {
+            const range = resolveRangeFromLabels([
+                Scope.NumbersSmaller5,
+                Scope.NumbersLarger5,
+            ]);
+            expect(range.min).toBe(5);
+            expect(range.max).toBe(5);
         });
     });
 });
