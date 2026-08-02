@@ -1,11 +1,28 @@
-export type ArithmeticProblem = {
-    num1: number;
-    num2: number;
-    num3?: number;
-    propertyLaw?: 'commutative' | 'associative';
-    operation: 'addition' | 'subtraction' | 'multiplication' | 'division';
+export type ArithmeticOperation = 'addition' | 'subtraction' | 'multiplication' | 'division';
+
+type ArithmeticProblemBase = {
+    operation: ArithmeticOperation;
     answer: number;
 };
+
+export type ArithmeticPairProblem = ArithmeticProblemBase & {
+    num1: number;
+    num2: number;
+    num3?: undefined;
+    propertyLaw?: undefined;
+    blankPart: 'num1' | 'num2' | 'solution';
+};
+
+export type ArithmeticTripleProblem = ArithmeticProblemBase & {
+    num1: number;
+    num2: number;
+    num3: number;
+    propertyLaw?: 'commutative' | 'associative';
+    blankPart?: undefined;
+};
+
+/** Shared payload accepted by arithmetic views that render both pairs and triples. */
+export type ArithmeticProblem = ArithmeticPairProblem | ArithmeticTripleProblem;
 
 export type ArithmeticDecomposeProblem = {
     targetNumber: number;
@@ -185,9 +202,9 @@ export type ShapePartitionProblem = {
 export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
     'operations-boxes': ArithmeticProblem;
-    'operations-representation': ArithmeticProblem;
+    'operations-representation': ArithmeticPairProblem;
     'operations-word-problem': ArithmeticProblem;
-    'operations-properties': ArithmeticProblem;
+    'operations-properties': ArithmeticTripleProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;

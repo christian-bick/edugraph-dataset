@@ -3,7 +3,7 @@ import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { OperationsWordProblemViewConfig, OperationsWordProblemViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData, ViewValidationError } from '../../../helpers/validation.ts';
-import {getWordProblemText, selectUnknownPart, UnknownPart} from './helpers.ts';
+import {getUnknownPart, getWordProblemText, UnknownPart} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -58,19 +58,18 @@ const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
         throw new ViewValidationError('operations-word-problem', `Unsupported operation: ${operation}`);
     }
 
-    const hasThirdAddend = data.num3 !== undefined;
-    if (hasThirdAddend) {
+    const hasThirdOperand = data.num3 !== undefined;
+    if (hasThirdOperand) {
         validateProblemData('operations-word-problem', data, ['num3']);
-        if (operation !== 'addition') {
-            throw new ViewValidationError('operations-word-problem', 'A third operand is only supported for addition.');
-        }
+    } else {
+        validateProblemData('operations-word-problem', data, ['blankPart']);
     }
 
     const num1 = data.num1;
     const num2 = data.num2;
     const num3 = data.num3;
     const answer = data.answer;
-    const unknownPart = selectUnknownPart(payload.seed, hasThirdAddend);
+    const unknownPart = getUnknownPart(data, payload.seed);
     const textScenario = getWordProblemText(data, unknownPart);
 
     const getInputClass = (part: UnknownPart, isFinal = false) => {
@@ -123,7 +122,7 @@ const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
                     <div className={getInputClass('num2')}>{boxContent('num2', num2)}</div>
                     {num3 !== undefined && (
                         <>
-                            <div className="text-[2rem] font-extrabold text-slate-500">+</div>
+                            <div className="text-[2rem] font-extrabold text-slate-500">{symbol}</div>
                             <div className={getInputClass('num3')}>{boxContent('num3', num3)}</div>
                         </>
                     )}

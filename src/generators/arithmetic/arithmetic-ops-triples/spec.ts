@@ -1,25 +1,22 @@
-import {Ability, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
-import {ConfigFromSchema} from '../../../types/schema.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
+import {ConfigFromSchema} from '../../../types/schema.ts';
 import {arithmeticOperations, resolveExplicitOperation} from '../helpers.ts';
 
 export const spec: GeneratorSpec = {
-    generatorId: 'arithmetic-ops-pairs',
+    generatorId: 'arithmetic-ops-triples',
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10,
+        Scope.NumbersWithoutNegatives,
         ...arithmeticOperations
     ]
 };
 
-export const ArithmeticOpsPairsGeneratorSchema = {
+export const ArithmeticOpsTriplesGeneratorSchema = {
     operation: resolveExplicitOperation,
-    requireNegative: [
-        [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
-        hasLabel(Scope.NumbersWithNegatives)
-    ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
@@ -28,9 +25,17 @@ export const ArithmeticOpsPairsGeneratorSchema = {
         [Scope.MultiplesOf10],
         hasLabel(Scope.MultiplesOf10)
     ],
-    invertProcedure: [
-        [Ability.ProcedureInversion],
-        hasLabel(Ability.ProcedureInversion)
+    useThreeAddends: [
+        [Area.Sum],
+        hasLabel(Area.Sum)
+    ],
+    useCommutativeLaw: [
+        [Area.CommutativeLaw],
+        hasLabel(Area.CommutativeLaw)
+    ],
+    useAssociativeLaw: [
+        [Area.AssociativeLaw],
+        hasLabel(Area.AssociativeLaw)
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
@@ -38,4 +43,4 @@ export const ArithmeticOpsPairsGeneratorSchema = {
     ]
 } as const;
 
-export type ArithmeticOpsPairsGeneratorConfig = ConfigFromSchema<typeof ArithmeticOpsPairsGeneratorSchema>;
+export type ArithmeticOpsTriplesGeneratorConfig = ConfigFromSchema<typeof ArithmeticOpsTriplesGeneratorSchema>;

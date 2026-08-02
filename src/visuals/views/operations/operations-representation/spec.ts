@@ -10,6 +10,7 @@ export const spec: ViewSpec = {
         Ability.ProcedureExecution
     ],
     rejectedLabels: [
+        Ability.ProcedureInversion,
         ...deductAdmitting([Scope.NumbersLarger10])
     ]
 };

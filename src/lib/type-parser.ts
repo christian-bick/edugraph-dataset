@@ -44,3 +44,25 @@ export function getGeneratorProblemType(genId: string): string | null {
     const match = content.match(/implements\s+ProblemGenerator<([^>]+)>/);
     return match ? match[1].split(',')[0].trim() : null;
 }
+
+/**
+ * Returns whether a view payload type accepts a generator payload type.
+ * Besides exact matches, this recognizes named unions declared in problems.ts,
+ * allowing selected views to share a broader contract while generators retain
+ * precise payload types.
+ */
+export function isProblemTypeCompatible(generatorType: string, viewType: string): boolean {
+    if (generatorType === viewType) return true;
+
+    const problemsPath = resolve(PROJECT_ROOT, 'src', 'types', 'problems.ts');
+    if (!existsSync(problemsPath)) return false;
+
+    const content = readFileSync(problemsPath, 'utf8');
+    const unionPattern = /export\s+type\s+(\w+)\s*=\s*((?:\w+\s*\|\s*)+\w+)\s*;/g;
+    for (const match of content.matchAll(unionPattern)) {
+        if (match[1] !== viewType) continue;
+        return match[2].split('|').map(member => member.trim()).includes(generatorType);
+    }
+
+    return false;
+}

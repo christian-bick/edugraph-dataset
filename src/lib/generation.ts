@@ -2,10 +2,9 @@ import { createHash } from 'crypto';
 import { existsSync, lstatSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { Ability } from 'edugraph-ts';
 import { isSubConceptOf } from './ontology.ts';
 import { findLeafModules, LeafModule } from './module-resolver.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType } from './type-parser.ts';
+import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
 import { extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
 import { CompetencyTarget, OntologyTodo, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
@@ -16,7 +15,6 @@ const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 
 const EDU_PREFIX = 'http://edugraph.io/edu/';
-const ABILITIES = new Set<string>(Object.values(Ability));
 
 // ---------------------------------------------------------------------------
 // Sample identity
@@ -146,7 +144,7 @@ export function matchesTarget(
     viewInfo: ViewMatchInfo
 ): MatchVerdict {
     if (generatorInfo.problemType != null && viewInfo.problemType != null
-        && generatorInfo.problemType !== viewInfo.problemType) {
+        && !isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType)) {
         return { matched: false, reason: 'incompatible-type' };
     }
 
@@ -156,16 +154,10 @@ export function matchesTarget(
     // `isSubConceptOf(capabilityLabel, targetLabel)`. The reverse (a specific
     // target met only by a more general capability) must NOT match, because the
     // general capability may specialize some other way. This is the same
-    // directionality for Area, Scope and Ability. Abilities are matched against
-    // the view only — generators are pure math and do not gate on abilities.
+    // directionality for Area, Scope and Ability. Each capability is owned by
+    // whichever module parameterizes or renders it; the other must not redeclare it.
     for (const compLabel of targetLabels) {
         if (!compLabel.startsWith(EDU_PREFIX)) continue;
-        if (ABILITIES.has(compLabel)) {
-            if (!viewInfo.supportedLabels.some(viewLabel => isSubConceptOf(viewLabel, compLabel))) {
-                return { matched: false, reason: 'unsupported-label', label: compLabel };
-            }
-            continue;
-        }
         const supportedByGen = generatorInfo.labels.some(genLabel => isSubConceptOf(genLabel, compLabel));
         const supportedByView = viewInfo.supportedLabels.some(viewLabel => isSubConceptOf(viewLabel, compLabel));
         if (!supportedByGen && !supportedByView) {

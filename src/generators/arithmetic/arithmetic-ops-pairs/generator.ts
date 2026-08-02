@@ -1,36 +1,31 @@
-import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
-import {ArithmeticProblem} from "../../../types/problems.ts";
-import {Area} from "edugraph-ts";
-import {random} from "../../../lib/random.ts";
-import {ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema} from "./spec.ts";
-import {validateConfigFields} from "../../../lib/errors.ts";
+import {Area} from 'edugraph-ts';
+import {validateConfigFields} from '../../../lib/errors.ts';
+import {random} from '../../../lib/random.ts';
+import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
+import {ArithmeticPairProblem} from '../../../types/problems.ts';
+import {operationNames} from '../helpers.ts';
+import {ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema} from './spec.ts';
 
-export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticProblem, ArithmeticOpsPairsGeneratorConfig> {
+export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticPairProblem, ArithmeticOpsPairsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticOpsPairsGeneratorSchema;
 
-    generate(config: ArithmeticOpsPairsGeneratorConfig): ProblemStub | null {
+    generate(config: ArithmeticOpsPairsGeneratorConfig): ProblemStub<ArithmeticPairProblem> | null {
         validateConfigFields('arithmetic-ops-pairs', config, [
             'range',
             'operation',
             'requireNegative',
             'requireZero',
             'requireMultipleOf10',
-            'useThreeAddends',
-            'useCommutativeLaw',
-            'useAssociativeLaw',
+            'invertProcedure'
         ]);
 
-        const operation = config.operation;
+        const operation = config.operation!;
+        if (operation === 'unsupported') return null;
+
         const requireNegative = config.requireNegative!;
         const requireZero = config.requireZero!;
         const requireMultipleOf10 = config.requireMultipleOf10!;
-        const useThreeAddends = config.useThreeAddends!;
-        const useCommutativeLaw = config.useCommutativeLaw!;
-        const useAssociativeLaw = config.useAssociativeLaw!;
-        if (useCommutativeLaw && useAssociativeLaw) return null;
-        if ((useCommutativeLaw || useAssociativeLaw) && operation !== Area.Addition) return null;
-        if (useCommutativeLaw && useThreeAddends) return null;
         const resolvedRange = config.range!;
         const step = requireMultipleOf10 ? 10 : 1;
         const minMagnitude = Math.ceil(Math.max(1, resolvedRange.min) / step) * step;
@@ -56,34 +51,10 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
 
         let num1 = 0;
         let num2 = 0;
-        let num3: number | undefined;
         let answer = 0;
 
         if (operation === Area.Addition) {
-            if (useThreeAddends || useAssociativeLaw) {
-                const nonZeroCount = requireZero ? 2 : 3;
-                if (maxMagnitude < nonZeroCount * minMagnitude) return null;
-
-                let remaining = maxMagnitude;
-                const addends: number[] = [];
-                for (let i = 0; i < nonZeroCount; i++) {
-                    const remainingCount = nonZeroCount - i - 1;
-                    const magnitude = randomMagnitude(
-                        minMagnitude,
-                        remaining - remainingCount * minMagnitude
-                    );
-                    if (magnitude === null) return null;
-                    addends.push(requireNegative ? -magnitude : magnitude);
-                    remaining -= magnitude;
-                }
-                if (requireZero) {
-                    const zeroIndex = Math.floor(random() * 3);
-                    addends.splice(zeroIndex, 0, 0);
-                }
-
-                [num1, num2, num3] = addends as [number, number, number];
-                answer = num1 + num2 + num3;
-            } else if (requireZero) {
+            if (requireZero) {
                 const magnitude = randomValue();
                 if (magnitude === null) return null;
                 num1 = requireNegative ? -magnitude : 0;
@@ -105,7 +76,6 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 answer = num1 + num2;
             }
         } else if (operation === Area.Subtraction) {
-            if (useThreeAddends) return null;
             if (requireZero) {
                 const magnitude = randomValue();
                 if (magnitude === null) return null;
@@ -128,7 +98,6 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num1 = num2 + answer;
             }
         } else if (operation === Area.Multiplication) {
-            if (useThreeAddends) return null;
             if (requireZero) {
                 const magnitude = randomValue();
                 if (magnitude === null) return null;
@@ -142,7 +111,6 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
             }
             answer = num1 * num2;
         } else if (operation === Area.Division) {
-            if (useThreeAddends) return null;
             if (requireZero) {
                 const magnitude = randomValue();
                 if (magnitude === null) return null;
@@ -160,30 +128,17 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
             return null;
         }
 
-        const opMap: Record<string, string> = {
-            [Area.Addition]: 'addition',
-            [Area.Subtraction]: 'subtraction',
-            [Area.Multiplication]: 'multiplication',
-            [Area.Division]: 'division'
-        };
-
-        const strOp = opMap[operation];
-
-        const normalizeZero = (val: number) => val === 0 ? 0 : val;
-        num1 = normalizeZero(num1);
-        num2 = normalizeZero(num2);
-        answer = normalizeZero(answer);
+        const normalizeZero = (value: number) => value === 0 ? 0 : value;
+        const blankPart = config.invertProcedure ? 'num2' : 'solution';
 
         return {
             tags: [operation],
             data: {
-                num1,
-                num2,
-                answer,
-                operation: strOp,
-                ...(num3 === undefined ? {} : {num3}),
-                ...(useCommutativeLaw ? {propertyLaw: 'commutative' as const} : {}),
-                ...(useAssociativeLaw ? {propertyLaw: 'associative' as const} : {})
+                num1: normalizeZero(num1),
+                num2: normalizeZero(num2),
+                answer: normalizeZero(answer),
+                operation: operationNames[operation],
+                blankPart
             }
         };
     }

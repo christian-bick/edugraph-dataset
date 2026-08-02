@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getViewToProblemTypeMap, getGeneratorProblemType } from './type-parser.ts';
+import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
 
 describe('type-parser', () => {
     it('successfully extracts view to problem type mapping', () => {
@@ -18,5 +18,11 @@ describe('type-parser', () => {
     it('returns null for non-existent generator', () => {
         const type = getGeneratorProblemType('non-existent');
         expect(type).toBeNull();
+    });
+
+    it('accepts a precise generator payload through a named view union', () => {
+        expect(isProblemTypeCompatible('ArithmeticPairProblem', 'ArithmeticProblem')).toBe(true);
+        expect(isProblemTypeCompatible('ArithmeticTripleProblem', 'ArithmeticProblem')).toBe(true);
+        expect(isProblemTypeCompatible('ArithmeticTripleProblem', 'ArithmeticPairProblem')).toBe(false);
     });
 });

@@ -51,41 +51,14 @@ const wordProblemBuilder = new DatasetPermutationBuilder()
         [Area.Subtraction]
     ]);
 
-const threeAddendsBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.Addition,
-        Area.Sum,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller20,
-        Scope.PhysicalNumbers,
-        Ability.TextualReception
-    ]);
-
-const propertiesBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.Addition,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller20,
-        Ability.ProcedureUnderstanding
-    ])
-    .applyLabelVariants([
-        [Area.CommutativeLaw],
-        [Area.AssociativeLaw]
-    ]);
-
 const unknownAddendBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Difference,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller20,
-        Ability.ProcedureExecution
+        Ability.ProcedureInversion
     ])
     .applyLabelVariants([
         [Area.Addition],
@@ -96,7 +69,5 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-arithmetic-ops-pairs', builder),
     ...toTargets('test-arithmetic-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('test-arithmetic-word-problems', wordProblemBuilder),
-    ...toTargets('test-arithmetic-three-addends', threeAddendsBuilder),
-    ...toTargets('test-arithmetic-properties', propertiesBuilder),
     ...toTargets('test-arithmetic-unknown-addend', unknownAddendBuilder)
 ];

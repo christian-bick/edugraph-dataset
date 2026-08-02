@@ -1,5 +1,4 @@
-- A binary problem must contain exactly two operands; a target labeled `Sum` must contain exactly three addends and use addition.
-- In a three-addend problem, all three addends and their sum must remain inside the target number range.
-- When the target requires multiples of ten, every operand and the solution must be divisible by 10.
-- A commutative-law payload must preserve the same two addends when their order is reversed; an associative-law payload must provide exactly three addends with one invariant sum across both groupings.
-- Every rendered arithmetic sample must be driven by an explicit Addition, Subtraction, Multiplication, or Division label; related concepts such as Difference must never select an operation by fallback.
+- The problem must contain exactly two operands and the exact result of applying the requested operation.
+- When procedure inversion is requested, the second operand must be the unknown; otherwise the result must be the unknown.
+- When multiples of ten are requested, both operands and the result must be divisible by 10.
+- An explicit Addition, Subtraction, Multiplication, or Division label must select the operation; related concepts must not select one by fallback.

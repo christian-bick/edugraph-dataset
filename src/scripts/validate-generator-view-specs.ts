@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { isSubConceptOf } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType } from '../lib/type-parser.ts';
+import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from '../lib/type-parser.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -143,7 +143,7 @@ async function validateSpecs() {
                     if (viewProblemType) {
                         // Find matching generators
                         const matchingGenIds = Object.keys(generatorProblemTypes).filter(
-                            genId => generatorProblemTypes[genId] === viewProblemType
+                            genId => isProblemTypeCompatible(generatorProblemTypes[genId], viewProblemType)
                         );
 
                         for (const genId of matchingGenIds) {
@@ -170,7 +170,7 @@ async function validateSpecs() {
                 const problemType = viewToProblemType[item];
                 if (problemType) {
                     const matchingGenIds = Object.keys(generatorProblemTypes).filter(
-                        genId => generatorProblemTypes[genId] === problemType
+                        genId => isProblemTypeCompatible(generatorProblemTypes[genId], problemType)
                     );
                     for (const genId of matchingGenIds) {
                         const genLabels = [

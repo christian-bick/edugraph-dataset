@@ -25,15 +25,13 @@ const OperationsPropertiesCore = ({config: _config, payload}: CoreProps) => {
     const data = problem.data;
     validateProblemData('operations-properties', data, ['num1', 'num2', 'operation', 'answer', 'propertyLaw']);
 
-    if (data.operation !== 'addition') {
-        throw new ViewValidationError('operations-properties', 'Arithmetic properties require an addition payload.');
+    if (data.operation !== 'addition' && data.operation !== 'multiplication') {
+        throw new ViewValidationError('operations-properties', 'Arithmetic properties require addition or multiplication.');
     }
     if (data.propertyLaw !== 'commutative' && data.propertyLaw !== 'associative') {
         throw new ViewValidationError('operations-properties', 'Unsupported arithmetic property.');
     }
-    if (data.propertyLaw === 'associative' && typeof data.num3 !== 'number') {
-        throw new ViewValidationError('operations-properties', 'Associative property payloads require three addends.');
-    }
+    validateProblemData('operations-properties', data, ['num3']);
 
     const values = [data.num1, data.num2, data.answer, ...(data.num3 === undefined ? [] : [data.num3])];
     if (values.some(value => !Number.isInteger(value) || value < 0 || value > 20)) {
@@ -44,6 +42,7 @@ const OperationsPropertiesCore = ({config: _config, payload}: CoreProps) => {
         ? (data.propertyLaw === 'commutative' ? data.num1 : data.num3)
         : undefined;
     const title = data.propertyLaw === 'commutative' ? 'Commutative property' : 'Associative property';
+    const symbol = data.operation === 'addition' ? '+' : '×';
 
     return (
         <div className="flex justify-center items-center p-8 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit">
@@ -57,26 +56,30 @@ const OperationsPropertiesCore = ({config: _config, payload}: CoreProps) => {
                 {data.propertyLaw === 'commutative' ? (
                     <div className="flex items-center gap-3 text-[2rem] font-bold text-slate-700">
                         <ValueBox value={data.num1} />
-                        <span>+</span>
+                        <span>{symbol}</span>
                         <ValueBox value={data.num2} />
+                        <span>{symbol}</span>
+                        <ValueBox value={data.num3} />
                         <span>=</span>
+                        <ValueBox value={data.num3} />
+                        <span>{symbol}</span>
                         <ValueBox value={data.num2} />
-                        <span>+</span>
+                        <span>{symbol}</span>
                         <ValueBox value={missingValue} highlighted={isSolutionView} />
                     </div>
                 ) : (
                     <div className="flex items-center gap-2 text-[2rem] font-bold text-slate-700">
                         <span>(</span>
                         <ValueBox value={data.num1} />
-                        <span>+</span>
+                        <span>{symbol}</span>
                         <ValueBox value={data.num2} />
-                        <span>) +</span>
+                        <span>) {symbol}</span>
                         <ValueBox value={data.num3} />
                         <span>=</span>
                         <ValueBox value={data.num1} />
-                        <span>+ (</span>
+                        <span>{symbol} (</span>
                         <ValueBox value={data.num2} />
-                        <span>+</span>
+                        <span>{symbol}</span>
                         <ValueBox value={missingValue} highlighted={isSolutionView} />
                         <span>)</span>
                     </div>

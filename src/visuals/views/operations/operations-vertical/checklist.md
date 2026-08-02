@@ -1,0 +1,3 @@
+- Pair payloads must stack two operands and triple payloads must stack three, with the requested operation symbol preceding every operand after the first.
+- In Question Mode, triples leave the result blank and pairs leave their payload-designated value blank.
+- In Solution Mode, the same layout restores that value highlighted in green.

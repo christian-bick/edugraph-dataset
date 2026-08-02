@@ -1,3 +1,3 @@
-- In Question Mode, exactly one box is blank. An operand-unknown layout leaves either operand blank; a result-unknown layout leaves the result blank.
-- In Solution Mode, the same equation layout must show the missing value in its original box.
-- Only a target whose ontology labels include `Difference` uses the unknown-addend banner: it must show a full-equation `Find the missing addend` banner in Question Mode and a same-position `Missing addend found` banner in Solution Mode. The solution banner and restored operand use green styling so `Difference` remains explicit. A `ProcedureInversion` operand blank without `Difference` does not use this banner.
+- The equation must show two operand boxes for pair payloads and three operand boxes for triple payloads, separated by the requested operation symbol.
+- In Question Mode, exactly the payload-designated pair value is blank; triples leave the result blank.
+- In Solution Mode, the same equation layout must reveal the missing value in its original box.

@@ -3,28 +3,40 @@ import {ArithmeticProblem} from '../../../../types/problems.ts';
 
 export type UnknownPart = 'num1' | 'num2' | 'num3' | 'answer';
 
-export function selectUnknownPart(seed: number, hasThirdAddend: boolean): UnknownPart {
+export function selectUnknownPart(seed: number, hasThirdOperand: boolean): UnknownPart {
     setSeed(seed);
-    const parts: UnknownPart[] = hasThirdAddend
+    const parts: UnknownPart[] = hasThirdOperand
         ? ['num1', 'num2', 'num3', 'answer']
         : ['num1', 'num2', 'answer'];
     return parts[Math.floor(random() * parts.length)];
 }
 
+export function getUnknownPart(data: ArithmeticProblem, seed: number): UnknownPart {
+    if (data.num3 !== undefined) return selectUnknownPart(seed, true);
+    return data.blankPart === 'solution' ? 'answer' : data.blankPart;
+}
+
 export function getWordProblemText(data: ArithmeticProblem, unknownPart: UnknownPart): string {
     const {num1, num2, num3, answer, operation} = data;
 
-    if (operation === 'addition' && num3 !== undefined) {
-        if (unknownPart === 'num1') {
-            return `There are some red apples, ${num2} green apples, and ${num3} yellow apples. There are ${answer} apples altogether. How many are red?`;
+    if (num3 !== undefined) {
+        const values: Record<UnknownPart, number | string> = {
+            num1: unknownPart === 'num1' ? 'some' : num1,
+            num2: unknownPart === 'num2' ? 'some' : num2,
+            num3: unknownPart === 'num3' ? 'some' : num3,
+            answer: unknownPart === 'answer' ? 'how many' : answer
+        };
+
+        if (operation === 'addition') {
+            return `There are ${values.num1} red apples, ${values.num2} green apples, and ${values.num3} yellow apples. There are ${values.answer} apples altogether. Find the unknown amount.`;
         }
-        if (unknownPart === 'num2') {
-            return `There are ${num1} red apples, some green apples, and ${num3} yellow apples. There are ${answer} apples altogether. How many are green?`;
+        if (operation === 'subtraction') {
+            return `Start with ${values.num1} apples, give away ${values.num2}, then give away ${values.num3}. There are ${values.answer} apples left. Find the unknown amount.`;
         }
-        if (unknownPart === 'num3') {
-            return `There are ${num1} red apples, ${num2} green apples, and some yellow apples. There are ${answer} apples altogether. How many are yellow?`;
+        if (operation === 'multiplication') {
+            return `There are ${values.num1} crates, with ${values.num2} rows in each crate and ${values.num3} apples in each row. There are ${values.answer} apples altogether. Find the unknown amount.`;
         }
-        return `There are ${num1} red apples, ${num2} green apples, and ${num3} yellow apples. How many apples are there altogether?`;
+        return `${values.num1} apples are shared among ${values.num2} teams, then each team's share is split among ${values.num3} friends. Each friend gets ${values.answer} apples. Find the unknown amount.`;
     }
 
     if (operation === 'addition') {

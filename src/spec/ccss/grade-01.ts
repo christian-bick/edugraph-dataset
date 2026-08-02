@@ -1,6 +1,6 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { CompetencyTarget, OntologyTodo } from '../../types/ml-engine.ts';
+import { CompetencyTarget, OntologyTodo, TargetEquivalence } from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Operations and Algebraic Thinking (1.OA)
@@ -50,21 +50,16 @@ const propertiesBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.OA.B.4: Understand subtraction as an unknown-addend problem ---
-// Conceptually this reverses the operation to recover a missing input
-// (Ability.ProcedureInversion), but at the supported level (Area.Difference
-// within 10) the make-ten generator/view produce the exact complement problem
-// of K.OA.A.4, so the two are indistinguishable by the ontology. Parked in
-// implementationTodos until a dedicated unknown-addend view exists; kept here
-// only because it is referenced by the implementationTodos entry below.
+// This reverses the operation to recover a missing input, so the competency is
+// explicitly scoped to procedure inversion rather than procedure execution.
 const unknownAddendBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Difference,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller20,
-        Ability.ProcedureExecution
+        Ability.ProcedureInversion
     ])
     .applyLabelVariants([
         [Area.Addition],
@@ -494,3 +489,8 @@ export const spec: CompetencyTarget[] = [
 export const implementationTodos: CompetencyTarget[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
+
+export const equivalentTargets: TargetEquivalence[] = [{
+    targets: ['1.OA.B.4-unknown-addend', '1.OA.D.8-unknown-operand'],
+    reason: 'At the supported level, both standards require the same addition/subtraction inversion task; their conceptual framing is not distinguishable by the ontology.'
+}];

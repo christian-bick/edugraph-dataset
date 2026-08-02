@@ -24,6 +24,7 @@ import {
     GeneratorMatchInfo,
     ViewMatchInfo
 } from './generation.ts';
+import {isProblemTypeCompatible} from './type-parser.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ProblemStub } from '../types/ml-engine.ts';
 
@@ -148,17 +149,24 @@ describe('matchesTarget', () => {
         expect(verdict).toEqual({ matched: true });
     });
 
-    it('routes ability labels through view compatibility only', () => {
-        const supported = matchesTarget(
+    it('accepts an ability from the module that owns it without double declaration', () => {
+        const generatorOwned = matchesTarget(
+            [Ability.ProcedureExecution],
+            gen([Ability.ProcedureExecution]),
+            view([])
+        );
+        expect(generatorOwned).toEqual({ matched: true });
+
+        const viewOwned = matchesTarget(
             [Ability.ProcedureExecution],
             gen([]),
             view([Ability.ProcedureExecution])
         );
-        expect(supported).toEqual({ matched: true });
+        expect(viewOwned).toEqual({ matched: true });
 
         const unsupported = matchesTarget(
             [Ability.ProcedureExecution],
-            gen([Ability.ProcedureExecution]),
+            gen([]),
             view([])
         );
         expect(unsupported).toEqual({
@@ -245,6 +253,15 @@ describe('matchesTarget', () => {
             view([Area.DigitNotation], [], 'CountingProblem')
         );
         expect(verdict).toEqual({ matched: false, reason: 'incompatible-type' });
+    });
+
+    it('accepts a generator subtype through a named union view contract', () => {
+        const verdict = matchesTarget(
+            [Area.Addition],
+            gen([Area.Addition], 'ArithmeticTripleProblem'),
+            view([], [], 'ArithmeticProblem')
+        );
+        expect(verdict).toEqual({ matched: true });
     });
 
     it('skips the type check when either side has no known type', () => {
@@ -525,7 +542,7 @@ describe('catalogs and end-to-end matching (integration)', () => {
             const gen = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!;
             const view = viewCatalog.find(v => v.viewId === tuple.viewId)!;
             if (gen.problemType != null && view.problemType != null) {
-                expect(gen.problemType).toBe(view.problemType);
+                expect(isProblemTypeCompatible(gen.problemType, view.problemType)).toBe(true);
             }
         }
 

@@ -4,7 +4,8 @@
 | :--- | :---: | :---: | :---: |
 | [src/generators/arithmetic/arithmetic-decompose/generator.ts](src/generators/arithmetic/arithmetic-decompose/generator.ts) | 96% | 93.75% | ✅ PASS |
 | [src/generators/arithmetic/arithmetic-equation-judgment/generator.ts](src/generators/arithmetic/arithmetic-equation-judgment/generator.ts) | 100% | 76.31% | ✅ PASS |
-| [src/generators/arithmetic/arithmetic-ops-pairs/generator.ts](src/generators/arithmetic/arithmetic-ops-pairs/generator.ts) | 100% | 84.15% | ✅ PASS |
+| [src/generators/arithmetic/arithmetic-ops-pairs/generator.ts](src/generators/arithmetic/arithmetic-ops-pairs/generator.ts) | 98.49% | 77.14% | ✅ PASS |
+| [src/generators/arithmetic/arithmetic-ops-triples/generator.ts](src/generators/arithmetic/arithmetic-ops-triples/generator.ts) | 98.65% | 76.19% | ✅ PASS |
 | [src/generators/comparison/generator.ts](src/generators/comparison/generator.ts) | 96.87% | 90% | ✅ PASS |
 | [src/generators/counting/counting-basic/generator.ts](src/generators/counting/counting-basic/generator.ts) | 100% | 80% | ✅ PASS |
 | [src/generators/counting/counting-classify-count/generator.ts](src/generators/counting/counting-classify-count/generator.ts) | 100% | 85.71% | ✅ PASS |

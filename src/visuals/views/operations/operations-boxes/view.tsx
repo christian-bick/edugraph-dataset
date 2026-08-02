@@ -1,6 +1,5 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {getBlankPart} from './helpers.ts';
 import {OperationsBoxesViewConfig, OperationsBoxesViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
@@ -18,77 +17,57 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-boxes'>;
 }
 
-const OperationsBoxesCore = ({ config, payload }: CoreProps) => {
-    const { problem, isSolutionView } = payload;
-
+const OperationsBoxesCore = ({config: _config, payload}: CoreProps) => {
+    const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-boxes', data, ['num1', 'num2', 'operation', 'answer']);
+
+    const isTriple = data.num3 !== undefined;
+    if (isTriple) {
+        validateProblemData('operations-boxes', data, ['num3']);
+    } else {
+        validateProblemData('operations-boxes', data, ['blankPart']);
+    }
+
     const symbol = operatorSymbols[data.operation];
     if (!symbol) {
         throw new ViewValidationError('operations-boxes', `Unsupported operation: ${data.operation}`);
     }
 
-    const blankPart = getBlankPart(
-        payload.seed,
-        config.invertProcedure || config.unknownAddendMode ? 'problem' : 'solution'
-    );
+    const blankPart = isTriple ? 'solution' : data.blankPart;
+    const operands = isTriple
+        ? ([['num1', data.num1], ['num2', data.num2], ['num3', data.num3]] as const)
+        : ([['num1', data.num1], ['num2', data.num2]] as const);
 
-    const isBlanked = (part: string) => {
-        return !isSolutionView && blankPart === part;
-    };
-
-    const isSolutionHighlight = (part: string) => {
-        return isSolutionView && blankPart === part;
-    };
+    const isBlanked = (part: string) => !isSolutionView && blankPart === part;
+    const isSolutionHighlight = (part: string) => isSolutionView && blankPart === part;
 
     const boxClass = (part: string) => {
-        let cls = 'border-2 border-neutral-800 rounded-md py-[6px] px-3 mx-[5px] min-w-[100px] min-h-[50px] text-center font-mono flex items-center justify-center';
-        if (isSolutionHighlight(part)) {
-            cls += ' text-emerald-700 font-bold';
-        }
-        return cls;
-    };
-
-    const symbolClass = (part: string) => {
-        let cls = 'text-[1.8rem] font-bold w-[50px] text-center';
-        if (isSolutionHighlight(part)) {
-            cls += ' text-emerald-700';
-        }
-        return cls;
+        let classes = 'border-2 border-neutral-800 rounded-md py-[6px] px-3 mx-[5px] min-w-[100px] min-h-[50px] text-center font-mono flex items-center justify-center';
+        if (isSolutionHighlight(part)) classes += ' text-emerald-700 font-bold';
+        return classes;
     };
 
     const equation = (
         <div className="flex items-center text-[1.5rem]">
-            <div className={boxClass('num1')}>
-                {isBlanked('num1') ? '' : data.num1}
-            </div>
-            <div className={symbolClass('symbol')}>
-                {isBlanked('symbol') ? '' : symbol}
-            </div>
-            <div className={boxClass('num2')}>
-                {isBlanked('num2') ? '' : data.num2}
-            </div>
-            <div className="text-[1.8rem] font-bold w-[50px] text-center">=</div>
-            <div className={`${boxClass('solution')} font-mono tracking-wider`}>
-                {isBlanked('solution') ? '' : data.answer}
-            </div>
+                {operands.map(([part, value], index) => (
+                    <div key={part} className="contents">
+                        {index > 0 && (
+                            <div className="text-[1.8rem] font-bold w-[50px] text-center">{symbol}</div>
+                        )}
+                        <div className={boxClass(part)}>{isBlanked(part) ? '' : value}</div>
+                    </div>
+                ))}
+                <div className="text-[1.8rem] font-bold w-[50px] text-center">=</div>
+                <div className={`${boxClass('solution')} font-mono tracking-wider`}>
+                    {isBlanked('solution') ? '' : data.answer}
+                </div>
         </div>
     );
 
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">
-            {config.unknownAddendMode ? (
-                <div className="flex flex-col items-center">
-                    <div className={`w-[430px] mb-3 py-2 rounded-xl text-center font-semibold font-sans ${
-                        isSolutionView
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-indigo-50 text-indigo-700'
-                    }`}>
-                        {isSolutionView ? 'Missing addend found' : 'Find the missing addend'}
-                    </div>
-                    {equation}
-                </div>
-            ) : equation}
+            {equation}
         </div>
     );
 };
@@ -100,9 +79,7 @@ let root: ReturnType<typeof createRoot> | null = null;
 window.renderView = (payload: ViewRenderPayload<'operations-boxes'>) => {
     const container = document.getElementById('view');
     if (container) {
-        if (!root) {
-            root = createRoot(container);
-        }
+        if (!root) root = createRoot(container);
         root.render(<OperationsBoxes payload={payload} />);
     }
 };
