@@ -14,7 +14,7 @@ Orchestrate inspecting and resolving `ontologyTodos` for a spec module (default 
 Before performing any analysis or issue generation, execute these two checks:
 
 1. **Check A: Sibling Repository Presence**
-   - Check if the sibling directory `../edugraph-ontology` (e.g. `c:\Users\silen\Documents\EduGraph\edugraph-ontology`) exists and contains ontology files (`src/concepts/Area.ts`, `src/concepts/Scope.ts`, etc.).
+   - Check if the sibling directory `../edugraph-ontology` exists and contains ontology source files (`core-areas-math.ttl`, `core-scopes-math.ttl`, etc.).
    - **If missing**: Stop execution, display the following error message, and **ABORT**:
      > `❌ Sibling repository '../edugraph-ontology' is missing.`  
      > `Instructions: Run 'git clone https://github.com/christian-bick/edugraph-ontology ../edugraph-ontology' in the parent directory to clone the ontology repository before running this skill.`
@@ -33,20 +33,21 @@ Before performing any analysis or issue generation, execute these two checks:
   npm run show:ont-todos -- --spec=<specModule>
   ```
 - Analyze the output. **Group logically related ontology TODOs** (e.g. missing numerical range scopes, missing operations, missing shape concepts) so they can be proposed as cohesive GitHub issues.
-- For what belongs in `ontologyTodos` versus `implementationTodos`, see the decision table in `docs/target-spec.md` (`TSPEC-7`).
 
 #### Step 3: Inspect Sibling Ontology Repository (`../edugraph-ontology`)
-- Search `../edugraph-ontology` for existing definitions in `Area`, `Scope`, and `Ability` Enums.
-- Inspect taxonomy hierarchies (`partOf` relationships) and check open issues/PRs to ensure the proposed additions fit cleanly into the ontology structure and do not duplicate existing work.
+- Inspect `core-schema.ttl` for a basic understanding of ontology types and relations.
+- Inspect `core-areas-math.ttl` for a fitting extension of `Area`, `core-scopes-math.ttl` for `Scope` and `core-abilities` for abilities.
+- Inspect taxonomy hierarchies to ensure the proposed additions fit cleanly into the ontology structure and do not duplicate existing work.
 
 #### Step 4: Formulate & Submit GitHub Issue Proposals
-For each grouped ontology gap, formulate a structured GitHub issue payload:
+For each previously grouped ontology gap, formulate a structured GitHub issue payload:
 - **Title**: `[Ontology <Area|Scope|Ability>] <Clear Summary Title>`
 - **Body**:
   - **Context & Affected Standards**: CCSS standard IDs (e.g. `1.NBT.B.2c`, `K.OA.A.5`) and target definition references.
   - **Missing Concept Description**: Detailed explanation of why current ontology labels cannot express the standard's requirements.
-  - **Proposed Enum Additions**: Concrete TypeScript code diff for `edugraph-ontology` (e.g. adding `Scope.NumbersSmaller5` under `Scope.NumbersSmaller10`).
   - **Taxonomic Placement**: `partOf` parent concept relationship.
+  - **Other Relations**: if applicable suggestions for other relations like `expands` etc.
+  - **Proposed Additions**: Concrete OWL diff for the specific `edugraph-ontology` file.
 - Create the issue using the GitHub CLI:
   ```bash
   gh issue create --repo christian-bick/edugraph-ontology --title "[Ontology Scope] Add Scope.NumbersSmaller5" --body "..."
