@@ -18,13 +18,12 @@ a target label `T` with a generator/view capability label `L` **only when `L` is
 or more specific than `T`** — `isSubConceptOf(L, T)`, i.e. `L partOf* T`. The reverse never
 matches: a specific target is *not* satisfied by a merely more-general capability.
 
-This directionality holds for Area, Scope **and** Ability. Which side has to supply the
-covering label differs by label kind:
+This directionality holds for Area, Scope **and** Ability. A target label is satisfied by
+the module that owns the corresponding behavior:
 
-| Target label kind | Satisfied by                                                        |
-|-------------------|---------------------------------------------------------------------|
-| Area, Scope       | the generator **or** the view — either side's declaration suffices  |
-| Ability           | the **view only** — generator declarations are not consulted        |
+| Target label kind    | Satisfied by                                                       |
+|----------------------|--------------------------------------------------------------------|
+| Area, Scope, Ability | the generator **or** the view — either side's declaration suffices |
 
 A view's `rejectedLabels` is then applied on top, and can veto an otherwise matching tuple
 ([SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-physical-boundaries-not-competency-filters)).
@@ -117,22 +116,6 @@ The two deduction operators are duals and are not interchangeable:
 See [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-physical-boundaries-not-competency-filters)
 and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting).
 
-### SPEC-11 — Abilities: matched on the view, mappable on both
-
-Two separate things must not be confused:
-
-- **Matching.** An `Ability` target label is satisfied **only** by the view's declarations
-  ([SPEC-1](#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific)).
-  A generator's ability declarations are never consulted by `matchesTarget`.
-- **Parameterization.** *Either* spec may map an ability in its schema, depending on where
-  the behavior is decided. If an ability affects the underlying **math logic**, map it in
-  the generator spec; if it affects the **visual mode or input interaction**, map it in the
-  view spec. The view is the more likely place for it.
-
-**Consequence:** if a generator's math branches on an ability, the paired view must declare
-that ability too. Otherwise no target requiring it will ever match, and the generator's
-branch becomes unreachable.
-
 ---
 
 ## Audit
@@ -147,5 +130,4 @@ branch becomes unreachable.
 - [ ] **SPEC-8** — no label parameterized by the generator is re-queried by the matching view.
 - [ ] **SPEC-9** — discrete label sets are expressed as plain arrays unless a resolver is genuinely required.
 - [ ] **SPEC-10** — `deductCompatible` appears only in schemas; `deductAdmitting` only in rejection lists.
-- [ ] **SPEC-11** — any ability the generator's math branches on is also declared by the paired view.
 - [ ] `npm run check:generator-view-specs` passes.

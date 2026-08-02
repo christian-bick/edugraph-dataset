@@ -460,11 +460,11 @@ describe('spec-validator', () => {
         it('validates and deduplicates the committed test spec module', async () => {
             const result = await normalizeAndValidateSpec('test');
             expect(result.errors).toHaveLength(0);
-            expect(result.stats.totalTargets).toBe(147);
-            expect(result.stats.uniqueTargets).toBe(147);
+            expect(result.stats.totalTargets).toBe(151);
+            expect(result.stats.uniqueTargets).toBe(151);
             expect(result.stats.deduplicatedCount).toBe(0);
             expect(result.warnings).toHaveLength(0);
-            expect(result.targets).toHaveLength(147);
+            expect(result.targets).toHaveLength(151);
 
             const ids = result.targets.map(t => t.id);
             expect(new Set(ids).size).toBe(ids.length);

@@ -90,17 +90,11 @@ numbers beyond the view's physical capacity of 10.
 **Never** use `deductCompatible` for rejection lists: it is the dual operator, for
 declaring capabilities in schemas ([SPEC-10](spec-general.md#spec-10--capabilities-use-deductcompatible-boundaries-use-deductadmitting)).
 
-### SPEC-V5 — Views are the only place Ability enters matching
+### SPEC-V5 — Declare only view-owned abilities
 
-The view spec declares the layout labels it supports in `generalLabels`. Because an
-`Ability` target label is satisfied by the view's declarations alone
-([SPEC-1](spec-general.md#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific)),
-a view's positive declarations are the only way an ability can enter matching at all.
-
-The view is also the more likely home for *mapping* an ability into configuration —
-abilities usually decide the visual mode or the input interaction. A generator may still
-map one when it decides the math, but then this view must declare it, or the target never
-matches ([SPEC-11](spec-general.md#spec-11--abilities-matched-on-the-view-mappable-on-both)).
+The view spec declares abilities that decide visual mode, layout, or interaction. An
+ability that instead changes the generated mathematics belongs to the generator and must
+not be redeclared by the view ([SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair)).
 
 ---
 
@@ -110,5 +104,5 @@ matches ([SPEC-11](spec-general.md#spec-11--abilities-matched-on-the-view-mappab
 - [ ] **SPEC-V2** — every schema parameter is visual/layout; no `range`, `requireZero`, `useDecimals`, `shapeType`, or comparable math parameter.
 - [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, not a competency the view merely does not want.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
-- [ ] **SPEC-V5** — abilities the view supports are declared positively in `generalLabels`, not handled by rejection, and include every ability its paired generator branches on.
+- [ ] **SPEC-V5** — view-owned abilities are declared positively in `generalLabels`, not handled by rejection, and no generator-owned ability is redeclared.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.
