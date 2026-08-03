@@ -12,6 +12,7 @@ import {
     loadGeneratorCatalog,
     loadViewCatalog,
     loadTargets,
+    loadSpecTodos,
     generateSample,
     generateSampleWithRetry,
     generateSampleByKey,
@@ -451,15 +452,32 @@ describe('loadTargets', () => {
         return dir;
     }
 
-    it('ignores implementationTodos/ontologyTodos — only the spec export feeds the pipeline', async () => {
+    it('ignores todos and beyondScope — only the spec export feeds the pipeline', async () => {
         const dir = writeFixture('with-todos', 'a.ts', `
             export const spec = [{ id: 'real-target', labels: [] }];
             export const implementationTodos = [{ id: 'todo-target', labels: [], explanation: 'not supported yet' }];
             export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x' }];
+            export const beyondScope = [{ standardId: 'Y', title: 'y', description: 'y' }];
         `);
         const targets = await loadTargets('with-todos', FIXTURE_ROOT);
         expect(targets.map(t => t.id)).toEqual(['real-target']);
         void dir;
+    });
+
+    it('loads todo and beyond-scope declarations without feeding them to generation', async () => {
+        writeFixture('with-dispositions', 'a.ts', `
+            export const spec = [];
+            export const implementationTodos = [{ id: 'todo-target', labels: [] }];
+            export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x' }];
+            export const beyondScope = [{ standardId: 'Y', title: 'y', description: 'y' }];
+        `);
+
+        const dispositions = await loadSpecTodos('with-dispositions', FIXTURE_ROOT);
+        expect(dispositions.implementationTodos).toHaveLength(1);
+        expect(dispositions.ontologyTodos).toHaveLength(1);
+        expect(dispositions.beyondScope).toEqual([
+            { standardId: 'Y', title: 'y', description: 'y' }
+        ]);
     });
 
     it('merges the spec export of every file in a spec directory, in sorted file order', async () => {

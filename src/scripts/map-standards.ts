@@ -338,11 +338,15 @@ async function main() {
   }
 
   // 3. Load spec module targets and their documented gaps
-  const [allSpecTargets, { implementationTodos: allImplementationTodos, ontologyTodos: allOntologyTodos }] = await Promise.all([
+  const [allSpecTargets, {
+    implementationTodos: allImplementationTodos,
+    ontologyTodos: allOntologyTodos,
+    beyondScope: allBeyondScope
+  }] = await Promise.all([
     loadTargets('ccss'),
     loadSpecTodos('ccss')
   ]);
-  console.log(`[CCSS Spec] Loaded ${allSpecTargets.length} implemented targets, ${allImplementationTodos.length} implementation TODOs, and ${allOntologyTodos.length} ontology TODOs.`);
+  console.log(`[CCSS Spec] Loaded ${allSpecTargets.length} implemented targets, ${allImplementationTodos.length} implementation TODOs, ${allOntologyTodos.length} ontology TODOs, and ${allBeyondScope.length} beyond-scope declarations.`);
 
   // Load view & generator specs for matching
   const [generatorCatalog, viewCatalog] = await Promise.all([
@@ -375,7 +379,19 @@ async function main() {
       description: o.description
     }));
 
-    const spec_covered = matchedTargets.length > 0 || matchedImplementationTodos.length > 0 || matchedOntologyTodos.length > 0;
+    // Match intentional project-medium exclusions from spec files
+    const matchedBeyondScope = allBeyondScope.filter(item => item.standardId === std.id);
+    const beyond_scope = matchedBeyondScope.map(item => ({
+      title: item.title,
+      description: item.description
+    }));
+
+    const spec_covered = matchedTargets.length > 0 || matchedImplementationTodos.length > 0 || matchedOntologyTodos.length > 0 || matchedBeyondScope.length > 0;
+    const fully_beyond_scope = matchedBeyondScope.length > 0
+      && matchedTargets.length === 0
+      && matchedImplementationTodos.length === 0
+      && matchedOntologyTodos.length === 0;
+    const partially_beyond_scope = matchedBeyondScope.length > 0 && !fully_beyond_scope;
 
     let matched_areas: string[] = [];
     let matched_scopes: string[] = [];
@@ -390,7 +406,7 @@ async function main() {
         matched_scopes = allLabelsUnion.filter(l => allScopes.includes(l as any));
         matched_abilities = allLabelsUnion.filter(l => allAbilities.includes(l as any));
       }
-      ontology_covered = (competencies.length > 0 || implementation_todos.length > 0) && matchedOntologyTodos.length === 0;
+      ontology_covered = (competencies.length > 0 || implementation_todos.length > 0 || beyond_scope.length > 0) && matchedOntologyTodos.length === 0;
     }
 
     // Check dataset coverage for matchedTargets
@@ -423,6 +439,9 @@ async function main() {
       competencies,
       implementation_todos,
       ontology_todos,
+      beyond_scope,
+      fully_beyond_scope,
+      partially_beyond_scope,
       matched_areas,
       matched_scopes,
       matched_abilities,
@@ -439,6 +458,7 @@ async function main() {
   const tasksByCluster: Record<string, any[]> = {};
   
   for (const [, data] of Object.entries(finalCoverageMap)) {
+    if (data.fully_beyond_scope) continue;
     if (data.spec_covered && data.ontology_covered && data.dataset_covered && (!data.ontology_todos || data.ontology_todos.length === 0) && (!data.implementation_todos || data.implementation_todos.length === 0)) continue;
 
     const clusterId = data.cluster_id;
@@ -519,9 +539,11 @@ async function main() {
       total_leaves_scanned: leafNodes.length,
       spec_covered_count: Object.values(finalCoverageMap).filter(s => s.spec_covered).length,
       covered_count: Object.values(finalCoverageMap).filter(s => s.dataset_covered).length,
-      missing_generator_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && ((s.implementation_todos && s.implementation_todos.length > 0) || !s.dataset_covered)).length,
+      missing_generator_count: Object.values(finalCoverageMap).filter(s => !s.fully_beyond_scope && s.spec_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && ((s.implementation_todos && s.implementation_todos.length > 0) || !s.dataset_covered)).length,
       missing_ontology_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (s.ontology_todos && s.ontology_todos.length > 0)).length,
-      analysis_needed_count: Object.values(finalCoverageMap).filter(s => !s.spec_covered).length
+      analysis_needed_count: Object.values(finalCoverageMap).filter(s => !s.spec_covered).length,
+      beyond_scope_count: Object.values(finalCoverageMap).filter(s => s.beyond_scope && s.beyond_scope.length > 0).length,
+      fully_beyond_scope_count: Object.values(finalCoverageMap).filter(s => s.fully_beyond_scope).length
     },
     coverage: finalCoverageMap,
     tasks: consolidatedTasks
@@ -530,12 +552,13 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(finalJson, null, 2), 'utf-8');
   console.log(`[Output] Successfully wrote coverage and tasks data to: ${OUTPUT_PATH}`);
 
-  const { covered_count, total_leaves_scanned, missing_generator_count, missing_ontology_count } = finalJson.metadata;
+  const { covered_count, total_leaves_scanned, missing_generator_count, missing_ontology_count, beyond_scope_count } = finalJson.metadata;
   console.log(`\nMapping pipeline complete!`);
   console.log(`Total scanned: ${total_leaves_scanned}`);
   console.log(`Covered by Dataset: ${covered_count} (${Math.round((covered_count/total_leaves_scanned)*100)}%)`);
   console.log(`Missing Generator: ${missing_generator_count}`);
   console.log(`Missing Ontology: ${missing_ontology_count}`);
+  console.log(`Beyond Scope: ${beyond_scope_count}`);
 }
 
 main().catch(console.error);

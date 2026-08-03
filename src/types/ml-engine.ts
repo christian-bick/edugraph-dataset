@@ -111,6 +111,17 @@ export interface OntologyTodo {
 }
 
 /**
+ * A competency that cannot be evidenced by the dataset's declared medium.
+ * Unlike a todo, this is an intentional project boundary and creates no
+ * implementation or ontology backlog item.
+ */
+export interface BeyondScopeEntry {
+    standardId: string;
+    title: string;
+    description: string;
+}
+
+/**
  * A deliberate declaration that two or more target definitions (their
  * `toTargets` id prefixes, e.g. 'K.CC.A.3-write-numerals') describe the same
  * competency and are therefore expected to produce identical permutation sets.

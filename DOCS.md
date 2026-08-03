@@ -168,7 +168,7 @@ To add a new mathematical concept or visual style to the dataset, follow this st
 ### Step 1: Define the Pedagogy
 Declare the target specifications in the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`), building permutations with the `DatasetPermutationBuilder`. See `src/spec/ccss/kindergarten.ts` for worked examples.
 
-The export contract, the content-hash id semantics, how to categorize gaps into `implementationTodos` / `ontologyTodos`, and the rule against stretching labels to force a match are all specified in [docs/target-spec.md](docs/target-spec.md).
+The export contract, the content-hash id semantics, how to categorize gaps into `implementationTodos` / `ontologyTodos`, how to declare intentional medium exclusions in `beyondScope`, and the rule against stretching labels to force a match are all specified in [docs/target-spec.md](docs/target-spec.md).
 
 ### Step 2: Analyze Matchings
 Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` to see if the new targets map to any existing generator or views.
@@ -259,7 +259,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 ### Loop 1: Standard Spec Generation (`/create-spec-from-standard`)
 - **Skill**: `.agents/skills/spec-from-standard/SKILL.md`
 - **Command**: `/create-spec-from-standard {standardId|gradeFile}`
-- **Function**: Translates educational standard leaf nodes (`public/coverage/ccss-tree.json`) into `DatasetPermutationBuilder` target specs in `src/spec/<module>/<gradeFile>.ts`, categorized across the export contract in [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-7`).
+- **Function**: Translates educational standard leaf nodes (`public/coverage/ccss-tree.json`) into target-spec dispositions in `src/spec/<module>/<gradeFile>.ts`, including intentional `beyondScope` medium exclusions, categorized across the export contract in [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-7`).
 - **Validation**: Runs `npm run check:standards-spec -- --spec=<module>` and `npm run check`. Finishes by presenting matching statistics to the user (allowing manual trigger of follow-up loops).
 
 ### Loop 2: Spec Implementation & Error-Free Generation (`/implement-spec`)

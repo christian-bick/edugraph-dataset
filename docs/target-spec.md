@@ -14,7 +14,7 @@ deliberately broad: they state what a competency demands, not how any module sat
 
 ### TSPEC-1 — The export contract
 
-Every file under `src/spec/<module>/` communicates through four fixed export names. Each is
+Every file under `src/spec/<module>/` communicates through five fixed export names. Each is
 read by a different consumer, by name — there is no scanning or filtering:
 
 | Export                | Type                  | Read by                                   | Meaning                                                                 |
@@ -22,10 +22,12 @@ read by a different consumer, by name — there is no scanning or filtering:
 | `spec`                | `CompetencyTarget[]`  | `loadTargets` → the generation pipeline   | Permutations with **both** a matching generator and a compatible view.  |
 | `implementationTodos` | `CompetencyTarget[]`  | `loadSpecTodos` → coverage report only    | Expressible in the ontology, but missing generator/view capability.     |
 | `ontologyTodos`       | `OntologyTodo[]`      | `loadSpecTodos` → coverage report only    | Not expressible: the ontology lacks the `Area`/`Scope`/`Ability`.       |
+| `beyondScope`         | `BeyondScopeEntry[]`  | `loadSpecTodos` → coverage report only    | Intentionally not addressable in the dataset's declared medium.        |
 | `equivalentTargets`   | `TargetEquivalence[]` | `loadSpecEquivalences` → the validator    | Definitions that are intentionally indistinguishable ([TSPEC-8](#tspec-8--definitions-must-be-distinct-unless-the-identity-is-declared)). |
 
-`loadTargets` reads `spec` and nothing else. A todo target can therefore **never** enter the
-pipeline, regardless of whether its labels would happen to match a generator/view pair.
+`loadTargets` reads `spec` and nothing else. A todo target or `beyondScope` declaration can
+therefore **never** enter the pipeline, regardless of whether it would happen to resemble a
+generator/view capability.
 
 ### TSPEC-2 — `spec` is the only path in; never alias it
 
@@ -80,7 +82,8 @@ match**.
 
 Park the gap instead: leave a `// TODO [<CCSS-id>]:` comment describing it, together with a
 commented-out reference builder/permutation, and/or collect the parked targets in the
-sibling `implementationTodos` / `ontologyTodos` exports — kept in the same file alongside
+sibling `implementationTodos` / `ontologyTodos` exports, or in `beyondScope` when the
+required evidence cannot exist in the dataset's declared medium — kept in the same file alongside
 `spec` so agents can work through gaps in context.
 
 **Why:** a stretched label produces a sample that is mislabeled. The dataset's whole value
@@ -88,13 +91,17 @@ is that labels are mathematically provable claims about the image.
 
 ### TSPEC-7 — Categorize each competency into exactly one export
 
-| Can the ontology express it? | Does a generator + view pair match it? | Goes to               |
-|------------------------------|----------------------------------------|-----------------------|
-| Yes                          | Yes                                    | `spec`                |
-| Yes                          | No                                     | `implementationTodos` |
-| No                           | —                                      | `ontologyTodos`       |
+| Addressable in the dataset medium? | Can the ontology express it? | Does a generator + view pair match it? | Goes to               |
+|------------------------------------|------------------------------|----------------------------------------|-----------------------|
+| No                                 | —                            | —                                      | `beyondScope`         |
+| Yes                                | Yes                          | Yes                                    | `spec`                |
+| Yes                                | Yes                          | No                                     | `implementationTodos` |
+| Yes                                | No                           | —                                      | `ontologyTodos`       |
 
 `ontologyTodos` entries are objects: `{ standardId, title, description }`.
+`beyondScope` entries use the same descriptive shape. They are intentional exclusions, not
+backlog items. A leaf standard may have one competency in `beyondScope` and a different
+competency in `spec`, but each individual competency still belongs to exactly one export.
 
 Confirm the middle column empirically with `npm run show:matching -- --spec=<module>` rather
 than by inspection.
@@ -168,13 +175,13 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 
 ## Audit
 
-- [ ] **TSPEC-1** — the file exports only the four contract names, each with its correct type.
+- [ ] **TSPEC-1** — the file exports only the five contract names, each with its correct type.
 - [ ] **TSPEC-2** — `spec` has no alias export; every live target is reachable through `spec` alone.
 - [ ] **TSPEC-3** — one builder per competency, derived from leaf standards, not one per standard.
 - [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` and mapped via `toTargets`; no hand-written target arrays.
 - [ ] **TSPEC-5** — no id is hand-written or position-derived; every id came out of `toTargets`.
 - [ ] **TSPEC-6** — no label is broader, narrower, or otherwise adjusted to make a target match; gaps are parked with a TODO or a todo export.
-- [ ] **TSPEC-7** — every competency sits in exactly one of the three arrays, with matching confirmed via `npm run show:matching`.
+- [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, with matching confirmed via `npm run show:matching` for addressable competencies.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless declared in `equivalentTargets` with a reason.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.

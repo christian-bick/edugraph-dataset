@@ -1,6 +1,6 @@
 ---
 name: create-spec-from-standard
-description: "/create-spec-from-standard {standardId|gradeFile} - Autonomous orchestrator skill to translate educational standard leaf nodes into valid target specs, categorizing expressible matching targets into spec, expressible gaps into implementationTodos, and missing ontology concepts into ontologyTodos."
+description: "/create-spec-from-standard {standardId|gradeFile} - Autonomous orchestrator skill to translate educational standard leaf nodes into valid target specs, categorizing matching targets, implementation gaps, ontology gaps, and competencies beyond the dataset medium."
 ---
 
 Orchestrate generating a valid competency target spec file for a new grade or educational standard module under `src/spec/[<module>/]{gradeFile}.ts` (e.g., `src/spec/ccss/grade-02.ts` or target standards file).
@@ -29,9 +29,9 @@ Study existing grade target specs in `src/spec/ccss/` (such as `kindergarten.ts`
 - Evaluate how the proposed permutations map against current generator and view catalogs.
 
 #### Step 4: Categorize Targets into Exports
-Sort every competency into exactly one export, following the export contract and the decision table in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`): `spec` for permutations with both a matching generator and a compatible view, `implementationTodos` for those expressible in the ontology but lacking module support, `ontologyTodos` for those the ontology cannot express at all.
+Sort every competency into exactly one export, following the export contract and the decision table in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`): `beyondScope` when the required evidence cannot exist in the dataset medium, `spec` for addressable permutations with both a matching generator and a compatible view, `implementationTodos` for addressable competencies expressible in the ontology but lacking module support, and `ontologyTodos` for addressable competencies the ontology cannot express at all.
 
-Build all of them per `TSPEC-3`/`TSPEC-4` (one builder per competency, mapped through `toTargets`). If two definitions turn out to be deliberately indistinguishable, declare it in `equivalentTargets` per `TSPEC-8`.
+Build addressable target permutations per `TSPEC-3`/`TSPEC-4` (one builder per competency, mapped through `toTargets`). Record `beyondScope` competencies as descriptive entries because they never enter target matching. If two target definitions turn out to be deliberately indistinguishable, declare them in `equivalentTargets` per `TSPEC-8`.
 
 #### Step 5: Validate Target Specs
 Run the validation gate from `TSPEC-9`:
@@ -48,4 +48,5 @@ npm run check -- --spec=<specModule>
   - Total active targets in `spec`
   - Total implementation gaps in `implementationTodos`
   - Total missing ontology concepts in `ontologyTodos`
+  - Total intentional medium exclusions in `beyondScope`
 - **DO NOT automatically trigger follow-up loops.** Present the findings to the user and stop so the user can manually decide when to trigger `/implement-spec` or `/update-ontology`.

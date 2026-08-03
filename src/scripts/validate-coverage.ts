@@ -173,7 +173,33 @@ function runValidation() {
       }
     }
 
-    // E. Verify cluster_id exists in standards.jsonl
+    // E. Verify beyond_scope structure and status flags
+    if (std.beyond_scope !== undefined) {
+      if (!Array.isArray(std.beyond_scope)) {
+        result.errors.push(`[Beyond Scope Error] Standard "${id}" beyond_scope is not an array`);
+        result.passed = false;
+      } else {
+        for (let idx = 0; idx < std.beyond_scope.length; idx++) {
+          const item = std.beyond_scope[idx];
+          if (!item || typeof item.title !== 'string' || typeof item.description !== 'string') {
+            result.errors.push(`[Beyond Scope Error] Standard "${id}" beyond_scope item at index ${idx} is invalid`);
+            result.passed = false;
+          }
+        }
+      }
+    }
+
+    const hasBeyondScope = Array.isArray(std.beyond_scope) && std.beyond_scope.length > 0;
+    if (Boolean(std.fully_beyond_scope) && (!hasBeyondScope || (std.competencies && std.competencies.length > 0))) {
+      result.errors.push(`[Beyond Scope Status Error] Standard "${id}" has an inconsistent fully_beyond_scope flag`);
+      result.passed = false;
+    }
+    if (Boolean(std.partially_beyond_scope) && (!hasBeyondScope || Boolean(std.fully_beyond_scope))) {
+      result.errors.push(`[Beyond Scope Status Error] Standard "${id}" has an inconsistent partially_beyond_scope flag`);
+      result.passed = false;
+    }
+
+    // F. Verify cluster_id exists in standards.jsonl
     const clusterId = std.cluster_id;
     if (clusterId && clusterId !== 'Other') {
       if (!standardsMap[clusterId]) {
@@ -219,8 +245,14 @@ function runValidation() {
         result.errors.push(`[Task Logic Error] Standard "${stdId}" is included in ONTOLOGY_EXTENSION task "${task.id}", but is marked as ontology_covered: true with no ontology_todos`);
         result.passed = false;
       }
-      if (task.type === 'DATASET_ENRICHMENT' && covEntry.dataset_covered) {
-        result.errors.push(`[Task Logic Error] Standard "${stdId}" is included in DATASET_ENRICHMENT task "${task.id}", but is marked as dataset_covered: true`);
+      if (task.type === 'DATASET_ENRICHMENT'
+        && covEntry.dataset_covered
+        && (!covEntry.implementation_todos || covEntry.implementation_todos.length === 0)) {
+        result.errors.push(`[Task Logic Error] Standard "${stdId}" is included in DATASET_ENRICHMENT task "${task.id}", but is marked as dataset_covered with no implementation_todos`);
+        result.passed = false;
+      }
+      if (covEntry.fully_beyond_scope) {
+        result.errors.push(`[Task Logic Error] Fully beyond-scope standard "${stdId}" must not appear in backlog task "${task.id}"`);
         result.passed = false;
       }
     }
@@ -228,6 +260,7 @@ function runValidation() {
 
   // --- CHECK 5: Orphaning check (Are all uncovered standards assigned to a task?) ---
   for (const [id, std] of Object.entries(coverage) as any) {
+    if (std.fully_beyond_scope) continue;
     if (!std.ontology_covered || (std.ontology_todos && std.ontology_todos.length > 0)) {
       if (!taskStandardIds.has(id)) {
         result.errors.push(`[Orphaned Standard Error] Standard "${id}" is missing ontology coverage (or has pending ontology tasks) but has no associated task in the backlog`);

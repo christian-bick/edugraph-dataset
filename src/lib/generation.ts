@@ -7,7 +7,7 @@ import { findLeafModules, LeafModule } from './module-resolver.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
 import { extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, OntologyTodo, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
+import { CompetencyTarget, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ViewSpec } from '../types/view-spec.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -439,14 +439,16 @@ export async function loadTargets(
 export interface SpecTodos {
     implementationTodos: CompetencyTarget[];
     ontologyTodos: OntologyTodo[];
+    beyondScope: BeyondScopeEntry[];
 }
 
 /**
  * Loads the documented gaps of a spec module: competencies whose labels are
  * expressible but have no generator/view support yet (`implementationTodos`),
  * and competencies that cannot be expressed because the ontology is missing
- * a label (`ontologyTodos`). Both exports are optional per file. This is the
- * counterpart to `loadTargets` for tooling that reports on gaps (currently
+ * a label (`ontologyTodos`), and intentional project-medium exclusions
+ * (`beyondScope`). All three exports are optional per file. This is the
+ * counterpart to `loadTargets` for tooling that reports on dispositions (currently
  * only `map-standards.ts`) — the dataset pipeline never calls this.
  */
 export async function loadSpecTodos(
@@ -457,6 +459,7 @@ export async function loadSpecTodos(
 
     const implementationTodos: CompetencyTarget[] = [];
     const ontologyTodos: OntologyTodo[] = [];
+    const beyondScope: BeyondScopeEntry[] = [];
     for (const filePath of files) {
         const module = await import(pathToFileURL(filePath).href);
         if (Array.isArray(module.implementationTodos)) {
@@ -465,8 +468,11 @@ export async function loadSpecTodos(
         if (Array.isArray(module.ontologyTodos)) {
             ontologyTodos.push(...(module.ontologyTodos as OntologyTodo[]));
         }
+        if (Array.isArray(module.beyondScope)) {
+            beyondScope.push(...(module.beyondScope as BeyondScopeEntry[]));
+        }
     }
-    return { implementationTodos, ontologyTodos };
+    return { implementationTodos, ontologyTodos, beyondScope };
 }
 
 /**

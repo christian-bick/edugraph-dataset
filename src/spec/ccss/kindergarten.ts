@@ -1,6 +1,6 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { CompetencyTarget, OntologyTodo } from '../../types/ml-engine.ts';
+import { BeyondScopeEntry, CompetencyTarget, OntologyTodo } from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Counting and Cardinality (K.CC)
@@ -11,6 +11,7 @@ const countTo100Builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Scope.NumbersSmaller100,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
@@ -18,15 +19,32 @@ const countTo100Builder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.AdditiveCount], // count by ones
-        [Scope.DerivedCount]   // skip count by tens
+        [Scope.MultiplesOf10]   // skip count by tens
+    ]);
+
+// --- K.CC.A.2: Start from a given number (5) ---
+const countFrom5Builder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumerationWithIntegers,
+        Scope.AdditiveCount,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersLarger5,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersSmaller10],
+        [Scope.NumbersSmaller20]
     ]);
 
 // --- K.CC.A.3: Write numbers from 0 to 20 (stroke writing) ---
 const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.DigitNotation,
         Scope.ArabicNumerals,
-        Ability.ProcedureExecution
+        Scope.Base10,
+        Ability.TextualArticulation
     ])
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
@@ -39,45 +57,14 @@ const representCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Scope.PhysicalNumbers,
-        Ability.ProcedureExecution
+        Ability.Formalization
     ])
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
         [Scope.NumbersWithZero, Scope.NumbersSmaller20]
-    ]);
-
-// --- K.CC.B.4a: One-to-one correspondence when counting objects ---
-const oneToOneBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.NumerationWithIntegers,
-        Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
-        Scope.AdditiveCount,
-        Scope.PhysicalNumbers,
-        Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
-    ]);
-
-// --- K.CC.B.4b: Cardinality (last number name tells the count) ---
-const cardinalityBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.NumerationWithIntegers,
-        Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
-        Scope.AdditiveCount,
-        Scope.PhysicalNumbers,
-        Ability.ProcedureUnderstanding
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
     ]);
 
 // --- K.CC.B.4b: Conservation (count is independent of arrangement/order) ---
@@ -106,6 +93,7 @@ const oneLargerBuilder = new DatasetPermutationBuilder()
         Area.NumerationWithIntegers,
         Area.Increment,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.PhysicalNumbers,
@@ -122,6 +110,7 @@ const howManyBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.AdditiveCount,
@@ -298,6 +287,7 @@ const classifyCountBuilder = new DatasetPermutationBuilder()
         Area.ObjectSorting,
         Area.CollectionSense,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller10,
@@ -305,7 +295,6 @@ const classifyCountBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.ShapeProperties],
-        []
     ]);
 
 // --- K.MD.B.3: Sort the categories by count ---
@@ -325,7 +314,6 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.ShapeProperties],
-        []
     ]);
 
 // ==========================================
@@ -493,10 +481,9 @@ const composeShapesOtherBuilder = new DatasetPermutationBuilder()
 export const spec: CompetencyTarget[] = [
     // K.CC - Counting and Cardinality
     ...toTargets('K.CC.A.1-count-to-100', countTo100Builder),
+    ...toTargets('K.CC.A.2-count-from-number', countFrom5Builder),
     ...toTargets('K.CC.A.3-write-numerals', writeNumeralsBuilder),
     ...toTargets('K.CC.A.3-represent-counts', representCountsBuilder),
-    ...toTargets('K.CC.B.4a-one-to-one', oneToOneBuilder),
-    ...toTargets('K.CC.B.4b-cardinality', cardinalityBuilder),
     ...toTargets('K.CC.B.4b-conservation', conservationBuilder),
     ...toTargets('K.CC.B.4c-one-larger', oneLargerBuilder),
     ...toTargets('K.CC.B.5-how-many', howManyBuilder),
@@ -533,3 +520,13 @@ export const spec: CompetencyTarget[] = [
 export const implementationTodos: CompetencyTarget[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
+
+export const beyondScope: BeyondScopeEntry[] = [{
+    standardId: 'K.CC.B.4a',
+    title: 'Spoken one-to-one counting',
+    description: 'Requires observing a learner say number names in order while pairing each spoken name with exactly one object; the static visual dataset cannot capture spoken, temporal performance.'
+}, {
+    standardId: 'K.CC.B.4b',
+    title: 'Spoken cardinality',
+    description: 'Requires evidence that the learner understands the last number name said as the cardinality of the counted set; the conservation component remains represented in spec.'
+}];
