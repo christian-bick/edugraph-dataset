@@ -1,4 +1,4 @@
-- The problem must define a starting integer, a direction of change (increment or decrement), a step size, and a resulting solution.
-- The step must be exactly one for additive/subtractive counting or exactly ten for derived counting.
+- The problem must define a starting quantity of objects, a direction of change (increment or decrement), and a resulting solution.
+- The change must represent either adding one (+1) or subtracting one (-1) from the starting quantity.
 - The solution must be the mathematically correct result of applying the change to the starting quantity.
 - All quantities and solutions must be positive integers.

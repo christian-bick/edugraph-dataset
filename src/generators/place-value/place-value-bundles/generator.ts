@@ -9,9 +9,8 @@ export class PlaceValueBundlesGenerator implements ProblemGenerator<PlaceValueBu
     schema = PlaceValueBundlesGeneratorSchema;
 
     generate(config: PlaceValueBundlesGeneratorConfig): ProblemStub | null {
-        validateConfigFields('place-value-bundles', config, ['useMultipleTens', 'range']);
+        validateConfigFields('place-value-bundles', config, ['range']);
         const range = config.range!;
-        const useMultipleTens = config.useMultipleTens!;
 
         if (range.min > range.max) {
             throw new GeneratorValidationError(
@@ -24,10 +23,7 @@ export class PlaceValueBundlesGenerator implements ProblemGenerator<PlaceValueBu
         const maxTens = Math.min(9, Math.floor(range.max / 10));
         if (minTens > maxTens) return null;
 
-        const tens = useMultipleTens
-            ? minTens + Math.floor(random() * (maxTens - minTens + 1))
-            : 1;
-        if (tens < minTens || tens > maxTens) return null;
+        const tens = minTens + Math.floor(random() * (maxTens - minTens + 1));
 
         return {
             data: {

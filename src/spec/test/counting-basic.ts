@@ -92,21 +92,6 @@ const incDecBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersSmaller20]
     ]);
 
-const tenMoreLessBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.NumerationWithIntegers,
-        Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller100,
-        Scope.DerivedCount,
-        Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Area.Increment],
-        [Area.Decrement]
-    ]);
-
 const countTo100Builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
@@ -125,7 +110,6 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-counting-basic', builder),
     ...toTargets('test-counting-basic-box-arrangement', boxArrangementBuilder),
     ...toTargets('test-counting-inc-dec', incDecBuilder),
-    ...toTargets('test-counting-ten-more-less', tenMoreLessBuilder),
     ...toTargets('test-counting-to-100', countTo100Builder),
     ...toTargets('test-classify-count', classifyBuilder),
     ...toTargets('test-classify-sort', sortBuilder)

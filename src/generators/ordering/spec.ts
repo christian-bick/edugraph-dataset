@@ -24,7 +24,7 @@ export const OrderingGeneratorSchema = {
         hasLabel(Scope.NumbersWithZero)
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
         resolveRangeFromLabels
     ]
 } as const;

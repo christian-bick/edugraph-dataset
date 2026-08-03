@@ -33,7 +33,6 @@ describe('ArithmeticOpsTriplesGenerator', () => {
                         operation,
                         requireZero,
                         requireMultipleOf10: false,
-                        useThreeAddends: false,
                         useCommutativeLaw: false,
                         useAssociativeLaw: false,
                         range: {min: 1, max: 20}
@@ -54,7 +53,6 @@ describe('ArithmeticOpsTriplesGenerator', () => {
                 operation,
                 requireZero: false,
                 requireMultipleOf10: true,
-                useThreeAddends: false,
                 useCommutativeLaw: false,
                 useAssociativeLaw: false,
                 range: {min: 1, max: 1000000}
@@ -76,7 +74,6 @@ describe('ArithmeticOpsTriplesGenerator', () => {
             operation,
             requireZero: false,
             requireMultipleOf10: false,
-            useThreeAddends: false,
             useCommutativeLaw: propertyLaw === 'commutative',
             useAssociativeLaw: propertyLaw === 'associative',
             range: {min: 1, max: 20}
@@ -90,13 +87,11 @@ describe('ArithmeticOpsTriplesGenerator', () => {
         const baseConfig = {
             requireZero: false,
             requireMultipleOf10: false,
-            useThreeAddends: false,
             useCommutativeLaw: false,
             useAssociativeLaw: false,
             range: {min: 1, max: 20}
         } as const;
 
-        expect(generator.generate({...baseConfig, operation: Area.Subtraction, useThreeAddends: true})).toBeNull();
         expect(generator.generate({...baseConfig, operation: Area.Division, useCommutativeLaw: true})).toBeNull();
         expect(generator.generate({
             ...baseConfig,

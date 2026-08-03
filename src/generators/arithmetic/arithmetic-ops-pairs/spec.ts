@@ -9,13 +9,12 @@ export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-pairs',
     generalLabels: [
         Scope.IntegerNumbers,
-        Scope.Base10,
-        ...arithmeticOperations
+        Scope.Base10
     ]
 };
 
 export const ArithmeticOpsPairsGeneratorSchema = {
-    operation: resolveExplicitOperation,
+    operation: [arithmeticOperations, resolveExplicitOperation],
     requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
         hasLabel(Scope.NumbersWithNegatives)

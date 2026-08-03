@@ -63,7 +63,6 @@ export type CountingProblem = {
 export type CountingIncDecProblem = {
     numObjects: number;
     incDecType: 'inc' | 'dec';
-    stepSize: 1 | 10;
     incDecAnswer: number;
     simpleAnswer: number;
 };
@@ -176,10 +175,6 @@ export type ShapeBuildShapeProblem = {
     target: string;
     sides: number;
     corners: number;
-    attributes: Array<{
-        label: string;
-        defining: boolean;
-    }>;
 };
 
 export type ShapeComposeShapesProblem = {

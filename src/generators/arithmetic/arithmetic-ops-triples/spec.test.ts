@@ -15,7 +15,7 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.num1 + stub!.data.num2 + stub!.data.num3).toBe(stub!.data.answer);
-        expect(stub!.tags).toEqual(expect.arrayContaining([Area.Addition, Area.Sum]));
+        expect(stub!.tags).toContain(Area.Addition);
     });
 
     it.each([
@@ -36,5 +36,6 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
     it('does not expose negative or procedure-inversion configuration', () => {
         expect(generator.schema).not.toHaveProperty('requireNegative');
         expect(generator.schema).not.toHaveProperty('invertProcedure');
+        expect(generator.schema).not.toHaveProperty('useThreeAddends');
     });
 });

@@ -16,7 +16,6 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
             'operation',
             'requireZero',
             'requireMultipleOf10',
-            'useThreeAddends',
             'useCommutativeLaw',
             'useAssociativeLaw'
         ]);
@@ -26,11 +25,9 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
 
         const requireZero = config.requireZero!;
         const requireMultipleOf10 = config.requireMultipleOf10!;
-        const useThreeAddends = config.useThreeAddends!;
         const useCommutativeLaw = config.useCommutativeLaw!;
         const useAssociativeLaw = config.useAssociativeLaw!;
         if (useCommutativeLaw && useAssociativeLaw) return null;
-        if (useThreeAddends && operation !== Area.Addition) return null;
         if ((useCommutativeLaw || useAssociativeLaw)
             && operation !== Area.Addition
             && operation !== Area.Multiplication) return null;

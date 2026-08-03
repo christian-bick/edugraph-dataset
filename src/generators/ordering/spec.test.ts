@@ -54,16 +54,4 @@ describe('OrderingGenerator Spec Integration', () => {
             ]));
         }
     });
-
-    it('resolves the 101-to-120 grade-one extension', () => {
-        const stub = generateWithLabels(generator, [
-            Area.NumericOrder,
-            Scope.NumbersWithoutZero,
-            Scope.NumbersWithoutNegatives,
-            Scope.NumbersLarger100,
-            Scope.NumbersSmaller1000
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.numbers.every((number: number) => number >= 101 && number <= 120)).toBe(true);
-    });
 });

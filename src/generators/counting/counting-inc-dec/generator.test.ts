@@ -22,14 +22,11 @@ describe('CountingIncDecGenerator', () => {
     it('increments by one without exceeding the range', () => {
         const stub = generator.generate({
             range: {min: 1, max: 10},
-            isIncrement: true,
-            isDecrement: false,
-            countMode: Scope.AdditiveCount
+            direction: Scope.AdditiveCount
         });
 
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
-        expect(stub!.data.stepSize).toBe(1);
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
         expect(stub!.data.incDecAnswer).toBeLessThanOrEqual(10);
     });
@@ -37,48 +34,26 @@ describe('CountingIncDecGenerator', () => {
     it('decrements by one without reaching zero', () => {
         const stub = generator.generate({
             range: {min: 1, max: 10},
-            isIncrement: false,
-            isDecrement: true,
-            countMode: Scope.SubtractiveCount
+            direction: Scope.SubtractiveCount
         });
 
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
-        expect(stub!.data.stepSize).toBe(1);
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
         expect(stub!.data.incDecAnswer).toBeGreaterThanOrEqual(1);
     });
 
-    it.each([true, false])('changes by ten for derived counting (increment: %s)', isIncrement => {
-        const stub = generator.generate({
-            range: {min: 1, max: 100},
-            isIncrement,
-            isDecrement: !isIncrement,
-            countMode: Scope.DerivedCount
-        });
-
-        expect(stub).not.toBeNull();
-        expect(stub!.data.stepSize).toBe(10);
-        expect(Math.abs(stub!.data.incDecAnswer - stub!.data.numObjects)).toBe(10);
-        expect(stub!.data.incDecAnswer).toBeGreaterThanOrEqual(1);
-        expect(stub!.data.incDecAnswer).toBeLessThanOrEqual(100);
-    });
-
-    it('returns null when the requested step cannot fit the range', () => {
+    it('returns null when the range cannot fit the requested change', () => {
         expect(generator.generate({
-            range: {min: 1, max: 10},
-            isIncrement: true,
-            isDecrement: false,
-            countMode: Scope.DerivedCount
+            range: {min: 1, max: 1},
+            direction: Scope.AdditiveCount
         })).toBeNull();
     });
 
-    it('returns null without one explicit direction', () => {
+    it('returns null for an unsupported direction', () => {
         expect(generator.generate({
-            range: {min: 1, max: 100},
-            isIncrement: false,
-            isDecrement: false,
-            countMode: Scope.DerivedCount
-        })).toBeNull();
+            range: {min: 1, max: 20},
+            direction: Scope.DerivedCount
+        } as never)).toBeNull();
     });
 });

@@ -157,13 +157,13 @@ const orderNumbersBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersLarger100,
-        Scope.NumbersSmaller1000,
+        Scope.NumbersSmaller100,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.Most],
-        [Scope.NumbersWithoutZero, Scope.Least]
+        [Scope.NumbersWithoutZero, Scope.Least],
+        [Scope.NumbersWithZero, Scope.Least]
     ]);
 
 // --- 1.NBT.A.1: Read and write numerals ---
@@ -171,10 +171,12 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
         Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersLarger100,
-        Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
+        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.A.1: Represent a number of objects with a written numeral ---
@@ -183,10 +185,12 @@ const representCountsBuilder = new DatasetPermutationBuilder()
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.PhysicalNumbers,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersLarger100,
-        Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
+        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.B.2a: 10 as a bundle of ten ones ---
@@ -413,6 +417,31 @@ const compareDataBuilder = new DatasetPermutationBuilder()
 // 4. Geometry (1.G)
 // ==========================================
 
+// --- 1.G.A.1: Build and draw shapes possessing defining attributes ---
+const buildShapesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Scope.ShapeProperties,
+        Ability.VisualArticulation
+    ])
+    .applyLabelVariants([
+        [Area.Triangle],
+        [Area.Square],
+        [Area.Rectangle],
+        [Area.Hexagon]
+    ]);
+
+const drawShapesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeIdentity,
+        Ability.VisualArticulation
+    ])
+    .applyLabelVariants([
+        [Area.Circle, Area.CircularShapeDrawing],
+        [Area.Square, Area.LinearShapeDrawing],
+        [Area.Triangle, Area.LinearShapeDrawing]
+    ]);
+
 // --- 1.G.A.2: Compose two-dimensional shapes into composite shapes ---
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -445,12 +474,9 @@ const partitionShapesBuilder = new DatasetPermutationBuilder()
     ]);
 
 // Standard exports following universal convention.
-// Several grade-1 standards are intentionally absent from the active spec:
-// at the supported level they reproduce a kindergarten competency and are
-// indistinguishable by the ontology, so they are parked in implementationTodos
-// (1.OA.B.4 unknown-addend, 1.NBT.A.1 write-numerals & represent-counts,
-// 1.G.A.1 build-shapes & draw-shapes) rather than
-// redeclared here — see those entries for the grade-1 elevation each awaits.
+// Partially supported or ontologically indistinguishable grade-one competencies
+// remain in implementationTodos until a generator/view can prove the complete
+// standard without curriculum-specific range or mode shims.
 export const spec: CompetencyTarget[] = [
     // 1.OA - Operations and Algebraic Thinking
     ...toTargets('1.OA.A.1-word-problems', wordProblemsBuilder),
@@ -463,30 +489,33 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.OA.D.8-unknown-number', unknownNumberBuilder),
     ...toTargets('1.OA.D.8-unknown-operand', unknownOperandBuilder),
     // 1.NBT - Number and Operations in Base Ten
-    ...toTargets('1.NBT.A.1-count-to-120', orderNumbersBuilder),
-    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder),
-    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder),
-    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder),
+    ...toTargets('1.NBT.A.1-order-numbers', orderNumbersBuilder),
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('1.NBT.B.3-compare-two-digit', compareTwoDigitBuilder),
     ...toTargets('1.NBT.C.4-add-within-100', addWithin100Builder),
-    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder),
     ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder),
     // 1.MD - Measurement and Data
-    ...toTargets('1.MD.A.1-order-lengths', orderLengthsBuilder),
     ...toTargets('1.MD.A.2-measure-length', measureLengthBuilder),
     ...toTargets('1.MD.B.3-time', hourTimeBuilder),
     ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder),
     ...toTargets('1.MD.B.3-digital-clocks', digitalTimeBuilder),
     ...toTargets('1.MD.C.4-interpret-data', interpretDataBuilder),
-    ...toTargets('1.MD.C.4-compare-data', compareDataBuilder),
-    // 1.G - Geometry
-    ...toTargets('1.G.A.2-compose-other-shapes', composeShapesBuilder),
-    ...toTargets('1.G.A.3-partition-shapes', partitionShapesBuilder)
+    ...toTargets('1.MD.C.4-compare-data', compareDataBuilder)
 ];
 
-export const implementationTodos: CompetencyTarget[] = [];
+export const implementationTodos: CompetencyTarget[] = [
+    ...toTargets('1.NBT.A.1-count-to-120', orderNumbersBuilder, 'The exact range through 120 is not expressible; ordering and counting generators currently support only the ontology range below 100.'),
+    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder, 'Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported.'),
+    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder, 'Representing a count with a written numeral coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported.'),
+    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder, 'All place-value-bundles outputs are multiples of ten. The current labels do not distinguish exactly one ten from other whole-ten quantities within the resolved range.'),
+    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'The counting-inc-dec generator models changes of one. Existing place-value bundle tasks represent whole tens but do not model ten more or ten less from an arbitrary number.'),
+    ...toTargets('1.MD.A.1-order-lengths', orderLengthsBuilder, 'The current measurement-order exercise directly orders three visible lengths but does not implement the standard\'s separate indirect-comparison competency using a third object.'),
+    ...toTargets('1.G.A.1-defining-attributes', buildShapesBuilder, 'Building shapes coincides with K.G.B.5; the grade-1 elevation of distinguishing defining from non-defining attributes needs a separately scoped generator/view.'),
+    ...toTargets('1.G.A.1-draw-shapes', drawShapesBuilder, 'Drawing shapes coincides with K.G.B.5; the grade-1 defining-attribute elevation is not represented.'),
+    ...toTargets('1.G.A.2-compose-other-shapes', composeShapesBuilder, 'The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape.'),
+    ...toTargets('1.G.A.3-partition-shapes', partitionShapesBuilder, 'The current partition exercise shows two or four equal parts but does not cover the required halves/fourths/quarters language, whole-as-shares descriptions, or the comparison that more equal shares are smaller.')
+];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

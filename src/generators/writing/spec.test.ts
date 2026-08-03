@@ -35,20 +35,4 @@ describe('WritingGenerator Spec Integration', () => {
             expect(stub!.tags).toContain(Scope.NumbersWithoutZero);
         }
     });
-
-    it('resolves the 101-to-120 grade-one extension', () => {
-        for (let seed = 0; seed < 20; seed++) {
-            setSeed(seed);
-            const stub = generateWithLabels(generator, [
-                Area.DigitNotation,
-                Scope.NumbersWithoutZero,
-                Scope.NumbersLarger100,
-                Scope.NumbersSmaller1000
-            ]);
-            expect(stub).not.toBeNull();
-            expect(stub!.data.number).toBeGreaterThanOrEqual(111);
-            expect(stub!.data.number).toBeLessThanOrEqual(119);
-            expect(String(stub!.data.number)).not.toContain('0');
-        }
-    });
 });

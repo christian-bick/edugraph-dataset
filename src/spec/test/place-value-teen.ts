@@ -15,17 +15,6 @@ const teenBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller20
     ]);
 
-const oneTenBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.PlaceValue,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller20,
-        Scope.PhysicalNumbers,
-        Ability.ProcedureUnderstanding
-    ]);
-
 const multipleTensBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.PlaceValue,
@@ -40,6 +29,5 @@ const multipleTensBuilder = new DatasetPermutationBuilder()
 
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-place-value-teen', teenBuilder),
-    ...toTargets('test-place-value-one-ten', oneTenBuilder),
     ...toTargets('test-place-value-multiple-tens', multipleTensBuilder)
 ];

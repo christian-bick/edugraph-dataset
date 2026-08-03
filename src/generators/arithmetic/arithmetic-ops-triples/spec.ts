@@ -10,13 +10,12 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        ...arithmeticOperations
+        Scope.NumbersWithoutNegatives
     ]
 };
 
 export const ArithmeticOpsTriplesGeneratorSchema = {
-    operation: resolveExplicitOperation,
+    operation: [[...arithmeticOperations, Area.Sum], resolveExplicitOperation],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
@@ -24,10 +23,6 @@ export const ArithmeticOpsTriplesGeneratorSchema = {
     requireMultipleOf10: [
         [Scope.MultiplesOf10],
         hasLabel(Scope.MultiplesOf10)
-    ],
-    useThreeAddends: [
-        [Area.Sum],
-        hasLabel(Area.Sum)
     ],
     useCommutativeLaw: [
         [Area.CommutativeLaw],

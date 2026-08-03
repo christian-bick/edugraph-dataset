@@ -44,23 +44,25 @@ interface CoreProps {
 
 const ShapeBuildShapeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
-    validateProblemData('shape-build-shape', problem.data, ['target', 'sides', 'corners', 'attributes']);
-    const { target, attributes } = problem.data;
+    validateProblemData('shape-build-shape', problem.data, ['target', 'sides', 'corners']);
+    const { target, sides, corners } = problem.data;
 
-    if (attributes.length === 0 || !attributes.some(attribute => attribute.defining) || !attributes.some(attribute => !attribute.defining)) {
-        throw new ViewValidationError('shape-build-shape', 'Attributes must include defining and non-defining choices');
-    }
+    const promptText = `To build a ${target}, how many sticks (sides) and clay balls (corners) do you need?`;
+    const options = ['3 sticks, 3 balls', '4 sticks, 4 balls', '6 sticks, 6 balls'];
 
-    const promptText = `Build a ${target}. Which facts must stay the same for it to remain a ${target}?`;
-
-    const getBtnClass = (defining: boolean) => {
-        let cls = "flex-1 min-w-[140px] py-2.5 px-2.5 border-2 rounded-lg text-center font-semibold text-[0.95rem] ";
-        if (defining && isSolutionView) {
+    const getBtnClass = (opt: string) => {
+        let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
+        const isCorrect = opt === `${sides} sticks, ${corners} balls`;
+        if (isCorrect && isSolutionView) {
             cls += "border-green-600 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(22,163,74,0.2)] font-bold";
         } else {
             cls += "border-slate-200 bg-white text-slate-600";
         }
         return cls;
+    };
+
+    const getLabelText = (opt: string) => {
+        return opt.charAt(0).toUpperCase() + opt.slice(1);
     };
 
     return (
@@ -87,9 +89,9 @@ const ShapeBuildShapeCore = ({ config: _config, payload }: CoreProps) => {
                 </div>
 
                 <div className="flex flex-wrap gap-3 w-full justify-center">
-                    {attributes.map((attribute, i) => (
-                        <div key={i} className={getBtnClass(attribute.defining)}>
-                            {attribute.label.charAt(0).toUpperCase() + attribute.label.slice(1)}
+                    {options.map((opt, i) => (
+                        <div key={i} className={getBtnClass(opt)}>
+                            {getLabelText(opt)}
                         </div>
                     ))}
                 </div>
