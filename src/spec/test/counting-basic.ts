@@ -103,7 +103,7 @@ const countTo100Builder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.AdditiveCount],
-        [Scope.DerivedCount]
+        [Scope.MultiplesOf10]
     ]);
 
 export const spec: CompetencyTarget[] = [

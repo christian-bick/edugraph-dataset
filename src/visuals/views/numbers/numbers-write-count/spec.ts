@@ -6,7 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'numbers-write-count',
     generalLabels: [
         Scope.PhysicalNumbers,
-        Ability.ProcedureExecution,
+        Ability.Formalization,
         Scope.ArabicNumerals
     ],
     rejectedLabels: [Area.DigitNotation],

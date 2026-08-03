@@ -173,7 +173,7 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
         Scope.ArabicNumerals,
-        Ability.ProcedureExecution
+        Ability.TextualArticulation
     ])
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
@@ -187,7 +187,7 @@ const representCountsBuilder = new DatasetPermutationBuilder()
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.PhysicalNumbers,
-        Ability.ProcedureExecution
+        Ability.Formalization
     ])
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],

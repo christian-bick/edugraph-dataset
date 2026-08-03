@@ -44,7 +44,7 @@ describe('CountingSequenceGenerator', () => {
     it('skip-counts by tens through 100', () => {
         const stub = generator.generate({
             range: {min: 1, max: 100},
-            countMode: Scope.DerivedCount
+            countMode: Scope.MultiplesOf10
         });
 
         expect(stub!.data.sequence).toEqual([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
@@ -54,7 +54,7 @@ describe('CountingSequenceGenerator', () => {
     it('returns null when fewer than two sequence values fit', () => {
         expect(generator.generate({
             range: {min: 10, max: 10},
-            countMode: Scope.DerivedCount
+            countMode: Scope.MultiplesOf10
         })).toBeNull();
     });
 });

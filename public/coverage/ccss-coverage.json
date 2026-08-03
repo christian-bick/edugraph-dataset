@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generated_at": "2026-08-03T17:59:28.032Z",
+    "generated_at": "2026-08-03T18:13:43.966Z",
     "ontology_version": "v0.10.0",
     "total_leaves_scanned": 467,
     "spec_covered_count": 47,
-    "covered_count": 37,
-    "missing_generator_count": 9,
+    "covered_count": 39,
+    "missing_generator_count": 7,
     "missing_ontology_count": 1,
     "analysis_needed_count": 420,
     "beyond_scope_count": 2,
@@ -60,7 +60,7 @@
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
+      "dataset_covered": true,
       "generator_module": "counting-sequence",
       "cluster_id": "K.CC.A"
     },
@@ -196,8 +196,8 @@
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "writing",
       "cluster_id": "K.CC.A"
     },
     "K.CC.B.4a": {
@@ -1953,69 +1953,69 @@
           "explanation": "The exact range through 120 is not expressible; ordering and counting generators currently support only the ontology range below 100."
         },
         {
-          "id": "1.NBT.A.1-write-numerals~0bdb698f",
+          "id": "1.NBT.A.1-write-numerals~663d1492",
           "labels": [
             "http://edugraph.io/edu/DigitNotation",
             "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/ProcedureExecution",
+            "http://edugraph.io/edu/TextualArticulation",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersSmaller10"
           ],
           "explanation": "Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
         },
         {
-          "id": "1.NBT.A.1-write-numerals~b3e5dba0",
+          "id": "1.NBT.A.1-write-numerals~9c798a27",
           "labels": [
             "http://edugraph.io/edu/DigitNotation",
             "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/ProcedureExecution",
+            "http://edugraph.io/edu/TextualArticulation",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersSmaller20"
           ],
           "explanation": "Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
         },
         {
-          "id": "1.NBT.A.1-write-numerals~79037cdc",
+          "id": "1.NBT.A.1-write-numerals~09421f5b",
           "labels": [
             "http://edugraph.io/edu/DigitNotation",
             "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/ProcedureExecution",
+            "http://edugraph.io/edu/TextualArticulation",
             "http://edugraph.io/edu/NumbersWithZero",
             "http://edugraph.io/edu/NumbersSmaller20"
           ],
           "explanation": "Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
         },
         {
-          "id": "1.NBT.A.1-represent-counts~371aa72c",
+          "id": "1.NBT.A.1-represent-counts~bd797c40",
           "labels": [
             "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/PhysicalNumbers",
-            "http://edugraph.io/edu/ProcedureExecution",
+            "http://edugraph.io/edu/Formalization",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersSmaller10"
           ],
           "explanation": "Representing a count with a written numeral coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
         },
         {
-          "id": "1.NBT.A.1-represent-counts~ea90e5d9",
+          "id": "1.NBT.A.1-represent-counts~5f906d79",
           "labels": [
             "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/PhysicalNumbers",
-            "http://edugraph.io/edu/ProcedureExecution",
+            "http://edugraph.io/edu/Formalization",
             "http://edugraph.io/edu/NumbersWithoutZero",
             "http://edugraph.io/edu/NumbersSmaller20"
           ],
           "explanation": "Representing a count with a written numeral coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
         },
         {
-          "id": "1.NBT.A.1-represent-counts~3dfdf2af",
+          "id": "1.NBT.A.1-represent-counts~a858ae7d",
           "labels": [
             "http://edugraph.io/edu/NumerationWithIntegers",
             "http://edugraph.io/edu/ArabicNumerals",
             "http://edugraph.io/edu/PhysicalNumbers",
-            "http://edugraph.io/edu/ProcedureExecution",
+            "http://edugraph.io/edu/Formalization",
             "http://edugraph.io/edu/NumbersWithZero",
             "http://edugraph.io/edu/NumbersSmaller20"
           ],
@@ -2045,7 +2045,9 @@
         "http://edugraph.io/edu/PhysicalNumbers"
       ],
       "matched_abilities": [
-        "http://edugraph.io/edu/ProcedureExecution"
+        "http://edugraph.io/edu/ProcedureExecution",
+        "http://edugraph.io/edu/TextualArticulation",
+        "http://edugraph.io/edu/Formalization"
       ],
       "reasoning": "",
       "suggested_task": null,
@@ -12266,18 +12268,6 @@
     }
   },
   "tasks": [
-    {
-      "id": "task-generator-K.CC.A",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "K.CC.A",
-      "cluster_description": "Know number names and the count sequence.",
-      "title": "Generate Dataset for K.CC.A",
-      "description": "Implement/extend generators and views to cover: K.CC.A.1, K.CC.A.3. Details:\n- K.CC.A.1: Implement generator/view for missing competencies\n- K.CC.A.3: Implement generator/view for missing competencies",
-      "standards": [
-        "K.CC.A.1",
-        "K.CC.A.3"
-      ]
-    },
     {
       "id": "task-ontology-1.OA.A",
       "type": "ONTOLOGY_EXTENSION",

@@ -5,8 +5,21 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 const builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
-        Ability.ProcedureExecution,
+        Ability.TextualArticulation,
         Scope.NumbersSmaller10
     ]);
 
-export const spec: CompetencyTarget[] = toTargets('test-writing', builder);
+const representCountsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumerationWithIntegers,
+        Scope.ArabicNumerals,
+        Scope.PhysicalNumbers,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller20,
+        Ability.Formalization
+    ]);
+
+export const spec: CompetencyTarget[] = [
+    ...toTargets('test-writing', builder),
+    ...toTargets('test-writing-represent-counts', representCountsBuilder)
+];

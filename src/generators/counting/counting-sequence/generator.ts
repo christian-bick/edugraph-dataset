@@ -14,7 +14,7 @@ export class CountingSequenceGenerator implements ProblemGenerator<CountingSeque
 
         const stepSize = config.countMode === Scope.AdditiveCount
             ? 1
-            : config.countMode === Scope.DerivedCount
+            : config.countMode === Scope.MultiplesOf10
                 ? 10
                 : null;
         if (stepSize === null) {

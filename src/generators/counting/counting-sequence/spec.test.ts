@@ -28,11 +28,11 @@ describe('CountingSequenceGenerator spec integration', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,
             Scope.NumbersSmaller100,
-            Scope.DerivedCount
+            Scope.MultiplesOf10
         ]);
 
         expect(stub).not.toBeNull();
         expect(stub!.data.stepSize).toBe(10);
-        expect(stub!.tags).toContain(Scope.DerivedCount);
+        expect(stub!.tags).toContain(Scope.MultiplesOf10);
     });
 });

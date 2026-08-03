@@ -19,7 +19,7 @@ export const CountingSequenceGeneratorSchema = {
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
         resolveRangeFromLabels
     ],
-    countMode: [Scope.AdditiveCount, Scope.DerivedCount]
+    countMode: [Scope.AdditiveCount, Scope.MultiplesOf10]
 } as const;
 
 export type CountingSequenceGeneratorConfig = ConfigFromSchema<typeof CountingSequenceGeneratorSchema>;
