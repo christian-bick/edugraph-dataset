@@ -22,18 +22,19 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.OA.A.2: Word problems with three addends (sum <= 20) ---
-// Todo: See ontological todo before being usable
-const threeAddendsBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.Addition,
-        Area.Sum,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller20,
-        Scope.PhysicalNumbers,
-        Ability.TextualReception
-    ]);
+// TODO [1.OA.A.2]: Parked in ontologyTodos until operand count can be
+// stated explicitly. Reference builder:
+// const threeAddendsBuilder = new DatasetPermutationBuilder()
+//     .addLabels([
+//         Area.Addition,
+//         Area.Sum,
+//         Scope.ArabicNumerals,
+//         Scope.Base10,
+//         Scope.NumbersWithoutNegatives,
+//         Scope.NumbersSmaller20,
+//         Scope.PhysicalNumbers,
+//         Ability.TextualReception
+//     ]);
 
 // --- 1.OA.B.3: Apply properties of operations (commutative/associative) ---
 const propertiesBuilder = new DatasetPermutationBuilder()
