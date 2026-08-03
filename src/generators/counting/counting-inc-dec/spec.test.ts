@@ -37,4 +37,30 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
         expect(stub!.tags).toContain(Scope.SubtractiveCount);
     });
+
+    it('resolves a subsequent position as an increment', () => {
+        const stub = generateWithLabels(generator, [
+            Area.NumerationWithIntegers,
+            Scope.NumbersSmaller20,
+            Scope.After
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.incDecType).toBe('inc');
+        expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
+        expect(stub!.tags).toContain(Scope.After);
+    });
+
+    it('resolves a preceding position as a decrement', () => {
+        const stub = generateWithLabels(generator, [
+            Area.NumerationWithIntegers,
+            Scope.NumbersSmaller20,
+            Scope.Before
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.incDecType).toBe('dec');
+        expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
+        expect(stub!.tags).toContain(Scope.Before);
+    });
 });

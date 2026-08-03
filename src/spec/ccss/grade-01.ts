@@ -79,8 +79,8 @@ const relateCountingBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.AdditiveCount],
-        [Scope.SubtractiveCount]
+        [Scope.AdditiveCount, Scope.After],
+        [Scope.SubtractiveCount, Scope.Before]
     ])
     .applyLabelVariants([
         [Scope.NumbersSmaller10],

@@ -15,6 +15,7 @@ const countTo100Builder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller100,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
+        Scope.After,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -32,6 +33,7 @@ const countFrom5Builder = new DatasetPermutationBuilder()
         Scope.NumbersLarger5,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
+        Scope.After,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -98,6 +100,7 @@ const oneLargerBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.PhysicalNumbers,
         Scope.AdditiveCount,
+        Scope.After,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([

@@ -3,6 +3,7 @@ import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {CountingSequenceGenerator} from './generator.ts';
+import {spec} from './spec.ts';
 
 describe('CountingSequenceGenerator spec integration', () => {
     let generator: CountingSequenceGenerator;
@@ -10,6 +11,10 @@ describe('CountingSequenceGenerator spec integration', () => {
     beforeEach(() => {
         generator = new CountingSequenceGenerator();
         setSeed(42);
+    });
+
+    it('declares every generated missing position as subsequent', () => {
+        expect(spec.generalLabels).toContain(Scope.After);
     });
 
     it('resolves count-by-ones labels', () => {

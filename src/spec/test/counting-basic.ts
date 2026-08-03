@@ -84,8 +84,8 @@ const incDecBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Area.Increment, Scope.AdditiveCount],
-        [Area.Decrement, Scope.SubtractiveCount]
+        [Area.Increment, Scope.AdditiveCount, Scope.After],
+        [Area.Decrement, Scope.SubtractiveCount, Scope.Before]
     ])
     .applyLabelVariants([
         [Scope.NumbersSmaller10],
@@ -99,6 +99,7 @@ const countTo100Builder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller100,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
+        Scope.After,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([

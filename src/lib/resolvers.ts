@@ -22,3 +22,9 @@ export const matchAllExactLabels = (labels: string[], supportedLabels?: readonly
     return supportedLabels.filter(s => labels.includes(s));
 };
 
+export const selectCanonicalLabel = <T extends string>(
+    groups: readonly (readonly [readonly string[], T])[]
+): ResolverFn<T | undefined> => {
+    return (labels: string[]) => groups.find(([group]) => group.some(label => labels.includes(label)))?.[1];
+};
+

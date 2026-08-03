@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { hasLabel, hasSubConcept, matchAllExactLabels, matchAllLabels } from './resolvers.ts';
+import {
+    hasLabel,
+    hasSubConcept,
+    matchAllExactLabels,
+    matchAllLabels,
+    selectCanonicalLabel
+} from './resolvers.ts';
 import { extractConfig } from './utils.ts';
 import { Scope, Area } from 'edugraph-ts';
 
@@ -81,5 +87,21 @@ describe('Resolvers & Utilities', () => {
             const { config } = extractConfig(MockSchema, [Area.ArithmeticOperations]);
             expect([Area.Addition, Area.Subtraction]).toContain(config.operation);
         });
+    });
+});
+
+describe('selectCanonicalLabel', () => {
+    const resolveDirection = selectCanonicalLabel([
+        [[Scope.SubtractiveCount, Area.Decrement, Scope.Before], Scope.SubtractiveCount],
+        [[Scope.AdditiveCount, Area.Increment, Scope.After], Scope.AdditiveCount]
+    ] as const);
+
+    it('maps equivalent exact labels to their canonical label', () => {
+        expect(resolveDirection([Scope.Before])).toBe(Scope.SubtractiveCount);
+        expect(resolveDirection([Area.Increment, Scope.After])).toBe(Scope.AdditiveCount);
+    });
+
+    it('returns undefined when none of the grouped labels is present', () => {
+        expect(resolveDirection([Scope.ArabicNumerals])).toBeUndefined();
     });
 });

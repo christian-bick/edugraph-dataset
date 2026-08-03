@@ -2,6 +2,7 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-inc-dec',
@@ -18,19 +19,15 @@ const countingDirections = [
     Scope.SubtractiveCount,
     Scope.AdditiveCount,
     Area.Decrement,
-    Area.Increment
+    Area.Increment,
+    Scope.Before,
+    Scope.After
 ] as const;
 
-function resolveDirection(labels: string[]): Scope.SubtractiveCount | Scope.AdditiveCount | undefined {
-    if (labels.includes(Scope.SubtractiveCount) || labels.includes(Area.Decrement)) {
-        return Scope.SubtractiveCount;
-    }
-    if (labels.includes(Scope.AdditiveCount) || labels.includes(Area.Increment)) {
-        return Scope.AdditiveCount;
-    }
-    return undefined;
-}
-
+const resolveDirection = selectCanonicalLabel([
+    [[Scope.SubtractiveCount, Area.Decrement, Scope.Before], Scope.SubtractiveCount],
+    [[Scope.AdditiveCount, Area.Increment, Scope.After], Scope.AdditiveCount]
+] as const);
 
 export const CountingIncDecGeneratorSchema = {
     range: [
