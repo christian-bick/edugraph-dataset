@@ -22,6 +22,7 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.OA.A.2: Word problems with three addends (sum <= 20) ---
+// Todo: See ontological todo before being usable
 const threeAddendsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Addition,
@@ -480,7 +481,6 @@ const partitionShapesBuilder = new DatasetPermutationBuilder()
 export const spec: CompetencyTarget[] = [
     // 1.OA - Operations and Algebraic Thinking
     ...toTargets('1.OA.A.1-word-problems', wordProblemsBuilder),
-    ...toTargets('1.OA.A.2-three-addends', threeAddendsBuilder),
     ...toTargets('1.OA.B.3-properties', propertiesBuilder),
     ...toTargets('1.OA.B.4-unknown-addend', unknownAddendBuilder),
     ...toTargets('1.OA.C.5-relate-counting', relateCountingBuilder),
@@ -517,7 +517,11 @@ export const implementationTodos: CompetencyTarget[] = [
     ...toTargets('1.G.A.3-partition-shapes', partitionShapesBuilder, 'The current partition exercise shows two or four equal parts but does not cover the required halves/fourths/quarters language, whole-as-shares descriptions, or the comparison that more equal shares are smaller.')
 ];
 
-export const ontologyTodos: OntologyTodo[] = [];
+export const ontologyTodos: OntologyTodo[] = [{
+    standardId: '1.OA.A.2',
+    title: 'Represent arithmetic operand count',
+    description: 'Add Scope.OperandCount with child scopes Scope.TwoOperands and Scope.ThreeOperands. Apply ThreeOperands to the three-addend competency and TwoOperands to arity-constrained binary arithmetic targets so pair and triple generators can be distinguished without overloading Area or Ability labels.'
+}];
 
 export const equivalentTargets: TargetEquivalence[] = [{
     targets: ['1.OA.B.4-unknown-addend', '1.OA.D.8-unknown-operand'],
