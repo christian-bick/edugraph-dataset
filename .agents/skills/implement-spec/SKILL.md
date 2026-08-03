@@ -25,16 +25,20 @@ Delegate component updates and audits to specialized skills:
 - For view work $\rightarrow$ Invoke `/update-view {viewName}`
 - For module review $\rightarrow$ Invoke `/review-gen {moduleName}` or `/review-view {viewName}`
 
-#### Step 4: Isolated Debugging & Error Resolution
-Refer to `DOCS.md § 6` (Efficient Development & Debugging Iteration) for isolated debugging workflows:
+#### Step 4: Targeted Debugging & Error Resolution
+Refer to `DOCS.md § 6` (Efficient Development & Debugging Iteration) for targeted debugging workflows:
 - **Target Matching & Output Inspection**:
   ```bash
-  npm run test:target -- --target=<targetId> --spec=test --render
+  npm run test:target -- --target=<targetId> --spec=<specModule> --render
   ```
 - **Single-Sample Replay & VQA Debugging**:
   ```bash
-  npm run test:sample -- --sample="<sampleKey>" --spec=test
+  npm run test:sample -- --sample="<sampleKey>" --spec=<specModule>
   ```
+
+Use the isolated `test` spec only for deliberately authored prototypes, smoke paths,
+and retained regressions. Add `--raw` to `test:target` only when inspecting source
+definitions before production overlap deduplication.
 
 #### Step 5: Fast Scoped Iteration Loop
 Keep iteration loops fast (<5 seconds) during active development:
@@ -52,6 +56,9 @@ Keep iteration loops fast (<5 seconds) during active development:
   npm run report:churn -- --spec=test
   ```
   *(Verify zero unexpected image churn in unrelated modules).*
+- Treat this `test` run as a fast smoke loop. Before promotion, inspect and generate the
+  actual target with `--spec=<specModule>`; the test spec is not evidence that the real
+  standard matches correctly.
 - Once clean and verified, **promote completed targets from `implementationTodos` to `spec`** in `src/spec/<spec>/`, per the export contract in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`).
 
 #### Step 6: Final Full Dataset Validation Gate (Completion Gate)

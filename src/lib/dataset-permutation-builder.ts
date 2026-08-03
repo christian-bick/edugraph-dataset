@@ -32,8 +32,9 @@ export default class DatasetPermutationBuilder {
     }
 
     /**
-     * Creates a cross-product of the current permutations with a set of mutually exclusive labels.
-     * e.g. .applyLabelVariants([Area.Add, Area.Sub])
+     * Creates a cross-product of the current permutations with alternative label groups.
+     * Labels within one group are conjunctive; successive calls multiply dimensions.
+     * e.g. .applyLabelVariants([[Area.Addition], [Area.Subtraction]])
      */
     applyLabelVariants(variants: string[][]): this {
         const newPermutations: GeneratorInput[] = [];

@@ -31,7 +31,7 @@ The data contract passed from the Playwright orchestrator into the browser's `wi
 *   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy from it — see `IMPL-V6` in [docs/implementation-view.md](docs/implementation-view.md). `problem.id` is present on the payload but is dead: no view reads it (see *Sample Identity & Determinism* below).
 
 To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
-1. **`ViewTypeMap`** (defined in [problems.ts](src/types/problems.ts)): A central contract mapping visual view identifiers (like `'operations-vertical'`) to their expected mathematical data structure (like `ArithmeticStandardProblem`).
+1. **`ViewTypeMap`** (defined in [problems.ts](src/types/problems.ts)): A central contract mapping visual view identifiers to their expected mathematical data structure. A shared view may accept a small structurally distinguishable union: `operations-vertical` and `operations-boxes` use `ArithmeticPairProblem | ArithmeticTripleProblem`, then narrow through the presence of `num3` and validate the corresponding fields.
 2. **`ViewRenderPayload<TViewId>`** (defined in [ml-engine.ts](src/types/ml-engine.ts)): A utility type that automatically resolves to the correct type-safe `RenderPayload` for a specific view ID, eliminating the need for manual type assertions (`as ...`) within the view components.
 
 **Environment Separation & Mapping:**
@@ -44,15 +44,19 @@ A **spec module** (`src/spec/<module>/`) is one education standard's competency 
 *   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples.
 *   **The union dataset (`out/dataset/`) is derived**, built by `npm run merge:dataset` from every non-isolated standard in precedence order. It is the released artifact; treat it as a build output, never as a source of truth — the merge replaces it wholesale.
 *   **The merge deduplicates identical content across standards.** The first standard in merge order keeps the exercise and later ones report it as duplicate overlap. Dedup is scoped per (split, view) by content fingerprint, with the validation split additionally excluding content already in train — the same rules generation applies within a single standard (where the scope is per module, since a view has only one generator), extended across them. Question and solution are independent draws of one exercise, so exercises are kept or dropped whole.
-*   **Isolated specs never merge.** `test` declares `isolated = true` in `src/spec/test/_module.ts`; it exists to exercise generators and views in a fast, small slice. Files prefixed with `_` describe the module rather than contributing targets, so the target loaders skip them.
+*   **Isolated specs never merge.** `test` declares `isolated = true` in `src/spec/test/_module.ts`; it is a fast prototyping, debugging, smoke-test and retained-regression workspace, not a second curriculum or exhaustive capability matrix. Every generator keeps at least one generatable target-view path there. Files prefixed with `_` describe the module rather than contributing targets, so the target loaders skip them.
 *   **Merge precedence** is ascending `unionOrder` (default 100), ties broken by name. Declare a higher `unionOrder` when adding a standard so established ones keep their samples and the newcomer contributes only its delta.
 
-This works because sample identity is content-derived: `target.id` embeds the standard's own id prefix, so keys never collide across standards, and val-split membership is a pure function of `target.id`, so a target lands in the same split regardless of what else was generated.
+Target IDs are unique within their own spec module. Sample keys and filenames are interpreted
+inside that spec's dataset folder, while metadata records the originating `spec`. The union
+does not require globally unique target prefixes: it reads each generated standard
+separately, preserves its metadata, and selects contributions by content fingerprint and
+merge precedence.
 
-**Known limitation — equivalent competencies are only collapsed within a spec module.** The shrinking delta comes from target-level deduplication before generation, not from the merge: `deduplicateTargetPermutations` (via `normalizeAndValidateSpec`) reduces identical label sets to one representative target, which `check:standards-spec` reports as cluster warnings. That does not span spec modules, and the merge cannot compensate — a second standard's equivalent targets carry different ids, hence different seeds and different content, so content-fingerprint dedup catches only coincidental collisions. When a second standard lands, extend target-level dedup across the union rather than deduplicating or validating afterwards.
+**Known limitation — equivalent competencies are only collapsed within a spec module.** Target-level deduplication before generation (`deduplicateTargetPermutations` via `normalizeAndValidateSpec`) reduces identical label sets to one representative only within that standard. Separate standards still generate independently; the union sees their rendered content rather than their target equivalence and removes only exercises whose content fingerprints actually coincide. Cross-standard competency equivalence would therefore require a separate union-level target normalization design.
 
 ### Sample Identity & Determinism
-Every dataset sample has a **structural identity**: the tuple `(target.id, generatorId, viewId, split, mode, instanceIdx)`, canonicalized as a *sample key* (e.g. `test-writing~fe4336da#writing#numbers-write-standard#train#question#inst:0`). Everything entropy-related is a pure function of this identity, implemented in `src/lib/generation.ts`:
+Within one spec dataset, every sample has a **structural identity**: the tuple `(target.id, generatorId, viewId, split, mode, instanceIdx)`, canonicalized as a *sample key* (e.g. `test-writing~fe4336da#writing#numbers-write-standard#train#question#inst:0`). Everything entropy-related is a pure function of this identity, implemented in `src/lib/generation.ts`:
 
 *   **Generation seed**: `computeSampleSeed(sampleKey, attempt)`. The `attempt` counter is a retry salt — when a generator returns `null` or produces duplicate content, the pipeline retries with the next attempt, which deterministically yields a different draw. The *winning* attempt is recorded in metadata and the VQA cache, so any sample can be replayed in isolation.
 *   **Render seed**: passed to the browser as `payload.seed`. The `withConfig` wrapper calls `setSeed(payload.seed)` before resolving the view config, and views derive all visual randomness from it.
@@ -105,12 +109,12 @@ The primary pipeline orchestrator.
 *   **Function**: Replays one exact sample draw from its identity, renders it to `out/retest/` (requires `npm run dev`), compares the image hash against the committed VQA cache, and performs live Gemini VQA validation by default (when `GEMINI_API_KEY` is present), automatically updating the local VQA cache on pass. Pass `--no-validate` to skip live VQA API calls, or `--no-render` to skip image rendering.
 
 ### `src/scripts/test-target.ts`
-*   **Execution**: `npm run test:target -- --target=<target.id_or_prefix> --spec=<spec_module> [--render] [--validate]`
-*   **Function**: Inspects one competency target end to end: supports full or prefix target IDs (e.g. `--target=test-writing`), which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — the actual images in `out/target-test/`. Pass `--validate` to run live Gemini VQA validation on rendered samples.
+*   **Execution**: `npm run test:target -- --target=<target.id_or_prefix> --spec=<spec_module> [--raw] [--render] [--validate]`
+*   **Function**: Inspects one production-normalized competency target end to end: supports full or prefix target IDs (e.g. `--target=test-writing`), which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — the actual images in `out/target-test/`. Pass `--raw` to select from source definitions before overlap deduplication, or `--validate` to run live Gemini VQA validation on rendered samples.
 
 ### `src/scripts/show-matching-stats.ts`
-*   **Execution**: `npm run show:matching -- --spec=<spec_module>` (or `npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module>`)
-*   **Function**: Prints the matched `(generator, view)` pairs for every target of a spec, probes actual generation with production sample keys, surfaces generation failures and `rejectedLabels` boundaries, and summarizes per-generator coverage. Shares its matching logic with the pipeline via `src/lib/generation.ts`.
+*   **Execution**: `npm run show:matching -- --spec=<spec_module> [--raw]`
+*   **Function**: Prints the matched `(generator, view)` pairs for the same normalized and deduplicated targets used by production generation. Every semantic match is reported; a cheap sample probe is shown as a separate success/failure status and never removes the tuple. Pass `--raw` to inspect every source target definition before overlap deduplication. The shared `matchTargets` predicate remains the authority in both modes.
 
 ### `src/scripts/show-implementation-todos.ts`
 *   **Execution**: `npm run show:imp-todos -- [--spec=<spec_module>]`
@@ -134,7 +138,7 @@ The primary pipeline orchestrator.
 
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<spec_module>`
-*   **Function**: Validates competency target standard specs (e.g. `test`, `ccss`) using `normalizeAndValidateSpec` from `src/lib/spec-validator.ts`. All checks always run: target ID uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set normalization, intra-target permutation uniqueness, and definition distinctness — no two target definitions may define an identical *set* of permutations, since such definitions are indistinguishable by the ontology. Definitions that merely *overlap* in some permutations are legitimate (related standards across grades); overlapping permutations are deduplicated to one representative target and reported as warnings, not errors.
+*   **Function**: Validates competency target standard specs (e.g. `test`, `ccss`) using `normalizeAndValidateSpec` from `src/lib/spec-validator.ts`. All checks always run: target ID uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set normalization, intra-target permutation uniqueness, and definition distinctness — no two target definitions may define an identical *set* of permutations, since such definitions are indistinguishable by the ontology. Definitions that merely *overlap* in some permutations are legitimate (related standards across grades); overlapping permutations are deduplicated to one representative target and reported as warnings, not errors. For `--spec=test`, validation additionally requires a matched target/view tuple that can produce a sample for every generator module.
 
 ### Type Checking (`npm run check:types`)
 *   **Execution**: `npm run check:types` (or `npx tsc --noEmit`)
@@ -171,10 +175,10 @@ Declare the target specifications in the appropriate grade level file in `src/sp
 The export contract, the content-hash id semantics, how to categorize gaps into `implementationTodos` / `ontologyTodos`, how to declare intentional medium exclusions in `beyondScope`, and the rule against stretching labels to force a match are all specified in [docs/target-spec.md](docs/target-spec.md).
 
 ### Step 2: Analyze Matchings
-Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` to see if the new targets map to any existing generator or views.
+Run `npm run show:matching -- --spec=ccss` to inspect the complete matched-pair set. Confirm both that the intended path exists and that every additional pair is a genuine realization. Use `--raw` only when tracing an overlapping source definition that production deduplicates.
 
 ### Step 3: Decide Next Steps
-- **Case A: Both Match (100% Match):** If the new targets already map to an existing generator and a compatible view, **nothing else needs to be done**! The dataset pipeline will automatically generate problems and render images for these targets.
+- **Case A: Both Match (100% Match):** If the intended generator-view path matches and every additional match is genuine, the dataset pipeline can generate the target without a new module.
 - **Case B: No Matching Generator:** If the target matches no generator, you must create a new generator module under `src/generators/` (see Scaffolding & Implementation below).
 - **Case C: No Matching View:** If the target matches no view, you must create a new view layout under `src/visuals/views/` (see Scaffolding & Implementation below).
 - **Case D: Matches Exist but Lacks Capabilities:** If matching modules exist but do not support the target's specific labels, you must extend their `spec.ts` (supportedLabels/constraints) and logic to support them.
@@ -195,9 +199,9 @@ The rule that breaks things silently is `IMPL-V6`: every randomized visual decis
 ### Step 7: Tests (`generator.test.ts`)
 Write unit tests per `IMPL-G5` in [docs/implementation-generator.md](docs/implementation-generator.md), then run `npm run test` to verify.
 
-### Step 7b: Targeted Testing via Test Specs
-To visually verify and test both your generator and view modules without overwriting the main dataset, you should use the `test` specs module:
-1. **Extend Test Specs**: Add minimal test permutations for your module to the `test` specs directory (`src/spec/test/`). The `test` module follows the same contract as `src/spec/ccss/` — see [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-4`).
+### Step 7b: Prototyping and Regression Testing via `test`
+Use the isolated `test` spec for fast visual prototyping, debugging, smoke generation and retained cached regressions. It is not a second curriculum or an exhaustive mirror of generator capabilities:
+1. **Maintain a Test Path**: Every generator must have at least one minimal test target with a compatible view. Keep existing targets when they remain useful regressions; add more only when they materially help debugging or protect behavior. The module follows the same builder contract as real standards — see [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-4`, `TSPEC-12`).
 2. **Run Targeted Dataset Generation**: Generate a smaller slice of the dataset exclusively to a `dataset-test` directory:
    ```bash
    npm run generate:dataset -- --generator=X --view=Y --spec=test
@@ -210,7 +214,7 @@ To visually verify and test both your generator and view modules without overwri
 
 ### Step 8: Final Verification
 1. Run `npm run check` (or `npm run check:types`, `npm run check:generator-view-specs`, `npm run check:standards-spec`) to verify type safety, spec constraints, label usage, and target standard specs.
-2. Run `npx vite-node src/scripts/show-matching-stats.ts --spec=ccss` (or `--spec=test`) to confirm that the ontology dynamically binds your targets to your generator and views.
+2. Run `npm run show:matching -- --spec=ccss` to confirm the real standard bindings; use `--spec=test` for the isolated smoke path and `--raw` only for source-definition diagnosis.
 3. Run `npm run generate:dataset -- --spec=ccss --generator=[moduleName]` to test local dataset generation.
 
 ## 6. Efficient Development & Debugging Iteration
@@ -267,8 +271,8 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Command**: `/implement-spec [{specModule}]`
 - **Function**: Resolves `implementationTodos` step-by-step to achieve 100% error-free problem generation and rendering.
 - **Delegation & Module Reviews**: Delegates module-level implementation to `/update-gen {moduleName}` and `/update-view {viewName}`, and targeted audits to `/review-gen {moduleName}` and `/review-view {viewName}`.
-- **Isolated Debugging**: Uses `npm run test:target -- --target=<id> --spec=test --render` and `npm run test:sample -- --sample="<sampleKey>" --spec=test` to isolate and fix failing samples.
-- **Fast Scoped Regeneration**: Uses `npm run generate:dataset -- --spec=test --generator=<gen> --view=<view> [--training-only]` during iteration.
+- **Target Debugging**: Uses `npm run test:target -- --target=<id> --spec=<real-standard> --render` for the target being implemented. The isolated `test` spec remains available for deliberately authored prototypes and retained regressions; `--raw` exposes source definitions before production deduplication.
+- **Fast Scoped Regeneration**: Uses the isolated `test` spec for cheap smoke iteration when it contains the relevant example, then verifies the promoted target against its real standard.
 - **Completion Gate**: Promotes verified targets to `spec`, then runs a final full regeneration (`npm run generate:dataset -- --spec=<spec>`), full VQA validation (`npm run validate:dataset`), VQA cache churn check (`npm run report:churn`), and full checks (`npm run check`). Note that the last two select a dataset *folder*, not a spec — see the dataset folder rule in §3.
 
 ### Loop 3: Ontological Todo Resolution (`/update-ontology`)

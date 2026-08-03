@@ -50,14 +50,27 @@ Study `src/spec/ccss/kindergarten.ts` and `grade-01.ts` for the established stru
 ### TSPEC-4 — Build permutations programmatically
 
 - `.addLabels([...])` — the label set shared by all permutations of a competency.
-- `.applyLabelVariants([...])` — orthogonal dimensions: number ranges,
-  `Scope.NumbersWithZero` vs. `Scope.NumbersWithoutZero`, shapes, relations.
+- `.applyLabelVariants([...])` — takes alternative **label groups** for one dimension.
+  Labels within one group are conjunctive; the method forms the Cartesian product of the
+  current permutations with those groups. Successive calls multiply orthogonal dimensions
+  such as number ranges, zero inclusion, shapes and relations.
 - `toTargets('<CCSS-id>-<slug>', builder)` from `src/lib/dataset-permutation-builder.ts` —
   maps the builder to targets. For todo entries, pass the third argument: a description of
   what generator or view functionality is missing.
 
 Build permutations programmatically rather than writing static arrays by hand — this
 applies to the `test` module too.
+
+For example:
+
+```typescript
+builder
+    .addLabels([Shared])
+    .applyLabelVariants([[A, B], [C]])
+    .applyLabelVariants([[X], [Y]]);
+```
+
+produces `current permutations × {A AND B, C} × {X, Y}`: four final permutations.
 
 ### TSPEC-5 — Target ids are content hashes, not positions
 
@@ -104,7 +117,8 @@ backlog items. A leaf standard may have one competency in `beyondScope` and a di
 competency in `spec`, but each individual competency still belongs to exactly one export.
 
 Confirm the middle column empirically with `npm run show:matching -- --spec=<module>` rather
-than by inspection.
+than by inspection. Audit the complete matched-pair set: the intended path must be present,
+and every additional generator-view match must also be a genuine realization of the target.
 
 ### TSPEC-8 — Definitions must be distinct, unless the identity is declared
 
@@ -152,22 +166,27 @@ target-bearing loaders skip them — a `_module.ts` must **not** export `spec`.
 exercise, so leaving it implicit would let adding one standard silently reshuffle another's
 contribution.
 
-### TSPEC-11 — Target id prefixes must be unique across all standards, not just within one
+### TSPEC-12 — `test` is an isolated prototyping and regression spec
 
-`toTargets('<standard-id>-<slug>', builder)` embeds the standard's own id in every target
-id, which is what keeps sample keys from colliding when standards are merged. Choose id
-prefixes that no other standard could produce.
+The `test` module is a fast workspace for prototyping, debugging, smoke generation and
+retained cached regressions. It is not a second curriculum and need not reproduce every
+capability permutation from the real standards.
 
-**Note:** `check:standards-spec` validates uniqueness *within* a spec module only, and the
-same is true of the deduplication that collapses identical label sets to one representative
-target. Nothing yet compares targets across standards, so this rule is on the author — see
-the known limitation under *Specs and the Union Dataset* in [DOCS.md](../DOCS.md).
+Keep existing useful targets when they continue to provide regression value. Every
+generator module must nevertheless match at least one `test` target together with at least
+one compatible view and produce a sample through that tuple, so each generator has a cheap
+end-to-end path. Durable mathematical and label-resolution coverage remains in the
+module's `generator.test.ts` and
+`spec.test.ts`; final matching is verified against the real standard spec.
 
 ### TSPEC-9 — Validation
 
 `npm run check:standards-spec -- --spec=<module>` always runs every check: target ID
 uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set
 normalization, intra-target permutation uniqueness, and definition distinctness.
+
+For `--spec=test`, it also verifies that every generator has at least one matched
+generator-view path whose bounded probe can produce a sample.
 
 Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 
@@ -185,4 +204,4 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless declared in `equivalentTargets` with a reason.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
-- [ ] **TSPEC-11** — every target id prefix is unmistakably this standard's, and collides with no other standard's.
+- [ ] **TSPEC-12** — `test` remains a focused prototyping/regression spec and provides at least one generatable target-view path per generator.

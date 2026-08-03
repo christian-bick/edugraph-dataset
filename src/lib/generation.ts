@@ -241,6 +241,47 @@ export interface ViewCatalogEntry extends ViewMatchInfo {
     spec: ViewSpec;
 }
 
+/**
+ * Returns generator IDs that have no semantically compatible target/view path
+ * capable of producing a sample. Used to keep the isolated test spec useful as
+ * a smoke and regression surface for every generator module.
+ */
+export function findGeneratorsWithoutTestPath(
+    targets: CompetencyTarget[],
+    generatorCatalog: GeneratorCatalogEntry[],
+    viewCatalog: ViewCatalogEntry[],
+    maxAttempts = 10
+): string[] {
+    const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
+
+    return generatorCatalog
+        .filter(entry => {
+            const candidates = tuples.filter(tuple => tuple.generatorId === entry.generatorId);
+            return !candidates.some(tuple => {
+                const sampleKey = computeSampleKey({
+                    targetId: tuple.target.id,
+                    generatorId: tuple.generatorId,
+                    viewId: tuple.viewId,
+                    split: 'train',
+                    mode: 'question',
+                    instanceIdx: 0
+                });
+                try {
+                    return generateSampleWithRetry({
+                        generator: entry.generator,
+                        labels: [...tuple.target.labels],
+                        sampleKey,
+                        maxAttempts
+                    }).stub !== null;
+                } catch {
+                    return false;
+                }
+            });
+        })
+        .map(entry => entry.generatorId)
+        .sort();
+}
+
 function camelCase(str: string): string {
     return str.replace(/-([a-z])/g, g => g[1].toUpperCase());
 }

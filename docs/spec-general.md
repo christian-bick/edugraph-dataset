@@ -18,6 +18,19 @@ a target label `T` with a generator/view capability label `L` **only when `L` is
 or more specific than `T`** — `isSubConceptOf(L, T)`, i.e. `L partOf* T`. The reverse never
 matches: a specific target is *not* satisfied by a merely more-general capability.
 
+Matching is conjunctive across the target and collective across the pair. For every
+ontology label `T` in the target, at least one capability label `L` in the union of the
+generator and view declarations must satisfy `L = T` or `L partOf* T`:
+
+```text
+for every T in targetLabels:
+    some L in (generatorLabels union viewLabels) satisfies isSubConceptOf(L, T)
+```
+
+Consequently, two labels on one target mean **A AND B**, not two independently selectable
+representations. The generator and view do not match the target separately; their combined
+capabilities match it as one type-compatible pair.
+
 This directionality holds for Area, Scope **and** Ability. A target label is satisfied by
 the module that owns the corresponding behavior:
 
@@ -70,11 +83,12 @@ The role-specific parameter lists and worked cases live in
 
 ### SPEC-6 — Reuse shared resolvers; pass them as references
 
-Do not define custom resolvers inline. Import them from the module that owns them:
+Do not define custom resolvers inline. Import them from the module that owns them. Common
+examples include:
 
 | Module                | Exports                                                                        |
 |-----------------------|--------------------------------------------------------------------------------|
-| `src/lib/resolvers.ts` | `hasLabel`, `hasSubConcept`, `matchAllLabels`, `selectExactMatch`, `matchAllExactLabels` |
+| `src/lib/resolvers.ts` | `hasLabel`, `hasSubConcept`, `matchAllLabels`, `selectExactMatch`, `matchAllExactLabels`, `selectCanonicalLabel` |
 | `src/lib/ontology.ts`  | label-derived value helpers such as `resolveRangeFromLabels`, `isSubConceptOf`  |
 
 Resolver functions must be passed as **references** — or as the output of curried factory
@@ -87,6 +101,17 @@ There must be zero overlap — **including taxonomic ancestors via `partOf`** �
 labels checked inside schema parameters and the spec's `generalLabels`. When a label is
 declared as part of a schema parameter, neither it nor any of its ancestors may appear in
 `generalLabels`.
+
+Choose between them by behavior:
+
+- `generalLabels` are invariant claims that are true for every output of the module and do
+  not select configuration;
+- schema labels distinguish supported configurations and change generated mathematics or
+  rendered presentation.
+
+For example, every `counting-sequence` output moves to a subsequent sequence position, so
+`Scope.After` is general there. `counting-inc-dec` supports both subsequent and preceding
+positions, so `Scope.After` and `Scope.Before` belong to its direction schema.
 
 **Verified by:** `npm run check:generator-view-specs`.
 
@@ -120,13 +145,13 @@ and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmit
 
 ## Audit
 
-- [ ] **SPEC-1** — every declared label is equal to or more specific than the targets it is meant to match.
+- [ ] **SPEC-1** — every target label is satisfied by the combined generator/view capabilities in the correct ontology direction.
 - [ ] **SPEC-2** — no declared label is an ancestor of another declared label.
 - [ ] **SPEC-3** — no leaf label is claimed where the leaf is an instrument/subtype the module does not actually produce.
 - [ ] **SPEC-4** — no declared capability is broader than the module's real output; distinguishable members are enumerated individually.
 - [ ] **SPEC-5** — the schema contains only parameters of this module's own concern (math for generators, visual for views).
 - [ ] **SPEC-6** — all resolvers are imported from `src/lib/resolvers.ts` (or `src/lib/ontology.ts` for label-derived value helpers); none is defined inline; none is executed prematurely inside a schema array.
-- [ ] **SPEC-7** — no schema parameter label, or ancestor thereof, appears in `generalLabels`.
+- [ ] **SPEC-7** — every invariant capability is general, every configurable capability is in the schema, and no schema parameter label or ancestor appears in `generalLabels`.
 - [ ] **SPEC-8** — no label parameterized by the generator is re-queried by the matching view.
 - [ ] **SPEC-9** — discrete label sets are expressed as plain arrays unless a resolver is genuinely required.
 - [ ] **SPEC-10** — `deductCompatible` appears only in schemas; `deductAdmitting` only in rejection lists.

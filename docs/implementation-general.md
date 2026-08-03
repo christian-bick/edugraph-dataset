@@ -10,11 +10,12 @@ Module layout, discovery, and shared-code placement for both generators and view
 
 ## Rules
 
-### IMPL-1 — Content is added in pairs
+### IMPL-1 — Content requires a matched generator-view path
 
-Adding content means creating two interconnected directories: a **Generator** (the abstract
-math) and a **Renderer/View** (the visual body). Neither is useful alone — the pipeline
-only produces samples for a matched `(target, generator, view)` tuple.
+The pipeline produces samples only for a matched `(target, generator, view)` tuple. Adding
+content therefore requires both roles to be covered, but it does **not** require creating
+both directories: a new generator may reuse compatible views, a new view may reuse
+compatible generators, and an existing pair may only need capability extensions.
 
 ### IMPL-2 — One category level; a leaf module is a directory with a `spec.ts`
 
@@ -65,10 +66,11 @@ for `checklist.md`.
 
 ### IMPL-6 — Scaffolding a new module
 
-1. Create the generator directory under `src/generators/` (e.g. `src/generators/fractions`).
-2. Create the corresponding renderer directory under `src/visuals/views/` (e.g.
-   `src/visuals/views/fractions-pie`).
-3. Add a link to the new renderer in `src/index.html` for easy browser preview.
+1. Identify which role is actually missing from the intended matched path.
+2. Create only the required generator and/or view leaf directory.
+3. When creating a view, add a link to it in `src/index.html` for browser preview.
+4. When reusing a counterpart, verify the shared problem type and payload contract rather
+   than duplicating the module.
 
 Note the relative import depth of any `lib`/`helpers` import must match the sub-directory
 level the module actually sits at ([IMPL-G2](implementation-generator.md#impl-g2--validate-configuration-strictly),
@@ -85,8 +87,10 @@ Given a gap to close, prefer in this order:
    `view.tsx`, and declare physical capacity limits in `rejectedLabels`
    ([SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting)). Keep
    existing renderings stable where possible.
-3. **Create a new leaf module** — **only when extending the supported ontological space**,
-   not to avoid touching an existing module.
+3. **Create a new leaf module** — when the new capability genuinely extends the supported
+   space or crosses the stable payload boundary described by
+   [IMPL-G7](implementation-generator.md#impl-g7--extend-capabilities-within-a-stable-payload-contract),
+   not merely to avoid touching an existing module.
 
 **Why:** every new module multiplies the matching surface and adds a checklist that has to
 be maintained. A new module that renders labels an existing module already covers competes
@@ -96,10 +100,10 @@ with it for the same targets.
 
 ## Audit
 
-- [ ] **IMPL-1** — the change delivers both a generator and a view path for the targets it claims.
+- [ ] **IMPL-1** — the change delivers a matched generator-view path and reuses a compatible existing role where possible.
 - [ ] **IMPL-2** — the module sits at most one category level deep, and every leaf directory contains a `spec.ts`.
 - [ ] **IMPL-3** — the directory name carries the full module prefix.
 - [ ] **IMPL-4** — all files of the module's inventory exist.
 - [ ] **IMPL-5** — shared code sits at the correct level: category `helpers.ts` for siblings, `src/visuals/components/` or `src/visuals/helpers/` for cross-category reuse.
-- [ ] **IMPL-6** — a new renderer is linked from `src/index.html`; relative import depths match the directory level.
+- [ ] **IMPL-6** — only genuinely missing roles were scaffolded; a new renderer is linked from `src/index.html`; relative import depths match.
 - [ ] **IMPL-7** — a newly created module genuinely extends the supported ontological space; otherwise an existing module was extended instead.

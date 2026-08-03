@@ -86,7 +86,9 @@ A view renders `problem.data`; it never invents or derives the mathematics it is
 When a view needs data the payload does not carry:
 
 1. Find the producing generators and inspect rejection reasons:
-   `npm run show:matching -- --spec=test` (or `--spec=ccss`).
+   `npm run show:matching -- --spec=<real-standard>` for the actual producers. Use
+   `--spec=test` for the isolated smoke path and add `--raw` only when diagnosing
+   pre-deduplication source definitions.
 2. Adopt each matched generator to supply the required field
    ([IMPL-G6](implementation-generator.md#impl-g6--a-payload-contract-change-is-a-two-module-change)).
 

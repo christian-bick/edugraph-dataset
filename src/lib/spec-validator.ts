@@ -19,6 +19,36 @@ export interface SpecValidationResult {
     equivalences: TargetEquivalence[];
 }
 
+export interface LoadMatchingTargetsOptions {
+    /** Read source target definitions without normalization or overlap deduplication. */
+    raw?: boolean;
+    specRoot?: string;
+}
+
+/**
+ * Loads the target set used by matching diagnostics. By default this is the
+ * same normalized, overlap-deduplicated set used by dataset generation.
+ * `raw` is an explicit diagnostic escape hatch for inspecting source
+ * definitions before production normalization.
+ */
+export async function loadMatchingTargets(
+    specName: string,
+    options: LoadMatchingTargetsOptions = {}
+): Promise<CompetencyTarget[]> {
+    if (options.raw) {
+        return loadTargets(specName, options.specRoot);
+    }
+
+    const result = await normalizeAndValidateSpec(specName, options.specRoot);
+    if (result.errors.length > 0) {
+        throw new Error(
+            `Spec module "${specName}" has ${result.errors.length} validation error(s):\n` +
+            result.errors.map(error => `- ${error}`).join('\n')
+        );
+    }
+    return result.targets;
+}
+
 /**
  * Extracts the target definition prefix from a target ID by stripping the
  * `~<labelSetHash>` permutation suffix that `toTargets` appends (e.g.

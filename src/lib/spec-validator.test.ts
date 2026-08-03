@@ -10,7 +10,8 @@ import {
     validateUniqueTargetPermutations,
     validateDeclaredEquivalences,
     deduplicateTargetPermutations,
-    normalizeAndValidateSpec
+    normalizeAndValidateSpec,
+    loadMatchingTargets
 } from './spec-validator.ts';
 import { CompetencyTarget } from '../types/ml-engine.ts';
 
@@ -393,6 +394,35 @@ describe('spec-validator', () => {
             expect(result.warnings[0]).toContain('defA~a, defB~a');
         });
 
+        it('loads production-normalized matching targets by default and raw definitions on request', async () => {
+            writeFixture('matching-targets', 'a.ts', `export const spec = [
+                { id: 'defA~a', labels: ['Z', 'A', 'Z'] },
+                { id: 'defA~b', labels: ['B'] },
+                { id: 'defB~a', labels: ['A', 'Z'] },
+                { id: 'defB~b', labels: ['C'] }
+            ];`);
+
+            const productionTargets = await loadMatchingTargets('matching-targets', { specRoot: FIXTURE_ROOT });
+            const rawTargets = await loadMatchingTargets('matching-targets', { raw: true, specRoot: FIXTURE_ROOT });
+
+            expect(productionTargets.map(target => target.id)).toEqual(['defA~a', 'defA~b', 'defB~b']);
+            expect(productionTargets[0].labels).toEqual(['A', 'Z']);
+            expect(rawTargets.map(target => target.id)).toEqual(['defA~a', 'defA~b', 'defB~a', 'defB~b']);
+            expect(rawTargets[0].labels).toEqual(['Z', 'A', 'Z']);
+        });
+
+        it('rejects invalid specs before using them for production matching', async () => {
+            writeFixture('invalid-matching', 'a.ts', `export const spec = [
+                { id: 'duplicate', labels: ['A'] },
+                { id: 'duplicate', labels: ['B'] }
+            ];`);
+
+            await expect(loadMatchingTargets('invalid-matching', { specRoot: FIXTURE_ROOT }))
+                .rejects.toThrow(/validation error/);
+            await expect(loadMatchingTargets('invalid-matching', { raw: true, specRoot: FIXTURE_ROOT }))
+                .resolves.toHaveLength(2);
+        });
+
         it('reports duplicate target IDs as validation errors (gatekeeper moved out of loadTargets)', async () => {
             writeFixture('dup-ids', 'a.ts', `export const spec = [{ id: 'dup~a', labels: ['A'] }];`);
             writeFixture('dup-ids', 'b.ts', `export const spec = [{ id: 'dup~a', labels: ['B'] }];`);
@@ -460,11 +490,10 @@ describe('spec-validator', () => {
         it('validates and deduplicates the committed test spec module', async () => {
             const result = await normalizeAndValidateSpec('test');
             expect(result.errors).toHaveLength(0);
-            expect(result.stats.totalTargets).toBe(146);
-            expect(result.stats.uniqueTargets).toBe(146);
-            expect(result.stats.deduplicatedCount).toBe(0);
-            expect(result.warnings).toHaveLength(0);
-            expect(result.targets).toHaveLength(146);
+            expect(result.stats.totalTargets).toBeGreaterThan(0);
+            expect(result.stats.uniqueTargets).toBe(result.targets.length);
+            expect(result.stats.totalTargets - result.stats.uniqueTargets)
+                .toBe(result.stats.deduplicatedCount);
 
             const ids = result.targets.map(t => t.id);
             expect(new Set(ids).size).toBe(ids.length);

@@ -3,7 +3,12 @@ import { existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
-import { listSpecModules } from '../lib/generation.ts';
+import {
+    listSpecModules,
+    loadGeneratorCatalog,
+    loadViewCatalog,
+    findGeneratorsWithoutTestPath
+} from '../lib/generation.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
 
@@ -95,6 +100,25 @@ async function main() {
                 }
                 hasError = true;
             } else {
+                if (specName === 'test') {
+                    const [generatorCatalog, viewCatalog] = await Promise.all([
+                        loadGeneratorCatalog(),
+                        loadViewCatalog()
+                    ]);
+                    const uncovered = findGeneratorsWithoutTestPath(
+                        result.targets,
+                        generatorCatalog,
+                        viewCatalog
+                    );
+                    if (uncovered.length > 0) {
+                        console.error(
+                            `❌ Test spec has no generatable target/view path for: ${uncovered.join(', ')}`
+                        );
+                        hasError = true;
+                    } else {
+                        console.log(`✅ Test spec covers all ${generatorCatalog.length} generator modules.`);
+                    }
+                }
                 console.log(`✅ Spec "${specName}" valid.`);
             }
         } catch (e) {

@@ -49,6 +49,10 @@ npm run generate:dataset -- --spec=ccss
 npm run generate:dataset -- --spec=test
 ```
 
+The isolated `test` spec is a prototyping, debugging, smoke, and retained-regression
+surface. It intentionally keeps at least one generatable target/view path per generator,
+but it is not an exhaustive curriculum or a substitute for validating real standard targets.
+
 **1b. Merge the Union Dataset**
 The released dataset at `out/dataset/` is the **union** of every education standard, deduplicated across them. Standards overlap heavily, so each one added contributes a shrinking delta — which the merge reports per standard.
 ```bash

@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
-    loadTargets,
     loadGeneratorCatalog,
     loadViewCatalog,
     matchTargets,
@@ -11,6 +10,7 @@ import {
     buildRenderPayload,
     sanitizeFilePart
 } from '../lib/generation.ts';
+import { loadMatchingTargets } from '../lib/spec-validator.ts';
 import { shortenLabel } from '../lib/utils.ts';
 import { renderTasks, RenderTask } from '../lib/render.ts';
 import { VqaCacheManager } from '../lib/vqa-cache.ts';
@@ -36,15 +36,16 @@ async function main() {
     const specName = getCliOption(args, 'spec');
     const shouldRender = args.includes('--render') || process.env.npm_config_render !== undefined;
     const shouldValidate = args.includes('--validate') || process.env.npm_config_validate !== undefined;
+    const raw = args.includes('--raw');
 
     if (!targetId || !specName) {
-        console.error('Usage: npm run test:target -- --target=<target.id> --spec=<spec_module> [--render] [--validate]');
+        console.error('Usage: npm run test:target -- --target=<target.id> --spec=<spec_module> [--raw] [--render] [--validate]');
         console.error('Example: npm run test:target -- --target=test-writing~fe4336da --spec=test');
         process.exit(1);
     }
 
     const [targets, generatorCatalog, viewCatalog] = await Promise.all([
-        loadTargets(specName),
+        loadMatchingTargets(specName, { raw }),
         loadGeneratorCatalog(),
         loadViewCatalog()
     ]);
@@ -71,7 +72,8 @@ async function main() {
         }
     }
 
-    console.log(`--- Target ${target.id} [spec: ${specName}] ---`);
+    const targetMode = raw ? 'raw source definitions' : 'production-normalized';
+    console.log(`--- Target ${target.id} [spec: ${specName}; ${targetMode}] ---`);
     console.log(`Labels: ${target.labels.map(shortenLabel).join(', ')}\n`);
 
     // 1. Matching

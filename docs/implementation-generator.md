@@ -69,13 +69,33 @@ When that contract changes — a renamed field, a new required field, a changed 
 change is not complete until the consuming views are adopted:
 
 1. Find the consuming views and inspect rejection reasons:
-   `npm run show:matching -- --spec=test` (or `--spec=ccss`).
+   `npm run show:matching -- --spec=<real-standard>` for the actual consumers. Use
+   `--spec=test` for the isolated smoke path and add `--raw` only when diagnosing
+   pre-deduplication source definitions.
 2. Adopt each matched view to render the updated payload fields.
 
 **Why:** views consume `problem.data` directly and validate it strictly
 ([IMPL-V2](implementation-view.md#impl-v2--validate-the-payload-strictly)). A silently
 renamed field surfaces as a `ViewValidationError` error card in the dataset, not as a type
 error at build time.
+
+### IMPL-G7 — Extend capabilities within a stable payload contract
+
+Prefer extending an existing generator when the new capability preserves the meaning and
+structure of its problem payload. Supporting negative values or another operation through
+the same `num1`, `num2` and `answer` fields is a capability extension.
+
+Strongly prefer a new generator when the capability requires a materially different
+payload shape. A third operand is not a clean extension of a structurally binary payload
+whose operands are fixed as `num1` and `num2`; changing those fields to an array or adding
+arity-specific fields changes the generator-view contract. A capability from an unrelated
+ontology branch is an additional warning that the module is crossing task-family
+boundaries.
+
+Separate generators may still share a view when their concrete payload types form a small,
+structurally distinguishable union. The established arithmetic pattern is
+`ArithmeticPairProblem | ArithmeticTripleProblem` in `ViewTypeMap`: the shared view narrows
+the union through `num3`, validates the corresponding fields, and reuses the common layout.
 
 ---
 
@@ -86,5 +106,6 @@ error at build time.
 - [ ] **IMPL-G3** — every runtime competency choice appears in `ProblemStub.tags`, and no configured label is duplicated there.
 - [ ] **IMPL-G4** — the generated math provably satisfies every label the config encodes.
 - [ ] **IMPL-G5** — `generator.test.ts` covers the mathematical boundaries; `spec.test.ts` covers tag resolution; an empty-config throw is asserted.
-- [ ] **IMPL-G6** — if the payload contract changed, every consuming view found via `npm run show:matching` renders the new fields.
+- [ ] **IMPL-G6** — if the payload contract changed, every consuming view found against the real standard via `npm run show:matching` renders the new fields; the test spec also retains a smoke path.
+- [ ] **IMPL-G7** — capability extensions preserve the payload contract; structurally different problem shapes use a separate generator and share a typed-union view where rendering remains simple.
 - [ ] `npm run test` and `npm run check:types` pass.

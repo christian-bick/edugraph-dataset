@@ -1,5 +1,10 @@
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { getCliOption } from '../lib/cli.ts';
+import {
+    loadGeneratorCatalog,
+    loadViewCatalog,
+    findGeneratorsWithoutTestPath
+} from '../lib/generation.ts';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -45,6 +50,24 @@ async function main() {
             console.error(`\n❌ Validation failed with ${result.errors.length} error(s).`);
             process.exit(1);
         } else {
+            if (specName === 'test') {
+                const [generatorCatalog, viewCatalog] = await Promise.all([
+                    loadGeneratorCatalog(),
+                    loadViewCatalog()
+                ]);
+                const uncovered = findGeneratorsWithoutTestPath(
+                    result.targets,
+                    generatorCatalog,
+                    viewCatalog
+                );
+                if (uncovered.length > 0) {
+                    console.error(
+                        `\n❌ Test spec has no generatable target/view path for: ${uncovered.join(', ')}`
+                    );
+                    process.exit(1);
+                }
+                console.log(`\n✅ Test spec covers all ${generatorCatalog.length} generator modules.`);
+            }
             console.log(`\n✅ Spec validation succeeded for "${specName}"! No errors detected.`);
         }
     } catch (e) {
