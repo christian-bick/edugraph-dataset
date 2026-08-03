@@ -500,7 +500,6 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('K.CC.B.4b-conservation', conservationBuilder),
     ...toTargets('K.CC.B.4c-one-larger', oneLargerBuilder),
     ...toTargets('K.CC.B.5-how-many', howManyBuilder),
-    ...toTargets('K.CC.B.5-box-arrangement', boxArrangementBuilder),
     ...toTargets('K.CC.C.6-compare-groups', compareGroupsBuilder),
     ...toTargets('K.CC.C.7-compare-numerals', compareNumeralsBuilder),
     // K.OA - Operations and Algebraic Thinking
