@@ -131,23 +131,8 @@ const howManyBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Scope.LinearArrangement, Scope.NumbersSmaller20],
         [Scope.CircularArrangement, Scope.NumbersSmaller20],
-        [Scope.ScatteredArrangement, Scope.NumbersSmaller10]
-    ]);
-
-const boxArrangementBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.NumerationWithIntegers,
-        Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
-        Scope.AdditiveCount,
-        Scope.PhysicalNumbers,
-        Scope.BoxArrangement,
-        Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.ScatteredArrangement, Scope.NumbersSmaller10],
+        [Scope.BoxArrangement, Scope.NumbersSmaller10]
     ]);
 
 // --- K.CC.C.6: Compare the number of objects in two groups (up to 10 objects) ---
