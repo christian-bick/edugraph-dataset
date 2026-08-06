@@ -32,7 +32,7 @@ Before performing any analysis or issue generation, execute these two checks:
   ```bash
   npm run show:ont-todos -- --spec=<specModule>
   ```
-- Analyze the output. **Group logically related ontology TODOs** (e.g. missing numerical range scopes, missing operations, missing shape concepts) so they can be proposed as cohesive GitHub issues.
+- Analyze the output. **Group logically related ontology TODOs within the same dimension** (e.g. missing numerical range scopes, missing operations, missing shape concepts) so they can be proposed as cohesive GitHub issues. Never combine `Scope`, `Area`, and `Ability` extensions in one issue; split cross-dimension gaps into separate issues.
 
 #### Step 3: Inspect Sibling Ontology Repository (`../edugraph-ontology`)
 - Inspect `core-schema.ttl` for a basic understanding of ontology types and relations.
@@ -42,6 +42,7 @@ Before performing any analysis or issue generation, execute these two checks:
 #### Step 4: Formulate & Submit GitHub Issue Proposals
 For each previously grouped ontology gap, formulate a structured GitHub issue payload:
 - **Title**: `[Ontology <Area|Scope|Ability>] <Clear Summary Title>`
+- **Label**: Apply exactly one dimension label matching the ontology dimension extended by the issue: `dimension:Scope`, `dimension:Area`, or `dimension:Ability`. Every issue must carry one of these labels.
 - **Body**:
   - **Context & Affected Standards**: CCSS standard IDs (e.g. `1.NBT.B.2c`, `K.OA.A.5`) and target definition references.
   - **Missing Concept Description**: Detailed explanation of why current ontology labels cannot express the standard's requirements.
@@ -50,7 +51,7 @@ For each previously grouped ontology gap, formulate a structured GitHub issue pa
   - **Proposed Additions**: Concrete OWL diff for the specific `edugraph-ontology` file.
 - Create the issue using the GitHub CLI:
   ```bash
-  gh issue create --repo christian-bick/edugraph-ontology --title "[Ontology Scope] Add Scope.NumbersSmaller5" --body "..."
+  gh issue create --repo christian-bick/edugraph-ontology --title "[Ontology Scope] Add Scope.NumbersSmaller5" --label "dimension:Scope" --body "..."
   ```
 
 #### Step 5: Summary Report
