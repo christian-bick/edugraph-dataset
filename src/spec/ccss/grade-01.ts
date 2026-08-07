@@ -9,6 +9,7 @@ import { BeyondScopeEntry, CompetencyTarget, OntologyTodo, TargetEquivalence } f
 // --- 1.OA.A.1: Addition and subtraction word problems within 20 ---
 const wordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -53,6 +54,7 @@ const propertiesBuilder = new DatasetPermutationBuilder()
 // explicitly scoped to procedure inversion rather than procedure execution.
 const unknownAddendBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -87,6 +89,7 @@ const relateCountingBuilder = new DatasetPermutationBuilder()
 // --- 1.OA.C.6: Add and subtract within 20, fluency within 10 ---
 const fluencyBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -119,6 +122,7 @@ const equalSignBuilder = new DatasetPermutationBuilder()
 // --- 1.OA.D.8: Determine the unknown whole number in an equation ---
 const unknownNumberBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -133,6 +137,7 @@ const unknownNumberBuilder = new DatasetPermutationBuilder()
 
 const unknownOperandBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -260,6 +265,7 @@ const compareTwoDigitBuilder = new DatasetPermutationBuilder()
 const addWithin100Builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Addition,
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -287,6 +293,7 @@ const tenMoreLessBuilder = new DatasetPermutationBuilder()
 const subtractTensBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Subtraction,
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.MultiplesOf10,
@@ -563,6 +570,7 @@ const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
 export const spec: CompetencyTarget[] = [
     // 1.OA - Operations and Algebraic Thinking
     ...toTargets('1.OA.A.1-word-problems', wordProblemsBuilder),
+    ...toTargets('1.OA.A.2-three-addend-word-problems', threeAddendsBuilder),
     ...toTargets('1.OA.B.3-properties', propertiesBuilder),
     ...toTargets('1.OA.B.4-unknown-addend', unknownAddendBuilder),
     ...toTargets('1.OA.C.5-relate-counting', relateCountingBuilder),
@@ -586,8 +594,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: CompetencyTarget[] = [
-    // 1.OA - Operations and Algebraic Thinking
-    ...toTargets('1.OA.A.2-three-addend-word-problems', threeAddendsBuilder, 'The triple-arithmetic generator and word-problem view must declare and consume ThreeOperands, then verify that all three-addend sums remain within 20.'),
     // 1.NBT - Number and Operations in Base Ten
     ...toTargets('1.NBT.A.1-count-to-120', countTo120Builder, 'The counting-sequence path must support an arbitrary starting number and continue by ones through the inclusive range of 120.'),
     ...toTargets('1.NBT.A.1-read-numerals', readNumeralsBuilder, 'A numeral-reading presentation must accept Arabic numerals throughout the inclusive range of 120 and elicit their number names.'),

@@ -47,6 +47,28 @@ describe('ArithmeticOpsTriplesGenerator', () => {
         }
     });
 
+    it('keeps a three-addend sum within the Grade 1 maximum of 20', () => {
+        for (let seed = 0; seed < 100; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({
+                operation: Area.Addition,
+                requireZero: false,
+                requireMultipleOf10: false,
+                useCommutativeLaw: false,
+                useAssociativeLaw: false,
+                range: {min: 0, max: 20}
+            });
+
+            expect(stub).not.toBeNull();
+            const operands = [stub!.data.num1, stub!.data.num2, stub!.data.num3];
+            expect(operands).toHaveLength(3);
+            expect(operands.every(Number.isInteger)).toBe(true);
+            expect(operands.every(value => value >= 0)).toBe(true);
+            expect(operands.reduce((sum, value) => sum + value, 0)).toBe(stub!.data.answer);
+            expect(stub!.data.answer).toBeLessThanOrEqual(20);
+        }
+    });
+
     it('supports multiples of ten for every operation', () => {
         for (const operation of operations) {
             const stub = generator.generate({

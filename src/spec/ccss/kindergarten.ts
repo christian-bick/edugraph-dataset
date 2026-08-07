@@ -167,6 +167,7 @@ const compareNumeralsBuilder = new DatasetPermutationBuilder()
 // --- K.OA.A.1: Represent addition and subtraction with objects/drawings ---
 const representOperationsBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -183,6 +184,7 @@ const representOperationsBuilder = new DatasetPermutationBuilder()
 // --- K.OA.A.2: Solve addition and subtraction word problems within 10 ---
 const wordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -224,6 +226,7 @@ const makeTenBuilder = new DatasetPermutationBuilder()
 // --- K.OA.A.5: Fluently add and subtract within 5 ---
 const fluencyBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,

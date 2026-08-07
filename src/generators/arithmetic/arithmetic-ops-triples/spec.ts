@@ -8,6 +8,7 @@ import {arithmeticOperations, resolveExplicitOperation} from '../helpers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-triples',
     generalLabels: [
+        Scope.ThreeOperands,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives

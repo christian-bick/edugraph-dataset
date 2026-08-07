@@ -4,6 +4,7 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives
@@ -25,6 +26,7 @@ const builder = new DatasetPermutationBuilder()
 const multiplesOfTenBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Subtraction,
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.MultiplesOf10,
@@ -39,6 +41,7 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
 
 const wordProblemBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -53,6 +56,7 @@ const wordProblemBuilder = new DatasetPermutationBuilder()
 
 const unknownAddendBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,

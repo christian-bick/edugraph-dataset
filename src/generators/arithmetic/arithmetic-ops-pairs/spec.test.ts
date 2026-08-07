@@ -3,11 +3,16 @@ import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {ArithmeticOpsPairsGenerator} from './generator.ts';
+import {spec} from './spec.ts';
 
 const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const;
 
 describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
     const generator = new ArithmeticOpsPairsGenerator();
+
+    it('declares its invariant binary operand cardinality', () => {
+        expect(spec.generalLabels).toContain(Scope.TwoOperands);
+    });
 
     it('resolves nonzero and nonnegative labels into universally valid samples', () => {
         for (const operation of operations) {

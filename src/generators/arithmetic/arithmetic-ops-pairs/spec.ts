@@ -9,7 +9,8 @@ export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-pairs',
     generalLabels: [
         Scope.IntegerNumbers,
-        Scope.Base10
+        Scope.Base10,
+        Scope.TwoOperands
     ]
 };
 
