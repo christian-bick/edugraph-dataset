@@ -6,6 +6,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'shape-partition',
     generalLabels: [
+        Area.ProportionSense,
         Scope.EqualShares
     ]
 };

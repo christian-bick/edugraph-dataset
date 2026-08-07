@@ -514,6 +514,7 @@ const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Partition circles and rectangles into equal shares ---
 const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.ProportionSense,
         Scope.EqualShares,
         Ability.VisualArticulation
     ])
@@ -525,6 +526,7 @@ const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Name individual shares as halves, fourths, or quarters ---
 const nameUnitSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.ProportionSense,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ActiveVocabulary
@@ -537,6 +539,7 @@ const nameUnitSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Describe a whole as all of its equal shares ---
 const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.ProportionSense,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ConceptComposition
@@ -549,6 +552,7 @@ const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Infer that more equal shares produce smaller shares ---
 const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.ProportionSense,
         Scope.EqualShares,
         Scope.UnitFractions,
         Scope.Less,

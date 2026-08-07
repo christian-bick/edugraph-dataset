@@ -7,8 +7,11 @@ import {ShapePartitionGeneratorSchema, spec} from './spec.ts';
 const generator = new ShapePartitionGenerator();
 
 describe('ShapePartitionGenerator spec integration', () => {
-    it('declares equal-share structure without requiring fraction notation', () => {
-        expect(spec.generalLabels).toEqual([Scope.EqualShares]);
+    it('declares proportional equal-share structure without requiring fraction notation', () => {
+        expect(spec.generalLabels).toEqual([
+            Area.ProportionSense,
+            Scope.EqualShares
+        ]);
         expect(extractSchemaLabels(ShapePartitionGeneratorSchema)).not.toContain(
             Area.FractionNotation
         );
@@ -28,6 +31,7 @@ describe('ShapePartitionGenerator spec integration', () => {
         (taskAbility, conditionalLabels, expectedTask) => {
             for (const shape of [Area.Circle, Area.Rectangle] as const) {
                 const stub = generateWithLabels(generator, [
+                    Area.ProportionSense,
                     Scope.EqualShares,
                     taskAbility,
                     shape,
@@ -47,6 +51,7 @@ describe('ShapePartitionGenerator spec integration', () => {
 
     it('does not consume unit-fraction or less labels for a partition task', () => {
         const stub = generateWithLabels(generator, [
+            Area.ProportionSense,
             Scope.EqualShares,
             Ability.VisualArticulation,
             Area.Circle
