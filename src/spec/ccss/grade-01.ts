@@ -514,7 +514,6 @@ const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Partition circles and rectangles into equal shares ---
 const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Scope.EqualShares,
         Ability.VisualArticulation
     ])
@@ -526,7 +525,6 @@ const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Name individual shares as halves, fourths, or quarters ---
 const nameUnitSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ActiveVocabulary
@@ -539,7 +537,6 @@ const nameUnitSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Describe a whole as all of its equal shares ---
 const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ConceptComposition
@@ -552,7 +549,6 @@ const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Infer that more equal shares produce smaller shares ---
 const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Scope.EqualShares,
         Scope.UnitFractions,
         Scope.Less,
@@ -564,9 +560,6 @@ const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
     ]);
 
 // Standard exports following universal convention.
-// Partially supported or ontologically indistinguishable grade-one competencies
-// remain in implementationTodos until a generator/view can prove the complete
-// standard without curriculum-specific range or mode shims.
 export const spec: CompetencyTarget[] = [
     // 1.OA - Operations and Algebraic Thinking
     ...toTargets('1.OA.A.1-word-problems', wordProblemsBuilder),
@@ -604,16 +597,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.G.A.1-build-from-defining-attributes', buildShapesBuilder),
     ...toTargets('1.G.A.1-draw-from-defining-attributes', drawShapesBuilder),
     ...toTargets('1.G.A.2-single-level-composition', singleLevelCompositionBuilder),
-    ...toTargets('1.G.A.2-multi-level-composition', multiLevelCompositionBuilder)
+    ...toTargets('1.G.A.2-multi-level-composition', multiLevelCompositionBuilder),
+    ...toTargets('1.G.A.3-partition-equal-shares', partitionEqualSharesBuilder),
+    ...toTargets('1.G.A.3-name-unit-shares', nameUnitSharesBuilder),
+    ...toTargets('1.G.A.3-compose-whole-from-shares', composeWholeFromSharesBuilder),
+    ...toTargets('1.G.A.3-compare-unit-share-sizes', compareUnitShareSizesBuilder)
 ];
 
-export const implementationTodos: CompetencyTarget[] = [
-    // 1.G - Geometry
-    ...toTargets('1.G.A.3-partition-equal-shares', partitionEqualSharesBuilder, 'The partition path must make equal-share count a controlled payload parameter and cover partitions into exactly two and four equal shares.'),
-    ...toTargets('1.G.A.3-name-unit-shares', nameUnitSharesBuilder, 'A vocabulary presentation must cover halves, fourths, and quarters for individual unit shares without requiring symbolic fraction notation.'),
-    ...toTargets('1.G.A.3-compose-whole-from-shares', composeWholeFromSharesBuilder, 'A composition presentation must describe the whole as two halves or four fourths and verify the corresponding equal-share structure.'),
-    ...toTargets('1.G.A.3-compare-unit-share-sizes', compareUnitShareSizesBuilder, 'A comparison presentation must establish that dividing the same whole into more equal shares produces smaller individual shares, covering halves versus fourths.')
-];
+export const implementationTodos: CompetencyTarget[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

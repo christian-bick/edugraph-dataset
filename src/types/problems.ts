@@ -256,10 +256,42 @@ export type ShapeComposeShapesProblem = {
     compositionDepth: 1 | 2;
 };
 
-export type ShapePartitionProblem = {
-    shape: 'circle' | 'rectangle';
-    parts: 2 | 4;
-};
+export type FractionShape = 'circle' | 'rectangle';
+export type FractionParts = 2 | 4;
+export type FractionShareName = 'half' | 'fourth' | 'quarter';
+
+export type ShapePartitionProblem =
+    | {
+        task: 'partition';
+        shape: FractionShape;
+        parts: FractionParts;
+    }
+    | {
+        task: 'name-share';
+        shape: FractionShape;
+        parts: FractionParts;
+        shareName: FractionShareName;
+        /** Zero-based index of the share being named. */
+        selectedShare: number;
+        answer: FractionShareName;
+    }
+    | {
+        task: 'compose-whole';
+        shape: FractionShape;
+        parts: FractionParts;
+        shareName: 'half' | 'fourth';
+        answer: 'one whole';
+    }
+    | {
+        task: 'compare-share-size';
+        shape: FractionShape;
+        shares: [
+            {parts: 2; shareName: 'half'},
+            {parts: 4; shareName: 'fourth'}
+        ];
+        relation: 'less';
+        answer: 'fourth';
+    };
 
 
 /**
