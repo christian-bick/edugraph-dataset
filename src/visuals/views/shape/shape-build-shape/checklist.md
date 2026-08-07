@@ -1,4 +1,6 @@
-- The rendered canvas must show a stick-and-ball representation of the target shape.
-- In Question Mode, the prompt text must ask for the correct shape name. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- In solution mode, the correct answer choice representing the exact count of sticks and clay balls must be highlighted in green.
-- In normal mode, no answer choices must be highlighted.
+- Parts-count layout: the canvas must show a completed stick-and-ball representation and three count choices.
+- Attribute-specification layout: a defining-attribute card must sit above a fixed-size construction workspace in both modes.
+- In Question Mode, the parts-count prompt must ask how many sticks and clay balls are needed, with no selected choice. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
+- In Question Mode, the attribute-specification prompt must ask the learner to build a shape with the listed defining attributes. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
+- In Question Mode, the attribute-specification workspace must show separate, unassembled sticks and clay balls with no completed shape.
+- In Solution Mode, the parts-count layout must highlight only the correct count choice, while the attribute-specification layout must show the completed construction.

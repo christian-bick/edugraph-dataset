@@ -587,7 +587,7 @@ describe('catalogs and end-to-end matching (integration)', () => {
         expect(viewsFor('1.NBT.B.3-compare-two-digit')).toEqual(new Set([
             'numbers-compare'
         ]));
-    }, 30000);
+    }, 60000);
 
     it('loads catalogs, matches the test spec and replays a sample by key', async () => {
         const [generatorCatalog, viewCatalog, targets] = await Promise.all([

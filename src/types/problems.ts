@@ -187,11 +187,50 @@ export type ShapeSameAttributeProblem = {
     answer: string;
 };
 
-export type ShapeBuildShapeProblem = {
-    target: string;
+export type PlaneShapeName = 'circle' | 'triangle' | 'square' | 'rectangle' | 'hexagon';
+
+export type ShapeDefinition = {
+    sideCount: 0 | 3 | 4 | 6;
+    vertexCount: 0 | 3 | 4 | 6;
+    closed: true;
+    boundary: 'curved' | 'straight';
+    equalSides?: true;
+    rightAngleCount?: 4;
+};
+
+export type ShapeAttributeOption = {
+    id: 'A' | 'B' | 'C' | 'D';
+    text: string;
+    kind: 'defining' | 'non-defining';
+};
+
+export type ShapeAttributeClassificationProblem = {
+    shape: PlaneShapeName;
+    definition: ShapeDefinition;
+    options: ShapeAttributeOption[];
+    answer: ShapeAttributeOption['id'];
+};
+
+export type ShapePartsConstructionProblem = {
+    target: PlaneShapeName;
     sides: number;
     corners: number;
+    task?: undefined;
+    definition?: undefined;
 };
+
+export type ShapeAttributeSpecificationProblem = {
+    target: PlaneShapeName;
+    sides: number;
+    corners: number;
+    task: 'specify-attributes';
+    definition: ShapeDefinition;
+};
+
+export type ShapeBuildShapeProblem = ShapePartsConstructionProblem | ShapeAttributeSpecificationProblem;
+
+/** Shared payload accepted by the legacy tracing and defining-attribute drawing modes. */
+export type ShapeDrawProblem = ShapeIdentityProblem | ShapeBuildShapeProblem;
 
 export type ShapeComposeShapesProblem = {
     target: string;
@@ -258,9 +297,10 @@ export interface ViewTypeMap {
     'shape-env-shapes': ShapeEnvShapesProblem;
     'shape-classify-dim': ShapeClassifyDimProblem;
     'shape-compare-attributes': ShapeCompareAttributesProblem;
+    'shape-classify-attributes': ShapeAttributeClassificationProblem;
     'shape-same-attribute': ShapeSameAttributeProblem;
     'shape-build-shape': ShapeBuildShapeProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
     'shape-partition-equal': ShapePartitionProblem;
-    'shape-draw-shape': ShapeIdentityProblem;
+    'shape-draw-shape': ShapeDrawProblem;
 }

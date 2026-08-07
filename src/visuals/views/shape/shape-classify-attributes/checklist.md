@@ -1,0 +1,4 @@
+- The example panel must show four instances of the same shape with visibly varied color, orientation, and size.
+- Exactly four attribute options must be visible in the same positions in both modes.
+- In Question Mode, the prompt must ask which statement always describes the shape, and no option may be selected. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
+- In Solution Mode, only the correct defining-attribute option must be highlighted.

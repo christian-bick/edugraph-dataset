@@ -1,3 +1,3 @@
-- The problem must specify a target shape (triangle, square, rectangle, or hexagon).
-- The number of sides (sticks) and corners (clay balls) must match the mathematical definition of the target shape.
-- The options must include the correct combination of sticks and clay balls for the target shape.
+- The target must be a supported plane shape: circle, triangle, square, rectangle, or hexagon.
+- Legacy construction payload: the side and corner counts must be mathematically correct for the target.
+- Attribute-specification payload: the definition must include the target's boundary, side, vertex, equal-side, and right-angle properties wherever those properties apply.

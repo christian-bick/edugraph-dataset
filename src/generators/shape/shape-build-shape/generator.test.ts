@@ -1,7 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {ShapeBuildShapeGenerator} from './generator.ts';
-import {setSeed} from '../../../lib/random.ts';
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 
 describe('ShapeBuildShapeGenerator', () => {
@@ -9,46 +8,91 @@ describe('ShapeBuildShapeGenerator', () => {
 
     beforeEach(() => {
         generator = new ShapeBuildShapeGenerator();
-        setSeed(42);
     });
 
     it('should have the correct type', () => {
         expect(generator.type).toBe('shape');
     });
 
-    it('should generate triangle details correctly', () => {
-        const stub = generator.generate({ target: Area.Triangle });
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('triangle');
-        expect(stub!.data.sides).toBe(3);
-        expect(stub!.data.corners).toBe(3);
+    it.each([
+        [Area.Circle, 'circle', 0, 0],
+        [Area.Triangle, 'triangle', 3, 3],
+        [Area.Square, 'square', 4, 4],
+        [Area.Rectangle, 'rectangle', 4, 4],
+        [Area.Hexagon, 'hexagon', 6, 6]
+    ] as const)('preserves the legacy construction payload for %s', (target, name, sides, corners) => {
+        const stub = generator.generate({
+            target,
+            attributeScope: Scope.ShapeProperties,
+            specifyAttributes: false
+        });
+
+        expect(stub).toEqual({
+            data: {target: name, sides, corners},
+            tags: []
+        });
     });
 
-    it('should generate square details correctly', () => {
-        const stub = generator.generate({ target: Area.Square });
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('square');
-        expect(stub!.data.sides).toBe(4);
-        expect(stub!.data.corners).toBe(4);
+    it.each([
+        [Area.Circle, 'circle', {sideCount: 0, vertexCount: 0, closed: true, boundary: 'curved'}],
+        [Area.Triangle, 'triangle', {sideCount: 3, vertexCount: 3, closed: true, boundary: 'straight'}],
+        [Area.Square, 'square', {
+            sideCount: 4,
+            vertexCount: 4,
+            closed: true,
+            boundary: 'straight',
+            equalSides: true,
+            rightAngleCount: 4
+        }],
+        [Area.Rectangle, 'rectangle', {
+            sideCount: 4,
+            vertexCount: 4,
+            closed: true,
+            boundary: 'straight',
+            rightAngleCount: 4
+        }],
+        [Area.Hexagon, 'hexagon', {sideCount: 6, vertexCount: 6, closed: true, boundary: 'straight'}]
+    ] as const)('emits defining attributes for %s specification', (target, name, definition) => {
+        const stub = generator.generate({
+            target,
+            attributeScope: Scope.ShapeAttributes,
+            specifyAttributes: true
+        });
+
+        expect(stub).toEqual({
+            data: {
+                target: name,
+                sides: definition.sideCount,
+                corners: definition.vertexCount,
+                task: 'specify-attributes',
+                definition
+            },
+            tags: []
+        });
     });
 
-    it('should generate rectangle details correctly', () => {
-        const stub = generator.generate({ target: Area.Rectangle });
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('rectangle');
-        expect(stub!.data.sides).toBe(4);
-        expect(stub!.data.corners).toBe(4);
+    it('returns null for unsupported target labels', () => {
+        expect(generator.generate({
+            target: Area.Cube as any,
+            attributeScope: Scope.ShapeProperties,
+            specifyAttributes: false
+        })).toBeNull();
     });
 
-    it('should generate hexagon details correctly', () => {
-        const stub = generator.generate({ target: Area.Hexagon });
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('hexagon');
-        expect(stub!.data.sides).toBe(6);
-        expect(stub!.data.corners).toBe(6);
+    it('returns null for unsupported scope and task combinations', () => {
+        expect(generator.generate({
+            target: Area.Triangle,
+            attributeScope: Scope.ShapeAttributes,
+            specifyAttributes: false
+        })).toBeNull();
+        expect(generator.generate({
+            target: Area.Triangle,
+            attributeScope: Scope.ShapeProperties,
+            specifyAttributes: true
+        })).toBeNull();
     });
 
-    it('should throw validation error if target is not specified', () => {
+    it('throws a validation error for an empty config', () => {
         expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
     });
 });

@@ -1,9 +1,6 @@
-### Shape Draw Shape Visual Checklist
-
-## Rendering Requirements
-- **Clear Prompt**: In Question Mode, the instruction prompt must ask to draw the named shape by following its guide. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- **SVG Canvas**: The outline of the shape (circle, triangle, or square) must be rendered clearly inside the drawing canvas.
-
-## Layout & Styling
-- **Dotted Path**: In both question and solution modes, a light-grey dotted construction guide must make the drawing action and target boundary unambiguous.
-- **Solution Mode Visuals**: In solution mode (`isSolutionView: true`), a solid green line (`forestgreen`) must overlay the dotted path. In question mode, only the dotted line must be present.
+- Guide-tracing layout: a light-grey dotted outline must appear inside the drawing canvas in both modes.
+- Attribute-specification layout: a defining-attribute card must sit above a blank drawing canvas in the same positions in both modes.
+- In Question Mode, the guide-tracing prompt must ask the learner to draw the named shape by following the guide. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
+- In Question Mode, the attribute-specification prompt must ask the learner to draw a shape with the listed defining attributes. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
+- In Question Mode, the attribute-specification canvas must not reveal a dotted or completed outline.
+- In Solution Mode, the guide-tracing canvas must overlay its guide with the completed line, while the attribute-specification canvas must show the completed outline.

@@ -9,6 +9,7 @@ export const spec: ViewSpec = {
         Area.CircularShapeDrawing,
         Ability.VisualArticulation
     ],
+    rejectedLabels: [Area.Hexagon]
 };
 
 

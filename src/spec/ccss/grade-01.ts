@@ -598,15 +598,15 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder),
     ...toTargets('1.MD.B.3-digital-clocks', digitalTimeBuilder),
     ...toTargets('1.MD.C.4-interpret-data', interpretDataBuilder),
-    ...toTargets('1.MD.C.4-compare-data', compareDataBuilder)
+    ...toTargets('1.MD.C.4-compare-data', compareDataBuilder),
+    // 1.G - Geometry
+    ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder),
+    ...toTargets('1.G.A.1-build-from-defining-attributes', buildShapesBuilder),
+    ...toTargets('1.G.A.1-draw-from-defining-attributes', drawShapesBuilder)
 ];
 
 export const implementationTodos: CompetencyTarget[] = [
-    // 1.MD - Measurement and Data
     // 1.G - Geometry
-    ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder, 'A classification path must distinguish defining attributes such as sides and vertices from non-defining attributes such as color, orientation, and size.'),
-    ...toTargets('1.G.A.1-build-from-defining-attributes', buildShapesBuilder, 'The shape-construction path must accept defining-attribute constraints while varying non-defining appearance independently.'),
-    ...toTargets('1.G.A.1-draw-from-defining-attributes', drawShapesBuilder, 'The shape-drawing path must accept defining-attribute constraints while varying non-defining appearance independently.'),
     ...toTargets('1.G.A.2-single-level-composition', singleLevelCompositionBuilder, 'The existing shape-composition path must declare SingleLevelComposition and verify that each result is formed directly from primitive component shapes.'),
     ...toTargets('1.G.A.2-multi-level-composition', multiLevelCompositionBuilder, 'The composition payload and view must represent an intermediate composite that is subsequently used to form a new shape.'),
     ...toTargets('1.G.A.3-partition-equal-shares', partitionEqualSharesBuilder, 'The partition path must make equal-share count a controlled payload parameter and cover partitions into exactly two and four equal shares.'),

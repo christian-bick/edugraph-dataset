@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ShapeBuildShapeGenerator } from './generator.ts';
-import { setSeed } from '../../../lib/random.ts';
-import { Area, Scope } from 'edugraph-ts';
+import { Ability, Area, Scope } from 'edugraph-ts';
 import { generateWithLabels } from '../../../lib/utils.ts';
 
 describe('ShapeBuildShapeGenerator Spec Integration', () => {
@@ -9,50 +8,39 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
 
     beforeEach(() => {
         generator = new ShapeBuildShapeGenerator();
-        setSeed(42);
     });
 
-    it('should generate triangle problem from Area.Triangle label', () => {
-        const stub = generateWithLabels(generator, [
-            Area.Triangle,
-            Scope.ShapeProperties
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('triangle');
-        expect(stub!.data.sides).toBe(3);
-        expect(stub!.data.corners).toBe(3);
-    });
-
-    it('should generate square problem from Area.Square label', () => {
-        const stub = generateWithLabels(generator, [
-            Area.Square,
-            Scope.ShapeProperties
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('square');
-        expect(stub!.data.sides).toBe(4);
-        expect(stub!.data.corners).toBe(4);
-    });
-
-    it('should generate rectangle problem from Area.Rectangle label', () => {
-        const stub = generateWithLabels(generator, [
-            Area.Rectangle,
-            Scope.ShapeProperties
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('rectangle');
-        expect(stub!.data.sides).toBe(4);
-        expect(stub!.data.corners).toBe(4);
-    });
-
-    it('should generate hexagon problem from Area.Hexagon label', () => {
+    it('resolves the kindergarten construction path without changing its payload', () => {
         const stub = generateWithLabels(generator, [
             Area.Hexagon,
             Scope.ShapeProperties
         ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('hexagon');
-        expect(stub!.data.sides).toBe(6);
-        expect(stub!.data.corners).toBe(6);
+
+        expect(stub).toEqual({
+            data: {target: 'hexagon', sides: 6, corners: 6},
+            tags: [Area.Hexagon, Scope.ShapeProperties]
+        });
+    });
+
+    it('resolves the Grade 1 attribute-specification path and records each configured label once', () => {
+        const labels = [Area.Circle, Scope.ShapeAttributes, Ability.ConceptSpecification];
+        const stub = generateWithLabels(generator, labels);
+
+        expect(stub).toEqual({
+            data: {
+                target: 'circle',
+                sides: 0,
+                corners: 0,
+                task: 'specify-attributes',
+                definition: {
+                    sideCount: 0,
+                    vertexCount: 0,
+                    closed: true,
+                    boundary: 'curved'
+                }
+            },
+            tags: labels
+        });
+        expect(new Set(stub!.tags).size).toBe(stub!.tags!.length);
     });
 });

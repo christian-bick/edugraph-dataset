@@ -30,6 +30,32 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
         [Area.Cone]
     ]);
 
+const classifyAttributesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Scope.ShapeAttributes,
+        Ability.ConceptClassification
+    ]);
+
+const specifyShapeBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Scope.ShapeAttributes,
+        Ability.ConceptSpecification,
+        Ability.VisualArticulation,
+        Area.Triangle
+    ]);
+
+const drawFromAttributesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeIdentity,
+        Scope.ShapeAttributes,
+        Ability.ConceptSpecification,
+        Ability.VisualArticulation,
+        Area.Circle,
+        Area.CircularShapeDrawing
+    ]);
+
 const compareAttrBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ShapeProperties,
@@ -133,6 +159,9 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-build-shape', builder),
     ...toTargets('test-shape-classify-dim', classifyDimBuilder),
+    ...toTargets('test-shape-classify-attributes', classifyAttributesBuilder),
+    ...toTargets('test-shape-specify-attributes', specifyShapeBuilder),
+    ...toTargets('test-shape-draw-from-attributes', drawFromAttributesBuilder),
     ...toTargets('test-shape-compare-attributes', compareAttrBuilder),
     ...toTargets('test-shape-compose-shapes', composeShapesBuilder),
     ...toTargets('test-shape-env-shapes', envShapesBuilder),
