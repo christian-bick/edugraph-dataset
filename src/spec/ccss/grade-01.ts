@@ -602,13 +602,13 @@ export const spec: CompetencyTarget[] = [
     // 1.G - Geometry
     ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder),
     ...toTargets('1.G.A.1-build-from-defining-attributes', buildShapesBuilder),
-    ...toTargets('1.G.A.1-draw-from-defining-attributes', drawShapesBuilder)
+    ...toTargets('1.G.A.1-draw-from-defining-attributes', drawShapesBuilder),
+    ...toTargets('1.G.A.2-single-level-composition', singleLevelCompositionBuilder),
+    ...toTargets('1.G.A.2-multi-level-composition', multiLevelCompositionBuilder)
 ];
 
 export const implementationTodos: CompetencyTarget[] = [
     // 1.G - Geometry
-    ...toTargets('1.G.A.2-single-level-composition', singleLevelCompositionBuilder, 'The existing shape-composition path must declare SingleLevelComposition and verify that each result is formed directly from primitive component shapes.'),
-    ...toTargets('1.G.A.2-multi-level-composition', multiLevelCompositionBuilder, 'The composition payload and view must represent an intermediate composite that is subsequently used to form a new shape.'),
     ...toTargets('1.G.A.3-partition-equal-shares', partitionEqualSharesBuilder, 'The partition path must make equal-share count a controlled payload parameter and cover partitions into exactly two and four equal shares.'),
     ...toTargets('1.G.A.3-name-unit-shares', nameUnitSharesBuilder, 'A vocabulary presentation must cover halves, fourths, and quarters for individual unit shares without requiring symbolic fraction notation.'),
     ...toTargets('1.G.A.3-compose-whole-from-shares', composeWholeFromSharesBuilder, 'A composition presentation must describe the whole as two halves or four fourths and verify the corresponding equal-share structure.'),

@@ -232,11 +232,28 @@ export type ShapeBuildShapeProblem = ShapePartsConstructionProblem | ShapeAttrib
 /** Shared payload accepted by the legacy tracing and defining-attribute drawing modes. */
 export type ShapeDrawProblem = ShapeIdentityProblem | ShapeBuildShapeProblem;
 
+export type ShapeCompositionLeaf = {
+    kind: 'primitive';
+    shape: string;
+};
+
+export type ShapeCompositionComposite = {
+    kind: 'composite';
+    shape: string;
+    inputs: ShapeCompositionNode[];
+};
+
+export type ShapeCompositionNode = ShapeCompositionLeaf | ShapeCompositionComposite;
+
 export type ShapeComposeShapesProblem = {
     target: string;
+    /** Compatibility projection of the authoritative tree's direct inputs. */
     components: string[];
     options: string[];
     answer: string;
+    compositionTree: ShapeCompositionComposite;
+    /** Primitive leaves have depth 0; a composite adds one to its deepest input. */
+    compositionDepth: 1 | 2;
 };
 
 export type ShapePartitionProblem = {

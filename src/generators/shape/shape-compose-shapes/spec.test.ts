@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { ShapeComposeShapesGenerator } from './generator.ts';
-import { setSeed } from '../../../lib/random.ts';
-import { Area, Scope } from 'edugraph-ts';
-import { generateWithLabels } from '../../../lib/utils.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {setSeed} from '../../../lib/random.ts';
+import {generateWithLabels} from '../../../lib/utils.ts';
+import {ShapeComposeShapesGenerator} from './generator.ts';
+import {ShapeComposeShapesGeneratorSchema, spec} from './spec.ts';
 
-describe('ShapeComposeShapesGenerator Spec Integration', () => {
+describe('ShapeComposeShapesGenerator spec integration', () => {
     let generator: ShapeComposeShapesGenerator;
 
     beforeEach(() => {
@@ -12,42 +13,45 @@ describe('ShapeComposeShapesGenerator Spec Integration', () => {
         setSeed(42);
     });
 
-    it('should generate rectangle compose problem from Area.Rectangle label', () => {
+    it('declares composition generally and structure as mathematical configuration', () => {
+        expect(spec.generalLabels).toEqual([Area.ShapeComposition]);
+        expect(Object.keys(ShapeComposeShapesGeneratorSchema)).toEqual([
+            'classify',
+            'compositionStructure'
+        ]);
+    });
+
+    it('resolves single-level labels into a depth-one tree', () => {
         const stub = generateWithLabels(generator, [
+            Area.ShapeComposition,
             Area.Rectangle,
-            Scope.ShapeProperties
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('rectangle');
-        expect(stub!.data.components).toEqual(['triangle', 'triangle']);
-        expect(stub!.data.answer).toBe('Two triangles');
+            Scope.SingleLevelComposition
+        ])!;
+
+        expect(stub.data.target).toBe('rectangle');
+        expect(stub.data.compositionDepth).toBe(1);
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Area.Rectangle,
+            Area.Triangle,
+            Scope.SingleLevelComposition
+        ]));
     });
 
-    it('should generate square compose problem from Area.Square label', () => {
+    it('resolves multi-level labels into a depth-two tree', () => {
         const stub = generateWithLabels(generator, [
-            Area.Square,
-            Scope.ShapeProperties
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe('square');
-        expect(stub!.data.components).toEqual(['triangle', 'triangle']);
-        expect(stub!.data.answer).toBe('Two triangles');
-    });
+            Area.ShapeComposition,
+            Area.Hexagon,
+            Scope.MultiLevelComposition
+        ])!;
 
-    it.each([
-        [Area.Triangle, 'triangle'],
-        [Area.Hexagon, 'hexagon'],
-        [Area.Trapezoid, 'trapezoid'],
-        [Area.HalfCircle, 'half circle'],
-        [Area.QuarterCircle, 'quarter circle'],
-        [Area.Cube, 'cube'],
-        [Area.RectangularPrism, 'rectangular prism'],
-        [Area.Cone, 'cone'],
-        [Area.Cylinder, 'cylinder']
-    ])('should resolve %s into a %s composition', (label, target) => {
-        const stub = generateWithLabels(generator, [label, Scope.ShapeProperties]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.target).toBe(target);
-        expect(stub!.data.options).toContain(stub!.data.answer);
+        expect(stub.data.target).toBe('hexagon');
+        expect(stub.data.components).toEqual(['trapezoid', 'trapezoid']);
+        expect(stub.data.compositionDepth).toBe(2);
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Area.Hexagon,
+            Area.Trapezoid,
+            Area.Triangle,
+            Scope.MultiLevelComposition
+        ]));
     });
 });

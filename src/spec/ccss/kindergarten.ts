@@ -469,6 +469,7 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,
+        Scope.SingleLevelComposition,
         Ability.ConceptComposition
     ])
     .applyLabelVariants([
@@ -479,6 +480,7 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
 const composeShapesOtherBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,
+        Scope.SingleLevelComposition,
         Ability.ConceptComposition
     ])
     .applyLabelVariants([

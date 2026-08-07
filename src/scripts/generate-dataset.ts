@@ -33,7 +33,7 @@ const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 let OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
 let SPEC_NAME = '';
-const BASE_URL = 'http://localhost:5173';
+const BASE_URL = process.env.RENDER_BASE_URL ?? 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
 const MAX_ATTEMPTS = 50;
 

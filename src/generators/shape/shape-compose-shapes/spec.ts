@@ -1,5 +1,5 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {selectExactMatch} from '../../../lib/resolvers.ts';
 
@@ -28,6 +28,10 @@ export const ShapeComposeShapesGeneratorSchema = {
         ],
         selectExactMatch
     ],
+    compositionStructure: [
+        [Scope.SingleLevelComposition, Scope.MultiLevelComposition],
+        selectExactMatch
+    ]
 } as const;
 
 export type ShapeComposeShapesGeneratorConfig = ConfigFromSchema<typeof ShapeComposeShapesGeneratorSchema>;

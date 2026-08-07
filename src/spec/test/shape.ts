@@ -71,23 +71,20 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
         [Area.Circle]
     ]);
 
-const composeShapesBuilder = new DatasetPermutationBuilder()
+const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,
-        Ability.ConceptComposition
-    ])
-    .applyLabelVariants([
-        [Area.Rectangle],
-        [Area.Square],
-        [Area.Triangle],
-        [Area.Hexagon],
-        [Area.Trapezoid],
-        [Area.HalfCircle],
-        [Area.QuarterCircle],
-        [Area.Cube],
-        [Area.RectangularPrism],
-        [Area.Cone],
-        [Area.Cylinder]
+        Scope.SingleLevelComposition,
+        Ability.ConceptComposition,
+        Area.Rectangle
+    ]);
+
+const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeComposition,
+        Scope.MultiLevelComposition,
+        Ability.ConceptComposition,
+        Area.Cube
     ]);
 
 const envShapesBuilder = new DatasetPermutationBuilder()
@@ -163,7 +160,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-specify-attributes', specifyShapeBuilder),
     ...toTargets('test-shape-draw-from-attributes', drawFromAttributesBuilder),
     ...toTargets('test-shape-compare-attributes', compareAttrBuilder),
-    ...toTargets('test-shape-compose-shapes', composeShapesBuilder),
+    ...toTargets('test-shape-compose-single-level', singleLevelCompositionBuilder),
+    ...toTargets('test-shape-compose-multi-level', multiLevelCompositionBuilder),
     ...toTargets('test-shape-env-shapes', envShapesBuilder),
     ...toTargets('test-shape-identity-naming', identityNamingBuilder),
     ...toTargets('test-shape-identity-draw', identityDrawBuilder),
