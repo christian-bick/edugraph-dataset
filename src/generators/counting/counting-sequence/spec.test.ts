@@ -13,31 +13,37 @@ describe('CountingSequenceGenerator spec integration', () => {
         setSeed(42);
     });
 
-    it('declares every generated missing position as subsequent', () => {
+    it('declares its invariant forward counting direction', () => {
+        expect(spec.generalLabels).toContain(Scope.AdditiveCount);
         expect(spec.generalLabels).toContain(Scope.After);
     });
 
-    it('resolves count-by-ones labels', () => {
+    it('resolves steps-of-one labels independently from direction', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,
-            Scope.NumbersSmaller20,
-            Scope.AdditiveCount
+            Scope.AdditiveCount,
+            Scope.StepsOf1,
+            Scope.NumbersSmaller120
         ]);
 
         expect(stub).not.toBeNull();
         expect(stub!.data.stepSize).toBe(1);
-        expect(stub!.tags).toContain(Scope.AdditiveCount);
+        expect(stub!.data.sequence.at(-1)).toBeLessThanOrEqual(120);
+        expect(stub!.tags).toContain(Scope.StepsOf1);
     });
 
-    it('resolves skip-count-by-tens labels', () => {
+    it('resolves steps-of-ten labels independently from direction', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,
             Scope.NumbersSmaller100,
+            Scope.StepsOf10,
             Scope.MultiplesOf10
         ]);
 
         expect(stub).not.toBeNull();
         expect(stub!.data.stepSize).toBe(10);
+        expect(stub!.data.sequence.every(value => value % 10 === 0)).toBe(true);
+        expect(stub!.tags).toContain(Scope.StepsOf10);
         expect(stub!.tags).toContain(Scope.MultiplesOf10);
     });
 });

@@ -28,6 +28,22 @@ describe('WritingGenerator', () => {
         }
     });
 
+    it('should include the upper boundary of 120', () => {
+        const stub = generator.generate({range: {min: 120, max: 120}, requireZero: false});
+        expect(stub).not.toBeNull();
+        expect(stub!.data.number).toBe(120);
+    });
+
+    it('should stay within the inclusive 1-120 range', () => {
+        for (let seed = 0; seed < 100; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({range: {min: 0, max: 120}, requireZero: false});
+            expect(stub).not.toBeNull();
+            expect(stub!.data.number).toBeGreaterThanOrEqual(1);
+            expect(stub!.data.number).toBeLessThanOrEqual(120);
+        }
+    });
+
     it('should return null for invalid or zero-incompatible ranges', () => {
         expect(generator.generate({range: {min: 5, max: 2}, requireZero: false})).toBeNull();
         expect(generator.generate({range: {min: 1, max: 20}, requireZero: true})).toBeNull();

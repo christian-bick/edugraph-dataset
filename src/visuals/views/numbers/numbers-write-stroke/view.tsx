@@ -5,6 +5,7 @@ import {getTracingPaths} from './helpers.ts';
 import { NumbersWriteStrokeViewConfig, NumbersWriteStrokeViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
+import {validateWritingNumber} from '../helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -89,6 +90,7 @@ const NumbersWriteStrokeCore = ({ config: _config, payload }: CoreProps) => {
     const data = problem.data;
     validateProblemData('numbers-write-stroke', data, ['number']);
     const number = data.number;
+    validateWritingNumber('numbers-write-stroke', number);
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] w-fit">
@@ -100,25 +102,25 @@ const NumbersWriteStrokeCore = ({ config: _config, payload }: CoreProps) => {
                 <div className="flex gap-3">
                     {/* Box 1: Tracing Guide */}
                     <div className="flex flex-col items-center gap-1">
-                        <span className="text-sm font-bold text-slate-500">Trace</span>
+                        <span className={`text-sm font-bold text-slate-500 ${isSolutionView ? 'invisible' : ''}`}>Trace</span>
                         <div className="border-2 border-slate-200 rounded-lg w-[110px] h-[70px] flex justify-center items-center bg-slate-50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden">
                             <TracingHelper number={number} />
                         </div>
                     </div>
                     {/* Box 2 & 3: Interactive/Response Boxes */}
                     {Array.from({ length: 2 }).map((_, idx) => {
-                        let content = String(number);
-                        let cls = 'border-2 border-slate-500 rounded-lg w-[70px] h-[70px] flex justify-center items-center text-[2.2rem] font-mono bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden';
+                        const content = isSolutionView ? String(number) : '';
+                        let cls = 'border-2 border-slate-500 rounded-lg w-[84px] h-[70px] flex justify-center items-center text-[2rem] font-mono bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden';
                         
                         if (isSolutionView) {
-                            cls += ' text-green-600 border-green-600 bg-green-50 font-bold';
+                            cls += ' text-emerald-700 border-emerald-700 bg-emerald-50 font-bold';
                         } else {
                             cls += ' text-slate-300 font-normal border-dashed';
                         }
 
                         return (
                             <div key={idx} className="flex flex-col items-center gap-1">
-                                <span className="text-sm font-bold text-slate-500">Write</span>
+                                <span className={`text-sm font-bold text-slate-500 ${isSolutionView ? 'invisible' : ''}`}>Write</span>
                                 <div className={cls}>
                                     {content}
                                 </div>

@@ -8,3 +8,4 @@
    - In Solution Mode (`_mode-S`), the same cell contains the missing numeral with solution highlighting.
 3. **Layout Integrity:**
    - All cells are evenly spaced, readable, and contained within the sequence panel without overlap or clipping.
+   - Arabic-numeral rows display complete one-, two-, or three-digit values through 120 inside their cells; raised physical-tile rows contain no more than six cells and show quantities through 20.

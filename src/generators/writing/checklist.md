@@ -1,3 +1,3 @@
 ### Writing Checklist
 
-- The problem data must define a valid target number to write or trace within the configured range.
+- The problem data must contain exactly one integer target number to write, trace, or represent.

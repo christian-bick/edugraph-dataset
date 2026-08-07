@@ -579,6 +579,10 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.OA.D.8-unknown-number', unknownNumberBuilder),
     ...toTargets('1.OA.D.8-unknown-operand', unknownOperandBuilder),
     // 1.NBT - Number and Operations in Base Ten
+    ...toTargets('1.NBT.A.1-count-to-120', countTo120Builder),
+    ...toTargets('1.NBT.A.1-read-numerals', readNumeralsBuilder),
+    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder),
+    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder),
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('1.NBT.B.3-compare-two-digit', compareTwoDigitBuilder),
@@ -595,10 +599,6 @@ export const spec: CompetencyTarget[] = [
 
 export const implementationTodos: CompetencyTarget[] = [
     // 1.NBT - Number and Operations in Base Ten
-    ...toTargets('1.NBT.A.1-count-to-120', countTo120Builder, 'The counting-sequence path must support an arbitrary starting number and continue by ones through the inclusive range of 120.'),
-    ...toTargets('1.NBT.A.1-read-numerals', readNumeralsBuilder, 'A numeral-reading presentation must accept Arabic numerals throughout the inclusive range of 120 and elicit their number names.'),
-    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder, 'The writing path must extend its range schema through 120 while retaining a distinct numeral-writing task mode.'),
-    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder, 'The count-to-numeral path must support quantities through 120 with a grouped tens-and-ones representation rather than rendering every object independently.'),
     ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder, 'The place-value bundle path must constrain this target to exactly one nonzero multiple of ten below or equal to ten and visibly group ten individual ones as one ten.'),
     ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'A place-value-oriented path must vary direction independently from a fixed step of ten and show that the tens digit changes while the ones digit remains unchanged.'),
     // 1.MD - Measurement and Data

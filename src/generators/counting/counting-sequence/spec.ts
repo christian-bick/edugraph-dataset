@@ -2,6 +2,7 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-sequence',
@@ -11,16 +12,18 @@ export const spec: GeneratorSpec = {
         Scope.Base10,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
+        Scope.AdditiveCount,
         Scope.After
     ]
 };
 
 export const CountingSequenceGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller120]),
         resolveRangeFromLabels
     ],
-    countMode: [Scope.AdditiveCount, Scope.MultiplesOf10]
+    stepMagnitude: [Scope.StepsOf1, Scope.StepsOf10],
+    requireMultipleOf10: [[Scope.MultiplesOf10], hasLabel(Scope.MultiplesOf10)]
 } as const;
 
 export type CountingSequenceGeneratorConfig = ConfigFromSchema<typeof CountingSequenceGeneratorSchema>;

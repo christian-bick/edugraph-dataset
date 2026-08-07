@@ -18,7 +18,8 @@ describe('CountingSequenceGenerator', () => {
     it('generates a forward sequence from a visible start', () => {
         const stub = generator.generate({
             range: {min: 1, max: 20},
-            countMode: Scope.AdditiveCount
+            stepMagnitude: Scope.StepsOf1,
+            requireMultipleOf10: false
         });
 
         expect(stub).not.toBeNull();
@@ -31,30 +32,72 @@ describe('CountingSequenceGenerator', () => {
         });
     });
 
-    it('ends the within-100 additive sequence at 100', () => {
-        const stub = generator.generate({
-            range: {min: 1, max: 100},
-            countMode: Scope.AdditiveCount
-        });
+    it('randomizes valid starts throughout a range ending at 120', () => {
+        const starts = new Set<number>();
 
-        expect(stub!.data.sequence).toEqual([91, 92, 93, 94, 95, 96, 97, 98, 99, 100]);
-        expect(stub!.data.sequence.at(-1)).toBe(100);
+        for (let seed = 0; seed < 200; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({
+                range: {min: 1, max: 120},
+                stepMagnitude: Scope.StepsOf1,
+                requireMultipleOf10: false
+            });
+
+            expect(stub).not.toBeNull();
+            expect(stub!.data.sequence[0]).toBeGreaterThanOrEqual(1);
+            expect(stub!.data.sequence.at(-1)).toBeLessThanOrEqual(120);
+            starts.add(stub!.data.sequence[0]);
+        }
+
+        expect(starts.size).toBeGreaterThan(50);
+        expect([...starts].some(start => start > 100)).toBe(true);
     });
 
-    it('skip-counts by tens through 100', () => {
+    it('steps by tens from an arbitrary randomized start', () => {
         const stub = generator.generate({
-            range: {min: 1, max: 100},
-            countMode: Scope.MultiplesOf10
+            range: {min: 3, max: 100},
+            stepMagnitude: Scope.StepsOf10,
+            requireMultipleOf10: false
         });
 
-        expect(stub!.data.sequence).toEqual([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+        expect(stub!.data.sequence.length).toBeGreaterThanOrEqual(2);
+        stub!.data.sequence.slice(1).forEach((value, index) => {
+            expect(value - stub!.data.sequence[index]).toBe(10);
+        });
         expect(stub!.data.stepSize).toBe(10);
+    });
+
+    it('aligns steps of ten when multiples of ten are required', () => {
+        const stub = generator.generate({
+            range: {min: 3, max: 100},
+            stepMagnitude: Scope.StepsOf10,
+            requireMultipleOf10: true
+        });
+
+        expect(stub!.data.sequence.every(value => value % 10 === 0)).toBe(true);
+    });
+
+    it('returns null when multiples of ten conflict with steps of one', () => {
+        expect(generator.generate({
+            range: {min: 1, max: 20},
+            stepMagnitude: Scope.StepsOf1,
+            requireMultipleOf10: true
+        })).toBeNull();
     });
 
     it('returns null when fewer than two sequence values fit', () => {
         expect(generator.generate({
             range: {min: 10, max: 10},
-            countMode: Scope.MultiplesOf10
+            stepMagnitude: Scope.StepsOf10,
+            requireMultipleOf10: true
         })).toBeNull();
+    });
+
+    it('rejects unsupported step magnitudes', () => {
+        expect(() => generator.generate({
+            range: {min: 1, max: 20},
+            stepMagnitude: Scope.StepMagnitude,
+            requireMultipleOf10: false
+        } as never)).toThrow('Unsupported step magnitude');
     });
 });

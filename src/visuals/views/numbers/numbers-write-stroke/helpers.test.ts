@@ -18,4 +18,10 @@ describe('numbers-write-stroke helpers', () => {
         const paths = getTracingPaths('a', 30, 48);
         expect(paths.length).toBe(0);
     });
+
+    it('provides tracing paths for every digit in the upper boundary 120', () => {
+        for (const digit of '120') {
+            expect(getTracingPaths(digit, 15, 42)).not.toHaveLength(0);
+        }
+    });
 });

@@ -56,6 +56,26 @@ describe('Ontology Helper', () => {
             expect(range.max).toBe(100);
         });
 
+        it('should resolve the inclusive 120 boundaries', () => {
+            const range = resolveRangeFromLabels([
+                Scope.NumbersSmaller120,
+                Scope.NumbersLarger120,
+            ]);
+            expect(range.min).toBe(120);
+            expect(range.max).toBe(120);
+        });
+
+        it('should prefer the tighter 100 boundary over 120', () => {
+            const range = resolveRangeFromLabels([
+                Scope.NumbersSmaller120,
+                Scope.NumbersSmaller100,
+                Scope.NumbersLarger100,
+                Scope.NumbersLarger120,
+            ]);
+            expect(range.min).toBe(120);
+            expect(range.max).toBe(100);
+        });
+
         it('should resolve the five-value boundaries', () => {
             const range = resolveRangeFromLabels([
                 Scope.NumbersSmaller5,

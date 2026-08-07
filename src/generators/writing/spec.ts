@@ -22,7 +22,7 @@ export const WritingGeneratorSchema = {
         hasLabel(Scope.NumbersWithZero)
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller120]),
         resolveRangeFromLabels
     ]
 } as const;

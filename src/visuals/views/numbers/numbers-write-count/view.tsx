@@ -3,6 +3,8 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import { NumbersWriteCountViewConfig, NumbersWriteCountViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
+import {validateWritingNumber} from '../helpers.ts';
+import {decomposeBaseTen} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -37,9 +39,7 @@ function DoubleTenFrame({ number }: { number: number }) {
 }
 
 function BaseTenBlocks({number}: {number: number}) {
-    const hundreds = Math.floor(number / 100);
-    const tens = Math.floor((number % 100) / 10);
-    const ones = number % 10;
+    const {hundreds, tens, ones} = decomposeBaseTen(number);
     return (
         <div className="flex items-end gap-5 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4">
             <div className="flex flex-col items-center gap-2">
@@ -50,7 +50,7 @@ function BaseTenBlocks({number}: {number: number}) {
                         </div>
                     ))}
                 </div>
-                <span className="font-bold text-slate-600">{hundreds} hundred</span>
+                <span className="font-bold text-slate-600">{hundreds} {hundreds === 1 ? 'hundred' : 'hundreds'}</span>
             </div>
             <div className="flex flex-col items-center gap-2">
                 <div className="flex gap-1.5">
@@ -78,6 +78,7 @@ export const NumbersWriteCountCore = ({ config: _config, payload }: CoreProps) =
     validateProblemData('numbers-write-count', data, ['number']);
 
     const number = data.number;
+    validateWritingNumber('numbers-write-count', number);
     const answerContent = isSolutionView ? number : '';
 
     return (
@@ -88,7 +89,7 @@ export const NumbersWriteCountCore = ({ config: _config, payload }: CoreProps) =
                     {!isSolutionView && <div className="text-[2rem] font-bold text-slate-700">Count:</div>}
                     <div className={`border-[2.5px] rounded-xl w-[75px] h-[75px] flex justify-center items-center text-[2.5rem] font-mono ${
                         isSolutionView 
-                            ? 'text-green-600 border-green-600 bg-green-50 font-bold' 
+                            ? 'text-emerald-700 border-emerald-700 bg-emerald-50 font-bold'
                             : 'border-slate-500 text-slate-800'
                     }`}>
                         {answerContent}

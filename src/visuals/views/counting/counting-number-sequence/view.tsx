@@ -1,9 +1,9 @@
-import {Scope} from 'edugraph-ts';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ViewValidationError, validateProblemData} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {CountingNumberSequenceViewConfig, CountingNumberSequenceViewSchema} from './spec.ts';
+import {resolveSequenceLayout} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -37,23 +37,13 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
     if (data.stepSize !== 1 && data.stepSize !== 10) {
         throw new ViewValidationError('counting-number-sequence', 'Step size must be 1 or 10.');
     }
-    if (config.representation !== Scope.PhysicalNumbers && config.representation !== Scope.ArabicNumerals) {
-        throw new ViewValidationError('counting-number-sequence', 'Unsupported number representation.');
-    }
-    const usesTiles = config.representation === Scope.PhysicalNumbers;
-    if (usesTiles && data.sequence.some(value => value > 20)) {
-        throw new ViewValidationError('counting-number-sequence', 'Physical sequence tiles support values through 20.');
-    }
     for (let index = 1; index < data.sequence.length; index++) {
         if (data.sequence[index] - data.sequence[index - 1] !== data.stepSize) {
             throw new ViewValidationError('counting-number-sequence', 'Sequence values do not follow the declared step.');
         }
     }
 
-    const tileSizeClass = usesTiles ? 'w-[84px] h-[104px]' : 'w-[56px] h-[56px]';
-    const tileClass = usesTiles
-        ? 'border-amber-300 bg-amber-50 shadow-[0_4px_0_#fbbf24]'
-        : 'border-slate-300 bg-slate-50';
+    const {usesTiles, tileSizeClass, tileClass} = resolveSequenceLayout(config.representation, data.sequence);
 
     return (
         <div className="flex justify-center items-center p-6 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] w-fit mx-auto font-sans">

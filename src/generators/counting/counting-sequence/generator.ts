@@ -10,36 +10,31 @@ export class CountingSequenceGenerator implements ProblemGenerator<CountingSeque
     schema = CountingSequenceGeneratorSchema;
 
     generate(config: CountingSequenceGeneratorConfig): ProblemStub<CountingSequenceProblem> | null {
-        validateConfigFields('counting-sequence', config, ['range', 'countMode']);
+        validateConfigFields('counting-sequence', config, ['range', 'stepMagnitude', 'requireMultipleOf10']);
 
-        const stepSize = config.countMode === Scope.AdditiveCount
+        const stepSize = config.stepMagnitude === Scope.StepsOf1
             ? 1
-            : config.countMode === Scope.MultiplesOf10
+            : config.stepMagnitude === Scope.StepsOf10
                 ? 10
                 : null;
         if (stepSize === null) {
-            throw new GeneratorValidationError('counting-sequence', 'Unsupported counting mode.');
+            throw new GeneratorValidationError('counting-sequence', 'Unsupported step magnitude.');
         }
+        if (config.requireMultipleOf10 && stepSize !== 10) return null;
 
         const range = config.range!;
         const min = Math.max(1, range.min);
-        const first = stepSize === 10 ? Math.ceil(min / 10) * 10 : min;
-        const last = stepSize === 10 ? Math.floor(range.max / 10) * 10 : range.max;
-        if (first > last) return null;
+        const first = config.requireMultipleOf10 ? Math.ceil(min / 10) * 10 : min;
+        const last = config.requireMultipleOf10 ? Math.floor(range.max / 10) * 10 : range.max;
+        const latestStart = last - stepSize;
+        if (first > latestStart) return null;
 
-        const available = Math.floor((last - first) / stepSize) + 1;
-        const length = stepSize === 1 && last < 100
-            ? Math.min(6, available)
-            : Math.min(10, available);
-        if (length < 2) return null;
+        const startCount = Math.floor((latestStart - first) / stepSize) + 1;
+        const start = first + Math.floor(random() * startCount) * stepSize;
+        const availableFromStart = Math.floor((last - start) / stepSize) + 1;
+        const preferredLength = stepSize === 1 && last < 100 ? 6 : 10;
+        const length = Math.min(preferredLength, availableFromStart);
 
-        const latestStart = last - (length - 1) * stepSize;
-        const earliestStart = stepSize === 1 && latestStart >= 2
-            ? Math.max(first, 2)
-            : first;
-        const start = last >= 100
-            ? latestStart
-            : earliestStart + Math.floor(random() * (Math.floor((latestStart - earliestStart) / stepSize) + 1)) * stepSize;
         const sequence = Array.from({length}, (_, index) => start + index * stepSize);
         const missingIndex = 1 + Math.floor(random() * (sequence.length - 1));
 

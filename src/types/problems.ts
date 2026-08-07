@@ -231,6 +231,7 @@ export interface ViewTypeMap {
     'numbers-write-stroke': WritingProblem;
     'numbers-write-standard': WritingProblem;
     'numbers-write-count': WritingProblem;
+    'numbers-read-standard': WritingProblem;
     'time-analog': TimeProblem;
     'time-digital': TimeProblem;
 

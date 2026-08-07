@@ -16,11 +16,12 @@ const countTo100Builder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.After,
+        Scope.AdditiveCount,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.AdditiveCount], // count by ones
-        [Scope.MultiplesOf10]   // skip count by tens
+        [Scope.StepsOf1], // count by ones
+        [Scope.StepsOf10, Scope.MultiplesOf10] // count by tens through decade values
     ]);
 
 // --- K.CC.A.2: Start from a given number (5) ---
@@ -28,6 +29,7 @@ const countFrom5Builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.AdditiveCount,
+        Scope.StepsOf1,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersLarger5,

@@ -49,6 +49,8 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
         max = 20;
     } else if (labels.includes(Scope.NumbersSmaller100)) {
         max = 100;
+    } else if (labels.includes(Scope.NumbersSmaller120)) {
+        max = 120;
     } else if (labels.includes(Scope.NumbersSmaller1000)) {
         max = 1000;
     } else if (labels.includes(Scope.NumbersSmaller10000)) {
@@ -69,6 +71,8 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
         min = 10000;
     } else if (labels.includes(Scope.NumbersLarger1000)) {
         min = 1000;
+    } else if (labels.includes(Scope.NumbersLarger120)) {
+        min = 120;
     } else if (labels.includes(Scope.NumbersLarger100)) {
         min = 100;
     } else if (labels.includes(Scope.NumbersLarger20)) {
