@@ -72,7 +72,7 @@ npm run report:coverage -- --spec=ccss
 # Generate report for test specifications
 npm run report:coverage -- --spec=test
 ```
-*(Tip: You can pass `--spec` to analyze different datasets; it defaults to `ccss`.)*
+The `--spec` parameter is required. Pass `--spec=union` to analyze the merged release dataset in `out/dataset/`.
 
 **2b. Audit the Train/Validation Split**
 Check that validation content is disjoint from train, free of duplicates, and covers the views and labels that training does.

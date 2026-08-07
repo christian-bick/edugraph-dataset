@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "generated_at": "2026-08-03T18:13:43.966Z",
-    "ontology_version": "v0.10.0",
+    "generated_at": "2026-08-07T22:33:00.694Z",
+    "ontology_version": "v0.11.0",
     "total_leaves_scanned": 467,
     "spec_covered_count": 47,
-    "covered_count": 39,
-    "missing_generator_count": 7,
-    "missing_ontology_count": 1,
+    "covered_count": 46,
+    "missing_generator_count": 0,
+    "missing_ontology_count": 0,
     "analysis_needed_count": 420,
     "beyond_scope_count": 2,
     "fully_beyond_scope_count": 1
@@ -24,8 +24,9 @@
           "http://edugraph.io/edu/NumbersSmaller100",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/ProcedureExecution",
-          "http://edugraph.io/edu/AdditiveCount"
+          "http://edugraph.io/edu/StepsOf1"
         ],
         [
           "http://edugraph.io/edu/NumerationWithIntegers",
@@ -34,7 +35,9 @@
           "http://edugraph.io/edu/NumbersSmaller100",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/ProcedureExecution",
+          "http://edugraph.io/edu/StepsOf10",
           "http://edugraph.io/edu/MultiplesOf10"
         ]
       ],
@@ -52,7 +55,9 @@
         "http://edugraph.io/edu/NumbersSmaller100",
         "http://edugraph.io/edu/NumbersWithoutZero",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
-        "http://edugraph.io/edu/AdditiveCount",
+        "http://edugraph.io/edu/After",
+        "http://edugraph.io/edu/StepsOf1",
+        "http://edugraph.io/edu/StepsOf10",
         "http://edugraph.io/edu/MultiplesOf10"
       ],
       "matched_abilities": [
@@ -71,23 +76,25 @@
       "competencies": [
         [
           "http://edugraph.io/edu/NumerationWithIntegers",
-          "http://edugraph.io/edu/AdditiveCount",
+          "http://edugraph.io/edu/StepsOf1",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersLarger5",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
           "http://edugraph.io/edu/NumerationWithIntegers",
-          "http://edugraph.io/edu/AdditiveCount",
+          "http://edugraph.io/edu/StepsOf1",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersLarger5",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/NumbersSmaller20"
         ]
@@ -101,12 +108,13 @@
         "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/AdditiveCount",
+        "http://edugraph.io/edu/StepsOf1",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersLarger5",
         "http://edugraph.io/edu/NumbersWithoutZero",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/After",
         "http://edugraph.io/edu/NumbersSmaller10",
         "http://edugraph.io/edu/NumbersSmaller20"
       ],
@@ -116,7 +124,7 @@
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": true,
-      "generator_module": "counting-basic",
+      "generator_module": "counting-inc-dec",
       "cluster_id": "K.CC.A"
     },
     "K.CC.A.3": {
@@ -125,23 +133,26 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/DigitNotation",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
-          "http://edugraph.io/edu/TextualArticulation",
+          "http://edugraph.io/edu/VisualArticulation",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
+          "http://edugraph.io/edu/DigitNotation",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
-          "http://edugraph.io/edu/TextualArticulation",
+          "http://edugraph.io/edu/VisualArticulation",
           "http://edugraph.io/edu/NumbersWithoutZero",
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
+          "http://edugraph.io/edu/DigitNotation",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
-          "http://edugraph.io/edu/TextualArticulation",
+          "http://edugraph.io/edu/VisualArticulation",
           "http://edugraph.io/edu/NumbersWithZero",
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
@@ -179,6 +190,7 @@
       "fully_beyond_scope": false,
       "partially_beyond_scope": false,
       "matched_areas": [
+        "http://edugraph.io/edu/DigitNotation",
         "http://edugraph.io/edu/NumerationWithIntegers"
       ],
       "matched_scopes": [
@@ -191,7 +203,7 @@
         "http://edugraph.io/edu/PhysicalNumbers"
       ],
       "matched_abilities": [
-        "http://edugraph.io/edu/TextualArticulation",
+        "http://edugraph.io/edu/VisualArticulation",
         "http://edugraph.io/edu/Formalization"
       ],
       "reasoning": "",
@@ -295,6 +307,8 @@
           "http://edugraph.io/edu/NumbersWithoutNegatives",
           "http://edugraph.io/edu/PhysicalNumbers",
           "http://edugraph.io/edu/AdditiveCount",
+          "http://edugraph.io/edu/StepsOf1",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
@@ -307,6 +321,8 @@
           "http://edugraph.io/edu/NumbersWithoutNegatives",
           "http://edugraph.io/edu/PhysicalNumbers",
           "http://edugraph.io/edu/AdditiveCount",
+          "http://edugraph.io/edu/StepsOf1",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/NumbersSmaller20"
         ]
@@ -327,6 +343,8 @@
         "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/AdditiveCount",
+        "http://edugraph.io/edu/StepsOf1",
+        "http://edugraph.io/edu/After",
         "http://edugraph.io/edu/NumbersSmaller10",
         "http://edugraph.io/edu/NumbersSmaller20"
       ],
@@ -552,6 +570,7 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -562,6 +581,7 @@
           "http://edugraph.io/edu/Addition"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -582,6 +602,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -604,6 +625,7 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -613,6 +635,7 @@
           "http://edugraph.io/edu/Addition"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -632,6 +655,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -735,6 +759,7 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -744,6 +769,7 @@
           "http://edugraph.io/edu/Addition"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -763,6 +789,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1396,7 +1423,7 @@
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": true,
-      "generator_module": "shape-build-shape, shape-identity",
+      "generator_module": "shape-build-shape",
       "cluster_id": "K.G.B"
     },
     "K.G.B.6": {
@@ -1406,21 +1433,25 @@
       "competencies": [
         [
           "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
           "http://edugraph.io/edu/ConceptComposition",
           "http://edugraph.io/edu/Rectangle"
         ],
         [
           "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
           "http://edugraph.io/edu/ConceptComposition",
           "http://edugraph.io/edu/Square"
         ],
         [
           "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
           "http://edugraph.io/edu/ConceptComposition",
           "http://edugraph.io/edu/Triangle"
         ],
         [
           "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
           "http://edugraph.io/edu/ConceptComposition",
           "http://edugraph.io/edu/Hexagon"
         ]
@@ -1437,7 +1468,9 @@
         "http://edugraph.io/edu/Triangle",
         "http://edugraph.io/edu/Hexagon"
       ],
-      "matched_scopes": [],
+      "matched_scopes": [
+        "http://edugraph.io/edu/SingleLevelComposition"
+      ],
       "matched_abilities": [
         "http://edugraph.io/edu/ConceptComposition"
       ],
@@ -1453,6 +1486,7 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1462,6 +1496,7 @@
           "http://edugraph.io/edu/Addition"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1481,6 +1516,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1499,25 +1535,40 @@
     "1.OA.A.2": {
       "id": "1.OA.A.2",
       "spec_covered": true,
-      "ontology_covered": false,
-      "competencies": [],
-      "implementation_todos": [],
-      "ontology_todos": [
-        {
-          "title": "Represent arithmetic operand count",
-          "description": "Add Scope.OperandCount with child scopes Scope.TwoOperands and Scope.ThreeOperands. Apply ThreeOperands to the three-addend competency and TwoOperands to arity-constrained binary arithmetic targets so pair and triple generators can be distinguished without overloading Area or Ability labels."
-        }
+      "ontology_covered": true,
+      "competencies": [
+        [
+          "http://edugraph.io/edu/Addition",
+          "http://edugraph.io/edu/ThreeOperands",
+          "http://edugraph.io/edu/ArabicNumerals",
+          "http://edugraph.io/edu/Base10",
+          "http://edugraph.io/edu/NumbersWithoutNegatives",
+          "http://edugraph.io/edu/NumbersSmaller20",
+          "http://edugraph.io/edu/TextualReception"
+        ]
       ],
+      "implementation_todos": [],
+      "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
       "partially_beyond_scope": false,
-      "matched_areas": [],
-      "matched_scopes": [],
-      "matched_abilities": [],
+      "matched_areas": [
+        "http://edugraph.io/edu/Addition"
+      ],
+      "matched_scopes": [
+        "http://edugraph.io/edu/ThreeOperands",
+        "http://edugraph.io/edu/ArabicNumerals",
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/NumbersWithoutNegatives",
+        "http://edugraph.io/edu/NumbersSmaller20"
+      ],
+      "matched_abilities": [
+        "http://edugraph.io/edu/TextualReception"
+      ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "arithmetic-ops-triples",
       "cluster_id": "1.OA.A"
     },
     "1.OA.B.3": {
@@ -1575,6 +1626,7 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1584,6 +1636,7 @@
           "http://edugraph.io/edu/Addition"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1603,6 +1656,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1631,6 +1685,7 @@
           "http://edugraph.io/edu/PhysicalNumbers",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/AdditiveCount",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
@@ -1641,6 +1696,7 @@
           "http://edugraph.io/edu/PhysicalNumbers",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/AdditiveCount",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
@@ -1651,6 +1707,7 @@
           "http://edugraph.io/edu/PhysicalNumbers",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/SubtractiveCount",
+          "http://edugraph.io/edu/Before",
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
@@ -1661,6 +1718,7 @@
           "http://edugraph.io/edu/PhysicalNumbers",
           "http://edugraph.io/edu/ProcedureExecution",
           "http://edugraph.io/edu/SubtractiveCount",
+          "http://edugraph.io/edu/Before",
           "http://edugraph.io/edu/NumbersSmaller20"
         ]
       ],
@@ -1678,9 +1736,11 @@
         "http://edugraph.io/edu/NumbersWithoutNegatives",
         "http://edugraph.io/edu/PhysicalNumbers",
         "http://edugraph.io/edu/AdditiveCount",
+        "http://edugraph.io/edu/After",
         "http://edugraph.io/edu/NumbersSmaller10",
         "http://edugraph.io/edu/NumbersSmaller20",
-        "http://edugraph.io/edu/SubtractiveCount"
+        "http://edugraph.io/edu/SubtractiveCount",
+        "http://edugraph.io/edu/Before"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution"
@@ -1688,7 +1748,7 @@
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": true,
-      "generator_module": "counting-basic, counting-inc-dec",
+      "generator_module": "counting-inc-dec",
       "cluster_id": "1.OA.C"
     },
     "1.OA.C.6": {
@@ -1697,6 +1757,7 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1706,6 +1767,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1715,6 +1777,7 @@
           "http://edugraph.io/edu/NumbersSmaller20"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1724,6 +1787,7 @@
           "http://edugraph.io/edu/NumbersSmaller10"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1743,6 +1807,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1811,6 +1876,7 @@
       "ontology_covered": true,
       "competencies": [
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1820,6 +1886,7 @@
           "http://edugraph.io/edu/Addition"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1829,6 +1896,7 @@
           "http://edugraph.io/edu/Subtraction"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1838,6 +1906,7 @@
           "http://edugraph.io/edu/Addition"
         ],
         [
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1857,6 +1926,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -1879,202 +1949,86 @@
       "ontology_covered": true,
       "competencies": [
         [
-          "http://edugraph.io/edu/NumericOrder",
+          "http://edugraph.io/edu/NumerationWithIntegers",
+          "http://edugraph.io/edu/StepsOf1",
+          "http://edugraph.io/edu/After",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
-          "http://edugraph.io/edu/NumbersSmaller100",
-          "http://edugraph.io/edu/ProcedureExecution",
-          "http://edugraph.io/edu/NumbersWithoutZero",
-          "http://edugraph.io/edu/Most"
+          "http://edugraph.io/edu/NumbersSmaller120",
+          "http://edugraph.io/edu/ProcedureExecution"
         ],
         [
-          "http://edugraph.io/edu/NumericOrder",
+          "http://edugraph.io/edu/DigitNotation",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
-          "http://edugraph.io/edu/NumbersSmaller100",
-          "http://edugraph.io/edu/ProcedureExecution",
-          "http://edugraph.io/edu/NumbersWithoutZero",
-          "http://edugraph.io/edu/Least"
+          "http://edugraph.io/edu/NumbersSmaller120",
+          "http://edugraph.io/edu/TextualReception"
         ],
         [
-          "http://edugraph.io/edu/NumericOrder",
+          "http://edugraph.io/edu/DigitNotation",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
-          "http://edugraph.io/edu/NumbersSmaller100",
-          "http://edugraph.io/edu/ProcedureExecution",
-          "http://edugraph.io/edu/NumbersWithZero",
-          "http://edugraph.io/edu/Least"
+          "http://edugraph.io/edu/NumbersSmaller120",
+          "http://edugraph.io/edu/VisualArticulation"
+        ],
+        [
+          "http://edugraph.io/edu/NumerationWithIntegers",
+          "http://edugraph.io/edu/ArabicNumerals",
+          "http://edugraph.io/edu/Base10",
+          "http://edugraph.io/edu/PhysicalNumbers",
+          "http://edugraph.io/edu/NumbersWithoutNegatives",
+          "http://edugraph.io/edu/NumbersSmaller120",
+          "http://edugraph.io/edu/Formalization"
         ]
       ],
-      "implementation_todos": [
-        {
-          "id": "1.NBT.A.1-count-to-120~c11b8b44",
-          "labels": [
-            "http://edugraph.io/edu/NumericOrder",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/Base10",
-            "http://edugraph.io/edu/NumbersWithoutNegatives",
-            "http://edugraph.io/edu/NumbersSmaller100",
-            "http://edugraph.io/edu/ProcedureExecution",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/Most"
-          ],
-          "explanation": "The exact range through 120 is not expressible; ordering and counting generators currently support only the ontology range below 100."
-        },
-        {
-          "id": "1.NBT.A.1-count-to-120~77ef41e8",
-          "labels": [
-            "http://edugraph.io/edu/NumericOrder",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/Base10",
-            "http://edugraph.io/edu/NumbersWithoutNegatives",
-            "http://edugraph.io/edu/NumbersSmaller100",
-            "http://edugraph.io/edu/ProcedureExecution",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/Least"
-          ],
-          "explanation": "The exact range through 120 is not expressible; ordering and counting generators currently support only the ontology range below 100."
-        },
-        {
-          "id": "1.NBT.A.1-count-to-120~0bfdb8d2",
-          "labels": [
-            "http://edugraph.io/edu/NumericOrder",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/Base10",
-            "http://edugraph.io/edu/NumbersWithoutNegatives",
-            "http://edugraph.io/edu/NumbersSmaller100",
-            "http://edugraph.io/edu/ProcedureExecution",
-            "http://edugraph.io/edu/NumbersWithZero",
-            "http://edugraph.io/edu/Least"
-          ],
-          "explanation": "The exact range through 120 is not expressible; ordering and counting generators currently support only the ontology range below 100."
-        },
-        {
-          "id": "1.NBT.A.1-write-numerals~663d1492",
-          "labels": [
-            "http://edugraph.io/edu/DigitNotation",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/TextualArticulation",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/NumbersSmaller10"
-          ],
-          "explanation": "Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
-        },
-        {
-          "id": "1.NBT.A.1-write-numerals~9c798a27",
-          "labels": [
-            "http://edugraph.io/edu/DigitNotation",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/TextualArticulation",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/NumbersSmaller20"
-          ],
-          "explanation": "Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
-        },
-        {
-          "id": "1.NBT.A.1-write-numerals~09421f5b",
-          "labels": [
-            "http://edugraph.io/edu/DigitNotation",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/TextualArticulation",
-            "http://edugraph.io/edu/NumbersWithZero",
-            "http://edugraph.io/edu/NumbersSmaller20"
-          ],
-          "explanation": "Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
-        },
-        {
-          "id": "1.NBT.A.1-represent-counts~bd797c40",
-          "labels": [
-            "http://edugraph.io/edu/NumerationWithIntegers",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/PhysicalNumbers",
-            "http://edugraph.io/edu/Formalization",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/NumbersSmaller10"
-          ],
-          "explanation": "Representing a count with a written numeral coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
-        },
-        {
-          "id": "1.NBT.A.1-represent-counts~5f906d79",
-          "labels": [
-            "http://edugraph.io/edu/NumerationWithIntegers",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/PhysicalNumbers",
-            "http://edugraph.io/edu/Formalization",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/NumbersSmaller20"
-          ],
-          "explanation": "Representing a count with a written numeral coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
-        },
-        {
-          "id": "1.NBT.A.1-represent-counts~a858ae7d",
-          "labels": [
-            "http://edugraph.io/edu/NumerationWithIntegers",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/PhysicalNumbers",
-            "http://edugraph.io/edu/Formalization",
-            "http://edugraph.io/edu/NumbersWithZero",
-            "http://edugraph.io/edu/NumbersSmaller20"
-          ],
-          "explanation": "Representing a count with a written numeral coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported."
-        }
-      ],
+      "implementation_todos": [],
       "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
       "partially_beyond_scope": false,
       "matched_areas": [
-        "http://edugraph.io/edu/NumericOrder",
-        "http://edugraph.io/edu/DigitNotation",
-        "http://edugraph.io/edu/NumerationWithIntegers"
+        "http://edugraph.io/edu/NumerationWithIntegers",
+        "http://edugraph.io/edu/DigitNotation"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/StepsOf1",
+        "http://edugraph.io/edu/After",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
-        "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/NumbersWithoutZero",
-        "http://edugraph.io/edu/Most",
-        "http://edugraph.io/edu/Least",
-        "http://edugraph.io/edu/NumbersWithZero",
-        "http://edugraph.io/edu/NumbersSmaller10",
-        "http://edugraph.io/edu/NumbersSmaller20",
+        "http://edugraph.io/edu/NumbersSmaller120",
         "http://edugraph.io/edu/PhysicalNumbers"
       ],
       "matched_abilities": [
         "http://edugraph.io/edu/ProcedureExecution",
-        "http://edugraph.io/edu/TextualArticulation",
+        "http://edugraph.io/edu/TextualReception",
+        "http://edugraph.io/edu/VisualArticulation",
         "http://edugraph.io/edu/Formalization"
       ],
       "reasoning": "",
       "suggested_task": null,
       "dataset_covered": true,
-      "generator_module": "ordering",
+      "generator_module": "counting-sequence, writing",
       "cluster_id": "1.NBT.A"
     },
     "1.NBT.B.2a": {
       "id": "1.NBT.B.2a",
       "spec_covered": true,
       "ontology_covered": true,
-      "competencies": [],
-      "implementation_todos": [
-        {
-          "id": "1.NBT.B.2a-ten-bundle~acd227be",
-          "labels": [
-            "http://edugraph.io/edu/PlaceValue",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/Base10",
-            "http://edugraph.io/edu/NumbersWithoutNegatives",
-            "http://edugraph.io/edu/NumbersSmaller20",
-            "http://edugraph.io/edu/PhysicalNumbers",
-            "http://edugraph.io/edu/ProcedureUnderstanding"
-          ],
-          "explanation": "All place-value-bundles outputs are multiples of ten. The current labels do not distinguish exactly one ten from other whole-ten quantities within the resolved range."
-        }
+      "competencies": [
+        [
+          "http://edugraph.io/edu/PlaceValue",
+          "http://edugraph.io/edu/MultiplesOf10",
+          "http://edugraph.io/edu/NumbersWithoutZero",
+          "http://edugraph.io/edu/NumbersSmaller10",
+          "http://edugraph.io/edu/PhysicalNumbers",
+          "http://edugraph.io/edu/ProcedureUnderstanding"
+        ]
       ],
+      "implementation_todos": [],
       "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
@@ -2083,10 +2037,9 @@
         "http://edugraph.io/edu/PlaceValue"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/ArabicNumerals",
-        "http://edugraph.io/edu/Base10",
-        "http://edugraph.io/edu/NumbersWithoutNegatives",
-        "http://edugraph.io/edu/NumbersSmaller20",
+        "http://edugraph.io/edu/MultiplesOf10",
+        "http://edugraph.io/edu/NumbersWithoutZero",
+        "http://edugraph.io/edu/NumbersSmaller10",
         "http://edugraph.io/edu/PhysicalNumbers"
       ],
       "matched_abilities": [
@@ -2094,8 +2047,8 @@
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "place-value-bundles",
       "cluster_id": "1.NBT.B"
     },
     "1.NBT.B.2b": {
@@ -2256,6 +2209,7 @@
       "competencies": [
         [
           "http://edugraph.io/edu/Addition",
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -2273,6 +2227,7 @@
         "http://edugraph.io/edu/Addition"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/NumbersWithoutNegatives",
@@ -2292,37 +2247,27 @@
       "id": "1.NBT.C.5",
       "spec_covered": true,
       "ontology_covered": true,
-      "competencies": [],
-      "implementation_todos": [
-        {
-          "id": "1.NBT.C.5-ten-more-less~501aafce",
-          "labels": [
-            "http://edugraph.io/edu/NumerationWithIntegers",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/NumbersWithoutNegatives",
-            "http://edugraph.io/edu/NumbersSmaller100",
-            "http://edugraph.io/edu/DerivedCount",
-            "http://edugraph.io/edu/ProcedureExecution",
-            "http://edugraph.io/edu/Increment"
-          ],
-          "explanation": "The counting-inc-dec generator models changes of one. Existing place-value bundle tasks represent whole tens but do not model ten more or ten less from an arbitrary number."
-        },
-        {
-          "id": "1.NBT.C.5-ten-more-less~37092ea2",
-          "labels": [
-            "http://edugraph.io/edu/NumerationWithIntegers",
-            "http://edugraph.io/edu/ArabicNumerals",
-            "http://edugraph.io/edu/NumbersWithoutZero",
-            "http://edugraph.io/edu/NumbersWithoutNegatives",
-            "http://edugraph.io/edu/NumbersSmaller100",
-            "http://edugraph.io/edu/DerivedCount",
-            "http://edugraph.io/edu/ProcedureExecution",
-            "http://edugraph.io/edu/Decrement"
-          ],
-          "explanation": "The counting-inc-dec generator models changes of one. Existing place-value bundle tasks represent whole tens but do not model ten more or ten less from an arbitrary number."
-        }
+      "competencies": [
+        [
+          "http://edugraph.io/edu/NumerationWithIntegers",
+          "http://edugraph.io/edu/Base10",
+          "http://edugraph.io/edu/StepsOf10",
+          "http://edugraph.io/edu/NumbersLarger10",
+          "http://edugraph.io/edu/NumbersSmaller100",
+          "http://edugraph.io/edu/ProcedureUnderstanding",
+          "http://edugraph.io/edu/Increment"
+        ],
+        [
+          "http://edugraph.io/edu/NumerationWithIntegers",
+          "http://edugraph.io/edu/Base10",
+          "http://edugraph.io/edu/StepsOf10",
+          "http://edugraph.io/edu/NumbersLarger10",
+          "http://edugraph.io/edu/NumbersSmaller100",
+          "http://edugraph.io/edu/ProcedureUnderstanding",
+          "http://edugraph.io/edu/Decrement"
+        ]
       ],
+      "implementation_todos": [],
       "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
@@ -2333,19 +2278,18 @@
         "http://edugraph.io/edu/Decrement"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/ArabicNumerals",
-        "http://edugraph.io/edu/NumbersWithoutZero",
-        "http://edugraph.io/edu/NumbersWithoutNegatives",
-        "http://edugraph.io/edu/NumbersSmaller100",
-        "http://edugraph.io/edu/DerivedCount"
+        "http://edugraph.io/edu/Base10",
+        "http://edugraph.io/edu/StepsOf10",
+        "http://edugraph.io/edu/NumbersLarger10",
+        "http://edugraph.io/edu/NumbersSmaller100"
       ],
       "matched_abilities": [
-        "http://edugraph.io/edu/ProcedureExecution"
+        "http://edugraph.io/edu/ProcedureUnderstanding"
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "counting-inc-dec",
       "cluster_id": "1.NBT.C"
     },
     "1.NBT.C.6": {
@@ -2355,6 +2299,7 @@
       "competencies": [
         [
           "http://edugraph.io/edu/Subtraction",
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/MultiplesOf10",
@@ -2365,6 +2310,7 @@
         ],
         [
           "http://edugraph.io/edu/Subtraction",
+          "http://edugraph.io/edu/TwoOperands",
           "http://edugraph.io/edu/ArabicNumerals",
           "http://edugraph.io/edu/Base10",
           "http://edugraph.io/edu/MultiplesOf10",
@@ -2383,6 +2329,7 @@
         "http://edugraph.io/edu/Subtraction"
       ],
       "matched_scopes": [
+        "http://edugraph.io/edu/TwoOperands",
         "http://edugraph.io/edu/ArabicNumerals",
         "http://edugraph.io/edu/Base10",
         "http://edugraph.io/edu/MultiplesOf10",
@@ -2404,31 +2351,31 @@
       "id": "1.MD.A.1",
       "spec_covered": true,
       "ontology_covered": true,
-      "competencies": [],
-      "implementation_todos": [
-        {
-          "id": "1.MD.A.1-order-lengths~d564a308",
-          "labels": [
-            "http://edugraph.io/edu/Measurement",
-            "http://edugraph.io/edu/ObjectSorting",
-            "http://edugraph.io/edu/LengthMeasurement",
-            "http://edugraph.io/edu/ProcedureExecution",
-            "http://edugraph.io/edu/Least"
-          ],
-          "explanation": "The current measurement-order exercise directly orders three visible lengths but does not implement the standard's separate indirect-comparison competency using a third object."
-        },
-        {
-          "id": "1.MD.A.1-order-lengths~a6240c82",
-          "labels": [
-            "http://edugraph.io/edu/Measurement",
-            "http://edugraph.io/edu/ObjectSorting",
-            "http://edugraph.io/edu/LengthMeasurement",
-            "http://edugraph.io/edu/ProcedureExecution",
-            "http://edugraph.io/edu/Most"
-          ],
-          "explanation": "The current measurement-order exercise directly orders three visible lengths but does not implement the standard's separate indirect-comparison competency using a third object."
-        }
+      "competencies": [
+        [
+          "http://edugraph.io/edu/Measurement",
+          "http://edugraph.io/edu/ObjectSorting",
+          "http://edugraph.io/edu/LengthMeasurement",
+          "http://edugraph.io/edu/DirectRelation",
+          "http://edugraph.io/edu/ProcedureExecution",
+          "http://edugraph.io/edu/Least"
+        ],
+        [
+          "http://edugraph.io/edu/Measurement",
+          "http://edugraph.io/edu/ObjectSorting",
+          "http://edugraph.io/edu/LengthMeasurement",
+          "http://edugraph.io/edu/DirectRelation",
+          "http://edugraph.io/edu/ProcedureExecution",
+          "http://edugraph.io/edu/Most"
+        ],
+        [
+          "http://edugraph.io/edu/Measurement",
+          "http://edugraph.io/edu/LengthMeasurement",
+          "http://edugraph.io/edu/MediatedRelation",
+          "http://edugraph.io/edu/ConceptDerivation"
+        ]
       ],
+      "implementation_todos": [],
       "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
@@ -2439,16 +2386,19 @@
       ],
       "matched_scopes": [
         "http://edugraph.io/edu/LengthMeasurement",
+        "http://edugraph.io/edu/DirectRelation",
         "http://edugraph.io/edu/Least",
-        "http://edugraph.io/edu/Most"
+        "http://edugraph.io/edu/Most",
+        "http://edugraph.io/edu/MediatedRelation"
       ],
       "matched_abilities": [
-        "http://edugraph.io/edu/ProcedureExecution"
+        "http://edugraph.io/edu/ProcedureExecution",
+        "http://edugraph.io/edu/ConceptDerivation"
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "measurement-order, measurement-mediated-comparison",
       "cluster_id": "1.MD.A"
     },
     "1.MD.A.2": {
@@ -2754,79 +2704,66 @@
       "id": "1.G.A.1",
       "spec_covered": true,
       "ontology_covered": true,
-      "competencies": [],
-      "implementation_todos": [
-        {
-          "id": "1.G.A.1-defining-attributes~a43ce7a0",
-          "labels": [
-            "http://edugraph.io/edu/ShapeRecognition",
-            "http://edugraph.io/edu/ShapeProperties",
-            "http://edugraph.io/edu/VisualArticulation",
-            "http://edugraph.io/edu/Triangle"
-          ],
-          "explanation": "Building shapes coincides with K.G.B.5; the grade-1 elevation of distinguishing defining from non-defining attributes needs a separately scoped generator/view."
-        },
-        {
-          "id": "1.G.A.1-defining-attributes~1b6ee01f",
-          "labels": [
-            "http://edugraph.io/edu/ShapeRecognition",
-            "http://edugraph.io/edu/ShapeProperties",
-            "http://edugraph.io/edu/VisualArticulation",
-            "http://edugraph.io/edu/Square"
-          ],
-          "explanation": "Building shapes coincides with K.G.B.5; the grade-1 elevation of distinguishing defining from non-defining attributes needs a separately scoped generator/view."
-        },
-        {
-          "id": "1.G.A.1-defining-attributes~169be47f",
-          "labels": [
-            "http://edugraph.io/edu/ShapeRecognition",
-            "http://edugraph.io/edu/ShapeProperties",
-            "http://edugraph.io/edu/VisualArticulation",
-            "http://edugraph.io/edu/Rectangle"
-          ],
-          "explanation": "Building shapes coincides with K.G.B.5; the grade-1 elevation of distinguishing defining from non-defining attributes needs a separately scoped generator/view."
-        },
-        {
-          "id": "1.G.A.1-defining-attributes~7fa4aedc",
-          "labels": [
-            "http://edugraph.io/edu/ShapeRecognition",
-            "http://edugraph.io/edu/ShapeProperties",
-            "http://edugraph.io/edu/VisualArticulation",
-            "http://edugraph.io/edu/Hexagon"
-          ],
-          "explanation": "Building shapes coincides with K.G.B.5; the grade-1 elevation of distinguishing defining from non-defining attributes needs a separately scoped generator/view."
-        },
-        {
-          "id": "1.G.A.1-draw-shapes~f9fcb7db",
-          "labels": [
-            "http://edugraph.io/edu/ShapeIdentity",
-            "http://edugraph.io/edu/VisualArticulation",
-            "http://edugraph.io/edu/Circle",
-            "http://edugraph.io/edu/CircularShapeDrawing"
-          ],
-          "explanation": "Drawing shapes coincides with K.G.B.5; the grade-1 defining-attribute elevation is not represented."
-        },
-        {
-          "id": "1.G.A.1-draw-shapes~24f08e48",
-          "labels": [
-            "http://edugraph.io/edu/ShapeIdentity",
-            "http://edugraph.io/edu/VisualArticulation",
-            "http://edugraph.io/edu/Square",
-            "http://edugraph.io/edu/LinearShapeDrawing"
-          ],
-          "explanation": "Drawing shapes coincides with K.G.B.5; the grade-1 defining-attribute elevation is not represented."
-        },
-        {
-          "id": "1.G.A.1-draw-shapes~89e056f7",
-          "labels": [
-            "http://edugraph.io/edu/ShapeIdentity",
-            "http://edugraph.io/edu/VisualArticulation",
-            "http://edugraph.io/edu/Triangle",
-            "http://edugraph.io/edu/LinearShapeDrawing"
-          ],
-          "explanation": "Drawing shapes coincides with K.G.B.5; the grade-1 defining-attribute elevation is not represented."
-        }
+      "competencies": [
+        [
+          "http://edugraph.io/edu/ShapeRecognition",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptClassification"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeRecognition",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptSpecification",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Triangle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeRecognition",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptSpecification",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Square"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeRecognition",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptSpecification",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Rectangle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeRecognition",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptSpecification",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Hexagon"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeIdentity",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptSpecification",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Circle",
+          "http://edugraph.io/edu/CircularShapeDrawing"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeIdentity",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptSpecification",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Square",
+          "http://edugraph.io/edu/LinearShapeDrawing"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeIdentity",
+          "http://edugraph.io/edu/ShapeAttributes",
+          "http://edugraph.io/edu/ConceptSpecification",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Triangle",
+          "http://edugraph.io/edu/LinearShapeDrawing"
+        ]
       ],
+      "implementation_todos": [],
       "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
@@ -2843,114 +2780,146 @@
         "http://edugraph.io/edu/LinearShapeDrawing"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/ShapeProperties"
+        "http://edugraph.io/edu/ShapeAttributes"
       ],
       "matched_abilities": [
+        "http://edugraph.io/edu/ConceptClassification",
+        "http://edugraph.io/edu/ConceptSpecification",
         "http://edugraph.io/edu/VisualArticulation"
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "shape-classify-attributes, shape-build-shape",
       "cluster_id": "1.G.A"
     },
     "1.G.A.2": {
       "id": "1.G.A.2",
       "spec_covered": true,
       "ontology_covered": true,
-      "competencies": [],
-      "implementation_todos": [
-        {
-          "id": "1.G.A.2-compose-other-shapes~8b0ad2b1",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/Rectangle"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~3b249edb",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/Square"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~1e62c4d0",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/Triangle"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~0b72882a",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/Trapezoid"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~596c75ed",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/HalfCircle"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~638b3988",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/QuarterCircle"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~c74af2f5",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/Cube"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~45494b65",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/RectangularPrism"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~9d0a2253",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/Cone"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        },
-        {
-          "id": "1.G.A.2-compose-other-shapes~9790702e",
-          "labels": [
-            "http://edugraph.io/edu/ShapeComposition",
-            "http://edugraph.io/edu/ConceptComposition",
-            "http://edugraph.io/edu/Cylinder"
-          ],
-          "explanation": "The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape."
-        }
+      "competencies": [
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Rectangle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Square"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Triangle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Trapezoid"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/HalfCircle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/QuarterCircle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Cube"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/RectangularPrism"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Cone"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/SingleLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Cylinder"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Rectangle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Square"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Triangle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Trapezoid"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/HalfCircle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/QuarterCircle"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Cube"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/RectangularPrism"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Cone"
+        ],
+        [
+          "http://edugraph.io/edu/ShapeComposition",
+          "http://edugraph.io/edu/MultiLevelComposition",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Cylinder"
+        ]
       ],
+      "implementation_todos": [],
       "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
@@ -2968,62 +2937,106 @@
         "http://edugraph.io/edu/Cone",
         "http://edugraph.io/edu/Cylinder"
       ],
-      "matched_scopes": [],
+      "matched_scopes": [
+        "http://edugraph.io/edu/SingleLevelComposition",
+        "http://edugraph.io/edu/MultiLevelComposition"
+      ],
       "matched_abilities": [
         "http://edugraph.io/edu/ConceptComposition"
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "shape-compose-shapes",
       "cluster_id": "1.G.A"
     },
     "1.G.A.3": {
       "id": "1.G.A.3",
       "spec_covered": true,
       "ontology_covered": true,
-      "competencies": [],
-      "implementation_todos": [
-        {
-          "id": "1.G.A.3-partition-shapes~68b8c0a2",
-          "labels": [
-            "http://edugraph.io/edu/FractionNotation",
-            "http://edugraph.io/edu/ShapeProperties",
-            "http://edugraph.io/edu/ConceptDerivation",
-            "http://edugraph.io/edu/Circle"
-          ],
-          "explanation": "The current partition exercise shows two or four equal parts but does not cover the required halves/fourths/quarters language, whole-as-shares descriptions, or the comparison that more equal shares are smaller."
-        },
-        {
-          "id": "1.G.A.3-partition-shapes~11ece1b7",
-          "labels": [
-            "http://edugraph.io/edu/FractionNotation",
-            "http://edugraph.io/edu/ShapeProperties",
-            "http://edugraph.io/edu/ConceptDerivation",
-            "http://edugraph.io/edu/Rectangle"
-          ],
-          "explanation": "The current partition exercise shows two or four equal parts but does not cover the required halves/fourths/quarters language, whole-as-shares descriptions, or the comparison that more equal shares are smaller."
-        }
+      "competencies": [
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Circle"
+        ],
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/VisualArticulation",
+          "http://edugraph.io/edu/Rectangle"
+        ],
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/UnitFractions",
+          "http://edugraph.io/edu/ActiveVocabulary",
+          "http://edugraph.io/edu/Circle"
+        ],
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/UnitFractions",
+          "http://edugraph.io/edu/ActiveVocabulary",
+          "http://edugraph.io/edu/Rectangle"
+        ],
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/UnitFractions",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Circle"
+        ],
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/UnitFractions",
+          "http://edugraph.io/edu/ConceptComposition",
+          "http://edugraph.io/edu/Rectangle"
+        ],
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/UnitFractions",
+          "http://edugraph.io/edu/Less",
+          "http://edugraph.io/edu/ConceptDerivation",
+          "http://edugraph.io/edu/Circle"
+        ],
+        [
+          "http://edugraph.io/edu/ProportionSense",
+          "http://edugraph.io/edu/EqualShares",
+          "http://edugraph.io/edu/UnitFractions",
+          "http://edugraph.io/edu/Less",
+          "http://edugraph.io/edu/ConceptDerivation",
+          "http://edugraph.io/edu/Rectangle"
+        ]
       ],
+      "implementation_todos": [],
       "ontology_todos": [],
       "beyond_scope": [],
       "fully_beyond_scope": false,
       "partially_beyond_scope": false,
       "matched_areas": [
-        "http://edugraph.io/edu/FractionNotation",
+        "http://edugraph.io/edu/ProportionSense",
         "http://edugraph.io/edu/Circle",
         "http://edugraph.io/edu/Rectangle"
       ],
       "matched_scopes": [
-        "http://edugraph.io/edu/ShapeProperties"
+        "http://edugraph.io/edu/EqualShares",
+        "http://edugraph.io/edu/UnitFractions",
+        "http://edugraph.io/edu/Less"
       ],
       "matched_abilities": [
+        "http://edugraph.io/edu/VisualArticulation",
+        "http://edugraph.io/edu/ActiveVocabulary",
+        "http://edugraph.io/edu/ConceptComposition",
         "http://edugraph.io/edu/ConceptDerivation"
       ],
       "reasoning": "",
       "suggested_task": null,
-      "dataset_covered": false,
-      "generator_module": null,
+      "dataset_covered": true,
+      "generator_module": "shape-partition",
       "cluster_id": "1.G.A"
     },
     "2.OA.A.1": {
@@ -12268,74 +12281,6 @@
     }
   },
   "tasks": [
-    {
-      "id": "task-ontology-1.OA.A",
-      "type": "ONTOLOGY_EXTENSION",
-      "cluster_id": "1.OA.A",
-      "cluster_description": "Represent and solve problems involving addition and subtraction.",
-      "title": "Extend Ontology for 1.OA.A",
-      "description": "Extend ontology to support: 1.OA.A.2. Details:\n- 1.OA.A.2: Represent arithmetic operand count (Add Scope.OperandCount with child scopes Scope.TwoOperands and Scope.ThreeOperands. Apply ThreeOperands to the three-addend competency and TwoOperands to arity-constrained binary arithmetic targets so pair and triple generators can be distinguished without overloading Area or Ability labels.)",
-      "standards": [
-        "1.OA.A.2"
-      ]
-    },
-    {
-      "id": "task-generator-1.NBT.A",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "1.NBT.A",
-      "cluster_description": "Extend the counting sequence.",
-      "title": "Generate Dataset for 1.NBT.A",
-      "description": "Implement/extend generators and views to cover: 1.NBT.A.1. Details:\n- 1.NBT.A.1: The exact range through 120 is not expressible; ordering and counting generators currently support only the ontology range below 100.",
-      "standards": [
-        "1.NBT.A.1"
-      ]
-    },
-    {
-      "id": "task-generator-1.NBT.B",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "1.NBT.B",
-      "cluster_description": "Understand place value.",
-      "title": "Generate Dataset for 1.NBT.B",
-      "description": "Implement/extend generators and views to cover: 1.NBT.B.2a. Details:\n- 1.NBT.B.2a: All place-value-bundles outputs are multiples of ten. The current labels do not distinguish exactly one ten from other whole-ten quantities within the resolved range.",
-      "standards": [
-        "1.NBT.B.2a"
-      ]
-    },
-    {
-      "id": "task-generator-1.NBT.C",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "1.NBT.C",
-      "cluster_description": "Use place value understanding and properties of operations to add and subtract.",
-      "title": "Generate Dataset for 1.NBT.C",
-      "description": "Implement/extend generators and views to cover: 1.NBT.C.5. Details:\n- 1.NBT.C.5: The counting-inc-dec generator models changes of one. Existing place-value bundle tasks represent whole tens but do not model ten more or ten less from an arbitrary number.",
-      "standards": [
-        "1.NBT.C.5"
-      ]
-    },
-    {
-      "id": "task-generator-1.MD.A",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "1.MD.A",
-      "cluster_description": "Measure lengths indirectly and by iterating length units.",
-      "title": "Generate Dataset for 1.MD.A",
-      "description": "Implement/extend generators and views to cover: 1.MD.A.1. Details:\n- 1.MD.A.1: The current measurement-order exercise directly orders three visible lengths but does not implement the standard's separate indirect-comparison competency using a third object.",
-      "standards": [
-        "1.MD.A.1"
-      ]
-    },
-    {
-      "id": "task-generator-1.G.A",
-      "type": "DATASET_ENRICHMENT",
-      "cluster_id": "1.G.A",
-      "cluster_description": "Reason with shapes and their attributes.",
-      "title": "Generate Dataset for 1.G.A",
-      "description": "Implement/extend generators and views to cover: 1.G.A.1, 1.G.A.2, 1.G.A.3. Details:\n- 1.G.A.1: Building shapes coincides with K.G.B.5; the grade-1 elevation of distinguishing defining from non-defining attributes needs a separately scoped generator/view.\n- 1.G.A.2: The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape.\n- 1.G.A.3: The current partition exercise shows two or four equal parts but does not cover the required halves/fourths/quarters language, whole-as-shares descriptions, or the comparison that more equal shares are smaller.",
-      "standards": [
-        "1.G.A.1",
-        "1.G.A.2",
-        "1.G.A.3"
-      ]
-    },
     {
       "id": "task-analysis-2.OA.A",
       "type": "ANALYSIS",

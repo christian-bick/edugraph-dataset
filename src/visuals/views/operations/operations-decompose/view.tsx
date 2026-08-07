@@ -1,4 +1,3 @@
-import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {getDecomposeLayout} from './helpers.ts';
@@ -8,6 +7,8 @@ import { validateProblemData } from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
+const PART_ONE_FILTER = 'brightness(0) saturate(100%) invert(31%) sepia(85%) saturate(2437%) hue-rotate(230deg) brightness(90%) contrast(99%) drop-shadow(0 1px 2px rgba(79, 70, 229, 0.25))';
+const PART_TWO_FILTER = 'brightness(0) saturate(100%) invert(47%) sepia(98%) saturate(1784%) hue-rotate(8deg) brightness(94%) contrast(95%) drop-shadow(0 1px 2px rgba(217, 119, 6, 0.3))';
 
 interface CoreProps {
     config: OperationsDecomposeViewConfig;
@@ -15,26 +16,27 @@ interface CoreProps {
 }
 
 function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
-    const { startX, spacing } = useMemo(() => {
-        return getDecomposeLayout(a, b, 18);
-    }, [a, b]);
+    const { height, iconSize, positions } = getDecomposeLayout(a, b);
 
     return (
-        <div className="relative w-[200px] h-[50px] bg-white border border-slate-200 rounded-lg mb-[15px]">
+        <div
+            className="relative w-[200px] bg-white border border-slate-200 rounded-lg mb-[15px]"
+            style={{ height: `${height}px` }}
+        >
             {/* Color A dots */}
             {Array.from({ length: a }).map((_, i) => {
-                const x = startX + i * spacing - 7.5;
+                const position = positions[i];
                 return (
                     <div 
                         key={`a-${i}`}
-                        className="absolute w-[15px] h-[15px] top-[17.5px] flex justify-center items-center"
-                        style={{ left: `${x}px` }}
+                        className="absolute flex justify-center items-center"
+                        style={{ left: `${position.left}px`, top: `${position.top}px`, width: `${iconSize}px`, height: `${iconSize}px` }}
                     >
                         <img 
                             src={`/icons/counting/${icon}`} 
-                            style={{ filter: 'drop-shadow(0 1px 2px rgba(244, 63, 94, 0.2))' }} 
+                            style={{ filter: PART_ONE_FILTER }}
                             alt="part 1 dot" 
-                            className="w-[15px] h-[15px]"
+                            className="w-full h-full"
                         />
                     </div>
                 );
@@ -42,18 +44,18 @@ function DotsDisplay({ a, b, icon }: { a: number; b: number; icon: string }) {
             
             {/* Color B dots */}
             {Array.from({ length: b }).map((_, i) => {
-                const x = startX + (a + i) * spacing - 7.5;
+                const position = positions[a + i];
                 return (
                     <div 
                         key={`b-${i}`}
-                        className="absolute w-[15px] h-[15px] top-[17.5px] flex justify-center items-center"
-                        style={{ left: `${x}px` }}
+                        className="absolute flex justify-center items-center"
+                        style={{ left: `${position.left}px`, top: `${position.top}px`, width: `${iconSize}px`, height: `${iconSize}px` }}
                     >
                         <img 
                             src={`/icons/counting/${icon}`} 
-                            style={{ filter: 'sepia(1) saturate(5) hue-rotate(10deg) drop-shadow(0 1px 2px rgba(234, 179, 8, 0.3))' }} 
+                            style={{ filter: PART_TWO_FILTER }}
                             alt="part 2 dot" 
-                            className="w-[15px] h-[15px]"
+                            className="w-full h-full"
                         />
                     </div>
                 );
@@ -72,9 +74,7 @@ const OperationsDecomposeCore = ({ config: _config, payload }: CoreProps) => {
     const pair1 = data.pair1;
     const pair2 = data.pair2;
 
-    const icon = useMemo(() => {
-        return ICONS[seed % ICONS.length];
-    }, [seed]);
+    const icon = ICONS[seed % ICONS.length];
 
     const box1_p1 = isSolutionView ? pair1[0] : '';
     const box2_p1 = isSolutionView ? pair1[1] : '';

@@ -35,14 +35,17 @@ jobs:
       - name: Start local server
         run: npm run dev &
 
-      - name: Generate Dataset
-        run: npm run generate:dataset
+      - name: Generate CCSS Dataset
+        run: npm run generate:dataset -- --spec=ccss
 
       - name: Audit VQA Validation Cache (Zero Cost)
-        run: npm run validate:dataset -- --audit
+        run: npm run validate:dataset -- --spec=ccss --audit
+
+      - name: Merge Release Dataset
+        run: npm run merge:dataset
 
       - name: Generate Coverage Report
-        run: npm run report:coverage
+        run: npm run report:coverage -- --spec=union
 
       - name: Push to HuggingFace
         env:

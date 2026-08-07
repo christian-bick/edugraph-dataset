@@ -273,7 +273,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Delegation & Module Reviews**: Delegates module-level implementation to `/update-gen {moduleName}` and `/update-view {viewName}`, and targeted audits to `/review-gen {moduleName}` and `/review-view {viewName}`.
 - **Target Debugging**: Uses `npm run test:target -- --target=<id> --spec=<real-standard> --render` for the target being implemented. The isolated `test` spec remains available for deliberately authored prototypes and retained regressions; `--raw` exposes source definitions before production deduplication.
 - **Fast Scoped Regeneration**: Uses the isolated `test` spec for cheap smoke iteration when it contains the relevant example, then verifies the promoted target against its real standard.
-- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full regeneration (`npm run generate:dataset -- --spec=<spec>`), full VQA validation (`npm run validate:dataset`), VQA cache churn check (`npm run report:churn`), and full checks (`npm run check`). Note that the last two select a dataset *folder*, not a spec — see the dataset folder rule in §3.
+- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full regeneration (`npm run generate:dataset -- --spec=<spec>`), full VQA validation (`npm run validate:dataset -- --spec=<spec>`), VQA cache churn check (`npm run report:churn -- --spec=<spec>`), and full checks (`npm run check -- --spec=<spec>`).
 
 ### Loop 3: Ontological Todo Resolution (`/update-ontology`)
 - **Skill**: `.agents/skills/update-ontology/SKILL.md`
