@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 export const CountingIncDecViewSchema = {} as const;
 
@@ -12,4 +12,7 @@ export const spec: ViewSpec = {
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
     ],
+    rejectedLabels: [
+        ...deductAdmitting([Scope.NumbersLarger20])
+    ]
 };

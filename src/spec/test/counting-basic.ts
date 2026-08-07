@@ -80,6 +80,7 @@ const incDecBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
+        Scope.StepsOf1,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
     ])

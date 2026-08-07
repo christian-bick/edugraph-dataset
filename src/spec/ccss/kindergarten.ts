@@ -102,6 +102,7 @@ const oneLargerBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.PhysicalNumbers,
         Scope.AdditiveCount,
+        Scope.StepsOf1,
         Scope.After,
         Ability.ProcedureExecution
     ])

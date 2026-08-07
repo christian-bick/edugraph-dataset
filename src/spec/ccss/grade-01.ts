@@ -588,6 +588,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('1.NBT.B.3-compare-two-digit', compareTwoDigitBuilder),
     ...toTargets('1.NBT.C.4-add-within-100', addWithin100Builder),
+    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder),
     ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder),
     // 1.MD - Measurement and Data
     ...toTargets('1.MD.A.2-measure-length', measureLengthBuilder),
@@ -599,8 +600,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: CompetencyTarget[] = [
-    // 1.NBT - Number and Operations in Base Ten
-    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'A place-value-oriented path must vary direction independently from a fixed step of ten and show that the tens digit changes while the ones digit remains unchanged.'),
     // 1.MD - Measurement and Data
     ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder, 'The existing three-object length-ordering path must declare DirectRelation so it is distinguishable from comparison mediated through a reference object.'),
     ...toTargets('1.MD.A.1-mediated-length-comparison', mediatedLengthComparisonBuilder, 'A comparison path must present two length relations through a shared third object and require the learner to infer the relation between the other two objects.'),

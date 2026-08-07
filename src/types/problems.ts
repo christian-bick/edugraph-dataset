@@ -65,6 +65,9 @@ export type CountingIncDecProblem = {
     incDecType: 'inc' | 'dec';
     incDecAnswer: number;
     simpleAnswer: number;
+    stepSize: 1 | 10;
+    startPlaceValue: {tens: number; ones: number};
+    resultPlaceValue: {tens: number; ones: number};
 };
 
 export type CountingSequenceProblem = {
@@ -212,6 +215,7 @@ export interface ViewTypeMap {
     'counting-objects-cardinality': CountingProblem;
     'counting-objects-count-out': CountingProblem;
     'counting-inc-dec': CountingIncDecProblem;
+    'counting-ten-more-less': CountingIncDecProblem;
     'counting-number-sequence': CountingSequenceProblem;
     'counting-conservation': CountingProblem;
     'sorting-classify-count': CountingClassifyCountProblem;

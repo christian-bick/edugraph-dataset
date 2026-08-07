@@ -9,14 +9,21 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
     type: AbstractProblem['type'] = 'counting';
     schema = CountingIncDecGeneratorSchema;
 
-    generate(config: CountingIncDecGeneratorConfig): ProblemStub | null {
-        validateConfigFields('counting-inc-dec', config, ['range', 'direction']);
+    generate(config: CountingIncDecGeneratorConfig): ProblemStub<CountingIncDecProblem> | null {
+        validateConfigFields('counting-inc-dec', config, ['range', 'direction', 'stepMagnitude']);
         const incDecType = config.direction === Scope.AdditiveCount
             ? 'inc'
             : config.direction === Scope.SubtractiveCount
                 ? 'dec'
                 : null;
         if (incDecType === null) return null;
+
+        const stepSize = config.stepMagnitude === Scope.StepsOf1
+            ? 1
+            : config.stepMagnitude === Scope.StepsOf10
+                ? 10
+                : null;
+        if (stepSize === null) return null;
 
         const resolvedRange = config.range!;
         let maxCount = resolvedRange.max;
@@ -26,9 +33,9 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
         }
 
         if (incDecType === 'inc') {
-            maxCount -= 1;
+            maxCount -= stepSize;
         } else {
-            minCount += 1;
+            minCount += stepSize;
         }
 
         if (minCount > maxCount) {
@@ -37,15 +44,24 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
 
         const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
         const incDecAnswer = incDecType === 'inc'
-            ? numObjects + 1
-            : numObjects - 1;
+            ? numObjects + stepSize
+            : numObjects - stepSize;
 
         return {
             data: {
                 numObjects,
                 incDecType,
                 incDecAnswer,
-                simpleAnswer: numObjects
+                simpleAnswer: numObjects,
+                stepSize,
+                startPlaceValue: {
+                    tens: Math.floor(numObjects / 10),
+                    ones: numObjects % 10
+                },
+                resultPlaceValue: {
+                    tens: Math.floor(incDecAnswer / 10),
+                    ones: incDecAnswer % 10
+                }
             }
         };
     }
