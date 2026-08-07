@@ -145,7 +145,10 @@ async function main() {
             viewPathMap[view.viewId] = view.module.relativePath;
         }
         const tasks: RenderTask[] = [];
-        const validableSamples: typeof samples = [];
+        const validableSamples: Array<{
+            sample: typeof samples[number];
+            renderFileName: string;
+        }> = [];
         for (const sample of samples) {
             if (!sample.stub) continue;
             const generatorType = generatorCatalog.find(g => g.generatorId === sample.identity.generatorId)!.generator.type;
@@ -154,8 +157,12 @@ async function main() {
                 type: generatorType,
                 labels: [...target.labels]
             });
+            // Train and validation samples intentionally share their canonical
+            // dataset filename. Qualify debug renders by split so they cannot
+            // overwrite each other in this single target-test directory.
+            const renderFileName = `${sample.identity.split}-${sample.fileName}`;
             tasks.push({
-                fileName: sample.fileName,
+                fileName: renderFileName,
                 viewId: sample.identity.viewId,
                 payload: buildRenderPayload({
                     problem,
@@ -165,7 +172,7 @@ async function main() {
                     seed: sample.seed
                 })
             });
-            validableSamples.push(sample);
+            validableSamples.push({sample, renderFileName});
         }
         const outDir = resolve(PROJECT_ROOT, 'out', 'target-test', sanitizeFilePart(target.id));
         const written = await renderTasks(tasks, outDir, viewPathMap);
@@ -177,9 +184,8 @@ async function main() {
                 console.log(`\nℹ️ GEMINI_API_KEY not set — skipping live VQA validation.`);
             } else {
                 console.log(`\n🤖 Running live VQA validation for rendered target samples...`);
-                for (let i = 0; i < written.length; i++) {
-                    const sample = validableSamples[i];
-                    const imagePath = written[i];
+                for (const {sample, renderFileName} of validableSamples) {
+                    const imagePath = resolve(outDir, renderFileName);
                     const cacheMgr = getCache(sample.identity.generatorId);
                     const vqaResult = await evaluateSampleVqa({
                         imagePath,

@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { RenderPayload } from '../types/ml-engine.ts';
 
-const BASE_URL = 'http://localhost:5173';
+const BASE_URL = process.env.RENDER_BASE_URL ?? 'http://localhost:5173';
 
 export interface RenderTask {
     fileName: string;
