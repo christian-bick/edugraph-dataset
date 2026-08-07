@@ -1,6 +1,6 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { CompetencyTarget, OntologyTodo, TargetEquivalence } from '../../types/ml-engine.ts';
+import { BeyondScopeEntry, CompetencyTarget, OntologyTodo, TargetEquivalence } from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Operations and Algebraic Thinking (1.OA)
@@ -22,19 +22,16 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.OA.A.2: Word problems with three addends (sum <= 20) ---
-// TODO [1.OA.A.2]: Parked in ontologyTodos until operand count can be
-// stated explicitly. Reference builder:
-// const threeAddendsBuilder = new DatasetPermutationBuilder()
-//     .addLabels([
-//         Area.Addition,
-//         Area.Sum,
-//         Scope.ArabicNumerals,
-//         Scope.Base10,
-//         Scope.NumbersWithoutNegatives,
-//         Scope.NumbersSmaller20,
-//         Scope.PhysicalNumbers,
-//         Ability.TextualReception
-//     ]);
+const threeAddendsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Addition,
+        Scope.ThreeOperands,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller20,
+        Ability.TextualReception
+    ]);
 
 // --- 1.OA.B.3: Apply properties of operations (commutative/associative) ---
 const propertiesBuilder = new DatasetPermutationBuilder()
@@ -152,33 +149,39 @@ const unknownOperandBuilder = new DatasetPermutationBuilder()
 // 2. Number and Operations in Base Ten (1.NBT)
 // ==========================================
 
-// --- 1.NBT.A.1: Count to 120 ---
-const orderNumbersBuilder = new DatasetPermutationBuilder()
+// --- 1.NBT.A.1: Count to 120 from any starting number below 120 ---
+const countTo120Builder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericOrder,
+        Area.NumerationWithIntegers,
+        Scope.AdditiveCount,
+        Scope.StepsOf1,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller100,
+        Scope.NumbersSmaller120,
         Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithoutZero, Scope.Most],
-        [Scope.NumbersWithoutZero, Scope.Least],
-        [Scope.NumbersWithZero, Scope.Least]
     ]);
 
-// --- 1.NBT.A.1: Read and write numerals ---
+// --- 1.NBT.A.1: Read numerals through 120 ---
+const readNumeralsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.DigitNotation,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller120,
+        Ability.TextualReception
+    ]);
+
+// --- 1.NBT.A.1: Write numerals through 120 ---
 const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
         Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller120,
         Ability.TextualArticulation
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
-        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.A.1: Represent a number of objects with a written numeral ---
@@ -186,23 +189,20 @@ const representCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Scope.PhysicalNumbers,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller120,
         Ability.Formalization
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
-        [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
-        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
     ]);
 
 // --- 1.NBT.B.2a: 10 as a bundle of ten ones ---
 const tenBundleBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.PlaceValue,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller20,
+        Scope.MultiplesOf10,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller10,
         Scope.PhysicalNumbers,
         Ability.ProcedureUnderstanding
     ]);
@@ -272,12 +272,11 @@ const addWithin100Builder = new DatasetPermutationBuilder()
 const tenMoreLessBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
-        Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
+        Scope.Base10,
+        Scope.StepsOf10,
+        Scope.NumbersLarger10,
         Scope.NumbersSmaller100,
-        Scope.DerivedCount,
-        Ability.ProcedureExecution
+        Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([
         [Area.Increment],
@@ -304,17 +303,27 @@ const subtractTensBuilder = new DatasetPermutationBuilder()
 // 3. Measurement and Data (1.MD)
 // ==========================================
 
-// --- 1.MD.A.1: Order three objects by length ---
-const orderLengthsBuilder = new DatasetPermutationBuilder()
+// --- 1.MD.A.1: Directly order three objects by length ---
+const directLengthComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Measurement,
         Area.ObjectSorting,
         Scope.LengthMeasurement,
+        Scope.DirectRelation,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
         [Scope.Least],
         [Scope.Most]
+    ]);
+
+// --- 1.MD.A.1: Compare two lengths through a third object ---
+const mediatedLengthComparisonBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Measurement,
+        Scope.LengthMeasurement,
+        Scope.MediatedRelation,
+        Ability.ConceptDerivation
     ]);
 
 // --- 1.MD.A.2: Express length as a whole number of iterated units ---
@@ -419,11 +428,20 @@ const compareDataBuilder = new DatasetPermutationBuilder()
 // 4. Geometry (1.G)
 // ==========================================
 
-// --- 1.G.A.1: Build and draw shapes possessing defining attributes ---
+// --- 1.G.A.1: Distinguish defining from non-defining attributes ---
+const classifyShapeAttributesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Scope.ShapeAttributes,
+        Ability.ConceptClassification
+    ]);
+
+// --- 1.G.A.1: Build shapes possessing defining attributes ---
 const buildShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
-        Scope.ShapeProperties,
+        Scope.ShapeAttributes,
+        Ability.ConceptSpecification,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
@@ -436,6 +454,8 @@ const buildShapesBuilder = new DatasetPermutationBuilder()
 const drawShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
+        Scope.ShapeAttributes,
+        Ability.ConceptSpecification,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
@@ -444,10 +464,11 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
         [Area.Triangle, Area.LinearShapeDrawing]
     ]);
 
-// --- 1.G.A.2: Compose two-dimensional shapes into composite shapes ---
-const composeShapesBuilder = new DatasetPermutationBuilder()
+// --- 1.G.A.2: Compose shapes in one level ---
+const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeComposition,
+        Scope.SingleLevelComposition,
         Ability.ConceptComposition
     ])
     .applyLabelVariants([
@@ -463,11 +484,71 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
         [Area.Cylinder]
     ]);
 
-// --- 1.G.A.3: Partition circles and rectangles into halves and fourths ---
-const partitionShapesBuilder = new DatasetPermutationBuilder()
+// --- 1.G.A.2: Compose a new shape from an intermediate composite ---
+const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionNotation,
-        Scope.ShapeProperties,
+        Area.ShapeComposition,
+        Scope.MultiLevelComposition,
+        Ability.ConceptComposition
+    ])
+    .applyLabelVariants([
+        [Area.Rectangle],
+        [Area.Square],
+        [Area.Triangle],
+        [Area.Trapezoid],
+        [Area.HalfCircle],
+        [Area.QuarterCircle],
+        [Area.Cube],
+        [Area.RectangularPrism],
+        [Area.Cone],
+        [Area.Cylinder]
+    ]);
+
+// --- 1.G.A.3: Partition circles and rectangles into equal shares ---
+const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionArithmetic,
+        Scope.EqualShares,
+        Ability.VisualArticulation
+    ])
+    .applyLabelVariants([
+        [Area.Circle],
+        [Area.Rectangle]
+    ]);
+
+// --- 1.G.A.3: Name individual shares as halves, fourths, or quarters ---
+const nameUnitSharesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionArithmetic,
+        Scope.EqualShares,
+        Scope.UnitFractions,
+        Ability.ActiveVocabulary
+    ])
+    .applyLabelVariants([
+        [Area.Circle],
+        [Area.Rectangle]
+    ]);
+
+// --- 1.G.A.3: Describe a whole as all of its equal shares ---
+const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionArithmetic,
+        Scope.EqualShares,
+        Scope.UnitFractions,
+        Ability.ConceptComposition
+    ])
+    .applyLabelVariants([
+        [Area.Circle],
+        [Area.Rectangle]
+    ]);
+
+// --- 1.G.A.3: Infer that more equal shares produce smaller shares ---
+const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionArithmetic,
+        Scope.EqualShares,
+        Scope.UnitFractions,
+        Scope.Less,
         Ability.ConceptDerivation
     ])
     .applyLabelVariants([
@@ -490,7 +571,6 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.OA.D.8-unknown-number', unknownNumberBuilder),
     ...toTargets('1.OA.D.8-unknown-operand', unknownOperandBuilder),
     // 1.NBT - Number and Operations in Base Ten
-    ...toTargets('1.NBT.A.1-order-numbers', orderNumbersBuilder),
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('1.NBT.B.3-compare-two-digit', compareTwoDigitBuilder),
@@ -506,23 +586,33 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: CompetencyTarget[] = [
-    ...toTargets('1.NBT.A.1-count-to-120', orderNumbersBuilder, 'The exact range through 120 is not expressible; ordering and counting generators currently support only the ontology range below 100.'),
-    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder, 'Writing numerals coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported.'),
-    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder, 'Representing a count with a written numeral coincides with K.CC.A.3 within the supported range; the grade-1 extension through 120 is unsupported.'),
-    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder, 'All place-value-bundles outputs are multiples of ten. The current labels do not distinguish exactly one ten from other whole-ten quantities within the resolved range.'),
-    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'The counting-inc-dec generator models changes of one. Existing place-value bundle tasks represent whole tens but do not model ten more or ten less from an arbitrary number.'),
-    ...toTargets('1.MD.A.1-order-lengths', orderLengthsBuilder, 'The current measurement-order exercise directly orders three visible lengths but does not implement the standard\'s separate indirect-comparison competency using a third object.'),
-    ...toTargets('1.G.A.1-defining-attributes', buildShapesBuilder, 'Building shapes coincides with K.G.B.5; the grade-1 elevation of distinguishing defining from non-defining attributes needs a separately scoped generator/view.'),
-    ...toTargets('1.G.A.1-draw-shapes', drawShapesBuilder, 'Drawing shapes coincides with K.G.B.5; the grade-1 defining-attribute elevation is not represented.'),
-    ...toTargets('1.G.A.2-compose-other-shapes', composeShapesBuilder, 'The current composition generator/view exercises one-stage composition but does not compose a new shape from an existing composite shape.'),
-    ...toTargets('1.G.A.3-partition-shapes', partitionShapesBuilder, 'The current partition exercise shows two or four equal parts but does not cover the required halves/fourths/quarters language, whole-as-shares descriptions, or the comparison that more equal shares are smaller.')
+    // 1.OA - Operations and Algebraic Thinking
+    ...toTargets('1.OA.A.2-three-addend-word-problems', threeAddendsBuilder, 'The triple-arithmetic generator and word-problem view must declare and consume ThreeOperands, then verify that all three-addend sums remain within 20.'),
+    // 1.NBT - Number and Operations in Base Ten
+    ...toTargets('1.NBT.A.1-count-to-120', countTo120Builder, 'The counting-sequence path must support an arbitrary starting number and continue by ones through the inclusive range of 120.'),
+    ...toTargets('1.NBT.A.1-read-numerals', readNumeralsBuilder, 'A numeral-reading presentation must accept Arabic numerals throughout the inclusive range of 120 and elicit their number names.'),
+    ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder, 'The writing path must extend its range schema through 120 while retaining a distinct numeral-writing task mode.'),
+    ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder, 'The count-to-numeral path must support quantities through 120 with a grouped tens-and-ones representation rather than rendering every object independently.'),
+    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder, 'The place-value bundle path must constrain this target to exactly one nonzero multiple of ten below or equal to ten and visibly group ten individual ones as one ten.'),
+    ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'A place-value-oriented path must vary direction independently from a fixed step of ten and show that the tens digit changes while the ones digit remains unchanged.'),
+    // 1.MD - Measurement and Data
+    ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder, 'The existing three-object length-ordering path must declare DirectRelation so it is distinguishable from comparison mediated through a reference object.'),
+    ...toTargets('1.MD.A.1-mediated-length-comparison', mediatedLengthComparisonBuilder, 'A comparison path must present two length relations through a shared third object and require the learner to infer the relation between the other two objects.'),
+    // 1.G - Geometry
+    ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder, 'A classification path must distinguish defining attributes such as sides and vertices from non-defining attributes such as color, orientation, and size.'),
+    ...toTargets('1.G.A.1-build-from-defining-attributes', buildShapesBuilder, 'The shape-construction path must accept defining-attribute constraints while varying non-defining appearance independently.'),
+    ...toTargets('1.G.A.1-draw-from-defining-attributes', drawShapesBuilder, 'The shape-drawing path must accept defining-attribute constraints while varying non-defining appearance independently.'),
+    ...toTargets('1.G.A.2-single-level-composition', singleLevelCompositionBuilder, 'The existing shape-composition path must declare SingleLevelComposition and verify that each result is formed directly from primitive component shapes.'),
+    ...toTargets('1.G.A.2-multi-level-composition', multiLevelCompositionBuilder, 'The composition payload and view must represent an intermediate composite that is subsequently used to form a new shape.'),
+    ...toTargets('1.G.A.3-partition-equal-shares', partitionEqualSharesBuilder, 'The partition path must make equal-share count a controlled payload parameter and cover partitions into exactly two and four equal shares.'),
+    ...toTargets('1.G.A.3-name-unit-shares', nameUnitSharesBuilder, 'A vocabulary presentation must cover halves, fourths, and quarters for individual unit shares without requiring symbolic fraction notation.'),
+    ...toTargets('1.G.A.3-compose-whole-from-shares', composeWholeFromSharesBuilder, 'A composition presentation must describe the whole as two halves or four fourths and verify the corresponding equal-share structure.'),
+    ...toTargets('1.G.A.3-compare-unit-share-sizes', compareUnitShareSizesBuilder, 'A comparison presentation must establish that dividing the same whole into more equal shares produces smaller individual shares, covering halves versus fourths.')
 ];
 
-export const ontologyTodos: OntologyTodo[] = [{
-    standardId: '1.OA.A.2',
-    title: 'Represent arithmetic operand count',
-    description: 'Add Scope.OperandCount with child scopes Scope.TwoOperands and Scope.ThreeOperands. Apply ThreeOperands to the three-addend competency and TwoOperands to arity-constrained binary arithmetic targets so pair and triple generators can be distinguished without overloading Area or Ability labels.'
-}];
+export const ontologyTodos: OntologyTodo[] = [];
+
+export const beyondScope: BeyondScopeEntry[] = [];
 
 export const equivalentTargets: TargetEquivalence[] = [{
     targets: ['1.OA.B.4-unknown-addend', '1.OA.D.8-unknown-operand'],
