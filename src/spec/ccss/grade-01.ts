@@ -591,6 +591,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder),
     ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder),
     // 1.MD - Measurement and Data
+    ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder),
+    ...toTargets('1.MD.A.1-mediated-length-comparison', mediatedLengthComparisonBuilder),
     ...toTargets('1.MD.A.2-measure-length', measureLengthBuilder),
     ...toTargets('1.MD.B.3-time', hourTimeBuilder),
     ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder),
@@ -601,8 +603,6 @@ export const spec: CompetencyTarget[] = [
 
 export const implementationTodos: CompetencyTarget[] = [
     // 1.MD - Measurement and Data
-    ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder, 'The existing three-object length-ordering path must declare DirectRelation so it is distinguishable from comparison mediated through a reference object.'),
-    ...toTargets('1.MD.A.1-mediated-length-comparison', mediatedLengthComparisonBuilder, 'A comparison path must present two length relations through a shared third object and require the learner to infer the relation between the other two objects.'),
     // 1.G - Geometry
     ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder, 'A classification path must distinguish defining attributes such as sides and vertices from non-defining attributes such as color, orientation, and size.'),
     ...toTargets('1.G.A.1-build-from-defining-attributes', buildShapesBuilder, 'The shape-construction path must accept defining-attribute constraints while varying non-defining appearance independently.'),

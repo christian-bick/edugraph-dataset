@@ -7,7 +7,8 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.Measurement,
         Area.ObjectSorting,
-        Scope.LengthMeasurement
+        Scope.LengthMeasurement,
+        Scope.DirectRelation
     ]
 };
 

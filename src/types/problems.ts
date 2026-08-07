@@ -118,6 +118,19 @@ export type MeasurementOrderProblem = {
     order: string[];
 };
 
+export type LengthComparisonRelation = 'longer' | 'shorter';
+
+export type MediatedLengthComparisonProblem = {
+    objects: [{id: 'A'}, {id: 'B'}, {id: 'C'}];
+    intermediary: 'B';
+    premises: [
+        {subject: 'A'; relation: LengthComparisonRelation; reference: 'B'},
+        {subject: 'B'; relation: LengthComparisonRelation; reference: 'C'}
+    ];
+    askedRelation: LengthComparisonRelation;
+    answer: 'A' | 'C';
+};
+
 export type ComparisonProblem = {
     num1: number;
     num2: number;
@@ -225,6 +238,7 @@ export interface ViewTypeMap {
     'measure-length-decimal': MeasurementStandardProblem;
     'measure-attributes': MeasurementAttributeProblem;
     'measure-compare': MeasurementCompareProblem;
+    'measure-mediated-comparison': MediatedLengthComparisonProblem;
     'measure-order': MeasurementOrderProblem;
 
     'numbers-compare': ComparisonProblem;
