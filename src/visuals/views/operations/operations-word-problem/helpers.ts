@@ -3,6 +3,24 @@ import {ArithmeticProblem} from '../../../../types/problems.ts';
 
 export type UnknownPart = 'num1' | 'num2' | 'num3' | 'answer';
 
+export type AppleGroupData = {
+    label: 'A' | 'B' | 'C';
+    part: Exclude<UnknownPart, 'answer'>;
+    value: number;
+};
+
+export function getAppleGroups(data: ArithmeticProblem): AppleGroupData[] {
+    const groups: AppleGroupData[] = [
+        {label: 'A', part: 'num1', value: data.num1},
+        {label: 'B', part: 'num2', value: data.num2}
+    ];
+
+    if (data.num3 !== undefined) {
+        groups.push({label: 'C', part: 'num3', value: data.num3});
+    }
+    return groups;
+}
+
 export function selectUnknownPart(seed: number, hasThirdOperand: boolean): UnknownPart {
     setSeed(seed);
     const parts: UnknownPart[] = hasThirdOperand

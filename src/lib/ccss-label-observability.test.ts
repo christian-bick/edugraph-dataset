@@ -78,4 +78,14 @@ describe('CCSS observable-label contracts', () => {
                 : Area.LinearShapeDrawing);
         }
     });
+
+    it('treats writing Arabic numeral symbols as visual articulation', () => {
+        const writingTargets = [
+            ...targets(kindergarten, 'K.CC.A.3-write-numerals'),
+            ...targets(gradeOne, '1.NBT.A.1-write-numerals')
+        ];
+
+        expectAll(writingTargets, [Area.DigitNotation, Scope.ArabicNumerals, Ability.VisualArticulation]);
+        expectNone(writingTargets, [Ability.TextualArticulation]);
+    });
 });

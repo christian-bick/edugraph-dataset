@@ -13,15 +13,14 @@ describe('CountingSequenceGenerator spec integration', () => {
         setSeed(42);
     });
 
-    it('declares its invariant forward counting direction', () => {
-        expect(spec.generalLabels).toContain(Scope.AdditiveCount);
+    it('declares its invariant forward sequence direction', () => {
         expect(spec.generalLabels).toContain(Scope.After);
     });
 
     it('resolves steps-of-one labels independently from direction', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,
-            Scope.AdditiveCount,
+            Scope.After,
             Scope.StepsOf1,
             Scope.NumbersSmaller120
         ]);
@@ -35,6 +34,7 @@ describe('CountingSequenceGenerator spec integration', () => {
     it('resolves steps-of-ten labels independently from direction', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,
+            Scope.After,
             Scope.NumbersSmaller100,
             Scope.StepsOf10,
             Scope.MultiplesOf10

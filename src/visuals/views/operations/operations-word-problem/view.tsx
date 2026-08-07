@@ -3,7 +3,7 @@ import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { OperationsWordProblemViewConfig, OperationsWordProblemViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData, ViewValidationError } from '../../../helpers/validation.ts';
-import {getUnknownPart, getWordProblemText, UnknownPart} from './helpers.ts';
+import {getAppleGroups, getUnknownPart, getWordProblemText, UnknownPart} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -63,12 +63,27 @@ const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
         validateProblemData('operations-word-problem', data, ['num3']);
     } else {
         validateProblemData('operations-word-problem', data, ['blankPart']);
+        if (!['num1', 'num2', 'solution'].includes(data.blankPart)) {
+            throw new ViewValidationError(
+                'operations-word-problem',
+                `Unsupported binary unknown: ${data.blankPart}`
+            );
+        }
     }
 
     const num1 = data.num1;
     const num2 = data.num2;
     const num3 = data.num3;
     const answer = data.answer;
+    const appleGroups = getAppleGroups(data);
+    if (appleGroups.some(group =>
+        !Number.isInteger(group.value) || group.value < 0 || group.value > 20
+    )) {
+        throw new ViewValidationError(
+            'operations-word-problem',
+            'Apple groups require whole-number quantities from 0 through 20.'
+        );
+    }
     const unknownPart = getUnknownPart(data, payload.seed);
     const textScenario = getWordProblemText(data, unknownPart);
 
@@ -98,23 +113,17 @@ const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
                     </div>
                 </div>
 
-                {num3 !== undefined && (
-                    <div className="mt-4 flex items-center gap-3">
-                        {([
-                            ['A', 'num1', num1],
-                            ['B', 'num2', num2],
-                            ['C', 'num3', num3]
-                        ] as const).map(([label, part, value]) => (
-                            <AppleGroup
-                                key={part}
-                                label={label}
-                                value={value}
-                                hidden={!isSolutionView && part === unknownPart}
-                                highlighted={isSolutionView && part === unknownPart}
-                            />
-                        ))}
-                    </div>
-                )}
+                <div className="mt-4 flex items-center gap-3">
+                    {appleGroups.map(({label, part, value}) => (
+                        <AppleGroup
+                            key={part}
+                            label={label}
+                            value={value}
+                            hidden={!isSolutionView && part === unknownPart}
+                            highlighted={isSolutionView && part === unknownPart}
+                        />
+                    ))}
+                </div>
 
                 <div className="flex items-center gap-3 mt-4">
                     <div className={getInputClass('num1')}>{boxContent('num1', num1)}</div>

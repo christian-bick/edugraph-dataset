@@ -1,8 +1,44 @@
 import {describe, expect, it} from 'vitest';
 import {ArithmeticProblem} from '../../../../types/problems.ts';
-import {getUnknownPart, getWordProblemText, selectUnknownPart} from './helpers.ts';
+import {
+    getAppleGroups,
+    getUnknownPart,
+    getWordProblemText,
+    selectUnknownPart
+} from './helpers.ts';
 
 describe('operations-word-problem helpers', () => {
+    it('projects binary operands into two compact apple groups', () => {
+        const data: ArithmeticProblem = {
+            num1: 3,
+            num2: 5,
+            operation: 'addition',
+            answer: 8,
+            blankPart: 'num2'
+        };
+
+        expect(getAppleGroups(data)).toEqual([
+            {label: 'A', part: 'num1', value: 3},
+            {label: 'B', part: 'num2', value: 5}
+        ]);
+    });
+
+    it('adds the third operand group only for triple payloads', () => {
+        const data: ArithmeticProblem = {
+            num1: 3,
+            num2: 5,
+            num3: 7,
+            operation: 'addition',
+            answer: 15
+        };
+
+        expect(getAppleGroups(data)).toEqual([
+            {label: 'A', part: 'num1', value: 3},
+            {label: 'B', part: 'num2', value: 5},
+            {label: 'C', part: 'num3', value: 7}
+        ]);
+    });
+
     it('selects every binary unknown position deterministically', () => {
         const first = Array.from({length: 100}, (_, seed) => selectUnknownPart(seed, false));
         const second = Array.from({length: 100}, (_, seed) => selectUnknownPart(seed, false));

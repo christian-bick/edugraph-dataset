@@ -28,7 +28,7 @@
 | [src/generators/shape/shape-compose-shapes/generator.ts](src/generators/shape/shape-compose-shapes/generator.ts) | 99.25% | 92.47% | ✅ PASS |
 | [src/generators/shape/shape-env-shapes/generator.ts](src/generators/shape/shape-env-shapes/generator.ts) | 94.87% | 90.9% | ✅ PASS |
 | [src/generators/shape/shape-identity/generator.ts](src/generators/shape/shape-identity/generator.ts) | 100% | 100% | ✅ PASS |
-| [src/generators/shape/shape-partition/generator.ts](src/generators/shape/shape-partition/generator.ts) | 100% | 88.88% | ✅ PASS |
+| [src/generators/shape/shape-partition/generator.ts](src/generators/shape/shape-partition/generator.ts) | 100% | 100% | ✅ PASS |
 | [src/generators/shape/shape-position/generator.ts](src/generators/shape/shape-position/generator.ts) | 93.1% | 85.71% | ✅ PASS |
 | [src/generators/shape/shape-same-attribute/generator.ts](src/generators/shape/shape-same-attribute/generator.ts) | 100% | 85.71% | ✅ PASS |
 | [src/generators/time/generator.ts](src/generators/time/generator.ts) | 100% | 100% | ✅ PASS |

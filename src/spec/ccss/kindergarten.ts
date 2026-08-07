@@ -16,7 +16,6 @@ const countTo100Builder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.After,
-        Scope.AdditiveCount,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -28,7 +27,6 @@ const countTo100Builder = new DatasetPermutationBuilder()
 const countFrom5Builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
-        Scope.AdditiveCount,
         Scope.StepsOf1,
         Scope.ArabicNumerals,
         Scope.Base10,
@@ -46,9 +44,10 @@ const countFrom5Builder = new DatasetPermutationBuilder()
 // --- K.CC.A.3: Write numbers from 0 to 20 (stroke writing) ---
 const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.DigitNotation,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Ability.TextualArticulation
+        Ability.VisualArticulation
     ])
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],

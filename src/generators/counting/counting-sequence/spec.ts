@@ -12,7 +12,6 @@ export const spec: GeneratorSpec = {
         Scope.Base10,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
-        Scope.AdditiveCount,
         Scope.After
     ]
 };

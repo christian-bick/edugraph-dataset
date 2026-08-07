@@ -8,7 +8,7 @@ const builder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Ability.TextualArticulation,
+        Ability.VisualArticulation,
         Scope.NumbersSmaller120
     ]);
 

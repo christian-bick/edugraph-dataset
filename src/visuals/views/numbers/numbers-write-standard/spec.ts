@@ -6,7 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'numbers-write-standard',
     generalLabels: [
         Scope.ArabicNumerals,
-        Ability.TextualArticulation
+        Ability.VisualArticulation
     ],
     rejectedLabels: [Area.NumerationWithIntegers],
 };

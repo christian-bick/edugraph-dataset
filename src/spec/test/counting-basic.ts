@@ -101,7 +101,6 @@ const countTo100Builder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.After,
-        Scope.AdditiveCount,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([

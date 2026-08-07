@@ -53,10 +53,16 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
                 )}
                 
                 <div className="relative w-[450px] h-[300px] bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                    {arrangement === 'circle' && (
+                        <div
+                            aria-hidden="true"
+                            className="absolute left-[114px] top-[39px] w-[222px] h-[222px] rounded-full border-2 border-dashed border-slate-300/80"
+                        />
+                    )}
                     {positions.map((pos, i) => (
                         <div 
                             key={i}
-                            className="absolute w-10 h-10 flex justify-center items-center"
+                            className="absolute z-10 w-10 h-10 flex justify-center items-center"
                             style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
                         >
                             <img className="w-10 h-10 transition-all duration-300" src={`/icons/counting/${icon}`} alt="counting object" />

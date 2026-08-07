@@ -158,8 +158,8 @@ const unknownOperandBuilder = new DatasetPermutationBuilder()
 const countTo120Builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
-        Scope.AdditiveCount,
         Scope.StepsOf1,
+        Scope.After,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -186,7 +186,7 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller120,
-        Ability.TextualArticulation
+        Ability.VisualArticulation
     ]);
 
 // --- 1.NBT.A.1: Represent a number of objects with a written numeral ---
