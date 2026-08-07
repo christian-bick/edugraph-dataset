@@ -583,6 +583,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.NBT.A.1-read-numerals', readNumeralsBuilder),
     ...toTargets('1.NBT.A.1-write-numerals', writeNumeralsBuilder),
     ...toTargets('1.NBT.A.1-represent-counts', representCountsBuilder),
+    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder),
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('1.NBT.B.3-compare-two-digit', compareTwoDigitBuilder),
@@ -599,7 +600,6 @@ export const spec: CompetencyTarget[] = [
 
 export const implementationTodos: CompetencyTarget[] = [
     // 1.NBT - Number and Operations in Base Ten
-    ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder, 'The place-value bundle path must constrain this target to exactly one nonzero multiple of ten below or equal to ten and visibly group ten individual ones as one ten.'),
     ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder, 'A place-value-oriented path must vary direction independently from a fixed step of ten and show that the tens digit changes while the ones digit remains unchanged.'),
     // 1.MD - Measurement and Data
     ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder, 'The existing three-object length-ordering path must declare DirectRelation so it is distinguishable from comparison mediated through a reference object.'),
