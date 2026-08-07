@@ -39,7 +39,7 @@ npx playwright install --with-deps chromium
 ### Usage
 
 **1. Generate the Dataset**
-Generate the ML dataset (images + `meta.json`). Each education standard generates into its own folder — `out/dataset-<spec>/` — so standards can be regenerated independently.
+Generate the ML dataset (images + JSONL metadata). Each education standard generates into its own folder — `out/dataset-<spec>/` — so standards can be regenerated independently. Start the Vite renderer with `npm run dev` before generation; the pipeline preflights every selected view before touching the live dataset.
 The `--spec` parameter must be specified to select the spec module.
 ```bash
 # Generate using curriculum standards -> out/dataset-ccss/
@@ -61,7 +61,10 @@ npm run merge:dataset
 *(Tip: You can filter the generation using optional parameters:
 *   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic-ops-pairs`).
 *   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
-*   `--training-only`: Skip validation set generation to speed up the process.)*
+*   `--training-only`: Skip validation set generation to speed up the process.
+*   `--concurrency=N`: Set the bounded Playwright worker count (default: 8).)*
+
+Scoped generation is transactional. A successful run replaces only the selected generator/view pairs; sibling views and unrelated generators remain unchanged. A preflight, generation, or render failure discards the staged output and leaves the previous dataset intact.
 
 **2. Generate Coverage Report**
 Analyze the generated dataset to ensure proper pedagogical label coverage and distribution.

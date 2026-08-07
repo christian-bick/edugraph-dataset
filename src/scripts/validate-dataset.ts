@@ -11,7 +11,20 @@ import {
 import { getCliOption } from "../lib/cli.ts";
 import { isUnionSpec, resolveDatasetDir } from "../lib/dataset-paths.ts";
 import { evaluateSampleVqa } from "../lib/vqa-evaluator.ts";
-import { parseSampleKey, SampleSplit, SPLIT_DIRS } from "../lib/generation.ts";
+import {
+    loadGeneratorCatalog,
+    loadViewCatalog,
+    parseSampleKey,
+    SampleSplit,
+    SPLIT_DIRS
+} from "../lib/generation.ts";
+import { validationFailed, validationReportPath } from '../lib/validation-report.ts';
+import {
+    buildDatasetManifestEntries,
+    datasetFreshnessIssues,
+    readDatasetManifest
+} from '../lib/dataset-manifest.ts';
+import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -129,11 +142,12 @@ async function main() {
     let targetView: string | undefined = process.env.npm_config_view;
     let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
+    let reportOnly = process.env.npm_config_report_only === 'true' || process.env.npm_config_report_only === '';
     
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('❌ Error: The --spec parameter is required.');
-        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force]');
+        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force] [--report-only] [--report=<path>]');
         process.exit(1);
     }
     if (isUnionSpec(specName)) {
@@ -143,16 +157,19 @@ async function main() {
         process.exit(1);
     }
     const datasetFolderName = resolveDatasetDir(specName);
+    const reportOverride = getCliOption(args, 'report');
 
     for (const arg of args) {
         if (arg.includes('generator=')) {
             targetGenerator = arg.split('generator=')[1];
         } else if (arg.includes('view=')) {
             targetView = arg.split('view=')[1];
-        } else if (arg.includes('force') || arg.includes('no-cache')) {
+        } else if (arg === '--force' || arg === '--no-cache') {
             force = true;
-        } else if (arg.includes('audit') || arg.includes('ci')) {
+        } else if (arg === '--audit' || arg === '--ci') {
             auditMode = true;
+        } else if (arg === '--report-only') {
+            reportOnly = true;
         }
     }
 
@@ -199,9 +216,53 @@ async function main() {
     }
 
     if (filtered.length === 0) {
-        console.log('No matching dataset images found to validate.');
-        return;
+        throw new Error('No matching dataset images found to validate.');
     }
+
+    const [specValidation, generatorCatalog, viewCatalog] = await Promise.all([
+        normalizeAndValidateSpec(specName),
+        loadGeneratorCatalog(),
+        loadViewCatalog()
+    ]);
+    if (specValidation.errors.length > 0) {
+        throw new Error(`Cannot validate dataset freshness because spec "${specName}" is invalid.`);
+    }
+    const scopedGenerators = targetGenerator
+        ? generatorCatalog.filter(entry =>
+            entry.generatorId === targetGenerator
+            || entry.module.relativePath === targetGenerator
+            || entry.module.category === targetGenerator)
+        : generatorCatalog;
+    const scopedViews = targetView
+        ? viewCatalog.filter(entry =>
+            entry.viewId === targetView
+            || entry.module.relativePath === targetView
+            || entry.module.category === targetView)
+        : viewCatalog;
+    const currentManifestEntries = buildDatasetManifestEntries({
+        projectRoot: PROJECT_ROOT,
+        datasetDir: DATASET_DIR,
+        targets: specValidation.targets,
+        generators: scopedGenerators,
+        views: scopedViews,
+        generatedSplits: presentSplits
+    });
+    const generatorIds = new Set(scopedGenerators.map(entry => entry.generatorId));
+    const viewIds = new Set(scopedViews.map(entry => entry.viewId));
+    const existingManifest = readDatasetManifest(DATASET_DIR);
+    const scopedManifest = existingManifest ? {
+        ...existingManifest,
+        entries: Object.fromEntries(Object.entries(existingManifest.entries)
+            .filter(([, entry]) => generatorIds.has(entry.generator) && viewIds.has(entry.view)))
+    } : null;
+    const freshnessIssues = datasetFreshnessIssues(scopedManifest, specName, currentManifestEntries);
+    if (freshnessIssues.length > 0) {
+        throw new Error(
+            `Dataset freshness check failed:\n${freshnessIssues.map(issue => `- ${issue}`).join('\n')}\n` +
+            'Regenerate the affected scope before running VQA.'
+        );
+    }
+    console.log('Dataset freshness manifest matches the selected scope.');
 
     // Collect active cache keys per module for auto-pruning
     const activeKeysPerModule = new Map<string, Set<string>>();
@@ -378,7 +439,13 @@ async function main() {
     }
 
     // Generate Markdown report and failure TODO list
-    const reportPath = generateValidationReport(datasetFolderName, filtered);
+    const resolvedReportPath = validationReportPath(PROJECT_ROOT, datasetFolderName, {
+        generator: targetGenerator,
+        view: targetView,
+        reportPath: reportOverride
+    });
+    const report = generateValidationReport(datasetFolderName, filtered, resolvedReportPath);
+    const reportPath = report.path;
     console.log(`📄 Validation report & TODO list generated: ${reportPath}`);
 
     if (auditMode) {
@@ -393,10 +460,19 @@ async function main() {
         if (uncachedCount > 0 || failingCount > 0) {
             console.error(`\n🚨 AUDIT FAILED: ${failingCount} failing samples.`);
             console.error(`Please run local validation using GEMINI_API_KEY, resolve failures, and commit updated cache files under cache/vqa-validation/${datasetFolderName}/.`);
-            process.exit(1);
         } else {
             console.log(`\n✅ AUDIT PASSED: All ${passed}/${total} generated samples have valid, passing cache records.`);
         }
+    }
+
+    if (validationFailed(report.counts, reportOnly)) {
+        throw new Error(
+            `VQA validation failed: ${report.counts.failed} failing and ${report.counts.uncached} uncached sample(s). ` +
+            `See ${report.path}.`
+        );
+    }
+    if (reportOnly && (report.counts.failed > 0 || report.counts.uncached > 0)) {
+        console.log('--report-only requested; validation findings do not affect the exit code.');
     }
 
     console.log('\nValidation Complete.');
@@ -404,9 +480,9 @@ async function main() {
 
 function generateValidationReport(
     datasetFolderName: string,
-    filteredEntries: any[]
-): string {
-    const reportPath = resolve(PROJECT_ROOT, 'out', datasetFolderName, 'validation-report.md');
+    filteredEntries: any[],
+    reportPath: string
+): { path: string; counts: { passed: number; failed: number; uncached: number } } {
     const outDir = dirname(reportPath);
     if (!existsSync(outDir)) {
         mkdirSync(outDir, { recursive: true });
@@ -538,7 +614,13 @@ ${[...perSplit.entries()]
     }
 
     writeFileSync(reportPath, md, 'utf-8');
-    return reportPath;
+    return {
+        path: reportPath,
+        counts: { passed: passedCount, failed: failedCount, uncached: uncachedCount }
+    };
 }
 
-main().catch(console.error);
+main().catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+});

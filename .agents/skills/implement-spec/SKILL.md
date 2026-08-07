@@ -51,6 +51,7 @@ Keep iteration loops fast (<5 seconds) during active development:
   ```bash
   npm run validate:dataset -- --generator=<generator> --view=<view> --spec=test
   ```
+  The command fails on any failing or uncached sample and writes its scoped report under `out/dataset-test/validation-reports/`.
 - Run **cache churn report**:
   ```bash
   npm run report:churn -- --spec=test

@@ -1,7 +1,7 @@
-import { Browser, chromium } from 'playwright';
+import { Browser, Page, chromium } from 'playwright';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync } from 'fs';
 import { AbstractProblem, ProblemStub } from '../types/ml-engine.ts';
 import { shortenLabel } from '../lib/utils.ts';
 import {
@@ -27,14 +27,20 @@ import {
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
+import {
+    beginDatasetTransaction,
+    DatasetRow,
+    finalizeDatasetMetadata,
+    mergeModuleMetadata
+} from '../lib/dataset-output.ts';
+import { buildDatasetManifestEntries, updateDatasetManifest } from '../lib/dataset-manifest.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-let OUT_DIR = resolve(PROJECT_ROOT, 'out', 'dataset');
-let SPEC_NAME = '';
 const BASE_URL = process.env.RENDER_BASE_URL ?? 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
+const DEFAULT_PREFLIGHT_CONCURRENCY = 4;
 const MAX_ATTEMPTS = 50;
 
 /**
@@ -51,45 +57,6 @@ interface RenderSample {
     attempt: number;
     fingerprint: string;
     problem: AbstractProblem;
-}
-
-/**
- * Merges hidden .metadata.jsonl files from module subdirectories into a single root metadata.jsonl
- */
-function finalizeMetadata(splitDirName: string) {
-    const splitDir = resolve(OUT_DIR, splitDirName);
-    if (!existsSync(splitDir)) return;
-
-    const rootMetaPath = resolve(splitDir, 'metadata.jsonl');
-
-    // We start fresh for the root metadata.jsonl
-    writeFileSync(rootMetaPath, '');
-
-    const modules = readdirSync(splitDir, { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name)
-        .sort();
-
-    for (const moduleName of modules) {
-        const moduleMetaPath = resolve(splitDir, moduleName, '.metadata.jsonl');
-        if (existsSync(moduleMetaPath)) {
-            const content = readFileSync(moduleMetaPath, 'utf-8');
-            const lines = content.split('\n').filter(l => l.trim() !== '');
-
-            const adjustedLines = lines.map(line => {
-                const entry = JSON.parse(line);
-                // Adjust file_name to be relative to the split root
-                entry.file_name = `${moduleName}/${entry.file_name}`;
-                return JSON.stringify(entry);
-            });
-
-            if (adjustedLines.length > 0) {
-                appendFileSync(rootMetaPath, adjustedLines.join('\n') + '\n');
-            }
-        }
-    }
-
-    console.log(`[${splitDirName}] Finalized root metadata.jsonl`);
 }
 
 /**
@@ -214,8 +181,101 @@ function generateModuleSamples(
     return samples;
 }
 
+interface PageDiagnostics {
+    pageErrors: string[];
+    consoleErrors: string[];
+    failedRequests: string[];
+}
+
+function attachPageDiagnostics(page: Page, baseUrl: string): PageDiagnostics {
+    const diagnostics: PageDiagnostics = { pageErrors: [], consoleErrors: [], failedRequests: [] };
+    page.on('pageerror', error => diagnostics.pageErrors.push(error.message || String(error)));
+    page.on('console', message => {
+        if (message.type() === 'error') diagnostics.consoleErrors.push(message.text());
+    });
+    page.on('requestfailed', request => {
+        const errorText = request.failure()?.errorText ?? 'failed';
+        // Vite/Chromium can abort a superseded optimized-dependency request
+        // while navigation still completes normally. Missing local resources
+        // use other failure codes and remain renderer-gating diagnostics.
+        if (request.url().startsWith(baseUrl) && errorText !== 'net::ERR_ABORTED') {
+            diagnostics.failedRequests.push(`${request.url()} (${errorText})`);
+        }
+    });
+    return diagnostics;
+}
+
+function formatDiagnostics(diagnostics: PageDiagnostics): string {
+    return [
+        ...diagnostics.pageErrors.map(error => `page error: ${error}`),
+        ...diagnostics.consoleErrors.map(error => `console error: ${error}`),
+        ...diagnostics.failedRequests.map(error => `request failed: ${error}`)
+    ].join('; ');
+}
+
+function renderViewUrl(baseUrl: string, relativePath: string): string {
+    return `${baseUrl.replace(/\/$/, '')}/visuals/views/${relativePath}/view.html`;
+}
+
+async function preflightViews(
+    browser: Browser,
+    views: ViewCatalogEntry[],
+    baseUrl: string,
+    concurrency: number
+): Promise<void> {
+    if (views.length === 0) return;
+    console.log(`Preflighting ${views.length} renderer view(s) at ${baseUrl}...`);
+    const queue = [...views].sort((a, b) => a.viewId.localeCompare(b.viewId));
+    const failures: Error[] = [];
+    let failed = false;
+
+    const worker = async () => {
+        const context = await browser.newContext();
+        try {
+            while (!failed) {
+                const view = queue.shift();
+                if (!view) break;
+                const page = await context.newPage();
+                const diagnostics = attachPageDiagnostics(page, baseUrl);
+                const url = renderViewUrl(baseUrl, view.module.relativePath);
+                try {
+                    const response = await page.goto(url, { waitUntil: 'networkidle' });
+                    if (!response || !response.ok()) {
+                        throw new Error(`HTTP ${response?.status() ?? 'no response'}`);
+                    }
+                    await page.waitForFunction(() => typeof window.renderView === 'function');
+                    if (diagnostics.pageErrors.length > 0 || diagnostics.failedRequests.length > 0) {
+                        throw new Error(formatDiagnostics(diagnostics));
+                    }
+                } catch (error) {
+                    failed = true;
+                    const detail = formatDiagnostics(diagnostics);
+                    failures.push(new Error(
+                        `Renderer preflight failed for ${view.viewId} (${url}): ${error instanceof Error ? error.message : error}` +
+                        (detail ? `; ${detail}` : '')
+                    ));
+                } finally {
+                    await page.close();
+                }
+            }
+        } finally {
+            await context.close();
+        }
+    };
+
+    await Promise.all(Array.from(
+        { length: Math.min(concurrency, queue.length) },
+        () => worker()
+    ));
+    if (failures.length > 0) throw new AggregateError(failures, 'Renderer preflight failed.');
+    console.log('Renderer preflight passed.');
+}
+
 async function renderSamples(
     browser: Browser,
+    outputDir: string,
+    specName: string,
+    baseUrl: string,
     split: SampleSplit,
     moduleName: string,
     samples: RenderSample[],
@@ -226,10 +286,8 @@ async function renderSamples(
 
     const splitDirName = SPLIT_DIRS[split];
     console.log(`\n--- Rendering [${moduleName}] Split: ${splitDirName} (${samples.length} samples) ---`);
-    const splitOutputDir = resolve(OUT_DIR, splitDirName, moduleName);
-    if (!existsSync(splitOutputDir)) {
-        mkdirSync(splitOutputDir, { recursive: true });
-    }
+    const splitOutputDir = resolve(outputDir, splitDirName, moduleName);
+    mkdirSync(splitOutputDir, { recursive: true });
 
     // Order by view to minimize page navigations; workers pull from a shared
     // queue, which is safe because every render is fully self-seeded.
@@ -238,26 +296,33 @@ async function renderSamples(
     );
     const totalTasks = taskQueue.length;
     let completedTasks = 0;
-    let totalImages = 0;
-    const metadata: any[] = [];
+    const metadata: DatasetRow[] = [];
+    const failures: Error[] = [];
+    let failed = false;
 
     const processQueue = async () => {
         const context = await browser.newContext();
         const page = await context.newPage();
+        const diagnostics = attachPageDiagnostics(page, baseUrl);
         let currentViewUrl = '';
+        let currentSampleKey = '';
 
         try {
-            while (true) {
+            while (!failed) {
                 const sample = taskQueue.shift();
                 if (!sample) break;
+                currentSampleKey = sample.sampleKey;
 
                 const { identity } = sample;
                 const viewPath = viewPathMap[identity.viewId] || identity.viewId;
-                const url = `${BASE_URL}/visuals/views/${viewPath}/view.html`;
+                const url = renderViewUrl(baseUrl, viewPath);
 
                 if (currentViewUrl !== url) {
-                    await page.goto(url, { waitUntil: 'networkidle' });
-                    await page.waitForFunction(() => typeof (window as any).renderView === 'function');
+                    const response = await page.goto(url, { waitUntil: 'networkidle' });
+                    if (!response || !response.ok()) {
+                        throw new Error(`View returned HTTP ${response?.status() ?? 'no response'}: ${url}`);
+                    }
+                    await page.waitForFunction(() => typeof window.renderView === 'function');
                     // CSS transitions/animations make pixels depend on screenshot
                     // timing and on the previous render of the reused page —
                     // disable them so every render settles instantly.
@@ -281,15 +346,17 @@ async function renderSamples(
                     && Array.from(document.images).every(img => img.complete && img.naturalWidth > 0)
                 );
                 await page.waitForTimeout(60);
+                if (diagnostics.pageErrors.length > 0) {
+                    throw new Error(formatDiagnostics(diagnostics));
+                }
 
                 const outPath = resolve(splitOutputDir, sample.fileName);
                 await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
-                totalImages++;
 
                 metadata.push({
                     file_name: sample.fileName,
                     sample_key: sample.sampleKey,
-                    spec: SPEC_NAME,
+                    spec: specName,
                     target_id: identity.targetId,
                     generator: identity.generatorId,
                     view: identity.viewId,
@@ -309,34 +376,46 @@ async function renderSamples(
                     console.log(`[${moduleName}:${splitDirName}] Progress: ${Math.floor((completedTasks / totalTasks) * 100)}%`);
                 }
             }
-        } catch (err) {
-            console.error('Worker error:', err);
+        } catch (error) {
+            failed = true;
+            const detail = formatDiagnostics(diagnostics);
+            failures.push(new Error(
+                `Failed to render ${currentSampleKey || `${moduleName}:${splitDirName}`}: ${error instanceof Error ? error.message : error}` +
+                (detail ? `; ${detail}` : '')
+            ));
         } finally {
             await context.close();
         }
     };
 
-    const workers = [];
-    for (let i = 0; i < Math.min(concurrency, taskQueue.length); i++) {
-        workers.push(processQueue());
-    }
-    await Promise.allSettled(workers);
+    await Promise.all(Array.from(
+        { length: Math.min(concurrency, taskQueue.length) },
+        () => processQueue()
+    ));
 
-    metadata.sort((a, b) => a.file_name.localeCompare(b.file_name));
-    const metaPath = resolve(splitOutputDir, '.metadata.jsonl');
-    const jsonlContent = metadata.map(entry => JSON.stringify(entry)).join('\n') + '\n';
-    writeFileSync(metaPath, jsonlContent);
+    if (failures.length > 0 || completedTasks !== totalTasks) {
+        if (failures.length === 0) {
+            failures.push(new Error(`Rendered ${completedTasks}/${totalTasks} expected images.`));
+        }
+        throw new AggregateError(failures, `Rendering failed for ${moduleName}:${splitDirName}.`);
+    }
+
+    mergeModuleMetadata(splitOutputDir, metadata);
     console.log(`[${moduleName}:${splitDirName}] Wrote modular metadata to .metadata.jsonl`);
 
-    return totalImages;
+    return completedTasks;
 }
 
 async function runModulePipeline(
     browser: Browser,
+    outputDir: string,
+    specName: string,
+    baseUrl: string,
     genEntry: GeneratorCatalogEntry,
     viewCatalog: ViewCatalogEntry[],
     allTargets: any[],
-    trainingOnly: boolean
+    trainingOnly: boolean,
+    concurrency: number
 ): Promise<number> {
     const moduleName = genEntry.generatorId;
     console.log(`\n--- Starting Pipeline for Module: ${moduleName} (${genEntry.module.relativePath}) ---`);
@@ -365,9 +444,29 @@ async function runModulePipeline(
     console.log(`[${moduleName}] Generated samples. Train (${trainSamples.length}), Validation (${valSamples.length})`);
 
     let moduleImages = 0;
-    moduleImages += await renderSamples(browser, 'train', moduleName, trainSamples, DEFAULT_CONCURRENCY, viewPathMap);
+    moduleImages += await renderSamples(
+        browser,
+        outputDir,
+        specName,
+        baseUrl,
+        'train',
+        moduleName,
+        trainSamples,
+        concurrency,
+        viewPathMap
+    );
     if (valSamples.length > 0) {
-        moduleImages += await renderSamples(browser, 'val', moduleName, valSamples, DEFAULT_CONCURRENCY, viewPathMap);
+        moduleImages += await renderSamples(
+            browser,
+            outputDir,
+            specName,
+            baseUrl,
+            'val',
+            moduleName,
+            valSamples,
+            concurrency,
+            viewPathMap
+        );
     }
     return moduleImages;
 }
@@ -384,11 +483,7 @@ async function main() {
         process.exit(1);
     }
 
-    // Every spec owns its dataset folder; the union at out/dataset/ is built
-    // from them by merge-dataset.ts, so regenerating one standard never
-    // disturbs another's samples.
-    OUT_DIR = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
-    SPEC_NAME = specName;
+    const outDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
 
     const validationResult = await normalizeAndValidateSpec(specName);
     if (validationResult.errors.length > 0) {
@@ -405,23 +500,10 @@ async function main() {
     const targetModule = getCliOption(args, 'generator');
     const targetView = getCliOption(args, 'view');
     const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.includes('--training-only');
-
-    if (!targetModule) {
-        if (existsSync(OUT_DIR)) {
-            console.log('Cleaning whole dataset output directory...');
-            rmSync(OUT_DIR, { recursive: true, force: true });
-        }
-        mkdirSync(OUT_DIR, { recursive: true });
-    } else {
-        // Clear specific module in both splits
-        Object.values(SPLIT_DIRS).forEach(splitDirName => {
-            const moduleDir = resolve(OUT_DIR, splitDirName, targetModule!);
-            if (existsSync(moduleDir)) {
-                console.log(`Cleaning target directory for module [${targetModule}] in split [${splitDirName}]...`);
-                rmSync(moduleDir, { recursive: true, force: true });
-            }
-        });
-        if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
+    const concurrencyOption = getCliOption(args, 'concurrency');
+    const concurrency = concurrencyOption === undefined ? DEFAULT_CONCURRENCY : Number(concurrencyOption);
+    if (!Number.isInteger(concurrency) || concurrency < 1) {
+        throw new Error(`--concurrency must be a positive integer; received "${concurrencyOption}".`);
     }
 
     const generatorCatalog = await loadGeneratorCatalog();
@@ -437,28 +519,85 @@ async function main() {
             v.viewId === targetView || v.module.relativePath === targetView || v.module.category === targetView)
         : fullViewCatalog;
 
+    if (modulesToRun.length === 0) {
+        throw new Error(`No generator modules matched --generator=${targetModule}.`);
+    }
+    if (viewCatalog.length === 0) {
+        throw new Error(`No views matched --view=${targetView}.`);
+    }
+
+    const matchedViewIds = new Set(
+        matchTargets(allTargets, modulesToRun, viewCatalog).tuples.map(tuple => tuple.viewId)
+    );
+    if (matchedViewIds.size === 0) {
+        throw new Error('The selected generation scope contains no matched generator-view tuples.');
+    }
+    const viewsToPreflight = viewCatalog.filter(view => matchedViewIds.has(view.viewId));
+
     const browser = await chromium.launch({ headless: true });
     const startTime = performance.now();
-    let totalImages = 0;
+    let transaction: ReturnType<typeof beginDatasetTransaction> | undefined;
 
-    for (const genEntry of modulesToRun) {
-        try {
-            totalImages += await runModulePipeline(browser, genEntry, viewCatalog, allTargets, trainingOnly);
-        } catch (e) {
-            console.error(`Failed to run pipeline for ${genEntry.generatorId}:`, e);
+    try {
+        await preflightViews(
+            browser,
+            viewsToPreflight,
+            BASE_URL,
+            Math.min(DEFAULT_PREFLIGHT_CONCURRENCY, concurrency)
+        );
+
+        const generationScope = {
+            fullDataset: !targetModule && !targetView,
+            generatorIds: modulesToRun.map(module => module.generatorId),
+            viewIds: targetView ? viewCatalog.map(view => view.viewId) : undefined
+        };
+        transaction = beginDatasetTransaction(outDir, generationScope);
+
+        let totalImages = 0;
+        for (const genEntry of modulesToRun) {
+            totalImages += await runModulePipeline(
+                browser,
+                transaction.stagingDir,
+                specName,
+                BASE_URL,
+                genEntry,
+                viewCatalog,
+                allTargets,
+                trainingOnly,
+                concurrency
+            );
         }
+
+        finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.train);
+        finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.val);
+        const manifestEntries = buildDatasetManifestEntries({
+            projectRoot: PROJECT_ROOT,
+            datasetDir: transaction.stagingDir,
+            targets: allTargets,
+            generators: modulesToRun,
+            views: viewCatalog,
+            generatedSplits: trainingOnly ? ['train'] : ['train', 'val']
+        });
+        updateDatasetManifest({
+            projectRoot: PROJECT_ROOT,
+            datasetDir: transaction.stagingDir,
+            specName,
+            entries: manifestEntries,
+            scope: generationScope
+        });
+        transaction.commit();
+
+        const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+        console.log(`\nDONE! Generated ${totalImages} images in ${duration}s.`);
+    } catch (error) {
+        transaction?.rollback();
+        throw error;
+    } finally {
+        await browser.close();
     }
-
-    await browser.close();
-
-    // Finalization step: Merge metadata
-    finalizeMetadata(SPLIT_DIRS.train);
-    if (!trainingOnly) {
-        finalizeMetadata(SPLIT_DIRS.val);
-    }
-
-    const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-    console.log(`\nDONE! Generated ${totalImages} images in ${duration}s.`);
 }
 
-main().catch(console.error);
+main().catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+});

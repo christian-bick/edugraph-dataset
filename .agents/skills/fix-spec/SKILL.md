@@ -33,7 +33,7 @@ Gather all three failure sources before fixing anything, so related defects are 
    ```bash
    npm run show:matching -- --spec=<specModule>
    ```
-2. **Visual QA failures** — the `## Failure TODO List` in `out/dataset-<spec>/validation-report.md`. Each entry carries its module/view, the reason, the failing checks, the full sample identity, and a ready-to-run **Retest** command:
+2. **Visual QA failures** — the `## Failure TODO List` in `out/dataset-<spec>/validation-report.md` for a full run, or the matching file under `out/dataset-<spec>/validation-reports/` for a scoped run. Each entry carries its module/view, the reason, the failing checks, the full sample identity, and a ready-to-run **Retest** command. Validation is a real gate: failures and uncached samples exit non-zero; use `--report-only` only when intentionally collecting diagnostics without gating:
    ```bash
    npm run validate:dataset -- --spec=<specModule> [--generator=X] [--view=Y]
    ```
