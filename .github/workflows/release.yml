@@ -6,6 +6,7 @@ on:
       - 'v*.*.*'
 
 permissions:
+  actions: write
   contents: read
 
 jobs:
@@ -54,10 +55,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-  deploy_coverage_explorer:
-    name: Deploy Coverage Explorer
-    needs: release
-    permissions:
-      contents: read
-      id-token: write
-    uses: ./.github/workflows/deploy.yaml
+      - name: Trigger coverage explorer deployment from main
+        run: gh workflow run deploy.yaml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

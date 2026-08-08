@@ -141,7 +141,8 @@ regenerated with `npm run generate:standards-explorer`.
 
 A successful tagged dataset release deploys the production Vite build to the
 `edugraph-coverage` Firebase Hosting site after the dataset has been pushed to Hugging
-Face. The reusable deployment workflow can also be run independently through GitHub
+Face. The release dispatches deployment separately on `main` so Google Workload
+Identity remains restricted to the trusted branch. The deployment workflow can also be run independently through GitHub
 Actions' manual `workflow_dispatch` trigger. Each deployment regenerates the explorer
 data before building. Authentication uses the shared Google Cloud Workload Identity
 Federation provider, so the workflow does not require a long-lived Firebase

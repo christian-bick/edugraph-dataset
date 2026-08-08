@@ -80,9 +80,9 @@ The production explorer is hosted by Firebase Hosting at the `edugraph-coverage`
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
 `firebase.json` serves `dist/` and redirects the site root to the explorer entry, and
 `.github/workflows/deploy.yaml` is a reusable workflow that regenerates the explorer
-data, builds the Vite application, and deploys it. The tagged-release workflow calls it
-only after dataset generation, validation, and the Hugging Face push succeed; it can
-also be started independently with `workflow_dispatch`. The deployment uses the same
+data, builds the Vite application, and deploys it. After dataset generation, validation,
+and the Hugging Face push succeed, the tagged-release workflow dispatches it separately
+on `main`; it can also be started independently with `workflow_dispatch`. The deployment uses the same
 Workload Identity Federation provider and Firebase service account as the sibling
 `edugraph-editor` project; no persistent Firebase token is stored in GitHub.
 
@@ -90,7 +90,9 @@ GitHub Actions keeps validation and publication separate. Pushes to `main` run t
 build, complete test suite, and repository checks through the local `quality-gates`
 composite action. A version tag repeats those gates, generates CCSS in the pinned
 canonical container, runs the strict read-only cache audit, merges the release dataset,
-publishes it to Hugging Face, and only then invokes the explorer deployment workflow.
+publishes it to Hugging Face, and only then dispatches the explorer deployment workflow
+on `main`. Keeping deployment in a branch-context run satisfies the Google Workload
+Identity provider's branch trust condition without allowing release-tag refs.
 Live Gemini VQA is a local development operation and never runs in either workflow.
 
 ### `src/scripts/map-standards.ts`
