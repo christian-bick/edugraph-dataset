@@ -1,0 +1,30 @@
+name: EduGraph quality gates
+description: Build the application and run the complete test and repository validation gates.
+
+inputs:
+  spec:
+    description: Spec module used by scoped repository validations.
+    required: false
+    default: ccss
+
+runs:
+  using: composite
+  steps:
+    - name: Verify installed workspace
+      shell: bash
+      run: |
+        test -f package-lock.json
+        test -d node_modules
+
+    - name: Build
+      shell: bash
+      run: npm run build
+
+    - name: Run complete test suite
+      shell: bash
+      run: npm run test:all
+
+    - name: Run repository validations
+      shell: bash
+      run: npm run check -- --spec="${{ inputs.spec }}"
+

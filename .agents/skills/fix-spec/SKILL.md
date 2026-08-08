@@ -67,7 +67,7 @@ Reproduce each representative failure before fixing it. Rendering requires `npm 
 
 - **Single-sample replay** — copy the `Retest` command straight from the report:
   ```bash
-  npm run test:sample -- --sample="<sampleKey>" --spec=<specModule>
+   npm run test:sample -- --sample="<sampleKey>" --spec=<specModule> --no-validate
   ```
 - **Whole-target inspection** — matched tuples, rejection reasons, exact seeds/attempts/data, cache status, and rendered images:
   ```bash
@@ -90,6 +90,7 @@ Keep the iteration loop cheap. **Batch all pixel-affecting changes before regene
 ```bash
 npm run test
 npm run generate:dataset -- --spec=<specModule> --generator=<generator> --view=<view> [--training-only]
+npm run generate:dataset:container -- --spec=<specModule> --generator=<generator> --view=<view> [--training-only]
 npm run validate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
 npm run report:churn -- --spec=<specModule>
 ```
@@ -100,7 +101,7 @@ Confirm the fixed samples now pass **and** that churn is confined to the modules
 
 Once the failure set is empty, verify across the whole standard, then rebuild the union:
 ```bash
-npm run generate:dataset -- --spec=<specModule>
+npm run generate:dataset:container -- --spec=<specModule>
 npm run validate:dataset -- --spec=<specModule>
 npm run report:churn -- --spec=<specModule>
 npm run check -- --spec=<specModule>

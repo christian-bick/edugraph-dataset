@@ -1,0 +1,25 @@
+name: Generate canonical EduGraph dataset
+description: Render one spec in the pinned canonical Playwright container.
+
+inputs:
+  spec:
+    description: Spec module to generate.
+    required: true
+  concurrency:
+    description: Bounded Playwright rendering worker count.
+    required: false
+    default: '8'
+
+runs:
+  using: composite
+  steps:
+    - name: Verify generation prerequisites
+      shell: bash
+      run: |
+        test -f package-lock.json
+        docker version
+
+    - name: Generate dataset in canonical container
+      shell: bash
+      run: npm run generate:dataset:container -- --spec="${{ inputs.spec }}" --concurrency="${{ inputs.concurrency }}"
+

@@ -8,6 +8,7 @@ import {
     computeImageSha256,
     computeValidationCacheKey,
     buildVqaValidationContext,
+    pruneObsoleteVqaCacheFiles,
     resolveVqaLabelDefinitions,
     VqaCacheManager,
     VqaCacheEntry
@@ -176,5 +177,16 @@ describe('VQA Cache Module', () => {
         expect(manager.size).toBe(1);
         expect(manager.get('active_val_key')).toBeDefined();
         expect(manager.get('stale_val_key')).toBeUndefined();
+    });
+
+    it('should remove cache files for modules absent from a complete dataset', () => {
+        const datasetCacheDir = resolve(TEST_CACHE_DIR, 'dataset-test');
+        mkdirSync(datasetCacheDir, { recursive: true });
+        writeFileSync(resolve(datasetCacheDir, 'active.jsonl'), '');
+        writeFileSync(resolve(datasetCacheDir, 'obsolete.jsonl'), '');
+
+        expect(pruneObsoleteVqaCacheFiles(datasetCacheDir, new Set(['active']))).toEqual(['obsolete']);
+        expect(existsSync(resolve(datasetCacheDir, 'active.jsonl'))).toBe(true);
+        expect(existsSync(resolve(datasetCacheDir, 'obsolete.jsonl'))).toBe(false);
     });
 });

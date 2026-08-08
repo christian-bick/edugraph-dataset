@@ -27,6 +27,7 @@ The architecture is split into three main parts:
 ### Prerequisites
 
 *   [Node.js](https://nodejs.org/) (v20+ recommended)
+*   Docker Desktop or another compatible Docker runtime for canonical generation
 
 ### Installation
 
@@ -48,6 +49,16 @@ npm run generate:dataset -- --spec=ccss
 # Generate using test specifications -> out/dataset-test/
 npm run generate:dataset -- --spec=test
 ```
+
+Native generation is the fast implementation loop. Before creating or updating committed
+VQA cache records, regenerate the relevant scope in the pinned canonical Linux renderer;
+this command starts its own Vite server and requires only a running Docker engine:
+```bash
+npm run generate:dataset:container -- --spec=ccss
+```
+The same `--generator`, `--view`, `--training-only`, and `--concurrency` filters apply.
+Container dependencies are isolated from host `node_modules` and reused while the lockfile
+and canonical renderer image remain unchanged.
 
 The isolated `test` spec is a prototyping, debugging, smoke, and retained-regression
 surface. It intentionally keeps at least one generatable target/view path per generator,
@@ -82,6 +93,16 @@ Check that validation content is disjoint from train, free of duplicates, and co
 ```bash
 npm run report:splits -- --spec=ccss
 ```
+
+**2c. Audit the Committed VQA Cache**
+Release validation is a strict offline, read-only check. It never calls Gemini or changes
+the cache, and it requires exact passing coverage for canonical images:
+```bash
+npm run audit:dataset -- --spec=ccss
+```
+Live Gemini validation is deliberately separate: generate canonically, then run
+`npm run validate:dataset -- --spec=ccss` on a development machine with
+`GEMINI_API_KEY` configured.
 
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
@@ -139,3 +160,4 @@ This project is licensed under the Apache 2.0 License. See the [LICENSE](./LICEN
 * **Common Core State Standards**: The educational standards mappings are aligned with the Common Core State Standards.
   * *Common Core State Standards © Copyright 2010. National Governors Association Center for Best Practices and Council of Chief State School Officers. All rights reserved.*
 * **Achieve the Core Dataset**: Standards metadata is structured using dataset entries compiled from the [achieve-the-core](https://huggingface.co/datasets/allenai/achieve-the-core) database by the Allen Institute for AI, which is licensed under the Open Data Commons Attribution License ([ODC-By 1.0](https://opendatacommons.org/licenses/by/)).
+* **Fonts**: Inter and Roboto Mono are self-hosted through Fontsource packages and licensed under the SIL Open Font License 1.1.

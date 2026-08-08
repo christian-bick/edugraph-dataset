@@ -18,8 +18,9 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
 4. **Validation Workflow**:
    - Follow the targeted debugging & fast-iteration workflows documented in `DOCS.md § 6` (Efficient Development & Debugging Iteration):
      - **Real Target Debugging**: `npm run test:target -- --target=<target.id> --spec=<real-standard> --render`
-     - **Real Sample Debugging**: `npm run test:sample -- --sample="<sample_key>" --spec=<real-standard>`
+     - **Real Sample Debugging**: `npm run test:sample -- --sample="<sample_key>" --spec=<real-standard> --no-validate`
      - **Fast Scoped Regeneration**: `npm run generate:dataset -- --spec=test --generator=<moduleName> --view=<viewName> [--training-only]`
+     - **Canonical VQA Regeneration**: `npm run generate:dataset:container -- --spec=test --generator=<moduleName> --view=<viewName> [--training-only]`
      - **VQA Validation**: `npm run validate:dataset -- --generator=<moduleName> --spec=test`
      - **Cache Churn Check**: `npm run report:churn -- --spec=test`
      - **Vitest Unit Tests**: `npm run test`

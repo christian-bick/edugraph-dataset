@@ -1,11 +1,12 @@
 import 'dotenv/config';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
-import { resolve, dirname } from "path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from "fs";
+import { resolve, dirname, relative } from "path";
 import { fileURLToPath } from "url";
 import { findLeafModules } from "../lib/module-resolver.ts";
 import {
     buildVqaValidationContext,
     computeImageSha256,
+    pruneObsoleteVqaCacheFiles,
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
@@ -21,10 +22,13 @@ import {
 import { validationFailed, validationReportPath } from '../lib/validation-report.ts';
 import {
     buildDatasetManifestEntries,
+    datasetRendererIssues,
     datasetFreshnessIssues,
     readDatasetManifest
 } from '../lib/dataset-manifest.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
+import { auditVqaCache, type ExpectedVqaCacheRecord } from '../lib/vqa-cache-audit.ts';
+import { CANONICAL_RENDERER_ID } from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -56,6 +60,40 @@ function imagePathFor(entry: any): string {
  */
 function displayPathOf(entry: any): string {
     return `${splitDirOf(entry)}/${entry.file_name}`;
+}
+
+function pngFilesBelow(path: string): string[] {
+    if (!existsSync(path)) return [];
+    return readdirSync(path, { withFileTypes: true }).flatMap(entry => {
+        const child = resolve(path, entry.name);
+        if (entry.isDirectory()) return pngFilesBelow(child);
+        return entry.isFile() && entry.name.toLowerCase().endsWith('.png') ? [child] : [];
+    });
+}
+
+function datasetStructureIssues(entries: any[], missingSplits: SampleSplit[]): string[] {
+    const issues = missingSplits.map(split => `Dataset split "${SPLIT_DIRS[split]}" is missing.`);
+    const sampleKeys = new Set<string>();
+    const imagePaths = new Set<string>();
+
+    for (const entry of entries) {
+        if (sampleKeys.has(entry.sample_key)) issues.push(`Duplicate metadata sample key: ${entry.sample_key}.`);
+        sampleKeys.add(entry.sample_key);
+        const imagePath = imagePathFor(entry);
+        if (imagePaths.has(imagePath)) issues.push(`Duplicate metadata image path: ${displayPathOf(entry)}.`);
+        imagePaths.add(imagePath);
+        if (!existsSync(imagePath)) issues.push(`Metadata image is missing: ${displayPathOf(entry)}.`);
+    }
+
+    for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
+        const splitRoot = resolve(DATASET_DIR, SPLIT_DIRS[split]);
+        for (const imagePath of pngFilesBelow(splitRoot)) {
+            if (!imagePaths.has(imagePath)) {
+                issues.push(`Image is not referenced by metadata: ${relative(DATASET_DIR, imagePath).replace(/\\/g, '/')}.`);
+            }
+        }
+    }
+    return issues;
 }
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -172,6 +210,9 @@ async function main() {
             reportOnly = true;
         }
     }
+    if (auditMode && (targetGenerator || targetView)) {
+        throw new Error('Strict --audit requires the complete dataset; remove --generator and --view filters.');
+    }
 
     DATASET_DIR = resolve(PROJECT_ROOT, 'out', datasetFolderName);
 
@@ -263,9 +304,17 @@ async function main() {
         );
     }
     console.log('Dataset freshness manifest matches the selected scope.');
+    const rendererIssues = datasetRendererIssues(scopedManifest, CANONICAL_RENDERER_ID);
+    if (!auditMode && rendererIssues.length > 0) {
+        throw new Error(
+            `Live VQA requires canonical container renders:\n${rendererIssues.map(issue => `- ${issue}`).join('\n')}\n` +
+            'Regenerate the selected scope with npm run generate:dataset:container before validation.'
+        );
+    }
 
     // Collect active cache keys per module for auto-pruning
     const activeKeysPerModule = new Map<string, Set<string>>();
+    const expectedCacheRecords: ExpectedVqaCacheRecord[] = [];
 
     for (const entry of filtered) {
         const moduleName = entry.generator;
@@ -282,6 +331,46 @@ async function main() {
             activeKeysPerModule.set(moduleName, new Set());
         }
         activeKeysPerModule.get(moduleName)!.add(valCacheKey);
+        expectedCacheRecords.push({
+            moduleName,
+            validationCacheKey: valCacheKey,
+            sampleKey: entry.sample_key
+        });
+    }
+
+    if (auditMode) {
+        const structureIssues = datasetStructureIssues(filtered, missingSplits);
+        const cacheAudit = auditVqaCache(
+            resolve(CACHE_DIR, datasetFolderName),
+            expectedCacheRecords
+        );
+
+        console.log(`\n--- Strict VQA Cache Audit Summary [${datasetFolderName}] ---`);
+        console.log(`Passing coverage: ${cacheAudit.passed}/${cacheAudit.expected}`);
+        console.log(`Uncovered images: ${cacheAudit.expected - cacheAudit.passed}`);
+        console.log(`Dataset structure issues: ${structureIssues.length}`);
+        console.log(`Renderer identity issues: ${rendererIssues.length}`);
+        for (const [kind, count] of Object.entries(cacheAudit.counts)) {
+            console.log(`Cache ${kind}${kind === 'missing' ? ' keys' : ''}: ${count}`);
+        }
+        for (const issue of structureIssues) console.error(`❌ DATASET: ${issue}`);
+        for (const issue of rendererIssues) console.error(`❌ RENDERER: ${issue}`);
+        for (const issue of cacheAudit.issues) console.error(`❌ CACHE ${issue.kind.toUpperCase()}: ${issue.message}`);
+
+        const failureCount = structureIssues.length + rendererIssues.length + cacheAudit.issues.length;
+        if (failureCount > 0 && !reportOnly) {
+            throw new Error(
+                `Strict VQA cache audit failed with ${failureCount} issue(s). ` +
+                `Run canonical generation and local live validation before release.`
+            );
+        }
+        if (failureCount > 0) {
+            console.log('--report-only requested; audit findings do not affect the exit code.');
+        } else {
+            console.log(`✅ AUDIT PASSED: all ${cacheAudit.expected} generated samples have exact passing cache coverage.`);
+        }
+        console.log('\nValidation Complete.');
+        return;
     }
 
     // Perform automatic safe pruning of stale cache entries for this dataset
@@ -305,44 +394,16 @@ async function main() {
                 console.log(`🧹 Auto-pruned ${pruned} stale cache entries for [${modName}] in cache/vqa-validation/${datasetFolderName}/`);
             }
         }
+        const obsoleteModules = pruneObsoleteVqaCacheFiles(
+            resolve(CACHE_DIR, datasetFolderName),
+            new Set(activeKeysPerModule.keys())
+        );
+        for (const moduleName of obsoleteModules) {
+            console.log(`🧹 Removed obsolete VQA cache file for [${moduleName}] in cache/vqa-validation/${datasetFolderName}/`);
+        }
     }
 
-    let uncachedCount = 0;
-    let failingCount = 0;
-    let auditPassedCount = 0;
-
-    if (auditMode) {
-        for (const entry of filtered) {
-            const moduleName = entry.generator;
-            const viewId = entry.view;
-            const imagePath = imagePathFor(entry);
-
-            if (!existsSync(imagePath)) {
-                console.error(`❌ AUDIT FAILURE (File missing): [${moduleName} : ${viewId}] ${displayPathOf(entry)}`);
-                uncachedCount++;
-                continue;
-            }
-
-            const imageBuffer = readFileSync(imagePath);
-            const imageSha256 = computeImageSha256(imageBuffer);
-            const checklistPaths = getChecklistPaths(moduleName, viewId);
-            const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
-
-            const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
-            const existingCache = cacheManager.get(valCacheKey);
-
-            if (!existingCache) {
-                console.error(`❌ AUDIT FAILURE (Uncached): [${moduleName} : ${viewId}] ${displayPathOf(entry)}`);
-                uncachedCount++;
-            } else if (!existingCache.evaluation.pass) {
-                console.error(`❌ AUDIT FAILURE (Failing evaluation): [${moduleName} : ${viewId}] ${displayPathOf(entry)} -> ${existingCache.evaluation.reasoning}`);
-                failingCount++;
-            } else {
-                auditPassedCount++;
-            }
-        }
-    } else {
-        const toEvaluate: any[] = [];
+    const toEvaluate: any[] = [];
         let cachedCount = 0;
         let cachedPassed = 0;
         let cachedFailed = 0;
@@ -429,7 +490,6 @@ async function main() {
                 }
                 console.log('\n');
             }
-        }
     }
 
     // Save and sort clean JSONL cache files for all active modules
@@ -447,23 +507,6 @@ async function main() {
     const report = generateValidationReport(datasetFolderName, filtered, resolvedReportPath);
     const reportPath = report.path;
     console.log(`📄 Validation report & TODO list generated: ${reportPath}`);
-
-    if (auditMode) {
-        const total = filtered.length;
-        const passed = auditPassedCount;
-        const cached = total - uncachedCount;
-
-        console.log(`\n--- VQA Cache Audit Summary [${datasetFolderName}] ---`);
-        console.log(`Passed: ${passed}/${total}`);
-        console.log(`Cached: ${cached}/${total}`);
-
-        if (uncachedCount > 0 || failingCount > 0) {
-            console.error(`\n🚨 AUDIT FAILED: ${failingCount} failing samples.`);
-            console.error(`Please run local validation using GEMINI_API_KEY, resolve failures, and commit updated cache files under cache/vqa-validation/${datasetFolderName}/.`);
-        } else {
-            console.log(`\n✅ AUDIT PASSED: All ${passed}/${total} generated samples have valid, passing cache records.`);
-        }
-    }
 
     if (validationFailed(report.counts, reportOnly)) {
         throw new Error(

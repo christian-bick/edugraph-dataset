@@ -33,7 +33,7 @@ Refer to `DOCS.md § 6` (Efficient Development & Debugging Iteration) for target
   ```
 - **Single-Sample Replay & VQA Debugging**:
   ```bash
-  npm run test:sample -- --sample="<sampleKey>" --spec=<specModule>
+  npm run test:sample -- --sample="<sampleKey>" --spec=<specModule> --no-validate
   ```
 
 Use the isolated `test` spec only for deliberately authored prototypes, smoke paths,
@@ -47,8 +47,9 @@ Keep iteration loops fast (<5 seconds) during active development:
   ```bash
   npm run generate:dataset -- --spec=test --generator=<generator> --view=<view> [--training-only]
   ```
-- Run **scoped VQA validation**:
+- At a VQA checkpoint, regenerate the scope canonically and run **scoped VQA validation**:
   ```bash
+  npm run generate:dataset:container -- --spec=test --generator=<generator> --view=<view> [--training-only]
   npm run validate:dataset -- --generator=<generator> --view=<view> --spec=test
   ```
   The command fails on any failing or uncached sample and writes its scoped report under `out/dataset-test/validation-reports/`.
@@ -67,7 +68,7 @@ Once ALL `implementationTodos` in the spec module are resolved and promoted to `
 
 Every spec owns its dataset folder, so `--spec=<specModule>` is passed consistently to every script:
 ```bash
-npm run generate:dataset -- --spec=<specModule>
+npm run generate:dataset:container -- --spec=<specModule>
 npm run validate:dataset -- --spec=<specModule>
 npm run report:churn -- --spec=<specModule>
 npm run check -- --spec=<specModule>

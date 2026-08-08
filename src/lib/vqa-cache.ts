@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { definition, type CompetencyDescriptor } from 'edugraph-ts';
 
@@ -135,6 +135,22 @@ export function buildVqaValidationContext(
         validationCacheKey,
         labelDefinitions
     };
+}
+
+export function pruneObsoleteVqaCacheFiles(
+    datasetCacheDir: string,
+    activeModuleNames: ReadonlySet<string>
+): string[] {
+    if (!existsSync(datasetCacheDir)) return [];
+    const removed: string[] = [];
+    for (const entry of readdirSync(datasetCacheDir, { withFileTypes: true })) {
+        if (!entry.isFile() || !entry.name.endsWith('.jsonl')) continue;
+        const moduleName = entry.name.slice(0, -'.jsonl'.length);
+        if (activeModuleNames.has(moduleName)) continue;
+        rmSync(resolve(datasetCacheDir, entry.name), { force: true });
+        removed.push(moduleName);
+    }
+    return removed.sort();
 }
 
 export class VqaCacheManager {

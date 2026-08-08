@@ -34,6 +34,7 @@ import {
     mergeModuleMetadata
 } from '../lib/dataset-output.ts';
 import { buildDatasetManifestEntries, updateDatasetManifest } from '../lib/dataset-manifest.ts';
+import { RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -230,7 +231,7 @@ async function preflightViews(
     let failed = false;
 
     const worker = async () => {
-        const context = await browser.newContext();
+        const context = await browser.newContext(RENDER_CONTEXT_OPTIONS);
         try {
             while (!failed) {
                 const view = queue.shift();
@@ -301,7 +302,7 @@ async function renderSamples(
     let failed = false;
 
     const processQueue = async () => {
-        const context = await browser.newContext();
+        const context = await browser.newContext(RENDER_CONTEXT_OPTIONS);
         const page = await context.newPage();
         const diagnostics = attachPageDiagnostics(page, baseUrl);
         let currentViewUrl = '';

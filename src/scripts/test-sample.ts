@@ -15,6 +15,7 @@ import { computeImageSha256, VqaCacheManager } from '../lib/vqa-cache.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { evaluateSampleVqa } from '../lib/vqa-evaluator.ts';
 import { datasetDirForSpec } from '../lib/dataset-paths.ts';
+import { CANONICAL_RENDERER_ID, currentRendererEnvironment } from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -133,6 +134,13 @@ async function main() {
         if (!apiKey) {
             console.log(`\nℹ️ GEMINI_API_KEY not set — skipping live VQA validation (cache comparison only).`);
             return;
+        }
+        if (currentRendererEnvironment() !== CANONICAL_RENDERER_ID) {
+            throw new Error(
+                'Live VQA cache updates require canonical container images. ' +
+                'Use this command for native cache comparison, then regenerate the relevant dataset scope with ' +
+                'npm run generate:dataset:container and run validate:dataset.'
+            );
         }
 
         console.log(`\n🤖 Running live VQA validation with Gemini API...`);

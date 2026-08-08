@@ -17,6 +17,7 @@ import { VqaCacheManager } from '../lib/vqa-cache.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { evaluateSampleVqa } from '../lib/vqa-evaluator.ts';
 import { datasetDirForSpec } from '../lib/dataset-paths.ts';
+import { CANONICAL_RENDERER_ID, currentRendererEnvironment } from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -182,6 +183,11 @@ async function main() {
             const apiKey = process.env.GEMINI_API_KEY;
             if (!apiKey) {
                 console.log(`\nℹ️ GEMINI_API_KEY not set — skipping live VQA validation.`);
+            } else if (currentRendererEnvironment() !== CANONICAL_RENDERER_ID) {
+                throw new Error(
+                    'Live VQA cache updates require canonical container images. ' +
+                    'Regenerate the relevant dataset scope with npm run generate:dataset:container and run validate:dataset.'
+                );
             } else {
                 console.log(`\n🤖 Running live VQA validation for rendered target samples...`);
                 for (const {sample, renderFileName} of validableSamples) {

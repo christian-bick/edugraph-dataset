@@ -7,12 +7,15 @@ import {
     DatasetManifest,
     DatasetManifestEntry,
     datasetFreshnessIssues,
+    datasetRendererIssues,
     updateDatasetManifest
 } from './dataset-manifest.ts';
+import { currentRendererEnvironment } from './render-environment.ts';
 
 const entry: DatasetManifestEntry = {
     generator: 'writing',
     view: 'numbers-write-standard',
+    renderer_environment: currentRendererEnvironment(),
     input_hash: 'input-a',
     content_hash: 'content-a',
     sample_counts: { train: 2, val: 0 },
@@ -72,6 +75,15 @@ describe('datasetFreshnessIssues', () => {
         expect(datasetFreshnessIssues(manifest(), 'ccss', current)).toContain(
             'writing#numbers-write-standard content fingerprints changed since generation.'
         );
+    });
+});
+
+describe('datasetRendererIssues', () => {
+    it('requires every generated pair to use the expected renderer', () => {
+        expect(datasetRendererIssues(manifest(), currentRendererEnvironment())).toEqual([]);
+        expect(datasetRendererIssues(manifest(), 'canonical')).toEqual([
+            `writing#numbers-write-standard was rendered by "${currentRendererEnvironment()}" instead of "canonical".`
+        ]);
     });
 });
 

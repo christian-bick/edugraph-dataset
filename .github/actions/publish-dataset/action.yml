@@ -1,0 +1,44 @@
+name: Publish EduGraph dataset
+description: Prepare and publish the merged dataset to Hugging Face and tag the revision.
+
+inputs:
+  dataset-directory:
+    description: Merged dataset directory to publish.
+    required: false
+    default: out/dataset
+  repository:
+    description: Hugging Face dataset repository.
+    required: false
+    default: christian-bick/edugraph-exercises
+  release-tag:
+    description: Tag to create in the Hugging Face repository.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Verify publication prerequisites
+      shell: bash
+      run: |
+        test -n "${HF_TOKEN:-}"
+        test -d "${{ inputs.dataset-directory }}"
+        test -f LICENSE
+        test -f HF_README.md
+
+    - name: Prepare dataset repository files
+      shell: bash
+      run: |
+        cp LICENSE "${{ inputs.dataset-directory }}/LICENSE"
+        cp HF_README.md "${{ inputs.dataset-directory }}/README.md"
+        find "${{ inputs.dataset-directory }}" -name ".metadata.jsonl" -delete
+
+    - name: Install Hugging Face CLI
+      shell: bash
+      run: python -m pip install --upgrade huggingface_hub
+
+    - name: Upload and tag dataset
+      shell: bash
+      run: |
+        hf upload "${{ inputs.repository }}" "${{ inputs.dataset-directory }}" . --repo-type dataset --delete="*"
+        hf repo tag create "${{ inputs.repository }}" "${{ inputs.release-tag }}" --repo-type dataset
+

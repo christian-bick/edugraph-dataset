@@ -1,0 +1,20 @@
+name: Audit release dataset
+description: Require exact, passing, read-only VQA cache coverage for a canonical dataset.
+
+inputs:
+  spec:
+    description: Generated spec module to audit.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Verify audit prerequisites
+      shell: bash
+      run: |
+        test -d "out/dataset-${{ inputs.spec }}"
+        test -d "cache/vqa-validation/dataset-${{ inputs.spec }}"
+
+    - name: Run strict offline VQA cache audit
+      shell: bash
+      run: npm run audit:dataset -- --spec="${{ inputs.spec }}"

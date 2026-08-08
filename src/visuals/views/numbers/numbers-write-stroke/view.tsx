@@ -31,7 +31,7 @@ function DigitSVG({ digit, isSingle }: { digit: string; isSingle: boolean }) {
                 y={yPos} 
                 textAnchor="middle" 
                 fontSize={fontSize} 
-                fontFamily="'Roboto Mono', monospace" 
+                fontFamily="'Roboto Mono Variable', monospace"
                 fontWeight="bold" 
                 fill="none" 
                 stroke="#cbd5e1" 
