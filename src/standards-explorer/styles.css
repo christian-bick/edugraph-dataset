@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+    color-scheme: dark;
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    background: #020617;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#standards-explorer-root {
+    height: 100%;
+    margin: 0;
+}
+
+button:focus,
+[role="button"]:focus {
+    outline: none;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}

@@ -69,6 +69,18 @@ The consequence: a code change only invalidates the samples whose identity input
 
 ## 3. Script Reference
 
+### Standards Explorer
+`src/standards-explorer.html` is a dedicated Vite entry for the Common Core coverage
+explorer. The React application lives under `src/standards-explorer/`, uses Zustand for
+its navigation and selection state, and reads the generated
+`public/coverage/ccss-tree.json` and `public/coverage/ccss-coverage.json` files at
+runtime. Run `npm run dev` and open `/standards-explorer.html` to use it.
+
+### `src/scripts/map-standards.ts`
+* **Execution**: `npm run generate:standards-explorer` (alias: `npm run map:standards`)
+* **Function**: Regenerates the standards tree, dataset coverage metadata, and grouped
+  task backlog consumed by the standards explorer.
+
 #### `src/scripts/generate-dataset.ts`
 The primary pipeline orchestrator.
 *   **Execution**: `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only] [--concurrency=<positive_integer>]`

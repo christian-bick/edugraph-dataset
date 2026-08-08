@@ -67,6 +67,7 @@
   "dependencies": {
     "edugraph-ts": "https://github.com/christian-bick/edugraph-ontology/releases/download/v0.11.0/edugraph-ts.tgz",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "zustand": "^5.0.14"
   }
 }

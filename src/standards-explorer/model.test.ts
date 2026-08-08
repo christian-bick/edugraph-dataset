@@ -1,0 +1,156 @@
+import { describe, expect, it } from 'vitest';
+import {
+    calculateStats,
+    filterTasks,
+    getClusters,
+    getCoverageKind,
+    getDomains,
+    getSearchCoverageKind,
+    gradeNameFromId,
+    intersectLabels,
+    matchesTaskGrade,
+    searchStandards,
+} from './model.ts';
+import type {
+    BacklogTask,
+    CoverageData,
+    Domain,
+    GradesTree,
+    StandardCoverage,
+    StandardNode,
+} from './types.ts';
+
+const createCoverage = (overrides: Partial<StandardCoverage> = {}): StandardCoverage => ({
+    id: 'K.CC.A.1',
+    spec_covered: true,
+    ontology_covered: true,
+    competencies: [],
+    implementation_todos: [],
+    ontology_todos: [],
+    beyond_scope: [],
+    fully_beyond_scope: false,
+    partially_beyond_scope: false,
+    matched_areas: [],
+    matched_scopes: [],
+    matched_abilities: [],
+    reasoning: '',
+    suggested_task: null,
+    dataset_covered: false,
+    generator_module: null,
+    cluster_id: 'K.CC.A',
+    ...overrides,
+});
+
+const createTask = (standards: string[], type: BacklogTask['type'] = 'ANALYSIS'): BacklogTask => ({
+    id: `task-${standards[0]}`,
+    type,
+    cluster_id: standards[0],
+    cluster_description: 'Cluster',
+    title: 'Task',
+    description: 'Description',
+    standards,
+});
+
+describe('standards explorer model', () => {
+    it('maps standard prefixes to explorer grade names', () => {
+        expect(gradeNameFromId('K.CC.A.1')).toBe('Kindergarten');
+        expect(gradeNameFromId('4.NF.A.1')).toBe('Grade 4');
+        expect(gradeNameFromId('HSN-RN.A.1')).toBe('High School');
+        expect(gradeNameFromId('N-RN.A.1')).toBe('High School');
+        expect(gradeNameFromId('OTHER')).toBe('Other');
+    });
+
+    it('flattens grade domains without duplicating domain ids', () => {
+        const firstDomain: Domain = { id: 'K.CC', name: 'Counting', clusters: [] };
+        const secondDomain: Domain = { id: 'K.G', name: 'Geometry', clusters: [] };
+        const tree: GradesTree = {
+            Kindergarten: {
+                First: { description: '', domains: { 'K.CC': firstDomain } },
+                Second: { description: '', domains: { 'K.CC': firstDomain, 'K.G': secondDomain } },
+            },
+        };
+
+        expect(getDomains(tree, 'Kindergarten')).toEqual([firstDomain, secondDomain]);
+        expect(getDomains(tree, 'Grade 8')).toEqual([]);
+    });
+
+    it('filters flattened clusters by domain', () => {
+        const tree: GradesTree = {
+            Kindergarten: {
+                Group: {
+                    description: '',
+                    domains: {
+                        'K.CC': { id: 'K.CC', name: '', clusters: [{ id: 'K.CC.A', description: '', cluster_type: 'major', standards: [] }] },
+                        'K.G': { id: 'K.G', name: '', clusters: [{ id: 'K.G.A', description: '', cluster_type: 'major', standards: [] }] },
+                    },
+                },
+            },
+        };
+
+        expect(getClusters(tree, 'Kindergarten', null).map(cluster => cluster.id)).toEqual(['K.CC.A', 'K.G.A']);
+        expect(getClusters(tree, 'Kindergarten', 'K.G').map(cluster => cluster.id)).toEqual(['K.G.A']);
+    });
+
+    it('applies the legacy coverage status precedence', () => {
+        expect(getCoverageKind(createCoverage({ spec_covered: false }))).toBe('analysis');
+        expect(getCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
+        expect(getCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');
+        expect(getCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('partial');
+        expect(getCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
+        expect(getCoverageKind(createCoverage())).toBe('implementation');
+    });
+
+    it('retains the legacy search-result status precedence', () => {
+        expect(getSearchCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
+        expect(getSearchCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('partial');
+        expect(getSearchCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
+        expect(getSearchCoverageKind(createCoverage({ ontology_covered: true }))).toBe('implementation');
+        expect(getSearchCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');
+    });
+
+    it('searches only standard-level nodes by id or description', () => {
+        const standards: Record<string, StandardNode> = {
+            'K.CC.A.1': { id: 'K.CC.A.1', description: 'Count by tens', level: 'Standard', aspects: [], modeling: false },
+            '1.NBT.A.1': { id: '1.NBT.A.1', description: 'Place value', level: 'Standard', aspects: [], modeling: false },
+            'K.CC.A': { id: 'K.CC.A', description: 'Count sequence', level: 'Cluster', aspects: [], modeling: false },
+        };
+
+        expect(searchStandards(standards, 'tens').map(standard => standard.id)).toEqual(['K.CC.A.1']);
+        expect(searchStandards(standards, '1.nbt').map(standard => standard.id)).toEqual(['1.NBT.A.1']);
+    });
+
+    it('matches and filters backlog tasks by grade and task type', () => {
+        const tasks = [
+            createTask(['K.CC.A.1']),
+            createTask(['2.OA.A.1']),
+            createTask(['N-RN.A.1'], 'ONTOLOGY_EXTENSION'),
+        ];
+
+        expect(matchesTaskGrade(tasks[0], 'Kindergarten')).toBe(true);
+        expect(matchesTaskGrade(tasks[2], 'High School')).toBe(true);
+        expect(filterTasks(tasks, 'Grade 2', null)).toEqual([tasks[1]]);
+        expect(filterTasks(tasks, 'High School', 'ANALYSIS')).toEqual([]);
+    });
+
+    it('calculates display statistics and common labels', () => {
+        const coverageData = {
+            metadata: {
+                total_leaves_scanned: 467,
+                covered_count: 46,
+                missing_generator_count: 2,
+                missing_ontology_count: 3,
+                analysis_needed_count: 420,
+            },
+        } as CoverageData;
+
+        expect(calculateStats(coverageData)).toEqual({
+            coverage: '10% (46)',
+            missingImplementation: 2,
+            missingOntology: 3,
+            analysisNeeded: 420,
+            leafStandards: 467,
+        });
+        expect(intersectLabels([['Area', 'Scope A'], ['Area', 'Scope B']])).toEqual(['Area']);
+        expect(intersectLabels([])).toEqual([]);
+    });
+});

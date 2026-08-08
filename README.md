@@ -112,6 +112,10 @@ Start the local Vite server to interactively preview the HTML/CSS rendering of t
 npm run dev
 ```
 
+The same server exposes the React-based Common Core coverage and task explorer at
+[`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). Its data is
+regenerated with `npm run generate:standards-explorer`.
+
 ## Contributing
 
 Contributions are welcome! Adding new generators and views is a great way to help grow the available labeled training data for open-source AI education models. Read [DOCS.md](./DOCS.md) to understand how to scaffold and register a new dataset module, and the reference library in [docs/](./docs/README.md) for the rules each module file must follow.
