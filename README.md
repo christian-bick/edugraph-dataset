@@ -9,6 +9,9 @@ By leveraging the [EduGraph Ontology](https://github.com/christian-bick/edugraph
 The latest generated and released version of the dataset is available on Hugging Face:
 👉 **[christian-bick/edugraph-exercises](https://huggingface.co/datasets/christian-bick/edugraph-exercises)**
 
+Explore its standards coverage and generated tasks:
+👉 **[EduGraph Coverage Explorer](https://coverage.edugraph.io)**
+
 > **Version Alignment:** The dataset version is strictly tied to the version of the [EduGraph Ontology](https://github.com/christian-bick/edugraph-ontology) it was generated with. This ensures that the semantic labels stay consistent with the training data. For example v0.6.0-02 refers to the second dataset revision for ontology version 0.6.0. 
 
 ## General Concepts
