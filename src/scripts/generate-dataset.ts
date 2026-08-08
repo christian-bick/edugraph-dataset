@@ -366,10 +366,7 @@ async function renderSamples(
                     attempt: sample.attempt,
                     seed: sample.seed,
                     content_fingerprint: sample.fingerprint,
-                    type: sample.problem.type,
-                    solution_visible: identity.mode === 'solution',
-                    tags: (sample.problem.tags || []).map(shortenLabel).sort(),
-                    parameters: sample.problem.data
+                    tags: (sample.problem.tags || []).map(shortenLabel).sort()
                 });
 
                 completedTasks++;

@@ -5,6 +5,7 @@ import {
     groupIntoExercises,
     parseMetadataLines,
     selectUnionExercises,
+    toPublishedMetadataRow,
     type MetadataRow,
 } from './dataset-merge.ts';
 
@@ -146,5 +147,24 @@ describe('parseMetadataLines', () => {
 
     it('returns nothing for empty content', () => {
         expect(parseMetadataLines('')).toEqual([]);
+    });
+});
+
+describe('toPublishedMetadataRow', () => {
+    it('keeps only the public training fields and derives the solution flag', () => {
+        expect(toPublishedMetadataRow(row({
+            mode: 'solution',
+            tags: ['Addition', 'ArabicNumerals'],
+            parameters: { answer: 4 },
+        }))).toEqual({
+            file_name: 'img.png',
+            tags: ['Addition', 'ArabicNumerals'],
+            solution: true,
+        });
+    });
+
+    it('rejects operational rows that cannot form valid public metadata', () => {
+        expect(() => toPublishedMetadataRow(row({ tags: undefined }))).toThrow(/without string tags/);
+        expect(() => toPublishedMetadataRow(row({ mode: 'preview', tags: [] }))).toThrow(/unknown mode/);
     });
 });

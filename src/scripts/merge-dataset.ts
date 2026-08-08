@@ -12,6 +12,7 @@ import {
     groupIntoExercises,
     parseMetadataLines,
     selectUnionExercises,
+    toPublishedMetadataRow,
     type Exercise,
     type FingerprintIndex,
     type MetadataRow,
@@ -96,7 +97,7 @@ function mergeSplit(
         mkdirSync(unionSplitDir, { recursive: true });
         writeFileSync(
             resolve(unionSplitDir, 'metadata.jsonl'),
-            rows.map(row => JSON.stringify(row)).join('\n') + '\n',
+            rows.map(row => JSON.stringify(toPublishedMetadataRow(row))).join('\n') + '\n',
             'utf-8'
         );
     }

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getCliOption } from '../lib/cli.ts';
-import { datasetOutDir, resolveDatasetDir } from '../lib/dataset-paths.ts';
+import { datasetOutDir, isUnionSpec, resolveDatasetDir } from '../lib/dataset-paths.ts';
 import { parseMetadataLines } from '../lib/dataset-merge.ts';
 import { DEFAULT_VAL_RATIO } from '../lib/generation.ts';
 import { buildSplitIntegrityReport, SplitIntegrityReport } from '../lib/split-report.ts';
@@ -111,7 +111,11 @@ function main() {
     if (!specName) {
         console.error('❌ Error: The --spec parameter is required.');
         console.error('Usage: npm run report:splits -- --spec=<spec_module>');
-        console.error('Pass --spec=union for the merged dataset across all standards.');
+        process.exit(1);
+    }
+    if (isUnionSpec(specName)) {
+        console.error('❌ Error: the released union contains compact training metadata only.');
+        console.error('Split integrity is audited on each source standard before it is merged.');
         process.exit(1);
     }
 

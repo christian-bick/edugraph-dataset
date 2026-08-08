@@ -29,6 +29,28 @@ export interface MetadataRow {
     [key: string]: unknown;
 }
 
+/** Stable, training-facing metadata written into the released union dataset. */
+export interface PublishedMetadataRow {
+    file_name: string;
+    tags: string[];
+    solution: boolean;
+}
+
+/** Projects an operational standard row onto the compact public schema. */
+export function toPublishedMetadataRow(row: MetadataRow): PublishedMetadataRow {
+    if (!Array.isArray(row.tags) || !row.tags.every(tag => typeof tag === 'string')) {
+        throw new Error(`Cannot publish metadata without string tags: ${row.sample_key}.`);
+    }
+    if (row.mode !== 'question' && row.mode !== 'solution') {
+        throw new Error(`Cannot publish metadata with unknown mode "${row.mode}": ${row.sample_key}.`);
+    }
+    return {
+        file_name: row.file_name,
+        tags: [...row.tags],
+        solution: row.mode === 'solution',
+    };
+}
+
 /**
  * One exercise: every mode (question and solution) of the same
  * (target, generator, view, instance) within a split. Modes are independent

@@ -32,6 +32,7 @@ Every image in this dataset is programmatically generated using the [EduGraph On
 
 - **Generation Engine:** [GitHub Repository](https://github.com/christian-bick/edugraph-content) (Contribute new generators or views!)
 - **Ontology:** [EduGraph Ontology](https://github.com/christian-bick/edugraph-ontology) (Semantic definitions for all labels)
+- **Coverage Explorer:** [coverage.edugraph.io](https://coverage.edugraph.io) (Explore standards coverage and generated tasks)
 
 ## Dataset Description
 
@@ -54,12 +55,8 @@ The dataset is split into `train` and `validation` folders. Each split contains:
 ### Metadata Schema
 Each entry in `metadata.jsonl` contains:
 - `file_name`: Path to the image file (relative to the split root).
-- `problem_id`: Unique identifier for the abstract problem.
-- `type`: The mathematical domain (e.g., `arithmetic`, `time`).
-- `solution_visible`: Boolean indicating if the image shows the solved state (S) or the question state (Q).
-- `mode`: Human-readable tag (`question` or `solution`).
 - `tags`: List of semantic labels from the EduGraph Ontology.
-- `parameters`: The exact mathematical constants and visual configuration used for generation.
+- `solution`: Boolean indicating whether the image shows a solved state.
 
 ## Versioning & Integrity
 
