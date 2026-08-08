@@ -86,6 +86,13 @@ also be started independently with `workflow_dispatch`. The deployment uses the 
 Workload Identity Federation provider and Firebase service account as the sibling
 `edugraph-editor` project; no persistent Firebase token is stored in GitHub.
 
+GitHub Actions keeps validation and publication separate. Pushes to `main` run the
+build, complete test suite, and repository checks through the local `quality-gates`
+composite action. A version tag repeats those gates, generates CCSS in the pinned
+canonical container, runs the strict read-only cache audit, merges the release dataset,
+publishes it to Hugging Face, and only then invokes the explorer deployment workflow.
+Live Gemini VQA is a local development operation and never runs in either workflow.
+
 ### `src/scripts/map-standards.ts`
 * **Execution**: `npm run generate:standards-explorer` (alias: `npm run map:standards`)
 * **Function**: Regenerates the standards tree, dataset coverage metadata, and grouped

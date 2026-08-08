@@ -5,67 +5,54 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: read
+
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Disable AppArmor for Playwright/Chromium
-        run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
+          cache: npm
 
-      - name: Install dependencies
+      - name: Install host dependencies
         run: npm ci
 
-      - name: Run Tests
-        run: npm run test:all
+      - name: Run quality gates
+        uses: ./.github/actions/quality-gates
+        with:
+          spec: ccss
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+      - name: Generate canonical CCSS dataset
+        uses: ./.github/actions/generate-dataset
+        with:
+          spec: ccss
+          concurrency: '8'
 
-      - name: Start local server
-        run: npm run dev &
+      - name: Audit committed VQA cache
+        uses: ./.github/actions/audit-release-dataset
+        with:
+          spec: ccss
 
-      - name: Generate CCSS Dataset
-        run: npm run generate:dataset -- --spec=ccss
-
-      - name: Audit VQA Validation Cache (Zero Cost)
-        run: npm run validate:dataset -- --spec=ccss --audit
-
-      - name: Merge Release Dataset
+      - name: Merge release dataset
         run: npm run merge:dataset
 
-      - name: Generate Coverage Report
+      - name: Generate union coverage report
         run: npm run report:coverage -- --spec=union
 
-      - name: Push to HuggingFace
+      - name: Publish dataset to Hugging Face
+        uses: ./.github/actions/publish-dataset
+        with:
+          release-tag: ${{ github.ref_name }}
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          # Copy license and HF_README (as README) so they are included in the HF repo
-          cp LICENSE out/dataset/
-          cp HF_README.md out/dataset/README.md
-          
-          # Clean up intermediate .metadata.jsonl files
-          find out/dataset -name ".metadata.jsonl" -delete
-
-          # Install huggingface_hub
-          pip install -U huggingface_hub
-          
-          # Push the dataset folder to the HF repo main branch and delete stale remote files
-          hf upload christian-bick/edugraph-exercises ./out/dataset . --repo-type dataset --delete="*"
-
-          # Tag the revision on HF to match the GitHub tag
-          hf repo tag create christian-bick/edugraph-exercises ${{ github.ref_name }} --repo-type dataset
 
   deploy_coverage_explorer:
     name: Deploy Coverage Explorer
