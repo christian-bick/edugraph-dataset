@@ -1,6 +1,6 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { BeyondScopeEntry, CompetencyTarget, OntologyTodo } from '../../types/ml-engine.ts';
+import { BeyondScopeEntry, CompetencyTarget, ImplementationTodo, OntologyTodo } from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Counting and Cardinality (K.CC)
@@ -527,7 +527,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('K.G.B.6-compose-shapes-other', composeShapesOtherBuilder)
 ];
 
-export const implementationTodos: CompetencyTarget[] = [];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

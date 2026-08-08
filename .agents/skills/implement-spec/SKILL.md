@@ -14,7 +14,7 @@ Orchestrate implementing the target gaps in `implementationTodos` for a spec mod
   ```bash
   npm run show:imp-todos -- --spec=<specModule>
   ```
-- Analyze the output. **Merge logically related implementation TODOs** (e.g. multiple targets needing the same generator extension or view arrangement) so they are tackled efficiently together.
+- Treat each authored `group` value as the stable implementation package. Work through groups in review order; do not regroup targets ad hoc unless the user approves changing their source `group` values.
 
 #### Step 2: Determine Extension vs. Creation Strategy
 For each target group, choose the cleanest implementation path per `IMPL-7` in `docs/implementation-general.md`: extend an existing generator, extend an existing view, and only create a new leaf module when doing so extends the supported ontological space.

@@ -20,7 +20,7 @@ read by a different consumer, by name — there is no scanning or filtering:
 | Export                | Type                  | Read by                                   | Meaning                                                                 |
 |-----------------------|-----------------------|-------------------------------------------|-------------------------------------------------------------------------|
 | `spec`                | `CompetencyTarget[]`  | `loadTargets` → the generation pipeline   | Permutations with **both** a matching generator and a compatible view.  |
-| `implementationTodos` | `CompetencyTarget[]`  | `loadSpecTodos` → coverage report only    | Expressible in the ontology, but missing generator/view capability.     |
+| `implementationTodos` | `ImplementationTodo[]`| `loadSpecTodos` → coverage report only    | Expressible in the ontology, but missing generator/view capability. Each has a stable `group`. |
 | `ontologyTodos`       | `OntologyTodo[]`      | `loadSpecTodos` → coverage report only    | Not expressible: the ontology lacks the `Area`/`Scope`/`Ability`.       |
 | `beyondScope`         | `BeyondScopeEntry[]`  | `loadSpecTodos` → coverage report only    | Intentionally not addressable in the dataset's declared medium.        |
 | `equivalentTargets`   | `TargetEquivalence[]` | `loadSpecEquivalences` → the validator    | Definitions that are intentionally indistinguishable ([TSPEC-8](#tspec-8--definitions-must-be-distinct-unless-the-identity-is-declared)). |
@@ -55,8 +55,9 @@ Study `src/spec/ccss/kindergarten.ts` and `grade-01.ts` for the established stru
   current permutations with those groups. Successive calls multiply orthogonal dimensions
   such as number ranges, zero inclusion, shapes and relations.
 - `toTargets('<CCSS-id>-<slug>', builder)` from `src/lib/dataset-permutation-builder.ts` —
-  maps the builder to targets. For todo entries, pass the third argument: a description of
-  what generator or view functionality is missing.
+  maps the builder to active targets.
+- `toImplementationTodos('<CCSS-id>-<slug>', builder, '<group>', '<explanation>')` — maps
+  an unsupported builder to implementation TODOs carrying their stable package identity.
 
 Build permutations programmatically rather than writing static arrays by hand — this
 applies to the `test` module too.
@@ -116,9 +117,17 @@ is that labels are mathematically provable claims about the image.
 backlog items. A leaf standard may have one competency in `beyondScope` and a different
 competency in `spec`, but each individual competency still belongs to exactly one export.
 
-Confirm the middle column empirically with `npm run show:matching -- --spec=<module>` rather
-than by inspection. Audit the complete matched-pair set: the intended path must be present,
-and every additional generator-view match must also be a genuine realization of the target.
+Every `implementationTodos` entry must declare a non-empty `group` string. Use the same
+stable, descriptive group for permutations and definitions that require one coherent
+generator/view implementation package. Tooling reports and `/implement-spec` preserve this
+authored grouping rather than inferring packages again from target prefixes.
+
+Confirm the middle column empirically rather than by inspection. During the two-pass authoring
+workflow, `npm run report:matching-diff -- --spec=<module> --plan=<planName>` includes both
+active targets and implementation TODOs; an implementation TODO should have no pair, while
+an active target must have its intended path. Use `npm run show:matching -- --spec=<module>`
+for the detailed active-target probes. Audit the complete matched-pair set: every additional
+generator-view match must also be a genuine realization of the target.
 
 ### TSPEC-8 — Definitions must be distinct, unless the identity is declared
 
@@ -128,6 +137,15 @@ are indistinguishable by the ontology, and this is an error.
 Definitions that merely *overlap* in some permutations are legitimate (e.g. related
 standards across grades). Overlapping permutations are deduplicated to one representative
 target and reported as **warnings**, not errors.
+
+During target authoring, run the advisory analysis to surface less obvious similarities:
+
+```bash
+npm run analyze:target-distinctness -- --spec=<module> --plan=<planName>
+```
+
+It reports identical, contained, overlapping, and one-label-adjacent definitions together
+with stable discriminator labels. Findings require review but are not validation errors.
 
 When two definitions are *deliberately* identical — e.g. two standards that differ only
 above the supported number range — declare it in `equivalentTargets`:
@@ -197,10 +215,10 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-1** — the file exports only the five contract names, each with its correct type.
 - [ ] **TSPEC-2** — `spec` has no alias export; every live target is reachable through `spec` alone.
 - [ ] **TSPEC-3** — one builder per competency, derived from leaf standards, not one per standard.
-- [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` and mapped via `toTargets`; no hand-written target arrays.
-- [ ] **TSPEC-5** — no id is hand-written or position-derived; every id came out of `toTargets`.
+- [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` and mapped via `toTargets` or `toImplementationTodos`; no hand-written target arrays.
+- [ ] **TSPEC-5** — no id is hand-written or position-derived; every id came out of `toTargets` or `toImplementationTodos`.
 - [ ] **TSPEC-6** — no label is broader, narrower, or otherwise adjusted to make a target match; gaps are parked with a TODO or a todo export.
-- [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, with matching confirmed via `npm run show:matching` for addressable competencies.
+- [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO has a stable non-empty `group`, and matching is confirmed via `npm run show:matching` for addressable competencies.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless declared in `equivalentTargets` with a reason.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.

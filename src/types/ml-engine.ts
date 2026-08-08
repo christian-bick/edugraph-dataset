@@ -102,6 +102,15 @@ export interface CompetencyTarget {
 }
 
 /**
+ * An addressable competency whose ontology labels are known but whose current
+ * generator/view catalog cannot realize it. `group` is a stable implementation
+ * package identifier shared by TODO permutations that belong together.
+ */
+export interface ImplementationTodo extends CompetencyTarget {
+    group: string;
+}
+
+/**
  * A missing ontology concept task defined in a spec module.
  */
 export interface OntologyTodo {

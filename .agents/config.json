@@ -24,6 +24,8 @@
       "command(npm run show:imp-todos)",
       "command(npm run show:ont-todos)",
       "command(npm run show:matching)",
+      "command(npm run report:matching-diff)",
+      "command(npm run analyze:target-distinctness)",
       "command(npm run generate:standards-explorer)",
       "command(npm run map:standards)",
       "command(npm run validate:coverage)",

@@ -7,7 +7,7 @@ import { findLeafModules, LeafModule } from './module-resolver.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
 import { extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
+import { CompetencyTarget, ImplementationTodo, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ViewSpec } from '../types/view-spec.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -478,7 +478,7 @@ export async function loadTargets(
 }
 
 export interface SpecTodos {
-    implementationTodos: CompetencyTarget[];
+    implementationTodos: ImplementationTodo[];
     ontologyTodos: OntologyTodo[];
     beyondScope: BeyondScopeEntry[];
 }
@@ -498,13 +498,20 @@ export async function loadSpecTodos(
 ): Promise<SpecTodos> {
     const files = resolveSpecFiles(specName, specRoot);
 
-    const implementationTodos: CompetencyTarget[] = [];
+    const implementationTodos: ImplementationTodo[] = [];
     const ontologyTodos: OntologyTodo[] = [];
     const beyondScope: BeyondScopeEntry[] = [];
     for (const filePath of files) {
         const module = await import(pathToFileURL(filePath).href);
         if (Array.isArray(module.implementationTodos)) {
-            implementationTodos.push(...(module.implementationTodos as CompetencyTarget[]));
+            for (const todo of module.implementationTodos as ImplementationTodo[]) {
+                if (typeof todo.group !== 'string' || todo.group.trim() === '') {
+                    throw new Error(
+                        `Implementation TODO "${todo.id ?? 'unknown'}" in "${filePath}" must declare a non-empty group.`
+                    );
+                }
+                implementationTodos.push({ ...todo, group: todo.group.trim() });
+            }
         }
         if (Array.isArray(module.ontologyTodos)) {
             ontologyTodos.push(...(module.ontologyTodos as OntologyTodo[]));

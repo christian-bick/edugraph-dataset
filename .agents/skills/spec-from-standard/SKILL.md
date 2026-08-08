@@ -1,52 +1,105 @@
 ---
 name: create-spec-from-standard
-description: "/create-spec-from-standard {standardId|gradeFile} - Autonomous orchestrator skill to translate educational standard leaf nodes into valid target specs, categorizing matching targets, implementation gaps, ontology gaps, and competencies beyond the dataset medium."
+description: "/create-spec-from-standard {grade} - Two-pass workflow that first creates a reviewable competency plan, then translates approved standard leaf nodes into valid target specs with matching-diff and distinctness reports."
 ---
 
-Orchestrate generating a valid competency target spec file for a new grade or educational standard module under `src/spec/[<module>/]{gradeFile}.ts` (e.g., `src/spec/ccss/grade-02.ts` or target standards file).
+Create or extend a competency target spec under `src/spec/[<module>/]{grade}.ts` from educational-standard leaf nodes. This is deliberately a **two-pass workflow with a user review boundary**: Pass 1 produces analysis artifacts only; Pass 2 edits the target spec only after the user explicitly approves that plan.
 
-Use `public/coverage/ccss-tree.json` (or standard tree source) as the starting hypothesis for standard hierarchy (Grade $\rightarrow$ Domain $\rightarrow$ Cluster $\rightarrow$ Standard / SubStandard leaf nodes).
+Use `public/coverage/ccss-tree.json` (or the relevant standard tree) as the starting hypothesis for the hierarchy. Study existing target specs in the same module and follow `docs/target-spec.md` throughout.
 
-Study existing grade target specs in `src/spec/ccss/` (such as `kindergarten.ts` and `grade-01.ts`) for exact structure and patterns.
+## Stable plan workspace
 
----
+Choose a short plan name from the target file without its extension, such as `grade-02`. Keep every intermediate artifact under:
 
-### Step-by-Step Orchestrator Workflow:
+```text
+temp/spec-plans/<specModule>/<planName>/
+├── plan.md
+├── matching-before.json
+├── matching-after.json
+├── matching-diff.md
+└── target-distinctness.md
+```
 
-#### Step 1: Analyze Standard Leaf Nodes
-- Traverse the standard tree (`public/coverage/ccss-tree.json`) down to individual leaf nodes.
-- For each leaf node standard, identify the distinct mathematical competencies required. Create one `DatasetPermutationBuilder` per competency.
+`temp/` is gitignored. The plan directory is review state, not a committed source of truth.
 
-#### Step 2: Express Competencies via Ontology Labels
-- Translate each competency's requirements into EduGraph ontology labels (`edugraph-ts` `Area`, `Scope`, `Ability`).
-- Follow `TSPEC-6` in `docs/target-spec.md`: declare the most specific ontology label that is a *true statement* about what the standard demands, and never stretch or invent label combinations to force a match with existing generators/views.
+## Pass 1 — Analyze and stop for review
 
-#### Step 3: Run Matching Probes
-- Run matching probe using the pre-approved npm script:
-  ```bash
-  npm run show:matching -- --spec=<specModule>
-  ```
-- Evaluate how the proposed permutations map against current generator and view catalogs.
+### 1. Establish the source scope
 
-#### Step 4: Categorize Targets into Exports
-Sort every competency into exactly one export, following the export contract and the decision table in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`): `beyondScope` when the required evidence cannot exist in the dataset medium, `spec` for addressable permutations with both a matching generator and a compatible view, `implementationTodos` for addressable competencies expressible in the ontology but lacking module support, and `ontologyTodos` for addressable competencies the ontology cannot express at all.
+- Traverse the standard tree to the exact leaf nodes covered by the requested grade/file.
+- Quote the source text needed to justify each competency.
+- Study neighboring grade files for established builder, naming, and disposition patterns.
+- Do **not** edit `src/spec/` during this pass.
 
-Build addressable target permutations per `TSPEC-3`/`TSPEC-4` (one builder per competency, mapped through `toTargets`). Record `beyondScope` competencies as descriptive entries because they never enter target matching. If two target definitions turn out to be deliberately indistinguishable, declare them in `equivalentTargets` per `TSPEC-8`.
+### 2. Capture the matching baseline
 
-#### Step 5: Validate Target Specs
-Run the validation gate from `TSPEC-9`:
+Before changing target definitions, record the current matching state: production-normalized active targets plus any implementation TODOs and their dispositions.
+
+```bash
+npm run report:matching-diff -- --spec=<specModule> --plan=<planName> --capture-before
+```
+
+Do not replace an existing baseline unless restarting that plan intentionally; replacement requires `--force`.
+
+### 3. Author `plan.md`
+
+Create `temp/spec-plans/<specModule>/<planName>/plan.md` with:
+
+- source scope and relevant standard quotations;
+- one row per distinct competency covered by leaf node in the start, not merely one row per node;
+- proposed builder dimensions and most-specific truthful ontology labels (`TSPEC-3`, `TSPEC-4`, `TSPEC-6`);
+- proposed disposition: `spec`, `implementationTodos`, `ontologyTodos`, or `beyondScope` (`TSPEC-7`);
+- expected generator/view matches and any matches that would be semantically suspicious;
+- proposed `equivalentTargets` declarations, if any (`TSPEC-8`);
+- a stable `group` string for every proposed implementation TODO package;
+- ontology questions and other decisions requiring user review.
+
+The plan may show illustrative TypeScript fragments, but it must not create a temporary executable spec file.
+
+### 4. Review boundary
+
+Present the plan path and a concise disposition/package summary to the user, then **stop**. Do not begin Pass 2, edit the target spec, create ontology issues, or trigger implementation work without explicit approval.
+
+## Pass 2 — Implement the approved plan
+
+Resume only after the user approves Pass 1, incorporating any requested changes.
+
+### 1. Author the target file
+
+- Create one `DatasetPermutationBuilder` per competency and map it with `toTargets`.
+- Use `toImplementationTodos(prefix, builder, group, explanation)` for implementation gaps; `group` is the stable implementation-package identity.
+- Export only the five target-spec contract names with their exact types (`TSPEC-1`, `TSPEC-2`).
+- Never stretch labels to force a match (`TSPEC-6`).
+
+### 2. Validate and inspect matching
+
 ```bash
 npm run check:standards-spec -- --spec=<specModule>
+npm run show:matching -- --spec=<specModule>
+npm run analyze:target-distinctness -- --spec=<specModule> --plan=<planName>
+npm run report:matching-diff -- --spec=<specModule> --plan=<planName>
 ```
-And run repository-wide checks:
+
+The distinctness report is advisory. Review identical, contained, overlapping, and one-label-adjacent definitions; an entry is not automatically a defect. The matching diff is also advisory, but every added or removed generator-view pair must be explained by the approved plan.
+
+If either report reveals an unapproved semantic change, correct the target definitions and regenerate both reports before proceeding.
+
+### 3. Run the repository gate
+
 ```bash
 npm run check -- --spec=<specModule>
 ```
 
-#### Step 6: Summary & Output
-- Present a clear summary report of the generated spec file:
-  - Total active targets in `spec`
-  - Total implementation gaps in `implementationTodos`
-  - Total missing ontology concepts in `ontologyTodos`
-  - Total intentional medium exclusions in `beyondScope`
-- **DO NOT automatically trigger follow-up loops.** Present the findings to the user and stop so the user can manually decide when to trigger `/implement-spec` or `/update-ontology`.
+### 4. Summarize and stop
+
+Report:
+
+- active target and permutation counts;
+- implementation groups and permutation counts;
+- ontology gaps and beyond-scope competencies;
+- intentional equivalences;
+- matching pairs added/removed;
+- distinctness findings reviewed and their disposition;
+- paths to `plan.md`, `matching-diff.md`, and `target-distinctness.md`.
+
+Do **not** automatically trigger `/implement-spec` or `/update-ontology`. The user decides when those follow-up workflows begin.

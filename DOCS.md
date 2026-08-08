@@ -122,9 +122,17 @@ The primary pipeline orchestrator.
 *   **Execution**: `npm run show:matching -- --spec=<spec_module> [--raw]`
 *   **Function**: Prints the matched `(generator, view)` pairs for the same normalized and deduplicated targets used by production generation. Every semantic match is reported; a cheap sample probe is shown as a separate success/failure status and never removes the tuple. Pass `--raw` to inspect every source target definition before overlap deduplication. The shared `matchTargets` predicate remains the authority in both modes.
 
+### `src/scripts/report-matching-diff.ts`
+*   **Execution**: First capture a baseline with `npm run report:matching-diff -- --spec=<spec_module> --plan=<plan_name> --capture-before`; after target edits, rerun without `--capture-before`.
+*   **Function**: Stores matching snapshots under `temp/spec-plans/<spec>/<plan>/` and writes `matching-diff.md` listing added/removed targets, moves between `implementationTodo` and active `spec`, and semantic generator-view pairs. Snapshots include production-normalized active targets plus implementation TODOs, so unsupported proposals remain visible. Baselines are protected from accidental replacement unless `--force` is explicit. The report is advisory, but target-spec review must account for every disposition and pair change.
+
+### `src/scripts/analyze-target-distinctness.ts`
+*   **Execution**: `npm run analyze:target-distinctness -- --spec=<spec_module> [--plan=<plan_name>]`
+*   **Function**: Compares raw active and implementation-TODO definitions and reports identical permutation sets, containment, overlap, and definitions whose nearest permutations differ by only one ontology label. It also shows labels that stably discriminate one definition from the other. With `--plan`, writes `target-distinctness.md` beside the matching snapshots; without it, prints Markdown. This is an advisory review aid, not a validation gate.
+
 ### `src/scripts/show-implementation-todos.ts`
 *   **Execution**: `npm run show:imp-todos -- [--spec=<spec_module>]`
-*   **Function**: Inspects `implementationTodos` across target spec files. Groups missing capabilities by standard definition prefix and details missing generator or view functionality.
+*   **Function**: Inspects `implementationTodos` across target spec files. Groups missing capabilities by their authored stable `group`, then lists the contained target definitions and missing generator or view functionality.
 
 ### `src/scripts/show-ontology-todos.ts`
 *   **Execution**: `npm run show:ont-todos -- [--spec=<spec_module>]`
@@ -269,8 +277,9 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 ### Loop 1: Standard Spec Generation (`/create-spec-from-standard`)
 - **Skill**: `.agents/skills/spec-from-standard/SKILL.md`
 - **Command**: `/create-spec-from-standard {standardId|gradeFile}`
-- **Function**: Translates educational standard leaf nodes (`public/coverage/ccss-tree.json`) into target-spec dispositions in `src/spec/<module>/<gradeFile>.ts`, including intentional `beyondScope` medium exclusions, categorized across the export contract in [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-7`).
-- **Validation**: Runs `npm run check:standards-spec -- --spec=<module>` and `npm run check`. Finishes by presenting matching statistics to the user (allowing manual trigger of follow-up loops).
+- **Pass 1 — review plan**: Reads and quotes the relevant standard leaves, captures `matching-before.json`, and writes a disposition/label/package proposal to `temp/spec-plans/<module>/<gradeFile>/plan.md`. It does not edit `src/spec/` and stops for explicit user approval.
+- **Pass 2 — approved implementation**: Authors the target file, runs target validation, writes `matching-after.json`, `matching-diff.md`, and `target-distinctness.md`, then runs `npm run check -- --spec=<module>`. Implementation gaps carry stable authored `group` strings.
+- **Boundary**: The skill finishes by presenting the review artifacts and never triggers ontology or implementation follow-up loops automatically.
 
 ### Loop 2: Spec Implementation & Error-Free Generation (`/implement-spec`)
 - **Skill**: `.agents/skills/implement-spec/SKILL.md`

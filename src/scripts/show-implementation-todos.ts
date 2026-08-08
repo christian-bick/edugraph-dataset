@@ -21,29 +21,35 @@ async function main() {
 
         console.log(`Found ${implementationTodos.length} target permutation(s) in implementationTodos.\n`);
 
-        // Group targets by definition prefix (e.g. "K.CC.A.1-count-to-100")
+        // Stable implementation packages are authored explicitly on each TODO.
         const grouped = new Map<string, typeof implementationTodos>();
         for (const target of implementationTodos) {
-            const prefix = getTargetPrefix(target.id);
-            if (!grouped.has(prefix)) {
-                grouped.set(prefix, []);
+            if (!grouped.has(target.group)) {
+                grouped.set(target.group, []);
             }
-            grouped.get(prefix)!.push(target);
+            grouped.get(target.group)!.push(target);
         }
 
         let idx = 1;
-        for (const [prefix, targets] of grouped.entries()) {
-            const first = targets[0];
-            console.log(`--------------------------------------------------`);
-            console.log(`${idx++}. Target Definition: ${prefix} (${targets.length} permutation(s))`);
-            if (first.explanation) {
-                console.log(`   💡 Reason/Gap: ${first.explanation}`);
+        for (const [group, targets] of grouped.entries()) {
+            const definitions = new Map<string, typeof targets>();
+            for (const target of targets) {
+                const prefix = getTargetPrefix(target.id);
+                if (!definitions.has(prefix)) definitions.set(prefix, []);
+                definitions.get(prefix)!.push(target);
             }
-            console.log(`   Labels (sample): [${first.labels.map(shortenLabel).join(', ')}]`);
+            console.log(`--------------------------------------------------`);
+            console.log(`${idx++}. Group: ${group} (${definitions.size} definition(s), ${targets.length} permutation(s))`);
+            for (const [prefix, definitionTargets] of definitions) {
+                const first = definitionTargets[0];
+                console.log(`   - ${prefix} (${definitionTargets.length} permutation(s))`);
+                if (first.explanation) console.log(`     💡 Reason/Gap: ${first.explanation}`);
+                console.log(`     Labels (sample): [${first.labels.map(shortenLabel).join(', ')}]`);
+            }
         }
 
         console.log(`\n========================================`);
-        console.log(`Total Target Groups: ${grouped.size}`);
+        console.log(`Total Implementation Groups: ${grouped.size}`);
         console.log(`Total Permutations:  ${implementationTodos.length}`);
         console.log(`========================================\n`);
     } catch (e) {

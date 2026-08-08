@@ -368,6 +368,7 @@ async function main() {
     const matchedImplementationTodos = allImplementationTodos.filter(t => findStandardIdForTarget(t.id, sortedLeafIds) === std.id);
     const implementation_todos = matchedImplementationTodos.map(t => ({
       id: t.id,
+      group: t.group,
       labels: t.labels,
       explanation: t.explanation || ''
     }));

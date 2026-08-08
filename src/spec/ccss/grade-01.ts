@@ -1,6 +1,6 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { BeyondScopeEntry, CompetencyTarget, OntologyTodo, TargetEquivalence } from '../../types/ml-engine.ts';
+import { BeyondScopeEntry, CompetencyTarget, ImplementationTodo, OntologyTodo, TargetEquivalence } from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Operations and Algebraic Thinking (1.OA)
@@ -608,7 +608,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.G.A.3-compare-unit-share-sizes', compareUnitShareSizesBuilder)
 ];
 
-export const implementationTodos: CompetencyTarget[] = [];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

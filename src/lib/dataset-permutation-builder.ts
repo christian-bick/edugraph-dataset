@@ -1,4 +1,4 @@
-import { CompetencyTarget, GeneratorInput } from "../types/ml-engine.ts";
+import { CompetencyTarget, GeneratorInput, ImplementationTodo } from "../types/ml-engine.ts";
 import { labelSetHash } from "./utils.ts";
 
 /**
@@ -16,6 +16,18 @@ export function toTargets(idPrefix: string, builder: DatasetPermutationBuilder, 
         labels: p.labels,
         ...(explanation ? { explanation } : {})
     }));
+}
+
+/** Maps a competency builder to a stable implementation package. */
+export function toImplementationTodos(
+    idPrefix: string,
+    builder: DatasetPermutationBuilder,
+    group: string,
+    explanation?: string
+): ImplementationTodo[] {
+    const normalizedGroup = group.trim();
+    if (normalizedGroup === '') throw new Error('Implementation TODO group must not be empty.');
+    return toTargets(idPrefix, builder, explanation).map(target => ({ ...target, group: normalizedGroup }));
 }
 
 export default class DatasetPermutationBuilder {

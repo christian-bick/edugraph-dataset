@@ -27,6 +27,8 @@
     "show:imp-todos": "vite-node src/scripts/show-implementation-todos.ts",
     "show:ont-todos": "vite-node src/scripts/show-ontology-todos.ts",
     "show:matching": "vite-node src/scripts/show-matching-stats.ts",
+    "report:matching-diff": "vite-node src/scripts/report-matching-diff.ts",
+    "analyze:target-distinctness": "vite-node src/scripts/analyze-target-distinctness.ts",
     "generate:standards-explorer": "npm run map:standards",
     "map:standards": "vite-node src/scripts/map-standards.ts",
     "validate:coverage": "vite-node src/scripts/validate-coverage.ts",

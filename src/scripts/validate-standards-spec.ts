@@ -3,7 +3,8 @@ import { getCliOption } from '../lib/cli.ts';
 import {
     loadGeneratorCatalog,
     loadViewCatalog,
-    findGeneratorsWithoutTestPath
+    findGeneratorsWithoutTestPath,
+    loadSpecTodos
 } from '../lib/generation.ts';
 
 async function main() {
@@ -21,7 +22,10 @@ async function main() {
     console.log(`\n=== Validating Standards Spec: "${specName}" ===`);
 
     try {
-        const result = await normalizeAndValidateSpec(specName);
+        const [result] = await Promise.all([
+            normalizeAndValidateSpec(specName),
+            loadSpecTodos(specName)
+        ]);
 
         console.log(`\n--- Statistics ---`);
         console.log(`Total Targets Defined:      ${result.stats.totalTargets}`);
