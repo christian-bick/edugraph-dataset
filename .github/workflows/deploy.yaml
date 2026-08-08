@@ -1,0 +1,47 @@
+name: Deploy Coverage Explorer to Firebase Hosting
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/575953891979/locations/global/workloadIdentityPools/gh-pool-v2/providers/gh-provider-v2
+          service_account: firebase-adminsdk-fbsvc@edugraph-438718.iam.gserviceaccount.com
+          token_format: access_token
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Standards Explorer Data
+        run: npm run generate:standards-explorer
+
+      - name: Build Vite App
+        run: npm run build
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Deploy to Firebase Hosting
+        run: firebase deploy --only hosting:edugraph-coverage --project edugraph-438718 --non-interactive
+        env:
+          FIREBASE_TOKEN: ${{ steps.auth.outputs.access_token }}

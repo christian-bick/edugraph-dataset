@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "edugraph-coverage": "edugraph-438718"
+  },
+  "targets": {
+    "edugraph-438718": {
+      "hosting": {
+        "edugraph-coverage": [
+          "edugraph-coverage"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

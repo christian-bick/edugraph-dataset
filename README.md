@@ -116,6 +116,16 @@ The same server exposes the React-based Common Core coverage and task explorer a
 [`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). Its data is
 regenerated with `npm run generate:standards-explorer`.
 
+### Coverage Explorer Deployment
+
+A successful tagged dataset release deploys the production Vite build to the
+`edugraph-coverage` Firebase Hosting site after the dataset has been pushed to Hugging
+Face. The reusable deployment workflow can also be run independently through GitHub
+Actions' manual `workflow_dispatch` trigger. Each deployment regenerates the explorer
+data before building. Authentication uses the shared Google Cloud Workload Identity
+Federation provider, so the workflow does not require a long-lived Firebase
+service-account secret. The hosted root redirects to the standards explorer.
+
 ## Contributing
 
 Contributions are welcome! Adding new generators and views is a great way to help grow the available labeled training data for open-source AI education models. Read [DOCS.md](./DOCS.md) to understand how to scaffold and register a new dataset module, and the reference library in [docs/](./docs/README.md) for the rules each module file must follow.

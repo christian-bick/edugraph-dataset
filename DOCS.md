@@ -76,6 +76,16 @@ its navigation and selection state, and reads the generated
 `public/coverage/ccss-tree.json` and `public/coverage/ccss-coverage.json` files at
 runtime. Run `npm run dev` and open `/standards-explorer.html` to use it.
 
+The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
+in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
+`firebase.json` serves `dist/` and redirects the site root to the explorer entry, and
+`.github/workflows/deploy.yaml` is a reusable workflow that regenerates the explorer
+data, builds the Vite application, and deploys it. The tagged-release workflow calls it
+only after dataset generation, validation, and the Hugging Face push succeed; it can
+also be started independently with `workflow_dispatch`. The deployment uses the same
+Workload Identity Federation provider and Firebase service account as the sibling
+`edugraph-editor` project; no persistent Firebase token is stored in GitHub.
+
 ### `src/scripts/map-standards.ts`
 * **Execution**: `npm run generate:standards-explorer` (alias: `npm run map:standards`)
 * **Function**: Regenerates the standards tree, dataset coverage metadata, and grouped

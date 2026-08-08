@@ -66,3 +66,11 @@ jobs:
 
           # Tag the revision on HF to match the GitHub tag
           hf repo tag create christian-bick/edugraph-exercises ${{ github.ref_name }} --repo-type dataset
+
+  deploy_coverage_explorer:
+    name: Deploy Coverage Explorer
+    needs: release
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy.yaml

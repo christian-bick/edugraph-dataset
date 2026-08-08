@@ -1,0 +1,18 @@
+{
+  "hosting": {
+    "target": "edugraph-coverage",
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/standards-explorer.html",
+        "type": 302
+      }
+    ]
+  }
+}
