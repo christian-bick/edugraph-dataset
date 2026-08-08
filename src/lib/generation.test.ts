@@ -8,16 +8,11 @@ import {
     computeSampleSeed,
     computeSampleFilename,
     matchesTarget,
-    matchTargets,
     findGeneratorsWithoutTestPath,
-    loadGeneratorCatalog,
-    loadViewCatalog,
     loadTargets,
     loadSpecTodos,
     generateSample,
     generateSampleWithRetry,
-    generateSampleByKey,
-    generateTargetSamples,
     computeContentFingerprint,
     isValTuple,
     DEFAULT_VAL_RATIO,
@@ -27,7 +22,6 @@ import {
     ViewMatchInfo,
     GeneratorCatalogEntry
 } from './generation.ts';
-import {isProblemTypeCompatible} from './type-parser.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ProblemStub } from '../types/ml-engine.ts';
 
@@ -570,115 +564,4 @@ describe('loadTargets', () => {
         const ids = targets.map(t => t.id);
         expect(new Set(ids).size).toBe(ids.length);
     }, 30000);
-});
-
-describe('catalogs and end-to-end matching (integration)', () => {
-    it('routes CCSS comparison targets to representation-compatible views', async () => {
-        const [generatorCatalog, viewCatalog, targets] = await Promise.all([
-            loadGeneratorCatalog(),
-            loadViewCatalog(),
-            loadTargets('ccss')
-        ]);
-        const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
-        const viewsFor = (targetPrefix: string) => new Set(
-            tuples
-                .filter(tuple => tuple.target.id.startsWith(targetPrefix))
-                .map(tuple => tuple.viewId)
-        );
-
-        expect(viewsFor('K.CC.C.6-compare-groups')).toEqual(new Set([
-            'numbers-compare-counting',
-            'numbers-compare-matching'
-        ]));
-        expect(viewsFor('K.CC.C.7-compare-numerals')).toEqual(new Set([
-            'numbers-compare'
-        ]));
-        expect(viewsFor('1.NBT.B.3-compare-two-digit')).toEqual(new Set([
-            'numbers-compare'
-        ]));
-    }, 60000);
-
-    it('loads catalogs, matches the test spec and replays a sample by key', async () => {
-        const [generatorCatalog, viewCatalog, targets] = await Promise.all([
-            loadGeneratorCatalog(),
-            loadViewCatalog(),
-            loadTargets('test')
-        ]);
-
-        expect(generatorCatalog.length).toBeGreaterThan(0);
-        expect(viewCatalog.length).toBeGreaterThan(0);
-        expect(targets.length).toBeGreaterThan(0);
-
-        // Every generator/view carries the labels and type info matching needs
-        for (const gen of generatorCatalog) {
-            expect(gen.generatorId).toBeTruthy();
-            expect(Array.isArray(gen.labels)).toBe(true);
-        }
-
-        const { tuples, rejections } = matchTargets(targets, generatorCatalog, viewCatalog);
-        expect(tuples.length).toBeGreaterThan(0);
-
-        // No tuple may pair a generator and view of different problem types
-        for (const tuple of tuples) {
-            const gen = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!;
-            const view = viewCatalog.find(v => v.viewId === tuple.viewId)!;
-            if (gen.problemType != null && view.problemType != null) {
-                expect(isProblemTypeCompatible(gen.problemType, view.problemType)).toBe(true);
-            }
-        }
-
-        // Rejections carry actionable reasons
-        for (const rejection of rejections) {
-            expect(['unsupported-label', 'rejected-label']).toContain(rejection.verdict.reason);
-        }
-
-        // Replaying a sample by key reproduces the direct draw exactly
-        const tuple = tuples[0];
-        const identity: SampleIdentity = {
-            targetId: tuple.target.id,
-            generatorId: tuple.generatorId,
-            viewId: tuple.viewId,
-            split: 'train',
-            mode: 'question',
-            instanceIdx: 0
-        };
-        const sampleKey = computeSampleKey(identity);
-        const replayed = await generateSampleByKey({ sampleKey, attempt: 1, specName: 'test' });
-
-        const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
-        const direct = generateSample({
-            generator,
-            labels: [...tuple.target.labels],
-            seed: computeSampleSeed(sampleKey, 1)
-        });
-
-        expect(replayed.identity).toEqual(identity);
-        expect(replayed.stub).toEqual(direct);
-    }, 60000);
-
-    it('generates all samples for a single target deterministically', async () => {
-        const [generatorCatalog, viewCatalog, targets] = await Promise.all([
-            loadGeneratorCatalog(),
-            loadViewCatalog(),
-            loadTargets('test')
-        ]);
-
-        const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
-        const target = tuples[0].target;
-
-        const first = generateTargetSamples(target, generatorCatalog, viewCatalog);
-        const second = generateTargetSamples(target, generatorCatalog, viewCatalog);
-
-        expect(first.length).toBeGreaterThan(0);
-        expect(first).toEqual(second);
-
-        // Q and S modes exist for every (view, split, instance) combination
-        const questionCount = first.filter(s => s.identity.mode === 'question').length;
-        const solutionCount = first.filter(s => s.identity.mode === 'solution').length;
-        expect(questionCount).toBe(solutionCount);
-
-        // Sample keys are unique
-        const keys = new Set(first.map(s => s.sampleKey));
-        expect(keys.size).toBe(first.length);
-    }, 60000);
 });

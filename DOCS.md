@@ -213,6 +213,8 @@ The rule that breaks things silently is `IMPL-V6`: every randomized visual decis
 ### Step 7: Tests (`generator.test.ts`)
 Write unit tests per `IMPL-G5` in [docs/implementation-generator.md](docs/implementation-generator.md), then run `npm run test` to verify.
 
+`npm run test` is the fast development loop and excludes files named `*.it.test.ts`. Put tests that traverse complete catalogs, load real standard modules, or exercise end-to-end module matching in `*.it.test.ts`; run those with `npm run test:integration`. Use `npm run test:all` as the complete local and CI gate. `npm run test:coverage` also runs the complete suite before checking generator coverage.
+
 ### Step 7b: Prototyping and Regression Testing via `test`
 Use the isolated `test` spec for fast visual prototyping, debugging, smoke generation and retained cached regressions. It is not a second curriculum or an exhaustive mirror of generator capabilities:
 1. **Maintain a Test Path**: Every generator must have at least one minimal test target with a compatible view. Keep existing targets when they remain useful regressions; add more only when they materially help debugging or protect behavior. The module follows the same builder contract as real standards — see [docs/target-spec.md](docs/target-spec.md) (`TSPEC-1`, `TSPEC-4`, `TSPEC-12`).

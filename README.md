@@ -96,7 +96,14 @@ npm run check -- --spec=ccss
 **4. Run Tests**
 Validate the mathematical logic, constraints, and edge cases of the generators and library modules.
 ```bash
+# Fast unit-test loop; excludes *.it.test.ts
 npm run test
+
+# Catalog and end-to-end integration tests
+npm run test:integration
+
+# Complete test gate
+npm run test:all
 ```
 
 **5. Development / Debugging**
