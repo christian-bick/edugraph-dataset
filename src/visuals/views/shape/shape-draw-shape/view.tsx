@@ -88,28 +88,48 @@ function SpecificationDrawingLayout({
     );
 }
 
-function LegacyDrawingLayout({shape, isSolutionView}: {shape: string; isSolutionView: boolean}) {
-    const promptText = `Draw the ${shape} by following the guide.`;
+function LegacyDrawingLayout({
+    shape,
+    isSolutionView
+}: {
+    shape: string;
+    isSolutionView: boolean;
+}) {
+    const promptText = `Draw the same ${shape}. Turning it does not change the shape.`;
     const pathD = getTracePath(shape);
+    const referenceRotation = shape === 'triangle'
+        ? 180
+        : shape === 'rectangle'
+            ? 90
+            : shape === 'square'
+                ? 45
+                : 0;
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit mx-auto font-sans">
-            <div className="flex flex-col items-center w-[480px]">
-                {!isSolutionView && (
-                    <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-normal">
-                        {promptText}
+            <div className="flex w-[560px] flex-col items-center">
+                <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-normal">
+                    {promptText}
+                </div>
+
+                <div className="flex w-full items-stretch justify-center gap-4">
+                    <div className="flex h-[220px] w-[250px] flex-col items-center justify-center rounded-xl border-2 border-blue-200 bg-blue-50 p-3">
+                        <span className="mb-1 text-sm font-bold text-blue-700">Reference</span>
+                        <svg width="150" height="150" viewBox="0 0 100 100" aria-label={`Reference ${shape}`}>
+                            <g transform={`rotate(${referenceRotation} 50 50)`}>
+                                <path d={pathD} fill="none" stroke="#1d4ed8" strokeWidth="4" />
+                            </g>
+                        </svg>
                     </div>
-                )}
-                
-                <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
-                    <svg width="150" height="150" viewBox="0 0 100 100" className="overflow-visible">
-                        {/* Dotted outline */}
-                        <path d={pathD} fill="none" stroke="#cbd5e1" strokeWidth="3" strokeDasharray="4 4" />
-                        {/* Solid trace path in solution view */}
-                        {isSolutionView && (
-                            <path d={pathD} fill="none" stroke="forestgreen" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                        )}
-                    </svg>
+                    <div className="flex h-[220px] w-[250px] flex-col items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50 p-3">
+                        <span className="mb-1 text-sm font-bold text-slate-600">Your drawing</span>
+                        <svg width="150" height="150" viewBox="0 0 100 100">
+                            <path d={pathD} fill="none" stroke="#cbd5e1" strokeWidth="3" strokeDasharray="4 4" />
+                            {isSolutionView && (
+                                <path d={pathD} fill="none" stroke="forestgreen" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            )}
+                        </svg>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,7 +155,12 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
                 />
             );
         }
-        return <LegacyDrawingLayout shape={data.target} isSolutionView={isSolutionView} />;
+        return (
+            <LegacyDrawingLayout
+                shape={data.target}
+                isSolutionView={isSolutionView}
+            />
+        );
     }
 
     validateProblemData('shape-draw-shape', data, ['shape', 'answer']);

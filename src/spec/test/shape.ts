@@ -48,7 +48,7 @@ const specifyShapeBuilder = new DatasetPermutationBuilder()
 
 const drawFromAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeRecognition,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation,
@@ -90,7 +90,7 @@ const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
 const envShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
-        Ability.ProcedureExecution
+        Ability.VisualRecognition
     ])
     .applyLabelVariants([
         [Area.Circle],

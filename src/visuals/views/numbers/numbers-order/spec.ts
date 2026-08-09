@@ -15,8 +15,8 @@ export const spec: ViewSpec = {
 
 export const NumbersOrderViewSchema = {
     isDesc: [
-        [Scope.Most, Scope.Least],
-        hasLabel(Scope.Most)
+        [Scope.AscendingOrder, Scope.DescendingOrder],
+        hasLabel(Scope.DescendingOrder)
     ]
 } as const;
 

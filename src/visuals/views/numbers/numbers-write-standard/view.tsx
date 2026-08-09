@@ -11,6 +11,29 @@ interface CoreProps {
     payload: ViewRenderPayload<'numbers-write-standard'>;
 }
 
+function BaseTenSketch({number}: {number: number}) {
+    const hundreds = Math.floor(number / 100);
+    const tens = Math.floor((number % 100) / 10);
+    const ones = number % 10;
+    return (
+        <div className="flex min-h-[82px] items-end gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3" aria-label="Base-ten representation">
+            {Array.from({length: hundreds}).map((_, index) => (
+                <span key={`h-${index}`} className="h-14 w-14 border-2 border-sky-700 bg-sky-100" />
+            ))}
+            <div className="flex gap-1">
+                {Array.from({length: tens}).map((_, index) => (
+                    <span key={`t-${index}`} className="h-14 w-2.5 border-2 border-amber-700 bg-amber-100" />
+                ))}
+            </div>
+            <div className="grid grid-cols-5 gap-1">
+                {Array.from({length: ones}).map((_, index) => (
+                    <span key={`o-${index}`} className="h-3 w-3 border-2 border-emerald-700 bg-emerald-100" />
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function DoubleTenFrame({ number }: { number: number }) {
     const renderFrame = (startOffset: number) => {
         return (
@@ -47,7 +70,7 @@ const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] w-fit">
             <div className="flex items-center gap-[30px] flex-wrap font-sans">
-                {number <= 20 && <DoubleTenFrame number={number} />}
+                {number <= 20 ? <DoubleTenFrame number={number} /> : <BaseTenSketch number={number} />}
                 <div className="text-[3.5rem] font-extrabold text-slate-800 min-w-[80px] text-center">
                     {number}
                 </div>
@@ -64,8 +87,10 @@ const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
                         }
 
                         return (
-                            <div key={idx} className={cls}>
-                                {content}
+                            <div key={idx} className={`${cls} relative`}>
+                                <span className="absolute left-2 right-2 top-1/2 border-t border-dashed border-slate-300" />
+                                <span className="absolute bottom-2 left-2 right-2 border-t-2 border-slate-300" />
+                                <span className="relative z-10">{content}</span>
                             </div>
                         );
                     })}

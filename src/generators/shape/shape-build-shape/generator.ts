@@ -13,7 +13,8 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         validateConfigFields('shape-build-shape', config, [
             'target',
             'attributeScope',
-            'specifyAttributes'
+            'specifyAttributes',
+            'shapeIdentity'
         ]);
 
         const target = shapeNameFromLabel(config.target!);
@@ -30,7 +31,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
             return {data: construction, tags: []};
         }
 
-        if (config.attributeScope === Scope.ShapeAttributes && config.specifyAttributes) {
+        if (config.attributeScope === Scope.ShapeAttributes && config.specifyAttributes && !config.shapeIdentity) {
             return {
                 data: {
                     ...construction,

@@ -62,7 +62,7 @@ describe('CCSS observable-label contracts', () => {
     it('keeps pairwise measurement comparison distinct from object sorting', () => {
         const comparisons = targets(kindergarten, 'K.MD.A.2-compare-attributes');
 
-        expectAll(comparisons, [Area.Measurement, Ability.ProcedureExecution]);
+        expectAll(comparisons, [Area.Measurement, Ability.VisualReception]);
         expectNone(comparisons, [Area.ObjectSorting]);
     });
 

@@ -10,7 +10,13 @@ interface CoreProps {
     payload: ViewRenderPayload<'time-digital'>;
 }
 
-function formatDigitalTime(time: string, interval: number): string {
+interface DigitalTimeParts {
+    hour: string;
+    minute: string;
+    second?: string;
+}
+
+function parseDigitalTime(time: string, interval: number): DigitalTimeParts {
     const match = /^(\d{2}):(\d{2}):(\d{2})$/.exec(time);
     if (!match) {
         throw new ViewValidationError('time-digital', `Invalid time: ${time}`);
@@ -26,8 +32,16 @@ function formatDigitalTime(time: string, interval: number): string {
 
     const normalizedHour = hour % 12;
     const hour12 = normalizedHour === 0 ? 12 : normalizedHour;
-    const base = `${hour12}:${minuteText}`;
-    return interval < 60 ? `${base}:${secondText}` : base;
+    return {
+        hour: String(hour12),
+        minute: minuteText,
+        ...(interval < 60 ? {second: secondText} : {})
+    };
+}
+
+function formatDigitalTime(parts: DigitalTimeParts): string {
+    const base = `${parts.hour}:${parts.minute}`;
+    return parts.second === undefined ? base : `${base}:${parts.second}`;
 }
 
 function DigitalDisplay({value, highlighted = false}: {value: string; highlighted?: boolean}) {
@@ -36,9 +50,9 @@ function DigitalDisplay({value, highlighted = false}: {value: string; highlighte
         : 'text-cyan-200 border-slate-500 shadow-[inset_0_0_20px_rgba(34,211,238,0.08)]';
 
     return (
-        <div className={`relative flex items-center justify-center w-[310px] h-[132px] rounded-2xl border-[6px] bg-slate-950 ${displayClass}`}>
+        <div className={`relative flex h-[132px] w-[310px] items-center justify-center rounded-2xl border-[6px] bg-slate-950 ${displayClass}`}>
             <div className="absolute inset-[8px] rounded-lg border border-slate-700/70" />
-            <div className="relative font-mono text-[4.6rem] font-bold tracking-[0.08em] tabular-nums leading-none">
+            <div className="relative font-mono text-[4.6rem] font-bold leading-none tracking-[0.08em] tabular-nums">
                 {value}
             </div>
             <div className="absolute right-4 top-3 text-[0.65rem] tracking-[0.2em] text-slate-500">DIGITAL</div>
@@ -46,37 +60,52 @@ function DigitalDisplay({value, highlighted = false}: {value: string; highlighte
     );
 }
 
+function numberToWords(value: number): string {
+    const small = [
+        'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+        'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+        'seventeen', 'eighteen', 'nineteen'
+    ];
+    if (value < 20) return small[value];
+    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty'];
+    const remainder = value % 10;
+    return remainder === 0 ? tens[Math.floor(value / 10)] : `${tens[Math.floor(value / 10)]}-${small[remainder]}`;
+}
+
+function formatTimeClue(parts: DigitalTimeParts): string {
+    const hour = Number(parts.hour);
+    const minute = Number(parts.minute);
+    if (parts.second !== undefined) {
+        return `${numberToWords(hour)} hours, ${numberToWords(minute)} minutes, and ${numberToWords(Number(parts.second))} seconds`;
+    }
+    if (minute === 0) return `${numberToWords(hour)} o'clock`;
+    if (minute === 30) return `half past ${numberToWords(hour)}`;
+    return `${numberToWords(minute)} minutes past ${numberToWords(hour)}`;
+}
+
 const TimeDigitalCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('time-digital', data, ['time', 'interval']);
 
-    const formattedTime = formatDigitalTime(data.time, data.interval);
-    const isReverse = config.isReverse;
-    const displayValue = isReverse && !isSolutionView
-        ? formattedTime.replace(/\d/g, '–')
-        : formattedTime;
+    const timeParts = parseDigitalTime(data.time, data.interval);
+    const formattedTime = formatDigitalTime(timeParts);
+    const timeClue = formatTimeClue(timeParts);
+    const displayValue = isSolutionView ? formattedTime : formattedTime.replace(/\d/g, '–');
+    const prompt = config.isReverse ? 'Build the digital time.' : 'Set the digital clock.';
 
     return (
         <div className="flex w-full items-center justify-center bg-white p-6 font-sans">
             <div className="flex w-[520px] flex-col items-center gap-6 rounded-3xl border border-slate-200 bg-slate-50 px-8 py-7 shadow-sm">
                 <div className="flex min-h-[32px] items-center justify-center text-center text-[1.35rem] font-bold leading-snug text-slate-700">
-                    {!isSolutionView && (
-                        isReverse ? `Set the digital clock to ${formattedTime}.` : 'Write the time shown.'
-                    )}
+                    {prompt}
                 </div>
 
-                <DigitalDisplay value={displayValue} highlighted={isReverse && isSolutionView} />
+                <div className="flex min-h-[86px] min-w-[300px] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-6 text-center text-[1.4rem] font-bold text-slate-800">
+                    {timeClue}
+                </div>
 
-                {!isReverse && (
-                    <div className={`flex min-h-[64px] min-w-[190px] items-center justify-center rounded-xl border-2 px-5 font-mono text-[2.2rem] font-bold tabular-nums ${
-                        isSolutionView
-                            ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                            : 'border-dashed border-slate-400 bg-white text-transparent'
-                    }`}>
-                        {formattedTime}
-                    </div>
-                )}
+                <DigitalDisplay value={displayValue} highlighted={isSolutionView} />
             </div>
         </div>
     );
@@ -89,9 +118,7 @@ let root: ReturnType<typeof createRoot> | null = null;
 window.renderView = (payload: ViewRenderPayload<'time-digital'>) => {
     const container = document.getElementById('view');
     if (container) {
-        if (!root) {
-            root = createRoot(container);
-        }
+        if (!root) root = createRoot(container);
         root.render(<TimeDigital payload={payload} />);
     }
 };

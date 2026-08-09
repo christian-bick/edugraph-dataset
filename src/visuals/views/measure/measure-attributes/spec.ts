@@ -5,8 +5,7 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'measure-attributes',
     generalLabels: [
-        Ability.VisualReception,
-        Ability.ProcedureExecution,
+        Ability.ConceptClassification,
     ]
 };
 

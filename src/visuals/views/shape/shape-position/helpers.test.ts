@@ -6,6 +6,7 @@ describe('shape-position helpers', () => {
         expect(getBallPosition('above')).toEqual({ x: 130, y: 25 });
         expect(getBallPosition('below')).toEqual({ x: 130, y: 150 });
         expect(getBallPosition('nextTo')).toEqual({ x: 200, y: 90 });
-        expect(getBallPosition('ahead')).toEqual({ x: 155, y: 70 });
+        expect(getBallPosition('behind')).toEqual({ x: 130, y: 55 });
+        expect(getBallPosition('ahead')).toEqual({ x: 130, y: 130 });
     });
 });

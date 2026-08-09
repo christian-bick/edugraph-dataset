@@ -314,14 +314,13 @@ const subtractTensBuilder = new DatasetPermutationBuilder()
 const directLengthComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Measurement,
-        Area.ObjectSorting,
         Scope.LengthMeasurement,
         Scope.DirectRelation,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Least],
-        [Scope.Most]
+        [Scope.AscendingOrder],
+        [Scope.DescendingOrder]
     ]);
 
 // --- 1.MD.A.1: Compare two lengths through a third object ---
@@ -460,7 +459,7 @@ const buildShapesBuilder = new DatasetPermutationBuilder()
 
 const drawShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeRecognition,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation

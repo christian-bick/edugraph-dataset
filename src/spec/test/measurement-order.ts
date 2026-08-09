@@ -5,12 +5,11 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const directBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Measurement,
-        Area.ObjectSorting,
         Scope.LengthMeasurement,
         Scope.DirectRelation,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Scope.Least], [Scope.Most]]);
+    .applyLabelVariants([[Scope.AscendingOrder], [Scope.DescendingOrder]]);
 
 const mediatedBuilder = new DatasetPermutationBuilder()
     .addLabels([

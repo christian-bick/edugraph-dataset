@@ -22,29 +22,23 @@ function Illustration({ attribute, val1, val2, maxVal }: { attribute: string; va
         return (
             <svg width="220" height="200" viewBox="0 0 220 200" className="overflow-visible drop-shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
                 {/* Scale Base & Pillar */}
-                <rect x="100" y="140" width="20" height="40" fill="#64748b" />
+                <rect x="100" y="88" width="20" height="92" fill="#64748b" />
                 <rect x="70" y="170" width="80" height="15" fill="#475569" rx="3" />
                 <circle cx="110" cy="90" r="6" fill="#334155" />
                 
-                {/* Rotating Beam */}
-                <g 
-                    style={{ 
-                        transformOrigin: '110px 90px', 
-                        transform: `rotate(${layout.beamRotate}deg)`,
-                        transition: 'transform 0.5s' 
-                    }}
-                >
-                    <line x1="30" y1="90" x2="190" y2="90" stroke="#475569" strokeWidth="5" />
+                {/* Beam and hangers */}
+                <g>
+                    <line x1="30" y1={layout.leftBeamY} x2="190" y2={layout.rightBeamY} stroke="#475569" strokeWidth="5" />
                     {/* Left Hanger */}
-                    <line x1="30" y1="90" x2="30" y2={layout.leftPanY - 20} stroke="#94a3b8" strokeWidth="2" />
-                    <line x1="30" y1="90" x2="15" y2={layout.leftPanY} stroke="#94a3b8" strokeWidth="1.5" />
-                    <line x1="30" y1="90" x2="45" y2={layout.leftPanY} stroke="#94a3b8" strokeWidth="1.5" />
+                    <line x1="30" y1={layout.leftBeamY} x2="30" y2={layout.leftPanY - 20} stroke="#94a3b8" strokeWidth="2" />
+                    <line x1="30" y1={layout.leftBeamY} x2="15" y2={layout.leftPanY} stroke="#94a3b8" strokeWidth="1.5" />
+                    <line x1="30" y1={layout.leftBeamY} x2="45" y2={layout.leftPanY} stroke="#94a3b8" strokeWidth="1.5" />
                     <path d={`M 10 ${layout.leftPanY} L 50 ${layout.leftPanY}`} stroke="#475569" strokeWidth="3" strokeLinecap="round" />
                     
                     {/* Right Hanger */}
-                    <line x1="190" y1="90" x2="190" y2={layout.rightPanY - 20} stroke="#94a3b8" strokeWidth="2" />
-                    <line x1="190" y1="90" x2="175" y2={layout.rightPanY} stroke="#94a3b8" strokeWidth="1.5" />
-                    <line x1="190" y1="90" x2="205" y2={layout.rightPanY} stroke="#94a3b8" strokeWidth="1.5" />
+                    <line x1="190" y1={layout.rightBeamY} x2="190" y2={layout.rightPanY - 20} stroke="#94a3b8" strokeWidth="2" />
+                    <line x1="190" y1={layout.rightBeamY} x2="175" y2={layout.rightPanY} stroke="#94a3b8" strokeWidth="1.5" />
+                    <line x1="190" y1={layout.rightBeamY} x2="205" y2={layout.rightPanY} stroke="#94a3b8" strokeWidth="1.5" />
                     <path d={`M 170 ${layout.rightPanY} L 210 ${layout.rightPanY}`} stroke="#475569" strokeWidth="3" strokeLinecap="round" />
                 </g>
 

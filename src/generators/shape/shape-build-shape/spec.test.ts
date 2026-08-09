@@ -43,4 +43,14 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         });
         expect(new Set(stub!.tags).size).toBe(stub!.tags!.length);
     });
+
+    it('resolves shape identity only for the identity construction mode', () => {
+        const labels = [Area.Circle, Scope.ShapeProperties, Area.ShapeIdentity];
+        const stub = generateWithLabels(generator, labels);
+
+        expect(stub).toEqual({
+            data: {target: 'circle', sides: 0, corners: 0},
+            tags: labels
+        });
+    });
 });

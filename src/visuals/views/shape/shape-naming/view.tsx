@@ -103,10 +103,9 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
         : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
 
     const seed = payload.seed;
-    const rotation = is3D ? 0 : (seed % 360);
-    const scale = is3D ? 1 : parseFloat(((seed % 6) / 10 + 0.8).toFixed(1));
+    const rotation = is3D ? 18 : 25 + (seed % 50);
 
-    const promptText = "What shape is this?";
+    const promptText = "What shape are these?";
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
@@ -125,18 +124,22 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="flex flex-col items-center w-[480px]">
-                {!isSolutionView && (
-                    <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-normal">
-                        {promptText}
-                    </div>
-                )}
+                <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-normal">
+                    {promptText}
+                </div>
                 
                 <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
-                    <div 
-                        style={{ transform: `rotate(${rotation}deg) scale(${scale})`, transformOrigin: 'center' }} 
-                        className="flex justify-center items-center w-[120px] h-[120px]"
-                    >
-                        <ShapeSVG shape={shape} size={100} />
+                    <div className="flex items-center justify-center gap-5">
+                        <div className="flex h-[120px] w-[120px] items-center justify-center">
+                            <ShapeSVG shape={shape} size={100} />
+                        </div>
+                        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">same shape</span>
+                        <div
+                            style={{transform: `rotate(${rotation}deg)`, transformOrigin: 'center'}}
+                            className="flex h-[120px] w-[120px] items-center justify-center"
+                        >
+                            <ShapeSVG shape={shape} size={100} />
+                        </div>
                     </div>
                 </div>
 

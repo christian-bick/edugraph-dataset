@@ -43,14 +43,21 @@ const CountingIncDecCore = ({ config: _config, payload }: CoreProps) => {
         <div className="flex justify-center items-center p-5 bg-white w-fit max-w-[600px]">
             <div className="flex justify-between items-center w-full">
                 <div className="flex flex-wrap justify-start gap-2.5 mb-2.5">
-                    {Array.from({ length: data.numObjects }).map((_, i) => (
-                        <img
-                            key={i}
-                            src={`/icons/counting/${icon}`}
-                            alt="counting object"
-                            className="w-[50px] h-[50px]"
-                        />
-                    ))}
+                    {Array.from({ length: data.numObjects }).map((_, i) => {
+                        const isRemoved = !isInc && i >= data.incDecAnswer;
+                        return (
+                            <div key={i} className="relative h-[50px] w-[50px]">
+                                <img
+                                    src={`/icons/counting/${icon}`}
+                                    alt="counting object"
+                                    className={`h-[50px] w-[50px] ${isRemoved ? 'opacity-[0.35] grayscale' : ''}`}
+                                />
+                                {isRemoved && (
+                                    <span className="absolute left-1/2 top-1/2 h-[3px] w-[58px] -translate-x-1/2 -translate-y-1/2 rotate-45 rounded bg-rose-600" />
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
                 
                 <div className="flex flex-row items-center ml-5 gap-[15px]">

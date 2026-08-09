@@ -7,9 +7,7 @@ import {PLANE_SHAPE_LABELS} from '../helpers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'shape-build-shape',
-    generalLabels: [
-        Area.ShapeIdentity
-    ],
+    generalLabels: [],
 };
 
 export const ShapeBuildShapeGeneratorSchema = {
@@ -24,6 +22,10 @@ export const ShapeBuildShapeGeneratorSchema = {
     specifyAttributes: [
         [Ability.ConceptSpecification],
         hasLabel(Ability.ConceptSpecification)
+    ],
+    shapeIdentity: [
+        [Area.ShapeIdentity],
+        hasLabel(Area.ShapeIdentity)
     ]
 } as const;
 

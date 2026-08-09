@@ -16,8 +16,8 @@ const builder = new DatasetPermutationBuilder()
         [Scope.NumbersWithoutNegatives]
     ])
     .applyLabelVariants([
-        [Scope.Most],
-        [Scope.Least]
+        [Scope.DescendingOrder],
+        [Scope.AscendingOrder]
     ])
     .addLabels([Scope.NumbersSmaller100]);
 

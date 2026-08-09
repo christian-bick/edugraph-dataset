@@ -15,10 +15,10 @@ export function getBallPosition(relation: string): BallPosition {
         ballX = 200;
     } else if (relation === 'behind') {
         ballY = 55;
-        ballX = 145;
+        ballX = 130;
     } else if (relation === 'ahead') {
-        ballY = 70;
-        ballX = 155;
+        ballY = 130;
+        ballX = 130;
     }
     return { x: ballX, y: ballY };
 }

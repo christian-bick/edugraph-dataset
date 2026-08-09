@@ -266,7 +266,7 @@ const teenNumbersBuilder = new DatasetPermutationBuilder()
 const measurableAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringObjects,
-        Ability.ProcedureExecution
+        Ability.ConceptClassification
     ])
     .applyLabelVariants([
         [Scope.LengthMeasurement],
@@ -277,7 +277,7 @@ const measurableAttributesBuilder = new DatasetPermutationBuilder()
 const compareAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Measurement,
-        Ability.ProcedureExecution
+        Ability.VisualReception
     ])
     .applyLabelVariants([
         [Scope.LengthMeasurement],
@@ -332,7 +332,7 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
 const envShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
-        Ability.ProcedureExecution
+        Ability.VisualRecognition
     ])
     .applyLabelVariants([
         [Area.Circle],
@@ -343,7 +343,7 @@ const envShapesBuilder = new DatasetPermutationBuilder()
 const envShapesOtherBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
-        Ability.ProcedureExecution
+        Ability.VisualRecognition
     ])
     .applyLabelVariants([
         [Area.Triangle],

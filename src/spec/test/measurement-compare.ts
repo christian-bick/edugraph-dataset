@@ -5,7 +5,7 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 const builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Measurement,
-        Ability.ProcedureExecution
+        Ability.VisualReception
     ])
     .applyLabelVariants([
         [Scope.LengthMeasurement],

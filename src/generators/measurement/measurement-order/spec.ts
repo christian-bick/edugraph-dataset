@@ -6,14 +6,13 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement-order',
     generalLabels: [
         Area.Measurement,
-        Area.ObjectSorting,
         Scope.LengthMeasurement,
         Scope.DirectRelation
     ]
 };
 
 export const MeasurementOrderGeneratorSchema = {
-    relation: [Scope.Least, Scope.Most]
+    direction: [Scope.AscendingOrder, Scope.DescendingOrder]
 } as const;
 
 export type MeasurementOrderGeneratorConfig = ConfigFromSchema<typeof MeasurementOrderGeneratorSchema>;

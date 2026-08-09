@@ -5,7 +5,7 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'shape-env-shapes',
     generalLabels: [
-        Ability.ProcedureExecution
+        Ability.VisualRecognition
     ],
 };
 

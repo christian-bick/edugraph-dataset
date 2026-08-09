@@ -1,6 +1,5 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {TenFrame} from '../../../components/TenFrame.tsx';
 import { PlaceValueMakeTenViewConfig, PlaceValueMakeTenViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { validateProblemData } from '../../../helpers/validation.ts';
@@ -9,6 +8,23 @@ import '../../../../tailwind.css';
 interface CoreProps {
     config: PlaceValueMakeTenViewConfig;
     payload: ViewRenderPayload<'place-value-make-ten'>;
+}
+
+function MakeTenFrame({givenNumber, revealMissing}: {givenNumber: number; revealMissing: boolean}) {
+    return (
+        <div className="grid grid-cols-5 grid-rows-2 gap-[3px] overflow-hidden rounded-md border-2 border-slate-600 bg-white">
+            {Array.from({length: 10}).map((_, index) => {
+                const isGiven = index < givenNumber;
+                const isMissing = !isGiven && revealMissing;
+                return (
+                    <div key={index} className="flex h-8 w-8 items-center justify-center border-[0.5px] border-slate-100">
+                        {isGiven && <div className="h-[22px] w-[22px] rounded-full bg-gradient-to-br from-rose-400 to-rose-600 shadow-[0_2px_4px_rgba(190,18,60,0.3)]" />}
+                        {isMissing && <div className="h-[22px] w-[22px] rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-[0_2px_4px_rgba(217,119,6,0.3)]" />}
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
 const PlaceValueMakeTenCore = ({ config: _config, payload }: CoreProps) => {
@@ -29,14 +45,11 @@ const PlaceValueMakeTenCore = ({ config: _config, payload }: CoreProps) => {
                     </div>
                 )}
                 
-                <div className="flex gap-[20px] bg-slate-50 p-[15px] border-[1.5px] border-dashed border-slate-300 rounded-xl mb-[25px]">
-                    <div className="flex flex-col items-center gap-1.5">
-                        <div className="text-[0.85rem] font-bold text-slate-400 uppercase">{givenNumber} ones</div>
-                        <TenFrame filledCount={givenNumber} colorClass="color-a" />
-                    </div>
-                    <div className="flex flex-col items-center gap-1.5">
-                        <div className="text-[0.85rem] font-bold text-slate-400 uppercase">{missingNumber} ones</div>
-                        <TenFrame filledCount={missingNumber} colorClass="color-b" />
+                <div className="mb-[25px] flex flex-col items-center gap-2 rounded-xl border-[1.5px] border-dashed border-slate-300 bg-slate-50 p-[15px]">
+                    <MakeTenFrame givenNumber={givenNumber} revealMissing={isSolutionView} />
+                    <div className="flex gap-4 text-[0.82rem] font-bold uppercase tracking-wide text-slate-500">
+                        <span className="text-rose-600">Given</span>
+                        {isSolutionView && <span className="text-amber-600">Added</span>}
                     </div>
                 </div>
 

@@ -24,7 +24,8 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             target,
             attributeScope: Scope.ShapeProperties,
-            specifyAttributes: false
+            specifyAttributes: false,
+            shapeIdentity: false
         });
 
         expect(stub).toEqual({
@@ -56,7 +57,8 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             target,
             attributeScope: Scope.ShapeAttributes,
-            specifyAttributes: true
+            specifyAttributes: true,
+            shapeIdentity: false
         });
 
         expect(stub).toEqual({
@@ -75,7 +77,8 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.generate({
             target: Area.Cube as any,
             attributeScope: Scope.ShapeProperties,
-            specifyAttributes: false
+            specifyAttributes: false,
+            shapeIdentity: false
         })).toBeNull();
     });
 
@@ -83,12 +86,20 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.generate({
             target: Area.Triangle,
             attributeScope: Scope.ShapeAttributes,
-            specifyAttributes: false
+            specifyAttributes: false,
+            shapeIdentity: false
         })).toBeNull();
         expect(generator.generate({
             target: Area.Triangle,
             attributeScope: Scope.ShapeProperties,
-            specifyAttributes: true
+            specifyAttributes: true,
+            shapeIdentity: false
+        })).toBeNull();
+        expect(generator.generate({
+            target: Area.Triangle,
+            attributeScope: Scope.ShapeAttributes,
+            specifyAttributes: true,
+            shapeIdentity: true
         })).toBeNull();
     });
 

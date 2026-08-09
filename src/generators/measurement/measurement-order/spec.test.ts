@@ -11,18 +11,17 @@ describe('MeasurementOrderGenerator spec integration', () => {
         expect(spec.generalLabels).toContain(Scope.DirectRelation);
     });
 
-    it('resolves least-first and most-first ordering', () => {
-        for (const relation of [Scope.Least, Scope.Most] as const) {
+    it('resolves ascending and descending ordering', () => {
+        for (const direction of [Scope.AscendingOrder, Scope.DescendingOrder] as const) {
             const stub = generateWithLabels(generator, [
                 Area.Measurement,
-                Area.ObjectSorting,
                 Scope.LengthMeasurement,
                 Scope.DirectRelation,
-                relation
+                direction
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.direction).toBe(relation === Scope.Least ? 'ascending' : 'descending');
-            expect(stub!.tags).toContain(relation);
+            expect(stub!.data.direction).toBe(direction === Scope.AscendingOrder ? 'ascending' : 'descending');
+            expect(stub!.tags).toContain(direction);
         }
     });
 });

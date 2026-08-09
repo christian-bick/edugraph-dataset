@@ -46,6 +46,21 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
                 <rect x="15" y="30" width="70" height="40" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" rx="4"/>
             </svg>
         );
+    } else if (shape === 'rectangular-prism') {
+        return (
+            <svg {...commonProps}>
+                <path d="M 14 38 L 64 38 L 64 76 L 14 76 Z" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
+                <path d="M 14 38 L 34 22 L 84 22 L 64 38 Z" fill="#60a5fa" stroke="#1d4ed8" strokeWidth="2" />
+                <path d="M 64 38 L 84 22 L 84 60 L 64 76 Z" fill="#2563eb" stroke="#1d4ed8" strokeWidth="2" />
+            </svg>
+        );
+    } else if (shape === 'cone') {
+        return (
+            <svg {...commonProps}>
+                <path d="M 50 15 L 18 76 Q 50 92 82 76 Z" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
+                <ellipse cx="50" cy="76" rx="32" ry="10" fill="#60a5fa" stroke="#1d4ed8" strokeWidth="2" />
+            </svg>
+        );
     }
     throw new ViewValidationError('shape-same-attribute', `Unsupported shape: ${shape}`);
 }
@@ -58,68 +73,79 @@ const ShapeSameAttributeCore = ({ config: _config, payload }: CoreProps) => {
     const attribute = data.attribute;
     const answer = data.answer;
 
-    const promptText = useMemo(() => {
-        const promptMap: Record<string, string> = {
-            'rollable': 'Which of these shapes rolls easily?',
-            'stackable': 'Which of these shapes is best for stacking?',
-            'foldable': 'Which of these shapes can be folded?'
+    const action = useMemo(() => {
+        const actionMap: Record<string, string> = {
+            'rollable': 'roll',
+            'stackable': 'stack',
+            'foldable': 'fold'
         };
-        const text = promptMap[attribute];
-        if (!text) {
+        const resolvedAction = actionMap[attribute];
+        if (!resolvedAction) {
             throw new ViewValidationError('shape-same-attribute', `Unsupported attribute: ${attribute}`);
         }
-        return text;
+        return resolvedAction;
     }, [attribute]);
 
-    const options = ['sphere', 'cube', 'rectangle'];
-
-    const getBtnClass = (opt: string) => {
-        let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
-        if (opt === answer && isSolutionView) {
-            cls += "border-green-600 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(22,163,74,0.2)] font-bold";
-        } else {
-            cls += "border-slate-200 bg-white text-slate-600";
-        }
-        return cls;
+    const options = attribute === 'rollable'
+        ? ['sphere', 'cube', 'rectangular-prism']
+        : attribute === 'stackable'
+            ? ['sphere', 'cube', 'cone']
+            : ['sphere', 'cube', 'rectangle'];
+    const otherOptions = options.filter(option => option !== answer);
+    const labelText = (shape: string) => {
+        if (shape === 'rectangular-prism') return 'Rectangular prism';
+        if (shape === 'rectangle') return 'Rectangular sheet';
+        return shape.charAt(0).toUpperCase() + shape.slice(1);
     };
-
-    const getLabelText = (opt: string) => {
-        return opt.charAt(0).toUpperCase() + opt.slice(1);
-    };
+    const shapeCard = (shape: string, solved = false) => (
+        <div
+            key={shape}
+            className={`flex min-w-[84px] flex-col items-center rounded-xl border-2 px-2 py-2 ${
+                solved ? 'border-emerald-600 bg-emerald-50' : 'border-slate-200 bg-white'
+            }`}
+        >
+            <ShapeSVG shape={shape} size={52} />
+            <span className={`text-sm font-bold ${solved ? 'text-emerald-700' : 'text-slate-600'}`}>
+                {labelText(shape)}
+            </span>
+        </div>
+    );
 
     return (
-        <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
+        <div className="mx-auto flex w-fit items-center justify-center rounded-2xl bg-white p-[30px] font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="flex flex-col items-center w-[480px]">
-                {!isSolutionView && (
-                    <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-normal">
-                        {promptText}
+                <div className="text-[1.3rem] font-bold text-slate-700 mb-[25px] text-center leading-normal">
+                    Sort the shapes by whether they can {action}.
+                </div>
+                
+                {!isSolutionView ? (
+                    <div className="flex w-[460px] flex-col items-center gap-3">
+                        <div className="flex w-full items-center justify-center gap-4 rounded-xl border-2 border-slate-200 bg-slate-50 p-3">
+                            {options.map(option => shapeCard(option))}
+                        </div>
+                        <div className="flex w-full gap-3">
+                            <div className="flex h-[72px] flex-1 items-center justify-center rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 text-sm font-bold text-emerald-700">
+                                Can {action}
+                            </div>
+                            <div className="flex h-[72px] flex-1 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-sm font-bold text-slate-600">
+                                Does not {action}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex w-[460px] items-stretch justify-center gap-3">
+                        <div className="flex min-h-[180px] flex-1 flex-col items-center gap-2 rounded-xl border-2 border-emerald-300 bg-emerald-50/40 p-3">
+                            <span className="text-sm font-bold text-emerald-700">Can {action}</span>
+                            {shapeCard(answer, true)}
+                        </div>
+                        <div className="flex min-h-[180px] flex-1 flex-col items-center gap-2 rounded-xl border-2 border-slate-200 bg-slate-50 p-3">
+                            <span className="text-sm font-bold text-slate-600">Does not {action}</span>
+                            <div className="flex gap-2">
+                                {otherOptions.map(option => shapeCard(option))}
+                            </div>
+                        </div>
                     </div>
                 )}
-                
-                <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
-                    <div className="flex gap-[30px] justify-center items-center w-full">
-                        <div className="flex flex-col items-center gap-1.5">
-                            <ShapeSVG shape="sphere" size={70} />
-                            <span className="font-bold text-slate-500">Sphere</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-1.5">
-                            <ShapeSVG shape="cube" size={70} />
-                            <span className="font-bold text-slate-500">Cube</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-1.5">
-                            <ShapeSVG shape="rectangle" size={70} />
-                            <span className="font-bold text-slate-500">Rectangle</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3 w-full justify-center">
-                    {options.map((opt, i) => (
-                        <div key={i} className={getBtnClass(opt)}>
-                            {getLabelText(opt)}
-                        </div>
-                    ))}
-                </div>
             </div>
         </div>
     );

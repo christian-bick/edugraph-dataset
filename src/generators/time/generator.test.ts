@@ -62,7 +62,7 @@ describe('TimeGenerator', () => {
             }
         });
 
-        it('should align time with the requested interval (30 minutes)', () => {
+        it('should make half-hour intervals visually distinguishable from whole-hour intervals', () => {
             const config = { 
                 intervalLabel: Scope.HalfHourIntervals,
                 requireZero: false
@@ -71,7 +71,7 @@ describe('TimeGenerator', () => {
                 const stub = generator.generate(config);
                 if (stub) {
                     const [, m, s] = stub.data.time.split(':').map(Number);
-                    expect(m % 30).toBe(0);
+                    expect(m).toBe(30);
                     expect(s).toBe(0);
                 }
             }

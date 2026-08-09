@@ -31,11 +31,13 @@ const PlaceValueDecomposeTeenCore = ({ config: _config, payload }: CoreProps) =>
                 
                 <div className="flex gap-[20px] bg-slate-50 p-[15px] border-[1.5px] border-dashed border-slate-300 rounded-xl mb-[25px]">
                     <div className="flex flex-col items-center gap-1.5">
-                        <div className="text-[0.85rem] font-bold text-slate-400 uppercase">10 ones</div>
+                        <div className="text-[0.85rem] font-bold text-slate-400 uppercase">One ten</div>
                         <TenFrame filledCount={10} colorClass="color-a" />
                     </div>
                     <div className="flex flex-col items-center gap-1.5">
-                        <div className="text-[0.85rem] font-bold text-slate-400 uppercase">{ones} ones</div>
+                        <div className="text-[0.85rem] font-bold text-slate-400 uppercase">
+                            {isSolutionView ? `${ones} ones` : 'Extra ones'}
+                        </div>
                         <TenFrame filledCount={ones} colorClass="color-b" />
                     </div>
                 </div>

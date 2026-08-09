@@ -1,2 +1,2 @@
-- **Identity:** One clearly rendered plane or solid shape and appropriate name choices make naming it self-explaining.
+- **Identity:** Clearly rendered examples of the same plane or solid shape in different orientations, plus appropriate name choices, make both identity and naming observable.
 - **Modes:** Question Mode leaves every name neutral; Solution Mode identifies the correct name.

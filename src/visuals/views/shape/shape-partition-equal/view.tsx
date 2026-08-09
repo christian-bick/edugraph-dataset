@@ -140,10 +140,10 @@ function SharePiece({shape, parts}: {shape: FractionShape; parts: FractionParts}
     );
 }
 
-function PromptSlot({isSolutionView, children}: {isSolutionView: boolean; children: string}) {
+function PromptSlot({children}: {isSolutionView: boolean; children: string}) {
     return (
         <div className="h-[58px] flex items-start justify-center text-[1.3rem] font-bold text-slate-700 text-center leading-snug px-4">
-            {!isSolutionView && children}
+            {children}
         </div>
     );
 }
@@ -237,7 +237,7 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>
-                        {`How many ${pluralShareName} make one whole?`}
+                        {`What do these ${pluralShareName} make?`}
                     </PromptSlot>
                     <div className="w-[420px] h-[260px] bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-center box-border">
                         {isSolutionView ? (
@@ -298,7 +298,6 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
                             );
                         })}
                     </div>
-                    <AnswerSlot isSolutionView={isSolutionView} answer={data.answer} />
                 </ViewFrame>
             );
         }

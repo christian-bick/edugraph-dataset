@@ -10,9 +10,9 @@ export class MeasurementOrderGenerator implements ProblemGenerator<MeasurementOr
     schema = MeasurementOrderGeneratorSchema;
 
     generate(config: MeasurementOrderGeneratorConfig): ProblemStub | null {
-        validateConfigFields('measurement-order', config, ['relation']);
-        const relation = config.relation;
-        if (relation !== Scope.Least && relation !== Scope.Most) return null;
+        validateConfigFields('measurement-order', config, ['direction']);
+        const orderScope = config.direction;
+        if (orderScope !== Scope.AscendingOrder && orderScope !== Scope.DescendingOrder) return null;
 
         const lengths = new Set<number>();
         while (lengths.size < 3) {
@@ -22,7 +22,7 @@ export class MeasurementOrderGenerator implements ProblemGenerator<MeasurementOr
             id: String.fromCharCode(65 + index),
             length
         }));
-        const direction = relation === Scope.Least ? 'ascending' : 'descending';
+        const direction = orderScope === Scope.AscendingOrder ? 'ascending' : 'descending';
         const order = [...objects]
             .sort((a, b) => direction === 'ascending' ? a.length - b.length : b.length - a.length)
             .map(object => object.id);

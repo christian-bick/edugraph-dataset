@@ -42,7 +42,7 @@ function BaseTenBlocks({number}: {number: number}) {
     const {hundreds, tens, ones} = decomposeBaseTen(number);
     return (
         <div className="flex items-end gap-5 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4">
-            <div className="flex flex-col items-center gap-2">
+            {hundreds > 0 && <div className="flex flex-col items-center gap-2">
                 <div className="flex gap-2">
                     {Array.from({length: hundreds}).map((_, index) => (
                         <div key={index} className="grid h-[112px] w-[112px] grid-cols-10 grid-rows-10 border-2 border-sky-700 bg-sky-100">
@@ -51,8 +51,8 @@ function BaseTenBlocks({number}: {number: number}) {
                     ))}
                 </div>
                 <span className="font-bold text-slate-600">{hundreds} {hundreds === 1 ? 'hundred' : 'hundreds'}</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
+            </div>}
+            {tens > 0 && <div className="flex flex-col items-center gap-2">
                 <div className="flex gap-1.5">
                     {Array.from({length: tens}).map((_, index) => (
                         <div key={index} className="grid h-[112px] w-[14px] grid-rows-10 border-2 border-amber-700 bg-amber-100">
@@ -61,13 +61,13 @@ function BaseTenBlocks({number}: {number: number}) {
                     ))}
                 </div>
                 <span className="font-bold text-slate-600">{tens} tens</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
+            </div>}
+            {ones > 0 && <div className="flex flex-col items-center gap-2">
                 <div className="grid grid-cols-5 gap-1.5">
                     {Array.from({length: ones}).map((_, index) => <span key={index} className="h-[14px] w-[14px] border-2 border-emerald-700 bg-emerald-100" />)}
                 </div>
                 <span className="font-bold text-slate-600">{ones} ones</span>
-            </div>
+            </div>}
         </div>
     );
 }

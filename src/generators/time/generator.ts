@@ -31,7 +31,10 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
         const dayInSeconds = 24 * 3600;
 
         const maxIntervals = Math.floor(dayInSeconds / interval);
-        const randomInterval = Math.floor(random() * maxIntervals);
+        let randomInterval = Math.floor(random() * maxIntervals);
+        if (config.intervalLabel === Scope.HalfHourIntervals && randomInterval % 2 === 0) {
+            randomInterval += 1;
+        }
         let totalSeconds = randomInterval * interval;
 
         if (config.requireZero && interval === 1) {
