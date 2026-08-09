@@ -18,6 +18,10 @@ describe('CountingClassifyCountGenerator', () => {
         expect(() => generator.generate({} as any)).toThrow();
     });
 
+    it('returns null when the requested range cannot contain a positive item count', () => {
+        expect(generator.generate({range: {min: 0, max: 0}})).toBeNull();
+    });
+
     it('should validate classify-count items and categories logic', () => {
         const config = {
             range: { min: 1, max: 10 }

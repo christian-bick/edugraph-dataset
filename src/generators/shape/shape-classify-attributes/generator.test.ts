@@ -1,5 +1,6 @@
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as shapeHelpers from '../helpers.ts';
 import {
     getDefiningAttributeStatements,
     getShapeDefinition,
@@ -24,6 +25,13 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(() => generator.generate(null as never)).toThrow(
             '[Generator: shape-classify-attributes] Validation Error'
         );
+    });
+
+    it('returns null when a selected ontology label has no shape mapping', () => {
+        const shapeNameSpy = vi.spyOn(shapeHelpers, 'shapeNameFromLabel').mockReturnValueOnce(null);
+
+        expect(generator.generate({})).toBeNull();
+        expect(shapeNameSpy).toHaveBeenCalledOnce();
     });
 
     it('generates exactly one defining option and three non-defining options', () => {

@@ -44,6 +44,26 @@ describe('MeasurementLengthGenerator', () => {
         expect(stub!.data.problemLength).toBeLessThanOrEqual(10);
     });
 
+    it('selects ruler bands that cover longer requested ranges', () => {
+        const observedBands = new Set<number>();
+
+        for (let seed = 0; seed < 200; seed++) {
+            setSeed(seed);
+            observedBands.add(generator.generate({range: {min: 0, max: 100}, useDecimals: false})!.data.bandLength);
+        }
+
+        expect(observedBands).toEqual(new Set([10, 20, 50, 100]));
+    });
+
+    it('caps the ruler and generated length at 100', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({range: {min: 0, max: 1_000}, useDecimals: true})!;
+            expect(stub.data.bandLength).toBeLessThanOrEqual(100);
+            expect(stub.data.problemLength).toBeLessThanOrEqual(100);
+        }
+    });
+
     it('should throw an error if range is missing', () => {
         const config = { range: null as any, useDecimals: true };
         expect(() => generator.generate(config)).toThrow();

@@ -37,7 +37,7 @@ export default defineConfig({
         tailwindcss(),
         handlebars({
             // Point to the directory where your partials are located
-            partialDirectory: resolve(__dirname, './src/partials'),
+            partialDirectory: resolve(import.meta.dirname, './src/partials'),
         }),
     ],
     test: {
