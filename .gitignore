@@ -32,5 +32,4 @@ examples
 gcloud-credentials.json
 
 # Unit test coverage outputs
-coverage/coverage-summary.json
-
+coverage/

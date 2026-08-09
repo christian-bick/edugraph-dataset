@@ -34,7 +34,7 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
     const isBehind = relation === 'behind';
 
     const getBtnClass = (opt: string) => {
-        let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
+        let cls = "flex-1 min-w-[120px] whitespace-nowrap py-3 px-1.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
         const isCorrect = opt === answer || (opt === 'nextTo' && answer === 'beside');
         if (isCorrect && isSolutionView) {
             cls += "border-green-600 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(22,163,74,0.2)] font-bold";
