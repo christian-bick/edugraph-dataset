@@ -1,9 +1,46 @@
 @import "tailwindcss";
 
 :root {
-    color-scheme: dark;
+    color-scheme: light;
     font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    background: #020617;
+    background: #ffffff;
+
+    /* Keep Tailwind's semantic utility classes while giving the explorer the
+       same light shell as the sibling EduGraph Editor. */
+    --color-slate-950: #ffffff;
+    --color-slate-900: #f4eff4;
+    --color-slate-800: #ded7de;
+    --color-slate-700: #c5bdc5;
+    --color-slate-600: #948b94;
+    --color-slate-500: #746c74;
+    --color-slate-400: #5f585f;
+    --color-slate-300: #464046;
+    --color-slate-200: #332e33;
+    --color-slate-100: #262626;
+
+    --color-indigo-600: #262626;
+    --color-indigo-500: #fb8500;
+    --color-indigo-400: #c65f00;
+    --color-indigo-300: #a34e00;
+
+    --color-emerald-500: #5cb85c;
+    --color-emerald-400: #28603b;
+    --color-orange-500: #fb8500;
+    --color-orange-400: #a94b00;
+    --color-orange-300: #8f3f00;
+    --color-red-500: #dc2626;
+    --color-red-400: #b42318;
+    --color-red-300: #9f1f17;
+    --color-sky-500: #219ebc;
+    --color-sky-400: #16738b;
+    --color-sky-300: #125f73;
+    --color-blue-500: #219ebc;
+    --color-blue-300: #125f73;
+    --color-yellow-500: #fb8500;
+    --color-yellow-300: #805500;
+    --color-purple-500: #8b5cf6;
+    --color-purple-300: #6840a0;
+    --color-purple-200: #59348d;
 }
 
 * {
@@ -22,20 +59,139 @@ button:focus,
     outline: none;
 }
 
+.explorer-header {
+    min-height: 3.5rem;
+    width: 100%;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    background: #f4eff4;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: #262626;
+    position: relative;
+    z-index: 20;
+}
+
+.explorer-header-left {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.explorer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex: 0 0 auto;
+}
+
+.explorer-brand img {
+    width: 18px;
+    height: 18px;
+}
+
+.explorer-brand-title {
+    font-size: 1.15rem;
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+}
+
+.explorer-standard-selector {
+    min-height: 36px;
+    padding: 0.3rem 0.75rem;
+    display: flex;
+    align-items: center;
+    color: #464046;
+    background: #faf7fa;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.explorer-metrics {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.explorer-metric {
+    min-height: 36px;
+    padding: 0.3rem 0.65rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #faf7fa;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.explorer-metric-label {
+    color: #746c74;
+    font-size: 0.55rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.explorer-metric-value {
+    margin-top: 0.18rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #1e293b;
+    background: #f4eff4;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #475569;
+    background: #c5bdc5;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
+    background: #948b94;
+}
+
+@media (max-width: 1100px) {
+    .explorer-metric {
+        padding-inline: 0.5rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .explorer-header {
+        min-height: auto;
+        padding-block: 0.65rem;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+    }
+
+    .explorer-header-left {
+        width: 100%;
+    }
+
+    .explorer-metrics {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.15rem;
+    }
 }

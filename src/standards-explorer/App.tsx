@@ -39,67 +39,67 @@ const coverageStyles: Record<CoverageKind, {
         label: 'Analysis',
         icon: 'fa-magnifying-glass',
         badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
-        card: 'border-sky-500/30 hover:border-sky-500/50 bg-sky-500/5',
-        selectedCard: 'border-indigo-500 ring-1 ring-indigo-500/50 bg-sky-500/5',
-        subCard: 'border-sky-500/20 hover:border-sky-500/40 bg-sky-500/5',
-        selectedSubCard: 'border-indigo-500 bg-sky-500/10 ring-1 ring-indigo-500/50',
+        card: 'border-sky-500/30 hover:border-sky-500/50 bg-sky-50 hover:bg-sky-100/70',
+        selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-sky-50',
+        subCard: 'border-sky-500/20 hover:border-sky-500/40 bg-sky-50 hover:bg-sky-100/70',
+        selectedSubCard: 'border-slate-500 bg-sky-50 ring-1 ring-slate-400/30',
         detailLabel: 'ANALYSIS NEEDED',
-        detailBadge: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+        detailBadge: 'bg-sky-50 text-sky-800 border-sky-200',
     },
     beyond: {
         label: 'Beyond Scope',
         icon: 'fa-ban',
         badge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
-        card: 'border-purple-500/30 hover:border-purple-500/50 bg-purple-500/5',
-        selectedCard: 'border-indigo-500 ring-1 ring-indigo-500/50 bg-purple-500/5',
-        subCard: 'border-purple-500/20 hover:border-purple-500/40 bg-purple-500/5',
-        selectedSubCard: 'border-indigo-500 bg-purple-500/10 ring-1 ring-indigo-500/50',
+        card: 'border-purple-500/30 hover:border-purple-500/50 bg-purple-50 hover:bg-purple-100/70',
+        selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-purple-50',
+        subCard: 'border-purple-500/20 hover:border-purple-500/40 bg-purple-50 hover:bg-purple-100/70',
+        selectedSubCard: 'border-slate-500 bg-purple-50 ring-1 ring-slate-400/30',
         detailLabel: 'BEYOND SCOPE',
-        detailBadge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
+        detailBadge: 'bg-purple-50 text-purple-800 border-purple-200',
     },
     ontology: {
         label: 'Ontology',
         icon: 'fa-circle-xmark',
         badge: 'bg-red-500/10 text-red-400 border-red-500/20',
-        card: 'border-red-500/30 hover:border-red-500/50 bg-red-500/5',
-        selectedCard: 'border-indigo-500 ring-1 ring-indigo-500/50 bg-red-500/5',
-        subCard: 'border-red-500/20 hover:border-red-500/40 bg-red-500/5',
-        selectedSubCard: 'border-indigo-500 bg-red-500/10 ring-1 ring-indigo-500/50',
+        card: 'border-red-500/30 hover:border-red-500/50 bg-red-50 hover:bg-red-100/70',
+        selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-red-50',
+        subCard: 'border-red-500/20 hover:border-red-500/40 bg-red-50 hover:bg-red-100/70',
+        selectedSubCard: 'border-slate-500 bg-red-50 ring-1 ring-slate-400/30',
         detailLabel: 'MISSING ONTOLOGY',
-        detailBadge: 'bg-red-500/10 text-red-400 border-red-500/20',
+        detailBadge: 'bg-red-50 text-red-800 border-red-200',
     },
     partial: {
         label: 'Partial Scope',
         icon: 'fa-circle-half-stroke',
         badge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
-        card: 'border-purple-500/30 hover:border-purple-500/50 bg-purple-500/5',
-        selectedCard: 'border-indigo-500 ring-1 ring-indigo-500/50 bg-purple-500/5',
-        subCard: 'border-purple-500/20 hover:border-purple-500/40 bg-purple-500/5',
-        selectedSubCard: 'border-indigo-500 bg-purple-500/10 ring-1 ring-indigo-500/50',
+        card: 'border-purple-500/30 hover:border-purple-500/50 bg-purple-50 hover:bg-purple-100/70',
+        selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-purple-50',
+        subCard: 'border-purple-500/20 hover:border-purple-500/40 bg-purple-50 hover:bg-purple-100/70',
+        selectedSubCard: 'border-slate-500 bg-purple-50 ring-1 ring-slate-400/30',
         detailLabel: 'PARTIAL SCOPE',
-        detailBadge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
+        detailBadge: 'bg-purple-50 text-purple-800 border-purple-200',
     },
     covered: {
         label: 'Covered',
         icon: 'fa-circle-check',
         badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-        card: 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/5',
-        selectedCard: 'border-indigo-500 ring-1 ring-indigo-500/50 bg-emerald-500/5',
-        subCard: 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5',
-        selectedSubCard: 'border-indigo-500 bg-emerald-500/10 ring-1 ring-indigo-500/50',
+        card: 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-50 hover:bg-emerald-100/70',
+        selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-emerald-50',
+        subCard: 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-50 hover:bg-emerald-100/70',
+        selectedSubCard: 'border-slate-500 bg-emerald-50 ring-1 ring-slate-400/30',
         detailLabel: 'COVERED',
-        detailBadge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        detailBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     },
     implementation: {
         label: 'Implementation',
         icon: 'fa-triangle-exclamation',
         badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-        card: 'border-orange-500/30 hover:border-orange-500/50 bg-orange-500/5',
-        selectedCard: 'border-indigo-500 ring-1 ring-indigo-500/50 bg-orange-500/5',
-        subCard: 'border-orange-500/20 hover:border-orange-500/40 bg-orange-500/5',
-        selectedSubCard: 'border-indigo-500 bg-orange-500/10 ring-1 ring-indigo-500/50',
+        card: 'border-orange-500/30 hover:border-orange-500/50 bg-orange-50 hover:bg-orange-100/70',
+        selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-orange-50',
+        subCard: 'border-orange-500/20 hover:border-orange-500/40 bg-orange-50 hover:bg-orange-100/70',
+        selectedSubCard: 'border-slate-500 bg-orange-50 ring-1 ring-slate-400/30',
         detailLabel: 'MISSING IMPLEMENTATION',
-        detailBadge: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+        detailBadge: 'bg-orange-50 text-orange-800 border-orange-200',
     },
 };
 
@@ -143,21 +143,21 @@ function Header() {
     ];
 
     return (
-        <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shrink-0">
-            <div className="flex items-center gap-3">
-                <div className="bg-indigo-600 p-2.5 rounded-lg text-white shadow-lg shadow-indigo-600/30">
-                    <Icon name="fa-graduation-cap" className="text-2xl" />
+        <header className="explorer-header shrink-0">
+            <div className="explorer-header-left">
+                <div className="explorer-brand">
+                    <img src="/favicon.png" alt="EduGraph logo" />
+                    <h1 className="explorer-brand-title">EduGraph Coverage</h1>
                 </div>
-                <div>
-                    <h1 className="text-xl font-bold tracking-tight text-white">Common Core Standards Explorer</h1>
-                    <p className="text-xs text-slate-400">Structured interactive task list for mathematical pedagogical modeling</p>
+                <div className="explorer-standard-selector">
+                    <span>Common Core Standards</span>
                 </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
+            <div className="explorer-metrics">
                 {items.map(item => (
-                    <div key={item.label} className="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-md">
-                        <span className="text-slate-400 font-medium">{item.label}</span>
-                        <span className={`${item.color} font-semibold ml-1`}>{item.value}</span>
+                    <div key={item.label} className="explorer-metric">
+                        <span className="explorer-metric-label">{item.label.replace(':', '')}</span>
+                        <span className={`${item.color} explorer-metric-value`}>{item.value}</span>
                     </div>
                 ))}
             </div>
@@ -179,7 +179,7 @@ function GradeTabs() {
                     onClick={() => setActiveGrade(grade)}
                     className={`px-2.5 py-2 text-xs font-semibold rounded-lg text-center transition-all duration-150 border ${
                         grade === activeGrade
-                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/15 font-bold'
+                            ? 'bg-[#fff8f0] border-indigo-500 text-slate-100 shadow-sm font-bold'
                             : 'bg-slate-900 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 hover:border-slate-700'
                     }`}
                 >
@@ -235,7 +235,7 @@ function ExplorerFilters() {
                                     onClick={() => toggleDomain(domain.id)}
                                     className={`w-full text-left px-3 py-2 text-xs rounded-lg border flex items-center justify-between transition-all duration-150 ${
                                         selected
-                                            ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300 font-semibold shadow-sm'
+                                            ? 'bg-[#fff8f0] border-indigo-500 text-slate-100 shadow-sm font-bold'
                                             : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                                     }`}
                                 >
@@ -309,7 +309,7 @@ function SidePanel() {
 
     const tabClass = (selected: boolean) => `flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 ${
         selected
-            ? 'border-indigo-500 bg-slate-900 text-white'
+            ? 'border-indigo-500 bg-[#faf7fa] text-slate-100'
             : 'border-transparent text-slate-400 hover:text-slate-200'
     }`;
 
@@ -351,11 +351,11 @@ function StandardCard({ standard, nested = false, search = false }: {
     const style = kind ? coverageStyles[kind] : null;
     const statusClass = nested
         ? selected
-            ? style?.selectedSubCard ?? 'border-indigo-500 bg-indigo-500/5 ring-1 ring-indigo-500/30'
+            ? style?.selectedSubCard ?? 'border-slate-500 bg-slate-900/40 ring-1 ring-slate-400/30'
             : style?.subCard ?? 'border-slate-800/40 hover:border-slate-700 bg-slate-900/10'
         : selected
-            ? style?.selectedCard ?? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5'
-            : style?.card ?? 'border-slate-800/60 hover:border-slate-700';
+            ? style?.selectedCard ?? 'border-slate-500 ring-1 ring-slate-400/30 bg-slate-900/40'
+            : style?.card ?? 'border-slate-800/60 hover:border-slate-700 bg-slate-950/60 hover:bg-slate-900/60';
     const subStandards = 'subStandards' in standard ? standard.subStandards : [];
 
     return (
@@ -370,7 +370,7 @@ function StandardCard({ standard, nested = false, search = false }: {
             onKeyDown={event => {
                 if (event.key === 'Enter' || event.key === ' ') setActiveStandard(standard.id);
             }}
-            className={`${nested ? 'p-2.5 rounded-md gap-1.5' : 'p-3.5 rounded-lg bg-slate-950/60 hover:bg-slate-900/60 gap-2.5'} border transition-all duration-150 cursor-pointer focus:outline-none flex flex-col ${statusClass}`}
+            className={`${nested ? 'p-2.5 rounded-md gap-1.5' : 'p-3.5 rounded-lg gap-2.5'} border transition-all duration-150 cursor-pointer focus:outline-none flex flex-col ${statusClass}`}
         >
             <div className={`flex items-${nested ? 'center' : 'start'} justify-between gap-3`}>
                 <span className={`${nested ? 'text-[11px] font-semibold' : 'text-xs font-bold'} font-mono text-slate-300`}>{standard.id}</span>
@@ -403,8 +403,7 @@ function ClusterList() {
             <section key={cluster.id} className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-5 space-y-4 shadow-sm">
                 <div className="flex items-start justify-between border-b border-slate-800/60 pb-3">
                     <div>
-                        <span className="px-2 py-0.5 bg-slate-800 border border-slate-700/60 text-slate-400 rounded text-[9px] font-mono tracking-wider">CLUSTER</span>
-                        <h3 className="text-sm font-semibold text-slate-200 mt-1.5 leading-snug">{cluster.id}: {cluster.description}</h3>
+                        <h3 className="text-sm font-semibold text-slate-200 leading-snug">{cluster.id}: {cluster.description}</h3>
                     </div>
                 </div>
                 <div className="space-y-3">
@@ -450,7 +449,7 @@ function TaskCard({ task }: { task: BacklogTask }) {
                 if (event.key === 'Enter' || event.key === ' ') setActiveTask(task.id);
             }}
             className={`bg-slate-900/40 border rounded-xl p-5 space-y-4 shadow-sm transition-all hover:bg-slate-900/60 cursor-pointer focus:outline-none ${
-                selected ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-500/5' : 'border-slate-800/80'
+                selected ? 'border-slate-500 ring-1 ring-slate-400/30 bg-slate-900/40' : 'border-slate-800/80'
             }`}
         >
             <div className="flex items-start justify-between gap-4">
@@ -460,7 +459,7 @@ function TaskCard({ task }: { task: BacklogTask }) {
                         <span className="text-xs text-slate-600">|</span>
                         <span className="text-xs text-slate-500 font-medium">{task.cluster_description}</span>
                     </div>
-                    <h3 className="text-base font-bold text-white">{task.title}</h3>
+                    <h3 className="text-base font-bold text-slate-100">{task.title}</h3>
                 </div>
                 <span className={`px-2 py-0.5 rounded text-[9px] border font-bold ${style.color}`}>{style.label}</span>
             </div>
@@ -511,8 +510,8 @@ function CenterPanel() {
     return (
         <main className="flex-1 flex flex-col min-h-0 bg-slate-950 overflow-y-auto border-r border-slate-800 p-6">
             <div className="mb-4">
-                <div className="text-xs uppercase tracking-wider text-indigo-400 font-semibold mb-1">{header.crumbs}</div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">{header.title}</h2>
+                <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">{header.crumbs}</div>
+                <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">{header.title}</h2>
                 <p className="text-sm text-slate-400 mt-1">{header.description}</p>
             </div>
             <div className="space-y-4">
@@ -529,20 +528,20 @@ function CenterPanel() {
 }
 
 const getConceptBadgeStyle = (coverage: StandardCoverage, label: string) => {
-    if (coverage.matched_areas.includes(label)) return 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30';
-    if (coverage.matched_scopes.includes(label)) return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
-    if (coverage.matched_abilities.includes(label)) return 'bg-blue-500/10 text-blue-300 border-blue-500/30';
-    return 'bg-slate-900 text-slate-300 border-slate-800';
+    if (coverage.matched_areas.includes(label)) return 'bg-amber-50 text-amber-800 border-amber-200';
+    if (coverage.matched_scopes.includes(label)) return 'bg-emerald-50 text-emerald-800 border-emerald-200';
+    if (coverage.matched_abilities.includes(label)) return 'bg-sky-50 text-sky-800 border-sky-200';
+    return 'bg-slate-900 text-slate-200 border-slate-700';
 };
 
 function ConceptBadges({ coverage, labels, emptyText }: { coverage: StandardCoverage; labels: string[]; emptyText: string }) {
-    if (labels.length === 0) return <span className="text-[9px] text-slate-500 italic">{emptyText}</span>;
+    if (labels.length === 0) return <span className="text-[10px] text-slate-500 italic">{emptyText}</span>;
     return <>
         {labels.map(label => (
             <span
                 key={label}
                 title={label}
-                className={`px-1.5 py-0.5 rounded border font-mono text-[9px] inline-block m-0.5 ${getConceptBadgeStyle(coverage, label)}`}
+                className={`px-2 py-1 rounded-md border font-mono font-semibold text-[10px] leading-none inline-block ${getConceptBadgeStyle(coverage, label)}`}
             >
                 {label.split('/').at(-1)}
             </span>
@@ -553,9 +552,9 @@ function ConceptBadges({ coverage, labels, emptyText }: { coverage: StandardCove
 function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
     if (!coverage.spec_covered) {
         return (
-            <div className="text-xs text-sky-300 bg-sky-950/40 border border-sky-500/30 rounded-md p-2.5 leading-relaxed mt-1">
+            <div className="text-xs text-sky-800 bg-sky-50 border border-sky-200 rounded-md p-2.5 leading-relaxed mt-1">
                 <div className="flex items-start gap-2">
-                    <Icon name="fa-magnifying-glass" className="text-sky-400 mt-0.5 shrink-0 text-[11px]" />
+                    <Icon name="fa-magnifying-glass" className="text-sky-600 mt-0.5 shrink-0 text-[11px]" />
                     <div><strong>Analysis Needed:</strong> Spec file not yet created for this grade/cluster. Domain analysis required to define target competencies.</div>
                 </div>
             </div>
@@ -563,9 +562,9 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
     }
     if (coverage.beyond_scope.length > 0) {
         return (
-            <div className="text-xs text-purple-200 bg-purple-950/40 border border-purple-500/30 rounded-md p-2.5 leading-relaxed mt-1">
+            <div className="text-xs text-purple-800 bg-purple-50 border border-purple-200 rounded-md p-2.5 leading-relaxed mt-1">
                 <div className="flex items-start gap-2">
-                    <Icon name="fa-ban" className="text-purple-300 mt-0.5 shrink-0 text-[11px]" />
+                    <Icon name="fa-ban" className="text-purple-600 mt-0.5 shrink-0 text-[11px]" />
                     <div>{coverage.beyond_scope.map(item => <div key={item.title}><strong>{item.title}:</strong> {item.description}</div>)}</div>
                 </div>
             </div>
@@ -573,9 +572,9 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
     }
     if (!coverage.ontology_covered || coverage.ontology_todos.length > 0) {
         return coverage.ontology_todos.length > 0 ? (
-            <div className="text-xs text-red-300 bg-red-950/40 border border-red-500/30 rounded-md p-2.5 leading-relaxed mt-1">
+            <div className="text-xs text-red-800 bg-red-50 border border-red-200 rounded-md p-2.5 leading-relaxed mt-1">
                 <div className="flex items-start gap-2">
-                    <Icon name="fa-circle-xmark" className="text-red-400 mt-0.5 shrink-0 text-[11px]" />
+                    <Icon name="fa-circle-xmark" className="text-red-600 mt-0.5 shrink-0 text-[11px]" />
                     <div>{coverage.ontology_todos.map(todo => <div key={todo.title}><strong>{todo.title}:</strong> {todo.description}</div>)}</div>
                 </div>
             </div>
@@ -583,65 +582,80 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
     }
     const explanations = [...new Set(coverage.implementation_todos.map(todo => todo.explanation).filter(Boolean))];
     return explanations.length > 0 ? (
-        <div className="text-xs text-orange-300 bg-orange-950/40 border border-orange-500/30 rounded-md p-2.5 leading-relaxed mt-1">
+        <div className="text-xs text-orange-800 bg-orange-50 border border-orange-200 rounded-md p-2.5 leading-relaxed mt-1">
             <div className="flex items-start gap-2">
-                <Icon name="fa-triangle-exclamation" className="text-orange-400 mt-0.5 shrink-0 text-[11px]" />
+                <Icon name="fa-triangle-exclamation" className="text-orange-600 mt-0.5 shrink-0 text-[11px]" />
                 <div>{explanations.map(explanation => <div key={explanation}>{explanation}</div>)}</div>
             </div>
         </div>
     ) : null;
 }
 
+function BreakdownHeading({ label, count }: { label: string; count: number }) {
+    return (
+        <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider flex items-center justify-between">
+            <span>{label}</span>
+            <span className="min-w-5 px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 text-center rounded-md">{count}</span>
+        </div>
+    );
+}
+
 function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
     const labelSets = getLabelSets(coverage);
     const intersection = intersectLabels(labelSets);
-    const hasContent = labelSets.length > 0 || coverage.ontology_todos.length > 0 || coverage.beyond_scope.length > 0;
+    const permutationCount = coverage.competencies.length + coverage.implementation_todos.length;
+    const hasContent = labelSets.length > 0 || coverage.ontology_todos.length > 0;
 
-    if (!hasContent) return <span className="text-slate-500 italic text-[10px]">No competency permutations defined</span>;
+    if (!hasContent) return null;
 
     return (
-        <div className="space-y-2 pt-1 border-t border-slate-800/80 mt-1">
-            {intersection.length > 0 && (
-                <div className="p-2 rounded bg-slate-950/80 border border-slate-800 space-y-1 mb-2">
-                    <div className="text-[9px] font-mono text-slate-400 font-semibold uppercase tracking-wider mb-1 flex items-center justify-between">
-                        <span>Common Concepts</span>
-                        <span className="text-[8px] px-1 py-0.5 bg-slate-800 text-slate-400 rounded">{intersection.length}</span>
+        <div className="space-y-3 pt-3 border-t border-slate-800/80 mt-1">
+            {labelSets.length > 0 && (
+                <div className="space-y-1.5">
+                    <BreakdownHeading label="Common Labels" count={intersection.length} />
+                    <div className="p-2 rounded-md bg-slate-950/80 border border-slate-800">
+                        <div className="flex flex-wrap gap-1.5">
+                            <ConceptBadges coverage={coverage} labels={intersection} emptyText="No labels shared by every permutation" />
+                        </div>
                     </div>
-                    <div className="flex flex-wrap gap-0.5"><ConceptBadges coverage={coverage} labels={intersection} emptyText="" /></div>
                 </div>
             )}
-            {coverage.competencies.map((permutation, index) => (
-                <div key={`competency-${index}`} className="p-2 rounded bg-slate-950/60 border border-slate-800/60">
-                    <div className="flex flex-wrap gap-0.5">
-                        <ConceptBadges coverage={coverage} labels={permutation.filter(label => !intersection.includes(label))} emptyText="Identical to common concepts" />
-                    </div>
+            {permutationCount > 0 && (
+                <div className="space-y-1.5">
+                    <BreakdownHeading label="Label Permutations" count={permutationCount} />
+                    {coverage.competencies.map((permutation, index) => (
+                        <div key={`competency-${index}`} className="p-2 rounded-md bg-slate-950/60 border border-slate-800/60">
+                            <div className="flex flex-wrap gap-1.5">
+                                <ConceptBadges coverage={coverage} labels={permutation.filter(label => !intersection.includes(label))} emptyText="Only common labels" />
+                            </div>
+                        </div>
+                    ))}
+                    {coverage.implementation_todos.map(todo => (
+                        <div key={todo.id} className="p-2 rounded-md bg-orange-50 border border-orange-200 space-y-1.5">
+                            <div className="flex justify-end">
+                                <span className="px-1.5 py-0.5 bg-orange-100 border border-orange-200 text-[9px] text-orange-800 font-semibold uppercase tracking-wider rounded">Implementation Todo</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                                <ConceptBadges coverage={coverage} labels={todo.labels.filter(label => !intersection.includes(label))} emptyText="Only common labels" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            ))}
-            {coverage.implementation_todos.map(todo => (
-                <div key={todo.id} className="p-2 rounded bg-orange-950/10 border border-orange-500/20">
-                    <div className="flex flex-wrap gap-0.5">
-                        <ConceptBadges coverage={coverage} labels={todo.labels.filter(label => !intersection.includes(label))} emptyText="Identical to common concepts" />
-                    </div>
+            )}
+            {coverage.ontology_todos.length > 0 && (
+                <div className="space-y-1.5">
+                    <BreakdownHeading label="Ontology Gaps" count={coverage.ontology_todos.length} />
+                    {coverage.ontology_todos.map(todo => (
+                        <div key={todo.title} className="p-2 rounded-md bg-red-50 border border-red-200 space-y-1">
+                            <div className="text-[10px] font-mono text-red-700 font-semibold flex items-center justify-between">
+                                <span>{todo.title}</span>
+                                <span className="text-[9px] px-1.5 py-0.5 bg-red-100 border border-red-200 rounded">ONTOLOGY TODO</span>
+                            </div>
+                            <p className="text-[10px] text-red-700/80 italic leading-snug">{todo.description}</p>
+                        </div>
+                    ))}
                 </div>
-            ))}
-            {coverage.ontology_todos.map(todo => (
-                <div key={todo.title} className="p-2 rounded bg-red-950/20 border border-red-500/30 space-y-1">
-                    <div className="text-[9px] font-mono text-red-400 font-semibold flex items-center justify-between">
-                        <span>{todo.title}</span>
-                        <span className="text-[8px] px-1 py-0.5 bg-red-500/10 border border-red-500/20 rounded">ONTOLOGY TODO</span>
-                    </div>
-                    <p className="text-[10px] text-red-300/80 italic leading-snug">{todo.description}</p>
-                </div>
-            ))}
-            {coverage.beyond_scope.map(item => (
-                <div key={item.title} className="p-2 rounded bg-purple-950/20 border border-purple-500/30 space-y-1">
-                    <div className="text-[9px] font-mono text-purple-300 font-semibold flex items-center justify-between">
-                        <span>{item.title}</span>
-                        <span className="text-[8px] px-1 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded">BEYOND SCOPE</span>
-                    </div>
-                    <p className="text-[10px] text-purple-200/80 italic leading-snug">{item.description}</p>
-                </div>
-            ))}
+            )}
         </div>
     );
 }
@@ -653,16 +667,13 @@ function StandardDetails() {
 
     return (
         <div className="p-6 bg-slate-900/60 flex flex-col gap-4">
-            <div className="flex items-start justify-between">
-                <span className="px-2.5 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded text-[10px] font-mono font-bold tracking-wider">
-                    {standard?.level.toUpperCase() ?? 'STANDARD'}
-                </span>
-                <span className="text-xs text-slate-500 font-mono">{standard?.id ?? 'K.CC.A.1'}</span>
-            </div>
             <div>
-                <h3 className="text-base font-semibold text-white leading-snug">
-                    {standard?.description ?? 'Select a standard from the list to display details.'}
+                <h3 className="text-base font-semibold text-slate-100 leading-snug">
+                    {standard?.id ?? 'Select a standard'}
                 </h3>
+                <p className="text-sm font-normal text-slate-600 mt-2 leading-relaxed">
+                    {standard?.description ?? 'Select a standard from the list to display details.'}
+                </p>
             </div>
             {standard && coverage && <MappingDetails coverage={coverage} />}
         </div>
@@ -680,7 +691,7 @@ function MappingDetails({ coverage }: { coverage: StandardCoverage }) {
             <div className="flex items-center gap-1.5">
                 <span className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${style.detailBadge}`}>{style.detailLabel}</span>
                 {showModule && (
-                    <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
                         {coverage.generator_module?.toUpperCase()}
                     </span>
                 )}
@@ -703,7 +714,7 @@ function TaskDetails() {
                     <span className="text-xs text-slate-500 font-mono">task-generator-K.CC.B</span>
                 </div>
                 <div>
-                    <h3 className="text-base font-semibold text-white leading-snug">Task Title</h3>
+                    <h3 className="text-base font-semibold text-slate-100 leading-snug">Task Title</h3>
                     <p className="text-xs text-slate-300 mt-2 whitespace-pre-wrap leading-relaxed">Task description...</p>
                 </div>
                 <div className="border-t border-slate-800/80 pt-3 text-xs">
@@ -721,7 +732,7 @@ function TaskDetails() {
                 <span className="text-xs text-slate-500 font-mono">{task.id}</span>
             </div>
             <div>
-                <h3 className="text-base font-semibold text-white leading-snug">{task.title}</h3>
+                <h3 className="text-base font-semibold text-slate-100 leading-snug">{task.title}</h3>
                 <p className="text-xs text-slate-300 mt-2 whitespace-pre-wrap leading-relaxed">{task.description}</p>
             </div>
             <div className="border-t border-slate-800/80 pt-3 text-xs">
