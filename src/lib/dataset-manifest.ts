@@ -15,15 +15,13 @@ import {
     ViewCatalogEntry
 } from './generation.ts';
 import { CompetencyTarget } from '../types/ml-engine.ts';
-import { currentRendererEnvironment } from './render-environment.ts';
 
-export const DATASET_MANIFEST_SCHEMA_VERSION = 2;
+export const DATASET_MANIFEST_SCHEMA_VERSION = 1;
 const GENERATION_PIPELINE_VERSION = 'transactional-render-v1';
 
 export interface DatasetManifestEntry {
     generator: string;
     view: string;
-    renderer_environment: string;
     input_hash: string;
     content_hash: string;
     sample_counts: Record<SampleSplit, number>;
@@ -94,7 +92,6 @@ function globalSourceHash(projectRoot: string): string {
         resolve(projectRoot, 'src', 'lib', 'generation.ts'),
         resolve(projectRoot, 'src', 'lib', 'module-resolver.ts'),
         resolve(projectRoot, 'src', 'lib', 'random.ts'),
-        resolve(projectRoot, 'src', 'lib', 'render-environment.ts'),
         resolve(projectRoot, 'src', 'lib', 'resolvers.ts'),
         resolve(projectRoot, 'src', 'lib', 'spec-validator.ts'),
         resolve(projectRoot, 'src', 'lib', 'type-parser.ts'),
@@ -104,7 +101,6 @@ function globalSourceHash(projectRoot: string): string {
         resolve(projectRoot, 'src', 'visuals', 'helpers'),
         resolve(projectRoot, 'src', 'visuals', 'withConfig.tsx'),
         resolve(projectRoot, 'src', 'partials'),
-        resolve(projectRoot, 'src', 'fonts.css'),
         resolve(projectRoot, 'src', 'tailwind.css'),
         resolve(projectRoot, 'public')
     ]);
@@ -145,17 +141,8 @@ export function buildDatasetManifestEntries(options: {
     generators: GeneratorCatalogEntry[];
     views: ViewCatalogEntry[];
     generatedSplits: SampleSplit[];
-    rendererEnvironment?: string;
 }): Record<string, DatasetManifestEntry> {
-    const {
-        projectRoot,
-        datasetDir,
-        targets,
-        generators,
-        views,
-        generatedSplits,
-        rendererEnvironment = currentRendererEnvironment()
-    } = options;
+    const { projectRoot, datasetDir, targets, generators, views, generatedSplits } = options;
     const tuples = matchTargets(targets, generators, views).tuples;
     const targetsByPair = new Map<string, CompetencyTarget[]>();
     for (const tuple of tuples) {
@@ -197,7 +184,6 @@ export function buildDatasetManifestEntries(options: {
         entries[key] = {
             generator: generatorId,
             view: viewId,
-            renderer_environment: rendererEnvironment,
             input_hash: hash(JSON.stringify({
                 pipeline: GENERATION_PIPELINE_VERSION,
                 ontology,
@@ -276,16 +262,4 @@ export function datasetFreshnessIssues(
         if (!currentEntries[key]) issues.push(`${key} remains in the manifest but no longer matches the current spec.`);
     }
     return issues;
-}
-
-export function datasetRendererIssues(
-    manifest: DatasetManifest | null,
-    expectedRendererEnvironment: string
-): string[] {
-    if (!manifest) return ['manifest.json is missing; renderer environment cannot be verified.'];
-    return Object.entries(manifest.entries)
-        .filter(([, entry]) => entry.renderer_environment !== expectedRendererEnvironment)
-        .map(([key, entry]) =>
-            `${key} was rendered by "${entry.renderer_environment || 'unknown'}" instead of "${expectedRendererEnvironment}".`
-        );
 }

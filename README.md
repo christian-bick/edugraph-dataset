@@ -29,7 +29,7 @@ The architecture is split into three main parts:
 
 ### Prerequisites
 
-*   [Node.js](https://nodejs.org/) (v20+ recommended)
+*   [Node.js](https://nodejs.org/) 24 LTS (the supported major is recorded in `.nvmrc`)
 *   Docker Desktop or another compatible Docker runtime for canonical generation
 
 ### Installation
