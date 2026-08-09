@@ -55,7 +55,7 @@
     "playwright": "1.60.0",
     "sass-embedded": "^1.100.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^8.2.1",
     "vite-node": "^6.0.0",
     "vitest": "^4.1.10"
