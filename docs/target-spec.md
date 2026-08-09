@@ -100,8 +100,19 @@ sibling `implementationTodos` / `ontologyTodos` exports, or in `beyondScope` whe
 required evidence cannot exist in the dataset's declared medium — kept in the same file alongside
 `spec` so agents can work through gaps in context.
 
-**Why:** a stretched label produces a sample that is mislabeled. The dataset's whole value
-is that labels are mathematically provable claims about the image.
+**Why:** a stretched label produces a mislabeled sample. The dataset's value depends on
+labels being truthful, observable claims about the training artifact.
+
+### TSPEC-13 — Labels require observable classification evidence
+
+A true statement about the source standard is not automatically a valid labeled competency. For
+every active target, the expected matched generator-view artifact must expose enough visual
+or necessary textual clues for a combination of labels to be reasonably identifiable and defendable.
+
+When the intended label is not actually elicited by the rendered task, select the most
+specific label that is. If the required evidence cannot exist in any image medium (would require a video), 
+suggest to use `beyondScope`; if the concept is missing from the ontology or implementation, 
+se the corresponding todo export.
 
 ### TSPEC-7 — Categorize each competency into exactly one export
 
@@ -223,3 +234,4 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
 - [ ] **TSPEC-12** — `test` remains a focused prototyping/regression spec and provides at least one generatable target-view path per generator.
+- [ ] **TSPEC-13** — every active label is reasonably identifiable and defendable from visual or textual evidence in the expected matched artifact; no target relies on hidden context.

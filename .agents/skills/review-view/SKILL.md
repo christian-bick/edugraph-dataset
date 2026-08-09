@@ -30,7 +30,9 @@ Without `--file`, review all three aspects.
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.
 
 Check these explicitly on every view:
-- `CHK-V6`: the leaf contract is missing, non-observable, or contains a sentence that does not pass the removal question.
+- `CHK-V6`: the central checklist is loaded once, every leaf has exactly one heading-free checklist with concise **Identity** and **Modes** criteria, and every extra sentence is observable and passes the removal question. There are no category or generator checklists.
+- `SPEC-V5`: every label in `generalLabels` is a property elicited by visible or necessary textual clues in the rendered task.
+- Central label support: ontology-label evidence and verdict policy stay in the central checklist, not the leaf checklist or evaluator prompt.
 - `IMPL-V6`: visual randomness is not derived from `payload.seed`.
 
 ---

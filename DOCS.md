@@ -7,7 +7,7 @@ This document provides a comprehensive technical overview of the EduGraph Conten
 ## 1. Architecture Overview
 
 ### Label-Driven Generation
-The core philosophy of this system is **Label-Driven Generation**. Pedagogical labels (derived from the EduGraph ontology, e.g., `Scope.IntegersWithZero`, `Area.Addition`) strictly dictate the mathematical properties of the generated problems. The system does not generate a problem and *then* label it; rather, it receives a set of constraints (labels) and acts as a constraint satisfier to generate a math problem that mathematically proves those labels.
+The core philosophy of this system is **Label-Driven Generation**. Pedagogical labels (derived from the EduGraph ontology, e.g., `Scope.IntegersWithZero`, `Area.Addition`) strictly dictate the mathematical properties and cognitive task represented by each artifact. The system does not generate a problem and *then* label it; it receives label constraints and produces a task whose mathematics satisfies them and whose visible or necessary textual clues make them reasonably defendable to a classifier.
 
 ### The Three Pillars
 The architecture is divided into three distinct layers:
@@ -138,7 +138,7 @@ The canonical cache-producing generation wrapper.
 *   **Function**: An automated Visual QA pipeline. Normal mode uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze canonical Q/A image pairs against exactly two visual contracts: the central view checklist and the selected leaf view's required checklist. Evaluator role and response mechanics are sent through the SDK's system instruction; the user content contains only the mode, ontology labels, a generic `## View-specific checklist` heading with the heading-free leaf criteria, and the global checklist under its own H2. Validation runs per standard — `--spec=test` targets the small `out/dataset-test/` slice for fast iteration. Normal mode rejects native renderer identities so a Windows or host-specific render cannot enter the committed cache.
 *   **Freshness gate**: Before inspecting or spending API calls on VQA, validation recomputes the manifest entries for the selected scope and fails if entries are missing, inputs are stale, aggregate `content_fingerprint` hashes differ, or sample counts drifted. Regenerate the reported generator/view scope first. A legacy dataset without `manifest.json` must be regenerated once.
 *   **Splits**: **Both `train` and `validation` are validated.** Validation images ship in the released dataset and are subject to the same checklists, so exempting them would let unchecked images reach consumers. Images are located by reading the split back out of the `sample_key` (`SPLIT_DIRS` in `src/lib/generation.ts`) — `file_name` is relative to its split root and does not encode the split, so **the same tuple's train and validation images share a filename**; every human-facing path is qualified with its split. The report breaks results down per split.
-*   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : validation-context hash)`. The validation context combines the applicable checklist hash with the sorted ontology labels and their definitions, so changing an image, checklist, label claim, or definition re-validates exactly the affected samples. Each cache entry also records the component hashes and the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
+*   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : validation-context hash)`. The validation context combines the applicable checklist hash with the sorted ontology labels and their definitions, so changing an image, checklist, label claim, or definition re-validates exactly the affected samples. The evaluator system instruction, response schema, and model identifier are deliberately excluded from this hash; changing any of them requires a deliberate full live validation with `--force`. Each cache entry also records the component hashes and the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
 *   **Prompt diagnostics**: `--log-prompts` prints the system instruction, user prompt, and image path immediately before every live request. Diagnostic runs use one request at a time so the prompt logs stay readable. The flag does not affect cache keys or evaluator behavior.
 *   **Gate semantics**: Normal validation updates cache records and reports; it exits non-zero for failing or uncached selected samples. Strict `--audit` is full-dataset-only, read-only, and never calls Gemini: it requires both splits, canonical renderer identities, exact metadata/image correspondence, and an exact set of passing cache keys. Missing, failing, stale, duplicate, malformed, orphaned, or obsolete-module records fail the audit. `--report-only` is the explicit diagnostic escape hatch.
 *   **Report paths**: Normal full validation writes `out/dataset-<spec>/validation-report.md`. A normal scoped run writes a stable, non-clobbering path under `out/dataset-<spec>/validation-reports/`, such as `generator=writing__view=numbers-write-standard.md`. `--report=<path>` overrides either location. Strict audit writes no report into the audited dataset.
@@ -228,7 +228,7 @@ To add a new mathematical concept or visual style to the dataset, follow this st
 ### Step 1: Define the Pedagogy
 Declare the target specifications in the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`), building permutations with the `DatasetPermutationBuilder`. See `src/spec/ccss/kindergarten.ts` for worked examples.
 
-The export contract, the content-hash id semantics, how to categorize gaps into `implementationTodos` / `ontologyTodos`, how to declare intentional medium exclusions in `beyondScope`, and the rule against stretching labels to force a match are all specified in [docs/target-spec.md](docs/target-spec.md).
+The export contract, content-hash id semantics, gap dispositions, rule against stretching labels, and requirement that every active label have observable classification evidence (`TSPEC-13`) are specified in [docs/target-spec.md](docs/target-spec.md).
 
 ### Step 2: Analyze Matchings
 Run `npm run show:matching -- --spec=ccss` to inspect the complete matched-pair set. Confirm both that the intended path exists and that every additional pair is a genuine realization. Use `--raw` only when tracing an overlapping source definition that production deduplicates.
@@ -245,7 +245,7 @@ Follow `IMPL-6` and `IMPL-7` in [docs/implementation-general.md](docs/implementa
 ### Step 5: Declaring Capabilities (`spec.ts`)
 Create or update the `spec.ts` files for both your generator and visual view, per [docs/spec-generator.md](docs/spec-generator.md) and [docs/spec-view.md](docs/spec-view.md), with the shared rules in [docs/spec-general.md](docs/spec-general.md).
 
-The two decisions that most often go wrong: declaring the most specific label that is *actually true* of your output (`SPEC-2`, `SPEC-3`), and expressing a view's physical limits as rejection boundaries rather than as absent capabilities (`SPEC-V3`, `SPEC-V4`).
+The decisions that most often go wrong are declaring the most specific label that is actually true (`SPEC-2`, `SPEC-3`), ensuring view-owned abilities are elicited by the rendered task (`SPEC-V5`), and expressing physical limits as rejection boundaries rather than competency filters (`SPEC-V3`, `SPEC-V4`).
 
 ### Step 6: Implementation
 Implement `generator.ts` per [docs/implementation-generator.md](docs/implementation-generator.md) and `view.tsx` per [docs/implementation-view.md](docs/implementation-view.md).
@@ -274,7 +274,13 @@ Use the isolated `test` spec for fast visual prototyping, debugging, smoke gener
 ### Step 8: Final Verification
 1. Run `npm run check` (or `npm run check:types`, `npm run check:generator-view-specs`, `npm run check:standards-spec`) to verify type safety, spec constraints, label usage, and target standard specs.
 2. Run `npm run show:matching -- --spec=ccss` to confirm the real standard bindings; use `--spec=test` for the isolated smoke path and `--raw` only for source-definition diagnosis.
-3. Run `npm run generate:dataset -- --spec=ccss --generator=[moduleName]` to test local dataset generation.
+3. Canonically regenerate and validate the affected real-standard generator/view scope. A passing `test` sample does not prove the production task or labels:
+   ```bash
+   npm run generate:dataset:container -- --spec=ccss --generator=X --view=Y
+   npm run validate:dataset -- --spec=ccss --generator=X --view=Y
+   npm run report:churn -- --spec=ccss
+   ```
+4. Before publishing, run full canonical generation and live validation, `audit:dataset`, `report:splits`, `check`, and then `merge:dataset`.
 
 ## 6. Efficient Development & Debugging Iteration
 
@@ -289,9 +295,9 @@ Shows the matched tuples, why near-miss pairs were rejected (`unsupported-label`
 ### Fixing a failed validation
 Every failure in `validation-report.md` includes its sample identity and a ready-to-run command:
 ```bash
-npm run test:sample -- --sample="<sample_key>" --spec=<spec>
+npm run test:sample -- --sample="<sample_key>" --spec=<spec> --no-validate
 ```
-After changing the generator or view, rerun it: `test:sample` re-renders the image and performs live Gemini VQA validation by default (updating the cache automatically on pass). If you only want an offline pixel/SHA256 check, pass `--no-validate`.
+Use this native replay to inspect the exact image and payload and compare its hash with the cache. It never updates the cache. After fixing the defect, canonically regenerate the affected real-standard generator/view scope and run scoped `validate:dataset`; that is the cache-producing verification path.
 
 ### Checking cache health after a regeneration
 ```bash
@@ -308,6 +314,7 @@ Churn tells you whether the *images* moved; this tells you whether the *split* i
 ### Rules that keep invalidation minimal
 - **Batch pixel-affecting changes** (view code and shared components) and regenerate once — every regeneration+validation cycle costs LLM calls for all changed images.
 - **Checklist edits do not require rendering**: the VQA context hash covers the central checklist plus the selected leaf checklist. Editing the central checklist re-validates every sample; editing one leaf checklist re-validates only that view.
+- **Evaluator mechanics are explicit full-invalidation changes**: the evaluator system instruction, response schema, and model identifier are intentionally outside the context hash. After changing one, rerun full live validation with `--force` rather than expecting automatic cache misses.
 - **All view entropy comes from `payload.seed`** (`IMPL-V6`) — breaking this makes renders order-dependent under the concurrent worker pool and poisons the cache non-deterministically.
 - **No timing-dependent pixels** (`IMPL-V7`) — pages are reused across renders, so an animation state or an unloadable async resource makes pixels depend on render order.
 - **Pin the Playwright/Chromium version**: cache keys are pixel hashes, so a browser upgrade re-rasterizes everything. Treat browser bumps as deliberate full-invalidation events.
@@ -333,7 +340,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Delegation & Module Reviews**: Delegates module-level implementation to `/update-gen {moduleName}` and `/update-view {viewName}`, and targeted audits to `/review-gen {moduleName}` and `/review-view {viewName}`.
 - **Target Debugging**: Uses `npm run test:target -- --target=<id> --spec=<real-standard> --render` for the target being implemented. The isolated `test` spec remains available for deliberately authored prototypes and retained regressions; `--raw` exposes source definitions before production deduplication.
 - **Fast Scoped Regeneration**: Uses the isolated `test` spec for cheap smoke iteration when it contains the relevant example, then verifies the promoted target against its real standard.
-- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full canonical regeneration (`npm run generate:dataset:container -- --spec=<spec>`), full VQA validation (`npm run validate:dataset -- --spec=<spec>`), VQA cache churn check (`npm run report:churn -- --spec=<spec>`), and full checks (`npm run check -- --spec=<spec>`).
+- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full canonical regeneration, full live VQA validation, strict cache audit, churn and split reports, repository checks, and the union merge for non-isolated specs.
 
 ### Loop 3: Ontological Todo Resolution (`/update-ontology`)
 - **Skill**: `.agents/skills/update-ontology/SKILL.md`
@@ -348,8 +355,8 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Skill**: `.agents/skills/fix-spec/SKILL.md`
 - **Command**: `/fix-spec [{specModule}] [--generator=X] [--view=Y]`
 - **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in `validation-report.md`), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
-- **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a `spec.ts` declaration or a competency target (`TSPEC-6`, `SPEC-V3`).
-- **Triage note**: A VQA failure is not proof of a code bug. Verify that the leaf criterion passes the minimal-contract review rule (`CHK-V6`) before changing a correct view.
+- **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a declaration or target. An evidence-backed classification correction is different: when the rendered task contradicts the current ability claim, use `SPEC-2`, `SPEC-V5`, `TSPEC-6`, and `TSPEC-13`, explain the evidence, and obtain user confirmation before changing a view spec or production target.
+- **Triage note**: A VQA failure is not proof of a code bug. Inspect the image, ontology definition, generated payload, view spec, and target together. Necessary mathematics belongs to the generator; omitted or muddled visual clues belong to the view; a false task-family ability claim belongs to the view spec or target; and a nonessential leaf criterion belongs to the checklist (`CHK-V6`).
 
 ### Module Update Skills
 - **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews it, updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.

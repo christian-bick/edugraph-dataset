@@ -16,7 +16,7 @@ Explore its standards coverage and generated tasks:
 
 ## General Concepts
 
-The pipeline is built on a **Label-Driven Generation** paradigm. Instead of generating a math problem and attempting to label it, the system receives a set of constraints (e.g., "Must include zero", "Uses addition") and generates problems that mathematically satisfy those semantic labels.
+The pipeline is built on a **Label-Driven Generation** paradigm. Instead of generating a math problem and attempting to label it, the system receives a set of constraints (e.g., "Must include zero", "Uses addition") and generates training artifacts that satisfy those labels and expose the visual or necessary textual clues a classifier needs to defend them.
 
 The architecture is split into three main parts:
 *   **The Brain (Generators):** Abstract mathematical constraint satisfiers.
@@ -106,7 +106,10 @@ npm run audit:dataset -- --spec=ccss
 ```
 Live Gemini validation is deliberately separate: generate canonically, then run
 `npm run validate:dataset -- --spec=ccss` on a development machine with
-`GEMINI_API_KEY` configured.
+`GEMINI_API_KEY` configured. Checklist and ontology-context edits invalidate affected
+records automatically. Because evaluator system instructions, response schema, and model
+selection are intentionally outside the validation-context hash, follow changes to those
+mechanics with a full `validate:dataset -- --spec=ccss --force` run.
 
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.

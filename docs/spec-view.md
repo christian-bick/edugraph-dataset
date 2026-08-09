@@ -90,9 +90,9 @@ numbers beyond the view's physical capacity of 10.
 **Never** use `deductCompatible` for rejection lists: it is the dual operator, for
 declaring capabilities in schemas ([SPEC-10](spec-general.md#spec-10--capabilities-use-deductcompatible-boundaries-use-deductadmitting)).
 
-### SPEC-V5 — Declare only view-owned abilities
+### SPEC-V5 — Declare only view-owned labels
 
-The view spec declares abilities that decide visual mode, layout, or interaction. An
+The view spec declares labels that decide visual mode, layout, or interaction. An
 ability that instead changes the generated mathematics belongs to the generator and must
 not be redeclared by the view ([SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair)).
 
@@ -104,5 +104,5 @@ not be redeclared by the view ([SPEC-8](spec-general.md#spec-8--no-duplicate-par
 - [ ] **SPEC-V2** — every schema parameter is visual/layout; no `range`, `requireZero`, `useDecimals`, `shapeType`, or comparable math parameter.
 - [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, not a competency the view merely does not want.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
-- [ ] **SPEC-V5** — view-owned abilities are declared positively in `generalLabels`, not handled by rejection, and no generator-owned ability is redeclared.
+- [ ] **SPEC-V5** — view-owned labels are declared positively in `generalLabels` or as parameters, are directly evidenced by the rendered task, are not listed in `rejectedLabels`, and do not redeclare generator-owned labels.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

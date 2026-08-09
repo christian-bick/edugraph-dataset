@@ -50,7 +50,7 @@ Keep iteration loops fast (<5 seconds) during active development:
 - At a VQA checkpoint, regenerate the scope canonically and run **scoped VQA validation**:
   ```bash
   npm run generate:dataset:container -- --spec=test --generator=<generator> --view=<view> [--training-only]
-  npm run validate:dataset -- --generator=<generator> --view=<view> --spec=test
+  npm run validate:dataset -- --spec=test --generator=<generator> --view=<view> 
   ```
   The command fails on any failing or uncached sample and writes its scoped report under `out/dataset-test/validation-reports/`.
 - Run **cache churn report**:
@@ -60,7 +60,12 @@ Keep iteration loops fast (<5 seconds) during active development:
   *(Verify zero unexpected image churn in unrelated modules).*
 - Treat this `test` run as a fast smoke loop. Before promotion, inspect and generate the
   actual target with `--spec=<specModule>`; the test spec is not evidence that the real
-  standard matches correctly.
+  standard matches correctly or that its production labels are visually defendable
+  (`TSPEC-13`):
+  ```bash
+  npm run generate:dataset:container -- --spec=<specModule> --generator=<generator> --view=<view>
+  npm run validate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
+  ```
 - Once clean and verified, **promote completed targets from `implementationTodos` to `spec`** in `src/spec/<spec>/`, per the export contract in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`).
 
 #### Step 6: Final Full Dataset Validation Gate (Completion Gate)
@@ -70,7 +75,9 @@ Every spec owns its dataset folder, so `--spec=<specModule>` is passed consisten
 ```bash
 npm run generate:dataset:container -- --spec=<specModule>
 npm run validate:dataset -- --spec=<specModule>
+npm run audit:dataset -- --spec=<specModule>
 npm run report:churn -- --spec=<specModule>
+npm run report:splits -- --spec=<specModule>
 npm run check -- --spec=<specModule>
 npm run merge:dataset
 ```

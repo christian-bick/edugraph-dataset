@@ -13,7 +13,7 @@ Hand off to `/implement-spec` instead of proceeding when a failure turns out to 
 - a **new** generator or view module, or an extension of the supported ontological space (`IMPL-7` in `docs/implementation-general.md`);
 - resolution of an entry in `implementationTodos`, or promotion of targets into `spec`.
 
-**Never make a failure disappear by weakening the spec.** Do not broaden or narrow ontology label declarations, add a `rejectedLabels` entry, or edit a competency target so a failing sample stops being generated — that hides the defect rather than fixing it, and it violates `TSPEC-6` and `SPEC-V3`. A rejection boundary is legitimate only when the view *physically cannot* render the case; if that is genuinely the situation, say so explicitly and confirm with the user before changing any `spec.ts`.
+**Never make a failure disappear by suppressing the match.** Do not weaken a declaration, add a convenient `rejectedLabels` entry, or edit a target merely so the sample stops being generated (`TSPEC-6`, `SPEC-V3`). An evidence-backed classification correction is legitimate when the ontology definition and rendered task show that the current claim is false and the replacement is the most specific directly observable claim (`SPEC-2`, `SPEC-V5`, `TSPEC-13`). Explain that evidence and obtain user confirmation before changing any view `spec.ts` or production target; update the aligned `test` target when one exists. A rejection boundary remains legitimate only when the view physically cannot render the case.
 
 ## Scope: One Standard at a Time
 
@@ -33,7 +33,7 @@ Gather all three failure sources before fixing anything, so related defects are 
    ```bash
    npm run show:matching -- --spec=<specModule>
    ```
-2. **Visual QA failures** — the `## Failure TODO List` in `out/dataset-<spec>/validation-report.md` for a full run, or the matching file under `out/dataset-<spec>/validation-reports/` for a scoped run. Each entry carries its module/view, the reason, the failing checks, the full sample identity, and a ready-to-run **Retest** command. Validation is a real gate: failures and uncached samples exit non-zero; use `--report-only` only when intentionally collecting diagnostics without gating:
+2. **Visual QA failures** — the `## Failure TODO List` in `out/dataset-<spec>/validation-report.md` for a full run, or the matching file under `out/dataset-<spec>/validation-reports/` for a scoped run. Each entry carries its module/view, the reason, the failing checks, the full sample identity, and a ready-to-run **Retest** command. VQA applies the central checklist and exactly one leaf checklist; the central checklist owns task identifiability and ontology-label support. Do not edit evaluator instructions or response mechanics to fix content. Validation is a real gate: failures and uncached samples exit non-zero; use `--report-only` only when intentionally collecting diagnostics without gating:
    ```bash
    npm run validate:dataset -- --spec=<specModule> [--generator=X] [--view=Y]
    ```
@@ -46,18 +46,21 @@ Gather all three failure sources before fixing anything, so related defects are 
 
 Decide *where* the defect lives before touching code. Assigning a failure to the wrong file is the main way fixing makes things worse.
 
-| Symptom                                                                 | Owning file      | Rules                        |
-|-------------------------------------------------------------------------|------------------|------------------------------|
-| Wrong answer, out-of-bounds value, label not satisfied by the math       | `generator.ts`   | `IMPL-G4`                    |
-| Correct data rendered wrong: overlap, clipping, `NaN`/`undefined` text   | `view.tsx`       | `IMPL-V3`, `IMPL-V4`         |
-| Answer visible in Question Mode, or layout differs between modes         | `view.tsx`       | `IMPL-V5`                    |
-| Checklist demands something a correctly-implemented view does not do     | `checklist.md`   | `CHK-V6`                     |
-| `🖼️ image changed (same seed & attempt)` in a module you did not touch  | `view.tsx`       | `IMPL-V6`, `IMPL-V7`         |
-| `⚠️ seed changed for same identity`                                      | seeding logic    | escalate — must never happen |
-| View error card in the rendered image (`ViewValidationError`)            | payload mismatch | `IMPL-G6`, `IMPL-V8`         |
-| Target matches no generator/view at all                                  | out of scope     | hand off to `/implement-spec`|
+| Symptom | Owning file | Rules |
+|---|---|---|
+| Wrong answer, out-of-bounds value, or generated mathematics contradicts the requested label | `generator.ts` | `IMPL-G4` |
+| A necessary mathematical clue or datum is absent from the payload | `generator.ts` / payload contract | `IMPL-G4`, `IMPL-G6`, `IMPL-V8` |
+| Necessary payload evidence exists but is omitted, obscured, or mislabeled in the image | `view.tsx` | `IMPL-V3`, `IMPL-V4` |
+| Correct data renders with overlap, clipping, or `NaN`/`undefined` text | `view.tsx` | `IMPL-V3`, `IMPL-V4` |
+| Answer visible in Question Mode, or layout differs between modes | `view.tsx` | `IMPL-V5` |
+| The rendered task family does not elicit the declared ability | view `spec.ts` or production target | `SPEC-2`, `SPEC-V5`, `TSPEC-6`, `TSPEC-13`; confirm with user |
+| Checklist demands something a correct view need not show | `checklist.md` | `CHK-V6` |
+| `🖼️ image changed (same seed & attempt)` in an untouched module | `view.tsx` | `IMPL-V6`, `IMPL-V7` |
+| `⚠️ seed changed for same identity` | seeding logic | escalate — must never happen |
+| View error card in the rendered image (`ViewValidationError`) | payload mismatch | `IMPL-G6`, `IMPL-V8` |
+| Target matches no generator/view at all | out of scope | hand off to `/implement-spec` |
 
-**A VQA failure is not proof of a code bug.** Before changing a view, apply the `CHK-V6` removal question to the failed leaf criterion and confirm that it describes an essential observable defect rather than duplicating the central checklist or a unit test.
+**A VQA failure is not proof of a code bug.** Inspect the rendered image, ontology definition, generator payload, view spec, and production target together. Judge only evidence available in the image. Before changing a checklist, apply the `CHK-V6` removal question and confirm that the leaf criterion describes an essential observable view contract rather than duplicating the central checklist or a unit test.
 
 Group the triaged failures by `(generator, view)` so one fix and one regeneration cycle covers every sample it affects.
 
@@ -89,8 +92,8 @@ Keep the iteration loop cheap. **Batch all pixel-affecting changes before regene
 
 ```bash
 npm run test
-npm run generate:dataset -- --spec=<specModule> --generator=<generator> --view=<view> [--training-only]
-npm run generate:dataset:container -- --spec=<specModule> --generator=<generator> --view=<view> [--training-only]
+npm run generate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
+npm run generate:dataset:container -- --spec=<specModule> --generator=<generator> --view=<view>
 npm run validate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
 npm run report:churn -- --spec=<specModule>
 ```
@@ -103,7 +106,9 @@ Once the failure set is empty, verify across the whole standard, then rebuild th
 ```bash
 npm run generate:dataset:container -- --spec=<specModule>
 npm run validate:dataset -- --spec=<specModule>
+npm run audit:dataset -- --spec=<specModule>
 npm run report:churn -- --spec=<specModule>
+npm run report:splits -- --spec=<specModule>
 npm run check -- --spec=<specModule>
 npm run merge:dataset
 ```
@@ -112,7 +117,7 @@ Skip `merge:dataset` for an isolated spec such as `test`, which never enters the
 
 #### Step 7: Report
 
-Summarize for the user: how many failures were found per source, how they were triaged, what was changed per module, which failures were resolved by fixing a *checklist* rather than code, and anything handed off to `/implement-spec`.
+Summarize for the user: how many failures were found per source, how they were triaged, what changed per module, any evidence-backed label corrections and their confirmation, which failures were resolved by fixing a checklist rather than code, and anything handed off to `/implement-spec`.
 
 IMPORTANT:
 - Do NOT update code outside views, generators, and the "test" spec without user confirmation.

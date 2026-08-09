@@ -1,6 +1,6 @@
 ---
 name: update-gen
-description: "/update-gen {moduleName} - Update the generator module under src/generators/[<category>/]{moduleName} to match its spec, create/update its spec.test.ts, adopt consuming views, and validate."
+description: "/update-gen {moduleName} - Update a generator module to match its spec, create or update its spec test, adopt consuming views, and validate."
 ---
 
 Update the generator module under `src/generators/[<category>/]{moduleName}` (identified by containing `spec.ts` and `generator.ts`) as follows:
@@ -19,14 +19,11 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
    - Follow the targeted debugging & fast-iteration workflows documented in `DOCS.md § 6` (Efficient Development & Debugging Iteration):
      - **Real Target Debugging**: `npm run test:target -- --target=<target.id> --spec=<real-standard> --render`
      - **Real Sample Debugging**: `npm run test:sample -- --sample="<sample_key>" --spec=<real-standard> --no-validate`
-     - **Fast Scoped Regeneration**: `npm run generate:dataset -- --spec=test --generator=<moduleName> --view=<viewName> [--training-only]`
-     - **Canonical VQA Regeneration**: `npm run generate:dataset:container -- --spec=test --generator=<moduleName> --view=<viewName> [--training-only]`
-     - **VQA Validation**: `npm run validate:dataset -- --generator=<moduleName> --spec=test`
-     - **Cache Churn Check**: `npm run report:churn -- --spec=test`
-     - **Vitest Unit Tests**: `npm run test`
-
-   The `test` spec commands are the fast prototype/smoke/regression loop. Final matching
-   and generation evidence must come from the real standard target.
+     - **Fast Scoped Regeneration (manual inspection)**: `npm run generate:dataset -- --spec=test --generator=<moduleName> --view=<viewName> [--training-only]`
+     - **Canonical VQA Regeneration**: `npm run generate:dataset:container -- --spec=<real-standard> --generator=<moduleName> --view=<viewName> [--training-only]`
+     - **VQA Validation**: `npm run validate:dataset -- --spec=<real-standard>` --generator=<moduleName>
+     - **Cache Churn Check**: `npm run report:churn -- --spec=<real-standard>`
+     - **Vitest Unit Tests**: `npm run <real-standard>`
 
 IMPORTANT:
 - Do NOT update code outside views, generators, and the "test" spec without user confirmation.

@@ -47,7 +47,7 @@ Create `temp/spec-plans/<specModule>/<planName>/plan.md` with:
 
 - source scope and relevant standard quotations;
 - one row per distinct competency covered by leaf node in the start, not merely one row per node;
-- proposed builder dimensions and most-specific truthful ontology labels (`TSPEC-3`, `TSPEC-4`, `TSPEC-6`);
+- proposed builder dimensions and most-specific truthful ontology labels, including the visible or necessary textual evidence the expected artifact provides for each claim (`TSPEC-3`, `TSPEC-4`, `TSPEC-6`, `TSPEC-13`);
 - proposed disposition: `spec`, `implementationTodos`, `ontologyTodos`, or `beyondScope` (`TSPEC-7`);
 - expected generator/view matches and any matches that would be semantically suspicious;
 - proposed `equivalentTargets` declarations, if any (`TSPEC-8`);
@@ -69,7 +69,7 @@ Resume only after the user approves Pass 1, incorporating any requested changes.
 - Create one `DatasetPermutationBuilder` per competency and map it with `toTargets`.
 - Use `toImplementationTodos(prefix, builder, group, explanation)` for implementation gaps; `group` is the stable implementation-package identity.
 - Export only the five target-spec contract names with their exact types (`TSPEC-1`, `TSPEC-2`).
-- Never stretch labels to force a match (`TSPEC-6`).
+- Never stretch labels to force a match. Every active label must also be reasonably identifiable and defendable from the expected rendered artifact, not merely from the source standard's prose (`TSPEC-6`, `TSPEC-13`).
 
 ### 2. Validate and inspect matching
 
@@ -80,7 +80,7 @@ npm run analyze:target-distinctness -- --spec=<specModule> --plan=<planName>
 npm run report:matching-diff -- --spec=<specModule> --plan=<planName>
 ```
 
-The distinctness report is advisory. Review identical, contained, overlapping, and one-label-adjacent definitions; an entry is not automatically a defect. The matching diff is also advisory, but every added or removed generator-view pair must be explained by the approved plan.
+The distinctness report is advisory. Review identical, contained, overlapping, and one-label-adjacent definitions; an entry is not automatically a defect. The matching diff is also advisory, but every added or removed generator-view pair must be explained by the approved plan. For each intended production match, inspect whether the rendered task can actually evidence its labels (`TSPEC-13`); semantic matching alone is insufficient.
 
 If either report reveals an unapproved semantic change, correct the target definitions and regenerate both reports before proceeding.
 
