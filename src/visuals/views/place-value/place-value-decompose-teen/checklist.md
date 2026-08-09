@@ -1,4 +1,2 @@
-# Decomposing Teen Numbers
-
 - **Identity:** A teen number is represented as one ten plus an unknown number of ones.
 - **Modes:** Question Mode withholds the ones addend without printing that answer elsewhere; Solution Mode reveals it while preserving the teen number and ten.

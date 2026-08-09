@@ -1,4 +1,2 @@
-# Shape Position
-
 - **Identity:** A visually distinct ball and box plus spatial-relation choices make their requested relative position identifiable without redundant object labels.
 - **Modes:** Question Mode leaves every relation neutral; Solution Mode identifies the relation visibly demonstrated by the scene.

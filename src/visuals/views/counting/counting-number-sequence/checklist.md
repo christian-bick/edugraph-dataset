@@ -1,4 +1,2 @@
-# Counting Number Sequence
-
 - **Identity:** An ordered numeral or countable-dot sequence has one identifiable missing position after its visible start.
 - **Modes:** Question Mode leaves that position empty; Solution Mode fills it with the value that continues the visible step pattern.

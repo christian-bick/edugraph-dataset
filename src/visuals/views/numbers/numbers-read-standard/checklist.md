@@ -1,4 +1,2 @@
-# Reading Numerals
-
 - **Identity:** An Arabic numeral and a speech-style response area make reading the number aloud identifiable.
 - **Modes:** Question Mode leaves the spoken number name empty; Solution Mode reveals the correctly spelled English number name.

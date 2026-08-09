@@ -1,4 +1,2 @@
-# Tracing and Writing Numerals
-
 - **Identity:** A source numeral, visible stroke guide, tracing space, and independent writing space make the motor-writing task identifiable.
 - **Modes:** Question Mode leaves the tracing and writing responses incomplete; Solution Mode shows the numeral completed in both spaces.

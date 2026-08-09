@@ -15,9 +15,10 @@ each leaf view.
 Visual QA loads exactly two files: the central checklist and the selected view's checklist.
 There are no category or generator checklists.
 
-Both files contain checklist criteria only. The evaluator supplies its role and response
-instructions separately, then presents the files as explicitly delimited global and
-view-specific parts of one combined checklist.
+Both files contain checklist criteria only. A leaf checklist has no title or headings; the
+evaluator adds the generic `## View-specific checklist` heading, inserts the leaf criteria,
+then appends the central checklist under its existing H2. It adds no wrapper text or
+implementation metadata.
 
 The central checklist is written for a first-time observer and owns broad rules that apply
 to every rendered exercise: task identifiability, separate Question and Solution mode
@@ -25,7 +26,7 @@ requirements, text economy, mathematical coherence, ontology-label support, layo
 integrity, and rendering integrity. Validation policy belongs here rather than in the
 unhashed evaluator prompt.
 
-Every leaf view must have one `checklist.md` containing:
+Every leaf view must have one heading-free `checklist.md` containing:
 
 - **Identity:** the shortest observable description that distinguishes the intended task;
 - **Modes:** what Question Mode withholds and what Solution Mode reveals, including any

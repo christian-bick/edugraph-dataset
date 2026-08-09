@@ -1,4 +1,2 @@
-# Classifying Shape Dimension
-
 - **Identity:** A clearly rendered shape and Flat (2D) and Solid (3D) choices define the dimensional classification task.
 - **Modes:** Question Mode leaves both choices neutral; Solution Mode identifies the shape's correct dimension.

@@ -1,4 +1,2 @@
-# Drawing Shapes
-
 - **Identity:** A tracing guide or defining-attribute card and drawing canvas make the requested shape-construction task identifiable.
 - **Modes:** Question Mode shows only the guide or uncompleted attribute workspace; Solution Mode adds the completed shape without removing the evidence that defined it.

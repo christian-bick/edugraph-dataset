@@ -1,4 +1,2 @@
-# Operations Word Problem
-
 - **Identity:** The concise scenario remains visible in both modes because it supplies the quantities and operation context that distinguish the task from a bare equation.
 - **Modes:** Question Mode withholds exactly the scenario's unknown quantity in both pictorial and equation representations; Solution Mode restores that quantity while preserving the scenario.

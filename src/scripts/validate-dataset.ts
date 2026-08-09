@@ -118,7 +118,7 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
     await Promise.all(workers);
 }
 
-async function evaluateSingleSample(entry: any, _datasetFolderName: string): Promise<any> {
+async function evaluateSingleSample(entry: any, _datasetFolderName: string, logPrompt: boolean): Promise<any> {
     const imagePath = imagePathFor(entry);
     const result = await evaluateSampleVqa({
         imagePath,
@@ -132,7 +132,8 @@ async function evaluateSingleSample(entry: any, _datasetFolderName: string): Pro
         seed: entry.seed,
         fileName: entry.file_name,
         labels: entry.tags,
-        apiKey
+        apiKey,
+        logPrompt
     });
 
     if (!result) return null;
@@ -147,11 +148,12 @@ async function main() {
     let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
     let reportOnly = process.env.npm_config_report_only === 'true' || process.env.npm_config_report_only === '';
+    let logPrompts = process.env.npm_config_log_prompts === 'true' || process.env.npm_config_log_prompts === '';
     
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('❌ Error: The --spec parameter is required.');
-        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force] [--report-only] [--report=<path>]');
+        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force] [--log-prompts] [--report-only] [--report=<path>]');
         process.exit(1);
     }
     if (isUnionSpec(specName)) {
@@ -174,6 +176,8 @@ async function main() {
             auditMode = true;
         } else if (arg === '--report-only') {
             reportOnly = true;
+        } else if (arg === '--log-prompts') {
+            logPrompts = true;
         }
     }
     if (auditMode && (targetGenerator || targetView)) {
@@ -406,7 +410,8 @@ async function main() {
             if (!apiKey) {
                 console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
             } else {
-                console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to 10 parallel requests)...`);
+                const evaluationConcurrency = logPrompts ? 1 : 10;
+                console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to ${evaluationConcurrency} parallel request${evaluationConcurrency === 1 ? '' : 's'})...`);
                 let processed = 0;
                 let evalPassed = cachedPassed;
                 let evalFailed = cachedFailed;
@@ -421,8 +426,8 @@ async function main() {
                     return cacheManagers.get(mod)!;
                 };
 
-                await runPool(toEvaluate, 10, async (entry) => {
-                    const record = await evaluateSingleSample(entry, datasetFolderName);
+                await runPool(toEvaluate, evaluationConcurrency, async (entry) => {
+                    const record = await evaluateSingleSample(entry, datasetFolderName, logPrompts);
                     processed++;
                     if (record) {
                         const mgr = getMgr(record.moduleName);

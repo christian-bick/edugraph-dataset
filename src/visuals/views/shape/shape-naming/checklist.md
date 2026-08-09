@@ -1,4 +1,2 @@
-# Naming Shapes
-
 - **Identity:** One clearly rendered plane or solid shape and appropriate name choices make naming it self-explaining.
 - **Modes:** Question Mode leaves every name neutral; Solution Mode identifies the correct name.

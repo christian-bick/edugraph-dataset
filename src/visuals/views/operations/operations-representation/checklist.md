@@ -1,4 +1,2 @@
-# Operation Representation
-
 - **Identity:** Countable object groups and operation symbols visibly represent the same arithmetic relationship as the equation.
 - **Modes:** Question Mode leaves the equation result empty; Solution Mode reveals the result supported by the unchanged objects.

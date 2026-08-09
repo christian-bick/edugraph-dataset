@@ -1,4 +1,2 @@
-# Copying Numerals
-
 - **Identity:** A source numeral and multiple handwriting-style response spaces make intentional numeral-copying practice identifiable rather than a reasoning task.
 - **Modes:** Question Mode leaves every response space empty; Solution Mode reproduces the source numeral in each space.

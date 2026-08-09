@@ -1,4 +1,2 @@
-# Counting Objects Simple
-
 - **Identity:** A clearly bounded collection of distinct, non-overlapping objects is presented for counting.
 - **Modes:** Question Mode leaves the total empty; Solution Mode reveals the number of visible objects.

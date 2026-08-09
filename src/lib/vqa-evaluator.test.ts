@@ -47,14 +47,16 @@ describe('vqa-evaluator', () => {
 
         expect(views.length).toBeGreaterThan(0);
         for (const view of views) {
-            expect(resolveViewChecklistPaths(viewsRoot, view.id)).toHaveLength(2);
+            const paths = resolveViewChecklistPaths(viewsRoot, view.id);
+            expect(paths).toHaveLength(2);
+            const leafChecklist = readFileSync(paths[1], 'utf-8');
+            expect(leafChecklist).toMatch(/^- \*\*Identity:\*\*/);
+            expect(leafChecklist).not.toMatch(/^#/m);
         }
     });
 
-    it('separates system instructions from the combined global and view checklist', () => {
+    it('separates system instructions from labels and the concatenated checklists', () => {
         const prompt = buildVqaPromptParts({
-            generatorId: 'arithmetic-ops-pairs',
-            viewId: testViewId,
             modeName: 'question',
             labelDefinitions: [{
                 iri: 'http://edugraph.io/edu/NumbersWithZero',
@@ -62,18 +64,23 @@ describe('vqa-evaluator', () => {
                 definition: 'Involves zero as a number.'
             }],
             globalChecklist: '## Global rules\n\n- Global criterion.',
-            viewChecklist: '# Vertical Operations\n\n- View criterion.'
+            viewChecklist: '- **Identity:** View criterion.\n- **Modes:** Mode criterion.'
         });
 
         expect(prompt.systemInstruction).toContain('senior Visual QA engineer');
         expect(prompt.systemInstruction).not.toContain('Global criterion');
         expect(prompt.userPrompt).not.toContain('senior Visual QA engineer');
+        expect(prompt.userPrompt).toMatch(/^Mode: Question Mode/);
         expect(prompt.userPrompt).toContain('## Ontology labels');
         expect(prompt.userPrompt).toContain('NumbersWithZero: Involves zero as a number.');
-        expect(prompt.userPrompt).toContain('<global-checklist>\n## Global rules');
-        expect(prompt.userPrompt).toContain('<view-specific-checklist>\n# Vertical Operations');
-        expect(prompt.userPrompt.indexOf('<global-checklist>'))
-            .toBeLessThan(prompt.userPrompt.indexOf('<view-specific-checklist>'));
+        expect(prompt.userPrompt).toContain('## View-specific checklist\n\n- **Identity:** View criterion.');
+        expect(prompt.userPrompt).toContain('## Global rules\n\n- Global criterion.');
+        expect(prompt.userPrompt.indexOf('## View-specific checklist'))
+            .toBeLessThan(prompt.userPrompt.indexOf('## Global rules'));
+        expect(prompt.userPrompt).not.toContain('Generator:');
+        expect(prompt.userPrompt).not.toContain('View:');
+        expect(prompt.userPrompt).not.toContain('Part 1');
+        expect(prompt.userPrompt).not.toContain('<global-checklist>');
     });
 
     it('rejects a missing global view checklist', () => {
@@ -156,6 +163,7 @@ describe('vqa-evaluator', () => {
         });
 
         const cacheManager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
         const result = await evaluateSampleVqa({
             imagePath: tmpImgPath,
@@ -170,7 +178,8 @@ describe('vqa-evaluator', () => {
             fileName: 'test-sample.png',
             labels: ['NumbersWithZero'],
             apiKey: 'test-api-key',
-            cacheManager
+            cacheManager,
+            logPrompt: true
         });
 
         expect(result).not.toBeNull();
@@ -185,10 +194,15 @@ describe('vqa-evaluator', () => {
         const prompt = request.contents[0] as string;
         expect(request.config.systemInstruction).toContain('senior Visual QA engineer');
         expect(request.config.systemInstruction).not.toContain('Global Visual QA Checklist');
-        expect(prompt).toContain('# Combined Visual QA Checklist');
+        expect(prompt).toContain('## View-specific checklist');
+        expect(prompt).toContain('A vertical arithmetic equation contains exactly one visually identifiable unknown value.');
+        expect(prompt).toContain('## Global Visual QA Checklist');
         expect(prompt).toContain('NumbersWithZero: Involves zero as a number.');
-        expect(prompt).toContain('<global-checklist>');
-        expect(prompt).toContain('<view-specific-checklist>');
+        expect(prompt).not.toContain('Generator:');
+        expect(prompt).not.toContain('View:');
+        expect(prompt).not.toContain('sections below are concatenated');
+        expect(prompt).not.toContain('<global-checklist>');
+        expect(prompt).not.toContain('# Vertical Operations');
         const centralChecklist = readFileSync(getChecklistPaths(testViewId)[0], 'utf-8');
         expect(centralChecklist).toContain('`defendable`');
         expect(centralChecklist).toContain('`not_defendable`');
@@ -198,6 +212,10 @@ describe('vqa-evaluator', () => {
         expect(request.config.responseMimeType).toBe('application/json');
         expect(request.config.responseJsonSchema.properties.label_checks.type).toBe('array');
         expect(request.contents[1].inlineData.mimeType).toBe('image/png');
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('--- SYSTEM INSTRUCTION ---'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('--- USER PROMPT ---'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('test#gen#view#train#question#inst:0'));
+        logSpy.mockRestore();
 
         // Second evaluation should return from cache without calling Gemini again
         const cachedResult = await evaluateSampleVqa({

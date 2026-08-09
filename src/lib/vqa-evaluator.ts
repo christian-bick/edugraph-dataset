@@ -19,7 +19,7 @@ const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const VIEWS_ROOT = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
 const VQA_MODEL = 'gemini-3.5-flash';
 const VQA_SYSTEM_INSTRUCTION = `You are a senior Visual QA engineer evaluating one rendered math-exercise image.
-Use only visible evidence and the evaluation context supplied by the user. Apply every rule in the combined checklist.
+Use only visible evidence and the supplied mode, ontology labels, and checklist.
 Return only JSON matching the provided response schema.
 If validation passes, set "reasoning" to an empty string. Provide non-empty reasoning only when validation fails.`;
 const VQA_GENERAL_CHECK_NAMES = [
@@ -112,6 +112,7 @@ export interface EvaluateSampleVqaInput {
     labels: readonly string[];
     apiKey?: string;
     cacheManager?: VqaCacheManager;
+    logPrompt?: boolean;
 }
 
 export interface EvaluateSampleVqaResult {
@@ -126,8 +127,6 @@ function formatLabelDefinitions(labelDefinitions: readonly VqaLabelDefinition[])
 }
 
 export interface VqaPromptPartsInput {
-    generatorId: string;
-    viewId: string;
     modeName: string;
     labelDefinitions: readonly VqaLabelDefinition[];
     globalChecklist: string;
@@ -141,43 +140,23 @@ export interface VqaPromptParts {
 
 export function buildVqaPromptParts(input: VqaPromptPartsInput): VqaPromptParts {
     const {
-        generatorId,
-        viewId,
         modeName,
         labelDefinitions,
         globalChecklist,
         viewChecklist
     } = input;
     const isSolution = modeName === 'solution';
-    const userPrompt = `# Evaluation context
-
-- Mode: ${isSolution ? 'Solution Mode (`_mode-S`)' : 'Question Mode (`_mode-Q`)'}
-- Generator: \`${generatorId}\`
-- View: \`${viewId}\`
+    const userPrompt = `Mode: ${isSolution ? 'Solution Mode (`_mode-S`)' : 'Question Mode (`_mode-Q`)'}
 
 ## Ontology labels
 
 ${formatLabelDefinitions(labelDefinitions)}
 
-# Combined Visual QA Checklist
+## View-specific checklist
 
-The global and view-specific sections below are concatenated into one checklist. Apply every rule in both sections.
-
----
-
-## Part 1 — Global checklist
-
-<global-checklist>
-${globalChecklist.trim()}
-</global-checklist>
-
----
-
-## Part 2 — View-specific checklist: \`${viewId}\`
-
-<view-specific-checklist>
 ${viewChecklist.trim()}
-</view-specific-checklist>`;
+
+${globalChecklist.trim()}`;
 
     return { systemInstruction: VQA_SYSTEM_INSTRUCTION, userPrompt };
 }
@@ -220,7 +199,8 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
         fileName,
         labels,
         apiKey,
-        cacheManager
+        cacheManager,
+        logPrompt = false
     } = input;
 
     if (!existsSync(imagePath)) return null;
@@ -250,13 +230,19 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
     }
 
     const promptParts = buildVqaPromptParts({
-        generatorId,
-        viewId,
         modeName,
         labelDefinitions: validationContext.labelDefinitions,
         globalChecklist,
         viewChecklist
     });
+
+    if (logPrompt) {
+        console.log(`\n=== VQA PROMPT: ${sampleKey} ===\n\n` +
+            `--- SYSTEM INSTRUCTION ---\n${promptParts.systemInstruction}\n\n` +
+            `--- USER PROMPT ---\n${promptParts.userPrompt}\n\n` +
+            `--- IMAGE ---\n${imagePath}\n` +
+            `=== END VQA PROMPT ===\n`);
+    }
 
     const imagePart = { inlineData: { data: imageBuffer.toString('base64'), mimeType: 'image/png' } };
     const response = await client.models.generateContent({

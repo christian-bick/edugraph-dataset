@@ -1,4 +1,2 @@
-# Counting Increment/Decrement
-
 - **Identity:** A visible start quantity changes in the arrow's direction by its displayed step of one or ten.
 - **Modes:** Question Mode withholds the resulting quantity; Solution Mode reveals the correct result without changing the represented step.

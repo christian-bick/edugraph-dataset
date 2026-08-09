@@ -1,4 +1,2 @@
-# Classifying Shape Attributes
-
 - **Identity:** Varied examples of one shape and four statements make distinguishing a defining attribute from incidental color, orientation, or size identifiable.
 - **Modes:** Question Mode leaves every statement neutral; Solution Mode identifies only the defining attribute.

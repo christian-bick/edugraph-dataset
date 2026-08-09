@@ -1,4 +1,2 @@
-# Comparing Shape Attributes
-
 - **Identity:** Two named shapes and the specific sides-or-corners comparison remain identifiable in both modes.
 - **Modes:** Question Mode leaves both shape choices neutral; Solution Mode identifies the shape with the larger visible attribute count.

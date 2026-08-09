@@ -1,4 +1,2 @@
-# Writing a Count
-
 - **Identity:** A countable ten-frame or place-value representation is the source for writing its numeral.
 - **Modes:** Question Mode leaves the numeral response empty; Solution Mode reveals the numeral matching the unchanged quantity.

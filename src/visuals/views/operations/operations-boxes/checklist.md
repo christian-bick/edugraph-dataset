@@ -1,4 +1,2 @@
-# Boxed Operations
-
 - **Identity:** A horizontal arithmetic equation contains exactly one visually identifiable unknown value.
 - **Modes:** Question Mode leaves that value empty; Solution Mode reveals it in the same equation position.

@@ -1,4 +1,2 @@
-# Counting Comparison
-
 - **Identity:** Named groups with countable objects and an identifiable more/fewer relation define the comparison.
 - **Modes:** Question Mode leaves all group choices neutral; Solution Mode identifies the group satisfying the visible relation.

@@ -1,4 +1,2 @@
-# Counting Ten More/Less
-
 - **Identity:** Start and result place-value panels are connected by an explicit increase or decrease of one ten while the ones digit remains unchanged.
 - **Modes:** Question Mode withholds the changed result and tens count; Solution Mode reveals both while preserving the visible operation and unchanged ones.

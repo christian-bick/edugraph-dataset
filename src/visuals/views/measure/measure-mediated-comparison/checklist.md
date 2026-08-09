@@ -1,4 +1,2 @@
-# Mediated Length Comparison
-
 - **Identity:** Two separate premises compare A with intermediary B and B with C, allowing the requested A-to-C relation to be inferred without directly displaying A against C.
 - **Modes:** Question Mode leaves A and C unselected; Solution Mode preserves both premises and identifies the endpoint implied by them.

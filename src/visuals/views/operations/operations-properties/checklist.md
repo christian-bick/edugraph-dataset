@@ -1,4 +1,2 @@
-# Operation Properties
-
 - **Identity:** The named property and paired equation structures make the commutative or associative relationship identifiable.
 - **Modes:** Question Mode leaves one value empty; Solution Mode reveals the value that completes the displayed property without changing the equation structure.
