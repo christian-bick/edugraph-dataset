@@ -94,6 +94,9 @@ publishes it to Hugging Face, and only then dispatches the explorer deployment w
 on `main`. Keeping deployment in a branch-context run satisfies the Google Workload
 Identity provider's branch trust condition without allowing release-tag refs.
 Live Gemini VQA is a local development operation and never runs in either workflow.
+All host-side workflows use Node.js 24 LTS, matching the local `.nvmrc` and the
+`package.json` engine constraint. Canonical generation still executes inside its pinned
+Playwright image, so changing the host runtime does not change the renderer identity.
 
 ### `src/scripts/map-standards.ts`
 * **Execution**: `npm run generate:standards-explorer` (alias: `npm run map:standards`)
