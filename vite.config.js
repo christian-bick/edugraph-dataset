@@ -1,8 +1,7 @@
 // vite.config.js
-import { readFileSync } from 'node:fs';
+import { globSync, readFileSync } from 'node:fs';
 import { resolve, relative, extname } from 'path';
 import { defineConfig } from 'vite';
-import { globSync } from 'glob';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -42,7 +41,7 @@ export default defineConfig({
         rollupOptions: {
             input: Object.fromEntries(
                 // ✨ Find all HTML files within the new root ('src')
-                globSync('./src/**/*.html', {ignore: './src/partials/**/*.html'}).map(file => [
+                globSync('./src/**/*.html', {exclude: ['./src/partials/**']}).map(file => [
                     // ✨ The key is now naturally relative to 'src'
                     // e.g., 'pages/about.html' -> 'pages/about'
                     // e.g., 'index.html' -> 'index'

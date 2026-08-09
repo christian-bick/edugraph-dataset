@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +18,41 @@ const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const GENERATORS_ROOT = resolve(PROJECT_ROOT, 'src', 'generators');
 const VIEWS_ROOT = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
+const VQA_MODEL = 'gemini-3.5-flash';
+const VQA_RESPONSE_SCHEMA = {
+    type: 'object',
+    properties: {
+        pass: { type: 'boolean' },
+        general_checks: {
+            type: 'object',
+            properties: {
+                no_overlaps: { type: 'boolean' },
+                no_placeholders: { type: 'boolean' },
+                sane_padding: { type: 'boolean' }
+            },
+            required: ['no_overlaps', 'no_placeholders', 'sane_padding']
+        },
+        coloring_pass: { type: 'boolean' },
+        layout_pass: { type: 'boolean' },
+        label_checks: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    label: { type: 'string' },
+                    verdict: {
+                        type: 'string',
+                        enum: ['defendable', 'uncertain', 'not_defendable']
+                    },
+                    evidence: { type: 'string' }
+                },
+                required: ['label', 'verdict', 'evidence']
+            }
+        },
+        reasoning: { type: 'string' }
+    },
+    required: ['pass', 'general_checks', 'label_checks', 'reasoning']
+};
 
 export function resolveTreeChecklists(rootDir: string, moduleId: string): string[] {
     const paths: string[] = [];
@@ -52,52 +87,11 @@ export function getChecklistPaths(moduleName: string, viewId: string): string[] 
     ];
 }
 
-export function initVqaModel(apiKey?: string) {
+export function initVqaClient(apiKey?: string) {
     const key = apiKey !== undefined ? apiKey : process.env.GEMINI_API_KEY;
     if (!key) return null;
 
-    const genAI = new GoogleGenerativeAI(key);
-    return genAI.getGenerativeModel({
-        model: 'gemini-3.5-flash',
-        generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-                type: SchemaType.OBJECT,
-                properties: {
-                    pass: { type: SchemaType.BOOLEAN },
-                    general_checks: {
-                        type: SchemaType.OBJECT,
-                        properties: {
-                            no_overlaps: { type: SchemaType.BOOLEAN },
-                            no_placeholders: { type: SchemaType.BOOLEAN },
-                            sane_padding: { type: SchemaType.BOOLEAN }
-                        },
-                        required: ['no_overlaps', 'no_placeholders', 'sane_padding']
-                    },
-                    coloring_pass: { type: SchemaType.BOOLEAN },
-                    layout_pass: { type: SchemaType.BOOLEAN },
-                    label_checks: {
-                        type: SchemaType.ARRAY,
-                        items: {
-                            type: SchemaType.OBJECT,
-                            properties: {
-                                label: { type: SchemaType.STRING },
-                                verdict: {
-                                    type: SchemaType.STRING,
-                                    format: 'enum',
-                                    enum: ['defendable', 'uncertain', 'not_defendable']
-                                },
-                                evidence: { type: SchemaType.STRING }
-                            },
-                            required: ['label', 'verdict', 'evidence']
-                        }
-                    },
-                    reasoning: { type: SchemaType.STRING }
-                },
-                required: ['pass', 'general_checks', 'label_checks', 'reasoning']
-            }
-        }
-    });
+    return new GoogleGenAI({ apiKey: key });
 }
 
 export interface EvaluateSampleVqaInput {
@@ -190,8 +184,8 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
         }
     }
 
-    const model = initVqaModel(apiKey);
-    if (!model) {
+    const client = initVqaClient(apiKey);
+    if (!client) {
         return null;
     }
 
@@ -216,8 +210,18 @@ Respond only in the provided JSON schema.
 `;
 
     const imagePart = { inlineData: { data: imageBuffer.toString('base64'), mimeType: 'image/png' } };
-    const result = await model.generateContent([prompt, imagePart]);
-    const responseText = result.response.text();
+    const response = await client.models.generateContent({
+        model: VQA_MODEL,
+        contents: [prompt, imagePart],
+        config: {
+            responseMimeType: 'application/json',
+            responseJsonSchema: VQA_RESPONSE_SCHEMA
+        }
+    });
+    const responseText = response.text;
+    if (!responseText) {
+        throw new Error('Invalid VQA response: Gemini returned no text');
+    }
     const parsed = JSON.parse(responseText);
     parsed.label_checks = validateLabelChecks(parsed.label_checks, validationContext.labelDefinitions);
     if (parsed.label_checks.some((check: VqaLabelCheck) => check.verdict === 'not_defendable')) {

@@ -1,26 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getChecklistPaths, initVqaModel, resolveTreeChecklists, evaluateSampleVqa } from './vqa-evaluator.ts';
+import { getChecklistPaths, initVqaClient, resolveTreeChecklists, evaluateSampleVqa } from './vqa-evaluator.ts';
 import { resolve } from 'path';
 import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { VqaCacheManager } from './vqa-cache.ts';
 
-// Mock @google/generative-ai
+// Mock @google/genai
 const mockGenerateContent = vi.fn();
-vi.mock('@google/generative-ai', () => {
+vi.mock('@google/genai', () => {
     return {
-        GoogleGenerativeAI: class {
-            constructor(public apiKey: string) {}
-            getGenerativeModel() {
-                return {
-                    generateContent: mockGenerateContent
-                };
-            }
-        },
-        SchemaType: {
-            OBJECT: 'OBJECT',
-            ARRAY: 'ARRAY',
-            BOOLEAN: 'BOOLEAN',
-            STRING: 'STRING'
+        GoogleGenAI: class {
+            models = {
+                generateContent: mockGenerateContent
+            };
+
+            constructor(public options: { apiKey: string }) {}
         }
     };
 });
@@ -51,14 +44,14 @@ describe('vqa-evaluator', () => {
         expect(paths).toEqual([]);
     });
 
-    it('returns null when initializing VQA model without an API key', () => {
-        const model = initVqaModel('');
-        expect(model).toBeNull();
+    it('returns null when initializing the VQA client without an API key', () => {
+        const client = initVqaClient('');
+        expect(client).toBeNull();
     });
 
-    it('returns model when initializing VQA model with explicit API key', () => {
-        const model = initVqaModel('fake-key');
-        expect(model).not.toBeNull();
+    it('returns a client when initializing VQA with an explicit API key', () => {
+        const client = initVqaClient('fake-key');
+        expect(client).not.toBeNull();
     });
 
     it('returns null when evaluateSampleVqa image does not exist', async () => {
@@ -81,22 +74,20 @@ describe('vqa-evaluator', () => {
 
     it('evaluates a sample with mocked Gemini VQA response and updates cache', async () => {
         mockGenerateContent.mockResolvedValueOnce({
-            response: {
-                text: () => JSON.stringify({
-                    pass: true,
-                    general_checks: {
-                        no_overlaps: true,
-                        no_placeholders: true,
-                        sane_padding: true
-                    },
-                    label_checks: [{
-                        label: 'NumbersWithZero',
-                        verdict: 'defendable',
-                        evidence: 'A zero is visible.'
-                    }],
-                    reasoning: 'looks good'
-                })
-            }
+            text: JSON.stringify({
+                pass: true,
+                general_checks: {
+                    no_overlaps: true,
+                    no_placeholders: true,
+                    sane_padding: true
+                },
+                label_checks: [{
+                    label: 'NumbersWithZero',
+                    verdict: 'defendable',
+                    evidence: 'A zero is visible.'
+                }],
+                reasoning: 'looks good'
+            })
         });
 
         const cacheManager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
@@ -125,9 +116,14 @@ describe('vqa-evaluator', () => {
         expect(result?.entry.label_context_hash).toHaveLength(16);
         expect(result?.entry.validation_context_hash).toHaveLength(16);
 
-        const prompt = mockGenerateContent.mock.calls[0][0][0] as string;
+        const request = mockGenerateContent.mock.calls[0][0];
+        const prompt = request.contents[0] as string;
         expect(prompt).toContain('NumbersWithZero: Involves zero as a number.');
         expect(prompt).toContain('uncertainty passes validation');
+        expect(request.model).toBe('gemini-3.5-flash');
+        expect(request.config.responseMimeType).toBe('application/json');
+        expect(request.config.responseJsonSchema.properties.label_checks.type).toBe('array');
+        expect(request.contents[1].inlineData.mimeType).toBe('image/png');
 
         // Second evaluation should return from cache without calling Gemini again
         const cachedResult = await evaluateSampleVqa({
@@ -168,24 +164,41 @@ describe('vqa-evaluator', () => {
         expect(result).toBeNull();
     });
 
+    it('rejects a Gemini response without text', async () => {
+        mockGenerateContent.mockResolvedValueOnce({text: undefined});
+
+        await expect(evaluateSampleVqa({
+            imagePath: tmpImgPath,
+            sampleKey: 'empty#gen#view#train#question#inst:0',
+            targetId: 'empty',
+            generatorId: 'gen',
+            viewId: 'view',
+            modeName: 'question',
+            instanceIdx: 0,
+            attempt: 1,
+            seed: 123,
+            fileName: 'test-sample.png',
+            labels: ['NumbersWithZero'],
+            apiKey: 'test-api-key'
+        })).rejects.toThrow('Gemini returned no text');
+    });
+
     it('passes uncertain label judgements', async () => {
         mockGenerateContent.mockResolvedValueOnce({
-            response: {
-                text: () => JSON.stringify({
-                    pass: true,
-                    general_checks: {
-                        no_overlaps: true,
-                        no_placeholders: true,
-                        sane_padding: true
-                    },
-                    label_checks: [{
-                        label: 'NumbersWithZero',
-                        verdict: 'uncertain',
-                        evidence: 'The value may be implied.'
-                    }],
-                    reasoning: ''
-                })
-            }
+            text: JSON.stringify({
+                pass: true,
+                general_checks: {
+                    no_overlaps: true,
+                    no_placeholders: true,
+                    sane_padding: true
+                },
+                label_checks: [{
+                    label: 'NumbersWithZero',
+                    verdict: 'uncertain',
+                    evidence: 'The value may be implied.'
+                }],
+                reasoning: ''
+            })
         });
 
         const result = await evaluateSampleVqa({
@@ -209,22 +222,20 @@ describe('vqa-evaluator', () => {
 
     it('forces a failure when a label is not defendable', async () => {
         mockGenerateContent.mockResolvedValueOnce({
-            response: {
-                text: () => JSON.stringify({
-                    pass: true,
-                    general_checks: {
-                        no_overlaps: true,
-                        no_placeholders: true,
-                        sane_padding: true
-                    },
-                    label_checks: [{
-                        label: 'NumbersWithZero',
-                        verdict: 'not_defendable',
-                        evidence: 'No zero is present.'
-                    }],
-                    reasoning: ''
-                })
-            }
+            text: JSON.stringify({
+                pass: true,
+                general_checks: {
+                    no_overlaps: true,
+                    no_placeholders: true,
+                    sane_padding: true
+                },
+                label_checks: [{
+                    label: 'NumbersWithZero',
+                    verdict: 'not_defendable',
+                    evidence: 'No zero is present.'
+                }],
+                reasoning: ''
+            })
         });
 
         const result = await evaluateSampleVqa({
@@ -248,18 +259,16 @@ describe('vqa-evaluator', () => {
 
     it('rejects responses that omit an expected label check', async () => {
         mockGenerateContent.mockResolvedValueOnce({
-            response: {
-                text: () => JSON.stringify({
-                    pass: true,
-                    general_checks: {
-                        no_overlaps: true,
-                        no_placeholders: true,
-                        sane_padding: true
-                    },
-                    label_checks: [],
-                    reasoning: ''
-                })
-            }
+            text: JSON.stringify({
+                pass: true,
+                general_checks: {
+                    no_overlaps: true,
+                    no_placeholders: true,
+                    sane_padding: true
+                },
+                label_checks: [],
+                reasoning: ''
+            })
         });
 
         await expect(evaluateSampleVqa({
