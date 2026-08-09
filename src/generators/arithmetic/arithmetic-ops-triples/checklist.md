@@ -1,4 +1,0 @@
-- The problem must contain exactly three operands and the exact left-to-right result of the requested operation.
-- Every operand and the result must be non-negative and remain inside the target number range.
-- A commutative-law payload must preserve the same three operands under reordering; an associative-law payload must preserve one result across both groupings.
-- When multiples of ten are requested, all three operands and the result must be divisible by 10.

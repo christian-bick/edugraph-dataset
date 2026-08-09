@@ -20,18 +20,18 @@ The reference library under `docs/` is authoritative. Load the references for th
 | `--file` | File under review | Load                                                      |
 |----------|-------------------|-----------------------------------------------------------|
 | `spec`      | `spec.ts`      | `docs/spec-general.md` + `docs/spec-view.md`              |
-| `checklist` | `checklist.md` | `docs/checklist-general.md` + `docs/checklist-view.md`    |
+| `checklist` | `checklist.md` | `docs/checklist-view.md`                                  |
 | `code`      | `view.tsx`     | `docs/implementation-general.md` + `docs/implementation-view.md` |
 
 Without `--file`, review all three aspects.
 
-**Reporting**: every finding must cite the rule ID it violates (e.g. `SPEC-V3`, `CHK-V4`, `IMPL-V6`). If something looks wrong but violates no rule, report it as an observation and say so — do not invent a rule ID.
+**Reporting**: every finding must cite the rule ID it violates (e.g. `SPEC-V3`, `CHK-V6`, `IMPL-V6`). If something looks wrong but violates no rule, report it as an observation and say so — do not invent a rule ID.
 
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.
 
-**Two failure modes dominate in this codebase** — check them explicitly on every view:
-- `CHK-V4`: a leaf checklist rule requiring prompt/instruction text without scoping it to Question Mode.
-- `IMPL-V6`: visual randomness not derived from `payload.seed`.
+Check these explicitly on every view:
+- `CHK-V6`: the leaf contract is missing, non-observable, or contains a sentence that does not pass the removal question.
+- `IMPL-V6`: visual randomness is not derived from `payload.seed`.
 
 ---
 

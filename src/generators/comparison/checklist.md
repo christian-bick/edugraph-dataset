@@ -1,4 +1,0 @@
-- The problem must present two values and a comparison relation (greater than, less than, or equal to).
-- The relation must correctly describe the relationship between the first value and the second value.
-- The solution must be mathematically correct based on the two values.
-- The problem identifier must uniquely represent the comparison expression.

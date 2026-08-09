@@ -1,0 +1,4 @@
+# Measurement Attributes
+
+- **Identity:** The depicted measurement setup makes the attribute being measured--length, height, or weight--identifiable.
+- **Modes:** Question Mode leaves every attribute choice neutral; Solution Mode identifies the attribute demonstrated by the setup.

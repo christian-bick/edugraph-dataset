@@ -1,3 +1,0 @@
-- The payload must represent one through nine tens with no leftover ones.
-- The target value must equal the number of tens multiplied by 10.
-- An inclusive upper bound of 10 must resolve to exactly one ten and a target value of 10.

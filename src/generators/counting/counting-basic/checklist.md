@@ -1,4 +1,0 @@
-- The problem must specify a quantity of objects to be counted.
-- The solution must be mathematically equal to the quantity of objects.
-- All quantities and solutions must be positive integers.
-- The problem identifier must uniquely represent the quantity of objects.

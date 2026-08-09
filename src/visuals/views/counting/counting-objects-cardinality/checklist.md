@@ -1,11 +1,4 @@
-### Counting Objects Cardinality View Checklist
+# Counting Objects Cardinality
 
-#### Visual Layout & Rendering Requirements
-1. **Instruction:**
-   - In Question Mode, the question text "Count the objects. What is the total number?" must be clearly visible above the canvas. Per the global Instruction & Mode Rules, this text must be absent in Solution Mode.
-2. **Cardinality & Highlighting:**
-   - In **Question Mode (`_mode-Q`)**, no counting badges should be rendered on the objects.
-   - In **Solution Mode (`_mode-S`)**, counting badges (1 to `numObjects`) must be displayed on top of each object.
-   - The final counting badge representing the cardinality (number `numObjects`) must be visually highlighted (e.g. using a yellow border/background/shadow) to indicate that this represents the total set size.
-3. **Answer Box:**
-   - Answer box at the bottom must be blank in Question Mode, and filled with the total count (`numObjects`) in Solution Mode.
+- **Identity:** A collection is counted one-to-one to identify its total cardinality.
+- **Modes:** Question Mode withholds counting badges and the total; Solution Mode numbers the objects in sequence and identifies the final count as the total.

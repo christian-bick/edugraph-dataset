@@ -1,6 +1,4 @@
-- Guide-tracing layout: a light-grey dotted outline must appear inside the drawing canvas in both modes.
-- Attribute-specification layout: a defining-attribute card must sit above a blank drawing canvas in the same positions in both modes.
-- In Question Mode, the guide-tracing prompt must ask the learner to draw the named shape by following the guide. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- In Question Mode, the attribute-specification prompt must ask the learner to draw a shape with the listed defining attributes. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- In Question Mode, the attribute-specification canvas must not reveal a dotted or completed outline.
-- In Solution Mode, the guide-tracing canvas must overlay its guide with the completed line, while the attribute-specification canvas must show the completed outline.
+# Drawing Shapes
+
+- **Identity:** A tracing guide or defining-attribute card and drawing canvas make the requested shape-construction task identifiable.
+- **Modes:** Question Mode shows only the guide or uncompleted attribute workspace; Solution Mode adds the completed shape without removing the evidence that defined it.

@@ -43,14 +43,18 @@ Consume resolved configuration parameters directly from the `config` prop, and
 `problem.data` directly, relying on `withConfig` to guarantee they resolve to non-null and
 correctly-typed values.
 
-### IMPL-V5 — Question and Solution render the same layout
+### IMPL-V5 — Question and Solution preserve the task while serving different roles
 
-- `isSolutionView: false` must visually hide the answer — render an empty box or
-  placeholder.
-- `isSolutionView: true` must render the **exact same layout** with the answer visible.
+- `isSolutionView: false` withholds the answer and must not reveal it through duplicate
+  text, answer styling, or another equivalent visual cue.
+- `isSolutionView: true` reveals the answer and keeps enough context to identify what was
+  solved.
+- Instructions may appear in either mode only when that image would otherwise be
+  ambiguous. Prefer stable geometry between modes, but do not retain unnecessary text just
+  to make their pixels identical.
 
-Mode-dependent expectations are asserted by the view's checklist
-([CHK-V3](checklist-view.md#chk-v3--distinguish-question-mode-from-solution-mode)).
+Mode-dependent expectations are asserted by the view's minimal checklist
+([CHK-V6](checklist-view.md#chk-v6--keep-one-minimal-observable-contract-per-view)).
 
 ### IMPL-V6 — All entropy comes from `payload.seed`
 
@@ -106,7 +110,7 @@ npm run test -- src/visuals/views/[<category>/]<view>/
 - [ ] **IMPL-V2** — `validateProblemData` is imported at the correct relative depth and called first, listing every required `problem.data` field.
 - [ ] **IMPL-V3** — every validation and range-check failure throws `ViewValidationError` rather than rendering degraded output.
 - [ ] **IMPL-V4** — no `||` fallback, default parameter, or optional-chaining default stands in for a resolved `config` or `problem.data` value.
-- [ ] **IMPL-V5** — Question and Solution renders differ only in answer visibility, not in layout.
+- [ ] **IMPL-V5** — Question Mode withholds the answer, Solution Mode reveals it with identifiable context, and each mode includes only instructions necessary for standalone understanding.
 - [ ] **IMPL-V6** — grep the view for `Math.random`, unseeded `random(`, and `problem.id`: all three must be absent. Every visual random decision traces back to `payload.seed`.
 - [ ] **IMPL-V7** — no reliance on animation state; every async resource the view loads resolves.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.

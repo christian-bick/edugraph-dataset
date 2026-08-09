@@ -7,18 +7,30 @@ import { findLeafModules } from './module-resolver.ts';
 import {
     buildVqaValidationContext,
     computeImageSha256,
-    VqaLabelCheck,
-    VqaLabelDefinition,
-    VqaCacheEntry,
+    type VqaLabelCheck,
+    type VqaLabelDefinition,
+    type VqaCacheEntry,
     VqaCacheManager
 } from './vqa-cache.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-const GENERATORS_ROOT = resolve(PROJECT_ROOT, 'src', 'generators');
 const VIEWS_ROOT = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
 const VQA_MODEL = 'gemini-3.5-flash';
+const VQA_SYSTEM_INSTRUCTION = `You are a senior Visual QA engineer evaluating one rendered math-exercise image.
+Use only visible evidence and the evaluation context supplied by the user. Apply every rule in the combined checklist.
+Return only JSON matching the provided response schema.
+If validation passes, set "reasoning" to an empty string. Provide non-empty reasoning only when validation fails.`;
+const VQA_GENERAL_CHECK_NAMES = [
+    'no_overlaps',
+    'no_placeholders',
+    'sane_padding',
+    'task_identifiable',
+    'mode_valid',
+    'text_minimal',
+    'math_coherent'
+] as const;
 const VQA_RESPONSE_SCHEMA = {
     type: 'object',
     properties: {
@@ -28,12 +40,14 @@ const VQA_RESPONSE_SCHEMA = {
             properties: {
                 no_overlaps: { type: 'boolean' },
                 no_placeholders: { type: 'boolean' },
-                sane_padding: { type: 'boolean' }
+                sane_padding: { type: 'boolean' },
+                task_identifiable: { type: 'boolean' },
+                mode_valid: { type: 'boolean' },
+                text_minimal: { type: 'boolean' },
+                math_coherent: { type: 'boolean' }
             },
-            required: ['no_overlaps', 'no_placeholders', 'sane_padding']
+            required: [...VQA_GENERAL_CHECK_NAMES]
         },
-        coloring_pass: { type: 'boolean' },
-        layout_pass: { type: 'boolean' },
         label_checks: {
             type: 'array',
             items: {
@@ -54,37 +68,27 @@ const VQA_RESPONSE_SCHEMA = {
     required: ['pass', 'general_checks', 'label_checks', 'reasoning']
 };
 
-export function resolveTreeChecklists(rootDir: string, moduleId: string): string[] {
-    const paths: string[] = [];
-
-    // 1. Root checklist.md
-    const rootChecklist = resolve(rootDir, 'checklist.md');
-    if (existsSync(rootChecklist)) paths.push(rootChecklist);
-
-    // 2. Discover leaf modules
-    const modules = findLeafModules(rootDir);
-    const mod = modules.find(m => m.id === moduleId);
-
-    // 3. Category checklist.md
-    if (mod && mod.category) {
-        const categoryChecklist = resolve(rootDir, mod.category, 'checklist.md');
-        if (existsSync(categoryChecklist)) paths.push(categoryChecklist);
+export function resolveViewChecklistPaths(viewsRoot: string, viewId: string): string[] {
+    const rootChecklist = resolve(viewsRoot, 'checklist.md');
+    if (!existsSync(rootChecklist)) {
+        throw new Error(`Missing global view checklist: ${rootChecklist}`);
     }
 
-    // 4. Leaf checklist.md
-    const leafChecklist = mod
-        ? resolve(mod.absolutePath, 'checklist.md')
-        : resolve(rootDir, moduleId, 'checklist.md');
-    if (existsSync(leafChecklist)) paths.push(leafChecklist);
+    const viewModule = findLeafModules(viewsRoot).find(module => module.id === viewId);
+    if (!viewModule) {
+        throw new Error(`Cannot resolve checklist for unknown view: ${viewId}`);
+    }
 
-    return paths;
+    const leafChecklist = resolve(viewModule.absolutePath, 'checklist.md');
+    if (!existsSync(leafChecklist)) {
+        throw new Error(`Missing checklist for view "${viewId}": ${leafChecklist}`);
+    }
+
+    return [rootChecklist, leafChecklist];
 }
 
-export function getChecklistPaths(moduleName: string, viewId: string): string[] {
-    return [
-        ...resolveTreeChecklists(GENERATORS_ROOT, moduleName),
-        ...resolveTreeChecklists(VIEWS_ROOT, viewId)
-    ];
+export function getChecklistPaths(viewId: string): string[] {
+    return resolveViewChecklistPaths(VIEWS_ROOT, viewId);
 }
 
 export function initVqaClient(apiKey?: string) {
@@ -119,6 +123,63 @@ function formatLabelDefinitions(labelDefinitions: readonly VqaLabelDefinition[])
     return labelDefinitions
         .map(({ label, definition: labelDefinition }) => `- ${label}: ${labelDefinition}`)
         .join('\n');
+}
+
+export interface VqaPromptPartsInput {
+    generatorId: string;
+    viewId: string;
+    modeName: string;
+    labelDefinitions: readonly VqaLabelDefinition[];
+    globalChecklist: string;
+    viewChecklist: string;
+}
+
+export interface VqaPromptParts {
+    systemInstruction: string;
+    userPrompt: string;
+}
+
+export function buildVqaPromptParts(input: VqaPromptPartsInput): VqaPromptParts {
+    const {
+        generatorId,
+        viewId,
+        modeName,
+        labelDefinitions,
+        globalChecklist,
+        viewChecklist
+    } = input;
+    const isSolution = modeName === 'solution';
+    const userPrompt = `# Evaluation context
+
+- Mode: ${isSolution ? 'Solution Mode (`_mode-S`)' : 'Question Mode (`_mode-Q`)'}
+- Generator: \`${generatorId}\`
+- View: \`${viewId}\`
+
+## Ontology labels
+
+${formatLabelDefinitions(labelDefinitions)}
+
+# Combined Visual QA Checklist
+
+The global and view-specific sections below are concatenated into one checklist. Apply every rule in both sections.
+
+---
+
+## Part 1 — Global checklist
+
+<global-checklist>
+${globalChecklist.trim()}
+</global-checklist>
+
+---
+
+## Part 2 — View-specific checklist: \`${viewId}\`
+
+<view-specific-checklist>
+${viewChecklist.trim()}
+</view-specific-checklist>`;
+
+    return { systemInstruction: VQA_SYSTEM_INSTRUCTION, userPrompt };
 }
 
 function validateLabelChecks(
@@ -166,12 +227,11 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
 
     const imageBuffer = readFileSync(imagePath);
     const imageSha256 = computeImageSha256(imageBuffer);
-    const checklistPaths = getChecklistPaths(generatorId, viewId);
+    const checklistPaths = getChecklistPaths(viewId);
 
-    let checklistText = '';
-    for (const p of checklistPaths) {
-        checklistText += readFileSync(p, 'utf-8') + '\n\n';
-    }
+    const [globalChecklistPath, viewChecklistPath] = checklistPaths;
+    const globalChecklist = readFileSync(globalChecklistPath, 'utf-8');
+    const viewChecklist = readFileSync(viewChecklistPath, 'utf-8');
 
     const validationContext = buildVqaValidationContext(imageSha256, checklistPaths, labels);
     const valCacheKey = validationContext.validationCacheKey;
@@ -189,31 +249,21 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
         return null;
     }
 
-    const isSolution = modeName === 'solution';
-    const prompt = `
-You are a senior Visual QA Engineer. Evaluate this math exercise image:
-Mode: "${isSolution ? 'Solution Mode (_mode-S)' : 'Question Mode (_mode-Q)'}"
-Module: "${generatorId}"
-View ID: "${viewId}"
-
-CHECKLIST:
-${checklistText}
-
-ONTOLOGY LABELS:
-${formatLabelDefinitions(validationContext.labelDefinitions)}
-
-For every ontology label, judge whether it is reasonably supported by visual inspection and straightforward mathematical reasoning from the image. A label does not need to be uniquely determined. Use "uncertain" when the evidence is indirect, ambiguous, or you are unsure; uncertainty passes validation. Use "not_defendable" only when the image clearly contradicts the definition or clearly lacks a feature required by it.
-
-IMPORTANT: If pass is true, all general checks pass, and no label is "not_defendable", set "reasoning" to "" (empty string). Only provide a non-empty reasoning string when validation fails.
-
-Respond only in the provided JSON schema.
-`;
+    const promptParts = buildVqaPromptParts({
+        generatorId,
+        viewId,
+        modeName,
+        labelDefinitions: validationContext.labelDefinitions,
+        globalChecklist,
+        viewChecklist
+    });
 
     const imagePart = { inlineData: { data: imageBuffer.toString('base64'), mimeType: 'image/png' } };
     const response = await client.models.generateContent({
         model: VQA_MODEL,
-        contents: [prompt, imagePart],
+        contents: [promptParts.userPrompt, imagePart],
         config: {
+            systemInstruction: promptParts.systemInstruction,
             responseMimeType: 'application/json',
             responseJsonSchema: VQA_RESPONSE_SCHEMA
         }
@@ -224,6 +274,15 @@ Respond only in the provided JSON schema.
     }
     const parsed = JSON.parse(responseText);
     parsed.label_checks = validateLabelChecks(parsed.label_checks, validationContext.labelDefinitions);
+    const failedGeneralChecks = VQA_GENERAL_CHECK_NAMES
+        .filter(name => parsed.general_checks?.[name] !== true);
+    if (failedGeneralChecks.length > 0) {
+        parsed.pass = false;
+        if (!parsed.reasoning) {
+            parsed.reasoning = `General checks failed: ${failedGeneralChecks.join(', ')}`;
+        }
+    }
+
     if (parsed.label_checks.some((check: VqaLabelCheck) => check.verdict === 'not_defendable')) {
         parsed.pass = false;
         if (!parsed.reasoning) {
@@ -235,7 +294,7 @@ Respond only in the provided JSON schema.
         }
     }
 
-    if (parsed.pass && parsed.general_checks?.no_overlaps && parsed.general_checks?.no_placeholders && parsed.general_checks?.sane_padding) {
+    if (parsed.pass && failedGeneralChecks.length === 0) {
         parsed.reasoning = '';
     }
 

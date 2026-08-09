@@ -1,6 +1,4 @@
-- Single-stage layout: one labeled target diagram must appear above exactly two answer options.
-- Two-stage layout: recognizable primitive glyphs must visibly feed into labeled intermediate composites, followed by an arrow labeled “reuse” leading to the final target; repeated identical intermediates must appear once with a visible multiplicity.
-- In Question Mode, the prompt must ask which pieces make the target, and both options must remain neutral. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- In Question Mode, no composition seams or selected answer may be visible in either layout, and the final-target panel must use neutral styling without green.
-- In Solution Mode, only the correct option must be highlighted and the relevant target and intermediate diagrams must reveal their composition seams.
-- Question and Solution Mode must keep every diagram, stage panel, arrow, and option in the same position.
+# Composing Shapes
+
+- **Identity:** Primitive pieces visibly relate to a target directly or through one reusable intermediate stage, making the composition structure identifiable.
+- **Modes:** Question Mode hides composition seams and leaves choices neutral; Solution Mode reveals the seams and identifies the pieces that compose the target.

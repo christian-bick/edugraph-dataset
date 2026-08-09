@@ -1,5 +1,0 @@
-- The problem must define a starting quantity of objects, a direction of change (increment or decrement), and a resulting solution.
-- The change must apply the resolved step magnitude, either one or ten, in the resolved direction.
-- The solution must be the mathematically correct result of applying the change to the starting quantity.
-- All quantities and solutions must be positive integers.
-- The start and result place-value decompositions must reconstruct their respective quantities; a step of ten must preserve the ones place and change the tens place by exactly one.

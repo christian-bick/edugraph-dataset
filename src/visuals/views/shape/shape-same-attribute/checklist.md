@@ -1,14 +1,4 @@
-### Shape Same Attribute Visual Checklist
+# Shared Physical Shape Attributes
 
-## Rendering Requirements
-- **Prompt Text**: In Question Mode, the prompt must correspond to the target attribute:
-  - `'rollable'`: "Which of these shapes rolls easily?"
-  - `'stackable'`: "Which of these shapes is best for stacking?"
-  - `'foldable'`: "Which of these shapes can be folded?"
-  - Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- **Visual Options**: The SVG container must display three shapes: Sphere, Cube, and Rectangle, each with their corresponding label text beneath them.
-
-## Layout & Styling
-- **Layout Integrity**: The three shape icons (Sphere, Cube, Rectangle) must align horizontally inside the slate-50 canvas.
-- **Multiple Choice Options**: Below the canvas, three option buttons ('Sphere', 'Cube', 'Rectangle') must be rendered.
-- **Solution Highlight**: In Solution Mode (`isSolutionView: true`), the correct button (Sphere, Cube, or Rectangle depending on prompt) must have a green border, green background, and bold green text. In Question Mode, all option buttons must look identical and unselected.
+- **Identity:** The physical property being evaluated--rolling, stacking, or folding--remains identifiable in both modes, and each candidate shape is identifiable without repeating its name beside an identical answer option.
+- **Modes:** Question Mode leaves every shape neutral; Solution Mode identifies the shape satisfying the visible property.

@@ -1,1 +1,0 @@
-### Counting Category Visual Checklist

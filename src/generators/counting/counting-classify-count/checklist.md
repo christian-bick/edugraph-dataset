@@ -1,5 +1,0 @@
-- The problem must contain a collection of items classified into distinct categories, along with a record of the count for each category.
-- Every item in the collection must belong to one of the defined categories.
-- The sum of the counts across all categories must exactly equal the total number of items in the collection.
-- All counts must be positive integers.
-- The problem identifier must uniquely map to the problem configuration.

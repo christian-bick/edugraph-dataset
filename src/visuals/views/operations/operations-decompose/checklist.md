@@ -1,5 +1,4 @@
-### Operations Decompose Visual Checklist
+# Number Decomposition
 
-- In Question Mode (`_mode-Q`), the prompt must read "Decompose [target number] in two different ways." All four answer boxes must be empty. Per the global Instruction & Mode Rules, the prompt is absent in Solution Mode.
-- In Solution Mode (`_mode-S`), all four answer boxes must show the two decompositions with solution highlighting; all other elements retain the Question Mode layout.
-- Each decomposition card must show centered, non-overlapping rows of icons, with its two parts visually distinguished by contrasting colors.
+- **Identity:** A visible target number and two distinct part-pair response areas define the task of decomposing it in two ways.
+- **Modes:** Question Mode leaves all parts empty; Solution Mode reveals two different pairs that each compose the target.

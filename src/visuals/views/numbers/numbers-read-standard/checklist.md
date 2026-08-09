@@ -1,5 +1,4 @@
-### Numbers Read Standard Visual Checklist
+# Reading Numerals
 
-- In Question Mode, the prompt MUST read "Read this number aloud.", the Arabic numeral MUST remain visible, and the speech-style answer area MUST be blank.
-- In Solution Mode, the prompt MUST be absent, the same Arabic numeral MUST remain visible, and the correctly spelled lowercase English number name MUST appear highlighted in the answer area.
-- Number names through "one hundred twenty" MUST fit without clipping or overflow.
+- **Identity:** An Arabic numeral and a speech-style response area make reading the number aloud identifiable.
+- **Modes:** Question Mode leaves the spoken number name empty; Solution Mode reveals the correctly spelled English number name.

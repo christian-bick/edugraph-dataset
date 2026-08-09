@@ -1,5 +1,4 @@
-- Exactly one observable layout appears per image: partition a whole, name one highlighted share, compose a whole from equal pieces, or compare the size of a half and a fourth.
-- In Question Mode, the task-specific prompt is visible above a fixed-size work area; any answer field is blank. In the partition layout, the whole has no partition lines. In the other three layouts, the relevant shares or pieces are visible without revealing the answer.
-- In Solution Mode, the prompt slot remains the same size but is empty. The partition layout shows the requested equal divisions; the vocabulary and comparison layouts reveal the correct word and highlight; the composition layout assembles the pieces into a completed whole and reveals the answer.
-- The work area, diagrams, labels, and any answer field retain the same positions and dimensions between Question and Solution Mode.
-- All share labels and answers use words such as "half", "fourth", "quarter", and "one whole"; symbolic fraction notation does not appear.
+# Equal Shares
+
+- **Identity:** The image makes exactly one task identifiable: partitioning a whole, naming a highlighted share, composing a whole, or comparing a half with a fourth.
+- **Modes:** Question Mode withholds the requested partition, vocabulary, composition, or comparison result; Solution Mode reveals it while preserving the visual evidence that defines the task.

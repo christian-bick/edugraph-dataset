@@ -1,4 +1,0 @@
-- The payload must contain an ordered sequence of at least two positive integers and exactly one missing position after the visible starting value.
-- Adjacent values must differ by the resolved step magnitude: exactly one or exactly ten.
-- The answer must equal the sequence value at the missing position.
-- Every sequence value must stay within the resolved numeric range.

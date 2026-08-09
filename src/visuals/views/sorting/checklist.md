@@ -1,1 +1,0 @@
-### Sorting Category Visual Checklist

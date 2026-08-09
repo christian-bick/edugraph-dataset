@@ -11,7 +11,7 @@ import {
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
 import { isUnionSpec, resolveDatasetDir } from "../lib/dataset-paths.ts";
-import { evaluateSampleVqa } from "../lib/vqa-evaluator.ts";
+import { evaluateSampleVqa, getChecklistPaths } from "../lib/vqa-evaluator.ts";
 import {
     loadGeneratorCatalog,
     loadViewCatalog,
@@ -34,7 +34,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, "..", "..");
 const GENERATORS_ROOT = resolve(PROJECT_ROOT, "src", "generators");
-const VIEWS_ROOT = resolve(PROJECT_ROOT, "src", "visuals", "views");
 const CACHE_DIR = resolve(PROJECT_ROOT, "cache", "vqa-validation");
 
 /** The dataset's root — every split folder hangs off it. */
@@ -97,39 +96,6 @@ function datasetStructureIssues(entries: any[], missingSplits: SampleSplit[]): s
 }
 
 const apiKey = process.env.GEMINI_API_KEY;
-
-function resolveTreeChecklists(rootDir: string, moduleId: string): string[] {
-    const paths: string[] = [];
-
-    // 1. Root checklist.md
-    const rootChecklist = resolve(rootDir, 'checklist.md');
-    if (existsSync(rootChecklist)) paths.push(rootChecklist);
-
-    // 2. Discover leaf modules
-    const modules = findLeafModules(rootDir);
-    const mod = modules.find(m => m.id === moduleId);
-
-    // 3. Category checklist.md
-    if (mod && mod.category) {
-        const categoryChecklist = resolve(rootDir, mod.category, 'checklist.md');
-        if (existsSync(categoryChecklist)) paths.push(categoryChecklist);
-    }
-
-    // 4. Leaf checklist.md
-    const leafChecklist = mod
-        ? resolve(mod.absolutePath, 'checklist.md')
-        : resolve(rootDir, moduleId, 'checklist.md');
-    if (existsSync(leafChecklist)) paths.push(leafChecklist);
-
-    return paths;
-}
-
-function getChecklistPaths(moduleName: string, viewId: string): string[] {
-    return [
-        ...resolveTreeChecklists(GENERATORS_ROOT, moduleName),
-        ...resolveTreeChecklists(VIEWS_ROOT, viewId)
-    ];
-}
 
 function renderProgressBar(current: number, total: number, passed: number, failed: number) {
     const width = 30;
@@ -324,7 +290,7 @@ async function main() {
         const imageBuffer = readFileSync(imagePath);
         const imageSha256 = computeImageSha256(imageBuffer);
 
-        const checklistPaths = getChecklistPaths(moduleName, entry.view);
+        const checklistPaths = getChecklistPaths(entry.view);
         const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
 
         if (!activeKeysPerModule.has(moduleName)) {
@@ -417,7 +383,7 @@ async function main() {
 
             const imageBuffer = readFileSync(imagePath);
             const imageSha256 = computeImageSha256(imageBuffer);
-            const checklistPaths = getChecklistPaths(moduleName, viewId);
+            const checklistPaths = getChecklistPaths(viewId);
             const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
 
             const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
@@ -561,7 +527,7 @@ function generateValidationReport(
 
         const imageBuffer = readFileSync(imagePath);
         const imageSha256 = computeImageSha256(imageBuffer);
-        const checklistPaths = getChecklistPaths(moduleName, viewId);
+        const checklistPaths = getChecklistPaths(viewId);
         const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
 
         const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
@@ -631,12 +597,10 @@ ${[...perSplit.entries()]
                 checks.push(`Overlaps: ${evalObj.general_checks.no_overlaps ? 'Pass' : 'FAIL'}`);
                 checks.push(`Placeholders: ${evalObj.general_checks.no_placeholders ? 'Pass' : 'FAIL'}`);
                 checks.push(`Padding: ${evalObj.general_checks.sane_padding ? 'Pass' : 'FAIL'}`);
-            }
-            if (evalObj.coloring_pass !== undefined) {
-                checks.push(`Coloring: ${evalObj.coloring_pass ? 'Pass' : 'FAIL'}`);
-            }
-            if (evalObj.layout_pass !== undefined) {
-                checks.push(`Layout: ${evalObj.layout_pass ? 'Pass' : 'FAIL'}`);
+                checks.push(`Task identifiable: ${evalObj.general_checks.task_identifiable ? 'Pass' : 'FAIL'}`);
+                checks.push(`Mode validity: ${evalObj.general_checks.mode_valid ? 'Pass' : 'FAIL'}`);
+                checks.push(`Minimal text: ${evalObj.general_checks.text_minimal ? 'Pass' : 'FAIL'}`);
+                checks.push(`Mathematical coherence: ${evalObj.general_checks.math_coherent ? 'Pass' : 'FAIL'}`);
             }
             for (const labelCheck of evalObj.label_checks || []) {
                 if (labelCheck.verdict === 'not_defendable') {

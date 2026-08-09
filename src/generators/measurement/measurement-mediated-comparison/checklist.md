@@ -1,3 +1,0 @@
-- The payload must contain exactly three distinct objects A, B and C and identify B as the intermediary.
-- The two strict length premises must form a compatible A-B-C chain in the same direction, without directly comparing A and C.
-- The answer must identify the endpoint that satisfies the requested longer-than or shorter-than relation by transitivity.

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getChecklistPaths, initVqaClient, resolveTreeChecklists, evaluateSampleVqa } from './vqa-evaluator.ts';
+import { buildVqaPromptParts, getChecklistPaths, initVqaClient, resolveViewChecklistPaths, evaluateSampleVqa } from './vqa-evaluator.ts';
 import { resolve } from 'path';
-import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
+import { writeFileSync, mkdirSync, existsSync, readFileSync, rmSync } from 'fs';
 import { VqaCacheManager } from './vqa-cache.ts';
+import { findLeafModules } from './module-resolver.ts';
 
 // Mock @google/genai
 const mockGenerateContent = vi.fn();
@@ -22,6 +23,7 @@ describe('vqa-evaluator', () => {
     const tmpDir = resolve(__dirname, '../../temp/vqa-test');
     const tmpImgPath = resolve(tmpDir, 'test-sample.png');
     const tmpCacheDir = resolve(tmpDir, 'cache');
+    const testViewId = 'operations-vertical';
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -32,16 +34,75 @@ describe('vqa-evaluator', () => {
         writeFileSync(tmpImgPath, Buffer.from('fake-png-data'));
     });
 
-    it('resolves checklist paths for generators and views', () => {
-        const paths = getChecklistPaths('arithmetic-ops-pairs', 'operations-vertical');
-        expect(paths.length).toBeGreaterThan(0);
-        expect(paths.some(p => p.includes('checklist.md'))).toBe(true);
+    it('resolves exactly the global and leaf checklist for a view', () => {
+        const paths = getChecklistPaths('operations-vertical');
+        expect(paths).toHaveLength(2);
+        expect(paths[0]).toMatch(/views[\\/]checklist\.md$/);
+        expect(paths[1]).toMatch(/operations[\\/]operations-vertical[\\/]checklist\.md$/);
     });
 
-    it('returns empty checklist list for non-existent module paths', () => {
-        const rootDir = resolve(__dirname, 'non-existent-dir');
-        const paths = resolveTreeChecklists(rootDir, 'fake-module');
-        expect(paths).toEqual([]);
+    it('has a resolvable checklist for every discovered view', () => {
+        const viewsRoot = resolve(__dirname, '../visuals/views');
+        const views = findLeafModules(viewsRoot);
+
+        expect(views.length).toBeGreaterThan(0);
+        for (const view of views) {
+            expect(resolveViewChecklistPaths(viewsRoot, view.id)).toHaveLength(2);
+        }
+    });
+
+    it('separates system instructions from the combined global and view checklist', () => {
+        const prompt = buildVqaPromptParts({
+            generatorId: 'arithmetic-ops-pairs',
+            viewId: testViewId,
+            modeName: 'question',
+            labelDefinitions: [{
+                iri: 'http://edugraph.io/edu/NumbersWithZero',
+                label: 'NumbersWithZero',
+                definition: 'Involves zero as a number.'
+            }],
+            globalChecklist: '## Global rules\n\n- Global criterion.',
+            viewChecklist: '# Vertical Operations\n\n- View criterion.'
+        });
+
+        expect(prompt.systemInstruction).toContain('senior Visual QA engineer');
+        expect(prompt.systemInstruction).not.toContain('Global criterion');
+        expect(prompt.userPrompt).not.toContain('senior Visual QA engineer');
+        expect(prompt.userPrompt).toContain('## Ontology labels');
+        expect(prompt.userPrompt).toContain('NumbersWithZero: Involves zero as a number.');
+        expect(prompt.userPrompt).toContain('<global-checklist>\n## Global rules');
+        expect(prompt.userPrompt).toContain('<view-specific-checklist>\n# Vertical Operations');
+        expect(prompt.userPrompt.indexOf('<global-checklist>'))
+            .toBeLessThan(prompt.userPrompt.indexOf('<view-specific-checklist>'));
+    });
+
+    it('rejects a missing global view checklist', () => {
+        const viewsRoot = resolve(tmpDir, 'views');
+        mkdirSync(resolve(viewsRoot, 'category', 'sample-view'), { recursive: true });
+        writeFileSync(resolve(viewsRoot, 'category', 'sample-view', 'spec.ts'), 'export const spec = {};');
+        writeFileSync(resolve(viewsRoot, 'category', 'sample-view', 'checklist.md'), '# Sample');
+
+        expect(() => resolveViewChecklistPaths(viewsRoot, 'sample-view'))
+            .toThrow('Missing global view checklist');
+    });
+
+    it('rejects a missing leaf view checklist', () => {
+        const viewsRoot = resolve(tmpDir, 'views');
+        mkdirSync(resolve(viewsRoot, 'category', 'sample-view'), { recursive: true });
+        writeFileSync(resolve(viewsRoot, 'checklist.md'), '# Global');
+        writeFileSync(resolve(viewsRoot, 'category', 'sample-view', 'spec.ts'), 'export const spec = {};');
+
+        expect(() => resolveViewChecklistPaths(viewsRoot, 'sample-view'))
+            .toThrow('Missing checklist for view "sample-view"');
+    });
+
+    it('rejects an unknown view', () => {
+        const viewsRoot = resolve(tmpDir, 'views');
+        mkdirSync(viewsRoot, { recursive: true });
+        writeFileSync(resolve(viewsRoot, 'checklist.md'), '# Global');
+
+        expect(() => resolveViewChecklistPaths(viewsRoot, 'fake-view'))
+            .toThrow('Cannot resolve checklist for unknown view: fake-view');
     });
 
     it('returns null when initializing the VQA client without an API key', () => {
@@ -60,7 +121,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'test#gen#view#train#question#inst:0',
             targetId: 'test',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,
@@ -79,7 +140,11 @@ describe('vqa-evaluator', () => {
                 general_checks: {
                     no_overlaps: true,
                     no_placeholders: true,
-                    sane_padding: true
+                    sane_padding: true,
+                    task_identifiable: true,
+                    mode_valid: true,
+                    text_minimal: true,
+                    math_coherent: true
                 },
                 label_checks: [{
                     label: 'NumbersWithZero',
@@ -97,7 +162,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'test#gen#view#train#question#inst:0',
             targetId: 'test',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,
@@ -118,8 +183,17 @@ describe('vqa-evaluator', () => {
 
         const request = mockGenerateContent.mock.calls[0][0];
         const prompt = request.contents[0] as string;
+        expect(request.config.systemInstruction).toContain('senior Visual QA engineer');
+        expect(request.config.systemInstruction).not.toContain('Global Visual QA Checklist');
+        expect(prompt).toContain('# Combined Visual QA Checklist');
         expect(prompt).toContain('NumbersWithZero: Involves zero as a number.');
-        expect(prompt).toContain('uncertainty passes validation');
+        expect(prompt).toContain('<global-checklist>');
+        expect(prompt).toContain('<view-specific-checklist>');
+        const centralChecklist = readFileSync(getChecklistPaths(testViewId)[0], 'utf-8');
+        expect(centralChecklist).toContain('`defendable`');
+        expect(centralChecklist).toContain('`not_defendable`');
+        expect(centralChecklist).toContain('`defendable` and `uncertain` pass; `not_defendable` fails.');
+        expect(prompt).not.toContain('For every ontology label, judge whether');
         expect(request.model).toBe('gemini-3.5-flash');
         expect(request.config.responseMimeType).toBe('application/json');
         expect(request.config.responseJsonSchema.properties.label_checks.type).toBe('array');
@@ -131,7 +205,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'test#gen#view#train#question#inst:0',
             targetId: 'test',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,
@@ -152,7 +226,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'test2#gen#view#train#question#inst:0',
             targetId: 'test2',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,
@@ -172,7 +246,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'empty#gen#view#train#question#inst:0',
             targetId: 'empty',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,
@@ -190,7 +264,11 @@ describe('vqa-evaluator', () => {
                 general_checks: {
                     no_overlaps: true,
                     no_placeholders: true,
-                    sane_padding: true
+                    sane_padding: true,
+                    task_identifiable: true,
+                    mode_valid: true,
+                    text_minimal: true,
+                    math_coherent: true
                 },
                 label_checks: [{
                     label: 'NumbersWithZero',
@@ -206,7 +284,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'uncertain#gen#view#train#question#inst:0',
             targetId: 'uncertain',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,
@@ -227,7 +305,11 @@ describe('vqa-evaluator', () => {
                 general_checks: {
                     no_overlaps: true,
                     no_placeholders: true,
-                    sane_padding: true
+                    sane_padding: true,
+                    task_identifiable: true,
+                    mode_valid: true,
+                    text_minimal: true,
+                    math_coherent: true
                 },
                 label_checks: [{
                     label: 'NumbersWithZero',
@@ -243,7 +325,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'rejected#gen#view#train#question#inst:0',
             targetId: 'rejected',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,
@@ -257,6 +339,47 @@ describe('vqa-evaluator', () => {
         expect(result?.entry.evaluation.reasoning).toContain('NumbersWithZero: No zero is present.');
     });
 
+    it('forces a failure when a central visual check fails', async () => {
+        mockGenerateContent.mockResolvedValueOnce({
+            text: JSON.stringify({
+                pass: true,
+                general_checks: {
+                    no_overlaps: true,
+                    no_placeholders: true,
+                    sane_padding: true,
+                    task_identifiable: false,
+                    mode_valid: true,
+                    text_minimal: true,
+                    math_coherent: true
+                },
+                label_checks: [{
+                    label: 'NumbersWithZero',
+                    verdict: 'defendable',
+                    evidence: 'A zero is visible.'
+                }],
+                reasoning: ''
+            })
+        });
+
+        const result = await evaluateSampleVqa({
+            imagePath: tmpImgPath,
+            sampleKey: 'unidentifiable#gen#view#train#question#inst:0',
+            targetId: 'unidentifiable',
+            generatorId: 'gen',
+            viewId: testViewId,
+            modeName: 'question',
+            instanceIdx: 0,
+            attempt: 1,
+            seed: 123,
+            fileName: 'test-sample.png',
+            labels: ['NumbersWithZero'],
+            apiKey: 'test-api-key'
+        });
+
+        expect(result?.entry.evaluation.pass).toBe(false);
+        expect(result?.entry.evaluation.reasoning).toContain('task_identifiable');
+    });
+
     it('rejects responses that omit an expected label check', async () => {
         mockGenerateContent.mockResolvedValueOnce({
             text: JSON.stringify({
@@ -264,7 +387,11 @@ describe('vqa-evaluator', () => {
                 general_checks: {
                     no_overlaps: true,
                     no_placeholders: true,
-                    sane_padding: true
+                    sane_padding: true,
+                    task_identifiable: true,
+                    mode_valid: true,
+                    text_minimal: true,
+                    math_coherent: true
                 },
                 label_checks: [],
                 reasoning: ''
@@ -276,7 +403,7 @@ describe('vqa-evaluator', () => {
             sampleKey: 'missing#gen#view#train#question#inst:0',
             targetId: 'missing',
             generatorId: 'gen',
-            viewId: 'view',
+            viewId: testViewId,
             modeName: 'question',
             instanceIdx: 0,
             attempt: 1,

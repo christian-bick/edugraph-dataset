@@ -1,6 +1,4 @@
-- Parts-count layout: the canvas must show a completed stick-and-ball representation and three count choices.
-- Attribute-specification layout: a defining-attribute card must sit above a fixed-size construction workspace in both modes.
-- In Question Mode, the parts-count prompt must ask how many sticks and clay balls are needed, with no selected choice. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- In Question Mode, the attribute-specification prompt must ask the learner to build a shape with the listed defining attributes. Per the global Instruction & Mode Rules, this prompt must be absent in Solution Mode.
-- In Question Mode, the attribute-specification workspace must show separate, unassembled sticks and clay balls with no completed shape.
-- In Solution Mode, the parts-count layout must highlight only the correct count choice, while the attribute-specification layout must show the completed construction.
+# Building Shapes
+
+- **Identity:** The image makes either counting construction parts or building from defining attributes identifiable through the completed target or attribute card.
+- **Modes:** Question Mode leaves every choice neutral or the construction unassembled; Solution Mode identifies the required parts or shows the completed construction.

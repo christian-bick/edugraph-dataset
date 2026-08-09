@@ -3,10 +3,10 @@ name: update-gen
 description: "/update-gen {moduleName} - Update the generator module under src/generators/[<category>/]{moduleName} to match its spec, create/update its spec.test.ts, adopt consuming views, and validate."
 ---
 
-Update the generator module under `src/generators/[<category>/]{moduleName}` (identified by containing `spec.ts`, `checklist.md`, and `generator.ts`) as follows:
+Update the generator module under `src/generators/[<category>/]{moduleName}` (identified by containing `spec.ts` and `generator.ts`) as follows:
 
 1. **Review Module Integrity**:
-   - Audit module structure, `spec.ts`, `checklist.md`, and `generator.ts` by invoking `/review-gen {moduleName}`.
+   - Audit module structure, `spec.ts`, `generator.ts`, and their tests by invoking `/review-gen {moduleName}`.
    - Core requirements: `docs/implementation-general.md` + `docs/implementation-generator.md`.
 
 2. **Tests & Specifications**:

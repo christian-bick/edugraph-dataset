@@ -21,6 +21,6 @@ Before executing any tasks always make yourself familiar with the project:
 
 - **ALWAYS read the README.md** to make yourself familiar with the artifact usage and general project context
 - **ALWAYS read the DOCS.md** to make yourself familiar with the architecture, the scripts, and the development workflows
-- **ALWAYS load the relevant reference from `docs/`** before authoring or reviewing a `spec.ts`, a `checklist.md`, a generator/view implementation, or a competency target spec. `docs/README.md` indexes them and says which to load for which task. These references are the single source of truth for authoring rules, and every rule has a stable ID (`SPEC-3`, `CHK-V4`, `IMPL-G2`, `TSPEC-1`) — cite the ID when reporting a violation.
+- **ALWAYS load the relevant reference from `docs/`** before authoring or reviewing a `spec.ts`, a `checklist.md`, a generator/view implementation, or a competency target spec. `docs/README.md` indexes them and says which to load for which task. These references are the single source of truth for authoring rules, and every rule has a stable ID (`SPEC-3`, `CHK-V6`, `IMPL-G2`, `TSPEC-1`) — cite the ID when reporting a violation.
 
 Update these documents after making larger changes to the project. A rule belongs in `docs/`; architecture, scripts and workflows belong in `DOCS.md`. Do not restate one in the other.

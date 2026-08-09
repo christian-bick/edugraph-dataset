@@ -53,9 +53,11 @@ export interface VqaCacheEntry {
             no_overlaps: boolean;
             no_placeholders: boolean;
             sane_padding: boolean;
+            task_identifiable: boolean;
+            mode_valid: boolean;
+            text_minimal: boolean;
+            math_coherent: boolean;
         };
-        coloring_pass?: boolean;
-        layout_pass?: boolean;
     };
 }
 

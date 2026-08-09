@@ -1,1 +1,0 @@
-### Measure Category Visual Checklist

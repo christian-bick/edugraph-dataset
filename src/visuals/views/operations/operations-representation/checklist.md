@@ -1,4 +1,4 @@
-- In Question Mode, the prompt asks the learner to use the objects and the equation answer box is empty.
-- In Solution Mode, the prompt is absent and the equation answer is shown.
-- Addition must show two visibly distinct object groups separated by a plus sign.
-- Subtraction must show the subtracted objects crossed out while leaving the remainder unobscured.
+# Operation Representation
+
+- **Identity:** Countable object groups and operation symbols visibly represent the same arithmetic relationship as the equation.
+- **Modes:** Question Mode leaves the equation result empty; Solution Mode reveals the result supported by the unchanged objects.

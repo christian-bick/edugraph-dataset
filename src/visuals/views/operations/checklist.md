@@ -1,1 +1,0 @@
-### Operations Category Visual Checklist

@@ -2,7 +2,7 @@
 
 This document provides a comprehensive technical overview of the EduGraph Content ML Dataset Generator. It is designed to guide developers and AI agents in understanding the system architecture, script orchestration, and the process for adding new educational content modules.
 
-> **Authoring rules live in [`docs/`](docs/README.md)** — the reference library covering `spec.ts`, `checklist.md`, and module implementation for generators and views, plus competency target specs. This document covers architecture, scripts and workflows, and links into that library rather than restating it.
+> **Authoring rules live in [`docs/`](docs/README.md)** — the reference library covering generator/view specifications and implementations, the visual checklist contract for views, and competency target specs. This document covers architecture, scripts and workflows, and links into that library rather than restating it.
 
 ## 1. Architecture Overview
 
@@ -135,7 +135,7 @@ The canonical cache-producing generation wrapper.
 ### `src/scripts/validate-dataset.ts`
 *   **Execution**: live mode: `npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force] [--report-only] [--report=<path>]`; strict audit: `npm run audit:dataset -- --spec=<spec_module>`
 *   **Dataset selection**: every script that reads a dataset takes `--spec=<module>` and nothing else, resolved by `resolveDatasetDir` in `src/lib/dataset-paths.ts` (`--spec=ccss` → `out/dataset-ccss/`). The reserved `--spec=union` addresses the merged `out/dataset/`, and is accepted only by `report:coverage` — validation and churn are per standard, and reject it with an explanation. `--spec` is required; there is no default.
-*   **Function**: An automated Visual QA pipeline. Normal mode uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze canonical Q/A image pairs against cascading `checklist.md` rules. Validation runs per standard — `--spec=test` targets the small `out/dataset-test/` slice for fast iteration. Normal mode rejects native renderer identities so a Windows or host-specific render cannot enter the committed cache.
+*   **Function**: An automated Visual QA pipeline. Normal mode uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze canonical Q/A image pairs against exactly two visual contracts: the central view checklist and the selected leaf view's required checklist. Evaluator role and response mechanics are sent through the SDK's system instruction; the user content separately carries evaluation context, ontology labels, and explicitly delimited global and view-specific parts of one combined checklist. Validation runs per standard — `--spec=test` targets the small `out/dataset-test/` slice for fast iteration. Normal mode rejects native renderer identities so a Windows or host-specific render cannot enter the committed cache.
 *   **Freshness gate**: Before inspecting or spending API calls on VQA, validation recomputes the manifest entries for the selected scope and fails if entries are missing, inputs are stale, aggregate `content_fingerprint` hashes differ, or sample counts drifted. Regenerate the reported generator/view scope first. A legacy dataset without `manifest.json` must be regenerated once.
 *   **Splits**: **Both `train` and `validation` are validated.** Validation images ship in the released dataset and are subject to the same checklists, so exempting them would let unchecked images reach consumers. Images are located by reading the split back out of the `sample_key` (`SPLIT_DIRS` in `src/lib/generation.ts`) — `file_name` is relative to its split root and does not encode the split, so **the same tuple's train and validation images share a filename**; every human-facing path is qualified with its split. The report breaks results down per split.
 *   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : validation-context hash)`. The validation context combines the applicable checklist hash with the sorted ontology labels and their definitions, so changing an image, checklist, label claim, or definition re-validates exactly the affected samples. Each cache entry also records the component hashes and the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
@@ -209,13 +209,13 @@ organized into a 1-level category sub-directory structure — e.g.
 
 The rules for authoring each file live in the reference library under
 [`docs/`](docs/README.md), which is their single source of truth. Every rule carries a
-stable ID — `SPEC-3`, `CHK-V4`, `IMPL-G2` — so skills and reviews cite one rule rather than
+stable ID — `SPEC-3`, `CHK-V6`, `IMPL-G2` — so skills and reviews cite one rule rather than
 a section number.
 
 | Artifact                    | Shared rules                                                | Generator                                                       | View                                                  |
 |-----------------------------|-------------------------------------------------------------|-----------------------------------------------------------------|-------------------------------------------------------|
 | `spec.ts`                   | [spec-general.md](docs/spec-general.md)                     | [spec-generator.md](docs/spec-generator.md)                     | [spec-view.md](docs/spec-view.md)                     |
-| `checklist.md`              | [checklist-general.md](docs/checklist-general.md)           | [checklist-generator.md](docs/checklist-generator.md)           | [checklist-view.md](docs/checklist-view.md)           |
+| `checklist.md`              | —                                                           | —                                                               | [checklist-view.md](docs/checklist-view.md)           |
 | `generator.ts` / `view.tsx` | [implementation-general.md](docs/implementation-general.md) | [implementation-generator.md](docs/implementation-generator.md) | [implementation-view.md](docs/implementation-view.md) |
 
 Competency target specs under `src/spec/` follow [target-spec.md](docs/target-spec.md).
@@ -305,8 +305,8 @@ npm run report:splits -- --spec=test
 Churn tells you whether the *images* moved; this tells you whether the *split* is still sound. Cross-split leakage and within-split redundancy fail the run — they make validation metrics optimistic. Coverage warnings are informational: a view whose content space is too small to yield a second distinct problem legitimately has no validation sample. Also runs as step 6 of `npm run check` for every spec that has a generated dataset.
 
 ### Rules that keep invalidation minimal
-- **Batch pixel-affecting changes** (view code, shared components, checklists) and regenerate once — every regeneration+validation cycle costs LLM calls for all changed images.
-- **Checklist edits cascade**: the checklist hash covers root + category + leaf `checklist.md` files, so editing a category checklist re-validates the whole category (images are unaffected, but all their cache keys change). Batch shared-checklist edits.
+- **Batch pixel-affecting changes** (view code and shared components) and regenerate once — every regeneration+validation cycle costs LLM calls for all changed images.
+- **Checklist edits do not require rendering**: the VQA context hash covers the central checklist plus the selected leaf checklist. Editing the central checklist re-validates every sample; editing one leaf checklist re-validates only that view.
 - **All view entropy comes from `payload.seed`** (`IMPL-V6`) — breaking this makes renders order-dependent under the concurrent worker pool and poisons the cache non-deterministically.
 - **No timing-dependent pixels** (`IMPL-V7`) — pages are reused across renders, so an animation state or an unloadable async resource makes pixels depend on render order.
 - **Pin the Playwright/Chromium version**: cache keys are pixel hashes, so a browser upgrade re-rasterizes everything. Treat browser bumps as deliberate full-invalidation events.
@@ -348,14 +348,14 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Command**: `/fix-spec [{specModule}] [--generator=X] [--view=Y]`
 - **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in `validation-report.md`), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
 - **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a `spec.ts` declaration or a competency target (`TSPEC-6`, `SPEC-V3`).
-- **Triage note**: A VQA failure is not proof of a code bug. An unscoped prompt-text rule in a leaf checklist (`CHK-V4`) fails views that correctly hide the prompt in Solution Mode; the checklist is verified before the view is changed.
+- **Triage note**: A VQA failure is not proof of a code bug. Verify that the leaf criterion passes the minimal-contract review rule (`CHK-V6`) before changing a correct view.
 
 ### Module Update Skills
 - **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews it, updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.
 - **`/update-view {viewName}`** (`.agents/skills/update-view/SKILL.md`): The same for one view module, adopting producing generators when the view needs a payload field it does not have (`IMPL-V8`).
 
 ### Module Review Skills
-- **`/review-gen {moduleName}`** (`.agents/skills/review-generator/SKILL.md`): Audits all three generator module files (`spec.ts`, `checklist.md`, `generator.ts`) against the Audit sections of the generator references.
+- **`/review-gen {moduleName}`** (`.agents/skills/review-generator/SKILL.md`): Audits the generator's `spec.ts`, `generator.ts`, and tests against the Audit sections of the generator references.
 - **`/review-view {viewName}`** (`.agents/skills/review-view/SKILL.md`): Audits all three view module files (`spec.ts`, `checklist.md`, `view.tsx`) against the Audit sections of the view references.
 
-Both accept an optional `--file=spec|checklist|code` filter, and both resolve `{moduleName}` as a leaf module, a category (all leaves beneath it), or — when omitted — every module.
+`/review-gen` accepts `--file=spec|code`; `/review-view` accepts `--file=spec|checklist|code`. Both resolve `{moduleName}` as a leaf module, a category (all leaves beneath it), or — when omitted — every module.

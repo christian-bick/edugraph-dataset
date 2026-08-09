@@ -1,2 +1,0 @@
-- The problem must specify a target shape (triangle, square, rectangle, circle, hexagon, cube, sphere, cone, or cylinder).
-- The solution (answer) must match the shape.

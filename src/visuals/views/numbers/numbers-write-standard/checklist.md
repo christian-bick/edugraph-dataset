@@ -1,5 +1,4 @@
-### Numbers Write Standard Visual Checklist
+# Copying Numerals
 
-- In Question Mode, the source numeral remains visible as the copy prompt and all three response boxes are empty.
-- In Solution Mode, the same source numeral and response-box layout remains, with the numeral filled into all three response boxes.
-- Every supported numeral from 0 through 120, including three-digit numerals, fits in the source and response boxes without clipping.
+- **Identity:** A source numeral and multiple handwriting-style response spaces make intentional numeral-copying practice identifiable rather than a reasoning task.
+- **Modes:** Question Mode leaves every response space empty; Solution Mode reproduces the source numeral in each space.

@@ -1,9 +1,9 @@
 ---
 name: review-gen
-description: "/review-gen [{moduleName}] [--file=spec|checklist|code] - Unified review of generator module(s) under src/generators/ against the EduGraph reference library."
+description: "/review-gen [{moduleName}] [--file=spec|code] - Unified review of generator module(s) under src/generators/ against the EduGraph reference library."
 ---
 
-Perform a review of generator module(s) under `src/generators/` (identified by `spec.ts`, `checklist.md`, and `generator.ts`). The goal is to enforce mathematical correctness, ontology spec separation of concerns, and robust configuration validation.
+Perform a review of generator module(s) under `src/generators/` (identified by `spec.ts` and `generator.ts`). The goal is to enforce mathematical correctness, ontology spec separation of concerns, robust configuration validation, and unit-test coverage of generator behavior.
 
 ## Scope Resolution
 - **Specific Leaf Module**: If `{moduleName}` matches a specific leaf module (e.g., `/review-gen arithmetic-ops-pairs`), restrict review to that module.
@@ -17,15 +17,14 @@ Perform a review of generator module(s) under `src/generators/` (identified by `
 
 The reference library under `docs/` is authoritative. Load the references for the aspects in scope and work through their **Audit** sections in order.
 
-| `--file` | File under review | Load                                                          |
-|----------|-------------------|---------------------------------------------------------------|
-| `spec`      | `spec.ts`      | `docs/spec-general.md` + `docs/spec-generator.md`             |
-| `checklist` | `checklist.md` | `docs/checklist-general.md` + `docs/checklist-generator.md`   |
-| `code`      | `generator.ts` | `docs/implementation-general.md` + `docs/implementation-generator.md` |
+| `--file` | Files under review                            | Load                                                                       |
+|----------|-----------------------------------------------|----------------------------------------------------------------------------|
+| `spec`   | `spec.ts`, `spec.test.ts`                     | `docs/spec-general.md` + `docs/spec-generator.md`                          |
+| `code`   | `generator.ts`, `generator.test.ts`           | `docs/implementation-general.md` + `docs/implementation-generator.md`      |
 
-Without `--file`, review all three aspects.
+Without `--file`, review both aspects.
 
-**Reporting**: every finding must cite the rule ID it violates (e.g. `SPEC-G2`, `CHK-2`, `IMPL-G3`). If something looks wrong but violates no rule, report it as an observation and say so — do not invent a rule ID.
+**Reporting**: every finding must cite the rule ID it violates (e.g. `SPEC-G2`, `IMPL-G3`). If something looks wrong but violates no rule, report it as an observation and say so — do not invent a rule ID.
 
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.
 

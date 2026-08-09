@@ -1,7 +1,4 @@
-# Shape Classify Dim - Visual & Rendering Checklist
+# Classifying Shape Dimension
 
-- Verify that the shape SVG is correctly centered inside its gray container.
-- Verify that two option buttons are rendered below the shape container: "Flat (2D)" and "Solid (3D)".
-- In question view (`isSolutionView: false`), both buttons must be styled identically with neutral outlines (slate/gray) and white backgrounds.
-- In solution view (`isSolutionView: true`), the correct button (matching the answer) must be clearly highlighted with a green border, light green background, bold green text, and a subtle green shadow, while the incorrect button remains in its neutral state.
-- Ensure all text (prompt, shape SVG, option buttons) is fully visible, readable, and does not overlap.
+- **Identity:** A clearly rendered shape and Flat (2D) and Solid (3D) choices define the dimensional classification task.
+- **Modes:** Question Mode leaves both choices neutral; Solution Mode identifies the shape's correct dimension.

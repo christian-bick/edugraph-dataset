@@ -51,13 +51,13 @@ Decide *where* the defect lives before touching code. Assigning a failure to the
 | Wrong answer, out-of-bounds value, label not satisfied by the math       | `generator.ts`   | `IMPL-G4`                    |
 | Correct data rendered wrong: overlap, clipping, `NaN`/`undefined` text   | `view.tsx`       | `IMPL-V3`, `IMPL-V4`         |
 | Answer visible in Question Mode, or layout differs between modes         | `view.tsx`       | `IMPL-V5`                    |
-| Checklist demands something a correctly-implemented view does not do     | `checklist.md`   | `CHK-V4`, `CHK-2`            |
+| Checklist demands something a correctly-implemented view does not do     | `checklist.md`   | `CHK-V6`                     |
 | `🖼️ image changed (same seed & attempt)` in a module you did not touch  | `view.tsx`       | `IMPL-V6`, `IMPL-V7`         |
 | `⚠️ seed changed for same identity`                                      | seeding logic    | escalate — must never happen |
 | View error card in the rendered image (`ViewValidationError`)            | payload mismatch | `IMPL-G6`, `IMPL-V8`         |
 | Target matches no generator/view at all                                  | out of scope     | hand off to `/implement-spec`|
 
-**A VQA failure is not proof of a code bug.** The most common false failure in this codebase is a leaf checklist requiring prompt text without scoping it to Question Mode (`CHK-V4`), which fails views that correctly hide the prompt in Solution Mode. Before changing a view, confirm the checklist rule it failed is itself correct.
+**A VQA failure is not proof of a code bug.** Before changing a view, apply the `CHK-V6` removal question to the failed leaf criterion and confirm that it describes an essential observable defect rather than duplicating the central checklist or a unit test.
 
 Group the triaged failures by `(generator, view)` so one fix and one regeneration cycle covers every sample it affects.
 

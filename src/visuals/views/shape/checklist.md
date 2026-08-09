@@ -1,1 +1,0 @@
-### Shape Category Visual Checklist

@@ -1,4 +1,0 @@
-- The problem must contain exactly two operands and the exact result of applying the requested operation.
-- When procedure inversion is requested, the second operand must be the unknown; otherwise the result must be the unknown.
-- When multiples of ten are requested, both operands and the result must be divisible by 10.
-- An explicit Addition, Subtraction, Multiplication, or Division label must select the operation; related concepts must not select one by fallback.

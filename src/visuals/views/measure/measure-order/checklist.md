@@ -1,3 +1,4 @@
-- In Question Mode, the prompt states the visible shortest-first or longest-first direction and all three answer boxes are empty.
-- In Solution Mode, the prompt is absent and the three object labels appear in the requested order.
-- The three measured bars must have visibly distinct lengths and remain fully inside the panel.
+# Measurement Ordering
+
+- **Identity:** Three visibly distinct lengths and an identifiable shortest-first or longest-first direction define the ordering task.
+- **Modes:** Question Mode leaves the ordered positions empty; Solution Mode places every object once in the requested order.

@@ -1,3 +1,4 @@
-- The equation must show two operand boxes for pair payloads and three operand boxes for triple payloads, separated by the requested operation symbol.
-- In Question Mode, exactly the payload-designated pair value is blank; triples leave the result blank.
-- In Solution Mode, the same equation layout must reveal the missing value in its original box.
+# Boxed Operations
+
+- **Identity:** A horizontal arithmetic equation contains exactly one visually identifiable unknown value.
+- **Modes:** Question Mode leaves that value empty; Solution Mode reveals it in the same equation position.

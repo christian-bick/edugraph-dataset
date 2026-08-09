@@ -42,15 +42,13 @@ Module discovery is performed dynamically up to 1 level deep via `findLeafModule
 |-----------------------------|------------------------------|
 | `generator.ts`              | `view.html`                  |
 | `spec.ts`                   | `view.tsx`                   |
-| `checklist.md`              | `spec.ts`                    |
-| `generator.test.ts`         | `checklist.md`               |
-| `spec.test.ts`              |                              |
+| `generator.test.ts`         | `spec.ts`                    |
+| `spec.test.ts`              | `checklist.md`               |
 
 Rules for each: [implementation-generator.md](implementation-generator.md) /
 [implementation-view.md](implementation-view.md) for code and tests,
 [spec-generator.md](spec-generator.md) / [spec-view.md](spec-view.md) for `spec.ts`,
-[checklist-generator.md](checklist-generator.md) / [checklist-view.md](checklist-view.md)
-for `checklist.md`.
+and [checklist-view.md](checklist-view.md) for the view `checklist.md`.
 
 ### IMPL-5 — Where shared code goes
 
@@ -92,9 +90,9 @@ Given a gap to close, prefer in this order:
    [IMPL-G7](implementation-generator.md#impl-g7--extend-capabilities-within-a-stable-payload-contract),
    not merely to avoid touching an existing module.
 
-**Why:** every new module multiplies the matching surface and adds a checklist that has to
-be maintained. A new module that renders labels an existing module already covers competes
-with it for the same targets.
+**Why:** every new module multiplies the matching surface, and every new view adds a visual
+contract that must be maintained. A new module that renders labels an existing module
+already covers competes with it for the same targets.
 
 ---
 
