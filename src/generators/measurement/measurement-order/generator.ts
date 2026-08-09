@@ -14,11 +14,20 @@ export class MeasurementOrderGenerator implements ProblemGenerator<MeasurementOr
         const orderScope = config.direction;
         if (orderScope !== Scope.AscendingOrder && orderScope !== Scope.DescendingOrder) return null;
 
-        const lengths = new Set<number>();
-        while (lengths.size < 3) {
-            lengths.add(60 + Math.floor(random() * 121));
+        const minimumLength = 60;
+        const maximumLength = 180;
+        const minimumGap = 20;
+        const availableOffset = maximumLength - minimumLength - minimumGap * 2;
+        const lengths = Array.from({length: 3}, () => Math.floor(random() * (availableOffset + 1)))
+            .sort((a, b) => a - b)
+            .map((offset, index) => minimumLength + offset + index * minimumGap);
+
+        for (let index = lengths.length - 1; index > 0; index--) {
+            const swapIndex = Math.floor(random() * (index + 1));
+            [lengths[index], lengths[swapIndex]] = [lengths[swapIndex], lengths[index]];
         }
-        const objects = Array.from(lengths).map((length, index) => ({
+
+        const objects = lengths.map((length, index) => ({
             id: String.fromCharCode(65 + index),
             length
         }));

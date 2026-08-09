@@ -41,6 +41,12 @@ const OperationsVerticalCore = ({config: _config, payload}: CoreProps) => {
         ? 'text-emerald-700 font-bold'
         : '';
     const showValue = (part: string) => isSolutionView || blankPart !== part;
+    const renderValue = (part: string, value: number) => showValue(part)
+        ? value
+        : <span
+            aria-label="unknown value"
+            className="inline-block h-[1.15em] w-[2.5ch] rounded border-2 border-slate-400"
+        />;
 
     return (
         <div className="flex justify-center items-center p-5 bg-white w-fit">
@@ -48,12 +54,12 @@ const OperationsVerticalCore = ({config: _config, payload}: CoreProps) => {
                 {operands.map(([part, operand], index) => (
                     <span key={part} className={`flex min-h-[2.5rem] items-center justify-end w-full ${valueClass(part)}`}>
                         {index > 0 && <span className="mr-[10px]">{symbol}</span>}
-                        {showValue(part) ? operand : ''}
+                        {renderValue(part, operand)}
                     </span>
                 ))}
                 <div className="w-full h-[2px] bg-neutral-800 my-1" />
                 <div className={`min-h-[2.5rem] flex items-center justify-end w-full ${valueClass('solution')}`}>
-                    {showValue('solution') ? data.answer : ''}
+                    {renderValue('solution', data.answer)}
                 </div>
             </div>
         </div>
