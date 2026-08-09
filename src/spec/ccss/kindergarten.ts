@@ -415,7 +415,7 @@ const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
         Area.ShapeRecognition,
         Area.NumericComparison,
         Scope.ShapeProperties,
-        Ability.VisualDecomposition
+        Ability.VisualReception
     ])
     .applyLabelVariants([
         [Area.Triangle],
@@ -430,7 +430,7 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ObjectSorting,
         Scope.ShapeProperties,
-        Ability.InductiveReasoning
+        Ability.ConceptClassification
     ])
     .applyLabelVariants([
         [Area.Sphere],

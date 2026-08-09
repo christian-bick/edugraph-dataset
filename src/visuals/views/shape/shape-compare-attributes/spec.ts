@@ -5,7 +5,7 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'shape-compare-attributes',
     generalLabels: [
-        Ability.VisualDecomposition
+        Ability.VisualReception
     ],
 };
 

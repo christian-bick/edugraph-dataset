@@ -6,7 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'shape-same-attribute',
     generalLabels: [
         Ability.VisualRecognition,
-        Ability.InductiveReasoning,
+        Ability.ConceptClassification,
     ],
 };
 

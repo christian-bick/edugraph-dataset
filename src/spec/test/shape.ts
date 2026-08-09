@@ -61,7 +61,7 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
         Scope.ShapeProperties,
         Area.ShapeRecognition,
         Area.NumericComparison,
-        Ability.VisualDecomposition
+        Ability.VisualReception
     ])
     .applyLabelVariants([
         [Area.Triangle],
@@ -144,7 +144,7 @@ const identityPositionBuilder = new DatasetPermutationBuilder()
 const sameAttributeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ObjectSorting,
-        Ability.InductiveReasoning,
+        Ability.ConceptClassification,
         Scope.ShapeProperties
     ])
     .applyLabelVariants([
