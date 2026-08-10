@@ -650,10 +650,7 @@ function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
                         </div>
                     ))}
                     {coverage.implementation_todos.map(todo => (
-                        <div key={todo.id} className="p-2 rounded-md bg-orange-50 border border-orange-200 space-y-1.5">
-                            <div className="flex justify-end">
-                                <span className="px-1.5 py-0.5 bg-orange-100 border border-orange-200 text-[9px] text-orange-800 font-semibold uppercase tracking-wider rounded">Implementation Todo</span>
-                            </div>
+                        <div key={todo.id} className="p-2 rounded-md bg-orange-50 border border-orange-200">
                             <div className="flex flex-wrap gap-1.5">
                                 <ConceptBadges coverage={coverage} labels={todo.labels.filter(label => !intersection.includes(label))} emptyText="Only common labels" />
                             </div>
