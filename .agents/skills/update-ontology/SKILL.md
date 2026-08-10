@@ -37,7 +37,7 @@ Before performing any analysis or issue generation, execute these two checks:
 #### Step 3: Inspect Sibling Ontology Repository (`../edugraph-ontology`)
 - Inspect `core-schema.ttl` for a basic understanding of ontology types and relations.
 - Inspect `core-areas-math.ttl` for a fitting extension of `Area`, `core-scopes-math.ttl` for `Scope` and `core-abilities` for abilities.
-- Inspect taxonomy hierarchies to ensure the proposed additions fit cleanly into the ontology structure and do not duplicate existing work.
+- Inspect taxonomy hierarchies to ensure each proposed entity and family placement fits cleanly into the ontology structure and does not duplicate existing work.
 
 #### Step 4: Formulate & Submit GitHub Issue Proposals
 For each previously grouped ontology gap, formulate a structured GitHub issue payload:
@@ -46,9 +46,10 @@ For each previously grouped ontology gap, formulate a structured GitHub issue pa
 - **Body**:
   - **Context & Affected Standards**: CCSS standard IDs (e.g. `1.NBT.B.2c`, `K.OA.A.5`) and target definition references.
   - **Missing Concept Description**: Detailed explanation of why current ontology labels cannot express the standard's requirements.
-  - **Taxonomic Placement**: `partOf` parent concept relationship.
-  - **Other Relations**: if applicable suggestions for other relations like `expands` etc.
-  - **Proposed Additions**: Concrete OWL diff for the specific `edugraph-ontology` file.
+  - **Proposed Entities**: Suggested names and dimensions for the new ontology entities.
+  - **Proposed Definitions**: Suggested semantic definitions grounded in the affected standards.
+  - **Proposed Family Placement**: Suggested immediate family or parent for each entity. Treat this placement as input to implementation analysis, not as a restriction on the final taxonomy.
+- Limit proposals to new entities, their definitions, and their family placement. Do not propose OWL/Turtle diffs or suggest, require, forbid, or otherwise constrain any additional relations. Determine all relations beyond family placement during ontology implementation analysis.
 - Create the issue using the GitHub CLI:
   ```bash
   gh issue create --repo christian-bick/edugraph-ontology --title "[Ontology Scope] Add Scope.NumbersSmaller5" --label "dimension:Scope" --body "..."

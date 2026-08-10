@@ -366,7 +366,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Upfront Prerequisite Checks**:
   1. **Sibling Repository**: Checks presence of `../edugraph-ontology`. If missing, prints clone instructions and aborts.
   2. **GitHub CLI Auth**: Checks `gh auth status`. If missing/unauthenticated, prints `gh auth login` instructions and aborts.
-- **Issue Creation**: Formulates structured issue titles, standard contexts, proposed Enum additions, `partOf` taxonomic relations, and TypeScript diffs, submitting them via `gh issue create`.
+- **Issue Creation**: Formulates structured issue titles, standard contexts, and suggestions for new entities, definitions, and family placement, then submits them via `gh issue create`. It deliberately leaves all other relation design to ontology implementation analysis.
 
 ### Loop 4: Failure Resolution (`/fix-spec`)
 - **Skill**: `.agents/skills/fix-spec/SKILL.md`
