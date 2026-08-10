@@ -1,5 +1,5 @@
 // vite.config.js
-import { globSync, readFileSync } from 'node:fs';
+import { existsSync, globSync, readFileSync } from 'node:fs';
 import { resolve, relative, extname } from 'path';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +8,32 @@ import tailwindcss from '@tailwindcss/vite';
 
 const VIEW_HEAD_PATH = resolve(import.meta.dirname, 'src/partials/head.html');
 const VIEW_HEAD_INVOCATION = /\{\{>\s*head\s+script=(['"])([^'"]+)\1\s*\}\}/g;
+const COVERAGE_SITE = 'https://coverage.edugraph.io';
+const COVERAGE_FILES = [
+    'ccss-tree.json',
+    'ccss-coverage.json',
+    'coverage-manifest.json',
+];
+
+function hasLocalCoverageSnapshot(requestUrl) {
+    const pathname = new URL(requestUrl || '/', 'http://localhost').pathname;
+    const match = pathname.match(/^\/coverage\/(latest|preview)\//);
+    if (!match) return false;
+
+    const snapshotDir = resolve(import.meta.dirname, 'public', 'coverage', match[1]);
+    return COVERAGE_FILES.every(file => existsSync(resolve(snapshotDir, file)));
+}
+
+function coverageProxy() {
+    return {
+        target: COVERAGE_SITE,
+        changeOrigin: true,
+        secure: true,
+        bypass(request) {
+            return hasLocalCoverageSnapshot(request.url) ? request.url : undefined;
+        },
+    };
+}
 
 function viewHeadPlugin() {
     return {
@@ -34,6 +60,12 @@ export default defineConfig({
     // ✨ Set the project's root to the 'src' directory
     root: 'src',
     publicDir: '../public',
+    server: {
+        proxy: {
+            '/coverage/latest': coverageProxy(),
+            '/coverage/preview': coverageProxy(),
+        },
+    },
     build: {
         // ✨ Output files to a 'dist' directory at the project level (../)
         outDir: '../dist',

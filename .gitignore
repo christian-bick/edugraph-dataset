@@ -33,3 +33,7 @@ gcloud-credentials.json
 
 # Unit test coverage outputs
 coverage/
+
+# Local coverage explorer snapshots
+public/coverage/latest/
+public/coverage/preview/

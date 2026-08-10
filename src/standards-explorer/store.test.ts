@@ -51,7 +51,7 @@ describe('standards explorer data views', () => {
     });
 
     it('loads Latest by default from the same-origin release snapshot', async () => {
-        const fetchMock = vi.fn(async (input: string | URL | Request) => {
+        const fetchMock = vi.fn(async (input: string | URL | Request, _init?: RequestInit) => {
             const url = String(input);
             if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
             if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
@@ -73,6 +73,7 @@ describe('standards explorer data views', () => {
             '/coverage/latest/ccss-coverage.json',
             '/coverage/latest/coverage-manifest.json',
         ]);
+        expect(fetchMock.mock.calls.every(([, init]) => init?.cache === 'no-store')).toBe(true);
         expect(useExplorerStore.getState().coverageManifest?.source_ref).toBe('v0.11.1-01');
     });
 

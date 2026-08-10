@@ -36,7 +36,7 @@ interface ExplorerStore {
 }
 
 const fetchJson = async <T,>(url: string): Promise<T> => {
-    const response = await fetch(url);
+    const response = await fetch(url, import.meta.env.DEV ? { cache: 'no-store' } : undefined);
     if (!response.ok) throw new Error(`Request failed (${response.status}): ${url}`);
     return response.json() as Promise<T>;
 };

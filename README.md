@@ -142,7 +142,9 @@ npm run dev
 
 The same server exposes the React-based Common Core coverage and task explorer at
 [`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). Its data is
-regenerated with `npm run generate:standards-explorer`; open
+loaded from the deployed coverage snapshots by default. Regenerate Preview with
+`npm run generate:standards-explorer`; the dev server automatically prefers that complete
+local snapshot over the deployed fallback. Open
 [`/standards-explorer.html?view=preview`](http://localhost:5173/standards-explorer.html?view=preview)
 to inspect that working-tree snapshot locally.
 

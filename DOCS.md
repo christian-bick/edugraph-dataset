@@ -78,7 +78,9 @@ its navigation and selection state, and reads a selected snapshot from
 the schema version, channel, source ref and SHA, generation time, and ontology version.
 Latest is the production default. Run `npm run generate:standards-explorer`, then
 `npm run dev`, and open `/standards-explorer.html?view=preview` for local working-tree
-development.
+development. During development, Vite serves a complete local snapshot when present and
+otherwise proxies that view to the deployed coverage site. This makes both views usable
+without committing generated snapshot copies while preserving local Preview overrides.
 
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
