@@ -329,7 +329,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 ### Loop 1: Standard Spec Generation (`/create-spec-from-standard`)
 - **Skill**: `.agents/skills/spec-from-standard/SKILL.md`
 - **Command**: `/create-spec-from-standard {standardId|gradeFile}`
-- **Pass 1 — review plan**: Reads and quotes the relevant standard leaves, captures `matching-before.json`, and writes a disposition/label/package proposal to `temp/spec-plans/<module>/<gradeFile>/plan.md`. It does not edit `src/spec/` and stops for explicit user approval.
+- **Pass 1 — review plan**: Reads and quotes the relevant standard leaves, captures `matching-before.json`, and writes a disposition, ownership, and design proposal to `temp/spec-plans/<module>/<gradeFile>/plan.md` using [`docs/target-spec-plan-template.md`](docs/target-spec-plan-template.md). It does not edit `src/spec/` and stops for explicit user approval.
 - **Pass 2 — approved implementation**: Authors the target file, runs target validation, writes `matching-after.json`, `matching-diff.md`, and `target-distinctness.md`, then runs `npm run check -- --spec=<module>`. Implementation gaps carry stable authored `group` strings.
 - **Boundary**: The skill finishes by presenting the review artifacts and never triggers ontology or implementation follow-up loops automatically.
 

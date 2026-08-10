@@ -5,7 +5,7 @@ description: "/create-spec-from-standard {grade} - Two-pass workflow that first 
 
 Create or extend a competency target spec under `src/spec/[<module>/]{grade}.ts` from educational-standard leaf nodes. This is deliberately a **two-pass workflow with a user review boundary**: Pass 1 produces analysis artifacts only; Pass 2 edits the target spec only after the user explicitly approves that plan.
 
-Use `public/coverage/ccss-tree.json` (or the relevant standard tree) as the starting hypothesis for the hierarchy. Study existing target specs in the same module and follow `docs/target-spec.md` throughout.
+Use `public/coverage/ccss-tree.json` (or the relevant standard tree) as the starting hypothesis for the hierarchy. Study existing target specs in the same module. Read and follow `docs/target-spec.md` and `docs/target-spec-plan-template.md` throughout.
 
 ## Stable plan workspace
 
@@ -43,18 +43,35 @@ Do not replace an existing baseline unless restarting that plan intentionally; r
 
 ### 3. Author `plan.md`
 
-Create `temp/spec-plans/<specModule>/<planName>/plan.md` with:
+Read `docs/target-spec-plan-template.md` completely. Copy its plan heading and table structure
+from **Source Scope** through **Open Questions** into
+`temp/spec-plans/<specModule>/<planName>/plan.md`, replace every placeholder, and use the
+template's final **Audit** section as a checklist without copying it. Keep the plan section
+order; write `None.` when a section is empty instead of inventing an alternative structure.
 
-- source scope and relevant standard quotations;
-- one row per distinct competency covered by leaf node in the start, not merely one row per node;
-- proposed builder dimensions and most-specific truthful ontology labels, including the visible or necessary textual evidence the expected artifact provides for each claim (`TSPEC-3`, `TSPEC-4`, `TSPEC-6`, `TSPEC-13`);
-- proposed disposition: `spec`, `implementationTodos`, `ontologyTodos`, or `beyondScope` (`TSPEC-7`);
-- expected generator/view matches and any matches that would be semantically suspicious;
-- proposed `equivalentTargets` declarations, if any (`TSPEC-8`);
-- a stable `group` string for every proposed implementation TODO package;
-- ontology questions and other decisions requiring user review.
+Complete the template with these constraints:
 
-The plan may show illustrative TypeScript fragments, but it must not create a temporary executable spec file.
+- Quote the source scope and create one disposition row per distinct competency, not merely
+  one row per leaf (`TSPEC-3`).
+- Put every competency in exactly one of `spec`, `implementationTodos`, `ontologyTodos`, or
+  `beyondScope` (`TSPEC-7`).
+- Give active and implementation targets their programmatic builder dimensions,
+  most-specific truthful ontology labels, and visible or necessary textual evidence
+  (`TSPEC-4`, `TSPEC-6`, `TSPEC-13`).
+- Record expected active generator/view matches and suspicious boundaries. For every
+  implementation TODO, give a stable `group` and identify generator/view ownership: bare id
+  for reuse as-is, `△` for adopting an existing module, and `＋` for a proposed new module.
+- Declare intentional equivalent definitions (`TSPEC-8`) and keep their count consistent with
+  the disposition summary.
+- Put accepted facts, rationale, matching expectations, and distinctness predictions under
+  **Detailed Design Decisions**. Do not create a separate notes section.
+- Put only unresolved, directly answerable decisions under **Open Questions**. Phrase every
+  numbered item as a question ending in `?`.
+- Keep counts only in **Disposition Summary**. Do not add an implementation-package summary
+  or project permutation counts for ontology TODOs before valid builders exist.
+
+The plan may show illustrative TypeScript fragments, but it must not create a temporary
+executable spec file.
 
 ### 4. Review boundary
 
