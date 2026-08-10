@@ -105,13 +105,13 @@ const coverageStyles: Record<CoverageKind, {
 
 const taskStyles: Record<TaskType, { label: string; icon: string; color: string; detail: string }> = {
     DATASET_ENRICHMENT: {
-        label: 'DATASET ENRICHMENT (GENERATOR/VIEW)',
+        label: 'Implementation',
         icon: 'fa-triangle-exclamation',
         color: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
         detail: 'bg-orange-500/10 border-orange-500/20 text-orange-300',
     },
     ONTOLOGY_EXTENSION: {
-        label: 'ONTOLOGY EXTENSION',
+        label: 'Ontology',
         icon: 'fa-circle-xmark',
         color: 'bg-red-500/10 text-red-400 border-red-500/20',
         detail: 'bg-red-500/10 border-red-500/20 text-red-300',
@@ -588,20 +588,14 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
     if (coverage.beyond_scope.length > 0) {
         return (
             <div className="text-xs text-purple-800 bg-purple-50 border border-purple-200 rounded-md p-2.5 leading-relaxed mt-1">
-                <div className="flex items-start gap-2">
-                    <Icon name="fa-ban" className="text-purple-600 mt-0.5 shrink-0 text-[11px]" />
-                    <div>{coverage.beyond_scope.map(item => <div key={item.title}><strong>{item.title}:</strong> {item.description}</div>)}</div>
-                </div>
+                {coverage.beyond_scope.map(item => <div key={item.title}><strong>{item.title}:</strong> {item.description}</div>)}
             </div>
         );
     }
     if (!coverage.ontology_covered || coverage.ontology_todos.length > 0) {
         return coverage.ontology_todos.length > 0 ? (
             <div className="text-xs text-red-800 bg-red-50 border border-red-200 rounded-md p-2.5 leading-relaxed mt-1">
-                <div className="flex items-start gap-2">
-                    <Icon name="fa-circle-xmark" className="text-red-600 mt-0.5 shrink-0 text-[11px]" />
-                    <div>{coverage.ontology_todos.map(todo => <div key={todo.title}><strong>{todo.title}:</strong> {todo.description}</div>)}</div>
-                </div>
+                {coverage.ontology_todos.map(todo => <div key={todo.title}><strong>{todo.title}:</strong> {todo.description}</div>)}
             </div>
         ) : null;
     }
@@ -629,7 +623,7 @@ function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
     const labelSets = getLabelSets(coverage);
     const intersection = intersectLabels(labelSets);
     const permutationCount = coverage.competencies.length + coverage.implementation_todos.length;
-    const hasContent = labelSets.length > 0 || coverage.ontology_todos.length > 0;
+    const hasContent = labelSets.length > 0;
 
     if (!hasContent) return null;
 
@@ -663,20 +657,6 @@ function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
                             <div className="flex flex-wrap gap-1.5">
                                 <ConceptBadges coverage={coverage} labels={todo.labels.filter(label => !intersection.includes(label))} emptyText="Only common labels" />
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-            {coverage.ontology_todos.length > 0 && (
-                <div className="space-y-1.5">
-                    <BreakdownHeading label="Ontology Gaps" count={coverage.ontology_todos.length} />
-                    {coverage.ontology_todos.map(todo => (
-                        <div key={todo.title} className="p-2 rounded-md bg-red-50 border border-red-200 space-y-1">
-                            <div className="text-[10px] font-mono text-red-700 font-semibold flex items-center justify-between">
-                                <span>{todo.title}</span>
-                                <span className="text-[9px] px-1.5 py-0.5 bg-red-100 border border-red-200 rounded">ONTOLOGY TODO</span>
-                            </div>
-                            <p className="text-[10px] text-red-700/80 italic leading-snug">{todo.description}</p>
                         </div>
                     ))}
                 </div>
@@ -753,7 +733,7 @@ function TaskDetails() {
     return (
         <div className="p-6 bg-slate-900/60 flex flex-col gap-4">
             <div className="flex items-start justify-between">
-                <span className={`px-2.5 py-0.5 border rounded text-[10px] font-mono font-bold tracking-wider ${style.detail}`}>{task.type}</span>
+                <span className={`px-2.5 py-0.5 border rounded text-[10px] font-mono font-bold tracking-wider ${style.detail}`}>{style.label}</span>
                 <span className="text-xs text-slate-500 font-mono">{task.id}</span>
             </div>
             <div>
