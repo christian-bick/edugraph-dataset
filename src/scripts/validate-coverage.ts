@@ -5,7 +5,12 @@ import { Area, Scope, Ability } from 'edugraph-ts';
 const PROJECT_ROOT = path.resolve('.');
 const TEMP_DIR = path.join(PROJECT_ROOT, 'temp', 'common-core');
 const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
-const COVERAGE_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-coverage.json');
+const coverageDirArg = process.argv.slice(2)
+  .find(arg => arg.startsWith('--coverage-dir='))
+  ?.slice('--coverage-dir='.length);
+const COVERAGE_DIR = path.resolve(PROJECT_ROOT, coverageDirArg || path.join('public', 'coverage', 'preview'));
+const COVERAGE_PATH = path.join(COVERAGE_DIR, 'ccss-coverage.json');
+const MANIFEST_PATH = path.join(COVERAGE_DIR, 'coverage-manifest.json');
 
 interface ValidationResult {
   passed: boolean;
@@ -24,6 +29,12 @@ function runValidation() {
     printReport(result);
     return;
   }
+  if (!fs.existsSync(MANIFEST_PATH)) {
+    result.errors.push(`Coverage manifest not found at: ${MANIFEST_PATH}`);
+    result.passed = false;
+    printReport(result);
+    return;
+  }
   if (!fs.existsSync(STANDARDS_PATH)) {
     result.errors.push(`Standards definitions not found at: ${STANDARDS_PATH}`);
     result.passed = false;
@@ -33,7 +44,29 @@ function runValidation() {
 
   // 2. Load data
   const coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
+  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'));
   const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
+
+  if (manifest.schema_version !== 1) {
+    result.errors.push(`Unsupported coverage manifest schema: ${manifest.schema_version}`);
+    result.passed = false;
+  }
+  if (manifest.channel !== 'latest' && manifest.channel !== 'preview') {
+    result.errors.push(`Invalid coverage manifest channel: ${manifest.channel}`);
+    result.passed = false;
+  }
+  if (!manifest.source_ref || !manifest.source_sha) {
+    result.errors.push('Coverage manifest must include source_ref and source_sha.');
+    result.passed = false;
+  }
+  if (manifest.generated_at !== coverageData.metadata?.generated_at) {
+    result.errors.push('Coverage manifest and data generated_at values do not match.');
+    result.passed = false;
+  }
+  if (manifest.ontology_version !== coverageData.metadata?.ontology_version) {
+    result.errors.push('Coverage manifest and data ontology versions do not match.');
+    result.passed = false;
+  }
 
   // Populate rdfNodes dynamically from edugraph-ts enums
   const rdfNodes: Record<string, string> = {};

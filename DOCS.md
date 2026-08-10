@@ -72,36 +72,51 @@ The consequence: a code change only invalidates the samples whose identity input
 ### Standards Explorer
 `src/standards-explorer.html` is a dedicated Vite entry for the Common Core coverage
 explorer. The React application lives under `src/standards-explorer/`, uses Zustand for
-its navigation and selection state, and reads the generated
-`public/coverage/ccss-tree.json` and `public/coverage/ccss-coverage.json` files at
-runtime. Run `npm run dev` and open `/standards-explorer.html` to use it.
+its navigation and selection state, and reads a selected snapshot from
+`public/coverage/latest/` or `public/coverage/preview/` at runtime. Each snapshot contains
+`ccss-tree.json`, `ccss-coverage.json`, and `coverage-manifest.json`; the manifest records
+the schema version, channel, source ref and SHA, generation time, and ontology version.
+Latest is the production default. Run `npm run generate:standards-explorer`, then
+`npm run dev`, and open `/standards-explorer.html?view=preview` for local working-tree
+development.
 
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
 `firebase.json` serves `dist/` and redirects the site root to the explorer entry, and
-`.github/workflows/deploy.yaml` is a reusable workflow that regenerates the explorer
-data, builds the Vite application, and deploys it. After dataset generation, validation,
-and the Hugging Face push succeed, the tagged-release workflow dispatches it separately
-on `main`; it can also be started independently with `workflow_dispatch`. The deployment uses the same
-Workload Identity Federation provider and Firebase service account as the sibling
-`edugraph-editor` project; no persistent Firebase token is stored in GitHub.
+`.github/workflows/deploy.yaml` is a reusable workflow that regenerates and validates
+Preview from an exact main SHA, downloads Latest from the repository's explicitly marked
+latest GitHub Release, builds the Vite application, and deploys it. The release stores the
+three immutable coverage files as individual assets, so deployment needs no historical
+checkout and the browser makes no cross-origin request. The workflow can also be started
+independently with `workflow_dispatch`. It uses the same Workload Identity Federation
+provider and Firebase service account as the sibling `edugraph-editor` project; no
+persistent Firebase token is stored in GitHub.
 
 GitHub Actions keeps validation and publication separate. Pushes to `main` run the
 build, complete test suite, and repository checks through the local `quality-gates`
 composite action. A version tag repeats those gates, generates CCSS in the pinned
 canonical container, runs the strict read-only cache audit, merges the release dataset,
-publishes it to Hugging Face, and only then dispatches the explorer deployment workflow
-on `main`. Keeping deployment in a branch-context run satisfies the Google Workload
-Identity provider's branch trust condition without allowing release-tag refs.
+generates and validates a release coverage snapshot, publishes the dataset to Hugging
+Face, creates or updates the matching GitHub Release with that snapshot, explicitly marks
+it Latest, and only then dispatches the explorer deployment workflow on `main`. A
+successful main validation also calls that reusable workflow with the validated commit
+SHA. Keeping deployment in a branch-context run satisfies the Google Workload Identity
+provider's branch trust condition without allowing release-tag refs.
+The release workflow's manual trigger accepts an existing `release_tag` and repeats the
+same full gate and publication path; use it to retry or backfill a tag rather than
+constructing Release assets by hand.
 Live Gemini VQA is a local development operation and never runs in either workflow.
 All host-side workflows use Node.js 24 LTS, matching the local `.nvmrc` and the
-`package.json` engine constraint. Canonical generation still executes inside its pinned
+`package.json` engine constraint. Production deployments are serialized through the
+`coverage-explorer-production` concurrency group. Canonical generation still executes inside its pinned
 Playwright image, so changing the host runtime does not change the renderer identity.
 
 ### `src/scripts/map-standards.ts`
-* **Execution**: `npm run generate:standards-explorer` (alias: `npm run map:standards`)
+* **Execution**: `npm run generate:standards-explorer -- [--output-dir=<path>] [--channel=latest|preview] [--source-ref=<ref>] [--source-sha=<sha>]` (alias: `npm run map:standards`)
 * **Function**: Regenerates the standards tree, dataset coverage metadata, and grouped
-  task backlog consumed by the standards explorer.
+  task backlog consumed by the standards explorer, plus the snapshot manifest. The
+  default output is `public/coverage/preview/` for local development; release and
+  deployment workflows pass explicit output directories and source identity.
 
 #### `src/scripts/generate-dataset.ts`
 The primary pipeline orchestrator.

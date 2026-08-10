@@ -1,5 +1,15 @@
 export type TaskType = 'DATASET_ENRICHMENT' | 'ONTOLOGY_EXTENSION' | 'ANALYSIS';
 export type MainTab = 'explorer' | 'backlog';
+export type DataView = 'latest' | 'preview';
+
+export interface CoverageManifest {
+    schema_version: number;
+    channel: DataView;
+    source_ref: string;
+    source_sha: string;
+    generated_at: string;
+    ontology_version: string;
+}
 
 export interface StandardNode {
     id: string;
@@ -112,4 +122,5 @@ export interface ExplorerData {
     gradesTree: GradesTree;
     standardsMap: Record<string, StandardNode>;
     coverageData: CoverageData | null;
+    coverageManifest: CoverageManifest | null;
 }

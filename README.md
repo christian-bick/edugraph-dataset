@@ -142,18 +142,23 @@ npm run dev
 
 The same server exposes the React-based Common Core coverage and task explorer at
 [`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). Its data is
-regenerated with `npm run generate:standards-explorer`.
+regenerated with `npm run generate:standards-explorer`; open
+[`/standards-explorer.html?view=preview`](http://localhost:5173/standards-explorer.html?view=preview)
+to inspect that working-tree snapshot locally.
 
 ### Coverage Explorer Deployment
 
-A successful tagged dataset release deploys the production Vite build to the
-`edugraph-coverage` Firebase Hosting site after the dataset has been pushed to Hugging
-Face. The release dispatches deployment separately on `main` so Google Workload
-Identity remains restricted to the trusted branch. The deployment workflow can also be run independently through GitHub
-Actions' manual `workflow_dispatch` trigger. Each deployment regenerates the explorer
-data before building. Authentication uses the shared Google Cloud Workload Identity
-Federation provider, so the workflow does not require a long-lived Firebase
-service-account secret. The hosted root redirects to the standards explorer.
+The production explorer offers two data views. **Latest** is the default and comes from
+the coverage snapshot attached to the most recent successful GitHub Release; **Preview**
+is regenerated from the exact validated `main` commit being deployed. Every successful
+push validation on `main` calls the reusable deployment workflow, while a successful
+tagged dataset release publishes its immutable coverage snapshot after the Hugging Face
+upload and dispatches the same workflow to promote it. Both snapshots are downloaded or
+generated during deployment and served from the `edugraph-coverage` Firebase Hosting
+site, so the browser has no cross-origin GitHub dependency. Google authentication uses
+Workload Identity Federation from the trusted `main` workflow context and requires no
+long-lived Firebase service-account secret. The hosted root redirects to the standards
+explorer; the deployment can also be started manually with `workflow_dispatch`.
 
 ## Contributing
 

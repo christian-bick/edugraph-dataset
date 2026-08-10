@@ -116,6 +116,51 @@ button:focus,
     white-space: nowrap;
 }
 
+.explorer-data-view {
+    min-height: 36px;
+    padding: 3px;
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    background: #ded7de;
+    border-radius: 6px;
+}
+
+.explorer-data-view button {
+    padding: 0.35rem 0.65rem;
+    color: #5f585f;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    font-size: 0.7rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.explorer-data-view button:hover:not(:disabled) {
+    color: #262626;
+}
+
+.explorer-data-view button.is-active {
+    color: #262626;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.explorer-data-view button:disabled {
+    cursor: wait;
+}
+
+.explorer-data-ref {
+    max-width: 8rem;
+    overflow: hidden;
+    color: #746c74;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.62rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .explorer-metrics {
     min-width: 0;
     display: flex;
@@ -186,6 +231,7 @@ button:focus,
 
     .explorer-header-left {
         width: 100%;
+        flex-wrap: wrap;
     }
 
     .explorer-metrics {

@@ -128,6 +128,10 @@ const EMPTY_TASKS: BacklogTask[] = [];
 
 function Header() {
     const coverageData = useExplorerStore(state => state.coverageData);
+    const coverageManifest = useExplorerStore(state => state.coverageManifest);
+    const dataView = useExplorerStore(state => state.dataView);
+    const loading = useExplorerStore(state => state.loading);
+    const setDataView = useExplorerStore(state => state.setDataView);
     const standardsMap = useExplorerStore(state => state.standardsMap);
     const stats = calculateStats(coverageData);
     if (!coverageData) {
@@ -152,6 +156,27 @@ function Header() {
                 <div className="explorer-standard-selector">
                     <span>Common Core Standards</span>
                 </div>
+                <div className="explorer-data-view" aria-label="Coverage data view">
+                    {(['latest', 'preview'] as const).map(view => (
+                        <button
+                            key={view}
+                            type="button"
+                            aria-pressed={dataView === view}
+                            disabled={loading}
+                            onClick={() => void setDataView(view)}
+                            className={dataView === view ? 'is-active' : ''}
+                        >
+                            {view === 'latest' ? 'Latest' : 'Preview'}
+                        </button>
+                    ))}
+                </div>
+                {coverageManifest && (
+                    <span className="explorer-data-ref" title={coverageManifest.source_sha}>
+                        {dataView === 'latest'
+                            ? coverageManifest.source_ref
+                            : coverageManifest.source_sha.slice(0, 7)}
+                    </span>
+                )}
             </div>
             <div className="explorer-metrics">
                 {items.map(item => (

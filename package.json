@@ -37,7 +37,7 @@
     "show:matching": "vite-node src/scripts/show-matching-stats.ts",
     "report:matching-diff": "vite-node src/scripts/report-matching-diff.ts",
     "analyze:target-distinctness": "vite-node src/scripts/analyze-target-distinctness.ts",
-    "generate:standards-explorer": "npm run map:standards",
+    "generate:standards-explorer": "vite-node src/scripts/map-standards.ts",
     "map:standards": "vite-node src/scripts/map-standards.ts",
     "validate:coverage": "vite-node src/scripts/validate-coverage.ts"
   },

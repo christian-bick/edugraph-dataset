@@ -24,8 +24,21 @@ const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const TEMP_DIR = path.resolve(PROJECT_ROOT, 'temp', 'common-core');
 const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
 const DOMAINS_PATH = path.join(TEMP_DIR, 'domain_groups.json');
-const OUTPUT_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-coverage.json');
-const TREE_OUT_PATH = path.resolve(PROJECT_ROOT, 'public', 'coverage', 'ccss-tree.json');
+
+const cliArgs = process.argv.slice(2);
+const readOption = (name: string): string | undefined =>
+  cliArgs.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+const outputDir = path.resolve(PROJECT_ROOT, readOption('output-dir') || path.join('public', 'coverage', 'preview'));
+const OUTPUT_PATH = path.join(outputDir, 'ccss-coverage.json');
+const TREE_OUT_PATH = path.join(outputDir, 'ccss-tree.json');
+const MANIFEST_OUT_PATH = path.join(outputDir, 'coverage-manifest.json');
+const channel = readOption('channel') || 'preview';
+const sourceRef = readOption('source-ref') || process.env.GITHUB_REF_NAME || 'working-tree';
+const sourceSha = readOption('source-sha') || process.env.GITHUB_SHA || 'working-tree';
+
+if (channel !== 'latest' && channel !== 'preview') {
+  throw new Error(`Invalid --channel=${channel}. Expected "latest" or "preview".`);
+}
 
 const STANDARDS_URL = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/standards.jsonl';
 const DOMAINS_URL = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/domain_groups.json';
@@ -220,9 +233,8 @@ async function ensureStandardsAndTreeData() {
     }
   }
 
-  const coverageDir = path.resolve(PROJECT_ROOT, 'public', 'coverage');
-  if (!fs.existsSync(coverageDir)) {
-    fs.mkdirSync(coverageDir, { recursive: true });
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
   }
 
   fs.writeFileSync(TREE_OUT_PATH, JSON.stringify({ tree, standardsMap: standardMap }, null, 2), 'utf-8');
@@ -284,7 +296,7 @@ function findGeneratorForTarget(
 }
 
 async function main() {
-  const args = process.argv.slice(2);
+  const args = cliArgs;
   const gradeLimit = args.find(a => a.startsWith('--grade='))?.split('=')[1];
   const excludeHS = args.includes('--k8') || args.includes('--exclude-hs');
 
@@ -533,9 +545,10 @@ async function main() {
   }
 
   // Save outputs
+  const generatedAt = new Date().toISOString();
   const finalJson = {
     metadata: {
-      generated_at: new Date().toISOString(),
+      generated_at: generatedAt,
       ontology_version: version,
       total_leaves_scanned: leafNodes.length,
       spec_covered_count: Object.values(finalCoverageMap).filter(s => s.spec_covered).length,
@@ -553,6 +566,17 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(finalJson, null, 2), 'utf-8');
   console.log(`[Output] Successfully wrote coverage and tasks data to: ${OUTPUT_PATH}`);
 
+  const manifest = {
+    schema_version: 1,
+    channel,
+    source_ref: sourceRef,
+    source_sha: sourceSha,
+    generated_at: generatedAt,
+    ontology_version: version
+  };
+  fs.writeFileSync(MANIFEST_OUT_PATH, JSON.stringify(manifest, null, 2), 'utf-8');
+  console.log(`[Output] Successfully wrote coverage manifest to: ${MANIFEST_OUT_PATH}`);
+
   const { covered_count, total_leaves_scanned, missing_generator_count, missing_ontology_count, beyond_scope_count } = finalJson.metadata;
   console.log(`\nMapping pipeline complete!`);
   console.log(`Total scanned: ${total_leaves_scanned}`);
@@ -562,4 +586,7 @@ async function main() {
   console.log(`Beyond Scope: ${beyond_scope_count}`);
 }
 
-main().catch(console.error);
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

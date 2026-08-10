@@ -4,10 +4,16 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing version tag to validate, publish, and backfill as a GitHub Release.
+        required: true
+        type: string
 
 permissions:
   actions: write
-  contents: read
+  contents: write
 
 jobs:
   release:
@@ -16,6 +22,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+
+      - id: release_source
+        name: Resolve release source
+        shell: bash
+        run: |
+          release_tag="${{ inputs.release_tag || github.ref_name }}"
+          if [[ ! "$release_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9]+)?$ ]]; then
+            echo "Invalid release tag: $release_tag" >&2
+            exit 1
+          fi
+          git show-ref --verify --quiet "refs/tags/$release_tag"
+          echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -48,12 +69,48 @@ jobs:
       - name: Generate union coverage report
         run: npm run report:coverage -- --spec=union
 
+      - name: Generate release coverage snapshot
+        run: >-
+          npm run generate:standards-explorer --
+          --output-dir=temp/coverage-release
+          --channel=latest
+          --source-ref="${{ steps.release_source.outputs.tag }}"
+          --source-sha="${{ steps.release_source.outputs.sha }}"
+
+      - name: Validate release coverage snapshot
+        run: npm run validate:coverage -- --coverage-dir=temp/coverage-release
+
       - name: Publish dataset to Hugging Face
         uses: ./.github/actions/publish-dataset
         with:
-          release-tag: ${{ github.ref_name }}
+          release-tag: ${{ steps.release_source.outputs.tag }}
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Publish GitHub Release coverage snapshot
+        shell: bash
+        run: |
+          release_tag="${{ steps.release_source.outputs.tag }}"
+          release_dir="temp/coverage-release"
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" \
+              "$release_dir/ccss-tree.json" \
+              "$release_dir/ccss-coverage.json" \
+              "$release_dir/coverage-manifest.json" \
+              --clobber
+            gh release edit "$release_tag" --latest
+          else
+            gh release create "$release_tag" \
+              "$release_dir/ccss-tree.json" \
+              "$release_dir/ccss-coverage.json" \
+              "$release_dir/coverage-manifest.json" \
+              --verify-tag \
+              --latest \
+              --notes-from-tag \
+              --title "Dataset Release $release_tag"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Trigger coverage explorer deployment from main
         run: gh workflow run deploy.yaml --ref main

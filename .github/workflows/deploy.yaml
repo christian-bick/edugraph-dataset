@@ -2,7 +2,21 @@ name: Deploy Coverage Explorer to Firebase Hosting
 
 on:
   workflow_call:
+    inputs:
+      preview_sha:
+        description: Validated main commit to publish as Preview.
+        required: true
+        type: string
   workflow_dispatch:
+    inputs:
+      preview_sha:
+        description: Main commit to publish as Preview (defaults to the selected workflow ref).
+        required: false
+        type: string
+
+concurrency:
+  group: coverage-explorer-production
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -14,14 +28,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
-
-      - id: auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v3
         with:
-          workload_identity_provider: projects/575953891979/locations/global/workloadIdentityPools/gh-pool-v2/providers/gh-provider-v2
-          service_account: firebase-adminsdk-fbsvc@edugraph-438718.iam.gserviceaccount.com
-          token_format: access_token
+          ref: ${{ inputs.preview_sha || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -32,11 +40,48 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Generate Standards Explorer Data
-        run: npm run generate:standards-explorer
+      - name: Generate Preview coverage data
+        run: >-
+          npm run generate:standards-explorer --
+          --output-dir=public/coverage/preview
+          --channel=preview
+          --source-ref=main
+          --source-sha="${{ inputs.preview_sha || github.sha }}"
+
+      - name: Validate Preview coverage data
+        run: npm run validate:coverage -- --coverage-dir=public/coverage/preview
+
+      - name: Download Latest release coverage data
+        shell: bash
+        run: |
+          mkdir -p public/coverage/latest
+          gh release download \
+            --repo "${{ github.repository }}" \
+            --pattern ccss-tree.json \
+            --pattern ccss-coverage.json \
+            --pattern coverage-manifest.json \
+            --dir public/coverage/latest \
+            --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Verify Latest release coverage data
+        shell: bash
+        run: |
+          test -f public/coverage/latest/ccss-tree.json
+          test -f public/coverage/latest/ccss-coverage.json
+          test -f public/coverage/latest/coverage-manifest.json
 
       - name: Build Vite App
         run: npm run build
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/575953891979/locations/global/workloadIdentityPools/gh-pool-v2/providers/gh-provider-v2
+          service_account: firebase-adminsdk-fbsvc@edugraph-438718.iam.gserviceaccount.com
+          token_format: access_token
 
       - name: Install Firebase CLI
         run: npm install --global firebase-tools

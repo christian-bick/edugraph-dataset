@@ -1,10 +1,19 @@
 import { create } from 'zustand';
-import type { CoverageData, MainTab, StandardsTreeData, TaskType } from './types.ts';
+import type {
+    CoverageData,
+    CoverageManifest,
+    DataView,
+    MainTab,
+    StandardsTreeData,
+    TaskType,
+} from './types.ts';
 
 interface ExplorerStore {
     standardsMap: StandardsTreeData['standardsMap'];
     gradesTree: StandardsTreeData['tree'];
     coverageData: CoverageData | null;
+    coverageManifest: CoverageManifest | null;
+    dataView: DataView;
     loading: boolean;
     error: string | null;
     activeGrade: string;
@@ -15,7 +24,8 @@ interface ExplorerStore {
     activeTaskId: string | null;
     searchQuery: string;
     searchActive: boolean;
-    loadData: () => Promise<void>;
+    loadData: (dataView?: DataView) => Promise<void>;
+    setDataView: (dataView: DataView) => Promise<void>;
     setActiveGrade: (grade: string) => void;
     toggleDomain: (domain: string) => void;
     setActiveStandard: (standardId: string) => void;
@@ -31,10 +41,30 @@ const fetchJson = async <T,>(url: string): Promise<T> => {
     return response.json() as Promise<T>;
 };
 
+const coveragePath = (dataView: DataView, fileName: string) =>
+    `/coverage/${dataView}/${fileName}`;
+
+const initialDataView = (): DataView => {
+    if (typeof window === 'undefined') return 'latest';
+    return new URLSearchParams(window.location.search).get('view') === 'preview'
+        ? 'preview'
+        : 'latest';
+};
+
+const syncDataViewUrl = (dataView: DataView) => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (dataView === 'preview') url.searchParams.set('view', 'preview');
+    else url.searchParams.delete('view');
+    window.history.replaceState(null, '', url);
+};
+
 export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     standardsMap: {},
     gradesTree: {},
     coverageData: null,
+    coverageManifest: null,
+    dataView: initialDataView(),
     loading: true,
     error: null,
     activeGrade: 'Kindergarten',
@@ -45,17 +75,33 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     activeTaskId: null,
     searchQuery: '',
     searchActive: false,
-    loadData: async () => {
-        set({ loading: true, error: null });
+    loadData: async (requestedView) => {
+        const dataView = requestedView ?? get().dataView;
+        set({
+            loading: true,
+            error: null,
+            standardsMap: {},
+            gradesTree: {},
+            coverageData: null,
+            coverageManifest: null,
+        });
         try {
-            const [treeData, coverageData] = await Promise.all([
-                fetchJson<StandardsTreeData>('/coverage/ccss-tree.json'),
-                fetchJson<CoverageData>('/coverage/ccss-coverage.json').catch(() => null),
+            const [treeData, coverageData, coverageManifest] = await Promise.all([
+                fetchJson<StandardsTreeData>(coveragePath(dataView, 'ccss-tree.json')),
+                fetchJson<CoverageData>(coveragePath(dataView, 'ccss-coverage.json')),
+                fetchJson<CoverageManifest>(coveragePath(dataView, 'coverage-manifest.json')),
             ]);
+            if (coverageManifest.schema_version !== 1) {
+                throw new Error(`Unsupported coverage schema: ${coverageManifest.schema_version}`);
+            }
+            if (coverageManifest.channel !== dataView) {
+                throw new Error(`Expected ${dataView} coverage data, received ${coverageManifest.channel}.`);
+            }
             set({
                 standardsMap: treeData.standardsMap,
                 gradesTree: treeData.tree,
                 coverageData,
+                coverageManifest,
                 loading: false,
             });
         } catch (error) {
@@ -64,6 +110,19 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
                 loading: false,
             });
         }
+    },
+    setDataView: async dataView => {
+        if (dataView === get().dataView && get().coverageData) return;
+        syncDataViewUrl(dataView);
+        set({
+            dataView,
+            activeDomain: null,
+            activeStandardId: null,
+            activeTaskId: null,
+            searchQuery: '',
+            searchActive: false,
+        });
+        await get().loadData(dataView);
     },
     setActiveGrade: grade => set({ activeGrade: grade, activeDomain: null, searchActive: false }),
     toggleDomain: domain => set({
