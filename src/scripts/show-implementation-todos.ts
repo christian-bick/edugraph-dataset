@@ -2,6 +2,10 @@ import { loadSpecTodos } from '../lib/generation.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { shortenLabel } from '../lib/utils.ts';
 import { getTargetPrefix } from '../lib/spec-validator.ts';
+import { Implementation, ModuleImplementation } from '../types/ml-engine.ts';
+
+const formatModules = (modules: readonly ModuleImplementation[]) =>
+    modules.map(({ module, strategy }) => `${strategy}: ${module}`).join(', ');
 
 async function main() {
     const args = process.argv.slice(2);
@@ -21,17 +25,17 @@ async function main() {
 
         console.log(`Found ${implementationTodos.length} target permutation(s) in implementationTodos.\n`);
 
-        // Stable implementation packages are authored explicitly on each TODO.
-        const grouped = new Map<string, typeof implementationTodos>();
+        const grouped = new Map<string, { implementation: Implementation; targets: typeof implementationTodos }>();
         for (const target of implementationTodos) {
-            if (!grouped.has(target.group)) {
-                grouped.set(target.group, []);
+            const { implementation } = target;
+            if (!grouped.has(implementation.id)) {
+                grouped.set(implementation.id, { implementation, targets: [] });
             }
-            grouped.get(target.group)!.push(target);
+            grouped.get(implementation.id)!.targets.push(target);
         }
 
         let idx = 1;
-        for (const [group, targets] of grouped.entries()) {
+        for (const { implementation, targets } of grouped.values()) {
             const definitions = new Map<string, typeof targets>();
             for (const target of targets) {
                 const prefix = getTargetPrefix(target.id);
@@ -39,7 +43,10 @@ async function main() {
                 definitions.get(prefix)!.push(target);
             }
             console.log(`--------------------------------------------------`);
-            console.log(`${idx++}. Group: ${group} (${definitions.size} definition(s), ${targets.length} permutation(s))`);
+            console.log(`${idx++}. Implementation: ${implementation.id} (${definitions.size} definition(s), ${targets.length} permutation(s))`);
+            console.log(`   ${implementation.description}`);
+            console.log(`   Generators: ${formatModules(implementation.generators)}`);
+            console.log(`   Views:      ${formatModules(implementation.views)}`);
             for (const [prefix, definitionTargets] of definitions) {
                 const first = definitionTargets[0];
                 console.log(`   - ${prefix} (${definitionTargets.length} permutation(s))`);
@@ -49,7 +56,7 @@ async function main() {
         }
 
         console.log(`\n========================================`);
-        console.log(`Total Implementation Groups: ${grouped.size}`);
+        console.log(`Total Implementations: ${grouped.size}`);
         console.log(`Total Permutations:  ${implementationTodos.length}`);
         console.log(`========================================\n`);
     } catch (e) {

@@ -41,12 +41,12 @@ directly answerable questions under Open Questions, and end every item there wit
 
 ### Proposed Implementation TODOs
 
-Legend: a bare module id is reused as-is; `△` adopts or extends an existing module; `＋`
-proposes a completely new module. Treat new module ids as provisional ownership names.
+Legend: a bare module id has strategy `reuse`; `△` has strategy `expand`; `＋` has strategy
+`new`. Treat new module ids as provisional ownership names.
 
-| Leaf / competency | Proposed labels and dimensions | Evidence required from a future artifact | Group | Generator | View |
+| Leaf / competency | Proposed labels and dimensions | Evidence required from a future artifact | Implementation TODO | Generator | View |
 |---|---|---|---|---|---|
-| `<standard-id>` <competency> | <Current-ontology labels and variants> | <Evidence the future artifact must expose> | `<stable-group>` | `<generator>`, △ `<generator>`, or ＋ `<generator>` | `<view>`, △ `<view>`, or ＋ `<view>` |
+| `<standard-id>` <competency> | <Current-ontology labels and variants> | <Evidence the future artifact must expose> | `<stable-implementation-id>` | `<generator>`, △ `<generator>`, or ＋ `<generator>` | `<view>`, △ `<view>`, or ＋ `<view>` |
 
 ### Disposition Summary
 
@@ -71,7 +71,7 @@ proposes a completely new module. Treat new module ids as provisional ownership 
 - `<target family>` → `<generator>#<view>`.
 
 State the expected added and removed active-pair totals. State that implementation TODOs
-must have no genuine production path until their assigned modules are implemented or adopted.
+must have no genuine production path until their reviewed implementation is complete.
 
 #### Matching-Diff Review
 
@@ -93,7 +93,7 @@ Use this checklist when authoring a plan; do not copy it into the generated `pla
 - [ ] Every covered standard leaf is quoted under Source Scope.
 - [ ] Every distinct competency appears in exactly one disposition.
 - [ ] Active and implementation targets state labels, permutation dimensions, and observable evidence.
-- [ ] Every implementation TODO has a stable group and generator/view ownership indicator.
+- [ ] Every implementation TODO has a stable id and explicit `reuse`/`expand`/`new` ownership for every generator and view.
 - [ ] Equivalence declarations and all disposition counts agree with their tables.
 - [ ] Detailed Design Decisions contains accepted rationale, matching risks, and distinctness expectations.
 - [ ] Open Questions contains only directly answerable questions ending in `?`.

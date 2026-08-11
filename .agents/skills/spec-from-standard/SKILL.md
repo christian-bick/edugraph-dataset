@@ -59,8 +59,8 @@ Complete the template with these constraints:
   most-specific truthful ontology labels, and visible or necessary textual evidence
   (`TSPEC-4`, `TSPEC-6`, `TSPEC-13`).
 - Record expected active generator/view matches and suspicious boundaries. For every
-  implementation TODO, give a stable `group` and identify generator/view ownership: bare id
-  for reuse as-is, `△` for adopting an existing module, and `＋` for a proposed new module.
+  implementation TODO, give a stable implementation id and identify every generator/view
+  role: bare id for `reuse`, `△` for `expand`, and `＋` for `new`.
 - Declare intentional equivalent definitions (`TSPEC-8`) and keep their count consistent with
   the disposition summary.
 - Put accepted facts, rationale, matching expectations, and distinctness predictions under
@@ -84,7 +84,10 @@ Resume only after the user approves Pass 1, incorporating any requested changes.
 ### 1. Author the target file
 
 - Create one `DatasetPermutationBuilder` per competency and map it with `toTargets`.
-- Use `toImplementationTodos(prefix, builder, group, explanation)` for implementation gaps; `group` is the stable implementation-package identity.
+- Define each reviewed package once with `defineImplementation`, including its stable id,
+  description, and `reuse`/`expand`/`new` generator and view modules. Pass that definition to
+  `toImplementationTodos(prefix, builder, implementation, explanation)` directly where the
+  `implementationTodos` export is assembled.
 - Export only the five target-spec contract names with their exact types (`TSPEC-1`, `TSPEC-2`).
 - Never stretch labels to force a match. Every active label must also be reasonably identifiable and defendable from the expected rendered artifact, not merely from the source standard's prose (`TSPEC-6`, `TSPEC-13`).
 
@@ -112,7 +115,7 @@ npm run check -- --spec=<specModule>
 Report:
 
 - active target and permutation counts;
-- implementation groups and permutation counts;
+- implementation definitions, module strategies, and permutation counts;
 - ontology gaps and beyond-scope competencies;
 - intentional equivalences;
 - matching pairs added/removed;

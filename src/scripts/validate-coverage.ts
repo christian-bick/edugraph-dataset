@@ -47,7 +47,7 @@ function runValidation() {
   const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'));
   const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
 
-  if (manifest.schema_version !== 1) {
+  if (manifest.schema_version !== 2) {
     result.errors.push(`Unsupported coverage manifest schema: ${manifest.schema_version}`);
     result.passed = false;
   }
@@ -105,6 +105,23 @@ function runValidation() {
 
   console.log(`[Coverage] Loaded evaluations for ${Object.keys(coverage).length} standards.`);
   console.log(`[Backlog] Loaded ${tasks.length} tasks.\n`);
+
+  const implementationStrategies = new Set(['reuse', 'expand', 'new']);
+  const isModuleImplementation = (item: any) => item
+    && typeof item.module === 'string'
+    && item.module.trim() !== ''
+    && implementationStrategies.has(item.strategy);
+  const isImplementation = (item: any) => item
+    && typeof item.id === 'string'
+    && item.id.trim() !== ''
+    && typeof item.description === 'string'
+    && item.description.trim() !== ''
+    && Array.isArray(item.generators)
+    && item.generators.length > 0
+    && item.generators.every(isModuleImplementation)
+    && Array.isArray(item.views)
+    && item.views.length > 0
+    && item.views.every(isModuleImplementation);
 
   // --- CHECK 1: metadata count matches coverage length ---
   const coverageKeys = Object.keys(coverage);
@@ -198,7 +215,10 @@ function runValidation() {
       } else {
         for (let idx = 0; idx < std.implementation_todos.length; idx++) {
           const item = std.implementation_todos[idx];
-          if (!item || typeof item.id !== 'string' || !Array.isArray(item.labels)) {
+          if (!item
+            || typeof item.id !== 'string'
+            || !Array.isArray(item.labels)
+            || !isImplementation(item.implementation)) {
             result.errors.push(`[Implementation Todos Error] Standard "${id}" implementation_todo at index ${idx} is invalid`);
             result.passed = false;
           }
@@ -247,6 +267,11 @@ function runValidation() {
   // --- CHECK 4: Tasks referential integrity and coverage ---
   const taskStandardIds = new Set<string>();
   const taskIds = new Set<string>();
+  const taskImplementationIds = new Set<string>();
+  const coverageImplementationIds = new Set<string>(Object.values(coverage)
+    .flatMap((entry: any) => entry.implementation_todos || [])
+    .map((todo: any) => todo.implementation?.id)
+    .filter((id: unknown): id is string => typeof id === 'string'));
 
   for (const task of tasks) {
     // A. Check duplicate task IDs
@@ -255,6 +280,13 @@ function runValidation() {
       result.passed = false;
     }
     taskIds.add(task.id);
+
+    if (task.implementation !== undefined && !isImplementation(task.implementation)) {
+      result.errors.push(`[Task Implementation Error] Task "${task.id}" has an invalid implementation definition`);
+      result.passed = false;
+    } else if (task.implementation) {
+      taskImplementationIds.add(task.implementation.id);
+    }
 
     // B. Check standard IDs in task
     const affectedStds = task.standards || [];
@@ -284,10 +316,22 @@ function runValidation() {
         result.errors.push(`[Task Logic Error] Standard "${stdId}" is included in DATASET_ENRICHMENT task "${task.id}", but is marked as dataset_covered with no implementation_todos`);
         result.passed = false;
       }
+      if (task.implementation
+        && !covEntry.implementation_todos?.some((todo: any) => todo.implementation?.id === task.implementation.id)) {
+        result.errors.push(`[Task Implementation Error] Task "${task.id}" assigns implementation "${task.implementation.id}" to unrelated standard "${stdId}"`);
+        result.passed = false;
+      }
       if (covEntry.fully_beyond_scope) {
         result.errors.push(`[Task Logic Error] Fully beyond-scope standard "${stdId}" must not appear in backlog task "${task.id}"`);
         result.passed = false;
       }
+    }
+  }
+
+  for (const implementationId of coverageImplementationIds) {
+    if (!taskImplementationIds.has(implementationId)) {
+      result.errors.push(`[Orphaned Implementation Error] Implementation "${implementationId}" has no package-level backlog task`);
+      result.passed = false;
     }
   }
 

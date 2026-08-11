@@ -380,9 +380,9 @@ async function main() {
     const matchedImplementationTodos = allImplementationTodos.filter(t => findStandardIdForTarget(t.id, sortedLeafIds) === std.id);
     const implementation_todos = matchedImplementationTodos.map(t => ({
       id: t.id,
-      group: t.group,
       labels: t.labels,
-      explanation: t.explanation || ''
+      explanation: t.explanation || '',
+      implementation: t.implementation
     }));
 
     // Match ontology TODOs from spec files
@@ -482,6 +482,44 @@ async function main() {
   }
 
   const consolidatedTasks: any[] = [];
+  const implementationPackages = new Map<string, {
+    implementation: (typeof allImplementationTodos)[number]['implementation'];
+    targets: typeof allImplementationTodos;
+  }>();
+
+  for (const target of allImplementationTodos) {
+    const id = target.implementation.id;
+    if (!implementationPackages.has(id)) {
+      implementationPackages.set(id, { implementation: target.implementation, targets: [] });
+    }
+    implementationPackages.get(id)!.targets.push(target);
+  }
+
+  for (const { implementation, targets } of implementationPackages.values()) {
+    const targetStandards = Array.from(new Set(targets
+      .map(target => findStandardIdForTarget(target.id, sortedLeafIds))
+      .filter((standardId): standardId is string => standardId !== null)));
+    const clusterIds = Array.from(new Set(targetStandards
+      .map(standardId => findParentClusterId(standardId, standardsMap))));
+    const targetDetails = Array.from(new Map(targets.map(target => [
+      target.id.split('~')[0],
+      `- ${target.id.split('~')[0]}: ${target.explanation || 'Implement the missing generator/view path.'}`
+    ])).values());
+
+    consolidatedTasks.push({
+      id: `task-implementation-${implementation.id}`,
+      type: 'DATASET_ENRICHMENT',
+      cluster_id: clusterIds.join(', '),
+      cluster_description: clusterIds
+        .map(clusterId => standardsMap[clusterId]?.description || 'Other Math Concepts')
+        .join(' / '),
+      title: implementation.id,
+      description: `${implementation.description}\nTargets:\n${targetDetails.join('\n')}`,
+      standards: targetStandards,
+      implementation
+    });
+  }
+
   for (const [clusterId, missingStds] of Object.entries(tasksByCluster)) {
     const parentCluster = standardsMap[clusterId] || { description: 'Other Math Concepts' };
     
@@ -489,9 +527,10 @@ async function main() {
     const uncoveredStds = missingStds.filter(s => !s.spec_covered);
 
     const missingOntology = specCoveredStds.filter(s => s.ontology_todos && s.ontology_todos.length > 0);
-    const missingGenerator = specCoveredStds.filter(s => 
+    const missingGenerator = specCoveredStds.filter(s =>
       (!s.ontology_todos || s.ontology_todos.length === 0) &&
-      ((s.implementation_todos && s.implementation_todos.length > 0) || !s.dataset_covered)
+      (!s.implementation_todos || s.implementation_todos.length === 0) &&
+      !s.dataset_covered
     );
 
     if (missingOntology.length > 0) {
@@ -567,7 +606,7 @@ async function main() {
   console.log(`[Output] Successfully wrote coverage and tasks data to: ${OUTPUT_PATH}`);
 
   const manifest = {
-    schema_version: 1,
+    schema_version: 2,
     channel,
     source_ref: sourceRef,
     source_sha: sourceSha,

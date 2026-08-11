@@ -101,13 +101,31 @@ export interface CompetencyTarget {
     explanation?: string;
 }
 
+export type ImplementationStrategy = 'reuse' | 'expand' | 'new';
+
+/** One generator or view module's reviewed role in an implementation package. */
+export interface ModuleImplementation {
+    module: string;
+    strategy: ImplementationStrategy;
+}
+
+/**
+ * A reviewed implementation package. Target TODOs reference this definition so
+ * module ownership and reuse/expansion/creation decisions are authored once.
+ */
+export interface Implementation {
+    id: string;
+    description: string;
+    generators: readonly ModuleImplementation[];
+    views: readonly ModuleImplementation[];
+}
+
 /**
  * An addressable competency whose ontology labels are known but whose current
- * generator/view catalog cannot realize it. `group` is a stable implementation
- * package identifier shared by TODO permutations that belong together.
+ * generator/view catalog cannot realize it.
  */
 export interface ImplementationTodo extends CompetencyTarget {
-    group: string;
+    implementation: Implementation;
 }
 
 /**

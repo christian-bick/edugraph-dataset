@@ -99,7 +99,7 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
                 fetchJson<CoverageData>(coveragePath(dataView, 'ccss-coverage.json')),
                 fetchJson<CoverageManifest>(coveragePath(dataView, 'coverage-manifest.json')),
             ]);
-            if (coverageManifest.schema_version !== 1) {
+            if (coverageManifest.schema_version !== 2) {
                 throw new Error(`Unsupported coverage schema: ${coverageManifest.schema_version}`);
             }
             if (coverageManifest.channel !== dataView) {

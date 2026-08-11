@@ -1,4 +1,5 @@
 import DatasetPermutationBuilder, {
+    defineImplementation,
     toImplementationTodos,
     toTargets
 } from '../../lib/dataset-permutation-builder.ts';
@@ -504,177 +505,338 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder)
 ];
 
+const wordProblemsWithin100Implementation = defineImplementation({
+    id: 'word-problems-within-100',
+    description: 'Extend arithmetic stories and layouts to one- and two-step problems within 100.',
+    generators: [
+        { module: 'arithmetic-ops-pairs', strategy: 'reuse' },
+        { module: 'arithmetic-ops-triples', strategy: 'expand' }
+    ],
+    views: [{ module: 'operations-word-problem', strategy: 'expand' }]
+});
+
+const placeValueHundredsImplementation = defineImplementation({
+    id: 'place-value-hundreds',
+    description: 'Extend place-value bundles through hundreds.',
+    generators: [{ module: 'place-value-bundles', strategy: 'expand' }],
+    views: [{ module: 'place-value-tens-bundles', strategy: 'expand' }]
+});
+
+const countingSequencesTo1000Implementation = defineImplementation({
+    id: 'counting-sequences-to-1000',
+    description: 'Extend counting sequences through 1000 with steps of 1, 5, 10, and 100.',
+    generators: [{ module: 'counting-sequence', strategy: 'expand' }],
+    views: [{ module: 'counting-number-sequence', strategy: 'expand' }]
+});
+
+const numberNotationTo1000Implementation = defineImplementation({
+    id: 'number-notation-to-1000',
+    description: 'Extend numeral reading and writing through 1000 and add written number names.',
+    generators: [{ module: 'writing', strategy: 'expand' }],
+    views: [
+        { module: 'numbers-read-standard', strategy: 'expand' },
+        { module: 'numbers-write-standard', strategy: 'expand' },
+        { module: 'numbers-write-name', strategy: 'new' }
+    ]
+});
+
+const expandedPlaceValueNotationImplementation = defineImplementation({
+    id: 'expanded-place-value-notation',
+    description: 'Add expanded-form generation and rendering for three-digit place value.',
+    generators: [{ module: 'place-value-expanded', strategy: 'new' }],
+    views: [{ module: 'place-value-expanded-form', strategy: 'new' }]
+});
+
+const multiDigitPlaceValueArithmeticImplementation = defineImplementation({
+    id: 'multi-digit-place-value-arithmetic',
+    description: 'Add concrete regrouping, written-method mapping, and strategy explanations.',
+    generators: [{ module: 'place-value-arithmetic', strategy: 'new' }],
+    views: [
+        { module: 'place-value-arithmetic-model', strategy: 'new' },
+        { module: 'place-value-arithmetic-explanation', strategy: 'new' }
+    ]
+});
+
+const placeValueOffsetsTo1000Implementation = defineImplementation({
+    id: 'place-value-offsets-to-1000',
+    description: 'Extend ten-more/less relationships through hundreds and steps of 100.',
+    generators: [{ module: 'counting-inc-dec', strategy: 'expand' }],
+    views: [{ module: 'counting-ten-more-less', strategy: 'expand' }]
+});
+
+const standardLengthToolsImplementation = defineImplementation({
+    id: 'standard-length-tools',
+    description: 'Support selecting and visibly using standard metric length tools.',
+    generators: [
+        { module: 'measurement-attribute', strategy: 'expand' },
+        { module: 'measurement-length', strategy: 'reuse' }
+    ],
+    views: [
+        { module: 'measure-select-tool', strategy: 'new' },
+        { module: 'measure-length-integer', strategy: 'expand' }
+    ]
+});
+
+const lengthEstimationImplementation = defineImplementation({
+    id: 'length-estimation',
+    description: 'Add metric length-estimation problems and an estimation layout.',
+    generators: [{ module: 'measurement-length', strategy: 'expand' }],
+    views: [{ module: 'measure-length-estimate', strategy: 'new' }]
+});
+
+const lengthComparisonByMeasureImplementation = defineImplementation({
+    id: 'length-comparison-by-measure',
+    description: 'Extend measured comparisons to explicit numerical length differences.',
+    generators: [{ module: 'measurement-compare', strategy: 'expand' }],
+    views: [{ module: 'measure-compare', strategy: 'expand' }]
+});
+
+const lengthArithmeticImplementation = defineImplementation({
+    id: 'length-arithmetic',
+    description: 'Extend word-problem layouts to same-unit length arithmetic.',
+    generators: [{ module: 'arithmetic-ops-pairs', strategy: 'reuse' }],
+    views: [{ module: 'operations-word-problem', strategy: 'expand' }]
+});
+
+const numberLineArithmeticImplementation = defineImplementation({
+    id: 'number-line-arithmetic',
+    description: 'Add a number-line layout for whole-number representation and arithmetic.',
+    generators: [
+        { module: 'writing', strategy: 'reuse' },
+        { module: 'arithmetic-ops-pairs', strategy: 'reuse' }
+    ],
+    views: [{ module: 'operations-number-line', strategy: 'new' }]
+});
+
+const timeFiveMinuteImplementation = defineImplementation({
+    id: 'time-five-minute',
+    description: 'Extend time generation to five-minute intervals for existing clock layouts.',
+    generators: [{ module: 'time', strategy: 'expand' }],
+    views: [
+        { module: 'time-analog', strategy: 'reuse' },
+        { module: 'time-digital', strategy: 'reuse' }
+    ]
+});
+
+const usMoneyWordProblemsImplementation = defineImplementation({
+    id: 'us-money-word-problems',
+    description: 'Add abstract dollar-denomination word problems with currency notation.',
+    generators: [{ module: 'currency-arithmetic', strategy: 'new' }],
+    views: [{ module: 'currency-word-problem', strategy: 'new' }]
+});
+
+const measurementDataImplementation = defineImplementation({
+    id: 'measurement-data',
+    description: 'Add generation and tabular presentation of whole-unit measurement data.',
+    generators: [{ module: 'measurement-data', strategy: 'new' }],
+    views: [{ module: 'measurement-data-table', strategy: 'new' }]
+});
+
+const shapeIdentityExtendedImplementation = defineImplementation({
+    id: 'shape-identity-extended',
+    description: 'Extend shape identity and naming to quadrilaterals and pentagons.',
+    generators: [{ module: 'shape-identity', strategy: 'expand' }],
+    views: [{ module: 'shape-naming', strategy: 'expand' }]
+});
+
+const shapeAttributeCountsImplementation = defineImplementation({
+    id: 'shape-attribute-counts',
+    description: 'Extend shape classification and construction to stated attribute counts.',
+    generators: [
+        { module: 'shape-classify-attributes', strategy: 'expand' },
+        { module: 'shape-build-shape', strategy: 'expand' }
+    ],
+    views: [
+        { module: 'shape-classify-attributes', strategy: 'expand' },
+        { module: 'shape-build-shape', strategy: 'expand' }
+    ]
+});
+
+const rectangularSquareArraysImplementation = defineImplementation({
+    id: 'rectangular-square-arrays',
+    description: 'Extend shape partitioning to rectangular arrays and square counting.',
+    generators: [{ module: 'shape-partition', strategy: 'expand' }],
+    views: [{ module: 'shape-partition-equal', strategy: 'expand' }]
+});
+
+const equalShareShapeEquivalenceImplementation = defineImplementation({
+    id: 'equal-share-shape-equivalence',
+    description: 'Add paired partitions showing equal shares with different geometries.',
+    generators: [{ module: 'shape-partition-equivalence', strategy: 'new' }],
+    views: [{ module: 'shape-partition-equivalence', strategy: 'new' }]
+});
+
 export const implementationTodos: ImplementationTodo[] = [
     // 2.OA - Operations and Algebraic Thinking
     ...toImplementationTodos(
         '2.OA.A.1-one-step-word-problems',
         oneStepWordProblemsBuilder,
-        'word-problems-within-100',
+        wordProblemsWithin100Implementation,
         'Render one-step stories and equations with unknowns in the source-required positions and values within 100.'
     ),
     ...toImplementationTodos(
         '2.OA.A.1-two-step-word-problems',
         twoStepWordProblemsBuilder,
-        'word-problems-within-100',
+        wordProblemsWithin100Implementation,
         'Render genuinely connected two-step stories and equations, including mixed-operation cases, with values within 100.'
     ),
     // 2.NBT - Number and Operations in Base Ten
     ...toImplementationTodos(
         '2.NBT.A.1a-ten-tens-make-hundred',
         tenTensMakeHundredBuilder,
-        'place-value-hundreds',
+        placeValueHundredsImplementation,
         'Show ten distinct tens bundled and renamed as one hundred.'
     ),
     ...toImplementationTodos(
         '2.NBT.A.1b-hundreds',
         hundredsBuilder,
-        'place-value-hundreds',
+        placeValueHundredsImplementation,
         'Represent 100 through 900 as one through nine hundreds with zero tens and zero ones.'
     ),
     ...toImplementationTodos(
         '2.NBT.A.2-count-within-1000',
         countWithin1000Builder,
-        'counting-sequences-to-1000',
+        countingSequencesTo1000Implementation,
         'Show a visible sequence with a missing continuation and the requested step through 1000.'
     ),
     ...toImplementationTodos(
         '2.NBT.A.3-base-ten-numerals',
         baseTenNumeralsBuilder,
-        'number-notation-to-1000',
+        numberNotationTo1000Implementation,
         'Pair three-digit numerals with an inspectable read prompt, word answer, or written numeral response without claiming oral performance.'
     ),
     ...toImplementationTodos(
         '2.NBT.A.3-number-names',
         numberNamesBuilder,
-        'number-notation-to-1000',
+        numberNotationTo1000Implementation,
         'Show a numeral and its correctly written number name.'
     ),
     ...toImplementationTodos(
         '2.NBT.A.3-expanded-form',
         expandedFormBuilder,
-        'expanded-place-value-notation',
+        expandedPlaceValueNotationImplementation,
         'Decompose a numeral into a visible sum of its non-zero hundreds, tens, and ones values.'
     ),
     ...toImplementationTodos(
         '2.NBT.B.7-concrete-regrouping',
         concreteRegroupingBuilder,
-        'multi-digit-place-value-arithmetic',
+        multiDigitPlaceValueArithmeticImplementation,
         'Show hundreds, tens, and ones models composing or decomposing during addition or subtraction.'
     ),
     ...toImplementationTodos(
         '2.NBT.B.7-model-to-written-method',
         modelToWrittenMethodBuilder,
-        'multi-digit-place-value-arithmetic',
+        multiDigitPlaceValueArithmeticImplementation,
         'Map the same values and regrouping steps from a concrete model into a written method.'
     ),
     ...toImplementationTodos(
         '2.NBT.B.8-place-value-offsets',
         placeValueOffsetsBuilder,
-        'place-value-offsets-to-1000',
+        placeValueOffsetsTo1000Implementation,
         'Show starting and result numerals with place-value evidence for adding or subtracting ten or one hundred.'
     ),
     ...toImplementationTodos(
         '2.NBT.B.9-explain-strategies',
         explainStrategiesBuilder,
-        'multi-digit-place-value-arithmetic',
+        multiDigitPlaceValueArithmeticImplementation,
         'Prompt for an explanation and provide visible place-value and equation evidence that makes it assessable.'
     ),
     // 2.MD - Measurement and Data
     ...toImplementationTodos(
         '2.MD.A.1-select-length-tool',
         selectLengthToolBuilder,
-        'standard-length-tools',
+        standardLengthToolsImplementation,
         'Show an object and competing tools with the appropriate length tool visibly selected.'
     ),
     ...toImplementationTodos(
         '2.MD.A.1-use-length-tool',
         useLengthToolBuilder,
-        'standard-length-tools',
+        standardLengthToolsImplementation,
         'Align the selected tool to an object and show a readable scale, unit, and measured answer.'
     ),
     ...toImplementationTodos(
         '2.MD.A.3-estimate-metric-lengths',
         estimateMetricLengthBuilder,
-        'length-estimation',
+        lengthEstimationImplementation,
         'Show a familiar object or span, named metric unit, estimate prompt, and plausible answer.'
     ),
     ...toImplementationTodos(
         '2.MD.A.4-measured-length-difference',
         measuredLengthDifferenceBuilder,
-        'length-comparison-by-measure',
+        lengthComparisonByMeasureImplementation,
         'Show two measured objects in a common unit and their numerical length difference.'
     ),
     ...toImplementationTodos(
         '2.MD.B.5-length-word-problems',
         lengthWordProblemsBuilder,
-        'length-arithmetic',
+        lengthArithmeticImplementation,
         'Show same-unit quantities in a story whose equation, unknown, and solution agree.'
     ),
     ...toImplementationTodos(
         '2.MD.B.6-number-line-representation',
         numberLineRepresentationBuilder,
-        'number-line-arithmetic',
+        numberLineArithmeticImplementation,
         'Show equally spaced labeled points beginning at zero and mark a requested whole number as a length.'
     ),
     ...toImplementationTodos(
         '2.MD.B.6-number-line-arithmetic',
         numberLineArithmeticBuilder,
-        'number-line-arithmetic',
+        numberLineArithmeticImplementation,
         'Show directional jumps, endpoints, an equation, and an answer that agree.'
     ),
     ...toImplementationTodos(
         '2.MD.C.7-nearest-five-minute-time',
         nearestFiveMinuteTimeBuilder,
-        'time-five-minute',
+        timeFiveMinuteImplementation,
         'Show multiples-of-five minute values with matching analog or digital displays and read or written answers.'
     ),
     ...toImplementationTodos(
         '2.MD.C.8-currency-word-problems',
         currencyWordProblemsBuilder,
-        'us-money-word-problems',
+        usMoneyWordProblemsImplementation,
         'Show currency representations and values in a story with correct arithmetic, units, answer, and dollar or cent notation.'
     ),
     ...toImplementationTodos(
         '2.MD.D.9-generate-measurement-data',
         measurementDataBuilder,
-        'measurement-data',
+        measurementDataImplementation,
         'Show several whole-unit length measurements and the collected data list.'
     ),
     // 2.G - Geometry
     ...toImplementationTodos(
         '2.G.A.1-identify-additional-shapes',
         identifyAdditionalShapesBuilder,
-        'shape-identity-extended',
+        shapeIdentityExtendedImplementation,
         'Show a generic quadrilateral or pentagon with defining-attribute cues and an explicit name response.'
     ),
     ...toImplementationTodos(
         '2.G.A.1-recognize-attribute-counts',
         recognizeShapeAttributeCountsBuilder,
-        'shape-attribute-counts',
+        shapeAttributeCountsImplementation,
         'State an attribute condition and show a selected shape that visibly satisfies it.'
     ),
     ...toImplementationTodos(
         '2.G.A.1-draw-attribute-counts',
         drawShapeAttributeCountsBuilder,
-        'shape-attribute-counts',
+        shapeAttributeCountsImplementation,
         'State the required attributes and show a solution drawing whose vertex or face condition is inspectable.'
     ),
     ...toImplementationTodos(
         '2.G.A.2-partition-rectangle',
         rectangularSquarePartitionBuilder,
-        'rectangular-square-arrays',
+        rectangularSquareArraysImplementation,
         'Tile a rectangle with same-size square cells organized in rows and columns without gaps or overlap.'
     ),
     ...toImplementationTodos(
         '2.G.A.2-count-squares',
         rectangularSquareCountBuilder,
-        'rectangular-square-arrays',
+        rectangularSquareArraysImplementation,
         'Show the rectangular square array together with an explicit count and total.'
     ),
     ...toImplementationTodos(
         '2.G.A.3-equal-shares-different-shapes',
         equalShareShapeEquivalenceBuilder,
-        'equal-share-shape-equivalence',
+        equalShareShapeEquivalenceImplementation,
         'Show identical wholes partitioned into equal-area pieces of visibly different shapes with an explicit equivalence conclusion.'
     )
 ];

@@ -18,6 +18,8 @@ import {
 import { useExplorerStore } from './store.ts';
 import type {
     BacklogTask,
+    Implementation,
+    ModuleImplementation,
     StandardCoverage,
     StandardNode,
     TaskType,
@@ -108,28 +110,125 @@ const coverageStyles: Record<CoverageKind, {
     },
 };
 
-const taskStyles: Record<TaskType, { label: string; icon: string; color: string; detail: string }> = {
+const taskStyles: Record<TaskType, { label: string; icon: string; color: string; detail: string; accent: string }> = {
     DATASET_ENRICHMENT: {
         label: 'Implementation',
         icon: 'fa-triangle-exclamation',
         color: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
         detail: 'bg-orange-500/10 border-orange-500/20 text-orange-300',
+        accent: 'border-orange-500/30',
     },
     ONTOLOGY_EXTENSION: {
         label: 'Ontology',
         icon: 'fa-circle-xmark',
         color: 'bg-red-500/10 text-red-400 border-red-500/20',
         detail: 'bg-red-500/10 border-red-500/20 text-red-300',
+        accent: 'border-red-500/30',
     },
     ANALYSIS: {
         label: 'ANALYSIS',
         icon: 'fa-magnifying-glass',
         color: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
         detail: 'bg-sky-500/10 border-sky-500/20 text-sky-300',
+        accent: 'border-sky-500/30',
     },
 };
 
 const EMPTY_TASKS: BacklogTask[] = [];
+
+const strategyStyles = {
+    reuse: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    expand: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+    new: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+} as const;
+
+interface TaskDescriptionItem {
+    id: string;
+    description: string;
+}
+
+function splitTaskDescription(description: string): {
+    summary: string;
+    detailLabel?: string;
+    details: TaskDescriptionItem[];
+} {
+    const sections = [
+        { marker: '\nTargets:\n', label: 'Targets' },
+        { marker: ' Details:\n', label: 'Details' },
+    ];
+    const section = sections.find(candidate => description.includes(candidate.marker));
+    if (!section) return { summary: description, details: [] };
+
+    const [summary, detailText = ''] = description.split(section.marker, 2);
+    const details = detailText
+        .split('\n')
+        .map(line => line.replace(/^\s*-\s*/, '').trim())
+        .filter(Boolean)
+        .map(line => {
+            const separator = line.indexOf(':');
+            return separator === -1
+                ? { id: line, description: '' }
+                : { id: line.slice(0, separator).trim(), description: line.slice(separator + 1).trim() };
+        });
+
+    return { summary: summary.trim(), detailLabel: section.label, details };
+}
+
+function ModuleImplementationList({
+    label,
+    modules,
+    stacked = false,
+}: {
+    label: string;
+    modules: ModuleImplementation[];
+    stacked?: boolean;
+}) {
+    return (
+        <div className={stacked ? 'space-y-1.5' : 'flex items-start gap-2'}>
+            <span className={stacked
+                ? 'block text-[10px] font-semibold uppercase tracking-wider text-slate-500'
+                : 'w-16 shrink-0 pt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500'}>
+                {label}
+            </span>
+            <div className={stacked ? 'space-y-1.5' : 'flex min-w-0 flex-wrap gap-1.5'}>
+                {modules.map(item => (
+                    <span
+                        key={`${item.strategy}-${item.module}`}
+                        className={`${stacked ? 'flex w-full' : 'inline-flex'} items-center overflow-hidden rounded border border-slate-700 bg-slate-950/70 font-mono text-[9px]`}
+                    >
+                        <span className={`${stacked ? 'flex w-14 shrink-0 items-center justify-center' : 'self-stretch'} border-r px-1.5 py-1 font-bold uppercase ${strategyStyles[item.strategy]}`}>
+                            {item.strategy}
+                        </span>
+                        <span className="min-w-0 break-all px-1.5 py-1 text-slate-300">{item.module}</span>
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function ImplementationDetails({
+    implementation,
+    showSummary = true,
+    boxed = true,
+}: {
+    implementation: Implementation;
+    showSummary?: boolean;
+    boxed?: boolean;
+}) {
+    return (
+        <div className={boxed ? 'space-y-2 rounded-md border border-slate-800 bg-slate-950/50 p-2.5' : 'space-y-2'}>
+            {showSummary && (
+                <div>
+                    <div className="font-mono text-[10px] font-semibold text-orange-300">{implementation.id}</div>
+                    <div className="mt-0.5 text-[10px] leading-relaxed text-slate-400">{implementation.description}</div>
+                </div>
+            )}
+            <ModuleImplementationList label="Generators" modules={implementation.generators} stacked={!boxed} />
+            <ModuleImplementationList label="Views" modules={implementation.views} stacked={!boxed} />
+        </div>
+    );
+}
 
 function Header() {
     const coverageData = useExplorerStore(state => state.coverageData);
@@ -469,6 +568,7 @@ function TaskCard({ task }: { task: BacklogTask }) {
     const setActiveTask = useExplorerStore(state => state.setActiveTask);
     const style = taskStyles[task.type];
     const selected = activeTaskId === task.id;
+    const summary = splitTaskDescription(task.description).summary;
 
     return (
         <article
@@ -493,7 +593,7 @@ function TaskCard({ task }: { task: BacklogTask }) {
                 </div>
                 <span className={`px-2 py-0.5 rounded text-[9px] border font-bold ${style.color}`}>{style.label}</span>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{task.description}</p>
+            <p className="text-xs text-slate-300 leading-relaxed">{summary}</p>
             <div className="flex flex-wrap gap-1.5 items-center pt-2 border-t border-slate-800/40">
                 <span className="text-[10px] text-slate-500 font-semibold mr-1">Standards:</span>
                 {task.standards.map(standard => (
@@ -517,7 +617,7 @@ function CenterPanel() {
         ? {
             crumbs: `TASK BACKLOG > ${activeGrade.toUpperCase()}`,
             title: `${activeGrade} Pedagogical Task Backlog`,
-            description: 'Backlog of missing generators, views, ontology definitions, or domain analysis tasks grouped by Cluster.',
+            description: 'Reviewed implementation packages plus ontology and domain-analysis backlog tasks.',
         }
         : searchActive
             ? {
@@ -615,13 +715,15 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
             </div>
         ) : null;
     }
-    const explanations = [...new Set(coverage.implementation_todos.map(todo => todo.explanation).filter(Boolean))];
-    return explanations.length > 0 ? (
-        <div className="text-xs text-orange-800 bg-orange-50 border border-orange-200 rounded-md p-2.5 leading-relaxed mt-1">
-            <div className="flex items-start gap-2">
-                <Icon name="fa-triangle-exclamation" className="text-orange-600 mt-0.5 shrink-0 text-[11px]" />
-                <div>{explanations.map(explanation => <div key={explanation}>{explanation}</div>)}</div>
-            </div>
+    const implementations = [...new Map(coverage.implementation_todos.map(todo => [
+        todo.implementation.id,
+        todo.implementation,
+    ])).values()];
+    return implementations.length > 0 ? (
+        <div className="space-y-2 rounded-md border border-orange-500/20 bg-orange-500/5 p-2.5 mt-1">
+            {implementations.map(implementation => (
+                <ImplementationDetails key={implementation.id} implementation={implementation} />
+            ))}
         </div>
     ) : null;
 }
@@ -906,41 +1008,55 @@ function TaskDetails() {
 
     if (!task) {
         return (
-            <div className="p-6 bg-slate-900/60 flex flex-col gap-4">
-                <div className="flex items-start justify-between">
-                    <span className="px-2.5 py-0.5 bg-orange-500/10 border border-orange-500/20 text-orange-300 rounded text-[10px] font-mono font-bold tracking-wider">DATASET_ENRICHMENT</span>
-                    <span className="text-xs text-slate-500 font-mono">task-generator-K.CC.B</span>
-                </div>
-                <div>
-                    <h3 className="text-base font-semibold text-slate-100 leading-snug">Task Title</h3>
-                    <p className="text-xs text-slate-300 mt-2 whitespace-pre-wrap leading-relaxed">Task description...</p>
-                </div>
-                <div className="border-t border-slate-800/80 pt-3 text-xs">
-                    <span className="text-slate-500 block mb-1.5">Affected Standards</span>
-                </div>
+            <div className="p-6 bg-slate-900/60">
+                <h3 className="text-base font-semibold text-slate-100">Select a backlog task</h3>
+                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                    Choose a task from the overview to inspect its targets, module ownership, and affected standards.
+                </p>
             </div>
         );
     }
 
     const style = taskStyles[task.type];
+    const description = splitTaskDescription(task.description);
     return (
-        <div className="p-6 bg-slate-900/60 flex flex-col gap-4">
-            <div className="flex items-start justify-between">
-                <span className={`px-2.5 py-0.5 border rounded text-[10px] font-mono font-bold tracking-wider ${style.detail}`}>{style.label}</span>
-                <span className="text-xs text-slate-500 font-mono">{task.id}</span>
-            </div>
-            <div>
-                <h3 className="text-base font-semibold text-slate-100 leading-snug">{task.title}</h3>
-                <p className="text-xs text-slate-300 mt-2 whitespace-pre-wrap leading-relaxed">{task.description}</p>
-            </div>
-            <div className="border-t border-slate-800/80 pt-3 text-xs">
-                <span className="text-slate-500 block mb-1.5">Affected Standards</span>
+        <div className="p-6 bg-slate-900/60 flex flex-col gap-5">
+            <header className="space-y-3">
+                <h3 className="text-lg font-semibold text-slate-100 leading-snug">{task.title}</h3>
+                <span className={`inline-flex px-2.5 py-0.5 border rounded text-[10px] font-mono font-bold tracking-wider ${style.detail}`}>{style.label}</span>
+            </header>
+            <section className="space-y-4">
+                <p className="text-xs text-slate-300 leading-relaxed">{description.summary}</p>
+                {description.details.length > 0 && (
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{description.detailLabel}</h4>
+                        <div className="space-y-3">
+                            {description.details.map(detail => (
+                                <div key={`${detail.id}-${detail.description}`} className={`border-l-2 pl-3 ${style.accent}`}>
+                                    <div className="break-words font-mono text-[10px] font-semibold leading-relaxed text-slate-200">{detail.id}</div>
+                                    {detail.description && (
+                                        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{detail.description}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </section>
+            {task.implementation && (
+                <section className="space-y-3 border-t border-slate-800/80 pt-4">
+                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Module ownership</h4>
+                    <ImplementationDetails implementation={task.implementation} showSummary={false} boxed={false} />
+                </section>
+            )}
+            <section className="border-t border-slate-800/80 pt-4 text-xs">
+                <h4 className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Affected standards</h4>
                 <div className="flex flex-wrap gap-1.5">
                     {task.standards.map(standard => (
-                        <span key={standard} className="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-400">{standard}</span>
+                        <span key={standard} className="mt-2 px-2 py-0.5 bg-slate-950 border border-slate-800 rounded font-mono text-[9px] text-slate-400">{standard}</span>
                     ))}
                 </div>
-            </div>
+            </section>
         </div>
     );
 }

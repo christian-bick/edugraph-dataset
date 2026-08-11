@@ -20,7 +20,7 @@ read by a different consumer, by name — there is no scanning or filtering:
 | Export                | Type                  | Read by                                   | Meaning                                                                 |
 |-----------------------|-----------------------|-------------------------------------------|-------------------------------------------------------------------------|
 | `spec`                | `CompetencyTarget[]`  | `loadTargets` → the generation pipeline   | Permutations with **both** a matching generator and a compatible view.  |
-| `implementationTodos` | `ImplementationTodo[]`| `loadSpecTodos` → coverage report only    | Expressible in the ontology, but missing generator/view capability. Each has a stable `group`. |
+| `implementationTodos` | `ImplementationTodo[]`| `loadSpecTodos` → coverage report only    | Expressible in the ontology, but missing generator/view capability. Each references an authored implementation definition. |
 | `ontologyTodos`       | `OntologyTodo[]`      | `loadSpecTodos` → coverage report only    | Not expressible: the ontology lacks the `Area`/`Scope`/`Ability`.       |
 | `beyondScope`         | `BeyondScopeEntry[]`  | `loadSpecTodos` → coverage report only    | Intentionally not addressable in the dataset's declared medium.        |
 | `equivalentTargets`   | `TargetEquivalence[]` | `loadSpecEquivalences` → the validator    | Definitions that are intentionally indistinguishable ([TSPEC-8](#tspec-8--definitions-must-be-distinct-unless-the-identity-is-declared)). |
@@ -56,8 +56,10 @@ Study `src/spec/ccss/kindergarten.ts` and `grade-01.ts` for the established stru
   such as number ranges, zero inclusion, shapes and relations.
 - `toTargets('<CCSS-id>-<slug>', builder)` from `src/lib/dataset-permutation-builder.ts` —
   maps the builder to active targets.
-- `toImplementationTodos('<CCSS-id>-<slug>', builder, '<group>', '<explanation>')` — maps
-  an unsupported builder to implementation TODOs carrying their stable package identity.
+- `defineImplementation({...})` — defines one stable implementation package with a description
+  and explicit `reuse`/`expand`/`new` generator and view roles.
+- `toImplementationTodos('<CCSS-id>-<slug>', builder, implementation, '<explanation>')` —
+  maps an unsupported builder to target TODOs referencing that package.
 
 Build permutations programmatically rather than writing static arrays by hand — this
 applies to the `test` module too.
@@ -128,10 +130,40 @@ se the corresponding todo export.
 backlog items. A leaf standard may have one competency in `beyondScope` and a different
 competency in `spec`, but each individual competency still belongs to exactly one export.
 
-Every `implementationTodos` entry must declare a non-empty `group` string. Use the same
-stable, descriptive group for permutations and definitions that require one coherent
-generator/view implementation package. Tooling reports and `/implement-spec` preserve this
-authored grouping rather than inferring packages again from target prefixes.
+Define every implementation package once with a stable, descriptive id, a non-empty
+description, and non-empty generator and view module lists. Each module role declares one
+strategy:
+
+- `reuse` — use the named existing module without changes;
+- `expand` — extend the named existing module;
+- `new` — create the named module.
+
+Reference that definition from `toImplementationTodos` directly where the exported
+`implementationTodos` array is assembled. Multiple target definitions may reference the same
+implementation when they form one coherent delivery package; a package may list multiple
+generators or views. Tooling and `/implement-spec` consume this authored package instead of
+reconstructing ownership from target prefixes.
+
+```typescript
+const numberLineImplementation = defineImplementation({
+    id: 'number-line-arithmetic',
+    description: 'Add a number-line layout for representation and arithmetic.',
+    generators: [
+        { module: 'writing', strategy: 'reuse' },
+        { module: 'arithmetic-ops-pairs', strategy: 'reuse' }
+    ],
+    views: [{ module: 'operations-number-line', strategy: 'new' }]
+});
+
+export const implementationTodos: ImplementationTodo[] = [
+    ...toImplementationTodos(
+        '2.MD.B.6-number-line-arithmetic',
+        numberLineArithmeticBuilder,
+        numberLineImplementation,
+        'Show directional jumps, endpoints, an equation, and an answer that agree.'
+    )
+];
+```
 
 Confirm the middle column empirically rather than by inspection. During the two-pass authoring
 workflow, `npm run report:matching-diff -- --spec=<module> --plan=<planName>` includes both
@@ -229,7 +261,7 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` and mapped via `toTargets` or `toImplementationTodos`; no hand-written target arrays.
 - [ ] **TSPEC-5** — no id is hand-written or position-derived; every id came out of `toTargets` or `toImplementationTodos`.
 - [ ] **TSPEC-6** — no label is broader, narrower, or otherwise adjusted to make a target match; gaps are parked with a TODO or a todo export.
-- [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO has a stable non-empty `group`, and matching is confirmed via `npm run show:matching` for addressable competencies.
+- [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO references a valid authored definition with explicit module strategies, and matching is confirmed via `npm run show:matching` for addressable competencies.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless declared in `equivalentTargets` with a reason.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.

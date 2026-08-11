@@ -1,4 +1,11 @@
-import { CompetencyTarget, GeneratorInput, ImplementationTodo } from "../types/ml-engine.ts";
+import {
+    CompetencyTarget,
+    GeneratorInput,
+    Implementation,
+    ImplementationStrategy,
+    ImplementationTodo,
+    ModuleImplementation
+} from "../types/ml-engine.ts";
 import { labelSetHash } from "./utils.ts";
 
 /**
@@ -18,16 +25,59 @@ export function toTargets(idPrefix: string, builder: DatasetPermutationBuilder, 
     }));
 }
 
-/** Maps a competency builder to a stable implementation package. */
+const IMPLEMENTATION_STRATEGIES = new Set<ImplementationStrategy>(['reuse', 'expand', 'new']);
+
+function normalizeModules(
+    implementationId: string,
+    role: 'generator' | 'view',
+    modules: readonly ModuleImplementation[]
+): ModuleImplementation[] {
+    if (!Array.isArray(modules) || modules.length === 0) {
+        throw new Error(`Implementation "${implementationId}" must declare at least one ${role}.`);
+    }
+
+    const normalized = modules.map(({ module, strategy }) => {
+        const normalizedModule = module.trim();
+        if (normalizedModule === '') {
+            throw new Error(`Implementation "${implementationId}" has an empty ${role} module.`);
+        }
+        if (!IMPLEMENTATION_STRATEGIES.has(strategy)) {
+            throw new Error(
+                `Implementation "${implementationId}" ${role} "${normalizedModule}" has invalid strategy "${strategy}".`
+            );
+        }
+        return { module: normalizedModule, strategy };
+    });
+
+    if (new Set(normalized.map(item => item.module)).size !== normalized.length) {
+        throw new Error(`Implementation "${implementationId}" declares a duplicate ${role} module.`);
+    }
+    return normalized;
+}
+
+/** Defines one reviewed implementation package independently of its target permutations. */
+export function defineImplementation(implementation: Implementation): Implementation {
+    const id = implementation.id.trim();
+    const description = implementation.description.trim();
+    if (id === '') throw new Error('Implementation id must not be empty.');
+    if (description === '') throw new Error(`Implementation "${id}" description must not be empty.`);
+
+    return {
+        id,
+        description,
+        generators: normalizeModules(id, 'generator', implementation.generators),
+        views: normalizeModules(id, 'view', implementation.views)
+    };
+}
+
+/** Maps a competency builder to target TODOs that reference one implementation package. */
 export function toImplementationTodos(
     idPrefix: string,
     builder: DatasetPermutationBuilder,
-    group: string,
+    implementation: Implementation,
     explanation?: string
 ): ImplementationTodo[] {
-    const normalizedGroup = group.trim();
-    if (normalizedGroup === '') throw new Error('Implementation TODO group must not be empty.');
-    return toTargets(idPrefix, builder, explanation).map(target => ({ ...target, group: normalizedGroup }));
+    return toTargets(idPrefix, builder, explanation).map(target => ({ ...target, implementation }));
 }
 
 export default class DatasetPermutationBuilder {

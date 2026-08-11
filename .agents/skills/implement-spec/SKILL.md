@@ -9,15 +9,21 @@ Orchestrate implementing the target gaps in `implementationTodos` for a spec mod
 
 ### Step-by-Step Orchestrator Workflow:
 
-#### Step 1: Inspect & Group `implementationTodos`
+#### Step 1: Inspect `implementationTodos`
 - Run the pre-approved npm script to list all pending implementation gaps:
   ```bash
   npm run show:imp-todos -- --spec=<specModule>
   ```
-- Treat each authored `group` value as the stable implementation package. Work through groups in review order; do not regroup targets ad hoc unless the user approves changing their source `group` values.
+- Treat each referenced implementation definition as the stable package. Work through
+  definitions in review order and preserve their authored module strategies. Do not regroup
+  targets or replace ownership decisions without evidence and user approval.
 
-#### Step 2: Determine Extension vs. Creation Strategy
-For each target group, choose the cleanest implementation path per `IMPL-7` in `docs/implementation-general.md`: extend an existing generator, extend an existing view, and only create a new leaf module when doing so extends the supported ontological space.
+#### Step 2: Execute the Reviewed Module Strategies
+For each implementation definition, use its generator and view roles directly: `reuse` needs
+no module change, `expand` updates the named existing module, and `new` creates the named
+module. Verify the plan still satisfies `IMPL-7` in `docs/implementation-general.md`; if the
+repository has changed enough to invalidate it, stop and request approval before changing the
+authored implementation definition.
 
 #### Step 3: Delegate Module-Level Tasks & Reviews
 Delegate component updates and audits to specialized skills:

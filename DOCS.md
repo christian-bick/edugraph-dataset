@@ -219,7 +219,7 @@ The canonical cache-producing generation wrapper.
 
 ### `src/scripts/show-implementation-todos.ts`
 *   **Execution**: `npm run show:imp-todos -- [--spec=<spec_module>]`
-*   **Function**: Inspects `implementationTodos` across target spec files. Groups missing capabilities by their authored stable `group`, then lists the contained target definitions and missing generator or view functionality.
+*   **Function**: Inspects `implementationTodos` across target spec files. Lists each authored implementation definition, its `reuse`/`expand`/`new` generator and view roles, and the referenced target definitions.
 
 ### `src/scripts/show-ontology-todos.ts`
 *   **Execution**: `npm run show:ont-todos -- [--spec=<spec_module>]`
@@ -375,7 +375,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Skill**: `.agents/skills/spec-from-standard/SKILL.md`
 - **Command**: `/create-spec-from-standard {standardId|gradeFile}`
 - **Pass 1 — review plan**: Reads and quotes the relevant standard leaves, captures `matching-before.json`, and writes a disposition, ownership, and design proposal to `temp/spec-plans/<module>/<gradeFile>/plan.md` using [`docs/target-spec-plan-template.md`](docs/target-spec-plan-template.md). It does not edit `src/spec/` and stops for explicit user approval.
-- **Pass 2 — approved implementation**: Authors the target file, runs target validation, writes `matching-after.json`, `matching-diff.md`, and `target-distinctness.md`, then runs `npm run check -- --spec=<module>`. Implementation gaps carry stable authored `group` strings.
+- **Pass 2 — approved implementation**: Authors the target file, runs target validation, writes `matching-after.json`, `matching-diff.md`, and `target-distinctness.md`, then runs `npm run check -- --spec=<module>`. Implementation gaps reference stable authored definitions that state generator/view ownership and `reuse`/`expand`/`new` strategy.
 - **Boundary**: The skill finishes by presenting the review artifacts and never triggers ontology or implementation follow-up loops automatically.
 
 ### Loop 2: Spec Implementation & Error-Free Generation (`/implement-spec`)

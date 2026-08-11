@@ -67,7 +67,7 @@ describe('standards explorer data views', () => {
             if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
             if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
             return jsonResponse({
-                schema_version: 1,
+                schema_version: 2,
                 channel: 'latest',
                 source_ref: 'v0.11.1-01',
                 source_sha: '5683072165da15c',
@@ -100,7 +100,7 @@ describe('standards explorer data views', () => {
             if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
             if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
             return jsonResponse({
-                schema_version: 1,
+                schema_version: 2,
                 channel: 'preview',
                 source_ref: 'main',
                 source_sha: '07590c32396405e',

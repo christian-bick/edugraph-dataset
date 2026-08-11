@@ -515,26 +515,37 @@ describe('loadTargets', () => {
     it('loads todo and beyond-scope declarations without feeding them to generation', async () => {
         writeFixture('with-dispositions', 'a.ts', `
             export const spec = [];
-            export const implementationTodos = [{ id: 'todo-target', labels: [], group: 'todo-group' }];
+            const implementation = {
+                id: 'todo-package',
+                description: 'Implement the missing path.',
+                generators: [{ module: 'generator', strategy: 'expand' }],
+                views: [{ module: 'view', strategy: 'new' }]
+            };
+            export const implementationTodos = [{ id: 'todo-target', labels: [], implementation }];
             export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x' }];
             export const beyondScope = [{ standardId: 'Y', title: 'y', description: 'y' }];
         `);
 
         const dispositions = await loadSpecTodos('with-dispositions', FIXTURE_ROOT);
         expect(dispositions.implementationTodos).toHaveLength(1);
-        expect(dispositions.implementationTodos[0].group).toBe('todo-group');
+        expect(dispositions.implementationTodos[0].implementation).toEqual({
+            id: 'todo-package',
+            description: 'Implement the missing path.',
+            generators: [{ module: 'generator', strategy: 'expand' }],
+            views: [{ module: 'view', strategy: 'new' }]
+        });
         expect(dispositions.ontologyTodos).toHaveLength(1);
         expect(dispositions.beyondScope).toEqual([
             { standardId: 'Y', title: 'y', description: 'y' }
         ]);
     });
 
-    it('rejects implementation TODOs without a stable group', async () => {
-        writeFixture('ungrouped-todos', 'a.ts', `
+    it('rejects implementation TODOs without an implementation definition', async () => {
+        writeFixture('unassigned-todos', 'a.ts', `
             export const spec = [];
             export const implementationTodos = [{ id: 'todo-target', labels: [] }];
         `);
-        await expect(loadSpecTodos('ungrouped-todos', FIXTURE_ROOT)).rejects.toThrow(/non-empty group/);
+        await expect(loadSpecTodos('unassigned-todos', FIXTURE_ROOT)).rejects.toThrow(/reference an implementation definition/);
     });
 
     it('merges the spec export of every file in a spec directory, in sorted file order', async () => {

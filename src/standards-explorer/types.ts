@@ -59,9 +59,23 @@ export interface StandardsTreeData {
 
 export interface ImplementationTodo {
     id: string;
-    group: string;
     labels: string[];
     explanation: string;
+    implementation: Implementation;
+}
+
+export type ImplementationStrategy = 'reuse' | 'expand' | 'new';
+
+export interface ModuleImplementation {
+    module: string;
+    strategy: ImplementationStrategy;
+}
+
+export interface Implementation {
+    id: string;
+    description: string;
+    generators: ModuleImplementation[];
+    views: ModuleImplementation[];
 }
 
 export interface NamedTodo {
@@ -110,6 +124,7 @@ export interface BacklogTask {
     title: string;
     description: string;
     standards: string[];
+    implementation?: Implementation;
 }
 
 export interface CoverageData {
