@@ -484,10 +484,12 @@ const rectangularSquareCountBuilder = new DatasetPermutationBuilder()
 const equalShareShapeEquivalenceBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeEquivalenceRelations,
-        Area.Circle,
-        Area.Rectangle,
         Scope.EqualShares,
         Ability.ConceptDerivation
+    ])
+    .applyLabelVariants([
+        [Area.Circle],
+        [Area.Rectangle]
     ]);
 
 export const spec: CompetencyTarget[] = [
@@ -721,18 +723,6 @@ export const ontologyTodos: OntologyTodo[] = [{
     standardId: '2.MD.D.10',
     title: 'Solve problems from a bar graph',
     description: 'Add the bar-graph representation distinction required before expressing the operation and interpretation target.'
-}, {
-    standardId: '2.G.A.3',
-    title: 'Partition into exactly two, three, or four equal shares',
-    description: 'Add orthogonal exact-share-count distinctions such as TwoEqualShares, ThreeEqualShares, and FourEqualShares, applied across circles and rectangles.'
-}, {
-    standardId: '2.G.A.3',
-    title: 'Name halves, thirds, and fourths',
-    description: 'Add exact share-count or unit-fraction-value distinctions that make half, third, and fourth vocabulary independently expressible.'
-}, {
-    standardId: '2.G.A.3',
-    title: 'Describe a whole by its exact equal-share count',
-    description: 'Reuse the exact share-count distinctions with ConceptComposition so Grade 2 overlaps Grade 1 on two and four shares while adding a distinct three-thirds permutation.'
 }];
 
 export const beyondScope: BeyondScopeEntry[] = [{
