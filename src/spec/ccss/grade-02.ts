@@ -65,6 +65,52 @@ const fluencyWithin20Builder = new DatasetPermutationBuilder()
         [Area.Subtraction]
     ]);
 
+// --- 2.OA.C.3: Classify a physical group as odd or even ---
+const objectGroupParityBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.OddAndEvenGroups,
+        Scope.PhysicalNumbers,
+        Scope.NumbersSmaller20,
+        Ability.ConceptClassification
+    ])
+    .applyLabelVariants([
+        [Scope.EvenNumbers],
+        [Scope.OddNumbers]
+    ]);
+
+// --- 2.OA.C.3: Express an even number as two equal addends ---
+const evenEqualAddendsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Addition,
+        Area.Equation,
+        Area.IteratedOperation,
+        Scope.EvenNumbers,
+        Scope.ExpressionOnOneSide,
+        Scope.TwoOperands,
+        Ability.Formalization
+    ]);
+
+// --- 2.OA.C.4: Add objects in a rectangular number array ---
+const numberArrayTotalBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Addition,
+        Scope.NumberArray,
+        Scope.BoxArrangement,
+        Ability.ProcedureExecution
+    ]);
+
+// --- 2.OA.C.4: Express an array total as equal addends ---
+const numberArrayEquationBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Addition,
+        Area.Equation,
+        Area.IteratedOperation,
+        Scope.NumberArray,
+        Scope.BoxArrangement,
+        Scope.ExpressionOnOneSide,
+        Ability.Formalization
+    ]);
+
 // ==========================================
 // 2. Number and Operations in Base Ten (2.NBT)
 // ==========================================
@@ -198,6 +244,20 @@ const twoThreeAddendsBuilder = new DatasetPermutationBuilder()
         [Scope.ThreeOperands]
     ]);
 
+// --- 2.NBT.B.6: Add four two-digit numbers ---
+const fourAddendsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Addition,
+        Scope.FourOperands,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersLarger10,
+        Scope.NumbersSmaller100,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Ability.ProcedureExecution
+    ]);
+
 // --- 2.NBT.B.7: Written addition and subtraction within 1000 ---
 const writtenAddSubtractBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -305,6 +365,14 @@ const useLengthToolBuilder = new DatasetPermutationBuilder()
         [Scope.Tapemeter]
     ]);
 
+// --- 2.MD.A.2: Relate measurement value to unit size ---
+const unitScaleRelationBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.UnitScaleRelation,
+        Scope.LengthMeasurement,
+        Ability.ConceptDerivation
+    ]);
+
 // --- 2.MD.A.3: Estimate metric lengths ---
 const estimateMetricLengthBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -377,6 +445,10 @@ const nearestFiveMinuteTimeBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Ability.ProcedureExecution],
         [Ability.VisualArticulation]
+    ])
+    .applyLabelVariants([
+        [Scope.AnteMeridiem],
+        [Scope.PostMeridiem]
     ]);
 
 // --- 2.MD.C.8: Generic currency word problems ---
@@ -391,9 +463,15 @@ const currencyWordProblemsBuilder = new DatasetPermutationBuilder()
         [Area.Subtraction]
     ])
     .applyLabelVariants([
-        [Scope.Coins, Scope.MinorDenomination],
+        [Scope.Coins, Scope.QuarterDenomination],
+        [Scope.Coins, Scope.TenthDenomination],
+        [Scope.Coins, Scope.TwentiethDenomination],
+        [Scope.Coins, Scope.HundredthDenomination],
         [Scope.Banknotes, Scope.MajorDenomination],
-        [Scope.Coins, Scope.MinorDenomination, Scope.Banknotes, Scope.MajorDenomination]
+        [Scope.Coins, Scope.QuarterDenomination, Scope.Banknotes, Scope.MajorDenomination],
+        [Scope.Coins, Scope.TenthDenomination, Scope.Banknotes, Scope.MajorDenomination],
+        [Scope.Coins, Scope.TwentiethDenomination, Scope.Banknotes, Scope.MajorDenomination],
+        [Scope.Coins, Scope.HundredthDenomination, Scope.Banknotes, Scope.MajorDenomination]
     ]);
 
 // --- 2.MD.D.9: Generate length-measurement data ---
@@ -404,6 +482,53 @@ const measurementDataBuilder = new DatasetPermutationBuilder()
         Scope.LengthMeasurement,
         Scope.IntegerNumbers,
         Ability.ProcedureExecution
+    ]);
+
+// --- 2.MD.D.9: Represent measurements with a line plot ---
+const measurementLinePlotBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.MeasuringObjects,
+        Scope.LengthMeasurement,
+        Scope.IntegerNumbers,
+        Scope.LinePlot,
+        Scope.StepsOf1,
+        Ability.VisualArticulation
+    ]);
+
+// --- 2.MD.D.10: Draw a single-unit picture graph ---
+const pictureGraphBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Scope.IntegerNumbers,
+        Scope.PictureGraph,
+        Scope.StepsOf1,
+        Ability.VisualArticulation
+    ]);
+
+// --- 2.MD.D.10: Draw a single-unit bar graph ---
+const barGraphBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Scope.IntegerNumbers,
+        Scope.BarGraph,
+        Scope.StepsOf1,
+        Ability.VisualArticulation
+    ]);
+
+// --- 2.MD.D.10: Solve arithmetic problems from a bar graph ---
+const barGraphProblemsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Scope.IntegerNumbers,
+        Scope.BarGraph,
+        Scope.StepsOf1,
+        Scope.TwoOperands,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Area.Addition],
+        [Area.Subtraction]
     ]);
 
 // ==========================================
@@ -515,6 +640,27 @@ const wordProblemsWithin100Implementation = defineImplementation({
     views: [{ module: 'operations-word-problem', strategy: 'expand' }]
 });
 
+const objectGroupParityImplementation = defineImplementation({
+    id: 'object-group-parity',
+    description: 'Add paired-object parity classification for physical groups through 20.',
+    generators: [{ module: 'counting-basic', strategy: 'expand' }],
+    views: [{ module: 'counting-objects-parity', strategy: 'new' }]
+});
+
+const equalAddendEquationsImplementation = defineImplementation({
+    id: 'equal-addend-equations',
+    description: 'Extend pair arithmetic to generate and render equations with equal addend values.',
+    generators: [{ module: 'arithmetic-ops-pairs', strategy: 'expand' }],
+    views: [{ module: 'operations-boxes', strategy: 'expand' }]
+});
+
+const numberArraysImplementation = defineImplementation({
+    id: 'number-arrays',
+    description: 'Add rectangular number arrays with visible totals and equal-addend equations.',
+    generators: [{ module: 'number-array', strategy: 'new' }],
+    views: [{ module: 'operations-number-array', strategy: 'new' }]
+});
+
 const placeValueHundredsImplementation = defineImplementation({
     id: 'place-value-hundreds',
     description: 'Extend place-value bundles through hundreds.',
@@ -547,6 +693,16 @@ const expandedPlaceValueNotationImplementation = defineImplementation({
     views: [{ module: 'place-value-expanded-form', strategy: 'new' }]
 });
 
+const fourAddendArithmeticImplementation = defineImplementation({
+    id: 'four-addend-arithmetic',
+    description: 'Add four-operand addition and adopt it in the existing arithmetic layouts.',
+    generators: [{ module: 'arithmetic-ops-four', strategy: 'new' }],
+    views: [
+        { module: 'operations-boxes', strategy: 'expand' },
+        { module: 'operations-vertical', strategy: 'expand' }
+    ]
+});
+
 const multiDigitPlaceValueArithmeticImplementation = defineImplementation({
     id: 'multi-digit-place-value-arithmetic',
     description: 'Add concrete regrouping, written-method mapping, and strategy explanations.',
@@ -575,6 +731,13 @@ const standardLengthToolsImplementation = defineImplementation({
         { module: 'measure-select-tool', strategy: 'new' },
         { module: 'measure-length-integer', strategy: 'expand' }
     ]
+});
+
+const measurementUnitScaleImplementation = defineImplementation({
+    id: 'measurement-unit-scale-relation',
+    description: 'Add paired measurements that expose the inverse relationship between unit size and measured value.',
+    generators: [{ module: 'measurement-unit-scale', strategy: 'new' }],
+    views: [{ module: 'measure-unit-scale-relation', strategy: 'new' }]
 });
 
 const lengthEstimationImplementation = defineImplementation({
@@ -610,11 +773,11 @@ const numberLineArithmeticImplementation = defineImplementation({
 
 const timeFiveMinuteImplementation = defineImplementation({
     id: 'time-five-minute',
-    description: 'Extend time generation to five-minute intervals for existing clock layouts.',
+    description: 'Extend time generation and clock layouts to five-minute intervals with explicit a.m./p.m. periods.',
     generators: [{ module: 'time', strategy: 'expand' }],
     views: [
-        { module: 'time-analog', strategy: 'reuse' },
-        { module: 'time-digital', strategy: 'reuse' }
+        { module: 'time-analog', strategy: 'expand' },
+        { module: 'time-digital', strategy: 'expand' }
     ]
 });
 
@@ -627,9 +790,22 @@ const usMoneyWordProblemsImplementation = defineImplementation({
 
 const measurementDataImplementation = defineImplementation({
     id: 'measurement-data',
-    description: 'Add generation and tabular presentation of whole-unit measurement data.',
+    description: 'Add generation and tabular or line-plot presentation of whole-unit measurement data.',
     generators: [{ module: 'measurement-data', strategy: 'new' }],
-    views: [{ module: 'measurement-data-table', strategy: 'new' }]
+    views: [
+        { module: 'measurement-data-table', strategy: 'new' },
+        { module: 'measurement-line-plot', strategy: 'new' }
+    ]
+});
+
+const statisticalGraphsImplementation = defineImplementation({
+    id: 'statistical-graphs',
+    description: 'Add single-unit picture and bar graphs, including arithmetic interpretation of bar-graph data.',
+    generators: [{ module: 'statistical-graphs', strategy: 'new' }],
+    views: [
+        { module: 'data-picture-graph', strategy: 'new' },
+        { module: 'data-bar-graph', strategy: 'new' }
+    ]
 });
 
 const shapeIdentityExtendedImplementation = defineImplementation({
@@ -680,6 +856,30 @@ export const implementationTodos: ImplementationTodo[] = [
         wordProblemsWithin100Implementation,
         'Render genuinely connected two-step stories and equations, including mixed-operation cases, with values within 100.'
     ),
+    ...toImplementationTodos(
+        '2.OA.C.3-object-group-parity',
+        objectGroupParityBuilder,
+        objectGroupParityImplementation,
+        'Show a physical group through 20 paired or grouped so its odd/even classification is visibly justified.'
+    ),
+    ...toImplementationTodos(
+        '2.OA.C.3-even-equal-addends',
+        evenEqualAddendsBuilder,
+        equalAddendEquationsImplementation,
+        'Show an even value equated to an addition expression whose two explicit addends have the same value.'
+    ),
+    ...toImplementationTodos(
+        '2.OA.C.4-number-array-total',
+        numberArrayTotalBuilder,
+        numberArraysImplementation,
+        'Show objects or cells in a rectangular number array and an explicit addition-derived total.'
+    ),
+    ...toImplementationTodos(
+        '2.OA.C.4-number-array-equation',
+        numberArrayEquationBuilder,
+        numberArraysImplementation,
+        'Show the rectangular number array together with an equation expressing its total as equal addends.'
+    ),
     // 2.NBT - Number and Operations in Base Ten
     ...toImplementationTodos(
         '2.NBT.A.1a-ten-tens-make-hundred',
@@ -718,6 +918,12 @@ export const implementationTodos: ImplementationTodo[] = [
         'Decompose a numeral into a visible sum of its non-zero hundreds, tens, and ones values.'
     ),
     ...toImplementationTodos(
+        '2.NBT.B.6-four-addends',
+        fourAddendsBuilder,
+        fourAddendArithmeticImplementation,
+        'Show four explicit two-digit addends and their sum in an inspectable arithmetic layout.'
+    ),
+    ...toImplementationTodos(
         '2.NBT.B.7-concrete-regrouping',
         concreteRegroupingBuilder,
         multiDigitPlaceValueArithmeticImplementation,
@@ -753,6 +959,12 @@ export const implementationTodos: ImplementationTodo[] = [
         useLengthToolBuilder,
         standardLengthToolsImplementation,
         'Align the selected tool to an object and show a readable scale, unit, and measured answer.'
+    ),
+    ...toImplementationTodos(
+        '2.MD.A.2-unit-scale-relation',
+        unitScaleRelationBuilder,
+        measurementUnitScaleImplementation,
+        'Measure the same length with differently sized units and state the inverse relationship between unit size and measured value.'
     ),
     ...toImplementationTodos(
         '2.MD.A.3-estimate-metric-lengths',
@@ -802,6 +1014,30 @@ export const implementationTodos: ImplementationTodo[] = [
         measurementDataImplementation,
         'Show several whole-unit length measurements and the collected data list.'
     ),
+    ...toImplementationTodos(
+        '2.MD.D.9-measurement-line-plot',
+        measurementLinePlotBuilder,
+        measurementDataImplementation,
+        'Plot the collected whole-unit measurements as frequency marks on a visibly single-unit numerical scale.'
+    ),
+    ...toImplementationTodos(
+        '2.MD.D.10-picture-graph',
+        pictureGraphBuilder,
+        statisticalGraphsImplementation,
+        'Draw categorical data as repeated pictures or symbols with a one-unit key.'
+    ),
+    ...toImplementationTodos(
+        '2.MD.D.10-bar-graph',
+        barGraphBuilder,
+        statisticalGraphsImplementation,
+        'Draw categorical data as bars against a visibly single-unit numerical scale.'
+    ),
+    ...toImplementationTodos(
+        '2.MD.D.10-bar-graph-problems',
+        barGraphProblemsBuilder,
+        statisticalGraphsImplementation,
+        'Show a bar graph together with a put-together, take-apart, or comparison computation whose values and answer agree with the bars.'
+    ),
     // 2.G - Geometry
     ...toImplementationTodos(
         '2.G.A.1-identify-additional-shapes',
@@ -841,51 +1077,7 @@ export const implementationTodos: ImplementationTodo[] = [
     )
 ];
 
-export const ontologyTodos: OntologyTodo[] = [{
-    standardId: '2.OA.C.3',
-    title: 'Classify object-group parity',
-    description: 'Broaden Area.OddsAndEvens from a final-digit divisibility shortcut to the general study, understanding, and application of integer parity. Preserve the shortcut as a narrower method if needed. The eventual target combines OddsAndEvens, EvenNumbers or OddNumbers, PhysicalNumbers, NumbersSmaller20, and ConceptClassification; pairing is visible evidence, while StepsOf2 applies only to an explicit counting-by-twos realization.'
-}, {
-    standardId: '2.OA.C.3',
-    title: 'Express an even number as two equal addends',
-    description: 'Add domain-neutral equation and relation-form distinctions plus a distinction for equal operand values. The eventual target combines Equation, ValueExpressionRelation, Addition, TwoOperands, EqualOperandValues, and EvenNumbers.'
-}, {
-    standardId: '2.OA.C.4',
-    title: 'Add objects in a rectangular array',
-    description: 'Add NumberArray under VisualNumbers as a sibling of TenFrame, integrating BoxArrangement so a number-representing array is distinguishable from a generic spatial arrangement.'
-}, {
-    standardId: '2.OA.C.4',
-    title: 'Express an array total as equal addends',
-    description: 'Combine NumberArray with the equation, value-expression relation, and equal-operand-value distinctions. BoxArrangement supplies the row and column layout through the array representation.'
-}, {
-    standardId: '2.NBT.B.6',
-    title: 'Add four two-digit numbers',
-    description: 'Add FourOperands to the operand-cardinality branch, which currently stops at ThreeOperands.'
-}, {
-    standardId: '2.MD.A.2',
-    title: 'Relate measurement to unit size',
-    description: 'Add a unit-size or comparative-measurement relation that can require two measurements of one object using differently sized units.'
-}, {
-    standardId: '2.MD.C.7',
-    title: 'Use a.m. and p.m.',
-    description: 'Add a day-period or meridiem family under TimeAbstraction with mutually exclusive ante-meridiem and post-meridiem children, combined explicitly with clock scopes only when required.'
-}, {
-    standardId: '2.MD.C.8',
-    title: 'Use quarter, dime, nickel, and penny values',
-    description: 'Add abstract minor-denomination ratio scopes for one quarter, one tenth, one twentieth, and one hundredth of the major denomination. Combine them with Dollar and Coins without adding US-specific coin identities.'
-}, {
-    standardId: '2.MD.D.9',
-    title: 'Represent measurements with a line plot',
-    description: 'Add LinePlot below a new StatisticalRepresentation family within RepresentationalScope. It is distinct from coordinate-plane LineGraphing.'
-}, {
-    standardId: '2.MD.D.10',
-    title: 'Draw picture and bar graphs',
-    description: 'Add PictureGraph and BarGraph under StatisticalRepresentation, plus an orthogonal single-unit-scale distinction if graph scale must be independently permuted.'
-}, {
-    standardId: '2.MD.D.10',
-    title: 'Solve problems from a bar graph',
-    description: 'Add the bar-graph representation distinction required before expressing the operation and interpretation target.'
-}];
+export const ontologyTodos: OntologyTodo[] = [];
 
 export const beyondScope: BeyondScopeEntry[] = [{
     standardId: '2.OA.B.2',
