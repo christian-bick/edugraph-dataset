@@ -74,25 +74,33 @@ Note the relative import depth of any `lib`/`helpers` import must match the sub-
 level the module actually sits at ([IMPL-G2](implementation-generator.md#impl-g2--validate-configuration-strictly),
 [IMPL-V2](implementation-view.md#impl-v2--validate-the-payload-strictly)).
 
-### IMPL-7 — Extend before you create; create only to extend the ontological space
+### IMPL-7 — Extend before you create; extend only when changes are surgical, otherwise create
 
 Given a gap to close, prefer in this order:
 
-1. **Extend an existing generator** — add parameters to the `spec.ts` schema and handling in
-   `generator.ts`. Keep problem payload contracts stable where possible
+1. **Extend an existing generator** when the capability remains in the same task family and
+   preserves backward compatibility of its payload. Add the required parameters to the
+   `spec.ts` schema and handling in `generator.ts`
    ([IMPL-G6](implementation-generator.md#impl-g6--a-payload-contract-change-is-a-two-module-change)).
-2. **Extend an existing view** — add layout properties to the `spec.ts` schema and
-   `view.tsx`, and declare physical capacity limits in `rejectedLabels`
-   ([SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting)). Keep
-   existing renderings stable where possible.
-3. **Create a new leaf module** — when the new capability genuinely extends the supported
-   space or crosses the stable payload boundary described by
+2. **Extend an existing view** when its existing visual layout can adopt the capability
+   through modest, configurable layout changes. Add the layout properties to its `spec.ts`
+   schema and `view.tsx`, and declare physical capacity limits in `rejectedLabels`
+   ([SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting)).
+3. **Always create a new generator or view** when the capability genuinely expands the
+   supported ontological space into new and unrelated families, crosses the stable payload
+   boundary described by
    [IMPL-G7](implementation-generator.md#impl-g7--extend-capabilities-within-a-stable-payload-contract),
-   not merely to avoid touching an existing module.
+   or would result in large independent implementation branches.
+
+An extension is surgical when it adds bounded configuration and handling within the
+module's existing responsibility while keeping existing payload consumers and renderings
+compatible. Large independent branches are separate module responsibilities hidden inside
+one implementation and should be split accordingly.
 
 **Why:** every new module multiplies the matching surface, and every new view adds a visual
-contract that must be maintained. A new module that renders labels an existing module
-already covers competes with it for the same targets.
+contract that must be maintained. Conversely, forcing an unrelated task family, incompatible
+payload, or effectively separate implementation into an existing module obscures ownership
+and makes that module harder to reason about and adopt safely.
 
 ---
 
@@ -104,4 +112,4 @@ already covers competes with it for the same targets.
 - [ ] **IMPL-4** — all files of the module's inventory exist.
 - [ ] **IMPL-5** — shared code sits at the correct level: category `helpers.ts` for siblings, `src/visuals/components/` or `src/visuals/helpers/` for cross-category reuse.
 - [ ] **IMPL-6** — only genuinely missing roles were scaffolded; a new renderer is linked from `src/index.html`; relative import depths match.
-- [ ] **IMPL-7** — a newly created module genuinely extends the supported ontological space; otherwise an existing module was extended instead.
+- [ ] **IMPL-7** — an extension stays within the same task family, preserves payload compatibility, and requires only surgical configurable changes; unrelated ontology families, stable payload-boundary crossings, and large independent code branches use a new module.
