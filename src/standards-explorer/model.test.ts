@@ -3,6 +3,7 @@ import {
     calculateStats,
     filterTasks,
     findReleasedSamples,
+    findReleasedSamplesForLabelSets,
     getClusters,
     getCoverageKind,
     getDomains,
@@ -181,5 +182,29 @@ describe('standards explorer model', () => {
         expect(releasedSampleUrl(index, samples[0])).toBe(
             'https://huggingface.co/datasets/owner/dataset/resolve/v1/train/module/image.png',
         );
+    });
+
+    it('aggregates label-set samples in order without duplicate released files', () => {
+        const first = {
+            split: 'train' as const,
+            file_name: 'first.png',
+            generator: 'generator',
+            view: 'view',
+            mode: 'question' as const,
+        };
+        const second = { ...first, split: 'validation' as const, file_name: 'second.png' };
+        const index: AssetIndex = {
+            schema_version: 1,
+            generated_at: 'fixed',
+            dataset: { repository: 'owner/dataset', revision: 'v1' },
+            label_sets: [
+                { requested_labels: ['First'], samples: [first] },
+                { requested_labels: ['Second'], samples: [first, second] },
+            ],
+        };
+
+        expect(findReleasedSamplesForLabelSets(index, [['First'], ['Second']]))
+            .toEqual([first, second]);
+        expect(findReleasedSamplesForLabelSets(null, [['First']])).toEqual([]);
     });
 });

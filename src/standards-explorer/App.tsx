@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
     calculateStats,
     filterTasks,
     findReleasedSamples,
+    findReleasedSamplesForLabelSets,
     getClusters,
     getCoverageKind,
     getDomains,
@@ -562,14 +564,25 @@ const getConceptBadgeStyle = (coverage: StandardCoverage, label: string) => {
     return 'bg-slate-900 text-slate-200 border-slate-700';
 };
 
-function ConceptBadges({ coverage, labels, emptyText }: { coverage: StandardCoverage; labels: string[]; emptyText: string }) {
-    if (labels.length === 0) return <span className="text-[10px] text-slate-500 italic">{emptyText}</span>;
+function ConceptBadges({
+    coverage,
+    labels,
+    emptyText,
+    size = 'default',
+}: {
+    coverage: StandardCoverage;
+    labels: string[];
+    emptyText: string;
+    size?: 'default' | 'large';
+}) {
+    const textSize = size === 'large' ? 'text-[15px]' : 'text-[10px]';
+    if (labels.length === 0) return <span className={`${textSize} text-slate-500 italic`}>{emptyText}</span>;
     return <>
         {labels.map(label => (
             <span
                 key={label}
                 title={label}
-                className={`px-2 py-1 rounded-md border font-mono font-semibold text-[10px] leading-none inline-block ${getConceptBadgeStyle(coverage, label)}`}
+                className={`px-2 py-1 rounded-md border font-mono font-semibold ${textSize} leading-none inline-block ${getConceptBadgeStyle(coverage, label)}`}
             >
                 {label.split('/').at(-1)}
             </span>
@@ -613,85 +626,172 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
     ) : null;
 }
 
-function BreakdownHeading({ label, count }: { label: string; count: number }) {
+function BreakdownHeading({ label }: { label: string }) {
     return (
-        <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider flex items-center justify-between">
-            <span>{label}</span>
-            <span className="min-w-5 px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 text-center rounded-md">{count}</span>
-        </div>
+        <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">{label}</div>
     );
 }
 
-function ReleasedSampleThumbnail({ index, sample }: { index: AssetIndex; sample: ReleasedAssetSample }) {
-    const [failed, setFailed] = useState(false);
-    const url = releasedSampleUrl(index, sample);
-    const modeLabel = sample.mode === 'question' ? 'Question' : 'Solution';
+function ReleasedSamplePopover({
+    index,
+    standard,
+    coverage,
+    labels,
+    samples,
+    selectedIndex,
+    onSelect,
+    onClose,
+}: {
+    index: AssetIndex;
+    standard: StandardNode;
+    coverage: StandardCoverage;
+    labels: string[];
+    samples: ReleasedAssetSample[];
+    selectedIndex: number;
+    onSelect: (index: number) => void;
+    onClose: () => void;
+}) {
+    const sample = samples[selectedIndex];
+    const hasPrevious = selectedIndex > 0;
+    const hasNext = selectedIndex < samples.length - 1;
+
+    useEffect(() => {
+        const explorerRoot = document.getElementById('standards-explorer-root');
+        const wasInert = explorerRoot?.inert ?? false;
+        const previousOverflow = document.body.style.overflow;
+        if (explorerRoot) explorerRoot.inert = true;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            if (explorerRoot) explorerRoot.inert = wasInert;
+            document.body.style.overflow = previousOverflow;
+        };
+    }, []);
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onClose();
+            if (event.key === 'ArrowLeft' && hasPrevious) onSelect(selectedIndex - 1);
+            if (event.key === 'ArrowRight' && hasNext) onSelect(selectedIndex + 1);
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [hasNext, hasPrevious, onClose, onSelect, selectedIndex]);
+
+    return createPortal(
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md sm:p-8"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Released sample preview"
+            onClick={onClose}
+        >
+            <div
+                className="relative flex h-[76vh] min-h-96 w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl"
+                onClick={event => event.stopPropagation()}
+            >
+                <header className="w-full shrink-0 border-b border-black/10 bg-white/60 px-6 py-5 pr-16 text-left">
+                    <h2 className="text-base font-semibold text-[#0f172a]">{standard.id}</h2>
+                    <p className="mt-1 text-sm leading-relaxed text-[#475569]">{standard.description}</p>
+                </header>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    autoFocus
+                    className="absolute right-4 top-4 z-10 flex size-8 items-center justify-center bg-transparent text-lg text-[#475569] transition-transform hover:text-[#0f172a] focus:outline-none focus-visible:scale-125 focus-visible:text-[#0f172a]"
+                    aria-label="Close image preview"
+                >
+                    <Icon name="fa-xmark" />
+                </button>
+                <div className="relative flex min-h-0 w-full flex-1 items-center justify-center px-14 py-6 sm:px-20">
+                    <button
+                        type="button"
+                        disabled={!hasPrevious}
+                        onClick={() => onSelect(selectedIndex - 1)}
+                        className="absolute left-4 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black text-white shadow-lg hover:bg-[#27272a] focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default disabled:opacity-30 disabled:hover:bg-black sm:left-5"
+                        aria-label="Previous image"
+                    >
+                        <Icon name="fa-chevron-left" />
+                    </button>
+                    <div className="flex size-full items-center justify-center p-2 sm:p-4">
+                        <img
+                            src={releasedSampleUrl(index, sample)}
+                            alt={`${sample.mode} sample rendered with ${sample.view}`}
+                            className="block max-h-full max-w-full rounded-lg bg-white object-contain shadow-xl"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        disabled={!hasNext}
+                        onClick={() => onSelect(selectedIndex + 1)}
+                        className="absolute right-4 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black text-white shadow-lg hover:bg-[#27272a] focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default disabled:opacity-30 disabled:hover:bg-black sm:right-5"
+                        aria-label="Next image"
+                    >
+                        <Icon name="fa-chevron-right" />
+                    </button>
+                </div>
+                <footer className="flex w-full shrink-0 flex-wrap gap-2 border-t border-black/10 bg-white/60 px-6 py-4 text-left">
+                    <ConceptBadges coverage={coverage} labels={labels} emptyText="No labels" size="large" />
+                </footer>
+            </div>
+        </div>,
+        document.body,
+    );
+}
+
+function ReleasedSampleLauncher({
+    index,
+    standard,
+    coverage,
+    labels,
+    samples,
+    ariaLabel,
+}: {
+    index: AssetIndex;
+    standard: StandardNode;
+    coverage: StandardCoverage;
+    labels: string[];
+    samples: ReleasedAssetSample[];
+    ariaLabel: string;
+}) {
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+    if (samples.length === 0) return null;
 
     return (
-        <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            className="block rounded-md border border-slate-800 bg-white overflow-hidden hover:border-slate-500 transition-colors"
-            title={`Open ${modeLabel.toLowerCase()} sample from ${sample.view}`}
-        >
-            {failed ? (
-                <div className="h-24 flex items-center justify-center px-3 text-center text-[10px] text-slate-500">
-                    Image unavailable — open the released file
-                </div>
-            ) : (
-                <img
-                    src={url}
-                    alt={`${modeLabel} sample rendered with ${sample.view}`}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-24 object-contain bg-white"
-                    onError={() => setFailed(true)}
+        <>
+            <button
+                type="button"
+                onClick={() => setSelectedIndex(0)}
+                className="flex size-8 shrink-0 self-center items-center justify-center rounded-md border border-[#cbd5e1] bg-white text-[#475569] transition-colors hover:border-[#94a3b8] hover:text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-sky-500"
+                aria-label={ariaLabel}
+                title={ariaLabel}
+            >
+                <Icon name="fa-image" />
+            </button>
+            {selectedIndex !== null && (
+                <ReleasedSamplePopover
+                    index={index}
+                    standard={standard}
+                    coverage={coverage}
+                    labels={labels}
+                    samples={samples}
+                    selectedIndex={selectedIndex}
+                    onSelect={setSelectedIndex}
+                    onClose={() => setSelectedIndex(null)}
                 />
             )}
-            <div className="flex items-center justify-between gap-2 px-2 py-1.5 border-t border-slate-800 bg-slate-950/70">
-                <span className={`px-1.5 py-0.5 rounded border text-[9px] font-semibold ${
-                    sample.mode === 'question'
-                        ? 'bg-sky-50 text-sky-800 border-sky-200'
-                        : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                }`}>{modeLabel}</span>
-                <span className="truncate font-mono text-[9px] text-slate-500" title={sample.view}>{sample.view}</span>
-            </div>
-        </a>
+        </>
     );
 }
 
-function ReleasedSampleGallery({ index, labels }: { index: AssetIndex; labels: string[] }) {
-    const samples = findReleasedSamples(index, labels);
-    return (
-        <div className="mt-2 pt-2 border-t border-slate-800/60">
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-                <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-500">Released samples</span>
-                <span className="text-[9px] font-mono text-slate-500">{index.dataset.revision}</span>
-            </div>
-            {samples.length === 0 ? (
-                <div className="text-[10px] text-slate-500 italic">No released samples yet</div>
-            ) : (
-                <div className="grid grid-cols-1 gap-2 max-h-72 overflow-y-auto pr-1">
-                    {samples.map(sample => (
-                        <ReleasedSampleThumbnail
-                            key={`${sample.split}/${sample.file_name}`}
-                            index={index}
-                            sample={sample}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
-function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
+function CompetencyBreakdown({ coverage, standard }: { coverage: StandardCoverage; standard: StandardNode }) {
     const assetIndex = useExplorerStore(state => state.assetIndex);
     const assetIndexLoading = useExplorerStore(state => state.assetIndexLoading);
     const assetIndexError = useExplorerStore(state => state.assetIndexError);
     const labelSets = getLabelSets(coverage);
     const intersection = intersectLabels(labelSets);
+    const commonSamples = findReleasedSamplesForLabelSets(assetIndex, coverage.competencies);
     const permutationCount = coverage.competencies.length + coverage.implementation_todos.length;
     const hasContent = labelSets.length > 0;
 
@@ -701,23 +801,42 @@ function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
         <div className="space-y-3 pt-3 border-t border-slate-800/80 mt-1">
             {labelSets.length > 0 && (
                 <div className="space-y-1.5">
-                    <BreakdownHeading label="Common Labels" count={intersection.length} />
-                    <div className="p-2 rounded-md bg-slate-950/80 border border-slate-800">
-                        <div className="flex flex-wrap gap-1.5">
+                    <BreakdownHeading label="Common Labels" />
+                    <div className="flex items-stretch gap-2">
+                        <div className="flex min-w-0 flex-1 flex-wrap gap-1.5 rounded-md border border-slate-800 bg-slate-950/80 p-2">
                             <ConceptBadges coverage={coverage} labels={intersection} emptyText="No labels shared by every permutation" />
                         </div>
+                        {assetIndex && (
+                            <ReleasedSampleLauncher
+                                index={assetIndex}
+                                standard={standard}
+                                coverage={coverage}
+                                labels={intersection}
+                                samples={commonSamples}
+                                ariaLabel="Preview released samples for common labels"
+                            />
+                        )}
                     </div>
                 </div>
             )}
             {permutationCount > 0 && (
                 <div className="space-y-1.5">
-                    <BreakdownHeading label="Label Permutations" count={permutationCount} />
+                    <BreakdownHeading label="Label Permutations" />
                     {coverage.competencies.map((permutation, index) => (
-                        <div key={`competency-${index}`} className="p-2 rounded-md bg-slate-950/60 border border-slate-800/60">
-                            <div className="flex flex-wrap gap-1.5">
+                        <div key={`competency-${index}`} className="flex items-stretch gap-2">
+                            <div className="flex min-w-0 flex-1 flex-wrap gap-1.5 rounded-md border border-slate-800/60 bg-slate-950/60 p-2">
                                 <ConceptBadges coverage={coverage} labels={permutation.filter(label => !intersection.includes(label))} emptyText="Only common labels" />
                             </div>
-                            {assetIndex && <ReleasedSampleGallery index={assetIndex} labels={permutation} />}
+                            {assetIndex && (
+                                <ReleasedSampleLauncher
+                                    index={assetIndex}
+                                    standard={standard}
+                                    coverage={coverage}
+                                    labels={permutation}
+                                    samples={findReleasedSamples(assetIndex, permutation)}
+                                    ariaLabel={`Preview released samples for permutation ${index + 1}`}
+                                />
+                            )}
                         </div>
                     ))}
                     {coverage.implementation_todos.map(todo => (
@@ -754,12 +873,12 @@ function StandardDetails() {
                     {standard?.description ?? 'Select a standard from the list to display details.'}
                 </p>
             </div>
-            {standard && coverage && <MappingDetails coverage={coverage} />}
+            {standard && coverage && <MappingDetails coverage={coverage} standard={standard} />}
         </div>
     );
 }
 
-function MappingDetails({ coverage }: { coverage: StandardCoverage }) {
+function MappingDetails({ coverage, standard }: { coverage: StandardCoverage; standard: StandardNode }) {
     const kind = getCoverageKind(coverage);
     const style = coverageStyles[kind];
     const showModule = (kind === 'partial' || kind === 'covered') && coverage.generator_module;
@@ -776,7 +895,7 @@ function MappingDetails({ coverage }: { coverage: StandardCoverage }) {
                 )}
             </div>
             <MappingExplanation coverage={coverage} />
-            <CompetencyBreakdown coverage={coverage} />
+            <CompetencyBreakdown coverage={coverage} standard={standard} />
         </div>
     );
 }

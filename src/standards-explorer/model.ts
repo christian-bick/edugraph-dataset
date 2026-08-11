@@ -125,6 +125,20 @@ export const findReleasedSamples = (
     return assetIndexSampleMap(index).get(requestedLabelKey(labels))?.samples ?? [];
 };
 
+export const findReleasedSamplesForLabelSets = (
+    index: AssetIndex | null,
+    labelSets: readonly (readonly string[])[],
+): ReleasedAssetSample[] => {
+    if (!index) return [];
+    const groups = assetIndexSampleMap(index);
+    const samples = labelSets.flatMap(labels =>
+        groups.get(requestedLabelKey(labels))?.samples ?? []);
+    return [...new Map(samples.map(sample => [
+        `${sample.split}\0${sample.file_name}`,
+        sample,
+    ])).values()];
+};
+
 export const releasedSampleUrl = (
     index: AssetIndex,
     sample: ReleasedAssetSample,
