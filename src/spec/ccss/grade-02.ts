@@ -632,12 +632,12 @@ export const spec: CompetencyTarget[] = [
 
 const wordProblemsWithin100Implementation = defineImplementation({
     id: 'word-problems-within-100',
-    description: 'Extend arithmetic stories and layouts to one- and two-step problems within 100.',
+    description: 'Add a within-100 story layout and a distinct payload for connected two-step problems, while reusing pair arithmetic for one-step and same-unit length stories.',
     generators: [
         { module: 'arithmetic-ops-pairs', strategy: 'reuse' },
-        { module: 'arithmetic-ops-triples', strategy: 'expand' }
+        { module: 'arithmetic-word-problems-two-step', strategy: 'new' }
     ],
-    views: [{ module: 'operations-word-problem', strategy: 'expand' }]
+    views: [{ module: 'operations-word-problem-within-100', strategy: 'new' }]
 });
 
 const objectGroupParityImplementation = defineImplementation({
@@ -663,9 +663,9 @@ const numberArraysImplementation = defineImplementation({
 
 const placeValueHundredsImplementation = defineImplementation({
     id: 'place-value-hundreds',
-    description: 'Extend place-value bundles through hundreds.',
+    description: 'Extend place-value bundle generation through hundreds and add a dedicated hundreds-scale layout.',
     generators: [{ module: 'place-value-bundles', strategy: 'expand' }],
-    views: [{ module: 'place-value-tens-bundles', strategy: 'expand' }]
+    views: [{ module: 'place-value-hundreds-bundles', strategy: 'new' }]
 });
 
 const countingSequencesTo1000Implementation = defineImplementation({
@@ -724,7 +724,7 @@ const standardLengthToolsImplementation = defineImplementation({
     id: 'standard-length-tools',
     description: 'Support selecting and visibly using standard metric length tools.',
     generators: [
-        { module: 'measurement-attribute', strategy: 'expand' },
+        { module: 'measurement-tool-selection', strategy: 'new' },
         { module: 'measurement-length', strategy: 'reuse' }
     ],
     views: [
@@ -749,16 +749,9 @@ const lengthEstimationImplementation = defineImplementation({
 
 const lengthComparisonByMeasureImplementation = defineImplementation({
     id: 'length-comparison-by-measure',
-    description: 'Extend measured comparisons to explicit numerical length differences.',
-    generators: [{ module: 'measurement-compare', strategy: 'expand' }],
-    views: [{ module: 'measure-compare', strategy: 'expand' }]
-});
-
-const lengthArithmeticImplementation = defineImplementation({
-    id: 'length-arithmetic',
-    description: 'Extend word-problem layouts to same-unit length arithmetic.',
-    generators: [{ module: 'arithmetic-ops-pairs', strategy: 'reuse' }],
-    views: [{ module: 'operations-word-problem', strategy: 'expand' }]
+    description: 'Add numerical length-difference generation and rendering without changing the categorical comparison contract.',
+    generators: [{ module: 'measurement-length-difference', strategy: 'new' }],
+    views: [{ module: 'measure-length-difference', strategy: 'new' }]
 });
 
 const numberLineArithmeticImplementation = defineImplementation({
@@ -830,9 +823,9 @@ const shapeAttributeCountsImplementation = defineImplementation({
 
 const rectangularSquareArraysImplementation = defineImplementation({
     id: 'rectangular-square-arrays',
-    description: 'Extend shape partitioning to rectangular arrays and square counting.',
-    generators: [{ module: 'shape-partition', strategy: 'expand' }],
-    views: [{ module: 'shape-partition-equal', strategy: 'expand' }]
+    description: 'Add rectangular square-array generation and rendering without adding an independent array branch to equal-share partitioning.',
+    generators: [{ module: 'shape-square-array', strategy: 'new' }],
+    views: [{ module: 'shape-square-array', strategy: 'new' }]
 });
 
 const equalShareShapeEquivalenceImplementation = defineImplementation({
@@ -981,7 +974,7 @@ export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos(
         '2.MD.B.5-length-word-problems',
         lengthWordProblemsBuilder,
-        lengthArithmeticImplementation,
+        wordProblemsWithin100Implementation,
         'Show same-unit quantities in a story whose equation, unknown, and solution agree.'
     ),
     ...toImplementationTodos(
