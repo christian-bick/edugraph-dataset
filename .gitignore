@@ -37,3 +37,6 @@ coverage/
 # Local coverage explorer snapshots
 public/coverage/latest/
 public/coverage/preview/
+
+# Locally generated released-dataset asset index
+public/dataset/asset-index.json

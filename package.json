@@ -23,6 +23,8 @@
     "generate:dataset": "vite-node src/scripts/generate-dataset.ts",
     "generate:dataset:container": "vite-node src/scripts/generate-dataset-container.ts",
     "merge:dataset": "vite-node src/scripts/merge-dataset.ts",
+    "generate:asset-index": "vite-node src/scripts/generate-asset-index.ts",
+    "validate:asset-index": "vite-node src/scripts/validate-asset-index.ts",
     "validate:dataset": "vite-node src/scripts/validate-dataset.ts",
     "audit:dataset": "vite-node src/scripts/validate-dataset.ts --audit",
     "audit:dataset:report": "vite-node src/scripts/validate-dataset.ts --audit --report-only",

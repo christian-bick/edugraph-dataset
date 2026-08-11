@@ -148,6 +148,20 @@ local snapshot over the deployed fallback. Open
 [`/standards-explorer.html?view=preview`](http://localhost:5173/standards-explorer.html?view=preview)
 to inspect that working-tree snapshot locally.
 
+The details sidebar also shows every released question and solution image for each
+implemented label combination. Those independent samples are indexed from the merged
+union dataset and loaded directly from the tag-pinned Hugging Face release. To trial the
+feature locally without a Vite build, generate and validate the index, then use the normal
+dev server:
+```bash
+npm run generate:asset-index -- --revision=YOUR_RELEASE_TAG
+npm run validate:asset-index
+npm run dev
+```
+The generated `public/dataset/asset-index.json` is a local, gitignored artifact. It
+requires a compatible merged dataset under `out/dataset/`; run `npm run merge:dataset`
+first when the union needs to be refreshed.
+
 ### Coverage Explorer Deployment
 
 The production explorer offers two data views. **Latest** is the default and comes from
@@ -161,6 +175,9 @@ site, so the browser has no cross-origin GitHub dependency. Google authenticatio
 Workload Identity Federation from the trusted `main` workflow context and requires no
 long-lived Firebase service-account secret. The hosted root redirects to the standards
 explorer; the deployment can also be started manually with `workflow_dispatch`.
+The same deployment downloads the latest release's `asset-index.json` to
+`/dataset/asset-index.json`. The index contains references only; the PNG files remain
+published exclusively in the Hugging Face dataset.
 
 ## Contributing
 

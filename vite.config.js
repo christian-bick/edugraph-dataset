@@ -14,6 +14,7 @@ const COVERAGE_FILES = [
     'ccss-coverage.json',
     'coverage-manifest.json',
 ];
+const LOCAL_ASSET_INDEX = resolve(import.meta.dirname, 'public', 'dataset', 'asset-index.json');
 
 function hasLocalCoverageSnapshot(requestUrl) {
     const pathname = new URL(requestUrl || '/', 'http://localhost').pathname;
@@ -31,6 +32,17 @@ function coverageProxy() {
         secure: true,
         bypass(request) {
             return hasLocalCoverageSnapshot(request.url) ? request.url : undefined;
+        },
+    };
+}
+
+function assetIndexProxy() {
+    return {
+        target: COVERAGE_SITE,
+        changeOrigin: true,
+        secure: true,
+        bypass(request) {
+            return existsSync(LOCAL_ASSET_INDEX) ? request.url : undefined;
         },
     };
 }
@@ -64,6 +76,7 @@ export default defineConfig({
         proxy: {
             '/coverage/latest': coverageProxy(),
             '/coverage/preview': coverageProxy(),
+            '/dataset/asset-index.json': assetIndexProxy(),
         },
     },
     build: {

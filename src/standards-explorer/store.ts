@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { isAssetIndex, type AssetIndex } from '../lib/asset-index.ts';
 import type {
     CoverageData,
     CoverageManifest,
@@ -13,6 +14,9 @@ interface ExplorerStore {
     gradesTree: StandardsTreeData['tree'];
     coverageData: CoverageData | null;
     coverageManifest: CoverageManifest | null;
+    assetIndex: AssetIndex | null;
+    assetIndexLoading: boolean;
+    assetIndexError: string | null;
     dataView: DataView;
     loading: boolean;
     error: string | null;
@@ -25,6 +29,7 @@ interface ExplorerStore {
     searchQuery: string;
     searchActive: boolean;
     loadData: (dataView?: DataView) => Promise<void>;
+    loadAssetIndex: () => Promise<void>;
     setDataView: (dataView: DataView) => Promise<void>;
     setActiveGrade: (grade: string) => void;
     toggleDomain: (domain: string) => void;
@@ -64,6 +69,9 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     gradesTree: {},
     coverageData: null,
     coverageManifest: null,
+    assetIndex: null,
+    assetIndexLoading: false,
+    assetIndexError: null,
     dataView: initialDataView(),
     loading: true,
     error: null,
@@ -108,6 +116,20 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
             set({
                 error: error instanceof Error ? error.message : 'Failed to load explorer data.',
                 loading: false,
+            });
+        }
+    },
+    loadAssetIndex: async () => {
+        if (get().assetIndex || get().assetIndexLoading) return;
+        set({ assetIndexLoading: true, assetIndexError: null });
+        try {
+            const index = await fetchJson<unknown>('/dataset/asset-index.json');
+            if (!isAssetIndex(index)) throw new Error('Unsupported or malformed asset-index schema.');
+            set({ assetIndex: index, assetIndexLoading: false });
+        } catch (error) {
+            set({
+                assetIndexError: error instanceof Error ? error.message : 'Failed to load released samples.',
+                assetIndexLoading: false,
             });
         }
     },

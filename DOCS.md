@@ -82,13 +82,24 @@ development. During development, Vite serves a complete local snapshot when pres
 otherwise proxies that view to the deployed coverage site. This makes both views usable
 without committing generated snapshot copies while preserving local Preview overrides.
 
+Released sample thumbnails are intentionally separate from those coverage views. The
+explorer loads `/dataset/asset-index.json` once and reuses it in both Latest and Preview,
+so Preview can show only images from the latest published dataset rather than working-tree
+renders. The index groups every retained public row by its requested target label set;
+question and solution rows remain independent samples. Each image URL is constructed from
+the index's Hugging Face repository, immutable release revision, split, and file path.
+`npm run generate:asset-index -- --revision=<release_tag>` writes the local gitignored
+`public/dataset/asset-index.json` by default, allowing the complete UI to run under
+`npm run dev` without a Vite build. When that file is absent, Vite proxies its URL to the
+deployed explorer just as it does for absent coverage snapshots.
+
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
 `firebase.json` serves `dist/` and redirects the site root to the explorer entry, and
 `.github/workflows/deploy.yaml` is a reusable workflow that regenerates and validates
 Preview from an exact main SHA, downloads Latest from the repository's explicitly marked
 latest GitHub Release, builds the Vite application, and deploys it. The release stores the
-three immutable coverage files as individual assets, so deployment needs no historical
+three immutable coverage files plus `asset-index.json` as individual assets, so deployment needs no historical
 checkout and the browser makes no cross-origin request. The workflow can also be started
 independently with `workflow_dispatch`. It uses the same Workload Identity Federation
 provider and Firebase service account as the sibling `edugraph-editor` project; no
@@ -98,7 +109,7 @@ GitHub Actions keeps validation and publication separate. Pushes to `main` run t
 build, complete test suite, and repository checks through the local `quality-gates`
 composite action. A version tag repeats those gates, generates CCSS in the pinned
 canonical container, runs the strict read-only cache audit, merges the release dataset,
-generates and validates a release coverage snapshot, publishes the dataset to Hugging
+generates and validates the released asset index and release coverage snapshot, publishes the dataset to Hugging
 Face, creates or updates the matching GitHub Release with that snapshot, explicitly marks
 it Latest, and only then dispatches the explorer deployment workflow on `main`. A
 successful main validation also calls that reusable workflow with the validated commit
@@ -119,6 +130,23 @@ Playwright image, so changing the host runtime does not change the renderer iden
   task backlog consumed by the standards explorer, plus the snapshot manifest. The
   default output is `public/coverage/preview/` for local development; release and
   deployment workflows pass explicit output directories and source identity.
+
+### `src/scripts/generate-asset-index.ts`
+* **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> [--repository=<owner/dataset>] [--output=<path>]`
+* **Function**: Independently replays the union selection over the operational metadata of
+  every non-isolated spec, resolves each retained row back to its requested target labels,
+  and writes the released dataset asset index. The output contains every retained question
+  and solution row as an independent sample; it does not pair modes or cap visual variants.
+  The default output is the gitignored `public/dataset/asset-index.json` for local no-build
+  development. Release automation writes `temp/release-assets/asset-index.json` instead.
+  The revision is required and rejects `main`, ensuring browser URLs remain release-pinned.
+
+### `src/scripts/validate-asset-index.ts`
+* **Execution**: `npm run validate:asset-index -- [--index=<path>] [--dataset-dir=<path>]`
+* **Function**: Validates the asset-index schema and release revision, canonical label-set
+  grouping, independent sample modes, exact correspondence with the merged public metadata,
+  requested-label containment, and on-disk image presence. Defaults to the local public
+  index and `out/dataset`; the release workflow passes its temporary index explicitly.
 
 #### `src/scripts/generate-dataset.ts`
 The primary pipeline orchestrator.

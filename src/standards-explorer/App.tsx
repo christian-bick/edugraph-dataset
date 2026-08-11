@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
     calculateStats,
     filterTasks,
+    findReleasedSamples,
     getClusters,
     getCoverageKind,
     getDomains,
     getLabelSets,
     getSearchCoverageKind,
     intersectLabels,
+    releasedSampleUrl,
     searchStandards,
     type CoverageKind,
 } from './model.ts';
@@ -19,6 +21,7 @@ import type {
     TaskType,
     TreeStandard,
 } from './types.ts';
+import type { AssetIndex, ReleasedAssetSample } from '../lib/asset-index.ts';
 
 const Icon = ({ name, className = '' }: { name: string; className?: string }) => (
     <i aria-hidden="true" className={`fa-solid ${name} ${className}`} />
@@ -619,7 +622,74 @@ function BreakdownHeading({ label, count }: { label: string; count: number }) {
     );
 }
 
+function ReleasedSampleThumbnail({ index, sample }: { index: AssetIndex; sample: ReleasedAssetSample }) {
+    const [failed, setFailed] = useState(false);
+    const url = releasedSampleUrl(index, sample);
+    const modeLabel = sample.mode === 'question' ? 'Question' : 'Solution';
+
+    return (
+        <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="block rounded-md border border-slate-800 bg-white overflow-hidden hover:border-slate-500 transition-colors"
+            title={`Open ${modeLabel.toLowerCase()} sample from ${sample.view}`}
+        >
+            {failed ? (
+                <div className="h-24 flex items-center justify-center px-3 text-center text-[10px] text-slate-500">
+                    Image unavailable — open the released file
+                </div>
+            ) : (
+                <img
+                    src={url}
+                    alt={`${modeLabel} sample rendered with ${sample.view}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-24 object-contain bg-white"
+                    onError={() => setFailed(true)}
+                />
+            )}
+            <div className="flex items-center justify-between gap-2 px-2 py-1.5 border-t border-slate-800 bg-slate-950/70">
+                <span className={`px-1.5 py-0.5 rounded border text-[9px] font-semibold ${
+                    sample.mode === 'question'
+                        ? 'bg-sky-50 text-sky-800 border-sky-200'
+                        : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                }`}>{modeLabel}</span>
+                <span className="truncate font-mono text-[9px] text-slate-500" title={sample.view}>{sample.view}</span>
+            </div>
+        </a>
+    );
+}
+
+function ReleasedSampleGallery({ index, labels }: { index: AssetIndex; labels: string[] }) {
+    const samples = findReleasedSamples(index, labels);
+    return (
+        <div className="mt-2 pt-2 border-t border-slate-800/60">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-500">Released samples</span>
+                <span className="text-[9px] font-mono text-slate-500">{index.dataset.revision}</span>
+            </div>
+            {samples.length === 0 ? (
+                <div className="text-[10px] text-slate-500 italic">No released samples yet</div>
+            ) : (
+                <div className="grid grid-cols-1 gap-2 max-h-72 overflow-y-auto pr-1">
+                    {samples.map(sample => (
+                        <ReleasedSampleThumbnail
+                            key={`${sample.split}/${sample.file_name}`}
+                            index={index}
+                            sample={sample}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
+    const assetIndex = useExplorerStore(state => state.assetIndex);
+    const assetIndexLoading = useExplorerStore(state => state.assetIndexLoading);
+    const assetIndexError = useExplorerStore(state => state.assetIndexError);
     const labelSets = getLabelSets(coverage);
     const intersection = intersectLabels(labelSets);
     const permutationCount = coverage.competencies.length + coverage.implementation_todos.length;
@@ -647,6 +717,7 @@ function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
                             <div className="flex flex-wrap gap-1.5">
                                 <ConceptBadges coverage={coverage} labels={permutation.filter(label => !intersection.includes(label))} emptyText="Only common labels" />
                             </div>
+                            {assetIndex && <ReleasedSampleGallery index={assetIndex} labels={permutation} />}
                         </div>
                     ))}
                     {coverage.implementation_todos.map(todo => (
@@ -656,6 +727,12 @@ function CompetencyBreakdown({ coverage }: { coverage: StandardCoverage }) {
                             </div>
                         </div>
                     ))}
+                    {assetIndexLoading && (
+                        <div className="text-[10px] text-slate-500 italic">Loading released samples…</div>
+                    )}
+                    {assetIndexError && (
+                        <div className="text-[10px] text-slate-500">Released samples unavailable: {assetIndexError}</div>
+                    )}
                 </div>
             )}
         </div>
@@ -760,12 +837,14 @@ function DetailsPanel() {
 
 export function App() {
     const loadData = useExplorerStore(state => state.loadData);
+    const loadAssetIndex = useExplorerStore(state => state.loadAssetIndex);
     const loading = useExplorerStore(state => state.loading);
     const error = useExplorerStore(state => state.error);
 
     useEffect(() => {
         void loadData();
-    }, [loadData]);
+        void loadAssetIndex();
+    }, [loadAssetIndex, loadData]);
 
     return (
         <div className="bg-slate-950 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">

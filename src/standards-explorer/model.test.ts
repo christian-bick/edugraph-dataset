@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     calculateStats,
     filterTasks,
+    findReleasedSamples,
     getClusters,
     getCoverageKind,
     getDomains,
@@ -9,6 +10,7 @@ import {
     gradeNameFromId,
     intersectLabels,
     matchesTaskGrade,
+    releasedSampleUrl,
     searchStandards,
 } from './model.ts';
 import type {
@@ -19,6 +21,7 @@ import type {
     StandardCoverage,
     StandardNode,
 } from './types.ts';
+import type { AssetIndex } from '../lib/asset-index.ts';
 
 const createCoverage = (overrides: Partial<StandardCoverage> = {}): StandardCoverage => ({
     id: 'K.CC.A.1',
@@ -152,5 +155,31 @@ describe('standards explorer model', () => {
         });
         expect(intersectLabels([['Area', 'Scope A'], ['Area', 'Scope B']])).toEqual(['Area']);
         expect(intersectLabels([])).toEqual([]);
+    });
+
+    it('finds only exact released label-set matches and constructs their URL', () => {
+        const index: AssetIndex = {
+            schema_version: 1,
+            generated_at: 'fixed',
+            dataset: { repository: 'owner/dataset', revision: 'v1' },
+            label_sets: [{
+                requested_labels: ['Area', 'Scope'],
+                samples: [{
+                    split: 'train',
+                    file_name: 'module/image.png',
+                    generator: 'generator',
+                    view: 'view',
+                    mode: 'question',
+                }],
+            }],
+        };
+
+        const samples = findReleasedSamples(index, ['Scope', 'Area']);
+        expect(samples).toHaveLength(1);
+        expect(findReleasedSamples(index, ['Area'])).toEqual([]);
+        expect(findReleasedSamples(null, ['Area', 'Scope'])).toEqual([]);
+        expect(releasedSampleUrl(index, samples[0])).toBe(
+            'https://huggingface.co/datasets/owner/dataset/resolve/v1/train/module/image.png',
+        );
     });
 });

@@ -8,6 +8,13 @@ import type {
     StandardNode,
     TaskType,
 } from './types.ts';
+import {
+    assetIndexSampleMap,
+    buildHuggingFaceAssetUrl,
+    requestedLabelKey,
+    type AssetIndex,
+    type ReleasedAssetSample,
+} from '../lib/asset-index.ts';
 
 export type CoverageKind = 'analysis' | 'beyond' | 'ontology' | 'partial' | 'covered' | 'implementation';
 
@@ -109,3 +116,16 @@ export const intersectLabels = (sets: string[][]): string[] => {
     if (sets.length === 0) return [];
     return sets[0].filter(label => sets.every(set => set.includes(label)));
 };
+
+export const findReleasedSamples = (
+    index: AssetIndex | null,
+    labels: readonly string[],
+): ReleasedAssetSample[] => {
+    if (!index) return [];
+    return assetIndexSampleMap(index).get(requestedLabelKey(labels))?.samples ?? [];
+};
+
+export const releasedSampleUrl = (
+    index: AssetIndex,
+    sample: ReleasedAssetSample,
+): string => buildHuggingFaceAssetUrl(index.dataset, sample);

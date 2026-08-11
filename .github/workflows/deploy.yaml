@@ -72,6 +72,19 @@ jobs:
           test -f public/coverage/latest/ccss-coverage.json
           test -f public/coverage/latest/coverage-manifest.json
 
+      - name: Download released dataset asset index
+        shell: bash
+        run: |
+          mkdir -p public/dataset
+          gh release download \
+            --repo "${{ github.repository }}" \
+            --pattern asset-index.json \
+            --dir public/dataset \
+            --clobber
+          test -f public/dataset/asset-index.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Build Vite App
         run: npm run build
 

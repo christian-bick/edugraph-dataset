@@ -66,6 +66,18 @@ jobs:
       - name: Merge release dataset
         run: npm run merge:dataset
 
+      - name: Generate released dataset asset index
+        run: >-
+          npm run generate:asset-index --
+          --output=temp/release-assets/asset-index.json
+          --revision="${{ steps.release_source.outputs.tag }}"
+
+      - name: Validate released dataset asset index
+        run: >-
+          npm run validate:asset-index --
+          --index=temp/release-assets/asset-index.json
+          --dataset-dir=out/dataset
+
       - name: Generate union coverage report
         run: npm run report:coverage -- --spec=union
 
@@ -92,11 +104,13 @@ jobs:
         run: |
           release_tag="${{ steps.release_source.outputs.tag }}"
           release_dir="temp/coverage-release"
+          asset_index="temp/release-assets/asset-index.json"
           if gh release view "$release_tag" >/dev/null 2>&1; then
             gh release upload "$release_tag" \
               "$release_dir/ccss-tree.json" \
               "$release_dir/ccss-coverage.json" \
               "$release_dir/coverage-manifest.json" \
+              "$asset_index" \
               --clobber
             gh release edit "$release_tag" --latest
           else
@@ -104,6 +118,7 @@ jobs:
               "$release_dir/ccss-tree.json" \
               "$release_dir/ccss-coverage.json" \
               "$release_dir/coverage-manifest.json" \
+              "$asset_index" \
               --verify-tag \
               --latest \
               --notes-from-tag \

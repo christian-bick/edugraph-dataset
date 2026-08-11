@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useExplorerStore } from './store.ts';
+import type { AssetIndex } from '../lib/asset-index.ts';
 
 const treeData = {
     tree: { Kindergarten: {} },
@@ -28,6 +29,13 @@ const jsonResponse = (data: unknown) => ({
     json: async () => data,
 }) as Response;
 
+const assetIndex: AssetIndex = {
+    schema_version: 1,
+    generated_at: '2026-08-10T00:00:00.000Z',
+    dataset: { repository: 'owner/dataset', revision: 'v1' },
+    label_sets: [],
+};
+
 describe('standards explorer data views', () => {
     beforeEach(() => {
         useExplorerStore.setState({
@@ -35,6 +43,9 @@ describe('standards explorer data views', () => {
             gradesTree: {},
             coverageData: null,
             coverageManifest: null,
+            assetIndex: null,
+            assetIndexLoading: false,
+            assetIndexError: null,
             dataView: 'latest',
             loading: true,
             error: null,
@@ -112,6 +123,35 @@ describe('standards explorer data views', () => {
             activeStandardId: null,
             searchQuery: '',
             searchActive: false,
+        });
+    });
+
+    it('loads the released asset index once and preserves it across data views', async () => {
+        const fetchMock = vi.fn(async () => jsonResponse(assetIndex));
+        vi.stubGlobal('fetch', fetchMock);
+
+        await useExplorerStore.getState().loadAssetIndex();
+        await useExplorerStore.getState().loadAssetIndex();
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledWith('/dataset/asset-index.json', { cache: 'no-store' });
+        expect(useExplorerStore.getState()).toMatchObject({
+            assetIndex,
+            assetIndexLoading: false,
+            assetIndexError: null,
+        });
+    });
+
+    it('treats an unavailable asset index as a nonfatal enhancement failure', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 404 }) as Response));
+
+        await useExplorerStore.getState().loadAssetIndex();
+
+        expect(useExplorerStore.getState()).toMatchObject({
+            assetIndex: null,
+            assetIndexLoading: false,
+            assetIndexError: 'Request failed (404): /dataset/asset-index.json',
+            error: null,
         });
     });
 });
