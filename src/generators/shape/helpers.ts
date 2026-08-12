@@ -14,6 +14,8 @@ const SHAPES_BY_LABEL: Readonly<Record<string, PlaneShapeName>> = {
     [Area.Triangle]: 'triangle',
     [Area.Square]: 'square',
     [Area.Rectangle]: 'rectangle',
+    [Area.Quadrilateral]: 'quadrilateral',
+    [Area.Pentagon]: 'pentagon',
     [Area.Hexagon]: 'hexagon'
 };
 
@@ -35,6 +37,8 @@ const DEFINITIONS: Readonly<Record<PlaneShapeName, ShapeDefinition>> = {
         boundary: 'straight',
         rightAngleCount: 4
     },
+    quadrilateral: {sideCount: 4, vertexCount: 4, closed: true, boundary: 'straight'},
+    pentagon: {sideCount: 5, vertexCount: 5, closed: true, boundary: 'straight'},
     hexagon: {sideCount: 6, vertexCount: 6, closed: true, boundary: 'straight'}
 };
 

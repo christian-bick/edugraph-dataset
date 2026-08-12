@@ -1,2 +1,3 @@
 - **Identity:** The image makes either counting construction parts or building from defining attributes identifiable through the completed target or attribute card.
 - **Modes:** Question Mode leaves every choice neutral or the construction unassembled; Solution Mode identifies the required parts or shows the completed construction.
+- **Attribute counts:** Vertex tasks show the requested number of construction points and a completed polygon; equal-face tasks show six congruent square pieces and a completed cube with its six-face net.

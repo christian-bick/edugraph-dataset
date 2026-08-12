@@ -7,6 +7,12 @@ import {
     NON_DEFINING_ATTRIBUTE_STATEMENTS
 } from '../helpers.ts';
 import {ShapeClassifyAttributesGenerator} from './generator.ts';
+import {Area, Scope} from 'edugraph-ts';
+
+const legacyConfig = {
+    shapes: [],
+    attributeCounts: []
+};
 
 describe('ShapeClassifyAttributesGenerator', () => {
     let generator: ShapeClassifyAttributesGenerator;
@@ -16,9 +22,9 @@ describe('ShapeClassifyAttributesGenerator', () => {
         setSeed(42);
     });
 
-    it('has the shape problem type and accepts its empty config', () => {
+    it('has the shape problem type and accepts its default config', () => {
         expect(generator.type).toBe('shape');
-        expect(generator.generate({})).not.toBeNull();
+        expect(generator.generate(legacyConfig)).not.toBeNull();
     });
 
     it('rejects a null config before generating', () => {
@@ -30,12 +36,14 @@ describe('ShapeClassifyAttributesGenerator', () => {
     it('returns null when a selected ontology label has no shape mapping', () => {
         const shapeNameSpy = vi.spyOn(shapeHelpers, 'shapeNameFromLabel').mockReturnValueOnce(null);
 
-        expect(generator.generate({})).toBeNull();
+        expect(generator.generate(legacyConfig)).toBeNull();
         expect(shapeNameSpy).toHaveBeenCalledOnce();
     });
 
     it('generates exactly one defining option and three non-defining options', () => {
-        const stub = generator.generate({})!;
+        const stub = generator.generate(legacyConfig)!;
+        expect('shape' in stub.data).toBe(true);
+        if (!('shape' in stub.data)) return;
         const {shape, definition, options, answer} = stub.data;
         const definingOptions = options.filter(option => option.kind === 'defining');
         const nonDefiningOptions = options.filter(option => option.kind === 'non-defining');
@@ -59,7 +67,8 @@ describe('ShapeClassifyAttributesGenerator', () => {
 
         for (let seed = 0; seed < 200; seed++) {
             setSeed(seed);
-            const stub = generator.generate({})!;
+            const stub = generator.generate(legacyConfig)!;
+            if (!('shape' in stub.data)) throw new Error('Expected a legacy classification problem.');
             const definingOption = stub.data.options.find(option => option.kind === 'defining')!;
 
             shapes.add(stub.data.shape);
@@ -74,10 +83,56 @@ describe('ShapeClassifyAttributesGenerator', () => {
 
     it('is deterministic for the same seed', () => {
         setSeed('classification-example');
-        const first = generator.generate({});
+        const first = generator.generate(legacyConfig);
         setSeed('classification-example');
-        const second = generator.generate({});
+        const second = generator.generate(legacyConfig);
 
         expect(second).toEqual(first);
+    });
+
+    it('classifies polygons by a visibly countable vertex total', () => {
+        const stub = generator.generate({
+            shapes: [],
+            attributeCounts: [Scope.VertexCount]
+        })!;
+
+        expect(stub.data.task).toBe('classify-count');
+        if (stub.data.task !== 'classify-count') return;
+        expect(stub.data.attribute).toBe('vertices');
+        expect(stub.data.options).toHaveLength(4);
+        expect(stub.data.options.filter(option => option.satisfies)).toHaveLength(1);
+        expect(stub.data.options.find(option => option.id === stub.data.answer)?.count)
+            .toBe(stub.data.requiredCount);
+    });
+
+    it('honors a specifically requested polygon in vertex-count mode', () => {
+        const stub = generator.generate({
+            shapes: [Area.Pentagon],
+            attributeCounts: [Scope.VertexCount]
+        })!;
+
+        expect(stub.data.task).toBe('classify-count');
+        if (stub.data.task !== 'classify-count') return;
+        expect(stub.data.requiredCount).toBe(5);
+        expect(stub.tags).toEqual([Area.Pentagon]);
+    });
+
+    it('classifies a cube from inspectable equal-face alternatives', () => {
+        const stub = generator.generate({
+            shapes: [],
+            attributeCounts: [Scope.FaceCount, Scope.Equal]
+        })!;
+
+        expect(stub.data.task).toBe('classify-count');
+        if (stub.data.task !== 'classify-count') return;
+        expect(stub.data).toMatchObject({attribute: 'equal-faces', requiredCount: 6});
+        expect(stub.data.options.find(option => option.id === stub.data.answer)?.shape).toBe('cube');
+    });
+
+    it('rejects contradictory attribute-count configurations', () => {
+        expect(() => generator.generate({
+            shapes: [],
+            attributeCounts: [Scope.VertexCount, Scope.FaceCount, Scope.Equal]
+        })).toThrow('Attribute-count labels must select either vertex count or equal face count.');
     });
 });

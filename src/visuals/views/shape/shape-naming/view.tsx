@@ -10,6 +10,15 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-naming'>;
 }
 
+const polygonCounts: Readonly<Record<string, number>> = {
+    triangle: 3,
+    square: 4,
+    rectangle: 4,
+    quadrilateral: 4,
+    pentagon: 5,
+    hexagon: 6
+};
+
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     const commonProps = {
         width: size,
@@ -34,6 +43,18 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
         return (
             <svg {...commonProps}>
                 <rect x="10" y="25" width="80" height="50" rx="4" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
+            </svg>
+        );
+    } else if (shape === 'quadrilateral') {
+        return (
+            <svg {...commonProps}>
+                <polygon points="18,20 84,12 72,86 10,70" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
+            </svg>
+        );
+    } else if (shape === 'pentagon') {
+        return (
+            <svg {...commonProps}>
+                <polygon points="50,8 90,38 75,88 25,88 10,38" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
             </svg>
         );
     } else if (shape === 'triangle') {
@@ -89,18 +110,21 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     throw new ViewValidationError('shape-naming', `Unsupported shape: ${shape}`);
 }
 
-const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
+const ShapeNamingCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('shape-naming', data, ['shape', 'answer']);
 
     const shape = data.shape;
     const answer = data.answer;
+    const polygonCount = polygonCounts[shape];
 
     const is3D = ['cube', 'cone', 'cylinder', 'sphere'].includes(shape);
-    const options = is3D 
+    const options = is3D
         ? ['cube', 'cone', 'cylinder', 'sphere']
-        : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
+        : ['quadrilateral', 'pentagon'].includes(shape)
+            ? ['triangle', 'quadrilateral', 'pentagon', 'hexagon']
+            : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
 
     const seed = payload.seed;
     const rotation = is3D ? 18 : 25 + (seed % 50);
@@ -142,6 +166,17 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
                         </div>
                     </div>
                 </div>
+
+                {config.showAttributes && polygonCount !== undefined && (
+                    <div className="mb-5 flex gap-2 text-sm font-bold text-blue-700">
+                        <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1">
+                            {polygonCount} straight sides
+                        </span>
+                        <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1">
+                            {polygonCount} vertices
+                        </span>
+                    </div>
+                )}
 
                 <div className="flex flex-wrap gap-3 w-full justify-center">
                     {options.map((opt, i) => (

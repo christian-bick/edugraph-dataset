@@ -37,6 +37,29 @@ const classifyAttributesBuilder = new DatasetPermutationBuilder()
         Ability.ConceptClassification
     ]);
 
+const classifyAttributeCountsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Scope.ShapeAttributes,
+        Ability.ConceptClassification
+    ])
+    .applyLabelVariants([
+        [Scope.VertexCount],
+        [Scope.FaceCount, Scope.Equal]
+    ]);
+
+const specifyAttributeCountsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeRecognition,
+        Scope.ShapeAttributes,
+        Ability.ConceptSpecification,
+        Ability.VisualArticulation
+    ])
+    .applyLabelVariants([
+        [Scope.VertexCount],
+        [Scope.FaceCount, Scope.Equal]
+    ]);
+
 const specifyShapeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeRecognition,
@@ -117,6 +140,17 @@ const identityNamingBuilder = new DatasetPermutationBuilder()
         [Area.Cylinder]
     ]);
 
+const extendedIdentityNamingBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeIdentity,
+        Scope.ShapeAttributes,
+        Ability.VisualRecognition
+    ])
+    .applyLabelVariants([
+        [Area.Quadrilateral],
+        [Area.Pentagon]
+    ]);
+
 const identityDrawBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
@@ -157,6 +191,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-build-shape', builder),
     ...toTargets('test-shape-classify-dim', classifyDimBuilder),
     ...toTargets('test-shape-classify-attributes', classifyAttributesBuilder),
+    ...toTargets('test-shape-classify-attribute-counts', classifyAttributeCountsBuilder),
+    ...toTargets('test-shape-specify-attribute-counts', specifyAttributeCountsBuilder),
     ...toTargets('test-shape-specify-attributes', specifyShapeBuilder),
     ...toTargets('test-shape-draw-from-attributes', drawFromAttributesBuilder),
     ...toTargets('test-shape-compare-attributes', compareAttrBuilder),
@@ -164,6 +200,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-compose-multi-level', multiLevelCompositionBuilder),
     ...toTargets('test-shape-env-shapes', envShapesBuilder),
     ...toTargets('test-shape-identity-naming', identityNamingBuilder),
+    ...toTargets('test-shape-identity-naming-extended', extendedIdentityNamingBuilder),
     ...toTargets('test-shape-identity-draw', identityDrawBuilder),
     ...toTargets('test-shape-identity-position', identityPositionBuilder),
     ...toTargets('test-shape-same-attribute', sameAttributeBuilder)

@@ -38,4 +38,12 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
         expect(stub!.data.shape).toBe('cylinder');
         expect(stub!.data.answer).toBe('cylinder');
     });
+
+    it.each([
+        [Area.Quadrilateral, 'quadrilateral'],
+        [Area.Pentagon, 'pentagon']
+    ] as const)('generates the extended %s identity problem', (label, shape) => {
+        const stub = generateWithLabels(generator, [label]);
+        expect(stub!.data).toEqual({shape, answer: shape});
+    });
 });

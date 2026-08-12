@@ -2,7 +2,7 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from "../../../types/schema.ts";
 
-import {hasLabel, selectExactMatch} from '../../../lib/resolvers.ts';
+import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
 import {PLANE_SHAPE_LABELS} from '../helpers.ts';
 
 export const spec: GeneratorSpec = {
@@ -11,13 +11,13 @@ export const spec: GeneratorSpec = {
 };
 
 export const ShapeBuildShapeGeneratorSchema = {
-    target: [
-        PLANE_SHAPE_LABELS,
-        selectExactMatch
+    targets: [
+        [...PLANE_SHAPE_LABELS, Area.Quadrilateral, Area.Pentagon, Area.Cube],
+        matchAllExactLabels
     ],
-    attributeScope: [
-        [Scope.ShapeProperties, Scope.ShapeAttributes],
-        selectExactMatch
+    constructionScopes: [
+        [Scope.ShapeProperties],
+        matchAllExactLabels
     ],
     specifyAttributes: [
         [Ability.ConceptSpecification],
@@ -26,6 +26,10 @@ export const ShapeBuildShapeGeneratorSchema = {
     shapeIdentity: [
         [Area.ShapeIdentity],
         hasLabel(Area.ShapeIdentity)
+    ],
+    attributeCounts: [
+        [Scope.VertexCount, Scope.FaceCount, Scope.Equal],
+        matchAllExactLabels
     ]
 } as const;
 

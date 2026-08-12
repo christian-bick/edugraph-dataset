@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
@@ -9,7 +9,7 @@ export const spec: ViewSpec = {
         Area.CircularShapeDrawing,
         Ability.VisualArticulation
     ],
-    rejectedLabels: [Area.Hexagon]
+    rejectedLabels: [Area.Hexagon, Scope.VertexCount, Scope.FaceCount]
 };
 
 

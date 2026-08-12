@@ -26,21 +26,19 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         const labels = [Area.Circle, Scope.ShapeAttributes, Ability.ConceptSpecification];
         const stub = generateWithLabels(generator, labels);
 
-        expect(stub).toEqual({
-            data: {
-                target: 'circle',
-                sides: 0,
-                corners: 0,
-                task: 'specify-attributes',
-                definition: {
-                    sideCount: 0,
-                    vertexCount: 0,
-                    closed: true,
-                    boundary: 'curved'
-                }
-            },
-            tags: labels
+        expect(stub?.data).toEqual({
+            target: 'circle',
+            sides: 0,
+            corners: 0,
+            task: 'specify-attributes',
+            definition: {
+                sideCount: 0,
+                vertexCount: 0,
+                closed: true,
+                boundary: 'curved'
+            }
         });
+        expect(stub?.tags).toEqual(expect.arrayContaining(labels));
         expect(new Set(stub!.tags).size).toBe(stub!.tags!.length);
     });
 
@@ -52,5 +50,53 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
             data: {target: 'circle', sides: 0, corners: 0},
             tags: labels
         });
+    });
+
+    it('does not invent a named target for a generic vertex-count task', () => {
+        const labels = [
+            Area.ShapeRecognition,
+            Scope.ShapeAttributes,
+            Scope.VertexCount,
+            Ability.ConceptSpecification,
+            Ability.VisualArticulation
+        ];
+        const stub = generateWithLabels(generator, labels)!;
+
+        expect(stub.data.task).toBe('specify-count');
+        if (stub.data.task !== 'specify-count') return;
+        expect(stub.data.attribute).toBe('vertices');
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Area.ShapeRecognition,
+            Scope.ShapeAttributes,
+            Scope.VertexCount,
+            Ability.ConceptSpecification
+        ]));
+    });
+
+    it('resolves the equal-face construction path without a named target label', () => {
+        const labels = [
+            Area.ShapeRecognition,
+            Scope.ShapeAttributes,
+            Scope.FaceCount,
+            Scope.Equal,
+            Ability.ConceptSpecification,
+            Ability.VisualArticulation
+        ];
+        const stub = generateWithLabels(generator, labels)!;
+
+        expect(stub.data).toMatchObject({
+            task: 'specify-count',
+            target: 'cube',
+            attribute: 'equal-faces',
+            requiredCount: 6
+        });
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Area.ShapeRecognition,
+            Scope.ShapeAttributes,
+            Scope.FaceCount,
+            Scope.Equal,
+            Ability.ConceptSpecification,
+            Area.Cube
+        ]));
     });
 });

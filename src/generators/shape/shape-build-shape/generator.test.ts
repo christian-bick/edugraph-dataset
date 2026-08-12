@@ -10,6 +10,11 @@ describe('ShapeBuildShapeGenerator', () => {
         generator = new ShapeBuildShapeGenerator();
     });
 
+    const configFor = (target: string) => ({
+        targets: [target],
+        attributeCounts: []
+    });
+
     it('should have the correct type', () => {
         expect(generator.type).toBe('shape');
     });
@@ -22,8 +27,8 @@ describe('ShapeBuildShapeGenerator', () => {
         [Area.Hexagon, 'hexagon', 6, 6]
     ] as const)('preserves the legacy construction payload for %s', (target, name, sides, corners) => {
         const stub = generator.generate({
-            target,
-            attributeScope: Scope.ShapeProperties,
+            ...configFor(target),
+            constructionScopes: [Scope.ShapeProperties],
             specifyAttributes: false,
             shapeIdentity: false
         });
@@ -55,8 +60,8 @@ describe('ShapeBuildShapeGenerator', () => {
         [Area.Hexagon, 'hexagon', {sideCount: 6, vertexCount: 6, closed: true, boundary: 'straight'}]
     ] as const)('emits defining attributes for %s specification', (target, name, definition) => {
         const stub = generator.generate({
-            target,
-            attributeScope: Scope.ShapeAttributes,
+            ...configFor(target),
+            constructionScopes: [],
             specifyAttributes: true,
             shapeIdentity: false
         });
@@ -75,8 +80,8 @@ describe('ShapeBuildShapeGenerator', () => {
 
     it('returns null for unsupported target labels', () => {
         expect(generator.generate({
-            target: Area.Cube as any,
-            attributeScope: Scope.ShapeProperties,
+            ...configFor(Area.Cube),
+            constructionScopes: [Scope.ShapeProperties],
             specifyAttributes: false,
             shapeIdentity: false
         })).toBeNull();
@@ -84,23 +89,61 @@ describe('ShapeBuildShapeGenerator', () => {
 
     it('returns null for unsupported scope and task combinations', () => {
         expect(generator.generate({
-            target: Area.Triangle,
-            attributeScope: Scope.ShapeAttributes,
+            ...configFor(Area.Triangle),
+            constructionScopes: [],
             specifyAttributes: false,
             shapeIdentity: false
         })).toBeNull();
         expect(generator.generate({
-            target: Area.Triangle,
-            attributeScope: Scope.ShapeProperties,
+            ...configFor(Area.Triangle),
+            constructionScopes: [Scope.ShapeProperties],
             specifyAttributes: true,
             shapeIdentity: false
         })).toBeNull();
         expect(generator.generate({
-            target: Area.Triangle,
-            attributeScope: Scope.ShapeAttributes,
+            ...configFor(Area.Triangle),
+            constructionScopes: [],
             specifyAttributes: true,
             shapeIdentity: true
         })).toBeNull();
+    });
+
+    it('specifies a polygon from its required vertex count', () => {
+        const stub = generator.generate({
+            targets: [],
+            constructionScopes: [],
+            specifyAttributes: true,
+            shapeIdentity: false,
+            attributeCounts: [Scope.VertexCount]
+        })!;
+
+        expect(stub.data.task).toBe('specify-count');
+        if (stub.data.task !== 'specify-count') return;
+        expect(stub.data.attribute).toBe('vertices');
+        expect(stub.data.corners).toBe(stub.data.requiredCount);
+        expect(stub.tags).toHaveLength(1);
+    });
+
+    it('specifies a cube from six equal faces', () => {
+        const stub = generator.generate({
+            targets: [],
+            constructionScopes: [],
+            specifyAttributes: true,
+            shapeIdentity: false,
+            attributeCounts: [Scope.FaceCount, Scope.Equal]
+        });
+
+        expect(stub).toEqual({
+            data: {
+                target: 'cube',
+                sides: 12,
+                corners: 8,
+                task: 'specify-count',
+                attribute: 'equal-faces',
+                requiredCount: 6
+            },
+            tags: [Area.Cube]
+        });
     });
 
     it('throws a validation error for an empty config', () => {

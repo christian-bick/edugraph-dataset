@@ -16,6 +16,8 @@ export const ShapeIdentityGeneratorSchema = {
             Area.Triangle,
             Area.Square,
             Area.Rectangle,
+            Area.Quadrilateral,
+            Area.Pentagon,
             Area.Circle,
             Area.Hexagon,
             Area.Cube,

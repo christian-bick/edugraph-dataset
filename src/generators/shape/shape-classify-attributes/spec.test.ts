@@ -15,7 +15,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
     });
 
     it('declares the shape-recognition and shape-attribute capabilities', () => {
-        expect(spec.generalLabels).toEqual([Area.ShapeRecognition, Scope.ShapeAttributes]);
+        expect(spec.generalLabels).toEqual([Area.ShapeRecognition]);
     });
 
     it('generates from general target labels with an empty schema', () => {
@@ -34,11 +34,40 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
                 Area.ShapeRecognition,
                 Scope.ShapeAttributes
             ])!;
+            if (!('shape' in stub.data)) throw new Error('Expected a legacy classification problem.');
+            const shape = stub.data.shape;
             const expectedLabel = PLANE_SHAPE_LABELS.find(
-                label => shapeNameFromLabel(label) === stub.data.shape
+                label => shapeNameFromLabel(label) === shape
             );
 
-            expect(stub.tags).toEqual([expectedLabel]);
+            expect(stub.tags).toEqual([expectedLabel, Scope.ShapeAttributes]);
         }
+    });
+
+    it('resolves the vertex-count classification path', () => {
+        const stub = generateWithLabels(generator, [
+            Area.ShapeRecognition,
+            Scope.ShapeAttributes,
+            Scope.VertexCount
+        ])!;
+
+        expect(stub.data.task).toBe('classify-count');
+        if (stub.data.task !== 'classify-count') return;
+        expect(stub.data.attribute).toBe('vertices');
+        expect(stub.tags).toContain(Scope.VertexCount);
+    });
+
+    it('resolves the equal-face-count classification path', () => {
+        const stub = generateWithLabels(generator, [
+            Area.ShapeRecognition,
+            Scope.ShapeAttributes,
+            Scope.FaceCount,
+            Scope.Equal
+        ])!;
+
+        expect(stub.data.task).toBe('classify-count');
+        if (stub.data.task !== 'classify-count') return;
+        expect(stub.data).toMatchObject({attribute: 'equal-faces', requiredCount: 6});
+        expect(stub.tags).toEqual(expect.arrayContaining([Scope.FaceCount, Scope.Equal, Area.Cube]));
     });
 });

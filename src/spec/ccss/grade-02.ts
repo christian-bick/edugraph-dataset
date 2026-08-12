@@ -660,28 +660,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.MD.D.10-bar-graph', barGraphBuilder),
     ...toTargets('2.MD.D.10-bar-graph-problems', barGraphProblemsBuilder),
     // 2.G - Geometry
-    ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder)
+    ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder),
+    ...toTargets('2.G.A.1-identify-additional-shapes', identifyAdditionalShapesBuilder),
+    ...toTargets('2.G.A.1-recognize-attribute-counts', recognizeShapeAttributeCountsBuilder),
+    ...toTargets('2.G.A.1-draw-attribute-counts', drawShapeAttributeCountsBuilder)
 ];
-
-const shapeIdentityExtendedImplementation = defineImplementation({
-    id: 'shape-identity-extended',
-    description: 'Extend shape identity and naming to quadrilaterals and pentagons.',
-    generators: [{ module: 'shape-identity', strategy: 'expand' }],
-    views: [{ module: 'shape-naming', strategy: 'expand' }]
-});
-
-const shapeAttributeCountsImplementation = defineImplementation({
-    id: 'shape-attribute-counts',
-    description: 'Extend shape classification and construction to stated attribute counts.',
-    generators: [
-        { module: 'shape-classify-attributes', strategy: 'expand' },
-        { module: 'shape-build-shape', strategy: 'expand' }
-    ],
-    views: [
-        { module: 'shape-classify-attributes', strategy: 'expand' },
-        { module: 'shape-build-shape', strategy: 'expand' }
-    ]
-});
 
 const rectangularSquareArraysImplementation = defineImplementation({
     id: 'rectangular-square-arrays',
@@ -702,24 +685,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // 2.NBT - Number and Operations in Base Ten
     // 2.MD - Measurement and Data
     // 2.G - Geometry
-    ...toImplementationTodos(
-        '2.G.A.1-identify-additional-shapes',
-        identifyAdditionalShapesBuilder,
-        shapeIdentityExtendedImplementation,
-        'Show a generic quadrilateral or pentagon with defining-attribute cues and an explicit name response.'
-    ),
-    ...toImplementationTodos(
-        '2.G.A.1-recognize-attribute-counts',
-        recognizeShapeAttributeCountsBuilder,
-        shapeAttributeCountsImplementation,
-        'State an attribute condition and show a selected shape that visibly satisfies it.'
-    ),
-    ...toImplementationTodos(
-        '2.G.A.1-draw-attribute-counts',
-        drawShapeAttributeCountsBuilder,
-        shapeAttributeCountsImplementation,
-        'State the required attributes and show a solution drawing whose vertex or face condition is inspectable.'
-    ),
     ...toImplementationTodos(
         '2.G.A.2-partition-rectangle',
         rectangularSquarePartitionBuilder,

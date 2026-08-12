@@ -1,2 +1,3 @@
 - **Identity:** Varied examples of one shape and four statements make distinguishing a defining attribute from incidental color, orientation, or size identifiable.
 - **Modes:** Question Mode leaves every statement neutral; Solution Mode identifies only the defining attribute.
+- **Attribute counts:** Vertex-count tasks expose every polygon vertex, while equal-face tasks show complete face nets whose face count and congruence are inspectable.

@@ -21,11 +21,15 @@ describe('ShapeIdentityGenerator', () => {
         expect(() => generator.generate({ shapes: [] })).toThrow(GeneratorValidationError);
     });
 
-    it('should use provided shapes', () => {
-        const stub = generator.generate({ shapes: [Area.Hexagon] });
+    it.each([
+        [Area.Hexagon, 'hexagon'],
+        [Area.Quadrilateral, 'quadrilateral'],
+        [Area.Pentagon, 'pentagon']
+    ] as const)('uses the provided %s shape', (label, shape) => {
+        const stub = generator.generate({shapes: [label]});
         expect(stub).not.toBeNull();
-        expect(stub!.data.shape).toBe('hexagon');
-        expect(stub!.data.answer).toBe('hexagon');
+        expect(stub!.data.shape).toBe(shape);
+        expect(stub!.data.answer).toBe(shape);
         expect(stub!.tags).toBeUndefined();
     });
 });

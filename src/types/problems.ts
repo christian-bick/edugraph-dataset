@@ -301,11 +301,18 @@ export type ShapeSameAttributeProblem = {
     answer: string;
 };
 
-export type PlaneShapeName = 'circle' | 'triangle' | 'square' | 'rectangle' | 'hexagon';
+export type PlaneShapeName =
+    | 'circle'
+    | 'triangle'
+    | 'square'
+    | 'rectangle'
+    | 'quadrilateral'
+    | 'pentagon'
+    | 'hexagon';
 
 export type ShapeDefinition = {
-    sideCount: 0 | 3 | 4 | 6;
-    vertexCount: 0 | 3 | 4 | 6;
+    sideCount: 0 | 3 | 4 | 5 | 6;
+    vertexCount: 0 | 3 | 4 | 5 | 6;
     closed: true;
     boundary: 'curved' | 'straight';
     equalSides?: true;
@@ -318,12 +325,41 @@ export type ShapeAttributeOption = {
     kind: 'defining' | 'non-defining';
 };
 
-export type ShapeAttributeClassificationProblem = {
+export type ShapeDefiningAttributeClassificationProblem = {
     shape: PlaneShapeName;
     definition: ShapeDefinition;
     options: ShapeAttributeOption[];
     answer: ShapeAttributeOption['id'];
+    task?: undefined;
 };
+
+export type ShapeCountAttribute = 'vertices' | 'equal-faces';
+
+export type ShapeCountOptionName =
+    | PlaneShapeName
+    | 'cube'
+    | 'rectangular-prism'
+    | 'triangular-prism'
+    | 'square-pyramid';
+
+export type ShapeCountOption = {
+    id: ShapeAttributeOption['id'];
+    shape: ShapeCountOptionName;
+    count: number;
+    satisfies: boolean;
+};
+
+export type ShapeCountClassificationProblem = {
+    task: 'classify-count';
+    attribute: ShapeCountAttribute;
+    requiredCount: number;
+    options: ShapeCountOption[];
+    answer: ShapeCountOption['id'];
+};
+
+export type ShapeAttributeClassificationProblem =
+    | ShapeDefiningAttributeClassificationProblem
+    | ShapeCountClassificationProblem;
 
 export type ShapePartsConstructionProblem = {
     target: PlaneShapeName;
@@ -341,7 +377,19 @@ export type ShapeAttributeSpecificationProblem = {
     definition: ShapeDefinition;
 };
 
-export type ShapeBuildShapeProblem = ShapePartsConstructionProblem | ShapeAttributeSpecificationProblem;
+export type ShapeAttributeCountSpecificationProblem = {
+    target: PlaneShapeName | 'cube';
+    sides: number;
+    corners: number;
+    task: 'specify-count';
+    attribute: ShapeCountAttribute;
+    requiredCount: number;
+};
+
+export type ShapeBuildShapeProblem =
+    | ShapePartsConstructionProblem
+    | ShapeAttributeSpecificationProblem
+    | ShapeAttributeCountSpecificationProblem;
 
 /** Shared payload accepted by the legacy tracing and defining-attribute drawing modes. */
 export type ShapeDrawProblem = ShapeIdentityProblem | ShapeBuildShapeProblem;
