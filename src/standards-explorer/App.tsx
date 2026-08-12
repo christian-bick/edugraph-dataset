@@ -33,16 +33,17 @@ const Icon = ({ name, className = '' }: { name: string; className?: string }) =>
     <i aria-hidden="true" className={`fa-solid ${name} ${className}`} />
 );
 
-const coverageStyles: Record<CoverageKind, {
+interface StatusStyle {
     label: string;
     icon: string;
     badge: string;
+}
+
+const coverageStyles: Record<CoverageKind, StatusStyle & {
     card: string;
     selectedCard: string;
     subCard: string;
     selectedSubCard: string;
-    detailLabel: string;
-    detailBadge: string;
 }> = {
     analysis: {
         label: 'Analysis',
@@ -52,8 +53,6 @@ const coverageStyles: Record<CoverageKind, {
         selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-sky-50',
         subCard: 'border-sky-500/20 hover:border-sky-500/40 bg-sky-50 hover:bg-sky-100/70',
         selectedSubCard: 'border-slate-500 bg-sky-50 ring-1 ring-slate-400/30',
-        detailLabel: 'ANALYSIS NEEDED',
-        detailBadge: 'bg-sky-50 text-sky-800 border-sky-200',
     },
     beyond: {
         label: 'Beyond Scope',
@@ -63,8 +62,6 @@ const coverageStyles: Record<CoverageKind, {
         selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-purple-50',
         subCard: 'border-purple-500/20 hover:border-purple-500/40 bg-purple-50 hover:bg-purple-100/70',
         selectedSubCard: 'border-slate-500 bg-purple-50 ring-1 ring-slate-400/30',
-        detailLabel: 'BEYOND SCOPE',
-        detailBadge: 'bg-purple-50 text-purple-800 border-purple-200',
     },
     ontology: {
         label: 'Ontology',
@@ -74,8 +71,6 @@ const coverageStyles: Record<CoverageKind, {
         selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-red-50',
         subCard: 'border-red-500/20 hover:border-red-500/40 bg-red-50 hover:bg-red-100/70',
         selectedSubCard: 'border-slate-500 bg-red-50 ring-1 ring-slate-400/30',
-        detailLabel: 'MISSING ONTOLOGY',
-        detailBadge: 'bg-red-50 text-red-800 border-red-200',
     },
     partial: {
         label: 'Partially Covered',
@@ -85,8 +80,6 @@ const coverageStyles: Record<CoverageKind, {
         selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-orange-50',
         subCard: 'border-orange-500/20 hover:border-orange-500/40 bg-orange-50 hover:bg-orange-100/70',
         selectedSubCard: 'border-slate-500 bg-orange-50 ring-1 ring-slate-400/30',
-        detailLabel: 'PARTIALLY COVERED',
-        detailBadge: 'bg-orange-50 text-orange-800 border-orange-200',
     },
     covered: {
         label: 'Covered',
@@ -96,8 +89,6 @@ const coverageStyles: Record<CoverageKind, {
         selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-emerald-50',
         subCard: 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-50 hover:bg-emerald-100/70',
         selectedSubCard: 'border-slate-500 bg-emerald-50 ring-1 ring-slate-400/30',
-        detailLabel: 'COVERED',
-        detailBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     },
     implementation: {
         label: 'Implementation',
@@ -107,8 +98,6 @@ const coverageStyles: Record<CoverageKind, {
         selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-orange-50',
         subCard: 'border-orange-500/20 hover:border-orange-500/40 bg-orange-50 hover:bg-orange-100/70',
         selectedSubCard: 'border-slate-500 bg-orange-50 ring-1 ring-slate-400/30',
-        detailLabel: 'MISSING IMPLEMENTATION',
-        detailBadge: 'bg-orange-50 text-orange-800 border-orange-200',
     },
 };
 
@@ -116,30 +105,19 @@ const partialScopeStyle = {
     label: 'Partially In Scope',
     icon: 'fa-circle-half-stroke',
     badge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
-    detailLabel: 'PARTIALLY IN SCOPE',
-    detailBadge: 'bg-purple-50 text-purple-800 border-purple-200/50',
 };
 
-const taskStyles: Record<TaskType, { label: string; icon: string; color: string; detail: string; accent: string }> = {
+const taskStyles: Record<TaskType, { coverageKind: CoverageKind; accent: string }> = {
     DATASET_ENRICHMENT: {
-        label: 'Implementation',
-        icon: 'fa-triangle-exclamation',
-        color: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-        detail: 'bg-orange-500/10 border-orange-500/20 text-orange-300',
+        coverageKind: 'implementation',
         accent: 'border-orange-500/30',
     },
     ONTOLOGY_EXTENSION: {
-        label: 'Ontology',
-        icon: 'fa-circle-xmark',
-        color: 'bg-red-500/10 text-red-400 border-red-500/20',
-        detail: 'bg-red-500/10 border-red-500/20 text-red-300',
+        coverageKind: 'ontology',
         accent: 'border-red-500/30',
     },
     ANALYSIS: {
-        label: 'ANALYSIS',
-        icon: 'fa-magnifying-glass',
-        color: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
-        detail: 'bg-sky-500/10 border-sky-500/20 text-sky-300',
+        coverageKind: 'analysis',
         accent: 'border-sky-500/30',
     },
 };
@@ -428,7 +406,7 @@ function BacklogFilters() {
                                 }`}
                             >
                                 <span className="flex items-center gap-2.5 font-medium">
-                                    <Icon name={taskStyles[filter.id].icon} className={filter.iconColor} />
+                                    <Icon name={coverageStyles[taskStyles[filter.id].coverageKind].icon} className={filter.iconColor} />
                                     {filter.name}
                                 </span>
                                 {selected && <Icon name="fa-check" className="text-indigo-400 text-[10px]" />}
@@ -468,13 +446,21 @@ function SidePanel() {
     );
 }
 
-function CoverageBadge({ coverage, small = false, search = false }: { coverage: StandardCoverage; small?: boolean; search?: boolean }) {
-    const style = coverageStyles[search ? getSearchCoverageKind(coverage) : getCoverageKind(coverage)];
+function StatusBadge({ style, small = false }: { style: StatusStyle; small?: boolean }) {
     return (
-        <span className={`${small ? 'px-1.5 text-[8px]' : 'px-2 text-[9px]'} py-0.5 rounded leading-none font-semibold border ${style.badge}`}>
+        <span className={`${small ? 'px-1.5 text-[8px]' : 'px-2 text-[9px]'} inline-flex shrink-0 items-center whitespace-nowrap py-0.5 rounded leading-none font-semibold border ${style.badge}`}>
             <Icon name={style.icon} className="mr-0.5" /> {style.label}
         </span>
     );
+}
+
+function CoverageBadge({ coverage, small = false, search = false }: { coverage: StandardCoverage; small?: boolean; search?: boolean }) {
+    const style = coverageStyles[search ? getSearchCoverageKind(coverage) : getCoverageKind(coverage)];
+    return <StatusBadge style={style} small={small} />;
+}
+
+function TaskStatusBadge({ type, small = false }: { type: TaskType; small?: boolean }) {
+    return <StatusBadge style={coverageStyles[taskStyles[type].coverageKind]} small={small} />;
 }
 
 function CoverageBadges({ coverage, small = false, search = false }: { coverage: StandardCoverage; small?: boolean; search?: boolean }) {
@@ -483,9 +469,7 @@ function CoverageBadges({ coverage, small = false, search = false }: { coverage:
         <span className="flex flex-wrap justify-end gap-1">
             <CoverageBadge coverage={coverage} small={small} search={search} />
             {partiallyInScope && (
-                <span className={`${small ? 'px-1.5 text-[8px]' : 'px-2 text-[9px]'} py-0.5 rounded leading-none font-semibold border ${partialScopeStyle.badge}`}>
-                    <Icon name={partialScopeStyle.icon} className="mr-0.5" /> {partialScopeStyle.label}
-                </span>
+                <StatusBadge style={partialScopeStyle} small={small} />
             )}
         </span>
     );
@@ -514,13 +498,9 @@ function DetailCoverageBadges({ coverage }: { coverage: StandardCoverage }) {
 
     return (
         <span className="flex flex-wrap justify-end gap-1.5">
-            <span className={`rounded border px-2.5 py-0.5 text-[10px] font-semibold ${style.detailBadge}`}>
-                {style.detailLabel}
-            </span>
+            <StatusBadge style={style} />
             {partiallyInScope && (
-                <span className={`rounded border px-2.5 py-0.5 text-[10px] font-semibold ${partialScopeStyle.detailBadge}`}>
-                    <Icon name={partialScopeStyle.icon} className="mr-1" /> {partialScopeStyle.detailLabel}
-                </span>
+                <StatusBadge style={partialScopeStyle} />
             )}
         </span>
     );
@@ -560,7 +540,7 @@ function StandardCard({ standard, nested = false, search = false }: {
             }}
             className={`${nested ? 'p-2.5 rounded-md gap-1.5' : 'p-3.5 rounded-lg gap-2.5'} border transition-all duration-150 cursor-pointer focus:outline-none flex flex-col ${selected ? 'shadow-sm' : ''} ${statusClass}`}
         >
-            <div className={`flex items-${nested ? 'center' : 'start'} justify-between gap-3`}>
+            <div className="flex items-center justify-between gap-3">
                 <span className={`${nested ? 'text-[11px] font-semibold' : 'text-xs font-bold'} font-mono text-slate-300`}>{standard.id}</span>
                 {coverage && <CoverageBadges coverage={coverage} small={nested} search={search} />}
             </div>
@@ -625,7 +605,6 @@ function SearchResults() {
 function TaskCard({ task }: { task: BacklogTask }) {
     const activeTaskId = useExplorerStore(state => state.activeTaskId);
     const setActiveTask = useExplorerStore(state => state.setActiveTask);
-    const style = taskStyles[task.type];
     const selected = activeTaskId === task.id;
     const summary = splitTaskDescription(task.description).summary;
 
@@ -641,16 +620,9 @@ function TaskCard({ task }: { task: BacklogTask }) {
                 selected ? 'border-slate-500 ring-1 ring-slate-400/30 bg-slate-900/40 shadow-sm' : 'border-slate-800/80'
             }`}
         >
-            <div className="flex items-start justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-mono font-bold text-slate-400">{task.cluster_id}</span>
-                        <span className="text-xs text-slate-600">|</span>
-                        <span className="text-xs text-slate-500 font-medium">{task.cluster_description}</span>
-                    </div>
-                    <h3 className="text-base font-bold text-slate-100">{task.title}</h3>
-                </div>
-                <span className={`px-2 py-0.5 rounded text-[9px] border font-bold ${style.color}`}>{style.label}</span>
+            <div className="flex items-center justify-between gap-4">
+                <h3 className="min-w-0 text-base font-bold text-slate-100">{task.title}</h3>
+                <TaskStatusBadge type={task.type} />
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">{summary}</p>
             <div className="flex flex-wrap gap-1.5 items-center pt-2 border-t border-slate-800/40">
@@ -771,26 +743,26 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
             </div>
         );
     }
-    if (coverage.beyond_scope.length > 0) {
-        return (
-            <div className="text-xs text-purple-800 bg-purple-50 border border-purple-200/50 rounded-md p-2.5 leading-relaxed mt-1">
-                {coverage.beyond_scope.map(item => <div key={item.title}><strong>{item.title}:</strong> {item.description}</div>)}
-            </div>
-        );
-    }
-    if (!coverage.ontology_covered || coverage.ontology_todos.length > 0) {
-        return coverage.ontology_todos.length > 0 ? (
-            <div className="text-xs text-red-800 bg-red-50 border border-red-200 rounded-md p-2.5 leading-relaxed mt-1">
-                {coverage.ontology_todos.map(todo => <div key={todo.title}><strong>{todo.title}:</strong> {todo.description}</div>)}
-            </div>
-        ) : null;
-    }
     const implementations = [...new Map(coverage.implementation_todos.map(todo => [
         todo.implementation.id,
         todo.implementation,
     ])).values()];
-    return implementations.length > 0 ? (
+    const hasDetails = coverage.beyond_scope.length > 0
+        || coverage.ontology_todos.length > 0
+        || implementations.length > 0;
+
+    return hasDetails ? (
         <div className="mt-1 space-y-2">
+            {coverage.beyond_scope.length > 0 && (
+                <div className="rounded-md border border-purple-200/50 bg-purple-50 p-2.5 text-xs leading-relaxed text-purple-800">
+                    {coverage.beyond_scope.map(item => <div key={item.title}><strong>{item.title}:</strong> {item.description}</div>)}
+                </div>
+            )}
+            {coverage.ontology_todos.length > 0 && (
+                <div className="rounded-md border border-red-200 bg-red-50 p-2.5 text-xs leading-relaxed text-red-800">
+                    {coverage.ontology_todos.map(todo => <div key={todo.title}><strong>{todo.title}:</strong> {todo.description}</div>)}
+                </div>
+            )}
             {implementations.map(implementation => (
                 <button
                     key={implementation.id}
@@ -1049,7 +1021,7 @@ function StandardDetails() {
     return (
         <div className="p-6 flex flex-col gap-4">
             <div>
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center justify-between gap-3">
                     <h3 className="text-base font-semibold text-slate-100 leading-snug">
                         {standard?.id ?? 'Select a standard'}
                     </h3>
@@ -1104,9 +1076,9 @@ function TaskDetails() {
     const description = splitTaskDescription(task.description);
     return (
         <div className="p-6 flex flex-col gap-5">
-            <header className="space-y-3">
+            <header className="flex items-center justify-between gap-3">
                 <h3 className="text-lg font-semibold text-slate-100 leading-snug">{task.title}</h3>
-                <span className={`inline-flex px-2.5 py-0.5 border rounded text-[10px] font-mono font-bold tracking-wider ${style.detail}`}>{style.label}</span>
+                <TaskStatusBadge type={task.type} />
             </header>
             <section className="space-y-4">
                 <p className="text-xs text-slate-300 leading-relaxed">{description.summary}</p>
