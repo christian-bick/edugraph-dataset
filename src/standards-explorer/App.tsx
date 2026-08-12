@@ -413,7 +413,7 @@ function BacklogFilters() {
                                 onClick={() => toggleTaskType(filter.id)}
                                 className={`w-full text-left px-3 py-2.5 text-xs rounded-lg border flex items-center justify-between transition-all duration-150 ${
                                     selected
-                                        ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300 font-semibold shadow-sm'
+                                        ? 'bg-[#fff8f0] border-indigo-500 text-slate-100 shadow-sm font-bold'
                                         : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                                 }`}
                             >
