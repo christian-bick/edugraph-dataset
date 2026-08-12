@@ -1,0 +1,1 @@
+import {describe,expect,it} from 'vitest';import {MeasurementLengthDifferenceGenerator} from './generator.ts';describe('MeasurementLengthDifferenceGenerator',()=>{it('keeps the numerical difference coherent',()=>{const d=new MeasurementLengthDifferenceGenerator().generate({}).data;expect(d.lengthA-d.lengthB).toBe(d.difference);});});

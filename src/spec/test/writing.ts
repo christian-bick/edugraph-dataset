@@ -34,8 +34,31 @@ const representCountsBuilder = new DatasetPermutationBuilder()
         Ability.Formalization
     ]);
 
+const gradeTwoNumeralBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.DigitNotation,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersLarger120,
+        Scope.NumbersSmaller1000
+    ])
+    .applyLabelVariants([
+        [Ability.TextualReception],
+        [Ability.VisualArticulation]
+    ]);
+
+const numberNameBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumberNotation,
+        Scope.Base10,
+        Scope.NumbersSmaller1000,
+        Ability.TextualArticulation
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-writing', builder),
     ...toTargets('test-reading-numerals', readNumeralsBuilder),
-    ...toTargets('test-writing-represent-counts', representCountsBuilder)
+    ...toTargets('test-writing-represent-counts', representCountsBuilder),
+    ...toTargets('test-writing-grade-two-numerals', gradeTwoNumeralBuilder),
+    ...toTargets('test-writing-number-name', numberNameBuilder)
 ];

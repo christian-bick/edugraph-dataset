@@ -284,7 +284,7 @@ export function findGeneratorsWithoutTestPath(
 }
 
 function camelCase(str: string): string {
-    return str.replace(/-([a-z])/g, g => g[1].toUpperCase());
+    return str.replace(/-([a-z0-9])/g, g => g[1].toUpperCase());
 }
 
 export async function loadGeneratorCatalog(

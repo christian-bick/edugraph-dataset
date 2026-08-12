@@ -1,0 +1,3 @@
+- **Identity:** A source numeral and a word response area make written number-name articulation identifiable.
+- **Question mode:** The numeral remains visible and the word response area is empty.
+- **Solution mode:** The numeral remains visible and the correctly spelled English number name appears in the same response area.

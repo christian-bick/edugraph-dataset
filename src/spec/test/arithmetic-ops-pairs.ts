@@ -69,9 +69,35 @@ const unknownAddendBuilder = new DatasetPermutationBuilder()
         [Area.Subtraction]
     ]);
 
+const lengthWordProblemBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Scope.LengthMeasurement,
+        Scope.TwoOperands,
+        Scope.NumbersSmaller100,
+        Ability.TextualReception
+    ])
+    .applyLabelVariants([
+        [Area.Addition],
+        [Area.Subtraction]
+    ]);
+
+const equalAddendsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Addition,
+        Area.Equation,
+        Area.IteratedOperation,
+        Scope.EvenNumbers,
+        Scope.ExpressionOnOneSide,
+        Scope.TwoOperands,
+        Scope.NumbersSmaller20,
+        Ability.Formalization
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-arithmetic-ops-pairs', builder),
     ...toTargets('test-arithmetic-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('test-arithmetic-word-problems', wordProblemBuilder),
-    ...toTargets('test-arithmetic-unknown-addend', unknownAddendBuilder)
+    ...toTargets('test-arithmetic-unknown-addend', unknownAddendBuilder),
+    ...toTargets('test-length-word-problems', lengthWordProblemBuilder),
+    ...toTargets('test-arithmetic-equal-addends', equalAddendsBuilder)
 ];

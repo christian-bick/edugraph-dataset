@@ -1,0 +1,4 @@
+- **Identity:** A rectangular array visibly contains the exact number of rows and columns carried by the problem payload.
+- **Question mode:** The total remains blank; an equation target keeps every equal addend visible.
+- **Solution mode:** The same array remains visible and the total is revealed in the answer position.
+- **Iterated-operation evidence:** Equation targets show at least three identical addends joined by repeated addition signs.

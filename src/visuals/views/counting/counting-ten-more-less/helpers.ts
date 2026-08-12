@@ -2,14 +2,16 @@ import {ViewValidationError} from '../../../helpers/validation.ts';
 import {CountingIncDecProblem} from '../../../../types/problems.ts';
 
 export interface PlaceValueParts {
+    hundreds?: number;
     tens: number;
     ones: number;
 }
 
-export interface TenStepAnalysis {
+export interface PlaceValueStepAnalysis {
     direction: 'inc' | 'dec';
     start: number;
     result: number;
+    stepSize: 10 | 100;
     startParts: PlaceValueParts;
     resultParts: PlaceValueParts;
 }
@@ -17,19 +19,26 @@ export interface TenStepAnalysis {
 export type TenStepProblem = CountingIncDecProblem;
 
 function isValidPlaceValue(number: number, parts: PlaceValueParts): boolean {
+    const usesHundreds = parts.hundreds !== undefined;
+    const reconstructed = usesHundreds
+        ? parts.hundreds! * 100 + parts.tens * 10 + parts.ones
+        : parts.tens * 10 + parts.ones;
+
     return Number.isInteger(number)
         && number >= 0
-        && number <= 100
+        && number <= 1000
+        && (usesHundreds || number <= 100)
+        && (!usesHundreds || (Number.isInteger(parts.hundreds) && parts.hundreds! >= 0 && parts.hundreds! <= 10))
         && Number.isInteger(parts.tens)
         && parts.tens >= 0
-        && parts.tens <= 10
+        && parts.tens <= (usesHundreds ? 9 : 10)
         && Number.isInteger(parts.ones)
         && parts.ones >= 0
         && parts.ones <= 9
-        && parts.tens * 10 + parts.ones === number;
+        && reconstructed === number;
 }
 
-export function analyzeTenStepProblem(data: TenStepProblem): TenStepAnalysis {
+export function analyzeTenStepProblem(data: TenStepProblem): PlaceValueStepAnalysis {
     const {
         numObjects: start,
         incDecAnswer: result,
@@ -40,17 +49,17 @@ export function analyzeTenStepProblem(data: TenStepProblem): TenStepAnalysis {
         resultPlaceValue: resultParts
     } = data;
 
-    if (simpleAnswer !== start || stepSize !== 10) {
+    if (simpleAnswer !== start || (stepSize !== 10 && stepSize !== 100)) {
         throw new ViewValidationError(
             'counting-ten-more-less',
-            'Expected simpleAnswer to equal the start and stepSize to equal 10.'
+            'Expected simpleAnswer to equal the start and stepSize to equal 10 or 100.'
         );
     }
 
     if (!isValidPlaceValue(start, startParts) || !isValidPlaceValue(result, resultParts)) {
         throw new ViewValidationError(
             'counting-ten-more-less',
-            'Expected consistent place-value decompositions for values from 0 through 100.'
+            'Expected consistent place-value decompositions for values from 0 through 1000.'
         );
     }
 
@@ -59,15 +68,16 @@ export function analyzeTenStepProblem(data: TenStepProblem): TenStepAnalysis {
         : direction === 'dec'
             ? start - stepSize
             : null;
+    const unchangedLowerPlaces = stepSize === 10
+        ? resultParts.ones === startParts.ones
+        : resultParts.ones === startParts.ones && resultParts.tens === startParts.tens;
 
-    if (expectedResult === null || result !== expectedResult
-        || resultParts.ones !== startParts.ones
-        || Math.abs(resultParts.tens - startParts.tens) !== 1) {
+    if (expectedResult === null || result !== expectedResult || !unchangedLowerPlaces) {
         throw new ViewValidationError(
             'counting-ten-more-less',
-            'Expected a ten-more or ten-less transition with an unchanged ones digit.'
+            `Expected a ${stepSize}-more or ${stepSize}-less transition with unchanged lower places.`
         );
     }
 
-    return {direction, start, result, startParts, resultParts};
+    return {direction, start, result, stepSize, startParts, resultParts};
 }

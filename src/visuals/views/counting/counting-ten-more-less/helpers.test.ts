@@ -28,6 +28,7 @@ describe('counting-ten-more-less helpers', () => {
             direction: 'inc',
             start: 23,
             result: 33,
+            stepSize: 10,
             startParts: {tens: 2, ones: 3},
             resultParts: {tens: 3, ones: 3}
         });
@@ -38,6 +39,7 @@ describe('counting-ten-more-less helpers', () => {
             direction: 'dec',
             start: 33,
             result: 23,
+            stepSize: 10,
             startParts: {tens: 3, ones: 3},
             resultParts: {tens: 2, ones: 3}
         });
@@ -53,6 +55,27 @@ describe('counting-ten-more-less helpers', () => {
         const analysis = analyzeTenStepProblem(problem(100, 90, 'dec'));
         expect(analysis.startParts).toEqual({tens: 10, ones: 0});
         expect(analysis.resultParts).toEqual({tens: 9, ones: 0});
+    });
+
+    it('analyzes one hundred more while preserving lower places', () => {
+        const data: TenStepProblem = {
+            numObjects: 246,
+            incDecAnswer: 346,
+            incDecType: 'inc',
+            simpleAnswer: 246,
+            stepSize: 100,
+            startPlaceValue: {hundreds: 2, tens: 4, ones: 6},
+            resultPlaceValue: {hundreds: 3, tens: 4, ones: 6}
+        };
+
+        expect(analyzeTenStepProblem(data)).toEqual({
+            direction: 'inc',
+            start: 246,
+            result: 346,
+            stepSize: 100,
+            startParts: {hundreds: 2, tens: 4, ones: 6},
+            resultParts: {hundreds: 3, tens: 4, ones: 6}
+        });
     });
 
     it.each([

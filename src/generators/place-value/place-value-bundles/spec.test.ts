@@ -41,4 +41,18 @@ describe('PlaceValueBundlesGenerator spec integration', () => {
         });
         expect(stub!.tags).toContain(Scope.NumbersSmaller10);
     });
+
+    it('resolves multiples of one hundred into hundred bundles', () => {
+        const stub = generateWithLabels(generator, [
+            Area.PlaceValue,
+            Scope.MultiplesOf100,
+            Scope.NumbersSmaller1000,
+            Scope.NumbersWithoutZero,
+            Scope.PhysicalNumbers
+        ]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.hundreds).toBeGreaterThanOrEqual(1);
+        expect(stub!.data.target % 100).toBe(0);
+        expect(stub!.tags).toContain(Scope.MultiplesOf100);
+    });
 });

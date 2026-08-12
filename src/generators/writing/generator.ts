@@ -9,7 +9,7 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
     schema = WritingGeneratorSchema;
 
     generate(config: WritingGeneratorConfig): ProblemStub | null {
-        validateConfigFields('writing', config, ['range', 'requireZero']);
+        validateConfigFields('writing', config, ['notationFamily', 'range', 'requireZero']);
         const resolvedRange = config.range!;
 
         if (config.requireZero) {

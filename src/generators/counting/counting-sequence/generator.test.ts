@@ -67,6 +67,23 @@ describe('CountingSequenceGenerator', () => {
         expect(stub!.data.stepSize).toBe(10);
     });
 
+    it.each([
+        [Scope.StepsOf5, 5],
+        [Scope.StepsOf100, 100]
+    ] as const)('supports %s through 1000', (stepMagnitude, expectedStep) => {
+        const stub = generator.generate({
+            range: {min: 1, max: 1000},
+            stepMagnitude,
+            requireMultipleOf10: false
+        });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.stepSize).toBe(expectedStep);
+        expect(stub!.data.sequence.at(-1)).toBeLessThanOrEqual(1000);
+        stub!.data.sequence.slice(1).forEach((value, index) => {
+            expect(value - stub!.data.sequence[index]).toBe(expectedStep);
+        });
+    });
+
     it('aligns steps of ten when multiples of ten are required', () => {
         const stub = generator.generate({
             range: {min: 3, max: 100},

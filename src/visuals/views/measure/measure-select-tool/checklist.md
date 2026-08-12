@@ -1,0 +1,3 @@
+- **Identity:** One familiar object appears with both a ruler and a measuring tape as competing choices.
+- **Modes:** Question Mode leaves both tools unmarked; Solution Mode visibly marks the tool appropriate to the object's scale.
+- **Tool labels:** `PhysicalRuler` requires the ruler to be correct; `Tapemeter` requires the measuring tape to be correct.

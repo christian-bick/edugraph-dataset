@@ -1,7 +1,7 @@
 import {Scope} from 'edugraph-ts';
 import {ViewValidationError} from '../../../helpers/validation.ts';
 
-export const MAX_ARABIC_SEQUENCE_VALUE = 120;
+export const MAX_ARABIC_SEQUENCE_VALUE = 1000;
 export const MAX_PHYSICAL_SEQUENCE_VALUE = 20;
 export const MAX_PHYSICAL_SEQUENCE_LENGTH = 6;
 

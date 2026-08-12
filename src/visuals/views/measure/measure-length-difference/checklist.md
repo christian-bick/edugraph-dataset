@@ -1,0 +1,2 @@
+- **Identity:** Two bars begin at the same baseline, carry visible measurements in one unit, and differ by the requested amount.
+- **Modes:** Question Mode withholds the numerical difference; Solution Mode reveals the coherent difference with its unit.

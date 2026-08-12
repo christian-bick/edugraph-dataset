@@ -12,12 +12,14 @@ export class CountingSequenceGenerator implements ProblemGenerator<CountingSeque
     generate(config: CountingSequenceGeneratorConfig): ProblemStub<CountingSequenceProblem> | null {
         validateConfigFields('counting-sequence', config, ['range', 'stepMagnitude', 'requireMultipleOf10']);
 
-        const stepSize = config.stepMagnitude === Scope.StepsOf1
-            ? 1
-            : config.stepMagnitude === Scope.StepsOf10
-                ? 10
-                : null;
-        if (stepSize === null) {
+        const stepSizes = new Map<string, 1 | 5 | 10 | 100>([
+            [Scope.StepsOf1, 1],
+            [Scope.StepsOf5, 5],
+            [Scope.StepsOf10, 10],
+            [Scope.StepsOf100, 100]
+        ]);
+        const stepSize = stepSizes.get(config.stepMagnitude!);
+        if (stepSize === undefined) {
             throw new GeneratorValidationError('counting-sequence', 'Unsupported step magnitude.');
         }
         if (config.requireMultipleOf10 && stepSize !== 10) return null;

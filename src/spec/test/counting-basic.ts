@@ -108,11 +108,24 @@ const countTo100Builder = new DatasetPermutationBuilder()
         [Scope.StepsOf10, Scope.MultiplesOf10]
     ]);
 
+const parityBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.OddAndEvenGroups,
+        Scope.PhysicalNumbers,
+        Scope.NumbersSmaller20,
+        Ability.ConceptClassification
+    ])
+    .applyLabelVariants([
+        [Scope.EvenNumbers],
+        [Scope.OddNumbers]
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-counting-basic', builder),
     ...toTargets('test-counting-basic-box-arrangement', boxArrangementBuilder),
     ...toTargets('test-counting-inc-dec', incDecBuilder),
     ...toTargets('test-counting-to-100', countTo100Builder),
+    ...toTargets('test-counting-parity', parityBuilder),
     ...toTargets('test-classify-count', classifyBuilder),
     ...toTargets('test-classify-sort', sortBuilder)
 ];

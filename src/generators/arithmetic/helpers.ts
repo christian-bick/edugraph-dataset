@@ -10,11 +10,29 @@ export const arithmeticOperations = [
 
 export type ArithmeticOperationLabel = typeof arithmeticOperations[number];
 
+export type AddSubtractOperationLabel = typeof Area.Addition | typeof Area.Subtraction;
+
+export type TwoStepOperationLabels = readonly [
+    AddSubtractOperationLabel,
+    AddSubtractOperationLabel
+];
+
 /** Resolves only an explicitly requested operation, never a related ontology label. */
 export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
     // Preserve the schema-array resolver's single RNG draw for stable pair samples.
     random();
     return arithmeticOperations.find(operation => labels.includes(operation)) ?? 'unsupported';
+}
+
+/** Resolves the operation sequence required by a connected two-step word problem. */
+export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabels | 'unsupported' {
+    const hasAddition = labels.includes(Area.Addition);
+    const hasSubtraction = labels.includes(Area.Subtraction);
+
+    if (hasAddition && hasSubtraction) return [Area.Addition, Area.Subtraction];
+    if (hasAddition) return [Area.Addition, Area.Addition];
+    if (hasSubtraction) return [Area.Subtraction, Area.Subtraction];
+    return 'unsupported';
 }
 
 export const operationNames: Record<ArithmeticOperationLabel, 'addition' | 'subtraction' | 'multiplication' | 'division'> = {

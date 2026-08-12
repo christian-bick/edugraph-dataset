@@ -1,0 +1,83 @@
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
+import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {withConfig} from '../../withConfig.tsx';
+import {OperationsNumberArrayViewConfig, OperationsNumberArrayViewSchema} from './spec.ts';
+import '../../../../tailwind.css';
+
+interface CoreProps {
+    config: OperationsNumberArrayViewConfig;
+    payload: ViewRenderPayload<'operations-number-array'>;
+}
+
+const OperationsNumberArrayCore = ({config, payload}: CoreProps) => {
+    const {problem, isSolutionView} = payload;
+    const data = problem.data;
+    validateProblemData('operations-number-array', data, ['rows', 'columns', 'total', 'addends']);
+
+    if (!Number.isInteger(data.rows) || data.rows < 2 || data.rows > 5
+        || !Number.isInteger(data.columns) || data.columns < 2 || data.columns > 5) {
+        throw new ViewValidationError('operations-number-array', 'Rows and columns must each be integers from 2 through 5.');
+    }
+    if (data.total !== data.rows * data.columns
+        || data.addends.length !== data.rows
+        || data.addends.some(addend => addend !== data.columns)) {
+        throw new ViewValidationError('operations-number-array', 'Array dimensions, total, and repeated addends must agree.');
+    }
+
+    return (
+        <div className="w-[620px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            <div className="text-center">
+                <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">Number array</div>
+                <div className="mt-2 text-xl font-semibold text-slate-700">
+                    {config.showEquation ? 'Write the array as equal addends.' : 'How many objects are in the array?'}
+                </div>
+            </div>
+
+            <div className="mt-6 flex min-h-[250px] items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-6">
+                <div
+                    className="grid gap-3"
+                    style={{gridTemplateColumns: `repeat(${data.columns}, minmax(0, 1fr))`}}
+                    aria-label={`${data.rows} rows by ${data.columns} columns`}
+                >
+                    {Array.from({length: data.total}, (_, index) => (
+                        <div key={index} className="flex size-12 items-center justify-center rounded-lg border-2 border-indigo-300 bg-white">
+                            <div className="size-6 rounded-full bg-indigo-500" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="mt-5 flex min-h-16 items-center justify-center rounded-xl border border-slate-200 px-5 py-4 font-mono text-2xl font-bold text-slate-700">
+                {config.showEquation ? (
+                    <>
+                        <span>{data.addends.join(' + ')}</span>
+                        <span className="mx-3">=</span>
+                        <span className="inline-flex min-w-16 justify-center rounded-md border-2 border-slate-700 px-3 py-1 text-emerald-700">
+                            {isSolutionView ? data.total : ''}
+                        </span>
+                    </>
+                ) : (
+                    <>
+                        <span className="mr-4 font-sans text-lg font-semibold text-slate-600">Total objects</span>
+                        <span className="inline-flex min-w-20 justify-center rounded-md border-2 border-slate-700 px-3 py-1 text-emerald-700">
+                            {isSolutionView ? data.total : ''}
+                        </span>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export const OperationsNumberArray = withConfig(OperationsNumberArrayViewSchema, OperationsNumberArrayCore);
+
+let root: ReturnType<typeof createRoot> | null = null;
+
+window.renderView = (payload: ViewRenderPayload<'operations-number-array'>) => {
+    const container = document.getElementById('view');
+    if (container) {
+        if (!root) root = createRoot(container);
+        root.render(<OperationsNumberArray payload={payload} />);
+    }
+};

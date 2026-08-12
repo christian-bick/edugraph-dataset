@@ -1,2 +1,3 @@
 - **Identity:** A horizontal arithmetic equation contains exactly one visually identifiable unknown value.
 - **Modes:** Question Mode leaves that value empty; Solution Mode reveals it in the same equation position.
+- **Iterated-operation evidence:** When the target includes `IteratedOperation`, the same visible value must occupy both addend positions. This repeated operand value is the required evidence; multiple operator glyphs are not required.

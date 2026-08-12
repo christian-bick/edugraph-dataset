@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Scope, deductAdmitting} from 'edugraph-ts';
+import {Ability, Area, Scope, deductAdmitting} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 import { hasLabel } from '../../../../lib/resolvers.ts';
 
@@ -13,6 +13,7 @@ export const spec: ViewSpec = {
     ],
     rejectedLabels: [
         Scope.IntegerNumbers,
+        Area.Estimation,
         ...deductAdmitting([Scope.NumbersLarger20])
     ]
 };

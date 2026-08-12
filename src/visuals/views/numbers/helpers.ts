@@ -14,10 +14,10 @@ export function validatePictorialComparisonCounts(viewId: string, num1: number, 
 }
 
 export function validateWritingNumber(viewId: string, number: number): void {
-    if (!Number.isInteger(number) || number < 0 || number > 120) {
+    if (!Number.isInteger(number) || number < 0 || number > 1000) {
         throw new ViewValidationError(
             viewId,
-            `number must be an integer between 0 and 120; received ${number}.`
+            `number must be an integer between 0 and 1000; received ${number}.`
         );
     }
 }

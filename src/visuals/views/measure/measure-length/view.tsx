@@ -51,6 +51,8 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
     const bandWidth = bandLength * pxPerUnit + margin * 2;
     const rectWidth = problemLength * pxPerUnit + margin;
     const displayLength = problemLength * pxPerUnit;
+    const toolName = data.tool === 'tape' ? 'Measuring tape' : data.tool === 'ruler' ? 'Ruler' : null;
+    const toolFill = data.tool === 'ruler' ? '#fde68a' : data.tool === 'tape' ? '#fef3c7' : '#f0f0f0';
 
     const ticks = useMemo(() => {
         return getRulerTicks(bandLength, margin, pxPerUnit);
@@ -62,6 +64,11 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
                 {!isSolutionView && isReverse && (
                     <div className="text-xl font-bold text-slate-700 font-sans mb-2">
                         Draw an object of the given length on the ruler:
+                    </div>
+                )}
+                {toolName && (
+                    <div className="rounded-full bg-amber-100 px-4 py-1 text-sm font-bold uppercase tracking-wide text-amber-900">
+                        {toolName}
                     </div>
                 )}
                 <div className="flex flex-col items-start">
@@ -76,7 +83,7 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
 
                     {/* Measure Band (Ruler) */}
                     <svg className="h-[50px] overflow-visible" width={bandWidth} height="50">
-                        <rect x={margin} y="0" width={data.bandLength * pxPerUnit} height="20" fill="#f0f0f0" stroke="black" strokeWidth="1" />
+                        <rect x={margin} y="0" width={data.bandLength * pxPerUnit} height="20" rx={data.tool === 'tape' ? 8 : 0} fill={toolFill} stroke="black" strokeWidth="1" />
                         {ticks.map((tick, i) => (
                             <React.Fragment key={i}>
                                 <line 

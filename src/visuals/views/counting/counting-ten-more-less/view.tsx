@@ -28,6 +28,40 @@ function TenBundles({count, highlighted}: {count: number; highlighted: boolean})
     );
 }
 
+function Hundreds({count, highlighted}: {count: number; highlighted: boolean}) {
+    return (
+        <div className="grid min-h-[54px] grid-cols-3 place-content-center gap-1" aria-label={`${count} hundred blocks`}>
+            {Array.from({length: count}, (_, index) => (
+                <span key={index} className={`size-6 border-2 ${
+                    highlighted ? 'border-emerald-700 bg-emerald-200' : 'border-indigo-600 bg-indigo-100'
+                }`} />
+            ))}
+        </div>
+    );
+}
+
+function CompactTens({count, highlighted}: {count: number; highlighted: boolean}) {
+    return (
+        <div className="grid min-h-[54px] grid-cols-5 place-content-center items-end gap-1" aria-label={`${count} ten bundles`}>
+            {Array.from({length: count}, (_, index) => (
+                <span key={index} className={`h-9 w-2 border-2 ${
+                    highlighted ? 'border-emerald-700 bg-emerald-200' : 'border-sky-700 bg-sky-200'
+                }`} />
+            ))}
+        </div>
+    );
+}
+
+function Ones({count}: {count: number}) {
+    return (
+        <div className="grid min-h-[54px] grid-cols-5 place-content-center gap-1" aria-label={`${count} ones`}>
+            {Array.from({length: count}, (_, index) => (
+                <span key={index} className="size-3 rounded-sm border border-amber-700 bg-amber-200" />
+            ))}
+        </div>
+    );
+}
+
 function PlaceValuePanel({
     label,
     value,
@@ -77,6 +111,49 @@ function PlaceValuePanel({
     );
 }
 
+function ExtendedPlaceValuePanel({
+    label,
+    value,
+    parts,
+    reveal,
+    highlighted
+}: {
+    label: string;
+    value: number;
+    parts: PlaceValueParts;
+    reveal: boolean;
+    highlighted: boolean;
+}) {
+    const resultClass = highlighted ? 'text-emerald-700' : 'text-slate-800';
+    const cells = [
+        {label: 'Hundreds', value: parts.hundreds ?? 0, blocks: <Hundreds count={parts.hundreds ?? 0} highlighted={highlighted}/>},
+        {label: 'Tens', value: parts.tens, blocks: <CompactTens count={parts.tens} highlighted={highlighted}/>},
+        {label: 'Ones', value: parts.ones, blocks: <Ones count={parts.ones}/>}
+    ];
+
+    return (
+        <div className={`flex w-[260px] flex-col items-center gap-3 rounded-2xl border-2 p-4 ${
+            highlighted ? 'border-emerald-600 bg-emerald-50' : 'border-slate-300 bg-slate-50'
+        }`}>
+            <div className="text-sm font-bold uppercase tracking-wider text-slate-500">{label}</div>
+            <div className={`h-[54px] text-[2.75rem] font-extrabold leading-[54px] ${resultClass}`}>
+                {reveal ? value : '?'}
+            </div>
+            <div className="grid w-full grid-cols-3 overflow-hidden rounded-xl border-2 border-slate-300 bg-white">
+                {cells.map((cell, index) => (
+                    <div key={cell.label} className={`flex min-h-[132px] flex-col items-center justify-between gap-2 p-2 ${index < 2 ? 'border-r-2 border-slate-300' : ''}`}>
+                        <span className="text-[0.65rem] font-bold uppercase tracking-wide text-slate-500">{cell.label}</span>
+                        {reveal ? cell.blocks : <span className="my-auto text-4xl font-bold text-slate-400">?</span>}
+                        <span className={`text-lg font-bold ${cell.label === 'Ones' ? 'text-amber-800' : resultClass}`}>
+                            {reveal ? cell.value : '?'}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 const CountingTenMoreLessCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
@@ -92,8 +169,10 @@ const CountingTenMoreLessCore = ({config: _config, payload}: CoreProps) => {
 
     const analysis = analyzeTenStepProblem(data);
     const isIncrement = analysis.direction === 'inc';
-    const prompt = isIncrement ? 'Find 10 more.' : 'Find 10 less.';
-    const stepLabel = isIncrement ? '+ 1 ten' : '− 1 ten';
+    const unit = analysis.stepSize === 100 ? 'hundred' : 'ten';
+    const prompt = `Find ${analysis.stepSize} ${isIncrement ? 'more' : 'less'}.`;
+    const dynamicStepLabel = `${isIncrement ? '+' : '−'} 1 ${unit}`;
+    const useHundreds = analysis.startParts.hundreds !== undefined;
 
     return (
         <div className="flex w-fit items-center justify-center rounded-2xl bg-white p-[30px] font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
@@ -102,33 +181,31 @@ const CountingTenMoreLessCore = ({config: _config, payload}: CoreProps) => {
                     {isSolutionView ? '' : prompt}
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <PlaceValuePanel
-                        label="Start"
-                        value={analysis.start}
-                        parts={analysis.startParts}
-                        revealTens
-                        highlighted={false}
-                    />
+                <div className="flex items-center gap-3">
+                    {useHundreds ? (
+                        <ExtendedPlaceValuePanel label="Start" value={analysis.start} parts={analysis.startParts} reveal highlighted={false}/>
+                    ) : (
+                        <PlaceValuePanel label="Start" value={analysis.start} parts={analysis.startParts} revealTens highlighted={false}/>
+                    )}
 
                     <div className="flex w-[112px] flex-col items-center gap-2">
                         <span className="text-4xl font-bold text-slate-400">→</span>
                         <span className="rounded-full bg-amber-100 px-3 py-1 text-lg font-bold text-amber-800">
-                            {stepLabel}
+                            {dynamicStepLabel}
                         </span>
                     </div>
 
-                    <PlaceValuePanel
-                        label="Result"
-                        value={analysis.result}
-                        parts={analysis.resultParts}
-                        revealTens={isSolutionView}
-                        highlighted={isSolutionView}
-                    />
+                    {useHundreds ? (
+                        <ExtendedPlaceValuePanel label="Result" value={analysis.result} parts={analysis.resultParts} reveal={isSolutionView} highlighted={isSolutionView}/>
+                    ) : (
+                        <PlaceValuePanel label="Result" value={analysis.result} parts={analysis.resultParts} revealTens={isSolutionView} highlighted={isSolutionView}/>
+                    )}
                 </div>
 
                 <div className="rounded-xl border-2 border-indigo-200 bg-indigo-50 px-6 py-3 text-xl font-bold text-indigo-800">
-                    Ones stay the same: {analysis.startParts.ones} = {analysis.resultParts.ones}
+                    {analysis.stepSize === 100
+                        ? `Tens and ones stay the same: ${analysis.startParts.tens}${analysis.startParts.ones} = ${analysis.resultParts.tens}${analysis.resultParts.ones}`
+                        : `Ones stay the same: ${analysis.startParts.ones} = ${analysis.resultParts.ones}`}
                 </div>
             </div>
         </div>

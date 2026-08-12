@@ -46,4 +46,21 @@ describe('CountingSequenceGenerator spec integration', () => {
         expect(stub!.tags).toContain(Scope.StepsOf10);
         expect(stub!.tags).toContain(Scope.MultiplesOf10);
     });
+
+    it.each([
+        [Scope.StepsOf5, 5],
+        [Scope.StepsOf100, 100]
+    ] as const)('resolves %s labels through 1000', (stepLabel, expectedStep) => {
+        const stub = generateWithLabels(generator, [
+            Area.NumerationWithIntegers,
+            Scope.After,
+            Scope.ArabicNumerals,
+            Scope.NumbersSmaller1000,
+            stepLabel
+        ]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.stepSize).toBe(expectedStep);
+        expect(stub!.data.sequence.at(-1)).toBeLessThanOrEqual(1000);
+        expect(stub!.tags).toContain(stepLabel);
+    });
 });

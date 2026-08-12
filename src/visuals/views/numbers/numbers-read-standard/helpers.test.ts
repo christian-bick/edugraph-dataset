@@ -17,12 +17,16 @@ describe('numbers-read-standard helpers', () => {
         [101, 'one hundred one'],
         [110, 'one hundred ten'],
         [119, 'one hundred nineteen'],
-        [120, 'one hundred twenty']
+        [120, 'one hundred twenty'],
+        [342, 'three hundred forty-two'],
+        [900, 'nine hundred'],
+        [999, 'nine hundred ninety-nine'],
+        [1000, 'one thousand']
     ] as const)('converts %i to %s', (number, expected) => {
         expect(numberToEnglishName(number)).toBe(expected);
     });
 
-    it.each([-1, 121, 1.5])('rejects the unsupported value %s', number => {
+    it.each([-1, 1001, 1.5])('rejects the unsupported value %s', number => {
         expect(() => numberToEnglishName(number)).toThrow(RangeError);
     });
 });

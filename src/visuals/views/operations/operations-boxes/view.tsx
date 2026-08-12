@@ -22,8 +22,11 @@ const OperationsBoxesCore = ({config: _config, payload}: CoreProps) => {
     const data = problem.data;
     validateProblemData('operations-boxes', data, ['num1', 'num2', 'operation', 'answer']);
 
-    const isTriple = data.num3 !== undefined;
-    if (isTriple) {
+    const isFour = 'num4' in data && data.num4 !== undefined;
+    const isTriple = !isFour && data.num3 !== undefined;
+    if (isFour) {
+        validateProblemData('operations-boxes', data, ['num3', 'num4']);
+    } else if (isTriple) {
         validateProblemData('operations-boxes', data, ['num3']);
     } else {
         validateProblemData('operations-boxes', data, ['blankPart']);
@@ -34,8 +37,10 @@ const OperationsBoxesCore = ({config: _config, payload}: CoreProps) => {
         throw new ViewValidationError('operations-boxes', `Unsupported operation: ${data.operation}`);
     }
 
-    const blankPart = isTriple ? 'solution' : data.blankPart;
-    const operands = isTriple
+    const blankPart = isFour || isTriple ? 'solution' : data.blankPart;
+    const operands = isFour
+        ? ([['num1', data.num1], ['num2', data.num2], ['num3', data.num3], ['num4', data.num4]] as const)
+        : isTriple
         ? ([['num1', data.num1], ['num2', data.num2], ['num3', data.num3]] as const)
         : ([['num1', data.num1], ['num2', data.num2]] as const);
 

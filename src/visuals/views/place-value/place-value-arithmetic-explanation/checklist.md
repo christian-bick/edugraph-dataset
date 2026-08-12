@@ -1,0 +1,3 @@
+- **Identity:** A two-operand equation, separate hundreds/tens/ones evidence, and an explanation response area make the place-value strategy prompt assessable.
+- **Question mode:** The numerical answer and prose response are withheld, while the equation operands and place-value evidence remain visible.
+- **Solution mode:** The answer and three ordered strategy statements are revealed and mathematically agree with the equation.

@@ -31,11 +31,11 @@ const resolveDirection = selectCanonicalLabel([
 
 export const CountingIncDecGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
         resolveRangeFromLabels
     ],
     direction: [countingDirections, resolveDirection],
-    stepMagnitude: [Scope.StepsOf1, Scope.StepsOf10]
+    stepMagnitude: [Scope.StepsOf1, Scope.StepsOf10, Scope.StepsOf100]
 } as const;
 
 export type CountingIncDecGeneratorConfig = ConfigFromSchema<typeof CountingIncDecGeneratorSchema>;

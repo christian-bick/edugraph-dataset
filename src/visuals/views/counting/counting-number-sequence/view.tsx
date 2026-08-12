@@ -34,8 +34,8 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
     if (!Number.isInteger(data.answer) || data.sequence[data.missingIndex] !== data.answer) {
         throw new ViewValidationError('counting-number-sequence', 'Answer does not match the missing sequence value.');
     }
-    if (data.stepSize !== 1 && data.stepSize !== 10) {
-        throw new ViewValidationError('counting-number-sequence', 'Step size must be 1 or 10.');
+    if (![1, 5, 10, 100].includes(data.stepSize)) {
+        throw new ViewValidationError('counting-number-sequence', 'Step size must be 1, 5, 10, or 100.');
     }
     for (let index = 1; index < data.sequence.length; index++) {
         if (data.sequence[index] - data.sequence[index - 1] !== data.stepSize) {
@@ -44,6 +44,7 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
     }
 
     const {usesTiles, tileSizeClass, tileClass} = resolveSequenceLayout(config.representation, data.sequence);
+    const numeralSizeClass = Math.max(...data.sequence) >= 1000 ? 'text-lg' : 'text-xl';
 
     return (
         <div className="flex justify-center items-center p-6 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] w-fit mx-auto font-sans">
@@ -62,7 +63,7 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
                         return (
                             <div
                                 key={`${index}-${value}`}
-                                className={`${tileSizeClass} border-2 rounded-lg flex flex-col items-center justify-center text-xl font-mono font-bold text-slate-800 ${solutionClass}`}
+                                className={`${tileSizeClass} border-2 rounded-lg flex flex-col items-center justify-center ${numeralSizeClass} font-mono font-bold text-slate-800 ${solutionClass}`}
                             >
                                 {isMissing && !isSolutionView ? '' : (
                                     <>

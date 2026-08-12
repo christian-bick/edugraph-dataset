@@ -1,5 +1,5 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
@@ -8,7 +8,7 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.VisualArticulation
     ],
-    rejectedLabels: [Area.NumerationWithIntegers],
+    rejectedLabels: [Area.NumerationWithIntegers, ...deductAdmitting([Scope.NumbersLarger120])],
 };
 
 

@@ -86,4 +86,21 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub!.tags).toContain(Area.Increment);
         expect(stub!.tags).toContain(Scope.StepsOf10);
     });
+
+    it('resolves a one-hundred step through 1000', () => {
+        const stub = generateWithLabels(generator, [
+            Area.NumerationWithIntegers,
+            Area.Increment,
+            Scope.NumbersLarger100,
+            Scope.NumbersSmaller1000,
+            Scope.StepsOf100
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.stepSize).toBe(100);
+        expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 100);
+        expect(stub!.data.resultPlaceValue.tens).toBe(stub!.data.startPlaceValue.tens);
+        expect(stub!.data.resultPlaceValue.ones).toBe(stub!.data.startPlaceValue.ones);
+        expect(stub!.tags).toContain(Scope.StepsOf100);
+    });
 });

@@ -1,0 +1,3 @@
+- **Identity:** Two aligned bars have equal total length but are partitioned into visibly different unit sizes and counts.
+- **Modes:** Question Mode asks which unit size needs more pieces; Solution Mode states the inverse relationship and compares the two counts.
+- **Scale relation:** The smaller unit always has the larger count while both rows span exactly the same visible length.

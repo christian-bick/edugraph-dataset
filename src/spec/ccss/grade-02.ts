@@ -87,6 +87,7 @@ const evenEqualAddendsBuilder = new DatasetPermutationBuilder()
         Scope.EvenNumbers,
         Scope.ExpressionOnOneSide,
         Scope.TwoOperands,
+        Scope.NumbersSmaller20,
         Ability.Formalization
     ]);
 
@@ -95,7 +96,6 @@ const numberArrayTotalBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Addition,
         Scope.NumberArray,
-        Scope.BoxArrangement,
         Ability.ProcedureExecution
     ]);
 
@@ -106,7 +106,6 @@ const numberArrayEquationBuilder = new DatasetPermutationBuilder()
         Area.Equation,
         Area.IteratedOperation,
         Scope.NumberArray,
-        Scope.BoxArrangement,
         Scope.ExpressionOnOneSide,
         Ability.Formalization
     ]);
@@ -162,6 +161,7 @@ const baseTenNumeralsBuilder = new DatasetPermutationBuilder()
         Area.DigitNotation,
         Scope.ArabicNumerals,
         Scope.Base10,
+        Scope.NumbersLarger120,
         Scope.NumbersSmaller1000
     ])
     .applyLabelVariants([
@@ -185,6 +185,7 @@ const expandedFormBuilder = new DatasetPermutationBuilder()
         Area.Sum,
         Scope.ArabicNumerals,
         Scope.Base10,
+        Scope.NumbersLarger100,
         Scope.NumbersSmaller1000,
         Ability.Formalization
     ])
@@ -358,6 +359,7 @@ const useLengthToolBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringObjects,
         Scope.LengthMeasurement,
+        Scope.IntegerNumbers,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -620,139 +622,39 @@ const equalShareShapeEquivalenceBuilder = new DatasetPermutationBuilder()
 
 export const spec: CompetencyTarget[] = [
     // 2.OA - Operations and Algebraic Thinking
+    ...toTargets('2.OA.A.1-one-step-word-problems', oneStepWordProblemsBuilder),
+    ...toTargets('2.OA.A.1-two-step-word-problems', twoStepWordProblemsBuilder),
     ...toTargets('2.OA.B.2-fluency', fluencyWithin20Builder),
+    ...toTargets('2.OA.C.3-object-group-parity', objectGroupParityBuilder),
+    ...toTargets('2.OA.C.3-even-equal-addends', evenEqualAddendsBuilder),
+    ...toTargets('2.OA.C.4-number-array-total', numberArrayTotalBuilder),
+    ...toTargets('2.OA.C.4-number-array-equation', numberArrayEquationBuilder),
     // 2.NBT - Number and Operations in Base Ten
+    ...toTargets('2.NBT.A.1a-ten-tens-make-hundred', tenTensMakeHundredBuilder),
+    ...toTargets('2.NBT.A.1b-hundreds', hundredsBuilder),
+    ...toTargets('2.NBT.A.2-count-within-1000', countWithin1000Builder),
+    ...toTargets('2.NBT.A.3-base-ten-numerals', baseTenNumeralsBuilder),
+    ...toTargets('2.NBT.A.3-number-names', numberNamesBuilder),
+    ...toTargets('2.NBT.A.3-expanded-form', expandedFormBuilder),
     ...toTargets('2.NBT.A.4-compare-three-digit', compareThreeDigitBuilder),
     ...toTargets('2.NBT.B.5-fluency', fluencyWithin100Builder),
     ...toTargets('2.NBT.B.6-two-three-addends', twoThreeAddendsBuilder),
+    ...toTargets('2.NBT.B.6-four-addends', fourAddendsBuilder),
     ...toTargets('2.NBT.B.7-written-add-subtract', writtenAddSubtractBuilder),
+    ...toTargets('2.NBT.B.7-concrete-regrouping', concreteRegroupingBuilder),
+    ...toTargets('2.NBT.B.7-model-to-written-method', modelToWrittenMethodBuilder),
+    ...toTargets('2.NBT.B.8-place-value-offsets', placeValueOffsetsBuilder),
+    ...toTargets('2.NBT.B.9-explain-strategies', explainStrategiesBuilder),
+    // 2.MD - Measurement and Data
+    ...toTargets('2.MD.A.1-select-length-tool', selectLengthToolBuilder),
+    ...toTargets('2.MD.A.1-use-length-tool', useLengthToolBuilder),
+    ...toTargets('2.MD.A.2-unit-scale-relation', unitScaleRelationBuilder),
+    ...toTargets('2.MD.A.3-estimate-metric-lengths', estimateMetricLengthBuilder),
+    ...toTargets('2.MD.A.4-measured-length-difference', measuredLengthDifferenceBuilder),
+    ...toTargets('2.MD.B.5-length-word-problems', lengthWordProblemsBuilder),
     // 2.G - Geometry
     ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder)
 ];
-
-const wordProblemsWithin100Implementation = defineImplementation({
-    id: 'word-problems-within-100',
-    description: 'Add a within-100 story layout and a distinct payload for connected two-step problems, while reusing pair arithmetic for one-step and same-unit length stories.',
-    generators: [
-        { module: 'arithmetic-ops-pairs', strategy: 'reuse' },
-        { module: 'arithmetic-word-problems-two-step', strategy: 'new' }
-    ],
-    views: [{ module: 'operations-word-problem-within-100', strategy: 'new' }]
-});
-
-const objectGroupParityImplementation = defineImplementation({
-    id: 'object-group-parity',
-    description: 'Add paired-object parity classification for physical groups through 20.',
-    generators: [{ module: 'counting-basic', strategy: 'expand' }],
-    views: [{ module: 'counting-objects-parity', strategy: 'new' }]
-});
-
-const equalAddendEquationsImplementation = defineImplementation({
-    id: 'equal-addend-equations',
-    description: 'Extend pair arithmetic to generate and render equations with equal addend values.',
-    generators: [{ module: 'arithmetic-ops-pairs', strategy: 'expand' }],
-    views: [{ module: 'operations-boxes', strategy: 'expand' }]
-});
-
-const numberArraysImplementation = defineImplementation({
-    id: 'number-arrays',
-    description: 'Add rectangular number arrays with visible totals and equal-addend equations.',
-    generators: [{ module: 'number-array', strategy: 'new' }],
-    views: [{ module: 'operations-number-array', strategy: 'new' }]
-});
-
-const placeValueHundredsImplementation = defineImplementation({
-    id: 'place-value-hundreds',
-    description: 'Extend place-value bundle generation through hundreds and add a dedicated hundreds-scale layout.',
-    generators: [{ module: 'place-value-bundles', strategy: 'expand' }],
-    views: [{ module: 'place-value-hundreds-bundles', strategy: 'new' }]
-});
-
-const countingSequencesTo1000Implementation = defineImplementation({
-    id: 'counting-sequences-to-1000',
-    description: 'Extend counting sequences through 1000 with steps of 1, 5, 10, and 100.',
-    generators: [{ module: 'counting-sequence', strategy: 'expand' }],
-    views: [{ module: 'counting-number-sequence', strategy: 'expand' }]
-});
-
-const numberNotationTo1000Implementation = defineImplementation({
-    id: 'number-notation-to-1000',
-    description: 'Extend numeral reading and writing through 1000 and add written number names.',
-    generators: [{ module: 'writing', strategy: 'expand' }],
-    views: [
-        { module: 'numbers-read-standard', strategy: 'expand' },
-        { module: 'numbers-write-standard', strategy: 'expand' },
-        { module: 'numbers-write-name', strategy: 'new' }
-    ]
-});
-
-const expandedPlaceValueNotationImplementation = defineImplementation({
-    id: 'expanded-place-value-notation',
-    description: 'Add expanded-form generation and rendering for three-digit place value.',
-    generators: [{ module: 'place-value-expanded', strategy: 'new' }],
-    views: [{ module: 'place-value-expanded-form', strategy: 'new' }]
-});
-
-const fourAddendArithmeticImplementation = defineImplementation({
-    id: 'four-addend-arithmetic',
-    description: 'Add four-operand addition and adopt it in the existing arithmetic layouts.',
-    generators: [{ module: 'arithmetic-ops-four', strategy: 'new' }],
-    views: [
-        { module: 'operations-boxes', strategy: 'expand' },
-        { module: 'operations-vertical', strategy: 'expand' }
-    ]
-});
-
-const multiDigitPlaceValueArithmeticImplementation = defineImplementation({
-    id: 'multi-digit-place-value-arithmetic',
-    description: 'Add concrete regrouping, written-method mapping, and strategy explanations.',
-    generators: [{ module: 'place-value-arithmetic', strategy: 'new' }],
-    views: [
-        { module: 'place-value-arithmetic-model', strategy: 'new' },
-        { module: 'place-value-arithmetic-explanation', strategy: 'new' }
-    ]
-});
-
-const placeValueOffsetsTo1000Implementation = defineImplementation({
-    id: 'place-value-offsets-to-1000',
-    description: 'Extend ten-more/less relationships through hundreds and steps of 100.',
-    generators: [{ module: 'counting-inc-dec', strategy: 'expand' }],
-    views: [{ module: 'counting-ten-more-less', strategy: 'expand' }]
-});
-
-const standardLengthToolsImplementation = defineImplementation({
-    id: 'standard-length-tools',
-    description: 'Support selecting and visibly using standard metric length tools.',
-    generators: [
-        { module: 'measurement-tool-selection', strategy: 'new' },
-        { module: 'measurement-length', strategy: 'reuse' }
-    ],
-    views: [
-        { module: 'measure-select-tool', strategy: 'new' },
-        { module: 'measure-length-integer', strategy: 'expand' }
-    ]
-});
-
-const measurementUnitScaleImplementation = defineImplementation({
-    id: 'measurement-unit-scale-relation',
-    description: 'Add paired measurements that expose the inverse relationship between unit size and measured value.',
-    generators: [{ module: 'measurement-unit-scale', strategy: 'new' }],
-    views: [{ module: 'measure-unit-scale-relation', strategy: 'new' }]
-});
-
-const lengthEstimationImplementation = defineImplementation({
-    id: 'length-estimation',
-    description: 'Add metric length-estimation problems and an estimation layout.',
-    generators: [{ module: 'measurement-length', strategy: 'expand' }],
-    views: [{ module: 'measure-length-estimate', strategy: 'new' }]
-});
-
-const lengthComparisonByMeasureImplementation = defineImplementation({
-    id: 'length-comparison-by-measure',
-    description: 'Add numerical length-difference generation and rendering without changing the categorical comparison contract.',
-    generators: [{ module: 'measurement-length-difference', strategy: 'new' }],
-    views: [{ module: 'measure-length-difference', strategy: 'new' }]
-});
 
 const numberLineArithmeticImplementation = defineImplementation({
     id: 'number-line-arithmetic',
@@ -837,146 +739,8 @@ const equalShareShapeEquivalenceImplementation = defineImplementation({
 
 export const implementationTodos: ImplementationTodo[] = [
     // 2.OA - Operations and Algebraic Thinking
-    ...toImplementationTodos(
-        '2.OA.A.1-one-step-word-problems',
-        oneStepWordProblemsBuilder,
-        wordProblemsWithin100Implementation,
-        'Render one-step stories and equations with unknowns in the source-required positions and values within 100.'
-    ),
-    ...toImplementationTodos(
-        '2.OA.A.1-two-step-word-problems',
-        twoStepWordProblemsBuilder,
-        wordProblemsWithin100Implementation,
-        'Render genuinely connected two-step stories and equations, including mixed-operation cases, with values within 100.'
-    ),
-    ...toImplementationTodos(
-        '2.OA.C.3-object-group-parity',
-        objectGroupParityBuilder,
-        objectGroupParityImplementation,
-        'Show a physical group through 20 paired or grouped so its odd/even classification is visibly justified.'
-    ),
-    ...toImplementationTodos(
-        '2.OA.C.3-even-equal-addends',
-        evenEqualAddendsBuilder,
-        equalAddendEquationsImplementation,
-        'Show an even value equated to an addition expression whose two explicit addends have the same value.'
-    ),
-    ...toImplementationTodos(
-        '2.OA.C.4-number-array-total',
-        numberArrayTotalBuilder,
-        numberArraysImplementation,
-        'Show objects or cells in a rectangular number array and an explicit addition-derived total.'
-    ),
-    ...toImplementationTodos(
-        '2.OA.C.4-number-array-equation',
-        numberArrayEquationBuilder,
-        numberArraysImplementation,
-        'Show the rectangular number array together with an equation expressing its total as equal addends.'
-    ),
     // 2.NBT - Number and Operations in Base Ten
-    ...toImplementationTodos(
-        '2.NBT.A.1a-ten-tens-make-hundred',
-        tenTensMakeHundredBuilder,
-        placeValueHundredsImplementation,
-        'Show ten distinct tens bundled and renamed as one hundred.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.A.1b-hundreds',
-        hundredsBuilder,
-        placeValueHundredsImplementation,
-        'Represent 100 through 900 as one through nine hundreds with zero tens and zero ones.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.A.2-count-within-1000',
-        countWithin1000Builder,
-        countingSequencesTo1000Implementation,
-        'Show a visible sequence with a missing continuation and the requested step through 1000.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.A.3-base-ten-numerals',
-        baseTenNumeralsBuilder,
-        numberNotationTo1000Implementation,
-        'Pair three-digit numerals with an inspectable read prompt, word answer, or written numeral response without claiming oral performance.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.A.3-number-names',
-        numberNamesBuilder,
-        numberNotationTo1000Implementation,
-        'Show a numeral and its correctly written number name.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.A.3-expanded-form',
-        expandedFormBuilder,
-        expandedPlaceValueNotationImplementation,
-        'Decompose a numeral into a visible sum of its non-zero hundreds, tens, and ones values.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.B.6-four-addends',
-        fourAddendsBuilder,
-        fourAddendArithmeticImplementation,
-        'Show four explicit two-digit addends and their sum in an inspectable arithmetic layout.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.B.7-concrete-regrouping',
-        concreteRegroupingBuilder,
-        multiDigitPlaceValueArithmeticImplementation,
-        'Show hundreds, tens, and ones models composing or decomposing during addition or subtraction.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.B.7-model-to-written-method',
-        modelToWrittenMethodBuilder,
-        multiDigitPlaceValueArithmeticImplementation,
-        'Map the same values and regrouping steps from a concrete model into a written method.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.B.8-place-value-offsets',
-        placeValueOffsetsBuilder,
-        placeValueOffsetsTo1000Implementation,
-        'Show starting and result numerals with place-value evidence for adding or subtracting ten or one hundred.'
-    ),
-    ...toImplementationTodos(
-        '2.NBT.B.9-explain-strategies',
-        explainStrategiesBuilder,
-        multiDigitPlaceValueArithmeticImplementation,
-        'Prompt for an explanation and provide visible place-value and equation evidence that makes it assessable.'
-    ),
     // 2.MD - Measurement and Data
-    ...toImplementationTodos(
-        '2.MD.A.1-select-length-tool',
-        selectLengthToolBuilder,
-        standardLengthToolsImplementation,
-        'Show an object and competing tools with the appropriate length tool visibly selected.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.A.1-use-length-tool',
-        useLengthToolBuilder,
-        standardLengthToolsImplementation,
-        'Align the selected tool to an object and show a readable scale, unit, and measured answer.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.A.2-unit-scale-relation',
-        unitScaleRelationBuilder,
-        measurementUnitScaleImplementation,
-        'Measure the same length with differently sized units and state the inverse relationship between unit size and measured value.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.A.3-estimate-metric-lengths',
-        estimateMetricLengthBuilder,
-        lengthEstimationImplementation,
-        'Show a familiar object or span, named metric unit, estimate prompt, and plausible answer.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.A.4-measured-length-difference',
-        measuredLengthDifferenceBuilder,
-        lengthComparisonByMeasureImplementation,
-        'Show two measured objects in a common unit and their numerical length difference.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.B.5-length-word-problems',
-        lengthWordProblemsBuilder,
-        wordProblemsWithin100Implementation,
-        'Show same-unit quantities in a story whose equation, unknown, and solution agree.'
-    ),
     ...toImplementationTodos(
         '2.MD.B.6-number-line-representation',
         numberLineRepresentationBuilder,

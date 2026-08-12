@@ -17,7 +17,9 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
             'requireNegative',
             'requireZero',
             'requireMultipleOf10',
-            'invertProcedure'
+            'invertProcedure',
+            'requireEqualAddends',
+            'requireEvenResult'
         ]);
 
         const operation = config.operation!;
@@ -54,7 +56,14 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         let answer = 0;
 
         if (operation === Area.Addition) {
-            if (requireZero) {
+            if (config.requireEqualAddends) {
+                if (requireNegative || requireZero) return null;
+                const addend = randomMagnitude(minMagnitude, Math.floor(maxMagnitude / 2));
+                if (addend === null) return null;
+                num1 = addend;
+                num2 = addend;
+                answer = addend * 2;
+            } else if (requireZero) {
                 const magnitude = randomValue();
                 if (magnitude === null) return null;
                 num1 = requireNegative ? -magnitude : 0;
@@ -127,6 +136,8 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         } else {
             return null;
         }
+
+        if (config.requireEvenResult && answer % 2 !== 0) return null;
 
         const normalizeZero = (value: number) => value === 0 ? 0 : value;
         const blankPart = config.invertProcedure ? 'num2' : 'solution';

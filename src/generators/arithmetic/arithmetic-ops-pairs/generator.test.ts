@@ -53,6 +53,8 @@ describe('ArithmeticOpsPairsGenerator', () => {
                             requireZero,
                             requireMultipleOf10: false,
                             invertProcedure: false,
+                            requireEqualAddends: false,
+                            requireEvenResult: false,
                             range: {min: 1, max: 10}
                         });
                         expect(stub).not.toBeNull();
@@ -78,6 +80,8 @@ describe('ArithmeticOpsPairsGenerator', () => {
                         requireZero,
                         requireMultipleOf10: true,
                         invertProcedure: false,
+                        requireEqualAddends: false,
+                        requireEvenResult: false,
                         range: {min: 1, max: 1000}
                     });
                     expect(stub).not.toBeNull();
@@ -96,6 +100,8 @@ describe('ArithmeticOpsPairsGenerator', () => {
             requireNegative: false,
             requireZero: false,
             requireMultipleOf10: false,
+            requireEqualAddends: false,
+            requireEvenResult: false,
             range: {min: 1, max: 10}
         } as const;
 
@@ -109,10 +115,32 @@ describe('ArithmeticOpsPairsGenerator', () => {
             requireZero: false,
             requireMultipleOf10: false,
             invertProcedure: false,
+            requireEqualAddends: false,
+            requireEvenResult: false,
             range: {min: 1, max: 10}
         } as const;
 
         expect(generator.generate({...baseConfig, operation: 'unsupported'})).toBeNull();
         expect(generator.generate({...baseConfig, operation: Area.Addition, range: {min: 10, max: 1}})).toBeNull();
+    });
+
+    it('generates an even result from two equal addends when requested', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({
+                operation: Area.Addition,
+                requireNegative: false,
+                requireZero: false,
+                requireMultipleOf10: false,
+                invertProcedure: false,
+                requireEqualAddends: true,
+                requireEvenResult: true,
+                range: {min: 1, max: 20}
+            });
+            expect(stub).not.toBeNull();
+            expect(stub!.data.num1).toBe(stub!.data.num2);
+            expect(stub!.data.answer % 2).toBe(0);
+            expect(stub!.data.answer).toBeLessThanOrEqual(20);
+        }
     });
 });

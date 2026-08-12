@@ -1,2 +1,3 @@
 - **Identity:** A visible start quantity changes in the arrow's direction by its displayed step of one or ten.
 - **Modes:** Question Mode withholds the resulting quantity; Solution Mode reveals the correct result without changing the represented step.
+- **Range labels:** Numeric range labels constrain the counted start and result quantities. The smaller numeral inside the arrow is an instructional step magnitude governed independently by `StepsOf1` or `StepsOf10`, so it is not evidence against the quantity range.

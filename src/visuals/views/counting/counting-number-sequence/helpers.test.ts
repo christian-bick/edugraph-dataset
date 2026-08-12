@@ -6,10 +6,10 @@ import {
 } from './helpers.ts';
 
 describe('resolveSequenceLayout', () => {
-    it('admits a full row of ten three-digit Arabic numerals through 120', () => {
+    it('admits a full row of Arabic numerals through 1000', () => {
         const layout = resolveSequenceLayout(
             Scope.ArabicNumerals,
-            [111, 112, 113, 114, 115, 116, 117, 118, 119, 120]
+            [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
         );
 
         expect(layout.usesTiles).toBe(false);
@@ -17,8 +17,8 @@ describe('resolveSequenceLayout', () => {
     });
 
     it('rejects Arabic numerals above the supported range', () => {
-        expect(() => resolveSequenceLayout(Scope.ArabicNumerals, [120, 121]))
-            .toThrow('through 120');
+        expect(() => resolveSequenceLayout(Scope.ArabicNumerals, [1000, 1001]))
+            .toThrow('through 1000');
     });
 
     it('admits compact physical sequences through 20', () => {

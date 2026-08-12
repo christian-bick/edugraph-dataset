@@ -4,6 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'place-value-tens-bundles',
+    rejectedLabels: [Scope.MultiplesOf100],
     generalLabels: [
         Scope.PhysicalNumbers,
         Scope.ArabicNumerals,

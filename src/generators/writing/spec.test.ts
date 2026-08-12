@@ -50,4 +50,19 @@ describe('WritingGenerator Spec Integration', () => {
             expect(stub!.tags).toContain(Scope.NumbersSmaller120);
         }
     });
+
+    it('should resolve the inclusive NumbersSmaller1000 boundary', () => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [
+                Area.DigitNotation,
+                Scope.NumbersWithoutZero,
+                Scope.NumbersSmaller1000
+            ]);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.number).toBeGreaterThanOrEqual(1);
+            expect(stub!.data.number).toBeLessThanOrEqual(1000);
+            expect(stub!.tags).toContain(Scope.NumbersSmaller1000);
+        }
+    });
 });

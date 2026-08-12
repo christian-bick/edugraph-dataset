@@ -47,15 +47,17 @@ function nameUnderHundred(number: number): string {
 }
 
 export function numberToEnglishName(number: number): string {
-    if (!Number.isInteger(number) || number < 0 || number > 120) {
-        throw new RangeError('Number names are supported for integers from 0 through 120.');
+    if (!Number.isInteger(number) || number < 0 || number > 1000) {
+        throw new RangeError('Number names are supported for integers from 0 through 1000.');
     }
 
     if (number === 0) return 'zero';
     if (number < 100) return nameUnderHundred(number);
 
-    const remainder = number - 100;
-    return remainder === 0
-        ? 'one hundred'
-        : `one hundred ${nameUnderHundred(remainder)}`;
+    if (number === 1000) return 'one thousand';
+
+    const hundreds = Math.floor(number / 100);
+    const remainder = number % 100;
+    const prefix = `${ONES[hundreds]} hundred`;
+    return remainder === 0 ? prefix : `${prefix} ${nameUnderHundred(remainder)}`;
 }

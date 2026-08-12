@@ -12,6 +12,7 @@ import {
     SampleIdentity
 } from './generation.ts';
 import { isProblemTypeCompatible } from './type-parser.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('catalogs and end-to-end matching', () => {
     it('routes CCSS comparison targets to representation-compatible views', async () => {
@@ -37,7 +38,7 @@ describe('catalogs and end-to-end matching', () => {
         expect(viewsFor('1.NBT.B.3-compare-two-digit')).toEqual(new Set([
             'numbers-compare'
         ]));
-    }, 60000);
+    }, 90000);
 
     it('loads catalogs, matches the test spec and replays a sample by key', async () => {
         const [generatorCatalog, viewCatalog, targets] = await Promise.all([
@@ -49,6 +50,11 @@ describe('catalogs and end-to-end matching', () => {
         expect(generatorCatalog.length).toBeGreaterThan(0);
         expect(viewCatalog.length).toBeGreaterThan(0);
         expect(targets.length).toBeGreaterThan(0);
+
+        expect(viewCatalog
+            .find(view => view.viewId === 'operations-word-problem-within-100')
+            ?.supportedLabels
+        ).toContain(Scope.LengthMeasurement);
 
         for (const gen of generatorCatalog) {
             expect(gen.generatorId).toBeTruthy();

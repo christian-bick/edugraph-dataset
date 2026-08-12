@@ -2,6 +2,7 @@ import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-bundles',
@@ -17,8 +18,12 @@ export const spec: GeneratorSpec = {
 
 export const PlaceValueBundlesGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
         resolveRangeFromLabels
+    ],
+    useHundreds: [
+        [Scope.MultiplesOf100],
+        hasLabel(Scope.MultiplesOf100)
     ]
 } as const;
 

@@ -22,6 +22,8 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
             ? 1
             : config.stepMagnitude === Scope.StepsOf10
                 ? 10
+                : config.stepMagnitude === Scope.StepsOf100
+                    ? 100
                 : null;
         if (stepSize === null) return null;
 
@@ -47,6 +49,18 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
             ? numObjects + stepSize
             : numObjects - stepSize;
 
+        const useHundreds = resolvedRange.max > 100;
+        const decompose = (value: number) => useHundreds
+            ? {
+                hundreds: Math.floor(value / 100),
+                tens: Math.floor((value % 100) / 10),
+                ones: value % 10
+            }
+            : {
+                tens: Math.floor(value / 10),
+                ones: value % 10
+            };
+
         return {
             data: {
                 numObjects,
@@ -54,14 +68,8 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
                 incDecAnswer,
                 simpleAnswer: numObjects,
                 stepSize,
-                startPlaceValue: {
-                    tens: Math.floor(numObjects / 10),
-                    ones: numObjects % 10
-                },
-                resultPlaceValue: {
-                    tens: Math.floor(incDecAnswer / 10),
-                    ones: incDecAnswer % 10
-                }
+                startPlaceValue: decompose(numObjects),
+                resultPlaceValue: decompose(incDecAnswer)
             }
         };
     }

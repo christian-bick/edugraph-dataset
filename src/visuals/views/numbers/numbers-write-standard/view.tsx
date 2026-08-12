@@ -60,12 +60,51 @@ function DoubleTenFrame({ number }: { number: number }) {
     );
 }
 
+function ResponseBoxes({number, isSolutionView}: {number: number; isSolutionView: boolean}) {
+    return (
+        <div className="flex gap-3">
+            {Array.from({ length: 3 }).map((_, idx) => {
+                const content = isSolutionView ? String(number) : '';
+                let cls = 'border-2 border-slate-500 rounded-lg w-[84px] h-[70px] flex justify-center items-center text-[2rem] font-mono bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden';
+
+                if (isSolutionView) {
+                    cls += ' text-emerald-700 border-emerald-700 bg-emerald-50 font-bold';
+                } else {
+                    cls += ' text-slate-300 font-normal border-dashed';
+                }
+
+                return (
+                    <div key={idx} className={`${cls} relative`}>
+                        <span className="absolute left-2 right-2 top-1/2 border-t border-dashed border-slate-300" />
+                        <span className="absolute bottom-2 left-2 right-2 border-t-2 border-slate-300" />
+                        <span className="relative z-10">{content}</span>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
 const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('numbers-write-standard', data, ['number']);
     const number = data.number;
     validateWritingNumber('numbers-write-standard', number);
+
+    if (number > 120) {
+        return (
+            <div className="w-[720px] rounded-2xl bg-white p-[30px] font-sans shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
+                <div className="flex flex-col items-center gap-6">
+                    <div className="flex w-full items-center justify-center gap-8">
+                        <BaseTenSketch number={number} />
+                        <div className="min-w-[120px] text-center text-[3.5rem] font-extrabold text-slate-800">{number}</div>
+                    </div>
+                    <ResponseBoxes number={number} isSolutionView={isSolutionView} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] w-fit">
@@ -74,27 +113,7 @@ const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
                 <div className="text-[3.5rem] font-extrabold text-slate-800 min-w-[80px] text-center">
                     {number}
                 </div>
-                <div className="flex gap-3">
-                    {/* Box 1, 2 & 3: Standard Writing Response Boxes */}
-                    {Array.from({ length: 3 }).map((_, idx) => {
-                        const content = isSolutionView ? String(number) : '';
-                        let cls = 'border-2 border-slate-500 rounded-lg w-[84px] h-[70px] flex justify-center items-center text-[2rem] font-mono bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden';
-                        
-                        if (isSolutionView) {
-                            cls += ' text-emerald-700 border-emerald-700 bg-emerald-50 font-bold';
-                        } else {
-                            cls += ' text-slate-300 font-normal border-dashed';
-                        }
-
-                        return (
-                            <div key={idx} className={`${cls} relative`}>
-                                <span className="absolute left-2 right-2 top-1/2 border-t border-dashed border-slate-300" />
-                                <span className="absolute bottom-2 left-2 right-2 border-t-2 border-slate-300" />
-                                <span className="relative z-10">{content}</span>
-                            </div>
-                        );
-                    })}
-                </div>
+                <ResponseBoxes number={number} isSolutionView={isSolutionView} />
             </div>
         </div>
     );

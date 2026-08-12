@@ -9,11 +9,10 @@ export const spec: ViewSpec = {
         Ability.TextualReception
     ],
     rejectedLabels: [
-        ...deductAdmitting([Scope.NumbersLarger120])
+        ...deductAdmitting([Scope.NumbersLarger1000])
     ]
 };
 
-export const NumbersReadStandardViewSchema = {
-} as const;
+export const NumbersReadStandardViewSchema = {} as const;
 
 export type NumbersReadStandardViewConfig = ConfigFromSchema<typeof NumbersReadStandardViewSchema>;

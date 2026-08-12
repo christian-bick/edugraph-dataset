@@ -90,6 +90,35 @@ describe('CountingIncDecGenerator', () => {
         );
     });
 
+    it('increments by one hundred while preserving the tens and ones places', () => {
+        const stub = generator.generate({
+            range: {min: 101, max: 999},
+            direction: Scope.AdditiveCount,
+            stepMagnitude: Scope.StepsOf100
+        });
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 100);
+        expect(stub!.data.stepSize).toBe(100);
+        expect(stub!.data.startPlaceValue.hundreds).toBeDefined();
+        expect(stub!.data.resultPlaceValue.hundreds).toBe(stub!.data.startPlaceValue.hundreds! + 1);
+        expect(stub!.data.resultPlaceValue.tens).toBe(stub!.data.startPlaceValue.tens);
+        expect(stub!.data.resultPlaceValue.ones).toBe(stub!.data.startPlaceValue.ones);
+    });
+
+    it('uses digit-place decompositions for three-digit values', () => {
+        const stub = generator.generate({
+            range: {min: 101, max: 999},
+            direction: Scope.SubtractiveCount,
+            stepMagnitude: Scope.StepsOf10
+        });
+
+        const start = stub!.data.startPlaceValue;
+        const result = stub!.data.resultPlaceValue;
+        expect(stub!.data.numObjects).toBe(start.hundreds! * 100 + start.tens * 10 + start.ones);
+        expect(stub!.data.incDecAnswer).toBe(result.hundreds! * 100 + result.tens * 10 + result.ones);
+    });
+
     it('returns null when the range cannot fit the requested change', () => {
         expect(generator.generate({
             range: {min: 1, max: 1},

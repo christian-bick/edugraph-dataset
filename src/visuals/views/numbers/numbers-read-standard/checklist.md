@@ -1,2 +1,2 @@
-- **Identity:** An Arabic numeral and a speech-style response area make reading the number aloud identifiable.
+- **Identity:** An Arabic numeral and its response area make the reading task identifiable; high-range targets use an inspectable written-number-name prompt without claiming oral performance.
 - **Modes:** Question Mode leaves the spoken number name empty; Solution Mode reveals the correctly spelled English number name.

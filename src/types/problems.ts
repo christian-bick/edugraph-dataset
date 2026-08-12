@@ -21,8 +21,31 @@ export type ArithmeticTripleProblem = ArithmeticProblemBase & {
     blankPart?: undefined;
 };
 
+export type ArithmeticFourProblem = ArithmeticProblemBase & {
+    num1: number;
+    num2: number;
+    num3: number;
+    num4: number;
+    propertyLaw?: undefined;
+    blankPart?: undefined;
+};
+
 /** Shared payload accepted by arithmetic views that render both pairs and triples. */
-export type ArithmeticProblem = ArithmeticPairProblem | ArithmeticTripleProblem;
+export type ArithmeticProblem = ArithmeticPairProblem | ArithmeticTripleProblem | ArithmeticFourProblem;
+
+export type ArithmeticWordProblemTwoStep = {
+    kind: 'two-step';
+    num1: number;
+    num2: number;
+    num3: number;
+    operations: readonly ['addition' | 'subtraction', 'addition' | 'subtraction'];
+    intermediate: number;
+    answer: number;
+    blankPart: 'solution';
+};
+
+/** Shared payload for within-100 one-step and connected two-step word problems. */
+export type ArithmeticWordProblemWithin100 = ArithmeticPairProblem | ArithmeticWordProblemTwoStep;
 
 export type ArithmeticDecomposeProblem = {
     targetNumber: number;
@@ -38,6 +61,13 @@ export type EquationJudgmentProblem = {
     isTrue: boolean;
 };
 
+export type NumberArrayProblem = {
+    rows: number;
+    columns: number;
+    total: number;
+    addends: number[];
+};
+
 export type PlaceValueTeenProblem = {
     ones: number;
     target: number;
@@ -47,6 +77,7 @@ export type PlaceValueBundlesProblem = {
     tens: number;
     ones: 0;
     target: number;
+    hundreds?: number;
 };
 
 export type PlaceValueMakeTenProblem = {
@@ -55,9 +86,29 @@ export type PlaceValueMakeTenProblem = {
     target: 10;
 };
 
+export type PlaceValueExpandedProblem = {
+    number: number;
+    terms: number[];
+};
+
+export type PlaceValueDigits = {hundreds: number; tens: number; ones: number};
+
+export type PlaceValueArithmeticProblem = {
+    num1: number;
+    num2: number;
+    answer: number;
+    operation: 'addition' | 'subtraction';
+    operands: [PlaceValueDigits, PlaceValueDigits];
+    result: PlaceValueDigits;
+    regrouping: string;
+    equation: string;
+    strategySteps: string[];
+};
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
+    parity?: 'even' | 'odd';
 };
 
 export type CountingIncDecProblem = {
@@ -65,16 +116,16 @@ export type CountingIncDecProblem = {
     incDecType: 'inc' | 'dec';
     incDecAnswer: number;
     simpleAnswer: number;
-    stepSize: 1 | 10;
-    startPlaceValue: {tens: number; ones: number};
-    resultPlaceValue: {tens: number; ones: number};
+    stepSize: 1 | 10 | 100;
+    startPlaceValue: {hundreds?: number; tens: number; ones: number};
+    resultPlaceValue: {hundreds?: number; tens: number; ones: number};
 };
 
 export type CountingSequenceProblem = {
     sequence: number[];
     missingIndex: number;
     answer: number;
-    stepSize: 1 | 10;
+    stepSize: 1 | 5 | 10 | 100;
 };
 
 
@@ -97,7 +148,27 @@ export type MeasurementStandardProblem = {
     bandLength: number;
     problemLength: number;
     useDecimals?: boolean;
+    tool?: 'ruler' | 'tape';
 };
+
+export type MeasurementEstimateProblem = {
+    problemLength: number;
+    unit: 'cm' | 'm';
+    object: 'crayon' | 'book' | 'desk' | 'door';
+};
+
+export type MeasurementToolSelectionProblem = {
+    object: 'pencil' | 'book' | 'table' | 'door';
+    correctTool: 'ruler' | 'tape';
+    tools: ['ruler', 'tape'];
+};
+
+export type MeasurementUnitScaleProblem = {
+    largeUnitCount: number;
+    smallUnitCount: number;
+    unitsPerLarge: number;
+};
+export type MeasurementLengthDifferenceProblem = {lengthA: number; lengthB: number; difference: number; unit: 'cm'};
 
 export type MeasurementAttributeProblem = {
     attribute: 'length' | 'height' | 'weight';
@@ -303,18 +374,25 @@ export interface ViewTypeMap {
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticPairProblem;
     'operations-word-problem': ArithmeticProblem;
+    'operations-word-problem-within-100': ArithmeticWordProblemWithin100;
     'operations-properties': ArithmeticTripleProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
+    'operations-number-array': NumberArrayProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;
     'place-value-make-ten': PlaceValueMakeTenProblem;
     'place-value-tens-bundles': PlaceValueBundlesProblem;
+    'place-value-hundreds-bundles': PlaceValueBundlesProblem;
+    'place-value-expanded-form': PlaceValueExpandedProblem;
+    'place-value-arithmetic-model': PlaceValueArithmeticProblem;
+    'place-value-arithmetic-explanation': PlaceValueArithmeticProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;
     'counting-objects-cardinality': CountingProblem;
     'counting-objects-count-out': CountingProblem;
+    'counting-objects-parity': CountingProblem;
     'counting-inc-dec': CountingIncDecProblem;
     'counting-ten-more-less': CountingIncDecProblem;
     'counting-number-sequence': CountingSequenceProblem;
@@ -324,6 +402,10 @@ export interface ViewTypeMap {
 
     'measure-length-integer': MeasurementStandardProblem;
     'measure-length-decimal': MeasurementStandardProblem;
+    'measure-select-tool': MeasurementToolSelectionProblem;
+    'measure-unit-scale-relation': MeasurementUnitScaleProblem;
+    'measure-length-estimate': MeasurementEstimateProblem;
+    'measure-length-difference': MeasurementLengthDifferenceProblem;
     'measure-attributes': MeasurementAttributeProblem;
     'measure-compare': MeasurementCompareProblem;
     'measure-mediated-comparison': MediatedLengthComparisonProblem;
@@ -338,6 +420,7 @@ export interface ViewTypeMap {
     'numbers-write-standard': WritingProblem;
     'numbers-write-count': WritingProblem;
     'numbers-read-standard': WritingProblem;
+    'numbers-write-name': WritingProblem;
     'time-analog': TimeProblem;
     'time-digital': TimeProblem;
 

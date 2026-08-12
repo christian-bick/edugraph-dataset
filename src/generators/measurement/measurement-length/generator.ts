@@ -1,6 +1,7 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
 import {MeasurementStandardProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
+import {Scope} from 'edugraph-ts';
 import {MeasurementLengthGeneratorConfig, MeasurementLengthGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
@@ -36,7 +37,8 @@ export class MeasurementLengthGenerator implements ProblemGenerator<MeasurementS
             data: {
                 bandLength: bandLength,
                 problemLength: problemLength,
-                useDecimals: useDecimals
+                useDecimals: useDecimals,
+                ...(config.tool ? {tool: config.tool === Scope.PhysicalRuler ? 'ruler' as const : 'tape' as const} : {})
             }
         };
     }

@@ -18,10 +18,10 @@ export const spec: GeneratorSpec = {
 
 export const CountingSequenceGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller120]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
         resolveRangeFromLabels
     ],
-    stepMagnitude: [Scope.StepsOf1, Scope.StepsOf10],
+    stepMagnitude: [Scope.StepsOf1, Scope.StepsOf5, Scope.StepsOf10, Scope.StepsOf100],
     requireMultipleOf10: [[Scope.MultiplesOf10], hasLabel(Scope.MultiplesOf10)]
 } as const;
 

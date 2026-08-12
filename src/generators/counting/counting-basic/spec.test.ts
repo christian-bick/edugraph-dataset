@@ -43,4 +43,16 @@ describe('CountingBasicGenerator Spec Integration', () => {
             expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
         }
     });
+
+    it('resolves even and odd scopes into matching counts', () => {
+        for (const [label, parity] of [
+            [Scope.EvenNumbers, 'even'],
+            [Scope.OddNumbers, 'odd']
+        ] as const) {
+            const stub = generateWithLabels(generator, [label, Scope.NumbersSmaller20]);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.parity).toBe(parity);
+            expect(stub!.tags).toContain(label);
+        }
+    });
 });

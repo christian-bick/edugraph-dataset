@@ -8,13 +8,15 @@ describe('PlaceValueBundlesGenerator', () => {
     it('strictly validates required configuration', () => {
         expect(() => generator.generate({} as any)).toThrow();
         expect(() => generator.generate({
-            range: {min: 20, max: 10}
+            range: {min: 20, max: 10},
+            useHundreds: false
         })).toThrow();
     });
 
     it('generates a whole-ten value inside a small range', () => {
         const stub = generator.generate({
-            range: {min: 0, max: 20}
+            range: {min: 0, max: 20},
+            useHundreds: false
         });
         expect(stub).not.toBeNull();
         expect(stub!.data.target).toBe(stub!.data.tens * 10);
@@ -25,7 +27,8 @@ describe('PlaceValueBundlesGenerator', () => {
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
             const stub = generator.generate({
-                range: {min: 0, max: 10}
+                range: {min: 0, max: 10},
+                useHundreds: false
             });
 
             expect(stub).not.toBeNull();
@@ -43,7 +46,8 @@ describe('PlaceValueBundlesGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generator.generate({
-                range: {min: 0, max: 100}
+                range: {min: 0, max: 100},
+                useHundreds: false
             });
             expect(stub).not.toBeNull();
             expect(stub!.data.tens).toBeGreaterThanOrEqual(1);
@@ -58,7 +62,30 @@ describe('PlaceValueBundlesGenerator', () => {
 
     it('returns null when the resolved range contains no positive multiple of ten', () => {
         expect(generator.generate({
-            range: {min: 0, max: 9}
+            range: {min: 0, max: 9},
+            useHundreds: false
         })).toBeNull();
+    });
+
+    it('represents ten tens as one hundred for the narrow hundreds range', () => {
+        const data = generator.generate({
+            range: {min: 1, max: 120},
+            useHundreds: true
+        })!.data;
+        expect(data).toEqual({hundreds: 1, tens: 10, ones: 0, target: 100});
+    });
+
+    it('generates one through nine complete hundreds', () => {
+        for (let seed = 0; seed < 40; seed++) {
+            setSeed(seed);
+            const data = generator.generate({
+                range: {min: 1, max: 1000},
+                useHundreds: true
+            })!.data;
+            expect(data.hundreds).toBeGreaterThanOrEqual(1);
+            expect(data.hundreds).toBeLessThanOrEqual(9);
+            expect(data.tens).toBe(0);
+            expect(data.target).toBe(data.hundreds! * 100);
+        }
     });
 });

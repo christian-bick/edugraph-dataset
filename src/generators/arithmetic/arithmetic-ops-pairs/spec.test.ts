@@ -84,6 +84,22 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         expect(stub!.tags).toContain(Ability.ProcedureInversion);
     });
 
+    it('resolves iterated addition into equal addend values and an even result', () => {
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [
+                Area.Addition,
+                Area.IteratedOperation,
+                Scope.EvenNumbers,
+                Scope.NumbersSmaller20
+            ]);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.num1).toBe(stub!.data.num2);
+            expect(stub!.data.answer % 2).toBe(0);
+            expect(stub!.data.answer).toBeLessThanOrEqual(20);
+        }
+    });
+
     it('does not infer an arithmetic operation from Difference alone', () => {
         const stub = generateWithLabels(generator, [
             Area.Difference,

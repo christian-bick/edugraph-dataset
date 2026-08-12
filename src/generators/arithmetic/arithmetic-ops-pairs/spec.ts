@@ -1,4 +1,4 @@
-import {Ability, deductCompatible, Scope} from 'edugraph-ts';
+import {Ability, Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -31,6 +31,14 @@ export const ArithmeticOpsPairsGeneratorSchema = {
     invertProcedure: [
         [Ability.ProcedureInversion],
         hasLabel(Ability.ProcedureInversion)
+    ],
+    requireEqualAddends: [
+        [Area.IteratedOperation],
+        (labels: string[]) => labels.includes(Area.Addition) && labels.includes(Area.IteratedOperation)
+    ],
+    requireEvenResult: [
+        [Scope.EvenNumbers],
+        hasLabel(Scope.EvenNumbers)
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
