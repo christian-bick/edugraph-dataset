@@ -1,0 +1,4 @@
+- **Identity:** Three labeled categories are represented by repeated picture markers and a visible one-picture-equals-one-item key.
+- **Question mode:** The source counts remain visible while every graph row is blank for drawing.
+- **Solution mode:** Each row contains exactly as many picture markers as its source count.
+- **Single-unit scale:** Every picture marker represents exactly one item; no grouped-symbol scale is implied.

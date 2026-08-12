@@ -1,0 +1,28 @@
+import {Ability, Area, Scope} from 'edugraph-ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
+import {CompetencyTarget} from '../../types/ml-engine.ts';
+
+const tableBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.MeasuringObjects,
+        Scope.LengthMeasurement,
+        Scope.IntegerNumbers,
+        Ability.ProcedureExecution
+    ]);
+
+const linePlotBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.MeasuringObjects,
+        Scope.LengthMeasurement,
+        Scope.IntegerNumbers,
+        Scope.LinePlot,
+        Scope.StepsOf1,
+        Ability.VisualArticulation
+    ]);
+
+export const spec: CompetencyTarget[] = [
+    ...toTargets('test-measurement-data-table', tableBuilder),
+    ...toTargets('test-measurement-data-line-plot', linePlotBuilder)
+];

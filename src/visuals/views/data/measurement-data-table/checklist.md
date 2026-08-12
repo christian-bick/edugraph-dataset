@@ -1,0 +1,2 @@
+- **Identity:** Six objects appear against whole-centimeter rulers with a corresponding measurement field for each object.
+- **Modes:** Question Mode leaves the measurement fields unresolved while the rulers remain usable; Solution Mode records values that agree with every object endpoint.

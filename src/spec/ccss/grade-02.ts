@@ -654,29 +654,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.MD.B.6-number-line-arithmetic', numberLineArithmeticBuilder),
     ...toTargets('2.MD.C.7-nearest-five-minute-time', nearestFiveMinuteTimeBuilder),
     ...toTargets('2.MD.C.8-currency-word-problems', currencyWordProblemsBuilder),
+    ...toTargets('2.MD.D.9-generate-measurement-data', measurementDataBuilder),
+    ...toTargets('2.MD.D.9-measurement-line-plot', measurementLinePlotBuilder),
+    ...toTargets('2.MD.D.10-picture-graph', pictureGraphBuilder),
+    ...toTargets('2.MD.D.10-bar-graph', barGraphBuilder),
+    ...toTargets('2.MD.D.10-bar-graph-problems', barGraphProblemsBuilder),
     // 2.G - Geometry
     ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder)
 ];
-
-const measurementDataImplementation = defineImplementation({
-    id: 'measurement-data',
-    description: 'Add generation and tabular or line-plot presentation of whole-unit measurement data.',
-    generators: [{ module: 'measurement-data', strategy: 'new' }],
-    views: [
-        { module: 'measurement-data-table', strategy: 'new' },
-        { module: 'measurement-line-plot', strategy: 'new' }
-    ]
-});
-
-const statisticalGraphsImplementation = defineImplementation({
-    id: 'statistical-graphs',
-    description: 'Add single-unit picture and bar graphs, including arithmetic interpretation of bar-graph data.',
-    generators: [{ module: 'statistical-graphs', strategy: 'new' }],
-    views: [
-        { module: 'data-picture-graph', strategy: 'new' },
-        { module: 'data-bar-graph', strategy: 'new' }
-    ]
-});
 
 const shapeIdentityExtendedImplementation = defineImplementation({
     id: 'shape-identity-extended',
@@ -716,36 +701,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // 2.OA - Operations and Algebraic Thinking
     // 2.NBT - Number and Operations in Base Ten
     // 2.MD - Measurement and Data
-    ...toImplementationTodos(
-        '2.MD.D.9-generate-measurement-data',
-        measurementDataBuilder,
-        measurementDataImplementation,
-        'Show several whole-unit length measurements and the collected data list.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.D.9-measurement-line-plot',
-        measurementLinePlotBuilder,
-        measurementDataImplementation,
-        'Plot the collected whole-unit measurements as frequency marks on a visibly single-unit numerical scale.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.D.10-picture-graph',
-        pictureGraphBuilder,
-        statisticalGraphsImplementation,
-        'Draw categorical data as repeated pictures or symbols with a one-unit key.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.D.10-bar-graph',
-        barGraphBuilder,
-        statisticalGraphsImplementation,
-        'Draw categorical data as bars against a visibly single-unit numerical scale.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.D.10-bar-graph-problems',
-        barGraphProblemsBuilder,
-        statisticalGraphsImplementation,
-        'Show a bar graph together with a put-together, take-apart, or comparison computation whose values and answer agree with the bars.'
-    ),
     // 2.G - Geometry
     ...toImplementationTodos(
         '2.G.A.1-identify-additional-shapes',

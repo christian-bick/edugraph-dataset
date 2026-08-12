@@ -1,0 +1,5 @@
+- **Identity:** Three labeled categories appear as bars against a visibly numbered zero-through-eight scale with one-unit intervals.
+- **Drawing question mode:** Source counts remain visible while outlined bar regions are left unresolved.
+- **Drawing solution mode:** Every bar reaches the tick matching its source count.
+- **Interpretation question mode:** Completed bars remain visible while the arithmetic result is withheld.
+- **Interpretation solution mode:** The same graph remains visible and the addition or subtraction result is revealed.

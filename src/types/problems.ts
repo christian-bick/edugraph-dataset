@@ -242,6 +242,28 @@ export type CurrencyArithmeticProblem = {
     answerCents: number;
 };
 
+export type MeasurementObservation = {
+    object: 'pencil' | 'crayon' | 'ribbon' | 'key' | 'brush' | 'block';
+    length: number;
+};
+
+export type MeasurementDataProblem = {
+    unit: 'cm';
+    observations: MeasurementObservation[];
+};
+
+export type StatisticalCategory = {
+    label: 'Apples' | 'Books' | 'Kites';
+    count: number;
+};
+
+export type StatisticalGraphProblem = {
+    categories: StatisticalCategory[];
+    operation?: 'addition' | 'subtraction';
+    operandIndices?: [number, number];
+    answer?: number;
+};
+
 // --- Shape Split Problem Types ---
 
 export type ShapeIdentityProblem = {
@@ -446,6 +468,10 @@ export interface ViewTypeMap {
     'time-analog': TimeProblem;
     'time-digital': TimeProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
+    'measurement-data-table': MeasurementDataProblem;
+    'measurement-line-plot': MeasurementDataProblem;
+    'data-picture-graph': StatisticalGraphProblem;
+    'data-bar-graph': StatisticalGraphProblem;
 
     'shape-naming': ShapeIdentityProblem;
     'shape-position': ShapePositionProblem;

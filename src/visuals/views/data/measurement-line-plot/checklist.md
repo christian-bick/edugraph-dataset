@@ -1,0 +1,2 @@
+- **Identity:** A list of whole-centimeter measurements accompanies a numerical line plot whose scale advances in visible steps of one.
+- **Modes:** Question Mode shows an empty plotting area above the numbered scale; Solution Mode places one frequency mark for every listed measurement at the matching value.

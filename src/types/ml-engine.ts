@@ -6,7 +6,7 @@ import { ViewTypeMap } from './problems.ts';
  */
 export interface AbstractProblem<TData = any> {
     /** The type of problem to route it to compatible renderers */
-    type: 'arithmetic' | 'counting' | 'measurement' | 'time' | 'ordering' | 'comparison' | 'writing' | 'shape';
+    type: 'arithmetic' | 'counting' | 'measurement' | 'statistics' | 'time' | 'ordering' | 'comparison' | 'writing' | 'shape';
     /** The core mathematical data. e.g. { num1: 15, num2: 7, operator: 'subtract', answer: 8 } */
     data: TData;
     /** Pedagogical tags for dataset balancing (e.g., ['has_zero', 'requires_carry', 'negative_result']) */
