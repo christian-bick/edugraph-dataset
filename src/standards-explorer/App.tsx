@@ -343,7 +343,7 @@ function ExplorerFilters() {
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                <div className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider mb-2 px-1 py-1.5 bg-slate-950/90 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between border-b border-slate-800/40">
+                <div className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider mb-2 px-1 py-1.5 sticky top-0 z-10 flex items-center justify-between border-b border-slate-800/40">
                     <span>Filter by Domain</span>
                     {activeDomain && (
                         <button type="button" onClick={() => toggleDomain(activeDomain)} className="text-[9px] text-indigo-400 hover:underline font-mono normal-case">
@@ -499,7 +499,7 @@ function StandardCard({ standard, nested = false, search = false }: {
             onKeyDown={event => {
                 if (event.key === 'Enter' || event.key === ' ') setActiveStandard(standard.id);
             }}
-            className={`${nested ? 'p-2.5 rounded-md gap-1.5' : 'p-3.5 rounded-lg gap-2.5'} border transition-all duration-150 cursor-pointer focus:outline-none flex flex-col ${statusClass}`}
+            className={`${nested ? 'p-2.5 rounded-md gap-1.5' : 'p-3.5 rounded-lg gap-2.5'} border transition-all duration-150 cursor-pointer focus:outline-none flex flex-col ${selected ? 'shadow-sm' : ''} ${statusClass}`}
         >
             <div className={`flex items-${nested ? 'center' : 'start'} justify-between gap-3`}>
                 <span className={`${nested ? 'text-[11px] font-semibold' : 'text-xs font-bold'} font-mono text-slate-300`}>{standard.id}</span>
@@ -529,7 +529,7 @@ function ClusterList() {
 
     return <>
         {clusters.map(cluster => (
-            <section key={cluster.id} className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-5 space-y-4 shadow-sm">
+            <section key={cluster.id} className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-5 space-y-4">
                 <div className="flex items-start justify-between border-b border-slate-800/60 pb-3">
                     <div>
                         <h3 className="text-sm font-semibold text-slate-200 leading-snug">{cluster.id}: {cluster.description}</h3>
@@ -555,7 +555,7 @@ function SearchResults() {
     }
 
     return (
-        <section className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-5 space-y-4 shadow-sm">
+        <section className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-5 space-y-4">
             <div className="space-y-3">
                 {matches.map(standard => <StandardCard key={standard.id} standard={standard} search />)}
             </div>
@@ -578,8 +578,8 @@ function TaskCard({ task }: { task: BacklogTask }) {
             onKeyDown={event => {
                 if (event.key === 'Enter' || event.key === ' ') setActiveTask(task.id);
             }}
-            className={`bg-slate-900/40 border rounded-xl p-5 space-y-4 shadow-sm transition-all hover:bg-slate-900/60 cursor-pointer focus:outline-none ${
-                selected ? 'border-slate-500 ring-1 ring-slate-400/30 bg-slate-900/40' : 'border-slate-800/80'
+            className={`bg-slate-900/40 border rounded-xl p-5 space-y-4 transition-all hover:bg-slate-900/60 cursor-pointer focus:outline-none ${
+                selected ? 'border-slate-500 ring-1 ring-slate-400/30 bg-slate-900/40 shadow-sm' : 'border-slate-800/80'
             }`}
         >
             <div className="flex items-start justify-between gap-4">
@@ -612,12 +612,13 @@ function CenterPanel() {
     const searchActive = useExplorerStore(state => state.searchActive);
     const tasks = useExplorerStore(state => state.coverageData?.tasks ?? EMPTY_TASKS);
     const filteredTasks = filterTasks(tasks, activeGrade, activeTaskType);
+    const compactHeader = activeTab === 'backlog' || (!searchActive && !activeDomain);
 
     const header = activeTab === 'backlog'
         ? {
-            crumbs: `TASK BACKLOG > ${activeGrade.toUpperCase()}`,
-            title: `${activeGrade} Pedagogical Task Backlog`,
-            description: 'Reviewed implementation packages plus ontology and domain-analysis backlog tasks.',
+            crumbs: '',
+            title: `CCSS ${activeGrade} Backlog`,
+            description: '',
         }
         : searchActive
             ? {
@@ -632,17 +633,19 @@ function CenterPanel() {
                     description: `Showing standards filtered for domain ${activeDomain} in ${activeGrade}. Tap domain again to unselect.`,
                 }
                 : {
-                    crumbs: `CCSS > ${activeGrade}`,
-                    title: `${activeGrade} Standards Overview`,
-                    description: `Showing all clusters and standards for ${activeGrade}. Tap a domain on the left to filter.`,
+                    crumbs: '',
+                    title: `CCSS ${activeGrade}`,
+                    description: '',
                 };
 
     return (
-        <main className="flex-1 flex flex-col min-h-0 bg-slate-950 overflow-y-auto border-r border-slate-800 p-6">
-            <div className="mb-4">
-                <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">{header.crumbs}</div>
+        <main className={`flex-1 flex flex-col min-h-0 bg-slate-950 overflow-y-auto border-r border-slate-800 p-6 ${compactHeader ? 'pt-0' : ''}`}>
+            <div className={`mb-4 ${compactHeader ? 'flex h-[42px] shrink-0 items-center' : ''}`}>
+                {header.crumbs && (
+                    <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">{header.crumbs}</div>
+                )}
                 <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">{header.title}</h2>
-                <p className="text-sm text-slate-400 mt-1">{header.description}</p>
+                {header.description && <p className="text-sm text-slate-400 mt-1">{header.description}</p>}
             </div>
             <div className="space-y-4">
                 {activeTab === 'backlog'
@@ -691,6 +694,14 @@ function ConceptBadges({
 }
 
 function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
+    const setActiveTab = useExplorerStore(state => state.setActiveTab);
+    const setActiveTask = useExplorerStore(state => state.setActiveTask);
+
+    const openImplementationTask = (implementationId: string) => {
+        setActiveTask(`task-implementation-${implementationId}`);
+        setActiveTab('backlog');
+    };
+
     if (!coverage.spec_covered) {
         return (
             <div className="text-xs text-sky-800 bg-sky-50 border border-sky-200 rounded-md p-2.5 leading-relaxed mt-1">
@@ -720,9 +731,20 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
         todo.implementation,
     ])).values()];
     return implementations.length > 0 ? (
-        <div className="space-y-2 rounded-md border border-orange-500/20 bg-orange-500/5 p-2.5 mt-1">
+        <div className="mt-1 space-y-2">
             {implementations.map(implementation => (
-                <ImplementationDetails key={implementation.id} implementation={implementation} />
+                <button
+                    key={implementation.id}
+                    type="button"
+                    onClick={() => openImplementationTask(implementation.id)}
+                    className="group w-full rounded-md border border-slate-800 bg-slate-950/50 p-2.5 text-left transition-colors hover:border-orange-500/40 hover:bg-orange-500/5 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                >
+                    <span className="flex items-center justify-between gap-3">
+                        <span className="font-mono text-[10px] font-semibold text-orange-300">{implementation.id}</span>
+                        <Icon name="fa-arrow-right" className="text-[10px] text-slate-500 transition-colors group-hover:text-orange-400" />
+                    </span>
+                    <span className="mt-0.5 block text-[10px] leading-relaxed text-slate-400">{implementation.description}</span>
+                </button>
             ))}
         </div>
     ) : null;
@@ -942,7 +964,7 @@ function CompetencyBreakdown({ coverage, standard }: { coverage: StandardCoverag
                         </div>
                     ))}
                     {coverage.implementation_todos.map(todo => (
-                        <div key={todo.id} className="p-2 rounded-md bg-orange-50 border border-orange-200">
+                        <div key={todo.id} className="rounded-md border border-slate-800/60 bg-slate-950/60 p-2">
                             <div className="flex flex-wrap gap-1.5">
                                 <ConceptBadges coverage={coverage} labels={todo.labels.filter(label => !intersection.includes(label))} emptyText="Only common labels" />
                             </div>
@@ -966,7 +988,7 @@ function StandardDetails() {
     const coverage = useExplorerStore(state => standardId ? state.coverageData?.coverage[standardId] : undefined);
 
     return (
-        <div className="p-6 bg-slate-900/60 flex flex-col gap-4">
+        <div className="p-6 flex flex-col gap-4">
             <div>
                 <h3 className="text-base font-semibold text-slate-100 leading-snug">
                     {standard?.id ?? 'Select a standard'}
@@ -987,7 +1009,7 @@ function MappingDetails({ coverage, standard }: { coverage: StandardCoverage; st
 
     return (
         <div className="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs">
-            <span className="text-slate-500 block font-semibold text-[11px]">Mapping Status</span>
+            <BreakdownHeading label="Mapping Status" />
             <div className="flex items-center gap-1.5">
                 <span className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${style.detailBadge}`}>{style.detailLabel}</span>
                 {showModule && (
@@ -1008,10 +1030,10 @@ function TaskDetails() {
 
     if (!task) {
         return (
-            <div className="p-6 bg-slate-900/60">
+            <div className="p-6">
                 <h3 className="text-base font-semibold text-slate-100">Select a backlog task</h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                    Choose a task from the overview to inspect its targets, module ownership, and affected standards.
+                    Choose a task from the overview to inspect its targets, involved modules, and affected standards.
                 </p>
             </div>
         );
@@ -1020,7 +1042,7 @@ function TaskDetails() {
     const style = taskStyles[task.type];
     const description = splitTaskDescription(task.description);
     return (
-        <div className="p-6 bg-slate-900/60 flex flex-col gap-5">
+        <div className="p-6 flex flex-col gap-5">
             <header className="space-y-3">
                 <h3 className="text-lg font-semibold text-slate-100 leading-snug">{task.title}</h3>
                 <span className={`inline-flex px-2.5 py-0.5 border rounded text-[10px] font-mono font-bold tracking-wider ${style.detail}`}>{style.label}</span>
@@ -1045,7 +1067,7 @@ function TaskDetails() {
             </section>
             {task.implementation && (
                 <section className="space-y-3 border-t border-slate-800/80 pt-4">
-                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Module ownership</h4>
+                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Involved modules</h4>
                     <ImplementationDetails implementation={task.implementation} showSummary={false} boxed={false} />
                 </section>
             )}
