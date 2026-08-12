@@ -7,6 +7,8 @@ import {
     parseSampleKey,
     computeSampleSeed,
     computeSampleFilename,
+    buildCompatibleModulePairIndex,
+    matchTargets,
     matchesTarget,
     findGeneratorsWithoutTestPath,
     loadTargets,
@@ -268,6 +270,52 @@ describe('matchesTarget', () => {
             view([], [], 'CountingProblem')
         );
         expect(verdict).toEqual({ matched: true });
+    });
+});
+
+describe('compatible module pair indexing', () => {
+    const generators: GeneratorMatchInfo[] = [
+        {generatorId: 'writing', labels: [Area.DigitNotation], problemType: 'WritingProblem'},
+        {generatorId: 'counting', labels: [], problemType: 'CountingProblem'},
+        {generatorId: 'unknown', labels: [Area.DigitNotation], problemType: null}
+    ];
+    const views: ViewMatchInfo[] = [
+        {viewId: 'writing-view', supportedLabels: [], problemType: 'WritingProblem'},
+        {viewId: 'counting-view', supportedLabels: [], problemType: 'CountingProblem'}
+    ];
+
+    it('builds only compatible pairs and groups them by generator problem type', () => {
+        const index = buildCompatibleModulePairIndex(generators, views);
+        const pairIds = index.orderedPairs.map(({generator, view}) =>
+            `${generator.generatorId}:${view.viewId}`
+        );
+
+        expect(pairIds).toEqual([
+            'writing:writing-view',
+            'counting:counting-view',
+            'unknown:writing-view',
+            'unknown:counting-view'
+        ]);
+        expect([...index.byProblemType.keys()]).toEqual([
+            'WritingProblem',
+            'CountingProblem',
+            '(unknown)'
+        ]);
+        expect(index.byProblemType.get('(unknown)')).toHaveLength(2);
+    });
+
+    it('matches targets only against the compatible pair search space', () => {
+        const target = {id: 'digit-target', labels: [Area.DigitNotation]};
+        const result = matchTargets([target], generators, views);
+
+        expect(result.tuples.map(tuple => `${tuple.generatorId}:${tuple.viewId}`)).toEqual([
+            'writing:writing-view',
+            'unknown:writing-view',
+            'unknown:counting-view'
+        ]);
+        expect(result.rejections.map(rejection =>
+            `${rejection.generatorId}:${rejection.viewId}:${rejection.verdict.reason}`
+        )).toEqual(['counting:counting-view:unsupported-label']);
     });
 });
 

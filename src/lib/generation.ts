@@ -134,21 +134,20 @@ export type MatchVerdict =
     | { matched: true }
     | { matched: false; reason: MatchFailureReason; label?: string };
 
-/**
- * The single matching predicate for (target, generator, view) triples.
- * Covers problem-type compatibility, label support and view rejection in one
- * place so no caller can apply a partial rule set.
- */
-export function matchesTarget(
+function hasCompatibleProblemTypes(
+    generatorInfo: GeneratorMatchInfo,
+    viewInfo: ViewMatchInfo
+): boolean {
+    return generatorInfo.problemType == null
+        || viewInfo.problemType == null
+        || isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType);
+}
+
+function matchesTargetCapabilities(
     targetLabels: string[],
     generatorInfo: GeneratorMatchInfo,
     viewInfo: ViewMatchInfo
-): MatchVerdict {
-    if (generatorInfo.problemType != null && viewInfo.problemType != null
-        && !isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType)) {
-        return { matched: false, reason: 'incompatible-type' };
-    }
-
+): Exclude<MatchVerdict, {matched: false; reason: 'incompatible-type'}> {
     // A target (competency/standard) is legitimately broad. It is satisfied by a
     // generator/view capability that is EQUAL TO or MORE SPECIFIC THAN the target
     // label — i.e. the capability specializes the broad competency:
@@ -174,6 +173,23 @@ export function matchesTarget(
     return { matched: true };
 }
 
+/**
+ * The single matching predicate for (target, generator, view) triples.
+ * Covers problem-type compatibility, label support and view rejection in one
+ * place so no caller can apply a partial rule set.
+ */
+export function matchesTarget(
+    targetLabels: string[],
+    generatorInfo: GeneratorMatchInfo,
+    viewInfo: ViewMatchInfo
+): MatchVerdict {
+    if (!hasCompatibleProblemTypes(generatorInfo, viewInfo)) {
+        return { matched: false, reason: 'incompatible-type' };
+    }
+
+    return matchesTargetCapabilities(targetLabels, generatorInfo, viewInfo);
+}
+
 export interface MatchTuple {
     target: CompetencyTarget;
     generatorId: string;
@@ -193,6 +209,48 @@ export interface MatchResult {
     rejections: MatchRejection[];
 }
 
+export interface CompatibleModulePair {
+    generator: GeneratorMatchInfo;
+    view: ViewMatchInfo;
+}
+
+export interface CompatibleModulePairIndex {
+    /** Compatible pairs in the generator-then-view order used by dataset generation. */
+    orderedPairs: CompatibleModulePair[];
+    /** The same pairs grouped by generator payload type for scoped consumers and diagnostics. */
+    byProblemType: Map<string, CompatibleModulePair[]>;
+}
+
+const UNKNOWN_PROBLEM_TYPE = '(unknown)';
+
+/**
+ * Computes the payload-compatible generator/view search space once. Target
+ * matching can then avoid reconsidering every impossible cross-type pair.
+ */
+export function buildCompatibleModulePairIndex(
+    generatorCatalog: GeneratorMatchInfo[],
+    viewCatalog: ViewMatchInfo[]
+): CompatibleModulePairIndex {
+    const orderedPairs: CompatibleModulePair[] = [];
+    const byProblemType = new Map<string, CompatibleModulePair[]>();
+
+    for (const generator of generatorCatalog) {
+        for (const view of viewCatalog) {
+            if (!hasCompatibleProblemTypes(generator, view)) continue;
+
+            const pair = {generator, view};
+            orderedPairs.push(pair);
+
+            const problemType = generator.problemType ?? UNKNOWN_PROBLEM_TYPE;
+            const group = byProblemType.get(problemType);
+            if (group) group.push(pair);
+            else byProblemType.set(problemType, [pair]);
+        }
+    }
+
+    return {orderedPairs, byProblemType};
+}
+
 /**
  * Produces the full deterministic list of (target, generator, view) tuples
  * the pipeline generates samples for, in stable iteration order
@@ -205,21 +263,20 @@ export function matchTargets(
 ): MatchResult {
     const tuples: MatchTuple[] = [];
     const rejections: MatchRejection[] = [];
+    const {orderedPairs} = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
 
     for (const target of targets) {
-        for (const generatorInfo of generatorCatalog) {
-            for (const viewInfo of viewCatalog) {
-                const verdict = matchesTarget(target.labels, generatorInfo, viewInfo);
-                if (verdict.matched) {
-                    tuples.push({ target, generatorId: generatorInfo.generatorId, viewId: viewInfo.viewId });
-                } else if (verdict.reason !== 'incompatible-type') {
-                    rejections.push({
-                        targetId: target.id,
-                        generatorId: generatorInfo.generatorId,
-                        viewId: viewInfo.viewId,
-                        verdict
-                    });
-                }
+        for (const {generator, view} of orderedPairs) {
+            const verdict = matchesTargetCapabilities(target.labels, generator, view);
+            if (verdict.matched) {
+                tuples.push({ target, generatorId: generator.generatorId, viewId: view.viewId });
+            } else {
+                rejections.push({
+                    targetId: target.id,
+                    generatorId: generator.generatorId,
+                    viewId: view.viewId,
+                    verdict
+                });
             }
         }
     }
