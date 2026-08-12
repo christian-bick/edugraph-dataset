@@ -591,7 +591,11 @@ async function main() {
       ontology_version: version,
       total_leaves_scanned: leafNodes.length,
       spec_covered_count: Object.values(finalCoverageMap).filter(s => s.spec_covered).length,
-      covered_count: Object.values(finalCoverageMap).filter(s => s.dataset_covered).length,
+      covered_count: Object.values(finalCoverageMap).filter(s =>
+        s.dataset_covered
+        && !s.partially_beyond_scope
+        && (!s.implementation_todos || s.implementation_todos.length === 0)
+      ).length,
       missing_generator_count: Object.values(finalCoverageMap).filter(s => !s.fully_beyond_scope && s.spec_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && ((s.implementation_todos && s.implementation_todos.length > 0) || !s.dataset_covered)).length,
       missing_ontology_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (s.ontology_todos && s.ontology_todos.length > 0)).length,
       analysis_needed_count: Object.values(finalCoverageMap).filter(s => !s.spec_covered).length,

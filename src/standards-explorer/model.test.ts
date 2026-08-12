@@ -95,18 +95,46 @@ describe('standards explorer model', () => {
         expect(getClusters(tree, 'Kindergarten', 'K.G').map(cluster => cluster.id)).toEqual(['K.G.A']);
     });
 
-    it('applies the legacy coverage status precedence', () => {
+    it('distinguishes partial implementation from complete dataset coverage', () => {
         expect(getCoverageKind(createCoverage({ spec_covered: false }))).toBe('analysis');
         expect(getCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
         expect(getCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');
         expect(getCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('partial');
+        expect(getCoverageKind(createCoverage({
+            dataset_covered: true,
+            implementation_todos: [{
+                id: 'K.CC.A.1-pending',
+                labels: ['Pending'],
+                explanation: 'Pending implementation',
+                implementation: {
+                    id: 'pending-implementation',
+                    description: 'Pending implementation',
+                    generators: [],
+                    views: [],
+                },
+            }],
+        }))).toBe('partial');
         expect(getCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
         expect(getCoverageKind(createCoverage())).toBe('implementation');
     });
 
-    it('retains the legacy search-result status precedence', () => {
+    it('uses the same partial implementation status in search results', () => {
         expect(getSearchCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
         expect(getSearchCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('partial');
+        expect(getSearchCoverageKind(createCoverage({
+            dataset_covered: true,
+            implementation_todos: [{
+                id: 'K.CC.A.1-pending',
+                labels: ['Pending'],
+                explanation: 'Pending implementation',
+                implementation: {
+                    id: 'pending-implementation',
+                    description: 'Pending implementation',
+                    generators: [],
+                    views: [],
+                },
+            }],
+        }))).toBe('partial');
         expect(getSearchCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
         expect(getSearchCoverageKind(createCoverage({ ontology_covered: true }))).toBe('implementation');
         expect(getSearchCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');

@@ -45,14 +45,16 @@ export const getCoverageKind = (coverage: StandardCoverage): CoverageKind => {
     if (!coverage.spec_covered) return 'analysis';
     if (coverage.fully_beyond_scope) return 'beyond';
     if (!coverage.ontology_covered || coverage.ontology_todos.length > 0) return 'ontology';
-    if (coverage.dataset_covered && coverage.partially_beyond_scope) return 'partial';
+    if (coverage.dataset_covered
+        && (coverage.partially_beyond_scope || coverage.implementation_todos.length > 0)) return 'partial';
     if (coverage.dataset_covered) return 'covered';
     return 'implementation';
 };
 
 export const getSearchCoverageKind = (coverage: StandardCoverage): CoverageKind => {
     if (coverage.fully_beyond_scope) return 'beyond';
-    if (coverage.dataset_covered && coverage.partially_beyond_scope) return 'partial';
+    if (coverage.dataset_covered
+        && (coverage.partially_beyond_scope || coverage.implementation_todos.length > 0)) return 'partial';
     if (coverage.dataset_covered) return 'covered';
     if (coverage.ontology_covered) return 'implementation';
     return 'ontology';
