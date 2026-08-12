@@ -455,6 +455,21 @@ export type ShapePartitionProblem =
         answer: 'fourth';
     };
 
+export type ShapeSquareArrayProblem = {
+    task: 'partition' | 'count';
+    rows: 2 | 3 | 4 | 5;
+    columns: 2 | 3 | 4 | 5;
+    squareCount: number;
+};
+
+export type ShapePartitionEquivalenceProblem = {
+    shape: FractionShape;
+    parts: 2;
+    firstPartition: 'straight';
+    secondPartition: 'diagonal' | 'curved';
+    conclusion: 'equal shares can have different shapes';
+};
+
 
 /**
  * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
@@ -531,5 +546,7 @@ export interface ViewTypeMap {
     'shape-build-shape': ShapeBuildShapeProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
     'shape-partition-equal': ShapePartitionProblem;
+    'shape-square-array': ShapeSquareArrayProblem;
+    'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
     'shape-draw-shape': ShapeDrawProblem;
 }

@@ -1,6 +1,4 @@
 import DatasetPermutationBuilder, {
-    defineImplementation,
-    toImplementationTodos,
     toTargets
 } from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
@@ -663,47 +661,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder),
     ...toTargets('2.G.A.1-identify-additional-shapes', identifyAdditionalShapesBuilder),
     ...toTargets('2.G.A.1-recognize-attribute-counts', recognizeShapeAttributeCountsBuilder),
-    ...toTargets('2.G.A.1-draw-attribute-counts', drawShapeAttributeCountsBuilder)
+    ...toTargets('2.G.A.1-draw-attribute-counts', drawShapeAttributeCountsBuilder),
+    ...toTargets('2.G.A.2-partition-rectangle', rectangularSquarePartitionBuilder),
+    ...toTargets('2.G.A.2-count-squares', rectangularSquareCountBuilder),
+    ...toTargets('2.G.A.3-equal-shares-different-shapes', equalShareShapeEquivalenceBuilder)
 ];
 
-const rectangularSquareArraysImplementation = defineImplementation({
-    id: 'rectangular-square-arrays',
-    description: 'Add rectangular square-array generation and rendering without adding an independent array branch to equal-share partitioning.',
-    generators: [{ module: 'shape-square-array', strategy: 'new' }],
-    views: [{ module: 'shape-square-array', strategy: 'new' }]
-});
-
-const equalShareShapeEquivalenceImplementation = defineImplementation({
-    id: 'equal-share-shape-equivalence',
-    description: 'Add paired partitions showing equal shares with different geometries.',
-    generators: [{ module: 'shape-partition-equivalence', strategy: 'new' }],
-    views: [{ module: 'shape-partition-equivalence', strategy: 'new' }]
-});
-
-export const implementationTodos: ImplementationTodo[] = [
-    // 2.OA - Operations and Algebraic Thinking
-    // 2.NBT - Number and Operations in Base Ten
-    // 2.MD - Measurement and Data
-    // 2.G - Geometry
-    ...toImplementationTodos(
-        '2.G.A.2-partition-rectangle',
-        rectangularSquarePartitionBuilder,
-        rectangularSquareArraysImplementation,
-        'Tile a rectangle with same-size square cells organized in rows and columns without gaps or overlap.'
-    ),
-    ...toImplementationTodos(
-        '2.G.A.2-count-squares',
-        rectangularSquareCountBuilder,
-        rectangularSquareArraysImplementation,
-        'Show the rectangular square array together with an explicit count and total.'
-    ),
-    ...toImplementationTodos(
-        '2.G.A.3-equal-shares-different-shapes',
-        equalShareShapeEquivalenceBuilder,
-        equalShareShapeEquivalenceImplementation,
-        'Show identical wholes partitioned into equal-area pieces of visibly different shapes with an explicit equivalence conclusion.'
-    )
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

@@ -1,0 +1,5 @@
+- **Identity:** A non-square rectangle is composed from same-size square cells arranged in visibly countable rows and columns.
+- **Partition question mode:** The correctly proportioned outer rectangle is shown without internal divisions while the requested row and column counts remain visible.
+- **Partition solution mode:** Square cell boundaries appear with no gaps or overlaps, and the row-by-column arrangement is stated without revealing a counting result.
+- **Count question mode:** The complete square array remains visible while its total is withheld.
+- **Count solution mode:** Every square receives a counting index and the multiplication statement reveals the total.

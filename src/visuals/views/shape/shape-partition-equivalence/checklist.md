@@ -1,0 +1,5 @@
+- **Identity:** Two identically sized wholes are each split into two equal-area shares, while the share boundaries produce visibly different geometries.
+- **Rectangle evidence:** One whole uses two rectangular shares and the other uses two triangular shares.
+- **Circle evidence:** One whole uses semicircular shares and the other uses two centrally symmetric curved shares.
+- **Question mode:** Both complete partitions remain visible while the equivalence conclusion is withheld.
+- **Solution mode:** Equal-area `=` markers appear on all shares and an explicit conclusion states that equal shares can have different shapes.
