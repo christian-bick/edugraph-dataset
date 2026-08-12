@@ -1,6 +1,7 @@
 export type TaskType = 'DATASET_ENRICHMENT' | 'ONTOLOGY_EXTENSION' | 'ANALYSIS';
 export type MainTab = 'explorer' | 'backlog';
 export type DataView = 'latest' | 'preview';
+export type AssetSource = 'released' | 'local';
 
 export interface CoverageManifest {
     schema_version: number;

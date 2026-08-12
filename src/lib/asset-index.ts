@@ -127,6 +127,13 @@ export function buildHuggingFaceAssetUrl(
     return `https://huggingface.co/datasets/${repository}/resolve/${revision}/${sample.split}/${fileName}`;
 }
 
+export function buildLocalAssetUrl(
+    sample: Pick<ReleasedAssetSample, 'split' | 'file_name'>,
+): string {
+    const fileName = sample.file_name.split('/').map(encodeURIComponent).join('/');
+    return `/dataset/local/${sample.split}/${fileName}`;
+}
+
 export function isAssetIndex(value: unknown): value is AssetIndex {
     if (!value || typeof value !== 'object') return false;
     const index = value as Partial<AssetIndex>;

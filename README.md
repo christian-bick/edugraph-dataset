@@ -162,6 +162,13 @@ The generated `public/dataset/asset-index.json` is a local, gitignored artifact.
 requires a compatible merged dataset under `out/dataset/`; run `npm run merge:dataset`
 first when the union needs to be refreshed.
 
+On `localhost` or `127.0.0.1`, the explorer header also offers a **Released / Local**
+image-source switch. Local mode serves the indexed PNGs directly from `out/dataset/`
+and can be opened at
+[`/standards-explorer.html?view=preview&assets=local`](http://localhost:5173/standards-explorer.html?view=preview&assets=local).
+The development renderer index links to this mode as well. The switch and local image
+route are development-only; deployed explorers always use release-pinned images.
+
 ### Coverage Explorer Deployment
 
 The production explorer offers two data views. **Latest** is the default and comes from

@@ -13,11 +13,11 @@ import {
     getSearchCoverageKind,
     getScopeKind,
     intersectLabels,
-    releasedSampleUrl,
+    sampleAssetUrl,
     searchStandards,
     type CoverageKind,
 } from './model.ts';
-import { useExplorerStore } from './store.ts';
+import { isLocalExplorerHost, useExplorerStore } from './store.ts';
 import type {
     BacklogTask,
     Implementation,
@@ -222,8 +222,10 @@ function Header() {
     const coverageData = useExplorerStore(state => state.coverageData);
     const coverageManifest = useExplorerStore(state => state.coverageManifest);
     const dataView = useExplorerStore(state => state.dataView);
+    const assetSource = useExplorerStore(state => state.assetSource);
     const loading = useExplorerStore(state => state.loading);
     const setDataView = useExplorerStore(state => state.setDataView);
+    const setAssetSource = useExplorerStore(state => state.setAssetSource);
     const standardsMap = useExplorerStore(state => state.standardsMap);
     const stats = calculateStats(coverageData);
     if (!coverageData) {
@@ -262,6 +264,21 @@ function Header() {
                         </button>
                     ))}
                 </div>
+                {isLocalExplorerHost() && (
+                    <div className="explorer-data-view" aria-label="Sample image source">
+                        {(['released', 'local'] as const).map(source => (
+                            <button
+                                key={source}
+                                type="button"
+                                aria-pressed={assetSource === source}
+                                onClick={() => setAssetSource(source)}
+                                className={assetSource === source ? 'is-active' : ''}
+                            >
+                                {source === 'released' ? 'Released' : 'Local'}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 {coverageManifest && (
                     <span className="explorer-data-ref" title={coverageManifest.source_sha}>
                         {dataView === 'latest'
@@ -806,6 +823,7 @@ function ReleasedSamplePopover({
     onSelect: (index: number) => void;
     onClose: () => void;
 }) {
+    const assetSource = useExplorerStore(state => state.assetSource);
     const sample = samples[selectedIndex];
     const hasPrevious = selectedIndex > 0;
     const hasNext = selectedIndex < samples.length - 1;
@@ -838,7 +856,7 @@ function ReleasedSamplePopover({
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md sm:p-8"
             role="dialog"
             aria-modal="true"
-            aria-label="Released sample preview"
+            aria-label="Sample preview"
             onClick={onClose}
         >
             <div
@@ -870,7 +888,7 @@ function ReleasedSamplePopover({
                     </button>
                     <div className="flex size-full items-center justify-center p-2 sm:p-4">
                         <img
-                            src={releasedSampleUrl(index, sample)}
+                            src={sampleAssetUrl(index, sample, assetSource)}
                             alt={`${sample.mode} sample rendered with ${sample.view}`}
                             className="block max-h-full max-w-full rounded-lg bg-white object-contain shadow-xl"
                         />

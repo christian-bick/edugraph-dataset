@@ -3,6 +3,7 @@ import { isAssetIndex, type AssetIndex } from '../lib/asset-index.ts';
 import type {
     CoverageData,
     CoverageManifest,
+    AssetSource,
     DataView,
     MainTab,
     StandardsTreeData,
@@ -17,6 +18,7 @@ interface ExplorerStore {
     assetIndex: AssetIndex | null;
     assetIndexLoading: boolean;
     assetIndexError: string | null;
+    assetSource: AssetSource;
     dataView: DataView;
     loading: boolean;
     error: string | null;
@@ -31,6 +33,7 @@ interface ExplorerStore {
     loadData: (dataView?: DataView) => Promise<void>;
     loadAssetIndex: () => Promise<void>;
     setDataView: (dataView: DataView) => Promise<void>;
+    setAssetSource: (assetSource: AssetSource) => void;
     setActiveGrade: (grade: string) => void;
     toggleDomain: (domain: string) => void;
     setActiveStandard: (standardId: string) => void;
@@ -56,11 +59,31 @@ const initialDataView = (): DataView => {
         : 'latest';
 };
 
+export const isLocalExplorerHost = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+};
+
+const initialAssetSource = (): AssetSource => {
+    if (!isLocalExplorerHost()) return 'released';
+    return new URLSearchParams(window.location.search).get('assets') === 'local'
+        ? 'local'
+        : 'released';
+};
+
 const syncDataViewUrl = (dataView: DataView) => {
     if (typeof window === 'undefined') return;
     const url = new URL(window.location.href);
     if (dataView === 'preview') url.searchParams.set('view', 'preview');
     else url.searchParams.delete('view');
+    window.history.replaceState(null, '', url);
+};
+
+const syncAssetSourceUrl = (assetSource: AssetSource) => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (assetSource === 'local') url.searchParams.set('assets', 'local');
+    else url.searchParams.delete('assets');
     window.history.replaceState(null, '', url);
 };
 
@@ -72,6 +95,7 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     assetIndex: null,
     assetIndexLoading: false,
     assetIndexError: null,
+    assetSource: initialAssetSource(),
     dataView: initialDataView(),
     loading: true,
     error: null,
@@ -145,6 +169,13 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
             searchActive: false,
         });
         await get().loadData(dataView);
+    },
+    setAssetSource: assetSource => {
+        const safeSource = assetSource === 'local' && isLocalExplorerHost()
+            ? 'local'
+            : 'released';
+        syncAssetSourceUrl(safeSource);
+        set({ assetSource: safeSource });
     },
     setActiveGrade: grade => set({ activeGrade: grade, activeDomain: null, searchActive: false }),
     toggleDomain: domain => set({

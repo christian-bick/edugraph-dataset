@@ -46,6 +46,7 @@ describe('standards explorer data views', () => {
             assetIndex: null,
             assetIndexLoading: false,
             assetIndexError: null,
+            assetSource: 'released',
             dataView: 'latest',
             loading: true,
             error: null,
@@ -153,5 +154,43 @@ describe('standards explorer data views', () => {
             assetIndexError: 'Request failed (404): /dataset/asset-index.json',
             error: null,
         });
+    });
+
+    it('stores the local asset choice in the URL on a local host', () => {
+        const localWindow = {
+            location: new URL('http://localhost:5173/standards-explorer.html?view=preview'),
+            history: {
+                replaceState: (_state: unknown, _unused: string, url: URL) => {
+                    localWindow.location = new URL(url);
+                },
+            },
+        };
+        vi.stubGlobal('window', localWindow);
+
+        useExplorerStore.getState().setAssetSource('local');
+
+        expect(useExplorerStore.getState().assetSource).toBe('local');
+        expect(new URLSearchParams(window.location.search).get('assets')).toBe('local');
+
+        useExplorerStore.getState().setAssetSource('released');
+        expect(useExplorerStore.getState().assetSource).toBe('released');
+        expect(new URLSearchParams(window.location.search).has('assets')).toBe(false);
+    });
+
+    it('rejects the local asset choice on non-local hosts', () => {
+        const remoteWindow = {
+            location: new URL('https://coverage.edugraph.io/standards-explorer.html?assets=local'),
+            history: {
+                replaceState: (_state: unknown, _unused: string, url: URL) => {
+                    remoteWindow.location = new URL(url);
+                },
+            },
+        };
+        vi.stubGlobal('window', remoteWindow);
+
+        useExplorerStore.getState().setAssetSource('local');
+
+        expect(useExplorerStore.getState().assetSource).toBe('released');
+        expect(new URLSearchParams(window.location.search).has('assets')).toBe(false);
     });
 });

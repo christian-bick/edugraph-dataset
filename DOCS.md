@@ -93,6 +93,13 @@ the index's Hugging Face repository, immutable release revision, split, and file
 `npm run dev` without a Vite build. When that file is absent, Vite proxies its URL to the
 deployed explorer just as it does for absent coverage snapshots.
 
+On `localhost` and `127.0.0.1`, the header exposes a Released / Local image-source
+switch. `assets=local` keeps the same index-based label lookup but resolves image URLs
+through a development-only Vite route backed by `out/dataset/`. That route serves only
+PNG files below the union dataset's `train/` and `validation/` directories. Production
+hosts do not render the switch and always resolve images through the release-pinned
+Hugging Face URL.
+
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
 `firebase.json` serves `dist/` and redirects the site root to the explorer entry, and

@@ -1,10 +1,11 @@
 // vite.config.js
-import { existsSync, globSync, readFileSync } from 'node:fs';
+import { createReadStream, existsSync, globSync, readFileSync, statSync } from 'node:fs';
 import { resolve, relative, extname } from 'path';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { resolveLocalDatasetAsset } from './src/lib/local-assets.ts';
 
 const VIEW_HEAD_PATH = resolve(import.meta.dirname, 'src/partials/head.html');
 const VIEW_HEAD_INVOCATION = /\{\{>\s*head\s+script=(['"])([^'"]+)\1\s*\}\}/g;
@@ -15,6 +16,8 @@ const COVERAGE_FILES = [
     'coverage-manifest.json',
 ];
 const LOCAL_ASSET_INDEX = resolve(import.meta.dirname, 'public', 'dataset', 'asset-index.json');
+const LOCAL_DATASET_ROOT = resolve(import.meta.dirname, 'out', 'dataset');
+const LOCAL_DATASET_ROUTE = '/dataset/local/';
 
 function hasLocalCoverageSnapshot(requestUrl) {
     const pathname = new URL(requestUrl || '/', 'http://localhost').pathname;
@@ -43,6 +46,57 @@ function assetIndexProxy() {
         secure: true,
         bypass(request) {
             return existsSync(LOCAL_ASSET_INDEX) ? request.url : undefined;
+        },
+    };
+}
+
+function serveLocalDataset(request, response, next) {
+    const rawPathname = (request.url || '/').split(/[?#]/, 1)[0];
+    if (!rawPathname.startsWith(LOCAL_DATASET_ROUTE)) return next();
+
+    const hostname = (request.headers.host || '').split(':')[0];
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        response.statusCode = 404;
+        return response.end();
+    }
+
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+        response.statusCode = 405;
+        response.setHeader('Allow', 'GET, HEAD');
+        return response.end();
+    }
+
+    const assetPath = resolveLocalDatasetAsset(
+        LOCAL_DATASET_ROOT,
+        rawPathname.slice(LOCAL_DATASET_ROUTE.length),
+    );
+    if (!assetPath || !existsSync(assetPath)) {
+        response.statusCode = 404;
+        return response.end();
+    }
+
+    const asset = statSync(assetPath);
+    if (!asset.isFile()) {
+        response.statusCode = 404;
+        return response.end();
+    }
+
+    response.statusCode = 200;
+    response.setHeader('Content-Type', 'image/png');
+    response.setHeader('Content-Length', asset.size);
+    response.setHeader('Cache-Control', 'no-store');
+    if (request.method === 'HEAD') return response.end();
+    return createReadStream(assetPath).pipe(response);
+}
+
+function localDatasetPlugin() {
+    return {
+        name: 'edugraph-local-dataset',
+        configureServer(server) {
+            server.middlewares.use(serveLocalDataset);
+        },
+        configurePreviewServer(server) {
+            server.middlewares.use(serveLocalDataset);
         },
     };
 }
@@ -104,6 +158,7 @@ export default defineConfig({
         react(),
         tailwindcss(),
         viewHeadPlugin(),
+        localDatasetPlugin(),
     ],
     test: {
         coverage: {

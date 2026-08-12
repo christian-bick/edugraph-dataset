@@ -3,6 +3,7 @@ import {
     assetIndexSampleMap,
     buildAssetIndex,
     buildHuggingFaceAssetUrl,
+    buildLocalAssetUrl,
     isAssetIndex,
     requestedLabelKey,
     targetLookupKey,
@@ -97,6 +98,9 @@ describe('asset-index helpers', () => {
         const group = assetIndexSampleMap(index).values().next().value!;
         expect(buildHuggingFaceAssetUrl(index.dataset, group.samples[0])).toBe(
             'https://huggingface.co/datasets/owner/data%20set/resolve/v1%2Fpreview/train/folder/file%20name.png',
+        );
+        expect(buildLocalAssetUrl(group.samples[0])).toBe(
+            '/dataset/local/train/folder/file%20name.png',
         );
         expect(isAssetIndex(index)).toBe(true);
         expect(isAssetIndex({ ...index, schema_version: 2 })).toBe(false);

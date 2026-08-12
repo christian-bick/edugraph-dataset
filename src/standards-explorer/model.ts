@@ -10,6 +10,7 @@ import type {
 } from './types.ts';
 import {
     assetIndexSampleMap,
+    buildLocalAssetUrl,
     buildHuggingFaceAssetUrl,
     requestedLabelKey,
     type AssetIndex,
@@ -169,7 +170,10 @@ export const getCoverageModules = (
     ];
 };
 
-export const releasedSampleUrl = (
+export const sampleAssetUrl = (
     index: AssetIndex,
     sample: ReleasedAssetSample,
-): string => buildHuggingFaceAssetUrl(index.dataset, sample);
+    source: 'released' | 'local' = 'released',
+): string => source === 'local'
+    ? buildLocalAssetUrl(sample)
+    : buildHuggingFaceAssetUrl(index.dataset, sample);

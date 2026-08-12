@@ -13,7 +13,7 @@ import {
     gradeNameFromId,
     intersectLabels,
     matchesTaskGrade,
-    releasedSampleUrl,
+    sampleAssetUrl,
     searchStandards,
 } from './model.ts';
 import type {
@@ -218,8 +218,11 @@ describe('standards explorer model', () => {
         expect(samples).toHaveLength(1);
         expect(findReleasedSamples(index, ['Area'])).toEqual([]);
         expect(findReleasedSamples(null, ['Area', 'Scope'])).toEqual([]);
-        expect(releasedSampleUrl(index, samples[0])).toBe(
+        expect(sampleAssetUrl(index, samples[0])).toBe(
             'https://huggingface.co/datasets/owner/dataset/resolve/v1/train/module/image.png',
+        );
+        expect(sampleAssetUrl(index, samples[0], 'local')).toBe(
+            '/dataset/local/train/module/image.png',
         );
         expect(getCoverageModules(createCoverage({
             competencies: [['Area', 'Scope']],
