@@ -8,6 +8,7 @@ import {
     getCoverageKind,
     getDomains,
     getSearchCoverageKind,
+    getScopeKind,
     gradeNameFromId,
     intersectLabels,
     matchesTaskGrade,
@@ -55,6 +56,18 @@ const createTask = (standards: string[], type: BacklogTask['type'] = 'ANALYSIS')
     standards,
 });
 
+const pendingImplementationTodo = {
+    id: 'K.CC.A.1-pending',
+    labels: ['Pending'],
+    explanation: 'Pending implementation',
+    implementation: {
+        id: 'pending-implementation',
+        description: 'Pending implementation',
+        generators: [],
+        views: [],
+    },
+};
+
 describe('standards explorer model', () => {
     it('maps standard prefixes to explorer grade names', () => {
         expect(gradeNameFromId('K.CC.A.1')).toBe('Kindergarten');
@@ -99,20 +112,10 @@ describe('standards explorer model', () => {
         expect(getCoverageKind(createCoverage({ spec_covered: false }))).toBe('analysis');
         expect(getCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
         expect(getCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');
-        expect(getCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('partial');
+        expect(getCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('covered');
         expect(getCoverageKind(createCoverage({
             dataset_covered: true,
-            implementation_todos: [{
-                id: 'K.CC.A.1-pending',
-                labels: ['Pending'],
-                explanation: 'Pending implementation',
-                implementation: {
-                    id: 'pending-implementation',
-                    description: 'Pending implementation',
-                    generators: [],
-                    views: [],
-                },
-            }],
+            implementation_todos: [pendingImplementationTodo],
         }))).toBe('partial');
         expect(getCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
         expect(getCoverageKind(createCoverage())).toBe('implementation');
@@ -120,24 +123,31 @@ describe('standards explorer model', () => {
 
     it('uses the same partial implementation status in search results', () => {
         expect(getSearchCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
-        expect(getSearchCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('partial');
+        expect(getSearchCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('covered');
         expect(getSearchCoverageKind(createCoverage({
             dataset_covered: true,
-            implementation_todos: [{
-                id: 'K.CC.A.1-pending',
-                labels: ['Pending'],
-                explanation: 'Pending implementation',
-                implementation: {
-                    id: 'pending-implementation',
-                    description: 'Pending implementation',
-                    generators: [],
-                    views: [],
-                },
-            }],
+            implementation_todos: [pendingImplementationTodo],
         }))).toBe('partial');
         expect(getSearchCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
         expect(getSearchCoverageKind(createCoverage({ ontology_covered: true }))).toBe('implementation');
         expect(getSearchCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');
+    });
+
+    it('tracks scope independently from implementation coverage', () => {
+        expect(getScopeKind(createCoverage())).toBe('in-scope');
+        expect(getScopeKind(createCoverage({ partially_beyond_scope: true }))).toBe('partially-in-scope');
+        expect(getScopeKind(createCoverage({
+            fully_beyond_scope: true,
+            partially_beyond_scope: true,
+        }))).toBe('beyond-scope');
+
+        const mixedCoverage = createCoverage({
+            dataset_covered: true,
+            partially_beyond_scope: true,
+            implementation_todos: [pendingImplementationTodo],
+        });
+        expect(getCoverageKind(mixedCoverage)).toBe('partial');
+        expect(getScopeKind(mixedCoverage)).toBe('partially-in-scope');
     });
 
     it('searches only standard-level nodes by id or description', () => {

@@ -17,6 +17,7 @@ import {
 } from '../lib/asset-index.ts';
 
 export type CoverageKind = 'analysis' | 'beyond' | 'ontology' | 'partial' | 'covered' | 'implementation';
+export type ScopeKind = 'in-scope' | 'partially-in-scope' | 'beyond-scope';
 
 export const gradeNameFromId = (id: string): string => {
     const first = id.split('.')[0];
@@ -45,19 +46,23 @@ export const getCoverageKind = (coverage: StandardCoverage): CoverageKind => {
     if (!coverage.spec_covered) return 'analysis';
     if (coverage.fully_beyond_scope) return 'beyond';
     if (!coverage.ontology_covered || coverage.ontology_todos.length > 0) return 'ontology';
-    if (coverage.dataset_covered
-        && (coverage.partially_beyond_scope || coverage.implementation_todos.length > 0)) return 'partial';
+    if (coverage.dataset_covered && coverage.implementation_todos.length > 0) return 'partial';
     if (coverage.dataset_covered) return 'covered';
     return 'implementation';
 };
 
 export const getSearchCoverageKind = (coverage: StandardCoverage): CoverageKind => {
     if (coverage.fully_beyond_scope) return 'beyond';
-    if (coverage.dataset_covered
-        && (coverage.partially_beyond_scope || coverage.implementation_todos.length > 0)) return 'partial';
+    if (coverage.dataset_covered && coverage.implementation_todos.length > 0) return 'partial';
     if (coverage.dataset_covered) return 'covered';
     if (coverage.ontology_covered) return 'implementation';
     return 'ontology';
+};
+
+export const getScopeKind = (coverage: StandardCoverage): ScopeKind => {
+    if (coverage.fully_beyond_scope) return 'beyond-scope';
+    if (coverage.partially_beyond_scope) return 'partially-in-scope';
+    return 'in-scope';
 };
 
 export const searchStandards = (

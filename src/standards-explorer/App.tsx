@@ -10,6 +10,7 @@ import {
     getDomains,
     getLabelSets,
     getSearchCoverageKind,
+    getScopeKind,
     intersectLabels,
     releasedSampleUrl,
     searchStandards,
@@ -108,6 +109,14 @@ const coverageStyles: Record<CoverageKind, {
         detailLabel: 'MISSING IMPLEMENTATION',
         detailBadge: 'bg-orange-50 text-orange-800 border-orange-200',
     },
+};
+
+const partialScopeStyle = {
+    label: 'Partially In Scope',
+    icon: 'fa-circle-half-stroke',
+    badge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
+    detailLabel: 'PARTIALLY IN SCOPE',
+    detailBadge: 'bg-purple-50 text-purple-800 border-purple-200',
 };
 
 const taskStyles: Record<TaskType, { label: string; icon: string; color: string; detail: string; accent: string }> = {
@@ -467,6 +476,20 @@ function CoverageBadge({ coverage, small = false, search = false }: { coverage: 
     );
 }
 
+function CoverageBadges({ coverage, small = false, search = false }: { coverage: StandardCoverage; small?: boolean; search?: boolean }) {
+    const partiallyInScope = getScopeKind(coverage) === 'partially-in-scope';
+    return (
+        <span className="flex flex-wrap justify-end gap-1">
+            <CoverageBadge coverage={coverage} small={small} search={search} />
+            {partiallyInScope && (
+                <span className={`${small ? 'px-1.5 text-[8px]' : 'px-2 text-[9px]'} py-0.5 rounded leading-none font-semibold border ${partialScopeStyle.badge}`}>
+                    <Icon name={partialScopeStyle.icon} className="mr-0.5" /> {partialScopeStyle.label}
+                </span>
+            )}
+        </span>
+    );
+}
+
 function StandardCard({ standard, nested = false, search = false }: {
     standard: TreeStandard | Omit<TreeStandard, 'subStandards'> | StandardNode;
     nested?: boolean;
@@ -503,7 +526,7 @@ function StandardCard({ standard, nested = false, search = false }: {
         >
             <div className={`flex items-${nested ? 'center' : 'start'} justify-between gap-3`}>
                 <span className={`${nested ? 'text-[11px] font-semibold' : 'text-xs font-bold'} font-mono text-slate-300`}>{standard.id}</span>
-                {coverage && <CoverageBadge coverage={coverage} small={nested} search={search} />}
+                {coverage && <CoverageBadges coverage={coverage} small={nested} search={search} />}
             </div>
             <p className={`${nested ? 'text-[11px] text-slate-400 leading-normal' : 'text-xs text-slate-300 leading-relaxed'}`}>{standard.description}</p>
             {!nested && subStandards.length > 0 && (
@@ -1006,12 +1029,18 @@ function MappingDetails({ coverage, standard }: { coverage: StandardCoverage; st
     const kind = getCoverageKind(coverage);
     const style = coverageStyles[kind];
     const showModule = (kind === 'partial' || kind === 'covered') && coverage.generator_module;
+    const partiallyInScope = getScopeKind(coverage) === 'partially-in-scope';
 
     return (
         <div className="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs">
             <BreakdownHeading label="Mapping Status" />
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
                 <span className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${style.detailBadge}`}>{style.detailLabel}</span>
+                {partiallyInScope && (
+                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${partialScopeStyle.detailBadge}`}>
+                        <Icon name={partialScopeStyle.icon} className="mr-1" /> {partialScopeStyle.detailLabel}
+                    </span>
+                )}
                 {showModule && (
                     <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
                         {coverage.generator_module?.toUpperCase()}
