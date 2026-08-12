@@ -617,7 +617,7 @@ function TaskCard({ task }: { task: BacklogTask }) {
                 if (event.key === 'Enter' || event.key === ' ') setActiveTask(task.id);
             }}
             className={`bg-slate-900/40 border rounded-xl p-5 space-y-4 transition-all hover:bg-slate-900/60 cursor-pointer focus:outline-none ${
-                selected ? 'border-slate-500 ring-1 ring-slate-400/30 bg-slate-900/40 shadow-sm' : 'border-slate-800/80'
+                selected ? 'border-slate-400/50 bg-slate-900/50 shadow-sm' : 'border-slate-800/80'
             }`}
         >
             <div className="flex items-center justify-between gap-4">
