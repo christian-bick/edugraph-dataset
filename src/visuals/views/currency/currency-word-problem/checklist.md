@@ -1,0 +1,2 @@
+- **Identity:** A two-operand dollar-currency story visibly represents each operand with the requested coin denomination, one-dollar banknotes, or both.
+- **Modes:** Question Mode leaves only the arithmetic result unresolved; Solution Mode reveals a result whose value, operation, story, currency pieces, and `$`/`¢` notation all agree.

@@ -44,7 +44,7 @@ function formatDigitalTime(parts: DigitalTimeParts): string {
     return parts.second === undefined ? base : `${base}:${parts.second}`;
 }
 
-function DigitalDisplay({value, highlighted = false}: {value: string; highlighted?: boolean}) {
+function DigitalDisplay({value, period, highlighted = false}: {value: string; period?: 'a.m.' | 'p.m.'; highlighted?: boolean}) {
     const displayClass = highlighted
         ? 'text-emerald-300 border-emerald-500 shadow-[inset_0_0_20px_rgba(16,185,129,0.15),0_0_16px_rgba(16,185,129,0.2)]'
         : 'text-cyan-200 border-slate-500 shadow-[inset_0_0_20px_rgba(34,211,238,0.08)]';
@@ -56,6 +56,11 @@ function DigitalDisplay({value, highlighted = false}: {value: string; highlighte
                 {value}
             </div>
             <div className="absolute right-4 top-3 text-[0.65rem] tracking-[0.2em] text-slate-500">DIGITAL</div>
+            {period !== undefined && (
+                <div className="absolute bottom-3 right-4 rounded bg-slate-800 px-2 py-1 font-sans text-[0.82rem] font-bold tracking-wide text-cyan-100">
+                    {period}
+                </div>
+            )}
         </div>
     );
 }
@@ -87,6 +92,9 @@ const TimeDigitalCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('time-digital', data, ['time', 'interval']);
+    if (data.period !== undefined && data.period !== 'a.m.' && data.period !== 'p.m.') {
+        throw new ViewValidationError('time-digital', `Unsupported day period: ${data.period}`);
+    }
 
     const timeParts = parseDigitalTime(data.time, data.interval);
     const formattedTime = formatDigitalTime(timeParts);
@@ -105,7 +113,7 @@ const TimeDigitalCore = ({config, payload}: CoreProps) => {
                     {timeClue}
                 </div>
 
-                <DigitalDisplay value={displayValue} highlighted={isSolutionView} />
+                <DigitalDisplay value={displayValue} period={data.period} highlighted={isSolutionView} />
             </div>
         </div>
     );

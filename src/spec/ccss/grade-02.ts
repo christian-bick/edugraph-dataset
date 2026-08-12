@@ -414,7 +414,6 @@ const numberLineRepresentationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.Numberline,
-        Scope.NumbersWithZero,
         Scope.NumbersSmaller100,
         Ability.VisualArticulation
     ]);
@@ -423,7 +422,6 @@ const numberLineRepresentationBuilder = new DatasetPermutationBuilder()
 const numberLineArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.Numberline,
-        Scope.NumbersWithZero,
         Scope.NumbersSmaller100,
         Scope.TwoOperands,
         Ability.ProcedureExecution
@@ -652,36 +650,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.MD.A.3-estimate-metric-lengths', estimateMetricLengthBuilder),
     ...toTargets('2.MD.A.4-measured-length-difference', measuredLengthDifferenceBuilder),
     ...toTargets('2.MD.B.5-length-word-problems', lengthWordProblemsBuilder),
+    ...toTargets('2.MD.B.6-number-line-representation', numberLineRepresentationBuilder),
+    ...toTargets('2.MD.B.6-number-line-arithmetic', numberLineArithmeticBuilder),
+    ...toTargets('2.MD.C.7-nearest-five-minute-time', nearestFiveMinuteTimeBuilder),
+    ...toTargets('2.MD.C.8-currency-word-problems', currencyWordProblemsBuilder),
     // 2.G - Geometry
     ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder)
 ];
-
-const numberLineArithmeticImplementation = defineImplementation({
-    id: 'number-line-arithmetic',
-    description: 'Add a number-line layout for whole-number representation and arithmetic.',
-    generators: [
-        { module: 'writing', strategy: 'reuse' },
-        { module: 'arithmetic-ops-pairs', strategy: 'reuse' }
-    ],
-    views: [{ module: 'operations-number-line', strategy: 'new' }]
-});
-
-const timeFiveMinuteImplementation = defineImplementation({
-    id: 'time-five-minute',
-    description: 'Extend time generation and clock layouts to five-minute intervals with explicit a.m./p.m. periods.',
-    generators: [{ module: 'time', strategy: 'expand' }],
-    views: [
-        { module: 'time-analog', strategy: 'expand' },
-        { module: 'time-digital', strategy: 'expand' }
-    ]
-});
-
-const usMoneyWordProblemsImplementation = defineImplementation({
-    id: 'us-money-word-problems',
-    description: 'Add abstract dollar-denomination word problems with currency notation.',
-    generators: [{ module: 'currency-arithmetic', strategy: 'new' }],
-    views: [{ module: 'currency-word-problem', strategy: 'new' }]
-});
 
 const measurementDataImplementation = defineImplementation({
     id: 'measurement-data',
@@ -741,30 +716,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // 2.OA - Operations and Algebraic Thinking
     // 2.NBT - Number and Operations in Base Ten
     // 2.MD - Measurement and Data
-    ...toImplementationTodos(
-        '2.MD.B.6-number-line-representation',
-        numberLineRepresentationBuilder,
-        numberLineArithmeticImplementation,
-        'Show equally spaced labeled points beginning at zero and mark a requested whole number as a length.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.B.6-number-line-arithmetic',
-        numberLineArithmeticBuilder,
-        numberLineArithmeticImplementation,
-        'Show directional jumps, endpoints, an equation, and an answer that agree.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.C.7-nearest-five-minute-time',
-        nearestFiveMinuteTimeBuilder,
-        timeFiveMinuteImplementation,
-        'Show multiples-of-five minute values with matching analog or digital displays and read or written answers.'
-    ),
-    ...toImplementationTodos(
-        '2.MD.C.8-currency-word-problems',
-        currencyWordProblemsBuilder,
-        usMoneyWordProblemsImplementation,
-        'Show currency representations and values in a story with correct arithmetic, units, answer, and dollar or cent notation.'
-    ),
     ...toImplementationTodos(
         '2.MD.D.9-generate-measurement-data',
         measurementDataBuilder,

@@ -82,4 +82,28 @@ describe('TimeGenerator Spec Integration', () => {
             expect(components.some((component: number) => component === 0)).toBe(true);
         }
     });
+
+    it.each([
+        [Scope.AnteMeridiem, 'a.m.', 0, 11],
+        [Scope.PostMeridiem, 'p.m.', 12, 23]
+    ] as const)('should resolve five-minute %s times', (periodLabel, expectedPeriod, minHour, maxHour) => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [
+                Area.MeasuringTime,
+                Scope.MinuteIntervals,
+                Scope.StepsOf5,
+                periodLabel
+            ]);
+            const [hour, minute, second] = stub!.data.time.split(':').map(Number);
+
+            expect(stub).not.toBeNull();
+            expect(stub!.tags).toEqual(expect.arrayContaining([Scope.StepsOf5, periodLabel]));
+            expect(minute % 5).toBe(0);
+            expect(second).toBe(0);
+            expect(hour).toBeGreaterThanOrEqual(minHour);
+            expect(hour).toBeLessThanOrEqual(maxHour);
+            expect(stub!.data.period).toBe(expectedPeriod);
+        }
+    });
 });

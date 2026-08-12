@@ -23,6 +23,18 @@ export const TimeGeneratorSchema = {
     requireZero: [
         [Scope.NumbersWithZero],
         hasLabel(Scope.NumbersWithZero)
+    ],
+    requireFiveMinuteStep: [
+        [Scope.StepsOf5],
+        hasLabel(Scope.StepsOf5)
+    ],
+    isAnteMeridiem: [
+        [Scope.AnteMeridiem],
+        hasLabel(Scope.AnteMeridiem)
+    ],
+    isPostMeridiem: [
+        [Scope.PostMeridiem],
+        hasLabel(Scope.PostMeridiem)
     ]
 } as const;
 

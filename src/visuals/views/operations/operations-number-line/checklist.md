@@ -1,0 +1,2 @@
+- **Identity:** A horizontal number line begins at zero and presents either a requested whole-number length or a two-operand addition or subtraction task.
+- **Modes:** Question Mode leaves the requested mark or arithmetic jump unresolved; Solution Mode marks the exact endpoint and, for arithmetic, shows a directional jump whose label, endpoints, equation, and answer agree.

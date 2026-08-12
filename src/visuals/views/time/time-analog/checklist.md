@@ -1,3 +1,4 @@
 - **Identity:** The exercise visibly converts between analog clock hands and digital time notation, with one representation serving as the source and the other as the response.
 - **Modes:** Question Mode withholds the response representation; Solution Mode reveals it while preserving the source representation.
 - **Essential specifics:** The clock uses 60 legible minute marks with stronger five-minute positions; numeric hour labels are intentionally unnecessary.
+- **Essential specifics:** When a day period is supplied, the literal `a.m.` or `p.m.` remains visible while the response itself is withheld.

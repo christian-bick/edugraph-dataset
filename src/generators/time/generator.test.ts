@@ -18,10 +18,10 @@ describe('TimeGenerator', () => {
     describe('generate', () => {
         it('should generate valid problem stubs', () => {
             const configs = [
-                { intervalLabel: Scope.HourIntervals, requireZero: false },
-                { intervalLabel: Scope.HalfHourIntervals, requireZero: false },
-                { intervalLabel: Scope.MinuteIntervals, requireZero: false },
-                { intervalLabel: Scope.SecondIntervals, requireZero: false }
+                { intervalLabel: Scope.HourIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false },
+                { intervalLabel: Scope.HalfHourIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false },
+                { intervalLabel: Scope.MinuteIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false },
+                { intervalLabel: Scope.SecondIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false }
             ];
             configs.forEach(config => {
                 const stub = generator.generate(config);
@@ -36,7 +36,7 @@ describe('TimeGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const config = { intervalLabel: Scope.HourIntervals, requireZero: false };
+            const config = { intervalLabel: Scope.HourIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false };
             setSeed(123);
             const stub1 = generator.generate(config);
             setSeed(123);
@@ -49,7 +49,10 @@ describe('TimeGenerator', () => {
         it('should align time with the requested interval (1 hour)', () => {
             const config = { 
                 intervalLabel: Scope.HourIntervals,
-                requireZero: false
+                requireZero: false,
+                requireFiveMinuteStep: false,
+                isAnteMeridiem: false,
+                isPostMeridiem: false
             };
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(config);
@@ -65,7 +68,10 @@ describe('TimeGenerator', () => {
         it('should make half-hour intervals visually distinguishable from whole-hour intervals', () => {
             const config = { 
                 intervalLabel: Scope.HalfHourIntervals,
-                requireZero: false
+                requireZero: false,
+                requireFiveMinuteStep: false,
+                isAnteMeridiem: false,
+                isPostMeridiem: false
             };
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(config);
@@ -80,7 +86,10 @@ describe('TimeGenerator', () => {
         it('should never exceed 23:59:59', () => {
             const config = { 
                 intervalLabel: Scope.HourIntervals,
-                requireZero: false
+                requireZero: false,
+                requireFiveMinuteStep: false,
+                isAnteMeridiem: false,
+                isPostMeridiem: false
             };
             for (let i = 0; i < 100; i++) {
                 const stub = generator.generate(config);
@@ -101,10 +110,53 @@ describe('TimeGenerator', () => {
         ])('should guarantee an observable zero for %s', intervalLabel => {
             for (let seed = 0; seed < 50; seed++) {
                 setSeed(seed);
-                const stub = generator.generate({intervalLabel, requireZero: true});
+                const stub = generator.generate({
+                    intervalLabel,
+                    requireZero: true,
+                    requireFiveMinuteStep: false,
+                    isAnteMeridiem: false,
+                    isPostMeridiem: false
+                });
                 const components = stub!.data.time.split(':').map(Number);
 
                 expect(components.some((component: number) => component === 0)).toBe(true);
+            }
+        });
+
+        it('should generate only five-minute values when requested', () => {
+            for (let seed = 0; seed < 50; seed++) {
+                setSeed(seed);
+                const stub = generator.generate({
+                    intervalLabel: Scope.MinuteIntervals,
+                    requireZero: false,
+                    requireFiveMinuteStep: true,
+                    isAnteMeridiem: false,
+                    isPostMeridiem: false
+                });
+                const [, minute, second] = stub!.data.time.split(':').map(Number);
+                expect(minute % 5).toBe(0);
+                expect(minute).toBeGreaterThan(0);
+                expect(second).toBe(0);
+            }
+        });
+
+        it.each([
+            [true, false, 'a.m.', 0, 11],
+            [false, true, 'p.m.', 12, 23]
+        ] as const)('should constrain the requested day period', (isAnteMeridiem, isPostMeridiem, period, minHour, maxHour) => {
+            for (let seed = 0; seed < 50; seed++) {
+                setSeed(seed);
+                const stub = generator.generate({
+                    intervalLabel: Scope.MinuteIntervals,
+                    requireZero: false,
+                    requireFiveMinuteStep: true,
+                    isAnteMeridiem,
+                    isPostMeridiem
+                });
+                const hour = Number(stub!.data.time.slice(0, 2));
+                expect(hour).toBeGreaterThanOrEqual(minHour);
+                expect(hour).toBeLessThanOrEqual(maxHour);
+                expect(stub!.data.period).toBe(period);
             }
         });
     });
@@ -121,8 +173,21 @@ describe('TimeGenerator', () => {
         it('should throw an error for an unsupported interval label', () => {
             expect(() => generator.generate({
                 intervalLabel: Scope.DayIntervals,
-                requireZero: false
+                requireZero: false,
+                requireFiveMinuteStep: false,
+                isAnteMeridiem: false,
+                isPostMeridiem: false
             } as any)).toThrow('Unsupported interval label');
+        });
+
+        it('should reject contradictory day periods', () => {
+            expect(() => generator.generate({
+                intervalLabel: Scope.MinuteIntervals,
+                requireZero: false,
+                requireFiveMinuteStep: true,
+                isAnteMeridiem: true,
+                isPostMeridiem: true
+            })).toThrow('both ante meridiem and post meridiem');
         });
     });
 });

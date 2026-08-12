@@ -216,9 +216,30 @@ export type WritingProblem = {
     number: number;
 };
 
+/** Shared payload accepted by the number-line view for representation and pair arithmetic. */
+export type NumberLineProblem = WritingProblem | ArithmeticPairProblem;
+
 export type TimeProblem = {
     time: string;
     interval: number;
+    period?: 'a.m.' | 'p.m.';
+};
+
+export type CurrencyItem = {
+    kind: 'coin' | 'banknote';
+    denominationCents: number;
+    count: number;
+};
+
+export type CurrencyAmount = {
+    items: CurrencyItem[];
+    totalCents: number;
+};
+
+export type CurrencyArithmeticProblem = {
+    operation: 'addition' | 'subtraction';
+    amounts: [CurrencyAmount, CurrencyAmount];
+    answerCents: number;
 };
 
 // --- Shape Split Problem Types ---
@@ -379,6 +400,7 @@ export interface ViewTypeMap {
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
     'operations-number-array': NumberArrayProblem;
+    'operations-number-line': NumberLineProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;
     'place-value-make-ten': PlaceValueMakeTenProblem;
@@ -423,6 +445,7 @@ export interface ViewTypeMap {
     'numbers-write-name': WritingProblem;
     'time-analog': TimeProblem;
     'time-digital': TimeProblem;
+    'currency-word-problem': CurrencyArithmeticProblem;
 
     'shape-naming': ShapeIdentityProblem;
     'shape-position': ShapePositionProblem;

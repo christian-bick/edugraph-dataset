@@ -19,8 +19,8 @@ describe('numbers view helpers', () => {
         expect(() => validateWritingNumber('test-view', number)).not.toThrow();
     });
 
-    it.each([-1, 120.5, 121, Number.NaN])('rejects unsupported writing number %s', number => {
+    it.each([-1, 120.5, 1001, Number.NaN])('rejects unsupported writing number %s', number => {
         expect(() => validateWritingNumber('test-view', number))
-            .toThrow(/must be an integer between 0 and 120/);
+            .toThrow(/must be an integer between 0 and 1000/);
     });
 });

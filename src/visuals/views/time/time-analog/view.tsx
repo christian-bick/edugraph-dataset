@@ -4,7 +4,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {formatTime, getClockAngles, getTickMarks} from './helpers.ts';
 import { TimeAnalogViewConfig, TimeAnalogViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import { validateProblemData } from '../../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -17,6 +17,9 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
     const data = problem.data;
     
     validateProblemData('time-analog', data, ['time', 'interval']);
+    if (data.period !== undefined && data.period !== 'a.m.' && data.period !== 'p.m.') {
+        throw new ViewValidationError('time-analog', `Unsupported day period: ${data.period}`);
+    }
 
     const isReverse = config.isReverse;
 
@@ -29,6 +32,7 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
     const formattedTime = useMemo(() => {
         return formatTime(data.time, data.interval);
     }, [data.time, data.interval]);
+    const displayedTime = data.period === undefined ? formattedTime : `${formattedTime} ${data.period}`;
 
     const angles = useMemo(() => {
         return getClockAngles(data.time);
@@ -48,6 +52,11 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
                 {!isSolutionView && (
                     <div className="text-[1.4rem] font-bold text-slate-700 text-center leading-relaxed">
                         {promptText}
+                    </div>
+                )}
+                {data.period !== undefined && !isReverse && (
+                    <div className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-[1.05rem] font-bold text-indigo-800">
+                        Period: {data.period}
                     </div>
                 )}
                 <svg className="w-[200px] h-[200px]" viewBox="0 0 100 100">
@@ -100,7 +109,7 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
                 } ${
                     isTextSolution ? 'text-emerald-700 border-emerald-600 bg-emerald-50 font-bold' : ''
                 }`}>
-                    {showTime ? formattedTime : ''}
+                    {showTime ? displayedTime : ''}
                 </div>
             </div>
         </div>
