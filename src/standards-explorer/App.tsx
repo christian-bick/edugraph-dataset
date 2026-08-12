@@ -887,7 +887,7 @@ function ReleasedSampleLauncher({
             <button
                 type="button"
                 onClick={() => setSelectedIndex(0)}
-                className="flex size-8 shrink-0 self-center items-center justify-center rounded-md border border-[#cbd5e1] bg-white text-[#475569] transition-colors hover:border-[#94a3b8] hover:text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="flex w-8 shrink-0 self-stretch items-center justify-center rounded-md border border-[#cbd5e1] bg-white text-[#475569] transition-colors hover:border-[#94a3b8] hover:text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-sky-500"
                 aria-label={ariaLabel}
                 title={ariaLabel}
             >
