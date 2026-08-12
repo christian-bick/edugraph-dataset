@@ -6,6 +6,7 @@ import {
     findReleasedSamplesForLabelSets,
     getClusters,
     getCoverageKind,
+    getCoverageModules,
     getDomains,
     getSearchCoverageKind,
     getScopeKind,
@@ -220,6 +221,18 @@ describe('standards explorer model', () => {
         expect(releasedSampleUrl(index, samples[0])).toBe(
             'https://huggingface.co/datasets/owner/dataset/resolve/v1/train/module/image.png',
         );
+        expect(getCoverageModules(createCoverage({
+            competencies: [['Area', 'Scope']],
+            generator_module: 'generator, fallback-generator',
+        }), index)).toEqual([
+            { kind: 'generator', name: 'generator' },
+            { kind: 'generator', name: 'fallback-generator' },
+            { kind: 'view', name: 'view' },
+        ]);
+        expect(getCoverageModules(createCoverage({ generator_module: 'first, second' }), null)).toEqual([
+            { kind: 'generator', name: 'first' },
+            { kind: 'generator', name: 'second' },
+        ]);
     });
 
     it('aggregates label-set samples in order without duplicate released files', () => {

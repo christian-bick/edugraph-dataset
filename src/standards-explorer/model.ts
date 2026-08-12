@@ -18,6 +18,12 @@ import {
 
 export type CoverageKind = 'analysis' | 'beyond' | 'ontology' | 'partial' | 'covered' | 'implementation';
 export type ScopeKind = 'in-scope' | 'partially-in-scope' | 'beyond-scope';
+export type CoverageModuleKind = 'generator' | 'view';
+
+export interface CoverageModule {
+    kind: CoverageModuleKind;
+    name: string;
+}
 
 export const gradeNameFromId = (id: string): string => {
     const first = id.split('.')[0];
@@ -144,6 +150,23 @@ export const findReleasedSamplesForLabelSets = (
         `${sample.split}\0${sample.file_name}`,
         sample,
     ])).values()];
+};
+
+export const getCoverageModules = (
+    coverage: StandardCoverage,
+    index: AssetIndex | null,
+): CoverageModule[] => {
+    const samples = findReleasedSamplesForLabelSets(index, coverage.competencies);
+    const generators = [
+        ...(coverage.generator_module?.split(',').map(module => module.trim()).filter(Boolean) ?? []),
+        ...samples.map(sample => sample.generator),
+    ];
+    const views = samples.map(sample => sample.view);
+
+    return [
+        ...[...new Set(generators)].map<CoverageModule>(name => ({ kind: 'generator', name })),
+        ...[...new Set(views)].map<CoverageModule>(name => ({ kind: 'view', name })),
+    ];
 };
 
 export const releasedSampleUrl = (

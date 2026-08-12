@@ -7,6 +7,7 @@ import {
     findReleasedSamplesForLabelSets,
     getClusters,
     getCoverageKind,
+    getCoverageModules,
     getDomains,
     getLabelSets,
     getSearchCoverageKind,
@@ -116,7 +117,7 @@ const partialScopeStyle = {
     icon: 'fa-circle-half-stroke',
     badge: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
     detailLabel: 'PARTIALLY IN SCOPE',
-    detailBadge: 'bg-purple-50 text-purple-800 border-purple-200',
+    detailBadge: 'bg-purple-50 text-purple-800 border-purple-200/50',
 };
 
 const taskStyles: Record<TaskType, { label: string; icon: string; color: string; detail: string; accent: string }> = {
@@ -490,6 +491,41 @@ function CoverageBadges({ coverage, small = false, search = false }: { coverage:
     );
 }
 
+function CoverageModuleBadges({ modules }: { modules: ReturnType<typeof getCoverageModules> }) {
+    return modules.map(module => {
+        const kindLabel = module.kind === 'generator' ? 'Generator' : 'View';
+        return (
+            <span
+                key={`${module.kind}-${module.name}`}
+                aria-label={`${kindLabel} module: ${module.name}`}
+                title={`${kindLabel} module`}
+                className="inline-flex items-center gap-1 rounded border border-slate-200/50 bg-slate-50/70 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-slate-600"
+            >
+                <Icon name={module.kind === 'generator' ? 'fa-gear' : 'fa-eye'} className="text-slate-400" />
+                {module.name}
+            </span>
+        );
+    });
+}
+
+function DetailCoverageBadges({ coverage }: { coverage: StandardCoverage }) {
+    const style = coverageStyles[getCoverageKind(coverage)];
+    const partiallyInScope = getScopeKind(coverage) === 'partially-in-scope';
+
+    return (
+        <span className="flex flex-wrap justify-end gap-1.5">
+            <span className={`rounded border px-2.5 py-0.5 text-[10px] font-semibold ${style.detailBadge}`}>
+                {style.detailLabel}
+            </span>
+            {partiallyInScope && (
+                <span className={`rounded border px-2.5 py-0.5 text-[10px] font-semibold ${partialScopeStyle.detailBadge}`}>
+                    <Icon name={partialScopeStyle.icon} className="mr-1" /> {partialScopeStyle.detailLabel}
+                </span>
+            )}
+        </span>
+    );
+}
+
 function StandardCard({ standard, nested = false, search = false }: {
     standard: TreeStandard | Omit<TreeStandard, 'subStandards'> | StandardNode;
     nested?: boolean;
@@ -737,7 +773,7 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
     }
     if (coverage.beyond_scope.length > 0) {
         return (
-            <div className="text-xs text-purple-800 bg-purple-50 border border-purple-200 rounded-md p-2.5 leading-relaxed mt-1">
+            <div className="text-xs text-purple-800 bg-purple-50 border border-purple-200/50 rounded-md p-2.5 leading-relaxed mt-1">
                 {coverage.beyond_scope.map(item => <div key={item.title}><strong>{item.title}:</strong> {item.description}</div>)}
             </div>
         );
@@ -1013,9 +1049,12 @@ function StandardDetails() {
     return (
         <div className="p-6 flex flex-col gap-4">
             <div>
-                <h3 className="text-base font-semibold text-slate-100 leading-snug">
-                    {standard?.id ?? 'Select a standard'}
-                </h3>
+                <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-base font-semibold text-slate-100 leading-snug">
+                        {standard?.id ?? 'Select a standard'}
+                    </h3>
+                    {coverage && <DetailCoverageBadges coverage={coverage} />}
+                </div>
                 <p className="text-sm font-normal text-slate-600 mt-2 leading-relaxed">
                     {standard?.description ?? 'Select a standard from the list to display details.'}
                 </p>
@@ -1026,27 +1065,20 @@ function StandardDetails() {
 }
 
 function MappingDetails({ coverage, standard }: { coverage: StandardCoverage; standard: StandardNode }) {
+    const assetIndex = useExplorerStore(state => state.assetIndex);
     const kind = getCoverageKind(coverage);
-    const style = coverageStyles[kind];
-    const showModule = (kind === 'partial' || kind === 'covered') && coverage.generator_module;
-    const partiallyInScope = getScopeKind(coverage) === 'partially-in-scope';
+    const modules = kind === 'partial' || kind === 'covered'
+        ? getCoverageModules(coverage, assetIndex)
+        : [];
 
     return (
         <div className="border-t border-slate-800/80 pt-3 flex flex-col gap-2.5 text-xs">
-            <BreakdownHeading label="Mapping Status" />
-            <div className="flex flex-wrap items-center gap-1.5">
-                <span className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${style.detailBadge}`}>{style.detailLabel}</span>
-                {partiallyInScope && (
-                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${partialScopeStyle.detailBadge}`}>
-                        <Icon name={partialScopeStyle.icon} className="mr-1" /> {partialScopeStyle.detailLabel}
-                    </span>
-                )}
-                {showModule && (
-                    <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
-                        {coverage.generator_module?.toUpperCase()}
-                    </span>
-                )}
-            </div>
+            <BreakdownHeading label="Mapping" />
+            {modules.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 rounded-md border border-slate-800 bg-slate-950/80 p-2">
+                    <CoverageModuleBadges modules={modules} />
+                </div>
+            )}
             <MappingExplanation coverage={coverage} />
             <CompetencyBreakdown coverage={coverage} standard={standard} />
         </div>
