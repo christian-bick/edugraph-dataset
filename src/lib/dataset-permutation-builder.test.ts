@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import DatasetPermutationBuilder, {
-    defineImplementation,
+    defineImplementationPackage,
     toImplementationTodos,
     toTargets
 } from './dataset-permutation-builder.ts';
@@ -13,7 +13,7 @@ describe('DatasetPermutationBuilder target mapping', () => {
     });
 
     it('maps implementation TODOs to a shared implementation definition', () => {
-        const implementation = defineImplementation({
+        const implementation = defineImplementationPackage({
             id: 'number-line-extension',
             description: 'Extend number-line support.',
             generators: [{ module: 'arithmetic-ops-pairs', strategy: 'reuse' }],
@@ -31,7 +31,7 @@ describe('DatasetPermutationBuilder target mapping', () => {
     });
 
     it('normalizes implementation definitions and validates their modules', () => {
-        expect(defineImplementation({
+        expect(defineImplementationPackage({
             id: ' package ',
             description: ' Package description. ',
             generators: [{ module: ' generator ', strategy: 'expand' }],
@@ -43,13 +43,13 @@ describe('DatasetPermutationBuilder target mapping', () => {
             views: [{ module: 'view', strategy: 'reuse' }]
         });
 
-        expect(() => defineImplementation({
+        expect(() => defineImplementationPackage({
             id: 'package',
             description: 'Description.',
             generators: [],
             views: [{ module: 'view', strategy: 'reuse' }]
         })).toThrow(/at least one generator/);
-        expect(() => defineImplementation({
+        expect(() => defineImplementationPackage({
             id: 'package',
             description: 'Description.',
             generators: [{ module: 'generator', strategy: 'reuse' }],

@@ -17,6 +17,7 @@ import {
     ViewCatalogEntry
 } from '../lib/generation.ts';
 import { CompetencyTarget } from '../types/ml-engine.ts';
+import { groupOntologyTodos } from '../lib/ontology-todo.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -389,7 +390,8 @@ async function main() {
     const matchedOntologyTodos = allOntologyTodos.filter(o => o.standardId === std.id);
     const ontology_todos = matchedOntologyTodos.map(o => ({
       title: o.title,
-      description: o.description
+      description: o.description,
+      ontology: o.ontology
     }));
 
     // Match intentional project-medium exclusions from spec files
@@ -520,36 +522,37 @@ async function main() {
     });
   }
 
+  for (const { ontology, todos } of groupOntologyTodos(allOntologyTodos)) {
+    const targetStandards = Array.from(new Set(todos.map(todo => todo.standardId)));
+    const clusterIds = Array.from(new Set(targetStandards
+      .map(standardId => findParentClusterId(standardId, standardsMap))));
+    const targetDetails = todos.map(todo =>
+      `- ${todo.standardId} — ${todo.title}: ${todo.description}`);
+
+    consolidatedTasks.push({
+      id: `task-ontology-${ontology.id}`,
+      type: 'ONTOLOGY_EXTENSION',
+      cluster_id: clusterIds.join(', '),
+      cluster_description: clusterIds
+        .map(clusterId => standardsMap[clusterId]?.description || 'Other Math Concepts')
+        .join(' / '),
+      title: ontology.id,
+      description: `${ontology.description}\nTargets:\n${targetDetails.join('\n')}`,
+      standards: targetStandards,
+      ontology
+    });
+  }
+
   for (const [clusterId, missingStds] of Object.entries(tasksByCluster)) {
     const parentCluster = standardsMap[clusterId] || { description: 'Other Math Concepts' };
-    
     const specCoveredStds = missingStds.filter(s => s.spec_covered);
     const uncoveredStds = missingStds.filter(s => !s.spec_covered);
 
-    const missingOntology = specCoveredStds.filter(s => s.ontology_todos && s.ontology_todos.length > 0);
     const missingGenerator = specCoveredStds.filter(s =>
       (!s.ontology_todos || s.ontology_todos.length === 0) &&
       (!s.implementation_todos || s.implementation_todos.length === 0) &&
       !s.dataset_covered
     );
-
-    if (missingOntology.length > 0) {
-      const descriptions = missingOntology.map(s => {
-        if (s.ontology_todos && s.ontology_todos.length > 0) {
-          return `- ${s.id}: ${s.ontology_todos.map((t: any) => `${t.title} (${t.description})`).join('; ')}`;
-        }
-        return `- ${s.id}: Extend ontology`;
-      });
-      consolidatedTasks.push({
-        id: `task-ontology-${clusterId}`,
-        type: 'ONTOLOGY_EXTENSION',
-        cluster_id: clusterId,
-        cluster_description: parentCluster.description,
-        title: `Extend Ontology for ${clusterId}`,
-        description: `Extend ontology to support: ${missingOntology.map(s => s.id).join(', ')}. Details:\n` + descriptions.join('\n'),
-        standards: missingOntology.map(s => s.id)
-      });
-    }
 
     if (missingGenerator.length > 0) {
       const descriptions = missingGenerator.map(s => {

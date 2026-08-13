@@ -79,9 +79,26 @@ export interface Implementation {
     views: ModuleImplementation[];
 }
 
+export type OntologyDimension = 'Area' | 'Scope' | 'Ability';
+
+export interface OntologyChange {
+    dimension: OntologyDimension;
+    entities: string[];
+}
+
+export interface OntologyPackage {
+    id: string;
+    description: string;
+    changes: OntologyChange[];
+}
+
 export interface NamedTodo {
     title: string;
     description: string;
+}
+
+export interface OntologyTodo extends NamedTodo {
+    ontology: OntologyPackage;
 }
 
 export interface StandardCoverage {
@@ -90,7 +107,7 @@ export interface StandardCoverage {
     ontology_covered: boolean;
     competencies: string[][];
     implementation_todos: ImplementationTodo[];
-    ontology_todos: NamedTodo[];
+    ontology_todos: OntologyTodo[];
     beyond_scope: NamedTodo[];
     fully_beyond_scope: boolean;
     partially_beyond_scope: boolean;
@@ -126,6 +143,7 @@ export interface BacklogTask {
     description: string;
     standards: string[];
     implementation?: Implementation;
+    ontology?: OntologyPackage;
 }
 
 export interface CoverageData {

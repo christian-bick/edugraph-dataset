@@ -21,7 +21,7 @@ read by a different consumer, by name — there is no scanning or filtering:
 |-----------------------|-----------------------|-------------------------------------------|-------------------------------------------------------------------------|
 | `spec`                | `CompetencyTarget[]`  | `loadTargets` → the generation pipeline   | Permutations with **both** a matching generator and a compatible view.  |
 | `implementationTodos` | `ImplementationTodo[]`| `loadSpecTodos` → coverage report only    | Expressible in the ontology, but missing generator/view capability. Each references an authored implementation definition. |
-| `ontologyTodos`       | `OntologyTodo[]`      | `loadSpecTodos` → coverage report only    | Not expressible: the ontology lacks the `Area`/`Scope`/`Ability`.       |
+| `ontologyTodos`       | `OntologyTodo[]`      | `loadSpecTodos` → coverage report only    | Not expressible: the ontology lacks the `Area`/`Scope`/`Ability`. Each leaf entry references an authored ontology package. |
 | `beyondScope`         | `BeyondScopeEntry[]`  | `loadSpecTodos` → coverage report only    | Intentionally not addressable in the dataset's declared medium.        |
 | `equivalentTargets`   | `TargetEquivalence[]` | `loadSpecEquivalences` → the validator    | Definitions that are intentionally indistinguishable ([TSPEC-8](#tspec-8--definitions-must-be-distinct-unless-the-identity-is-declared)). |
 
@@ -56,10 +56,14 @@ Study `src/spec/ccss/kindergarten.ts` and `grade-01.ts` for the established stru
   such as number ranges, zero inclusion, shapes and relations.
 - `toTargets('<CCSS-id>-<slug>', builder)` from `src/lib/dataset-permutation-builder.ts` —
   maps the builder to active targets.
-- `defineImplementation({...})` — defines one stable implementation package with a description
+- `defineImplementationPackage({...})` — defines one stable implementation package with a description
   and explicit `reuse`/`expand`/`new` generator and view roles.
 - `toImplementationTodos('<CCSS-id>-<slug>', builder, implementation, '<explanation>')` —
   maps an unsupported builder to target TODOs referencing that package.
+- `defineOntologyPackage({...})` — defines one stable ontology package with a description
+  and one entity group per affected `Area`, `Scope`, or `Ability` dimension.
+- `toOntologyTodo('<standard-id>', '<title>', ontology, '<description>')` — creates a
+  leaf-indexed ontology TODO referencing that shared package.
 
 Build permutations programmatically rather than writing static arrays by hand — this
 applies to the `test` module too.
@@ -125,7 +129,42 @@ se the corresponding todo export.
 | Yes                                | Yes                          | No                                     | `implementationTodos` |
 | Yes                                | No                           | —                                      | `ontologyTodos`       |
 
-`ontologyTodos` entries are objects: `{ standardId, title, description }`.
+`ontologyTodos` entries retain `{ standardId, title, description }` for exact leaf coverage
+and reference one shared `ontology: OntologyPackage`. Define each ontology package once with
+a stable id, non-empty description, and non-empty changes. Every change names exactly one
+`Area`, `Scope`, or `Ability` dimension and one or more proposed entity names. Consolidate
+all entities for the same dimension into one change.
+
+Multiple leaf TODOs may reference the same package when one coherent ontology change serves
+them. This authored package identity drives CLI grouping and the Standards Explorer backlog;
+tooling must not reconstruct ontology ownership from standard clusters.
+
+```typescript
+const areaUnitOntology = defineOntologyPackage({
+    id: 'unit-square-area-measurement',
+    description: 'Model area measurement through iteration of unit squares.',
+    changes: [
+        { dimension: 'Area', entities: ['UnitIteration'] },
+        { dimension: 'Scope', entities: ['AreaMeasurement', 'UnitSquares'] }
+    ]
+});
+
+export const ontologyTodos: OntologyTodo[] = [
+    toOntologyTodo(
+        '3.MD.C.5a',
+        'Unit square as an area unit',
+        areaUnitOntology,
+        'Define a unit square as one square unit of area.'
+    ),
+    toOntologyTodo(
+        '3.MD.C.5b',
+        'Area from unit-square coverage',
+        areaUnitOntology,
+        'Relate exhaustive unit-square coverage to the numerical area.'
+    )
+];
+```
+
 `beyondScope` entries use the same descriptive shape. They are intentional exclusions, not
 backlog items. A leaf standard may have one competency in `beyondScope` and a different
 competency in `spec`, but each individual competency still belongs to exactly one export.
@@ -145,7 +184,7 @@ generators or views. Tooling and `/implement-spec` consume this authored package
 reconstructing ownership from target prefixes.
 
 ```typescript
-const numberLineImplementation = defineImplementation({
+const numberLineImplementation = defineImplementationPackage({
     id: 'number-line-arithmetic',
     description: 'Add a number-line layout for representation and arithmetic.',
     generators: [
@@ -258,10 +297,10 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-1** — the file exports only the five contract names, each with its correct type.
 - [ ] **TSPEC-2** — `spec` has no alias export; every live target is reachable through `spec` alone.
 - [ ] **TSPEC-3** — one builder per competency, derived from leaf standards, not one per standard.
-- [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` and mapped via `toTargets` or `toImplementationTodos`; no hand-written target arrays.
+- [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` and mapped via `toTargets` or `toImplementationTodos`; ontology gaps use `defineOntologyPackage`/`toOntologyTodo`; no hand-written target arrays.
 - [ ] **TSPEC-5** — no id is hand-written or position-derived; every id came out of `toTargets` or `toImplementationTodos`.
 - [ ] **TSPEC-6** — no label is broader, narrower, or otherwise adjusted to make a target match; gaps are parked with a TODO or a todo export.
-- [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO references a valid authored definition with explicit module strategies, and matching is confirmed via `npm run show:matching` for addressable competencies.
+- [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO references a valid authored definition with explicit module strategies, every ontology TODO references a valid authored ontology package, and matching is confirmed via `npm run show:matching` for addressable competencies.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless declared in `equivalentTargets` with a reason.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.

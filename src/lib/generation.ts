@@ -7,9 +7,10 @@ import { findLeafModules, LeafModule } from './module-resolver.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
 import { extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, Implementation, ImplementationTodo, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
+import { CompetencyTarget, Implementation, ImplementationTodo, OntologyPackage, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ViewSpec } from '../types/view-spec.ts';
-import { defineImplementation } from './dataset-permutation-builder.ts';
+import { defineImplementationPackage } from './dataset-permutation-builder.ts';
+import { defineOntologyPackage, toOntologyTodo } from './ontology-todo.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -560,6 +561,8 @@ export async function loadSpecTodos(
     const ontologyTodos: OntologyTodo[] = [];
     const beyondScope: BeyondScopeEntry[] = [];
     const normalizedImplementations = new WeakMap<object, Implementation>();
+    const normalizedOntologies = new WeakMap<object, OntologyPackage>();
+    const ontologiesById = new Map<string, OntologyPackage>();
     for (const filePath of files) {
         const module = await import(pathToFileURL(filePath).href);
         if (Array.isArray(module.implementationTodos)) {
@@ -572,7 +575,7 @@ export async function loadSpecTodos(
                 let implementation = normalizedImplementations.get(todo.implementation);
                 if (!implementation) {
                     try {
-                        implementation = defineImplementation(todo.implementation);
+                        implementation = defineImplementationPackage(todo.implementation);
                     } catch (error) {
                         const detail = error instanceof Error ? error.message : String(error);
                         throw new Error(
@@ -585,7 +588,45 @@ export async function loadSpecTodos(
             }
         }
         if (Array.isArray(module.ontologyTodos)) {
-            ontologyTodos.push(...(module.ontologyTodos as OntologyTodo[]));
+            for (const todo of module.ontologyTodos as OntologyTodo[]) {
+                if (!todo.ontology || typeof todo.ontology !== 'object') {
+                    throw new Error(
+                        `Ontology TODO "${todo.standardId ?? 'unknown'}" in "${filePath}" must reference an ontology package.`
+                    );
+                }
+                let ontology = normalizedOntologies.get(todo.ontology);
+                if (!ontology) {
+                    try {
+                        ontology = defineOntologyPackage(todo.ontology);
+                    } catch (error) {
+                        const detail = error instanceof Error ? error.message : String(error);
+                        throw new Error(
+                            `Invalid ontology package for TODO "${todo.standardId ?? 'unknown'}" in "${filePath}": ${detail}`
+                        );
+                    }
+                    normalizedOntologies.set(todo.ontology, ontology);
+                }
+
+                const existing = ontologiesById.get(ontology.id);
+                if (existing && JSON.stringify(existing) !== JSON.stringify(ontology)) {
+                    throw new Error(`Ontology package id "${ontology.id}" has conflicting definitions.`);
+                }
+                const canonicalOntology = existing ?? ontology;
+                ontologiesById.set(canonicalOntology.id, canonicalOntology);
+                try {
+                    ontologyTodos.push(toOntologyTodo(
+                        todo.standardId,
+                        todo.title,
+                        canonicalOntology,
+                        todo.description
+                    ));
+                } catch (error) {
+                    const detail = error instanceof Error ? error.message : String(error);
+                    throw new Error(
+                        `Invalid ontology TODO "${todo.standardId ?? 'unknown'}" in "${filePath}": ${detail}`
+                    );
+                }
+            }
         }
         if (Array.isArray(module.beyondScope)) {
             beyondScope.push(...(module.beyondScope as BeyondScopeEntry[]));

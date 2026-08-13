@@ -1,9 +1,9 @@
 ---
 name: update-ontology
-description: "/update-ontology [{specModule}] - Autonomous orchestrator skill to inspect ontologyTodos, perform upfront prerequisite checks (sibling repo & gh auth), group related gaps, and create formal GitHub issues in christian-bick/edugraph-ontology."
+description: "/update-ontology [{specModule}] - Autonomous orchestrator skill to inspect authored ontology packages, perform upfront prerequisite checks (sibling repo & gh auth), and create formal GitHub issues in christian-bick/edugraph-ontology."
 ---
 
-Orchestrate inspecting and resolving `ontologyTodos` for a spec module (default `--spec=ccss`) by grouping related missing ontological concepts and creating formal GitHub issues in the `christian-bick/edugraph-ontology` repository.
+Orchestrate inspecting and resolving authored ontology packages for a spec module (default `--spec=ccss`) and creating formal GitHub issues in the `christian-bick/edugraph-ontology` repository.
 
 ---
 
@@ -27,12 +27,15 @@ Before performing any analysis or issue generation, execute these two checks:
 
 ---
 
-#### Step 2: Inspect & Group `ontologyTodos`
+#### Step 2: Inspect Ontology Packages
 - Run the pre-approved npm script to list all pending ontology gaps:
   ```bash
   npm run show:ont-todos -- --spec=<specModule>
   ```
-- Analyze the output. **Group logically related ontology TODOs within the same dimension** (e.g. missing numerical range scopes, missing operations, missing shape concepts) so they can be proposed as cohesive GitHub issues. Never combine `Scope`, `Area`, and `Ability` extensions in one issue; split cross-dimension gaps into separate issues.
+- Treat each authored ontology package as the unit of ownership; do not regroup leaf TODOs
+  heuristically by standard or cluster. A package may affect multiple standards and dimensions.
+  Create one issue per dimension change within that package. Never combine `Scope`, `Area`,
+  and `Ability` extensions in one issue.
 
 #### Step 3: Inspect Sibling Ontology Repository (`../edugraph-ontology`)
 - Inspect `core-schema.ttl` for a basic understanding of ontology types and relations.
@@ -40,7 +43,7 @@ Before performing any analysis or issue generation, execute these two checks:
 - Inspect taxonomy hierarchies to ensure each proposed entity and family placement fits cleanly into the ontology structure and does not duplicate existing work.
 
 #### Step 4: Formulate & Submit GitHub Issue Proposals
-For each previously grouped ontology gap, formulate a structured GitHub issue payload:
+For each dimension change in each ontology package, formulate a structured GitHub issue payload:
 - **Title**: `[Ontology <Area|Scope|Ability>] <Clear Summary Title>`
 - **Label**: Apply exactly one dimension label matching the ontology dimension extended by the issue: `dimension:Scope`, `dimension:Area`, or `dimension:Ability`. Every issue must carry one of these labels.
 - **Body**:

@@ -128,13 +128,33 @@ export interface ImplementationTodo extends CompetencyTarget {
     implementation: Implementation;
 }
 
+export type OntologyDimension = 'Area' | 'Scope' | 'Ability';
+
+/** One ontology dimension's reviewed contribution to an ontology package. */
+export interface OntologyChange {
+    dimension: OntologyDimension;
+    entities: readonly string[];
+}
+
 /**
- * A missing ontology concept task defined in a spec module.
+ * A reviewed ontology package. Leaf-indexed TODOs reference this definition so
+ * one coherent ontology change can serve multiple standards or competencies.
+ */
+export interface OntologyPackage {
+    id: string;
+    description: string;
+    changes: readonly OntologyChange[];
+}
+
+/**
+ * A leaf-indexed missing ontology competency that references one reviewed
+ * ontology package.
  */
 export interface OntologyTodo {
     standardId: string;
     title: string;
     description: string;
+    ontology: OntologyPackage;
 }
 
 /**

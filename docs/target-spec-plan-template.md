@@ -35,9 +35,9 @@ directly answerable questions under Open Questions, and end every item there wit
 
 ### Proposed Ontology TODOs
 
-| Leaf / competency | Missing ontology distinction / proposal |
-|---|---|
-| `<standard-id>` <competency> | <Most-specific missing distinction and proposed ontology placement> |
+| Leaf / competency | Ontology package | Missing ontology distinction / proposal |
+|---|---|---|
+| `<standard-id>` <competency> | `<stable-ontology-package-id>` | <Most-specific missing distinction, dimension, proposed entities, and family placement> |
 
 ### Proposed Implementation TODOs
 
@@ -93,6 +93,7 @@ Use this checklist when authoring a plan; do not copy it into the generated `pla
 - [ ] Every covered standard leaf is quoted under Source Scope.
 - [ ] Every distinct competency appears in exactly one disposition.
 - [ ] Active and implementation targets state labels, permutation dimensions, and observable evidence.
+- [ ] Every ontology TODO names a stable package; related leaf entries share the same package id where one ontology change serves them.
 - [ ] Every implementation TODO has a stable id and explicit `reuse`/`expand`/`new` ownership for every generator and view.
 - [ ] Equivalence declarations and all disposition counts agree with their tables.
 - [ ] Detailed Design Decisions contains accepted rationale, matching risks, and distinctness expectations.

@@ -552,7 +552,16 @@ describe('loadTargets', () => {
         const dir = writeFixture('with-todos', 'a.ts', `
             export const spec = [{ id: 'real-target', labels: [] }];
             export const implementationTodos = [{ id: 'todo-target', labels: [], explanation: 'not supported yet' }];
-            export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x' }];
+            export const ontologyTodos = [{
+                standardId: 'X',
+                title: 'x',
+                description: 'x',
+                ontology: {
+                    id: 'ontology-package',
+                    description: 'Add the missing concept.',
+                    changes: [{ dimension: 'Area', entities: ['MissingArea'] }]
+                }
+            }];
             export const beyondScope = [{ standardId: 'Y', title: 'y', description: 'y' }];
         `);
         const targets = await loadTargets('with-todos', FIXTURE_ROOT);
@@ -570,7 +579,12 @@ describe('loadTargets', () => {
                 views: [{ module: 'view', strategy: 'new' }]
             };
             export const implementationTodos = [{ id: 'todo-target', labels: [], implementation }];
-            export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x' }];
+            const ontology = {
+                id: 'ontology-package',
+                description: 'Add the missing concept.',
+                changes: [{ dimension: 'Area', entities: ['MissingArea'] }]
+            };
+            export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x', ontology }];
             export const beyondScope = [{ standardId: 'Y', title: 'y', description: 'y' }];
         `);
 
@@ -583,6 +597,11 @@ describe('loadTargets', () => {
             views: [{ module: 'view', strategy: 'new' }]
         });
         expect(dispositions.ontologyTodos).toHaveLength(1);
+        expect(dispositions.ontologyTodos[0].ontology).toEqual({
+            id: 'ontology-package',
+            description: 'Add the missing concept.',
+            changes: [{ dimension: 'Area', entities: ['MissingArea'] }]
+        });
         expect(dispositions.beyondScope).toEqual([
             { standardId: 'Y', title: 'y', description: 'y' }
         ]);
@@ -594,6 +613,28 @@ describe('loadTargets', () => {
             export const implementationTodos = [{ id: 'todo-target', labels: [] }];
         `);
         await expect(loadSpecTodos('unassigned-todos', FIXTURE_ROOT)).rejects.toThrow(/reference an implementation definition/);
+    });
+
+    it('rejects ontology TODOs without a package definition', async () => {
+        writeFixture('unassigned-ontology-todos', 'a.ts', `
+            export const spec = [];
+            export const ontologyTodos = [{ standardId: 'X', title: 'x', description: 'x' }];
+        `);
+        await expect(loadSpecTodos('unassigned-ontology-todos', FIXTURE_ROOT)).rejects.toThrow(/reference an ontology package/);
+    });
+
+    it('rejects conflicting ontology packages with the same id', async () => {
+        writeFixture('conflicting-ontology-packages', 'a.ts', `
+            export const spec = [];
+            export const ontologyTodos = [{
+                standardId: 'X', title: 'x', description: 'x',
+                ontology: { id: 'shared', description: 'First', changes: [{ dimension: 'Area', entities: ['A'] }] }
+            }, {
+                standardId: 'Y', title: 'y', description: 'y',
+                ontology: { id: 'shared', description: 'Second', changes: [{ dimension: 'Scope', entities: ['B'] }] }
+            }];
+        `);
+        await expect(loadSpecTodos('conflicting-ontology-packages', FIXTURE_ROOT)).rejects.toThrow(/conflicting definitions/);
     });
 
     it('merges the spec export of every file in a spec directory, in sorted file order', async () => {

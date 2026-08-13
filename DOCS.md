@@ -136,8 +136,9 @@ Playwright image, so changing the host runtime does not change the renderer iden
 
 ### `src/scripts/map-standards.ts`
 * **Execution**: `npm run generate:standards-explorer -- [--output-dir=<path>] [--channel=latest|preview] [--source-ref=<ref>] [--source-sha=<sha>]` (alias: `npm run map:standards`)
-* **Function**: Regenerates the standards tree, dataset coverage metadata, and grouped
-  task backlog consumed by the standards explorer, plus the snapshot manifest. The
+* **Function**: Regenerates the standards tree, dataset coverage metadata, and authored-package
+  task backlog consumed by the standards explorer, plus the snapshot manifest. Implementation
+  and ontology tasks are grouped by stable package id. The
   default output is `public/coverage/preview/` for local development; release and
   deployment workflows pass explicit output directories and source identity.
 

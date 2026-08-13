@@ -122,6 +122,22 @@ function runValidation() {
     && Array.isArray(item.views)
     && item.views.length > 0
     && item.views.every(isModuleImplementation);
+  const ontologyDimensions = new Set(['Area', 'Scope', 'Ability']);
+  const isOntologyChange = (item: any) => item
+    && ontologyDimensions.has(item.dimension)
+    && Array.isArray(item.entities)
+    && item.entities.length > 0
+    && item.entities.every((entity: unknown) => typeof entity === 'string' && entity.trim() !== '')
+    && new Set(item.entities).size === item.entities.length;
+  const isOntologyPackage = (item: any) => item
+    && typeof item.id === 'string'
+    && item.id.trim() !== ''
+    && typeof item.description === 'string'
+    && item.description.trim() !== ''
+    && Array.isArray(item.changes)
+    && item.changes.length > 0
+    && item.changes.every(isOntologyChange)
+    && new Set(item.changes.map((change: any) => change.dimension)).size === item.changes.length;
 
   // --- CHECK 1: metadata count matches coverage length ---
   const coverageKeys = Object.keys(coverage);
@@ -226,7 +242,26 @@ function runValidation() {
       }
     }
 
-    // E. Verify beyond_scope structure and status flags
+    // E. Verify ontology_todos structure
+    if (std.ontology_todos !== undefined) {
+      if (!Array.isArray(std.ontology_todos)) {
+        result.errors.push(`[Ontology Todos Error] Standard "${id}" ontology_todos is not an array`);
+        result.passed = false;
+      } else {
+        for (let idx = 0; idx < std.ontology_todos.length; idx++) {
+          const item = std.ontology_todos[idx];
+          if (!item
+            || typeof item.title !== 'string'
+            || typeof item.description !== 'string'
+            || !isOntologyPackage(item.ontology)) {
+            result.errors.push(`[Ontology Todos Error] Standard "${id}" ontology_todo at index ${idx} is invalid`);
+            result.passed = false;
+          }
+        }
+      }
+    }
+
+    // F. Verify beyond_scope structure and status flags
     if (std.beyond_scope !== undefined) {
       if (!Array.isArray(std.beyond_scope)) {
         result.errors.push(`[Beyond Scope Error] Standard "${id}" beyond_scope is not an array`);
@@ -252,7 +287,7 @@ function runValidation() {
       result.passed = false;
     }
 
-    // F. Verify cluster_id exists in standards.jsonl
+    // G. Verify cluster_id exists in standards.jsonl
     const clusterId = std.cluster_id;
     if (clusterId && clusterId !== 'Other') {
       if (!standardsMap[clusterId]) {
@@ -268,9 +303,14 @@ function runValidation() {
   const taskStandardIds = new Set<string>();
   const taskIds = new Set<string>();
   const taskImplementationIds = new Set<string>();
+  const taskOntologyIds = new Set<string>();
   const coverageImplementationIds = new Set<string>(Object.values(coverage)
     .flatMap((entry: any) => entry.implementation_todos || [])
     .map((todo: any) => todo.implementation?.id)
+    .filter((id: unknown): id is string => typeof id === 'string'));
+  const coverageOntologyIds = new Set<string>(Object.values(coverage)
+    .flatMap((entry: any) => entry.ontology_todos || [])
+    .map((todo: any) => todo.ontology?.id)
     .filter((id: unknown): id is string => typeof id === 'string'));
 
   for (const task of tasks) {
@@ -286,6 +326,24 @@ function runValidation() {
       result.passed = false;
     } else if (task.implementation) {
       taskImplementationIds.add(task.implementation.id);
+    }
+    if (task.ontology !== undefined && !isOntologyPackage(task.ontology)) {
+      result.errors.push(`[Task Ontology Error] Task "${task.id}" has an invalid ontology package`);
+      result.passed = false;
+    } else if (task.ontology) {
+      if (taskOntologyIds.has(task.ontology.id)) {
+        result.errors.push(`[Task Ontology Error] Ontology package "${task.ontology.id}" has multiple backlog tasks`);
+        result.passed = false;
+      }
+      taskOntologyIds.add(task.ontology.id);
+    }
+    if (task.type === 'ONTOLOGY_EXTENSION' && !task.ontology) {
+      result.errors.push(`[Task Ontology Error] Ontology task "${task.id}" must reference an ontology package`);
+      result.passed = false;
+    }
+    if (task.ontology && task.type !== 'ONTOLOGY_EXTENSION') {
+      result.errors.push(`[Task Ontology Error] Task "${task.id}" references an ontology package but is not an ONTOLOGY_EXTENSION task`);
+      result.passed = false;
     }
 
     // B. Check standard IDs in task
@@ -321,6 +379,11 @@ function runValidation() {
         result.errors.push(`[Task Implementation Error] Task "${task.id}" assigns implementation "${task.implementation.id}" to unrelated standard "${stdId}"`);
         result.passed = false;
       }
+      if (task.ontology
+        && !covEntry.ontology_todos?.some((todo: any) => todo.ontology?.id === task.ontology.id)) {
+        result.errors.push(`[Task Ontology Error] Task "${task.id}" assigns ontology package "${task.ontology.id}" to unrelated standard "${stdId}"`);
+        result.passed = false;
+      }
       if (covEntry.fully_beyond_scope) {
         result.errors.push(`[Task Logic Error] Fully beyond-scope standard "${stdId}" must not appear in backlog task "${task.id}"`);
         result.passed = false;
@@ -331,6 +394,12 @@ function runValidation() {
   for (const implementationId of coverageImplementationIds) {
     if (!taskImplementationIds.has(implementationId)) {
       result.errors.push(`[Orphaned Implementation Error] Implementation "${implementationId}" has no package-level backlog task`);
+      result.passed = false;
+    }
+  }
+  for (const ontologyId of coverageOntologyIds) {
+    if (!taskOntologyIds.has(ontologyId)) {
+      result.errors.push(`[Orphaned Ontology Error] Ontology package "${ontologyId}" has no package-level backlog task`);
       result.passed = false;
     }
   }

@@ -58,6 +58,8 @@ Complete the template with these constraints:
 - Give active and implementation targets their programmatic builder dimensions,
   most-specific truthful ontology labels, and visible or necessary textual evidence
   (`TSPEC-4`, `TSPEC-6`, `TSPEC-13`).
+- Give every ontology TODO a stable ontology package id. Reuse that id across leaf entries
+  when one coherent ontology change serves them; identify each proposed entity's dimension.
 - Record expected active generator/view matches and suspicious boundaries. For every
   implementation TODO, give a stable implementation id and identify every generator/view
   role: bare id for `reuse`, `△` for `expand`, and `＋` for `new`.
@@ -84,10 +86,13 @@ Resume only after the user approves Pass 1, incorporating any requested changes.
 ### 1. Author the target file
 
 - Create one `DatasetPermutationBuilder` per competency and map it with `toTargets`.
-- Define each reviewed package once with `defineImplementation`, including its stable id,
+- Define each reviewed package once with `defineImplementationPackage`, including its stable id,
   description, and `reuse`/`expand`/`new` generator and view modules. Pass that definition to
   `toImplementationTodos(prefix, builder, implementation, explanation)` directly where the
   `implementationTodos` export is assembled.
+- Define each reviewed ontology package once with `defineOntologyPackage`, including its
+  stable id, description, and dimension-specific entity groups. Create every exact-leaf
+  reference with `toOntologyTodo` so related standards share authored package identity.
 - Export only the five target-spec contract names with their exact types (`TSPEC-1`, `TSPEC-2`).
 - Never stretch labels to force a match. Every active label must also be reasonably identifiable and defendable from the expected rendered artifact, not merely from the source standard's prose (`TSPEC-6`, `TSPEC-13`).
 

@@ -22,6 +22,7 @@ import type {
     BacklogTask,
     Implementation,
     ModuleImplementation,
+    OntologyPackage,
     StandardCoverage,
     StandardNode,
     TaskType,
@@ -223,6 +224,37 @@ function ImplementationDetails({
             )}
             <ModuleImplementationList label="Generators" modules={implementation.generators} stacked={!boxed} />
             <ModuleImplementationList label="Views" modules={implementation.views} stacked={!boxed} />
+        </div>
+    );
+}
+
+const ontologyDimensionStyles = {
+    Area: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+    Scope: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+    Ability: 'border-sky-500/30 bg-sky-500/10 text-sky-300',
+} as const;
+
+function OntologyDetails({ ontology }: {
+    ontology: OntologyPackage;
+}) {
+    return (
+        <div className="space-y-2">
+            <div className="space-y-1.5">
+                {ontology.changes.map(change => (
+                    <div key={change.dimension} className="flex items-start gap-2">
+                        <span className={`w-14 shrink-0 rounded border px-1.5 py-1 text-center text-[9px] font-bold uppercase ${ontologyDimensionStyles[change.dimension]}`}>
+                            {change.dimension}
+                        </span>
+                        <div className="flex min-w-0 flex-wrap gap-1.5">
+                            {change.entities.map(entity => (
+                                <span key={entity} className="rounded border border-slate-700 bg-slate-950/70 px-1.5 py-1 font-mono text-[9px] text-slate-300">
+                                    {entity}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
@@ -757,6 +789,10 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
         setActiveTask(`task-implementation-${implementationId}`);
         setActiveTab('backlog');
     };
+    const openOntologyTask = (ontologyId: string) => {
+        setActiveTask(`task-ontology-${ontologyId}`);
+        setActiveTab('backlog');
+    };
 
     if (!coverage.spec_covered) {
         return (
@@ -772,6 +808,10 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
         todo.implementation.id,
         todo.implementation,
     ])).values()];
+    const ontologies = [...new Map(coverage.ontology_todos.map(todo => [
+        todo.ontology.id,
+        todo.ontology,
+    ])).values()];
     const hasDetails = coverage.beyond_scope.length > 0
         || coverage.ontology_todos.length > 0
         || implementations.length > 0;
@@ -783,11 +823,29 @@ function MappingExplanation({ coverage }: { coverage: StandardCoverage }) {
                     {coverage.beyond_scope.map(item => <div key={item.title}><strong>{item.title}:</strong> {item.description}</div>)}
                 </div>
             )}
-            {coverage.ontology_todos.length > 0 && (
-                <div className="rounded-md border border-red-200 bg-red-50 p-2.5 text-xs leading-relaxed text-red-800">
-                    {coverage.ontology_todos.map(todo => <div key={todo.title}><strong>{todo.title}:</strong> {todo.description}</div>)}
-                </div>
-            )}
+            {ontologies.map(ontology => (
+                <button
+                    key={ontology.id}
+                    type="button"
+                    onClick={() => openOntologyTask(ontology.id)}
+                    className="group w-full rounded-md border border-red-200 bg-red-50 p-2.5 text-left text-red-900 transition-colors hover:border-red-400 hover:bg-red-100/70 focus:outline-none focus:ring-2 focus:ring-red-400/40"
+                >
+                    <span className="flex items-center justify-between gap-3">
+                        <span className="font-mono text-[10px] font-semibold">{ontology.id}</span>
+                        <Icon name="fa-arrow-right" className="text-[10px] text-red-400 transition-colors group-hover:text-red-600" />
+                    </span>
+                    <span className="mt-0.5 block text-[10px] leading-relaxed text-red-800">{ontology.description}</span>
+                    <span className="mt-1.5 block space-y-0.5 border-t border-red-200/70 pt-1.5">
+                        {coverage.ontology_todos
+                            .filter(todo => todo.ontology.id === ontology.id)
+                            .map(todo => (
+                                <span key={`${todo.title}-${todo.description}`} className="block text-[10px] leading-relaxed text-red-700">
+                                    <strong>{todo.title}:</strong> {todo.description}
+                                </span>
+                            ))}
+                    </span>
+                </button>
+            ))}
             {implementations.map(implementation => (
                 <button
                     key={implementation.id}
@@ -1137,6 +1195,12 @@ function TaskDetails() {
                 <section className="space-y-3 border-t border-slate-800/80 pt-4">
                     <h4 className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Involved modules</h4>
                     <ImplementationDetails implementation={task.implementation} showSummary={false} boxed={false} />
+                </section>
+            )}
+            {task.ontology && (
+                <section className="space-y-3 border-t border-slate-800/80 pt-4">
+                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Ontology changes</h4>
+                    <OntologyDetails ontology={task.ontology} />
                 </section>
             )}
             <section className="border-t border-slate-800/80 pt-4 text-xs">

@@ -56,7 +56,7 @@ function normalizeModules(
 }
 
 /** Defines one reviewed implementation package independently of its target permutations. */
-export function defineImplementation(implementation: Implementation): Implementation {
+export function defineImplementationPackage(implementation: Implementation): Implementation {
     const id = implementation.id.trim();
     const description = implementation.description.trim();
     if (id === '') throw new Error('Implementation id must not be empty.');
