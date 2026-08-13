@@ -141,12 +141,10 @@ npm run dev
 ```
 
 The same server exposes the React-based Common Core coverage and task explorer at
-[`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). Its data is
-loaded from the deployed coverage snapshots by default. Regenerate Preview with
-`npm run generate:standards-explorer`; the dev server automatically prefers that complete
-local snapshot over the deployed fallback. Open
-[`/standards-explorer.html?view=preview`](http://localhost:5173/standards-explorer.html?view=preview)
-to inspect that working-tree snapshot locally.
+[`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). The explorer
+always shows coverage for the deployed `main` revision. Regenerate the working snapshot
+with `npm run generate:standards-explorer`; the dev server automatically prefers that
+complete local snapshot over the deployed fallback.
 
 The details sidebar also shows every released question and solution image for each
 implemented label combination. Those independent samples are indexed from the merged
@@ -154,25 +152,29 @@ union dataset and loaded directly from the tag-pinned Hugging Face release. Duri
 development, `npm run dev` dynamically builds the equivalent index from the current
 per-standard datasets under `out/`; no index-generation or union-merge command is needed.
 
-On `localhost` or `127.0.0.1`, the explorer header also offers a **Released / Local**
-image-source switch. Local mode serves the selected PNGs directly from their current
-per-standard dataset folders
-and can be opened at
-[`/standards-explorer.html?view=preview&assets=local`](http://localhost:5173/standards-explorer.html?view=preview&assets=local).
-The development renderer index links to this mode as well. The switch and local image
-route are development-only; deployed explorers always use release-pinned images. The
-`generate:asset-index` and `validate:asset-index` commands remain release/CI operations.
+On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
+images. Released uses the immutable published asset index; Local uses PNGs served from
+the current per-standard dataset folders and can be opened at
+[`/standards-explorer.html?assets=local`](http://localhost:5173/standards-explorer.html?assets=local).
+The development renderer index links to this mode as well. Coverage and navigation state
+do not change when the image source changes. Deployed explorers always use release-pinned
+images and do not render the switch. The `generate:asset-index` and
+`validate:asset-index` commands remain release/CI operations.
+
+A dataset-covered leaf is labeled **Released** only when the released asset index has an
+exact requested-label-set match for every implemented permutation. Otherwise it is
+labeled **Ready** with the same green theme and an hourglass icon. Local samples never
+change this publication status.
 
 ### Coverage Explorer Deployment
 
-The production explorer offers two data views. **Latest** is the default and comes from
-the coverage snapshot attached to the most recent successful GitHub Release; **Preview**
-is regenerated from the exact validated `main` commit being deployed. Every successful
-push validation on `main` calls the reusable deployment workflow, while a successful
-tagged dataset release publishes its immutable coverage snapshot after the Hugging Face
-upload and dispatches the same workflow to promote it. Both snapshots are downloaded or
-generated during deployment and served from the `edugraph-coverage` Firebase Hosting
-site, so the browser has no cross-origin GitHub dependency. Google authentication uses
+The production explorer shows the coverage snapshot regenerated from the exact validated
+`main` commit being deployed and combines it with the latest released asset index. Every
+successful push validation on `main` calls the reusable deployment workflow, while a
+successful tagged dataset release publishes its immutable coverage snapshot after the
+Hugging Face upload and dispatches the same workflow to promote its assets. The files are
+served from the `edugraph-coverage` Firebase Hosting site, so the browser has no
+cross-origin GitHub dependency. Google authentication uses
 Workload Identity Federation from the trusted `main` workflow context and requires no
 long-lived Firebase service-account secret. The hosted root redirects to the standards
 explorer; the deployment can also be started manually with `workflow_dispatch`.

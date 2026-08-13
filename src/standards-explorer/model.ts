@@ -17,7 +17,7 @@ import {
     type ReleasedAssetSample,
 } from '../lib/asset-index.ts';
 
-export type CoverageKind = 'analysis' | 'beyond' | 'ontology' | 'partial' | 'covered' | 'implementation';
+export type CoverageKind = 'analysis' | 'beyond' | 'ontology' | 'partial' | 'ready' | 'released' | 'implementation';
 export type ScopeKind = 'in-scope' | 'partially-in-scope' | 'beyond-scope';
 export type CoverageModuleKind = 'generator' | 'view';
 
@@ -49,19 +49,35 @@ export const getClusters = (tree: GradesTree, grade: string, domainId: string | 
         .filter(domain => !domainId || domain.id === domainId)
         .flatMap(domain => domain.clusters ?? []);
 
-export const getCoverageKind = (coverage: StandardCoverage): CoverageKind => {
+export const hasReleasedSamplesForEveryPermutation = (
+    coverage: StandardCoverage,
+    releasedIndex: AssetIndex | null,
+): boolean => coverage.competencies.length > 0
+    && coverage.competencies.every(labels => findReleasedSamples(releasedIndex, labels).length > 0);
+
+export const getCoverageKind = (
+    coverage: StandardCoverage,
+    releasedIndex: AssetIndex | null = null,
+): CoverageKind => {
     if (!coverage.spec_covered) return 'analysis';
     if (coverage.fully_beyond_scope) return 'beyond';
     if (!coverage.ontology_covered || coverage.ontology_todos.length > 0) return 'ontology';
     if (coverage.dataset_covered && coverage.implementation_todos.length > 0) return 'partial';
-    if (coverage.dataset_covered) return 'covered';
+    if (coverage.dataset_covered) {
+        return hasReleasedSamplesForEveryPermutation(coverage, releasedIndex) ? 'released' : 'ready';
+    }
     return 'implementation';
 };
 
-export const getSearchCoverageKind = (coverage: StandardCoverage): CoverageKind => {
+export const getSearchCoverageKind = (
+    coverage: StandardCoverage,
+    releasedIndex: AssetIndex | null = null,
+): CoverageKind => {
     if (coverage.fully_beyond_scope) return 'beyond';
     if (coverage.dataset_covered && coverage.implementation_todos.length > 0) return 'partial';
-    if (coverage.dataset_covered) return 'covered';
+    if (coverage.dataset_covered) {
+        return hasReleasedSamplesForEveryPermutation(coverage, releasedIndex) ? 'released' : 'ready';
+    }
     if (coverage.ontology_covered) return 'implementation';
     return 'ontology';
 };

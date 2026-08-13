@@ -72,30 +72,36 @@ The consequence: a code change only invalidates the samples whose identity input
 ### Standards Explorer
 `src/standards-explorer.html` is a dedicated Vite entry for the Common Core coverage
 explorer. The React application lives under `src/standards-explorer/`, uses Zustand for
-its navigation and selection state, and reads a selected snapshot from
-`public/coverage/latest/` or `public/coverage/preview/` at runtime. Each snapshot contains
+its navigation and selection state, and reads the deployed-main snapshot from
+`public/coverage/preview/` at runtime. The internal `preview` channel denotes coverage for
+the exact deployed `main` revision; it is not a user-selectable preview mode. The snapshot contains
 `ccss-tree.json`, `ccss-coverage.json`, and `coverage-manifest.json`; the manifest records
 the schema version, channel, source ref and SHA, generation time, and ontology version.
-Latest is the production default. Run `npm run generate:standards-explorer`, then
-`npm run dev`, and open `/standards-explorer.html?view=preview` for local working-tree
-development. During development, Vite serves a complete local snapshot when present and
-otherwise proxies that view to the deployed coverage site. This makes both views usable
-without committing generated snapshot copies while preserving local Preview overrides.
+Run `npm run generate:standards-explorer`, then `npm run dev`, and open
+`/standards-explorer.html` for local working-tree development. During development, Vite
+serves a complete local snapshot when present and otherwise proxies the deployed main
+snapshot. This avoids committing generated snapshot copies.
 
 Released sample thumbnails are intentionally separate from those coverage views. The
-explorer loads `/dataset/asset-index.json` for Released mode; the development server
+explorer always loads `/dataset/asset-index.json` as its publication baseline; the development server
 always proxies that path to the deployed explorer. The index groups every retained public
 row by its requested target label set; question and solution rows remain independent
 samples. Each released image URL is constructed from the index's Hugging Face repository,
 immutable release revision, split, and file path.
 
-On `localhost` and `127.0.0.1`, the header exposes a Released / Local image-source
-switch. `assets=local` loads `/dataset/local-asset-index.json`, which Vite builds in memory
+On `localhost` and `127.0.0.1`, a Released / Local selector changes only the active sample
+image source. Local sets `assets=local` and loads `/dataset/local-asset-index.json`, which Vite builds in memory
 by replaying union selection over the current per-standard metadata under `out/`. The
 cached index is invalidated when generated datasets or target specs change. Its image
 route serves only selected PNG files from those generated standard datasets, so local
 preview does not require a merged union or an index file on disk. Production hosts do not
 render the switch and always resolve images through the release-pinned Hugging Face URL.
+
+The released index remains loaded in both modes. A dataset-covered leaf is `Released`
+only when every implemented competency permutation has an exact canonical label-set match
+with at least one sample in that index; otherwise it is `Ready`. The active Local index is
+used only for sample launchers and involved-module evidence, so local generation cannot
+alter publication readiness.
 
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,

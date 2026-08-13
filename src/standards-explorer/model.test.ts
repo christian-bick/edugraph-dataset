@@ -9,6 +9,7 @@ import {
     getCoverageModules,
     getDomains,
     getSearchCoverageKind,
+    hasReleasedSamplesForEveryPermutation,
     getScopeKind,
     gradeNameFromId,
     intersectLabels,
@@ -46,6 +47,22 @@ const createCoverage = (overrides: Partial<StandardCoverage> = {}): StandardCove
     cluster_id: 'K.CC.A',
     ...overrides,
 });
+
+const releasedIndex: AssetIndex = {
+    schema_version: 1,
+    generated_at: 'fixed',
+    dataset: { repository: 'owner/dataset', revision: 'v1' },
+    label_sets: [{
+        requested_labels: ['Area'],
+        samples: [{
+            split: 'train',
+            file_name: 'sample.png',
+            generator: 'generator',
+            view: 'view',
+            mode: 'question',
+        }],
+    }],
+};
 
 const createTask = (standards: string[], type: BacklogTask['type'] = 'ANALYSIS'): BacklogTask => ({
     id: `task-${standards[0]}`,
@@ -109,27 +126,42 @@ describe('standards explorer model', () => {
         expect(getClusters(tree, 'Kindergarten', 'K.G').map(cluster => cluster.id)).toEqual(['K.G.A']);
     });
 
-    it('distinguishes partial implementation from complete dataset coverage', () => {
+    it('distinguishes ready content from fully released permutations', () => {
         expect(getCoverageKind(createCoverage({ spec_covered: false }))).toBe('analysis');
         expect(getCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
         expect(getCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');
-        expect(getCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('covered');
+        expect(getCoverageKind(createCoverage({
+            dataset_covered: true,
+            partially_beyond_scope: true,
+            competencies: [['Area']],
+        }), releasedIndex)).toBe('released');
         expect(getCoverageKind(createCoverage({
             dataset_covered: true,
             implementation_todos: [pendingImplementationTodo],
         }))).toBe('partial');
-        expect(getCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
+        expect(getCoverageKind(createCoverage({
+            dataset_covered: true,
+            competencies: [['Area'], ['Missing']],
+        }), releasedIndex)).toBe('ready');
+        expect(getCoverageKind(createCoverage({ dataset_covered: true }))).toBe('ready');
         expect(getCoverageKind(createCoverage())).toBe('implementation');
+        expect(hasReleasedSamplesForEveryPermutation(createCoverage({
+            competencies: [['Area']],
+        }), releasedIndex)).toBe(true);
     });
 
     it('uses the same partial implementation status in search results', () => {
         expect(getSearchCoverageKind(createCoverage({ fully_beyond_scope: true }))).toBe('beyond');
-        expect(getSearchCoverageKind(createCoverage({ dataset_covered: true, partially_beyond_scope: true }))).toBe('covered');
+        expect(getSearchCoverageKind(createCoverage({
+            dataset_covered: true,
+            partially_beyond_scope: true,
+            competencies: [['Area']],
+        }), releasedIndex)).toBe('released');
         expect(getSearchCoverageKind(createCoverage({
             dataset_covered: true,
             implementation_todos: [pendingImplementationTodo],
         }))).toBe('partial');
-        expect(getSearchCoverageKind(createCoverage({ dataset_covered: true }))).toBe('covered');
+        expect(getSearchCoverageKind(createCoverage({ dataset_covered: true }))).toBe('ready');
         expect(getSearchCoverageKind(createCoverage({ ontology_covered: true }))).toBe('implementation');
         expect(getSearchCoverageKind(createCoverage({ ontology_covered: false }))).toBe('ontology');
     });

@@ -4,7 +4,6 @@ import type {
     CoverageData,
     CoverageManifest,
     AssetSource,
-    DataView,
     MainTab,
     StandardsTreeData,
     TaskType,
@@ -16,11 +15,11 @@ interface ExplorerStore {
     coverageData: CoverageData | null;
     coverageManifest: CoverageManifest | null;
     assetIndex: AssetIndex | null;
+    releasedAssetIndex: AssetIndex | null;
     assetIndexLoading: boolean;
     assetIndexError: string | null;
     assetSource: AssetSource;
     assetIndexSource: AssetSource | null;
-    dataView: DataView;
     loading: boolean;
     error: string | null;
     activeGrade: string;
@@ -31,10 +30,10 @@ interface ExplorerStore {
     activeTaskId: string | null;
     searchQuery: string;
     searchActive: boolean;
-    loadData: (dataView?: DataView) => Promise<void>;
+    loadData: () => Promise<void>;
+    loadReleasedAssetIndex: () => Promise<void>;
     loadAssetIndex: (assetSource?: AssetSource) => Promise<void>;
-    setDataView: (dataView: DataView) => Promise<void>;
-    setAssetSource: (assetSource: AssetSource) => Promise<void>;
+    setAssetSource: (source: AssetSource) => Promise<void>;
     setActiveGrade: (grade: string) => void;
     toggleDomain: (domain: string) => void;
     setActiveStandard: (standardId: string) => void;
@@ -50,19 +49,11 @@ const fetchJson = async <T,>(url: string): Promise<T> => {
     return response.json() as Promise<T>;
 };
 
-const coveragePath = (dataView: DataView, fileName: string) =>
-    `/coverage/${dataView}/${fileName}`;
+const coveragePath = (fileName: string) => `/coverage/preview/${fileName}`;
 
 const assetIndexPath = (assetSource: AssetSource) => assetSource === 'local'
     ? '/dataset/local-asset-index.json'
     : '/dataset/asset-index.json';
-
-const initialDataView = (): DataView => {
-    if (typeof window === 'undefined') return 'latest';
-    return new URLSearchParams(window.location.search).get('view') === 'preview'
-        ? 'preview'
-        : 'latest';
-};
 
 export const isLocalExplorerHost = (): boolean => {
     if (typeof window === 'undefined') return false;
@@ -70,27 +61,21 @@ export const isLocalExplorerHost = (): boolean => {
 };
 
 const initialAssetSource = (): AssetSource => {
-    if (!isLocalExplorerHost()) return 'released';
-    return new URLSearchParams(window.location.search).get('assets') === 'local'
-        ? 'local'
-        : 'released';
+    if (typeof window === 'undefined') return 'released';
+    const params = new URLSearchParams(window.location.search);
+    return isLocalExplorerHost() && params.get('assets') === 'local' ? 'local' : 'released';
 };
 
-const syncDataViewUrl = (dataView: DataView) => {
+const syncAssetSourceUrl = (source: AssetSource) => {
     if (typeof window === 'undefined') return;
     const url = new URL(window.location.href);
-    if (dataView === 'preview') url.searchParams.set('view', 'preview');
-    else url.searchParams.delete('view');
-    window.history.replaceState(null, '', url);
-};
-
-const syncAssetSourceUrl = (assetSource: AssetSource) => {
-    if (typeof window === 'undefined') return;
-    const url = new URL(window.location.href);
-    if (assetSource === 'local') url.searchParams.set('assets', 'local');
+    url.searchParams.delete('view');
+    if (source === 'local') url.searchParams.set('assets', 'local');
     else url.searchParams.delete('assets');
     window.history.replaceState(null, '', url);
 };
+
+const startingAssetSource = initialAssetSource();
 
 export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     standardsMap: {},
@@ -98,11 +83,11 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     coverageData: null,
     coverageManifest: null,
     assetIndex: null,
+    releasedAssetIndex: null,
     assetIndexLoading: false,
     assetIndexError: null,
-    assetSource: initialAssetSource(),
+    assetSource: startingAssetSource,
     assetIndexSource: null,
-    dataView: initialDataView(),
     loading: true,
     error: null,
     activeGrade: 'Kindergarten',
@@ -113,8 +98,8 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     activeTaskId: null,
     searchQuery: '',
     searchActive: false,
-    loadData: async (requestedView) => {
-        const dataView = requestedView ?? get().dataView;
+    loadData: async () => {
+        syncAssetSourceUrl(get().assetSource);
         set({
             loading: true,
             error: null,
@@ -125,15 +110,15 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
         });
         try {
             const [treeData, coverageData, coverageManifest] = await Promise.all([
-                fetchJson<StandardsTreeData>(coveragePath(dataView, 'ccss-tree.json')),
-                fetchJson<CoverageData>(coveragePath(dataView, 'ccss-coverage.json')),
-                fetchJson<CoverageManifest>(coveragePath(dataView, 'coverage-manifest.json')),
+                fetchJson<StandardsTreeData>(coveragePath('ccss-tree.json')),
+                fetchJson<CoverageData>(coveragePath('ccss-coverage.json')),
+                fetchJson<CoverageManifest>(coveragePath('coverage-manifest.json')),
             ]);
             if (coverageManifest.schema_version !== 2) {
                 throw new Error(`Unsupported coverage schema: ${coverageManifest.schema_version}`);
             }
-            if (coverageManifest.channel !== dataView) {
-                throw new Error(`Expected ${dataView} coverage data, received ${coverageManifest.channel}.`);
+            if (coverageManifest.channel !== 'preview') {
+                throw new Error(`Expected preview coverage data, received ${coverageManifest.channel}.`);
             }
             set({
                 standardsMap: treeData.standardsMap,
@@ -149,8 +134,45 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
             });
         }
     },
+    loadReleasedAssetIndex: async () => {
+        if (get().releasedAssetIndex) return;
+        if (get().assetSource === 'released') set({ assetIndexLoading: true, assetIndexError: null });
+        try {
+            const index = await fetchJson<unknown>(assetIndexPath('released'));
+            if (!isAssetIndex(index)) throw new Error('Unsupported or malformed asset-index schema.');
+            set({
+                releasedAssetIndex: index,
+                ...(get().assetSource === 'released' ? {
+                    assetIndex: index,
+                    assetIndexSource: 'released' as const,
+                    assetIndexLoading: false,
+                } : {}),
+            });
+        } catch (error) {
+            if (get().assetSource === 'released') {
+                set({
+                    assetIndexError: error instanceof Error ? error.message : 'Failed to load released samples.',
+                    assetIndexLoading: false,
+                });
+            }
+        }
+    },
     loadAssetIndex: async requestedSource => {
         const assetSource = requestedSource ?? get().assetSource;
+        if (assetSource === 'released') {
+            const releasedIndex = get().releasedAssetIndex;
+            if (releasedIndex) {
+                set({
+                    assetIndex: releasedIndex,
+                    assetIndexSource: 'released',
+                    assetIndexLoading: false,
+                    assetIndexError: null,
+                });
+                return;
+            }
+            await get().loadReleasedAssetIndex();
+            return;
+        }
         if (get().assetIndex && get().assetIndexSource === assetSource) return;
         set({ assetIndexLoading: true, assetIndexError: null });
         try {
@@ -166,32 +188,20 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
             });
         }
     },
-    setDataView: async dataView => {
-        if (dataView === get().dataView && get().coverageData) return;
-        syncDataViewUrl(dataView);
+    setAssetSource: async requestedSource => {
+        const assetSource: AssetSource = requestedSource === 'local' && !isLocalExplorerHost()
+            ? 'released'
+            : requestedSource;
+        syncAssetSourceUrl(assetSource);
+        const needsAssets = assetSource !== get().assetIndexSource || !get().assetIndex;
+        if (!needsAssets) return;
+
         set({
-            dataView,
-            activeDomain: null,
-            activeStandardId: null,
-            activeTaskId: null,
-            searchQuery: '',
-            searchActive: false,
-        });
-        await get().loadData(dataView);
-    },
-    setAssetSource: async assetSource => {
-        const safeSource = assetSource === 'local' && isLocalExplorerHost()
-            ? 'local'
-            : 'released';
-        syncAssetSourceUrl(safeSource);
-        if (safeSource === get().assetSource && get().assetIndexSource === safeSource) return;
-        set({
-            assetSource: safeSource,
-            assetIndex: null,
-            assetIndexSource: null,
+            assetSource,
+            ...(needsAssets ? { assetIndex: null, assetIndexSource: null } : {}),
             assetIndexError: null,
         });
-        await get().loadAssetIndex(safeSource);
+        await get().loadAssetIndex(assetSource);
     },
     setActiveGrade: grade => set({ activeGrade: grade, activeDomain: null, searchActive: false }),
     toggleDomain: domain => set({

@@ -81,9 +81,18 @@ const coverageStyles: Record<CoverageKind, StatusStyle & {
         subCard: 'border-orange-500/20 hover:border-orange-500/40 bg-orange-50 hover:bg-orange-100/70',
         selectedSubCard: 'border-slate-500 bg-orange-50 ring-1 ring-slate-400/30',
     },
-    covered: {
-        label: 'Covered',
+    released: {
+        label: 'Released',
         icon: 'fa-circle-check',
+        badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        card: 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-50 hover:bg-emerald-100/70',
+        selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-emerald-50',
+        subCard: 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-50 hover:bg-emerald-100/70',
+        selectedSubCard: 'border-slate-500 bg-emerald-50 ring-1 ring-slate-400/30',
+    },
+    ready: {
+        label: 'Ready',
+        icon: 'fa-hourglass-half',
         badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
         card: 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-50 hover:bg-emerald-100/70',
         selectedCard: 'border-slate-500 ring-1 ring-slate-400/30 bg-emerald-50',
@@ -221,10 +230,8 @@ function ImplementationDetails({
 function Header() {
     const coverageData = useExplorerStore(state => state.coverageData);
     const coverageManifest = useExplorerStore(state => state.coverageManifest);
-    const dataView = useExplorerStore(state => state.dataView);
     const assetSource = useExplorerStore(state => state.assetSource);
-    const loading = useExplorerStore(state => state.loading);
-    const setDataView = useExplorerStore(state => state.setDataView);
+    const assetIndexLoading = useExplorerStore(state => state.assetIndexLoading);
     const setAssetSource = useExplorerStore(state => state.setAssetSource);
     const standardsMap = useExplorerStore(state => state.standardsMap);
     const stats = calculateStats(coverageData);
@@ -250,40 +257,25 @@ function Header() {
                 <div className="explorer-standard-selector">
                     <span>Common Core Standards</span>
                 </div>
-                <div className="explorer-data-view" aria-label="Coverage data view">
-                    {(['latest', 'preview'] as const).map(view => (
-                        <button
-                            key={view}
-                            type="button"
-                            aria-pressed={dataView === view}
-                            disabled={loading}
-                            onClick={() => void setDataView(view)}
-                            className={dataView === view ? 'is-active' : ''}
-                        >
-                            {view === 'latest' ? 'Latest' : 'Preview'}
-                        </button>
-                    ))}
-                </div>
                 {isLocalExplorerHost() && (
                     <div className="explorer-data-view" aria-label="Sample image source">
                         {(['released', 'local'] as const).map(source => (
-                            <button
-                                key={source}
-                                type="button"
-                                aria-pressed={assetSource === source}
-                                onClick={() => void setAssetSource(source)}
-                                className={assetSource === source ? 'is-active' : ''}
-                            >
-                                {source === 'released' ? 'Released' : 'Local'}
-                            </button>
+                        <button
+                            key={source}
+                            type="button"
+                            aria-pressed={assetSource === source}
+                            disabled={assetIndexLoading}
+                            onClick={() => void setAssetSource(source)}
+                            className={assetSource === source ? 'is-active' : ''}
+                        >
+                            {source[0].toUpperCase() + source.slice(1)}
+                        </button>
                         ))}
                     </div>
                 )}
                 {coverageManifest && (
                     <span className="explorer-data-ref" title={coverageManifest.source_sha}>
-                        {dataView === 'latest'
-                            ? coverageManifest.source_ref
-                            : coverageManifest.source_sha.slice(0, 7)}
+                        {coverageManifest.source_sha.slice(0, 7)}
                     </span>
                 )}
             </div>
@@ -472,7 +464,10 @@ function StatusBadge({ style, small = false }: { style: StatusStyle; small?: boo
 }
 
 function CoverageBadge({ coverage, small = false, search = false }: { coverage: StandardCoverage; small?: boolean; search?: boolean }) {
-    const style = coverageStyles[search ? getSearchCoverageKind(coverage) : getCoverageKind(coverage)];
+    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
+    const style = coverageStyles[search
+        ? getSearchCoverageKind(coverage, releasedIndex)
+        : getCoverageKind(coverage, releasedIndex)];
     return <StatusBadge style={style} small={small} />;
 }
 
@@ -510,7 +505,8 @@ function CoverageModuleBadges({ modules }: { modules: ReturnType<typeof getCover
 }
 
 function DetailCoverageBadges({ coverage }: { coverage: StandardCoverage }) {
-    const style = coverageStyles[getCoverageKind(coverage)];
+    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
+    const style = coverageStyles[getCoverageKind(coverage, releasedIndex)];
     const partiallyInScope = getScopeKind(coverage) === 'partially-in-scope';
 
     return (
@@ -529,10 +525,13 @@ function StandardCard({ standard, nested = false, search = false }: {
     search?: boolean;
 }) {
     const coverage = useExplorerStore(state => state.coverageData?.coverage[standard.id]);
+    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
     const activeStandardId = useExplorerStore(state => state.activeStandardId);
     const setActiveStandard = useExplorerStore(state => state.setActiveStandard);
     const selected = activeStandardId === standard.id;
-    const kind = coverage ? (search ? getSearchCoverageKind(coverage) : getCoverageKind(coverage)) : null;
+    const kind = coverage
+        ? (search ? getSearchCoverageKind(coverage, releasedIndex) : getCoverageKind(coverage, releasedIndex))
+        : null;
     const style = kind ? coverageStyles[kind] : null;
     const statusClass = nested
         ? selected
@@ -1056,8 +1055,9 @@ function StandardDetails() {
 
 function MappingDetails({ coverage, standard }: { coverage: StandardCoverage; standard: StandardNode }) {
     const assetIndex = useExplorerStore(state => state.assetIndex);
-    const kind = getCoverageKind(coverage);
-    const modules = kind === 'partial' || kind === 'covered'
+    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
+    const kind = getCoverageKind(coverage, releasedIndex);
+    const modules = kind === 'partial' || kind === 'ready' || kind === 'released'
         ? getCoverageModules(coverage, assetIndex)
         : [];
 
@@ -1145,14 +1145,16 @@ function DetailsPanel() {
 
 export function App() {
     const loadData = useExplorerStore(state => state.loadData);
+    const loadReleasedAssetIndex = useExplorerStore(state => state.loadReleasedAssetIndex);
     const loadAssetIndex = useExplorerStore(state => state.loadAssetIndex);
     const loading = useExplorerStore(state => state.loading);
     const error = useExplorerStore(state => state.error);
 
     useEffect(() => {
         void loadData();
-        void loadAssetIndex();
-    }, [loadAssetIndex, loadData]);
+        void loadReleasedAssetIndex();
+        if (useExplorerStore.getState().assetSource === 'local') void loadAssetIndex('local');
+    }, [loadAssetIndex, loadData, loadReleasedAssetIndex]);
 
     return (
         <div className="bg-slate-950 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
