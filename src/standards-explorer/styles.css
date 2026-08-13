@@ -63,9 +63,9 @@ button:focus,
     min-height: 3.5rem;
     width: 100%;
     padding: 0 1rem;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
     gap: 1.5rem;
     background: #f4eff4;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -78,6 +78,19 @@ button:focus,
     min-width: 0;
     display: flex;
     align-items: center;
+    gap: 0.75rem;
+}
+
+.explorer-header-center {
+    display: flex;
+    justify-content: center;
+}
+
+.explorer-header-right {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: 0.75rem;
 }
 
@@ -225,19 +238,46 @@ button:focus,
     .explorer-header {
         min-height: auto;
         padding-block: 0.65rem;
-        flex-wrap: wrap;
+        grid-template-columns: minmax(0, 1fr) auto;
         gap: 0.65rem;
     }
 
     .explorer-header-left {
-        width: 100%;
         flex-wrap: wrap;
     }
 
+    .explorer-header-center {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .explorer-header-right {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
     .explorer-metrics {
-        width: 100%;
+        flex: 0 0 auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .explorer-header {
+        grid-template-columns: 1fr;
+    }
+
+    .explorer-header-center,
+    .explorer-header-right {
+        grid-column: 1;
+    }
+
+    .explorer-header-center {
+        grid-row: 2;
         justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 0.15rem;
+    }
+
+    .explorer-header-right {
+        grid-row: 3;
+        justify-content: flex-start;
     }
 }

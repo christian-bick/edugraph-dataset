@@ -219,7 +219,7 @@ describe('standards explorer model', () => {
         } as CoverageData;
 
         expect(calculateStats(coverageData)).toEqual({
-            coverage: '10% (46)',
+            coverage: '10% (46/467)',
             missingImplementation: 2,
             missingOntology: 3,
             analysisNeeded: 420,

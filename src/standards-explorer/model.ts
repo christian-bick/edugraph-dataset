@@ -129,7 +129,7 @@ export const calculateStats = (coverageData: CoverageData | null) => {
     const leafCount = metadata?.total_leaves_scanned ?? 0;
     const coveredCount = metadata?.covered_count ?? 0;
     return {
-        coverage: `${leafCount > 0 ? Math.round((coveredCount / leafCount) * 100) : 0}% (${coveredCount})`,
+        coverage: `${leafCount > 0 ? Math.round((coveredCount / leafCount) * 100) : 0}% (${coveredCount}/${leafCount})`,
         missingImplementation: metadata?.missing_generator_count ?? 0,
         missingOntology: metadata?.missing_ontology_count ?? 0,
         analysisNeeded: metadata?.analysis_needed_count ?? 0,

@@ -229,7 +229,7 @@ function ImplementationDetails({
 
 function Header() {
     const coverageData = useExplorerStore(state => state.coverageData);
-    const coverageManifest = useExplorerStore(state => state.coverageManifest);
+    const releasedAssetIndex = useExplorerStore(state => state.releasedAssetIndex);
     const assetSource = useExplorerStore(state => state.assetSource);
     const assetIndexLoading = useExplorerStore(state => state.assetIndexLoading);
     const setAssetSource = useExplorerStore(state => state.setAssetSource);
@@ -238,14 +238,8 @@ function Header() {
     if (!coverageData) {
         stats.leafStandards = Object.values(standardsMap)
             .filter(standard => standard.level.toLowerCase() === 'standard').length;
+        stats.coverage = `0% (0/${stats.leafStandards})`;
     }
-    const items = [
-        { label: 'Dataset Coverage:', value: stats.coverage, color: 'text-emerald-400' },
-        { label: 'Missing Implementation:', value: stats.missingImplementation, color: 'text-orange-400' },
-        { label: 'Missing Ontology:', value: stats.missingOntology, color: 'text-red-400' },
-        { label: 'Analysis Needed:', value: stats.analysisNeeded, color: 'text-sky-400' },
-        { label: 'Leaf Standards:', value: stats.leafStandards, color: 'text-indigo-400' },
-    ];
 
     return (
         <header className="explorer-header shrink-0">
@@ -254,9 +248,21 @@ function Header() {
                     <img src="/favicon.png" alt="EduGraph logo" />
                     <h1 className="explorer-brand-title">EduGraph Coverage</h1>
                 </div>
+            </div>
+            <div className="explorer-header-center">
                 <div className="explorer-standard-selector">
                     <span>Common Core Standards</span>
                 </div>
+            </div>
+            <div className="explorer-header-right">
+                {assetSource === 'released' && releasedAssetIndex && (
+                    <span
+                        className="explorer-data-ref"
+                        title={`Released dataset ${releasedAssetIndex.dataset.revision}`}
+                    >
+                        {releasedAssetIndex.dataset.revision}
+                    </span>
+                )}
                 {isLocalExplorerHost() && (
                     <div className="explorer-data-view" aria-label="Sample image source">
                         {(['released', 'local'] as const).map(source => (
@@ -273,19 +279,12 @@ function Header() {
                         ))}
                     </div>
                 )}
-                {coverageManifest && (
-                    <span className="explorer-data-ref" title={coverageManifest.source_sha}>
-                        {coverageManifest.source_sha.slice(0, 7)}
-                    </span>
-                )}
-            </div>
-            <div className="explorer-metrics">
-                {items.map(item => (
-                    <div key={item.label} className="explorer-metric">
-                        <span className="explorer-metric-label">{item.label.replace(':', '')}</span>
-                        <span className={`${item.color} explorer-metric-value`}>{item.value}</span>
+                <div className="explorer-metrics">
+                    <div className="explorer-metric">
+                        <span className="explorer-metric-label">Dataset Coverage</span>
+                        <span className="text-emerald-400 explorer-metric-value">{stats.coverage}</span>
                     </div>
-                ))}
+                </div>
             </div>
         </header>
     );
