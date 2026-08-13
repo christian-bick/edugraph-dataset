@@ -487,7 +487,17 @@ function CoverageBadges({ coverage, small = false, search = false }: { coverage:
     );
 }
 
-function CoverageModuleBadges({ modules }: { modules: ReturnType<typeof getCoverageModules> }) {
+function CoverageModuleBadges({
+    modules,
+    size = 'default',
+}: {
+    modules: ReturnType<typeof getCoverageModules>;
+    size?: 'default' | 'large';
+}) {
+    const sizeClasses = size === 'large'
+        ? 'rounded-md border-slate-700/70 px-2 py-1 text-[15px] leading-none text-slate-500'
+        : 'rounded border-slate-200/50 px-2.5 py-0.5 text-[10px] text-slate-600';
+
     return modules.map(module => {
         const kindLabel = module.kind === 'generator' ? 'Generator' : 'View';
         return (
@@ -495,7 +505,7 @@ function CoverageModuleBadges({ modules }: { modules: ReturnType<typeof getCover
                 key={`${module.kind}-${module.name}`}
                 aria-label={`${kindLabel} module: ${module.name}`}
                 title={`${kindLabel} module`}
-                className="inline-flex items-center gap-1 rounded border border-slate-200/50 bg-slate-50/70 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-slate-600"
+                className={`inline-flex items-center gap-1 border bg-slate-50/70 font-mono font-semibold ${sizeClasses}`}
             >
                 <Icon name={module.kind === 'generator' ? 'fa-gear' : 'fa-eye'} className="text-slate-400" />
                 {module.name}
@@ -902,8 +912,16 @@ function ReleasedSamplePopover({
                         <Icon name="fa-chevron-right" />
                     </button>
                 </div>
-                <footer className="flex w-full shrink-0 flex-wrap gap-2 border-t border-black/10 bg-white/60 px-6 py-4 text-left">
-                    <ConceptBadges coverage={coverage} labels={labels} emptyText="No labels" size="large" />
+                <footer className="flex w-full shrink-0 flex-col items-start gap-3 border-t border-black/10 bg-white/60 px-6 py-4 text-left">
+                    <div className="flex flex-wrap gap-2">
+                        <ConceptBadges coverage={coverage} labels={labels} emptyText="No labels" size="large" />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <CoverageModuleBadges size="large" modules={[
+                            { kind: 'generator', name: sample.generator },
+                            { kind: 'view', name: sample.view },
+                        ]} />
+                    </div>
                 </footer>
             </div>
         </div>,
