@@ -150,24 +150,18 @@ to inspect that working-tree snapshot locally.
 
 The details sidebar also shows every released question and solution image for each
 implemented label combination. Those independent samples are indexed from the merged
-union dataset and loaded directly from the tag-pinned Hugging Face release. To trial the
-feature locally without a Vite build, generate and validate the index, then use the normal
-dev server:
-```bash
-npm run generate:asset-index -- --revision=YOUR_RELEASE_TAG
-npm run validate:asset-index
-npm run dev
-```
-The generated `public/dataset/asset-index.json` is a local, gitignored artifact. It
-requires a compatible merged dataset under `out/dataset/`; run `npm run merge:dataset`
-first when the union needs to be refreshed.
+union dataset and loaded directly from the tag-pinned Hugging Face release. During local
+development, `npm run dev` dynamically builds the equivalent index from the current
+per-standard datasets under `out/`; no index-generation or union-merge command is needed.
 
 On `localhost` or `127.0.0.1`, the explorer header also offers a **Released / Local**
-image-source switch. Local mode serves the indexed PNGs directly from `out/dataset/`
+image-source switch. Local mode serves the selected PNGs directly from their current
+per-standard dataset folders
 and can be opened at
 [`/standards-explorer.html?view=preview&assets=local`](http://localhost:5173/standards-explorer.html?view=preview&assets=local).
 The development renderer index links to this mode as well. The switch and local image
-route are development-only; deployed explorers always use release-pinned images.
+route are development-only; deployed explorers always use release-pinned images. The
+`generate:asset-index` and `validate:asset-index` commands remain release/CI operations.
 
 ### Coverage Explorer Deployment
 

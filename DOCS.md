@@ -83,22 +83,19 @@ otherwise proxies that view to the deployed coverage site. This makes both views
 without committing generated snapshot copies while preserving local Preview overrides.
 
 Released sample thumbnails are intentionally separate from those coverage views. The
-explorer loads `/dataset/asset-index.json` once and reuses it in both Latest and Preview,
-so Preview can show only images from the latest published dataset rather than working-tree
-renders. The index groups every retained public row by its requested target label set;
-question and solution rows remain independent samples. Each image URL is constructed from
-the index's Hugging Face repository, immutable release revision, split, and file path.
-`npm run generate:asset-index -- --revision=<release_tag>` writes the local gitignored
-`public/dataset/asset-index.json` by default, allowing the complete UI to run under
-`npm run dev` without a Vite build. When that file is absent, Vite proxies its URL to the
-deployed explorer just as it does for absent coverage snapshots.
+explorer loads `/dataset/asset-index.json` for Released mode; the development server
+always proxies that path to the deployed explorer. The index groups every retained public
+row by its requested target label set; question and solution rows remain independent
+samples. Each released image URL is constructed from the index's Hugging Face repository,
+immutable release revision, split, and file path.
 
 On `localhost` and `127.0.0.1`, the header exposes a Released / Local image-source
-switch. `assets=local` keeps the same index-based label lookup but resolves image URLs
-through a development-only Vite route backed by `out/dataset/`. That route serves only
-PNG files below the union dataset's `train/` and `validation/` directories. Production
-hosts do not render the switch and always resolve images through the release-pinned
-Hugging Face URL.
+switch. `assets=local` loads `/dataset/local-asset-index.json`, which Vite builds in memory
+by replaying union selection over the current per-standard metadata under `out/`. The
+cached index is invalidated when generated datasets or target specs change. Its image
+route serves only selected PNG files from those generated standard datasets, so local
+preview does not require a merged union or an index file on disk. Production hosts do not
+render the switch and always resolve images through the release-pinned Hugging Face URL.
 
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
@@ -139,14 +136,14 @@ Playwright image, so changing the host runtime does not change the renderer iden
   deployment workflows pass explicit output directories and source identity.
 
 ### `src/scripts/generate-asset-index.ts`
-* **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> [--repository=<owner/dataset>] [--output=<path>]`
+* **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> --output=<path> [--repository=<owner/dataset>]`
 * **Function**: Independently replays the union selection over the operational metadata of
   every non-isolated spec, resolves each retained row back to its requested target labels,
   and writes the released dataset asset index. The output contains every retained question
   and solution row as an independent sample; it does not pair modes or cap visual variants.
-  The default output is the gitignored `public/dataset/asset-index.json` for local no-build
-  development. Release automation writes `temp/release-assets/asset-index.json` instead.
-  The revision is required and rejects `main`, ensuring browser URLs remain release-pinned.
+  This is a release/CI operation; local development uses Vite's dynamic index instead.
+  Release automation writes `temp/release-assets/asset-index.json`. The revision is
+  required and rejects `main`, ensuring browser URLs remain release-pinned.
 
 ### `src/scripts/validate-asset-index.ts`
 * **Execution**: `npm run validate:asset-index -- [--index=<path>] [--dataset-dir=<path>]`

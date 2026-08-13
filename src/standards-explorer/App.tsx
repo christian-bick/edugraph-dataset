@@ -271,7 +271,7 @@ function Header() {
                                 key={source}
                                 type="button"
                                 aria-pressed={assetSource === source}
-                                onClick={() => setAssetSource(source)}
+                                onClick={() => void setAssetSource(source)}
                                 className={assetSource === source ? 'is-active' : ''}
                             >
                                 {source === 'released' ? 'Released' : 'Local'}
@@ -986,7 +986,7 @@ function CompetencyBreakdown({ coverage, standard }: { coverage: StandardCoverag
                                 coverage={coverage}
                                 labels={intersection}
                                 samples={commonSamples}
-                                ariaLabel="Preview released samples for common labels"
+                                ariaLabel="Preview samples for common labels"
                             />
                         )}
                     </div>
@@ -1007,7 +1007,7 @@ function CompetencyBreakdown({ coverage, standard }: { coverage: StandardCoverag
                                     coverage={coverage}
                                     labels={permutation}
                                     samples={findReleasedSamples(assetIndex, permutation)}
-                                    ariaLabel={`Preview released samples for permutation ${index + 1}`}
+                                    ariaLabel={`Preview samples for permutation ${index + 1}`}
                                 />
                             )}
                         </div>
@@ -1020,10 +1020,10 @@ function CompetencyBreakdown({ coverage, standard }: { coverage: StandardCoverag
                         </div>
                     ))}
                     {assetIndexLoading && (
-                        <div className="text-[10px] text-slate-500 italic">Loading released samples…</div>
+                        <div className="text-[10px] text-slate-500 italic">Loading samples…</div>
                     )}
                     {assetIndexError && (
-                        <div className="text-[10px] text-slate-500">Released samples unavailable: {assetIndexError}</div>
+                        <div className="text-[10px] text-slate-500">Samples unavailable: {assetIndexError}</div>
                     )}
                 </div>
             )}

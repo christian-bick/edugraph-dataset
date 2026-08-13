@@ -19,6 +19,7 @@ interface ExplorerStore {
     assetIndexLoading: boolean;
     assetIndexError: string | null;
     assetSource: AssetSource;
+    assetIndexSource: AssetSource | null;
     dataView: DataView;
     loading: boolean;
     error: string | null;
@@ -31,9 +32,9 @@ interface ExplorerStore {
     searchQuery: string;
     searchActive: boolean;
     loadData: (dataView?: DataView) => Promise<void>;
-    loadAssetIndex: () => Promise<void>;
+    loadAssetIndex: (assetSource?: AssetSource) => Promise<void>;
     setDataView: (dataView: DataView) => Promise<void>;
-    setAssetSource: (assetSource: AssetSource) => void;
+    setAssetSource: (assetSource: AssetSource) => Promise<void>;
     setActiveGrade: (grade: string) => void;
     toggleDomain: (domain: string) => void;
     setActiveStandard: (standardId: string) => void;
@@ -51,6 +52,10 @@ const fetchJson = async <T,>(url: string): Promise<T> => {
 
 const coveragePath = (dataView: DataView, fileName: string) =>
     `/coverage/${dataView}/${fileName}`;
+
+const assetIndexPath = (assetSource: AssetSource) => assetSource === 'local'
+    ? '/dataset/local-asset-index.json'
+    : '/dataset/asset-index.json';
 
 const initialDataView = (): DataView => {
     if (typeof window === 'undefined') return 'latest';
@@ -96,6 +101,7 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     assetIndexLoading: false,
     assetIndexError: null,
     assetSource: initialAssetSource(),
+    assetIndexSource: null,
     dataView: initialDataView(),
     loading: true,
     error: null,
@@ -143,14 +149,17 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
             });
         }
     },
-    loadAssetIndex: async () => {
-        if (get().assetIndex || get().assetIndexLoading) return;
+    loadAssetIndex: async requestedSource => {
+        const assetSource = requestedSource ?? get().assetSource;
+        if (get().assetIndex && get().assetIndexSource === assetSource) return;
         set({ assetIndexLoading: true, assetIndexError: null });
         try {
-            const index = await fetchJson<unknown>('/dataset/asset-index.json');
+            const index = await fetchJson<unknown>(assetIndexPath(assetSource));
             if (!isAssetIndex(index)) throw new Error('Unsupported or malformed asset-index schema.');
-            set({ assetIndex: index, assetIndexLoading: false });
+            if (get().assetSource !== assetSource) return;
+            set({ assetIndex: index, assetIndexSource: assetSource, assetIndexLoading: false });
         } catch (error) {
+            if (get().assetSource !== assetSource) return;
             set({
                 assetIndexError: error instanceof Error ? error.message : 'Failed to load released samples.',
                 assetIndexLoading: false,
@@ -170,12 +179,19 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
         });
         await get().loadData(dataView);
     },
-    setAssetSource: assetSource => {
+    setAssetSource: async assetSource => {
         const safeSource = assetSource === 'local' && isLocalExplorerHost()
             ? 'local'
             : 'released';
         syncAssetSourceUrl(safeSource);
-        set({ assetSource: safeSource });
+        if (safeSource === get().assetSource && get().assetIndexSource === safeSource) return;
+        set({
+            assetSource: safeSource,
+            assetIndex: null,
+            assetIndexSource: null,
+            assetIndexError: null,
+        });
+        await get().loadAssetIndex(safeSource);
     },
     setActiveGrade: grade => set({ activeGrade: grade, activeDomain: null, searchActive: false }),
     toggleDomain: domain => set({

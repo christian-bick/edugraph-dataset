@@ -1,4 +1,4 @@
-import { ViewTypeMap } from './problems.ts';
+import type { ViewTypeMap } from './problems.ts';
 
 /**
  * Represents the fundamental, abstract mathematical or conceptual problem.

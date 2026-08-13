@@ -47,6 +47,7 @@ describe('standards explorer data views', () => {
             assetIndexLoading: false,
             assetIndexError: null,
             assetSource: 'released',
+            assetIndexSource: null,
             dataView: 'latest',
             loading: true,
             error: null,
@@ -138,6 +139,7 @@ describe('standards explorer data views', () => {
         expect(fetchMock).toHaveBeenCalledWith('/dataset/asset-index.json', { cache: 'no-store' });
         expect(useExplorerStore.getState()).toMatchObject({
             assetIndex,
+            assetIndexSource: 'released',
             assetIndexLoading: false,
             assetIndexError: null,
         });
@@ -156,7 +158,7 @@ describe('standards explorer data views', () => {
         });
     });
 
-    it('stores the local asset choice in the URL on a local host', () => {
+    it('loads and stores the local asset choice on a local host', async () => {
         const localWindow = {
             location: new URL('http://localhost:5173/standards-explorer.html?view=preview'),
             history: {
@@ -166,18 +168,23 @@ describe('standards explorer data views', () => {
             },
         };
         vi.stubGlobal('window', localWindow);
+        const fetchMock = vi.fn(async () => jsonResponse(assetIndex));
+        vi.stubGlobal('fetch', fetchMock);
 
-        useExplorerStore.getState().setAssetSource('local');
+        await useExplorerStore.getState().setAssetSource('local');
 
         expect(useExplorerStore.getState().assetSource).toBe('local');
+        expect(useExplorerStore.getState().assetIndexSource).toBe('local');
+        expect(fetchMock).toHaveBeenCalledWith('/dataset/local-asset-index.json', { cache: 'no-store' });
         expect(new URLSearchParams(window.location.search).get('assets')).toBe('local');
 
-        useExplorerStore.getState().setAssetSource('released');
+        await useExplorerStore.getState().setAssetSource('released');
         expect(useExplorerStore.getState().assetSource).toBe('released');
+        expect(fetchMock).toHaveBeenLastCalledWith('/dataset/asset-index.json', { cache: 'no-store' });
         expect(new URLSearchParams(window.location.search).has('assets')).toBe(false);
     });
 
-    it('rejects the local asset choice on non-local hosts', () => {
+    it('rejects the local asset choice on non-local hosts', async () => {
         const remoteWindow = {
             location: new URL('https://coverage.edugraph.io/standards-explorer.html?assets=local'),
             history: {
@@ -187,8 +194,9 @@ describe('standards explorer data views', () => {
             },
         };
         vi.stubGlobal('window', remoteWindow);
+        vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(assetIndex)));
 
-        useExplorerStore.getState().setAssetSource('local');
+        await useExplorerStore.getState().setAssetSource('local');
 
         expect(useExplorerStore.getState().assetSource).toBe('released');
         expect(new URLSearchParams(window.location.search).has('assets')).toBe(false);

@@ -1,11 +1,12 @@
 // vite.config.js
 import { createReadStream, existsSync, globSync, readFileSync, statSync } from 'node:fs';
-import { resolve, relative, extname } from 'path';
+import { resolve, relative, extname, sep } from 'path';
+import { execFile } from 'node:child_process';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { resolveLocalDatasetAsset } from './src/lib/local-assets.ts';
+import { localAssetRequestKey } from './src/lib/local-assets.ts';
 
 const VIEW_HEAD_PATH = resolve(import.meta.dirname, 'src/partials/head.html');
 const VIEW_HEAD_INVOCATION = /\{\{>\s*head\s+script=(['"])([^'"]+)\1\s*\}\}/g;
@@ -15,9 +16,25 @@ const COVERAGE_FILES = [
     'ccss-coverage.json',
     'coverage-manifest.json',
 ];
-const LOCAL_ASSET_INDEX = resolve(import.meta.dirname, 'public', 'dataset', 'asset-index.json');
-const LOCAL_DATASET_ROOT = resolve(import.meta.dirname, 'out', 'dataset');
 const LOCAL_DATASET_ROUTE = '/dataset/local/';
+const LOCAL_ASSET_INDEX_ROUTE = '/dataset/local-asset-index.json';
+const LOCAL_ASSET_INDEX_WORKER = resolve(
+    import.meta.dirname,
+    'node_modules',
+    'vite-node',
+    'dist',
+    'cli.mjs',
+);
+const LOCAL_ASSET_INDEX_SCRIPT = resolve(
+    import.meta.dirname,
+    'src',
+    'scripts',
+    'build-local-asset-index.ts',
+);
+const LOCAL_ASSET_WATCH_ROOTS = [
+    resolve(import.meta.dirname, 'out'),
+    resolve(import.meta.dirname, 'src', 'spec'),
+];
 
 function hasLocalCoverageSnapshot(requestUrl) {
     const pathname = new URL(requestUrl || '/', 'http://localhost').pathname;
@@ -39,64 +56,112 @@ function coverageProxy() {
     };
 }
 
-function assetIndexProxy() {
-    return {
-        target: COVERAGE_SITE,
-        changeOrigin: true,
-        secure: true,
-        bypass(request) {
-            return existsSync(LOCAL_ASSET_INDEX) ? request.url : undefined;
-        },
-    };
-}
-
-function serveLocalDataset(request, response, next) {
-    const rawPathname = (request.url || '/').split(/[?#]/, 1)[0];
-    if (!rawPathname.startsWith(LOCAL_DATASET_ROUTE)) return next();
-
+const isLocalRequest = request => {
     const hostname = (request.headers.host || '').split(':')[0];
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-        response.statusCode = 404;
-        return response.end();
-    }
-
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
-        response.statusCode = 405;
-        response.setHeader('Allow', 'GET, HEAD');
-        return response.end();
-    }
-
-    const assetPath = resolveLocalDatasetAsset(
-        LOCAL_DATASET_ROOT,
-        rawPathname.slice(LOCAL_DATASET_ROUTE.length),
-    );
-    if (!assetPath || !existsSync(assetPath)) {
-        response.statusCode = 404;
-        return response.end();
-    }
-
-    const asset = statSync(assetPath);
-    if (!asset.isFile()) {
-        response.statusCode = 404;
-        return response.end();
-    }
-
-    response.statusCode = 200;
-    response.setHeader('Content-Type', 'image/png');
-    response.setHeader('Content-Length', asset.size);
-    response.setHeader('Cache-Control', 'no-store');
-    if (request.method === 'HEAD') return response.end();
-    return createReadStream(assetPath).pipe(response);
-}
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+};
 
 function localDatasetPlugin() {
+    let bundlePromise;
+    const invalidate = () => {
+        bundlePromise = undefined;
+    };
+    const getBundle = () => {
+        bundlePromise ??= new Promise((accept, reject) => {
+            execFile(
+                process.execPath,
+                [LOCAL_ASSET_INDEX_WORKER, LOCAL_ASSET_INDEX_SCRIPT],
+                { cwd: import.meta.dirname, maxBuffer: 50 * 1024 * 1024 },
+                (error, stdout, stderr) => {
+                    if (error) {
+                        reject(new Error(stderr.trim() || error.message));
+                        return;
+                    }
+                    try {
+                        const bundle = JSON.parse(stdout);
+                        accept({
+                            index: bundle.index,
+                            localAssets: new Map(bundle.localAssets),
+                        });
+                    } catch (parseError) {
+                        reject(parseError);
+                    }
+                },
+            );
+        }).catch(error => {
+            invalidate();
+            throw error;
+        });
+        return bundlePromise;
+    };
+
+    const serve = async (request, response, next) => {
+        const rawPathname = (request.url || '/').split(/[?#]/, 1)[0];
+        const servesIndex = rawPathname === LOCAL_ASSET_INDEX_ROUTE;
+        const servesImage = rawPathname.startsWith(LOCAL_DATASET_ROUTE);
+        if (!servesIndex && !servesImage) return next();
+
+        if (!isLocalRequest(request)) {
+            response.statusCode = 404;
+            return response.end();
+        }
+
+        if (request.method !== 'GET' && request.method !== 'HEAD') {
+            response.statusCode = 405;
+            response.setHeader('Allow', 'GET, HEAD');
+            return response.end();
+        }
+
+        try {
+            const bundle = await getBundle();
+            if (servesIndex) {
+                const payload = JSON.stringify(bundle.index);
+                response.statusCode = 200;
+                response.setHeader('Content-Type', 'application/json; charset=utf-8');
+                response.setHeader('Cache-Control', 'no-store');
+                if (request.method === 'HEAD') return response.end();
+                return response.end(payload);
+            }
+
+            const key = localAssetRequestKey(rawPathname.slice(LOCAL_DATASET_ROUTE.length));
+            const assetPath = key ? bundle.localAssets.get(key) : undefined;
+            if (!assetPath || !existsSync(assetPath)) {
+                response.statusCode = 404;
+                return response.end();
+            }
+
+            const asset = statSync(assetPath);
+            if (!asset.isFile()) {
+                response.statusCode = 404;
+                return response.end();
+            }
+
+            response.statusCode = 200;
+            response.setHeader('Content-Type', 'image/png');
+            response.setHeader('Content-Length', asset.size);
+            response.setHeader('Cache-Control', 'no-store');
+            if (request.method === 'HEAD') return response.end();
+            return createReadStream(assetPath).pipe(response);
+        } catch (error) {
+            response.statusCode = 500;
+            response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            return response.end(error instanceof Error ? error.message : 'Failed to build local asset index.');
+        }
+    };
+
     return {
         name: 'edugraph-local-dataset',
         configureServer(server) {
-            server.middlewares.use(serveLocalDataset);
+            server.watcher.add(LOCAL_ASSET_WATCH_ROOTS);
+            server.watcher.on('all', (_event, changedPath) => {
+                const normalizedPath = resolve(changedPath);
+                if (LOCAL_ASSET_WATCH_ROOTS.some(root =>
+                    normalizedPath === root || normalizedPath.startsWith(`${root}${sep}`))) invalidate();
+            });
+            server.middlewares.use(serve);
         },
         configurePreviewServer(server) {
-            server.middlewares.use(serveLocalDataset);
+            server.middlewares.use(serve);
         },
     };
 }
@@ -130,7 +195,11 @@ export default defineConfig({
         proxy: {
             '/coverage/latest': coverageProxy(),
             '/coverage/preview': coverageProxy(),
-            '/dataset/asset-index.json': assetIndexProxy(),
+            '/dataset/asset-index.json': {
+                target: COVERAGE_SITE,
+                changeOrigin: true,
+                secure: true,
+            },
         },
     },
     build: {
