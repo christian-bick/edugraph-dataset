@@ -4,16 +4,15 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Less],
-        [Scope.Equal],
-        [Scope.Greater]
+        [Area.NumericInequality, Scope.Less],
+        [Area.NumericEquality, Scope.Equal],
+        [Area.NumericInequality, Scope.Greater]
     ])
     .applyLabelVariants([
         [Scope.NumbersWithZero],

@@ -140,15 +140,14 @@ const compareGroupsBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Greater],
-        [Scope.Less],
-        [Scope.Equal]
+        [Area.NumericInequality, Scope.Greater],
+        [Area.NumericInequality, Scope.Less],
+        [Area.NumericEquality, Scope.Equal]
     ]);
 
 // --- K.CC.C.7: Compare two numbers between 1 and 10 presented as written numerals ---
 const compareNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -157,9 +156,9 @@ const compareNumeralsBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Greater],
-        [Scope.Less],
-        [Scope.Equal]
+        [Area.NumericInequality, Scope.Greater],
+        [Area.NumericInequality, Scope.Less],
+        [Area.NumericEquality, Scope.Equal]
     ]);
 
 // ==========================================

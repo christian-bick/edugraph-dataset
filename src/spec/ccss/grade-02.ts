@@ -194,7 +194,6 @@ const expandedFormBuilder = new DatasetPermutationBuilder()
 // --- 2.NBT.A.4: Compare three-digit numbers ---
 const compareThreeDigitBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersLarger100,
@@ -204,9 +203,9 @@ const compareThreeDigitBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Greater],
-        [Scope.Equal],
-        [Scope.Less]
+        [Area.NumericInequality, Scope.Greater],
+        [Area.NumericEquality, Scope.Equal],
+        [Area.NumericInequality, Scope.Less]
     ]);
 
 // --- 2.NBT.B.5: Compute within 100 ---

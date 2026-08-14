@@ -28,8 +28,18 @@ describe('CCSS observable-label contracts', () => {
 
         expectAll(groups, [Area.SetComparison, Scope.PhysicalNumbers]);
         expectNone(groups, [Area.NumericComparison, Scope.ArabicNumerals, Scope.Base10]);
-        expectAll(numerals, [Area.NumericComparison, Scope.ArabicNumerals, Scope.Base10]);
-        expectNone(numerals, [Area.SetComparison, Scope.PhysicalNumbers]);
+        expectAll(numerals, [Scope.ArabicNumerals, Scope.Base10]);
+        expectNone(numerals, [Area.NumericComparison, Area.SetComparison, Scope.PhysicalNumbers]);
+
+        for (const target of [...groups, ...numerals]) {
+            const isEqual = target.labels.includes(Scope.Equal);
+            expect(target.labels).toContain(isEqual
+                ? Area.NumericEquality
+                : Area.NumericInequality);
+            expect(target.labels).not.toContain(isEqual
+                ? Area.NumericInequality
+                : Area.NumericEquality);
+        }
     });
 
     it('describes conservation as a physical representation', () => {

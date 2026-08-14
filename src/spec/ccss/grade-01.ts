@@ -246,7 +246,6 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
 // --- 1.NBT.B.3: Compare two two-digit numbers ---
 const compareTwoDigitBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -256,9 +255,9 @@ const compareTwoDigitBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Greater],
-        [Scope.Less],
-        [Scope.Equal]
+        [Area.NumericInequality, Scope.Greater],
+        [Area.NumericInequality, Scope.Less],
+        [Area.NumericEquality, Scope.Equal]
     ]);
 
 // --- 1.NBT.C.4: Add within 100 ---

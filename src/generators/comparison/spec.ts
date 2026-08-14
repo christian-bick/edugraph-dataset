@@ -3,11 +3,11 @@ import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
 import {hasLabel} from '../../lib/resolvers.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
+import {resolveComparisonRelation} from './helpers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'comparison',
     generalLabels: [
-        Area.NumericComparison,
         Scope.IntegerNumbers,
         Scope.Base10,
     ]
@@ -15,7 +15,16 @@ export const spec: GeneratorSpec = {
 
 
 export const ComparisonGeneratorSchema = {
-    relation: [Scope.Less, Scope.Equal, Scope.Greater],
+    relation: [
+        [
+            Area.NumericEquality,
+            Area.NumericInequality,
+            Scope.Less,
+            Scope.Equal,
+            Scope.Greater
+        ],
+        resolveComparisonRelation
+    ],
     requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
         hasLabel(Scope.NumbersWithNegatives)
