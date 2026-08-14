@@ -1,8 +1,8 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {MeasurementObservation} from '../../../../types/problems.ts';
+import {MeasurementDataProblem, MeasurementObservation} from '../../../../types/problems.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {validateMeasurementData} from '../helpers.ts';
+import {formatMeasurement, validateMeasurementData} from '../helpers.ts';
 import {MeasurementDataTableViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -10,8 +10,10 @@ interface CoreProps {
     payload: ViewRenderPayload<'measurement-data-table'>;
 }
 
-function MeasurementRow({observation, reveal}: {observation: MeasurementObservation; reveal: boolean}) {
+function MeasurementRow({observation, data, reveal}: {observation: MeasurementObservation; data: MeasurementDataProblem; reveal: boolean}) {
     const width = observation.length * 28;
+    const maxLength = data.unit === 'cm' ? 10 : 8;
+    const tickCount = maxLength * data.subdivisions;
     return (
         <div className="grid grid-cols-[90px_1fr_92px] items-center gap-4 border-t border-slate-200 py-3 first:border-t-0">
             <div className="text-base font-bold capitalize text-slate-700">{observation.object}</div>
@@ -21,12 +23,16 @@ function MeasurementRow({observation, reveal}: {observation: MeasurementObservat
                     style={{width}}
                 />
                 <div className="absolute bottom-0 left-0 flex">
-                    {Array.from({length: 11}, (_, value) => (
-                        <div key={value} className="relative h-6 w-7 border-l border-slate-500 last:border-r">
-                            <span className="absolute left-0 top-2 -translate-x-1/2 text-[10px] font-semibold text-slate-500">{value}</span>
+                    {Array.from({length: tickCount + 1}, (_, tick) => (
+                        <div
+                            key={tick}
+                            className={`relative border-l border-slate-500 ${tick % data.subdivisions === 0 ? 'h-6' : tick % 2 === 0 ? 'mt-2 h-4' : 'mt-3 h-3'}`}
+                            style={{width: tick === tickCount ? 0 : 28 / data.subdivisions}}
+                        >
+                            {tick % data.subdivisions === 0 && <span className="absolute left-0 top-2 -translate-x-1/2 text-[10px] font-semibold text-slate-500">{tick / data.subdivisions}</span>}
                         </div>
                     ))}
-                    <span className="ml-2 mt-2 text-[10px] font-bold text-slate-500">cm</span>
+                    <span className="ml-2 mt-2 text-[10px] font-bold text-slate-500">{data.unit}</span>
                 </div>
             </div>
             <div className={`flex h-11 items-center justify-center rounded-lg border-2 font-mono text-lg font-extrabold ${
@@ -34,7 +40,7 @@ function MeasurementRow({observation, reveal}: {observation: MeasurementObservat
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                     : 'border-dashed border-slate-400 bg-white text-slate-400'
             }`}>
-                {reveal ? `${observation.length} cm` : '? cm'}
+                {reveal ? formatMeasurement(observation.length, data.unit) : `? ${data.unit}`}
             </div>
         </div>
     );
@@ -49,11 +55,13 @@ const MeasurementDataTableCore = ({payload}: CoreProps) => {
         <div className="w-[690px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Collect length data</div>
             <div className="mt-1 text-xl font-bold text-slate-800">
-                {isSolutionView ? 'Recorded measurements' : 'Measure each object to the nearest centimeter.'}
+                {isSolutionView
+                    ? 'Recorded measurements'
+                    : `Measure each object to the nearest ${data.unit === 'cm' ? 'centimeter' : 'quarter inch'}.`}
             </div>
             <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-5">
                 {data.observations.map(observation => (
-                    <MeasurementRow key={observation.object} observation={observation} reveal={isSolutionView} />
+                    <MeasurementRow key={observation.object} observation={observation} data={data} reveal={isSolutionView} />
                 ))}
             </div>
         </div>

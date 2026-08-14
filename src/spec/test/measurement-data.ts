@@ -7,9 +7,9 @@ const tableBuilder = new DatasetPermutationBuilder()
         Area.Statistics,
         Area.MeasuringObjects,
         Scope.LengthMeasurement,
-        Scope.IntegerNumbers,
         Ability.ProcedureExecution
-    ]);
+    ])
+    .applyLabelVariants([[Scope.IntegerNumbers], [Scope.FractionNumbers]]);
 
 const linePlotBuilder = new DatasetPermutationBuilder()
     .addLabels([

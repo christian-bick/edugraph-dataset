@@ -16,4 +16,18 @@ describe('measurement-data spec', () => {
         expect(result?.data.observations).toHaveLength(6);
         expect(result?.data.unit).toBe('cm');
     });
+
+    it('resolves fractional labels to quarter-inch observations', () => {
+        const result = generateWithLabels(new MeasurementDataGenerator(), [
+            Area.Statistics,
+            Area.MeasuringObjects,
+            Scope.LengthMeasurement,
+            Scope.FractionNumbers,
+            Ability.ProcedureExecution
+        ]);
+
+        expect(result?.data.unit).toBe('in');
+        expect(result?.data.subdivisions).toBe(4);
+        expect(result?.data.observations.every(({length}) => Number.isInteger(length * 4))).toBe(true);
+    });
 });

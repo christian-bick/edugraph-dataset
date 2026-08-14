@@ -11,16 +11,37 @@ const expectedLabels = ['Apples', 'Books', 'Kites'];
 const expectedObjects = ['pencil', 'crayon', 'ribbon', 'key', 'brush', 'block'];
 
 export function validateMeasurementData(data: MeasurementDataProblem, viewId: string) {
-    validateProblemData(viewId, data, ['unit', 'observations']);
-    if (data.unit !== 'cm' || !Array.isArray(data.observations) || data.observations.length !== 6) {
-        throw new ViewValidationError(viewId, 'Expected six centimeter observations.');
+    validateProblemData(viewId, data, ['unit', 'subdivisions', 'observations']);
+    if (!Array.isArray(data.observations) || data.observations.length !== 6) {
+        throw new ViewValidationError(viewId, 'Expected six length observations.');
     }
     if (data.observations.some(({object}, index) => object !== expectedObjects[index])) {
         throw new ViewValidationError(viewId, 'Measurement objects or their order are invalid.');
     }
-    if (data.observations.some(({length}) => !Number.isInteger(length) || length < 2 || length > 10)) {
-        throw new ViewValidationError(viewId, 'Observation lengths must be whole centimeters from 2 through 10.');
+    if (data.unit === 'cm' && data.subdivisions === 1) {
+        if (data.observations.some(({length}) => !Number.isInteger(length) || length < 2 || length > 10)) {
+            throw new ViewValidationError(viewId, 'Centimeter lengths must be whole numbers from 2 through 10.');
+        }
+        return;
     }
+    if (data.unit === 'in' && data.subdivisions === 4) {
+        const quarterUnits = data.observations.map(({length}) => length * 4);
+        if (quarterUnits.some(value => !Number.isInteger(value) || value < 8 || value > 32)
+            || !quarterUnits.some(value => value % 4 === 2)
+            || !quarterUnits.some(value => value % 2 === 1)) {
+            throw new ViewValidationError(viewId, 'Inch lengths must use quarter-inch ticks and include half- and quarter-inch data.');
+        }
+        return;
+    }
+    throw new ViewValidationError(viewId, 'Measurement unit and subdivisions are incompatible.');
+}
+
+export function formatMeasurement(length: number, unit: MeasurementDataProblem['unit']): string {
+    if (unit === 'cm') return `${length} cm`;
+    const quarterUnits = Math.round(length * 4);
+    const whole = Math.floor(quarterUnits / 4);
+    const fraction = ['', '¼', '½', '¾'][quarterUnits % 4];
+    return `${whole}${fraction} in`;
 }
 
 export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: string) {

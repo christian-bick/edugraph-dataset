@@ -1,2 +1,3 @@
-- **Identity:** Six objects appear against whole-centimeter rulers with a corresponding measurement field for each object.
+- **Identity:** Six objects appear against rulers whose visible subdivisions match the dataset: whole centimeters or quarter inches, with a corresponding measurement field for each object.
 - **Modes:** Question Mode leaves the measurement fields unresolved while the rulers remain usable; Solution Mode records values that agree with every object endpoint.
+- **Fractional data:** Quarter-inch rulers visibly include half and fourth ticks, and mixed-number answers land exactly on those endpoints.

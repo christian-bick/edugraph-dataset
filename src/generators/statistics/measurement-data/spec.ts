@@ -7,10 +7,11 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.Statistics,
         Area.MeasuringObjects,
-        Scope.LengthMeasurement,
-        Scope.IntegerNumbers
+        Scope.LengthMeasurement
     ]
 };
 
-export const MeasurementDataGeneratorSchema = {} as const;
+export const MeasurementDataGeneratorSchema = {
+    numberKind: [Scope.IntegerNumbers, Scope.FractionNumbers]
+} as const;
 export type MeasurementDataGeneratorConfig = ConfigFromSchema<typeof MeasurementDataGeneratorSchema>;

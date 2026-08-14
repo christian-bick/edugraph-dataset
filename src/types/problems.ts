@@ -372,7 +372,8 @@ export type MeasurementObservation = {
 };
 
 export type MeasurementDataProblem = {
-    unit: 'cm';
+    unit: 'cm' | 'in';
+    subdivisions: 1 | 4;
     observations: MeasurementObservation[];
 };
 
