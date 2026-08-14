@@ -110,14 +110,13 @@ const countTo100Builder = new DatasetPermutationBuilder()
 
 const parityBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.OddAndEvenGroups,
         Scope.PhysicalNumbers,
         Scope.NumbersSmaller20,
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Scope.EvenNumbers],
-        [Scope.OddNumbers]
+        [Area.EvenDivisibility, Scope.EvenNumbers],
+        [Area.UnevenDivisibility, Scope.OddNumbers]
     ]);
 
 export const spec: CompetencyTarget[] = [

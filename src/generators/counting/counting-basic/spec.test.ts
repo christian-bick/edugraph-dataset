@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CountingBasicGenerator } from './generator.ts';
 import { setSeed } from '../../../lib/random.ts';
-import { Scope } from 'edugraph-ts';
+import { Area, Scope } from 'edugraph-ts';
 import { generateWithLabels } from '../../../lib/utils.ts';
 
 describe('CountingBasicGenerator Spec Integration', () => {
@@ -44,15 +44,27 @@ describe('CountingBasicGenerator Spec Integration', () => {
         }
     });
 
-    it('resolves even and odd scopes into matching counts', () => {
-        for (const [label, parity] of [
-            [Scope.EvenNumbers, 'even'],
-            [Scope.OddNumbers, 'odd']
+    it('resolves collection divisibility areas and complementary number scopes into matching counts', () => {
+        for (const [area, scope, parity] of [
+            [Area.EvenDivisibility, Scope.EvenNumbers, 'even'],
+            [Area.UnevenDivisibility, Scope.OddNumbers, 'odd']
         ] as const) {
-            const stub = generateWithLabels(generator, [label, Scope.NumbersSmaller20]);
+            const stub = generateWithLabels(generator, [
+                area,
+                scope,
+                Scope.NumbersSmaller20
+            ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.parity).toBe(parity);
-            expect(stub!.tags).toContain(label);
+            expect(stub!.tags).toEqual(expect.arrayContaining([area, scope]));
         }
+    });
+
+    it('rejects contradictory collection divisibility and number-scope labels', () => {
+        expect(() => generateWithLabels(generator, [
+            Area.EvenDivisibility,
+            Scope.OddNumbers,
+            Scope.NumbersSmaller20
+        ])).toThrow();
     });
 });

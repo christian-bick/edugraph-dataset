@@ -1,2 +1,2 @@
-- **Identity:** Every visible object belongs to an outlined pair except the single visibly unpaired remainder in an odd group; the pair count and remainder statement agree with the objects.
-- **Modes:** Question Mode leaves the odd/even classification blank while preserving the pairing evidence; Solution Mode reveals the classification without changing the grouped objects.
+- **Identity:** One counted collection is distributed into exactly two bounded groups of equal size, with either no remainder or one visibly separate leftover object.
+- **Modes:** Question Mode leaves the odd/even classification blank while preserving the two-group evidence; Solution Mode reveals the classification and states the equal group size and remainder.

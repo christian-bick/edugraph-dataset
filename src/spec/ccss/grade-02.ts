@@ -63,17 +63,16 @@ const fluencyWithin20Builder = new DatasetPermutationBuilder()
         [Area.Subtraction]
     ]);
 
-// --- 2.OA.C.3: Classify a physical group as odd or even ---
+// --- 2.OA.C.3: Classify a collection as evenly or unevenly divisible into two groups ---
 const objectGroupParityBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.OddAndEvenGroups,
         Scope.PhysicalNumbers,
         Scope.NumbersSmaller20,
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Scope.EvenNumbers],
-        [Scope.OddNumbers]
+        [Area.EvenDivisibility, Scope.EvenNumbers],
+        [Area.UnevenDivisibility, Scope.OddNumbers]
     ]);
 
 // --- 2.OA.C.3: Express an even number as two equal addends ---

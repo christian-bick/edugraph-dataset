@@ -19,7 +19,12 @@ export const spec: GeneratorSpec = {
 
 export const CountingBasicGeneratorSchema = {
     parity: [
-        [Scope.EvenNumbers, Scope.OddNumbers],
+        [
+            Area.EvenDivisibility,
+            Area.UnevenDivisibility,
+            Scope.EvenNumbers,
+            Scope.OddNumbers
+        ],
         resolveParityConstraint
     ],
     range: [

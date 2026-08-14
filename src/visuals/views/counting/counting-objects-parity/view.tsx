@@ -32,8 +32,8 @@ const CountingObjectsParityCore = ({config: _config, payload}: CoreProps) => {
         throw new ViewValidationError('counting-objects-parity', 'The parity label does not match the object count.');
     }
 
-    const pairCount = Math.floor(data.numObjects / 2);
-    const hasRemainder = data.numObjects % 2 === 1;
+    const groupSize = Math.floor(data.numObjects / 2);
+    const remainder = data.numObjects % 2 as 0 | 1;
     const color = colors[seed % colors.length];
 
     return (
@@ -41,32 +41,45 @@ const CountingObjectsParityCore = ({config: _config, payload}: CoreProps) => {
             <div className="text-center">
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Odd or even?</div>
                 <div className="mt-2 text-xl font-semibold text-slate-700">
-                    Pair every object. Does one remain without a partner?
+                    Can {data.numObjects} objects be split into two equal groups?
                 </div>
             </div>
 
-            <div className="mt-6 flex min-h-[230px] flex-wrap content-center justify-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-6">
-                {Array.from({length: pairCount}, (_, index) => (
-                    <div
-                        key={index}
-                        className="flex items-center gap-2 rounded-full border-2 border-slate-300 bg-white p-2"
-                        aria-label={`pair ${index + 1}`}
-                    >
+            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <div className="flex justify-center gap-4">
+                    {[1, 2].map(groupNumber => (
+                        <div
+                            key={groupNumber}
+                            className="min-h-[190px] w-[240px] rounded-xl border-2 border-sky-300 bg-white p-4"
+                            aria-label={`group ${groupNumber} with ${groupSize} objects`}
+                        >
+                            <div className="mb-4 text-center text-sm font-bold uppercase tracking-wide text-sky-700">
+                                Group {groupNumber}
+                            </div>
+                            <div className="flex flex-wrap content-center justify-center gap-3">
+                                {Array.from({length: groupSize}, (_, index) => (
+                                    <ObjectDot key={index} color={color} />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mx-auto mt-4 flex min-h-16 w-48 items-center justify-center gap-3 rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-2">
+                    <span className="text-sm font-bold uppercase tracking-wide text-amber-700">Left over</span>
+                    {remainder === 1 ? (
                         <ObjectDot color={color} />
-                        <ObjectDot color={color} />
-                    </div>
-                ))}
-                {hasRemainder && (
-                    <div className="flex items-center rounded-full border-2 border-dashed border-amber-500 bg-amber-50 p-2" aria-label="unpaired object">
-                        <ObjectDot color={color} />
-                    </div>
-                )}
+                    ) : (
+                        <span className="text-lg font-bold text-amber-700">None</span>
+                    )}
+                </div>
             </div>
 
             <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-200 px-5 py-4">
                 <div className="text-base font-semibold text-slate-600">
-                    {pairCount} complete {pairCount === 1 ? 'pair' : 'pairs'}
-                    {hasRemainder ? ' and 1 unpaired object' : ' and no unpaired objects'}
+                    {isSolutionView
+                        ? `2 groups of ${groupSize}, ${remainder} left over`
+                        : 'Classify the collection'}
                 </div>
                 <div className={`flex h-12 w-28 items-center justify-center rounded-lg border-2 text-lg font-extrabold uppercase tracking-wide ${
                     isSolutionView
