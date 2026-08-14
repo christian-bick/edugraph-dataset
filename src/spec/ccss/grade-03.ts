@@ -587,13 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const elapsedTimeImplementation = defineImplementationPackage({
-    id: 'elapsed-time-minutes',
-    description: 'Solve addition or subtraction time-interval stories.',
-    generators: [{ module: 'time-interval-arithmetic', strategy: 'new' }],
-    views: [{ module: 'time-interval-word-problem', strategy: 'new' }]
-});
-
 const massVolumeMeasurementImplementation = defineImplementationPackage({
     id: 'mass-volume-measurement',
     description: 'Measure liquid volume and mass using readable metric instruments.',
@@ -757,6 +750,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.NBT.A.1-round-nearest-10-100', integerRoundingBuilder),
     ...toTargets('3.NBT.A.3-one-digit-times-multiple-of-ten', oneDigitTimesMultipleOfTenBuilder),
     ...toTargets('3.MD.A.1-elapsed-minutes', elapsedTimeBuilder),
+    ...toTargets('3.MD.A.1-time-interval-word-problems', timeIntervalWordProblemsBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -764,7 +758,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.A.1-time-interval-word-problems', timeIntervalWordProblemsBuilder, elapsedTimeImplementation, 'Align the story, interval equation, clock evidence, and answer.'),
     ...toImplementationTodos('3.MD.A.2-measure-liquid-volume', measureLiquidVolumeBuilder, massVolumeMeasurementImplementation, 'Show a calibrated vessel, liquid level, liter unit, and measured answer.'),
     ...toImplementationTodos('3.MD.A.2-estimate-liquid-volume', estimateLiquidVolumeBuilder, massVolumeEstimationImplementation, 'Show a familiar container, liter reference, and plausible estimate.'),
     ...toImplementationTodos('3.MD.A.2-measure-mass', measureMassBuilder, massVolumeMeasurementImplementation, 'Show an object, readable scale, metric unit, and measured mass.'),

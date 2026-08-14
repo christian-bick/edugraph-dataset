@@ -1,0 +1,2 @@
+- **Identity:** The written story, start time, elapsed or end-time information, clock representation, two-operand equation, unknown, and answer all agree in minutes.
+- **Modes:** Question Mode hides exactly the requested end time or elapsed duration; Solution Mode completes the clock evidence and shows the normalized addition or subtraction equation with its answer.

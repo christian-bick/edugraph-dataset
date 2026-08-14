@@ -298,6 +298,18 @@ export type ElapsedTimeProblem = {
     crossesHour: true;
 };
 
+export type TimeIntervalWordProblem = {
+    operation: 'addition' | 'subtraction';
+    story: string;
+    startTime: string;
+    endTime: string;
+    elapsedMinutes: number;
+    referenceHour: number;
+    startOffsetMinutes: number;
+    endOffsetMinutes: number;
+    unknown: 'end-time' | 'elapsed-minutes';
+};
+
 export type CurrencyItem = {
     kind: 'coin' | 'banknote';
     denominationCents: number;
@@ -609,6 +621,7 @@ export interface ViewTypeMap {
     'time-analog': TimeProblem;
     'time-digital': TimeProblem;
     'time-elapsed': ElapsedTimeProblem;
+    'time-interval-word-problem': TimeIntervalWordProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
