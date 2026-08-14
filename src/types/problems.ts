@@ -665,6 +665,7 @@ export interface ViewTypeMap {
     'measure-mass': MassVolumeMeasurementProblem;
     'measure-liquid-volume-estimate': MassVolumeEstimateProblem;
     'measure-mass-estimate': MassVolumeEstimateProblem;
+    'measurement-word-problem': ArithmeticPairProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;

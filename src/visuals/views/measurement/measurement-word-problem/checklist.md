@@ -1,0 +1,2 @@
+- **Identity:** The one-step story, operation, two operands, same measurement unit, equation, unknown, and answer all agree.
+- **Modes:** Question Mode preserves both given quantities and hides only the result; Solution Mode completes the equation and states the answer with its unit.
