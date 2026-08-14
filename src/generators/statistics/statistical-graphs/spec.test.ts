@@ -48,4 +48,28 @@ describe('statistical-graphs spec', () => {
         expect(result.data.operation).toBe(operation);
         expect(result.tags).toEqual(expect.arrayContaining([Scope.TwoOperands, operationLabel]));
     });
+
+    it.each([
+        [Scope.StepsOf2, 2],
+        [Scope.StepsOf5, 5],
+        [Scope.StepsOf10, 10]
+    ] as const)('resolves a one-step subtraction comparison on the %s scale', (scaleLabel, scale) => {
+        const data = generateWithLabels(new StatisticalGraphsGenerator(), [
+            Area.Statistics,
+            Area.Subtraction,
+            Scope.IntegerNumbers,
+            Scope.BarGraph,
+            scaleLabel,
+            Scope.TwoOperands,
+            Ability.ProcedureExecution
+        ])!.data;
+        const [firstIndex, secondIndex] = data.operandIndices!;
+        const first = data.categories[firstIndex].count;
+        const second = data.categories[secondIndex].count;
+
+        expect(data.scale).toBe(scale);
+        expect(data.operation).toBe('subtraction');
+        expect(data.answer).toBe(first - second);
+        expect(data.categories.every(({count}) => count % scale === 0)).toBe(true);
+    });
 });
