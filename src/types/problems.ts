@@ -97,6 +97,19 @@ export type ArithmeticPatternProblem = {
     highlightedCells?: Array<[number, number]>;
 };
 
+export type IntegerRoundingProblem = {
+    number: number;
+    roundingPlace: 10 | 100;
+    lowerMultiple: number;
+    midpoint: number;
+    upperMultiple: number;
+    roundedValue: number;
+    direction: 'down' | 'up';
+    distanceLower: number;
+    distanceUpper: number;
+    isMidpointTie: boolean;
+};
+
 export type EqualGroupsOperation =
     | 'addition'
     | 'multiplication'
@@ -538,6 +551,7 @@ export interface ViewTypeMap {
     'operations-answer-reasonableness': ArithmeticEstimationProblem;
     'operations-pattern-table': ArithmeticPatternProblem;
     'operations-pattern-explanation': ArithmeticPatternProblem;
+    'numbers-rounding-line': IntegerRoundingProblem;
     'operations-number-array': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
     'operations-number-line': NumberLineProblem;

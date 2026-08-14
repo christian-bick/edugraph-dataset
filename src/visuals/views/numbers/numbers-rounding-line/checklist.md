@@ -1,0 +1,2 @@
+- **Identity:** The original whole number, requested rounding place, neighboring multiples, midpoint, and exact position are all visible on one number line.
+- **Modes:** Question Mode leaves the rounded value unresolved; Solution Mode highlights the selected endpoint, shows both distances, and states the midpoint or nearest-neighbor rule used.
