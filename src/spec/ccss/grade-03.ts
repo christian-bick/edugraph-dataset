@@ -587,16 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const fractionalMeasurementDataImplementation = defineImplementationPackage({
-    id: 'fractional-measurement-data',
-    description: 'Collect half- and quarter-inch measurements and plot them on a fractional line plot.',
-    generators: [{ module: 'measurement-data', strategy: 'expand' }],
-    views: [
-        { module: 'measurement-data-table', strategy: 'expand' },
-        { module: 'measurement-line-plot', strategy: 'expand' }
-    ]
-});
-
 const unitSquareAreaImplementation = defineImplementationPackage({
     id: 'unit-square-area',
     description: 'Measure area by exhaustively counting equal square units.',
@@ -724,6 +714,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.B.3-one-step-scaled-bar-comparisons', oneStepScaledBarComparisonBuilder),
     ...toTargets('3.MD.B.3-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder),
     ...toTargets('3.MD.B.4-generate-fractional-measurements', generateFractionalMeasurementsBuilder),
+    ...toTargets('3.MD.B.4-plot-fractional-measurements', plotFractionalMeasurementsBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -731,7 +722,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.B.4-plot-fractional-measurements', plotFractionalMeasurementsBuilder, fractionalMeasurementDataImplementation, 'Plot collected measurements against whole, half, and quarter ticks.'),
     ...toImplementationTodos('3.MD.C.5a-unit-square-area-unit', unitSquareAreaUnitBuilder, unitSquareAreaImplementation, 'Identify one square tile as one unit on an area scale.'),
     ...toImplementationTodos('3.MD.C.5b-unit-square-coverage', unitSquareCoverageBuilder, unitSquareAreaImplementation, 'Cover the figure exhaustively without overlap and interpret the iterated square-tile count as area.'),
     ...toImplementationTodos('3.MD.C.6-count-unit-squares', countUnitSquaresBuilder, unitSquareAreaImplementation, 'Fully tile the figure and expose the counted square-unit total.'),

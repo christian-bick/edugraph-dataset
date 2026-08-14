@@ -22,7 +22,19 @@ const linePlotBuilder = new DatasetPermutationBuilder()
         Ability.VisualArticulation
     ]);
 
+const fractionalLinePlotBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.MeasuringObjects,
+        Scope.LengthMeasurement,
+        Scope.FractionNumbers,
+        Scope.LinePlot,
+        Ability.ProcedureExecution,
+        Ability.VisualArticulation
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-measurement-data-table', tableBuilder),
-    ...toTargets('test-measurement-data-line-plot', linePlotBuilder)
+    ...toTargets('test-measurement-data-line-plot', linePlotBuilder),
+    ...toTargets('test-fractional-measurement-line-plot', fractionalLinePlotBuilder)
 ];

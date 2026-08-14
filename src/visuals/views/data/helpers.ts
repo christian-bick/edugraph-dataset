@@ -36,12 +36,16 @@ export function validateMeasurementData(data: MeasurementDataProblem, viewId: st
     throw new ViewValidationError(viewId, 'Measurement unit and subdivisions are incompatible.');
 }
 
-export function formatMeasurement(length: number, unit: MeasurementDataProblem['unit']): string {
-    if (unit === 'cm') return `${length} cm`;
+export function formatMeasurementValue(length: number, unit: MeasurementDataProblem['unit']): string {
+    if (unit === 'cm') return String(length);
     const quarterUnits = Math.round(length * 4);
     const whole = Math.floor(quarterUnits / 4);
     const fraction = ['', '¼', '½', '¾'][quarterUnits % 4];
-    return `${whole}${fraction} in`;
+    return `${whole}${fraction}`;
+}
+
+export function formatMeasurement(length: number, unit: MeasurementDataProblem['unit']): string {
+    return `${formatMeasurementValue(length, unit)} ${unit}`;
 }
 
 export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: string) {

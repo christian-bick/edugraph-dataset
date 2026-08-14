@@ -1,2 +1,4 @@
-- **Identity:** A list of whole-centimeter measurements accompanies a numerical line plot whose scale advances in visible steps of one.
+- **Identity:** A list of measurements accompanies a numerical line plot whose visible ticks match the payload: whole centimeters or quarter inches.
 - **Modes:** Question Mode shows an empty plotting area above the numbered scale; Solution Mode places one frequency mark for every listed measurement at the matching value.
+- **Fractional scale:** Whole, half, and quarter-inch values are labeled as mixed numbers, and every frequency mark is centered over its exact tick.
+- **Collected measurements:** `Ability.ProcedureExecution` changes the prompt to identify the source values as measurements the learner collected.
