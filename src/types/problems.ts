@@ -329,13 +329,25 @@ export type MassMeasurementProblem = {
 
 export type MassVolumeMeasurementProblem = LiquidVolumeMeasurementProblem | MassMeasurementProblem;
 
-export type MassVolumeEstimateProblem = {
+export type LiquidVolumeEstimateProblem = {
     measurementKind: 'liquid-volume';
     container: 'water-bottle' | 'juice-carton' | 'watering-can' | 'bucket';
     unit: 'L';
     estimateLiters: 1 | 2 | 5 | 10;
     referenceLiters: 1;
 };
+
+export type MassEstimateProblem = {
+    measurementKind: 'mass';
+    object: 'crayon' | 'apple' | 'book' | 'backpack' | 'chair' | 'bicycle';
+    unit: 'g' | 'kg';
+    estimate: number;
+    referenceCount: number;
+    referenceObject: 'paperclip' | 'one-kilogram-bag';
+    referenceValue: 1;
+};
+
+export type MassVolumeEstimateProblem = LiquidVolumeEstimateProblem | MassEstimateProblem;
 
 export type CurrencyItem = {
     kind: 'coin' | 'banknote';
@@ -652,6 +664,7 @@ export interface ViewTypeMap {
     'measure-liquid-volume': MassVolumeMeasurementProblem;
     'measure-mass': MassVolumeMeasurementProblem;
     'measure-liquid-volume-estimate': MassVolumeEstimateProblem;
+    'measure-mass-estimate': MassVolumeEstimateProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;

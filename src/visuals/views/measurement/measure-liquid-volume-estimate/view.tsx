@@ -1,6 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {MassVolumeEstimateProblem} from '../../../../types/problems.ts';
+import {LiquidVolumeEstimateProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
@@ -14,14 +14,14 @@ interface CoreProps {
     payload: ViewRenderPayload<'measure-liquid-volume-estimate'>;
 }
 
-const profiles: Record<MassVolumeEstimateProblem['container'], {name: string; estimate: number}> = {
+const profiles: Record<LiquidVolumeEstimateProblem['container'], {name: string; estimate: number}> = {
     'water-bottle': {name: 'Water bottle', estimate: 1},
     'juice-carton': {name: 'Juice carton', estimate: 2},
     'watering-can': {name: 'Watering can', estimate: 5},
     bucket: {name: 'Bucket', estimate: 10}
 };
 
-const TargetContainer = ({container}: {container: MassVolumeEstimateProblem['container']}) => {
+const TargetContainer = ({container}: {container: LiquidVolumeEstimateProblem['container']}) => {
     if (container === 'water-bottle') return <g>
         <rect x="112" y="36" width="56" height="24" rx="5" fill="#0f766e" />
         <path d="M100 78 Q100 60 118 60 H162 Q180 60 180 78 L190 270 Q190 292 168 292 H112 Q90 292 90 270 Z" fill="#99f6e4" stroke="#0f766e" strokeWidth="6" />
@@ -51,8 +51,10 @@ const MeasureLiquidVolumeEstimateCore = ({config: _config, payload}: CoreProps) 
     validateProblemData('measure-liquid-volume-estimate', data, [
         'measurementKind', 'container', 'unit', 'estimateLiters', 'referenceLiters'
     ]);
-    if (data.measurementKind !== 'liquid-volume'
-        || !(data.container in profiles)
+    if (data.measurementKind !== 'liquid-volume') {
+        throw new ViewValidationError('measure-liquid-volume-estimate', 'Unsupported liquid-volume estimate.');
+    }
+    if (!(data.container in profiles)
         || data.unit !== 'L'
         || data.referenceLiters !== 1
         || data.estimateLiters !== profiles[data.container].estimate) {

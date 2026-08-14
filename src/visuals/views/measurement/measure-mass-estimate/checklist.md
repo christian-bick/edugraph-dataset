@@ -1,0 +1,2 @@
+- **Identity:** A familiar target object, a separate labeled 1-gram or 1-kilogram reference object, the matching metric unit, estimation prompt, and plausible response are visible and agree.
+- **Modes:** Question Mode leaves the estimate unresolved; Solution Mode states the plausible mass estimate while preserving the same target and reference cue.
