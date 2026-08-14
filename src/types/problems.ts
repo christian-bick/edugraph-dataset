@@ -310,7 +310,7 @@ export type TimeIntervalWordProblem = {
     unknown: 'end-time' | 'elapsed-minutes';
 };
 
-export type MassVolumeMeasurementProblem = {
+export type LiquidVolumeMeasurementProblem = {
     measurementKind: 'liquid-volume';
     object: 'measuring-jug';
     unit: 'L';
@@ -318,6 +318,16 @@ export type MassVolumeMeasurementProblem = {
     capacity: number;
     tickStep: 1;
 };
+
+export type MassMeasurementProblem = {
+    measurementKind: 'mass';
+    object: 'apple' | 'book' | 'toy-car' | 'watermelon' | 'backpack' | 'suitcase';
+    unit: 'g' | 'kg';
+    value: number;
+    instrument: 'digital-scale';
+};
+
+export type MassVolumeMeasurementProblem = LiquidVolumeMeasurementProblem | MassMeasurementProblem;
 
 export type MassVolumeEstimateProblem = {
     measurementKind: 'liquid-volume';
@@ -640,6 +650,7 @@ export interface ViewTypeMap {
     'time-elapsed': ElapsedTimeProblem;
     'time-interval-word-problem': TimeIntervalWordProblem;
     'measure-liquid-volume': MassVolumeMeasurementProblem;
+    'measure-mass': MassVolumeMeasurementProblem;
     'measure-liquid-volume-estimate': MassVolumeEstimateProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;

@@ -1,0 +1,2 @@
+- **Identity:** A familiar object rests on a clearly recognizable digital scale whose numerical display, gram or kilogram unit, and response all agree.
+- **Modes:** Question Mode leaves the written response unresolved while keeping the scale readable; Solution Mode highlights and states the same measured mass.
