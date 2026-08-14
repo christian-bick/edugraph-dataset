@@ -1,0 +1,2 @@
+- **Identity:** A calibrated measuring vessel, horizontal liquid level, numbered liter ticks, unit label, and measured-value response are all visible and agree.
+- **Modes:** Question Mode leaves the numerical reading unresolved; Solution Mode highlights the matching tick and states the measured liquid volume in liters.

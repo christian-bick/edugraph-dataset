@@ -310,6 +310,15 @@ export type TimeIntervalWordProblem = {
     unknown: 'end-time' | 'elapsed-minutes';
 };
 
+export type MassVolumeMeasurementProblem = {
+    measurementKind: 'liquid-volume';
+    object: 'measuring-jug';
+    unit: 'L';
+    value: number;
+    capacity: number;
+    tickStep: 1;
+};
+
 export type CurrencyItem = {
     kind: 'coin' | 'banknote';
     denominationCents: number;
@@ -622,6 +631,7 @@ export interface ViewTypeMap {
     'time-digital': TimeProblem;
     'time-elapsed': ElapsedTimeProblem;
     'time-interval-word-problem': TimeIntervalWordProblem;
+    'measure-liquid-volume': MassVolumeMeasurementProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
