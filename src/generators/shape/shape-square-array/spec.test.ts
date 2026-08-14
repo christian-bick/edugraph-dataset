@@ -47,4 +47,25 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
             Ability.Interpretation
         ]));
     });
+
+    it('resolves iterated tile-scale interpretation to exhaustive coverage', () => {
+        const stub = generateWithLabels(generator, [
+            Area.AreaCalculation,
+            Area.Iteration,
+            Area.Square,
+            Scope.TileScale,
+            Scope.IntegerNumbers,
+            Ability.Interpretation
+        ])!;
+
+        expect(stub.data.task).toBe('interpret-coverage');
+        expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Area.AreaCalculation,
+            Area.Iteration,
+            Scope.TileScale,
+            Scope.IntegerNumbers,
+            Ability.Interpretation
+        ]));
+    });
 });

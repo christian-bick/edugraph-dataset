@@ -10,7 +10,15 @@ export const spec: GeneratorSpec = {
 
 export const ShapeSquareArrayGeneratorSchema = {
     modelFeatures: [
-        [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares, Scope.TileScale],
+        [
+            Area.AreaCalculation,
+            Area.Iteration,
+            Area.ShapeComposition,
+            Scope.BoxArrangement,
+            Scope.EqualShares,
+            Scope.IntegerNumbers,
+            Scope.TileScale
+        ],
         matchAllExactLabels
     ],
     taskAbility: [

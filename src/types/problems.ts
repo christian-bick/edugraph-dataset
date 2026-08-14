@@ -583,7 +583,7 @@ export type ShapePartitionProblem =
     };
 
 export type ShapeSquareArrayProblem = {
-    task: 'interpret-unit' | 'partition' | 'count';
+    task: 'interpret-unit' | 'interpret-coverage' | 'partition' | 'count';
     rows: 1 | 2 | 3 | 4 | 5;
     columns: 1 | 2 | 3 | 4 | 5;
     squareCount: number;

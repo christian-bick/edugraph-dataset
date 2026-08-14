@@ -46,6 +46,23 @@ describe('ShapeSquareArrayGenerator', () => {
         });
     });
 
+    it('creates complete arrays for area-from-coverage interpretation', () => {
+        const data = generator.generate({
+            modelFeatures: [
+                Area.AreaCalculation,
+                Area.Iteration,
+                Scope.IntegerNumbers,
+                Scope.TileScale
+            ],
+            taskAbility: Ability.Interpretation
+        })!.data;
+
+        expect(data.task).toBe('interpret-coverage');
+        expect(data.squareCount).toBe(data.rows * data.columns);
+        expect(data.rows).toBeGreaterThanOrEqual(2);
+        expect(data.columns).toBeGreaterThanOrEqual(2);
+    });
+
     it('rejects abilities without their required model features', () => {
         expect(generator.generate({
             modelFeatures: [Scope.TileScale],

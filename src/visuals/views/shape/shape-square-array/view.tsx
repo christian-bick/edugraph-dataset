@@ -14,8 +14,13 @@ interface CoreProps {
 const CELL_SIZE = 44;
 
 function validateArray(data: ShapeSquareArrayProblem) {
-    if (data.task !== 'interpret-unit' && data.task !== 'partition' && data.task !== 'count') {
-        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, partition, or count task.');
+    if (
+        data.task !== 'interpret-unit'
+        && data.task !== 'interpret-coverage'
+        && data.task !== 'partition'
+        && data.task !== 'count'
+    ) {
+        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, coverage interpretation, partition, or count task.');
     }
     if (data.task === 'interpret-unit') {
         if (data.rows !== 1 || data.columns !== 1 || data.squareCount !== 1) {
@@ -145,6 +150,7 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
     validateArray(problem.data);
 
     const isUnitInterpretation = problem.data.task === 'interpret-unit';
+    const isCoverageInterpretation = problem.data.task === 'interpret-coverage';
     const isPartition = problem.data.task === 'partition';
     const showCells = !isPartition || isSolutionView;
 
@@ -154,6 +160,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                 <div className="h-[58px] px-5 flex items-start justify-center text-center text-[1.3rem] leading-snug font-bold text-slate-700">
                     {isUnitInterpretation
                         ? 'This square tile has side length 1 unit. What area does it represent?'
+                        : isCoverageInterpretation
+                            ? 'Unit squares cover this figure exactly. What does the count tell you?'
                         : isPartition
                         ? `Partition the rectangle into ${problem.data.rows} rows and ${problem.data.columns} columns of equal squares.`
                         : 'How many equal squares are in the rectangle?'}
@@ -173,25 +181,37 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                     className={`h-[52px] min-w-[270px] px-6 rounded-xl border-2 flex items-center justify-center text-[1.18rem] font-bold box-border ${
                         isSolutionView
                             ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                            : isPartition || isUnitInterpretation
+                            : isPartition || isUnitInterpretation || isCoverageInterpretation
                                 ? 'border-slate-200 bg-slate-100 text-slate-600'
                                 : 'border-slate-300 bg-white text-transparent'
                     }`}
                     aria-label={isSolutionView
                         ? isUnitInterpretation
                             ? 'Answer: one square unit'
+                            : isCoverageInterpretation
+                                ? `Answer: ${problem.data.squareCount} square units of area`
                             : isPartition
                             ? `Partition: ${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `Answer: ${problem.data.squareCount} equal squares`
-                        : isUnitInterpretation ? 'Name the area' : isPartition ? 'Draw the square grid' : 'Blank answer'}
+                        : isUnitInterpretation
+                            ? 'Name the area'
+                            : isCoverageInterpretation
+                                ? 'Interpret the tile count as area'
+                                : isPartition ? 'Draw the square grid' : 'Blank answer'}
                 >
                     {isSolutionView
                         ? isUnitInterpretation
                             ? '1 unit × 1 unit = 1 square unit'
+                            : isCoverageInterpretation
+                                ? `${problem.data.squareCount} unit squares cover the figure, so its area is ${problem.data.squareCount} square units.`
                             : isPartition
                             ? `${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} equal squares`
-                        : isUnitInterpretation ? 'Name the area represented.' : isPartition ? 'Draw the square grid.' : '\u00a0'}
+                        : isUnitInterpretation
+                            ? 'Name the area represented.'
+                            : isCoverageInterpretation
+                                ? 'Interpret the square-tile count as area.'
+                                : isPartition ? 'Draw the square grid.' : '\u00a0'}
                 </div>
             </div>
         </div>

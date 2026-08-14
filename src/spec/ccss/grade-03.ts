@@ -716,6 +716,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.B.4-generate-fractional-measurements', generateFractionalMeasurementsBuilder),
     ...toTargets('3.MD.B.4-plot-fractional-measurements', plotFractionalMeasurementsBuilder),
     ...toTargets('3.MD.C.5a-unit-square-area-unit', unitSquareAreaUnitBuilder),
+    ...toTargets('3.MD.C.5b-unit-square-coverage', unitSquareCoverageBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -723,7 +724,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.C.5b-unit-square-coverage', unitSquareCoverageBuilder, unitSquareAreaImplementation, 'Cover the figure exhaustively without overlap and interpret the iterated square-tile count as area.'),
     ...toImplementationTodos('3.MD.C.6-count-unit-squares', countUnitSquaresBuilder, unitSquareAreaImplementation, 'Fully tile the figure and expose the counted square-unit total.'),
     ...toImplementationTodos('3.MD.C.7a-tiling-side-length-product', connectTilingToMultiplicationBuilder, rectangularAreaModelsImplementation, 'Align tiled rows and columns, side lengths, multiplication, and area.'),
     ...toImplementationTodos('3.MD.C.7b-rectangular-area', rectangularAreaBuilder, rectangularAreaModelsImplementation, 'Show side lengths, a rectangular model, multiplication, units, and optional story.'),

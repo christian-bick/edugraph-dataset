@@ -37,6 +37,21 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
 
         if (config.taskAbility === Ability.Interpretation) {
             if (!config.modelFeatures?.includes(Scope.TileScale)) return null;
+            const interpretsCoverage = [Area.AreaCalculation, Area.Iteration, Scope.IntegerNumbers]
+                .every(label => config.modelFeatures?.includes(label));
+            if (interpretsCoverage) {
+                const [rows, columns] = ARRAY_DIMENSIONS[
+                    Math.floor(random() * ARRAY_DIMENSIONS.length)
+                ];
+                return {
+                    data: {
+                        task: 'interpret-coverage',
+                        rows,
+                        columns,
+                        squareCount: rows * columns
+                    }
+                };
+            }
             return {
                 data: {
                     task: 'interpret-unit',
