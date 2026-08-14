@@ -148,6 +148,7 @@ const multiplicationDistributiveBuilder = new DatasetPermutationBuilder()
 const fourOperationTwoStepBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ThreeOperands,
+        Scope.MultiLevelComposition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -586,13 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const fourOperationTwoStepImplementation = defineImplementationPackage({
-    id: 'four-operation-two-step-word-problems',
-    description: 'Extend connected two-step stories across all four arithmetic operations.',
-    generators: [{ module: 'arithmetic-word-problems-two-step', strategy: 'expand' }],
-    views: [{ module: 'operations-word-problem-within-100', strategy: 'expand' }]
-});
-
 const answerReasonablenessImplementation = defineImplementationPackage({
     id: 'answer-reasonableness',
     description: 'Compare exact and rounded or estimated values to judge whether an answer is reasonable.',
@@ -796,6 +790,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.OA.A.4-unknown-multiplication-division', unknownMultiplicationDivisionBuilder),
     ...toTargets('3.OA.B.5-multiplication-properties', multiplicationPropertiesBuilder),
     ...toTargets('3.OA.B.5-distributive-property', multiplicationDistributiveBuilder),
+    ...toTargets('3.OA.D.8-two-step-word-problems', fourOperationTwoStepBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -803,7 +798,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.OA.D.8-two-step-word-problems', fourOperationTwoStepBuilder, fourOperationTwoStepImplementation, 'Render one connected two-step story, intermediate equation, unknown, and answer.'),
     ...toImplementationTodos('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder, answerReasonablenessImplementation, 'Show exact and estimated values and elicit a reasonableness judgment.'),
     ...toImplementationTodos('3.OA.D.9-identify-patterns', identifyArithmeticPatternsBuilder, arithmeticTablePatternsImplementation, 'Expose a systematic operation-table pattern for identification.'),
     ...toImplementationTodos('3.OA.D.9-explain-patterns', explainArithmeticPatternsBuilder, arithmeticTablePatternsImplementation, 'Connect a visible pattern to a written operation-property explanation.'),

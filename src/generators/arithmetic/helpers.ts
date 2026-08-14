@@ -12,10 +12,7 @@ export type ArithmeticOperationLabel = typeof arithmeticOperations[number];
 
 export type AddSubtractOperationLabel = typeof Area.Addition | typeof Area.Subtraction;
 
-export type TwoStepOperationLabels = readonly [
-    AddSubtractOperationLabel,
-    AddSubtractOperationLabel
-];
+export type TwoStepOperationLabels = readonly [ArithmeticOperationLabel, ArithmeticOperationLabel];
 
 /** Resolves only an explicitly requested operation, never a related ontology label. */
 export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
@@ -37,10 +34,19 @@ export function resolvePropertyAwareOperation(labels: string[]): ArithmeticOpera
 export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabels | 'unsupported' {
     const hasAddition = labels.includes(Area.Addition);
     const hasSubtraction = labels.includes(Area.Subtraction);
+    const hasMultiplication = labels.includes(Area.Multiplication);
+    const hasDivision = labels.includes(Area.Division);
 
     if (hasAddition && hasSubtraction) return [Area.Addition, Area.Subtraction];
+    if (hasAddition && hasMultiplication) return [Area.Multiplication, Area.Addition];
+    if (hasAddition && hasDivision) return [Area.Division, Area.Addition];
+    if (hasSubtraction && hasMultiplication) return [Area.Multiplication, Area.Subtraction];
+    if (hasSubtraction && hasDivision) return [Area.Division, Area.Subtraction];
+    if (hasMultiplication && hasDivision) return [Area.Multiplication, Area.Division];
     if (hasAddition) return [Area.Addition, Area.Addition];
     if (hasSubtraction) return [Area.Subtraction, Area.Subtraction];
+    if (hasMultiplication) return [Area.Multiplication, Area.Multiplication];
+    if (hasDivision) return [Area.Division, Area.Division];
     return 'unsupported';
 }
 

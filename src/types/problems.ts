@@ -40,7 +40,7 @@ export type ArithmeticWordProblemTwoStep = {
     num1: number;
     num2: number;
     num3: number;
-    operations: readonly ['addition' | 'subtraction', 'addition' | 'subtraction'];
+    operations: readonly [ArithmeticOperation, ArithmeticOperation];
     intermediate: number;
     answer: number;
     blankPart: 'solution';

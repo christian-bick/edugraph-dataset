@@ -10,16 +10,24 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
     it('declares invariant cardinality and sign constraints', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([
             Scope.ThreeOperands,
+            Scope.MultiLevelComposition,
             Scope.NumbersWithoutNegatives,
             Scope.NumbersWithoutZero
         ]));
     });
 
-    it('resolves addition-only, subtraction-only, and mixed sequences', () => {
+    it('resolves all reviewed single-operation and mixed sequences', () => {
         const cases = [
             {labels: [Area.Addition], operations: ['addition', 'addition']},
             {labels: [Area.Subtraction], operations: ['subtraction', 'subtraction']},
-            {labels: [Area.Addition, Area.Subtraction], operations: ['addition', 'subtraction']}
+            {labels: [Area.Multiplication], operations: ['multiplication', 'multiplication']},
+            {labels: [Area.Division], operations: ['division', 'division']},
+            {labels: [Area.Addition, Area.Subtraction], operations: ['addition', 'subtraction']},
+            {labels: [Area.Addition, Area.Multiplication], operations: ['multiplication', 'addition']},
+            {labels: [Area.Addition, Area.Division], operations: ['division', 'addition']},
+            {labels: [Area.Subtraction, Area.Multiplication], operations: ['multiplication', 'subtraction']},
+            {labels: [Area.Subtraction, Area.Division], operations: ['division', 'subtraction']},
+            {labels: [Area.Multiplication, Area.Division], operations: ['multiplication', 'division']}
         ] as const;
 
         for (const entry of cases) {

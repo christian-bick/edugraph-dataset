@@ -8,6 +8,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-word-problems-two-step',
     generalLabels: [
         Scope.ThreeOperands,
+        Scope.MultiLevelComposition,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -17,7 +18,7 @@ export const spec: GeneratorSpec = {
 
 export const ArithmeticWordProblemsTwoStepGeneratorSchema = {
     operations: [
-        [Area.Addition, Area.Subtraction],
+        [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division],
         resolveTwoStepOperations
     ],
     range: [

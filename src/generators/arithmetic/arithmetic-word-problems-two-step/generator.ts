@@ -7,11 +7,14 @@ import {
     ArithmeticWordProblemsTwoStepGeneratorConfig,
     ArithmeticWordProblemsTwoStepGeneratorSchema
 } from './spec.ts';
+import {operationNames, TwoStepOperationLabels} from '../helpers.ts';
 
 type Values = Pick<
     ArithmeticWordProblemTwoStep,
     'num1' | 'num2' | 'num3' | 'intermediate' | 'answer'
 >;
+
+const MAX_TWO_STEP_VALUE = 100;
 
 export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
     ArithmeticWordProblemTwoStep,
@@ -29,7 +32,7 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
         if (operations === 'unsupported') return null;
 
         const minimum = Math.max(1, Math.ceil(config.range!.min));
-        const maximum = Math.floor(config.range!.max);
+        const maximum = Math.min(MAX_TWO_STEP_VALUE, Math.floor(config.range!.max));
         if (minimum > maximum) return null;
 
         const randomInteger = (min: number, max: number): number | null => {
@@ -45,46 +48,40 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
             data: {
                 kind: 'two-step',
                 ...values,
-                operations: [
-                    operations[0] === Area.Addition ? 'addition' : 'subtraction',
-                    operations[1] === Area.Addition ? 'addition' : 'subtraction'
-                ],
+                operations: [operationNames[operations[0]], operationNames[operations[1]]],
                 blankPart: 'solution'
             }
         };
     }
 
     private generateValues(
-        operations: readonly [string, string],
+        operations: TwoStepOperationLabels,
         minimum: number,
         maximum: number,
         randomInteger: (min: number, max: number) => number | null
     ): Values | null {
-        if (operations[0] === Area.Addition && operations[1] === Area.Addition) {
-            const num1 = randomInteger(minimum, maximum - 2 * minimum);
-            if (num1 === null) return null;
-            const num2 = randomInteger(minimum, maximum - num1 - minimum)!;
-            const num3 = randomInteger(minimum, maximum - num1 - num2)!;
-            const intermediate = num1 + num2;
-            return {num1, num2, num3, intermediate, answer: intermediate + num3};
-        }
+        const apply = (left: number, right: number, operation: string): number => {
+            if (operation === Area.Addition) return left + right;
+            if (operation === Area.Subtraction) return left - right;
+            if (operation === Area.Multiplication) return left * right;
+            return left / right;
+        };
 
-        if (operations[0] === Area.Subtraction && operations[1] === Area.Subtraction) {
-            const num2 = randomInteger(minimum, maximum - 2 * minimum);
-            if (num2 === null) return null;
-            const num3 = randomInteger(minimum, maximum - num2 - minimum)!;
-            const answer = randomInteger(minimum, maximum - num2 - num3)!;
-            const intermediate = answer + num3;
-            return {num1: intermediate + num2, num2, num3, intermediate, answer};
-        }
+        for (let attempt = 0; attempt < 200; attempt++) {
+            const operandLimit = Math.min(maximum, Math.max(12, minimum + 12));
+            const num1 = randomInteger(minimum, operandLimit);
+            const num2 = randomInteger(minimum, operandLimit);
+            const num3 = randomInteger(minimum, operandLimit);
+            if (num1 === null || num2 === null || num3 === null) return null;
 
-        if (operations[0] === Area.Addition && operations[1] === Area.Subtraction) {
-            const num1 = randomInteger(minimum, maximum - 2 * minimum);
-            if (num1 === null) return null;
-            const num2 = randomInteger(minimum, maximum - num1 - minimum)!;
-            const intermediate = num1 + num2;
-            const num3 = randomInteger(minimum, intermediate - minimum)!;
-            return {num1, num2, num3, intermediate, answer: intermediate - num3};
+            const intermediate = apply(num1, num2, operations[0]);
+            const answer = apply(intermediate, num3, operations[1]);
+            const values = [num1, num2, num3, intermediate, answer];
+            if (values.every(value => Number.isInteger(value)
+                && value >= minimum
+                && value <= maximum)) {
+                return {num1, num2, num3, intermediate, answer};
+            }
         }
 
         return null;

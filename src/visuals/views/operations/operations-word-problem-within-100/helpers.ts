@@ -20,6 +20,10 @@ function quantity(value: number, useLengthContext: boolean): string {
     return useLengthContext ? `${value} cm` : `${value}`;
 }
 
+function noun(count: number, singular: string): string {
+    return count === 1 ? singular : `${singular}s`;
+}
+
 export function getWordProblemStory(
     data: ArithmeticWordProblemWithin100,
     useLengthContext: boolean
@@ -29,13 +33,21 @@ export function getWordProblemStory(
         const second = quantity(data.num2, useLengthContext);
         const third = quantity(data.num3, useLengthContext);
 
-        if (data.operations[0] === 'addition' && data.operations[1] === 'addition') {
-            return `A class collected ${first} on Monday, ${second} on Tuesday, and ${third} on Wednesday. How many did they collect altogether?`;
-        }
-        if (data.operations[0] === 'subtraction' && data.operations[1] === 'subtraction') {
-            return `A collection began with ${first}. Then ${second} were used, and later ${third} more were used. How many remain?`;
-        }
-        return `A collection began with ${first}. Then ${second} were added, and later ${third} were used. How many remain?`;
+        const firstStep = data.operations[0] === 'addition'
+            ? `A collection began with ${first} ${noun(data.num1, 'item')} and received ${second} more.`
+            : data.operations[0] === 'subtraction'
+                ? `A collection began with ${first} ${noun(data.num1, 'item')} and ${second} ${data.num2 === 1 ? 'was' : 'were'} removed.`
+                : data.operations[0] === 'multiplication'
+                    ? `A display has ${first} equal ${noun(data.num1, 'group')} with ${second} ${noun(data.num2, 'item')} in each group.`
+                    : `${first} ${noun(data.num1, 'item')} ${data.num1 === 1 ? 'is' : 'are'} shared equally among ${second} ${noun(data.num2, 'group')}.`;
+        const secondStep = data.operations[1] === 'addition'
+            ? `Then ${third} more ${noun(data.num3, 'item')} ${data.num3 === 1 ? 'is' : 'are'} added.`
+            : data.operations[1] === 'subtraction'
+                ? `Then ${third} ${noun(data.num3, 'item')} ${data.num3 === 1 ? 'is' : 'are'} removed.`
+                : data.operations[1] === 'multiplication'
+                    ? `Then each item is replaced by a pack of ${third} ${noun(data.num3, 'item')}.`
+                    : `Then the result is shared equally among ${third} ${noun(data.num3, 'team')}.`;
+        return `${firstStep} ${secondStep} How many items does the story end with?`;
     }
 
     const unknown = getPairUnknown(data);

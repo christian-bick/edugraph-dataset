@@ -5,6 +5,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const builder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ThreeOperands,
+        Scope.MultiLevelComposition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -15,7 +16,14 @@ const builder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction],
-        [Area.Addition, Area.Subtraction]
+        [Area.Multiplication],
+        [Area.Division],
+        [Area.Addition, Area.Subtraction],
+        [Area.Addition, Area.Multiplication],
+        [Area.Addition, Area.Division],
+        [Area.Subtraction, Area.Multiplication],
+        [Area.Subtraction, Area.Division],
+        [Area.Multiplication, Area.Division]
     ]);
 
 export const spec: CompetencyTarget[] = [

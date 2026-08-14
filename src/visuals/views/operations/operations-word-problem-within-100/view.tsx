@@ -137,17 +137,19 @@ function validatePair(data: ArithmeticPairProblem) {
 
 function validateTwoStep(data: ArithmeticWordProblemTwoStep) {
     if (data.operations.length !== 2 || data.operations.some(operation =>
-        operation !== 'addition' && operation !== 'subtraction'
+        !['addition', 'subtraction', 'multiplication', 'division'].includes(operation)
     )) {
         throw new ViewValidationError('operations-word-problem-within-100', 'Unsupported two-step operation sequence.');
     }
 
-    const intermediate = data.operations[0] === 'addition'
-        ? data.num1 + data.num2
-        : data.num1 - data.num2;
-    const answer = data.operations[1] === 'addition'
-        ? intermediate + data.num3
-        : intermediate - data.num3;
+    const apply = (left: number, right: number, operation: string) => {
+        if (operation === 'addition') return left + right;
+        if (operation === 'subtraction') return left - right;
+        if (operation === 'multiplication') return left * right;
+        return left / right;
+    };
+    const intermediate = apply(data.num1, data.num2, data.operations[0]);
+    const answer = apply(intermediate, data.num3, data.operations[1]);
     if (intermediate !== data.intermediate || answer !== data.answer) {
         throw new ViewValidationError('operations-word-problem-within-100', 'The connected two-step equations are inconsistent.');
     }
