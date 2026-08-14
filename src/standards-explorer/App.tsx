@@ -4,7 +4,6 @@ import {
     calculateStats,
     filterTasks,
     findReleasedSamples,
-    findReleasedSamplesForLabelSets,
     getClusters,
     getCoverageKind,
     getCoverageModules,
@@ -1038,7 +1037,6 @@ function CompetencyBreakdown({ coverage, standard }: { coverage: StandardCoverag
     const assetIndexError = useExplorerStore(state => state.assetIndexError);
     const labelSets = getLabelSets(coverage);
     const intersection = intersectLabels(labelSets);
-    const commonSamples = findReleasedSamplesForLabelSets(assetIndex, coverage.competencies);
     const permutationCount = coverage.competencies.length + coverage.implementation_todos.length;
     const hasContent = labelSets.length > 0;
 
@@ -1053,16 +1051,6 @@ function CompetencyBreakdown({ coverage, standard }: { coverage: StandardCoverag
                         <div className="flex min-w-0 flex-1 flex-wrap gap-1.5 rounded-md border border-slate-800 bg-slate-950/80 p-2">
                             <ConceptBadges coverage={coverage} labels={intersection} emptyText="No labels shared by every permutation" />
                         </div>
-                        {assetIndex && (
-                            <ReleasedSampleLauncher
-                                index={assetIndex}
-                                standard={standard}
-                                coverage={coverage}
-                                labels={intersection}
-                                samples={commonSamples}
-                                ariaLabel="Preview samples for common labels"
-                            />
-                        )}
                     </div>
                 </div>
             )}
