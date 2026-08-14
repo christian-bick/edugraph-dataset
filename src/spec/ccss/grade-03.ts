@@ -3,7 +3,6 @@ import DatasetPermutationBuilder, {
     toImplementationTodos,
     toTargets
 } from '../../lib/dataset-permutation-builder.ts';
-import { defineOntologyPackage, toOntologyTodo } from '../../lib/ontology-todo.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -82,6 +81,41 @@ const multiplicationEqualGroupsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Multiplication,
         Area.GroupRecognition,
+        Scope.EqualShares,
+        Scope.TwoOperands,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller100,
+        Ability.Interpretation
+    ])
+    .applyLabelVariants([
+        [Scope.PhysicalNumbers],
+        [Scope.NumberArray, Scope.BoxArrangement]
+    ]);
+
+// --- 3.OA.A.2: Interpret quotients through collection division ---
+const partitiveDivisionBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PartitiveDivision,
+        Scope.EqualShares,
+        Scope.TwoOperands,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller100,
+        Ability.Interpretation
+    ])
+    .applyLabelVariants([
+        [Scope.PhysicalNumbers],
+        [Scope.NumberArray, Scope.BoxArrangement]
+    ]);
+
+const quotativeDivisionBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.QuotativeDivision,
         Scope.EqualShares,
         Scope.TwoOperands,
         Scope.ArabicNumerals,
@@ -337,14 +371,40 @@ const plotFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
         Ability.VisualArticulation
     ]);
 
+// --- 3.MD.C.5a: Interpret one square tile as one area unit ---
+const unitSquareAreaUnitBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Square,
+        Scope.TileScale,
+        Ability.Interpretation
+    ]);
+
+// --- 3.MD.C.5b: Interpret exhaustive square-tile coverage as area ---
+const unitSquareCoverageBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.AreaCalculation,
+        Area.Iteration,
+        Area.Square,
+        Scope.TileScale,
+        Scope.IntegerNumbers,
+        Ability.Interpretation
+    ]);
+
 const countUnitSquaresBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.AreaCalculation,
+        Area.Iteration,
         Area.Square,
-        Scope.BoxArrangement,
-        Scope.EqualShares,
+        Scope.TileScale,
         Scope.IntegerNumbers,
         Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [],
+        [Scope.SquareCentimeterScale],
+        [Scope.SquareMeterScale],
+        [Scope.SquareInchScale],
+        [Scope.SquareFootScale]
     ]);
 
 const connectTilingToMultiplicationBuilder = new DatasetPermutationBuilder()
@@ -526,9 +586,9 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const multiplicationEqualGroupsImplementation = defineImplementationPackage({
-    id: 'multiplication-equal-groups-interpretation',
-    description: 'Elicit factor-role interpretation through arrays and visibly separated equal groups.',
+const equalGroupsInterpretationImplementation = defineImplementationPackage({
+    id: 'equal-groups-operation-interpretations',
+    description: 'Elicit multiplication factor roles and partitive or quotative division through arrays and visibly separated equal groups.',
     generators: [
         { module: 'number-array', strategy: 'expand' },
         { module: 'equal-groups-collection', strategy: 'new' }
@@ -745,38 +805,8 @@ const fractionComparisonImplementation = defineImplementationPackage({
 });
 
 // ==========================================
-// 7. Reviewed ontology packages
+// 7. Target-spec exports
 // ==========================================
-
-const integerDivisionInterpretationsOntology = defineOntologyPackage({
-    id: 'integer-division-interpretations',
-    description: 'Distinguish partitive and quotative division interpretations within integer arithmetic.',
-    changes: [{
-        dimension: 'Area',
-        entities: ['DivisionInterpretation', 'PartitiveDivision', 'QuotativeDivision']
-    }]
-});
-
-const unitSquareAreaAbstractionOntology = defineOntologyPackage({
-    id: 'unit-square-area-abstraction',
-    description: 'Represent area units through exhaustive, non-overlapping iteration of unit squares and metric or imperial square-unit scales.',
-    changes: [
-        { dimension: 'Area', entities: ['UnitIteration'] },
-        {
-            dimension: 'Scope',
-            entities: [
-                'AreaAbstraction',
-                'UnitSquares',
-                'MetricAreaScale',
-                'SquareCentimeterScale',
-                'SquareMeterScale',
-                'ImperialAreaScale',
-                'SquareInchScale',
-                'SquareFootScale'
-            ]
-        }
-    ]
-});
 
 export const spec: CompetencyTarget[] = [
     ...toTargets('3.OA.A.3-multiplication-division-word-problems', multiplicationDivisionWordProblemsBuilder),
@@ -789,7 +819,9 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.OA.A.1-equal-groups-interpretation', multiplicationEqualGroupsBuilder, multiplicationEqualGroupsImplementation, 'Map both multiplication factors to visible equal-group roles.'),
+    ...toImplementationTodos('3.OA.A.1-equal-groups-interpretation', multiplicationEqualGroupsBuilder, equalGroupsInterpretationImplementation, 'Map both multiplication factors to visible equal-group roles.'),
+    ...toImplementationTodos('3.OA.A.2-partitive-division', partitiveDivisionBuilder, equalGroupsInterpretationImplementation, 'Show a fixed number of exhaustive equal subcollections and derive the shared objects-per-group quotient.'),
+    ...toImplementationTodos('3.OA.A.2-quotative-division', quotativeDivisionBuilder, equalGroupsInterpretationImplementation, 'Show exhaustive subcollections of a fixed size and derive the number-of-groups quotient.'),
     ...toImplementationTodos('3.OA.B.5-distributive-property', multiplicationDistributiveBuilder, multiplicationDistributiveImplementation, 'Show the original product, decomposition, partial products, and equal sum.'),
     ...toImplementationTodos('3.OA.D.8-two-step-word-problems', fourOperationTwoStepBuilder, fourOperationTwoStepImplementation, 'Render one connected two-step story, intermediate equation, unknown, and answer.'),
     ...toImplementationTodos('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder, answerReasonablenessImplementation, 'Show exact and estimated values and elicit a reasonableness judgment.'),
@@ -810,6 +842,8 @@ export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos('3.MD.B.3-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder, scaledStatisticalGraphsImplementation, 'Use three graph values, an intermediate result, and a final comparison answer.'),
     ...toImplementationTodos('3.MD.B.4-generate-fractional-measurements', generateFractionalMeasurementsBuilder, fractionalMeasurementDataImplementation, 'Collect visible half- and quarter-inch ruler measurements.'),
     ...toImplementationTodos('3.MD.B.4-plot-fractional-measurements', plotFractionalMeasurementsBuilder, fractionalMeasurementDataImplementation, 'Plot collected measurements against whole, half, and quarter ticks.'),
+    ...toImplementationTodos('3.MD.C.5a-unit-square-area-unit', unitSquareAreaUnitBuilder, unitSquareAreaImplementation, 'Identify one square tile as one unit on an area scale.'),
+    ...toImplementationTodos('3.MD.C.5b-unit-square-coverage', unitSquareCoverageBuilder, unitSquareAreaImplementation, 'Cover the figure exhaustively without overlap and interpret the iterated square-tile count as area.'),
     ...toImplementationTodos('3.MD.C.6-count-unit-squares', countUnitSquaresBuilder, unitSquareAreaImplementation, 'Fully tile the figure and expose the counted square-unit total.'),
     ...toImplementationTodos('3.MD.C.7a-tiling-side-length-product', connectTilingToMultiplicationBuilder, rectangularAreaModelsImplementation, 'Align tiled rows and columns, side lengths, multiplication, and area.'),
     ...toImplementationTodos('3.MD.C.7b-rectangular-area', rectangularAreaBuilder, rectangularAreaModelsImplementation, 'Show side lengths, a rectangular model, multiplication, units, and optional story.'),
@@ -831,32 +865,7 @@ export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos('3.NF.A.3d-compare-fractions', compareFractionsBuilder, fractionComparisonImplementation, 'Use the same visible whole and justify the comparison symbol through models.')
 ];
 
-export const ontologyTodos: OntologyTodo[] = [
-    toOntologyTodo(
-        '3.OA.A.2',
-        'Interpret division as objects per share',
-        integerDivisionInterpretationsOntology,
-        'Add partitive division under an integer-arithmetic division-interpretation family.'
-    ),
-    toOntologyTodo(
-        '3.OA.A.2',
-        'Interpret division as the number of shares',
-        integerDivisionInterpretationsOntology,
-        'Add quotative division as the sibling interpretation for counting groups of a fixed size.'
-    ),
-    toOntologyTodo(
-        '3.MD.C.5a',
-        'Understand a unit square as one square unit',
-        unitSquareAreaAbstractionOntology,
-        'Combine unit iteration with observable unit squares as countable area units.'
-    ),
-    toOntologyTodo(
-        '3.MD.C.5b',
-        'Cover a figure without gaps or overlaps by unit squares',
-        unitSquareAreaAbstractionOntology,
-        'Use the same area-unit package to express exhaustive, non-overlapping square coverage.'
-    )
-];
+export const ontologyTodos: OntologyTodo[] = [];
 
 export const beyondScope: BeyondScopeEntry[] = [];
 
