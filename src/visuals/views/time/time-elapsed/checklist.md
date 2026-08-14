@@ -1,0 +1,2 @@
+- **Identity:** Start time, end time, elapsed-minute unknown, and the selected analog or digital clock representation are simultaneously visible and agree.
+- **Modes:** Question Mode leaves elapsed minutes unresolved; Solution Mode splits the interval at the crossed hour, shows both partial intervals, and adds them to the final elapsed-minute answer.

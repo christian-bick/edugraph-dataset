@@ -589,15 +589,9 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 
 const elapsedTimeImplementation = defineImplementationPackage({
     id: 'elapsed-time-minutes',
-    description: 'Measure elapsed minutes and solve addition or subtraction interval stories.',
-    generators: [
-        { module: 'time', strategy: 'expand' },
-        { module: 'time-interval-arithmetic', strategy: 'new' }
-    ],
-    views: [
-        { module: 'time-elapsed', strategy: 'new' },
-        { module: 'time-interval-word-problem', strategy: 'new' }
-    ]
+    description: 'Solve addition or subtraction time-interval stories.',
+    generators: [{ module: 'time-interval-arithmetic', strategy: 'new' }],
+    views: [{ module: 'time-interval-word-problem', strategy: 'new' }]
 });
 
 const massVolumeMeasurementImplementation = defineImplementationPackage({
@@ -762,6 +756,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.OA.D.9-explain-patterns', explainArithmeticPatternsBuilder),
     ...toTargets('3.NBT.A.1-round-nearest-10-100', integerRoundingBuilder),
     ...toTargets('3.NBT.A.3-one-digit-times-multiple-of-ten', oneDigitTimesMultipleOfTenBuilder),
+    ...toTargets('3.MD.A.1-elapsed-minutes', elapsedTimeBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -769,7 +764,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.A.1-elapsed-minutes', elapsedTimeBuilder, elapsedTimeImplementation, 'Show start time, end time, elapsed minutes, and hour-boundary handling.'),
     ...toImplementationTodos('3.MD.A.1-time-interval-word-problems', timeIntervalWordProblemsBuilder, elapsedTimeImplementation, 'Align the story, interval equation, clock evidence, and answer.'),
     ...toImplementationTodos('3.MD.A.2-measure-liquid-volume', measureLiquidVolumeBuilder, massVolumeMeasurementImplementation, 'Show a calibrated vessel, liquid level, liter unit, and measured answer.'),
     ...toImplementationTodos('3.MD.A.2-estimate-liquid-volume', estimateLiquidVolumeBuilder, massVolumeEstimationImplementation, 'Show a familiar container, liter reference, and plausible estimate.'),

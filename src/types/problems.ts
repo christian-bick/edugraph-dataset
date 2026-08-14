@@ -289,6 +289,15 @@ export type TimeProblem = {
     period?: 'a.m.' | 'p.m.';
 };
 
+export type ElapsedTimeProblem = {
+    startTime: string;
+    endTime: string;
+    elapsedMinutes: number;
+    minutesToNextHour: number;
+    minutesAfterHour: number;
+    crossesHour: true;
+};
+
 export type CurrencyItem = {
     kind: 'coin' | 'banknote';
     denominationCents: number;
@@ -599,6 +608,7 @@ export interface ViewTypeMap {
     'numbers-write-name': WritingProblem;
     'time-analog': TimeProblem;
     'time-digital': TimeProblem;
+    'time-elapsed': ElapsedTimeProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
