@@ -319,6 +319,14 @@ export type MassVolumeMeasurementProblem = {
     tickStep: 1;
 };
 
+export type MassVolumeEstimateProblem = {
+    measurementKind: 'liquid-volume';
+    container: 'water-bottle' | 'juice-carton' | 'watering-can' | 'bucket';
+    unit: 'L';
+    estimateLiters: 1 | 2 | 5 | 10;
+    referenceLiters: 1;
+};
+
 export type CurrencyItem = {
     kind: 'coin' | 'banknote';
     denominationCents: number;
@@ -632,6 +640,7 @@ export interface ViewTypeMap {
     'time-elapsed': ElapsedTimeProblem;
     'time-interval-word-problem': TimeIntervalWordProblem;
     'measure-liquid-volume': MassVolumeMeasurementProblem;
+    'measure-liquid-volume-estimate': MassVolumeEstimateProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;

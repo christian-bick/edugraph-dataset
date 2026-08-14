@@ -596,12 +596,9 @@ const massVolumeMeasurementImplementation = defineImplementationPackage({
 
 const massVolumeEstimationImplementation = defineImplementationPackage({
     id: 'mass-volume-estimation',
-    description: 'Estimate liquid volume and mass from familiar reference objects and units.',
-    generators: [{ module: 'measurement-mass-volume-estimation', strategy: 'new' }],
-    views: [
-        { module: 'measure-liquid-volume-estimate', strategy: 'new' },
-        { module: 'measure-mass-estimate', strategy: 'new' }
-    ]
+    description: 'Estimate mass from familiar reference objects using grams or kilograms.',
+    generators: [{ module: 'measurement-mass-volume-estimation', strategy: 'expand' }],
+    views: [{ module: 'measure-mass-estimate', strategy: 'new' }]
 });
 
 const massVolumeWordProblemsImplementation = defineImplementationPackage({
@@ -749,6 +746,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.A.1-elapsed-minutes', elapsedTimeBuilder),
     ...toTargets('3.MD.A.1-time-interval-word-problems', timeIntervalWordProblemsBuilder),
     ...toTargets('3.MD.A.2-measure-liquid-volume', measureLiquidVolumeBuilder),
+    ...toTargets('3.MD.A.2-estimate-liquid-volume', estimateLiquidVolumeBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -756,7 +754,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.A.2-estimate-liquid-volume', estimateLiquidVolumeBuilder, massVolumeEstimationImplementation, 'Show a familiar container, liter reference, and plausible estimate.'),
     ...toImplementationTodos('3.MD.A.2-measure-mass', measureMassBuilder, massVolumeMeasurementImplementation, 'Show an object, readable scale, metric unit, and measured mass.'),
     ...toImplementationTodos('3.MD.A.2-estimate-mass', estimateMassBuilder, massVolumeEstimationImplementation, 'Show a familiar object, metric reference, and plausible mass estimate.'),
     ...toImplementationTodos('3.MD.A.2-same-unit-word-problems', massVolumeWordProblemsBuilder, massVolumeWordProblemsImplementation, 'Keep every quantity in the same visible unit and align story, equation, and answer.'),
