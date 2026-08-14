@@ -1,4 +1,6 @@
 import DatasetPermutationBuilder, {
+    defineImplementationPackage,
+    toImplementationTodos,
     toTargets
 } from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
@@ -383,6 +385,18 @@ const estimateMetricLengthBuilder = new DatasetPermutationBuilder()
         [Scope.MeterScale]
     ]);
 
+// --- 2.MD.A.3: Estimate imperial lengths ---
+const estimateImperialLengthBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Estimation,
+        Scope.LengthMeasurement,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.InchScale],
+        [Scope.FootScale]
+    ]);
+
 // --- 2.MD.A.4: Measure a length difference ---
 const measuredLengthDifferenceBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -614,6 +628,17 @@ const equalShareShapeEquivalenceBuilder = new DatasetPermutationBuilder()
         [Area.Rectangle]
     ]);
 
+// ==========================================
+// 6. Reviewed implementation packages
+// ==========================================
+
+const imperialLengthEstimationImplementation = defineImplementationPackage({
+    id: 'imperial-length-estimation',
+    description: 'Make length-estimation content scale-neutral and let the view resolve metric, imperial, or abstract distance scales into appropriate units, reference objects, and visual proportions.',
+    generators: [{ module: 'measurement-length-estimation', strategy: 'expand' }],
+    views: [{ module: 'measure-length-estimate', strategy: 'expand' }]
+});
+
 export const spec: CompetencyTarget[] = [
     // 2.OA - Operations and Algebraic Thinking
     ...toTargets('2.OA.A.1-one-step-word-problems', oneStepWordProblemsBuilder),
@@ -665,7 +690,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.G.A.3-equal-shares-different-shapes', equalShareShapeEquivalenceBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [];
+export const implementationTodos: ImplementationTodo[] = [
+    ...toImplementationTodos(
+        '2.MD.A.3-estimate-imperial-lengths',
+        estimateImperialLengthBuilder,
+        imperialLengthEstimationImplementation,
+        'Resolve InchScale and FootScale through the imperial distance-scale family while keeping generated estimation content independent of the rendered unit system.'
+    )
+];
 
 export const ontologyTodos: OntologyTodo[] = [];
 
@@ -681,10 +713,6 @@ export const beyondScope: BeyondScopeEntry[] = [{
     standardId: '2.NBT.A.3',
     title: 'Read numbers aloud',
     description: 'Written numeral and number-name correspondence is representable, but a static artifact cannot establish spoken reading or pronunciation.'
-}, {
-    standardId: '2.MD.A.3',
-    title: 'Estimate lengths in inches and feet',
-    description: 'Imperial length units are intentionally excluded from the ontology and generated dataset for now; the metric-equivalent competency remains in implementation scope.'
 }];
 
 export const equivalentTargets: TargetEquivalence[] = [{
