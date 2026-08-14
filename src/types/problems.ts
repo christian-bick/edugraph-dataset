@@ -78,6 +78,25 @@ export type ArithmeticEstimationProblem = {
     isReasonable: boolean;
 };
 
+export type ArithmeticPatternProperty = 'commutative' | 'associative' | 'distributive';
+
+export type ArithmeticPatternProblem = {
+    operation: 'addition' | 'multiplication';
+    headers: number[];
+    table: number[][];
+    focusRow: number;
+    sequence: number[];
+    patternStep: number;
+    patternOptions: string[];
+    patternAnswer: string;
+    propertyLaw?: ArithmeticPatternProperty;
+    leftExpression?: string;
+    rightExpression?: string;
+    propertyResult?: number;
+    explanation?: string;
+    highlightedCells?: Array<[number, number]>;
+};
+
 export type EqualGroupsOperation =
     | 'addition'
     | 'multiplication'
@@ -517,6 +536,8 @@ export interface ViewTypeMap {
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
     'operations-answer-reasonableness': ArithmeticEstimationProblem;
+    'operations-pattern-table': ArithmeticPatternProblem;
+    'operations-pattern-explanation': ArithmeticPatternProblem;
     'operations-number-array': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
     'operations-number-line': NumberLineProblem;

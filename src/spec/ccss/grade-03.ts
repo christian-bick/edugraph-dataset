@@ -587,16 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const arithmeticTablePatternsImplementation = defineImplementationPackage({
-    id: 'arithmetic-table-patterns',
-    description: 'Identify and explain systematic addition and multiplication table patterns.',
-    generators: [{ module: 'arithmetic-patterns', strategy: 'new' }],
-    views: [
-        { module: 'operations-pattern-table', strategy: 'new' },
-        { module: 'operations-pattern-explanation', strategy: 'new' }
-    ]
-});
-
 const integerRoundingImplementation = defineImplementationPackage({
     id: 'integer-rounding',
     description: 'Round whole numbers to the nearest ten or hundred with visible midpoint evidence.',
@@ -785,6 +775,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.OA.B.5-distributive-property', multiplicationDistributiveBuilder),
     ...toTargets('3.OA.D.8-two-step-word-problems', fourOperationTwoStepBuilder),
     ...toTargets('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder),
+    ...toTargets('3.OA.D.9-identify-patterns', identifyArithmeticPatternsBuilder),
+    ...toTargets('3.OA.D.9-explain-patterns', explainArithmeticPatternsBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -792,8 +784,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.OA.D.9-identify-patterns', identifyArithmeticPatternsBuilder, arithmeticTablePatternsImplementation, 'Expose a systematic operation-table pattern for identification.'),
-    ...toImplementationTodos('3.OA.D.9-explain-patterns', explainArithmeticPatternsBuilder, arithmeticTablePatternsImplementation, 'Connect a visible pattern to a written operation-property explanation.'),
     ...toImplementationTodos('3.NBT.A.1-round-nearest-10-100', integerRoundingBuilder, integerRoundingImplementation, 'Show neighboring multiples, midpoint logic, and the selected rounded value.'),
     ...toImplementationTodos('3.NBT.A.3-one-digit-times-multiple-of-ten', oneDigitTimesMultipleOfTenBuilder, oneDigitTimesMultipleOfTenImplementation, 'Constrain factor roles to one digit by a multiple of ten from 10 through 90.'),
     ...toImplementationTodos('3.MD.A.1-elapsed-minutes', elapsedTimeBuilder, elapsedTimeImplementation, 'Show start time, end time, elapsed minutes, and hour-boundary handling.'),

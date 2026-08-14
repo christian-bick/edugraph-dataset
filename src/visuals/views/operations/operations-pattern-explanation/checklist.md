@@ -1,0 +1,2 @@
+- **Identity:** Selected operation-table cells, two equal property expressions, and the named law provide consistent evidence for explaining the arithmetic pattern.
+- **Modes:** Question Mode provides an empty writing area without revealing the explanation; Solution Mode replaces it with a concise written explanation of why the two expressions agree.

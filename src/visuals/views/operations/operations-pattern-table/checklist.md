@@ -1,0 +1,2 @@
+- **Identity:** A complete addition or multiplication table highlights one row, and the response choices classify the constant change visible across that row.
+- **Modes:** Question Mode leaves every pattern choice neutral; Solution Mode identifies the rule that exactly matches the highlighted sequence.
