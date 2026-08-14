@@ -46,4 +46,24 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
         expect(generator.schema).not.toHaveProperty('invertProcedure');
         expect(generator.schema).not.toHaveProperty('useThreeAddends');
     });
+
+    it('resolves a distributive target to multiplication with two partial products', () => {
+        const stub = generateWithLabels(generator, [
+            Area.Addition,
+            Area.Multiplication,
+            Area.DistributiveLaw,
+            Scope.ThreeOperands,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersSmaller100
+        ]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.operation).toBe('multiplication');
+        expect(stub!.data.propertyLaw).toBe('distributive');
+        expect(stub!.data.partialProducts).toHaveLength(2);
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            Area.Addition,
+            Area.Multiplication,
+            Area.DistributiveLaw
+        ]));
+    });
 });

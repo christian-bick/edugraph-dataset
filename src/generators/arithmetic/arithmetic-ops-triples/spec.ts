@@ -3,7 +3,7 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {arithmeticOperations, resolveExplicitOperation} from '../helpers.ts';
+import {arithmeticOperations, resolvePropertyAwareOperation} from '../helpers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-triples',
@@ -16,7 +16,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const ArithmeticOpsTriplesGeneratorSchema = {
-    operation: [[...arithmeticOperations, Area.Sum], resolveExplicitOperation],
+    operation: [[...arithmeticOperations, Area.Sum], resolvePropertyAwareOperation],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
@@ -32,6 +32,10 @@ export const ArithmeticOpsTriplesGeneratorSchema = {
     useAssociativeLaw: [
         [Area.AssociativeLaw],
         hasLabel(Area.AssociativeLaw)
+    ],
+    useDistributiveLaw: [
+        [Area.DistributiveLaw],
+        hasLabel(Area.DistributiveLaw)
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),

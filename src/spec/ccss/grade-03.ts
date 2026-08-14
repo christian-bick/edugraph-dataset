@@ -600,13 +600,6 @@ const answerReasonablenessImplementation = defineImplementationPackage({
     views: [{ module: 'operations-answer-reasonableness', strategy: 'new' }]
 });
 
-const multiplicationDistributiveImplementation = defineImplementationPackage({
-    id: 'multiplication-distributive-property',
-    description: 'Show a product, its decomposition, both partial products, and their equal sum.',
-    generators: [{ module: 'arithmetic-ops-triples', strategy: 'expand' }],
-    views: [{ module: 'operations-properties', strategy: 'expand' }]
-});
-
 const arithmeticTablePatternsImplementation = defineImplementationPackage({
     id: 'arithmetic-table-patterns',
     description: 'Identify and explain systematic addition and multiplication table patterns.',
@@ -802,6 +795,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.OA.A.3-multiplication-division-word-problems', multiplicationDivisionWordProblemsBuilder),
     ...toTargets('3.OA.A.4-unknown-multiplication-division', unknownMultiplicationDivisionBuilder),
     ...toTargets('3.OA.B.5-multiplication-properties', multiplicationPropertiesBuilder),
+    ...toTargets('3.OA.B.5-distributive-property', multiplicationDistributiveBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -809,7 +803,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.OA.B.5-distributive-property', multiplicationDistributiveBuilder, multiplicationDistributiveImplementation, 'Show the original product, decomposition, partial products, and equal sum.'),
     ...toImplementationTodos('3.OA.D.8-two-step-word-problems', fourOperationTwoStepBuilder, fourOperationTwoStepImplementation, 'Render one connected two-step story, intermediate equation, unknown, and answer.'),
     ...toImplementationTodos('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder, answerReasonablenessImplementation, 'Show exact and estimated values and elicit a reasonableness judgment.'),
     ...toImplementationTodos('3.OA.D.9-identify-patterns', identifyArithmeticPatternsBuilder, arithmeticTablePatternsImplementation, 'Expose a systematic operation-table pattern for identification.'),

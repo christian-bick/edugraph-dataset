@@ -24,6 +24,15 @@ export function resolveExplicitOperation(labels: string[]): ArithmeticOperationL
     return arithmeticOperations.find(operation => labels.includes(operation)) ?? 'unsupported';
 }
 
+/** Resolves multiplication for a distributive-law target that also names addition. */
+export function resolvePropertyAwareOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
+    if (labels.includes(Area.DistributiveLaw)) {
+        random();
+        return Area.Multiplication;
+    }
+    return resolveExplicitOperation(labels);
+}
+
 /** Resolves the operation sequence required by a connected two-step word problem. */
 export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabels | 'unsupported' {
     const hasAddition = labels.includes(Area.Addition);

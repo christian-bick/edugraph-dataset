@@ -9,7 +9,12 @@ const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.D
 function expectValidEquation(problem: ArithmeticTripleProblem) {
     if (problem.operation === 'addition') expect(problem.num1 + problem.num2 + problem.num3).toBe(problem.answer);
     if (problem.operation === 'subtraction') expect(problem.num1 - problem.num2 - problem.num3).toBe(problem.answer);
-    if (problem.operation === 'multiplication') expect(problem.num1 * problem.num2 * problem.num3).toBe(problem.answer);
+    if (problem.operation === 'multiplication') {
+        const expected = problem.propertyLaw === 'distributive'
+            ? problem.num1 * (problem.num2 + problem.num3)
+            : problem.num1 * problem.num2 * problem.num3;
+        expect(expected).toBe(problem.answer);
+    }
     if (problem.operation === 'division') {
         expect(problem.num2).not.toBe(0);
         expect(problem.num3).not.toBe(0);
@@ -35,6 +40,7 @@ describe('ArithmeticOpsTriplesGenerator', () => {
                         requireMultipleOf10: false,
                         useCommutativeLaw: false,
                         useAssociativeLaw: false,
+                        useDistributiveLaw: false,
                         range: {min: 1, max: 20}
                     });
                     expect(stub).not.toBeNull();
@@ -56,6 +62,7 @@ describe('ArithmeticOpsTriplesGenerator', () => {
                 requireMultipleOf10: false,
                 useCommutativeLaw: false,
                 useAssociativeLaw: false,
+                useDistributiveLaw: false,
                 range: {min: 0, max: 20}
             });
 
@@ -77,6 +84,7 @@ describe('ArithmeticOpsTriplesGenerator', () => {
                 requireMultipleOf10: true,
                 useCommutativeLaw: false,
                 useAssociativeLaw: false,
+                useDistributiveLaw: false,
                 range: {min: 1, max: 1000000}
             });
             expect(stub).not.toBeNull();
@@ -98,6 +106,7 @@ describe('ArithmeticOpsTriplesGenerator', () => {
             requireMultipleOf10: false,
             useCommutativeLaw: propertyLaw === 'commutative',
             useAssociativeLaw: propertyLaw === 'associative',
+            useDistributiveLaw: false,
             range: {min: 1, max: 20}
         });
         expect(stub).not.toBeNull();
@@ -111,6 +120,7 @@ describe('ArithmeticOpsTriplesGenerator', () => {
             requireMultipleOf10: false,
             useCommutativeLaw: false,
             useAssociativeLaw: false,
+            useDistributiveLaw: false,
             range: {min: 1, max: 20}
         } as const;
 
@@ -122,5 +132,29 @@ describe('ArithmeticOpsTriplesGenerator', () => {
             useAssociativeLaw: true
         })).toBeNull();
         expect(generator.generate({...baseConfig, operation: 'unsupported'})).toBeNull();
+    });
+
+    it('generates a bounded distributive multiplication decomposition', () => {
+        for (let seed = 0; seed < 40; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({
+                operation: Area.Multiplication,
+                requireZero: false,
+                requireMultipleOf10: false,
+                useCommutativeLaw: false,
+                useAssociativeLaw: false,
+                useDistributiveLaw: true,
+                range: {min: 1, max: 100}
+            });
+            expect(stub).not.toBeNull();
+            expect(stub!.data.propertyLaw).toBe('distributive');
+            expect(stub!.data.combinedFactor).toBe(stub!.data.num2 + stub!.data.num3);
+            expect(stub!.data.partialProducts).toEqual([
+                stub!.data.num1 * stub!.data.num2,
+                stub!.data.num1 * stub!.data.num3
+            ]);
+            expectValidEquation(stub!.data);
+            expect(stub!.data.answer).toBeLessThanOrEqual(100);
+        }
     });
 });

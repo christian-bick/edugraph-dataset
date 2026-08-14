@@ -17,7 +17,8 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
             'requireZero',
             'requireMultipleOf10',
             'useCommutativeLaw',
-            'useAssociativeLaw'
+            'useAssociativeLaw',
+            'useDistributiveLaw'
         ]);
 
         const operation = config.operation!;
@@ -27,10 +28,12 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
         const requireMultipleOf10 = config.requireMultipleOf10!;
         const useCommutativeLaw = config.useCommutativeLaw!;
         const useAssociativeLaw = config.useAssociativeLaw!;
-        if (useCommutativeLaw && useAssociativeLaw) return null;
+        const useDistributiveLaw = config.useDistributiveLaw!;
+        if ([useCommutativeLaw, useAssociativeLaw, useDistributiveLaw].filter(Boolean).length > 1) return null;
         if ((useCommutativeLaw || useAssociativeLaw)
             && operation !== Area.Addition
             && operation !== Area.Multiplication) return null;
+        if (useDistributiveLaw && operation !== Area.Multiplication) return null;
 
         const resolvedRange = config.range!;
         const step = requireMultipleOf10 ? 10 : 1;
@@ -104,6 +107,18 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
                 [num2, num3, answer] = terms as [number, number, number];
                 num1 = num2 + num3 + answer;
             }
+        } else if (operation === Area.Multiplication && useDistributiveLaw) {
+            const first = randomMagnitude(minMagnitude, Math.min(9, Math.floor(maxMagnitude / 2)));
+            if (first === null) return null;
+            const maxCombinedFactor = Math.floor(maxMagnitude / first);
+            const second = randomMagnitude(minMagnitude, maxCombinedFactor - minMagnitude);
+            if (second === null) return null;
+            const third = randomMagnitude(minMagnitude, maxCombinedFactor - second);
+            if (third === null) return null;
+            num1 = first;
+            num2 = second;
+            num3 = third;
+            answer = num1 * (num2 + num3);
         } else if (operation === Area.Multiplication) {
             if (requireZero) {
                 const first = randomValue();
@@ -143,7 +158,16 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
             ? 'commutative' as const
             : useAssociativeLaw
                 ? 'associative' as const
-                : undefined;
+                : useDistributiveLaw
+                    ? 'distributive' as const
+                    : undefined;
+
+        const distributiveData = useDistributiveLaw
+            ? {
+                combinedFactor: num2 + num3,
+                partialProducts: [num1 * num2, num1 * num3] as [number, number]
+            }
+            : {};
 
         return {
             tags: [operation],
@@ -153,7 +177,8 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
                 num3,
                 answer,
                 operation: operationNames[operation],
-                ...(propertyLaw ? {propertyLaw} : {})
+                ...(propertyLaw ? {propertyLaw} : {}),
+                ...distributiveData
             }
         };
     }

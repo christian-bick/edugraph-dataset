@@ -17,7 +17,9 @@ export type ArithmeticTripleProblem = ArithmeticProblemBase & {
     num1: number;
     num2: number;
     num3: number;
-    propertyLaw?: 'commutative' | 'associative';
+    propertyLaw?: 'commutative' | 'associative' | 'distributive';
+    combinedFactor?: number;
+    partialProducts?: [number, number];
     blankPart?: undefined;
 };
 

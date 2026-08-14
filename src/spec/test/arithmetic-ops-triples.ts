@@ -47,8 +47,22 @@ const propertiesBuilder = new DatasetPermutationBuilder()
         [Area.AssociativeLaw]
     ]);
 
+const distributiveBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Addition,
+        Area.Multiplication,
+        Area.DistributiveLaw,
+        Scope.ThreeOperands,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller100,
+        Ability.ProcedureUnderstanding
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-arithmetic-ops-triples', operationsBuilder),
     ...toTargets('test-arithmetic-three-addends', threeAddendsBuilder),
-    ...toTargets('test-arithmetic-properties', propertiesBuilder)
+    ...toTargets('test-arithmetic-properties', propertiesBuilder),
+    ...toTargets('test-arithmetic-distributive-property', distributiveBuilder)
 ];

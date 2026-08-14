@@ -28,20 +28,44 @@ const OperationsPropertiesCore = ({config: _config, payload}: CoreProps) => {
     if (data.operation !== 'addition' && data.operation !== 'multiplication') {
         throw new ViewValidationError('operations-properties', 'Arithmetic properties require addition or multiplication.');
     }
-    if (data.propertyLaw !== 'commutative' && data.propertyLaw !== 'associative') {
+    if (data.propertyLaw !== 'commutative'
+        && data.propertyLaw !== 'associative'
+        && data.propertyLaw !== 'distributive') {
         throw new ViewValidationError('operations-properties', 'Unsupported arithmetic property.');
     }
     validateProblemData('operations-properties', data, ['num3']);
 
-    const values = [data.num1, data.num2, data.answer, ...(data.num3 === undefined ? [] : [data.num3])];
-    if (values.some(value => !Number.isInteger(value) || value < 0 || value > 20)) {
-        throw new ViewValidationError('operations-properties', 'This view supports whole-number values from 0 through 20.');
+    const values = [data.num1, data.num2, data.num3, data.answer];
+    if (values.some(value => !Number.isInteger(value) || value < 0 || value > 100)) {
+        throw new ViewValidationError('operations-properties', 'This view supports whole-number values from 0 through 100.');
     }
+
+    if (data.propertyLaw === 'distributive') {
+        validateProblemData('operations-properties', data, ['combinedFactor', 'partialProducts']);
+        const combinedFactor = data.combinedFactor!;
+        const partialProducts = data.partialProducts!;
+        if (data.operation !== 'multiplication'
+            || combinedFactor !== data.num2 + data.num3
+            || partialProducts.length !== 2
+            || partialProducts[0] !== data.num1 * data.num2
+            || partialProducts[1] !== data.num1 * data.num3
+            || data.answer !== partialProducts[0] + partialProducts[1]) {
+            throw new ViewValidationError('operations-properties', 'The distributive decomposition must be mathematically consistent.');
+        }
+    }
+
+    const distributiveData = data.propertyLaw === 'distributive'
+        ? {combinedFactor: data.combinedFactor!, partialProducts: data.partialProducts!}
+        : undefined;
 
     const missingValue = isSolutionView
         ? (data.propertyLaw === 'commutative' ? data.num1 : data.num3)
         : undefined;
-    const title = data.propertyLaw === 'commutative' ? 'Commutative property' : 'Associative property';
+    const title = data.propertyLaw === 'commutative'
+        ? 'Commutative property'
+        : data.propertyLaw === 'associative'
+            ? 'Associative property'
+            : 'Distributive property';
     const symbol = data.operation === 'addition' ? '+' : '×';
 
     return (
@@ -53,7 +77,25 @@ const OperationsPropertiesCore = ({config: _config, payload}: CoreProps) => {
                 <div className="mb-6 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold font-sans">
                     {title}
                 </div>
-                {data.propertyLaw === 'commutative' ? (
+                {data.propertyLaw === 'distributive' ? (
+                    <div className="flex flex-col items-center gap-5 font-mono text-[1.65rem] font-bold text-slate-700">
+                        <div className="flex items-center gap-2">
+                            <span>{data.num1} × ({data.num2} + {data.num3})</span>
+                            <span>=</span>
+                            <span>{data.num1} × {distributiveData!.combinedFactor}</span>
+                            <span>=</span>
+                            <ValueBox value={isSolutionView ? data.answer : undefined} highlighted={isSolutionView} />
+                        </div>
+                        <div className="text-sm font-bold uppercase tracking-wider text-indigo-600">Distribute the factor</div>
+                        <div className="flex items-center gap-2">
+                            <span>({data.num1} × {data.num2}) + ({data.num1} × {data.num3})</span>
+                            <span>=</span>
+                            <span>{distributiveData!.partialProducts[0]} + {distributiveData!.partialProducts[1]}</span>
+                            <span>=</span>
+                            <ValueBox value={isSolutionView ? data.answer : undefined} highlighted={isSolutionView} />
+                        </div>
+                    </div>
+                ) : data.propertyLaw === 'commutative' ? (
                     <div className="flex items-center gap-3 text-[2rem] font-bold text-slate-700">
                         <ValueBox value={data.num1} />
                         <span>{symbol}</span>
