@@ -757,12 +757,24 @@ const integerDivisionInterpretationsOntology = defineOntologyPackage({
     }]
 });
 
-const unitSquareAreaMeasurementOntology = defineOntologyPackage({
-    id: 'unit-square-area-measurement',
-    description: 'Represent area measurement through exhaustive, non-overlapping iteration of unit squares.',
+const unitSquareAreaAbstractionOntology = defineOntologyPackage({
+    id: 'unit-square-area-abstraction',
+    description: 'Represent area units through exhaustive, non-overlapping iteration of unit squares and metric or imperial square-unit scales.',
     changes: [
         { dimension: 'Area', entities: ['UnitIteration'] },
-        { dimension: 'Scope', entities: ['AreaMeasurement', 'UnitSquares'] }
+        {
+            dimension: 'Scope',
+            entities: [
+                'AreaAbstraction',
+                'UnitSquares',
+                'MetricAreaScale',
+                'SquareCentimeterScale',
+                'SquareMeterScale',
+                'ImperialAreaScale',
+                'SquareInchScale',
+                'SquareFootScale'
+            ]
+        }
     ]
 });
 
@@ -835,13 +847,13 @@ export const ontologyTodos: OntologyTodo[] = [
     toOntologyTodo(
         '3.MD.C.5a',
         'Understand a unit square as one square unit',
-        unitSquareAreaMeasurementOntology,
+        unitSquareAreaAbstractionOntology,
         'Combine unit iteration with observable unit squares as countable area units.'
     ),
     toOntologyTodo(
         '3.MD.C.5b',
         'Cover a figure without gaps or overlaps by unit squares',
-        unitSquareAreaMeasurementOntology,
+        unitSquareAreaAbstractionOntology,
         'Use the same area-unit package to express exhaustive, non-overlapping square coverage.'
     )
 ];
