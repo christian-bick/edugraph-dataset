@@ -1,0 +1,2 @@
+- **Identity:** The original operation, both nearest-ten roundings, estimated result, and proposed answer are visible so the reasonableness judgment follows from the displayed estimate.
+- **Modes:** Question Mode keeps the exact result and verdict unresolved; Solution Mode reveals the exact result, identifies the correct verdict, and states whether the proposal is close to or far from the estimate.

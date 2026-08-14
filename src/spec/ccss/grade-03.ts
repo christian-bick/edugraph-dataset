@@ -587,13 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const answerReasonablenessImplementation = defineImplementationPackage({
-    id: 'answer-reasonableness',
-    description: 'Compare exact and rounded or estimated values to judge whether an answer is reasonable.',
-    generators: [{ module: 'arithmetic-estimation', strategy: 'new' }],
-    views: [{ module: 'operations-answer-reasonableness', strategy: 'new' }]
-});
-
 const arithmeticTablePatternsImplementation = defineImplementationPackage({
     id: 'arithmetic-table-patterns',
     description: 'Identify and explain systematic addition and multiplication table patterns.',
@@ -791,6 +784,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.OA.B.5-multiplication-properties', multiplicationPropertiesBuilder),
     ...toTargets('3.OA.B.5-distributive-property', multiplicationDistributiveBuilder),
     ...toTargets('3.OA.D.8-two-step-word-problems', fourOperationTwoStepBuilder),
+    ...toTargets('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -798,7 +792,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder, answerReasonablenessImplementation, 'Show exact and estimated values and elicit a reasonableness judgment.'),
     ...toImplementationTodos('3.OA.D.9-identify-patterns', identifyArithmeticPatternsBuilder, arithmeticTablePatternsImplementation, 'Expose a systematic operation-table pattern for identification.'),
     ...toImplementationTodos('3.OA.D.9-explain-patterns', explainArithmeticPatternsBuilder, arithmeticTablePatternsImplementation, 'Connect a visible pattern to a written operation-property explanation.'),
     ...toImplementationTodos('3.NBT.A.1-round-nearest-10-100', integerRoundingBuilder, integerRoundingImplementation, 'Show neighboring multiples, midpoint logic, and the selected rounded value.'),

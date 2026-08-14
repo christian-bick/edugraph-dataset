@@ -63,6 +63,21 @@ export type EquationJudgmentProblem = {
     isTrue: boolean;
 };
 
+export type ArithmeticEstimationProblem = {
+    num1: number;
+    num2: number;
+    operation: ArithmeticOperation;
+    roundedNum1: number;
+    roundedNum2: number;
+    roundingPlace: 10;
+    exactAnswer: number;
+    estimatedAnswer: number;
+    proposedAnswer: number;
+    estimateDifference: number;
+    tolerance: number;
+    isReasonable: boolean;
+};
+
 export type EqualGroupsOperation =
     | 'addition'
     | 'multiplication'
@@ -501,6 +516,7 @@ export interface ViewTypeMap {
     'operations-properties': ArithmeticTripleProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
+    'operations-answer-reasonableness': ArithmeticEstimationProblem;
     'operations-number-array': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
     'operations-number-line': NumberLineProblem;
