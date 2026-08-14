@@ -61,12 +61,27 @@ export type EquationJudgmentProblem = {
     isTrue: boolean;
 };
 
-export type NumberArrayProblem = {
+export type EqualGroupsOperation =
+    | 'addition'
+    | 'multiplication'
+    | 'partitive-division'
+    | 'quotative-division';
+
+export type EqualGroupsProblem = {
+    operation: EqualGroupsOperation;
+    groupCount: number;
+    groupSize: number;
+    total: number;
+    answer: number;
+};
+
+export type NumberArrayProblem = EqualGroupsProblem & {
     rows: number;
     columns: number;
-    total: number;
     addends: number[];
 };
+
+export type EqualGroupsCollectionProblem = EqualGroupsProblem;
 
 export type PlaceValueTeenProblem = {
     ones: number;
@@ -485,6 +500,7 @@ export interface ViewTypeMap {
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
     'operations-number-array': NumberArrayProblem;
+    'operations-equal-groups': EqualGroupsCollectionProblem;
     'operations-number-line': NumberLineProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;

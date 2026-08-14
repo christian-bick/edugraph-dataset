@@ -1,0 +1,3 @@
+- **Identity:** Visibly separated groups contain equal object counts and agree with the stated multiplication, partitive-division, or quotative-division task.
+- **Question mode:** The complete grouped collection remains visible while the requested total, objects per group, or number of groups is withheld.
+- **Solution mode:** The grouped collection remains visible and both the equation and sentence explicitly identify the requested equal-group role.

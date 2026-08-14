@@ -11,18 +11,34 @@ export class NumberArrayGenerator implements ProblemGenerator<NumberArrayProblem
     schema = NumberArrayGeneratorSchema;
 
     generate(config: NumberArrayGeneratorConfig): ProblemStub<NumberArrayProblem> {
-        validateConfigFields('number-array', config, ['requireIteratedOperation']);
+        validateConfigFields('number-array', config, [
+            'operation',
+            'requireTwoOperands',
+            'requireIteratedOperation'
+        ]);
 
+        const operation = config.operation!;
         const minimumRows = config.requireIteratedOperation ? 3 : 2;
-        const rows = randomInteger(minimumRows, 5);
+        const rows = operation === 'addition' && config.requireTwoOperands
+            ? 2
+            : randomInteger(minimumRows, 5);
         const columns = randomInteger(2, 5);
         const total = rows * columns;
+        const answer = operation === 'partitive-division'
+            ? columns
+            : operation === 'quotative-division'
+                ? rows
+                : total;
 
         return {
             data: {
+                operation,
+                groupCount: rows,
+                groupSize: columns,
                 rows,
                 columns,
                 total,
+                answer,
                 addends: Array.from({length: rows}, () => columns)
             }
         };

@@ -92,7 +92,7 @@ const multiplicationEqualGroupsBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.PhysicalNumbers],
-        [Scope.NumberArray, Scope.BoxArrangement]
+        [Scope.NumberArray]
     ]);
 
 // --- 3.OA.A.2: Interpret quotients through collection division ---
@@ -110,7 +110,7 @@ const partitiveDivisionBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.PhysicalNumbers],
-        [Scope.NumberArray, Scope.BoxArrangement]
+        [Scope.NumberArray]
     ]);
 
 const quotativeDivisionBuilder = new DatasetPermutationBuilder()
@@ -127,7 +127,7 @@ const quotativeDivisionBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.PhysicalNumbers],
-        [Scope.NumberArray, Scope.BoxArrangement]
+        [Scope.NumberArray]
     ]);
 
 // --- 3.OA.B.5: Use the distributive property for multiplication ---
@@ -586,19 +586,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const equalGroupsInterpretationImplementation = defineImplementationPackage({
-    id: 'equal-groups-operation-interpretations',
-    description: 'Elicit multiplication factor roles and partitive or quotative division through arrays and visibly separated equal groups.',
-    generators: [
-        { module: 'number-array', strategy: 'expand' },
-        { module: 'equal-groups-collection', strategy: 'new' }
-    ],
-    views: [
-        { module: 'operations-number-array', strategy: 'expand' },
-        { module: 'operations-equal-groups', strategy: 'new' }
-    ]
-});
-
 const fourOperationTwoStepImplementation = defineImplementationPackage({
     id: 'four-operation-two-step-word-problems',
     description: 'Extend connected two-step stories across all four arithmetic operations.',
@@ -809,6 +796,9 @@ const fractionComparisonImplementation = defineImplementationPackage({
 // ==========================================
 
 export const spec: CompetencyTarget[] = [
+    ...toTargets('3.OA.A.1-equal-groups-interpretation', multiplicationEqualGroupsBuilder),
+    ...toTargets('3.OA.A.2-partitive-division', partitiveDivisionBuilder),
+    ...toTargets('3.OA.A.2-quotative-division', quotativeDivisionBuilder),
     ...toTargets('3.OA.A.3-multiplication-division-word-problems', multiplicationDivisionWordProblemsBuilder),
     ...toTargets('3.OA.A.4-unknown-multiplication-division', unknownMultiplicationDivisionBuilder),
     ...toTargets('3.OA.B.5-multiplication-properties', multiplicationPropertiesBuilder),
@@ -819,9 +809,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.OA.A.1-equal-groups-interpretation', multiplicationEqualGroupsBuilder, equalGroupsInterpretationImplementation, 'Map both multiplication factors to visible equal-group roles.'),
-    ...toImplementationTodos('3.OA.A.2-partitive-division', partitiveDivisionBuilder, equalGroupsInterpretationImplementation, 'Show a fixed number of exhaustive equal subcollections and derive the shared objects-per-group quotient.'),
-    ...toImplementationTodos('3.OA.A.2-quotative-division', quotativeDivisionBuilder, equalGroupsInterpretationImplementation, 'Show exhaustive subcollections of a fixed size and derive the number-of-groups quotient.'),
     ...toImplementationTodos('3.OA.B.5-distributive-property', multiplicationDistributiveBuilder, multiplicationDistributiveImplementation, 'Show the original product, decomposition, partial products, and equal sum.'),
     ...toImplementationTodos('3.OA.D.8-two-step-word-problems', fourOperationTwoStepBuilder, fourOperationTwoStepImplementation, 'Render one connected two-step story, intermediate equation, unknown, and answer.'),
     ...toImplementationTodos('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder, answerReasonablenessImplementation, 'Show exact and estimated values and elicit a reasonableness judgment.'),
