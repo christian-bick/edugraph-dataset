@@ -11,48 +11,44 @@ import { localAssetRequestKey } from './src/lib/local-assets.ts';
 const VIEW_HEAD_PATH = resolve(import.meta.dirname, 'src/partials/head.html');
 const VIEW_HEAD_INVOCATION = /\{\{>\s*head\s+script=(['"])([^'"]+)\1\s*\}\}/g;
 const COVERAGE_SITE = 'https://coverage.edugraph.io';
-const COVERAGE_FILES = [
-    'ccss-tree.json',
-    'ccss-coverage.json',
-    'coverage-manifest.json',
-];
+const LOCAL_COVERAGE_ROUTES = new Map([
+    ['/coverage/preview/ccss-tree.json', 'tree'],
+    ['/coverage/preview/ccss-coverage.json', 'coverage'],
+    ['/coverage/preview/coverage-manifest.json', 'manifest'],
+]);
 const LOCAL_DATASET_ROUTE = '/dataset/local/';
 const LOCAL_ASSET_INDEX_ROUTE = '/dataset/local-asset-index.json';
-const LOCAL_ASSET_INDEX_WORKER = resolve(
-    import.meta.dirname,
-    'node_modules',
-    'vite-node',
-    'dist',
-    'cli.mjs',
-);
+const VITE_NODE_WORKER = resolve(import.meta.dirname, 'node_modules', 'vite-node', 'dist', 'cli.mjs');
 const LOCAL_ASSET_INDEX_SCRIPT = resolve(
     import.meta.dirname,
     'src',
     'scripts',
     'build-local-asset-index.ts',
 );
+const LOCAL_COVERAGE_SCRIPT = resolve(import.meta.dirname, 'src', 'scripts', 'build-local-coverage.ts');
 const LOCAL_ASSET_WATCH_ROOTS = [
     resolve(import.meta.dirname, 'out'),
     resolve(import.meta.dirname, 'src', 'spec'),
 ];
-
-function hasLocalCoverageSnapshot(requestUrl) {
-    const pathname = new URL(requestUrl || '/', 'http://localhost').pathname;
-    const match = pathname.match(/^\/coverage\/(latest|preview)\//);
-    if (!match) return false;
-
-    const snapshotDir = resolve(import.meta.dirname, 'public', 'coverage', match[1]);
-    return COVERAGE_FILES.every(file => existsSync(resolve(snapshotDir, file)));
-}
+const LOCAL_COVERAGE_WATCH_ROOTS = [
+    resolve(import.meta.dirname, 'package.json'),
+    resolve(import.meta.dirname, 'src', 'spec'),
+    resolve(import.meta.dirname, 'src', 'generators'),
+    resolve(import.meta.dirname, 'src', 'visuals', 'views'),
+    resolve(import.meta.dirname, 'out'),
+    resolve(import.meta.dirname, 'src', 'scripts', 'build-local-coverage.ts'),
+    resolve(import.meta.dirname, 'src', 'lib', 'asset-index.ts'),
+    resolve(import.meta.dirname, 'src', 'lib', 'asset-index-builder.ts'),
+    resolve(import.meta.dirname, 'src', 'lib', 'generation.ts'),
+    resolve(import.meta.dirname, 'src', 'lib', 'standards-coverage.ts'),
+    resolve(import.meta.dirname, 'public', 'coverage', 'ccss-tree.json'),
+];
 
 function coverageProxy() {
     return {
         target: COVERAGE_SITE,
         changeOrigin: true,
         secure: true,
-        bypass(request) {
-            return hasLocalCoverageSnapshot(request.url) ? request.url : undefined;
-        },
     };
 }
 
@@ -60,6 +56,81 @@ const isLocalRequest = request => {
     const hostname = (request.headers.host || '').split(':')[0];
     return hostname === 'localhost' || hostname === '127.0.0.1';
 };
+
+function localCoveragePlugin() {
+    let bundlePromise;
+    const invalidate = () => {
+        bundlePromise = undefined;
+    };
+    const getBundle = () => {
+        bundlePromise ??= new Promise((accept, reject) => {
+            execFile(
+                process.execPath,
+                [VITE_NODE_WORKER, LOCAL_COVERAGE_SCRIPT],
+                {cwd: import.meta.dirname, maxBuffer: 50 * 1024 * 1024},
+                (error, stdout, stderr) => {
+                    if (error) {
+                        reject(new Error(stderr.trim() || error.message));
+                        return;
+                    }
+                    try {
+                        accept(JSON.parse(stdout));
+                    } catch (parseError) {
+                        reject(parseError);
+                    }
+                },
+            );
+        }).catch(error => {
+            invalidate();
+            throw error;
+        });
+        return bundlePromise;
+    };
+
+    const serve = async (request, response, next) => {
+        const pathname = (request.url || '/').split(/[?#]/, 1)[0];
+        const bundleKey = LOCAL_COVERAGE_ROUTES.get(pathname);
+        if (!bundleKey) return next();
+        if (!isLocalRequest(request)) {
+            response.statusCode = 404;
+            return response.end();
+        }
+        if (request.method !== 'GET' && request.method !== 'HEAD') {
+            response.statusCode = 405;
+            response.setHeader('Allow', 'GET, HEAD');
+            return response.end();
+        }
+        try {
+            const bundle = await getBundle();
+            const payload = JSON.stringify(bundle[bundleKey]);
+            response.statusCode = 200;
+            response.setHeader('Content-Type', 'application/json; charset=utf-8');
+            response.setHeader('Cache-Control', 'no-store');
+            if (request.method === 'HEAD') return response.end();
+            return response.end(payload);
+        } catch (error) {
+            response.statusCode = 500;
+            response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            return response.end(error instanceof Error ? error.message : 'Failed to build live coverage data.');
+        }
+    };
+
+    return {
+        name: 'edugraph-local-coverage',
+        configureServer(server) {
+            server.watcher.add(LOCAL_COVERAGE_WATCH_ROOTS);
+            server.watcher.on('all', (_event, changedPath) => {
+                const normalizedPath = resolve(changedPath);
+                if (LOCAL_COVERAGE_WATCH_ROOTS.some(root =>
+                    normalizedPath === root || normalizedPath.startsWith(`${root}${sep}`))) invalidate();
+            });
+            server.middlewares.use(serve);
+        },
+        configurePreviewServer(server) {
+            server.middlewares.use(serve);
+        },
+    };
+}
 
 function localDatasetPlugin() {
     let bundlePromise;
@@ -70,7 +141,7 @@ function localDatasetPlugin() {
         bundlePromise ??= new Promise((accept, reject) => {
             execFile(
                 process.execPath,
-                [LOCAL_ASSET_INDEX_WORKER, LOCAL_ASSET_INDEX_SCRIPT],
+                [VITE_NODE_WORKER, LOCAL_ASSET_INDEX_SCRIPT],
                 { cwd: import.meta.dirname, maxBuffer: 50 * 1024 * 1024 },
                 (error, stdout, stderr) => {
                     if (error) {
@@ -227,6 +298,7 @@ export default defineConfig({
         react(),
         tailwindcss(),
         viewHeadPlugin(),
+        localCoveragePlugin(),
         localDatasetPlugin(),
     ],
     test: {

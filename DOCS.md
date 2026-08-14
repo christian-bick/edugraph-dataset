@@ -72,15 +72,19 @@ The consequence: a code change only invalidates the samples whose identity input
 ### Standards Explorer
 `src/standards-explorer.html` is a dedicated Vite entry for the Common Core coverage
 explorer. The React application lives under `src/standards-explorer/`, uses Zustand for
-its navigation and selection state, and reads the deployed-main snapshot from
-`public/coverage/preview/` at runtime. The internal `preview` channel denotes coverage for
-the exact deployed `main` revision; it is not a user-selectable preview mode. The snapshot contains
+its navigation and selection state, and reads the `preview` coverage routes at runtime.
+In a production build, those routes contain the deployed-main snapshot under
+`public/coverage/preview/`. The internal `preview` channel denotes coverage for the exact
+deployed `main` revision; it is not a user-selectable preview mode. The snapshot contains
 `ccss-tree.json`, `ccss-coverage.json`, and `coverage-manifest.json`; the manifest records
 the schema version, channel, source ref and SHA, generation time, and ontology version.
-Run `npm run generate:standards-explorer`, then `npm run dev`, and open
-`/standards-explorer.html` for local working-tree development. During development, Vite
-serves a complete local snapshot when present and otherwise proxies the deployed main
-snapshot. This avoids committing generated snapshot copies.
+Run `npm run dev` and open `/standards-explorer.html` for local working-tree development.
+Vite intercepts the three preview routes and builds their responses in memory from the
+tracked standards tree and current specs. The first request reuses current per-standard
+dataset metadata to resolve already-generated label sets and evaluates only missing sets;
+the result is cached until specs, generators, views, the ontology dependency, generated
+datasets, or the shared coverage helper change. It neither reads nor writes a generated
+local coverage snapshot.
 
 Released sample thumbnails are intentionally separate from those coverage views. The
 explorer always loads `/dataset/asset-index.json` as its publication baseline; the development server
@@ -138,9 +142,19 @@ Playwright image, so changing the host runtime does not change the renderer iden
 * **Execution**: `npm run generate:standards-explorer -- [--output-dir=<path>] [--channel=latest|preview] [--source-ref=<ref>] [--source-sha=<sha>]` (alias: `npm run map:standards`)
 * **Function**: Regenerates the standards tree, dataset coverage metadata, and authored-package
   task backlog consumed by the standards explorer, plus the snapshot manifest. Implementation
-  and ontology tasks are grouped by stable package id. The
-  default output is `public/coverage/preview/` for local development; release and
-  deployment workflows pass explicit output directories and source identity.
+  and ontology tasks are grouped by stable package id. It shares the coverage builder with
+  the local Vite worker so snapshot and live semantics cannot drift. The default output is
+  `public/coverage/preview/` for an explicit manual snapshot; release and deployment
+  workflows pass explicit output directories and source identity. Normal local preview
+  does not run this command.
+
+### `src/scripts/build-local-coverage.ts`
+* **Execution**: Invoked internally by the Vite development middleware.
+* **Function**: Builds the three preview responses from the tracked standards tree and
+  current working-tree specs without writing artifacts. Existing local asset metadata is
+  used as a fast implementation lookup before the shared builder evaluates an unmatched
+  generator/view path. Vite caches the complete response bundle and invalidates it on
+  relevant source or dataset changes.
 
 ### `src/scripts/generate-asset-index.ts`
 * **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> --output=<path> [--repository=<owner/dataset>]`

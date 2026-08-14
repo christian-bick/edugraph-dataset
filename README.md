@@ -142,9 +142,11 @@ npm run dev
 
 The same server exposes the React-based Common Core coverage and task explorer at
 [`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). The explorer
-always shows coverage for the deployed `main` revision. Regenerate the working snapshot
-with `npm run generate:standards-explorer`; the dev server automatically prefers that
-complete local snapshot over the deployed fallback.
+shows the current working-tree specs during local development. Vite builds that coverage
+in memory on the first request, reuses existing generated dataset metadata when resolving
+implemented permutations, and invalidates it when specs, generators, views, ontology
+version, or generated datasets change. No coverage snapshot needs to be regenerated or
+written to disk for local preview.
 
 The details sidebar also shows every released question and solution image for each
 implemented label combination. Those independent samples are indexed from the merged

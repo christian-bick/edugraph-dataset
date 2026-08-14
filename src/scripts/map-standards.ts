@@ -1,638 +1,224 @@
 import 'dotenv/config';
-import fs from 'fs';
-import path from 'path';
-import https from 'https';
-import { IncomingMessage } from 'http';
-import { fileURLToPath } from 'url';
-import { Area, Scope, Ability } from 'edugraph-ts';
+import fs from 'node:fs';
+import https from 'node:https';
+import path from 'node:path';
+import type {IncomingMessage} from 'node:http';
+import {fileURLToPath} from 'node:url';
 import {
-    loadTargets,
-    loadSpecTodos,
-    loadGeneratorCatalog,
-    loadViewCatalog,
-    matchTargets,
-    computeSampleKey,
-    generateSampleWithRetry,
-    GeneratorCatalogEntry,
-    ViewCatalogEntry
-} from '../lib/generation.ts';
-import { CompetencyTarget } from '../types/ml-engine.ts';
-import { groupOntologyTodos } from '../lib/ontology-todo.ts';
+    buildCoverageManifest,
+    buildCurrentStandardsCoverage,
+    parseStandardsTree,
+    resolveOntologyVersion
+} from '../lib/standards-coverage.ts';
+import type {
+    Cluster,
+    DataView,
+    Domain,
+    DomainGroup,
+    GradesTree,
+    StandardNode,
+    StandardsTreeData,
+    TreeStandard
+} from '../standards-explorer/types.ts';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
-const TEMP_DIR = path.resolve(PROJECT_ROOT, 'temp', 'common-core');
-const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
-const DOMAINS_PATH = path.join(TEMP_DIR, 'domain_groups.json');
-
-const cliArgs = process.argv.slice(2);
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const tempDir = path.resolve(projectRoot, 'temp', 'common-core');
+const standardsPath = path.join(tempDir, 'standards.jsonl');
+const domainsPath = path.join(tempDir, 'domain_groups.json');
+const args = process.argv.slice(2);
 const readOption = (name: string): string | undefined =>
-  cliArgs.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
-const outputDir = path.resolve(PROJECT_ROOT, readOption('output-dir') || path.join('public', 'coverage', 'preview'));
-const OUTPUT_PATH = path.join(outputDir, 'ccss-coverage.json');
-const TREE_OUT_PATH = path.join(outputDir, 'ccss-tree.json');
-const MANIFEST_OUT_PATH = path.join(outputDir, 'coverage-manifest.json');
-const channel = readOption('channel') || 'preview';
+    args.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+const outputDir = path.resolve(projectRoot, readOption('output-dir') || path.join('public', 'coverage', 'preview'));
+const channel = (readOption('channel') || 'preview') as DataView;
 const sourceRef = readOption('source-ref') || process.env.GITHUB_REF_NAME || 'working-tree';
 const sourceSha = readOption('source-sha') || process.env.GITHUB_SHA || 'working-tree';
 
 if (channel !== 'latest' && channel !== 'preview') {
-  throw new Error(`Invalid --channel=${channel}. Expected "latest" or "preview".`);
+    throw new Error(`Invalid --channel=${channel}. Expected "latest" or "preview".`);
 }
 
-const STANDARDS_URL = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/standards.jsonl';
-const DOMAINS_URL = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/domain_groups.json';
+const standardsUrl = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/standards.jsonl';
+const domainsUrl = 'https://huggingface.co/datasets/allenai/achieve-the-core/raw/main/domain_groups.json';
 
-// 1. Read package.json to sync ontology version
-const pkgPath = path.resolve(PROJECT_ROOT, 'package.json');
-const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-const edugraphTsUrl = pkg.dependencies['edugraph-ts'] || '';
-const versionMatch = edugraphTsUrl.match(/\/releases\/download\/(v[\d.]+)\//);
-const version = versionMatch ? versionMatch[1] : 'v0.6.0';
-
-function downloadFile(url: string, dest: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    console.log(`Downloading ${url} to ${dest}...`);
-    const file = fs.createWriteStream(dest);
-    https.get(url, (response: IncomingMessage) => {
-      if (response.statusCode !== 200) {
-        file.close();
-        fs.unlink(dest, () => {});
-        reject(new Error(`Failed to download file: status code ${response.statusCode}`));
-        return;
-      }
-      response.pipe(file);
-      file.on('finish', () => {
-        file.close();
-        resolve();
-      });
-    }).on('error', (err) => {
-      file.close();
-      fs.unlink(dest, () => {});
-      reject(err);
+function downloadFile(url: string, destination: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        console.log(`Downloading ${url} to ${destination}...`);
+        const file = fs.createWriteStream(destination);
+        https.get(url, (response: IncomingMessage) => {
+            if (response.statusCode !== 200) {
+                file.close();
+                fs.unlink(destination, () => undefined);
+                reject(new Error(`Failed to download file: status code ${response.statusCode}`));
+                return;
+            }
+            response.pipe(file);
+            file.on('finish', () => {
+                file.close();
+                resolve();
+            });
+        }).on('error', error => {
+            file.close();
+            fs.unlink(destination, () => undefined);
+            reject(error);
+        });
     });
-  });
 }
 
-function getDomainCat(id: string): string {
-  const parts = id.split('.');
-  const first = parts[0];
-  if (first.startsWith('HS')) return first.charAt(2) || '';
-  if (/^[NAFGS]-/.test(first)) return first.charAt(0);
-  return parts[1] || '';
+const getDomainCategory = (id: string): string => {
+    const parts = id.split('.');
+    const first = parts[0];
+    if (first.startsWith('HS')) return first.charAt(2) || '';
+    if (/^[NAFGS]-/.test(first)) return first.charAt(0);
+    return parts[1] || '';
+};
+
+const findDomainGroup = (
+    domainCategory: string,
+    domainGroups: Record<string, {description: string; domain_cats?: string[]}>
+): string => {
+    if (!domainCategory) return 'Other';
+    const exact = Object.entries(domainGroups).find(([, group]) =>
+        group.domain_cats?.includes(domainCategory));
+    if (exact) return exact[0];
+    return Object.entries(domainGroups).find(([, group]) =>
+        group.domain_cats?.some(category =>
+            domainCategory.startsWith(category) || category.startsWith(domainCategory)))?.[0] ?? 'Other';
+};
+
+const gradeFor = (id: string): string => {
+    const first = id.split('.')[0];
+    if (first.startsWith('HS') || /^[NAFGS]-/.test(first)) return 'High School';
+    if (first === 'K') return 'Kindergarten';
+    if (/^[1-8]$/.test(first)) return `Grade ${first}`;
+    return 'Other';
+};
+
+function buildStandardsTree(
+    standards: StandardNode[],
+    domainGroups: Record<string, {description: string; domain_cats?: string[]}>
+): StandardsTreeData {
+    const standardsMap = Object.fromEntries(standards.map(standard => [standard.id, standard]));
+    const tree: GradesTree = {};
+    const gradeOrder = [
+        'Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4',
+        'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'High School'
+    ];
+    for (const grade of gradeOrder) {
+        tree[grade] = Object.fromEntries(Object.entries(domainGroups).map(([name, group]) => [
+            name,
+            {description: group.description, domains: {}} satisfies DomainGroup
+        ]));
+        tree[grade].Other = {description: 'Other concepts and miscellaneous standards.', domains: {}};
+    }
+
+    const clusters = standards.filter(standard => standard.level.toLowerCase() === 'cluster');
+    const domainMap = new Map<string, Domain & {grade: string; group: string}>();
+    for (const cluster of clusters) {
+        if (!cluster.parent || domainMap.has(cluster.parent)) continue;
+        const group = findDomainGroup(getDomainCategory(cluster.id), domainGroups);
+        domainMap.set(cluster.parent, {
+            id: cluster.parent,
+            name: `${cluster.parent} - ${group}`,
+            grade: gradeFor(cluster.id),
+            group,
+            clusters: []
+        });
+    }
+
+    const clusterMap = new Map<string, Cluster>();
+    for (const standard of clusters) {
+        const cluster: Cluster = {
+            id: standard.id,
+            description: standard.description,
+            cluster_type: standard.cluster_type || 'major cluster',
+            standards: []
+        };
+        clusterMap.set(standard.id, cluster);
+        if (standard.parent) domainMap.get(standard.parent)?.clusters.push(cluster);
+    }
+
+    const standardUiMap = new Map<string, TreeStandard>();
+    for (const standard of standards.filter(item => item.level.toLowerCase() === 'standard')) {
+        const treeStandard: TreeStandard = {
+            id: standard.id,
+            description: standard.description,
+            aspects: standard.aspects,
+            modeling: standard.modeling,
+            subStandards: []
+        };
+        standardUiMap.set(standard.id, treeStandard);
+        if (standard.parent) clusterMap.get(standard.parent)?.standards.push(treeStandard);
+    }
+
+    for (const standard of standards.filter(item => item.level.toLowerCase() === 'sub-standard')) {
+        if (!standard.parent) continue;
+        standardUiMap.get(standard.parent)?.subStandards.push({
+            id: standard.id,
+            description: standard.description,
+            aspects: standard.aspects,
+            modeling: standard.modeling
+        });
+    }
+
+    for (const domain of domainMap.values()) {
+        const group = tree[domain.grade]?.[domain.group];
+        if (group) group.domains[domain.id] = {
+            id: domain.id,
+            name: domain.name,
+            clusters: domain.clusters
+        };
+    }
+    for (const grade of Object.values(tree)) {
+        for (const [name, group] of Object.entries(grade)) {
+            if (Object.keys(group.domains).length === 0) delete grade[name];
+        }
+    }
+    return {tree, standardsMap};
 }
 
-function findDomainGroupName(domainCat: string, domainGroups: any): string {
-  if (!domainCat) return 'Other';
-  for (const [groupName, groupData] of Object.entries(domainGroups)) {
-    const cats = (groupData as any).domain_cats || [];
-    if (cats.includes(domainCat)) return groupName;
-  }
-  for (const [groupName, groupData] of Object.entries(domainGroups)) {
-    const cats = (groupData as any).domain_cats || [];
-    for (const cat of cats) {
-      if (domainCat.startsWith(cat) || cat.startsWith(domainCat)) return groupName;
-    }
-  }
-  return 'Other';
-}
-
-function getGrade(id: string): string {
-  const first = id.split('.')[0];
-  if (first.startsWith('HS') || /^[NAFGS]-/.test(first)) return 'High School';
-  if (first === 'K') return 'Kindergarten';
-  if (/^[1-8]$/.test(first)) return `Grade ${first}`;
-  return 'Other';
-}
-
-async function ensureStandardsAndTreeData() {
-  if (!fs.existsSync(TEMP_DIR)) {
-    fs.mkdirSync(TEMP_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(STANDARDS_PATH)) {
-    await downloadFile(STANDARDS_URL, STANDARDS_PATH);
-  }
-  if (!fs.existsSync(DOMAINS_PATH)) {
-    await downloadFile(DOMAINS_URL, DOMAINS_PATH);
-  }
-
-  // Generate ccss-tree.json
-  const domainGroups = JSON.parse(fs.readFileSync(DOMAINS_PATH, 'utf-8'));
-  const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
-  const standards: any[] = [];
-  const standardMap: Record<string, any> = {};
-
-  for (const line of standardsLines) {
-    if (line.trim()) {
-      const std = JSON.parse(line);
-      standards.push(std);
-      standardMap[std.id] = std;
-    }
-  }
-
-  const tree: any = {};
-  const gradeOrder = [
-    'Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4',
-    'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'High School'
-  ];
-
-  for (const grade of gradeOrder) {
-    tree[grade] = {};
-    for (const groupName of Object.keys(domainGroups)) {
-      tree[grade][groupName] = {
-        description: domainGroups[groupName].description,
-        domains: {}
-      };
-    }
-    tree[grade]['Other'] = {
-      description: 'Other concepts and miscellaneous standards.',
-      domains: {}
-    };
-  }
-
-  const clusters = standards.filter(s => s.level.toLowerCase() === 'cluster');
-  const standardsList = standards.filter(s => s.level.toLowerCase() === 'standard');
-  const subStandards = standards.filter(s => s.level.toLowerCase() === 'sub-standard');
-
-  const domains: Record<string, any> = {};
-  for (const cluster of clusters) {
-    const parentDomainId = cluster.parent;
-    if (!parentDomainId) continue;
-    const grade = getGrade(cluster.id);
-    const domainCat = getDomainCat(cluster.id);
-    const groupName = findDomainGroupName(domainCat, domainGroups);
-
-    if (!domains[parentDomainId]) {
-      domains[parentDomainId] = {
-        id: parentDomainId,
-        name: `${parentDomainId} - ${groupName}`,
-        grade,
-        group: groupName,
-        clusters: []
-      };
-    }
-  }
-
-  const clusterMap: Record<string, any> = {};
-  for (const cluster of clusters) {
-    clusterMap[cluster.id] = {
-      id: cluster.id,
-      description: cluster.description,
-      cluster_type: cluster.cluster_type || 'major cluster',
-      standards: []
-    };
-    const domainId = cluster.parent;
-    if (domainId && domains[domainId]) {
-      domains[domainId].clusters.push(clusterMap[cluster.id]);
-    }
-  }
-
-  const standardUiMap: Record<string, any> = {};
-  for (const std of standardsList) {
-    standardUiMap[std.id] = {
-      id: std.id,
-      description: std.description,
-      aspects: std.aspects,
-      modeling: std.modeling,
-      subStandards: []
-    };
-    const clusterId = std.parent;
-    if (clusterId && clusterMap[clusterId]) {
-      clusterMap[clusterId].standards.push(standardUiMap[std.id]);
-    }
-  }
-
-  for (const sub of subStandards) {
-    const parentStdId = sub.parent;
-    if (parentStdId && standardUiMap[parentStdId]) {
-      standardUiMap[parentStdId].subStandards.push({
-        id: sub.id,
-        description: sub.description,
-        aspects: sub.aspects,
-        modeling: sub.modeling
-      });
-    }
-  }
-
-  for (const domain of Object.values(domains)) {
-    const { grade, group, id } = domain;
-    if (tree[grade] && tree[grade][group]) {
-      tree[grade][group].domains[id] = {
-        id,
-        name: domain.name,
-        clusters: domain.clusters
-      };
-    }
-  }
-
-  for (const grade of Object.keys(tree)) {
-    for (const groupName of Object.keys(tree[grade])) {
-      if (Object.keys(tree[grade][groupName].domains).length === 0) {
-        delete tree[grade][groupName];
-      }
-    }
-  }
-
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-
-  fs.writeFileSync(TREE_OUT_PATH, JSON.stringify({ tree, standardsMap: standardMap }, null, 2), 'utf-8');
-  console.log(`[Tree] Saved ccss-tree.json to: ${TREE_OUT_PATH}`);
-}
-
-// Recursively find the parent Cluster ID for a standard
-function findParentClusterId(stdId: string, standardsMap: Record<string, any>): string {
-  let current = standardsMap[stdId];
-  while (current && current.level.toLowerCase() !== 'cluster') {
-    const parentId = current.parent;
-    if (!parentId) break;
-    current = standardsMap[parentId];
-  }
-  return current ? current.id : 'Other';
-}
-
-function findStandardIdForTarget(targetId: string, sortedLeafIds: string[]): string | null {
-  for (const stdId of sortedLeafIds) {
-    if (targetId === stdId || targetId.startsWith(stdId + '-')) {
-      return stdId;
-    }
-  }
-  return null;
-}
-
-/**
- * Finds the first generator (in catalog order) with at least one matching
- * view that actually produces a stub for this target — mirroring what the
- * dataset pipeline would generate, not just label-level compatibility.
- * Reuses the shared matching (`matchTargets`) and generation
- * (`generateSampleWithRetry`, keyed like a real train/question sample) so
- * this report can never drift from what `generate-dataset.ts` does.
- */
-function findGeneratorForTarget(
-  target: CompetencyTarget,
-  generatorCatalog: GeneratorCatalogEntry[],
-  viewCatalog: ViewCatalogEntry[]
-): string | null {
-  const { tuples } = matchTargets([target], generatorCatalog, viewCatalog);
-  for (const tuple of tuples) {
-    const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
-    const sampleKey = computeSampleKey({
-      targetId: target.id,
-      generatorId: tuple.generatorId,
-      viewId: tuple.viewId,
-      split: 'train',
-      mode: 'question',
-      instanceIdx: 0
-    });
-    try {
-      const { stub } = generateSampleWithRetry({ generator, labels: [...target.labels], sampleKey, maxAttempts: 10 });
-      if (stub) return tuple.generatorId;
-    } catch {
-      // Generation failed for this pairing — try the next matched tuple
-    }
-  }
-  return null;
+async function prepareStandardsTree(): Promise<StandardsTreeData> {
+    fs.mkdirSync(tempDir, {recursive: true});
+    if (!fs.existsSync(standardsPath)) await downloadFile(standardsUrl, standardsPath);
+    if (!fs.existsSync(domainsPath)) await downloadFile(domainsUrl, domainsPath);
+    const standards = fs.readFileSync(standardsPath, 'utf-8')
+        .split('\n')
+        .filter(Boolean)
+        .map(line => JSON.parse(line) as StandardNode);
+    const domainGroups = JSON.parse(fs.readFileSync(domainsPath, 'utf-8')) as
+        Record<string, {description: string; domain_cats?: string[]}>;
+    return buildStandardsTree(standards, domainGroups);
 }
 
 async function main() {
-  const args = cliArgs;
-  const gradeLimit = args.find(a => a.startsWith('--grade='))?.split('=')[1];
-  const excludeHS = args.includes('--k8') || args.includes('--exclude-hs');
-
-  console.log('--- Initiating CCSS Ontology Mapping Pipeline ---');
-
-  // 1. Ensure standards and tree data exist
-  await ensureStandardsAndTreeData();
-
-  // Extract valid Area, Scope, Ability values
-  const allAreas = Object.values(Area);
-  const allScopes = Object.values(Scope);
-  const allAbilities = Object.values(Ability);
-
-  // 2. Load CCSS leaf standards
-  const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
-  const standardsMap: Record<string, any> = {};
-  const leafNodes: any[] = [];
-
-  for (const line of standardsLines) {
-    if (!line.trim()) continue;
-    const std = JSON.parse(line);
-    standardsMap[std.id] = std;
-  }
-
-  for (const std of Object.values(standardsMap)) {
-    if (std.children && std.children.length === 0) {
-      const first = std.id.split('.')[0];
-      const isHS = first.startsWith('HS') || /^[NAFGS]-/.test(first);
-      if (!isHS || !excludeHS) {
-        leafNodes.push(std);
-      }
-    }
-  }
-
-  let targetLeaves = leafNodes;
-  if (gradeLimit) {
-    targetLeaves = leafNodes.filter(n => {
-      const first = n.id.split('.')[0];
-      const normalizedLimit = gradeLimit.toLowerCase().trim();
-      if ((normalizedLimit === 'k' || normalizedLimit === 'kindergarten') && first === 'K') return true;
-      if (normalizedLimit === 'hs' || normalizedLimit === 'high school') {
-        return first.startsWith('HS') || /^[NAFGS]-/.test(first);
-      }
-      if (first === gradeLimit) return true;
-      if (`grade ${first}`.toLowerCase() === normalizedLimit) return true;
-      return false;
+    console.log('--- Initiating CCSS Ontology Mapping Pipeline ---');
+    const tree = parseStandardsTree(await prepareStandardsTree());
+    const packageJson = JSON.parse(fs.readFileSync(path.resolve(projectRoot, 'package.json'), 'utf-8'));
+    const ontologyVersion = resolveOntologyVersion(packageJson);
+    const generatedAt = new Date().toISOString();
+    const coverage = await buildCurrentStandardsCoverage({
+        standardsMap: tree.standardsMap,
+        ontologyVersion,
+        generatedAt,
+        grade: readOption('grade'),
+        excludeHighSchool: args.includes('--k8') || args.includes('--exclude-hs')
     });
-    console.log(`[CCSS] Filtering standards for Grade Limit: ${gradeLimit}. Found ${targetLeaves.length} leaf nodes.`);
-  } else {
-    console.log(`[CCSS] Found ${targetLeaves.length} total leaf nodes to evaluate.`);
-  }
-
-  // 3. Load spec module targets and their documented gaps
-  const [allSpecTargets, {
-    implementationTodos: allImplementationTodos,
-    ontologyTodos: allOntologyTodos,
-    beyondScope: allBeyondScope
-  }] = await Promise.all([
-    loadTargets('ccss'),
-    loadSpecTodos('ccss')
-  ]);
-  console.log(`[CCSS Spec] Loaded ${allSpecTargets.length} implemented targets, ${allImplementationTodos.length} implementation TODOs, ${allOntologyTodos.length} ontology TODOs, and ${allBeyondScope.length} beyond-scope declarations.`);
-
-  // Load view & generator specs for matching
-  const [generatorCatalog, viewCatalog] = await Promise.all([
-    loadGeneratorCatalog(),
-    loadViewCatalog()
-  ]);
-
-  // 4. Programmatic Dataset, Permutations & Backlog Processing
-  console.log('[Coverage] Processing competencies and dataset matching from spec files...');
-  const finalCoverageMap: Record<string, any> = {};
-  const sortedLeafIds = leafNodes.map(l => l.id).sort((a, b) => b.length - a.length);
-
-  for (const std of leafNodes) {
-    // Match implemented target permutations from spec files
-    const matchedTargets = allSpecTargets.filter(t => findStandardIdForTarget(t.id, sortedLeafIds) === std.id);
-    const competencies: string[][] = matchedTargets.map(t => t.labels);
-
-    // Match implementation TODOs from spec files
-    const matchedImplementationTodos = allImplementationTodos.filter(t => findStandardIdForTarget(t.id, sortedLeafIds) === std.id);
-    const implementation_todos = matchedImplementationTodos.map(t => ({
-      id: t.id,
-      labels: t.labels,
-      explanation: t.explanation || '',
-      implementation: t.implementation
-    }));
-
-    // Match ontology TODOs from spec files
-    const matchedOntologyTodos = allOntologyTodos.filter(o => o.standardId === std.id);
-    const ontology_todos = matchedOntologyTodos.map(o => ({
-      title: o.title,
-      description: o.description,
-      ontology: o.ontology
-    }));
-
-    // Match intentional project-medium exclusions from spec files
-    const matchedBeyondScope = allBeyondScope.filter(item => item.standardId === std.id);
-    const beyond_scope = matchedBeyondScope.map(item => ({
-      title: item.title,
-      description: item.description
-    }));
-
-    const spec_covered = matchedTargets.length > 0 || matchedImplementationTodos.length > 0 || matchedOntologyTodos.length > 0 || matchedBeyondScope.length > 0;
-    const fully_beyond_scope = matchedBeyondScope.length > 0
-      && matchedTargets.length === 0
-      && matchedImplementationTodos.length === 0
-      && matchedOntologyTodos.length === 0;
-    const partially_beyond_scope = matchedBeyondScope.length > 0 && !fully_beyond_scope;
-
-    let matched_areas: string[] = [];
-    let matched_scopes: string[] = [];
-    let matched_abilities: string[] = [];
-    let ontology_covered = false;
-
-    if (spec_covered) {
-      const allLabels = [...competencies.flat(), ...implementation_todos.flatMap(t => t.labels)];
-      if (allLabels.length > 0) {
-        const allLabelsUnion = Array.from(new Set(allLabels));
-        matched_areas = allLabelsUnion.filter(l => allAreas.includes(l as any));
-        matched_scopes = allLabelsUnion.filter(l => allScopes.includes(l as any));
-        matched_abilities = allLabelsUnion.filter(l => allAbilities.includes(l as any));
-      }
-      ontology_covered = (competencies.length > 0 || implementation_todos.length > 0 || beyond_scope.length > 0) && matchedOntologyTodos.length === 0;
-    }
-
-    // Check dataset coverage for matchedTargets
-    let dataset_covered = false;
-    let generator_module: string | null = null;
-
-    if (matchedTargets.length > 0) {
-      const genModulesSet = new Set<string>();
-      let allTargetsCovered = true;
-
-      for (const target of matchedTargets) {
-        const genId = findGeneratorForTarget(target, generatorCatalog, viewCatalog);
-        if (genId) {
-          genModulesSet.add(genId);
-        } else {
-          allTargetsCovered = false;
-        }
-      }
-
-      if (genModulesSet.size > 0) {
-        generator_module = Array.from(genModulesSet).join(', ');
-        dataset_covered = allTargetsCovered;
-      }
-    }
-
-    finalCoverageMap[std.id] = {
-      id: std.id,
-      spec_covered,
-      ontology_covered,
-      competencies,
-      implementation_todos,
-      ontology_todos,
-      beyond_scope,
-      fully_beyond_scope,
-      partially_beyond_scope,
-      matched_areas,
-      matched_scopes,
-      matched_abilities,
-      reasoning: spec_covered ? '' : 'Spec file not yet created for this grade.',
-      suggested_task: spec_covered ? null : { title: 'Analyze Standard', description: 'Domain analysis required to define target competencies.' },
-      dataset_covered,
-      generator_module,
-      cluster_id: findParentClusterId(std.id, standardsMap)
-    };
-  }
-
-  // 5. Consolidate Task Backlog from spec TODOs and uncovered standards
-  console.log('[Tasks] Building task backlog...');
-  const tasksByCluster: Record<string, any[]> = {};
-  
-  for (const [, data] of Object.entries(finalCoverageMap)) {
-    if (data.fully_beyond_scope) continue;
-    if (data.spec_covered && data.ontology_covered && data.dataset_covered && (!data.ontology_todos || data.ontology_todos.length === 0) && (!data.implementation_todos || data.implementation_todos.length === 0)) continue;
-
-    const clusterId = data.cluster_id;
-    if (!tasksByCluster[clusterId]) {
-      tasksByCluster[clusterId] = [];
-    }
-    tasksByCluster[clusterId].push(data);
-  }
-
-  const consolidatedTasks: any[] = [];
-  const implementationPackages = new Map<string, {
-    implementation: (typeof allImplementationTodos)[number]['implementation'];
-    targets: typeof allImplementationTodos;
-  }>();
-
-  for (const target of allImplementationTodos) {
-    const id = target.implementation.id;
-    if (!implementationPackages.has(id)) {
-      implementationPackages.set(id, { implementation: target.implementation, targets: [] });
-    }
-    implementationPackages.get(id)!.targets.push(target);
-  }
-
-  for (const { implementation, targets } of implementationPackages.values()) {
-    const targetStandards = Array.from(new Set(targets
-      .map(target => findStandardIdForTarget(target.id, sortedLeafIds))
-      .filter((standardId): standardId is string => standardId !== null)));
-    const clusterIds = Array.from(new Set(targetStandards
-      .map(standardId => findParentClusterId(standardId, standardsMap))));
-    const targetDetails = Array.from(new Map(targets.map(target => [
-      target.id.split('~')[0],
-      `- ${target.id.split('~')[0]}: ${target.explanation || 'Implement the missing generator/view path.'}`
-    ])).values());
-
-    consolidatedTasks.push({
-      id: `task-implementation-${implementation.id}`,
-      type: 'DATASET_ENRICHMENT',
-      cluster_id: clusterIds.join(', '),
-      cluster_description: clusterIds
-        .map(clusterId => standardsMap[clusterId]?.description || 'Other Math Concepts')
-        .join(' / '),
-      title: implementation.id,
-      description: `${implementation.description}\nTargets:\n${targetDetails.join('\n')}`,
-      standards: targetStandards,
-      implementation
+    const manifest = buildCoverageManifest({
+        channel,
+        sourceRef,
+        sourceSha,
+        ontologyVersion,
+        generatedAt
     });
-  }
 
-  for (const { ontology, todos } of groupOntologyTodos(allOntologyTodos)) {
-    const targetStandards = Array.from(new Set(todos.map(todo => todo.standardId)));
-    const clusterIds = Array.from(new Set(targetStandards
-      .map(standardId => findParentClusterId(standardId, standardsMap))));
-    const targetDetails = todos.map(todo =>
-      `- ${todo.standardId} — ${todo.title}: ${todo.description}`);
+    fs.mkdirSync(outputDir, {recursive: true});
+    fs.writeFileSync(path.join(outputDir, 'ccss-tree.json'), JSON.stringify(tree, null, 2));
+    fs.writeFileSync(path.join(outputDir, 'ccss-coverage.json'), JSON.stringify(coverage, null, 2));
+    fs.writeFileSync(path.join(outputDir, 'coverage-manifest.json'), JSON.stringify(manifest, null, 2));
 
-    consolidatedTasks.push({
-      id: `task-ontology-${ontology.id}`,
-      type: 'ONTOLOGY_EXTENSION',
-      cluster_id: clusterIds.join(', '),
-      cluster_description: clusterIds
-        .map(clusterId => standardsMap[clusterId]?.description || 'Other Math Concepts')
-        .join(' / '),
-      title: ontology.id,
-      description: `${ontology.description}\nTargets:\n${targetDetails.join('\n')}`,
-      standards: targetStandards,
-      ontology
-    });
-  }
-
-  for (const [clusterId, missingStds] of Object.entries(tasksByCluster)) {
-    const parentCluster = standardsMap[clusterId] || { description: 'Other Math Concepts' };
-    const specCoveredStds = missingStds.filter(s => s.spec_covered);
-    const uncoveredStds = missingStds.filter(s => !s.spec_covered);
-
-    const missingGenerator = specCoveredStds.filter(s =>
-      (!s.ontology_todos || s.ontology_todos.length === 0) &&
-      (!s.implementation_todos || s.implementation_todos.length === 0) &&
-      !s.dataset_covered
-    );
-
-    if (missingGenerator.length > 0) {
-      const descriptions = missingGenerator.map(s => {
-        if (s.implementation_todos && s.implementation_todos.length > 0) {
-          const explanation = s.implementation_todos[0].explanation;
-          return `- ${s.id}: ${explanation}`;
-        }
-        return `- ${s.id}: Implement generator/view for missing competencies`;
-      });
-      consolidatedTasks.push({
-        id: `task-generator-${clusterId}`,
-        type: 'DATASET_ENRICHMENT',
-        cluster_id: clusterId,
-        cluster_description: parentCluster.description,
-        title: `Generate Dataset for ${clusterId}`,
-        description: `Implement/extend generators and views to cover: ${missingGenerator.map(s => s.id).join(', ')}. Details:\n` + descriptions.join('\n'),
-        standards: missingGenerator.map(s => s.id)
-      });
-    }
-
-    if (uncoveredStds.length > 0) {
-      consolidatedTasks.push({
-        id: `task-analysis-${clusterId}`,
-        type: 'ANALYSIS',
-        cluster_id: clusterId,
-        cluster_description: parentCluster.description,
-        title: `Perform Analysis for ${clusterId}`,
-        description: `Perform domain analysis and write spec file for: ${uncoveredStds.map(s => s.id).join(', ')}.`,
-        standards: uncoveredStds.map(s => s.id)
-      });
-    }
-  }
-
-  // Save outputs
-  const generatedAt = new Date().toISOString();
-  const finalJson = {
-    metadata: {
-      generated_at: generatedAt,
-      ontology_version: version,
-      total_leaves_scanned: leafNodes.length,
-      spec_covered_count: Object.values(finalCoverageMap).filter(s => s.spec_covered).length,
-      covered_count: Object.values(finalCoverageMap).filter(s =>
-        s.dataset_covered
-        && !s.partially_beyond_scope
-        && (!s.implementation_todos || s.implementation_todos.length === 0)
-      ).length,
-      missing_generator_count: Object.values(finalCoverageMap).filter(s => !s.fully_beyond_scope && s.spec_covered && (!s.ontology_todos || s.ontology_todos.length === 0) && ((s.implementation_todos && s.implementation_todos.length > 0) || !s.dataset_covered)).length,
-      missing_ontology_count: Object.values(finalCoverageMap).filter(s => s.spec_covered && (s.ontology_todos && s.ontology_todos.length > 0)).length,
-      analysis_needed_count: Object.values(finalCoverageMap).filter(s => !s.spec_covered).length,
-      beyond_scope_count: Object.values(finalCoverageMap).filter(s => s.beyond_scope && s.beyond_scope.length > 0).length,
-      fully_beyond_scope_count: Object.values(finalCoverageMap).filter(s => s.fully_beyond_scope).length
-    },
-    coverage: finalCoverageMap,
-    tasks: consolidatedTasks
-  };
-
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(finalJson, null, 2), 'utf-8');
-  console.log(`[Output] Successfully wrote coverage and tasks data to: ${OUTPUT_PATH}`);
-
-  const manifest = {
-    schema_version: 2,
-    channel,
-    source_ref: sourceRef,
-    source_sha: sourceSha,
-    generated_at: generatedAt,
-    ontology_version: version
-  };
-  fs.writeFileSync(MANIFEST_OUT_PATH, JSON.stringify(manifest, null, 2), 'utf-8');
-  console.log(`[Output] Successfully wrote coverage manifest to: ${MANIFEST_OUT_PATH}`);
-
-  const { covered_count, total_leaves_scanned, missing_generator_count, missing_ontology_count, beyond_scope_count } = finalJson.metadata;
-  console.log(`\nMapping pipeline complete!`);
-  console.log(`Total scanned: ${total_leaves_scanned}`);
-  console.log(`Covered by Dataset: ${covered_count} (${Math.round((covered_count/total_leaves_scanned)*100)}%)`);
-  console.log(`Missing Generator: ${missing_generator_count}`);
-  console.log(`Missing Ontology: ${missing_ontology_count}`);
-  console.log(`Beyond Scope: ${beyond_scope_count}`);
+    console.log(`Mapping pipeline complete: ${coverage.metadata.covered_count}/${coverage.metadata.total_leaves_scanned} covered.`);
 }
 
 main().catch(error => {
-  console.error(error);
-  process.exitCode = 1;
+    console.error(error);
+    process.exitCode = 1;
 });
