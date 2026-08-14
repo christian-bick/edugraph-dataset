@@ -587,16 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const oneDigitTimesMultipleOfTenImplementation = defineImplementationPackage({
-    id: 'one-digit-times-multiple-of-ten',
-    description: 'Constrain multiplication to one one-digit factor and one multiple of ten from 10 through 90.',
-    generators: [{ module: 'arithmetic-ops-pairs', strategy: 'expand' }],
-    views: [
-        { module: 'operations-boxes', strategy: 'reuse' },
-        { module: 'operations-vertical', strategy: 'reuse' }
-    ]
-});
-
 const elapsedTimeImplementation = defineImplementationPackage({
     id: 'elapsed-time-minutes',
     description: 'Measure elapsed minutes and solve addition or subtraction interval stories.',
@@ -771,6 +761,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.OA.D.9-identify-patterns', identifyArithmeticPatternsBuilder),
     ...toTargets('3.OA.D.9-explain-patterns', explainArithmeticPatternsBuilder),
     ...toTargets('3.NBT.A.1-round-nearest-10-100', integerRoundingBuilder),
+    ...toTargets('3.NBT.A.3-one-digit-times-multiple-of-ten', oneDigitTimesMultipleOfTenBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -778,7 +769,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.NBT.A.3-one-digit-times-multiple-of-ten', oneDigitTimesMultipleOfTenBuilder, oneDigitTimesMultipleOfTenImplementation, 'Constrain factor roles to one digit by a multiple of ten from 10 through 90.'),
     ...toImplementationTodos('3.MD.A.1-elapsed-minutes', elapsedTimeBuilder, elapsedTimeImplementation, 'Show start time, end time, elapsed minutes, and hour-boundary handling.'),
     ...toImplementationTodos('3.MD.A.1-time-interval-word-problems', timeIntervalWordProblemsBuilder, elapsedTimeImplementation, 'Align the story, interval equation, clock evidence, and answer.'),
     ...toImplementationTodos('3.MD.A.2-measure-liquid-volume', measureLiquidVolumeBuilder, massVolumeMeasurementImplementation, 'Show a calibrated vessel, liquid level, liter unit, and measured answer.'),

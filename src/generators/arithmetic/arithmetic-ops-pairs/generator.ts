@@ -43,6 +43,10 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         };
 
         const randomValue = (max = maxMagnitude) => randomMagnitude(minMagnitude, max);
+        const randomInteger = (min: number, max: number): number | null => {
+            if (min > max) return null;
+            return min + Math.floor(random() * (max - min + 1));
+        };
         const randomFactorPair = (): [number, number] | null => {
             const maxFirst = Math.floor(maxMagnitude / minMagnitude);
             const first = randomMagnitude(minMagnitude, maxFirst);
@@ -112,6 +116,28 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 if (magnitude === null) return null;
                 num1 = 0;
                 num2 = requireNegative ? -magnitude : magnitude;
+            } else if (requireMultipleOf10) {
+                const minimumFactor = Math.max(1, Math.ceil(resolvedRange.min));
+                const candidates: Array<[number, number]> = [];
+                for (let oneDigit = minimumFactor; oneDigit <= Math.min(9, maxMagnitude); oneDigit++) {
+                    for (let multiple = 10; multiple <= Math.min(90, maxMagnitude); multiple += 10) {
+                        const product = oneDigit * multiple;
+                        if (product >= resolvedRange.min && product <= maxMagnitude) {
+                            candidates.push([oneDigit, multiple]);
+                        }
+                    }
+                }
+                const candidateIndex = randomInteger(0, candidates.length - 1);
+                if (candidateIndex === null) return null;
+                const [oneDigit, multiple] = candidates[candidateIndex];
+                const signedOneDigit = requireNegative ? -oneDigit : oneDigit;
+                if (random() < 0.5) {
+                    num1 = signedOneDigit;
+                    num2 = multiple;
+                } else {
+                    num1 = multiple;
+                    num2 = signedOneDigit;
+                }
             } else {
                 const factors = randomFactorPair();
                 if (!factors) return null;

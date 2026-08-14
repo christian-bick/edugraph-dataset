@@ -55,7 +55,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         }
     });
 
-    it('resolves multiples of ten into universally valid terms', () => {
+    it('resolves multiples of ten into operation-appropriate witnesses', () => {
         for (const operation of operations) {
             const stub = generateWithLabels(generator, [
                 operation,
@@ -65,8 +65,15 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
                 Scope.NumbersSmaller1000
             ]);
             expect(stub).not.toBeNull();
-            expect([stub!.data.num1, stub!.data.num2, stub!.data.answer]
-                .every(value => value % 10 === 0)).toBe(true);
+            if (operation === Area.Multiplication) {
+                const factors = [stub!.data.num1, stub!.data.num2];
+                expect(factors.filter(value => value >= 1 && value <= 9)).toHaveLength(1);
+                expect(factors.filter(value => value >= 10 && value <= 90 && value % 10 === 0)).toHaveLength(1);
+                expect(stub!.data.answer % 10).toBe(0);
+            } else {
+                expect([stub!.data.num1, stub!.data.num2, stub!.data.answer]
+                    .every(value => value % 10 === 0)).toBe(true);
+            }
             expect(stub!.tags).toContain(Scope.MultiplesOf10);
         }
     });

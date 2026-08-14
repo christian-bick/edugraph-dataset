@@ -69,8 +69,8 @@ describe('ArithmeticOpsPairsGenerator', () => {
         }
     });
 
-    it('constrains every numeric term to a multiple of 10', () => {
-        for (const operation of operations) {
+    it('constrains every numeric term to a multiple of 10 for non-multiplication operations', () => {
+        for (const operation of [Area.Addition, Area.Subtraction, Area.Division] as const) {
             for (const requireZero of [false, true]) {
                 for (let seed = 0; seed < 20; seed++) {
                     setSeed(seed);
@@ -91,6 +91,30 @@ describe('ArithmeticOpsPairsGenerator', () => {
                     expect(values.includes(0)).toBe(requireZero);
                 }
             }
+        }
+    });
+
+    it('multiplies exactly one one-digit factor by one multiple from 10 through 90', () => {
+        for (let seed = 0; seed < 100; seed++) {
+            setSeed(seed);
+            const data = generator.generate({
+                operation: Area.Multiplication,
+                requireNegative: false,
+                requireZero: false,
+                requireMultipleOf10: true,
+                invertProcedure: false,
+                requireEqualAddends: false,
+                requireEvenResult: false,
+                range: {min: 1, max: 1000}
+            })!.data;
+            const factors = [data.num1, data.num2];
+            const oneDigitFactors = factors.filter(value => value >= 1 && value <= 9);
+            const decadeFactors = factors.filter(value => value >= 10 && value <= 90 && value % 10 === 0);
+
+            expect(oneDigitFactors).toHaveLength(1);
+            expect(decadeFactors).toHaveLength(1);
+            expect(data.answer).toBe(data.num1 * data.num2);
+            expect(data.answer).toBeLessThan(1000);
         }
     });
 

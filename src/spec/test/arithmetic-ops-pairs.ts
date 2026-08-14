@@ -39,6 +39,19 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
         [Scope.NumbersWithoutZero]
     ]);
 
+const oneDigitTimesMultipleOfTenBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Multiplication,
+        Scope.TwoOperands,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.MultiplesOf10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller1000,
+        Ability.ProcedureExecution
+    ]);
+
 const wordProblemBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.TwoOperands,
@@ -96,6 +109,7 @@ const equalAddendsBuilder = new DatasetPermutationBuilder()
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-arithmetic-ops-pairs', builder),
     ...toTargets('test-arithmetic-multiples-of-ten', multiplesOfTenBuilder),
+    ...toTargets('test-one-digit-times-multiple-of-ten', oneDigitTimesMultipleOfTenBuilder),
     ...toTargets('test-arithmetic-word-problems', wordProblemBuilder),
     ...toTargets('test-arithmetic-unknown-addend', unknownAddendBuilder),
     ...toTargets('test-length-word-problems', lengthWordProblemBuilder),
