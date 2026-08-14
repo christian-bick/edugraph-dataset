@@ -1,6 +1,22 @@
 import { partOf, Scope } from 'edugraph-ts';
 import type { CompetencyDescriptor } from 'edugraph-ts';
 
+export const DISTANCE_SCALE_LABELS = [
+    Scope.CentimeterScale,
+    Scope.MeterScale,
+    Scope.InchScale,
+    Scope.FootScale,
+    Scope.SegmentScale
+] as const;
+
+export type DistanceScaleLabel = typeof DISTANCE_SCALE_LABELS[number];
+export type DistanceScaleFamily = 'metric' | 'imperial' | 'abstract';
+
+export interface DistanceScaleResolution {
+    label: DistanceScaleLabel;
+    family: DistanceScaleFamily;
+}
+
 /**
  * Returns true if child is equal to parent, or if parent is a transitive 
  * ancestor of child via the taxonomic partOf relation.
@@ -30,6 +46,21 @@ export function isSubConceptOf(child: string, parent: string): boolean {
     }
 
     return false;
+}
+
+/** Resolves an exact distance-scale label and classifies it through its ontology parent. */
+export function resolveDistanceScale(
+    labels: string[],
+    supportedLabels: readonly string[] = DISTANCE_SCALE_LABELS
+): DistanceScaleResolution | undefined {
+    const label = DISTANCE_SCALE_LABELS.find(candidate =>
+        supportedLabels.includes(candidate) && labels.includes(candidate));
+    if (!label) return undefined;
+
+    if (isSubConceptOf(label, Scope.MetricDistanceScale)) return {label, family: 'metric'};
+    if (isSubConceptOf(label, Scope.ImperialDistanceScale)) return {label, family: 'imperial'};
+    if (isSubConceptOf(label, Scope.DistanceAbstraction)) return {label, family: 'abstract'};
+    return undefined;
 }
 
 

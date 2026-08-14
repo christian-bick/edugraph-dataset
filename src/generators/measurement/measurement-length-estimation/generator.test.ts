@@ -1,30 +1,54 @@
 import {describe, expect, it} from 'vitest';
-import {Scope} from 'edugraph-ts';
 import {MeasurementLengthEstimationGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 
 describe('MeasurementLengthEstimationGenerator', () => {
-    it.each([[Scope.CentimeterScale, 'cm'], [Scope.MeterScale, 'm']] as const)('generates plausible %s estimates', (label, unit) => {
-        const data = new MeasurementLengthEstimationGenerator().generate({unit: label})!.data;
-        expect(data.unit).toBe(unit);
-        expect(data.problemLength).toBeGreaterThan(0);
+    it('generates only a scale-neutral size and estimate variant', () => {
+        setSeed(42);
+        const data = new MeasurementLengthEstimationGenerator().generate({}).data;
+
+        expect(data).toEqual({
+            referenceSize: expect.stringMatching(/^(small|large)$/),
+            estimateVariant: expect.any(Number),
+            referenceVariant: expect.any(Number)
+        });
+        expect([0, 1, 2]).toContain(data.estimateVariant);
+        expect([0, 1, 2, 3]).toContain(data.referenceVariant);
     });
 
-    it.each([
-        [Scope.CentimeterScale, ['crayon', 'book']],
-        [Scope.MeterScale, ['desk', 'door']]
-    ] as const)('covers both familiar objects for %s', (unit, expectedObjects) => {
-        const objects = new Set<string>();
-        for (let seed = 0; seed < 50; seed++) {
+    it('covers both reference sizes, all estimate variants, and all reference variants', () => {
+        const referenceSizes = new Set<string>();
+        const estimateVariants = new Set<number>();
+        const referenceVariants = new Set<number>();
+        const states = new Set<string>();
+
+        for (let seed = 0; seed < 500; seed++) {
             setSeed(seed);
-            objects.add(new MeasurementLengthEstimationGenerator().generate({unit})!.data.object);
+            const data = new MeasurementLengthEstimationGenerator().generate({}).data;
+            referenceSizes.add(data.referenceSize);
+            estimateVariants.add(data.estimateVariant);
+            referenceVariants.add(data.referenceVariant);
+            states.add(JSON.stringify(data));
         }
-        expect([...objects].sort()).toEqual([...expectedObjects].sort());
+
+        expect([...referenceSizes].sort()).toEqual(['large', 'small']);
+        expect([...estimateVariants].sort()).toEqual([0, 1, 2]);
+        expect([...referenceVariants].sort()).toEqual([0, 1, 2, 3]);
+        expect(states.size).toBe(24);
     });
 
-    it('rejects missing and unsupported metric scales', () => {
+    it('is deterministic for the same seed', () => {
         const generator = new MeasurementLengthEstimationGenerator();
-        expect(() => generator.generate({})).toThrow();
-        expect(generator.generate({unit: 'unsupported-scale'} as any)).toBeNull();
+        setSeed('length-estimate');
+        const first = generator.generate({});
+        setSeed('length-estimate');
+
+        expect(generator.generate({})).toEqual(first);
+    });
+
+    it('rejects a missing configuration object', () => {
+        expect(() => new MeasurementLengthEstimationGenerator().generate(null as never)).toThrow(
+            '[Generator: measurement-length-estimation] Validation Error'
+        );
     });
 });

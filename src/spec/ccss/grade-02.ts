@@ -1,6 +1,4 @@
 import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
     toTargets
 } from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
@@ -628,17 +626,6 @@ const equalShareShapeEquivalenceBuilder = new DatasetPermutationBuilder()
         [Area.Rectangle]
     ]);
 
-// ==========================================
-// 6. Reviewed implementation packages
-// ==========================================
-
-const imperialLengthEstimationImplementation = defineImplementationPackage({
-    id: 'imperial-length-estimation',
-    description: 'Make length-estimation content scale-neutral and let the view resolve metric, imperial, or abstract distance scales into appropriate units, reference objects, and visual proportions.',
-    generators: [{ module: 'measurement-length-estimation', strategy: 'expand' }],
-    views: [{ module: 'measure-length-estimate', strategy: 'expand' }]
-});
-
 export const spec: CompetencyTarget[] = [
     // 2.OA - Operations and Algebraic Thinking
     ...toTargets('2.OA.A.1-one-step-word-problems', oneStepWordProblemsBuilder),
@@ -669,6 +656,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.MD.A.1-use-length-tool', useLengthToolBuilder),
     ...toTargets('2.MD.A.2-unit-scale-relation', unitScaleRelationBuilder),
     ...toTargets('2.MD.A.3-estimate-metric-lengths', estimateMetricLengthBuilder),
+    ...toTargets('2.MD.A.3-estimate-imperial-lengths', estimateImperialLengthBuilder),
     ...toTargets('2.MD.A.4-measured-length-difference', measuredLengthDifferenceBuilder),
     ...toTargets('2.MD.B.5-length-word-problems', lengthWordProblemsBuilder),
     ...toTargets('2.MD.B.6-number-line-representation', numberLineRepresentationBuilder),
@@ -690,14 +678,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.G.A.3-equal-shares-different-shapes', equalShareShapeEquivalenceBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '2.MD.A.3-estimate-imperial-lengths',
-        estimateImperialLengthBuilder,
-        imperialLengthEstimationImplementation,
-        'Resolve InchScale and FootScale through the imperial distance-scale family while keeping generated estimation content independent of the rendered unit system.'
-    )
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

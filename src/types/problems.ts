@@ -152,9 +152,9 @@ export type MeasurementStandardProblem = {
 };
 
 export type MeasurementEstimateProblem = {
-    problemLength: number;
-    unit: 'cm' | 'm';
-    object: 'crayon' | 'book' | 'desk' | 'door';
+    referenceSize: 'small' | 'large';
+    estimateVariant: 0 | 1 | 2;
+    referenceVariant: 0 | 1 | 2 | 3;
 };
 
 export type MeasurementToolSelectionProblem = {

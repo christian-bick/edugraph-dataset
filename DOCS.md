@@ -37,6 +37,14 @@ To ensure end-to-end type safety between problem generators (which run in Node.j
 **Environment Separation & Mapping:**
 Because the Node orchestrator and generator configurations do not statically import the React view files (which are dynamically bundled by Vite and loaded headlessly inside Playwright via URLs), TypeScript cannot automatically inspect `window.renderView` in the browser code from the Node side. `ViewTypeMap` serves as a shared bridge, allowing the compiler to statically verify that generators specify view names compatible with the data structures the views expect to render.
 
+### Ontology Scale Resolution
+Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in
+`src/lib/ontology.ts` maps the concrete centimeter, meter, inch, foot, or abstract segment
+label to both its scale and its metric, imperial, or abstract ontology family. A compatible
+generator can therefore emit scale-neutral mathematical choices while the consuming view
+owns unit text, reference objects, and display proportions. Family-only labels remain
+ambiguous and are not silently converted into a concrete unit.
+
 ### Specs and the Union Dataset
 
 A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
@@ -82,9 +90,11 @@ Run `npm run dev` and open `/standards-explorer.html` for local working-tree dev
 Vite intercepts the three preview routes and builds their responses in memory from the
 tracked standards tree and current specs. The first request reuses current per-standard
 dataset metadata to resolve already-generated label sets and evaluates only missing sets;
-the result is cached until specs, generators, views, the ontology dependency, generated
-datasets, or the shared coverage helper change. It neither reads nor writes a generated
-local coverage snapshot.
+parallel explorer requests share one in-flight build, and a subsequent reload rebuilds the
+bundle after a 250 ms coalescing window. Relevant source changes invalidate it immediately.
+Generated output is deliberately not watched: recursive `out/` watchers hold directory
+handles on Windows and prevent atomic dataset swaps. It neither reads nor writes a
+generated local coverage snapshot.
 
 Released sample thumbnails are intentionally separate from those coverage views. The
 explorer always loads `/dataset/asset-index.json` as its publication baseline; the development server
@@ -96,7 +106,8 @@ immutable release revision, split, and file path.
 On `localhost` and `127.0.0.1`, a Released / Local selector changes only the active sample
 image source. Local sets `assets=local` and loads `/dataset/local-asset-index.json`, which Vite builds in memory
 by replaying union selection over the current per-standard metadata under `out/`. The
-cached index is invalidated when generated datasets or target specs change. Its image
+index is rebuilt on each explorer reload after the same 250 ms request-coalescing window;
+target spec changes also invalidate it immediately. Its image
 route serves only selected PNG files from those generated standard datasets, so local
 preview does not require a merged union or an index file on disk. Production hosts do not
 render the switch and always resolve images through the release-pinned Hugging Face URL.
@@ -153,8 +164,8 @@ Playwright image, so changing the host runtime does not change the renderer iden
 * **Function**: Builds the three preview responses from the tracked standards tree and
   current working-tree specs without writing artifacts. Existing local asset metadata is
   used as a fast implementation lookup before the shared builder evaluates an unmatched
-  generator/view path. Vite caches the complete response bundle and invalidates it on
-  relevant source or dataset changes.
+  generator/view path. Vite coalesces concurrent response requests and rebuilds on the
+  next explorer reload; source edits invalidate the short-lived bundle immediately.
 
 ### `src/scripts/generate-asset-index.ts`
 * **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> --output=<path> [--repository=<owner/dataset>]`

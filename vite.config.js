@@ -27,7 +27,6 @@ const LOCAL_ASSET_INDEX_SCRIPT = resolve(
 );
 const LOCAL_COVERAGE_SCRIPT = resolve(import.meta.dirname, 'src', 'scripts', 'build-local-coverage.ts');
 const LOCAL_ASSET_WATCH_ROOTS = [
-    resolve(import.meta.dirname, 'out'),
     resolve(import.meta.dirname, 'src', 'spec'),
 ];
 const LOCAL_COVERAGE_WATCH_ROOTS = [
@@ -35,7 +34,6 @@ const LOCAL_COVERAGE_WATCH_ROOTS = [
     resolve(import.meta.dirname, 'src', 'spec'),
     resolve(import.meta.dirname, 'src', 'generators'),
     resolve(import.meta.dirname, 'src', 'visuals', 'views'),
-    resolve(import.meta.dirname, 'out'),
     resolve(import.meta.dirname, 'src', 'scripts', 'build-local-coverage.ts'),
     resolve(import.meta.dirname, 'src', 'lib', 'asset-index.ts'),
     resolve(import.meta.dirname, 'src', 'lib', 'asset-index-builder.ts'),
@@ -59,10 +57,13 @@ const isLocalRequest = request => {
 
 function localCoveragePlugin() {
     let bundlePromise;
+    let bundleExpiresAt = 0;
     const invalidate = () => {
         bundlePromise = undefined;
+        bundleExpiresAt = 0;
     };
     const getBundle = () => {
+        if (bundlePromise && bundleExpiresAt > 0 && Date.now() >= bundleExpiresAt) invalidate();
         bundlePromise ??= new Promise((accept, reject) => {
             execFile(
                 process.execPath,
@@ -80,6 +81,13 @@ function localCoveragePlugin() {
                     }
                 },
             );
+        }).then(bundle => {
+            // Share one build across the explorer's parallel tree/coverage/manifest
+            // requests, while keeping each subsequent reload live. Watching `out`
+            // directly locks dataset directories on Windows and prevents the
+            // generator's atomic rename transaction from committing.
+            bundleExpiresAt = Date.now() + 250;
+            return bundle;
         }).catch(error => {
             invalidate();
             throw error;
@@ -134,10 +142,13 @@ function localCoveragePlugin() {
 
 function localDatasetPlugin() {
     let bundlePromise;
+    let bundleExpiresAt = 0;
     const invalidate = () => {
         bundlePromise = undefined;
+        bundleExpiresAt = 0;
     };
     const getBundle = () => {
+        if (bundlePromise && bundleExpiresAt > 0 && Date.now() >= bundleExpiresAt) invalidate();
         bundlePromise ??= new Promise((accept, reject) => {
             execFile(
                 process.execPath,
@@ -159,6 +170,12 @@ function localDatasetPlugin() {
                     }
                 },
             );
+        }).then(bundle => {
+            // The asset index is rebuilt on each explorer reload (with a tiny
+            // coalescing window) instead of watching `out`, which would hold a
+            // Windows directory handle across atomic dataset swaps.
+            bundleExpiresAt = Date.now() + 250;
+            return bundle;
         }).catch(error => {
             invalidate();
             throw error;

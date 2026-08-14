@@ -1,3 +1,3 @@
-- **Identity:** A familiar object and named metric unit establish an estimation task without displaying a measuring scale.
+- **Identity:** A reference object or segment and named distance unit establish an estimation task without displaying a measuring scale.
 - **Modes:** Question Mode leaves the estimate blank; Solution Mode reveals a plausible whole-number estimate in the requested unit.
-- **Unit scale:** `CentimeterScale` uses a small object and centimeters; `MeterScale` uses a larger object or span and meters.
+- **Unit scale:** Metric scales use centimeters or meters, imperial scales use inches or feet, and the abstract scale uses unit segments; each uses a reference and proportion appropriate to that scale.

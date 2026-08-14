@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { isSubConceptOf, resolveRangeFromLabels } from './ontology.ts';
+import {
+    DISTANCE_SCALE_LABELS,
+    isSubConceptOf,
+    resolveDistanceScale,
+    resolveRangeFromLabels
+} from './ontology.ts';
 import { Scope, Area } from 'edugraph-ts';
 
 describe('Ontology Helper', () => {
@@ -83,6 +88,30 @@ describe('Ontology Helper', () => {
             ]);
             expect(range.min).toBe(5);
             expect(range.max).toBe(5);
+        });
+    });
+
+    describe('resolveDistanceScale', () => {
+        it.each([
+            [Scope.CentimeterScale, 'metric'],
+            [Scope.MeterScale, 'metric'],
+            [Scope.InchScale, 'imperial'],
+            [Scope.FootScale, 'imperial'],
+            [Scope.SegmentScale, 'abstract']
+        ] as const)('classifies %s through its ontology family', (label, family) => {
+            expect(resolveDistanceScale([label])).toEqual({label, family});
+        });
+
+        it('honors the schema-supported scale subset', () => {
+            expect(resolveDistanceScale(
+                [Scope.InchScale],
+                [Scope.CentimeterScale, Scope.MeterScale]
+            )).toBeUndefined();
+            expect(DISTANCE_SCALE_LABELS).toContain(Scope.SegmentScale);
+        });
+
+        it('does not infer an arbitrary concrete unit from a family label', () => {
+            expect(resolveDistanceScale([Scope.ImperialDistanceScale])).toBeUndefined();
         });
     });
 });
