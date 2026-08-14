@@ -1,4 +1,5 @@
-- **Identity:** A non-square rectangle is composed from same-size square cells arranged in visibly countable rows and columns.
+- **Identity:** The artifact shows either one dimensioned unit square or a non-square rectangle composed from same-size square cells.
+- **Unit-square interpretation:** A single square tile has both side lengths marked `1 unit`; the solution explicitly identifies its area as `1 square unit`.
 - **Partition question mode:** The correctly proportioned outer rectangle is shown without internal divisions while the requested row and column counts remain visible.
 - **Partition solution mode:** Square cell boundaries appear with no gaps or overlaps, and the row-by-column arrangement is stated without revealing a counting result.
 - **Count question mode:** The complete square array remains visible while its total is withheld.

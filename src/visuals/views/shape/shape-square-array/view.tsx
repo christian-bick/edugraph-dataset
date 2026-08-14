@@ -14,8 +14,14 @@ interface CoreProps {
 const CELL_SIZE = 44;
 
 function validateArray(data: ShapeSquareArrayProblem) {
-    if (data.task !== 'partition' && data.task !== 'count') {
-        throw new ViewValidationError('shape-square-array', 'Expected a partition or count task.');
+    if (data.task !== 'interpret-unit' && data.task !== 'partition' && data.task !== 'count') {
+        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, partition, or count task.');
+    }
+    if (data.task === 'interpret-unit') {
+        if (data.rows !== 1 || data.columns !== 1 || data.squareCount !== 1) {
+            throw new ViewValidationError('shape-square-array', 'A unit-square interpretation must contain exactly one square.');
+        }
+        return;
     }
     if (
         !Number.isInteger(data.rows)
@@ -31,6 +37,23 @@ function validateArray(data: ShapeSquareArrayProblem) {
     if (data.squareCount !== data.rows * data.columns) {
         throw new ViewValidationError('shape-square-array', 'The square count must equal rows times columns.');
     }
+}
+
+function UnitSquare() {
+    return (
+        <svg viewBox="0 0 340 260" className="h-[260px] w-[340px]" aria-label="A square tile with side lengths of 1 unit">
+            <rect x="92" y="38" width="156" height="156" rx="4" fill="#ede9fe" stroke="#6d28d9" strokeWidth="5" />
+            <line x1="92" y1="215" x2="248" y2="215" stroke="#475569" strokeWidth="2" />
+            <line x1="92" y1="208" x2="92" y2="222" stroke="#475569" strokeWidth="2" />
+            <line x1="248" y1="208" x2="248" y2="222" stroke="#475569" strokeWidth="2" />
+            <text x="170" y="240" textAnchor="middle" className="fill-slate-700 text-[16px] font-bold">1 unit</text>
+            <line x1="70" y1="38" x2="70" y2="194" stroke="#475569" strokeWidth="2" />
+            <line x1="63" y1="38" x2="77" y2="38" stroke="#475569" strokeWidth="2" />
+            <line x1="63" y1="194" x2="77" y2="194" stroke="#475569" strokeWidth="2" />
+            <text x="43" y="116" textAnchor="middle" transform="rotate(-90 43 116)" className="fill-slate-700 text-[16px] font-bold">1 unit</text>
+            <text x="170" y="123" textAnchor="middle" className="fill-violet-800 text-[18px] font-extrabold">unit square</text>
+        </svg>
+    );
 }
 
 function SquareArray({
@@ -121,6 +144,7 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
     ]);
     validateArray(problem.data);
 
+    const isUnitInterpretation = problem.data.task === 'interpret-unit';
     const isPartition = problem.data.task === 'partition';
     const showCells = !isPartition || isSolutionView;
 
@@ -128,36 +152,46 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
         <div className="flex justify-center items-center p-8 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="w-[520px] h-[450px] flex flex-col items-center gap-4">
                 <div className="h-[58px] px-5 flex items-start justify-center text-center text-[1.3rem] leading-snug font-bold text-slate-700">
-                    {isPartition
+                    {isUnitInterpretation
+                        ? 'This square tile has side length 1 unit. What area does it represent?'
+                        : isPartition
                         ? `Partition the rectangle into ${problem.data.rows} rows and ${problem.data.columns} columns of equal squares.`
                         : 'How many equal squares are in the rectangle?'}
                 </div>
                 <div className="w-[420px] h-[280px] rounded-xl border-2 border-slate-200 bg-slate-50 flex items-center justify-center box-border">
-                    <SquareArray
-                        data={problem.data}
-                        showCells={showCells}
-                        showCount={!isPartition && isSolutionView}
-                    />
+                    {isUnitInterpretation
+                        ? <UnitSquare />
+                        : (
+                            <SquareArray
+                                data={problem.data}
+                                showCells={showCells}
+                                showCount={!isPartition && isSolutionView}
+                            />
+                        )}
                 </div>
                 <div
                     className={`h-[52px] min-w-[270px] px-6 rounded-xl border-2 flex items-center justify-center text-[1.18rem] font-bold box-border ${
                         isSolutionView
                             ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                            : isPartition
+                            : isPartition || isUnitInterpretation
                                 ? 'border-slate-200 bg-slate-100 text-slate-600'
                                 : 'border-slate-300 bg-white text-transparent'
                     }`}
                     aria-label={isSolutionView
-                        ? isPartition
+                        ? isUnitInterpretation
+                            ? 'Answer: one square unit'
+                            : isPartition
                             ? `Partition: ${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `Answer: ${problem.data.squareCount} equal squares`
-                        : isPartition ? 'Draw the square grid' : 'Blank answer'}
+                        : isUnitInterpretation ? 'Name the area' : isPartition ? 'Draw the square grid' : 'Blank answer'}
                 >
                     {isSolutionView
-                        ? isPartition
+                        ? isUnitInterpretation
+                            ? '1 unit × 1 unit = 1 square unit'
+                            : isPartition
                             ? `${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} equal squares`
-                        : isPartition ? 'Draw the square grid.' : '\u00a0'}
+                        : isUnitInterpretation ? 'Name the area represented.' : isPartition ? 'Draw the square grid.' : '\u00a0'}
                 </div>
             </div>
         </div>

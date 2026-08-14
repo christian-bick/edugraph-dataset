@@ -1,4 +1,4 @@
-import {Ability} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -9,13 +9,19 @@ const generator = new ShapeSquareArrayGenerator();
 describe('ShapeSquareArrayGenerator', () => {
     it('strictly requires the task ability', () => {
         expect(() => generator.generate({})).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({
+            taskAbility: Ability.ProcedureExecution
+        })).toThrow(GeneratorValidationError);
     });
 
     it.each([
         [Ability.VisualArticulation, 'partition'],
         [Ability.ProcedureExecution, 'count']
     ] as const)('maps %s to the %s task', (taskAbility, expectedTask) => {
-        const stub = generator.generate({taskAbility})!;
+        const stub = generator.generate({
+            modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            taskAbility
+        })!;
 
         expect(stub.data.task).toBe(expectedTask);
         expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
@@ -23,7 +29,31 @@ describe('ShapeSquareArrayGenerator', () => {
 
     it('rejects unsupported abilities', () => {
         expect(generator.generate({
+            modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
             taskAbility: 'unsupported' as typeof Ability.VisualArticulation
+        })).toBeNull();
+    });
+
+    it('creates a single square for tile-scale interpretation', () => {
+        expect(generator.generate({
+            modelFeatures: [Scope.TileScale],
+            taskAbility: Ability.Interpretation
+        })!.data).toEqual({
+            task: 'interpret-unit',
+            rows: 1,
+            columns: 1,
+            squareCount: 1
+        });
+    });
+
+    it('rejects abilities without their required model features', () => {
+        expect(generator.generate({
+            modelFeatures: [Scope.TileScale],
+            taskAbility: Ability.ProcedureExecution
+        })).toBeNull();
+        expect(generator.generate({
+            modelFeatures: [Area.ShapeComposition],
+            taskAbility: Ability.Interpretation
         })).toBeNull();
     });
 
@@ -31,6 +61,7 @@ describe('ShapeSquareArrayGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const data = generator.generate({
+                modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
                 taskAbility: Ability.ProcedureExecution
             })!.data;
 
@@ -45,9 +76,13 @@ describe('ShapeSquareArrayGenerator', () => {
 
     it('is deterministic for a fixed seed', () => {
         setSeed(18);
-        const first = generator.generate({taskAbility: Ability.VisualArticulation});
+        const config = {
+            modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            taskAbility: Ability.VisualArticulation
+        };
+        const first = generator.generate(config);
         setSeed(18);
-        const second = generator.generate({taskAbility: Ability.VisualArticulation});
+        const second = generator.generate(config);
 
         expect(second).toEqual(first);
     });

@@ -20,7 +20,14 @@ const countBuilder = new DatasetPermutationBuilder().addLabels([
     Ability.ProcedureExecution
 ]);
 
+const interpretUnitBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Square,
+    Scope.TileScale,
+    Ability.Interpretation
+]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-square-array-partition', partitionBuilder),
-    ...toTargets('test-shape-square-array-count', countBuilder)
+    ...toTargets('test-shape-square-array-count', countBuilder),
+    ...toTargets('test-shape-square-array-interpret-unit', interpretUnitBuilder)
 ];

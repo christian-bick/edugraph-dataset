@@ -7,13 +7,8 @@ import {spec} from './spec.ts';
 const generator = new ShapeSquareArrayGenerator();
 
 describe('ShapeSquareArrayGenerator spec integration', () => {
-    it('declares square composition and rectangular arrangement once', () => {
-        expect(spec.generalLabels).toEqual([
-            Area.Square,
-            Area.ShapeComposition,
-            Scope.BoxArrangement,
-            Scope.EqualShares
-        ]);
+    it('declares the shared square identity once', () => {
+        expect(spec.generalLabels).toEqual([Area.Square]);
         expect(spec.generalLabels).not.toContain(Area.Rectangle);
     });
 
@@ -32,5 +27,24 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
 
         expect(stub.data.task).toBe(task);
         expect(stub.tags).toContain(ability);
+    });
+
+    it('resolves tile-scale interpretation to one unit square', () => {
+        const stub = generateWithLabels(generator, [
+            Area.Square,
+            Scope.TileScale,
+            Ability.Interpretation
+        ])!;
+
+        expect(stub.data).toEqual({
+            task: 'interpret-unit',
+            rows: 1,
+            columns: 1,
+            squareCount: 1
+        });
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Scope.TileScale,
+            Ability.Interpretation
+        ]));
     });
 });

@@ -583,9 +583,9 @@ export type ShapePartitionProblem =
     };
 
 export type ShapeSquareArrayProblem = {
-    task: 'partition' | 'count';
-    rows: 2 | 3 | 4 | 5;
-    columns: 2 | 3 | 4 | 5;
+    task: 'interpret-unit' | 'partition' | 'count';
+    rows: 1 | 2 | 3 | 4 | 5;
+    columns: 1 | 2 | 3 | 4 | 5;
     squareCount: number;
 };
 
