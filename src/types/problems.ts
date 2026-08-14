@@ -383,6 +383,7 @@ export type StatisticalCategory = {
 
 export type StatisticalGraphProblem = {
     categories: StatisticalCategory[];
+    scale: 1 | 2 | 5 | 10;
     operation?: 'addition' | 'subtraction';
     operandIndices?: [number, number];
     answer?: number;

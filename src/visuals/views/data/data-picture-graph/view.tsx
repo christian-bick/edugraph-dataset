@@ -39,7 +39,7 @@ const DataPictureGraphCore = ({payload}: CoreProps) => {
                     <div key={label} className="grid min-h-16 grid-cols-[90px_1fr] items-center border-t border-slate-200 first:border-t-0">
                         <div className="font-bold text-slate-700">{label}</div>
                         <div className="flex min-h-11 items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 bg-white px-4">
-                            {isSolutionView && Array.from({length: count}, (_, marker) => (
+                            {isSolutionView && Array.from({length: count / data.scale}, (_, marker) => (
                                 <span key={marker} className={`size-6 ${categoryStyles[index].marker}`} />
                             ))}
                         </div>
@@ -48,7 +48,7 @@ const DataPictureGraphCore = ({payload}: CoreProps) => {
             </div>
 
             <div className="mt-4 text-center text-sm font-bold text-slate-600">
-                Each symbol = 1 item
+                Each symbol = {data.scale} {data.scale === 1 ? 'item' : 'items'}
             </div>
         </div>
     );

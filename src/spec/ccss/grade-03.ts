@@ -729,6 +729,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.A.2-measure-mass', measureMassBuilder),
     ...toTargets('3.MD.A.2-estimate-mass', estimateMassBuilder),
     ...toTargets('3.MD.A.2-same-unit-word-problems', massVolumeWordProblemsBuilder),
+    ...toTargets('3.MD.B.3-scaled-picture-graphs', scaledPictureGraphBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -736,7 +737,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.B.3-scaled-picture-graphs', scaledPictureGraphBuilder, scaledStatisticalGraphsImplementation, 'Align categorical totals with repeated symbols and a visible non-unit key.'),
     ...toImplementationTodos('3.MD.B.3-scaled-bar-graphs', scaledBarGraphBuilder, scaledStatisticalGraphsImplementation, 'Align categorical values with bars and a visibly scaled axis.'),
     ...toImplementationTodos('3.MD.B.3-one-step-scaled-bar-comparisons', oneStepScaledBarComparisonBuilder, scaledStatisticalGraphsImplementation, 'Derive a one-step more-or-less comparison from two scaled bars.'),
     ...toImplementationTodos('3.MD.B.3-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder, scaledStatisticalGraphsImplementation, 'Use three graph values, an intermediate result, and a final comparison answer.'),

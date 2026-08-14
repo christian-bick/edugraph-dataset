@@ -24,15 +24,18 @@ export function validateMeasurementData(data: MeasurementDataProblem, viewId: st
 }
 
 export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: string) {
-    validateProblemData(viewId, data, ['categories']);
+    validateProblemData(viewId, data, ['categories', 'scale']);
+    if (![1, 2, 5, 10].includes(data.scale)) {
+        throw new ViewValidationError(viewId, 'Graph scale must be 1, 2, 5, or 10.');
+    }
     if (!Array.isArray(data.categories) || data.categories.length !== 3) {
         throw new ViewValidationError(viewId, 'Expected exactly three statistical categories.');
     }
     if (data.categories.some(({label}, index) => label !== expectedLabels[index])) {
         throw new ViewValidationError(viewId, 'Statistical category labels or their order are invalid.');
     }
-    if (data.categories.some(({count}) => !Number.isInteger(count) || count < 0 || count > 8)) {
-        throw new ViewValidationError(viewId, 'Category counts must be whole numbers from zero through eight.');
+    if (data.categories.some(({count}) => !Number.isInteger(count) || count < 0 || count > 8 * data.scale || count % data.scale !== 0)) {
+        throw new ViewValidationError(viewId, 'Category totals must be whole-number multiples of the graph scale through eight steps.');
     }
     if (data.operation === undefined) {
         if (data.operandIndices !== undefined || data.answer !== undefined) {

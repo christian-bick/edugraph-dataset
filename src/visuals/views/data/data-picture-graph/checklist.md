@@ -1,4 +1,4 @@
-- **Identity:** Three labeled categories are represented by repeated picture markers and a visible one-picture-equals-one-item key.
+- **Identity:** Three labeled category totals are represented by repeated picture markers and a visible one-picture-equals-scale key.
 - **Question mode:** The source counts remain visible while every graph row is blank for drawing.
-- **Solution mode:** Each row contains exactly as many picture markers as its source count.
-- **Single-unit scale:** Every picture marker represents exactly one item; no grouped-symbol scale is implied.
+- **Solution mode:** Each row contains exactly `category total ÷ scale` picture markers.
+- **Scale:** The key visibly states whether each marker represents 1, 2, 5, or 10 items, and every category total is an exact multiple of that value.

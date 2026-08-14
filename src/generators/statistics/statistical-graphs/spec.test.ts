@@ -12,7 +12,24 @@ describe('statistical-graphs spec', () => {
             Scope.StepsOf1,
             Ability.VisualArticulation
         ])!.data;
+        expect(data.scale).toBe(1);
         expect(data.operation).toBeUndefined();
+    });
+
+    it.each([
+        [Scope.StepsOf2, 2],
+        [Scope.StepsOf5, 5],
+        [Scope.StepsOf10, 10]
+    ] as const)('resolves %s as a non-unit graph scale', (scaleLabel, scale) => {
+        const data = generateWithLabels(new StatisticalGraphsGenerator(), [
+            Area.Statistics,
+            Scope.IntegerNumbers,
+            Scope.PictureGraph,
+            scaleLabel,
+            Ability.VisualArticulation
+        ])!.data;
+        expect(data.scale).toBe(scale);
+        expect(data.categories.every(({count}) => count % scale === 0)).toBe(true);
     });
 
     it.each([

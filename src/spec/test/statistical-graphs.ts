@@ -7,9 +7,9 @@ const pictureGraphBuilder = new DatasetPermutationBuilder()
         Area.Statistics,
         Scope.IntegerNumbers,
         Scope.PictureGraph,
-        Scope.StepsOf1,
         Ability.VisualArticulation
-    ]);
+    ])
+    .applyLabelVariants([[Scope.StepsOf1], [Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
 
 const barGraphBuilder = new DatasetPermutationBuilder()
     .addLabels([

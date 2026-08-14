@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'data-bar-graph',
-    generalLabels: [Scope.BarGraph, Scope.StepsOf1]
+    generalLabels: [Scope.BarGraph]
 };
 
 export const DataBarGraphViewSchema = {
