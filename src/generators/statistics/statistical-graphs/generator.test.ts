@@ -11,7 +11,8 @@ describe('StatisticalGraphsGenerator', () => {
         scale: Scope.StepsOf1,
         useAddition: false,
         useSubtraction: false,
-        useTwoOperands: false
+        useTwoOperands: false,
+        useThreeOperands: false
     } as const;
 
     it('generates three distinct positive whole-number category counts', () => {
@@ -52,10 +53,31 @@ describe('StatisticalGraphsGenerator', () => {
         if (operation === 'subtraction') expect(first).toBeGreaterThan(second);
     });
 
+    it('generates a connected three-operand subtraction question', () => {
+        const data = generator.generate({
+            ...baseConfig,
+            scale: Scope.StepsOf5,
+            useSubtraction: true,
+            useThreeOperands: true
+        }).data;
+        if (data.operandIndices?.length !== 3) throw new Error('Expected three operand indices.');
+        const [firstIndex, secondIndex, thirdIndex] = data.operandIndices;
+        const first = data.categories[firstIndex].count;
+        const second = data.categories[secondIndex].count;
+        const third = data.categories[thirdIndex].count;
+
+        expect(data.operation).toBe('subtraction');
+        expect(data.intermediate).toBe(first - second);
+        expect(data.answer).toBe(data.intermediate! - third);
+        expect(data.answer).toBeGreaterThan(0);
+    });
+
     it('rejects contradictory configurations', () => {
         expect(() => generator.generate({})).toThrow();
         expect(() => generator.generate({...baseConfig, useAddition: true, useSubtraction: true, useTwoOperands: true})).toThrow();
         expect(() => generator.generate({...baseConfig, useAddition: true, useTwoOperands: false})).toThrow();
         expect(() => generator.generate({...baseConfig, useTwoOperands: true})).toThrow();
+        expect(() => generator.generate({...baseConfig, useSubtraction: true, useTwoOperands: true, useThreeOperands: true})).toThrow();
+        expect(() => generator.generate({...baseConfig, useAddition: true, useThreeOperands: true})).toThrow();
     });
 });

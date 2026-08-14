@@ -72,4 +72,24 @@ describe('statistical-graphs spec', () => {
         expect(data.answer).toBe(first - second);
         expect(data.categories.every(({count}) => count % scale === 0)).toBe(true);
     });
+
+    it('resolves a connected three-operand scaled subtraction comparison', () => {
+        const result = generateWithLabels(new StatisticalGraphsGenerator(), [
+            Area.Statistics,
+            Area.Subtraction,
+            Scope.IntegerNumbers,
+            Scope.BarGraph,
+            Scope.StepsOf5,
+            Scope.ThreeOperands,
+            Ability.ProcedureExecution
+        ])!;
+        if (result.data.operandIndices?.length !== 3) throw new Error('Expected three operand indices.');
+        const [firstIndex, secondIndex, thirdIndex] = result.data.operandIndices;
+        const [first, second, third] = [firstIndex, secondIndex, thirdIndex]
+            .map(index => result.data.categories[index].count);
+
+        expect(result.data.intermediate).toBe(first - second);
+        expect(result.data.answer).toBe(result.data.intermediate! - third);
+        expect(result.tags).toEqual(expect.arrayContaining([Area.Subtraction, Scope.ThreeOperands]));
+    });
 });

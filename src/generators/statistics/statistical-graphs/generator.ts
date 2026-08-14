@@ -22,24 +22,63 @@ function uniqueCounts(): number[] {
     return values;
 }
 
+function connectedSubtractionCounts(): number[] {
+    const triples = [
+        [8, 3, 2],
+        [8, 4, 2],
+        [8, 5, 2],
+        [7, 3, 2],
+        [7, 4, 2]
+    ];
+    const values = [...triples[Math.floor(random() * triples.length)]];
+    for (let index = values.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [values[index], values[swapIndex]] = [values[swapIndex], values[index]];
+    }
+    return values;
+}
+
 export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalGraphProblem, StatisticalGraphsGeneratorConfig> {
     type: AbstractProblem['type'] = 'statistics';
     schema = StatisticalGraphsGeneratorSchema;
 
     generate(config: StatisticalGraphsGeneratorConfig): ProblemStub<StatisticalGraphProblem> {
-        validateConfigFields('statistical-graphs', config, ['scale', 'useAddition', 'useSubtraction', 'useTwoOperands']);
+        validateConfigFields('statistical-graphs', config, [
+            'scale', 'useAddition', 'useSubtraction', 'useTwoOperands', 'useThreeOperands'
+        ]);
         if (config.useAddition && config.useSubtraction) {
             throw new GeneratorValidationError('statistical-graphs', 'A graph question cannot require both addition and subtraction.');
         }
         const hasOperation = config.useAddition || config.useSubtraction;
-        if (hasOperation !== config.useTwoOperands) {
-            throw new GeneratorValidationError('statistical-graphs', 'Arithmetic graph questions require exactly two operands.');
+        const operandCardinalities = Number(config.useTwoOperands) + Number(config.useThreeOperands);
+        if (hasOperation !== (operandCardinalities === 1)) {
+            throw new GeneratorValidationError('statistical-graphs', 'Arithmetic graph questions require exactly one operand cardinality.');
+        }
+        if (config.useThreeOperands && !config.useSubtraction) {
+            throw new GeneratorValidationError('statistical-graphs', 'Three-operand graph questions require subtraction.');
         }
 
         const scale = scaleValues[config.scale!];
-        const counts = uniqueCounts().map(count => count * scale);
+        const counts = (config.useThreeOperands ? connectedSubtractionCounts() : uniqueCounts())
+            .map(count => count * scale);
         const categories = labels.map((label, index) => ({label, count: counts[index]}));
         if (!hasOperation) return {data: {categories, scale}};
+
+        if (config.useThreeOperands) {
+            const firstIndex = counts.indexOf(Math.max(...counts));
+            const [secondIndex, thirdIndex] = [0, 1, 2].filter(index => index !== firstIndex);
+            const intermediate = counts[firstIndex] - counts[secondIndex];
+            return {
+                data: {
+                    categories,
+                    scale,
+                    operation: 'subtraction',
+                    operandIndices: [firstIndex, secondIndex, thirdIndex],
+                    intermediate,
+                    answer: intermediate - counts[thirdIndex]
+                }
+            };
+        }
 
         let operandIndices: [number, number] = [0, 1];
         if (config.useSubtraction && categories[0].count < categories[1].count) {

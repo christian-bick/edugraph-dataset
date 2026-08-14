@@ -587,16 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const scaledStatisticalGraphsImplementation = defineImplementationPackage({
-    id: 'scaled-statistical-graphs',
-    description: 'Draw and interpret picture and bar graphs with non-unit scales.',
-    generators: [{ module: 'statistical-graphs', strategy: 'expand' }],
-    views: [
-        { module: 'data-picture-graph', strategy: 'expand' },
-        { module: 'data-bar-graph', strategy: 'expand' }
-    ]
-});
-
 const fractionalMeasurementDataImplementation = defineImplementationPackage({
     id: 'fractional-measurement-data',
     description: 'Collect half- and quarter-inch measurements and plot them on a fractional line plot.',
@@ -732,6 +722,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.B.3-scaled-picture-graphs', scaledPictureGraphBuilder),
     ...toTargets('3.MD.B.3-scaled-bar-graphs', scaledBarGraphBuilder),
     ...toTargets('3.MD.B.3-one-step-scaled-bar-comparisons', oneStepScaledBarComparisonBuilder),
+    ...toTargets('3.MD.B.3-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -739,7 +730,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.B.3-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder, scaledStatisticalGraphsImplementation, 'Use three graph values, an intermediate result, and a final comparison answer.'),
     ...toImplementationTodos('3.MD.B.4-generate-fractional-measurements', generateFractionalMeasurementsBuilder, fractionalMeasurementDataImplementation, 'Collect visible half- and quarter-inch ruler measurements.'),
     ...toImplementationTodos('3.MD.B.4-plot-fractional-measurements', plotFractionalMeasurementsBuilder, fractionalMeasurementDataImplementation, 'Plot collected measurements against whole, half, and quarter ticks.'),
     ...toImplementationTodos('3.MD.C.5a-unit-square-area-unit', unitSquareAreaUnitBuilder, unitSquareAreaImplementation, 'Identify one square tile as one unit on an area scale.'),

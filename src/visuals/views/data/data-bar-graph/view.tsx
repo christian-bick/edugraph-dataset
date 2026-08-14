@@ -77,15 +77,40 @@ const DataBarGraphCore = ({config, payload}: CoreProps) => {
             </div>
 
             {!isDrawing && data.operation && data.operandIndices && (
-                <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
-                    <span>{data.categories[data.operandIndices[0]].count}</span>
-                    <span>{data.operation === 'addition' ? '+' : '-'}</span>
-                    <span>{data.categories[data.operandIndices[1]].count}</span>
-                    <span>=</span>
-                    <span className="inline-flex min-w-16 justify-center rounded-md border-2 border-slate-500 bg-white px-3 py-1 text-emerald-700">
-                        {isSolutionView ? data.answer : ''}
-                    </span>
-                </div>
+                data.operandIndices.length === 3 ? (
+                    <div className="mt-5 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xl font-bold text-slate-700">
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="font-sans text-xs font-bold uppercase tracking-wide text-slate-500">Step 1</span>
+                            <span>{data.categories[data.operandIndices[0]].count}</span>
+                            <span>−</span>
+                            <span>{data.categories[data.operandIndices[1]].count}</span>
+                            <span>=</span>
+                            <span className="inline-flex min-w-14 justify-center rounded-md border-2 border-slate-500 bg-white px-2 py-1 text-emerald-700">
+                                {isSolutionView ? data.intermediate : ''}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="font-sans text-xs font-bold uppercase tracking-wide text-slate-500">Step 2</span>
+                            <span>{isSolutionView ? data.intermediate : 'Step 1'}</span>
+                            <span>−</span>
+                            <span>{data.categories[data.operandIndices[2]].count}</span>
+                            <span>=</span>
+                            <span className="inline-flex min-w-14 justify-center rounded-md border-2 border-slate-500 bg-white px-2 py-1 text-emerald-700">
+                                {isSolutionView ? data.answer : ''}
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
+                        <span>{data.categories[data.operandIndices[0]].count}</span>
+                        <span>{data.operation === 'addition' ? '+' : '−'}</span>
+                        <span>{data.categories[data.operandIndices[1]].count}</span>
+                        <span>=</span>
+                        <span className="inline-flex min-w-16 justify-center rounded-md border-2 border-slate-500 bg-white px-3 py-1 text-emerald-700">
+                            {isSolutionView ? data.answer : ''}
+                        </span>
+                    </div>
+                )
             )}
         </div>
     );

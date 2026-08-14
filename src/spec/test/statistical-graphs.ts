@@ -45,9 +45,21 @@ const scaledBarComparisonBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
 
+const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.Subtraction,
+        Scope.IntegerNumbers,
+        Scope.BarGraph,
+        Scope.ThreeOperands,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-picture-graph', pictureGraphBuilder),
     ...toTargets('test-bar-graph', barGraphBuilder),
     ...toTargets('test-bar-graph-problems', barGraphProblemsBuilder),
-    ...toTargets('test-scaled-bar-comparisons', scaledBarComparisonBuilder)
+    ...toTargets('test-scaled-bar-comparisons', scaledBarComparisonBuilder),
+    ...toTargets('test-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder)
 ];

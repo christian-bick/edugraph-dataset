@@ -385,7 +385,8 @@ export type StatisticalGraphProblem = {
     categories: StatisticalCategory[];
     scale: 1 | 2 | 5 | 10;
     operation?: 'addition' | 'subtraction';
-    operandIndices?: [number, number];
+    operandIndices?: [number, number] | [number, number, number];
+    intermediate?: number;
     answer?: number;
 };
 

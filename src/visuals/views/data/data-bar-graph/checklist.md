@@ -3,3 +3,4 @@
 - **Drawing solution mode:** Every bar reaches the tick matching its source total, and the axis states the scale step.
 - **Interpretation question mode:** Completed bars remain visible while the arithmetic result is withheld.
 - **Interpretation solution mode:** The same graph remains visible and the addition or subtraction result is revealed.
+- **Two-step comparison:** Three distinct bars feed two connected subtraction equations; Question Mode withholds both calculated results, while Solution Mode shows the intermediate and final answer consistently.
