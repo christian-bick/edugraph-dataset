@@ -12,8 +12,6 @@ interface CoreProps {
     payload: ViewRenderPayload<'data-bar-graph'>;
 }
 
-const axisValues = Array.from({length: 9}, (_, value) => 8 - value);
-
 const DataBarGraphCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
@@ -24,6 +22,7 @@ const DataBarGraphCore = ({config, payload}: CoreProps) => {
         throw new ViewValidationError('data-bar-graph', 'The task ability and arithmetic payload do not agree.');
     }
     const revealBars = !isDrawing || isSolutionView;
+    const axisValues = Array.from({length: 9}, (_, value) => (8 - value) * data.scale);
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
@@ -63,7 +62,7 @@ const DataBarGraphCore = ({config, payload}: CoreProps) => {
                                             ? `${categoryStyles[index].bar} border-slate-600`
                                             : 'border-dashed border-slate-400 bg-white'
                                     }`}
-                                    style={{height: revealBars ? `${count * 12.5}%` : '100%'}}
+                                    style={{height: revealBars ? `${(count / data.scale) * 12.5}%` : '100%'}}
                                 >
                                     {revealBars && <div className="pt-2 text-center font-mono text-lg font-black text-slate-800">{count}</div>}
                                 </div>
@@ -73,7 +72,7 @@ const DataBarGraphCore = ({config, payload}: CoreProps) => {
                     <div className="flex justify-around px-8 pt-2">
                         {data.categories.map(({label}) => <div key={label} className="w-24 text-center text-sm font-bold text-slate-700">{label}</div>)}
                     </div>
-                    <div className="mt-2 text-center text-xs font-bold uppercase tracking-wider text-slate-500">Number of items - scale steps by 1</div>
+                    <div className="mt-2 text-center text-xs font-bold uppercase tracking-wider text-slate-500">Number of items - scale steps by {data.scale}</div>
                 </div>
             </div>
 

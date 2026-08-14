@@ -16,9 +16,9 @@ const barGraphBuilder = new DatasetPermutationBuilder()
         Area.Statistics,
         Scope.IntegerNumbers,
         Scope.BarGraph,
-        Scope.StepsOf1,
         Ability.VisualArticulation
-    ]);
+    ])
+    .applyLabelVariants([[Scope.StepsOf1], [Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
 
 const barGraphProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
