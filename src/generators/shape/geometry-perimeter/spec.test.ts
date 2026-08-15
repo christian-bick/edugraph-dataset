@@ -29,4 +29,19 @@ describe('GeometryPerimeterGenerator spec integration', () => {
             );
         }
     );
+
+    it.each([Area.Triangle, Area.Quadrilateral, Area.Pentagon, Area.Hexagon])(
+        'generates the reviewed inverse %s target',
+        polygonShape => {
+            const stub = generateWithLabels(new GeometryPerimeterGenerator(), [
+                Area.PerimeterCalculation,
+                Scope.IntegerNumbers,
+                Ability.ProcedureInversion,
+                polygonShape
+            ]);
+
+            expect(stub).not.toBeNull();
+            expect(stub!.data.task).toBe('find-missing-side');
+        }
+    );
 });

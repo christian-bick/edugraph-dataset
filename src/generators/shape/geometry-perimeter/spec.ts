@@ -14,7 +14,7 @@ export const GeometryPerimeterGeneratorSchema = {
         selectExactMatch
     ],
     taskAbility: [
-        [Ability.ProcedureExecution],
+        [Ability.ProcedureExecution, Ability.ProcedureInversion],
         selectExactMatch
     ]
 } as const;

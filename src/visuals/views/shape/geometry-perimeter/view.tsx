@@ -25,7 +25,7 @@ function validatePerimeter(data: GeometryPerimeterProblem) {
     const expectedSideCounts = {triangle: 3, quadrilateral: 4, pentagon: 5, hexagon: 6};
     const sideCount = expectedSideCounts[data.shape];
     if (
-        data.task !== 'find-perimeter'
+        (data.task !== 'find-perimeter' && data.task !== 'find-missing-side')
         || data.unit !== 'units'
         || !sideCount
         || data.vertices.length !== sideCount
@@ -37,6 +37,17 @@ function validatePerimeter(data: GeometryPerimeterProblem) {
         throw new ViewValidationError(
             'geometry-perimeter',
             'The polygon, side lengths, and perimeter total must be consistent.'
+        );
+    }
+    if (data.task === 'find-missing-side' && (
+        !Number.isInteger(data.unknownSideIndex)
+        || data.unknownSideIndex < 0
+        || data.unknownSideIndex >= sideCount
+        || data.knownSideTotal !== data.perimeter - data.sideLengths[data.unknownSideIndex]
+    )) {
+        throw new ViewValidationError(
+            'geometry-perimeter',
+            'An inverse perimeter task must hide one valid side and total the remaining sides.'
         );
     }
 }
@@ -71,9 +82,10 @@ function labelPosition(start: ScreenVertex, end: ScreenVertex, center: ScreenVer
     };
 }
 
-function PolygonDiagram({data, traceBoundary}: {
+function PolygonDiagram({data, traceBoundary, hideUnknown}: {
     data: GeometryPerimeterProblem;
     traceBoundary: boolean;
+    hideUnknown: boolean;
 }) {
     const vertices = fitVertices(data.vertices);
     const center = {
@@ -125,7 +137,11 @@ function PolygonDiagram({data, traceBoundary}: {
                             textAnchor="middle"
                             className="fill-slate-800 text-[14px] font-extrabold"
                         >
-                            {data.sideLengths[index]} units
+                            {hideUnknown
+                                && data.task === 'find-missing-side'
+                                && index === data.unknownSideIndex
+                                ? '? units'
+                                : `${data.sideLengths[index]} units`}
                         </text>
                     </g>
                 );
@@ -139,23 +155,42 @@ const GeometryPerimeterCore = ({config: _config, payload}: CoreProps) => {
     const data = problem.data;
     validatePerimeter(data);
     const addition = data.sideLengths.join(' + ');
+    const isInverse = data.task === 'find-missing-side';
+    const knownAddition = isInverse
+        ? data.sideLengths
+            .filter((_, index) => index !== data.unknownSideIndex)
+            .join(' + ')
+        : '';
+    const missingSide = isInverse ? data.sideLengths[data.unknownSideIndex] : 0;
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="text-center text-[1.3rem] font-bold text-slate-700">
-                Find the perimeter of the {data.shape}.
+                {isInverse
+                    ? `The perimeter is ${data.perimeter} ${data.unit}. Find the missing side length.`
+                    : `Find the perimeter of the ${data.shape}.`}
             </div>
             <div className="mt-4 flex justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
-                <PolygonDiagram data={data} traceBoundary={isSolutionView} />
+                <PolygonDiagram
+                    data={data}
+                    traceBoundary={isSolutionView}
+                    hideUnknown={isInverse && !isSolutionView}
+                />
             </div>
-            <div className={`mt-4 min-h-[62px] rounded-xl border-2 px-5 py-3 text-center font-mono text-[1.15rem] font-bold ${
+            <div className={`mt-4 min-h-[62px] rounded-xl border-2 px-5 py-3 text-center font-mono ${
+                isInverse ? 'text-[1rem]' : 'text-[1.15rem]'
+            } font-bold ${
                 isSolutionView
                     ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
                     : 'border-slate-300 bg-white text-slate-600'
             }`}>
                 {isSolutionView
-                    ? `Perimeter = ${addition} = ${data.perimeter} ${data.unit}`
-                    : `Add the lengths of all ${data.sideLengths.length} sides.`}
+                    ? isInverse
+                        ? `Missing side = ${data.perimeter} - (${knownAddition}) = ${missingSide} ${data.unit}`
+                        : `Perimeter = ${addition} = ${data.perimeter} ${data.unit}`
+                    : isInverse
+                        ? `Known sides total ${data.knownSideTotal} ${data.unit}.`
+                        : `Add the lengths of all ${data.sideLengths.length} sides.`}
             </div>
         </div>
     );

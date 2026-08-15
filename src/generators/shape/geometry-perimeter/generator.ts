@@ -48,22 +48,36 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
         config: GeometryPerimeterGeneratorConfig
     ): ProblemStub<GeometryPerimeterProblem> | null {
         validateConfigFields('geometry-perimeter', config, ['polygonShape', 'taskAbility']);
-        if (config.taskAbility !== Ability.ProcedureExecution) return null;
+        if (
+            config.taskAbility !== Ability.ProcedureExecution
+            && config.taskAbility !== Ability.ProcedureInversion
+        ) return null;
 
         const template = POLYGONS.get(config.polygonShape!);
         if (!template) return null;
 
         const factor = Math.floor(random() * 3) + 1;
         const sideLengths = template.sideLengths.map(length => length * factor);
-        return {
-            data: {
-                task: 'find-perimeter',
-                shape: template.shape,
-                vertices: template.vertices.map(vertex => scaleVertex(vertex, factor)),
-                sideLengths,
-                perimeter: sideLengths.reduce((sum, length) => sum + length, 0),
-                unit: 'units'
-            }
+        const perimeter = sideLengths.reduce((sum, length) => sum + length, 0);
+        const common = {
+            shape: template.shape,
+            vertices: template.vertices.map(vertex => scaleVertex(vertex, factor)),
+            sideLengths,
+            perimeter,
+            unit: 'units' as const
         };
+        if (config.taskAbility === Ability.ProcedureInversion) {
+            const unknownSideIndex = Math.floor(random() * sideLengths.length);
+            return {
+                data: {
+                    ...common,
+                    task: 'find-missing-side',
+                    unknownSideIndex,
+                    knownSideTotal: perimeter - sideLengths[unknownSideIndex]
+                }
+            };
+        }
+
+        return {data: {...common, task: 'find-perimeter'}};
     }
 }

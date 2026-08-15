@@ -6,6 +6,11 @@ const polygonPerimeterBuilder = new DatasetPermutationBuilder()
     .addLabels([Area.PerimeterCalculation, Scope.IntegerNumbers, Ability.ProcedureExecution])
     .applyLabelVariants([[Area.Triangle], [Area.Quadrilateral], [Area.Pentagon], [Area.Hexagon]]);
 
+const unknownPolygonSideBuilder = new DatasetPermutationBuilder()
+    .addLabels([Area.PerimeterCalculation, Scope.IntegerNumbers, Ability.ProcedureInversion])
+    .applyLabelVariants([[Area.Triangle], [Area.Quadrilateral], [Area.Pentagon], [Area.Hexagon]]);
+
 export const spec: CompetencyTarget[] = [
-    ...toTargets('test-polygon-perimeter', polygonPerimeterBuilder)
+    ...toTargets('test-polygon-perimeter', polygonPerimeterBuilder),
+    ...toTargets('test-unknown-polygon-side', unknownPolygonSideBuilder)
 ];

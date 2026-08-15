@@ -37,12 +37,26 @@ describe('GeometryPerimeterGenerator', () => {
         }
     });
 
-    it('rejects the not-yet-implemented inverse task', () => {
-        expect(generator.generate({
-            polygonShape: Area.Triangle,
-            taskAbility: Ability.ProcedureInversion
-        })).toBeNull();
-    });
+    it.each([Area.Triangle, Area.Quadrilateral, Area.Pentagon, Area.Hexagon])(
+        'hides one %s side for an inverse task',
+        polygonShape => {
+            for (let seed = 0; seed < 10; seed++) {
+                setSeed(seed);
+                const data = generator.generate({
+                    polygonShape,
+                    taskAbility: Ability.ProcedureInversion
+                })!.data;
+
+                expect(data.task).toBe('find-missing-side');
+                if (data.task !== 'find-missing-side') throw new Error('Expected inverse data.');
+                expect(data.unknownSideIndex).toBeGreaterThanOrEqual(0);
+                expect(data.unknownSideIndex).toBeLessThan(data.sideLengths.length);
+                expect(data.knownSideTotal).toBe(
+                    data.perimeter - data.sideLengths[data.unknownSideIndex]
+                );
+            }
+        }
+    );
 
     it('is deterministic for a fixed seed', () => {
         const config = {

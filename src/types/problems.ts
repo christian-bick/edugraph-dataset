@@ -621,14 +621,27 @@ export type PolygonVertex = {
     y: number;
 };
 
-export type GeometryPerimeterProblem = {
-    task: 'find-perimeter';
+type GeometryPerimeterProblemBase = {
     shape: 'triangle' | 'quadrilateral' | 'pentagon' | 'hexagon';
     vertices: PolygonVertex[];
     sideLengths: number[];
     perimeter: number;
     unit: 'units';
 };
+
+export type FindPolygonPerimeterProblem = GeometryPerimeterProblemBase & {
+    task: 'find-perimeter';
+};
+
+export type FindMissingPolygonSideProblem = GeometryPerimeterProblemBase & {
+    task: 'find-missing-side';
+    unknownSideIndex: number;
+    knownSideTotal: number;
+};
+
+export type GeometryPerimeterProblem =
+    | FindPolygonPerimeterProblem
+    | FindMissingPolygonSideProblem;
 
 export type ShapePartitionEquivalenceProblem = {
     shape: FractionShape;
