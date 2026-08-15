@@ -16,7 +16,7 @@ const resolveCoinDenomination = (labels: string[]) =>
 
 export const spec: GeneratorSpec = {
     generatorId: 'currency-arithmetic',
-    generalLabels: [Scope.Dollar, Scope.TwoOperands]
+    generalLabels: [Scope.Dollar, Scope.TwoOperands, Scope.SingleStep]
 };
 
 export const CurrencyArithmeticGeneratorSchema = {

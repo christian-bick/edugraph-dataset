@@ -8,7 +8,7 @@ const builder = new DatasetPermutationBuilder()
         Scope.TimeIntervals,
         Scope.MinuteIntervals,
         Scope.IntegerNumbers,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Ability.ProcedureExecution,
         Ability.TextualReception
     ])

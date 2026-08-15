@@ -7,9 +7,9 @@ import {spec} from './spec.ts';
 describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
     const generator = new ArithmeticWordProblemsTwoStepGenerator();
 
-    it('declares invariant cardinality and sign constraints', () => {
+    it('declares invariant multi-step and sign constraints', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([
-            Scope.ThreeOperands,
+            Scope.MultiStep,
             Scope.MultiLevelComposition,
             Scope.NumbersWithoutNegatives,
             Scope.NumbersWithoutZero

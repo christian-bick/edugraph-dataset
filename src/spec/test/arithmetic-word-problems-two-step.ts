@@ -4,7 +4,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.ThreeOperands,
+        Scope.MultiStep,
         Scope.MultiLevelComposition,
         Scope.ArabicNumerals,
         Scope.Base10,

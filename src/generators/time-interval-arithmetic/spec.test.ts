@@ -10,7 +10,7 @@ describe('TimeIntervalArithmeticGenerator spec integration', () => {
             Scope.TimeIntervals,
             Scope.MinuteIntervals,
             Scope.IntegerNumbers,
-            Scope.TwoOperands,
+            Scope.SingleStep,
             operation
         ]);
 

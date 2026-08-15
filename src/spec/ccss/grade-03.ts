@@ -18,7 +18,7 @@ import {
 
 const multiplicationDivisionWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -147,7 +147,7 @@ const multiplicationDistributiveBuilder = new DatasetPermutationBuilder()
 // --- 3.OA.D.8: Solve connected two-step word problems ---
 const fourOperationTwoStepBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.ThreeOperands,
+        Scope.MultiStep,
         Scope.MultiLevelComposition,
         Scope.ArabicNumerals,
         Scope.Base10,
@@ -275,7 +275,7 @@ const timeIntervalWordProblemsBuilder = new DatasetPermutationBuilder()
         Scope.TimeIntervals,
         Scope.MinuteIntervals,
         Scope.IntegerNumbers,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Ability.ProcedureExecution,
         Ability.TextualReception
     ])
@@ -309,7 +309,7 @@ const estimateMassBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([[Scope.GramScale], [Scope.KilogramScale]]);
 
 const massVolumeWordProblemsBuilder = new DatasetPermutationBuilder()
-    .addLabels([Scope.TwoOperands, Ability.TextualReception])
+    .addLabels([Scope.SingleStep, Ability.TextualReception])
     .applyLabelVariants([
         [Scope.WeightMeasurement, Scope.GramScale],
         [Scope.WeightMeasurement, Scope.KilogramScale],
@@ -336,7 +336,7 @@ const oneStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
         Area.Subtraction,
         Scope.IntegerNumbers,
         Scope.BarGraph,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
@@ -347,7 +347,7 @@ const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
         Area.Subtraction,
         Scope.IntegerNumbers,
         Scope.BarGraph,
-        Scope.ThreeOperands,
+        Scope.MultiStep,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);

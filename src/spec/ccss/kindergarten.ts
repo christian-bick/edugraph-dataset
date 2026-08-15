@@ -185,7 +185,7 @@ const representOperationsBuilder = new DatasetPermutationBuilder()
 // --- K.OA.A.2: Solve addition and subtraction word problems within 10 ---
 const wordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,

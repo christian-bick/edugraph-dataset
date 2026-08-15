@@ -26,7 +26,7 @@ const barGraphProblemsBuilder = new DatasetPermutationBuilder()
         Scope.IntegerNumbers,
         Scope.BarGraph,
         Scope.StepsOf1,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -40,7 +40,7 @@ const scaledBarComparisonBuilder = new DatasetPermutationBuilder()
         Area.Subtraction,
         Scope.IntegerNumbers,
         Scope.BarGraph,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
@@ -51,7 +51,7 @@ const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
         Area.Subtraction,
         Scope.IntegerNumbers,
         Scope.BarGraph,
-        Scope.ThreeOperands,
+        Scope.MultiStep,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);

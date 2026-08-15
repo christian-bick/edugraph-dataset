@@ -17,7 +17,7 @@ import {
 // --- 2.OA.A.1: One-step word problems within 100 ---
 const oneStepWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -33,7 +33,7 @@ const oneStepWordProblemsBuilder = new DatasetPermutationBuilder()
 // --- 2.OA.A.1: Two-step word problems within 100 ---
 const twoStepWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.ThreeOperands,
+        Scope.MultiStep,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -408,7 +408,7 @@ const measuredLengthDifferenceBuilder = new DatasetPermutationBuilder()
 const lengthWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.LengthMeasurement,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Scope.NumbersSmaller100,
         Ability.TextualReception
     ])
@@ -463,7 +463,7 @@ const nearestFiveMinuteTimeBuilder = new DatasetPermutationBuilder()
 const currencyWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.Dollar,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Ability.TextualReception
     ])
     .applyLabelVariants([

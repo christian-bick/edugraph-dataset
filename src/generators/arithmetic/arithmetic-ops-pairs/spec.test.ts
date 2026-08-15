@@ -10,8 +10,9 @@ const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.D
 describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
     const generator = new ArithmeticOpsPairsGenerator();
 
-    it('declares its invariant binary operand cardinality', () => {
+    it('declares its invariant binary operand cardinality and single-step complexity', () => {
         expect(spec.generalLabels).toContain(Scope.TwoOperands);
+        expect(spec.generalLabels).toContain(Scope.SingleStep);
     });
 
     it('resolves nonzero and nonnegative labels into universally valid samples', () => {

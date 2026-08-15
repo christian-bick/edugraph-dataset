@@ -9,7 +9,7 @@ import { BeyondScopeEntry, CompetencyTarget, ImplementationTodo, OntologyTodo, T
 // --- 1.OA.A.1: Addition and subtraction word problems within 20 ---
 const wordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,

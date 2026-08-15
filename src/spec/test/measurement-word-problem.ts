@@ -3,7 +3,7 @@ import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutatio
 import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
-    .addLabels([Scope.TwoOperands, Ability.TextualReception])
+    .addLabels([Scope.SingleStep, Ability.TextualReception])
     .applyLabelVariants([
         [Scope.WeightMeasurement, Scope.GramScale],
         [Scope.WeightMeasurement, Scope.KilogramScale],

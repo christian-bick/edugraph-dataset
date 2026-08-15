@@ -7,7 +7,7 @@ import {resolveTwoStepOperations} from '../helpers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-word-problems-two-step',
     generalLabels: [
-        Scope.ThreeOperands,
+        Scope.MultiStep,
         Scope.MultiLevelComposition,
         Scope.IntegerNumbers,
         Scope.Base10,

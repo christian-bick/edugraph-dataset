@@ -12,8 +12,8 @@ export const StatisticalGraphsGeneratorSchema = {
     scale: [Scope.StepsOf1, Scope.StepsOf2, Scope.StepsOf5, Scope.StepsOf10],
     useAddition: [[Area.Addition], hasLabel(Area.Addition)],
     useSubtraction: [[Area.Subtraction], hasLabel(Area.Subtraction)],
-    useTwoOperands: [[Scope.TwoOperands], hasLabel(Scope.TwoOperands)],
-    useThreeOperands: [[Scope.ThreeOperands], hasLabel(Scope.ThreeOperands)]
+    isSingleStep: [[Scope.SingleStep], hasLabel(Scope.SingleStep)],
+    isMultiStep: [[Scope.MultiStep], hasLabel(Scope.MultiStep)]
 } as const;
 
 export type StatisticalGraphsGeneratorConfig = ConfigFromSchema<typeof StatisticalGraphsGeneratorSchema>;

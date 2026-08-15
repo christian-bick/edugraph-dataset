@@ -14,7 +14,7 @@ describe('CurrencyArithmeticGenerator spec', () => {
         setSeed(4);
         const problem = generateWithLabels(new CurrencyArithmeticGenerator(), [
             Scope.Dollar,
-            Scope.TwoOperands,
+            Scope.SingleStep,
             Scope.Coins,
             denomination,
             Area.Addition,
@@ -29,7 +29,7 @@ describe('CurrencyArithmeticGenerator spec', () => {
         setSeed(7);
         const problem = generateWithLabels(new CurrencyArithmeticGenerator(), [
             Scope.Dollar,
-            Scope.TwoOperands,
+            Scope.SingleStep,
             Scope.Banknotes,
             Scope.MajorDenomination,
             Area.Subtraction,

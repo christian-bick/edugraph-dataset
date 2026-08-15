@@ -44,27 +44,27 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
 
     generate(config: StatisticalGraphsGeneratorConfig): ProblemStub<StatisticalGraphProblem> {
         validateConfigFields('statistical-graphs', config, [
-            'scale', 'useAddition', 'useSubtraction', 'useTwoOperands', 'useThreeOperands'
+            'scale', 'useAddition', 'useSubtraction', 'isSingleStep', 'isMultiStep'
         ]);
         if (config.useAddition && config.useSubtraction) {
             throw new GeneratorValidationError('statistical-graphs', 'A graph question cannot require both addition and subtraction.');
         }
         const hasOperation = config.useAddition || config.useSubtraction;
-        const operandCardinalities = Number(config.useTwoOperands) + Number(config.useThreeOperands);
-        if (hasOperation !== (operandCardinalities === 1)) {
-            throw new GeneratorValidationError('statistical-graphs', 'Arithmetic graph questions require exactly one operand cardinality.');
+        const stepComplexities = Number(config.isSingleStep) + Number(config.isMultiStep);
+        if (hasOperation !== (stepComplexities === 1)) {
+            throw new GeneratorValidationError('statistical-graphs', 'Arithmetic graph questions require exactly one step complexity.');
         }
-        if (config.useThreeOperands && !config.useSubtraction) {
-            throw new GeneratorValidationError('statistical-graphs', 'Three-operand graph questions require subtraction.');
+        if (config.isMultiStep && !config.useSubtraction) {
+            throw new GeneratorValidationError('statistical-graphs', 'Multi-step graph questions require subtraction.');
         }
 
         const scale = scaleValues[config.scale!];
-        const counts = (config.useThreeOperands ? connectedSubtractionCounts() : uniqueCounts())
+        const counts = (config.isMultiStep ? connectedSubtractionCounts() : uniqueCounts())
             .map(count => count * scale);
         const categories = labels.map((label, index) => ({label, count: counts[index]}));
         if (!hasOperation) return {data: {categories, scale}};
 
-        if (config.useThreeOperands) {
+        if (config.isMultiStep) {
             const firstIndex = counts.indexOf(Math.max(...counts));
             const [secondIndex, thirdIndex] = [0, 1, 2].filter(index => index !== firstIndex);
             const intermediate = counts[firstIndex] - counts[secondIndex];

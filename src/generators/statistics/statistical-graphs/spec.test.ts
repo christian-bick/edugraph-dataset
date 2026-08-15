@@ -35,18 +35,18 @@ describe('statistical-graphs spec', () => {
     it.each([
         [Area.Addition, 'addition'],
         [Area.Subtraction, 'subtraction']
-    ] as const)('resolves %s for a two-operand graph question', (operationLabel, operation) => {
+    ] as const)('resolves %s for a single-step graph question', (operationLabel, operation) => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics,
             Scope.IntegerNumbers,
             Scope.BarGraph,
             Scope.StepsOf1,
-            Scope.TwoOperands,
+            Scope.SingleStep,
             Ability.ProcedureExecution,
             operationLabel
         ])!;
         expect(result.data.operation).toBe(operation);
-        expect(result.tags).toEqual(expect.arrayContaining([Scope.TwoOperands, operationLabel]));
+        expect(result.tags).toEqual(expect.arrayContaining([Scope.SingleStep, operationLabel]));
     });
 
     it.each([
@@ -60,7 +60,7 @@ describe('statistical-graphs spec', () => {
             Scope.IntegerNumbers,
             Scope.BarGraph,
             scaleLabel,
-            Scope.TwoOperands,
+            Scope.SingleStep,
             Ability.ProcedureExecution
         ])!.data;
         const [firstIndex, secondIndex] = data.operandIndices!;
@@ -73,14 +73,14 @@ describe('statistical-graphs spec', () => {
         expect(data.categories.every(({count}) => count % scale === 0)).toBe(true);
     });
 
-    it('resolves a connected three-operand scaled subtraction comparison', () => {
+    it('resolves a connected multi-step scaled subtraction comparison', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics,
             Area.Subtraction,
             Scope.IntegerNumbers,
             Scope.BarGraph,
             Scope.StepsOf5,
-            Scope.ThreeOperands,
+            Scope.MultiStep,
             Ability.ProcedureExecution
         ])!;
         if (result.data.operandIndices?.length !== 3) throw new Error('Expected three operand indices.');
@@ -90,6 +90,6 @@ describe('statistical-graphs spec', () => {
 
         expect(result.data.intermediate).toBe(first - second);
         expect(result.data.answer).toBe(result.data.intermediate! - third);
-        expect(result.tags).toEqual(expect.arrayContaining([Area.Subtraction, Scope.ThreeOperands]));
+        expect(result.tags).toEqual(expect.arrayContaining([Area.Subtraction, Scope.MultiStep]));
     });
 });

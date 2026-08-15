@@ -11,8 +11,8 @@ describe('StatisticalGraphsGenerator', () => {
         scale: Scope.StepsOf1,
         useAddition: false,
         useSubtraction: false,
-        useTwoOperands: false,
-        useThreeOperands: false
+        isSingleStep: false,
+        isMultiStep: false
     } as const;
 
     it('generates three distinct positive whole-number category counts', () => {
@@ -43,7 +43,7 @@ describe('StatisticalGraphsGenerator', () => {
         [true, false, 'addition'],
         [false, true, 'subtraction']
     ] as const)('generates a coherent %s graph question', (useAddition, useSubtraction, operation) => {
-        const data = generator.generate({...baseConfig, useAddition, useSubtraction, useTwoOperands: true}).data;
+        const data = generator.generate({...baseConfig, useAddition, useSubtraction, isSingleStep: true}).data;
         const [firstIndex, secondIndex] = data.operandIndices!;
         const first = data.categories[firstIndex].count;
         const second = data.categories[secondIndex].count;
@@ -53,12 +53,12 @@ describe('StatisticalGraphsGenerator', () => {
         if (operation === 'subtraction') expect(first).toBeGreaterThan(second);
     });
 
-    it('generates a connected three-operand subtraction question', () => {
+    it('generates a connected multi-step subtraction question', () => {
         const data = generator.generate({
             ...baseConfig,
             scale: Scope.StepsOf5,
             useSubtraction: true,
-            useThreeOperands: true
+            isMultiStep: true
         }).data;
         if (data.operandIndices?.length !== 3) throw new Error('Expected three operand indices.');
         const [firstIndex, secondIndex, thirdIndex] = data.operandIndices;
@@ -74,10 +74,10 @@ describe('StatisticalGraphsGenerator', () => {
 
     it('rejects contradictory configurations', () => {
         expect(() => generator.generate({})).toThrow();
-        expect(() => generator.generate({...baseConfig, useAddition: true, useSubtraction: true, useTwoOperands: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, useAddition: true, useTwoOperands: false})).toThrow();
-        expect(() => generator.generate({...baseConfig, useTwoOperands: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, useSubtraction: true, useTwoOperands: true, useThreeOperands: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, useAddition: true, useThreeOperands: true})).toThrow();
+        expect(() => generator.generate({...baseConfig, useAddition: true, useSubtraction: true, isSingleStep: true})).toThrow();
+        expect(() => generator.generate({...baseConfig, useAddition: true, isSingleStep: false})).toThrow();
+        expect(() => generator.generate({...baseConfig, isSingleStep: true})).toThrow();
+        expect(() => generator.generate({...baseConfig, useSubtraction: true, isSingleStep: true, isMultiStep: true})).toThrow();
+        expect(() => generator.generate({...baseConfig, useAddition: true, isMultiStep: true})).toThrow();
     });
 });

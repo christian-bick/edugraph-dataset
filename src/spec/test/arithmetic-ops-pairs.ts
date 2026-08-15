@@ -54,7 +54,7 @@ const oneDigitTimesMultipleOfTenBuilder = new DatasetPermutationBuilder()
 
 const wordProblemBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -85,7 +85,7 @@ const unknownAddendBuilder = new DatasetPermutationBuilder()
 const lengthWordProblemBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.LengthMeasurement,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Scope.NumbersSmaller100,
         Ability.TextualReception
     ])

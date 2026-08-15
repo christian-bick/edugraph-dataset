@@ -10,7 +10,8 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10,
-        Scope.TwoOperands
+        Scope.TwoOperands,
+        Scope.SingleStep
     ]
 };
 
