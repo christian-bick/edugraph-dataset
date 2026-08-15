@@ -1,2 +1,3 @@
-- **Identity:** The image makes exactly one task identifiable: partitioning a whole, naming a highlighted share, composing a whole, or comparing a half with a fourth.
-- **Modes:** Question Mode withholds the requested partition, vocabulary, composition, or comparison result; Solution Mode reveals it while preserving the visual evidence that defines the task.
+- **Identity:** The image makes exactly one task identifiable: partitioning a whole, labeling one equal part as a unit fraction, interpreting highlighted equal parts as a fraction, naming a highlighted share, composing a whole, or comparing a half with a fourth.
+- **Equal-part evidence:** For 2, 3, 4, 6, or 8 parts, every region has equal area; the visible partition count agrees with the denominator, and the highlighted-region count agrees with the numerator.
+- **Modes:** Question Mode withholds the requested construction, label, vocabulary, composition, or comparison result while retaining any source fraction model needed to answer; Solution Mode reveals the result and preserves its defining visual evidence.

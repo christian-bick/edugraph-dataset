@@ -496,7 +496,7 @@ const partitionEqualAreaPartsBuilder = new DatasetPermutationBuilder()
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.VisualArticulation,
-        Ability.ActiveVocabulary
+        Ability.Formalization
     ])
     .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);
 
@@ -577,13 +577,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const fractionModelsGrade3Implementation = defineImplementationPackage({
-    id: 'fraction-models-grade-3',
-    description: 'Model unit and non-unit fractions and create equal-area partitions for Grade 3 denominators.',
-    generators: [{ module: 'shape-partition', strategy: 'expand' }],
-    views: [{ module: 'shape-partition-equal', strategy: 'expand' }]
-});
-
 const fractionNumberLineImplementation = defineImplementationPackage({
     id: 'fraction-number-line',
     description: 'Locate unit and non-unit fractions by iterating equal lengths from zero.',
@@ -655,6 +648,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.D.8-area-perimeter-relations', areaPerimeterRelationsBuilder),
     ...toTargets('3.G.A.1-classify-quadrilateral-subcategories', classifyQuadrilateralSubcategoriesBuilder),
     ...toTargets('3.G.A.1-draw-other-quadrilateral', drawOtherQuadrilateralBuilder),
+    ...toTargets('3.G.A.2-partition-equal-area-parts', partitionEqualAreaPartsBuilder),
+    ...toTargets('3.NF.A.1-fractions-of-a-whole', interpretFractionsOfWholeBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -662,8 +657,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.G.A.2-partition-equal-area-parts', partitionEqualAreaPartsBuilder, fractionModelsGrade3Implementation, 'Partition equal areas and label one part as a unit fraction.'),
-    ...toImplementationTodos('3.NF.A.1-fractions-of-a-whole', interpretFractionsOfWholeBuilder, fractionModelsGrade3Implementation, 'Align the whole, equal shares, highlighted numerator count, and fraction notation.'),
     ...toImplementationTodos('3.NF.A.2a-unit-fractions-number-line', locateUnitFractionsBuilder, fractionNumberLineImplementation, 'Partition zero to one and locate one unit-fraction length.'),
     ...toImplementationTodos('3.NF.A.2b-non-unit-fractions-number-line', locateNonUnitFractionsBuilder, fractionNumberLineImplementation, 'Iterate unit-fraction lengths from zero to the requested endpoint.'),
     ...toImplementationTodos('3.NF.A.3a-recognize-equivalent-fractions', recognizeEquivalentFractionsBuilder, fractionEquivalenceImplementation, 'Show distinct notations occupying the same model size or number-line point.'),

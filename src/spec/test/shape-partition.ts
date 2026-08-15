@@ -38,9 +38,31 @@ const comparisonBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);
 
+const partitionAndLabelBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ProportionSense,
+        Scope.EqualShares,
+        Scope.UnitFractions,
+        Ability.VisualArticulation,
+        Ability.Formalization
+    ])
+    .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);
+
+const interpretFractionBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionNotation,
+        Area.ProportionSense,
+        Scope.EqualShares,
+        Ability.ConceptDerivation
+    ])
+    .applyLabelVariants([[Scope.UnitFractions], [Scope.NonUnitFractions]])
+    .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-partition', partitionBuilder),
     ...toTargets('test-shape-share-vocabulary', vocabularyBuilder),
     ...toTargets('test-shape-share-composition', compositionBuilder),
-    ...toTargets('test-shape-share-comparison', comparisonBuilder)
+    ...toTargets('test-shape-share-comparison', comparisonBuilder),
+    ...toTargets('test-shape-partition-and-label-unit-fraction', partitionAndLabelBuilder),
+    ...toTargets('test-shape-interpret-fraction', interpretFractionBuilder)
 ];

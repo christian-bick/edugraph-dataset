@@ -14,7 +14,10 @@ interface CoreProps {
 
 const PART_WORDS: Record<FractionParts, string> = {
     2: 'two',
-    4: 'four'
+    3: 'three',
+    4: 'four',
+    6: 'six',
+    8: 'eight'
 };
 
 function validateShape(shape: string): asserts shape is FractionShape {
@@ -24,33 +27,140 @@ function validateShape(shape: string): asserts shape is FractionShape {
 }
 
 function validateParts(parts: number): asserts parts is FractionParts {
+    if (parts !== 2 && parts !== 3 && parts !== 4 && parts !== 6 && parts !== 8) {
+        throw new ViewValidationError('shape-partition-equal', 'Expected 2, 3, 4, 6, or 8 equal parts.');
+    }
+}
+
+function validateLegacyParts(parts: number): asserts parts is 2 | 4 {
     if (parts !== 2 && parts !== 4) {
         throw new ViewValidationError('shape-partition-equal', 'Expected two or four equal parts.');
     }
 }
 
-function CircleShare({parts, index, fill}: {parts: FractionParts; index: number; fill: string}) {
-    const paths = parts === 2
-        ? [
+function circlePoint(angle: number, radius = 80): {x: number; y: number} {
+    const radians = angle * Math.PI / 180;
+    return {
+        x: 150 + radius * Math.cos(radians),
+        y: 100 + radius * Math.sin(radians)
+    };
+}
+
+function circleSharePath(parts: FractionParts, index: number): string {
+    if (parts === 2) {
+        return [
             'M 150 100 L 150 20 A 80 80 0 0 0 150 180 Z',
             'M 150 100 L 150 20 A 80 80 0 0 1 150 180 Z'
-        ]
-        : [
+        ][index];
+    }
+    if (parts === 4) {
+        return [
             'M 150 100 L 150 20 A 80 80 0 0 1 230 100 Z',
             'M 150 100 L 230 100 A 80 80 0 0 1 150 180 Z',
             'M 150 100 L 150 180 A 80 80 0 0 1 70 100 Z',
             'M 150 100 L 70 100 A 80 80 0 0 1 150 20 Z'
-        ];
-    return <path d={paths[index]} fill={fill} />;
+        ][index];
+    }
+    const start = circlePoint(-90 + index * 360 / parts);
+    const end = circlePoint(-90 + (index + 1) * 360 / parts);
+    return `M 150 100 L ${start.x} ${start.y} A 80 80 0 0 1 ${end.x} ${end.y} Z`;
+}
+
+function CircleShare({parts, index, fill}: {parts: FractionParts; index: number; fill: string}) {
+    return <path d={circleSharePath(parts, index)} fill={fill} />;
 }
 
 function RectangleShare({parts, index, fill}: {parts: FractionParts; index: number; fill: string}) {
     if (parts === 2) {
         return <rect x={45 + index * 105} y="35" width="105" height="130" fill={fill} />;
     }
-    const column = index % 2;
-    const row = Math.floor(index / 2);
-    return <rect x={45 + column * 105} y={35 + row * 65} width="105" height="65" fill={fill} />;
+    if (parts === 4) {
+        const column = index % 2;
+        const row = Math.floor(index / 2);
+        return <rect x={45 + column * 105} y={35 + row * 65} width="105" height="65" fill={fill} />;
+    }
+    const columns = parts === 3 || parts === 6 ? 3 : 4;
+    const rows = parts === 3 ? 1 : 2;
+    const width = 210 / columns;
+    const height = 130 / rows;
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    return <rect x={45 + column * width} y={35 + row * height} width={width} height={height} fill={fill} />;
+}
+
+function DivisionLines({shape, parts, stroke}: {shape: FractionShape; parts: FractionParts; stroke: string}) {
+    if (parts === 2 || parts === 4) {
+        return (
+            <>
+                <line
+                    x1="150"
+                    y1={shape === 'circle' ? 20 : 35}
+                    x2="150"
+                    y2={shape === 'circle' ? 180 : 165}
+                    stroke={stroke}
+                    strokeWidth="5"
+                />
+                {parts === 4 && (
+                    <line
+                        x1={shape === 'circle' ? 70 : 45}
+                        y1="100"
+                        x2={shape === 'circle' ? 230 : 255}
+                        y2="100"
+                        stroke={stroke}
+                        strokeWidth="5"
+                    />
+                )}
+            </>
+        );
+    }
+    if (shape === 'circle') {
+        return <>{Array.from({length: parts}, (_, index) => {
+            const point = circlePoint(-90 + index * 360 / parts);
+            return <line key={index} x1="150" y1="100" x2={point.x} y2={point.y} stroke={stroke} strokeWidth="4" />;
+        })}</>;
+    }
+    const columns = parts === 3 || parts === 6 ? 3 : 4;
+    const rows = parts === 3 ? 1 : 2;
+    return (
+        <>
+            {Array.from({length: columns - 1}, (_, index) => (
+                <line
+                    key={`column-${index}`}
+                    x1={45 + (index + 1) * 210 / columns}
+                    y1="35"
+                    x2={45 + (index + 1) * 210 / columns}
+                    y2="165"
+                    stroke={stroke}
+                    strokeWidth="4"
+                />
+            ))}
+            {rows === 2 && <line x1="45" y1="100" x2="255" y2="100" stroke={stroke} strokeWidth="4" />}
+        </>
+    );
+}
+
+function ShareLabel({shape, parts, index, label}: {shape: FractionShape; parts: FractionParts; index: number; label: string}) {
+    if (shape === 'circle') {
+        const point = circlePoint(-90 + (index + 0.5) * 360 / parts, 48);
+        return <text x={point.x} y={point.y} textAnchor="middle" dominantBaseline="middle" fill="#166534" fontSize="20" fontWeight="700">{label}</text>;
+    }
+    const columns = parts === 2 ? 2 : parts === 3 || parts === 6 ? 3 : parts === 4 ? 2 : 4;
+    const rows = parts === 2 || parts === 3 ? 1 : 2;
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    return (
+        <text
+            x={45 + (column + 0.5) * 210 / columns}
+            y={35 + (row + 0.5) * 130 / rows}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="#166534"
+            fontSize="20"
+            fontWeight="700"
+        >
+            {label}
+        </text>
+    );
 }
 
 function PartitionedShape({
@@ -58,16 +168,21 @@ function PartitionedShape({
     parts,
     showDivisions,
     highlightedShare,
+    highlightedShares,
+    shareLabel,
     solvedHighlight = false
 }: {
     shape: FractionShape;
     parts: FractionParts;
     showDivisions: boolean;
     highlightedShare?: number;
+    highlightedShares?: number[];
+    shareLabel?: {index: number; text: string};
     solvedHighlight?: boolean;
 }) {
     const highlightFill = solvedHighlight ? '#dcfce7' : '#bfdbfe';
     const divisionStroke = solvedHighlight ? 'forestgreen' : '#475569';
+    const selectedShares = highlightedShares ?? (highlightedShare === undefined ? [] : [highlightedShare]);
     return (
         <svg
             viewBox="0 0 300 200"
@@ -77,42 +192,18 @@ function PartitionedShape({
             {shape === 'circle' ? (
                 <>
                     <circle cx="150" cy="100" r="80" fill="#f8fafc" />
-                    {highlightedShare !== undefined && (
-                        <CircleShare parts={parts} index={highlightedShare} fill={highlightFill} />
-                    )}
+                    {selectedShares.map(index => <CircleShare key={index} parts={parts} index={index} fill={highlightFill} />)}
                     <circle cx="150" cy="100" r="80" fill="none" stroke="#334155" strokeWidth="5" />
                 </>
             ) : (
                 <>
                     <rect x="45" y="35" width="210" height="130" rx="4" fill="#f8fafc" />
-                    {highlightedShare !== undefined && (
-                        <RectangleShare parts={parts} index={highlightedShare} fill={highlightFill} />
-                    )}
+                    {selectedShares.map(index => <RectangleShare key={index} parts={parts} index={index} fill={highlightFill} />)}
                     <rect x="45" y="35" width="210" height="130" rx="4" fill="none" stroke="#334155" strokeWidth="5" />
                 </>
             )}
-            {showDivisions && (
-                <>
-                    <line
-                        x1="150"
-                        y1={shape === 'circle' ? 20 : 35}
-                        x2="150"
-                        y2={shape === 'circle' ? 180 : 165}
-                        stroke={divisionStroke}
-                        strokeWidth="5"
-                    />
-                    {parts === 4 && (
-                        <line
-                            x1={shape === 'circle' ? 70 : 45}
-                            y1="100"
-                            x2={shape === 'circle' ? 230 : 255}
-                            y2="100"
-                            stroke={divisionStroke}
-                            strokeWidth="5"
-                        />
-                    )}
-                </>
-            )}
+            {showDivisions && <DivisionLines shape={shape} parts={parts} stroke={divisionStroke} />}
+            {shareLabel && <ShareLabel shape={shape} parts={parts} index={shareLabel.index} label={shareLabel.text} />}
         </svg>
     );
 }
@@ -182,7 +273,7 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
     switch (data.task) {
         case 'partition': {
             validateProblemData('shape-partition-equal', data, ['parts']);
-            validateParts(data.parts);
+            validateLegacyParts(data.parts);
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>
@@ -199,7 +290,7 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
         }
         case 'name-share': {
             validateProblemData('shape-partition-equal', data, ['parts', 'shareName', 'selectedShare', 'answer']);
-            validateParts(data.parts);
+            validateLegacyParts(data.parts);
             if (!Number.isInteger(data.selectedShare) || data.selectedShare < 0 || data.selectedShare >= data.parts) {
                 throw new ViewValidationError('shape-partition-equal', 'The selected share must identify one of the equal parts.');
             }
@@ -226,7 +317,7 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
         }
         case 'compose-whole': {
             validateProblemData('shape-partition-equal', data, ['parts', 'shareName', 'answer']);
-            validateParts(data.parts);
+            validateLegacyParts(data.parts);
             const hasMatchingShareName = data.parts === 2
                 ? data.shareName === 'half'
                 : data.shareName === 'fourth';
@@ -297,6 +388,81 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
                                 </div>
                             );
                         })}
+                    </div>
+                </ViewFrame>
+            );
+        }
+        case 'partition-and-label-unit-fraction': {
+            validateProblemData('shape-partition-equal', data, ['parts', 'selectedShare', 'unitFraction', 'answer']);
+            validateParts(data.parts);
+            if (
+                !Number.isInteger(data.selectedShare)
+                || data.selectedShare < 0
+                || data.selectedShare >= data.parts
+                || data.unitFraction !== `1/${data.parts}`
+                || data.answer !== `${data.unitFraction} of the whole`
+            ) {
+                throw new ViewValidationError('shape-partition-equal', 'Expected one valid part labeled with its unit fraction.');
+            }
+            return (
+                <ViewFrame>
+                    <PromptSlot isSolutionView={isSolutionView}>
+                        {`Partition the shape into ${PART_WORDS[data.parts]} equal parts and label one part ${data.unitFraction}.`}
+                    </PromptSlot>
+                    <div className="w-[420px] h-[260px] bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-center box-border">
+                        <PartitionedShape
+                            shape={data.shape}
+                            parts={data.parts}
+                            showDivisions={isSolutionView}
+                            highlightedShare={isSolutionView ? data.selectedShare : undefined}
+                            shareLabel={isSolutionView ? {index: data.selectedShare, text: data.unitFraction} : undefined}
+                            solvedHighlight={isSolutionView}
+                        />
+                    </div>
+                    <AnswerSlot isSolutionView={isSolutionView} answer={data.answer} />
+                </ViewFrame>
+            );
+        }
+        case 'interpret-fraction': {
+            validateProblemData('shape-partition-equal', data, [
+                'parts',
+                'numerator',
+                'highlightedShares',
+                'unitFraction',
+                'fraction',
+                'answer'
+            ]);
+            validateParts(data.parts);
+            const expectedShares = Array.from({length: data.numerator}, (_, index) => index);
+            if (
+                !Number.isInteger(data.numerator)
+                || data.numerator < 1
+                || data.numerator >= data.parts
+                || data.highlightedShares.length !== expectedShares.length
+                || data.highlightedShares.some((share, index) => share !== expectedShares[index])
+                || data.unitFraction !== `1/${data.parts}`
+                || data.fraction !== `${data.numerator}/${data.parts}`
+                || data.answer !== data.fraction
+            ) {
+                throw new ViewValidationError('shape-partition-equal', 'Expected a fraction matching the highlighted equal parts.');
+            }
+            return (
+                <ViewFrame>
+                    <PromptSlot isSolutionView={isSolutionView}>What fraction of the whole is highlighted?</PromptSlot>
+                    <div className="w-[420px] h-[260px] bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-center box-border">
+                        <PartitionedShape
+                            shape={data.shape}
+                            parts={data.parts}
+                            showDivisions
+                            highlightedShares={data.highlightedShares}
+                            solvedHighlight={isSolutionView}
+                        />
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                        <AnswerSlot isSolutionView={isSolutionView} answer={data.answer} />
+                        <div className={`h-[20px] text-sm font-semibold ${isSolutionView ? 'text-slate-600' : 'text-transparent'}`}>
+                            {`${data.numerator} equal ${data.numerator === 1 ? 'part' : 'parts'} of size ${data.unitFraction}`}
+                        </div>
                     </div>
                 </ViewFrame>
             );

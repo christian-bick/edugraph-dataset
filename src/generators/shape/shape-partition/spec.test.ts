@@ -7,12 +7,12 @@ import {ShapePartitionGeneratorSchema, spec} from './spec.ts';
 const generator = new ShapePartitionGenerator();
 
 describe('ShapePartitionGenerator spec integration', () => {
-    it('declares proportional equal-share structure without requiring fraction notation', () => {
+    it('declares proportional equal-share structure and conditionally consumes fraction notation', () => {
         expect(spec.generalLabels).toEqual([
             Area.ProportionSense,
             Scope.EqualShares
         ]);
-        expect(extractSchemaLabels(ShapePartitionGeneratorSchema)).not.toContain(
+        expect(extractSchemaLabels(ShapePartitionGeneratorSchema)).toContain(
             Area.FractionNotation
         );
     });
@@ -59,5 +59,53 @@ describe('ShapePartitionGenerator spec integration', () => {
 
         expect(stub.tags).not.toContain(Scope.UnitFractions);
         expect(stub.tags).not.toContain(Scope.Less);
+    });
+
+    it.each([Area.Circle, Area.Rectangle] as const)(
+        'combines partitioning and unit-fraction labeling for %s models',
+        shape => {
+            const labels = [
+                Area.ProportionSense,
+                Scope.EqualShares,
+                Scope.UnitFractions,
+                Ability.VisualArticulation,
+                Ability.Formalization,
+                shape
+            ];
+            const stub = generateWithLabels(generator, labels)!;
+
+            expect(stub.data.task).toBe('partition-and-label-unit-fraction');
+            expect(stub.tags).toEqual(expect.arrayContaining([
+                shape,
+                Scope.UnitFractions,
+                Ability.VisualArticulation,
+                Ability.Formalization
+            ]));
+        }
+    );
+
+    it.each([
+        [Scope.UnitFractions, Area.Circle],
+        [Scope.UnitFractions, Area.Rectangle],
+        [Scope.NonUnitFractions, Area.Circle],
+        [Scope.NonUnitFractions, Area.Rectangle]
+    ] as const)('interprets %s using a %s model', (fractionType, shape) => {
+        const labels = [
+            Area.ProportionSense,
+            Area.FractionNotation,
+            Scope.EqualShares,
+            fractionType,
+            Ability.ConceptDerivation,
+            shape
+        ];
+        const stub = generateWithLabels(generator, labels)!;
+
+        expect(stub.data.task).toBe('interpret-fraction');
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            shape,
+            fractionType,
+            Area.FractionNotation,
+            Ability.ConceptDerivation
+        ]));
     });
 });

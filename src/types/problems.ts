@@ -581,19 +581,19 @@ export type ShapeComposeShapesProblem = {
 };
 
 export type FractionShape = 'circle' | 'rectangle';
-export type FractionParts = 2 | 4;
+export type FractionParts = 2 | 3 | 4 | 6 | 8;
 export type FractionShareName = 'half' | 'fourth' | 'quarter';
 
 export type ShapePartitionProblem =
     | {
         task: 'partition';
         shape: FractionShape;
-        parts: FractionParts;
+        parts: 2 | 4;
     }
     | {
         task: 'name-share';
         shape: FractionShape;
-        parts: FractionParts;
+        parts: 2 | 4;
         shareName: FractionShareName;
         /** Zero-based index of the share being named. */
         selectedShare: number;
@@ -602,7 +602,7 @@ export type ShapePartitionProblem =
     | {
         task: 'compose-whole';
         shape: FractionShape;
-        parts: FractionParts;
+        parts: 2 | 4;
         shareName: 'half' | 'fourth';
         answer: 'one whole';
     }
@@ -615,6 +615,24 @@ export type ShapePartitionProblem =
         ];
         relation: 'less';
         answer: 'fourth';
+    }
+    | {
+        task: 'partition-and-label-unit-fraction';
+        shape: FractionShape;
+        parts: FractionParts;
+        selectedShare: number;
+        unitFraction: string;
+        answer: string;
+    }
+    | {
+        task: 'interpret-fraction';
+        shape: FractionShape;
+        parts: FractionParts;
+        numerator: number;
+        highlightedShares: number[];
+        unitFraction: string;
+        fraction: string;
+        answer: string;
     };
 
 export type ShapeSquareArrayProblem = {

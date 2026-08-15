@@ -1,4 +1,4 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -12,8 +12,9 @@ function config(
 ): ShapePartitionGeneratorConfig {
     return {
         shape: Area.Circle,
-        taskAbility: Ability.VisualArticulation,
-        unitFractions: false,
+        taskAbilities: [Ability.VisualArticulation],
+        fractionTypes: [],
+        fractionNotation: false,
         isLessComparison: false,
         ...overrides
     };
@@ -29,9 +30,10 @@ describe('ShapePartitionGenerator', () => {
         expect(() => generator.generate({shape: Area.Circle})).toThrow(
             GeneratorValidationError
         );
-        expect(() => generator.generate(config({unitFractions: undefined}))).toThrow(
+        expect(() => generator.generate(config({fractionTypes: undefined}))).toThrow(
             GeneratorValidationError
         );
+        expect(() => generator.generate(config({fractionNotation: undefined}))).toThrow(GeneratorValidationError);
         expect(() => generator.generate(config({isLessComparison: undefined}))).toThrow(
             GeneratorValidationError
         );
@@ -48,8 +50,8 @@ describe('ShapePartitionGenerator', () => {
             for (const unitFractions of [false, true]) {
                 for (const isLessComparison of [false, true]) {
                     const stub = generator.generate(config({
-                        taskAbility,
-                        unitFractions,
+                        taskAbilities: [taskAbility],
+                        fractionTypes: unitFractions ? [Scope.UnitFractions] : [],
                         isLessComparison
                     }));
                     expect(stub === null).toBe(
@@ -66,7 +68,7 @@ describe('ShapePartitionGenerator', () => {
             shape: 'unsupported-shape' as typeof Area.Circle
         }))).toBeNull();
         expect(generator.generate(config({
-            taskAbility: 'unsupported-ability' as typeof Ability.VisualArticulation
+            taskAbilities: ['unsupported-ability']
         }))).toBeNull();
     });
 
@@ -95,8 +97,8 @@ describe('ShapePartitionGenerator', () => {
         for (let seed = 0; seed < 200; seed++) {
             setSeed(seed);
             const stub = generator.generate(config({
-                taskAbility: Ability.ActiveVocabulary,
-                unitFractions: true
+                taskAbilities: [Ability.ActiveVocabulary],
+                fractionTypes: [Scope.UnitFractions]
             }))!;
 
             expect(stub.data.task).toBe('name-share');
@@ -123,8 +125,8 @@ describe('ShapePartitionGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generator.generate(config({
-                taskAbility: Ability.ConceptComposition,
-                unitFractions: true
+                taskAbilities: [Ability.ConceptComposition],
+                fractionTypes: [Scope.UnitFractions]
             }))!;
 
             expect(stub.data.task).toBe('compose-whole');
@@ -139,8 +141,8 @@ describe('ShapePartitionGenerator', () => {
 
     it('directly compares halves and fourths and identifies the smaller share', () => {
         const stub = generator.generate(config({
-            taskAbility: Ability.ConceptDerivation,
-            unitFractions: true,
+            taskAbilities: [Ability.ConceptDerivation],
+            fractionTypes: [Scope.UnitFractions],
             isLessComparison: true
         }))!;
 
@@ -154,5 +156,42 @@ describe('ShapePartitionGenerator', () => {
             relation: 'less',
             answer: 'fourth'
         });
+    });
+
+    it('partitions and labels every Grade 3 denominator as a unit fraction', () => {
+        const seen = new Set<number>();
+        for (let seed = 0; seed < 300; seed++) {
+            setSeed(seed);
+            const stub = generator.generate(config({
+                taskAbilities: [Ability.VisualArticulation, Ability.Formalization],
+                fractionTypes: [Scope.UnitFractions]
+            }))!;
+            expect(stub.data.task).toBe('partition-and-label-unit-fraction');
+            if (stub.data.task !== 'partition-and-label-unit-fraction') continue;
+            expect(stub.data.unitFraction).toBe(`1/${stub.data.parts}`);
+            expect(stub.data.answer).toBe(`${stub.data.unitFraction} of the whole`);
+            seen.add(stub.data.parts);
+        }
+        expect(seen).toEqual(new Set([2, 3, 4, 6, 8]));
+    });
+
+    it.each([
+        [Scope.UnitFractions, true],
+        [Scope.NonUnitFractions, false]
+    ] as const)('interprets %s from highlighted equal parts', (fractionType, isUnit) => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const stub = generator.generate(config({
+                taskAbilities: [Ability.ConceptDerivation],
+                fractionTypes: [fractionType],
+                fractionNotation: true
+            }))!;
+            expect(stub.data.task).toBe('interpret-fraction');
+            if (stub.data.task !== 'interpret-fraction') continue;
+            expect(stub.data.numerator === 1).toBe(isUnit);
+            expect(stub.data.highlightedShares).toHaveLength(stub.data.numerator);
+            expect(stub.data.unitFraction).toBe(`1/${stub.data.parts}`);
+            expect(stub.data.fraction).toBe(`${stub.data.numerator}/${stub.data.parts}`);
+        }
     });
 });
