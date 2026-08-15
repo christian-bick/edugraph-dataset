@@ -35,9 +35,27 @@ const interpretCoverageBuilder = new DatasetPermutationBuilder().addLabels([
     Ability.Interpretation
 ]);
 
+const countAreaBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.AreaCalculation,
+        Area.Iteration,
+        Area.Square,
+        Scope.TileScale,
+        Scope.IntegerNumbers,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [],
+        [Scope.SquareCentimeterScale],
+        [Scope.SquareMeterScale],
+        [Scope.SquareInchScale],
+        [Scope.SquareFootScale]
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-square-array-partition', partitionBuilder),
     ...toTargets('test-shape-square-array-count', countBuilder),
     ...toTargets('test-shape-square-array-interpret-unit', interpretUnitBuilder),
-    ...toTargets('test-shape-square-array-interpret-coverage', interpretCoverageBuilder)
+    ...toTargets('test-shape-square-array-interpret-coverage', interpretCoverageBuilder),
+    ...toTargets('test-shape-square-array-count-area', countAreaBuilder)
 ];

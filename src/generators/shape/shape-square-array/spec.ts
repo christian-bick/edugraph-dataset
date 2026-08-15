@@ -17,6 +17,10 @@ export const ShapeSquareArrayGeneratorSchema = {
             Scope.BoxArrangement,
             Scope.EqualShares,
             Scope.IntegerNumbers,
+            Scope.SquareCentimeterScale,
+            Scope.SquareFootScale,
+            Scope.SquareInchScale,
+            Scope.SquareMeterScale,
             Scope.TileScale
         ],
         matchAllExactLabels

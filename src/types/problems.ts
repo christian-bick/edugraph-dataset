@@ -583,10 +583,11 @@ export type ShapePartitionProblem =
     };
 
 export type ShapeSquareArrayProblem = {
-    task: 'interpret-unit' | 'interpret-coverage' | 'partition' | 'count';
+    task: 'interpret-unit' | 'interpret-coverage' | 'partition' | 'count' | 'count-area';
     rows: 1 | 2 | 3 | 4 | 5;
     columns: 1 | 2 | 3 | 4 | 5;
     squareCount: number;
+    areaUnit?: 'square units' | 'square centimeters' | 'square meters' | 'square inches' | 'square feet';
 };
 
 export type ShapePartitionEquivalenceProblem = {

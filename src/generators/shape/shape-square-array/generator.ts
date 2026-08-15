@@ -23,6 +23,13 @@ const ARRAY_DIMENSIONS = [
     [5, 4]
 ] as const;
 
+const AREA_UNITS = new Map<string, ShapeSquareArrayProblem['areaUnit']>([
+    [Scope.SquareCentimeterScale, 'square centimeters'],
+    [Scope.SquareMeterScale, 'square meters'],
+    [Scope.SquareInchScale, 'square inches'],
+    [Scope.SquareFootScale, 'square feet']
+]);
+
 export class ShapeSquareArrayGenerator implements ProblemGenerator<
     ShapeSquareArrayProblem,
     ShapeSquareArrayGeneratorConfig
@@ -62,10 +69,6 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
             };
         }
 
-        const hasArrayModel = [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares]
-            .every(label => config.modelFeatures?.includes(label));
-        if (!hasArrayModel) return null;
-
         const task = config.taskAbility === Ability.VisualArticulation
             ? 'partition'
             : config.taskAbility === Ability.ProcedureExecution
@@ -76,6 +79,27 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
         const [rows, columns] = ARRAY_DIMENSIONS[
             Math.floor(random() * ARRAY_DIMENSIONS.length)
         ];
+
+        const measuresArea = [Area.AreaCalculation, Area.Iteration, Scope.IntegerNumbers, Scope.TileScale]
+            .every(label => config.modelFeatures?.includes(label));
+        if (task === 'count' && measuresArea) {
+            const namedUnit = config.modelFeatures
+                ?.map(label => AREA_UNITS.get(label))
+                .find(unit => unit !== undefined);
+            return {
+                data: {
+                    task: 'count-area',
+                    rows,
+                    columns,
+                    squareCount: rows * columns,
+                    areaUnit: namedUnit ?? 'square units'
+                }
+            };
+        }
+
+        const hasArrayModel = [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares]
+            .every(label => config.modelFeatures?.includes(label));
+        if (!hasArrayModel) return null;
 
         return {
             data: {

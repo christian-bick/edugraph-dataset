@@ -68,4 +68,26 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
             Ability.Interpretation
         ]));
     });
+
+    it.each([
+        [undefined, 'square units'],
+        [Scope.SquareCentimeterScale, 'square centimeters'],
+        [Scope.SquareMeterScale, 'square meters'],
+        [Scope.SquareInchScale, 'square inches'],
+        [Scope.SquareFootScale, 'square feet']
+    ] as const)('resolves area counting for %s', (scale, areaUnit) => {
+        const stub = generateWithLabels(generator, [
+            Area.AreaCalculation,
+            Area.Iteration,
+            Area.Square,
+            Scope.TileScale,
+            Scope.IntegerNumbers,
+            Ability.ProcedureExecution,
+            ...(scale ? [scale] : [])
+        ])!;
+
+        expect(stub.data.task).toBe('count-area');
+        expect(stub.data.areaUnit).toBe(areaUnit);
+        expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
+    });
 });

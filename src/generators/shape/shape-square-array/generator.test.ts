@@ -63,6 +63,29 @@ describe('ShapeSquareArrayGenerator', () => {
         expect(data.columns).toBeGreaterThanOrEqual(2);
     });
 
+    it.each([
+        [undefined, 'square units'],
+        [Scope.SquareCentimeterScale, 'square centimeters'],
+        [Scope.SquareMeterScale, 'square meters'],
+        [Scope.SquareInchScale, 'square inches'],
+        [Scope.SquareFootScale, 'square feet']
+    ] as const)('carries %s into the area-count payload', (scale, areaUnit) => {
+        const data = generator.generate({
+            modelFeatures: [
+                Area.AreaCalculation,
+                Area.Iteration,
+                Scope.IntegerNumbers,
+                Scope.TileScale,
+                ...(scale ? [scale] : [])
+            ],
+            taskAbility: Ability.ProcedureExecution
+        })!.data;
+
+        expect(data.task).toBe('count-area');
+        expect(data.areaUnit).toBe(areaUnit);
+        expect(data.squareCount).toBe(data.rows * data.columns);
+    });
+
     it('rejects abilities without their required model features', () => {
         expect(generator.generate({
             modelFeatures: [Scope.TileScale],

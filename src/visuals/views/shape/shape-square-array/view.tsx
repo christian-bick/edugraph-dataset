@@ -19,8 +19,9 @@ function validateArray(data: ShapeSquareArrayProblem) {
         && data.task !== 'interpret-coverage'
         && data.task !== 'partition'
         && data.task !== 'count'
+        && data.task !== 'count-area'
     ) {
-        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, coverage interpretation, partition, or count task.');
+        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, coverage interpretation, partition, count, or area-count task.');
     }
     if (data.task === 'interpret-unit') {
         if (data.rows !== 1 || data.columns !== 1 || data.squareCount !== 1) {
@@ -41,6 +42,9 @@ function validateArray(data: ShapeSquareArrayProblem) {
     }
     if (data.squareCount !== data.rows * data.columns) {
         throw new ViewValidationError('shape-square-array', 'The square count must equal rows times columns.');
+    }
+    if (data.task === 'count-area' && !data.areaUnit) {
+        throw new ViewValidationError('shape-square-array', 'An area-count task must name its square unit.');
     }
 }
 
@@ -151,6 +155,7 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
 
     const isUnitInterpretation = problem.data.task === 'interpret-unit';
     const isCoverageInterpretation = problem.data.task === 'interpret-coverage';
+    const isAreaCount = problem.data.task === 'count-area';
     const isPartition = problem.data.task === 'partition';
     const showCells = !isPartition || isSolutionView;
 
@@ -162,6 +167,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                         ? 'This square tile has side length 1 unit. What area does it represent?'
                         : isCoverageInterpretation
                             ? 'Unit squares cover this figure exactly. What does the count tell you?'
+                            : isAreaCount
+                                ? `Count the ${problem.data.areaUnit} that cover this figure. What is its area?`
                         : isPartition
                         ? `Partition the rectangle into ${problem.data.rows} rows and ${problem.data.columns} columns of equal squares.`
                         : 'How many equal squares are in the rectangle?'}
@@ -190,6 +197,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                             ? 'Answer: one square unit'
                             : isCoverageInterpretation
                                 ? `Answer: ${problem.data.squareCount} square units of area`
+                                : isAreaCount
+                                    ? `Answer: ${problem.data.squareCount} ${problem.data.areaUnit}`
                             : isPartition
                             ? `Partition: ${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `Answer: ${problem.data.squareCount} equal squares`
@@ -197,6 +206,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                             ? 'Name the area'
                             : isCoverageInterpretation
                                 ? 'Interpret the tile count as area'
+                                : isAreaCount
+                                    ? 'Blank area answer'
                                 : isPartition ? 'Draw the square grid' : 'Blank answer'}
                 >
                     {isSolutionView
@@ -204,6 +215,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                             ? '1 unit × 1 unit = 1 square unit'
                             : isCoverageInterpretation
                                 ? `${problem.data.squareCount} unit squares cover the figure, so its area is ${problem.data.squareCount} square units.`
+                                : isAreaCount
+                                    ? `Area = ${problem.data.squareCount} ${problem.data.areaUnit}`
                             : isPartition
                             ? `${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} equal squares`
@@ -211,6 +224,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                             ? 'Name the area represented.'
                             : isCoverageInterpretation
                                 ? 'Interpret the square-tile count as area.'
+                                : isAreaCount
+                                    ? '\u00a0'
                                 : isPartition ? 'Draw the square grid.' : '\u00a0'}
                 </div>
             </div>
