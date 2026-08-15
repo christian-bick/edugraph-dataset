@@ -21,8 +21,9 @@ function validateArray(data: ShapeSquareArrayProblem) {
         && data.task !== 'count'
         && data.task !== 'count-area'
         && data.task !== 'explain-product'
+        && data.task !== 'calculate-area'
     ) {
-        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, coverage interpretation, partition, count, area-count, or product-explanation task.');
+        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, coverage interpretation, partition, count, area-count, product-explanation, or rectangular-area task.');
     }
     if (data.task === 'interpret-unit') {
         if (data.rows !== 1 || data.columns !== 1 || data.squareCount !== 1) {
@@ -146,7 +147,7 @@ function SquareArray({
     );
 }
 
-const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
+const ShapeSquareArrayCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     validateProblemData('shape-square-array', problem.data, [
         'task',
@@ -160,6 +161,7 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
     const isCoverageInterpretation = problem.data.task === 'interpret-coverage';
     const isAreaCount = problem.data.task === 'count-area';
     const isProductExplanation = problem.data.task === 'explain-product';
+    const isAreaCalculation = problem.data.task === 'calculate-area';
     const isPartition = problem.data.task === 'partition';
     const showCells = !isPartition || isSolutionView;
 
@@ -175,6 +177,10 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                 ? `Count the ${problem.data.areaUnit} that cover this figure. What is its area?`
                                 : isProductExplanation
                                     ? 'Why does multiplying the side lengths give the area of this tiled rectangle?'
+                                    : isAreaCalculation
+                                        ? config.useStory
+                                            ? `A garden is ${problem.data.columns} units long and ${problem.data.rows} units wide. What is its area?`
+                                            : `Find the area of this ${problem.data.columns}-unit by ${problem.data.rows}-unit rectangle.`
                         : isPartition
                         ? `Partition the rectangle into ${problem.data.rows} rows and ${problem.data.columns} columns of equal squares.`
                         : 'How many equal squares are in the rectangle?'}
@@ -186,8 +192,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                             <SquareArray
                                 data={problem.data}
                                 showCells={showCells}
-                                showCount={!isPartition && !isProductExplanation && isSolutionView}
-                                showSideLengths={isProductExplanation}
+                                showCount={!isPartition && !isProductExplanation && !isAreaCalculation && isSolutionView}
+                                showSideLengths={isProductExplanation || isAreaCalculation}
                             />
                         )}
                 </div>
@@ -208,6 +214,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                     ? `Answer: ${problem.data.squareCount} ${problem.data.areaUnit}`
                                     : isProductExplanation
                                         ? `Explanation: ${problem.data.rows} times ${problem.data.columns} equals ${problem.data.squareCount} square units`
+                                        : isAreaCalculation
+                                            ? `Answer: ${problem.data.squareCount} square units`
                             : isPartition
                             ? `Partition: ${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `Answer: ${problem.data.squareCount} equal squares`
@@ -219,6 +227,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                     ? 'Blank area answer'
                                     : isProductExplanation
                                         ? 'Connect side lengths, rows, columns, and area'
+                                        : isAreaCalculation
+                                            ? 'Blank area answer'
                                 : isPartition ? 'Draw the square grid' : 'Blank answer'}
                 >
                     {isSolutionView
@@ -230,6 +240,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                     ? `Area = ${problem.data.squareCount} ${problem.data.areaUnit}`
                                     : isProductExplanation
                                         ? `${problem.data.rows} rows of ${problem.data.columns} unit squares: ${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} square units.`
+                                        : isAreaCalculation
+                                            ? `Area = ${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} square units`
                             : isPartition
                             ? `${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} equal squares`
@@ -241,6 +253,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                     ? '\u00a0'
                                     : isProductExplanation
                                         ? 'Connect the tiled side lengths to multiplication.'
+                                        : isAreaCalculation
+                                            ? '\u00a0'
                                 : isPartition ? 'Draw the square grid.' : '\u00a0'}
                 </div>
             </div>

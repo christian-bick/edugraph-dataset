@@ -19,7 +19,7 @@ describe('ShapeSquareArrayGenerator', () => {
         [Ability.ProcedureExecution, 'count']
     ] as const)('maps %s to the %s task', (taskAbility, expectedTask) => {
         const stub = generator.generate({
-            modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
             taskAbility
         })!;
 
@@ -29,14 +29,14 @@ describe('ShapeSquareArrayGenerator', () => {
 
     it('rejects unsupported abilities', () => {
         expect(generator.generate({
-            modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
             taskAbility: 'unsupported' as typeof Ability.VisualArticulation
         })).toBeNull();
     });
 
     it('creates a single square for tile-scale interpretation', () => {
         expect(generator.generate({
-            modelFeatures: [Scope.TileScale],
+            modelFeatures: [Area.Square, Scope.TileScale],
             taskAbility: Ability.Interpretation
         })!.data).toEqual({
             task: 'interpret-unit',
@@ -51,6 +51,7 @@ describe('ShapeSquareArrayGenerator', () => {
             modelFeatures: [
                 Area.AreaCalculation,
                 Area.Iteration,
+                Area.Square,
                 Scope.IntegerNumbers,
                 Scope.TileScale
             ],
@@ -74,6 +75,7 @@ describe('ShapeSquareArrayGenerator', () => {
             modelFeatures: [
                 Area.AreaCalculation,
                 Area.Iteration,
+                Area.Square,
                 Scope.IntegerNumbers,
                 Scope.TileScale,
                 ...(scale ? [scale] : [])
@@ -91,6 +93,7 @@ describe('ShapeSquareArrayGenerator', () => {
             modelFeatures: [
                 Area.AreaCalculation,
                 Area.Multiplication,
+                Area.Square,
                 Scope.BoxArrangement,
                 Scope.TwoOperands
             ],
@@ -98,6 +101,17 @@ describe('ShapeSquareArrayGenerator', () => {
         })!.data;
 
         expect(data.task).toBe('explain-product');
+        expect(data.areaUnit).toBe('square units');
+        expect(data.squareCount).toBe(data.rows * data.columns);
+    });
+
+    it('calculates rectangular area from two side lengths', () => {
+        const data = generator.generate({
+            modelFeatures: [Area.AreaCalculation, Area.Multiplication, Scope.TwoOperands],
+            taskAbility: Ability.ProcedureExecution
+        })!.data;
+
+        expect(data.task).toBe('calculate-area');
         expect(data.areaUnit).toBe('square units');
         expect(data.squareCount).toBe(data.rows * data.columns);
     });
@@ -117,7 +131,7 @@ describe('ShapeSquareArrayGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const data = generator.generate({
-                modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+                modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
                 taskAbility: Ability.ProcedureExecution
             })!.data;
 
@@ -133,7 +147,7 @@ describe('ShapeSquareArrayGenerator', () => {
     it('is deterministic for a fixed seed', () => {
         setSeed(18);
         const config = {
-            modelFeatures: [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
             taskAbility: Ability.VisualArticulation
         };
         const first = generator.generate(config);

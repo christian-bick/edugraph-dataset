@@ -7,8 +7,8 @@ import {spec} from './spec.ts';
 const generator = new ShapeSquareArrayGenerator();
 
 describe('ShapeSquareArrayGenerator spec integration', () => {
-    it('declares the shared square identity once', () => {
-        expect(spec.generalLabels).toEqual([Area.Square]);
+    it('keeps task-specific shape identities in the schema', () => {
+        expect(spec.generalLabels).toEqual([]);
         expect(spec.generalLabels).not.toContain(Area.Rectangle);
     });
 
@@ -103,6 +103,21 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
         ])!;
 
         expect(stub.data.task).toBe('explain-product');
+        expect(stub.data.areaUnit).toBe('square units');
+        expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
+    });
+
+    it.each([false, true])('resolves rectangular area calculation with story=%s', useStory => {
+        const stub = generateWithLabels(generator, [
+            Area.AreaCalculation,
+            Area.Rectangle,
+            Area.Multiplication,
+            Scope.TwoOperands,
+            Ability.ProcedureExecution,
+            ...(useStory ? [Ability.TextualReception] : [])
+        ])!;
+
+        expect(stub.data.task).toBe('calculate-area');
         expect(stub.data.areaUnit).toBe('square units');
         expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
     });

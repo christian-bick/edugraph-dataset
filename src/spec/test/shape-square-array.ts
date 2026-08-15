@@ -62,11 +62,22 @@ const explainProductBuilder = new DatasetPermutationBuilder().addLabels([
     Ability.ProcedureUnderstanding
 ]);
 
+const calculateAreaBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.AreaCalculation,
+        Area.Rectangle,
+        Area.Multiplication,
+        Scope.TwoOperands,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([[], [Ability.TextualReception]]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-square-array-partition', partitionBuilder),
     ...toTargets('test-shape-square-array-count', countBuilder),
     ...toTargets('test-shape-square-array-interpret-unit', interpretUnitBuilder),
     ...toTargets('test-shape-square-array-interpret-coverage', interpretCoverageBuilder),
     ...toTargets('test-shape-square-array-count-area', countAreaBuilder),
-    ...toTargets('test-shape-square-array-explain-product', explainProductBuilder)
+    ...toTargets('test-shape-square-array-explain-product', explainProductBuilder),
+    ...toTargets('test-shape-square-array-calculate-area', calculateAreaBuilder)
 ];

@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'shape-square-array',
-    generalLabels: [Area.Square]
+    generalLabels: []
 };
 
 export const ShapeSquareArrayGeneratorSchema = {
@@ -14,6 +14,7 @@ export const ShapeSquareArrayGeneratorSchema = {
             Area.AreaCalculation,
             Area.Iteration,
             Area.Multiplication,
+            Area.Square,
             Area.ShapeComposition,
             Scope.BoxArrangement,
             Scope.EqualShares,

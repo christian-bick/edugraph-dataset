@@ -43,7 +43,10 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
         validateConfigFields('shape-square-array', config, ['modelFeatures', 'taskAbility']);
 
         if (config.taskAbility === Ability.Interpretation) {
-            if (!config.modelFeatures?.includes(Scope.TileScale)) return null;
+            if (
+                !config.modelFeatures?.includes(Area.Square)
+                || !config.modelFeatures.includes(Scope.TileScale)
+            ) return null;
             const interpretsCoverage = [Area.AreaCalculation, Area.Iteration, Scope.IntegerNumbers]
                 .every(label => config.modelFeatures?.includes(label));
             if (interpretsCoverage) {
@@ -73,6 +76,7 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
             const connectsTilingToProduct = [
                 Area.AreaCalculation,
                 Area.Multiplication,
+                Area.Square,
                 Scope.BoxArrangement,
                 Scope.TwoOperands
             ].every(label => config.modelFeatures?.includes(label));
@@ -104,7 +108,7 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
 
         const measuresArea = [Area.AreaCalculation, Area.Iteration, Scope.IntegerNumbers, Scope.TileScale]
             .every(label => config.modelFeatures?.includes(label));
-        if (task === 'count' && measuresArea) {
+        if (task === 'count' && measuresArea && config.modelFeatures?.includes(Area.Square)) {
             const namedUnit = config.modelFeatures
                 ?.map(label => AREA_UNITS.get(label))
                 .find(unit => unit !== undefined);
@@ -119,7 +123,22 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
             };
         }
 
-        const hasArrayModel = [Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares]
+
+        const calculatesRectangularArea = [Area.AreaCalculation, Area.Multiplication, Scope.TwoOperands]
+            .every(label => config.modelFeatures?.includes(label));
+        if (task === 'count' && calculatesRectangularArea) {
+            return {
+                data: {
+                    task: 'calculate-area',
+                    rows,
+                    columns,
+                    squareCount: rows * columns,
+                    areaUnit: 'square units'
+                }
+            };
+        }
+
+        const hasArrayModel = [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares]
             .every(label => config.modelFeatures?.includes(label));
         if (!hasArrayModel) return null;
 

@@ -3,6 +3,7 @@
 - **Coverage interpretation:** Equal unit squares cover the entire figure without gaps or overlaps; the solution states that the tile count is the area in square units.
 - **Area count:** The question withholds the total while showing a complete square-unit cover; the solution numbers every tile and reports the area using the payload's generic or named square unit.
 - **Tiling/product connection:** A fully tiled rectangle has both side lengths labeled in units; the solution aligns rows, columns, multiplication, and square-unit area.
+- **Rectangular area:** Mathematical and story prompts share a tiled rectangle with visible side lengths; the solution multiplies those lengths and reports square-unit area.
 - **Partition question mode:** The correctly proportioned outer rectangle is shown without internal divisions while the requested row and column counts remain visible.
 - **Partition solution mode:** Square cell boundaries appear with no gaps or overlaps, and the row-by-column arrangement is stated without revealing a counting result.
 - **Count question mode:** The complete square array remains visible while its total is withheld.
