@@ -1,0 +1,4 @@
+- **Identity:** A closed triangle, quadrilateral, pentagon, or hexagon is shown with one integer length on every side.
+- **Question mode:** Every side length and unit are visible, while the perimeter total and calculation remain unrevealed.
+- **Solution mode:** The complete boundary is highlighted and every visible side length appears in the addition equation.
+- **Perimeter result:** The sum, perimeter total, and linear unit agree with the generated polygon data.

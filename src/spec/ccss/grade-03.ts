@@ -694,6 +694,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.C.7b-rectangular-area', rectangularAreaBuilder),
     ...toTargets('3.MD.C.7c-distributive-area-model', distributiveAreaModelBuilder),
     ...toTargets('3.MD.C.7d-additive-rectilinear-area', additiveRectilinearAreaBuilder),
+    ...toTargets('3.MD.D.8-polygon-perimeter', polygonPerimeterBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -701,7 +702,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.D.8-polygon-perimeter', polygonPerimeterBuilder, polygonPerimeterImplementation, 'Show every side length, boundary, calculation, unit, and perimeter.'),
     ...toImplementationTodos('3.MD.D.8-unknown-polygon-side', unknownPolygonSideBuilder, polygonPerimeterImplementation, 'Show total perimeter and recover one hidden side by inversion.'),
     ...toImplementationTodos('3.MD.D.8-same-perimeter-different-area', samePerimeterDifferentAreaBuilder, areaPerimeterRelationsImplementation, 'Compare rectangles with equal perimeter and visibly different areas.'),
     ...toImplementationTodos('3.MD.D.8-same-area-different-perimeter', sameAreaDifferentPerimeterBuilder, areaPerimeterRelationsImplementation, 'Compare rectangles with equal area and visibly different perimeters.'),

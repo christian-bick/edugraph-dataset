@@ -616,6 +616,20 @@ export type AreaDecompositionProblem =
     | DistributiveAreaDecompositionProblem
     | RectilinearAreaDecompositionProblem;
 
+export type PolygonVertex = {
+    x: number;
+    y: number;
+};
+
+export type GeometryPerimeterProblem = {
+    task: 'find-perimeter';
+    shape: 'triangle' | 'quadrilateral' | 'pentagon' | 'hexagon';
+    vertices: PolygonVertex[];
+    sideLengths: number[];
+    perimeter: number;
+    unit: 'units';
+};
+
 export type ShapePartitionEquivalenceProblem = {
     shape: FractionShape;
     parts: 2;
@@ -715,6 +729,7 @@ export interface ViewTypeMap {
     'shape-square-array': ShapeSquareArrayProblem;
     'area-distributive-model': AreaDecompositionProblem;
     'area-rectilinear-decomposition': AreaDecompositionProblem;
+    'geometry-perimeter': GeometryPerimeterProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
     'shape-draw-shape': ShapeDrawProblem;
 }
