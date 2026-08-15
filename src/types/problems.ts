@@ -444,8 +444,8 @@ export type ShapeDefinition = {
     vertexCount: 0 | 3 | 4 | 5 | 6;
     closed: true;
     boundary: 'curved' | 'straight';
-    equalSides?: true;
-    rightAngleCount?: 4;
+    equalSides?: boolean;
+    rightAngleCount?: 0 | 4;
 };
 
 export type ShapeAttributeOption = {
@@ -523,6 +523,15 @@ export type ShapeRotationConstructionProblem = {
     task: 'rotation-conservation';
 };
 
+export type ShapeExcludedQuadrilateralProblem = {
+    target: 'quadrilateral';
+    sides: 4;
+    corners: 4;
+    task: 'exclude-quadrilateral-subcategories';
+    definition: ShapeDefinition;
+    excludedCategories: ['rhombus', 'rectangle', 'square'];
+};
+
 export type ShapeAttributeSpecificationProblem = {
     target: PlaneShapeName;
     sides: number;
@@ -543,6 +552,7 @@ export type ShapeAttributeCountSpecificationProblem = {
 export type ShapeBuildShapeProblem =
     | ShapePartsConstructionProblem
     | ShapeRotationConstructionProblem
+    | ShapeExcludedQuadrilateralProblem
     | ShapeAttributeSpecificationProblem
     | ShapeAttributeCountSpecificationProblem;
 

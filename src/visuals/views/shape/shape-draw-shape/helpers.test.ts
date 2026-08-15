@@ -9,4 +9,8 @@ describe('shape-draw-shape helpers', () => {
         expect(getTracePath('rectangle')).toBe('M 15 25 L 85 25 L 85 75 L 15 75 Z');
         expect(getTracePath('unknown')).toBe('');
     });
+
+    it('provides an irregular quadrilateral trace', () => {
+        expect(getTracePath('quadrilateral')).toContain('L 88 12');
+    });
 });

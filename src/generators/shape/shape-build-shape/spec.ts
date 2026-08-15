@@ -16,7 +16,7 @@ export const ShapeBuildShapeGeneratorSchema = {
         matchAllExactLabels
     ],
     constructionScopes: [
-        [Scope.ShapeProperties],
+        [Scope.ShapeProperties, Scope.ShapeAttributes],
         matchAllExactLabels
     ],
     specifyAttributes: [
@@ -24,7 +24,12 @@ export const ShapeBuildShapeGeneratorSchema = {
         hasLabel(Ability.ConceptSpecification)
     ],
     shapeArea: [
-        [Area.ShapeIdentity, Area.ShapeClassification, Area.ShapeRotationConservation],
+        [
+            Area.ShapeIdentity,
+            Area.ShapeClassification,
+            Area.ShapeRotationConservation,
+            Area.ShapeSubsumption
+        ],
         selectExactMatch
     ],
     attributeCounts: [

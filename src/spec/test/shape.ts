@@ -174,6 +174,15 @@ const identityDrawBuilder = new DatasetPermutationBuilder()
         [Area.Triangle, Area.LinearShapeDrawing]
     ]);
 
+const otherQuadrilateralDrawingBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Quadrilateral,
+        Area.ShapeSubsumption,
+        Area.LinearShapeDrawing,
+        Scope.ShapeAttributes,
+        Ability.VisualArticulation
+    ]);
+
 const identityPositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.SpatialModelling,
@@ -215,6 +224,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-identity-naming-extended', extendedIdentityNamingBuilder),
     ...toTargets('test-quadrilateral-hierarchy', quadrilateralHierarchyBuilder),
     ...toTargets('test-shape-identity-draw', identityDrawBuilder),
+    ...toTargets('test-other-quadrilateral-drawing', otherQuadrilateralDrawingBuilder),
     ...toTargets('test-shape-identity-position', identityPositionBuilder),
     ...toTargets('test-shape-same-attribute', sameAttributeBuilder)
 ];

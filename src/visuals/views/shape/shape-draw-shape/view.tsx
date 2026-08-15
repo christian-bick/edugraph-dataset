@@ -1,6 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {ShapeDefinition} from '../../../../types/problems.ts';
+import {ShapeDefinition, ShapeExcludedQuadrilateralProblem} from '../../../../types/problems.ts';
 import {getTracePath} from './helpers.ts';
 import {ShapeDrawShapeViewConfig, ShapeDrawShapeViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
@@ -12,7 +12,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-draw-shape'>;
 }
 
-const SUPPORTED_SHAPES = ['circle', 'triangle', 'square', 'rectangle'] as const;
+const SUPPORTED_SHAPES = ['circle', 'triangle', 'square', 'rectangle', 'quadrilateral'] as const;
 
 const ensureSupportedShape = (shape: string) => {
     if (!(SUPPORTED_SHAPES as readonly string[]).includes(shape)) {
@@ -28,7 +28,8 @@ function definitionLines(definition: ShapeDefinition): string[] {
             : `${definition.sideCount} straight sides`,
         `${definition.vertexCount} vertices`
     ];
-    if (definition.equalSides) lines.push('All sides have equal length');
+    if (definition.equalSides === true) lines.push('All sides have equal length');
+    if (definition.equalSides === false) lines.push('Sides are not all equal');
     if (definition.rightAngleCount !== undefined) lines.push(`${definition.rightAngleCount} right angles`);
     return lines;
 }
@@ -136,6 +137,85 @@ function LegacyDrawingLayout({
     );
 }
 
+function validateExcludedQuadrilateral(data: ShapeExcludedQuadrilateralProblem) {
+    const definition = data.definition;
+    const exclusions = ['rhombus', 'rectangle', 'square'];
+    if (
+        data.target !== 'quadrilateral'
+        || data.sides !== 4
+        || data.corners !== 4
+        || definition.sideCount !== 4
+        || definition.vertexCount !== 4
+        || definition.boundary !== 'straight'
+        || definition.equalSides !== false
+        || definition.rightAngleCount !== 0
+        || data.excludedCategories.length !== exclusions.length
+        || !exclusions.every((category, index) => data.excludedCategories[index] === category)
+    ) {
+        throw new ViewValidationError(
+            'shape-draw-shape',
+            'The excluded-subcategory quadrilateral payload is invalid.'
+        );
+    }
+}
+
+function ExcludedQuadrilateralLayout({
+    data,
+    isSolutionView
+}: {
+    data: ShapeExcludedQuadrilateralProblem;
+    isSolutionView: boolean;
+}) {
+    const pathD = getTracePath(data.target);
+    const exclusions = [
+        ['Rhombus', 'Needs 4 equal sides', 'Sides are not all equal'],
+        ['Rectangle', 'Needs 4 right angles', 'Has no right angles'],
+        ['Square', 'Needs equal sides and right angles', 'Has neither property']
+    ] as const;
+
+    return (
+        <div className="mx-auto flex w-fit justify-center rounded-2xl bg-white p-[28px] font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="flex w-[650px] flex-col items-center gap-4">
+                <div className="text-center text-[1.25rem] font-bold leading-normal text-slate-700">
+                    Draw a quadrilateral that is not a rhombus, rectangle, or square.
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                    {definitionLines(data.definition).map(line => (
+                        <span key={line} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
+                            {line}
+                        </span>
+                    ))}
+                </div>
+                <div className="flex w-full items-stretch gap-4">
+                    <div className="flex h-[250px] w-[300px] items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
+                        <svg width="190" height="190" viewBox="0 0 100 100" aria-label="Other quadrilateral drawing">
+                            {isSolutionView && (
+                                <path d={pathD} fill="#dcfce7" stroke="forestgreen" strokeWidth="3" strokeLinejoin="round" />
+                            )}
+                        </svg>
+                    </div>
+                    <div className="flex flex-1 flex-col justify-center gap-2">
+                        {exclusions.map(([category, requirement, evidence]) => (
+                            <div key={category} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                                <div className="font-extrabold text-slate-700">Not a {category.toLowerCase()}</div>
+                                <div className="text-xs font-semibold text-slate-500">{requirement}</div>
+                                <div className={`mt-1 text-sm font-bold ${isSolutionView ? 'text-emerald-700' : 'text-blue-700'}`}>
+                                    {isSolutionView ? `✓ ${evidence}` : evidence}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className={`min-h-[42px] text-center text-sm font-bold ${isSolutionView ? 'text-emerald-700' : 'text-slate-500'}`}>
+                    {isSolutionView
+                        ? 'This is a quadrilateral, but it belongs to none of the three named subcategories.'
+                        : 'Use four straight sides while avoiding the defining attributes of all three subcategories.'}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
@@ -143,6 +223,12 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
 
     validateProblemData('shape-draw-shape', data, ['target', 'sides', 'corners']);
     ensureSupportedShape(data.target);
+
+    if (data.task === 'exclude-quadrilateral-subcategories') {
+        validateProblemData('shape-draw-shape', data, ['task', 'definition', 'excludedCategories']);
+        validateExcludedQuadrilateral(data);
+        return <ExcludedQuadrilateralLayout data={data} isSolutionView={isSolutionView} />;
+    }
 
     if (data.task === 'rotation-conservation') {
         return (

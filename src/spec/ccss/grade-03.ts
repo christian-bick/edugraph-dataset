@@ -577,13 +577,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const otherQuadrilateralDrawingImplementation = defineImplementationPackage({
-    id: 'other-quadrilateral-drawing',
-    description: 'Draw a quadrilateral whose visible attributes exclude rhombus, rectangle, and square.',
-    generators: [{ module: 'shape-build-shape', strategy: 'expand' }],
-    views: [{ module: 'shape-draw-shape', strategy: 'expand' }]
-});
-
 const fractionModelsGrade3Implementation = defineImplementationPackage({
     id: 'fraction-models-grade-3',
     description: 'Model unit and non-unit fractions and create equal-area partitions for Grade 3 denominators.',
@@ -661,6 +654,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.D.8-unknown-polygon-side', unknownPolygonSideBuilder),
     ...toTargets('3.MD.D.8-area-perimeter-relations', areaPerimeterRelationsBuilder),
     ...toTargets('3.G.A.1-classify-quadrilateral-subcategories', classifyQuadrilateralSubcategoriesBuilder),
+    ...toTargets('3.G.A.1-draw-other-quadrilateral', drawOtherQuadrilateralBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -668,7 +662,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.G.A.1-draw-other-quadrilateral', drawOtherQuadrilateralBuilder, otherQuadrilateralDrawingImplementation, 'Draw and verify a quadrilateral outside the named subcategories.'),
     ...toImplementationTodos('3.G.A.2-partition-equal-area-parts', partitionEqualAreaPartsBuilder, fractionModelsGrade3Implementation, 'Partition equal areas and label one part as a unit fraction.'),
     ...toImplementationTodos('3.NF.A.1-fractions-of-a-whole', interpretFractionsOfWholeBuilder, fractionModelsGrade3Implementation, 'Align the whole, equal shares, highlighted numerator count, and fraction notation.'),
     ...toImplementationTodos('3.NF.A.2a-unit-fractions-number-line', locateUnitFractionsBuilder, fractionNumberLineImplementation, 'Partition zero to one and locate one unit-fraction length.'),

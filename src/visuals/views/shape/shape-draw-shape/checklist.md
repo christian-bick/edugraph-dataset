@@ -1,3 +1,4 @@
 - **Identity:** A rotated tracing guide or defining-attribute card and drawing canvas make the requested shape-construction task identifiable.
 - **Rotation conservation:** The rotated reference remains visibly congruent to the requested drawing, directly showing that orientation does not change the shape.
+- **Quadrilateral exclusions:** The other-quadrilateral mode shows four straight sides and explicit unequal-side/no-right-angle evidence, then checks those properties against rhombus, rectangle, and square definitions.
 - **Modes:** Question Mode shows only the guide or uncompleted attribute workspace; Solution Mode adds the completed shape without removing the evidence that defined it.

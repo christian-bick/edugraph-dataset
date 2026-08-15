@@ -77,6 +77,28 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         });
     });
 
+    it('resolves the other-quadrilateral exclusion path', () => {
+        const labels = [
+            Area.Quadrilateral,
+            Area.ShapeSubsumption,
+            Area.LinearShapeDrawing,
+            Scope.ShapeAttributes,
+            Ability.VisualArticulation
+        ];
+        const stub = generateWithLabels(generator, labels);
+
+        expect(stub?.data).toMatchObject({
+            target: 'quadrilateral',
+            task: 'exclude-quadrilateral-subcategories',
+            excludedCategories: ['rhombus', 'rectangle', 'square']
+        });
+        expect(stub?.tags).toEqual(expect.arrayContaining([
+            Area.Quadrilateral,
+            Area.ShapeSubsumption,
+            Scope.ShapeAttributes
+        ]));
+    });
+
     it('does not invent a named target for a generic vertex-count task', () => {
         const labels = [
             Area.ShapeClassification,

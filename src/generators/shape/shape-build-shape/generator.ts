@@ -33,7 +33,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         const requireEqualFaces = config.attributeCounts!.includes(Scope.Equal);
         const isAttributeSpecification = config.specifyAttributes
             && config.shapeArea === Area.ShapeClassification
-            && config.constructionScopes!.length === 0;
+            && !config.constructionScopes!.includes(Scope.ShapeProperties);
 
         if (isAttributeSpecification && useVertexCount && !useFaceCount && !requireEqualFaces) {
             const selected = VERTEX_TARGETS[Math.floor(random() * VERTEX_TARGETS.length)];
@@ -81,6 +81,28 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
             sides: definition.sideCount,
             corners: definition.vertexCount
         };
+
+        if (config.shapeArea === Area.ShapeSubsumption && !config.specifyAttributes) {
+            if (target !== 'quadrilateral') return null;
+            return {
+                data: {
+                    target,
+                    sides: 4,
+                    corners: 4,
+                    task: 'exclude-quadrilateral-subcategories',
+                    definition: {
+                        sideCount: 4,
+                        vertexCount: 4,
+                        closed: true,
+                        boundary: 'straight',
+                        equalSides: false,
+                        rightAngleCount: 0
+                    },
+                    excludedCategories: ['rhombus', 'rectangle', 'square']
+                },
+                tags: []
+            };
+        }
 
         if (config.shapeArea === Area.ShapeRotationConservation && !config.specifyAttributes) {
             return {

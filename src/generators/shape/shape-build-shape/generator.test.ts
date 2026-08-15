@@ -58,6 +58,43 @@ describe('ShapeBuildShapeGenerator', () => {
         });
     });
 
+    it('generates a quadrilateral that excludes the named subcategories', () => {
+        const stub = generator.generate({
+            ...configFor(Area.Quadrilateral),
+            constructionScopes: [Scope.ShapeAttributes],
+            specifyAttributes: false,
+            shapeArea: Area.ShapeSubsumption
+        });
+
+        expect(stub).toEqual({
+            data: {
+                target: 'quadrilateral',
+                sides: 4,
+                corners: 4,
+                task: 'exclude-quadrilateral-subcategories',
+                definition: {
+                    sideCount: 4,
+                    vertexCount: 4,
+                    closed: true,
+                    boundary: 'straight',
+                    equalSides: false,
+                    rightAngleCount: 0
+                },
+                excludedCategories: ['rhombus', 'rectangle', 'square']
+            },
+            tags: []
+        });
+    });
+
+    it('does not apply the exclusion task to a named quadrilateral subtype', () => {
+        expect(generator.generate({
+            ...configFor(Area.Square),
+            constructionScopes: [Scope.ShapeAttributes],
+            specifyAttributes: false,
+            shapeArea: Area.ShapeSubsumption
+        })).toBeNull();
+    });
+
     it.each([
         [Area.Circle, 'circle', {sideCount: 0, vertexCount: 0, closed: true, boundary: 'curved'}],
         [Area.Triangle, 'triangle', {sideCount: 3, vertexCount: 3, closed: true, boundary: 'straight'}],
