@@ -44,8 +44,16 @@ const DataBarGraphCore = ({config, payload}: CoreProps) => {
             )}
 
             <div className="mt-5 grid grid-cols-[30px_1fr] gap-3">
-                <div className="grid h-[280px] grid-rows-9 text-right font-mono text-xs font-bold text-slate-500">
-                    {axisValues.map(value => <div key={value} className="-translate-y-2">{value}</div>)}
+                <div className="relative h-[280px] text-right font-mono text-xs font-bold text-slate-500">
+                    {axisValues.map((value, index) => (
+                        <div
+                            key={value}
+                            className="absolute right-0 -translate-y-1/2"
+                            style={{top: `${index * 12.5}%`}}
+                        >
+                            {value}
+                        </div>
+                    ))}
                 </div>
                 <div>
                     <div className="relative flex h-[280px] items-end justify-around border-b-2 border-l-2 border-slate-700 px-8">

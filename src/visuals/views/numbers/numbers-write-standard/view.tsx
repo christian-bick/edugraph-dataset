@@ -17,10 +17,12 @@ function BaseTenSketch({number}: {number: number}) {
     const ones = number % 10;
     return (
         <div className="flex min-h-[82px] items-end gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3" aria-label="Base-ten representation">
-            {Array.from({length: hundreds}).map((_, index) => (
-                <span key={`h-${index}`} className="h-14 w-14 border-2 border-sky-700 bg-sky-100" />
-            ))}
-            <div className="flex gap-1">
+            <div className="grid grid-cols-5 items-end gap-1.5">
+                {Array.from({length: hundreds}).map((_, index) => (
+                    <span key={`h-${index}`} className="h-14 w-14 border-2 border-sky-700 bg-sky-100" />
+                ))}
+            </div>
+            <div className="grid grid-cols-5 items-end gap-1">
                 {Array.from({length: tens}).map((_, index) => (
                     <span key={`t-${index}`} className="h-14 w-2.5 border-2 border-amber-700 bg-amber-100" />
                 ))}
