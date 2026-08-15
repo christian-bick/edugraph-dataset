@@ -590,6 +590,16 @@ export type ShapeSquareArrayProblem = {
     areaUnit?: 'square units' | 'square centimeters' | 'square meters' | 'square inches' | 'square feet';
 };
 
+export type AreaDecompositionProblem = {
+    height: number;
+    leftWidth: number;
+    rightWidth: number;
+    totalWidth: number;
+    leftArea: number;
+    rightArea: number;
+    totalArea: number;
+};
+
 export type ShapePartitionEquivalenceProblem = {
     shape: FractionShape;
     parts: 2;
@@ -687,6 +697,7 @@ export interface ViewTypeMap {
     'shape-compose-shapes': ShapeComposeShapesProblem;
     'shape-partition-equal': ShapePartitionProblem;
     'shape-square-array': ShapeSquareArrayProblem;
+    'area-distributive-model': AreaDecompositionProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
     'shape-draw-shape': ShapeDrawProblem;
 }

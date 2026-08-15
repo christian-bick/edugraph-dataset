@@ -1,0 +1,4 @@
+- **Identity:** One rectangular area model is visibly split into two non-overlapping rectangular regions with a shared height.
+- **Dimensions:** The shared height, both component widths, and combined width are visible and agree with the grid.
+- **Distributive reasoning:** The solution shows both partial products and the equality between the original product, their sum, and the total square-unit area.
+- **Modes:** Question Mode withholds partial and total areas; Solution Mode labels both regions and completes the distributive equation.
