@@ -330,7 +330,8 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
 // --- K.G.A.1: Describe objects in the environment using names of shapes ---
 const envShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeNaming,
+        Scope.PhysicalGeometry,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -341,7 +342,8 @@ const envShapesBuilder = new DatasetPermutationBuilder()
 
 const envShapesOtherBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeNaming,
+        Scope.PhysicalGeometry,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -374,7 +376,8 @@ const positionsAheadBuilder = new DatasetPermutationBuilder()
 // --- K.G.A.2: Correctly name shapes ---
 const shapeNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeNaming,
+        Area.ShapeRecognition,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -392,7 +395,7 @@ const shapeNamingBuilder = new DatasetPermutationBuilder()
 // --- K.G.A.3: Identify shapes as 2D or 3D ---
 const classifyDimBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeProperties,
         Ability.ConceptClassification
     ])
@@ -411,7 +414,7 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
 // --- K.G.B.4: Analyze and compare shapes ---
 const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeIdentity,
         Area.NumericComparison,
         Scope.ShapeProperties,
         Ability.VisualReception
@@ -440,7 +443,7 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
 // --- K.G.B.5: Model shapes by building them ---
 const buildShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeIdentity,
         Scope.ShapeProperties,
         Ability.VisualArticulation
     ])
@@ -454,7 +457,7 @@ const buildShapesBuilder = new DatasetPermutationBuilder()
 // --- K.G.B.5: Model shapes by drawing them ---
 const drawShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeRotationConservation,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
@@ -466,7 +469,7 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
 // --- K.G.B.6: Compose simple shapes ---
 const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeComposition,
+        Area.ShapeSynthesis,
         Scope.SingleLevelComposition,
         Ability.ConceptComposition
     ])
@@ -477,7 +480,7 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
 
 const composeShapesOtherBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeComposition,
+        Area.ShapeSynthesis,
         Scope.SingleLevelComposition,
         Ability.ConceptComposition
     ])

@@ -5,7 +5,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const partitionBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Rectangle,
     Area.Square,
-    Area.ShapeComposition,
+    Area.ShapeDecomposition,
     Scope.BoxArrangement,
     Scope.EqualShares,
     Ability.VisualArticulation
@@ -14,7 +14,7 @@ const partitionBuilder = new DatasetPermutationBuilder().addLabels([
 const countBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Rectangle,
     Area.Square,
-    Area.ShapeComposition,
+    Area.ShapeDecomposition,
     Scope.BoxArrangement,
     Scope.EqualShares,
     Ability.ProcedureExecution

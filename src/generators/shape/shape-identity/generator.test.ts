@@ -32,4 +32,17 @@ describe('ShapeIdentityGenerator', () => {
         expect(stub!.data.answer).toBe(shape);
         expect(stub!.tags).toBeUndefined();
     });
+
+    it('supplies generated attributes for an attributed rhombus naming task', () => {
+        const stub = generator.generate({shapes: [Area.Rhombus], includeAttributes: true})!;
+
+        expect(stub.data.shape).toBe('rhombus');
+        expect(stub.data.attributes).toContain('4 equal sides');
+    });
+
+    it('supplies generated attributes for extended identity tasks', () => {
+        const stub = generator.generate({shapes: [Area.Pentagon], includeAttributes: true})!;
+
+        expect(stub.data.attributes).toEqual(['5 straight sides', '5 vertices']);
+    });
 });

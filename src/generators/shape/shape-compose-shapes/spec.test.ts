@@ -14,7 +14,7 @@ describe('ShapeComposeShapesGenerator spec integration', () => {
     });
 
     it('declares composition generally and structure as mathematical configuration', () => {
-        expect(spec.generalLabels).toEqual([Area.ShapeComposition]);
+        expect(spec.generalLabels).toEqual([Area.ShapeSynthesis]);
         expect(Object.keys(ShapeComposeShapesGeneratorSchema)).toEqual([
             'classify',
             'compositionStructure'
@@ -23,7 +23,7 @@ describe('ShapeComposeShapesGenerator spec integration', () => {
 
     it('resolves single-level labels into a depth-one tree', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeComposition,
+            Area.ShapeSynthesis,
             Area.Rectangle,
             Scope.SingleLevelComposition
         ])!;
@@ -39,7 +39,7 @@ describe('ShapeComposeShapesGenerator spec integration', () => {
 
     it('resolves multi-level labels into a depth-two tree', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeComposition,
+            Area.ShapeSynthesis,
             Area.Hexagon,
             Scope.MultiLevelComposition
         ])!;

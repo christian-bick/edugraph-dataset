@@ -436,7 +436,7 @@ const compareDataBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.1: Distinguish defining from non-defining attributes ---
 const classifyShapeAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptClassification
     ]);
@@ -444,7 +444,7 @@ const classifyShapeAttributesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.1: Build shapes possessing defining attributes ---
 const buildShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation
@@ -458,7 +458,7 @@ const buildShapesBuilder = new DatasetPermutationBuilder()
 
 const drawShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation
@@ -472,7 +472,7 @@ const drawShapesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.2: Compose shapes in one level ---
 const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeComposition,
+        Area.ShapeSynthesis,
         Scope.SingleLevelComposition,
         Ability.ConceptComposition
     ])
@@ -492,7 +492,7 @@ const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.2: Compose a new shape from an intermediate composite ---
 const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeComposition,
+        Area.ShapeSynthesis,
         Scope.MultiLevelComposition,
         Ability.ConceptComposition
     ])

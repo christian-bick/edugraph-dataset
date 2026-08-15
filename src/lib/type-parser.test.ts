@@ -6,7 +6,7 @@ describe('type-parser', () => {
         const map = getViewToProblemTypeMap();
         expect(map['operations-vertical']).toBe('ArithmeticProblem');
         expect(map['place-value-compose-teen']).toBe('PlaceValueTeenProblem');
-        expect(map['shape-naming']).toBe('ShapeIdentityProblem');
+        expect(map['shape-naming']).toBe('ShapeNamingProblem');
         expect(map['shape-position']).toBe('ShapePositionProblem');
     });
 

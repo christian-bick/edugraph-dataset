@@ -433,7 +433,7 @@ const distributiveAreaModelBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.AreaCalculation,
         Area.Rectangle,
-        Area.ShapeComposition,
+        Area.ShapeDecomposition,
         Area.Multiplication,
         Area.Addition,
         Area.DistributiveLaw,
@@ -445,7 +445,7 @@ const additiveRectilinearAreaBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.AreaCalculation,
         Area.Rectangle,
-        Area.ShapeComposition,
+        Area.ShapeDecomposition,
         Area.Addition,
         Ability.VisualDecomposition,
         Ability.ProcedureExecution
@@ -474,7 +474,7 @@ const areaPerimeterRelationsBuilder = new DatasetPermutationBuilder()
 
 const classifyQuadrilateralSubcategoriesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeSubsumption,
         Scope.ShapeAttributes,
         Ability.ConceptClassification,
         Ability.VisualRecognition
@@ -484,8 +484,7 @@ const classifyQuadrilateralSubcategoriesBuilder = new DatasetPermutationBuilder(
 const drawOtherQuadrilateralBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Quadrilateral,
-        Area.ShapeIdentity,
-        Area.ShapeRecognition,
+        Area.ShapeSubsumption,
         Area.LinearShapeDrawing,
         Scope.ShapeAttributes,
         Ability.VisualArticulation
@@ -578,19 +577,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const quadrilateralSubcategoriesImplementation = defineImplementationPackage({
-    id: 'quadrilateral-subcategories',
-    description: 'Elicit hierarchical classification of rhombuses, rectangles, and squares as quadrilaterals.',
-    generators: [
-        { module: 'shape-classify-attributes', strategy: 'expand' },
-        { module: 'shape-identity', strategy: 'expand' }
-    ],
-    views: [
-        { module: 'shape-classify-attributes', strategy: 'expand' },
-        { module: 'shape-naming', strategy: 'expand' }
-    ]
-});
-
 const otherQuadrilateralDrawingImplementation = defineImplementationPackage({
     id: 'other-quadrilateral-drawing',
     description: 'Draw a quadrilateral whose visible attributes exclude rhombus, rectangle, and square.',
@@ -674,6 +660,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.D.8-polygon-perimeter', polygonPerimeterBuilder),
     ...toTargets('3.MD.D.8-unknown-polygon-side', unknownPolygonSideBuilder),
     ...toTargets('3.MD.D.8-area-perimeter-relations', areaPerimeterRelationsBuilder),
+    ...toTargets('3.G.A.1-classify-quadrilateral-subcategories', classifyQuadrilateralSubcategoriesBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -681,7 +668,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.G.A.1-classify-quadrilateral-subcategories', classifyQuadrilateralSubcategoriesBuilder, quadrilateralSubcategoriesImplementation, 'Expose defining attributes and hierarchical quadrilateral inclusion.'),
     ...toImplementationTodos('3.G.A.1-draw-other-quadrilateral', drawOtherQuadrilateralBuilder, otherQuadrilateralDrawingImplementation, 'Draw and verify a quadrilateral outside the named subcategories.'),
     ...toImplementationTodos('3.G.A.2-partition-equal-area-parts', partitionEqualAreaPartsBuilder, fractionModelsGrade3Implementation, 'Partition equal areas and label one part as a unit fraction.'),
     ...toImplementationTodos('3.NF.A.1-fractions-of-a-whole', interpretFractionsOfWholeBuilder, fractionModelsGrade3Implementation, 'Align the whole, equal shares, highlighted numerator count, and fraction notation.'),

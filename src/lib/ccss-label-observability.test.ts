@@ -79,7 +79,7 @@ describe('CCSS observable-label contracts', () => {
     it('uses drawing labels rather than coordinate-plane plotting for shape tracing', () => {
         const drawingTargets = targets(kindergarten, 'K.G.B.5-draw-shapes');
 
-        expectAll(drawingTargets, [Area.ShapeIdentity, Ability.VisualArticulation]);
+        expectAll(drawingTargets, [Area.ShapeRotationConservation, Ability.VisualArticulation]);
         expectNone(drawingTargets, [Area.ShapePlotting]);
         for (const target of drawingTargets) {
             const isCircle = target.labels.includes(Area.Circle);

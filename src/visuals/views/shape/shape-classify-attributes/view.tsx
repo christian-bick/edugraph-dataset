@@ -3,7 +3,8 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {
     PlaneShapeName,
     ShapeAttributeClassificationProblem,
-    ShapeCountOption
+    ShapeCountOption,
+    ShapeSubsumptionProblem
 } from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {getShapeAppearance, ShapeAppearance} from '../helpers.ts';
@@ -17,6 +18,7 @@ import '../../../../tailwind.css';
 const SUPPORTED_SHAPES: readonly PlaneShapeName[] = [
     'circle',
     'triangle',
+    'rhombus',
     'square',
     'rectangle',
     'hexagon'
@@ -37,10 +39,98 @@ function ShapeExample({shape, appearance}: {shape: PlaneShapeName; appearance: S
         <svg width="76" height="76" viewBox="0 0 100 100" className="overflow-visible" style={style}>
             {shape === 'circle' && <circle cx="50" cy="50" r="37" {...common} />}
             {shape === 'triangle' && <polygon points="50,10 90,88 10,88" {...common} />}
+            {shape === 'rhombus' && <polygon points="50,8 91,50 50,92 9,50" {...common} />}
             {shape === 'square' && <rect x="13" y="13" width="74" height="74" rx="3" {...common} />}
             {shape === 'rectangle' && <rect x="8" y="25" width="84" height="50" rx="3" {...common} />}
             {shape === 'hexagon' && <polygon points="50,8 87,29 87,71 50,92 13,71 13,29" {...common} />}
         </svg>
+    );
+}
+
+function titleCase(value: string): string {
+    return value[0].toUpperCase() + value.slice(1);
+}
+
+function validateSubsumptionProblem(data: ShapeSubsumptionProblem) {
+    if (!['rhombus', 'rectangle', 'square'].includes(data.shape)) {
+        throw new ViewValidationError('shape-classify-attributes', `Unsupported hierarchy shape: ${data.shape}`);
+    }
+    if (!Array.isArray(data.attributes) || data.attributes.length < 2) {
+        throw new ViewValidationError('shape-classify-attributes', 'Hierarchy attributes must be visible and complete.');
+    }
+    if (!Array.isArray(data.options) || data.options.length !== 4) {
+        throw new ViewValidationError('shape-classify-attributes', 'Exactly four category options are required.');
+    }
+    const ids = new Set(data.options.map(option => option.id));
+    const satisfying = data.options.filter(option => option.satisfies);
+    if (
+        ids.size !== 4
+        || satisfying.length !== 1
+        || satisfying[0].category !== data.category
+        || satisfying[0].id !== data.answer
+    ) {
+        throw new ViewValidationError('shape-classify-attributes', 'The answer must identify quadrilateral as the larger category.');
+    }
+}
+
+function ShapeSubsumptionLayout({
+    data,
+    isSolutionView,
+    seed
+}: {
+    data: ShapeSubsumptionProblem;
+    isSolutionView: boolean;
+    seed: number;
+}) {
+    const appearances = Array.from({length: 3}, (_, index) => getShapeAppearance(seed, index));
+    const shapeName = titleCase(data.shape);
+
+    return (
+        <div className="w-[680px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="text-center text-[1.3rem] font-bold text-slate-700">
+                Which larger shape category includes every {data.shape}?
+            </div>
+            <div className="mt-4 rounded-xl border-2 border-slate-200 bg-slate-50 p-4">
+                <div className="text-center text-[1.05rem] font-extrabold text-blue-700">{shapeName}</div>
+                <div className="mt-2 flex h-[106px] items-center justify-center gap-12">
+                    {appearances.map((appearance, index) => (
+                        <ShapeExample key={index} shape={data.shape} appearance={appearance} />
+                    ))}
+                </div>
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                    {data.attributes.map(attribute => (
+                        <span key={attribute} className="rounded-full border border-blue-200 bg-white px-3 py-1 text-sm font-bold text-blue-700">
+                            {attribute}
+                        </span>
+                    ))}
+                </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+                {data.options.map(option => {
+                    const correct = option.id === data.answer;
+                    return (
+                        <div
+                            key={option.id}
+                            className={`rounded-lg border-2 px-4 py-3 text-center font-semibold ${
+                                isSolutionView && correct
+                                    ? 'border-green-600 bg-green-50 text-green-700'
+                                    : 'border-slate-200 bg-white text-slate-700'
+                            }`}
+                        >
+                            <span className="mr-2 font-bold text-slate-500">{option.id}</span>
+                            {titleCase(option.category)}
+                        </div>
+                    );
+                })}
+            </div>
+            <div className={`mt-4 min-h-[52px] rounded-lg px-4 py-3 text-center font-bold ${
+                isSolutionView ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-50 text-slate-600'
+            }`}>
+                {isSolutionView
+                    ? `A ${data.shape} is a quadrilateral because it has 4 straight sides.`
+                    : `Use the shared attribute: 4 straight sides.`}
+            </div>
+        </div>
     );
 }
 
@@ -204,6 +294,25 @@ interface CoreProps {
 const ShapeClassifyAttributesCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
+
+    if (data.task === 'classify-quadrilateral-subcategory') {
+        validateProblemData('shape-classify-attributes', data, [
+            'task',
+            'shape',
+            'attributes',
+            'category',
+            'options',
+            'answer'
+        ]);
+        validateSubsumptionProblem(data);
+        return (
+            <ShapeSubsumptionLayout
+                data={data}
+                isSolutionView={isSolutionView}
+                seed={seed}
+            />
+        );
+    }
 
     if (data.task === 'classify-count') {
         validateProblemData('shape-classify-attributes', data, [

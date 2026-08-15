@@ -1,25 +1,32 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
-import {ShapeIdentityProblem} from "../../../types/problems.ts";
+import {ShapeNamingProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
 import {ShapeIdentityGeneratorConfig, ShapeIdentityGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
+import {getVisibleShapeAttributes, shapeNameFromLabel} from '../helpers.ts';
 
-export class ShapeIdentityGenerator implements ProblemGenerator<ShapeIdentityProblem, ShapeIdentityGeneratorConfig> {
+export class ShapeIdentityGenerator implements ProblemGenerator<ShapeNamingProblem, ShapeIdentityGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeIdentityGeneratorSchema;
 
-    generate(config: ShapeIdentityGeneratorConfig): ProblemStub<ShapeIdentityProblem> | null {
+    generate(config: ShapeIdentityGeneratorConfig): ProblemStub<ShapeNamingProblem> | null {
         validateConfigFields('shape-identity', config, ['shapes']);
         const validShapes = config.shapes!;
 
         const selectedArea = validShapes[Math.floor(random() * validShapes.length)];
-        const shape = selectedArea.split('/').pop()!.toLowerCase();
+        const planeShape = shapeNameFromLabel(selectedArea);
+        const shape = planeShape ?? selectedArea.split('/').pop()!.toLowerCase();
+
+        const data: ShapeNamingProblem = {
+            shape,
+            answer: shape
+        };
+        if (config.includeAttributes && planeShape) {
+            data.attributes = getVisibleShapeAttributes(planeShape);
+        }
 
         return {
-            data: {
-                shape,
-                answer: shape
-            }
+            data
         };
     }
 }

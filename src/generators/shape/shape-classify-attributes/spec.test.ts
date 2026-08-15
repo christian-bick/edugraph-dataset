@@ -1,4 +1,4 @@
-import {Area, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
@@ -15,23 +15,35 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
     });
 
     it('declares the shape-recognition and shape-attribute capabilities', () => {
-        expect(spec.generalLabels).toEqual([Area.ShapeRecognition]);
+        expect(spec.generalLabels).toEqual([Area.ShapeClassification]);
     });
 
     it('generates from general target labels with an empty schema', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeRecognition,
+            Area.ShapeClassification,
             Scope.ShapeAttributes
         ]);
 
         expect(stub).not.toBeNull();
     });
 
+    it('generates the quadrilateral subsumption target', () => {
+        const stub = generateWithLabels(generator, [
+            Area.ShapeSubsumption,
+            Scope.ShapeAttributes,
+            Ability.ConceptClassification,
+            Ability.VisualRecognition,
+            Area.Rhombus
+        ]);
+
+        expect(stub?.data.task).toBe('classify-quadrilateral-subcategory');
+    });
+
     it('tags each problem with exactly its runtime-selected shape', () => {
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
             const stub = generateWithLabels(generator, [
-                Area.ShapeRecognition,
+                Area.ShapeClassification,
                 Scope.ShapeAttributes
             ])!;
             if (!('shape' in stub.data)) throw new Error('Expected a legacy classification problem.');
@@ -46,7 +58,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
 
     it('resolves the vertex-count classification path', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeRecognition,
+            Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.VertexCount
         ])!;
@@ -59,7 +71,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
 
     it('resolves the equal-face-count classification path', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeRecognition,
+            Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.FaceCount,
             Scope.Equal

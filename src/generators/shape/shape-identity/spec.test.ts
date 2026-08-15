@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ShapeIdentityGenerator } from './generator.ts';
 import { setSeed } from '../../../lib/random.ts';
-import { Area } from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import { generateWithLabels } from '../../../lib/utils.ts';
 
 describe('ShapeIdentityGenerator Spec Integration', () => {
@@ -14,6 +14,7 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
 
     it('should generate triangle problem from Area.Triangle label', () => {
         const stub = generateWithLabels(generator, [
+            Area.ShapeNaming,
             Area.Triangle
         ]);
         expect(stub).not.toBeNull();
@@ -23,6 +24,7 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
 
     it('should generate hexagon problem from Area.Hexagon label', () => {
         const stub = generateWithLabels(generator, [
+            Area.ShapeNaming,
             Area.Hexagon
         ]);
         expect(stub).not.toBeNull();
@@ -32,6 +34,7 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
 
     it('should generate cylinder problem from Area.Cylinder label', () => {
         const stub = generateWithLabels(generator, [
+            Area.ShapeNaming,
             Area.Cylinder
         ]);
         expect(stub).not.toBeNull();
@@ -42,8 +45,17 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
     it.each([
         [Area.Quadrilateral, 'quadrilateral'],
         [Area.Pentagon, 'pentagon']
-    ] as const)('generates the extended %s identity problem', (label, shape) => {
-        const stub = generateWithLabels(generator, [label]);
-        expect(stub!.data).toEqual({shape, answer: shape});
+    ] as const)('generates the extended %s naming problem', (label, shape) => {
+        const stub = generateWithLabels(generator, [
+            Area.ShapeNaming,
+            Scope.ShapeAttributes,
+            label
+        ]);
+        const count = shape === 'quadrilateral' ? 4 : 5;
+        expect(stub!.data).toEqual({
+            shape,
+            answer: shape,
+            attributes: [`${count} straight sides`, `${count} vertices`]
+        });
     });
 });

@@ -1,12 +1,12 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {matchAllExactLabels} from '../../../lib/resolvers.ts';
+import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'shape-identity',
     generalLabels: [
-        Area.ShapeIdentity
+        Area.ShapeNaming
     ]
 };
 
@@ -14,6 +14,7 @@ export const ShapeIdentityGeneratorSchema = {
     shapes: [
         [
             Area.Triangle,
+            Area.Rhombus,
             Area.Square,
             Area.Rectangle,
             Area.Quadrilateral,
@@ -26,7 +27,8 @@ export const ShapeIdentityGeneratorSchema = {
             Area.Cylinder
         ],
         matchAllExactLabels
-    ]
+    ],
+    includeAttributes: [[Scope.ShapeAttributes], hasLabel(Scope.ShapeAttributes)]
 } as const;
 
 export type ShapeIdentityGeneratorConfig = ConfigFromSchema<typeof ShapeIdentityGeneratorSchema>;

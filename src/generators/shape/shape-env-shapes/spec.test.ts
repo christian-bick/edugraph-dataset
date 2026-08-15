@@ -15,7 +15,8 @@ describe('ShapeEnvShapesGenerator Spec Integration', () => {
     it('should generate clock env-shape from Area.Circle label', () => {
         const stub = generateWithLabels(generator, [
             Area.Circle,
-            Scope.ShapeProperties
+            Area.ShapeNaming,
+            Scope.PhysicalGeometry
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.answer).toBe('circle');
@@ -25,7 +26,8 @@ describe('ShapeEnvShapesGenerator Spec Integration', () => {
     it('should generate window env-shape from Area.Square label', () => {
         const stub = generateWithLabels(generator, [
             Area.Square,
-            Scope.ShapeProperties
+            Area.ShapeNaming,
+            Scope.PhysicalGeometry
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.answer).toBe('square');
@@ -35,7 +37,8 @@ describe('ShapeEnvShapesGenerator Spec Integration', () => {
     it('should generate table env-shape from Area.Rectangle label', () => {
         const stub = generateWithLabels(generator, [
             Area.Rectangle,
-            Scope.ShapeProperties
+            Area.ShapeNaming,
+            Scope.PhysicalGeometry
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.answer).toBe('rectangle');
@@ -45,7 +48,8 @@ describe('ShapeEnvShapesGenerator Spec Integration', () => {
     it('should generate pennant env-shape from Area.Triangle label', () => {
         const stub = generateWithLabels(generator, [
             Area.Triangle,
-            Scope.ShapeProperties
+            Area.ShapeNaming,
+            Scope.PhysicalGeometry
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data).toEqual({ answer: 'triangle', target: 'pennant' });
@@ -54,7 +58,8 @@ describe('ShapeEnvShapesGenerator Spec Integration', () => {
     it('should generate honeycomb env-shape from Area.Hexagon label', () => {
         const stub = generateWithLabels(generator, [
             Area.Hexagon,
-            Scope.ShapeProperties
+            Area.ShapeNaming,
+            Scope.PhysicalGeometry
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data).toEqual({ answer: 'hexagon', target: 'honeycomb cell' });

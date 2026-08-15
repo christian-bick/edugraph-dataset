@@ -19,8 +19,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
 
     generate(config: ShapeBuildShapeGeneratorConfig): ProblemStub<ShapeBuildShapeProblem> | null {
         validateConfigFields('shape-build-shape', config, [
-            'specifyAttributes',
-            'shapeIdentity'
+            'specifyAttributes'
         ]);
         if (!Array.isArray(config.targets) || !Array.isArray(config.constructionScopes) || !Array.isArray(config.attributeCounts)) {
             throw new GeneratorValidationError(
@@ -33,7 +32,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         const useFaceCount = config.attributeCounts!.includes(Scope.FaceCount);
         const requireEqualFaces = config.attributeCounts!.includes(Scope.Equal);
         const isAttributeSpecification = config.specifyAttributes
-            && !config.shapeIdentity
+            && config.shapeArea === Area.ShapeClassification
             && config.constructionScopes!.length === 0;
 
         if (isAttributeSpecification && useVertexCount && !useFaceCount && !requireEqualFaces) {
@@ -83,7 +82,14 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
             corners: definition.vertexCount
         };
 
-        if (config.constructionScopes!.includes(Scope.ShapeProperties) && !config.specifyAttributes) {
+        if (config.shapeArea === Area.ShapeRotationConservation && !config.specifyAttributes) {
+            return {
+                data: {...construction, task: 'rotation-conservation'},
+                tags: []
+            };
+        }
+
+        if (!config.specifyAttributes) {
             return {data: construction, tags: []};
         }
 

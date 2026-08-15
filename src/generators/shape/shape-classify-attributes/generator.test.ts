@@ -10,6 +10,7 @@ import {ShapeClassifyAttributesGenerator} from './generator.ts';
 import {Area, Scope} from 'edugraph-ts';
 
 const legacyConfig = {
+    subsumption: false,
     shapes: [],
     attributeCounts: []
 };
@@ -43,7 +44,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
     it('generates exactly one defining option and three non-defining options', () => {
         const stub = generator.generate(legacyConfig)!;
         expect('shape' in stub.data).toBe(true);
-        if (!('shape' in stub.data)) return;
+        if (stub.data.task !== undefined) return;
         const {shape, definition, options, answer} = stub.data;
         const definingOptions = options.filter(option => option.kind === 'defining');
         const nonDefiningOptions = options.filter(option => option.kind === 'non-defining');
@@ -68,7 +69,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
         for (let seed = 0; seed < 200; seed++) {
             setSeed(seed);
             const stub = generator.generate(legacyConfig)!;
-            if (!('shape' in stub.data)) throw new Error('Expected a legacy classification problem.');
+            if (stub.data.task !== undefined) throw new Error('Expected a legacy classification problem.');
             const definingOption = stub.data.options.find(option => option.kind === 'defining')!;
 
             shapes.add(stub.data.shape);
@@ -92,6 +93,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
 
     it('classifies polygons by a visibly countable vertex total', () => {
         const stub = generator.generate({
+            subsumption: false,
             shapes: [],
             attributeCounts: [Scope.VertexCount]
         })!;
@@ -107,6 +109,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
 
     it('honors a specifically requested polygon in vertex-count mode', () => {
         const stub = generator.generate({
+            subsumption: false,
             shapes: [Area.Pentagon],
             attributeCounts: [Scope.VertexCount]
         })!;
@@ -119,6 +122,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
 
     it('classifies a cube from inspectable equal-face alternatives', () => {
         const stub = generator.generate({
+            subsumption: false,
             shapes: [],
             attributeCounts: [Scope.FaceCount, Scope.Equal]
         })!;
@@ -129,8 +133,26 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(stub.data.options.find(option => option.id === stub.data.answer)?.shape).toBe('cube');
     });
 
+    it.each([
+        [Area.Rhombus, 'rhombus'],
+        [Area.Rectangle, 'rectangle'],
+        [Area.Square, 'square']
+    ] as const)('classifies %s as a quadrilateral from visible attributes', (label, shape) => {
+        const stub = generator.generate({subsumption: true, shapes: [label], attributeCounts: []})!;
+
+        expect(stub.data.task).toBe('classify-quadrilateral-subcategory');
+        if (stub.data.task !== 'classify-quadrilateral-subcategory') return;
+        expect(stub.data.shape).toBe(shape);
+        expect(stub.data.attributes).toContain('4 straight sides');
+        expect(stub.data.category).toBe('quadrilateral');
+        expect(stub.data.options.find(option => option.id === stub.data.answer))
+            .toMatchObject({category: 'quadrilateral', satisfies: true});
+        expect(stub.tags).toEqual([label]);
+    });
+
     it('rejects contradictory attribute-count configurations', () => {
         expect(() => generator.generate({
+            subsumption: false,
             shapes: [],
             attributeCounts: [Scope.VertexCount, Scope.FaceCount, Scope.Equal]
         })).toThrow('Attribute-count labels must select either vertex count or equal face count.');

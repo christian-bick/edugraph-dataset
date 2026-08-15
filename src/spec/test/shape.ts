@@ -5,7 +5,7 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 const builder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ShapeProperties,
-        Area.ShapeRecognition,
+        Area.ShapeIdentity,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
@@ -18,7 +18,7 @@ const builder = new DatasetPermutationBuilder()
 const classifyDimBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ShapeProperties,
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
@@ -32,14 +32,14 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
 
 const classifyAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptClassification
     ]);
 
 const classifyAttributeCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptClassification
     ])
@@ -50,7 +50,7 @@ const classifyAttributeCountsBuilder = new DatasetPermutationBuilder()
 
 const specifyAttributeCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation
@@ -62,7 +62,7 @@ const specifyAttributeCountsBuilder = new DatasetPermutationBuilder()
 
 const specifyShapeBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation,
@@ -71,7 +71,7 @@ const specifyShapeBuilder = new DatasetPermutationBuilder()
 
 const drawFromAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation,
@@ -82,7 +82,7 @@ const drawFromAttributesBuilder = new DatasetPermutationBuilder()
 const compareAttrBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ShapeProperties,
-        Area.ShapeRecognition,
+        Area.ShapeIdentity,
         Area.NumericComparison,
         Ability.VisualReception
     ])
@@ -96,7 +96,7 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
 
 const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeComposition,
+        Area.ShapeSynthesis,
         Scope.SingleLevelComposition,
         Ability.ConceptComposition,
         Area.Rectangle
@@ -104,7 +104,7 @@ const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
 
 const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeComposition,
+        Area.ShapeSynthesis,
         Scope.MultiLevelComposition,
         Ability.ConceptComposition,
         Area.Cube
@@ -112,7 +112,8 @@ const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
 
 const envShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeNaming,
+        Scope.PhysicalGeometry,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -125,7 +126,8 @@ const envShapesBuilder = new DatasetPermutationBuilder()
 
 const identityNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeNaming,
+        Area.ShapeRecognition,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -142,7 +144,8 @@ const identityNamingBuilder = new DatasetPermutationBuilder()
 
 const extendedIdentityNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeNaming,
+        Area.ShapeRecognition,
         Scope.ShapeAttributes,
         Ability.VisualRecognition
     ])
@@ -151,9 +154,18 @@ const extendedIdentityNamingBuilder = new DatasetPermutationBuilder()
         [Area.Pentagon]
     ]);
 
+const quadrilateralHierarchyBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.ShapeSubsumption,
+        Scope.ShapeAttributes,
+        Ability.ConceptClassification,
+        Ability.VisualRecognition
+    ])
+    .applyLabelVariants([[Area.Rhombus], [Area.Rectangle], [Area.Square]]);
+
 const identityDrawBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeRotationConservation,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
@@ -201,6 +213,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-env-shapes', envShapesBuilder),
     ...toTargets('test-shape-identity-naming', identityNamingBuilder),
     ...toTargets('test-shape-identity-naming-extended', extendedIdentityNamingBuilder),
+    ...toTargets('test-quadrilateral-hierarchy', quadrilateralHierarchyBuilder),
     ...toTargets('test-shape-identity-draw', identityDrawBuilder),
     ...toTargets('test-shape-identity-position', identityPositionBuilder),
     ...toTargets('test-shape-same-attribute', sameAttributeBuilder)

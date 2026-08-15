@@ -19,7 +19,7 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
         const stub = generateWithLabels(generator, [
             Area.Rectangle,
             Area.Square,
-            Area.ShapeComposition,
+            Area.ShapeDecomposition,
             Scope.BoxArrangement,
             Scope.EqualShares,
             ability

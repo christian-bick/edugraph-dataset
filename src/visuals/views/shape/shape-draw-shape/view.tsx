@@ -141,20 +141,10 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
     const data = problem.data;
     validateProblemData('shape-draw-shape', data, []);
 
-    if ('target' in data) {
-        validateProblemData('shape-draw-shape', data, ['target', 'sides', 'corners']);
-        ensureSupportedShape(data.target);
-        if (data.task === 'specify-attributes') {
-            validateProblemData('shape-draw-shape', data, ['task', 'definition']);
-            validateDefinition(data.definition);
-            return (
-                <SpecificationDrawingLayout
-                    shape={data.target}
-                    definition={data.definition}
-                    isSolutionView={isSolutionView}
-                />
-            );
-        }
+    validateProblemData('shape-draw-shape', data, ['target', 'sides', 'corners']);
+    ensureSupportedShape(data.target);
+
+    if (data.task === 'rotation-conservation') {
         return (
             <LegacyDrawingLayout
                 shape={data.target}
@@ -163,9 +153,21 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
         );
     }
 
-    validateProblemData('shape-draw-shape', data, ['shape', 'answer']);
-    ensureSupportedShape(data.shape);
-    return <LegacyDrawingLayout shape={data.shape} isSolutionView={isSolutionView} />;
+    if (data.task !== 'specify-attributes') {
+        throw new ViewValidationError(
+            'shape-draw-shape',
+            'Attribute drawing requires a defining-attribute payload.'
+        );
+    }
+    validateProblemData('shape-draw-shape', data, ['task', 'definition']);
+    validateDefinition(data.definition);
+    return (
+        <SpecificationDrawingLayout
+            shape={data.target}
+            definition={data.definition}
+            isSolutionView={isSolutionView}
+        />
+    );
 };
 
 export const ShapeDrawShape = withConfig(ShapeDrawShapeViewSchema, ShapeDrawShapeCore);

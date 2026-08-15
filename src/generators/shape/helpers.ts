@@ -1,5 +1,11 @@
 import {Area} from 'edugraph-ts';
-import {PlaneShapeName, ShapeDefinition} from '../../types/problems.ts';
+import {
+    PlaneShapeName,
+    QuadrilateralSubtypeName,
+    ShapeCategoryOption,
+    ShapeDefinition,
+    ShapeSubsumptionProblem
+} from '../../types/problems.ts';
 
 export const PLANE_SHAPE_LABELS = [
     Area.Circle,
@@ -12,6 +18,7 @@ export const PLANE_SHAPE_LABELS = [
 const SHAPES_BY_LABEL: Readonly<Record<string, PlaneShapeName>> = {
     [Area.Circle]: 'circle',
     [Area.Triangle]: 'triangle',
+    [Area.Rhombus]: 'rhombus',
     [Area.Square]: 'square',
     [Area.Rectangle]: 'rectangle',
     [Area.Quadrilateral]: 'quadrilateral',
@@ -22,6 +29,13 @@ const SHAPES_BY_LABEL: Readonly<Record<string, PlaneShapeName>> = {
 const DEFINITIONS: Readonly<Record<PlaneShapeName, ShapeDefinition>> = {
     circle: {sideCount: 0, vertexCount: 0, closed: true, boundary: 'curved'},
     triangle: {sideCount: 3, vertexCount: 3, closed: true, boundary: 'straight'},
+    rhombus: {
+        sideCount: 4,
+        vertexCount: 4,
+        closed: true,
+        boundary: 'straight',
+        equalSides: true
+    },
     square: {
         sideCount: 4,
         vertexCount: 4,
@@ -70,3 +84,50 @@ export const NON_DEFINING_ATTRIBUTE_STATEMENTS = [
     'points upward',
     'is large'
 ] as const;
+
+export const QUADRILATERAL_SUBTYPE_LABELS = [
+    Area.Rhombus,
+    Area.Rectangle,
+    Area.Square
+] as const;
+
+const CATEGORY_NAMES: readonly ShapeCategoryOption['category'][] = [
+    'triangle',
+    'quadrilateral',
+    'pentagon',
+    'hexagon'
+];
+
+export function getVisibleShapeAttributes(shape: PlaneShapeName): string[] {
+    const definition = DEFINITIONS[shape];
+    const attributes = definition.boundary === 'curved'
+        ? ['one curved boundary', '0 vertices']
+        : [`${definition.sideCount} straight sides`, `${definition.vertexCount} vertices`];
+
+    if (definition.equalSides) attributes.push('4 equal sides');
+    if (definition.rightAngleCount) attributes.push('4 right angles');
+    return attributes;
+}
+
+export function createQuadrilateralSubsumptionProblem(
+    shape: QuadrilateralSubtypeName,
+    optionOffset: number
+): ShapeSubsumptionProblem {
+    const categories = CATEGORY_NAMES.map((_, index) =>
+        CATEGORY_NAMES[(index + optionOffset) % CATEGORY_NAMES.length]
+    );
+    const options = categories.map((category, index) => ({
+        id: ['A', 'B', 'C', 'D'][index] as ShapeCategoryOption['id'],
+        category,
+        satisfies: category === 'quadrilateral'
+    }));
+
+    return {
+        task: 'classify-quadrilateral-subcategory',
+        shape,
+        attributes: getVisibleShapeAttributes(shape),
+        category: 'quadrilateral',
+        options,
+        answer: options.find(option => option.satisfies)!.id
+    };
+}

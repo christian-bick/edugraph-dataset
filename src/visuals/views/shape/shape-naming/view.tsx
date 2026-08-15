@@ -10,15 +10,6 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-naming'>;
 }
 
-const polygonCounts: Readonly<Record<string, number>> = {
-    triangle: 3,
-    square: 4,
-    rectangle: 4,
-    quadrilateral: 4,
-    pentagon: 5,
-    hexagon: 6
-};
-
 function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     const commonProps = {
         width: size,
@@ -37,6 +28,12 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
         return (
             <svg {...commonProps}>
                 <rect x="10" y="10" width="80" height="80" rx="4" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
+            </svg>
+        );
+    } else if (shape === 'rhombus') {
+        return (
+            <svg {...commonProps}>
+                <polygon points="50,8 92,50 50,92 8,50" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3"/>
             </svg>
         );
     } else if (shape === 'rectangle') {
@@ -110,14 +107,14 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     throw new ViewValidationError('shape-naming', `Unsupported shape: ${shape}`);
 }
 
-const ShapeNamingCore = ({ config, payload }: CoreProps) => {
+const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
+
     validateProblemData('shape-naming', data, ['shape', 'answer']);
 
     const shape = data.shape;
     const answer = data.answer;
-    const polygonCount = polygonCounts[shape];
 
     const is3D = ['cube', 'cone', 'cylinder', 'sphere'].includes(shape);
     const options = is3D
@@ -167,14 +164,13 @@ const ShapeNamingCore = ({ config, payload }: CoreProps) => {
                     </div>
                 </div>
 
-                {config.showAttributes && polygonCount !== undefined && (
-                    <div className="mb-5 flex gap-2 text-sm font-bold text-blue-700">
-                        <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1">
-                            {polygonCount} straight sides
-                        </span>
-                        <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1">
-                            {polygonCount} vertices
-                        </span>
+                {data.attributes && (
+                    <div className="mb-5 flex flex-wrap justify-center gap-2 text-sm font-bold text-blue-700">
+                        {data.attributes.map(attribute => (
+                            <span key={attribute} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1">
+                                {attribute}
+                            </span>
+                        ))}
                     </div>
                 )}
 

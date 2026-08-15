@@ -8,7 +8,7 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.AreaCalculation,
         Area.Rectangle,
-        Area.ShapeComposition,
+        Area.ShapeDecomposition,
         Area.Addition
     ]
 };

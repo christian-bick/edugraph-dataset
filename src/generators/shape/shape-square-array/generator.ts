@@ -138,7 +138,7 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
             };
         }
 
-        const hasArrayModel = [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares]
+        const hasArrayModel = [Area.Square, Area.ShapeDecomposition, Scope.BoxArrangement, Scope.EqualShares]
             .every(label => config.modelFeatures?.includes(label));
         if (!hasArrayModel) return null;
 

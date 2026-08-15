@@ -393,9 +393,10 @@ export type StatisticalGraphProblem = {
 
 // --- Shape Split Problem Types ---
 
-export type ShapeIdentityProblem = {
+export type ShapeNamingProblem = {
     shape: string;
     answer: string;
+    attributes?: string[];
 };
 
 export type ShapePositionProblem = {
@@ -431,6 +432,7 @@ export type ShapeSameAttributeProblem = {
 export type PlaneShapeName =
     | 'circle'
     | 'triangle'
+    | 'rhombus'
     | 'square'
     | 'rectangle'
     | 'quadrilateral'
@@ -484,9 +486,27 @@ export type ShapeCountClassificationProblem = {
     answer: ShapeCountOption['id'];
 };
 
+export type QuadrilateralSubtypeName = 'rhombus' | 'rectangle' | 'square';
+
+export type ShapeCategoryOption = {
+    id: ShapeAttributeOption['id'];
+    category: 'triangle' | 'quadrilateral' | 'pentagon' | 'hexagon';
+    satisfies: boolean;
+};
+
+export type ShapeSubsumptionProblem = {
+    task: 'classify-quadrilateral-subcategory';
+    shape: QuadrilateralSubtypeName;
+    attributes: string[];
+    category: 'quadrilateral';
+    options: ShapeCategoryOption[];
+    answer: ShapeCategoryOption['id'];
+};
+
 export type ShapeAttributeClassificationProblem =
     | ShapeDefiningAttributeClassificationProblem
-    | ShapeCountClassificationProblem;
+    | ShapeCountClassificationProblem
+    | ShapeSubsumptionProblem;
 
 export type ShapePartsConstructionProblem = {
     target: PlaneShapeName;
@@ -494,6 +514,13 @@ export type ShapePartsConstructionProblem = {
     corners: number;
     task?: undefined;
     definition?: undefined;
+};
+
+export type ShapeRotationConstructionProblem = {
+    target: PlaneShapeName;
+    sides: number;
+    corners: number;
+    task: 'rotation-conservation';
 };
 
 export type ShapeAttributeSpecificationProblem = {
@@ -515,11 +542,9 @@ export type ShapeAttributeCountSpecificationProblem = {
 
 export type ShapeBuildShapeProblem =
     | ShapePartsConstructionProblem
+    | ShapeRotationConstructionProblem
     | ShapeAttributeSpecificationProblem
     | ShapeAttributeCountSpecificationProblem;
-
-/** Shared payload accepted by the legacy tracing and defining-attribute drawing modes. */
-export type ShapeDrawProblem = ShapeIdentityProblem | ShapeBuildShapeProblem;
 
 export type ShapeCompositionLeaf = {
     kind: 'primitive';
@@ -754,7 +779,7 @@ export interface ViewTypeMap {
     'data-picture-graph': StatisticalGraphProblem;
     'data-bar-graph': StatisticalGraphProblem;
 
-    'shape-naming': ShapeIdentityProblem;
+    'shape-naming': ShapeNamingProblem;
     'shape-position': ShapePositionProblem;
     'shape-env-shapes': ShapeEnvShapesProblem;
     'shape-classify-dim': ShapeClassifyDimProblem;
@@ -770,5 +795,5 @@ export interface ViewTypeMap {
     'geometry-perimeter': GeometryPerimeterProblem;
     'area-perimeter-comparison': AreaPerimeterRelationProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
-    'shape-draw-shape': ShapeDrawProblem;
+    'shape-draw-shape': ShapeBuildShapeProblem;
 }

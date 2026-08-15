@@ -30,11 +30,30 @@ describe('ShapeBuildShapeGenerator', () => {
             ...configFor(target),
             constructionScopes: [Scope.ShapeProperties],
             specifyAttributes: false,
-            shapeIdentity: false
+            shapeArea: Area.ShapeIdentity
         });
 
         expect(stub).toEqual({
             data: {target: name, sides, corners},
+            tags: []
+        });
+    });
+
+    it('generates a construction payload for rotation-conservation drawing', () => {
+        const stub = generator.generate({
+            ...configFor(Area.Triangle),
+            constructionScopes: [],
+            specifyAttributes: false,
+            shapeArea: Area.ShapeRotationConservation
+        });
+
+        expect(stub).toEqual({
+            data: {
+                target: 'triangle',
+                sides: 3,
+                corners: 3,
+                task: 'rotation-conservation'
+            },
             tags: []
         });
     });
@@ -63,7 +82,7 @@ describe('ShapeBuildShapeGenerator', () => {
             ...configFor(target),
             constructionScopes: [],
             specifyAttributes: true,
-            shapeIdentity: false
+            shapeArea: Area.ShapeClassification
         });
 
         expect(stub).toEqual({
@@ -83,28 +102,16 @@ describe('ShapeBuildShapeGenerator', () => {
             ...configFor(Area.Cube),
             constructionScopes: [Scope.ShapeProperties],
             specifyAttributes: false,
-            shapeIdentity: false
+            shapeArea: Area.ShapeIdentity
         })).toBeNull();
     });
 
     it('returns null for unsupported scope and task combinations', () => {
         expect(generator.generate({
             ...configFor(Area.Triangle),
-            constructionScopes: [],
-            specifyAttributes: false,
-            shapeIdentity: false
-        })).toBeNull();
-        expect(generator.generate({
-            ...configFor(Area.Triangle),
             constructionScopes: [Scope.ShapeProperties],
             specifyAttributes: true,
-            shapeIdentity: false
-        })).toBeNull();
-        expect(generator.generate({
-            ...configFor(Area.Triangle),
-            constructionScopes: [],
-            specifyAttributes: true,
-            shapeIdentity: true
+            shapeArea: Area.ShapeClassification
         })).toBeNull();
     });
 
@@ -113,7 +120,7 @@ describe('ShapeBuildShapeGenerator', () => {
             targets: [],
             constructionScopes: [],
             specifyAttributes: true,
-            shapeIdentity: false,
+            shapeArea: Area.ShapeClassification,
             attributeCounts: [Scope.VertexCount]
         })!;
 
@@ -129,7 +136,7 @@ describe('ShapeBuildShapeGenerator', () => {
             targets: [],
             constructionScopes: [],
             specifyAttributes: true,
-            shapeIdentity: false,
+            shapeArea: Area.ShapeClassification,
             attributeCounts: [Scope.FaceCount, Scope.Equal]
         });
 

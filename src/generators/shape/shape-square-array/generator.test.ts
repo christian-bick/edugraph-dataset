@@ -19,7 +19,7 @@ describe('ShapeSquareArrayGenerator', () => {
         [Ability.ProcedureExecution, 'count']
     ] as const)('maps %s to the %s task', (taskAbility, expectedTask) => {
         const stub = generator.generate({
-            modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            modelFeatures: [Area.Square, Area.ShapeDecomposition, Scope.BoxArrangement, Scope.EqualShares],
             taskAbility
         })!;
 
@@ -29,7 +29,7 @@ describe('ShapeSquareArrayGenerator', () => {
 
     it('rejects unsupported abilities', () => {
         expect(generator.generate({
-            modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            modelFeatures: [Area.Square, Area.ShapeDecomposition, Scope.BoxArrangement, Scope.EqualShares],
             taskAbility: 'unsupported' as typeof Ability.VisualArticulation
         })).toBeNull();
     });
@@ -122,7 +122,7 @@ describe('ShapeSquareArrayGenerator', () => {
             taskAbility: Ability.ProcedureExecution
         })).toBeNull();
         expect(generator.generate({
-            modelFeatures: [Area.ShapeComposition],
+            modelFeatures: [Area.ShapeDecomposition],
             taskAbility: Ability.Interpretation
         })).toBeNull();
     });
@@ -131,7 +131,7 @@ describe('ShapeSquareArrayGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const data = generator.generate({
-                modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+                modelFeatures: [Area.Square, Area.ShapeDecomposition, Scope.BoxArrangement, Scope.EqualShares],
                 taskAbility: Ability.ProcedureExecution
             })!.data;
 
@@ -147,7 +147,7 @@ describe('ShapeSquareArrayGenerator', () => {
     it('is deterministic for a fixed seed', () => {
         setSeed(18);
         const config = {
-            modelFeatures: [Area.Square, Area.ShapeComposition, Scope.BoxArrangement, Scope.EqualShares],
+            modelFeatures: [Area.Square, Area.ShapeDecomposition, Scope.BoxArrangement, Scope.EqualShares],
             taskAbility: Ability.VisualArticulation
         };
         const first = generator.generate(config);

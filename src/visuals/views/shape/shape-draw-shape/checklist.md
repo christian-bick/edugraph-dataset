@@ -1,2 +1,3 @@
-- **Identity:** A tracing guide or defining-attribute card and drawing canvas make the requested shape-construction task identifiable.
+- **Identity:** A rotated tracing guide or defining-attribute card and drawing canvas make the requested shape-construction task identifiable.
+- **Rotation conservation:** The rotated reference remains visibly congruent to the requested drawing, directly showing that orientation does not change the shape.
 - **Modes:** Question Mode shows only the guide or uncompleted attribute workspace; Solution Mode adds the completed shape without removing the evidence that defined it.

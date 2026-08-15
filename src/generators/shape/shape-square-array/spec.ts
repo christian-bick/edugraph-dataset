@@ -15,7 +15,7 @@ export const ShapeSquareArrayGeneratorSchema = {
             Area.Iteration,
             Area.Multiplication,
             Area.Square,
-            Area.ShapeComposition,
+            Area.ShapeDecomposition,
             Scope.BoxArrangement,
             Scope.EqualShares,
             Scope.IntegerNumbers,

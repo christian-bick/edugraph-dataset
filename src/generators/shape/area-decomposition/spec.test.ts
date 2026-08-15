@@ -9,7 +9,7 @@ describe('AreaDecompositionGenerator spec integration', () => {
         expect(spec.generalLabels).toEqual([
             Area.AreaCalculation,
             Area.Rectangle,
-            Area.ShapeComposition,
+            Area.ShapeDecomposition,
             Area.Addition
         ]);
     });
@@ -18,7 +18,7 @@ describe('AreaDecompositionGenerator spec integration', () => {
         const stub = generateWithLabels(new AreaDecompositionGenerator(), [
             Area.AreaCalculation,
             Area.Rectangle,
-            Area.ShapeComposition,
+            Area.ShapeDecomposition,
             Area.Multiplication,
             Area.Addition,
             Area.DistributiveLaw,
@@ -34,7 +34,7 @@ describe('AreaDecompositionGenerator spec integration', () => {
         const stub = generateWithLabels(new AreaDecompositionGenerator(), [
             Area.AreaCalculation,
             Area.Rectangle,
-            Area.ShapeComposition,
+            Area.ShapeDecomposition,
             Area.Addition,
             Ability.VisualDecomposition,
             Ability.ProcedureExecution

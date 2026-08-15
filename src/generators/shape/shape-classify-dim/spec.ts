@@ -6,7 +6,7 @@ import {selectExactMatch} from '../../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'shape-classify-dim',
     generalLabels: [
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeProperties,
         Scope.ThreeDimensional,
         Scope.TwoDimensional,

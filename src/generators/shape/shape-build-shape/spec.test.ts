@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ShapeBuildShapeGenerator } from './generator.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
-import { generateWithLabels } from '../../../lib/utils.ts';
+import { extractSchemaLabels, generateWithLabels } from '../../../lib/utils.ts';
+import { ShapeBuildShapeGeneratorSchema } from './spec.ts';
 
 describe('ShapeBuildShapeGenerator Spec Integration', () => {
     let generator: ShapeBuildShapeGenerator;
@@ -13,17 +14,23 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
     it('resolves the kindergarten construction path without changing its payload', () => {
         const stub = generateWithLabels(generator, [
             Area.Hexagon,
+            Area.ShapeIdentity,
             Scope.ShapeProperties
         ]);
 
         expect(stub).toEqual({
             data: {target: 'hexagon', sides: 6, corners: 6},
-            tags: [Area.Hexagon, Scope.ShapeProperties]
+            tags: [Area.Hexagon, Scope.ShapeProperties, Area.ShapeIdentity]
         });
     });
 
     it('resolves the Grade 1 attribute-specification path and records each configured label once', () => {
-        const labels = [Area.Circle, Scope.ShapeAttributes, Ability.ConceptSpecification];
+        const labels = [
+            Area.Circle,
+            Area.ShapeClassification,
+            Scope.ShapeAttributes,
+            Ability.ConceptSpecification
+        ];
         const stub = generateWithLabels(generator, labels);
 
         expect(stub?.data).toEqual({
@@ -52,9 +59,27 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         });
     });
 
+    it('owns the rotation-conservation task mode', () => {
+        expect(extractSchemaLabels(ShapeBuildShapeGeneratorSchema))
+            .toContain(Area.ShapeRotationConservation);
+
+        const stub = generateWithLabels(generator, [
+            Area.Triangle,
+            Area.ShapeRotationConservation,
+            Area.LinearShapeDrawing,
+            Ability.VisualArticulation
+        ]);
+        expect(stub?.data).toEqual({
+            target: 'triangle',
+            sides: 3,
+            corners: 3,
+            task: 'rotation-conservation'
+        });
+    });
+
     it('does not invent a named target for a generic vertex-count task', () => {
         const labels = [
-            Area.ShapeRecognition,
+            Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.VertexCount,
             Ability.ConceptSpecification,
@@ -66,7 +91,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         if (stub.data.task !== 'specify-count') return;
         expect(stub.data.attribute).toBe('vertices');
         expect(stub.tags).toEqual(expect.arrayContaining([
-            Area.ShapeRecognition,
+            Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.VertexCount,
             Ability.ConceptSpecification
@@ -75,7 +100,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
 
     it('resolves the equal-face construction path without a named target label', () => {
         const labels = [
-            Area.ShapeRecognition,
+            Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.FaceCount,
             Scope.Equal,
@@ -91,7 +116,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
             requiredCount: 6
         });
         expect(stub.tags).toEqual(expect.arrayContaining([
-            Area.ShapeRecognition,
+            Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.FaceCount,
             Scope.Equal,

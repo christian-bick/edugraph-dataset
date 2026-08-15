@@ -546,7 +546,7 @@ const barGraphProblemsBuilder = new DatasetPermutationBuilder()
 // --- 2.G.A.1: Identify currently supported named shapes ---
 const identifySupportedShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeNaming,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -558,7 +558,7 @@ const identifySupportedShapesBuilder = new DatasetPermutationBuilder()
 // --- 2.G.A.1: Identify additional named shapes ---
 const identifyAdditionalShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeNaming,
         Scope.ShapeAttributes,
         Ability.VisualRecognition
     ])
@@ -570,7 +570,7 @@ const identifyAdditionalShapesBuilder = new DatasetPermutationBuilder()
 // --- 2.G.A.1: Recognize shapes from specified attribute counts ---
 const recognizeShapeAttributeCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptClassification
     ])
@@ -582,7 +582,7 @@ const recognizeShapeAttributeCountsBuilder = new DatasetPermutationBuilder()
 // --- 2.G.A.1: Draw shapes from specified attribute counts ---
 const drawShapeAttributeCountsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeRecognition,
+        Area.ShapeClassification,
         Scope.ShapeAttributes,
         Ability.ConceptSpecification,
         Ability.VisualArticulation
@@ -597,7 +597,7 @@ const rectangularSquarePartitionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Rectangle,
         Area.Square,
-        Area.ShapeComposition,
+        Area.ShapeDecomposition,
         Scope.BoxArrangement,
         Scope.EqualShares,
         Ability.VisualArticulation
@@ -608,7 +608,7 @@ const rectangularSquareCountBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Rectangle,
         Area.Square,
-        Area.ShapeComposition,
+        Area.ShapeDecomposition,
         Scope.BoxArrangement,
         Scope.EqualShares,
         Ability.ProcedureExecution

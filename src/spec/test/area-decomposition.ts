@@ -5,7 +5,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const distributiveAreaBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AreaCalculation,
     Area.Rectangle,
-    Area.ShapeComposition,
+    Area.ShapeDecomposition,
     Area.Multiplication,
     Area.Addition,
     Area.DistributiveLaw,
@@ -16,7 +16,7 @@ const distributiveAreaBuilder = new DatasetPermutationBuilder().addLabels([
 const rectilinearAreaBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AreaCalculation,
     Area.Rectangle,
-    Area.ShapeComposition,
+    Area.ShapeDecomposition,
     Area.Addition,
     Ability.VisualDecomposition,
     Ability.ProcedureExecution

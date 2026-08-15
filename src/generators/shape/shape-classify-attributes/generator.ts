@@ -8,10 +8,12 @@ import {
     ShapeCountOption
 } from '../../../types/problems.ts';
 import {
+    createQuadrilateralSubsumptionProblem,
     getDefiningAttributeStatements,
     getShapeDefinition,
     NON_DEFINING_ATTRIBUTE_STATEMENTS,
     PLANE_SHAPE_LABELS,
+    QUADRILATERAL_SUBTYPE_LABELS,
     shapeNameFromLabel
 } from '../helpers.ts';
 import {
@@ -78,7 +80,7 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
     generate(
         config: ShapeClassifyAttributesGeneratorConfig
     ): ProblemStub<ShapeAttributeClassificationProblem> | null {
-        validateConfigFields('shape-classify-attributes', config, []);
+        validateConfigFields('shape-classify-attributes', config, ['subsumption']);
         if (!Array.isArray(config.attributeCounts)) {
             throw new GeneratorValidationError(
                 'shape-classify-attributes',
@@ -136,6 +138,19 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
                 'shape-classify-attributes',
                 'Attribute-count labels must select either vertex count or equal face count.'
             );
+        }
+
+        const subsumptionLabel = config.shapes!.find(label =>
+            QUADRILATERAL_SUBTYPE_LABELS.includes(label as typeof QUADRILATERAL_SUBTYPE_LABELS[number])
+        );
+        if (config.subsumption) {
+            if (!subsumptionLabel) return null;
+            const shape = shapeNameFromLabel(subsumptionLabel);
+            if (shape !== 'rhombus' && shape !== 'rectangle' && shape !== 'square') return null;
+            return {
+                data: createQuadrilateralSubsumptionProblem(shape, Math.floor(random() * OPTION_IDS.length)),
+                tags: [subsumptionLabel]
+            };
         }
 
         const shapeLabel = pickRandom(PLANE_SHAPE_LABELS);
