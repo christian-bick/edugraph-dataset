@@ -36,19 +36,24 @@ function validateRelation(data: AreaPerimeterRelationProblem) {
         'unit',
         'areaUnit'
     ]);
+    const validMeasures = data.task === 'same-perimeter'
+        ? data.equalMeasure === 'perimeter'
+            && data.first.perimeter === data.second.perimeter
+            && data.first.area !== data.second.area
+        : data.equalMeasure === 'area'
+            && data.first.area === data.second.area
+            && data.first.perimeter !== data.second.perimeter;
+
     if (
-        data.task !== 'same-perimeter'
-        || data.equalMeasure !== 'perimeter'
-        || data.unit !== 'units'
+        data.unit !== 'units'
         || data.areaUnit !== 'square units'
         || !validRectangle(data.first)
         || !validRectangle(data.second)
-        || data.first.perimeter !== data.second.perimeter
-        || data.first.area === data.second.area
+        || !validMeasures
     ) {
         throw new ViewValidationError(
             'area-perimeter-comparison',
-            'Expected two valid rectangles with equal perimeters and different areas.'
+            'Expected two valid rectangles with exactly one equal measure and one different measure.'
         );
     }
 }
@@ -107,11 +112,14 @@ const AreaPerimeterComparisonCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateRelation(data);
+    const samePerimeter = data.task === 'same-perimeter';
 
     return (
         <div className="w-[740px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="text-center text-[1.3rem] font-bold text-slate-700">
-                These rectangles have the same perimeter. Compare their areas.
+                {samePerimeter
+                    ? 'These rectangles have the same perimeter. Compare their areas.'
+                    : 'These rectangles have the same area. Compare their perimeters.'}
             </div>
             <div className="mt-4 flex justify-center gap-5 rounded-xl bg-slate-50 p-4">
                 <RectangleCard name="A" rectangle={data.first} showCalculations={isSolutionView} />
@@ -123,8 +131,12 @@ const AreaPerimeterComparisonCore = ({config: _config, payload}: CoreProps) => {
                     : 'border-slate-300 bg-white text-slate-600'
             }`}>
                 {isSolutionView
-                    ? `Perimeters: ${data.first.perimeter} = ${data.second.perimeter} ${data.unit}. Areas: ${data.first.area} ≠ ${data.second.area} ${data.areaUnit}.`
-                    : `Both perimeters are ${data.first.perimeter} ${data.unit}. Are the areas equal?`}
+                    ? samePerimeter
+                        ? `Perimeters: ${data.first.perimeter} = ${data.second.perimeter} ${data.unit}. Areas: ${data.first.area} ≠ ${data.second.area} ${data.areaUnit}.`
+                        : `Areas: ${data.first.area} = ${data.second.area} ${data.areaUnit}. Perimeters: ${data.first.perimeter} ≠ ${data.second.perimeter} ${data.unit}.`
+                    : samePerimeter
+                        ? `Both perimeters are ${data.first.perimeter} ${data.unit}. Are the areas equal?`
+                        : `Both areas are ${data.first.area} ${data.areaUnit}. Are the perimeters equal?`}
             </div>
         </div>
     );

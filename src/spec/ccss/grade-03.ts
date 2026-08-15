@@ -459,16 +459,7 @@ const unknownPolygonSideBuilder = new DatasetPermutationBuilder()
     .addLabels([Area.PerimeterCalculation, Scope.IntegerNumbers, Ability.ProcedureInversion])
     .applyLabelVariants([[Area.Triangle], [Area.Quadrilateral], [Area.Pentagon], [Area.Hexagon]]);
 
-const samePerimeterDifferentAreaBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.PerimeterCalculation,
-        Area.AreaCalculation,
-        Area.Rectangle,
-        Scope.Equal,
-        Ability.ConceptDerivation
-    ]);
-
-const sameAreaDifferentPerimeterBuilder = new DatasetPermutationBuilder()
+const areaPerimeterRelationsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.PerimeterCalculation,
         Area.AreaCalculation,
@@ -587,13 +578,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const areaPerimeterRelationsImplementation = defineImplementationPackage({
-    id: 'area-perimeter-relations',
-    description: 'Contrast rectangles with equal perimeter or area but different companion measures.',
-    generators: [{ module: 'area-perimeter-relations', strategy: 'new' }],
-    views: [{ module: 'area-perimeter-comparison', strategy: 'new' }]
-});
-
 const quadrilateralSubcategoriesImplementation = defineImplementationPackage({
     id: 'quadrilateral-subcategories',
     description: 'Elicit hierarchical classification of rhombuses, rectangles, and squares as quadrilaterals.',
@@ -689,7 +673,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.C.7d-additive-rectilinear-area', additiveRectilinearAreaBuilder),
     ...toTargets('3.MD.D.8-polygon-perimeter', polygonPerimeterBuilder),
     ...toTargets('3.MD.D.8-unknown-polygon-side', unknownPolygonSideBuilder),
-    ...toTargets('3.MD.D.8-same-perimeter-different-area', samePerimeterDifferentAreaBuilder),
+    ...toTargets('3.MD.D.8-area-perimeter-relations', areaPerimeterRelationsBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -697,7 +681,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.D.8-same-area-different-perimeter', sameAreaDifferentPerimeterBuilder, areaPerimeterRelationsImplementation, 'Compare rectangles with equal area and visibly different perimeters.'),
     ...toImplementationTodos('3.G.A.1-classify-quadrilateral-subcategories', classifyQuadrilateralSubcategoriesBuilder, quadrilateralSubcategoriesImplementation, 'Expose defining attributes and hierarchical quadrilateral inclusion.'),
     ...toImplementationTodos('3.G.A.1-draw-other-quadrilateral', drawOtherQuadrilateralBuilder, otherQuadrilateralDrawingImplementation, 'Draw and verify a quadrilateral outside the named subcategories.'),
     ...toImplementationTodos('3.G.A.2-partition-equal-area-parts', partitionEqualAreaPartsBuilder, fractionModelsGrade3Implementation, 'Partition equal areas and label one part as a unit fraction.'),

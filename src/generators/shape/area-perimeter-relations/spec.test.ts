@@ -17,11 +17,16 @@ describe('AreaPerimeterRelationsGenerator spec integration', () => {
         expect(spec.generalLabels).toEqual(labels);
     });
 
-    it('generates the reviewed same-perimeter target', () => {
+    it('generates the reviewed area-perimeter relation target', () => {
         const stub = generateWithLabels(new AreaPerimeterRelationsGenerator(), labels);
 
         expect(stub).not.toBeNull();
-        expect(stub!.data.first.perimeter).toBe(stub!.data.second.perimeter);
-        expect(stub!.data.first.area).not.toBe(stub!.data.second.area);
+        if (stub!.data.task === 'same-perimeter') {
+            expect(stub!.data.first.perimeter).toBe(stub!.data.second.perimeter);
+            expect(stub!.data.first.area).not.toBe(stub!.data.second.area);
+        } else {
+            expect(stub!.data.first.area).toBe(stub!.data.second.area);
+            expect(stub!.data.first.perimeter).not.toBe(stub!.data.second.perimeter);
+        }
     });
 });

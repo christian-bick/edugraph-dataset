@@ -650,14 +650,23 @@ export type RectangleMeasures = {
     perimeter: number;
 };
 
-export type AreaPerimeterRelationProblem = {
-    task: 'same-perimeter';
-    equalMeasure: 'perimeter';
+type AreaPerimeterRelationBase = {
     first: RectangleMeasures;
     second: RectangleMeasures;
     unit: 'units';
     areaUnit: 'square units';
 };
+
+export type AreaPerimeterRelationProblem = AreaPerimeterRelationBase & (
+    | {
+        task: 'same-perimeter';
+        equalMeasure: 'perimeter';
+    }
+    | {
+        task: 'same-area';
+        equalMeasure: 'area';
+    }
+);
 
 export type ShapePartitionEquivalenceProblem = {
     shape: FractionShape;
