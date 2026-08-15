@@ -13,6 +13,16 @@ const distributiveAreaBuilder = new DatasetPermutationBuilder().addLabels([
     Ability.ProcedureUnderstanding
 ]);
 
+const rectilinearAreaBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.AreaCalculation,
+    Area.Rectangle,
+    Area.ShapeComposition,
+    Area.Addition,
+    Ability.VisualDecomposition,
+    Ability.ProcedureExecution
+]);
+
 export const spec: CompetencyTarget[] = [
-    ...toTargets('test-area-distributive-model', distributiveAreaBuilder)
+    ...toTargets('test-area-distributive-model', distributiveAreaBuilder),
+    ...toTargets('test-area-rectilinear-decomposition', rectilinearAreaBuilder)
 ];

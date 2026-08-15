@@ -1,4 +1,6 @@
 import {random} from '../../../lib/random.ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
+import {validateConfigFields} from '../../../lib/errors.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {AreaDecompositionProblem} from '../../../types/problems.ts';
 import {AreaDecompositionGeneratorConfig, AreaDecompositionGeneratorSchema} from './spec.ts';
@@ -13,7 +15,34 @@ export class AreaDecompositionGenerator implements ProblemGenerator<
     type: AbstractProblem['type'] = 'shape';
     schema = AreaDecompositionGeneratorSchema;
 
-    generate(_config: AreaDecompositionGeneratorConfig): ProblemStub<AreaDecompositionProblem> {
+    generate(config: AreaDecompositionGeneratorConfig): ProblemStub<AreaDecompositionProblem> | null {
+        validateConfigFields('area-decomposition', config, ['decompositionKind']);
+
+        if (config.decompositionKind === Ability.VisualDecomposition) {
+            const leftWidth = randomInteger(2, 3);
+            const rightWidth = randomInteger(2, 3);
+            const totalHeight = randomInteger(3, 5);
+            const bottomHeight = randomInteger(1, Math.min(2, totalHeight - 1));
+            const leftArea = leftWidth * totalHeight;
+            const rightArea = rightWidth * bottomHeight;
+            return {
+                data: {
+                    kind: 'rectilinear',
+                    leftWidth,
+                    rightWidth,
+                    totalHeight,
+                    bottomHeight,
+                    leftArea,
+                    rightArea,
+                    totalArea: leftArea + rightArea
+                }
+            };
+        }
+
+        const hasDistributiveFeatures = [Area.Multiplication, Scope.ThreeOperands]
+            .every(label => config.distributiveFeatures?.includes(label));
+        if (config.decompositionKind !== Area.DistributiveLaw || !hasDistributiveFeatures) return null;
+
         const height = randomInteger(2, 5);
         const leftWidth = randomInteger(2, 3);
         const rightWidth = randomInteger(2, 3);
@@ -23,6 +52,7 @@ export class AreaDecompositionGenerator implements ProblemGenerator<
 
         return {
             data: {
+                kind: 'distributive',
                 height,
                 leftWidth,
                 rightWidth,

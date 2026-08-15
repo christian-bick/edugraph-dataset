@@ -1,0 +1,4 @@
+- **Identity:** A dimensioned L-shaped rectilinear figure is composed from equal square units.
+- **Question mode:** The complete figure is visible while its component rectangles and total area remain unlabeled.
+- **Solution mode:** A visible split produces exactly two non-overlapping rectangles whose labeled dimensions and individual areas agree with the figure.
+- **Additive area:** The two component areas are added explicitly, and their sum is reported in square units as the whole figure's area.

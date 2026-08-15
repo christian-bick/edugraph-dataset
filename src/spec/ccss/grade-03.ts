@@ -587,13 +587,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const additiveRectilinearAreaImplementation = defineImplementationPackage({
-    id: 'additive-rectilinear-area',
-    description: 'Decompose rectilinear figures into rectangles and add their labeled areas.',
-    generators: [{ module: 'area-decomposition', strategy: 'new' }],
-    views: [{ module: 'area-rectilinear-decomposition', strategy: 'new' }]
-});
-
 const polygonPerimeterImplementation = defineImplementationPackage({
     id: 'polygon-perimeter',
     description: 'Find polygon perimeters and recover an unknown side from a known perimeter.',
@@ -700,6 +693,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.C.7a-tiling-side-length-product', connectTilingToMultiplicationBuilder),
     ...toTargets('3.MD.C.7b-rectangular-area', rectangularAreaBuilder),
     ...toTargets('3.MD.C.7c-distributive-area-model', distributiveAreaModelBuilder),
+    ...toTargets('3.MD.C.7d-additive-rectilinear-area', additiveRectilinearAreaBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -707,7 +701,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.C.7d-additive-rectilinear-area', additiveRectilinearAreaBuilder, additiveRectilinearAreaImplementation, 'Decompose into non-overlapping rectangles and add their labeled areas.'),
     ...toImplementationTodos('3.MD.D.8-polygon-perimeter', polygonPerimeterBuilder, polygonPerimeterImplementation, 'Show every side length, boundary, calculation, unit, and perimeter.'),
     ...toImplementationTodos('3.MD.D.8-unknown-polygon-side', unknownPolygonSideBuilder, polygonPerimeterImplementation, 'Show total perimeter and recover one hidden side by inversion.'),
     ...toImplementationTodos('3.MD.D.8-same-perimeter-different-area', samePerimeterDifferentAreaBuilder, areaPerimeterRelationsImplementation, 'Compare rectangles with equal perimeter and visibly different areas.'),

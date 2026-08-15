@@ -5,15 +5,12 @@ import {AreaDecompositionGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
 describe('AreaDecompositionGenerator spec integration', () => {
-    it('declares the distributive area-model structure', () => {
+    it('declares the shared additive area-decomposition structure', () => {
         expect(spec.generalLabels).toEqual([
             Area.AreaCalculation,
             Area.Rectangle,
             Area.ShapeComposition,
-            Area.Multiplication,
-            Area.Addition,
-            Area.DistributiveLaw,
-            Scope.ThreeOperands
+            Area.Addition
         ]);
     });
 
@@ -30,6 +27,21 @@ describe('AreaDecompositionGenerator spec integration', () => {
         ]);
 
         expect(stub).not.toBeNull();
+        expect(stub!.data.totalArea).toBe(stub!.data.leftArea + stub!.data.rightArea);
+    });
+
+    it('generates the reviewed rectilinear decomposition target', () => {
+        const stub = generateWithLabels(new AreaDecompositionGenerator(), [
+            Area.AreaCalculation,
+            Area.Rectangle,
+            Area.ShapeComposition,
+            Area.Addition,
+            Ability.VisualDecomposition,
+            Ability.ProcedureExecution
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.kind).toBe('rectilinear');
         expect(stub!.data.totalArea).toBe(stub!.data.leftArea + stub!.data.rightArea);
     });
 });

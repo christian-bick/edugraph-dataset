@@ -1,6 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {AreaDecompositionProblem} from '../../../../types/problems.ts';
+import {AreaDecompositionProblem, DistributiveAreaDecompositionProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {AreaDistributiveModelViewConfig, AreaDistributiveModelViewSchema} from './spec.ts';
@@ -13,8 +13,11 @@ interface CoreProps {
 
 const CELL_SIZE = 40;
 
-function validateDecomposition(data: AreaDecompositionProblem) {
+function validateDecomposition(
+    data: AreaDecompositionProblem
+): asserts data is DistributiveAreaDecompositionProblem {
     validateProblemData('area-distributive-model', data, [
+        'kind',
         'height',
         'leftWidth',
         'rightWidth',
@@ -24,7 +27,8 @@ function validateDecomposition(data: AreaDecompositionProblem) {
         'totalArea'
     ]);
     if (
-        !Number.isInteger(data.height)
+        data.kind !== 'distributive'
+        || !Number.isInteger(data.height)
         || !Number.isInteger(data.leftWidth)
         || !Number.isInteger(data.rightWidth)
         || data.height < 2
@@ -42,7 +46,7 @@ function validateDecomposition(data: AreaDecompositionProblem) {
     }
 }
 
-function SplitRectangle({data, showAreas}: {data: AreaDecompositionProblem; showAreas: boolean}) {
+function SplitRectangle({data, showAreas}: {data: DistributiveAreaDecompositionProblem; showAreas: boolean}) {
     const width = data.totalWidth * CELL_SIZE;
     const height = data.height * CELL_SIZE;
     const x = (520 - width) / 2;
