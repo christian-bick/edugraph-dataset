@@ -1,0 +1,4 @@
+- **Identity:** Two visibly different rectangles are shown as complete unit-square grids with both side lengths labeled.
+- **Question mode:** The shared perimeter is stated and both sets of dimensions remain visible, while the area comparison is withheld.
+- **Solution mode:** Each rectangle's perimeter and area calculations are explicit and agree with its dimensions.
+- **Relation:** The rectangles have equal linear perimeters and unequal square-unit areas, stated with the correct units.

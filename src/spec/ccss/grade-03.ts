@@ -689,6 +689,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.C.7d-additive-rectilinear-area', additiveRectilinearAreaBuilder),
     ...toTargets('3.MD.D.8-polygon-perimeter', polygonPerimeterBuilder),
     ...toTargets('3.MD.D.8-unknown-polygon-side', unknownPolygonSideBuilder),
+    ...toTargets('3.MD.D.8-same-perimeter-different-area', samePerimeterDifferentAreaBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -696,7 +697,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.D.8-same-perimeter-different-area', samePerimeterDifferentAreaBuilder, areaPerimeterRelationsImplementation, 'Compare rectangles with equal perimeter and visibly different areas.'),
     ...toImplementationTodos('3.MD.D.8-same-area-different-perimeter', sameAreaDifferentPerimeterBuilder, areaPerimeterRelationsImplementation, 'Compare rectangles with equal area and visibly different perimeters.'),
     ...toImplementationTodos('3.G.A.1-classify-quadrilateral-subcategories', classifyQuadrilateralSubcategoriesBuilder, quadrilateralSubcategoriesImplementation, 'Expose defining attributes and hierarchical quadrilateral inclusion.'),
     ...toImplementationTodos('3.G.A.1-draw-other-quadrilateral', drawOtherQuadrilateralBuilder, otherQuadrilateralDrawingImplementation, 'Draw and verify a quadrilateral outside the named subcategories.'),

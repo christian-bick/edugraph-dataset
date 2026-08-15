@@ -643,6 +643,22 @@ export type GeometryPerimeterProblem =
     | FindPolygonPerimeterProblem
     | FindMissingPolygonSideProblem;
 
+export type RectangleMeasures = {
+    width: number;
+    height: number;
+    area: number;
+    perimeter: number;
+};
+
+export type AreaPerimeterRelationProblem = {
+    task: 'same-perimeter';
+    equalMeasure: 'perimeter';
+    first: RectangleMeasures;
+    second: RectangleMeasures;
+    unit: 'units';
+    areaUnit: 'square units';
+};
+
 export type ShapePartitionEquivalenceProblem = {
     shape: FractionShape;
     parts: 2;
@@ -743,6 +759,7 @@ export interface ViewTypeMap {
     'area-distributive-model': AreaDecompositionProblem;
     'area-rectilinear-decomposition': AreaDecompositionProblem;
     'geometry-perimeter': GeometryPerimeterProblem;
+    'area-perimeter-comparison': AreaPerimeterRelationProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
     'shape-draw-shape': ShapeDrawProblem;
 }
