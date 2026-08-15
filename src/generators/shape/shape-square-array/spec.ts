@@ -13,6 +13,7 @@ export const ShapeSquareArrayGeneratorSchema = {
         [
             Area.AreaCalculation,
             Area.Iteration,
+            Area.Multiplication,
             Area.ShapeComposition,
             Scope.BoxArrangement,
             Scope.EqualShares,
@@ -21,12 +22,18 @@ export const ShapeSquareArrayGeneratorSchema = {
             Scope.SquareFootScale,
             Scope.SquareInchScale,
             Scope.SquareMeterScale,
-            Scope.TileScale
+            Scope.TileScale,
+            Scope.TwoOperands
         ],
         matchAllExactLabels
     ],
     taskAbility: [
-        [Ability.Interpretation, Ability.VisualArticulation, Ability.ProcedureExecution],
+        [
+            Ability.Interpretation,
+            Ability.VisualArticulation,
+            Ability.ProcedureExecution,
+            Ability.ProcedureUnderstanding
+        ],
         selectExactMatch
     ]
 } as const;

@@ -86,6 +86,22 @@ describe('ShapeSquareArrayGenerator', () => {
         expect(data.squareCount).toBe(data.rows * data.columns);
     });
 
+    it('connects tiled side lengths to the rectangular area product', () => {
+        const data = generator.generate({
+            modelFeatures: [
+                Area.AreaCalculation,
+                Area.Multiplication,
+                Scope.BoxArrangement,
+                Scope.TwoOperands
+            ],
+            taskAbility: Ability.ProcedureUnderstanding
+        })!.data;
+
+        expect(data.task).toBe('explain-product');
+        expect(data.areaUnit).toBe('square units');
+        expect(data.squareCount).toBe(data.rows * data.columns);
+    });
+
     it('rejects abilities without their required model features', () => {
         expect(generator.generate({
             modelFeatures: [Scope.TileScale],

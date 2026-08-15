@@ -711,6 +711,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.MD.C.5a-unit-square-area-unit', unitSquareAreaUnitBuilder),
     ...toTargets('3.MD.C.5b-unit-square-coverage', unitSquareCoverageBuilder),
     ...toTargets('3.MD.C.6-count-unit-squares', countUnitSquaresBuilder),
+    ...toTargets('3.MD.C.7a-tiling-side-length-product', connectTilingToMultiplicationBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -718,7 +719,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.MD.C.7a-tiling-side-length-product', connectTilingToMultiplicationBuilder, rectangularAreaModelsImplementation, 'Align tiled rows and columns, side lengths, multiplication, and area.'),
     ...toImplementationTodos('3.MD.C.7b-rectangular-area', rectangularAreaBuilder, rectangularAreaModelsImplementation, 'Show side lengths, a rectangular model, multiplication, units, and optional story.'),
     ...toImplementationTodos('3.MD.C.7c-distributive-area-model', distributiveAreaModelBuilder, distributiveAreaModelImplementation, 'Show the original rectangle, split, partial products, and equal total.'),
     ...toImplementationTodos('3.MD.C.7d-additive-rectilinear-area', additiveRectilinearAreaBuilder, additiveRectilinearAreaImplementation, 'Decompose into non-overlapping rectangles and add their labeled areas.'),

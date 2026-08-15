@@ -20,8 +20,9 @@ function validateArray(data: ShapeSquareArrayProblem) {
         && data.task !== 'partition'
         && data.task !== 'count'
         && data.task !== 'count-area'
+        && data.task !== 'explain-product'
     ) {
-        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, coverage interpretation, partition, count, or area-count task.');
+        throw new ViewValidationError('shape-square-array', 'Expected a unit interpretation, coverage interpretation, partition, count, area-count, or product-explanation task.');
     }
     if (data.task === 'interpret-unit') {
         if (data.rows !== 1 || data.columns !== 1 || data.squareCount !== 1) {
@@ -68,11 +69,13 @@ function UnitSquare() {
 function SquareArray({
     data,
     showCells,
-    showCount
+    showCount,
+    showSideLengths
 }: {
     data: ShapeSquareArrayProblem;
     showCells: boolean;
     showCount: boolean;
+    showSideLengths: boolean;
 }) {
     const width = data.columns * CELL_SIZE;
     const height = data.rows * CELL_SIZE;
@@ -128,7 +131,7 @@ function SquareArray({
                 textAnchor="middle"
                 className="fill-slate-600 text-[15px] font-bold"
             >
-                {data.columns} columns
+                {showSideLengths ? `${data.columns} units` : `${data.columns} columns`}
             </text>
             <text
                 x={x - 16}
@@ -137,7 +140,7 @@ function SquareArray({
                 transform={`rotate(-90 ${x - 16} ${y + height / 2})`}
                 className="fill-slate-600 text-[15px] font-bold"
             >
-                {data.rows} rows
+                {showSideLengths ? `${data.rows} units` : `${data.rows} rows`}
             </text>
         </svg>
     );
@@ -156,6 +159,7 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
     const isUnitInterpretation = problem.data.task === 'interpret-unit';
     const isCoverageInterpretation = problem.data.task === 'interpret-coverage';
     const isAreaCount = problem.data.task === 'count-area';
+    const isProductExplanation = problem.data.task === 'explain-product';
     const isPartition = problem.data.task === 'partition';
     const showCells = !isPartition || isSolutionView;
 
@@ -169,6 +173,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                             ? 'Unit squares cover this figure exactly. What does the count tell you?'
                             : isAreaCount
                                 ? `Count the ${problem.data.areaUnit} that cover this figure. What is its area?`
+                                : isProductExplanation
+                                    ? 'Why does multiplying the side lengths give the area of this tiled rectangle?'
                         : isPartition
                         ? `Partition the rectangle into ${problem.data.rows} rows and ${problem.data.columns} columns of equal squares.`
                         : 'How many equal squares are in the rectangle?'}
@@ -180,7 +186,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                             <SquareArray
                                 data={problem.data}
                                 showCells={showCells}
-                                showCount={!isPartition && isSolutionView}
+                                showCount={!isPartition && !isProductExplanation && isSolutionView}
+                                showSideLengths={isProductExplanation}
                             />
                         )}
                 </div>
@@ -199,6 +206,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                 ? `Answer: ${problem.data.squareCount} square units of area`
                                 : isAreaCount
                                     ? `Answer: ${problem.data.squareCount} ${problem.data.areaUnit}`
+                                    : isProductExplanation
+                                        ? `Explanation: ${problem.data.rows} times ${problem.data.columns} equals ${problem.data.squareCount} square units`
                             : isPartition
                             ? `Partition: ${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `Answer: ${problem.data.squareCount} equal squares`
@@ -208,6 +217,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                 ? 'Interpret the tile count as area'
                                 : isAreaCount
                                     ? 'Blank area answer'
+                                    : isProductExplanation
+                                        ? 'Connect side lengths, rows, columns, and area'
                                 : isPartition ? 'Draw the square grid' : 'Blank answer'}
                 >
                     {isSolutionView
@@ -217,6 +228,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                 ? `${problem.data.squareCount} unit squares cover the figure, so its area is ${problem.data.squareCount} square units.`
                                 : isAreaCount
                                     ? `Area = ${problem.data.squareCount} ${problem.data.areaUnit}`
+                                    : isProductExplanation
+                                        ? `${problem.data.rows} rows of ${problem.data.columns} unit squares: ${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} square units.`
                             : isPartition
                             ? `${problem.data.rows} rows of ${problem.data.columns} equal squares`
                             : `${problem.data.rows} × ${problem.data.columns} = ${problem.data.squareCount} equal squares`
@@ -226,6 +239,8 @@ const ShapeSquareArrayCore = ({config: _config, payload}: CoreProps) => {
                                 ? 'Interpret the square-tile count as area.'
                                 : isAreaCount
                                     ? '\u00a0'
+                                    : isProductExplanation
+                                        ? 'Connect the tiled side lengths to multiplication.'
                                 : isPartition ? 'Draw the square grid.' : '\u00a0'}
                 </div>
             </div>

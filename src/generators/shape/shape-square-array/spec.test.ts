@@ -90,4 +90,20 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
         expect(stub.data.areaUnit).toBe(areaUnit);
         expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
     });
+
+    it('resolves procedure understanding to a tiled side-length product', () => {
+        const stub = generateWithLabels(generator, [
+            Area.AreaCalculation,
+            Area.Rectangle,
+            Area.Square,
+            Area.Multiplication,
+            Scope.BoxArrangement,
+            Scope.TwoOperands,
+            Ability.ProcedureUnderstanding
+        ])!;
+
+        expect(stub.data.task).toBe('explain-product');
+        expect(stub.data.areaUnit).toBe('square units');
+        expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
+    });
 });

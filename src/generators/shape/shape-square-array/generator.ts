@@ -69,6 +69,28 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
             };
         }
 
+        if (config.taskAbility === Ability.ProcedureUnderstanding) {
+            const connectsTilingToProduct = [
+                Area.AreaCalculation,
+                Area.Multiplication,
+                Scope.BoxArrangement,
+                Scope.TwoOperands
+            ].every(label => config.modelFeatures?.includes(label));
+            if (!connectsTilingToProduct) return null;
+            const [rows, columns] = ARRAY_DIMENSIONS[
+                Math.floor(random() * ARRAY_DIMENSIONS.length)
+            ];
+            return {
+                data: {
+                    task: 'explain-product',
+                    rows,
+                    columns,
+                    squareCount: rows * columns,
+                    areaUnit: 'square units'
+                }
+            };
+        }
+
         const task = config.taskAbility === Ability.VisualArticulation
             ? 'partition'
             : config.taskAbility === Ability.ProcedureExecution

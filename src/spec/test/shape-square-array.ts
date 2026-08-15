@@ -52,10 +52,21 @@ const countAreaBuilder = new DatasetPermutationBuilder()
         [Scope.SquareFootScale]
     ]);
 
+const explainProductBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.AreaCalculation,
+    Area.Rectangle,
+    Area.Square,
+    Area.Multiplication,
+    Scope.BoxArrangement,
+    Scope.TwoOperands,
+    Ability.ProcedureUnderstanding
+]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-shape-square-array-partition', partitionBuilder),
     ...toTargets('test-shape-square-array-count', countBuilder),
     ...toTargets('test-shape-square-array-interpret-unit', interpretUnitBuilder),
     ...toTargets('test-shape-square-array-interpret-coverage', interpretCoverageBuilder),
-    ...toTargets('test-shape-square-array-count-area', countAreaBuilder)
+    ...toTargets('test-shape-square-array-count-area', countAreaBuilder),
+    ...toTargets('test-shape-square-array-explain-product', explainProductBuilder)
 ];
