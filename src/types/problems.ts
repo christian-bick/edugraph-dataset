@@ -607,7 +607,7 @@ export type FractionValue = {
     notation: string;
 };
 
-export type FractionEquivalenceProblem = {
+export type ProperFractionEquivalenceProblem = {
     task: 'recognize-equivalence' | 'generate-equivalence';
     first: FractionValue;
     second: FractionValue;
@@ -617,6 +617,20 @@ export type FractionEquivalenceProblem = {
     explanation: string;
     answer: string;
 };
+
+export type WholeNumberFractionEquivalenceProblem = {
+    task: 'represent-whole-as-fraction';
+    wholeNumber: 1 | 2 | 3;
+    fraction: FractionValue;
+    relation: 'equal';
+    equation: string;
+    explanation: string;
+    answer: string;
+};
+
+export type FractionEquivalenceProblem =
+    | ProperFractionEquivalenceProblem
+    | WholeNumberFractionEquivalenceProblem;
 
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
 
@@ -861,5 +875,6 @@ export interface ViewTypeMap {
     'area-perimeter-comparison': AreaPerimeterRelationProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
     'fractions-equivalence-model': FractionEquivalenceProblem;
+    'fractions-whole-equivalence': FractionEquivalenceProblem;
     'shape-draw-shape': ShapeBuildShapeProblem;
 }

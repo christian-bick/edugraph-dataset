@@ -577,16 +577,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const wholeNumberFractionsImplementation = defineImplementationPackage({
-    id: 'whole-number-fractions',
-    description: 'Express whole numbers as equal fractional values in notation and on number lines.',
-    generators: [{ module: 'fraction-equivalence', strategy: 'expand' }],
-    views: [
-        { module: 'fractions-whole-equivalence', strategy: 'new' },
-        { module: 'numbers-fraction-line', strategy: 'expand' }
-    ]
-});
-
 // Deferred pending review of explicit fraction-comparison ontology distinctions.
 const fractionComparisonImplementation = defineImplementationPackage({
     id: 'fraction-comparison',
@@ -644,6 +634,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.NF.A.2b-iterated-fractions-number-line', locateIteratedFractionsBuilder),
     ...toTargets('3.NF.A.3a-recognize-equivalent-fractions', recognizeEquivalentFractionsBuilder),
     ...toTargets('3.NF.A.3b-generate-explain-equivalent-fractions', generateExplainEquivalentFractionsBuilder),
+    ...toTargets('3.NF.A.3c-whole-numbers-as-fractions', wholeNumbersAsFractionsBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -651,7 +642,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.NF.A.3c-whole-numbers-as-fractions', wholeNumbersAsFractionsBuilder, wholeNumberFractionsImplementation, 'Show whole-number and fractional notation at the same value.'),
     ...toImplementationTodos('3.NF.A.3d-compare-fractions', compareFractionsBuilder, fractionComparisonImplementation, 'Use the same visible whole and justify the comparison symbol through models.')
 ];
 

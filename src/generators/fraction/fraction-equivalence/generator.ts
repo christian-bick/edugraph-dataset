@@ -14,6 +14,7 @@ import {
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
 const SCALE_FACTORS = [2, 3, 4] as const;
+const WHOLE_NUMBERS = [1, 2, 3] as const;
 
 type EquivalentPair = {
     firstNumerator: number;
@@ -51,7 +52,12 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
     schema = FractionEquivalenceGeneratorSchema;
 
     generate(config: FractionEquivalenceGeneratorConfig): ProblemStub<FractionEquivalenceProblem> {
-        validateConfigFields('fraction-equivalence', config, ['taskAbilities']);
+        validateConfigFields('fraction-equivalence', config, [
+            'taskAbilities',
+            'usesEqualShares',
+            'usesImproperFractions',
+            'usesIntegerNumbers'
+        ]);
 
         const taskAbilities = config.taskAbilities!;
         if (!Array.isArray(taskAbilities)) {
@@ -66,10 +72,38 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
         const generatesEquivalence = taskAbilities.length === 2
             && taskAbilities.includes(Ability.Formalization)
             && taskAbilities.includes(Ability.ProcedureUnderstanding);
-        if (!recognizesEquivalence && !generatesEquivalence) {
+        const representsWhole = taskAbilities.length === 1
+            && taskAbilities.includes(Ability.Formalization);
+        const usesProperFractionMode = config.usesEqualShares === true
+            && config.usesImproperFractions === false
+            && config.usesIntegerNumbers === false;
+        const usesWholeNumberMode = config.usesEqualShares === false
+            && config.usesImproperFractions === true
+            && config.usesIntegerNumbers === true;
+
+        if (usesWholeNumberMode && representsWhole) {
+            const wholeNumber = randomItem(WHOLE_NUMBERS);
+            const denominator = randomItem(DENOMINATORS);
+            const fraction = toFractionValue(wholeNumber * denominator, denominator);
+            const groupWord = wholeNumber === 1 ? 'group' : 'groups';
+
+            return {
+                data: {
+                    task: 'represent-whole-as-fraction',
+                    wholeNumber,
+                    fraction,
+                    relation: 'equal',
+                    equation: `${wholeNumber} = ${fraction.notation}`,
+                    explanation: `${fraction.notation} contains ${wholeNumber} ${groupWord} of ${denominator}/${denominator}, so it equals ${wholeNumber}.`,
+                    answer: fraction.notation
+                }
+            };
+        }
+
+        if (!usesProperFractionMode || (!recognizesEquivalence && !generatesEquivalence)) {
             throw new GeneratorValidationError(
                 'fraction-equivalence',
-                'taskAbilities must select ConceptDerivation alone or Formalization with ProcedureUnderstanding.'
+                'Select EqualShares with ConceptDerivation or Formalization plus ProcedureUnderstanding, or select ImproperFractions and IntegerNumbers with Formalization.'
             );
         }
 

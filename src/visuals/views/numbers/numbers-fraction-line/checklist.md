@@ -1,2 +1,2 @@
-- **Identity:** A horizontal number line either locates a named fraction by iterating its unit fraction from zero or shows two equivalent fractions at the same point.
-- **Modes:** For location, Question Mode withholds the partition, steps, and endpoint; for equivalence, it retains the shared point while withholding the verdict or missing numerator. Solution Mode reveals the requested result and the equal-step or scaling explanation that proves it.
+- **Identity:** A horizontal number line locates a fraction by iterated unit lengths or co-locates equal fraction/fraction or whole-number/fraction notations.
+- **Modes:** Question Mode withholds the requested endpoint, verdict, or numerator while retaining the needed line evidence; Solution Mode reveals it with the equal-step, scaling, or whole-composition explanation that proves the result.

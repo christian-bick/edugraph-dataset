@@ -14,7 +14,6 @@ describe('FractionEquivalenceGenerator spec integration', () => {
             generalLabels: [
                 Area.FractionEquivalence,
                 Area.FractionNotation,
-                Scope.EqualShares,
                 Scope.Equal
             ]
         });
@@ -36,5 +35,26 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe(expectedTask);
         expect(stub!.tags).toEqual(expect.arrayContaining([...taskAbilities]));
+    });
+
+    it('resolves whole-number formalization without EqualShares', () => {
+        setSeed('whole-number-fraction');
+        const stub = generateWithLabels(generator, [
+            Area.FractionEquivalence,
+            Area.FractionNotation,
+            Scope.ImproperFractions,
+            Scope.IntegerNumbers,
+            Scope.Equal,
+            Ability.Formalization
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.task).toBe('represent-whole-as-fraction');
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            Scope.ImproperFractions,
+            Scope.IntegerNumbers,
+            Ability.Formalization
+        ]));
+        expect(stub!.tags).not.toContain(Scope.EqualShares);
     });
 });

@@ -1,0 +1,2 @@
+- **Identity:** A whole-number numeral is expressed as an equal improper fraction with a visible denominator.
+- **Modes:** Question Mode withholds the fraction numerator while retaining enough symbolic structure to derive it; Solution Mode reveals the complete equality and explains how the denominator-sized parts compose the whole number.

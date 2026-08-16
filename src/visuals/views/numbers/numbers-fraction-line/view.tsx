@@ -1,8 +1,9 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {
-    FractionEquivalenceProblem,
-    FractionNumberLineStep
+    FractionNumberLineStep,
+    ProperFractionEquivalenceProblem,
+    WholeNumberFractionEquivalenceProblem
 } from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
@@ -35,7 +36,135 @@ const validateSteps = (steps: FractionNumberLineStep[], numerator: number) => {
     });
 };
 
-const validateEquivalenceProblem = (data: FractionEquivalenceProblem) => {
+const validateWholeFractionProblem = (data: WholeNumberFractionEquivalenceProblem) => {
+    validateProblemData(VIEW_ID, data, [
+        'task',
+        'wholeNumber',
+        'fraction',
+        'relation',
+        'equation',
+        'explanation',
+        'answer'
+    ]);
+
+    const fraction = data.fraction;
+    const coherent = data.task === 'represent-whole-as-fraction'
+        && Number.isInteger(data.wholeNumber)
+        && data.wholeNumber >= 1
+        && data.wholeNumber <= 3
+        && fraction
+        && typeof fraction === 'object'
+        && Number.isInteger(fraction.numerator)
+        && Number.isInteger(fraction.denominator)
+        && DENOMINATORS.includes(fraction.denominator)
+        && fraction.numerator === data.wholeNumber * fraction.denominator
+        && fraction.notation === `${fraction.numerator}/${fraction.denominator}`
+        && data.relation === 'equal'
+        && data.equation === `${data.wholeNumber} = ${fraction.notation}`
+        && typeof data.explanation === 'string'
+        && data.explanation.includes(String(data.wholeNumber))
+        && data.explanation.includes(fraction.notation)
+        && data.explanation.includes(`${fraction.denominator}/${fraction.denominator}`)
+        && data.answer === fraction.notation;
+    if (!coherent) {
+        throw new ViewValidationError(VIEW_ID, 'Whole-number and fraction data must describe one coherent equality.');
+    }
+};
+
+const WholeFractionEquivalenceLine = ({
+    data,
+    isSolutionView
+}: {
+    data: WholeNumberFractionEquivalenceProblem;
+    isSolutionView: boolean;
+}) => {
+    validateWholeFractionProblem(data);
+
+    const subdivisionCount = data.wholeNumber * data.fraction.denominator;
+    const ticks = Array.from({length: subdivisionCount + 1}, (_, index) => index);
+    const toX = (numeratorUnits: number) => LEFT
+        + (numeratorUnits / subdivisionCount) * (RIGHT - LEFT);
+    const endpointX = toX(data.fraction.numerator);
+    const displayedFraction = isSolutionView
+        ? data.fraction.notation
+        : `?/${data.fraction.denominator}`;
+
+    return (
+        <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
+            <div className="text-center text-[1.45rem] font-bold text-slate-800">
+                Complete {data.wholeNumber} = ?/{data.fraction.denominator}. Use the number line to explain.
+            </div>
+
+            <svg
+                viewBox="0 0 840 285"
+                className="mt-2 h-[285px] w-full"
+                role="img"
+                aria-label={`Whole number ${data.wholeNumber} and an equal fraction at one point on a number line`}
+            >
+                <line x1={LEFT} y1={AXIS_Y} x2={RIGHT} y2={AXIS_Y} stroke="#334155" strokeWidth="4" />
+                {ticks.map(index => {
+                    const x = toX(index);
+                    const isWhole = index % data.fraction.denominator === 0;
+                    return (
+                        <g key={index}>
+                            <line
+                                x1={x}
+                                y1={AXIS_Y - (isWhole ? 16 : 9)}
+                                x2={x}
+                                y2={AXIS_Y + (isWhole ? 16 : 9)}
+                                stroke="#334155"
+                                strokeWidth={isWhole ? 3 : 2}
+                            />
+                            {isWhole && (
+                                <text
+                                    x={x}
+                                    y={AXIS_Y + 43}
+                                    textAnchor="middle"
+                                    className="fill-slate-700 text-[18px] font-bold"
+                                >
+                                    {index / data.fraction.denominator}
+                                </text>
+                            )}
+                        </g>
+                    );
+                })}
+
+                <line
+                    x1={endpointX}
+                    y1={60}
+                    x2={endpointX}
+                    y2={AXIS_Y + 58}
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeDasharray="6 5"
+                />
+                <circle cx={endpointX} cy={AXIS_Y} r="13" fill="#dbeafe" stroke="#2563eb" strokeWidth="4" />
+                <circle cx={endpointX} cy={AXIS_Y} r="6" fill="#059669" />
+                <text x={endpointX - 14} y={80} textAnchor="end" className="fill-blue-700 text-[21px] font-bold">
+                    {data.wholeNumber}
+                </text>
+                <text x={endpointX + 14} y={80} textAnchor="start" className="fill-emerald-700 text-[21px] font-bold">
+                    {displayedFraction}
+                </text>
+                <text x={endpointX} y={AXIS_Y + 76} textAnchor="middle" className="fill-slate-600 text-[15px] font-semibold">
+                    same point
+                </text>
+            </svg>
+
+            <div className={`rounded-xl border-2 px-5 py-4 text-center text-lg font-semibold ${
+                isSolutionView
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                    : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
+            }`}>
+                {isSolutionView
+                    ? `${data.equation}. ${data.explanation}`
+                    : `Count the 1/${data.fraction.denominator} steps from 0 to ${data.wholeNumber}.`}
+            </div>
+        </div>
+    );
+};
+
+const validateEquivalenceProblem = (data: ProperFractionEquivalenceProblem) => {
     validateProblemData(VIEW_ID, data, [
         'task',
         'first',
@@ -80,7 +209,7 @@ const FractionEquivalenceLine = ({
     data,
     isSolutionView
 }: {
-    data: FractionEquivalenceProblem;
+    data: ProperFractionEquivalenceProblem;
     isSolutionView: boolean;
 }) => {
     validateEquivalenceProblem(data);
@@ -172,6 +301,9 @@ const NumbersFractionLineCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData(VIEW_ID, data, ['task']);
+    if (data.task === 'represent-whole-as-fraction') {
+        return <WholeFractionEquivalenceLine data={data} isSolutionView={isSolutionView} />;
+    }
     if (data.task === 'recognize-equivalence' || data.task === 'generate-equivalence') {
         return <FractionEquivalenceLine data={data} isSolutionView={isSolutionView} />;
     }
