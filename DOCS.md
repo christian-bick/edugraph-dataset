@@ -116,11 +116,12 @@ the explorer shows an explicit loading state while coverage, the index, and imag
 materialized. Production hosts do not
 render the switch and always resolve images through the release-pinned Hugging Face URL.
 
-The released index remains loaded in both modes. A dataset-covered leaf is `Released`
-only when every implemented competency permutation has an exact canonical label-set match
-with at least one sample in that index; otherwise it is `Ready`. The active Local index is
-used only for sample launchers and involved-module evidence, so local generation cannot
-alter publication readiness.
+The released index remains loaded in both modes, but status evidence follows the selected
+asset source. A dataset-covered leaf is `Released` only when every implemented competency
+permutation has an exact canonical label-set match with at least one sample in the active
+index; otherwise it is `Ready`. Released mode therefore reports actual publication state,
+while Local mode previews whether the immutable working-tree snapshot satisfies the same
+asset-evidence invariant before publication.
 
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,

@@ -16,7 +16,7 @@ import {
     searchStandards,
     type CoverageKind,
 } from './model.ts';
-import { isLocalExplorerHost, useExplorerStore } from './store.ts';
+import { isLocalExplorerHost, selectCoverageAssetIndex, useExplorerStore } from './store.ts';
 import type {
     BacklogTask,
     Implementation,
@@ -518,10 +518,10 @@ function StatusBadge({ style, small = false }: { style: StatusStyle; small?: boo
 }
 
 function CoverageBadge({ coverage, small = false, search = false }: { coverage: StandardCoverage; small?: boolean; search?: boolean }) {
-    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
+    const coverageIndex = useExplorerStore(selectCoverageAssetIndex);
     const style = coverageStyles[search
-        ? getSearchCoverageKind(coverage, releasedIndex)
-        : getCoverageKind(coverage, releasedIndex)];
+        ? getSearchCoverageKind(coverage, coverageIndex)
+        : getCoverageKind(coverage, coverageIndex)];
     return <StatusBadge style={style} small={small} />;
 }
 
@@ -569,8 +569,8 @@ function CoverageModuleBadges({
 }
 
 function DetailCoverageBadges({ coverage }: { coverage: StandardCoverage }) {
-    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
-    const style = coverageStyles[getCoverageKind(coverage, releasedIndex)];
+    const coverageIndex = useExplorerStore(selectCoverageAssetIndex);
+    const style = coverageStyles[getCoverageKind(coverage, coverageIndex)];
     const partiallyInScope = getScopeKind(coverage) === 'partially-in-scope';
 
     return (
@@ -589,12 +589,12 @@ function StandardCard({ standard, nested = false, search = false }: {
     search?: boolean;
 }) {
     const coverage = useExplorerStore(state => state.coverageData?.coverage[standard.id]);
-    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
+    const coverageIndex = useExplorerStore(selectCoverageAssetIndex);
     const activeStandardId = useExplorerStore(state => state.activeStandardId);
     const setActiveStandard = useExplorerStore(state => state.setActiveStandard);
     const selected = activeStandardId === standard.id;
     const kind = coverage
-        ? (search ? getSearchCoverageKind(coverage, releasedIndex) : getCoverageKind(coverage, releasedIndex))
+        ? (search ? getSearchCoverageKind(coverage, coverageIndex) : getCoverageKind(coverage, coverageIndex))
         : null;
     const style = kind ? coverageStyles[kind] : null;
     const statusClass = nested
@@ -1142,8 +1142,8 @@ function StandardDetails() {
 
 function MappingDetails({ coverage, standard }: { coverage: StandardCoverage; standard: StandardNode }) {
     const assetIndex = useExplorerStore(state => state.assetIndex);
-    const releasedIndex = useExplorerStore(state => state.releasedAssetIndex);
-    const kind = getCoverageKind(coverage, releasedIndex);
+    const coverageIndex = useExplorerStore(selectCoverageAssetIndex);
+    const kind = getCoverageKind(coverage, coverageIndex);
     const modules = kind === 'partial' || kind === 'ready' || kind === 'released'
         ? getCoverageModules(coverage, assetIndex)
         : [];

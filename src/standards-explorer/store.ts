@@ -51,6 +51,10 @@ interface ExplorerStore {
     setSearchQuery: (query: string) => void;
 }
 
+export const selectCoverageAssetIndex = (
+    state: Pick<ExplorerStore, 'assetIndex' | 'assetIndexSource' | 'assetSource'>,
+): AssetIndex | null => state.assetIndexSource === state.assetSource ? state.assetIndex : null;
+
 const fetchJson = async <T,>(url: string, init?: RequestInit): Promise<T> => {
     const response = await fetch(url, import.meta.env.DEV
         ? {cache: 'no-store', ...init}

@@ -161,11 +161,12 @@ do not change when the image source changes. Deployed explorers always use relea
 images and do not render the switch. The `generate:asset-index` and
 `validate:asset-index` commands remain release/CI operations.
 
-A dataset-covered leaf is labeled **Released** only when the released asset index has an
+A dataset-covered leaf is labeled **Released** only when the selected asset index has an
 exact requested-label-set match for every implemented permutation. Otherwise it is
-labeled **Ready** with the same green theme and an hourglass icon. Local samples never
-change this publication status. Release validation enforces the same invariant and blocks
-publication if any production permutation lacks exact asset evidence.
+labeled **Ready** with the same green theme and an hourglass icon. Released mode therefore
+shows publication status, while Local mode previews whether the current snapshot has enough
+evidence to become the next release. Release validation enforces the same invariant and
+blocks publication if any production permutation lacks exact asset evidence.
 
 ### Coverage Explorer Deployment
 

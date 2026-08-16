@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useExplorerStore } from './store.ts';
+import { selectCoverageAssetIndex, useExplorerStore } from './store.ts';
 import type { AssetIndex } from '../lib/asset-index.ts';
 
 const treeData = {
@@ -76,6 +76,18 @@ describe('standards explorer data and sample sources', () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+    });
+
+    it('uses only the index loaded for the selected coverage source', () => {
+        useExplorerStore.setState({
+            assetIndex,
+            assetSource: 'local',
+            assetIndexSource: 'released',
+        });
+        expect(selectCoverageAssetIndex(useExplorerStore.getState())).toBeNull();
+
+        useExplorerStore.setState({assetIndexSource: 'local'});
+        expect(selectCoverageAssetIndex(useExplorerStore.getState())).toBe(assetIndex);
     });
 
     it('always loads the deployed main coverage snapshot', async () => {
@@ -159,6 +171,7 @@ describe('standards explorer data and sample sources', () => {
             assetSource: 'local',
             assetIndexSource: 'local',
         });
+        expect(selectCoverageAssetIndex(useExplorerStore.getState())).toBe(localIndex);
         expect(fetchMock).toHaveBeenCalledWith('/dataset/local-asset-index.json', { cache: 'no-store' });
         expect(new URLSearchParams(window.location.search).get('assets')).toBe('local');
         expect(new URLSearchParams(window.location.search).has('view')).toBe(false);
@@ -172,6 +185,7 @@ describe('standards explorer data and sample sources', () => {
             assetSource: 'released',
             assetIndexSource: 'released',
         });
+        expect(selectCoverageAssetIndex(useExplorerStore.getState())).toBe(assetIndex);
         expect(new URLSearchParams(window.location.search).has('assets')).toBe(false);
     });
 
