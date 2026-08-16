@@ -584,6 +584,23 @@ export type FractionShape = 'circle' | 'rectangle';
 export type FractionParts = 2 | 3 | 4 | 6 | 8;
 export type FractionShareName = 'half' | 'fourth' | 'quarter';
 
+export type FractionNumberLineStep = {
+    /** Step endpoints measured in denominator-sized units from zero. */
+    fromNumerator: number;
+    toNumerator: number;
+};
+
+export type FractionNumberLineProblem = {
+    task: 'locate-fraction';
+    numerator: number;
+    denominator: FractionParts;
+    unitFraction: string;
+    targetFraction: string;
+    wholeCount: 1 | 2;
+    steps: FractionNumberLineStep[];
+    answer: string;
+};
+
 export type ShapePartitionProblem =
     | {
         task: 'partition';
@@ -747,6 +764,7 @@ export interface ViewTypeMap {
     'operations-pattern-table': ArithmeticPatternProblem;
     'operations-pattern-explanation': ArithmeticPatternProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
+    'numbers-fraction-line': FractionNumberLineProblem;
     'operations-number-array': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
     'operations-number-line': NumberLineProblem;

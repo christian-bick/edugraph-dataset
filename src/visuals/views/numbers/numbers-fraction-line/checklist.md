@@ -1,0 +1,2 @@
+- **Identity:** A horizontal number line asks the learner to partition whole units equally and locate a named fraction by iterating its unit fraction from zero.
+- **Modes:** Question Mode shows only whole-number ticks and withholds the partition, steps, and endpoint; Solution Mode reveals equal subdivisions, consecutive unit-fraction steps from zero, the target endpoint, and a matching explanation.
