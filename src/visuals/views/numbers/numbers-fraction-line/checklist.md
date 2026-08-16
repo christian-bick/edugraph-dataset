@@ -1,2 +1,2 @@
-- **Identity:** A horizontal number line asks the learner to partition whole units equally and locate a named fraction by iterating its unit fraction from zero.
-- **Modes:** Question Mode shows only whole-number ticks and withholds the partition, steps, and endpoint; Solution Mode reveals equal subdivisions, consecutive unit-fraction steps from zero, the target endpoint, and a matching explanation.
+- **Identity:** A horizontal number line either locates a named fraction by iterating its unit fraction from zero or shows two equivalent fractions at the same point.
+- **Modes:** For location, Question Mode withholds the partition, steps, and endpoint; for equivalence, it retains the shared point while withholding the verdict or missing numerator. Solution Mode reveals the requested result and the equal-step or scaling explanation that proves it.

@@ -1,6 +1,9 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {FractionNumberLineStep} from '../../../../types/problems.ts';
+import {
+    FractionEquivalenceProblem,
+    FractionNumberLineStep
+} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {NumbersFractionLineViewConfig, NumbersFractionLineViewSchema} from './spec.ts';
@@ -32,9 +35,146 @@ const validateSteps = (steps: FractionNumberLineStep[], numerator: number) => {
     });
 };
 
+const validateEquivalenceProblem = (data: FractionEquivalenceProblem) => {
+    validateProblemData(VIEW_ID, data, [
+        'task',
+        'first',
+        'second',
+        'scaleFactor',
+        'relation',
+        'equation',
+        'explanation',
+        'answer'
+    ]);
+
+    const fractions = [data.first, data.second];
+    const validFractions = fractions.every(fraction =>
+        Number.isInteger(fraction.numerator)
+        && fraction.numerator > 0
+        && Number.isInteger(fraction.denominator)
+        && DENOMINATORS.includes(fraction.denominator)
+        && fraction.numerator < fraction.denominator
+        && fraction.notation === `${fraction.numerator}/${fraction.denominator}`
+    );
+    const expectedAnswer = data.task === 'recognize-equivalence'
+        ? 'equivalent'
+        : data.second.notation;
+    const coherent = validFractions
+        && (data.task === 'recognize-equivalence' || data.task === 'generate-equivalence')
+        && (data.scaleFactor === 2 || data.scaleFactor === 3 || data.scaleFactor === 4)
+        && data.second.numerator === data.first.numerator * data.scaleFactor
+        && data.second.denominator === data.first.denominator * data.scaleFactor
+        && data.relation === 'equal'
+        && data.equation === `${data.first.notation} = ${data.second.notation}`
+        && typeof data.explanation === 'string'
+        && data.explanation.includes(data.first.notation)
+        && data.explanation.includes(data.second.notation)
+        && data.explanation.includes(String(data.scaleFactor))
+        && data.answer === expectedAnswer;
+    if (!coherent) {
+        throw new ViewValidationError(VIEW_ID, 'Equivalent fractions must describe one coherent scaling relation.');
+    }
+};
+
+const FractionEquivalenceLine = ({
+    data,
+    isSolutionView
+}: {
+    data: FractionEquivalenceProblem;
+    isSolutionView: boolean;
+}) => {
+    validateEquivalenceProblem(data);
+
+    const ticks = Array.from({length: data.second.denominator + 1}, (_, index) => index);
+    const toX = (numeratorUnits: number) => LEFT
+        + (numeratorUnits / data.second.denominator) * (RIGHT - LEFT);
+    const endpointUnits = data.second.numerator;
+    const endpointX = toX(endpointUnits);
+    const unknownNotation = `?/${data.second.denominator}`;
+    const secondNotation = data.task === 'generate-equivalence' && !isSolutionView
+        ? unknownNotation
+        : data.second.notation;
+    const prompt = data.task === 'recognize-equivalence'
+        ? `Do ${data.first.notation} and ${data.second.notation} locate the same point?`
+        : `Complete ${data.first.notation} = ${unknownNotation}. Use the number line to explain.`;
+
+    return (
+        <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
+            <div className="text-center text-[1.45rem] font-bold text-slate-800">{prompt}</div>
+
+            <svg
+                viewBox="0 0 840 285"
+                className="mt-2 h-[285px] w-full"
+                role="img"
+                aria-label="Equivalent fractions at one point on a number line from zero to one"
+            >
+                <line x1={LEFT} y1={AXIS_Y} x2={RIGHT} y2={AXIS_Y} stroke="#334155" strokeWidth="4" />
+                {ticks.map(index => {
+                    const x = toX(index);
+                    const isWhole = index === 0 || index === data.second.denominator;
+                    return (
+                        <g key={index}>
+                            <line
+                                x1={x}
+                                y1={AXIS_Y - (isWhole ? 16 : 10)}
+                                x2={x}
+                                y2={AXIS_Y + (isWhole ? 16 : 10)}
+                                stroke="#334155"
+                                strokeWidth={isWhole ? 3 : 2}
+                            />
+                            {isWhole && (
+                                <text x={x} y={AXIS_Y + 43} textAnchor="middle" className="fill-slate-700 text-[18px] font-bold">
+                                    {index === 0 ? 0 : 1}
+                                </text>
+                            )}
+                        </g>
+                    );
+                })}
+
+                <line
+                    x1={endpointX}
+                    y1={62}
+                    x2={endpointX}
+                    y2={AXIS_Y + 58}
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeDasharray="6 5"
+                />
+                <circle cx={endpointX} cy={AXIS_Y} r="13" fill="#dbeafe" stroke="#2563eb" strokeWidth="4" />
+                <circle cx={endpointX} cy={AXIS_Y} r="6" fill="#059669" />
+                <text x={endpointX - 14} y={82} textAnchor="end" className="fill-blue-700 text-[20px] font-bold">
+                    {data.first.notation}
+                </text>
+                <text x={endpointX + 14} y={82} textAnchor="start" className="fill-emerald-700 text-[20px] font-bold">
+                    {secondNotation}
+                </text>
+                <text x={endpointX} y={AXIS_Y + 76} textAnchor="middle" className="fill-slate-600 text-[15px] font-semibold">
+                    same point
+                </text>
+            </svg>
+
+            <div className={`rounded-xl border-2 px-5 py-4 text-center text-lg font-semibold ${
+                isSolutionView
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                    : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
+            }`}>
+                {isSolutionView
+                    ? `${data.equation}. ${data.explanation}`
+                    : data.task === 'recognize-equivalence'
+                        ? 'Equivalent or not equivalent?'
+                        : `Count the equal parts to complete ${data.first.notation} = ${unknownNotation}.`}
+            </div>
+        </div>
+    );
+};
+
 const NumbersFractionLineCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
+    validateProblemData(VIEW_ID, data, ['task']);
+    if (data.task === 'recognize-equivalence' || data.task === 'generate-equivalence') {
+        return <FractionEquivalenceLine data={data} isSolutionView={isSolutionView} />;
+    }
     validateProblemData(VIEW_ID, data, [
         'task',
         'numerator',

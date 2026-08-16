@@ -601,6 +601,25 @@ export type FractionNumberLineProblem = {
     answer: string;
 };
 
+export type FractionValue = {
+    numerator: number;
+    denominator: FractionParts;
+    notation: string;
+};
+
+export type FractionEquivalenceProblem = {
+    task: 'recognize-equivalence' | 'generate-equivalence';
+    first: FractionValue;
+    second: FractionValue;
+    scaleFactor: 2 | 3 | 4;
+    relation: 'equal';
+    equation: string;
+    explanation: string;
+    answer: string;
+};
+
+export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
+
 export type ShapePartitionProblem =
     | {
         task: 'partition';
@@ -764,7 +783,7 @@ export interface ViewTypeMap {
     'operations-pattern-table': ArithmeticPatternProblem;
     'operations-pattern-explanation': ArithmeticPatternProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
-    'numbers-fraction-line': FractionNumberLineProblem;
+    'numbers-fraction-line': FractionLineProblem;
     'operations-number-array': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
     'operations-number-line': NumberLineProblem;
@@ -841,5 +860,6 @@ export interface ViewTypeMap {
     'geometry-perimeter': GeometryPerimeterProblem;
     'area-perimeter-comparison': AreaPerimeterRelationProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
+    'fractions-equivalence-model': FractionEquivalenceProblem;
     'shape-draw-shape': ShapeBuildShapeProblem;
 }

@@ -1,0 +1,2 @@
+- **Identity:** Two equal-length fraction bars use different equal partitions but shade the same portion of one whole.
+- **Modes:** For recognition, Question Mode shows both fractions and withholds the equivalence verdict; for generation, it withholds the second numerator while its model remains solvable. Solution Mode reveals the complete equality and explains multiplying both terms by the scale factor.

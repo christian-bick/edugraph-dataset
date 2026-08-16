@@ -577,16 +577,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
 // 6. Reviewed implementation packages
 // ==========================================
 
-const fractionEquivalenceImplementation = defineImplementationPackage({
-    id: 'fraction-equivalence',
-    description: 'Recognize, generate, and explain equivalent fractions with models or number lines.',
-    generators: [{ module: 'fraction-equivalence', strategy: 'new' }],
-    views: [
-        { module: 'fractions-equivalence-model', strategy: 'new' },
-        { module: 'numbers-fraction-line', strategy: 'expand' }
-    ]
-});
-
 const wholeNumberFractionsImplementation = defineImplementationPackage({
     id: 'whole-number-fractions',
     description: 'Express whole numbers as equal fractional values in notation and on number lines.',
@@ -652,6 +642,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.NF.A.1-fractions-of-a-whole', interpretFractionsOfWholeBuilder),
     ...toTargets('3.NF.A.2a-unit-fractions-number-line', locateUnitFractionsBuilder),
     ...toTargets('3.NF.A.2b-iterated-fractions-number-line', locateIteratedFractionsBuilder),
+    ...toTargets('3.NF.A.3a-recognize-equivalent-fractions', recognizeEquivalentFractionsBuilder),
+    ...toTargets('3.NF.A.3b-generate-explain-equivalent-fractions', generateExplainEquivalentFractionsBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
@@ -659,8 +651,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.NF.A.3a-recognize-equivalent-fractions', recognizeEquivalentFractionsBuilder, fractionEquivalenceImplementation, 'Show distinct notations occupying the same model size or number-line point.'),
-    ...toImplementationTodos('3.NF.A.3b-generate-explain-equivalent-fractions', generateExplainEquivalentFractionsBuilder, fractionEquivalenceImplementation, 'Transform numerator and denominator consistently and explain the equal value.'),
     ...toImplementationTodos('3.NF.A.3c-whole-numbers-as-fractions', wholeNumbersAsFractionsBuilder, wholeNumberFractionsImplementation, 'Show whole-number and fractional notation at the same value.'),
     ...toImplementationTodos('3.NF.A.3d-compare-fractions', compareFractionsBuilder, fractionComparisonImplementation, 'Use the same visible whole and justify the comparison symbol through models.')
 ];
