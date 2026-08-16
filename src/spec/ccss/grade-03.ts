@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -569,21 +565,15 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
         Area.NumericComparison,
         Area.FractionNotation,
         Scope.ProperFractions,
+        Scope.SingleFrameOfReference,
+        Scope.VisualNumbers,
         Ability.ConceptDerivation
     ])
-    .applyLabelVariants([[Scope.Greater], [Scope.Equal], [Scope.Less]]);
-
-// ==========================================
-// 6. Reviewed implementation packages
-// ==========================================
-
-// Deferred pending review of explicit fraction-comparison ontology distinctions.
-const fractionComparisonImplementation = defineImplementationPackage({
-    id: 'fraction-comparison',
-    description: 'Compare fractions sharing a numerator or denominator against the same visible whole.',
-    generators: [{ module: 'fraction-comparison', strategy: 'new' }],
-    views: [{ module: 'fractions-compare-models', strategy: 'new' }]
-});
+    .applyLabelVariants([
+        [Area.FractionNumeratorInterpretation, Scope.CommonDenominator],
+        [Area.FractionDenominatorInterpretation, Scope.CommonNumerator]
+    ])
+    .applyLabelVariants([[Scope.Greater], [Scope.Less]]);
 
 // ==========================================
 // 7. Target-spec exports
@@ -635,15 +625,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.NF.A.3a-recognize-equivalent-fractions', recognizeEquivalentFractionsBuilder),
     ...toTargets('3.NF.A.3b-generate-explain-equivalent-fractions', generateExplainEquivalentFractionsBuilder),
     ...toTargets('3.NF.A.3c-whole-numbers-as-fractions', wholeNumbersAsFractionsBuilder),
+    ...toTargets('3.NF.A.3d-compare-fractions', compareFractionsBuilder),
     ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
     ...toTargets('3.MD.A.1-tell-write-nearest-minute', nearestMinuteTimeBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('3.NF.A.3d-compare-fractions', compareFractionsBuilder, fractionComparisonImplementation, 'Use the same visible whole and justify the comparison symbol through models.')
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

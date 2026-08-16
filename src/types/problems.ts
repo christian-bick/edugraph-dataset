@@ -634,6 +634,19 @@ export type FractionEquivalenceProblem =
 
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
 
+export type FractionComparisonProblem = {
+    task: 'compare-fractions';
+    first: FractionValue;
+    second: FractionValue;
+    family: 'common-denominator' | 'common-numerator';
+    sharedComponent: number;
+    relation: 'greater' | 'less';
+    symbol: '>' | '<';
+    sharedWhole: 1;
+    answer: string;
+    rationale: string;
+};
+
 export type ShapePartitionProblem =
     | {
         task: 'partition';
@@ -876,5 +889,6 @@ export interface ViewTypeMap {
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
     'fractions-equivalence-model': FractionEquivalenceProblem;
     'fractions-whole-equivalence': FractionEquivalenceProblem;
+    'fractions-compare-models': FractionComparisonProblem;
     'shape-draw-shape': ShapeBuildShapeProblem;
 }

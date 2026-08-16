@@ -1,0 +1,2 @@
+- **Identity:** Two equal-length fraction bars represent the same whole and visibly emphasize either their shared numerator or shared denominator.
+- **Modes:** Question Mode shows both fraction models but withholds the comparison symbol; Solution Mode reveals the complete comparison and a concise same-whole rationale.
