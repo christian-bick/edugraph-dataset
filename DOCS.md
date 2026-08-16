@@ -124,7 +124,8 @@ alter publication readiness.
 
 The production explorer is hosted by Firebase Hosting at the `edugraph-coverage` site
 in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
-`firebase.json` serves `dist/` and redirects the site root to the explorer entry, and
+`firebase.json` serves the root `dist/index.html` directly and requires revalidation for
+the mutable coverage JSON and released asset index routes, and
 `.github/workflows/deploy.yaml` is a reusable workflow that regenerates and validates
 Preview from an exact main SHA, downloads Latest from the repository's explicitly marked
 latest GitHub Release, builds the Vite application, and deploys it. The release stores the

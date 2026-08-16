@@ -173,11 +173,14 @@ Hugging Face upload and dispatches the same workflow to promote its assets. The 
 served from the `edugraph-coverage` Firebase Hosting site, so the browser has no
 cross-origin GitHub dependency. Google authentication uses
 Workload Identity Federation from the trusted `main` workflow context and requires no
-long-lived Firebase service-account secret. The hosted root redirects to the standards
-explorer; the deployment can also be started manually with `workflow_dispatch`.
+long-lived Firebase service-account secret. Firebase serves the explorer's built
+`index.html` directly at the hosted root; the deployment can also be started manually
+with `workflow_dispatch`.
 The same deployment downloads the latest release's `asset-index.json` to
 `/dataset/asset-index.json`. The index contains references only; the PNG files remain
-published exclusively in the Hugging Face dataset.
+published exclusively in the Hugging Face dataset. Mutable coverage JSON and the released
+asset index use revalidation caching so a new deployment cannot remain hidden behind a
+previous release's browser or CDN cache entry.
 
 ## Contributing
 

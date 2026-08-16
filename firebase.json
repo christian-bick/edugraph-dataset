@@ -7,11 +7,24 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "redirects": [
+    "headers": [
       {
-        "source": "/",
-        "destination": "/standards-explorer.html",
-        "type": 302
+        "source": "/dataset/asset-index.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, max-age=0, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/coverage/**/*.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, max-age=0, must-revalidate"
+          }
+        ]
       }
     ]
   }
