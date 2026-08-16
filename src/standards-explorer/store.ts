@@ -22,6 +22,7 @@ interface ExplorerStore {
     assetIndexSource: AssetSource | null;
     localSnapshotAvailable: boolean;
     localSnapshotRefreshing: boolean;
+    localSnapshotProgress: string | null;
     localSnapshotGeneratedAt: string | null;
     localSnapshotAssetCount: number;
     localSnapshotError: string | null;
@@ -56,6 +57,52 @@ const fetchJson = async <T,>(url: string, init?: RequestInit): Promise<T> => {
         : init);
     if (!response.ok) throw new Error(`Request failed (${response.status}): ${url}`);
     return response.json() as Promise<T>;
+};
+
+interface LocalSnapshotRefreshResult {
+    generated_at: string;
+    asset_count: number;
+}
+
+type LocalSnapshotRefreshEvent =
+    | {type: 'progress'; message: string}
+    | ({type: 'result'} & LocalSnapshotRefreshResult)
+    | {type: 'error'; message: string};
+
+const refreshLocalSnapshotData = async (
+    onProgress: (message: string) => void,
+): Promise<LocalSnapshotRefreshResult> => {
+    const response = await fetch('/__edugraph/local-snapshot/refresh', import.meta.env.DEV
+        ? {cache: 'no-store', method: 'POST'}
+        : {method: 'POST'});
+    if (!response.ok) throw new Error(`Request failed (${response.status}): /__edugraph/local-snapshot/refresh`);
+    if (!response.body) throw new Error('Local snapshot refresh returned no progress stream.');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let result: LocalSnapshotRefreshResult | null = null;
+
+    const consumeLine = (line: string): void => {
+        if (!line.trim()) return;
+        const event = JSON.parse(line) as LocalSnapshotRefreshEvent;
+        if (event.type === 'progress') onProgress(event.message);
+        else if (event.type === 'result') result = event;
+        else if (event.type === 'error') throw new Error(event.message);
+        else throw new Error('Local snapshot refresh returned an unknown event.');
+    };
+
+    while (true) {
+        const {done, value} = await reader.read();
+        buffer += decoder.decode(value, {stream: !done});
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop() ?? '';
+        lines.forEach(consumeLine);
+        if (done) break;
+    }
+    consumeLine(buffer);
+    if (!result) throw new Error('Local snapshot refresh completed without a result.');
+    return result;
 };
 
 const coveragePath = (fileName: string) => `/coverage/preview/${fileName}`;
@@ -99,6 +146,7 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     assetIndexSource: null,
     localSnapshotAvailable: false,
     localSnapshotRefreshing: false,
+    localSnapshotProgress: null,
     localSnapshotGeneratedAt: null,
     localSnapshotAssetCount: 0,
     localSnapshotError: null,
@@ -233,19 +281,20 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
         if (!isLocalExplorerHost() || get().localSnapshotRefreshing) return;
         set({
             localSnapshotRefreshing: true,
+            localSnapshotProgress: null,
             localSnapshotError: null,
             loading: true,
         });
         try {
-            const status = await fetchJson<{
-                generated_at: string;
-                asset_count: number;
-            }>('/__edugraph/local-snapshot/refresh', {method: 'POST'});
+            const status = await refreshLocalSnapshotData(message => set({
+                localSnapshotProgress: message,
+            }));
             const usesLocalAssets = get().assetSource === 'local';
             set({
                 localSnapshotAvailable: true,
                 localSnapshotGeneratedAt: status.generated_at,
                 localSnapshotAssetCount: status.asset_count,
+                localSnapshotProgress: 'Loading refreshed explorer data…',
                 ...(usesLocalAssets ? {assetIndex: null, assetIndexSource: null} : {}),
             });
             await get().loadData();

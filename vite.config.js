@@ -1,7 +1,7 @@
 // vite.config.js
 import { createReadStream, existsSync, globSync, readFileSync, statSync } from 'node:fs';
 import { resolve, relative, extname } from 'path';
-import { execFile } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
@@ -39,7 +39,7 @@ const isLocalRequest = request => {
 };
 
 function localExplorerSnapshotPlugin() {
-    let refreshPromise;
+    let refreshRunning = false;
 
     const jsonResponse = (response, statusCode, payload) => {
         response.statusCode = statusCode;
@@ -48,28 +48,77 @@ function localExplorerSnapshotPlugin() {
         return response.end(JSON.stringify(payload));
     };
 
-    const refresh = () => {
-        refreshPromise ??= new Promise((accept, reject) => {
-            execFile(
-                process.execPath,
-                [VITE_NODE_WORKER, LOCAL_SNAPSHOT_SCRIPT],
-                {cwd: import.meta.dirname, maxBuffer: 50 * 1024 * 1024},
-                (error, stdout, stderr) => {
-                    if (error) {
-                        reject(new Error(stderr.trim() || error.message));
-                        return;
-                    }
-                    try {
-                        accept(JSON.parse(stdout));
-                    } catch (parseError) {
-                        reject(parseError);
-                    }
-                },
-            );
-        }).finally(() => {
-            refreshPromise = undefined;
+    const streamRefresh = response => {
+        if (refreshRunning) {
+            return jsonResponse(response, 409, {error: 'A local snapshot refresh is already running.'});
+        }
+
+        refreshRunning = true;
+        response.statusCode = 200;
+        response.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+        response.setHeader('Cache-Control', 'no-store');
+        response.setHeader('X-Accel-Buffering', 'no');
+        response.flushHeaders?.();
+
+        const writeEvent = event => {
+            if (!response.destroyed && !response.writableEnded) {
+                response.write(`${JSON.stringify(event)}\n`);
+            }
+        };
+
+        const worker = spawn(
+            process.execPath,
+            [VITE_NODE_WORKER, LOCAL_SNAPSHOT_SCRIPT],
+            {cwd: import.meta.dirname, stdio: ['ignore', 'pipe', 'pipe']},
+        );
+        let stdoutBuffer = '';
+        let stderr = '';
+        let receivedResult = false;
+        let finished = false;
+
+        const forwardLine = line => {
+            if (!line.trim()) return;
+            try {
+                const event = JSON.parse(line);
+                if (event?.type !== 'progress' && event?.type !== 'result') {
+                    throw new Error('Unknown refresh event.');
+                }
+                receivedResult ||= event.type === 'result';
+                writeEvent(event);
+            } catch (error) {
+                stderr += `${error instanceof Error ? error.message : String(error)}: ${line}\n`;
+            }
+        };
+        const finish = error => {
+            if (finished) return;
+            finished = true;
+            refreshRunning = false;
+            if (error) writeEvent({type: 'error', message: error});
+            if (!response.destroyed && !response.writableEnded) response.end();
+        };
+
+        worker.stdout.setEncoding('utf8');
+        worker.stdout.on('data', chunk => {
+            stdoutBuffer += chunk;
+            const lines = stdoutBuffer.split(/\r?\n/);
+            stdoutBuffer = lines.pop() ?? '';
+            lines.forEach(forwardLine);
         });
-        return refreshPromise;
+        worker.stderr.setEncoding('utf8');
+        worker.stderr.on('data', chunk => {
+            stderr += chunk;
+        });
+        worker.on('error', error => finish(error.message));
+        worker.on('close', code => {
+            forwardLine(stdoutBuffer);
+            if (code !== 0) {
+                finish(stderr.trim() || `Local snapshot worker exited with code ${code}.`);
+            } else if (!receivedResult) {
+                finish(stderr.trim() || 'Local snapshot worker completed without a result.');
+            } else {
+                finish();
+            }
+        });
     };
 
     const serve = async (request, response, next) => {
@@ -88,13 +137,7 @@ function localExplorerSnapshotPlugin() {
                 response.setHeader('Allow', 'POST');
                 return jsonResponse(response, 405, {error: 'Method not allowed.'});
             }
-            try {
-                return jsonResponse(response, 200, await refresh());
-            } catch (error) {
-                return jsonResponse(response, 500, {
-                    error: error instanceof Error ? error.message : 'Failed to refresh local explorer data.',
-                });
-            }
+            return streamRefresh(response);
         }
 
         if (request.method !== 'GET' && request.method !== 'HEAD') {

@@ -93,6 +93,8 @@ for direct renderer previews.
 Vite intercepts the three preview routes and serves them from the newest completed local
 snapshot. **Refresh local data** explicitly builds working-tree coverage, the local asset
 index, and a copy of every selected PNG under `temp/standards-explorer-preview/<id>/`.
+The refresh endpoint streams newline-delimited progress events to the explorer so the status
+panel reports each build stage while the immutable snapshot is being prepared.
 Snapshots are versioned and become visible only after their manifest is written, so a
 failed refresh leaves the previous one intact. Reloads and source edits do not rebuild or
 invalidate data implicitly. Vite neither watches nor streams from `out/`, preventing the

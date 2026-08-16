@@ -60,6 +60,7 @@ describe('standards explorer data and sample sources', () => {
             assetIndexSource: null,
             localSnapshotAvailable: false,
             localSnapshotRefreshing: false,
+            localSnapshotProgress: null,
             localSnapshotGeneratedAt: null,
             localSnapshotAssetCount: 0,
             localSnapshotError: null,
@@ -207,9 +208,18 @@ describe('standards explorer data and sample sources', () => {
         const refreshedIndex = {...assetIndex, generated_at: '2026-08-16T12:00:00.000Z'};
         const fetchMock = vi.fn(async (input: string | URL | Request) => {
             const url = String(input);
-            if (url.endsWith('/refresh')) return jsonResponse({
-                generated_at: '2026-08-16T12:00:00.000Z',
-                asset_count: 42,
+            if (url.endsWith('/refresh')) return new Response([
+                JSON.stringify({type: 'progress', message: 'Indexing generated samples…'}),
+                JSON.stringify({type: 'progress', message: 'Publishing local snapshot…'}),
+                JSON.stringify({
+                    type: 'result',
+                    generated_at: '2026-08-16T12:00:00.000Z',
+                    asset_count: 42,
+                }),
+                '',
+            ].join('\n'), {
+                status: 200,
+                headers: {'Content-Type': 'application/x-ndjson'},
             });
             if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
             if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
@@ -228,6 +238,7 @@ describe('standards explorer data and sample sources', () => {
             localSnapshotAvailable: true,
             localSnapshotRefreshing: false,
             localSnapshotAssetCount: 42,
+            localSnapshotProgress: 'Loading refreshed explorer data…',
             assetIndex: refreshedIndex,
             assetIndexSource: 'local',
         });

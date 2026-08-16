@@ -1243,6 +1243,7 @@ export function App() {
     const loadLocalSnapshotStatus = useExplorerStore(state => state.loadLocalSnapshotStatus);
     const localSnapshotAvailable = useExplorerStore(state => state.localSnapshotAvailable);
     const localSnapshotRefreshing = useExplorerStore(state => state.localSnapshotRefreshing);
+    const localSnapshotProgress = useExplorerStore(state => state.localSnapshotProgress);
     const localSnapshotError = useExplorerStore(state => state.localSnapshotError);
     const refreshLocalSnapshot = useExplorerStore(state => state.refreshLocalSnapshot);
     const loading = useExplorerStore(state => state.loading);
@@ -1262,36 +1263,55 @@ export function App() {
     return (
         <div className="bg-slate-950 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
             <Header />
-            <div className={`relative flex-1 flex flex-col lg:flex-row min-h-0 w-full overflow-hidden ${loading ? 'opacity-30' : ''}`}>
+            <div className="relative flex-1 min-h-0 w-full overflow-hidden">
                 {localSnapshotRefreshing && (
-                    <div className="absolute inset-x-0 top-3 z-50 mx-auto w-fit rounded-md border border-sky-500/40 bg-slate-900 px-4 py-2 text-xs text-sky-100 shadow-xl">
-                        Building coverage, indexing samples, and snapshotting local images…
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 pointer-events-none">
+                        <div
+                            role="status"
+                            aria-live="polite"
+                            className="w-[min(26rem,100%)] rounded-lg border border-sky-500/40 bg-slate-900 px-4 py-3 text-xs text-sky-100 shadow-xl"
+                        >
+                            <div className="flex items-center gap-2 font-semibold text-[#0f172a]">
+                                <i
+                                    className="fa-solid fa-arrows-rotate fa-spin text-[#0284c7]"
+                                    aria-hidden="true"
+                                />
+                                Refreshing Local Snapshot
+                            </div>
+                            {localSnapshotProgress && (
+                                <p className="mt-2 text-[11px] leading-4 text-slate-300">
+                                    {localSnapshotProgress}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 )}
-                <SidePanel />
-                {isLocalExplorerHost() && !localSnapshotAvailable && !localSnapshotRefreshing ? (
-                    <main className="flex flex-1 items-center justify-center bg-slate-950 p-6">
-                        <div className="max-w-md rounded-lg border border-slate-800 bg-slate-900/70 p-5 text-center">
-                            <h2 className="text-sm font-semibold text-slate-100">Local explorer data needs a snapshot</h2>
-                            <p className="mt-2 text-xs leading-5 text-slate-400">
-                                Refresh once after generation or spec changes. The explorer serves the immutable snapshot and never reads the live dataset while you browse.
-                            </p>
-                            {localSnapshotError && <p className="mt-2 text-xs text-rose-300">{localSnapshotError}</p>}
-                            <button
-                                type="button"
-                                onClick={() => void refreshLocalSnapshot()}
-                                className="mt-4 rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500"
-                            >
-                                Refresh local data
-                            </button>
-                        </div>
-                    </main>
-                ) : error ? (
-                    <main className="flex-1 bg-slate-950 p-6 text-sm text-red-300">Failed to load dynamically fetched CCSS explorer data: {error}</main>
-                ) : (
-                    <CenterPanel />
-                )}
-                <DetailsPanel />
+                <div className={`flex h-full min-h-0 w-full flex-col overflow-hidden lg:flex-row ${loading ? 'opacity-30' : ''}`}>
+                    <SidePanel />
+                    {isLocalExplorerHost() && !localSnapshotAvailable && !localSnapshotRefreshing ? (
+                        <main className="flex flex-1 items-center justify-center bg-slate-950 p-6">
+                            <div className="max-w-md rounded-lg border border-slate-800 bg-slate-900/70 p-5 text-center">
+                                <h2 className="text-sm font-semibold text-slate-100">Local explorer data needs a snapshot</h2>
+                                <p className="mt-2 text-xs leading-5 text-slate-400">
+                                    Refresh once after generation or spec changes. The explorer serves the immutable snapshot and never reads the live dataset while you browse.
+                                </p>
+                                {localSnapshotError && <p className="mt-2 text-xs text-rose-300">{localSnapshotError}</p>}
+                                <button
+                                    type="button"
+                                    onClick={() => void refreshLocalSnapshot()}
+                                    className="mt-4 rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500"
+                                >
+                                    Refresh local data
+                                </button>
+                            </div>
+                        </main>
+                    ) : error ? (
+                        <main className="flex-1 bg-slate-950 p-6 text-sm text-red-300">Failed to load dynamically fetched CCSS explorer data: {error}</main>
+                    ) : (
+                        <CenterPanel />
+                    )}
+                    <DetailsPanel />
+                </div>
             </div>
         </div>
     );
