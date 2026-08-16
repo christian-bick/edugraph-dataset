@@ -186,7 +186,7 @@ async function main() {
             } else if (currentRendererEnvironment() !== CANONICAL_RENDERER_ID) {
                 throw new Error(
                     'Live VQA cache updates require canonical container images. ' +
-                    'Regenerate the relevant dataset scope with npm run generate:dataset:container and run validate:dataset.'
+                    'Regenerate the relevant dataset scope with npm run generate:dataset and run validate:dataset.'
                 );
             } else {
                 console.log(`\n🤖 Running live VQA validation for rendered target samples...`);

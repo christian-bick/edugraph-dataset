@@ -8,7 +8,9 @@ import {
     CANONICAL_RENDERER_ID,
     CANONICAL_RENDERER_IMAGE,
     CANONICAL_RENDERER_PLATFORM,
-    RENDERER_ENVIRONMENT_VARIABLE
+    CANONICAL_RENDERER_PORT,
+    RENDERER_ENVIRONMENT_VARIABLE,
+    RENDERER_PORT_VARIABLE
 } from './render-environment.ts';
 
 describe('container generation command', () => {
@@ -41,6 +43,7 @@ describe('container generation command', () => {
         expect(args).toContain('edugraph-test');
         expect(args).toContain(`type=bind,source=/cache/npm,target=/root/.npm`);
         expect(args).toContain(`${RENDERER_ENVIRONMENT_VARIABLE}=${CANONICAL_RENDERER_ID}`);
+        expect(args).toContain(`${RENDERER_PORT_VARIABLE}=${CANONICAL_RENDERER_PORT}`);
         expect(args).toContain('EDUGRAPH_HOST_UID=1001');
         expect(args.slice(-2)).toEqual(['--spec=test', '--generator=writing']);
     });

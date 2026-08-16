@@ -58,6 +58,11 @@ describe('standards explorer data and sample sources', () => {
             assetIndexError: null,
             assetSource: 'released',
             assetIndexSource: null,
+            localSnapshotAvailable: false,
+            localSnapshotRefreshing: false,
+            localSnapshotGeneratedAt: null,
+            localSnapshotAssetCount: 0,
+            localSnapshotError: null,
             loading: true,
             error: null,
             activeDomain: null,
@@ -190,5 +195,41 @@ describe('standards explorer data and sample sources', () => {
         expect(useExplorerStore.getState().assetSource).toBe('released');
         expect(new URLSearchParams(window.location.search).has('assets')).toBe(false);
         expect(new URLSearchParams(window.location.search).has('view')).toBe(false);
+    });
+
+    it('refreshes an immutable local snapshot before reloading local data', async () => {
+        const localWindow = {
+            location: new URL('http://localhost:5173/standards-explorer.html?assets=local'),
+            history: {replaceState: vi.fn()},
+        };
+        vi.stubGlobal('window', localWindow);
+        useExplorerStore.setState({assetSource: 'local'});
+        const refreshedIndex = {...assetIndex, generated_at: '2026-08-16T12:00:00.000Z'};
+        const fetchMock = vi.fn(async (input: string | URL | Request) => {
+            const url = String(input);
+            if (url.endsWith('/refresh')) return jsonResponse({
+                generated_at: '2026-08-16T12:00:00.000Z',
+                asset_count: 42,
+            });
+            if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
+            if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
+            if (url.endsWith('coverage-manifest.json')) return jsonResponse(previewManifest);
+            return jsonResponse(refreshedIndex);
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        await useExplorerStore.getState().refreshLocalSnapshot();
+
+        expect(fetchMock).toHaveBeenCalledWith('/__edugraph/local-snapshot/refresh', {
+            cache: 'no-store',
+            method: 'POST',
+        });
+        expect(useExplorerStore.getState()).toMatchObject({
+            localSnapshotAvailable: true,
+            localSnapshotRefreshing: false,
+            localSnapshotAssetCount: 42,
+            assetIndex: refreshedIndex,
+            assetIndexSource: 'local',
+        });
     });
 });

@@ -1,46 +1,29 @@
 // vite.config.js
 import { createReadStream, existsSync, globSync, readFileSync, statSync } from 'node:fs';
-import { resolve, relative, extname, sep } from 'path';
+import { resolve, relative, extname } from 'path';
 import { execFile } from 'node:child_process';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { localAssetRequestKey } from './src/lib/local-assets.ts';
+import { readLatestLocalExplorerSnapshot } from './src/lib/local-explorer-snapshot.ts';
 
 const VIEW_HEAD_PATH = resolve(import.meta.dirname, 'src/partials/head.html');
 const VIEW_HEAD_INVOCATION = /\{\{>\s*head\s+script=(['"])([^'"]+)\1\s*\}\}/g;
 const COVERAGE_SITE = 'https://coverage.edugraph.io';
-const LOCAL_COVERAGE_ROUTES = new Map([
-    ['/coverage/preview/ccss-tree.json', 'tree'],
-    ['/coverage/preview/ccss-coverage.json', 'coverage'],
-    ['/coverage/preview/coverage-manifest.json', 'manifest'],
+const LOCAL_SNAPSHOT_ROUTES = new Map([
+    ['/coverage/preview/ccss-tree.json', 'coverage/ccss-tree.json'],
+    ['/coverage/preview/ccss-coverage.json', 'coverage/ccss-coverage.json'],
+    ['/coverage/preview/coverage-manifest.json', 'coverage/coverage-manifest.json'],
+    ['/dataset/local-asset-index.json', 'dataset/local-asset-index.json'],
 ]);
 const LOCAL_DATASET_ROUTE = '/dataset/local/';
-const LOCAL_ASSET_INDEX_ROUTE = '/dataset/local-asset-index.json';
+const LOCAL_SNAPSHOT_STATUS_ROUTE = '/__edugraph/local-snapshot/status';
+const LOCAL_SNAPSHOT_REFRESH_ROUTE = '/__edugraph/local-snapshot/refresh';
+const LOCAL_SNAPSHOT_ROOT = resolve(import.meta.dirname, 'temp', 'standards-explorer-preview');
 const VITE_NODE_WORKER = resolve(import.meta.dirname, 'node_modules', 'vite-node', 'dist', 'cli.mjs');
-const LOCAL_ASSET_INDEX_SCRIPT = resolve(
-    import.meta.dirname,
-    'src',
-    'scripts',
-    'build-local-asset-index.ts',
-);
-const LOCAL_COVERAGE_SCRIPT = resolve(import.meta.dirname, 'src', 'scripts', 'build-local-coverage.ts');
-const LOCAL_ASSET_WATCH_ROOTS = [
-    resolve(import.meta.dirname, 'src', 'spec'),
-];
-const LOCAL_COVERAGE_WATCH_ROOTS = [
-    resolve(import.meta.dirname, 'package.json'),
-    resolve(import.meta.dirname, 'src', 'spec'),
-    resolve(import.meta.dirname, 'src', 'generators'),
-    resolve(import.meta.dirname, 'src', 'visuals', 'views'),
-    resolve(import.meta.dirname, 'src', 'scripts', 'build-local-coverage.ts'),
-    resolve(import.meta.dirname, 'src', 'lib', 'asset-index.ts'),
-    resolve(import.meta.dirname, 'src', 'lib', 'asset-index-builder.ts'),
-    resolve(import.meta.dirname, 'src', 'lib', 'generation.ts'),
-    resolve(import.meta.dirname, 'src', 'lib', 'standards-coverage.ts'),
-    resolve(import.meta.dirname, 'public', 'coverage', 'ccss-tree.json'),
-];
+const LOCAL_SNAPSHOT_SCRIPT = resolve(import.meta.dirname, 'src', 'scripts', 'refresh-local-explorer.ts');
 
 function coverageProxy() {
     return {
@@ -55,19 +38,21 @@ const isLocalRequest = request => {
     return hostname === 'localhost' || hostname === '127.0.0.1';
 };
 
-function localCoveragePlugin() {
-    let bundlePromise;
-    let bundleExpiresAt = 0;
-    const invalidate = () => {
-        bundlePromise = undefined;
-        bundleExpiresAt = 0;
+function localExplorerSnapshotPlugin() {
+    let refreshPromise;
+
+    const jsonResponse = (response, statusCode, payload) => {
+        response.statusCode = statusCode;
+        response.setHeader('Content-Type', 'application/json; charset=utf-8');
+        response.setHeader('Cache-Control', 'no-store');
+        return response.end(JSON.stringify(payload));
     };
-    const getBundle = () => {
-        if (bundlePromise && bundleExpiresAt > 0 && Date.now() >= bundleExpiresAt) invalidate();
-        bundlePromise ??= new Promise((accept, reject) => {
+
+    const refresh = () => {
+        refreshPromise ??= new Promise((accept, reject) => {
             execFile(
                 process.execPath,
-                [VITE_NODE_WORKER, LOCAL_COVERAGE_SCRIPT],
+                [VITE_NODE_WORKER, LOCAL_SNAPSHOT_SCRIPT],
                 {cwd: import.meta.dirname, maxBuffer: 50 * 1024 * 1024},
                 (error, stdout, stderr) => {
                     if (error) {
@@ -81,171 +66,78 @@ function localCoveragePlugin() {
                     }
                 },
             );
-        }).then(bundle => {
-            // Share one build across the explorer's parallel tree/coverage/manifest
-            // requests, while keeping each subsequent reload live. Watching `out`
-            // directly locks dataset directories on Windows and prevents the
-            // generator's atomic rename transaction from committing.
-            bundleExpiresAt = Date.now() + 250;
-            return bundle;
-        }).catch(error => {
-            invalidate();
-            throw error;
+        }).finally(() => {
+            refreshPromise = undefined;
         });
-        return bundlePromise;
-    };
-
-    const serve = async (request, response, next) => {
-        const pathname = (request.url || '/').split(/[?#]/, 1)[0];
-        const bundleKey = LOCAL_COVERAGE_ROUTES.get(pathname);
-        if (!bundleKey) return next();
-        if (!isLocalRequest(request)) {
-            response.statusCode = 404;
-            return response.end();
-        }
-        if (request.method !== 'GET' && request.method !== 'HEAD') {
-            response.statusCode = 405;
-            response.setHeader('Allow', 'GET, HEAD');
-            return response.end();
-        }
-        try {
-            const bundle = await getBundle();
-            const payload = JSON.stringify(bundle[bundleKey]);
-            response.statusCode = 200;
-            response.setHeader('Content-Type', 'application/json; charset=utf-8');
-            response.setHeader('Cache-Control', 'no-store');
-            if (request.method === 'HEAD') return response.end();
-            return response.end(payload);
-        } catch (error) {
-            response.statusCode = 500;
-            response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            return response.end(error instanceof Error ? error.message : 'Failed to build live coverage data.');
-        }
-    };
-
-    return {
-        name: 'edugraph-local-coverage',
-        configureServer(server) {
-            server.watcher.add(LOCAL_COVERAGE_WATCH_ROOTS);
-            server.watcher.on('all', (_event, changedPath) => {
-                const normalizedPath = resolve(changedPath);
-                if (LOCAL_COVERAGE_WATCH_ROOTS.some(root =>
-                    normalizedPath === root || normalizedPath.startsWith(`${root}${sep}`))) invalidate();
-            });
-            server.middlewares.use(serve);
-        },
-        configurePreviewServer(server) {
-            server.middlewares.use(serve);
-        },
-    };
-}
-
-function localDatasetPlugin() {
-    let bundlePromise;
-    let bundleExpiresAt = 0;
-    const invalidate = () => {
-        bundlePromise = undefined;
-        bundleExpiresAt = 0;
-    };
-    const getBundle = () => {
-        if (bundlePromise && bundleExpiresAt > 0 && Date.now() >= bundleExpiresAt) invalidate();
-        bundlePromise ??= new Promise((accept, reject) => {
-            execFile(
-                process.execPath,
-                [VITE_NODE_WORKER, LOCAL_ASSET_INDEX_SCRIPT],
-                { cwd: import.meta.dirname, maxBuffer: 50 * 1024 * 1024 },
-                (error, stdout, stderr) => {
-                    if (error) {
-                        reject(new Error(stderr.trim() || error.message));
-                        return;
-                    }
-                    try {
-                        const bundle = JSON.parse(stdout);
-                        accept({
-                            index: bundle.index,
-                            localAssets: new Map(bundle.localAssets),
-                        });
-                    } catch (parseError) {
-                        reject(parseError);
-                    }
-                },
-            );
-        }).then(bundle => {
-            // The asset index is rebuilt on each explorer reload (with a tiny
-            // coalescing window) instead of watching `out`, which would hold a
-            // Windows directory handle across atomic dataset swaps.
-            bundleExpiresAt = Date.now() + 250;
-            return bundle;
-        }).catch(error => {
-            invalidate();
-            throw error;
-        });
-        return bundlePromise;
+        return refreshPromise;
     };
 
     const serve = async (request, response, next) => {
         const rawPathname = (request.url || '/').split(/[?#]/, 1)[0];
-        const servesIndex = rawPathname === LOCAL_ASSET_INDEX_ROUTE;
-        const servesImage = rawPathname.startsWith(LOCAL_DATASET_ROUTE);
-        if (!servesIndex && !servesImage) return next();
+        const isStatus = rawPathname === LOCAL_SNAPSHOT_STATUS_ROUTE;
+        const isRefresh = rawPathname === LOCAL_SNAPSHOT_REFRESH_ROUTE;
+        const staticPath = LOCAL_SNAPSHOT_ROUTES.get(rawPathname);
+        const assetKey = rawPathname.startsWith(LOCAL_DATASET_ROUTE)
+            ? localAssetRequestKey(rawPathname.slice(LOCAL_DATASET_ROUTE.length))
+            : null;
+        if (!isStatus && !isRefresh && !staticPath && !assetKey) return next();
+        if (!isLocalRequest(request)) return jsonResponse(response, 404, {error: 'Not found.'});
 
-        if (!isLocalRequest(request)) {
-            response.statusCode = 404;
-            return response.end();
+        if (isRefresh) {
+            if (request.method !== 'POST') {
+                response.setHeader('Allow', 'POST');
+                return jsonResponse(response, 405, {error: 'Method not allowed.'});
+            }
+            try {
+                return jsonResponse(response, 200, await refresh());
+            } catch (error) {
+                return jsonResponse(response, 500, {
+                    error: error instanceof Error ? error.message : 'Failed to refresh local explorer data.',
+                });
+            }
         }
 
         if (request.method !== 'GET' && request.method !== 'HEAD') {
-            response.statusCode = 405;
             response.setHeader('Allow', 'GET, HEAD');
-            return response.end();
+            return jsonResponse(response, 405, {error: 'Method not allowed.'});
         }
 
-        try {
-            const bundle = await getBundle();
-            if (servesIndex) {
-                const payload = JSON.stringify(bundle.index);
-                response.statusCode = 200;
-                response.setHeader('Content-Type', 'application/json; charset=utf-8');
-                response.setHeader('Cache-Control', 'no-store');
-                if (request.method === 'HEAD') return response.end();
-                return response.end(payload);
-            }
-
-            const key = localAssetRequestKey(rawPathname.slice(LOCAL_DATASET_ROUTE.length));
-            const assetPath = key ? bundle.localAssets.get(key) : undefined;
-            if (!assetPath || !existsSync(assetPath)) {
-                response.statusCode = 404;
-                return response.end();
-            }
-
-            const asset = statSync(assetPath);
-            if (!asset.isFile()) {
-                response.statusCode = 404;
-                return response.end();
-            }
-
-            response.statusCode = 200;
-            response.setHeader('Content-Type', 'image/png');
-            response.setHeader('Content-Length', asset.size);
-            response.setHeader('Cache-Control', 'no-store');
+        const snapshot = readLatestLocalExplorerSnapshot(LOCAL_SNAPSHOT_ROOT);
+        if (isStatus) {
+            const payload = snapshot
+                ? {
+                    available: true,
+                    generated_at: snapshot.generated_at,
+                    asset_count: snapshot.asset_count,
+                }
+                : {available: false};
             if (request.method === 'HEAD') return response.end();
-            return createReadStream(assetPath).pipe(response);
-        } catch (error) {
-            response.statusCode = 500;
-            response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            return response.end(error instanceof Error ? error.message : 'Failed to build local asset index.');
+            return jsonResponse(response, 200, payload);
         }
+        if (!snapshot) {
+            return jsonResponse(response, 409, {
+                error: 'Local explorer data is unavailable. Use Refresh local data.',
+            });
+        }
+
+        const snapshotPath = staticPath
+            ? resolve(snapshot.directory, ...staticPath.split('/'))
+            : resolve(snapshot.directory, 'dataset', 'local', ...assetKey.split('/'));
+        if (!existsSync(snapshotPath)) return jsonResponse(response, 404, {error: 'Not found.'});
+        const file = statSync(snapshotPath);
+        if (!file.isFile()) return jsonResponse(response, 404, {error: 'Not found.'});
+
+        response.statusCode = 200;
+        response.setHeader('Content-Type', assetKey ? 'image/png' : 'application/json; charset=utf-8');
+        response.setHeader('Content-Length', file.size);
+        response.setHeader('Cache-Control', 'no-store');
+        if (request.method === 'HEAD') return response.end();
+        return createReadStream(snapshotPath).pipe(response);
     };
 
     return {
-        name: 'edugraph-local-dataset',
+        name: 'edugraph-local-explorer-snapshot',
         configureServer(server) {
-            server.watcher.add(LOCAL_ASSET_WATCH_ROOTS);
-            server.watcher.on('all', (_event, changedPath) => {
-                const normalizedPath = resolve(changedPath);
-                if (LOCAL_ASSET_WATCH_ROOTS.some(root =>
-                    normalizedPath === root || normalizedPath.startsWith(`${root}${sep}`))) invalidate();
-            });
             server.middlewares.use(serve);
         },
         configurePreviewServer(server) {
@@ -315,8 +207,7 @@ export default defineConfig({
         react(),
         tailwindcss(),
         viewHeadPlugin(),
-        localCoveragePlugin(),
-        localDatasetPlugin(),
+        localExplorerSnapshotPlugin(),
     ],
     test: {
         coverage: {

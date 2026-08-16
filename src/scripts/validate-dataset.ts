@@ -278,7 +278,7 @@ async function main() {
     if (!auditMode && rendererIssues.length > 0) {
         throw new Error(
             `Live VQA requires canonical container renders:\n${rendererIssues.map(issue => `- ${issue}`).join('\n')}\n` +
-            'Regenerate the selected scope with npm run generate:dataset:container before validation.'
+            'Regenerate the selected scope with npm run generate:dataset before validation.'
         );
     }
 

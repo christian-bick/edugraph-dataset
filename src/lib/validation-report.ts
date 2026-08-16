@@ -4,6 +4,7 @@ export interface ValidationReportScope {
     generator?: string;
     view?: string;
     reportPath?: string;
+    generatedAt?: Date;
 }
 
 function sanitizeScopePart(value: string): string {
@@ -25,16 +26,19 @@ export function validationReportPath(
             : resolve(projectRoot, scope.reportPath);
     }
 
-    const datasetDir = resolve(projectRoot, 'out', datasetFolderName);
-    if (!scope.generator && !scope.view) {
-        return resolve(datasetDir, 'validation-report.md');
-    }
-
     const parts = [
         scope.generator ? `generator=${sanitizeScopePart(scope.generator)}` : null,
         scope.view ? `view=${sanitizeScopePart(scope.view)}` : null
     ].filter((part): part is string => part !== null);
-    return resolve(datasetDir, 'validation-reports', `${parts.join('__')}.md`);
+    const timestamp = (scope.generatedAt ?? new Date()).toISOString().replace(/[:.]/g, '-');
+    const scopeName = parts.length > 0 ? parts.join('__') : 'full';
+    return resolve(
+        projectRoot,
+        'temp',
+        'validation-reports',
+        datasetFolderName,
+        `${timestamp}__${scopeName}.md`,
+    );
 }
 
 export function validationFailed(
@@ -43,4 +47,3 @@ export function validationFailed(
 ): boolean {
     return !reportOnly && (counts.failed > 0 || counts.uncached > 0);
 }
-

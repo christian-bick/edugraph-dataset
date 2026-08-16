@@ -20,6 +20,11 @@ interface ExplorerStore {
     assetIndexError: string | null;
     assetSource: AssetSource;
     assetIndexSource: AssetSource | null;
+    localSnapshotAvailable: boolean;
+    localSnapshotRefreshing: boolean;
+    localSnapshotGeneratedAt: string | null;
+    localSnapshotAssetCount: number;
+    localSnapshotError: string | null;
     loading: boolean;
     error: string | null;
     activeGrade: string;
@@ -33,6 +38,8 @@ interface ExplorerStore {
     loadData: () => Promise<void>;
     loadReleasedAssetIndex: () => Promise<void>;
     loadAssetIndex: (assetSource?: AssetSource) => Promise<void>;
+    loadLocalSnapshotStatus: () => Promise<boolean>;
+    refreshLocalSnapshot: () => Promise<void>;
     setAssetSource: (source: AssetSource) => Promise<void>;
     setActiveGrade: (grade: string) => void;
     toggleDomain: (domain: string) => void;
@@ -43,8 +50,10 @@ interface ExplorerStore {
     setSearchQuery: (query: string) => void;
 }
 
-const fetchJson = async <T,>(url: string): Promise<T> => {
-    const response = await fetch(url, import.meta.env.DEV ? { cache: 'no-store' } : undefined);
+const fetchJson = async <T,>(url: string, init?: RequestInit): Promise<T> => {
+    const response = await fetch(url, import.meta.env.DEV
+        ? {cache: 'no-store', ...init}
+        : init);
     if (!response.ok) throw new Error(`Request failed (${response.status}): ${url}`);
     return response.json() as Promise<T>;
 };
@@ -88,6 +97,11 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     assetIndexError: null,
     assetSource: startingAssetSource,
     assetIndexSource: null,
+    localSnapshotAvailable: false,
+    localSnapshotRefreshing: false,
+    localSnapshotGeneratedAt: null,
+    localSnapshotAssetCount: 0,
+    localSnapshotError: null,
     loading: true,
     error: null,
     activeGrade: 'Kindergarten',
@@ -185,6 +199,65 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
             set({
                 assetIndexError: error instanceof Error ? error.message : 'Failed to load released samples.',
                 assetIndexLoading: false,
+            });
+        }
+    },
+    loadLocalSnapshotStatus: async () => {
+        if (!isLocalExplorerHost()) return true;
+        try {
+            const status = await fetchJson<{
+                available: boolean;
+                generated_at?: string;
+                asset_count?: number;
+            }>('/__edugraph/local-snapshot/status');
+            set({
+                localSnapshotAvailable: status.available,
+                localSnapshotGeneratedAt: status.generated_at ?? null,
+                localSnapshotAssetCount: status.asset_count ?? 0,
+                localSnapshotError: null,
+                ...(!status.available ? {loading: false} : {}),
+            });
+            return status.available;
+        } catch (error) {
+            set({
+                localSnapshotAvailable: false,
+                localSnapshotError: error instanceof Error
+                    ? error.message
+                    : 'Failed to inspect local explorer data.',
+                loading: false,
+            });
+            return false;
+        }
+    },
+    refreshLocalSnapshot: async () => {
+        if (!isLocalExplorerHost() || get().localSnapshotRefreshing) return;
+        set({
+            localSnapshotRefreshing: true,
+            localSnapshotError: null,
+            loading: true,
+        });
+        try {
+            const status = await fetchJson<{
+                generated_at: string;
+                asset_count: number;
+            }>('/__edugraph/local-snapshot/refresh', {method: 'POST'});
+            const usesLocalAssets = get().assetSource === 'local';
+            set({
+                localSnapshotAvailable: true,
+                localSnapshotGeneratedAt: status.generated_at,
+                localSnapshotAssetCount: status.asset_count,
+                ...(usesLocalAssets ? {assetIndex: null, assetIndexSource: null} : {}),
+            });
+            await get().loadData();
+            if (usesLocalAssets) await get().loadAssetIndex('local');
+            set({localSnapshotRefreshing: false});
+        } catch (error) {
+            set({
+                localSnapshotRefreshing: false,
+                localSnapshotError: error instanceof Error
+                    ? error.message
+                    : 'Failed to refresh local explorer data.',
+                loading: false,
             });
         }
     },

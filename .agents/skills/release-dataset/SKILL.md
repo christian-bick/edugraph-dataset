@@ -46,21 +46,22 @@ All inspection and local validation before tag publication must remain reversibl
 
 Prevent a release tag from becoming the first full canonical test:
 
-1. Ensure no development server is holding `out/dataset-ccss` open. On Windows, identify
-   listeners before stopping anything and ask before terminating a user-owned process.
-2. Generate the complete canonical dataset:
+1. Generate the complete canonical dataset. The explorer serves immutable snapshots from
+   `temp/` and host development servers are not generation prerequisites. If the transactional
+   swap still reports a filesystem lock, inspect the exact external handle before stopping a
+   user-owned process.
 
    ```bash
-   npm run generate:dataset:container -- --spec=ccss
+   npm run generate:dataset -- --spec=ccss
    ```
 
-3. Run the strict, offline cache audit:
+2. Run the strict, offline cache audit:
 
    ```bash
    npm run audit:dataset -- --spec=ccss
    ```
 
-4. Run the release-relevant dataset checks:
+3. Run the release-relevant dataset checks:
 
    ```bash
    npm run report:churn -- --spec=ccss
@@ -68,7 +69,7 @@ Prevent a release tag from becoming the first full canonical test:
    npm run merge:dataset
    ```
 
-5. Confirm that the worktree remains clean. Generated files in `out/` are build output and
+4. Confirm that the worktree remains clean. Generated files in `out/` are build output and
    must not be committed.
 
 Do not create or push the release tag unless canonical generation, strict audit, split

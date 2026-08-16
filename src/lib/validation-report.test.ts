@@ -2,17 +2,21 @@ import { describe, expect, it } from 'vitest';
 import { validationFailed, validationReportPath } from './validation-report.ts';
 
 describe('validationReportPath', () => {
-    it('reserves the canonical report for unfiltered validation', () => {
-        expect(validationReportPath('/repo', 'dataset-ccss', {}).replace(/\\/g, '/'))
-            .toMatch(/\/repo\/out\/dataset-ccss\/validation-report\.md$/);
+    it('preserves a timestamped full validation report outside the generated dataset', () => {
+        expect(validationReportPath('/repo', 'dataset-ccss', {
+            generatedAt: new Date('2026-08-16T12:34:56.789Z')
+        }).replace(/\\/g, '/')).toMatch(
+            /\/repo\/temp\/validation-reports\/dataset-ccss\/2026-08-16T12-34-56-789Z__full\.md$/
+        );
     });
 
-    it('uses deterministic scoped report names', () => {
+    it('preserves timestamped scoped reports without clobbering prior runs', () => {
         expect(validationReportPath('/repo', 'dataset-ccss', {
             generator: 'writing',
-            view: 'numbers/numbers-write-standard'
+            view: 'numbers/numbers-write-standard',
+            generatedAt: new Date('2026-08-16T12:34:56.789Z')
         }).replace(/\\/g, '/')).toMatch(
-            /\/repo\/out\/dataset-ccss\/validation-reports\/generator=writing__view=numbers-numbers-write-standard\.md$/
+            /\/repo\/temp\/validation-reports\/dataset-ccss\/2026-08-16T12-34-56-789Z__generator=writing__view=numbers-numbers-write-standard\.md$/
         );
     });
 

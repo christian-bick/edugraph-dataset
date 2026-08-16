@@ -33,7 +33,7 @@ Gather all three failure sources before fixing anything, so related defects are 
    ```bash
    npm run show:matching -- --spec=<specModule>
    ```
-2. **Visual QA failures** — the `## Failure TODO List` in `out/dataset-<spec>/validation-report.md` for a full run, or the matching file under `out/dataset-<spec>/validation-reports/` for a scoped run. Each entry carries its module/view, the reason, the failing checks, the full sample identity, and a ready-to-run **Retest** command. VQA applies the central checklist and exactly one leaf checklist; the central checklist owns task identifiability and ontology-label support. Do not edit evaluator instructions or response mechanics to fix content. Validation is a real gate: failures and uncached samples exit non-zero; use `--report-only` only when intentionally collecting diagnostics without gating:
+2. **Visual QA failures** — the `## Failure TODO List` in the timestamped report path printed by `validate:dataset` under `temp/validation-reports/dataset-<spec>/`. Each run creates a new report instead of overwriting prior evidence. Every entry carries its module/view, the reason, the failing checks, the full sample identity, and a ready-to-run **Retest** command. VQA applies the central checklist and exactly one leaf checklist; the central checklist owns task identifiability and ontology-label support. Do not edit evaluator instructions or response mechanics to fix content. Validation is a real gate: failures and uncached samples exit non-zero; use `--report-only` only when intentionally collecting diagnostics without gating:
    ```bash
    npm run validate:dataset -- --spec=<specModule> [--generator=X] [--view=Y]
    ```
@@ -93,7 +93,6 @@ Keep the iteration loop cheap. **Batch all pixel-affecting changes before regene
 ```bash
 npm run test
 npm run generate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
-npm run generate:dataset:container -- --spec=<specModule> --generator=<generator> --view=<view>
 npm run validate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
 npm run report:churn -- --spec=<specModule>
 ```
@@ -104,7 +103,7 @@ Confirm the fixed samples now pass **and** that churn is confined to the modules
 
 Once the failure set is empty, verify across the whole standard, then rebuild the union:
 ```bash
-npm run generate:dataset:container -- --spec=<specModule>
+npm run generate:dataset -- --spec=<specModule>
 npm run validate:dataset -- --spec=<specModule>
 npm run audit:dataset -- --spec=<specModule>
 npm run report:churn -- --spec=<specModule>

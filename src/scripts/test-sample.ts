@@ -139,7 +139,7 @@ async function main() {
             throw new Error(
                 'Live VQA cache updates require canonical container images. ' +
                 'Use this command for native cache comparison, then regenerate the relevant dataset scope with ' +
-                'npm run generate:dataset:container and run validate:dataset.'
+                'npm run generate:dataset and run validate:dataset.'
             );
         }
 

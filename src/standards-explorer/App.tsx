@@ -263,6 +263,11 @@ function Header() {
     const releasedAssetIndex = useExplorerStore(state => state.releasedAssetIndex);
     const assetSource = useExplorerStore(state => state.assetSource);
     const assetIndexLoading = useExplorerStore(state => state.assetIndexLoading);
+    const localSnapshotAvailable = useExplorerStore(state => state.localSnapshotAvailable);
+    const localSnapshotRefreshing = useExplorerStore(state => state.localSnapshotRefreshing);
+    const localSnapshotGeneratedAt = useExplorerStore(state => state.localSnapshotGeneratedAt);
+    const localSnapshotAssetCount = useExplorerStore(state => state.localSnapshotAssetCount);
+    const refreshLocalSnapshot = useExplorerStore(state => state.refreshLocalSnapshot);
     const setAssetSource = useExplorerStore(state => state.setAssetSource);
     const standardsMap = useExplorerStore(state => state.standardsMap);
     const stats = calculateStats(coverageData);
@@ -295,20 +300,33 @@ function Header() {
                     </span>
                 )}
                 {isLocalExplorerHost() && (
-                    <div className="explorer-data-view" aria-label="Sample image source">
-                        {(['released', 'local'] as const).map(source => (
+                    <>
                         <button
-                            key={source}
                             type="button"
-                            aria-pressed={assetSource === source}
-                            disabled={assetIndexLoading}
-                            onClick={() => void setAssetSource(source)}
-                            className={assetSource === source ? 'is-active' : ''}
+                            disabled={localSnapshotRefreshing}
+                            onClick={() => void refreshLocalSnapshot()}
+                            title={localSnapshotGeneratedAt
+                                ? `Local snapshot from ${localSnapshotGeneratedAt} (${localSnapshotAssetCount} images)`
+                                : 'Build local coverage and sample data'}
+                            className="rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-slate-200 hover:border-sky-500 disabled:cursor-wait disabled:opacity-60"
                         >
-                            {source[0].toUpperCase() + source.slice(1)}
+                            {localSnapshotRefreshing ? 'Refreshing local data…' : 'Refresh local data'}
                         </button>
-                        ))}
-                    </div>
+                        <div className="explorer-data-view" aria-label="Sample image source">
+                            {(['released', 'local'] as const).map(source => (
+                            <button
+                                key={source}
+                                type="button"
+                                aria-pressed={assetSource === source}
+                                disabled={assetIndexLoading || (source === 'local' && !localSnapshotAvailable)}
+                                onClick={() => void setAssetSource(source)}
+                                className={assetSource === source ? 'is-active' : ''}
+                            >
+                                {source[0].toUpperCase() + source.slice(1)}
+                            </button>
+                            ))}
+                        </div>
+                    </>
                 )}
                 <div className="explorer-metrics">
                     <div className="explorer-metric">
@@ -1216,21 +1234,53 @@ export function App() {
     const loadData = useExplorerStore(state => state.loadData);
     const loadReleasedAssetIndex = useExplorerStore(state => state.loadReleasedAssetIndex);
     const loadAssetIndex = useExplorerStore(state => state.loadAssetIndex);
+    const loadLocalSnapshotStatus = useExplorerStore(state => state.loadLocalSnapshotStatus);
+    const localSnapshotAvailable = useExplorerStore(state => state.localSnapshotAvailable);
+    const localSnapshotRefreshing = useExplorerStore(state => state.localSnapshotRefreshing);
+    const localSnapshotError = useExplorerStore(state => state.localSnapshotError);
+    const refreshLocalSnapshot = useExplorerStore(state => state.refreshLocalSnapshot);
     const loading = useExplorerStore(state => state.loading);
     const error = useExplorerStore(state => state.error);
 
     useEffect(() => {
-        void loadData();
-        void loadReleasedAssetIndex();
-        if (useExplorerStore.getState().assetSource === 'local') void loadAssetIndex('local');
-    }, [loadAssetIndex, loadData, loadReleasedAssetIndex]);
+        void (async () => {
+            const snapshotReady = await loadLocalSnapshotStatus();
+            if (snapshotReady) await loadData();
+            await loadReleasedAssetIndex();
+            if (snapshotReady && useExplorerStore.getState().assetSource === 'local') {
+                await loadAssetIndex('local');
+            }
+        })();
+    }, [loadAssetIndex, loadData, loadLocalSnapshotStatus, loadReleasedAssetIndex]);
 
     return (
         <div className="bg-slate-950 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
             <Header />
-            <div className={`flex-1 flex flex-col lg:flex-row min-h-0 w-full overflow-hidden ${loading ? 'opacity-30' : ''}`}>
+            <div className={`relative flex-1 flex flex-col lg:flex-row min-h-0 w-full overflow-hidden ${loading ? 'opacity-30' : ''}`}>
+                {localSnapshotRefreshing && (
+                    <div className="absolute inset-x-0 top-3 z-50 mx-auto w-fit rounded-md border border-sky-500/40 bg-slate-900 px-4 py-2 text-xs text-sky-100 shadow-xl">
+                        Building coverage, indexing samples, and snapshotting local images…
+                    </div>
+                )}
                 <SidePanel />
-                {error ? (
+                {isLocalExplorerHost() && !localSnapshotAvailable && !localSnapshotRefreshing ? (
+                    <main className="flex flex-1 items-center justify-center bg-slate-950 p-6">
+                        <div className="max-w-md rounded-lg border border-slate-800 bg-slate-900/70 p-5 text-center">
+                            <h2 className="text-sm font-semibold text-slate-100">Local explorer data needs a snapshot</h2>
+                            <p className="mt-2 text-xs leading-5 text-slate-400">
+                                Refresh once after generation or spec changes. The explorer serves the immutable snapshot and never reads the live dataset while you browse.
+                            </p>
+                            {localSnapshotError && <p className="mt-2 text-xs text-rose-300">{localSnapshotError}</p>}
+                            <button
+                                type="button"
+                                onClick={() => void refreshLocalSnapshot()}
+                                className="mt-4 rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500"
+                            >
+                                Refresh local data
+                            </button>
+                        </div>
+                    </main>
+                ) : error ? (
                     <main className="flex-1 bg-slate-950 p-6 text-sm text-red-300">Failed to load dynamically fetched CCSS explorer data: {error}</main>
                 ) : (
                     <CenterPanel />

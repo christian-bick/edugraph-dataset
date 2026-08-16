@@ -46,10 +46,12 @@ else
 fi
 dependency_seconds=$SECONDS
 
-npm run dev -- --host 127.0.0.1 --strictPort > /tmp/edugraph-vite.log 2>&1 &
+: "${EDUGRAPH_RENDERER_PORT:?Canonical renderer port is required.}"
+renderer_url="http://127.0.0.1:${EDUGRAPH_RENDERER_PORT}"
+npm run dev -- --host 127.0.0.1 --port "$EDUGRAPH_RENDERER_PORT" --strictPort > /tmp/edugraph-vite.log 2>&1 &
 server_pid=$!
-node /workspace/scripts/wait-for-renderer.mjs http://127.0.0.1:5173 60000
+node /workspace/scripts/wait-for-renderer.mjs "$renderer_url" 60000
 renderer_seconds=$SECONDS
 
 echo "Container setup: source-copy=$((source_seconds - start_seconds))s dependencies=$((dependency_seconds - source_seconds))s renderer=$((renderer_seconds - dependency_seconds))s"
-npm run generate:dataset -- "$@"
+EDUGRAPH_CONTAINER_GENERATION=1 RENDER_BASE_URL="$renderer_url" npm run generate:dataset:internal -- "$@"

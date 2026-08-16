@@ -49,8 +49,8 @@ ambiguous and are not silently converted into a concrete unit.
 
 A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
 
-*   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples.
-*   **Every generated standard has a freshness manifest.** `manifest.json` records each matched `(generator, view)` pair's generation-input hash, aggregate output-content hash, sample counts, and renderer-environment identity. The input hash covers the relevant target labels, ontology dependency, generator/view sources, and shared generation/rendering sources. The content hash aggregates the existing per-sample `content_fingerprint` values: those fingerprints efficiently detect changed mathematical payloads, while the input hash also detects changes such as view code that can alter pixels without altering problem data. VQA `checklist.md` files are deliberately excluded: checklist changes invalidate the separate VQA validation-context cache but do not make rendered dataset content stale. Scoped generation can temporarily mix native and canonical pairs; release audit requires every pair to carry the canonical renderer identity.
+*   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` canonically writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples, and generation never depends on a host Vite server.
+*   **Every generated standard has a freshness manifest.** `manifest.json` records each matched `(generator, view)` pair's generation-input hash, aggregate output-content hash, sample counts, and renderer-environment identity. The input hash covers the relevant target labels, ontology dependency, generator/view sources, and shared generation/rendering sources. The content hash aggregates the existing per-sample `content_fingerprint` values: those fingerprints efficiently detect changed mathematical payloads, while the input hash also detects changes such as view code that can alter pixels without altering problem data. VQA `checklist.md` files are deliberately excluded: checklist changes invalidate the separate VQA validation-context cache but do not make rendered dataset content stale. Every public generation path uses the canonical renderer identity, including scoped development runs.
 *   **The union dataset (`out/dataset/`) is derived**, built by `npm run merge:dataset` from every non-isolated standard in precedence order. It is the released artifact; treat it as a build output, never as a source of truth — the merge replaces it wholesale. Its public rows are compact projections containing only `file_name`, `tags`, and `solution`; operational identity remains in the source standard datasets.
 *   **The merge deduplicates identical content across standards.** The first standard in merge order keeps the exercise and later ones report it as duplicate overlap. Dedup is scoped per (split, view) by content fingerprint, with the validation split additionally excluding content already in train — the same rules generation applies within a single standard (where the scope is per module, since a view has only one generator), extended across them. Question and solution are independent draws of one exercise, so exercises are kept or dropped whole.
 *   **Isolated specs never merge.** `test` declares `isolated = true` in `src/spec/test/_module.ts`; it is a fast prototyping, debugging, smoke-test and retained-regression workspace, not a second curriculum or exhaustive capability matrix. Every generator keeps at least one generatable target-view path there. Files prefixed with `_` describe the module rather than contributing targets, so the target loaders skip them.
@@ -87,14 +87,13 @@ deployed `main` revision; it is not a user-selectable preview mode. The snapshot
 `ccss-tree.json`, `ccss-coverage.json`, and `coverage-manifest.json`; the manifest records
 the schema version, channel, source ref and SHA, generation time, and ontology version.
 Run `npm run dev` and open `/standards-explorer.html` for local working-tree development.
-Vite intercepts the three preview routes and builds their responses in memory from the
-tracked standards tree and current specs. The first request reuses current per-standard
-dataset metadata to resolve already-generated label sets and evaluates only missing sets;
-parallel explorer requests share one in-flight build, and a subsequent reload rebuilds the
-bundle after a 250 ms coalescing window. Relevant source changes invalidate it immediately.
-Generated output is deliberately not watched: recursive `out/` watchers hold directory
-handles on Windows and prevent atomic dataset swaps. It neither reads nor writes a
-generated local coverage snapshot.
+Vite intercepts the three preview routes and serves them from the newest completed local
+snapshot. **Refresh local data** explicitly builds working-tree coverage, the local asset
+index, and a copy of every selected PNG under `temp/standards-explorer-preview/<id>/`.
+Snapshots are versioned and become visible only after their manifest is written, so a
+failed refresh leaves the previous one intact. Reloads and source edits do not rebuild or
+invalidate data implicitly. Vite neither watches nor streams from `out/`, preventing the
+explorer from retaining Windows handles across atomic dataset swaps.
 
 Released sample thumbnails are intentionally separate from those coverage views. The
 explorer always loads `/dataset/asset-index.json` as its publication baseline; the development server
@@ -104,12 +103,12 @@ samples. Each released image URL is constructed from the index's Hugging Face re
 immutable release revision, split, and file path.
 
 On `localhost` and `127.0.0.1`, a Released / Local selector changes only the active sample
-image source. Local sets `assets=local` and loads `/dataset/local-asset-index.json`, which Vite builds in memory
-by replaying union selection over the current per-standard metadata under `out/`. The
-index is rebuilt on each explorer reload after the same 250 ms request-coalescing window;
-target spec changes also invalidate it immediately. Its image
-route serves only selected PNG files from those generated standard datasets, so local
-preview does not require a merged union or an index file on disk. Production hosts do not
+image source. Local sets `assets=local` and loads `/dataset/local-asset-index.json` from the
+same immutable snapshot. Its image route serves the copied snapshot PNGs, so ordinary
+browsing never reads generated standard datasets and local preview does not require a
+merged union. Refresh again after target, generator, view, ontology, or dataset changes;
+the explorer shows an explicit loading state while coverage, the index, and images are
+materialized. Production hosts do not
 render the switch and always resolve images through the release-pinned Hugging Face URL.
 
 The released index remains loaded in both modes. A dataset-covered leaf is `Released`
@@ -154,18 +153,20 @@ Playwright image, so changing the host runtime does not change the renderer iden
 * **Function**: Regenerates the standards tree, dataset coverage metadata, and authored-package
   task backlog consumed by the standards explorer, plus the snapshot manifest. Implementation
   and ontology tasks are grouped by stable package id. It shares the coverage builder with
-  the local Vite worker so snapshot and live semantics cannot drift. The default output is
+  the local refresh script so development and deployment semantics cannot drift. The default output is
   `public/coverage/preview/` for an explicit manual snapshot; release and deployment
   workflows pass explicit output directories and source identity. Normal local preview
   does not run this command.
 
-### `src/scripts/build-local-coverage.ts`
-* **Execution**: Invoked internally by the Vite development middleware.
-* **Function**: Builds the three preview responses from the tracked standards tree and
-  current working-tree specs without writing artifacts. Existing local asset metadata is
-  used as a fast implementation lookup before the shared builder evaluates an unmatched
-  generator/view path. Vite coalesces concurrent response requests and rebuilds on the
-  next explorer reload; source edits invalidate the short-lived bundle immediately.
+### `src/scripts/refresh-local-explorer.ts`
+* **Execution**: Invoked by the local explorer's **Refresh local data** action.
+* **Function**: Builds working-tree coverage, replays the union asset selection, and copies
+  the selected PNGs into a complete versioned snapshot under
+  `temp/standards-explorer-preview/`. Vite serves only the newest completed snapshot; it
+  neither watches nor streams from `out/`. Reloading the explorer therefore performs no
+  dataset reads, and canonical generation can atomically replace a standard dataset while
+  an older snapshot remains open in the browser. Refresh retains the newest two completed
+  snapshots and best-effort removes older versions after open response streams have closed.
 
 ### `src/scripts/generate-asset-index.ts`
 * **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> --output=<path> [--repository=<owner/dataset>]`
@@ -173,7 +174,7 @@ Playwright image, so changing the host runtime does not change the renderer iden
   every non-isolated spec, resolves each retained row back to its requested target labels,
   and writes the released dataset asset index. The output contains every retained question
   and solution row as an independent sample; it does not pair modes or cap visual variants.
-  This is a release/CI operation; local development uses Vite's dynamic index instead.
+  This is a release/CI operation; local development uses the explicit explorer snapshot instead.
   Release automation writes `temp/release-assets/asset-index.json`. The revision is
   required and rejects `main`, ensuring browser URLs remain release-pinned.
 
@@ -185,12 +186,12 @@ Playwright image, so changing the host runtime does not change the renderer iden
   index and `out/dataset`; the release workflow passes its temporary index explicitly.
 
 #### `src/scripts/generate-dataset.ts`
-The primary pipeline orchestrator.
-*   **Execution**: `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only] [--concurrency=<positive_integer>]`
-*   **Function**: Loads targets and catalogs via `src/lib/generation.ts`, computes the matched `(target, generator, view)` tuples, generates one question and one solution sample per tuple with structural seeds, and renders them headlessly via Playwright (requires the vite dev server, `npm run dev`).
+The container-internal pipeline orchestrator.
+*   **Execution**: The canonical wrapper invokes `npm run generate:dataset:internal`; direct host execution is rejected. The public command is `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only] [--concurrency=<positive_integer>]`.
+*   **Function**: Loads targets and catalogs via `src/lib/generation.ts`, computes the matched `(target, generator, view)` tuples, generates one question and one solution sample per tuple with structural seeds, and renders them headlessly through the Vite server owned by the same Docker container.
 *   **Renderer preflight**: Before opening an output transaction, the pipeline visits only the views matched by the selected scope, verifies a successful document response and the `window.renderView` hook, and rejects page errors or genuine local-resource failures. Preflight uses at most four workers; rendering uses a bounded worker pool (8 by default, configurable with `--concurrency`). A render worker failure stops assignment of new work and fails the run instead of silently producing a partial module.
 *   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of tuples selected by `isValTuple`. Both use the same identity-based seeding with the split as a key component. Audit the result with `report:splits` — a tuple whose content space is too small to yield a draw disjoint from train produces no validation sample, which that report surfaces.
-*   **Split dependency direction (invariant)**: **train generation never depends on validation generation; validation always depends on train.** Train is generated first into its own fingerprint index, and the val pass only reads that index. The asymmetry is required, not incidental: train is the primary artifact and must be reproducible on its own, while validation cannot be disjoint from train without being constrained by it. Verify with `generate:dataset --spec=test` followed by `generate:dataset --spec=test --training-only` — the train split must come out byte-identical. The practical consequence is that a generator change shifts train content, which can change which validation draws survive dedup; `report:churn` classifies that as an *attempt shift* and it is expected, not a determinism regression.
+*   **Split dependency direction (invariant)**: **train generation never depends on validation generation; validation always depends on train.** Train is generated first into its own fingerprint index, and the val pass only reads that index. The asymmetry is required, not incidental: train is the primary artifact and must be reproducible on its own, while validation cannot be disjoint from train without being constrained by it. Verify with `npm run generate:dataset -- --spec=test` followed by `npm run generate:dataset -- --spec=test --training-only` — the train split must come out byte-identical. The practical consequence is that a generator change shifts train content, which can change which validation draws survive dedup; `report:churn` classifies that as an *attempt shift* and it is expected, not a determinism regression.
 *   **Dedup**: Content fingerprints per (module, split, view), covering **both modes** — every drawn content item is claimed for its view, so a question never repeats a solution's content or vice versa, and no val draw repeats content already in train. A collision triggers a deterministic retry on the next attempt; the winning attempt is recorded. A solution that exhausts its retries falls back to the question's content shown solved. The module scope keeps `--generator=X` reproducing exactly what a full run produces for that module, and costs nothing because no view is rendered by more than one generator.
 *   **Metadata**: Each standard image row records its operational identity: `sample_key`, `spec`, `target_id`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, plus `tags`. The generator's problem data is used to render the image but is not duplicated into metadata. Generators no longer author a separate descriptive id; identity is entirely structural.
 *   **`--training-only` Flag**: If specified, skips validation sample generation, rendering, and metadata writing.
@@ -199,10 +200,10 @@ The primary pipeline orchestrator.
 *   **Scoped replacement**: An unfiltered run replaces the whole standard dataset. `--generator=X` replaces that generator's rows and images in both splits. Adding `--view=Y`, or using a view-only scope, replaces only matching rows/images and preserves every sibling view and unrelated generator copied into the transaction. Scoped manifest updates follow the same pair-level boundary.
 
 #### `src/scripts/generate-dataset-container.ts`
-The canonical cache-producing generation wrapper.
-*   **Execution**: `npm run generate:dataset:container -- --spec=<spec_module> [the same scope flags as native generation]`
-*   **Function**: Runs the existing generator and an internal Vite server in the immutable Playwright Linux/AMD64 image declared by `src/lib/render-environment.ts`. The repository is mounted and copied into the container filesystem before startup so Windows bind-mount latency does not slow module discovery; only transactional `out/` writes flow back to the host. The npm download cache is mounted, while Linux `node_modules` lives in a separate Docker volume keyed by the package lock and renderer digest. A warm run therefore skips `npm ci`; changing either input creates a fresh dependency volume automatically.
-*   **Workflow boundary**: Native `generate:dataset` remains the fast visual/debug loop. Any image used to create a committed VQA cache record must come from this canonical wrapper. Local setup otherwise remains native; Docker Desktop or a compatible runtime is the only added prerequisite.
+The only public dataset-generation entry point.
+*   **Execution**: `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only] [--concurrency=<positive_integer>]`.
+*   **Function**: Runs the internal generator and its own Vite server in the immutable Playwright Linux/AMD64 image declared by `src/lib/render-environment.ts`. The renderer binds only inside the container on dedicated port `4173` with `strictPort`; no host server or host port participates. The repository is mounted and copied into the container filesystem before startup so Windows bind-mount latency does not slow module discovery; only transactional `out/` writes flow back to the host. The npm download cache is mounted, while Linux `node_modules` lives in a separate Docker volume keyed by the package lock and renderer digest. A warm run therefore skips `npm ci`; changing either input creates a fresh dependency volume automatically.
+*   **Workflow boundary**: Full, scoped, development, VQA, CI, and release generation all use this wrapper. Host Vite remains available only for interactive view replay and the standards explorer; it is never a dataset-generation prerequisite.
 *   **Assets and settings**: Inter and Roboto Mono are pinned local package assets. Browser locale, timezone, viewport, scale, media preferences, Playwright version, platform, and image digest are explicit. No host font or remote font request participates in canonical pixels.
 
 ### `src/scripts/merge-dataset.ts`
@@ -219,10 +220,10 @@ The canonical cache-producing generation wrapper.
 *   **Function**: An automated Visual QA pipeline. Normal mode uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze canonical Q/A image pairs against exactly two visual contracts: the central view checklist and the selected leaf view's required checklist. Evaluator role and response mechanics are sent through the SDK's system instruction; the user content contains only the mode, ontology labels, a generic `## View-specific checklist` heading with the heading-free leaf criteria, and the global checklist under its own H2. Validation runs per standard — `--spec=test` targets the small `out/dataset-test/` slice for fast iteration. Normal mode rejects native renderer identities so a Windows or host-specific render cannot enter the committed cache.
 *   **Freshness gate**: Before inspecting or spending API calls on VQA, validation recomputes the manifest entries for the selected scope and fails if entries are missing, inputs are stale, aggregate `content_fingerprint` hashes differ, or sample counts drifted. Regenerate the reported generator/view scope first. A legacy dataset without `manifest.json` must be regenerated once.
 *   **Splits**: **Both `train` and `validation` are validated.** Validation images ship in the released dataset and are subject to the same checklists, so exempting them would let unchecked images reach consumers. Images are located by reading the split back out of the `sample_key` (`SPLIT_DIRS` in `src/lib/generation.ts`) — `file_name` is relative to its split root and does not encode the split, so **the same tuple's train and validation images share a filename**; every human-facing path is qualified with its split. The report breaks results down per split.
-*   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : validation-context hash)`. The validation context combines the applicable checklist hash with the sorted ontology labels and their definitions, so changing an image, checklist, label claim, or definition re-validates exactly the affected samples. The evaluator system instruction, response schema, and model identifier are deliberately excluded from this hash; changing any of them requires a deliberate full live validation with `--force`. Each cache entry also records the component hashes and the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in the generated `validation-report.md` include a ready-to-run `test:sample` command.
+*   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : validation-context hash)`. The validation context combines the applicable checklist hash with the sorted ontology labels and their definitions, so changing an image, checklist, label claim, or definition re-validates exactly the affected samples. The evaluator system instruction, response schema, and model identifier are deliberately excluded from this hash; changing any of them requires a deliberate full live validation with `--force`. Each cache entry also records the component hashes and the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in every generated timestamped report include a ready-to-run `test:sample` command.
 *   **Prompt diagnostics**: `--log-prompts` prints the system instruction, user prompt, and image path immediately before every live request. Diagnostic runs use one request at a time so the prompt logs stay readable. The flag does not affect cache keys or evaluator behavior.
 *   **Gate semantics**: Normal validation updates cache records and reports; it exits non-zero for failing or uncached selected samples. Strict `--audit` is full-dataset-only, read-only, and never calls Gemini: it requires both splits, canonical renderer identities, exact metadata/image correspondence, and an exact set of passing cache keys. Missing, failing, stale, duplicate, malformed, orphaned, or obsolete-module records fail the audit. `--report-only` is the explicit diagnostic escape hatch.
-*   **Report paths**: Normal full validation writes `out/dataset-<spec>/validation-report.md`. A normal scoped run writes a stable, non-clobbering path under `out/dataset-<spec>/validation-reports/`, such as `generator=writing__view=numbers-write-standard.md`. `--report=<path>` overrides either location. Strict audit writes no report into the audited dataset.
+*   **Report paths**: Every normal validation writes a new immutable report under `temp/validation-reports/dataset-<spec>/`. Names contain an ISO timestamp and the scope, such as `2026-08-16T12-34-56-789Z__full.md` or `2026-08-16T12-34-56-789Z__generator=writing__view=numbers-write-standard.md`. Reports survive dataset regeneration because they are outside transactional `out/`; the command prints the exact path. `--report=<path>` remains an explicit override. Strict audit writes no report.
 *   **Pruning**: Normal validation auto-prunes stale entries and obsolete module files only when the run covers the whole dataset. A run narrowed by `--generator`/`--view`, or one against a dataset generated with `--training-only`, skips pruning and says so. Strict audit never prunes; stale state is a release-blocking finding.
 
 ### `src/scripts/report-cache-churn.ts`
@@ -348,7 +349,6 @@ Use the isolated `test` spec for fast visual prototyping, debugging, smoke gener
    This allows you to quickly inspect the generated output under `out/dataset-test/` without running the entire dataset generation pipeline.
 3. **Run Targeted Validation**: Run automated Visual QA against your small test output:
    ```bash
-   npm run generate:dataset:container -- --generator=X --view=Y --spec=test
    npm run validate:dataset -- --generator=X --view=Y --spec=test
    ```
 
@@ -357,7 +357,7 @@ Use the isolated `test` spec for fast visual prototyping, debugging, smoke gener
 2. Run `npm run show:matching -- --spec=ccss` to confirm the real standard bindings; use `--spec=test` for the isolated smoke path and `--raw` only for source-definition diagnosis.
 3. Canonically regenerate and validate the affected real-standard generator/view scope. A passing `test` sample does not prove the production task or labels:
    ```bash
-   npm run generate:dataset:container -- --spec=ccss --generator=X --view=Y
+   npm run generate:dataset -- --spec=ccss --generator=X --view=Y
    npm run validate:dataset -- --spec=ccss --generator=X --view=Y
    npm run report:churn -- --spec=ccss
    ```
@@ -374,7 +374,7 @@ npm run test:target -- --target=K.CC.B.5-how-many~<hash> --spec=ccss --render
 Shows the matched tuples, why near-miss pairs were rejected (`unsupported-label` / `rejected-label` with the offending label), the exact sample keys/seeds/data the pipeline would produce, their status in the VQA cache, and (with `--render` and `npm run dev` running) the rendered images in `out/target-test/`.
 
 ### Fixing a failed validation
-Every failure in `validation-report.md` includes its sample identity and a ready-to-run command:
+Every failure in the timestamped report printed by `validate:dataset` includes its sample identity and a ready-to-run command:
 ```bash
 npm run test:sample -- --sample="<sample_key>" --spec=<spec> --no-validate
 ```
@@ -418,9 +418,12 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Skill**: `.agents/skills/implement-spec/SKILL.md`
 - **Command**: `/implement-spec [{specModule}]`
 - **Function**: Resolves `implementationTodos` step-by-step to achieve 100% error-free problem generation and rendering.
+- **Stop boundary**: Proceeds autonomously through reversible implementation work and pauses only for ontology changes, genuine semantic ambiguity, invalidated authored strategies, production declaration changes, or work outside the current todo.
+- **Contract-first phase**: Establishes and typechecks a new or materially changed shared problem type and `ViewTypeMap` entry before generator and view work diverge (`IMPL-8`).
 - **Delegation & Module Reviews**: Delegates module-level implementation to `/update-gen {moduleName}` and `/update-view {viewName}`, and targeted audits to `/review-gen {moduleName}` and `/review-view {viewName}`.
 - **Target Debugging**: Uses `npm run test:target -- --target=<id> --spec=<real-standard> --render` for the target being implemented. The isolated `test` spec remains available for deliberately authored prototypes and retained regressions; `--raw` exposes source definitions before production deduplication.
-- **Fast Scoped Regeneration**: Uses the isolated `test` spec for cheap smoke iteration when it contains the relevant example, then verifies the promoted target against its real standard.
+- **Canonical Scoped Regeneration**: Uses the isolated `test` spec for a small canonical smoke slice when it contains the relevant example, then verifies the promoted target against its real standard. Every dataset render runs through Docker.
+- **Commit and continuation**: After each smooth todo, writes an implementation commit without VQA cache files, then a separate cache-only commit when validation changed records. It records both hashes, compacts context, and moves to the next reviewed todo without another prompt.
 - **Completion Gate**: Promotes verified targets to `spec`, then runs a final full canonical regeneration, full live VQA validation, strict cache audit, churn and split reports, repository checks, and the union merge for non-isolated specs.
 
 ### Loop 3: Ontological Todo Resolution (`/update-ontology`)
@@ -435,7 +438,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 ### Loop 4: Failure Resolution (`/fix-spec`)
 - **Skill**: `.agents/skills/fix-spec/SKILL.md`
 - **Command**: `/fix-spec [{specModule}] [--generator=X] [--view=Y]`
-- **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in `validation-report.md`), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
+- **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in the latest timestamped validation report), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
 - **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a declaration or target. An evidence-backed classification correction is different: when the rendered task contradicts the current ability claim, use `SPEC-2`, `SPEC-V5`, `TSPEC-6`, and `TSPEC-13`, explain the evidence, and obtain user confirmation before changing a view spec or production target.
 - **Triage note**: A VQA failure is not proof of a code bug. Inspect the image, ontology definition, generated payload, view spec, and target together. Necessary mathematics belongs to the generator; omitted or muddled visual clues belong to the view; a false task-family ability claim belongs to the view spec or target; and a nonessential leaf criterion belongs to the checklist (`CHK-V6`).
 

@@ -43,8 +43,7 @@ npx playwright install --with-deps chromium
 ### Usage
 
 **1. Generate the Dataset**
-Generate the ML dataset (images + JSONL metadata). Each education standard generates into its own folder — `out/dataset-<spec>/` — so standards can be regenerated independently. Start the Vite renderer with `npm run dev` before generation; the pipeline preflights every selected view before touching the live dataset.
-The `--spec` parameter must be specified to select the spec module.
+Generate the ML dataset (images + JSONL metadata). Each education standard generates into its own folder — `out/dataset-<spec>/` — so standards can be regenerated independently. Generation always runs inside the pinned canonical Docker renderer and starts its own isolated Vite server; it never depends on a host development server. The `--spec` parameter must be specified to select the spec module.
 ```bash
 # Generate using curriculum standards -> out/dataset-ccss/
 npm run generate:dataset -- --spec=ccss
@@ -53,15 +52,10 @@ npm run generate:dataset -- --spec=ccss
 npm run generate:dataset -- --spec=test
 ```
 
-Native generation is the fast implementation loop. Before creating or updating committed
-VQA cache records, regenerate the relevant scope in the pinned canonical Linux renderer;
-this command starts its own Vite server and requires only a running Docker engine:
-```bash
-npm run generate:dataset:container -- --spec=ccss
-```
-The same `--generator`, `--view`, `--training-only`, and `--concurrency` filters apply.
-Container dependencies are isolated from host `node_modules` and reused while the lockfile
-and canonical renderer image remain unchanged.
+The same `--generator`, `--view`, `--training-only`, and `--concurrency` filters apply to
+full and scoped generation. Container dependencies are isolated from host `node_modules`
+and reused while the lockfile and canonical renderer image remain unchanged, keeping
+targeted canonical iteration warm and repeatable.
 
 The isolated `test` spec is a prototyping, debugging, smoke, and retained-regression
 surface. It intentionally keeps at least one generatable target/view path per generator,
@@ -142,21 +136,21 @@ npm run dev
 
 The same server exposes the React-based Common Core coverage and task explorer at
 [`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). The explorer
-shows the current working-tree specs during local development. Vite builds that coverage
-in memory on the first request, reuses existing generated dataset metadata when resolving
-implemented permutations, and invalidates it when specs, generators, views, ontology
-version, or generated datasets change. No coverage snapshot needs to be regenerated or
-written to disk for local preview.
+shows a local snapshot of the current working-tree specs during development. Use
+**Refresh local data** after generation, spec, view, generator, or ontology changes. The
+refresh builds a complete versioned snapshot under `temp/standards-explorer-preview/`;
+normal browsing reads only that snapshot and never holds handles in the transactional
+`out/` directories.
 
 The details sidebar also shows every released question and solution image for each
 implemented label combination. Those independent samples are indexed from the merged
-union dataset and loaded directly from the tag-pinned Hugging Face release. During local
-development, `npm run dev` dynamically builds the equivalent index from the current
-per-standard datasets under `out/`; no index-generation or union-merge command is needed.
+union dataset and loaded directly from the tag-pinned Hugging Face release. A local refresh
+builds the equivalent index and copies its selected images into the immutable development
+snapshot; no union-merge command is needed.
 
 On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
 images. Released uses the immutable published asset index; Local uses PNGs served from
-the current per-standard dataset folders and can be opened at
+the latest explicit development snapshot and can be opened at
 [`/standards-explorer.html?assets=local`](http://localhost:5173/standards-explorer.html?assets=local).
 The development renderer index links to this mode as well. Coverage and navigation state
 do not change when the image source changes. Deployed explorers always use release-pinned

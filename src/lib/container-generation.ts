@@ -3,7 +3,9 @@ import {
     CANONICAL_RENDERER_ID,
     CANONICAL_RENDERER_IMAGE,
     CANONICAL_RENDERER_PLATFORM,
-    RENDERER_ENVIRONMENT_VARIABLE
+    CANONICAL_RENDERER_PORT,
+    RENDERER_ENVIRONMENT_VARIABLE,
+    RENDERER_PORT_VARIABLE
 } from './render-environment.ts';
 
 export interface ContainerGenerationOptions {
@@ -63,6 +65,7 @@ export function containerGenerationDockerArgs(options: ContainerGenerationOption
         '--mount', mount('bind', options.npmCacheDir, '/root/.npm'),
         '--workdir', '/workspace',
         '--env', `${RENDERER_ENVIRONMENT_VARIABLE}=${CANONICAL_RENDERER_ID}`,
+        '--env', `${RENDERER_PORT_VARIABLE}=${CANONICAL_RENDERER_PORT}`,
         '--env', 'CI=true',
         '--env', 'TZ=UTC',
         '--env', 'LANG=C.UTF-8'

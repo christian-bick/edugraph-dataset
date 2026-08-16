@@ -34,7 +34,7 @@ import {
     mergeModuleMetadata
 } from '../lib/dataset-output.ts';
 import { buildDatasetManifestEntries, updateDatasetManifest } from '../lib/dataset-manifest.ts';
-import { RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
+import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -470,6 +470,11 @@ async function runModulePipeline(
 }
 
 async function main() {
+    if (process.env[CONTAINER_GENERATION_VARIABLE] !== '1') {
+        throw new Error(
+            'Dataset generation is container-only. Run npm run generate:dataset -- --spec=<spec_module>.'
+        );
+    }
     const args = process.argv.slice(2);
 
     const specName = getCliOption(args, 'spec');

@@ -102,6 +102,19 @@ contract that must be maintained. Conversely, forcing an unrelated task family, 
 payload, or effectively separate implementation into an existing module obscures ownership
 and makes that module harder to reason about and adopt safely.
 
+### IMPL-8 — Establish the shared problem contract before parallel role implementation
+
+When a change creates or materially extends both a generator and a consuming view, define
+the shared problem payload first. Add the concrete problem type or discriminated union and
+its `ViewTypeMap` entry, then require `npm run check:types` to pass before generator and view
+implementation proceed independently.
+
+The contract phase must settle required fields, discriminants, mathematical invariants, and
+which view ids consume the shape. Generator and view work may proceed in parallel only after
+that boundary is stable. Completion still requires an integrated typecheck, matching audit,
+generation, and render verification; isolated role checks are not evidence that the shared
+path works.
+
 ---
 
 ## Audit
@@ -113,3 +126,4 @@ and makes that module harder to reason about and adopt safely.
 - [ ] **IMPL-5** — shared code sits at the correct level: category `helpers.ts` for siblings, `src/visuals/components/` or `src/visuals/helpers/` for cross-category reuse.
 - [ ] **IMPL-6** — only genuinely missing roles were scaffolded; a new renderer is linked from `src/index.html`; relative import depths match.
 - [ ] **IMPL-7** — an extension stays within the same task family, preserves payload compatibility, and requires only surgical configurable changes; unrelated ontology families, stable payload-boundary crossings, and large independent code branches use a new module.
+- [ ] **IMPL-8** — a new or materially changed shared payload and its `ViewTypeMap` entry typecheck before generator/view work diverges; integrated matching, generation, and rendering verify the completed path.
