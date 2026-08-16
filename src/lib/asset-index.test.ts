@@ -5,6 +5,7 @@ import {
     buildHuggingFaceAssetUrl,
     buildLocalAssetUrl,
     isAssetIndex,
+    missingTargetAssetEvidence,
     requestedLabelKey,
     targetLookupKey,
 } from './asset-index.ts';
@@ -80,6 +81,27 @@ describe('buildAssetIndex', () => {
         expect(() => buildAssetIndex({ ...base, rows: [{ split: 'train', row: row({ mode: 'other' }) }] })).toThrow(/Unsupported asset mode/);
         expect(() => buildAssetIndex({ ...base, rows: [...base.rows, ...base.rows] })).toThrow(/Duplicate released asset path/);
     });
+
+    it('associates one physical sample with every deduplicated target permutation', () => {
+        const associatedLabels = new Map([
+            ...targetLabels,
+            [targetLookupKey('ccss', 'associated'), ['http://edugraph.io/edu/Counting']],
+        ]);
+        const index = buildAssetIndex({
+            rows: [{
+                split: 'train',
+                row: row({target_associations: [{spec: 'ccss', target_id: 'associated'}]}),
+            }],
+            targetLabels: associatedLabels,
+            repository: 'owner/dataset',
+            revision: 'v1',
+            generatedAt: 'fixed',
+        });
+
+        expect(index.label_sets).toHaveLength(2);
+        expect(index.label_sets.flatMap(group => group.samples.map(sample => sample.file_name)))
+            .toEqual(['counting/example-Q.png', 'counting/example-Q.png']);
+    });
 });
 
 describe('asset-index helpers', () => {
@@ -106,5 +128,24 @@ describe('asset-index helpers', () => {
         expect(isAssetIndex({ ...index, schema_version: 2 })).toBe(false);
         expect(isAssetIndex({ ...index, dataset: { ...index.dataset, revision: 'main' } })).toBe(false);
         expect(isAssetIndex({ ...index, dataset: { ...index.dataset, repository: ' ' } })).toBe(false);
+    });
+
+    it('reports exact production target permutations missing from the index', () => {
+        const index = buildAssetIndex({
+            rows: [{split: 'train', row: row()}],
+            targetLabels,
+            repository: 'owner/dataset',
+            revision: 'v1',
+            generatedAt: 'fixed',
+        });
+        const targets = [
+            {id: 'target', labels: [...targetLabels.values()][0]},
+            {id: 'missing', labels: ['http://edugraph.io/edu/Subtraction']},
+        ];
+
+        expect(missingTargetAssetEvidence(index, targets)).toEqual([{
+            targetId: 'missing',
+            labels: ['http://edugraph.io/edu/Subtraction'],
+        }]);
     });
 });

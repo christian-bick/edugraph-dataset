@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+    addRowTargetAssociations,
     emptyFingerprintIndex,
     exerciseKey,
     groupIntoExercises,
     parseMetadataLines,
+    rowTargetAssociations,
     selectUnionExercises,
     toPublishedMetadataRow,
     type MetadataRow,
@@ -147,6 +149,23 @@ describe('parseMetadataLines', () => {
 
     it('returns nothing for empty content', () => {
         expect(parseMetadataLines('')).toEqual([]);
+    });
+});
+
+describe('target associations', () => {
+    it('keeps the primary target and deduplicates added associations', () => {
+        const metadata = row({target_associations: [{spec: 'nctm', target_id: 'N.1'}]});
+        addRowTargetAssociations(metadata, [
+            {spec: 'nctm', target_id: 'N.1'},
+            {spec: 'ccss', target_id: metadata.target_id},
+            {spec: 'state', target_id: 'M.1'},
+        ]);
+
+        expect(rowTargetAssociations(metadata)).toEqual([
+            {spec: 'ccss', target_id: metadata.target_id},
+            {spec: 'nctm', target_id: 'N.1'},
+            {spec: 'state', target_id: 'M.1'},
+        ]);
     });
 });
 

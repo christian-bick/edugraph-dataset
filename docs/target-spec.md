@@ -23,7 +23,7 @@ read by a different consumer, by name — there is no scanning or filtering:
 | `implementationTodos` | `ImplementationTodo[]`| `loadSpecTodos` → coverage report only    | Expressible in the ontology, but missing generator/view capability. Each references an authored implementation definition. |
 | `ontologyTodos`       | `OntologyTodo[]`      | `loadSpecTodos` → coverage report only    | Not expressible: the ontology lacks the `Area`/`Scope`/`Ability`. Each leaf entry references an authored ontology package. |
 | `beyondScope`         | `BeyondScopeEntry[]`  | `loadSpecTodos` → coverage report only    | Intentionally not addressable in the dataset's declared medium.        |
-| `equivalentTargets`   | `TargetEquivalence[]` | `loadSpecEquivalences` → the validator    | Definitions that are intentionally indistinguishable ([TSPEC-8](#tspec-8--definitions-must-be-distinct-unless-the-identity-is-declared)). |
+| `equivalentTargets`   | `TargetEquivalence[]` | `loadSpecEquivalences` → the validator    | Definitions whose complete source competencies are intentionally indistinguishable ([TSPEC-8](#tspec-8--definitions-must-be-distinct-exact-semantic-identities-must-be-declared)). |
 
 `loadTargets` reads `spec` and nothing else. A todo target or `beyondScope` declaration can
 therefore **never** enter the pipeline, regardless of whether it would happen to resemble a
@@ -43,7 +43,9 @@ Work from the **leaf nodes** of the standard tree (`public/coverage/ccss-tree.js
 traversing Grade → Domain → Cluster → Standard/SubStandard.
 
 A single leaf standard often bundles several competencies — create **one
-`DatasetPermutationBuilder` per competency**, not one per standard.
+`DatasetPermutationBuilder` per competency**, not one per standard. Different competencies
+from one leaf may have different dispositions, but do not divide one competency into an active
+subset and a TODO remainder merely because current implementation support stops at that boundary.
 
 Study `src/spec/ccss/kindergarten.ts` and `grade-01.ts` for the established structure.
 
@@ -211,10 +213,17 @@ an active target must have its intended path. Use `npm run show:matching -- --sp
 for the detailed active-target probes. Audit the complete matched-pair set: every additional
 generator-view match must also be a genuine realization of the target.
 
-### TSPEC-8 — Definitions must be distinct, unless the identity is declared
+### TSPEC-8 — Definitions must be distinct; exact semantic identities must be declared
 
 No two target definitions may define an identical **set** of permutations — such definitions
 are indistinguishable by the ontology, and this is an error.
+
+An identical permutation set is only a structural collision; it does **not** establish that the
+source competencies are equivalent. Declare equivalence only when the complete source leaf
+competencies are semantically indistinguishable: each means or implies 100% of the other. Do not
+declare equivalence for partial overlap, containment, different range requirements, an identical
+currently supported slice, or a missing ontology/implementation distinction. Resolve those cases
+by refining truthful labels or parking the affected competency in the appropriate TODO export.
 
 Definitions that merely *overlap* in some permutations are legitimate (e.g. related
 standards across grades). Overlapping permutations are deduplicated to one representative
@@ -229,8 +238,8 @@ npm run analyze:target-distinctness -- --spec=<module> --plan=<planName>
 It reports identical, contained, overlapping, and one-label-adjacent definitions together
 with stable discriminator labels. Findings require review but are not validation errors.
 
-When two definitions are *deliberately* identical — e.g. two standards that differ only
-above the supported number range — declare it in `equivalentTargets`:
+When two definitions represent source leaf competencies that satisfy that semantic test and are
+therefore deliberately identical, declare them in `equivalentTargets`:
 
 ```typescript
 export const equivalentTargets: TargetEquivalence[] = [
@@ -301,7 +310,7 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-5** — no id is hand-written or position-derived; every id came out of `toTargets` or `toImplementationTodos`.
 - [ ] **TSPEC-6** — no label is broader, narrower, or otherwise adjusted to make a target match; gaps are parked with a TODO or a todo export.
 - [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO references a valid authored definition with explicit module strategies, every ontology TODO references a valid authored ontology package, and matching is confirmed via `npm run show:matching` for addressable competencies.
-- [ ] **TSPEC-8** — no two definitions share an identical permutation set unless declared in `equivalentTargets` with a reason.
+- [ ] **TSPEC-8** — no two definitions share an identical permutation set unless their complete source leaf competencies mutually imply one another and the identity is declared in `equivalentTargets` with a reason; partial overlap, containment, current-support coincidence, and missing distinctions are not equivalence.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
 - [ ] **TSPEC-12** — `test` remains a focused prototyping/regression spec and provides at least one generatable target-view path per generator.

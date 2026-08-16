@@ -1,5 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
+import {ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {formatMeasurement, formatMeasurementValue, validateMeasurementData} from '../helpers.ts';
 import {MeasurementLinePlotViewConfig, MeasurementLinePlotViewSchema} from './spec.ts';
@@ -14,6 +15,9 @@ const MeasurementLinePlotCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateMeasurementData(data, 'measurement-line-plot');
+    if (config.usesUnitSteps && data.subdivisions !== 1) {
+        throw new ViewValidationError('measurement-line-plot', 'Unit-step line plots require whole-unit subdivisions.');
+    }
 
     const frequencies = new Map<number, number>();
     for (const {length} of data.observations) frequencies.set(length, (frequencies.get(length) ?? 0) + 1);

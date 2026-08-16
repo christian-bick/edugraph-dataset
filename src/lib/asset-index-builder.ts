@@ -7,9 +7,11 @@ import {
     type AssetSplit,
 } from './asset-index.ts';
 import {
+    addRowTargetAssociations,
     emptyFingerprintIndex,
     groupIntoExercises,
     parseMetadataLines,
+    rowTargetAssociations,
     selectUnionExercises,
     type FingerprintIndex,
     type MetadataRow,
@@ -28,6 +30,7 @@ interface SelectedRows {
     rows: Array<{ split: AssetSplit; row: MetadataRow }>;
     index: FingerprintIndex;
     localAssets: Map<string, string>;
+    canonicalRows: Map<string, MetadataRow[]>;
 }
 
 const localAssetKey = (split: AssetSplit, fileName: string): string =>
@@ -55,19 +58,22 @@ function selectSplitRows(
     split: AssetSplit,
     specNames: string[],
     excluded?: FingerprintIndex,
+    inheritedCanonicalRows: Map<string, MetadataRow[]> = new Map(),
 ): SelectedRows {
     const index = emptyFingerprintIndex();
     const rows: SelectedRows['rows'] = [];
     const localAssets = new Map<string, string>();
+    const canonicalRows = new Map(inheritedCanonicalRows);
 
     for (const specName of specNames) {
         const specDir = datasetOutDir(projectRoot, datasetDirForSpec(specName));
-        const { kept } = selectUnionExercises(
+        const { kept, dropped } = selectUnionExercises(
             groupIntoExercises(readSpecSplit(projectRoot, specName, split)),
             index,
             excluded,
         );
         for (const exercise of kept) {
+            canonicalRows.set(`${exercise.view}\0${exercise.fingerprint}`, exercise.rows);
             for (const row of exercise.rows) {
                 rows.push({ split, row });
                 localAssets.set(
@@ -76,8 +82,18 @@ function selectSplitRows(
                 );
             }
         }
+        for (const exercise of dropped) {
+            const canonical = canonicalRows.get(`${exercise.view}\0${exercise.fingerprint}`);
+            if (!canonical) continue;
+            const associations = exercise.rows.flatMap(rowTargetAssociations);
+            const matchingQuestionRows = canonical.filter(row =>
+                row.mode === 'question' && row.content_fingerprint === exercise.fingerprint);
+            for (const row of matchingQuestionRows.length > 0 ? matchingQuestionRows : canonical.slice(0, 1)) {
+                addRowTargetAssociations(row, associations);
+            }
+        }
     }
-    return { rows, index, localAssets };
+    return { rows, index, localAssets, canonicalRows };
 }
 
 async function loadTargetLabels(specNames: string[]): Promise<Map<string, readonly string[]>> {
@@ -124,7 +140,13 @@ export async function buildAssetIndexBundle({
     }
 
     const train = selectSplitRows(projectRoot, 'train', specNames);
-    const validation = selectSplitRows(projectRoot, 'validation', specNames, train.index);
+    const validation = selectSplitRows(
+        projectRoot,
+        'validation',
+        specNames,
+        train.index,
+        train.canonicalRows,
+    );
     const selectedRows = [...train.rows, ...validation.rows];
     const localAssets = new Map([...train.localAssets, ...validation.localAssets]);
 

@@ -14,6 +14,11 @@
  * merge spans whole standards and so scopes per (split, view).
  */
 
+export interface TargetAssociation {
+    spec: string;
+    target_id: string;
+}
+
 export interface MetadataRow {
     file_name: string;
     sample_key: string;
@@ -24,9 +29,42 @@ export interface MetadataRow {
     mode: string;
     instance: number;
     content_fingerprint: string;
+    /** Additional target permutations represented by the same physical sample. */
+    target_associations?: TargetAssociation[];
     /** Shortened ontology labels, as written by the pipeline. */
     tags?: string[];
     [key: string]: unknown;
+}
+
+const associationKey = ({spec, target_id}: TargetAssociation): string => `${spec}\0${target_id}`;
+
+/** Returns the primary target and every deduplicated target associated with a physical row. */
+export function rowTargetAssociations(row: MetadataRow): TargetAssociation[] {
+    const associations = new Map<string, TargetAssociation>();
+    const primary = {spec: row.spec, target_id: row.target_id};
+    associations.set(associationKey(primary), primary);
+    for (const association of row.target_associations ?? []) {
+        associations.set(associationKey(association), association);
+    }
+    return [...associations.values()].sort((left, right) =>
+        left.spec.localeCompare(right.spec) || left.target_id.localeCompare(right.target_id));
+}
+
+/** Adds non-primary target associations without duplicating references. */
+export function addRowTargetAssociations(
+    row: MetadataRow,
+    additions: readonly TargetAssociation[]
+): void {
+    const primaryKey = associationKey({spec: row.spec, target_id: row.target_id});
+    const associations = new Map(
+        (row.target_associations ?? []).map(association => [associationKey(association), association])
+    );
+    for (const association of additions) {
+        const key = associationKey(association);
+        if (key !== primaryKey) associations.set(key, {...association});
+    }
+    row.target_associations = [...associations.values()].sort((left, right) =>
+        left.spec.localeCompare(right.spec) || left.target_id.localeCompare(right.target_id));
 }
 
 /** Stable, training-facing metadata written into the released union dataset. */

@@ -9,6 +9,10 @@ export const spec: ViewSpec = {
 };
 
 export const MeasurementLinePlotViewSchema = {
+    usesUnitSteps: [
+        [Scope.StepsOf1],
+        hasLabel(Scope.StepsOf1)
+    ],
     plotCollectedMeasurements: [
         [Ability.ProcedureExecution],
         hasLabel(Ability.ProcedureExecution)

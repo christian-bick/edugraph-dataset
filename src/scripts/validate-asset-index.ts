@@ -1,6 +1,12 @@
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { isAssetIndex, requestedLabelKey, type AssetIndex } from '../lib/asset-index.ts';
+import {
+    isAssetIndex,
+    missingTargetAssetEvidence,
+    requestedLabelKey,
+    type AssetIndex,
+} from '../lib/asset-index.ts';
+import { loadMatchingTargets } from '../lib/spec-validator.ts';
 import { shortenLabel } from '../lib/utils.ts';
 
 const PROJECT_ROOT = resolve('.');
@@ -9,6 +15,7 @@ const readOption = (name: string): string | undefined =>
     args.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
 const indexPath = resolve(PROJECT_ROOT, readOption('index') ?? 'public/dataset/asset-index.json');
 const datasetDir = resolve(PROJECT_ROOT, readOption('dataset-dir') ?? 'out/dataset');
+const specName = readOption('spec');
 
 interface PublicRow {
     file_name: string;
@@ -25,7 +32,7 @@ function readPublicRows(split: 'train' | 'validation'): PublicRow[] {
         .map(line => JSON.parse(line) as PublicRow);
 }
 
-function validate(index: AssetIndex): string[] {
+async function validate(index: AssetIndex): Promise<string[]> {
     const errors: string[] = [];
     if (!index.dataset.repository.trim()) errors.push('Dataset repository is empty.');
     if (!index.dataset.revision.trim() || index.dataset.revision === 'main') {
@@ -42,6 +49,7 @@ function validate(index: AssetIndex): string[] {
     }
 
     const indexedRows = new Set<string>();
+    const requestedLabelsBySample = new Map<string, string[][]>();
     const labelKeys = new Set<string>();
     let previousLabelKey = '';
     for (const group of index.label_sets) {
@@ -60,11 +68,10 @@ function validate(index: AssetIndex): string[] {
 
         for (const sample of group.samples) {
             const sampleKey = `${sample.split}\0${sample.file_name}`;
-            if (indexedRows.has(sampleKey)) {
-                errors.push(`Asset indexed more than once: ${sample.split}/${sample.file_name}.`);
-                continue;
-            }
             indexedRows.add(sampleKey);
+            const labelSets = requestedLabelsBySample.get(sampleKey) ?? [];
+            labelSets.push(group.requested_labels.map(shortenLabel));
+            requestedLabelsBySample.set(sampleKey, labelSets);
 
             const publicRow = publicRows.get(sampleKey);
             if (!publicRow) {
@@ -75,15 +82,25 @@ function validate(index: AssetIndex): string[] {
             if (sample.mode !== expectedMode) {
                 errors.push(`Mode mismatch for ${sample.split}/${sample.file_name}: ${sample.mode} vs ${expectedMode}.`);
             }
-            const publicTags = new Set(publicRow.tags);
-            for (const label of group.requested_labels.map(shortenLabel)) {
-                if (!publicTags.has(label)) {
-                    errors.push(`Requested label ${label} is absent from ${sample.split}/${sample.file_name}.`);
-                }
-            }
             if (!existsSync(resolve(datasetDir, sample.split, sample.file_name))) {
                 errors.push(`Indexed image is missing on disk: ${sample.split}/${sample.file_name}.`);
             }
+        }
+    }
+
+    for (const [sampleKey, labelSets] of requestedLabelsBySample) {
+        const publicRow = publicRows.get(sampleKey);
+        if (!publicRow) continue;
+        const publicTags = new Set(publicRow.tags);
+        if (!labelSets.some(labels => labels.every(label => publicTags.has(label)))) {
+            const [split, fileName] = sampleKey.split('\0');
+            errors.push(`No requested label set matches the published tags for ${split}/${fileName}.`);
+        }
+    }
+
+    if (specName) {
+        for (const missing of missingTargetAssetEvidence(index, await loadMatchingTargets(specName))) {
+            errors.push(`Production target has no released asset: ${missing.targetId} [${missing.labels.map(shortenLabel).join(', ')}].`);
         }
     }
 
@@ -96,12 +113,12 @@ function validate(index: AssetIndex): string[] {
     return errors;
 }
 
-function main(): void {
+async function main(): Promise<void> {
     if (!existsSync(indexPath)) throw new Error(`Asset index not found: ${indexPath}.`);
     const parsed: unknown = JSON.parse(readFileSync(indexPath, 'utf-8'));
     if (!isAssetIndex(parsed)) throw new Error(`Invalid asset-index schema: ${indexPath}.`);
 
-    const errors = validate(parsed);
+    const errors = await validate(parsed);
     if (errors.length > 0) {
         console.error(`Asset index validation failed with ${errors.length} error(s):`);
         errors.forEach(error => console.error(`- ${error}`));
@@ -115,7 +132,7 @@ function main(): void {
 }
 
 try {
-    main();
+    await main();
 } catch (error) {
     console.error(error);
     process.exit(1);

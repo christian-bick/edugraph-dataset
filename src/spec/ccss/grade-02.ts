@@ -531,7 +531,7 @@ const barGraphProblemsBuilder = new DatasetPermutationBuilder()
         Scope.IntegerNumbers,
         Scope.BarGraph,
         Scope.StepsOf1,
-        Scope.TwoOperands,
+        Scope.SingleStep,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([

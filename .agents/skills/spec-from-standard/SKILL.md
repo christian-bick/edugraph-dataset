@@ -54,7 +54,9 @@ Complete the template with these constraints:
 - Quote the source scope and create one disposition row per distinct competency, not merely
   one row per leaf (`TSPEC-3`).
 - Put every competency in exactly one of `spec`, `implementationTodos`, `ontologyTodos`, or
-  `beyondScope` (`TSPEC-7`).
+  `beyondScope` (`TSPEC-7`). Different competencies bundled in one leaf may have different
+  dispositions, but never split one competency into a currently supported active slice and
+  an unsupported TODO remainder.
 - Give active and implementation targets their programmatic builder dimensions,
   most-specific truthful ontology labels, and visible or necessary textual evidence
   (`TSPEC-4`, `TSPEC-6`, `TSPEC-13`).
@@ -63,8 +65,13 @@ Complete the template with these constraints:
 - Record expected active generator/view matches and suspicious boundaries. For every
   implementation TODO, give a stable implementation id and identify every generator/view
   role: bare id for `reuse`, `△` for `expand`, and `＋` for `new`.
-- Declare intentional equivalent definitions (`TSPEC-8`) and keep their count consistent with
-  the disposition summary.
+- Declare an intentional equivalence only when the complete source leaf competencies are
+  semantically indistinguishable: each means or implies 100% of the other (`TSPEC-8`). An
+  identical current label/permutation set, production match, supported number range, or task
+  slice is necessary for the declaration to validate but is not evidence of semantic
+  equivalence. Partial overlap, containment, or an ontology/implementation gap must remain
+  distinct and be refined or parked in the appropriate TODO instead. Keep the accepted
+  declaration count consistent with the disposition summary.
 - Put accepted facts, rationale, matching expectations, and distinctness predictions under
   **Detailed Design Decisions**. Do not create a separate notes section.
 - Put only unresolved, directly answerable decisions under **Open Questions**. Phrase every
@@ -106,6 +113,11 @@ npm run report:matching-diff -- --spec=<specModule> --plan=<planName>
 ```
 
 The distinctness report is advisory. Review identical, contained, overlapping, and one-label-adjacent definitions; an entry is not automatically a defect. The matching diff is also advisory, but every added or removed generator-view pair must be explained by the approved plan. For each intended production match, inspect whether the rendered task can actually evidence its labels (`TSPEC-13`); semantic matching alone is insufficient.
+
+For every declared equivalence, reread both source leaf quotations and confirm mutual semantic
+implication before accepting the validator result. Identical normalized permutations verify only
+the declaration's structural consistency; they do not establish that the source competencies are
+equivalent.
 
 If either report reveals an unapproved semantic change, correct the target definitions and regenerate both reports before proceeding.
 

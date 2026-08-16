@@ -31,7 +31,7 @@ directly answerable questions under Open Questions, and end every item there wit
 
 | Definition pair | Reason |
 |---|---|
-| `<definition-prefix-a>` ↔ `<definition-prefix-b>` | <Why identical permutation sets are intentional> |
+| `<definition-prefix-a>` ↔ `<definition-prefix-b>` | <Why the complete source leaf competencies mutually imply one another, not merely why current permutations coincide> |
 
 ### Proposed Ontology TODOs
 
@@ -91,11 +91,11 @@ must have no genuine production path until their reviewed implementation is comp
 Use this checklist when authoring a plan; do not copy it into the generated `plan.md`.
 
 - [ ] Every covered standard leaf is quoted under Source Scope.
-- [ ] Every distinct competency appears in exactly one disposition.
+- [ ] Every distinct competency appears in exactly one disposition; no competency is split into active and TODO portions solely at the boundary of current implementation support.
 - [ ] Active and implementation targets state labels, permutation dimensions, and observable evidence.
 - [ ] Every ontology TODO names a stable package; related leaf entries share the same package id where one ontology change serves them.
 - [ ] Every implementation TODO has a stable id and explicit `reuse`/`expand`/`new` ownership for every generator and view.
-- [ ] Equivalence declarations and all disposition counts agree with their tables.
+- [ ] Every equivalence is a 100% mutual semantic implication between complete source leaf competencies; partial overlap, containment, and identical current-support slices remain distinct. Declaration and disposition counts agree with their tables.
 - [ ] Detailed Design Decisions contains accepted rationale, matching risks, and distinctness expectations.
 - [ ] Open Questions contains only directly answerable questions ending in `?`.
 - [ ] No implementation-package summary or pre-ontology permutation projection is included.

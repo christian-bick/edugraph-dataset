@@ -77,6 +77,7 @@ jobs:
           npm run validate:asset-index --
           --index=temp/release-assets/asset-index.json
           --dataset-dir=out/dataset
+          --spec=ccss
 
       - name: Generate union coverage report
         run: npm run report:coverage -- --spec=union

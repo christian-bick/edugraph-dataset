@@ -1,5 +1,6 @@
 import { labelSetKey } from './utils.ts';
-import type { MetadataRow } from './dataset-merge.ts';
+import { rowTargetAssociations, type MetadataRow } from './dataset-merge.ts';
+import type { CompetencyTarget } from '../types/ml-engine.ts';
 
 export const ASSET_INDEX_SCHEMA_VERSION = 1;
 
@@ -70,34 +71,42 @@ export function buildAssetIndex({
     }
 
     const grouped = new Map<string, ReleasedAssetLabelSet>();
+    const groupedSamplePaths = new Map<string, Set<string>>();
     const samplePaths = new Set<string>();
 
     for (const { split, row } of rows) {
         if (row.mode !== 'question' && row.mode !== 'solution') {
             throw new Error(`Unsupported asset mode "${row.mode}" for ${row.sample_key}.`);
         }
-        const labels = targetLabels.get(targetLookupKey(row.spec, row.target_id));
-        if (!labels) {
-            throw new Error(`Cannot resolve requested labels for ${row.spec}:${row.target_id}.`);
-        }
-
         const samplePath = `${split}\0${row.file_name}`;
         if (samplePaths.has(samplePath)) {
             throw new Error(`Duplicate released asset path: ${split}/${row.file_name}.`);
         }
         samplePaths.add(samplePath);
 
-        const requestedLabels = canonicalLabels(labels);
-        const key = requestedLabelKey(requestedLabels);
-        const group = grouped.get(key) ?? { requested_labels: requestedLabels, samples: [] };
-        group.samples.push({
-            split,
-            file_name: row.file_name,
-            generator: row.generator,
-            view: row.view,
-            mode: row.mode,
-        });
-        grouped.set(key, group);
+        for (const association of rowTargetAssociations(row)) {
+            const labels = targetLabels.get(targetLookupKey(association.spec, association.target_id));
+            if (!labels) {
+                throw new Error(`Cannot resolve requested labels for ${association.spec}:${association.target_id}.`);
+            }
+
+            const requestedLabels = canonicalLabels(labels);
+            const key = requestedLabelKey(requestedLabels);
+            const group = grouped.get(key) ?? { requested_labels: requestedLabels, samples: [] };
+            const groupPaths = groupedSamplePaths.get(key) ?? new Set<string>();
+            if (!groupPaths.has(samplePath)) {
+                group.samples.push({
+                    split,
+                    file_name: row.file_name,
+                    generator: row.generator,
+                    view: row.view,
+                    mode: row.mode,
+                });
+                groupPaths.add(samplePath);
+            }
+            grouped.set(key, group);
+            groupedSamplePaths.set(key, groupPaths);
+        }
     }
 
     return {
@@ -115,6 +124,24 @@ export function buildAssetIndex({
 
 export function assetIndexSampleMap(index: AssetIndex): Map<string, ReleasedAssetLabelSet> {
     return new Map(index.label_sets.map(group => [requestedLabelKey(group.requested_labels), group]));
+}
+
+export interface MissingTargetAssetEvidence {
+    targetId: string;
+    labels: string[];
+}
+
+/** Exact production target permutations that have no physical sample association in an index. */
+export function missingTargetAssetEvidence(
+    index: AssetIndex,
+    targets: readonly CompetencyTarget[]
+): MissingTargetAssetEvidence[] {
+    const indexedLabelKeys = new Set(index.label_sets
+        .filter(group => group.samples.length > 0)
+        .map(group => requestedLabelKey(group.requested_labels)));
+    return targets
+        .filter(target => !indexedLabelKeys.has(requestedLabelKey(target.labels)))
+        .map(target => ({targetId: target.id, labels: canonicalLabels(target.labels)}));
 }
 
 export function buildHuggingFaceAssetUrl(

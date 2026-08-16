@@ -64,6 +64,9 @@ but it is not an exhaustive curriculum or a substitute for validating real stand
 **1b. Merge the Union Dataset**
 The released dataset at `out/dataset/` is the **union** of every education standard, deduplicated across them. Standards overlap heavily, so each one added contributes a shrinking delta — which the merge reports per standard.
 Its public `metadata.jsonl` contains only the image path, ontology tags, and a `solution` flag; richer operational metadata remains in the per-standard datasets.
+Physical samples are deduplicated without losing competency provenance: one retained image can
+provide released evidence for multiple exact target permutations in the asset index, while the
+PNG and public metadata row remain singular.
 ```bash
 npm run merge:dataset
 ```
@@ -161,7 +164,8 @@ images and do not render the switch. The `generate:asset-index` and
 A dataset-covered leaf is labeled **Released** only when the released asset index has an
 exact requested-label-set match for every implemented permutation. Otherwise it is
 labeled **Ready** with the same green theme and an hourglass icon. Local samples never
-change this publication status.
+change this publication status. Release validation enforces the same invariant and blocks
+publication if any production permutation lacks exact asset evidence.
 
 ### Coverage Explorer Deployment
 

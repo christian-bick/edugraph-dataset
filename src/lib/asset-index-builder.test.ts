@@ -44,6 +44,39 @@ describe('buildAssetIndexBundle', () => {
         );
     });
 
+    it('preserves target evidence when the union reuses an earlier physical sample', async () => {
+        const moduleDir = resolve(projectRoot, 'out', 'dataset-nctm', 'train', 'counting');
+        mkdirSync(moduleDir, { recursive: true });
+        writeFileSync(resolve(moduleDir, 'duplicate.png'), 'png');
+        writeFileSync(resolve(moduleDir, '.metadata.jsonl'), `${JSON.stringify({
+            file_name: 'duplicate.png',
+            sample_key: 'other#generator#view#train#question#inst:0',
+            spec: 'nctm',
+            target_id: 'other',
+            generator: 'generator',
+            view: 'view',
+            mode: 'question',
+            instance: 0,
+            content_fingerprint: 'fingerprint',
+            tags: ['Addition', 'Counting'],
+        })}\n`);
+
+        const bundle = await buildAssetIndexBundle({
+            projectRoot,
+            repository: 'local',
+            revision: 'working-tree',
+            specNames: ['ccss', 'nctm'],
+            targetLabels: new Map([
+                [targetLookupKey('ccss', 'target'), ['Counting']],
+                [targetLookupKey('nctm', 'other'), ['Addition', 'Counting']],
+            ]),
+        });
+
+        expect(bundle.index.label_sets).toHaveLength(2);
+        expect(bundle.index.label_sets.flatMap(group => group.samples.map(sample => sample.file_name)))
+            .toEqual(['counting/sample.png', 'counting/sample.png']);
+    });
+
     it('requires the merged image only for release-index generation', async () => {
         const options = {
             projectRoot,
