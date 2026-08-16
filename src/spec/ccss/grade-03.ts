@@ -523,14 +523,14 @@ const locateUnitFractionsBuilder = new DatasetPermutationBuilder()
         Ability.VisualArticulation
     ]);
 
-const locateNonUnitFractionsBuilder = new DatasetPermutationBuilder()
+const locateIteratedFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithFractions,
         Area.FractionNotation,
         Scope.Numberline,
-        Scope.NonUnitFractions,
         Ability.VisualArticulation
-    ]);
+    ])
+    .applyLabelVariants([[Scope.NonUnitFractions], [Scope.ImproperFractions]]);
 
 const recognizeEquivalentFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -540,7 +540,7 @@ const recognizeEquivalentFractionsBuilder = new DatasetPermutationBuilder()
         Scope.Equal,
         Ability.ConceptDerivation
     ])
-    .applyLabelVariants([[Scope.PhysicalNumbers], [Scope.Numberline]]);
+    .applyLabelVariants([[Scope.VisualNumbers], [Scope.Numberline]]);
 
 const generateExplainEquivalentFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -551,7 +551,7 @@ const generateExplainEquivalentFractionsBuilder = new DatasetPermutationBuilder(
         Ability.Formalization,
         Ability.ProcedureUnderstanding
     ])
-    .applyLabelVariants([[Scope.PhysicalNumbers], [Scope.Numberline]]);
+    .applyLabelVariants([[Scope.VisualNumbers], [Scope.Numberline]]);
 
 const wholeNumbersAsFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -588,16 +588,23 @@ const fractionEquivalenceImplementation = defineImplementationPackage({
     id: 'fraction-equivalence',
     description: 'Recognize, generate, and explain equivalent fractions with models or number lines.',
     generators: [{ module: 'fraction-equivalence', strategy: 'new' }],
-    views: [{ module: 'fractions-equivalence-model', strategy: 'new' }]
+    views: [
+        { module: 'fractions-equivalence-model', strategy: 'new' },
+        { module: 'numbers-fraction-line', strategy: 'expand' }
+    ]
 });
 
 const wholeNumberFractionsImplementation = defineImplementationPackage({
     id: 'whole-number-fractions',
     description: 'Express whole numbers as equal fractional values in notation and on number lines.',
-    generators: [{ module: 'fraction-equivalence', strategy: 'new' }],
-    views: [{ module: 'fractions-whole-equivalence', strategy: 'new' }]
+    generators: [{ module: 'fraction-equivalence', strategy: 'expand' }],
+    views: [
+        { module: 'fractions-whole-equivalence', strategy: 'new' },
+        { module: 'numbers-fraction-line', strategy: 'expand' }
+    ]
 });
 
+// Deferred pending review of explicit fraction-comparison ontology distinctions.
 const fractionComparisonImplementation = defineImplementationPackage({
     id: 'fraction-comparison',
     description: 'Compare fractions sharing a numerator or denominator against the same visible whole.',
@@ -658,7 +665,7 @@ export const spec: CompetencyTarget[] = [
 
 export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos('3.NF.A.2a-unit-fractions-number-line', locateUnitFractionsBuilder, fractionNumberLineImplementation, 'Partition zero to one and locate one unit-fraction length.'),
-    ...toImplementationTodos('3.NF.A.2b-non-unit-fractions-number-line', locateNonUnitFractionsBuilder, fractionNumberLineImplementation, 'Iterate unit-fraction lengths from zero to the requested endpoint.'),
+    ...toImplementationTodos('3.NF.A.2b-iterated-fractions-number-line', locateIteratedFractionsBuilder, fractionNumberLineImplementation, 'Iterate unit-fraction lengths from zero to a proper or improper fractional endpoint.'),
     ...toImplementationTodos('3.NF.A.3a-recognize-equivalent-fractions', recognizeEquivalentFractionsBuilder, fractionEquivalenceImplementation, 'Show distinct notations occupying the same model size or number-line point.'),
     ...toImplementationTodos('3.NF.A.3b-generate-explain-equivalent-fractions', generateExplainEquivalentFractionsBuilder, fractionEquivalenceImplementation, 'Transform numerator and denominator consistently and explain the equal value.'),
     ...toImplementationTodos('3.NF.A.3c-whole-numbers-as-fractions', wholeNumbersAsFractionsBuilder, wholeNumberFractionsImplementation, 'Show whole-number and fractional notation at the same value.'),
