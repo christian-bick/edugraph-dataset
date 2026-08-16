@@ -135,7 +135,7 @@ npm run dev
 ```
 
 The same server exposes the React-based Common Core coverage and task explorer at
-[`/standards-explorer.html`](http://localhost:5173/standards-explorer.html). The explorer
+[`/`](http://localhost:5173/). The explorer
 shows a local snapshot of the current working-tree specs during development. Use
 **Refresh local data** after generation, spec, view, generator, or ontology changes. The
 refresh builds a complete versioned snapshot under `temp/standards-explorer-preview/`;
@@ -151,8 +151,9 @@ snapshot; no union-merge command is needed.
 On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
 images. Released uses the immutable published asset index; Local uses PNGs served from
 the latest explicit development snapshot and can be opened at
-[`/standards-explorer.html?assets=local`](http://localhost:5173/standards-explorer.html?assets=local).
-The development renderer index links to this mode as well. Coverage and navigation state
+[`/?assets=local`](http://localhost:5173/?assets=local).
+The renderer module directory at [`/modules.html`](http://localhost:5173/modules.html)
+links to this mode as well. Coverage and navigation state
 do not change when the image source changes. Deployed explorers always use release-pinned
 images and do not render the switch. The `generate:asset-index` and
 `validate:asset-index` commands remain release/CI operations.

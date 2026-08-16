@@ -66,7 +66,7 @@ and [checklist-view.md](checklist-view.md) for the view `checklist.md`.
 
 1. Identify which role is actually missing from the intended matched path.
 2. Create only the required generator and/or view leaf directory.
-3. When creating a view, add a link to it in `src/index.html` for browser preview.
+3. When creating a view, add a link to it in `src/modules.html` for browser preview.
 4. When reusing a counterpart, verify the shared problem type and payload contract rather
    than duplicating the module.
 
@@ -124,6 +124,6 @@ path works.
 - [ ] **IMPL-3** — the directory name carries the full module prefix.
 - [ ] **IMPL-4** — all files of the module's inventory exist.
 - [ ] **IMPL-5** — shared code sits at the correct level: category `helpers.ts` for siblings, `src/visuals/components/` or `src/visuals/helpers/` for cross-category reuse.
-- [ ] **IMPL-6** — only genuinely missing roles were scaffolded; a new renderer is linked from `src/index.html`; relative import depths match.
+- [ ] **IMPL-6** — only genuinely missing roles were scaffolded; a new renderer is linked from `src/modules.html`; relative import depths match.
 - [ ] **IMPL-7** — an extension stays within the same task family, preserves payload compatibility, and requires only surgical configurable changes; unrelated ontology families, stable payload-boundary crossings, and large independent code branches use a new module.
 - [ ] **IMPL-8** — a new or materially changed shared payload and its `ViewTypeMap` entry typecheck before generator/view work diverges; integrated matching, generation, and rendering verify the completed path.

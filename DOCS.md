@@ -78,15 +78,18 @@ The consequence: a code change only invalidates the samples whose identity input
 ## 3. Script Reference
 
 ### Standards Explorer
-`src/standards-explorer.html` is a dedicated Vite entry for the Common Core coverage
-explorer. The React application lives under `src/standards-explorer/`, uses Zustand for
+`src/index.html` is the root Vite entry for the Common Core coverage explorer. The prior
+`src/standards-explorer.html` entry remains as a compatible direct URL. The renderer/view
+directory previously at the root is preserved at `src/modules.html`. The React application
+lives under `src/standards-explorer/`, uses Zustand for
 its navigation and selection state, and reads the `preview` coverage routes at runtime.
 In a production build, those routes contain the deployed-main snapshot under
 `public/coverage/preview/`. The internal `preview` channel denotes coverage for the exact
 deployed `main` revision; it is not a user-selectable preview mode. The snapshot contains
 `ccss-tree.json`, `ccss-coverage.json`, and `coverage-manifest.json`; the manifest records
 the schema version, channel, source ref and SHA, generation time, and ontology version.
-Run `npm run dev` and open `/standards-explorer.html` for local working-tree development.
+Run `npm run dev` and open `/` for local working-tree development; open `/modules.html`
+for direct renderer previews.
 Vite intercepts the three preview routes and serves them from the newest completed local
 snapshot. **Refresh local data** explicitly builds working-tree coverage, the local asset
 index, and a copy of every selected PNG under `temp/standards-explorer-preview/<id>/`.

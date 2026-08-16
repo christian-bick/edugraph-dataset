@@ -301,17 +301,23 @@ function Header() {
                 )}
                 {isLocalExplorerHost() && (
                     <>
-                        <button
-                            type="button"
-                            disabled={localSnapshotRefreshing}
-                            onClick={() => void refreshLocalSnapshot()}
-                            title={localSnapshotGeneratedAt
-                                ? `Local snapshot from ${localSnapshotGeneratedAt} (${localSnapshotAssetCount} images)`
-                                : 'Build local coverage and sample data'}
-                            className="rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-slate-200 hover:border-sky-500 disabled:cursor-wait disabled:opacity-60"
-                        >
-                            {localSnapshotRefreshing ? 'Refreshing local data…' : 'Refresh local data'}
-                        </button>
+                        {assetSource === 'local' && (
+                            <button
+                                type="button"
+                                disabled={localSnapshotRefreshing}
+                                onClick={() => void refreshLocalSnapshot()}
+                                aria-label={localSnapshotRefreshing ? 'Refreshing local data' : 'Refresh local data'}
+                                title={localSnapshotGeneratedAt
+                                    ? `Refresh local snapshot from ${localSnapshotGeneratedAt} (${localSnapshotAssetCount} images)`
+                                    : 'Build local coverage and sample data'}
+                                className="flex size-9 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-900 text-xs text-slate-200 hover:border-sky-500 disabled:cursor-wait disabled:opacity-60"
+                            >
+                                <i
+                                    className={`fa-solid fa-arrows-rotate${localSnapshotRefreshing ? ' fa-spin' : ''}`}
+                                    aria-hidden="true"
+                                />
+                            </button>
+                        )}
                         <div className="explorer-data-view" aria-label="Sample image source">
                             {(['released', 'local'] as const).map(source => (
                             <button

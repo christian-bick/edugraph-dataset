@@ -131,7 +131,7 @@ describe('standards explorer data and sample sources', () => {
 
     it('switches only the active sample index on a local host', async () => {
         const localWindow = {
-            location: new URL('http://localhost:5173/standards-explorer.html?view=preview'),
+            location: new URL('http://localhost:5173/?view=preview'),
             history: {
                 replaceState: (_state: unknown, _unused: string, url: URL) => {
                     localWindow.location = new URL(url);
@@ -176,7 +176,7 @@ describe('standards explorer data and sample sources', () => {
 
     it('rejects the local asset choice on non-local hosts', async () => {
         const remoteWindow = {
-            location: new URL('https://coverage.edugraph.io/standards-explorer.html?assets=local&view=preview'),
+            location: new URL('https://coverage.edugraph.io/?assets=local&view=preview'),
             history: {
                 replaceState: (_state: unknown, _unused: string, url: URL) => {
                     remoteWindow.location = new URL(url);
@@ -199,7 +199,7 @@ describe('standards explorer data and sample sources', () => {
 
     it('refreshes an immutable local snapshot before reloading local data', async () => {
         const localWindow = {
-            location: new URL('http://localhost:5173/standards-explorer.html?assets=local'),
+            location: new URL('http://localhost:5173/?assets=local'),
             history: {replaceState: vi.fn()},
         };
         vi.stubGlobal('window', localWindow);
