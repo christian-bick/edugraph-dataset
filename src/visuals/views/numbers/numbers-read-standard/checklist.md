@@ -1,2 +1,2 @@
-- **Identity:** An Arabic numeral and its response area make the reading task identifiable; high-range targets use an inspectable written-number-name prompt without claiming oral performance.
-- **Modes:** Question Mode leaves the spoken number name empty; Solution Mode reveals the correctly spelled English number name.
+- **Identity:** An Arabic numeral, a reading prompt, and a number-name response area make the task identifiable.
+- **Modes:** Question Mode keeps the complete numeral visible and withholds its English name; Solution Mode reveals the correctly spelled name without removing the numeral.

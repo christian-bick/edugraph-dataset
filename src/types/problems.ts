@@ -334,10 +334,39 @@ export type PlaceValueMakeTenProblem = {
     target: 10;
 };
 
-export type PlaceValueExpandedProblem = {
+export type WholeNumberPlaceName =
+    | 'ones'
+    | 'tens'
+    | 'hundreds'
+    | 'thousands'
+    | 'ten-thousands'
+    | 'hundred-thousands'
+    | 'millions';
+
+export type WholeNumberPlaceValue = {
+    name: WholeNumberPlaceName;
+    exponent: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    digit: number;
+    value: number;
+};
+
+export type LegacyPlaceValueExpandedProblem = {
     number: number;
     terms: number[];
 };
+
+export type MultiDigitPlaceValueExpandedProblem = {
+    task: 'multi-digit-expanded-form';
+    number: number;
+    terms: number[];
+    placeValues: WholeNumberPlaceValue[];
+    prompt: string;
+    expandedEquation: string;
+};
+
+export type PlaceValueExpandedProblem =
+    | LegacyPlaceValueExpandedProblem
+    | MultiDigitPlaceValueExpandedProblem;
 
 export type PlaceValueDigits = {hundreds: number; tens: number; ones: number};
 
@@ -485,19 +514,75 @@ export type MediatedLengthComparisonProblem = {
     answer: 'A' | 'C';
 };
 
-export type ComparisonProblem = {
+export type LegacyComparisonProblem = {
     num1: number;
     num2: number;
     relation: 'less' | 'greater' | 'equal';
 };
 
+export type MultiDigitComparisonEvidence =
+    | {
+        kind: 'first-difference';
+        placeName: WholeNumberPlaceName;
+        exponent: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+        leftDigit: number;
+        rightDigit: number;
+        leftPlaceValue: number;
+        rightPlaceValue: number;
+        explanation: string;
+    }
+    | {
+        kind: 'all-equal';
+        explanation: string;
+    };
+
+export type MultiDigitComparisonProblem = {
+    task: 'multi-digit-place-value-comparison';
+    num1: number;
+    num2: number;
+    relation: 'less' | 'greater' | 'equal';
+    leftNumeral: string;
+    rightNumeral: string;
+    symbol: '<' | '>' | '=';
+    prompt: string;
+    comparisonEquation: string;
+    conclusion: string;
+    evidence: MultiDigitComparisonEvidence;
+};
+
+export type ComparisonProblem = LegacyComparisonProblem | MultiDigitComparisonProblem;
+
 export type OrderingProblem = {
     numbers: number[];
 };
 
-export type WritingProblem = {
+export type LegacyWritingProblem = {
     number: number;
 };
+
+export type MultiDigitBaseTenNumeralProblem = {
+    task: 'multi-digit-base-ten-numeral';
+    number: number;
+    standardNumeral: string;
+    numberName: string;
+    placeValues: WholeNumberPlaceValue[];
+    readPrompt: string;
+    writePrompt: string;
+};
+
+export type MultiDigitNumberNameProblem = {
+    task: 'multi-digit-number-name';
+    number: number;
+    standardNumeral: string;
+    numberName: string;
+    placeValues: WholeNumberPlaceValue[];
+    prompt: string;
+};
+
+export type WritingProblem =
+    | LegacyWritingProblem
+    | MultiDigitBaseTenNumeralProblem
+    | MultiDigitNumberNameProblem;
 
 /** Shared payload accepted by the number-line view for representation and pair arithmetic. */
 export type NumberLineProblem = WritingProblem | ArithmeticPairProblem;

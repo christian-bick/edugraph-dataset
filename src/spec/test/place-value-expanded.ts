@@ -8,7 +8,6 @@ const builder = new DatasetPermutationBuilder()
         Area.Sum,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger100,
         Scope.NumbersSmaller1000,
         Ability.Formalization
     ])
@@ -17,4 +16,17 @@ const builder = new DatasetPermutationBuilder()
         [Scope.ThreeOperands]
     ]);
 
-export const spec: CompetencyTarget[] = toTargets('test-place-value-expanded', builder);
+const gradeFourBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PlaceValue,
+        Area.Sum,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersSmaller1000000,
+        Ability.Formalization
+    ]);
+
+export const spec: CompetencyTarget[] = [
+    ...toTargets('test-place-value-expanded', builder),
+    ...toTargets('test-place-value-expanded-grade-four', gradeFourBuilder)
+];

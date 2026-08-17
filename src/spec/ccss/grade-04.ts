@@ -16,23 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const multiDigitNumerationImplementation = defineImplementationPackage({
-    id: 'multi-digit-numeration',
-    description: 'Extend reading, writing, expanded form, and comparison to whole numbers through one million.',
-    generators: [
-        { module: 'writing', strategy: 'expand' },
-        { module: 'place-value-expanded', strategy: 'expand' },
-        { module: 'comparison', strategy: 'expand' }
-    ],
-    views: [
-        { module: 'numbers-read-standard', strategy: 'expand' },
-        { module: 'numbers-write-standard', strategy: 'expand' },
-        { module: 'numbers-write-name', strategy: 'expand' },
-        { module: 'place-value-expanded-form', strategy: 'expand' },
-        { module: 'numbers-compare', strategy: 'expand' }
-    ]
-});
-
 const grade4IntegerRoundingImplementation = defineImplementationPackage({
     id: 'grade4-integer-rounding',
     description: 'Extend integer rounding through one million to every place from tens through hundred-thousands.',
@@ -401,7 +384,6 @@ const writeExpandedFormBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Sum,
     Scope.ArabicNumerals,
     Scope.Base10,
-    Scope.NumbersLarger1000,
     Scope.NumbersSmaller1000000,
     Ability.Formalization
 ]);
@@ -857,14 +839,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.OA.C.5-identify-shape-pattern-feature', identifyShapePatternFeatureBuilder),
     ...toTargets('4.OA.C.5-explain-shape-pattern-feature', explainShapePatternFeatureBuilder),
     ...toTargets('4.NBT.A.1-adjacent-place-scaling', adjacentPlaceScalingBuilder),
+    ...toTargets('4.NBT.A.2-read-write-base-ten-numerals', readWriteBaseTenNumeralsBuilder),
+    ...toTargets('4.NBT.A.2-write-number-names', writeNumberNamesBuilder),
+    ...toTargets('4.NBT.A.2-expanded-form', writeExpandedFormBuilder),
+    ...toTargets('4.NBT.A.2-compare-multi-digit-numbers', compareMultiDigitNumbersBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NBT.A.2-read-write-base-ten-numerals', readWriteBaseTenNumeralsBuilder, multiDigitNumerationImplementation, 'Expose the complete numeral and the direction of transcription through one million.'),
-    ...toImplementationTodos('4.NBT.A.2-write-number-names', writeNumberNamesBuilder, multiDigitNumerationImplementation, 'Map every digit and place to the correctly written English number name.'),
-    ...toImplementationTodos('4.NBT.A.2-expanded-form', writeExpandedFormBuilder, multiDigitNumerationImplementation, 'Expand every nonzero digit into its place-value addend and recompose the source numeral.'),
-    ...toImplementationTodos('4.NBT.A.2-compare-multi-digit-numbers', compareMultiDigitNumbersBuilder, multiDigitNumerationImplementation, 'Expose the first differing place, comparison symbol, and conclusion.'),
     ...toImplementationTodos('4.NBT.A.3-round-to-any-place', grade4IntegerRoundingBuilder, grade4IntegerRoundingImplementation, 'Show bounding multiples, the midpoint rule, selected value, and named rounding place.'),
     ...toImplementationTodos('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder, grade4MultiDigitMultiplicationImplementation, 'Show operand place-value decomposition, partial products, an equation or area model, the final product, and an explanation that agree.'),
     ...toImplementationTodos('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder, grade4MultiDigitDivisionImplementation, 'Show dividend and divisor place-value decomposition, partial quotients, multiplication checks, quotient, and remainder that agree.'),

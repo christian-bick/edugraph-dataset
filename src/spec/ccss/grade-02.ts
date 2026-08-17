@@ -182,7 +182,6 @@ const expandedFormBuilder = new DatasetPermutationBuilder()
         Area.Sum,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger100,
         Scope.NumbersSmaller1000,
         Ability.Formalization
     ])

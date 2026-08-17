@@ -1,4 +1,4 @@
-import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -7,9 +7,6 @@ export const spec: ViewSpec = {
     generalLabels: [
         Scope.ArabicNumerals,
         Ability.TextualReception
-    ],
-    rejectedLabels: [
-        ...deductAdmitting([Scope.NumbersLarger1000])
     ]
 };
 

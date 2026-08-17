@@ -24,4 +24,23 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
         expect(stub!.data.terms).toHaveLength(expectedLength);
         expect(stub!.tags).toContain(operandCardinality);
     });
+
+    it('resolves the Grade 4 all-nonzero-place expansion without an operand count', () => {
+        const stub = generateWithLabels(generator, [
+            Area.PlaceValue,
+            Area.Sum,
+            Scope.ArabicNumerals,
+            Scope.Base10,
+            Scope.NumbersLarger1000,
+            Scope.NumbersSmaller1000000,
+            Ability.Formalization
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect('task' in stub!.data && stub!.data.task).toBe('multi-digit-expanded-form');
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            Scope.NumbersLarger1000,
+            Scope.NumbersSmaller1000000
+        ]));
+    });
 });

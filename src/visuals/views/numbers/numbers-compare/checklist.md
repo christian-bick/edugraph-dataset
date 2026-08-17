@@ -1,2 +1,2 @@
-- **Identity:** Two visible numbers and a central relation position form a self-explaining numerical comparison.
-- **Modes:** Question Mode leaves the relation empty; Solution Mode reveals the mathematically correct comparison symbol.
+- **Identity:** Two visible numerals and a central relation position form a numerical comparison; multi-digit solutions identify the decisive place or confirm that every place matches.
+- **Modes:** Question Mode withholds the symbol and place-value evidence; Solution Mode reveals the supplied equation, deciding-place evidence, and conclusion.

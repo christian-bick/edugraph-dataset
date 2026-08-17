@@ -65,4 +65,27 @@ describe('WritingGenerator Spec Integration', () => {
             expect(stub!.tags).toContain(Scope.NumbersSmaller1000);
         }
     });
+
+    it.each([
+        [Area.DigitNotation, 'multi-digit-base-ten-numeral'],
+        [Area.NumberNotation, 'multi-digit-number-name']
+    ] as const)('resolves Grade 4 %s through one million', (notationFamily, task) => {
+        setSeed(404);
+        const stub = generateWithLabels(generator, [
+            notationFamily,
+            Scope.Base10,
+            Scope.NumbersLarger1000,
+            Scope.NumbersSmaller1000000
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect('task' in stub!.data && stub!.data.task).toBe(task);
+        expect(stub!.data.number).toBeGreaterThanOrEqual(1000);
+        expect(stub!.data.number).toBeLessThanOrEqual(1_000_000);
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            notationFamily,
+            Scope.NumbersLarger1000,
+            Scope.NumbersSmaller1000000
+        ]));
+    });
 });

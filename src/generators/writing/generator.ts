@@ -1,14 +1,20 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {WritingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
+import {
+    createWholeNumberPlaceValues,
+    formatStandardNumeral,
+    wholeNumberToEnglishName
+} from '../../lib/whole-number-notation.ts';
 import {WritingGeneratorConfig, WritingGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../lib/errors.ts";
+import {Area} from 'edugraph-ts';
 
 export class WritingGenerator implements ProblemGenerator<WritingProblem, WritingGeneratorConfig> {
     type: AbstractProblem['type'] = 'writing';
     schema = WritingGeneratorSchema;
 
-    generate(config: WritingGeneratorConfig): ProblemStub | null {
+    generate(config: WritingGeneratorConfig): ProblemStub<WritingProblem> | null {
         validateConfigFields('writing', config, ['notationFamily', 'range', 'requireZero']);
         const resolvedRange = config.range!;
 
@@ -24,10 +30,39 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
 
         const currentNum = Math.floor(random() * (maxNum - minNum + 1)) + minNum;
         
-        return {
-            data: {
-                number: currentNum
-            }
-        };
+        if (resolvedRange.max <= 1000) return {data: {number: currentNum}};
+
+        const standardNumeral = formatStandardNumeral(currentNum);
+        const numberName = wholeNumberToEnglishName(currentNum);
+        const placeValues = createWholeNumberPlaceValues(currentNum);
+
+        if (config.notationFamily === Area.DigitNotation) {
+            return {
+                data: {
+                    task: 'multi-digit-base-ten-numeral',
+                    number: currentNum,
+                    standardNumeral,
+                    numberName,
+                    placeValues,
+                    readPrompt: 'Read the base-ten numeral and give its number name.',
+                    writePrompt: 'Write the number name as a base-ten numeral.'
+                }
+            };
+        }
+
+        if (config.notationFamily === Area.NumberNotation) {
+            return {
+                data: {
+                    task: 'multi-digit-number-name',
+                    number: currentNum,
+                    standardNumeral,
+                    numberName,
+                    placeValues,
+                    prompt: 'Write the numeral in words.'
+                }
+            };
+        }
+
+        return {data: {number: currentNum}};
     }
 }

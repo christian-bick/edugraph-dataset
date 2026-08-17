@@ -1,3 +1,2 @@
-- **Identity:** A three-digit numeral is followed by exactly two or three place-value term positions joined as a sum.
-- **Question mode:** Each place-value term is withheld, while the number of terms and addition structure remain visible.
-- **Solution mode:** Every non-zero hundreds, tens, and ones value is revealed and their sum equals the source numeral.
+- **Identity:** A numeral and its ordered digit-place columns lead to an expanded-form sum with one term for every non-zero place.
+- **Modes:** Question Mode withholds every place-value term while preserving the sum structure; Solution Mode reveals the complete supplied equation whose terms recompose the numeral.

@@ -55,10 +55,34 @@ const numberNameBuilder = new DatasetPermutationBuilder()
         Ability.TextualArticulation
     ]);
 
+const gradeFourNumeralBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.DigitNotation,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersLarger1000,
+        Scope.NumbersSmaller1000000
+    ])
+    .applyLabelVariants([
+        [Ability.TextualReception],
+        [Ability.VisualArticulation]
+    ]);
+
+const gradeFourNumberNameBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumberNotation,
+        Scope.Base10,
+        Scope.NumbersLarger1000,
+        Scope.NumbersSmaller1000000,
+        Ability.TextualArticulation
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-writing', builder),
     ...toTargets('test-reading-numerals', readNumeralsBuilder),
     ...toTargets('test-writing-represent-counts', representCountsBuilder),
     ...toTargets('test-writing-grade-two-numerals', gradeTwoNumeralBuilder),
-    ...toTargets('test-writing-number-name', numberNameBuilder)
+    ...toTargets('test-writing-number-name', numberNameBuilder),
+    ...toTargets('test-writing-grade-four-numerals', gradeFourNumeralBuilder),
+    ...toTargets('test-writing-grade-four-number-name', gradeFourNumberNameBuilder)
 ];

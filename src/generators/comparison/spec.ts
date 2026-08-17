@@ -19,6 +19,7 @@ export const ComparisonGeneratorSchema = {
         [
             Area.NumericEquality,
             Area.NumericInequality,
+            Area.NumericComparison,
             Scope.Less,
             Scope.Equal,
             Scope.Greater
@@ -34,7 +35,7 @@ export const ComparisonGeneratorSchema = {
         hasLabel(Scope.NumbersWithZero)
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
         resolveRangeFromLabels
     ]
 } as const;

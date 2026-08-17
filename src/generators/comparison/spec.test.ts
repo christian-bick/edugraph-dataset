@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {Area, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {setSeed} from '../../lib/random.ts';
 import {generateWithLabels} from '../../lib/utils.ts';
 import {ComparisonGenerator} from './generator.ts';
@@ -69,5 +69,36 @@ describe('ComparisonGenerator Spec Integration', () => {
                 ]));
             }
         }
+    });
+
+    it.each([
+        [Scope.Less, 'less', '<'],
+        [Scope.Equal, 'equal', '='],
+        [Scope.Greater, 'greater', '>']
+    ] as const)('resolves Grade 4 NumericComparison %s', (relation, resolved, symbol) => {
+        const stub = generateWithLabels(generator, [
+            Area.NumericComparison,
+            relation,
+            Scope.ArabicNumerals,
+            Scope.Base10,
+            Scope.NumbersLarger1000,
+            Scope.NumbersSmaller1000000,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero,
+            Ability.ProcedureExecution
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data).toMatchObject({
+            task: 'multi-digit-place-value-comparison',
+            relation: resolved,
+            symbol
+        });
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            Area.NumericComparison,
+            relation,
+            Scope.NumbersLarger1000,
+            Scope.NumbersSmaller1000000
+        ]));
     });
 });

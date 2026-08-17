@@ -2,13 +2,72 @@ import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { NumbersWriteStandardViewConfig, NumbersWriteStandardViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import { validateProblemData } from '../../../helpers/validation.ts';
+import {ViewValidationError, validateProblemData} from '../../../helpers/validation.ts';
 import {validateWritingNumber} from '../helpers.ts';
+import {
+    isMultiDigitWritingProblem,
+    validateMultiDigitWritingProblem
+} from '../writing-view-helpers.tsx';
+import {legacyNumeralDigits, legacyWritingCue, placeValueResponseDigits} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
     config: NumbersWriteStandardViewConfig;
     payload: ViewRenderPayload<'numbers-write-standard'>;
+}
+
+function MultiDigitNumeralWritingTask({
+    data,
+    isSolutionView
+}: {
+    data: Extract<ViewRenderPayload<'numbers-write-standard'>['problem']['data'], {task: 'multi-digit-base-ten-numeral'}>;
+    isSolutionView: boolean;
+}) {
+    const responseDigits = placeValueResponseDigits(data.placeValues);
+
+    return (
+        <div className="w-[760px] rounded-2xl bg-white p-8 font-sans shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
+            <div className="flex flex-col items-center gap-5">
+                <div className="text-center text-xl font-semibold text-slate-700">{data.writePrompt}</div>
+                <div className="flex min-h-24 w-full items-center justify-center rounded-2xl border-2 border-sky-300 bg-sky-50 px-8 text-center text-[1.6rem] font-semibold leading-snug text-slate-800">
+                    {data.numberName}
+                </div>
+                <div
+                    aria-label="Place-value writing chart"
+                    className="grid w-full overflow-hidden rounded-xl border border-slate-300 bg-slate-50"
+                    style={{gridTemplateColumns: `repeat(${data.placeValues.length}, minmax(0, 1fr))`}}
+                >
+                    {data.placeValues.map((place, index) => (
+                        <div
+                            key={place.name}
+                            className="flex min-w-0 flex-col items-center border-r border-slate-300 px-1 py-2.5 last:border-r-0"
+                        >
+                            <span className={`flex h-16 w-16 items-center justify-center rounded-lg border-2 font-mono text-3xl font-bold ${
+                                isSolutionView
+                                    ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                                    : 'border-dashed border-slate-400 bg-white text-slate-700'
+                            }`}>
+                                {isSolutionView ? responseDigits[index] : ''}
+                            </span>
+                            <span className="mt-2 min-h-7 text-center text-[0.62rem] font-bold uppercase leading-tight tracking-wide text-slate-600">
+                                {place.name}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+                <div
+                    aria-label="Complete standard numeral response"
+                    className={`flex h-20 min-w-96 items-center justify-center rounded-xl border-2 px-10 font-mono text-5xl font-extrabold tracking-wide ${
+                        isSolutionView
+                            ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                            : 'border-dashed border-slate-400 bg-white text-slate-700'
+                    }`}
+                >
+                    {isSolutionView ? data.standardNumeral : ''}
+                </div>
+            </div>
+        </div>
+    );
 }
 
 function BaseTenSketch({number}: {number: number}) {
@@ -63,10 +122,12 @@ function DoubleTenFrame({ number }: { number: number }) {
 }
 
 function ResponseBoxes({number, isSolutionView}: {number: number; isSolutionView: boolean}) {
+    const digits = legacyNumeralDigits(number);
+
     return (
         <div className="flex gap-3">
-            {Array.from({ length: 3 }).map((_, idx) => {
-                const content = isSolutionView ? String(number) : '';
+            {digits.map((digit, idx) => {
+                const content = isSolutionView ? digit : '';
                 let cls = 'border-2 border-slate-500 rounded-lg w-[84px] h-[70px] flex justify-center items-center text-[2rem] font-mono bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] overflow-hidden';
 
                 if (isSolutionView) {
@@ -91,16 +152,49 @@ const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('numbers-write-standard', data, ['number']);
+
+    if (isMultiDigitWritingProblem(data)) {
+        if (data.task !== 'multi-digit-base-ten-numeral') {
+            throw new ViewValidationError(
+                'numbers-write-standard',
+                "Expected task 'multi-digit-base-ten-numeral'."
+            );
+        }
+        validateProblemData('numbers-write-standard', data, [
+            'task',
+            'number',
+            'standardNumeral',
+            'numberName',
+            'placeValues',
+            'readPrompt',
+            'writePrompt'
+        ]);
+        validateMultiDigitWritingProblem(
+            'numbers-write-standard',
+            data,
+            'multi-digit-base-ten-numeral'
+        );
+        return <MultiDigitNumeralWritingTask data={data} isSolutionView={isSolutionView} />;
+    }
+
     const number = data.number;
     validateWritingNumber('numbers-write-standard', number);
+    const legacyCue = legacyWritingCue(number, isSolutionView);
 
     if (number > 120) {
         return (
             <div className="w-[720px] rounded-2xl bg-white p-[30px] font-sans shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
-                <div className="flex flex-col items-center gap-6">
+                <div className="flex flex-col items-center gap-5">
+                    <div className="text-center text-xl font-semibold text-slate-700">
+                        {legacyCue.instruction}
+                    </div>
                     <div className="flex w-full items-center justify-center gap-8">
                         <BaseTenSketch number={number} />
-                        <div className="min-w-[120px] text-center text-[3.5rem] font-extrabold text-slate-800">{number}</div>
+                        {legacyCue.sourceText !== null && (
+                            <div className="min-w-[120px] text-center text-[3.5rem] font-extrabold text-slate-800">
+                                {legacyCue.sourceText}
+                            </div>
+                        )}
                     </div>
                     <ResponseBoxes number={number} isSolutionView={isSolutionView} />
                 </div>
@@ -109,11 +203,20 @@ const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
     }
 
     return (
-        <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] w-fit">
-            <div className="flex items-center gap-[30px] flex-wrap font-sans">
-                {number <= 20 ? <DoubleTenFrame number={number} /> : <BaseTenSketch number={number} />}
-                <div className="text-[3.5rem] font-extrabold text-slate-800 min-w-[80px] text-center">
-                    {number}
+        <div className="w-fit rounded-2xl bg-white p-[30px] font-sans shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
+            <div className="flex flex-col items-center gap-5">
+                <div className="text-center text-xl font-semibold text-slate-700">
+                    {legacyCue.instruction}
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-[30px]">
+                    {number <= 20 ? <DoubleTenFrame number={number} /> : <BaseTenSketch number={number} />}
+                    {legacyCue.sourceText !== null && (
+                        <div className={`min-w-[110px] text-center font-extrabold text-slate-800 ${
+                            number === 0 ? 'text-2xl' : 'text-[3.5rem]'
+                        }`}>
+                            {legacyCue.sourceText}
+                        </div>
+                    )}
                 </div>
                 <ResponseBoxes number={number} isSolutionView={isSolutionView} />
             </div>

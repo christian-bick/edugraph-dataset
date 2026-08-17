@@ -1,2 +1,2 @@
-- **Identity:** A source numeral and multiple handwriting-style response spaces make intentional numeral-copying practice identifiable rather than a reasoning task.
-- **Modes:** Question Mode leaves every response space empty; Solution Mode reproduces the source numeral in each space.
+- **Identity:** A quantity model or number-name source, a direct writing instruction, and one response slot per digit make Arabic-numeral writing identifiable; an empty model is explicitly labeled "No objects," and Grade 4 names every place-value column.
+- **Modes:** Question Mode leaves every digit slot and the final numeral empty; Solution Mode fills each slot with one supplied digit and shows the comma-grouped numeral while keeping the source visible.
