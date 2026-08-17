@@ -1,0 +1,2 @@
+- **Identity:** Both operands are decomposed into labeled place-value row and column headers, and every Cartesian partial-product region is inspectable in one area-model grid.
+- **Modes:** Question Mode shows the decompositions and unresolved top-level and cell equations without any products; Solution Mode reveals every cell product, their supplied sum equation, the final multiplication equation, and the place-value explanation.

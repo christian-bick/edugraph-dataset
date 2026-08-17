@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const grade4MultiDigitMultiplicationImplementation = defineImplementationPackage({
-    id: 'grade4-multi-digit-multiplication',
-    description: 'Multiply the complete Grade 4 operand-digit profiles with visible place-value decomposition and partial products.',
-    generators: [{ module: 'multi-digit-multiplication', strategy: 'new' }],
-    views: [{ module: 'operations-multiplication-area-model', strategy: 'new' }]
-});
-
 const grade4MultiDigitDivisionImplementation = defineImplementationPackage({
     id: 'grade4-multi-digit-division',
     description: 'Find quotients and remainders for the complete Grade 4 dividend/divisor digit profiles with visible place-value reasoning.',
@@ -426,6 +419,7 @@ const standardAlgorithmAddSubtractBuilder = new DatasetPermutationBuilder()
 const grade4MultiDigitMultiplicationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Multiplication,
+        Scope.TwoOperands,
         Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
@@ -836,11 +830,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NBT.A.2-expanded-form', writeExpandedFormBuilder),
     ...toTargets('4.NBT.A.2-compare-multi-digit-numbers', compareMultiDigitNumbersBuilder),
     ...toTargets('4.NBT.A.3-round-to-any-place', grade4IntegerRoundingBuilder),
-    ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder)
+    ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder),
+    ...toTargets('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder, grade4MultiDigitMultiplicationImplementation, 'Show operand place-value decomposition, partial products, an equation or area model, the final product, and an explanation that agree.'),
     ...toImplementationTodos('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder, grade4MultiDigitDivisionImplementation, 'Show dividend and divisor place-value decomposition, partial quotients, multiplication checks, quotient, and remainder that agree.'),
     ...toImplementationTodos('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder, measurementConversionsImplementation, 'Show both units, one common quantity, their relative-size relation, and numerical factor.'),
     ...toImplementationTodos('4.MD.A.1-convert-larger-to-smaller', convertLargerToSmallerUnitsBuilder, measurementConversionsImplementation, 'Show the source measure, conversion factor, multiplication equation, destination unit, and result.'),

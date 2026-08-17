@@ -51,6 +51,45 @@ export type MultiplicativeComparisonProblem = {
     comparisonStatement: string;
 };
 
+export type MultiplicationPlaceValuePart = {
+    digit: number;
+    placeValue: 1 | 10 | 100 | 1000;
+    placeName: 'ones' | 'tens' | 'hundreds' | 'thousands';
+    value: number;
+};
+
+export type MultiplicationOperandDecomposition = {
+    operand: number;
+    parts: readonly MultiplicationPlaceValuePart[];
+    expandedExpression: string;
+    equation: string;
+};
+
+export type MultiplicationPartialProduct = {
+    largestPart: MultiplicationPlaceValuePart;
+    smallestPart: MultiplicationPlaceValuePart;
+    product: number;
+    questionEquation: string;
+    solutionEquation: string;
+};
+
+export type MultiDigitMultiplicationProblem = {
+    task: 'multi-digit-multiplication';
+    largestOperand: number;
+    smallestOperand: number;
+    largestOperandDigits: 1 | 2 | 3 | 4;
+    smallestOperandDigits: 1 | 2;
+    largestDecomposition: MultiplicationOperandDecomposition;
+    smallestDecomposition: MultiplicationOperandDecomposition;
+    partialProducts: readonly MultiplicationPartialProduct[];
+    product: number;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    partialProductsSumEquation: string;
+    explanation: string;
+};
+
 export type PositiveFactorPair = {
     lowerFactor: number;
     upperFactor: number;
@@ -1172,6 +1211,7 @@ export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
+    'operations-multiplication-area-model': MultiDigitMultiplicationProblem;
     'numbers-factors-multiples': FactorMultipleRelationsProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticPairProblem;
