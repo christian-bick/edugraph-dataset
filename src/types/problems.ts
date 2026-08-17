@@ -215,7 +215,7 @@ export type ArithmeticEstimationProblem = {
 
 export type ArithmeticPatternProperty = 'commutative' | 'associative' | 'distributive';
 
-export type ArithmeticPatternProblem = {
+export type ArithmeticPatternTableBase = {
     operation: 'addition' | 'multiplication';
     headers: number[];
     table: number[][];
@@ -231,6 +231,55 @@ export type ArithmeticPatternProblem = {
     explanation?: string;
     highlightedCells?: Array<[number, number]>;
 };
+
+export type ArithmeticPatternRuleOperation = 'add' | 'multiply' | 'multiply-position';
+
+export type ArithmeticPatternLegacyProblem = ArithmeticPatternTableBase & {
+    /** Absent on retained lower-grade/legacy table payloads. */
+    task?: undefined;
+};
+
+type ArithmeticPatternGrade4Base = ArithmeticPatternTableBase & {
+    startValue: number;
+    ruleOperation: ArithmeticPatternRuleOperation;
+    ruleValue: number;
+    ruleText: string;
+    terms: readonly number[];
+    prompt: string;
+};
+
+export type ArithmeticPatternGenerateProblem = ArithmeticPatternGrade4Base & {
+    task: 'generate';
+    missingTermIndex: number;
+    response: number;
+};
+
+export type ArithmeticPatternIdentifyFeatureProblem = ArithmeticPatternGrade4Base & {
+    task: 'identify-feature';
+    featureOptions: readonly string[];
+    inferredFeature: string;
+    featureEvidence: string;
+    response: string;
+};
+
+export type ArithmeticPatternExplainFeatureProblem = ArithmeticPatternGrade4Base & {
+    task: 'explain-feature';
+    inferredFeature: string;
+    featureEvidence: string;
+    response: string;
+    propertyLaw: ArithmeticPatternProperty;
+    leftExpression: string;
+    rightExpression: string;
+    propertyResult: number;
+    explanation: string;
+    highlightedCells: Array<[number, number]>;
+};
+
+export type ArithmeticPatternProblem =
+    | ArithmeticPatternLegacyProblem
+    | ArithmeticPatternGenerateProblem
+    | ArithmeticPatternIdentifyFeatureProblem
+    | ArithmeticPatternExplainFeatureProblem;
 
 export type IntegerRoundingProblem = {
     number: number;
@@ -833,6 +882,49 @@ export type ShapePartitionProblem =
         answer: string;
     };
 
+export type ShapePatternToken = {
+    shape: 'square' | 'triangle';
+    orientation: 0 | 90 | 180 | 270;
+};
+
+export type ShapePatternTerm = {
+    position: number;
+    tokens: ShapePatternToken[];
+    caption: string;
+};
+
+export type ShapePatternEvidence = {
+    positions: number[];
+    observation: string;
+};
+
+type ShapePatternProblemBase = {
+    patternKind: 'growth-parity' | 'rotation-axis';
+    rule: string;
+    sequence: ShapePatternTerm[];
+    givenTermCount: number;
+    feature: string;
+    evidence: ShapePatternEvidence[];
+    explanation: string;
+};
+
+export type ShapePatternProblem = ShapePatternProblemBase & (
+    | {
+        task: 'generate';
+        prompt: string;
+        responsePositions: [number, number];
+    }
+    | {
+        task: 'identify';
+        prompt: string;
+        featureOptions: [string, string, string];
+    }
+    | {
+        task: 'explain';
+        prompt: string;
+    }
+);
+
 export type ShapeSquareArrayProblem = {
     task: 'interpret-unit' | 'interpret-coverage' | 'partition' | 'count' | 'count-area' | 'explain-product' | 'calculate-area';
     rows: 1 | 2 | 3 | 4 | 5;
@@ -1019,6 +1111,7 @@ export interface ViewTypeMap {
     'shape-build-shape': ShapeBuildShapeProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
     'shape-partition-equal': ShapePartitionProblem;
+    'shape-patterns': ShapePatternProblem;
     'shape-square-array': ShapeSquareArrayProblem;
     'area-distributive-model': AreaDecompositionProblem;
     'area-rectilinear-decomposition': AreaDecompositionProblem;

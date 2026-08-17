@@ -16,19 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const patternGenerationAnalysisImplementation = defineImplementationPackage({
-    id: 'pattern-generation-analysis',
-    description: 'Generate number and shape patterns, identify non-explicit features, and explain why those features continue.',
-    generators: [
-        { module: 'arithmetic-patterns', strategy: 'expand' },
-        { module: 'shape-patterns', strategy: 'new' }
-    ],
-    views: [
-        { module: 'operations-pattern-table', strategy: 'expand' },
-        { module: 'shape-patterns', strategy: 'new' }
-    ]
-});
-
 const multiDigitPlaceValueImplementation = defineImplementationPackage({
     id: 'multi-digit-place-value',
     description: 'Expose the same digit in adjacent places and derive the factor-ten relationship between its values.',
@@ -367,19 +354,19 @@ const explainGeneratedNumberPatternFeatureBuilder = new DatasetPermutationBuilde
 
 const generateShapePatternBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PatternRecognition,
-    Scope.PhysicalGeometry,
+    Scope.VisualGeometry,
     Ability.VisualArticulation
 ]);
 
 const identifyShapePatternFeatureBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PatternRecognition,
-    Scope.PhysicalGeometry,
+    Scope.VisualGeometry,
     Ability.ConceptClassification
 ]);
 
 const explainShapePatternFeatureBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PatternRecognition,
-    Scope.PhysicalGeometry,
+    Scope.VisualGeometry,
     Ability.ProcedureUnderstanding,
     Ability.TextualArticulation
 ]);
@@ -870,16 +857,16 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.OA.B.4-multiple-test', oneDigitMultipleTestBuilder),
     ...toTargets('4.OA.B.4-prime-classification', primeClassificationBuilder),
     ...toTargets('4.OA.B.4-composite-classification', compositeClassificationBuilder),
+    ...toTargets('4.OA.C.5-generate-number-pattern', generateNumberPatternBuilder),
+    ...toTargets('4.OA.C.5-identify-number-pattern-feature', identifyGeneratedNumberPatternFeatureBuilder),
+    ...toTargets('4.OA.C.5-explain-number-pattern-feature', explainGeneratedNumberPatternFeatureBuilder),
+    ...toTargets('4.OA.C.5-generate-shape-pattern', generateShapePatternBuilder),
+    ...toTargets('4.OA.C.5-identify-shape-pattern-feature', identifyShapePatternFeatureBuilder),
+    ...toTargets('4.OA.C.5-explain-shape-pattern-feature', explainShapePatternFeatureBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.OA.C.5-generate-number-pattern', generateNumberPatternBuilder, patternGenerationAnalysisImplementation, 'Show the starting value, rule, generated terms, and response.'),
-    ...toImplementationTodos('4.OA.C.5-identify-number-pattern-feature', identifyGeneratedNumberPatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Expose a feature supported by generated terms but not stated directly by the rule.'),
-    ...toImplementationTodos('4.OA.C.5-explain-number-pattern-feature', explainGeneratedNumberPatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Require a written causal explanation of why the generated feature continues.'),
-    ...toImplementationTodos('4.OA.C.5-generate-shape-pattern', generateShapePatternBuilder, patternGenerationAnalysisImplementation, 'Make the stated repeat or growth rule and learner-produced next terms agree.'),
-    ...toImplementationTodos('4.OA.C.5-identify-shape-pattern-feature', identifyShapePatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Require identification of a visible invariant or alternation not stated directly by the rule.'),
-    ...toImplementationTodos('4.OA.C.5-explain-shape-pattern-feature', explainShapePatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Show the generated shapes, inferred feature, and explanation of continuation together.'),
     ...toImplementationTodos('4.NBT.A.1-adjacent-place-scaling', adjacentPlaceScalingBuilder, multiDigitPlaceValueImplementation, 'Highlight the same digit in adjacent places and show both place values and their factor-ten equation.'),
     ...toImplementationTodos('4.NBT.A.2-read-write-base-ten-numerals', readWriteBaseTenNumeralsBuilder, multiDigitNumerationImplementation, 'Expose the complete numeral and the direction of transcription through one million.'),
     ...toImplementationTodos('4.NBT.A.2-write-number-names', writeNumberNamesBuilder, multiDigitNumerationImplementation, 'Map every digit and place to the correctly written English number name.'),

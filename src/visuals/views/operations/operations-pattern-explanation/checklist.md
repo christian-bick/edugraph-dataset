@@ -1,2 +1,2 @@
-- **Identity:** Selected operation-table cells, two equal property expressions, and the named law provide consistent evidence for explaining the arithmetic pattern.
-- **Modes:** Question Mode provides an empty writing area without revealing the explanation; Solution Mode replaces it with a concise written explanation of why the two expressions agree.
+- **Identity:** A visible rule and ordered terms identify a term-generation or causal feature-explanation task; explanations also show the named law and equation evidence.
+- **Modes:** Question Mode withholds the missing term or written explanation; Solution Mode reveals it with the supplied pattern evidence.

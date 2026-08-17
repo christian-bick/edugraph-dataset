@@ -1,4 +1,4 @@
-import {Area} from 'edugraph-ts';
+import {Ability, Area} from 'edugraph-ts';
 import {random} from '../../lib/random.ts';
 
 export const arithmeticOperations = [
@@ -19,6 +19,13 @@ export type ArithmeticWordProblemTask =
     | 'interpreted-remainder'
     | 'letter-equation'
     | 'reasonableness';
+
+export type ArithmeticPatternTask =
+    | 'legacy-identify'
+    | 'legacy-explain'
+    | 'generate'
+    | 'identify-feature'
+    | 'explain-feature';
 
 /** Resolves only an explicitly requested operation, never a related ontology label. */
 export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
@@ -66,6 +73,22 @@ export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWo
     }
     if (labels.includes(Area.Equation)) return 'letter-equation';
     return 'two-step';
+}
+
+/** Keeps Grade 3 table identification distinct from Grade 4 rule generation and analysis. */
+export function resolveArithmeticPatternTask(labels: string[]): ArithmeticPatternTask | undefined {
+    const hasLaw = [
+        Area.CommutativeLaw,
+        Area.AssociativeLaw,
+        Area.DistributiveLaw
+    ].some(law => labels.includes(law));
+    const classifies = labels.includes(Ability.ConceptClassification);
+    const executes = labels.includes(Ability.ProcedureExecution);
+    if (hasLaw) return executes ? 'explain-feature' : 'legacy-explain';
+    if (classifies && executes) return 'identify-feature';
+    if (executes) return 'generate';
+    if (classifies) return 'legacy-identify';
+    return undefined;
 }
 
 export const operationNames: Record<ArithmeticOperationLabel, 'addition' | 'subtraction' | 'multiplication' | 'division'> = {

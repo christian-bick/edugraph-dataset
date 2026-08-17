@@ -1,2 +1,2 @@
-- **Identity:** A complete addition or multiplication table highlights one row, and the response choices classify the constant change visible across that row.
-- **Modes:** Question Mode leaves every pattern choice neutral; Solution Mode identifies the rule that exactly matches the highlighted sequence.
+- **Identity:** Generation shows a starting value, rule, and ordered terms; classification explicitly asks learners to classify generated terms into supplied feature categories or a highlighted table row into supplied rule categories.
+- **Modes:** Question Mode withholds the missing term or selected feature; Solution Mode reveals it with the supplied pattern evidence while retained table choices highlight only the correct rule.

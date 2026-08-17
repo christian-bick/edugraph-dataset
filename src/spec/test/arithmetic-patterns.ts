@@ -2,8 +2,23 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import {CompetencyTarget} from '../../types/ml-engine.ts';
 
+const generate = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PatternRecognition,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([[Area.Addition], [Area.Multiplication]]);
+
 const identify = new DatasetPermutationBuilder()
-    .addLabels([Area.PatternRecognition, Scope.ArabicNumerals, Scope.Base10, Ability.ConceptClassification])
+    .addLabels([
+        Area.PatternRecognition,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Ability.ProcedureExecution,
+        Ability.ConceptClassification
+    ])
     .applyLabelVariants([[Area.Addition], [Area.Multiplication]]);
 
 const explain = new DatasetPermutationBuilder()
@@ -11,6 +26,7 @@ const explain = new DatasetPermutationBuilder()
         Area.PatternRecognition,
         Scope.ArabicNumerals,
         Scope.Base10,
+        Ability.ProcedureExecution,
         Ability.ProcedureUnderstanding,
         Ability.TextualArticulation
     ])
@@ -23,6 +39,7 @@ const explain = new DatasetPermutationBuilder()
     ]);
 
 export const spec: CompetencyTarget[] = [
+    ...toTargets('test-arithmetic-pattern-generate', generate),
     ...toTargets('test-arithmetic-pattern-identify', identify),
     ...toTargets('test-arithmetic-pattern-explain', explain)
 ];
