@@ -1,4 +1,4 @@
-- **Identity:** Varied examples of one shape and four statements make distinguishing a defining attribute from incidental color, orientation, or size identifiable.
-- **Modes:** Question Mode leaves every statement neutral; Solution Mode identifies only the defining attribute.
+- **Identity:** Varied figures and visible sides, corners, and marks support classifying defining attributes, counts, line relations, angle types, or category membership.
+- **Modes:** Question Mode keeps every choice or membership neutral; Solution Mode identifies the answer or assigns every positive and negative membership and explains the visible evidence.
 - **Attribute counts:** Vertex-count tasks expose every polygon vertex, while equal-face tasks show complete face nets whose face count and congruence are inspectable.
-- **Shape subsumption:** Rhombus, rectangle, and square tasks name the subtype, show its defining attributes and varied examples, and identify quadrilateral as the larger category.
+- **Shape subsumption:** Quadrilateral and right-triangle tasks show defining evidence and state the larger category; right triangles retain a visible square-corner marker.

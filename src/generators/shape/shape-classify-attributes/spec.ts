@@ -22,7 +22,18 @@ export const ShapeClassifyAttributesGeneratorSchema = {
             Area.Quadrilateral,
             Area.Pentagon,
             Area.Hexagon,
-            Area.Cube
+            Area.Cube,
+            Area.RightTriangle
+        ],
+        matchAllExactLabels
+    ],
+    criteria: [
+        [
+            Area.ParallelismRelation,
+            Area.PerpendicularityRelation,
+            Area.RightAngle,
+            Area.AcuteAngle,
+            Area.ObtuseAngle
         ],
         matchAllExactLabels
     ],

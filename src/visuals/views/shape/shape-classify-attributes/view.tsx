@@ -2,8 +2,15 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {
     PlaneShapeName,
+    RightTriangleCategoryProblem,
+    ShapeAngleClassificationProblem,
     ShapeAttributeClassificationProblem,
+    ShapeClassificationCoordinate,
+    ShapeClassificationFigure,
+    ShapeClassificationMarker,
+    ShapeClassificationStroke,
     ShapeCountOption,
+    ShapeLineRelationClassificationProblem,
     ShapeSubsumptionProblem
 } from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
@@ -13,6 +20,7 @@ import {
     ShapeClassifyAttributesViewConfig,
     ShapeClassifyAttributesViewSchema
 } from './spec.ts';
+import {isValidGrade4ShapeClassificationProblem} from './helpers.ts';
 import '../../../../tailwind.css';
 
 const SUPPORTED_SHAPES: readonly PlaneShapeName[] = [
@@ -23,6 +31,217 @@ const SUPPORTED_SHAPES: readonly PlaneShapeName[] = [
     'rectangle',
     'hexagon'
 ];
+
+const markerPoint = (
+    center: ShapeClassificationCoordinate,
+    radius: number,
+    degrees: number
+): ShapeClassificationCoordinate => {
+    const radians = degrees * Math.PI / 180;
+    return {
+        x: center.x + radius * Math.cos(radians),
+        y: center.y + radius * Math.sin(radians)
+    };
+};
+
+const angleMarkerPath = (
+    center: ShapeClassificationCoordinate,
+    radius: number,
+    startDegrees: number,
+    endDegrees: number
+): string => {
+    const start = markerPoint(center, radius, startDegrees);
+    const end = markerPoint(center, radius, endDegrees);
+    const large = Math.abs(endDegrees - startDegrees) > 180 ? 1 : 0;
+    const sweep = endDegrees >= startDegrees ? 1 : 0;
+    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${large} ${sweep} ${end.x} ${end.y}`;
+};
+
+function EvidenceMarker({marker}: {marker: ShapeClassificationMarker | null}) {
+    if (marker === null) return null;
+    if (marker.kind === 'angle-arc') {
+        return (
+            <path
+                d={angleMarkerPath(marker.center, marker.radius, marker.startDegrees, marker.endDegrees)}
+                fill="none"
+                stroke="#d97706"
+                strokeWidth="2.8"
+                strokeLinecap="round"
+            />
+        );
+    }
+    if (marker.kind === 'right-angle') {
+        return (
+            <polyline
+                points={marker.points.map(point => `${point.x},${point.y}`).join(' ')}
+                fill="none"
+                stroke="#d97706"
+                strokeWidth="2.8"
+                strokeLinejoin="round"
+            />
+        );
+    }
+    return (
+        <g stroke="#d97706" strokeWidth="2.8" strokeLinecap="round">
+            {marker.strokes.map((stroke, index) => (
+                <line
+                    key={index}
+                    x1={stroke.start.x}
+                    y1={stroke.start.y}
+                    x2={stroke.end.x}
+                    y2={stroke.end.y}
+                />
+            ))}
+        </g>
+    );
+}
+
+function ClassificationFigure({
+    figure,
+    evidence,
+    marker,
+    solvedPositive
+}: {
+    figure: ShapeClassificationFigure;
+    evidence: [ShapeClassificationStroke, ShapeClassificationStroke];
+    marker: ShapeClassificationMarker | null;
+    solvedPositive: boolean;
+}) {
+    const points = figure.vertices.map(point => `${point.x},${point.y}`).join(' ');
+    const evidenceColor = solvedPositive ? '#047857' : '#4f46e5';
+    return (
+        <svg viewBox="0 0 100 100" className="h-[118px] w-[150px]" aria-hidden="true">
+            <polygon points={points} fill="#eff6ff" stroke="#334155" strokeWidth="2.8" strokeLinejoin="round" />
+            {evidence.map((stroke, index) => (
+                <line
+                    key={index}
+                    x1={stroke.start.x}
+                    y1={stroke.start.y}
+                    x2={stroke.end.x}
+                    y2={stroke.end.y}
+                    stroke={evidenceColor}
+                    strokeWidth="4.2"
+                    strokeLinecap="round"
+                />
+            ))}
+            <EvidenceMarker marker={marker} />
+            {figure.vertices.map((point, index) => (
+                <circle key={index} cx={point.x} cy={point.y} r="2.1" fill="#ffffff" stroke="#334155" strokeWidth="1.4" />
+            ))}
+        </svg>
+    );
+}
+
+type Grade4Option =
+    | ShapeLineRelationClassificationProblem['options'][number]
+    | ShapeAngleClassificationProblem['options'][number]
+    | RightTriangleCategoryProblem['options'][number];
+
+function MembershipOption({
+    option,
+    evidence,
+    marker,
+    positiveLabel,
+    negativeLabel,
+    isSolutionView
+}: {
+    option: Grade4Option;
+    evidence: [ShapeClassificationStroke, ShapeClassificationStroke];
+    marker: ShapeClassificationMarker | null;
+    positiveLabel: string;
+    negativeLabel: string;
+    isSolutionView: boolean;
+}) {
+    const solutionClass = !isSolutionView
+        ? 'border-slate-200 bg-slate-50'
+        : option.satisfies
+            ? 'border-emerald-600 bg-emerald-50'
+            : 'border-rose-300 bg-rose-50';
+    return (
+        <div
+            className={`relative flex h-[190px] flex-col items-center justify-center rounded-xl border-2 px-3 pb-2 pt-4 ${solutionClass}`}
+            role="img"
+            aria-label={`Figure ${option.id}, ${option.figure.vertices.length}-sided polygon with two highlighted sides and ${
+                option.marker === null
+                    ? 'no geometric marker'
+                    : option.marker.kind === 'parallel'
+                        ? 'two matching marks across the highlighted sides'
+                        : option.marker.kind === 'right-angle'
+                            ? 'a small square corner marker'
+                            : 'a curved angle marker'
+            }${
+                isSolutionView ? `, ${option.satisfies ? positiveLabel : negativeLabel}` : ', membership not revealed'
+            }`}
+        >
+            <div className={`absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-sm font-extrabold text-white ${
+                isSolutionView && option.satisfies ? 'bg-emerald-700' : 'bg-slate-700'
+            }`}>
+                {option.id}
+            </div>
+            {isSolutionView && (
+                <div className={`absolute right-3 top-3 rounded-full px-2.5 py-1 text-[0.66rem] font-extrabold uppercase tracking-wide ${
+                    option.satisfies ? 'bg-emerald-700 text-white' : 'bg-rose-100 text-rose-800'
+                }`}>
+                    {option.satisfies ? positiveLabel : negativeLabel}
+                </div>
+            )}
+            <ClassificationFigure
+                figure={option.figure}
+                evidence={evidence}
+                marker={marker}
+                solvedPositive={isSolutionView && option.satisfies}
+            />
+            <div className="mt-1 text-[0.82rem] font-bold text-slate-700">Figure {option.id}</div>
+        </div>
+    );
+}
+
+function Grade4ClassificationLayout({
+    data,
+    isSolutionView
+}: {
+    data: ShapeLineRelationClassificationProblem | ShapeAngleClassificationProblem | RightTriangleCategoryProblem;
+    isSolutionView: boolean;
+}) {
+    const isRightTriangle = data.task === 'classify-right-triangle-category';
+    const options: readonly Grade4Option[] = data.options;
+    return (
+        <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
+            <div className="flex min-h-[54px] items-center justify-center px-4 text-center text-[1.2rem] font-extrabold leading-snug text-slate-700">
+                {data.prompt}
+            </div>
+            {isRightTriangle && (
+                <div className="mt-2 flex items-center justify-center gap-2 rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-2 text-center">
+                    {data.attributes.map(attribute => (
+                        <span key={attribute} className="rounded-full border border-blue-200 bg-white px-3 py-1 text-[0.78rem] font-bold text-blue-800">
+                            {attribute}
+                        </span>
+                    ))}
+                    <span className="ml-2 text-[0.84rem] font-extrabold text-blue-800">{data.categoryStatement}</span>
+                </div>
+            )}
+            <div className="mt-3 grid grid-cols-2 gap-3">
+                {options.map(option => (
+                    <MembershipOption
+                        key={option.id}
+                        option={option}
+                        evidence={'evidenceStrokes' in option ? option.evidenceStrokes : option.evidenceRays}
+                        marker={option.marker}
+                        positiveLabel={data.positiveLabel}
+                        negativeLabel={data.negativeLabel}
+                        isSolutionView={isSolutionView}
+                    />
+                ))}
+            </div>
+            {isSolutionView && (
+                <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
+                    <div className="text-[0.98rem] font-extrabold">{data.answerStatement}</div>
+                    <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                </div>
+            )}
+        </div>
+    );
+}
 
 function ShapeExample({shape, appearance}: {shape: PlaneShapeName; appearance: ShapeAppearance}) {
     const common = {
@@ -291,9 +510,34 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-classify-attributes'>;
 }
 
-const ShapeClassifyAttributesCore = ({config: _config, payload}: CoreProps) => {
+const ShapeClassifyAttributesCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
+
+    if (data.task === 'classify-line-relation'
+        || data.task === 'classify-angle-size'
+        || data.task === 'classify-right-triangle-category') {
+        const requiredFields = [
+            'task',
+            'prompt',
+            'positiveLabel',
+            'negativeLabel',
+            'options',
+            'answerIds',
+            'answerStatement',
+            'explanation'
+        ];
+        validateProblemData('shape-classify-attributes', data, data.task === 'classify-right-triangle-category'
+            ? [...requiredFields, 'attributes', 'category', 'categoryStatement']
+            : [...requiredFields, 'criterion']);
+        if (!isValidGrade4ShapeClassificationProblem(data, config.visualRecognition)) {
+            throw new ViewValidationError(
+                'shape-classify-attributes',
+                'Grade 4 classification geometry, evidence, membership, and prose must agree.'
+            );
+        }
+        return <Grade4ClassificationLayout data={data} isSolutionView={isSolutionView} />;
+    }
 
     if (data.task === 'classify-quadrilateral-subcategory') {
         validateProblemData('shape-classify-attributes', data, [

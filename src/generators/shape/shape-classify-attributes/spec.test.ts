@@ -1,7 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
 import {PLANE_SHAPE_LABELS, shapeNameFromLabel} from '../helpers.ts';
 import {ShapeClassifyAttributesGenerator} from './generator.ts';
 import {spec} from './spec.ts';
@@ -81,5 +81,64 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         if (stub.data.task !== 'classify-count') return;
         expect(stub.data).toMatchObject({attribute: 'equal-faces', requiredCount: 6});
         expect(stub.tags).toEqual(expect.arrayContaining([Scope.FaceCount, Scope.Equal, Area.Cube]));
+    });
+
+    it.each([
+        [Area.ParallelismRelation, 'classify-line-relation', 'de328e3a'],
+        [Area.PerpendicularityRelation, 'classify-line-relation', 'f9f6aed4'],
+        [Area.RightAngle, 'classify-angle-size', 'e71f1a71'],
+        [Area.AcuteAngle, 'classify-angle-size', '01ffd3a5'],
+        [Area.ObtuseAngle, 'classify-angle-size', '9764bcf9']
+    ] as const)('resolves the corrected Grade 4 %s classification target', (
+        criterion,
+        task,
+        expectedHash
+    ) => {
+        const labels = [
+            Area.ShapeClassification,
+            criterion,
+            Scope.ShapeAttributes,
+            Ability.ConceptClassification
+        ];
+        expect(labelSetHash(labels)).toBe(expectedHash);
+        const stub = generateWithLabels(generator, labels);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.task).toBe(task);
+        expect(stub!.tags).toContain(criterion);
+    });
+
+    it('resolves the corrected Grade 4 right-triangle category target', () => {
+        const labels = [
+            Area.ShapeSubsumption,
+            Area.RightTriangle,
+            Area.RightAngle,
+            Scope.ShapeAttributes,
+            Ability.ConceptClassification,
+            Ability.VisualRecognition
+        ];
+        expect(labelSetHash(labels)).toBe('7352de55');
+        const stub = generateWithLabels(generator, labels);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.task).toBe('classify-right-triangle-category');
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            Area.ShapeSubsumption,
+            Area.RightTriangle,
+            Area.RightAngle
+        ]));
+    });
+
+    it.each([
+        [Area.ParallelismRelation, 'classify-line-relation'],
+        [Area.PerpendicularityRelation, 'classify-line-relation'],
+        [Area.RightAngle, 'classify-angle-size'],
+        [Area.AcuteAngle, 'classify-angle-size'],
+        [Area.ObtuseAngle, 'classify-angle-size']
+    ] as const)('generates a truthful classification payload for overlapping 4.G.A.1 %s recognition', (
+        criterion,
+        task
+    ) => {
+        const stub = generateWithLabels(generator, [criterion, Ability.VisualRecognition]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.task).toBe(task);
     });
 });

@@ -1204,10 +1204,137 @@ export type ShapeSubsumptionProblem = {
     answer: ShapeCategoryOption['id'];
 };
 
+export type ShapeClassificationCoordinate = {
+    x: number;
+    y: number;
+};
+
+export type ShapeClassificationStroke = {
+    start: ShapeClassificationCoordinate;
+    end: ShapeClassificationCoordinate;
+};
+
+export type ShapeClassificationMarker =
+    | {
+        kind: 'angle-arc';
+        center: ShapeClassificationCoordinate;
+        radius: number;
+        startDegrees: number;
+        endDegrees: number;
+    }
+    | {
+        kind: 'right-angle';
+        points: [
+            ShapeClassificationCoordinate,
+            ShapeClassificationCoordinate,
+            ShapeClassificationCoordinate
+        ];
+    }
+    | {
+        kind: 'parallel';
+        strokes: [
+            ShapeClassificationStroke,
+            ShapeClassificationStroke
+        ];
+    };
+
+export type ShapeClassificationFigure = {
+    vertices: ShapeClassificationCoordinate[];
+    sides: ShapeClassificationStroke[];
+};
+
+export type ShapeLineRelationOption = {
+    id: ShapeAttributeOption['id'];
+    figureName: string;
+    figure: ShapeClassificationFigure;
+    relations: Array<'parallel' | 'perpendicular'>;
+    evidenceStrokes: [ShapeClassificationStroke, ShapeClassificationStroke];
+    marker: ShapeClassificationMarker | null;
+    satisfies: boolean;
+};
+
+export type ShapeLineRelationClassificationProblem = {
+    task: 'classify-line-relation';
+    criterion: 'parallel' | 'perpendicular';
+    prompt: string;
+    positiveLabel: string;
+    negativeLabel: string;
+    options: [
+        ShapeLineRelationOption,
+        ShapeLineRelationOption,
+        ShapeLineRelationOption,
+        ShapeLineRelationOption
+    ];
+    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
+    answerStatement: string;
+    explanation: string;
+};
+
+export type ShapeAngleClassOption = {
+    id: ShapeAttributeOption['id'];
+    figureName: string;
+    figure: ShapeClassificationFigure;
+    angleClasses: Array<'right' | 'acute' | 'obtuse'>;
+    angleClass: 'right' | 'acute' | 'obtuse';
+    evidenceRays: [ShapeClassificationStroke, ShapeClassificationStroke];
+    marker: ShapeClassificationMarker;
+    satisfies: boolean;
+};
+
+export type ShapeAngleClassificationProblem = {
+    task: 'classify-angle-size';
+    criterion: 'right' | 'acute' | 'obtuse';
+    prompt: string;
+    positiveLabel: string;
+    negativeLabel: string;
+    options: [
+        ShapeAngleClassOption,
+        ShapeAngleClassOption,
+        ShapeAngleClassOption,
+        ShapeAngleClassOption
+    ];
+    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
+    answerStatement: string;
+    explanation: string;
+};
+
+export type ShapeRightTriangleOption = {
+    id: ShapeAttributeOption['id'];
+    figureName: string;
+    figure: ShapeClassificationFigure;
+    angleClasses: Array<'right' | 'acute' | 'obtuse'>;
+    angleClass: 'right' | 'acute' | 'obtuse';
+    evidenceRays: [ShapeClassificationStroke, ShapeClassificationStroke];
+    marker: ShapeClassificationMarker;
+    satisfies: boolean;
+};
+
+export type RightTriangleCategoryProblem = {
+    task: 'classify-right-triangle-category';
+    prompt: 'Which figures are right triangles?';
+    positiveLabel: 'right triangle';
+    negativeLabel: 'not a right triangle';
+    options: [
+        ShapeRightTriangleOption,
+        ShapeRightTriangleOption,
+        ShapeRightTriangleOption,
+        ShapeRightTriangleOption
+    ];
+    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
+    attributes: ['3 straight sides', '1 right angle'];
+    category: 'triangle';
+    categoryStatement: 'Every right triangle is a triangle.';
+    answerStatement: string;
+    explanation: string;
+};
+
 export type ShapeAttributeClassificationProblem =
     | ShapeDefiningAttributeClassificationProblem
     | ShapeCountClassificationProblem
-    | ShapeSubsumptionProblem;
+    | ShapeSubsumptionProblem
+    | ShapeLineRelationClassificationProblem
+    | ShapeAngleClassificationProblem
+    | RightTriangleCategoryProblem;
 
 export type ShapePartsConstructionProblem = {
     target: PlaneShapeName;

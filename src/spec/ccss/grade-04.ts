@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const lineAngleShapeClassificationImplementation = defineImplementationPackage({
-    id: 'line-angle-shape-classification',
-    description: 'Extend shape classification to parallel and perpendicular lines, angle sizes, and right-triangle subsumption.',
-    generators: [{ module: 'shape-classify-attributes', strategy: 'expand' }],
-    views: [{ module: 'shape-classify-attributes', strategy: 'expand' }]
-});
-
 const lineSymmetryImplementation = defineImplementationPackage({
     id: 'line-symmetry',
     description: 'Identify line-symmetric figures and draw fold-valid lines of symmetry.',
@@ -790,13 +783,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.MD.C.7-additive-angle-measure', additiveAngleMeasureBuilder),
     ...toTargets('4.MD.C.7-unknown-angles', unknownAnglesBuilder),
     ...toTargets('4.G.A.1-draw-geometric-primitives', drawGeometricPrimitivesBuilder),
-    ...toTargets('4.G.A.1-identify-geometric-primitives', identifyGeometricPrimitivesBuilder)
+    ...toTargets('4.G.A.1-identify-geometric-primitives', identifyGeometricPrimitivesBuilder),
+    ...toTargets('4.G.A.2-classify-line-relations', classifyByLineRelationsBuilder),
+    ...toTargets('4.G.A.2-classify-angle-size', classifyByAngleSizeBuilder),
+    ...toTargets('4.G.A.2-right-triangle-category', recognizeRightTrianglesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.G.A.2-classify-line-relations', classifyByLineRelationsBuilder, lineAngleShapeClassificationImplementation, 'Expose marked or measurable line relations that justify the selected category.'),
-    ...toImplementationTodos('4.G.A.2-classify-angle-size', classifyByAngleSizeBuilder, lineAngleShapeClassificationImplementation, 'Expose angle-size evidence that justifies the selected category.'),
-    ...toImplementationTodos('4.G.A.2-right-triangle-category', recognizeRightTrianglesBuilder, lineAngleShapeClassificationImplementation, 'Show a right-angle marker and make the triangle-category relationship explicit.'),
     ...toImplementationTodos('4.G.A.3-identify-line-symmetry', identifyLineSymmetryBuilder, lineSymmetryImplementation, 'Show how a proposed fold line maps corresponding visible points or parts.'),
     ...toImplementationTodos('4.G.A.3-draw-line-symmetry', drawLineSymmetryBuilder, lineSymmetryImplementation, 'Require completed lines that divide the figure into visibly reflected halves.'),
     ...toImplementationTodos('4.NF.A.1-equivalent-fraction-scaling', equivalentFractionScalingBuilder, fractionEquivalenceScalingImplementation, 'Require scaling, recognition of equality, and an explanation of changed part count and size but unchanged amount.'),
