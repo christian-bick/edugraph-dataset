@@ -1336,6 +1336,71 @@ export type ShapeAttributeClassificationProblem =
     | ShapeAngleClassificationProblem
     | RightTriangleCategoryProblem;
 
+export type LineSymmetryCoordinate = {
+    x: number;
+    y: number;
+};
+
+export type LineSymmetryCorrespondence = {
+    first: LineSymmetryCoordinate;
+    second: LineSymmetryCoordinate;
+    foldPoint: LineSymmetryCoordinate;
+    distanceToAxis: number;
+};
+
+export type LineSymmetryAxis = {
+    id: 'vertical' | 'horizontal' | 'diagonal-rise' | 'diagonal-fall';
+    start: LineSymmetryCoordinate;
+    end: LineSymmetryCoordinate;
+    equation: {
+        a: number;
+        b: number;
+        c: number;
+    };
+    correspondences: LineSymmetryCorrespondence[];
+};
+
+export type LineSymmetryFigure = {
+    figureKind: 'isosceles-triangle' | 'rectangle' | 'square' | 'scalene-triangle' | 'parallelogram';
+    vertices: LineSymmetryCoordinate[];
+    validAxes: LineSymmetryAxis[];
+    axisCount: 0 | 1 | 2 | 4;
+};
+
+export type LineSymmetryIdentificationOption = {
+    id: ShapeAttributeOption['id'];
+    figure: LineSymmetryFigure;
+    hasLineSymmetry: boolean;
+};
+
+export type IdentifyLineSymmetryProblem = {
+    task: 'identify-line-symmetry';
+    prompt: 'Classify each figure by whether it can be folded along a line into exactly matching halves.';
+    positiveLabel: 'has line symmetry';
+    negativeLabel: 'does not have line symmetry';
+    options: [
+        LineSymmetryIdentificationOption,
+        LineSymmetryIdentificationOption,
+        LineSymmetryIdentificationOption,
+        LineSymmetryIdentificationOption
+    ];
+    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
+    answerStatement: string;
+    explanation: 'Each selected figure can be folded along a valid line so its matching parts coincide.';
+};
+
+export type DrawLineSymmetryProblem = {
+    task: 'draw-line-symmetry';
+    prompt: 'Draw every line where folding the figure makes exactly matching halves.';
+    figure: LineSymmetryFigure;
+    completedAxes: LineSymmetryAxis[];
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type ShapeLineSymmetryProblem = IdentifyLineSymmetryProblem | DrawLineSymmetryProblem;
+
 export type ShapePartsConstructionProblem = {
     target: PlaneShapeName;
     sides: number;
@@ -2088,6 +2153,7 @@ export interface ViewTypeMap {
     'shape-classify-dim': ShapeClassifyDimProblem;
     'shape-compare-attributes': ShapeCompareAttributesProblem;
     'shape-classify-attributes': ShapeAttributeClassificationProblem;
+    'shape-line-symmetry': ShapeLineSymmetryProblem;
     'shape-same-attribute': ShapeSameAttributeProblem;
     'shape-build-shape': ShapeBuildShapeProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;

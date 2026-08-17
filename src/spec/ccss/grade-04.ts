@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const lineSymmetryImplementation = defineImplementationPackage({
-    id: 'line-symmetry',
-    description: 'Identify line-symmetric figures and draw fold-valid lines of symmetry.',
-    generators: [{ module: 'shape-line-symmetry', strategy: 'new' }],
-    views: [{ module: 'shape-line-symmetry', strategy: 'new' }]
-});
-
 const fractionEquivalenceScalingImplementation = defineImplementationPackage({
     id: 'fraction-equivalence-scaling',
     description: 'Explain, recognize, and generate equivalent fractions through common numerator-and-denominator scaling.',
@@ -578,16 +571,14 @@ const recognizeRightTrianglesBuilder = new DatasetPermutationBuilder().addLabels
 ]);
 
 const identifyLineSymmetryBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.SymmetryRelation,
-    Area.Reflection,
+    Area.ShapeReflection,
     Scope.Foldable,
     Ability.ConceptClassification,
     Ability.VisualRecognition
 ]);
 
 const drawLineSymmetryBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.SymmetryRelation,
-    Area.Reflection,
+    Area.ShapeReflection,
     Scope.Foldable,
     Ability.VisualArticulation
 ]);
@@ -786,12 +777,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.G.A.1-identify-geometric-primitives', identifyGeometricPrimitivesBuilder),
     ...toTargets('4.G.A.2-classify-line-relations', classifyByLineRelationsBuilder),
     ...toTargets('4.G.A.2-classify-angle-size', classifyByAngleSizeBuilder),
-    ...toTargets('4.G.A.2-right-triangle-category', recognizeRightTrianglesBuilder)
+    ...toTargets('4.G.A.2-right-triangle-category', recognizeRightTrianglesBuilder),
+    ...toTargets('4.G.A.3-identify-line-symmetry', identifyLineSymmetryBuilder),
+    ...toTargets('4.G.A.3-draw-line-symmetry', drawLineSymmetryBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.G.A.3-identify-line-symmetry', identifyLineSymmetryBuilder, lineSymmetryImplementation, 'Show how a proposed fold line maps corresponding visible points or parts.'),
-    ...toImplementationTodos('4.G.A.3-draw-line-symmetry', drawLineSymmetryBuilder, lineSymmetryImplementation, 'Require completed lines that divide the figure into visibly reflected halves.'),
     ...toImplementationTodos('4.NF.A.1-equivalent-fraction-scaling', equivalentFractionScalingBuilder, fractionEquivalenceScalingImplementation, 'Require scaling, recognition of equality, and an explanation of changed part count and size but unchanged amount.'),
     ...toImplementationTodos('4.NF.A.2-unlike-fraction-comparison', unlikeFractionComparisonBuilder, unlikeFractionComparisonImplementation, 'Show unlike original fractions, a same-whole comparison strategy, the relation symbol, and visual justification.'),
     ...toImplementationTodos('4.NF.B.3a-interpret-fraction-arithmetic', interpretFractionAdditionSubtractionBuilder, grade4FractionArithmeticImplementation, 'Make the same-whole join or separate model agree with the fraction equation.'),
