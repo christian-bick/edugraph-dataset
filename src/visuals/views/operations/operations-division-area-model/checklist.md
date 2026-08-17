@@ -1,0 +1,2 @@
+- **Identity:** The dividend and divisor are decomposed by place value, and every ordered partial-quotient step visibly connects a quotient chunk, multiplication check, subtraction, and amount remaining.
+- **Modes:** Question Mode keeps all quotient chunks, partial products, running remainders, final quotient/remainder, check, and explanation unresolved; Solution Mode reveals every supplied step and the complete quotient-with-remainder reasoning.

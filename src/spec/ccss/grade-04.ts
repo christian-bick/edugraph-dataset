@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const grade4MultiDigitDivisionImplementation = defineImplementationPackage({
-    id: 'grade4-multi-digit-division',
-    description: 'Find quotients and remainders for the complete Grade 4 dividend/divisor digit profiles with visible place-value reasoning.',
-    generators: [{ module: 'multi-digit-division', strategy: 'new' }],
-    views: [{ module: 'operations-division-area-model', strategy: 'new' }]
-});
-
 const measurementConversionsImplementation = defineImplementationPackage({
     id: 'measurement-conversions',
     description: 'Relate Grade 4 unit pairs, convert larger units to smaller units, and record conversion sequences in two-column tables.',
@@ -440,6 +433,7 @@ const grade4MultiDigitDivisionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Division,
         Area.Modulo,
+        Scope.TwoOperands,
         Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
@@ -831,11 +825,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NBT.A.2-compare-multi-digit-numbers', compareMultiDigitNumbersBuilder),
     ...toTargets('4.NBT.A.3-round-to-any-place', grade4IntegerRoundingBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder),
-    ...toTargets('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder)
+    ...toTargets('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder),
+    ...toTargets('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder, grade4MultiDigitDivisionImplementation, 'Show dividend and divisor place-value decomposition, partial quotients, multiplication checks, quotient, and remainder that agree.'),
     ...toImplementationTodos('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder, measurementConversionsImplementation, 'Show both units, one common quantity, their relative-size relation, and numerical factor.'),
     ...toImplementationTodos('4.MD.A.1-convert-larger-to-smaller', convertLargerToSmallerUnitsBuilder, measurementConversionsImplementation, 'Show the source measure, conversion factor, multiplication equation, destination unit, and result.'),
     ...toImplementationTodos('4.MD.A.1-two-column-tables', twoColumnConversionTableBuilder, measurementConversionsImplementation, 'Show labeled columns, ordered equivalent pairs, the constant factor, and completed entries.'),

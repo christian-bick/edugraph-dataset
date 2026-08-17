@@ -90,6 +90,54 @@ export type MultiDigitMultiplicationProblem = {
     explanation: string;
 };
 
+export type DivisionPlaceValuePart = {
+    digit: number;
+    placeValue: 1 | 10 | 100 | 1000;
+    placeName: 'ones' | 'tens' | 'hundreds' | 'thousands';
+    value: number;
+};
+
+export type DivisionOperandDecomposition = {
+    operand: number;
+    parts: readonly DivisionPlaceValuePart[];
+    expandedExpression: string;
+    equation: string;
+};
+
+export type DivisionPartialQuotientStep = {
+    quotientDigit: number;
+    placeValue: 1 | 10 | 100 | 1000;
+    placeName: 'ones' | 'tens' | 'hundreds' | 'thousands';
+    partialQuotient: number;
+    remainingBefore: number;
+    partialProduct: number;
+    remainingAfter: number;
+    questionMultiplicationEquation: string;
+    solutionMultiplicationEquation: string;
+    questionSubtractionEquation: string;
+    solutionSubtractionEquation: string;
+};
+
+export type MultiDigitDivisionProblem = {
+    task: 'multi-digit-division';
+    dividend: number;
+    divisor: number;
+    quotient: number;
+    remainder: number;
+    dividendDigits: 1 | 2 | 3 | 4;
+    divisorDigits: 1;
+    dividendDecomposition: DivisionOperandDecomposition;
+    divisorDecomposition: DivisionOperandDecomposition;
+    partialQuotients: readonly DivisionPartialQuotientStep[];
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    partialQuotientsSumEquation: string;
+    multiplicationCheckEquation: string;
+    remainderStatement: string;
+    explanation: string;
+};
+
 export type PositiveFactorPair = {
     lowerFactor: number;
     upperFactor: number;
@@ -1212,6 +1260,7 @@ export interface ViewTypeMap {
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;
+    'operations-division-area-model': MultiDigitDivisionProblem;
     'numbers-factors-multiples': FactorMultipleRelationsProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticPairProblem;
