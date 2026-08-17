@@ -1657,6 +1657,8 @@ export type FractionArithmeticModelGroupRole =
     | 'remaining'
     | 'removed'
     | 'decomposition-part'
+    | 'unit-part'
+    | 'fraction-group'
     | 'result';
 
 export type FractionArithmeticModelGroup = {
@@ -1692,13 +1694,15 @@ export type FractionArithmeticStory = {
         | 'poster-separate'
         | 'mosaic-decomposition'
         | 'route-combination'
-        | 'route-difference';
+        | 'route-difference'
+        | 'ribbon-unit-multiple'
+        | 'equal-fraction-groups';
     context: string;
     question: string;
     wholeLabel: string;
     unitLabel: string;
     givenDisplays: [string] | [string, string];
-    unknownRole: 'operation' | 'decompositions' | 'result';
+    unknownRole: 'operation' | 'decompositions' | 'result' | 'product' | 'multiplier';
 };
 
 export type FractionArithmeticCommon = {
@@ -1768,10 +1772,64 @@ export type MixedFractionOperationProblem = FractionArithmeticCommon & {
     solutionModel: FractionArithmeticModel;
 };
 
+export type FractionMultiplicationCommon = {
+    operation: 'multiplication';
+    denominator: FractionParts;
+    sharedWhole: 1;
+    referenceId: 'same-whole';
+    story: FractionArithmeticStory;
+    productKind: 'proper' | 'improper';
+    wholeFactor: number;
+    wholeFactorDisplay: string;
+    unitFraction: LikeDenominatorFractionValue;
+    product: LikeDenominatorFractionValue;
+    groupCount: number;
+    partsPerGroup: number;
+    totalUnitParts: number;
+    solutionModel: FractionArithmeticModel;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    equationChain: string;
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type UnitFractionMultipleProblem = FractionMultiplicationCommon & {
+    task: 'unit-fraction-multiple';
+    productKind: 'proper' | 'improper';
+    partsPerGroup: 1;
+    questionModel: FractionArithmeticModel;
+    unitSizeStatement: string;
+    unitMultipleEquation: string;
+};
+
+export type WholeNumberFractionProductCommon = FractionMultiplicationCommon & {
+    fractionFactor: LikeDenominatorFractionValue;
+    questionGroupModels: FractionArithmeticModel[];
+    fractionAsUnitMultipleEquation: string;
+    iteratedUnitEquation: string;
+};
+
+export type WholeNumberFractionProductProblem = WholeNumberFractionProductCommon & {
+    task: 'whole-number-fraction-product';
+};
+
+export type FractionMultiplicationWordProblem = WholeNumberFractionProductCommon & {
+    task: 'fraction-multiplication-problem';
+    lowerWhole: number;
+    upperWhole: number;
+    boundsStatement: string;
+};
+
 export type FractionArithmeticProblem =
     | FractionBinaryOperationProblem
     | FractionDecompositionProblem
-    | MixedFractionOperationProblem;
+    | MixedFractionOperationProblem
+    | UnitFractionMultipleProblem
+    | WholeNumberFractionProductProblem
+    | FractionMultiplicationWordProblem;
 
 export type ShapePartitionProblem =
     | {

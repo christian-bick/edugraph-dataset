@@ -35,7 +35,42 @@ const validateData = (data: FractionArithmeticProblem) => {
         'answerStatement',
         'explanation'
     ]);
-    if (data.task === 'interpret-operation' || data.task === 'fraction-operation') {
+    if (data.operation === 'multiplication') {
+        validateProblemData(VIEW_ID, data, [
+            'productKind',
+            'wholeFactor',
+            'wholeFactorDisplay',
+            'unitFraction',
+            'product',
+            'groupCount',
+            'partsPerGroup',
+            'totalUnitParts',
+            'solutionModel',
+            'solutionEquation',
+            'equationChain'
+        ]);
+        if (data.task === 'unit-fraction-multiple') {
+            validateProblemData(VIEW_ID, data, [
+                'questionModel',
+                'unitSizeStatement',
+                'unitMultipleEquation'
+            ]);
+        } else {
+            validateProblemData(VIEW_ID, data, [
+                'fractionFactor',
+                'questionGroupModels',
+                'fractionAsUnitMultipleEquation',
+                'iteratedUnitEquation'
+            ]);
+        }
+        if (data.task === 'fraction-multiplication-problem') {
+            validateProblemData(VIEW_ID, data, [
+                'lowerWhole',
+                'upperWhole',
+                'boundsStatement'
+            ]);
+        }
+    } else if (data.task === 'interpret-operation' || data.task === 'fraction-operation') {
         validateProblemData(VIEW_ID, data, [
             'symbol',
             'action',
@@ -118,6 +153,8 @@ const FractionsOperationModelCore = ({config: _config, payload}: CoreProps) => {
                             ? 'operation and equation'
                             : data.story.unknownRole === 'decompositions'
                                 ? 'decompositions'
+                                : data.story.unknownRole === 'multiplier'
+                                    ? 'multiplier'
                                 : 'result'}.
                     </div>
                 )}

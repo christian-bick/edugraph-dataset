@@ -16,16 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const grade4FractionMultiplicationImplementation = defineImplementationPackage({
-    id: 'grade4-fraction-multiplication',
-    description: 'Interpret and solve whole-number-by-fraction multiplication with unit-fraction reasoning and visual models.',
-    generators: [{ module: 'fraction-arithmetic', strategy: 'new' }],
-    views: [
-        { module: 'fractions-operation-model', strategy: 'new' },
-        { module: 'fractions-word-problem', strategy: 'new' }
-    ]
-});
-
 const tenthsHundredthsArithmeticImplementation = defineImplementationPackage({
     id: 'tenths-hundredths-arithmetic',
     description: 'Convert tenths to hundredths and add fractions expressed in tenths and hundredths.',
@@ -640,7 +630,10 @@ const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionNotation,
     Area.Multiplication,
     Area.IteratedOperation,
+    Area.Equation,
     Scope.UnitFractions,
+    Scope.IntegerNumbers,
+    Scope.SingleFrameOfReference,
     Ability.Interpretation
 ]);
 
@@ -649,6 +642,10 @@ const wholeNumberFractionMultiplicationBuilder = new DatasetPermutationBuilder()
         Area.FractionArithmetic,
         Area.FractionNotation,
         Area.Multiplication,
+        Area.IteratedOperation,
+        Area.Equation,
+        Scope.IntegerNumbers,
+        Scope.SingleFrameOfReference,
         Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([[Scope.ProperFractions], [Scope.ImproperFractions]]);
@@ -658,7 +655,11 @@ const fractionMultiplicationWordProblemsBuilder = new DatasetPermutationBuilder(
         Area.FractionArithmetic,
         Area.FractionNotation,
         Area.Multiplication,
-        Ability.ProcedureUnderstanding,
+        Area.IteratedOperation,
+        Area.Equation,
+        Scope.IntegerNumbers,
+        Scope.SingleFrameOfReference,
+        Ability.ProcedureExecution,
         Ability.TextualReception
     ])
     .applyLabelVariants([[Scope.ProperFractions], [Scope.ImproperFractions]]);
@@ -769,13 +770,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NF.B.3a-interpret-fraction-arithmetic', interpretFractionAdditionSubtractionBuilder),
     ...toTargets('4.NF.B.3b-decompose-fractions', decomposeFractionsBuilder),
     ...toTargets('4.NF.B.3c-mixed-number-arithmetic', mixedNumberArithmeticBuilder),
-    ...toTargets('4.NF.B.3d-fraction-word-problems', fractionArithmeticWordProblemsBuilder)
+    ...toTargets('4.NF.B.3d-fraction-word-problems', fractionArithmeticWordProblemsBuilder),
+    ...toTargets('4.NF.B.4a-unit-fraction-multiples', unitFractionMultipleBuilder),
+    ...toTargets('4.NF.B.4b-whole-number-fraction-products', wholeNumberFractionMultiplicationBuilder),
+    ...toTargets('4.NF.B.4c-fraction-multiplication-word-problems', fractionMultiplicationWordProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NF.B.4a-unit-fraction-multiples', unitFractionMultipleBuilder, grade4FractionMultiplicationImplementation, 'Show a equal unit fractions, a × (1/b), and a/b as the same value.'),
-    ...toImplementationTodos('4.NF.B.4b-whole-number-fraction-products', wholeNumberFractionMultiplicationBuilder, grade4FractionMultiplicationImplementation, 'Show the whole-number factor, repeated fractional groups, unit-fraction rewrite, product, and result.'),
-    ...toImplementationTodos('4.NF.B.4c-fraction-multiplication-word-problems', fractionMultiplicationWordProblemsBuilder, grade4FractionMultiplicationImplementation, 'Keep story groups, visual model, equation, bounds where relevant, and answer consistent.'),
     ...toImplementationTodos('4.NF.C.5-tenths-to-hundredths', tenthsToHundredthsBuilder, tenthsHundredthsArithmeticImplementation, 'Show denominator-ten and denominator-hundred fractions, common scaling, equality, and model or place-value evidence.'),
     ...toImplementationTodos('4.NF.C.5-add-tenths-hundredths', addTenthsHundredthsBuilder, tenthsHundredthsArithmeticImplementation, 'Show the conversion to a common denominator, addition equation, and result.'),
     ...toImplementationTodos('4.NF.C.6-fraction-decimal-conversion', fractionDecimalConversionBuilder, decimalNotationGrade4Implementation, 'Show the fraction, decimal, place-value evidence, equality, and prompted conversion direction.'),

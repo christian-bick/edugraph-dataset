@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
@@ -41,6 +42,19 @@ const configs = {
         task: 'mixed-operation',
         usesCommonDenominator: true,
         operation
+    }),
+    unitMultiple: (): FractionArithmeticGeneratorConfig => ({
+        task: 'unit-fraction-multiple',
+        usesCommonDenominator: false,
+        operation: 'multiplication'
+    }),
+    fractionProduct: (
+        task: 'whole-number-fraction-product' | 'fraction-multiplication-problem',
+        productKind: 'proper' | 'improper'
+    ): FractionArithmeticGeneratorConfig => ({
+        task: `${task}-${productKind}`,
+        usesCommonDenominator: false,
+        operation: 'multiplication'
     })
 };
 
@@ -140,7 +154,7 @@ const expectStrictStory = (problem: FractionArithmeticProblem): void => {
             givenDisplays: [problem.sourceDisplay],
             unknownRole: 'decompositions'
         });
-    } else {
+    } else if (problem.task === 'mixed-operation') {
         const expectedKind = problem.operation === 'addition'
             ? 'route-combination'
             : 'route-difference';
@@ -158,6 +172,8 @@ const expectStrictStory = (problem: FractionArithmeticProblem): void => {
         expect(problem.story.question).toBe(problem.operation === 'addition'
             ? 'How many miles long are the two sections altogether?'
             : 'How many miles remain?');
+    } else {
+        throw new Error(`Unexpected multiplication task ${problem.task}.`);
     }
 };
 
@@ -190,7 +206,7 @@ describe('FractionArithmeticGenerator', () => {
         expect(() => generator.generate({
             ...configs.interpret('addition'),
             operation: 'unsupported'
-        } as never)).toThrow('Operation must be addition or subtraction.');
+        } as never)).toThrow('Operation must be addition, subtraction, or multiplication.');
         expect(() => generator.generate({
             task: 'unsupported',
             usesCommonDenominator: true,
@@ -208,6 +224,15 @@ describe('FractionArithmeticGenerator', () => {
             ...configs.decomposeProper(),
             task: 'unsupported'
         } as never)).toThrow('Unsupported task ability');
+        expect(() => generator.generate({
+            ...configs.unitMultiple(),
+            task: 'interpret-operation'
+        })).toThrow('Unsupported multiplication task');
+        expect(() => generator.generate({
+            ...configs.unitMultiple(),
+            operation: 'addition',
+            usesCommonDenominator: true
+        })).toThrow('Unsupported task ability');
     });
 
     it.each([
@@ -381,11 +406,221 @@ describe('FractionArithmeticGenerator', () => {
         }
     );
 
+    it('generates exact unit-fraction multiples with the multiplier hidden in Q', () => {
+        const productKinds = new Set<string>();
+        for (let seed = 0; seed < 200; seed++) {
+            setSeed(`unit-fraction-multiple-${seed}`);
+            const problem = generator.generate(configs.unitMultiple()).data;
+            expect(problem.task).toBe('unit-fraction-multiple');
+            if (problem.task !== 'unit-fraction-multiple') {
+                throw new Error('Expected a unit-fraction multiple.');
+            }
+            expect(problem.operation).toBe('multiplication');
+            expect(problem.wholeFactor).toBeGreaterThanOrEqual(2);
+            expect(problem.wholeFactor).toBeLessThanOrEqual(4);
+            expect(problem.wholeFactorDisplay).toBe(`${problem.wholeFactor}`);
+            expectFraction(problem.unitFraction, problem.denominator);
+            expect(problem.unitFraction.numerator).toBe(1);
+            expectFraction(problem.product, problem.denominator);
+            expect(problem.product.numerator).toBe(problem.wholeFactor);
+            expect(problem.productKind).toBe(problem.product.numerator < problem.denominator
+                ? 'proper'
+                : 'improper');
+            expect(problem.groupCount).toBe(problem.wholeFactor);
+            expect(problem.partsPerGroup).toBe(1);
+            expect(problem.totalUnitParts).toBe(problem.wholeFactor);
+            expectModel(problem.questionModel);
+            expect(problem.questionModel.display).toBe(problem.product.notation);
+            expect(problem.questionModel.totalNumerator).toBe(problem.product.numerator);
+            expect(problem.questionModel.groups).toEqual([{
+                id: 'given-product',
+                role: 'result',
+                label: problem.product.notation,
+                startPart: 0,
+                partCount: problem.product.numerator
+            }]);
+            expectModel(problem.solutionModel);
+            expect(problem.solutionModel.display).toBe(problem.product.notation);
+            expect(problem.solutionModel.totalNumerator).toBe(problem.product.numerator);
+            expect(problem.solutionModel.groups).toHaveLength(problem.wholeFactor);
+            expect(problem.solutionModel.groups.every(group => group.role === 'unit-part'))
+                .toBe(true);
+            const identity = `${problem.product.notation} = ${problem.wholeFactor} × (${problem.unitFraction.notation})`;
+            expect(problem.unitMultipleEquation).toBe(identity);
+            expect(problem.solutionEquation).toBe(identity);
+            expect(problem.equationChain).toBe(identity);
+            expect(problem.prompt).toBe(
+                `How many copies of ${problem.unitFraction.notation} make ${problem.product.notation}? Complete the equation.`
+            );
+            expect(problem.questionEquation).toBe(
+                `${problem.product.notation} = ? × (${problem.unitFraction.notation})`
+            );
+            expect(problem.unitSizeStatement).toBe(
+                `Each equal part is ${problem.unitFraction.notation} of the ribbon.`
+            );
+            expect(problem.answer).toBe(`${problem.wholeFactor}`);
+            expect(problem.answerStatement).toBe(
+                `${problem.product.notation} is ${problem.wholeFactor} copies of ${problem.unitFraction.notation}, so ${identity}.`
+            );
+            expect(problem.story).toEqual({
+                storyKind: 'ribbon-unit-multiple',
+                context: `A ribbon is divided into ${problem.denominator} equal parts. The highlighted amount is ${problem.product.notation} of the ribbon, and each equal part is ${problem.unitFraction.notation} of the same ribbon.`,
+                question: `How many copies of ${problem.unitFraction.notation} make ${problem.product.notation}? Complete the equation.`,
+                wholeLabel: 'one ribbon',
+                unitLabel: 'of the ribbon',
+                givenDisplays: [problem.product.notation, problem.unitFraction.notation],
+                unknownRole: 'multiplier'
+            });
+            productKinds.add(problem.productKind);
+        }
+        expect(productKinds).toEqual(new Set(['proper', 'improper']));
+    });
+
+    it.each([
+        ['whole-number-fraction-product', 'proper'],
+        ['whole-number-fraction-product', 'improper'],
+        ['fraction-multiplication-problem', 'proper'],
+        ['fraction-multiplication-problem', 'improper']
+    ] as const)('generates coherent %s / %s products and exact unit chains', (
+        task,
+        productKind
+    ) => {
+        for (let seed = 0; seed < 200; seed++) {
+            setSeed(`${task}-${productKind}-${seed}`);
+            const problem = generator.generate(configs.fractionProduct(task, productKind)).data;
+            expect(problem.task).toBe(task);
+            if (problem.task !== 'whole-number-fraction-product'
+                && problem.task !== 'fraction-multiplication-problem') {
+                throw new Error('Expected a whole-number fraction product.');
+            }
+            expect(problem.operation).toBe('multiplication');
+            expect(problem.productKind).toBe(productKind);
+            expect(problem.wholeFactor).toBeGreaterThanOrEqual(2);
+            expect(problem.wholeFactor).toBeLessThanOrEqual(4);
+            expect(problem.wholeFactorDisplay).toBe(`${problem.wholeFactor}`);
+            expectFraction(problem.unitFraction, problem.denominator);
+            expect(problem.unitFraction.numerator).toBe(1);
+            expectFraction(problem.fractionFactor, problem.denominator);
+            expect(problem.fractionFactor.numerator).toBeGreaterThan(1);
+            expect(problem.fractionFactor.numerator).toBeLessThan(problem.denominator);
+            expectFraction(problem.product, problem.denominator);
+            expect(problem.product.numerator).toBe(
+                problem.wholeFactor * problem.fractionFactor.numerator
+            );
+            expect(problem.product.numerator).toBeLessThanOrEqual(4 * problem.denominator);
+            expect(problem.product.numerator % problem.denominator).not.toBe(0);
+            expect(problem.product.numerator < problem.denominator).toBe(
+                productKind === 'proper'
+            );
+            expect(problem.groupCount).toBe(problem.wholeFactor);
+            expect(problem.partsPerGroup).toBe(problem.fractionFactor.numerator);
+            expect(problem.totalUnitParts).toBe(problem.product.numerator);
+            expect(problem.questionGroupModels).toHaveLength(problem.wholeFactor);
+            problem.questionGroupModels.forEach((model, groupIndex) => {
+                expectModel(model);
+                expect(model.display).toBe(problem.fractionFactor.notation);
+                expect(model.totalNumerator).toBe(problem.fractionFactor.numerator);
+                expect(model.groups).toEqual([{
+                    id: `group-${groupIndex}`,
+                    role: 'fraction-group',
+                    label: problem.fractionFactor.notation,
+                    startPart: 0,
+                    partCount: problem.fractionFactor.numerator
+                }]);
+            });
+            expectModel(problem.solutionModel);
+            expect(problem.solutionModel.display).toBe(problem.product.notation);
+            expect(problem.solutionModel.totalNumerator).toBe(problem.product.numerator);
+            expect(problem.solutionModel.groups).toHaveLength(problem.wholeFactor);
+            expect(problem.solutionModel.groups.every(group =>
+                group.role === 'fraction-group'
+                && group.partCount === problem.fractionFactor.numerator
+            )).toBe(true);
+            const factorEquation = `${problem.fractionFactor.notation} = ${problem.fractionFactor.numerator} × (${problem.unitFraction.notation})`;
+            const iteratedEquation = `${problem.wholeFactor} × (${problem.fractionFactor.notation}) = ${problem.product.numerator} × (${problem.unitFraction.notation})`;
+            const solutionEquation = `${problem.wholeFactor} × (${problem.fractionFactor.notation}) = ${problem.product.notation}`;
+            const equationChain = `${problem.wholeFactor} × (${problem.fractionFactor.notation}) = (${problem.wholeFactor} × ${problem.fractionFactor.numerator}) × (${problem.unitFraction.notation}) = ${problem.product.numerator} × (${problem.unitFraction.notation}) = ${problem.product.notation}`;
+            expect(problem.fractionAsUnitMultipleEquation).toBe(factorEquation);
+            expect(problem.iteratedUnitEquation).toBe(iteratedEquation);
+            expect(problem.solutionEquation).toBe(solutionEquation);
+            expect(problem.equationChain).toBe(equationChain);
+            expect(problem.questionEquation).toBe(
+                `${problem.wholeFactor} × (${problem.fractionFactor.notation}) = ?/${problem.denominator}`
+            );
+            expect(problem.answer).toBe(problem.product.notation);
+            expect(problem.story.storyKind).toBe('equal-fraction-groups');
+            expect(problem.story.context).toBe(
+                `${problem.wholeFactor} craft kits each use ${problem.fractionFactor.notation} meter of ribbon from the same kind of roll.`
+            );
+            expect(problem.story.givenDisplays).toEqual([
+                `${problem.wholeFactor} craft kits`,
+                problem.fractionFactor.notation
+            ]);
+            expect(problem.story.unknownRole).toBe('product');
+            if (problem.task === 'fraction-multiplication-problem') {
+                expect(problem.lowerWhole).toBe(Math.floor(
+                    problem.product.numerator / problem.denominator
+                ));
+                expect(problem.upperWhole).toBe(Math.ceil(
+                    problem.product.numerator / problem.denominator
+                ));
+                expect(problem.upperWhole).toBe(problem.lowerWhole + 1);
+                expect(problem.boundsStatement).toBe(
+                    `${problem.lowerWhole} < ${problem.product.notation} < ${problem.upperWhole}`
+                );
+                expect(problem.story.question).toBe(
+                    'How many meters of ribbon do the craft kits use altogether?'
+                );
+            } else {
+                expect(problem.story.question).toBe(
+                    'Use unit-fraction groups to determine the total ribbon used.'
+                );
+            }
+        }
+    });
+
     it('is deterministic for a complete task configuration', () => {
         const config = configs.mixed('subtraction');
         setSeed('fraction-arithmetic-determinism');
         const first = generator.generate(config);
         setSeed('fraction-arithmetic-determinism');
         expect(generator.generate(config)).toEqual(first);
+    });
+
+    it.each([
+        [
+            'interpret',
+            'legacy-interpret',
+            configs.interpret('addition'),
+            '93d4abb6057f18ef50706661398064f0f106dd0c25d271ef704764e85891ef92'
+        ],
+        [
+            'decompose',
+            'legacy-decompose',
+            configs.decomposeMixed(),
+            '9c9392ce740fffc83073edd17c0fa86e11f6d0bd629421e2628f513465c94597'
+        ],
+        [
+            'mixed',
+            'legacy-mixed',
+            configs.mixed('subtraction'),
+            'bbed4731e79d44c5a1f3ace2a917d0c59fe48e04a6ed68827a441be049784d51'
+        ],
+        [
+            'word',
+            'legacy-word',
+            configs.fractionOperation('addition'),
+            '39b7a249802f5ba85bcbe4f1bb90698e3bcb67c382dc862288732f8d33b258fb'
+        ]
+    ] as const)('preserves the fixed-seed B.3 %s payload', (
+        _name,
+        seed,
+        config,
+        expectedHash
+    ) => {
+        setSeed(seed);
+        const payload = generator.generate(config).data;
+        expect(createHash('sha256').update(JSON.stringify(payload)).digest('hex'))
+            .toBe(expectedHash);
     });
 });

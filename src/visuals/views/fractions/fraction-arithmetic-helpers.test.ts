@@ -39,7 +39,12 @@ const fixtures = [
         `mixed-subtract-${index}`,
         'mixed-operation',
         'subtraction'
-    ))
+    )),
+    generate('unit-multiple', 'unit-fraction-multiple', 'multiplication'),
+    generate('proper-product', 'whole-number-fraction-product-proper', 'multiplication'),
+    generate('improper-product', 'whole-number-fraction-product-improper', 'multiplication'),
+    generate('proper-word-product', 'fraction-multiplication-problem-proper', 'multiplication'),
+    generate('improper-word-product', 'fraction-multiplication-problem-improper', 'multiplication')
 ];
 
 const changed = (
@@ -156,6 +161,52 @@ describe('isValidFractionArithmeticProblem', () => {
                 data.first.notation = `${data.first.numerator}/${data.denominator}`;
                 data.first.improperNumerator = data.first.numerator;
                 data.first.improperNotation = data.first.notation;
+            }
+        }))).toBe(false);
+    });
+
+    it('rejects contradictory unit-fraction multiplier evidence and out-of-capacity groups', () => {
+        const source = fixtures.find(data => data.task === 'unit-fraction-multiple')!;
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'unit-fraction-multiple') data.questionModel.display = data.unitFraction.notation;
+        }))).toBe(false);
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'unit-fraction-multiple') data.questionEquation = data.solutionEquation;
+        }))).toBe(false);
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'unit-fraction-multiple') data.solutionModel.groups[0]!.partCount += 1;
+        }))).toBe(false);
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'unit-fraction-multiple') {
+                data.wholeFactor = 5;
+                data.wholeFactorDisplay = '5';
+            }
+        }))).toBe(false);
+    });
+
+    it('rejects contradictory repeated groups, unit rewrites, products, and bounds', () => {
+        const source = fixtures.find(data => data.task === 'whole-number-fraction-product')!;
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'whole-number-fraction-product') data.questionGroupModels.pop();
+        }))).toBe(false);
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'whole-number-fraction-product') data.questionGroupModels[0]!.groups[0]!.id = 'wrong-group';
+        }))).toBe(false);
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'whole-number-fraction-product') data.fractionAsUnitMultipleEquation = '2/3 = 2/3';
+        }))).toBe(false);
+        expect(isValidFractionArithmeticProblem(changed(source, data => {
+            if (data.task === 'whole-number-fraction-product') data.product.numerator += 1;
+        }))).toBe(false);
+
+        const word = fixtures.find(data => data.task === 'fraction-multiplication-problem')!;
+        expect(isValidFractionArithmeticProblem(changed(word, data => {
+            if (data.task === 'fraction-multiplication-problem') data.boundsStatement = `0 < ${data.product.notation} < 99`;
+        }))).toBe(false);
+        expect(isValidFractionArithmeticProblem(changed(word, data => {
+            if (data.task === 'fraction-multiplication-problem') {
+                data.product.numerator = data.denominator;
+                data.product.notation = `${data.denominator}/${data.denominator}`;
             }
         }))).toBe(false);
     });

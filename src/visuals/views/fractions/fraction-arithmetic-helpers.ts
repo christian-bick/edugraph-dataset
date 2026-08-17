@@ -5,10 +5,14 @@ import {
     FractionArithmeticStory,
     FractionBinaryOperationProblem,
     FractionDecompositionProblem,
+    FractionMultiplicationWordProblem,
     FractionParts,
     LikeDenominatorFractionValue,
     MixedFractionOperationProblem,
-    MixedFractionValue
+    MixedFractionValue,
+    UnitFractionMultipleProblem,
+    WholeNumberFractionProductCommon,
+    WholeNumberFractionProductProblem
 } from '../../../types/problems.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const;
@@ -379,13 +383,159 @@ const validMixedOperation = (data: MixedFractionOperationProblem): boolean => {
         && data.explanation === `${steps.join(' Then ')} Therefore, ${solutionEquation}.`;
 };
 
+const validMultiplicationCommon = (
+    data: UnitFractionMultipleProblem | WholeNumberFractionProductCommon,
+    expectedPartsPerGroup: number,
+    expectedRole: 'unit-part' | 'fraction-group',
+    expectedLabel: string
+): boolean => {
+    const {denominator, wholeFactor, product, unitFraction} = data;
+    const expectedTotal = wholeFactor * expectedPartsPerGroup;
+    const expectedProductKind = expectedTotal < denominator ? 'proper' : 'improper';
+    const expectedGroups = Array.from({length: wholeFactor}, (_, groupIndex) => ({
+        id: `group-${groupIndex}`,
+        role: expectedRole,
+        label: expectedLabel,
+        partCount: expectedPartsPerGroup
+    }));
+
+    return data.operation === 'multiplication'
+        && Number.isInteger(wholeFactor)
+        && wholeFactor >= 2
+        && wholeFactor <= 4
+        && data.wholeFactorDisplay === `${wholeFactor}`
+        && validFraction(unitFraction, denominator)
+        && unitFraction.numerator === 1
+        && validFraction(product, denominator)
+        && data.groupCount === wholeFactor
+        && data.partsPerGroup === expectedPartsPerGroup
+        && data.totalUnitParts === expectedTotal
+        && product.numerator === expectedTotal
+        && data.productKind === expectedProductKind
+        && validModel(
+            data.solutionModel,
+            denominator,
+            product.notation,
+            expectedTotal,
+            expectedGroups
+        );
+};
+
+const validUnitFractionMultiple = (data: UnitFractionMultipleProblem): boolean => {
+    const {denominator, wholeFactor, product, unitFraction} = data;
+    const solutionEquation = `${product.notation} = ${wholeFactor} × (${unitFraction.notation})`;
+    const story: FractionArithmeticStory = {
+        storyKind: 'ribbon-unit-multiple',
+        context: `A ribbon is divided into ${denominator} equal parts. The highlighted amount is ${product.notation} of the ribbon, and each equal part is ${unitFraction.notation} of the same ribbon.`,
+        question: `How many copies of ${unitFraction.notation} make ${product.notation}? Complete the equation.`,
+        wholeLabel: 'one ribbon',
+        unitLabel: 'of the ribbon',
+        givenDisplays: [product.notation, unitFraction.notation],
+        unknownRole: 'multiplier'
+    };
+
+    return validMultiplicationCommon(data, 1, 'unit-part', unitFraction.notation)
+        && sameStory(data.story, story)
+        && singleGroup(
+            data.questionModel,
+            denominator,
+            product.notation,
+            product.numerator,
+            'given-product',
+            'result'
+        )
+        && data.prompt === story.question
+        && data.questionEquation === `${product.notation} = ? × (${unitFraction.notation})`
+        && data.solutionEquation === solutionEquation
+        && data.equationChain === solutionEquation
+        && data.unitSizeStatement === `Each equal part is ${unitFraction.notation} of the ribbon.`
+        && data.unitMultipleEquation === solutionEquation
+        && data.answer === `${wholeFactor}`
+        && data.answerStatement === `${product.notation} is ${wholeFactor} copies of ${unitFraction.notation}, so ${solutionEquation}.`
+        && data.explanation === `Each copy is one of ${denominator} equal parts of the same whole. ${wholeFactor} copies make ${wholeFactor} unit parts, so ${solutionEquation}.`;
+};
+
+const validWholeNumberFractionProduct = (
+    data: WholeNumberFractionProductProblem | FractionMultiplicationWordProblem
+): boolean => {
+    const {denominator, wholeFactor, fractionFactor, product, unitFraction} = data;
+    if (!validFraction(fractionFactor, denominator)
+        || fractionFactor.numerator < 2
+        || fractionFactor.numerator >= denominator
+        || !Array.isArray(data.questionGroupModels)
+        || data.questionGroupModels.length !== wholeFactor) return false;
+
+    const fractionAsUnitMultipleEquation = `${fractionFactor.notation} = ${fractionFactor.numerator} × (${unitFraction.notation})`;
+    const iteratedUnitEquation = `${wholeFactor} × (${fractionFactor.notation}) = ${product.numerator} × (${unitFraction.notation})`;
+    const solutionEquation = `${wholeFactor} × (${fractionFactor.notation}) = ${product.notation}`;
+    const equationChain = `${wholeFactor} × (${fractionFactor.notation}) = (${wholeFactor} × ${fractionFactor.numerator}) × (${unitFraction.notation}) = ${product.numerator} × (${unitFraction.notation}) = ${product.notation}`;
+    const story: FractionArithmeticStory = {
+        storyKind: 'equal-fraction-groups',
+        context: `${wholeFactor} craft kits each use ${fractionFactor.notation} meter of ribbon from the same kind of roll.`,
+        question: data.task === 'whole-number-fraction-product'
+            ? 'Use unit-fraction groups to determine the total ribbon used.'
+            : 'How many meters of ribbon do the craft kits use altogether?',
+        wholeLabel: 'one meter',
+        unitLabel: 'meters of ribbon',
+        givenDisplays: [`${wholeFactor} craft kits`, fractionFactor.notation],
+        unknownRole: 'product'
+    };
+    const validQuestionGroups = data.questionGroupModels.every((model, groupIndex) =>
+        singleGroup(
+            model,
+            denominator,
+            fractionFactor.notation,
+            fractionFactor.numerator,
+            `group-${groupIndex}`,
+            'fraction-group'
+        ));
+    const expectedPrompt = data.task === 'whole-number-fraction-product'
+        ? `Use unit fractions to calculate ${wholeFactor} × (${fractionFactor.notation}).`
+        : story.question;
+    const expectedStatement = data.task === 'whole-number-fraction-product'
+        ? `The product is ${product.notation}.`
+        : `The craft kits use ${product.notation} meters of ribbon.`;
+    const expectedExplanation = `${fractionAsUnitMultipleEquation}. There are ${wholeFactor} groups of ${fractionFactor.numerator} unit parts, giving ${product.numerator} unit parts in all. Therefore, ${equationChain}.`;
+
+    if (!validMultiplicationCommon(
+        data,
+        fractionFactor.numerator,
+        'fraction-group',
+        fractionFactor.notation
+    )
+        || !validQuestionGroups
+        || !sameStory(data.story, story)
+        || data.fractionAsUnitMultipleEquation !== fractionAsUnitMultipleEquation
+        || data.iteratedUnitEquation !== iteratedUnitEquation
+        || data.prompt !== expectedPrompt
+        || data.questionEquation !== `${wholeFactor} × (${fractionFactor.notation}) = ?/${denominator}`
+        || data.solutionEquation !== solutionEquation
+        || data.equationChain !== equationChain
+        || data.answer !== product.notation
+        || data.answerStatement !== expectedStatement
+        || data.explanation !== expectedExplanation) return false;
+
+    if (data.task === 'whole-number-fraction-product') return true;
+    const lowerWhole = Math.floor(product.numerator / denominator);
+    const upperWhole = Math.ceil(product.numerator / denominator);
+    return product.numerator % denominator !== 0
+        && data.lowerWhole === lowerWhole
+        && data.upperWhole === upperWhole
+        && data.boundsStatement === `${lowerWhole} < ${product.notation} < ${upperWhole}`;
+};
+
 export const isValidFractionArithmeticProblem = (data: FractionArithmeticProblem): boolean =>
     typeof data === 'object'
     && data !== null
     && validDenominator(data.denominator)
     && data.sharedWhole === 1
     && data.referenceId === 'same-whole'
-    && (data.task === 'interpret-operation' || data.task === 'fraction-operation'
+    && (data.task === 'unit-fraction-multiple'
+        ? validUnitFractionMultiple(data)
+        : data.task === 'whole-number-fraction-product'
+            || data.task === 'fraction-multiplication-problem'
+            ? validWholeNumberFractionProduct(data)
+            : data.task === 'interpret-operation' || data.task === 'fraction-operation'
         ? validBinary(data)
         : data.task === 'decompose'
             ? validDecomposition(data)

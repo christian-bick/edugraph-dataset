@@ -12,13 +12,17 @@ describe('FractionArithmeticGenerator spec integration', () => {
         Ability.ProcedureUnderstanding,
         Ability.Formalization,
         Ability.ProcedureExecution,
+        Area.IteratedOperation,
         Scope.FractionNumbers,
+        Scope.IntegerNumbers,
         Scope.ProperFractions,
         Scope.ImproperFractions,
         Scope.MixedNumbers,
+        Scope.UnitFractions,
         Scope.CommonDenominator,
         Area.Addition,
-        Area.Subtraction
+        Area.Subtraction,
+        Area.Multiplication
     ];
 
     it('declares exactly the invariant mathematical capabilities', () => {
@@ -156,6 +160,88 @@ describe('FractionArithmeticGenerator spec integration', () => {
             ],
             '7320471e',
             'fraction-operation'
+        ],
+        [
+            '4a unit fraction multiple',
+            [
+                Area.FractionArithmetic,
+                Area.FractionNotation,
+                Area.Multiplication,
+                Area.IteratedOperation,
+                Area.Equation,
+                Scope.UnitFractions,
+                Scope.IntegerNumbers,
+                Scope.SingleFrameOfReference,
+                Ability.Interpretation
+            ],
+            '120545e8',
+            'unit-fraction-multiple'
+        ],
+        [
+            '4b proper product',
+            [
+                Area.FractionArithmetic,
+                Area.FractionNotation,
+                Area.Multiplication,
+                Area.IteratedOperation,
+                Area.Equation,
+                Scope.IntegerNumbers,
+                Scope.SingleFrameOfReference,
+                Ability.ProcedureUnderstanding,
+                Scope.ProperFractions
+            ],
+            'bb541f43',
+            'whole-number-fraction-product'
+        ],
+        [
+            '4b improper product',
+            [
+                Area.FractionArithmetic,
+                Area.FractionNotation,
+                Area.Multiplication,
+                Area.IteratedOperation,
+                Area.Equation,
+                Scope.IntegerNumbers,
+                Scope.SingleFrameOfReference,
+                Ability.ProcedureUnderstanding,
+                Scope.ImproperFractions
+            ],
+            '3037bd93',
+            'whole-number-fraction-product'
+        ],
+        [
+            '4c proper word product',
+            [
+                Area.FractionArithmetic,
+                Area.FractionNotation,
+                Area.Multiplication,
+                Area.IteratedOperation,
+                Area.Equation,
+                Scope.IntegerNumbers,
+                Scope.SingleFrameOfReference,
+                Ability.ProcedureExecution,
+                Ability.TextualReception,
+                Scope.ProperFractions
+            ],
+            '52e7330d',
+            'fraction-multiplication-problem'
+        ],
+        [
+            '4c improper word product',
+            [
+                Area.FractionArithmetic,
+                Area.FractionNotation,
+                Area.Multiplication,
+                Area.IteratedOperation,
+                Area.Equation,
+                Scope.IntegerNumbers,
+                Scope.SingleFrameOfReference,
+                Ability.ProcedureExecution,
+                Ability.TextualReception,
+                Scope.ImproperFractions
+            ],
+            '29b60da5',
+            'fraction-multiplication-problem'
         ]
     ] as const)('resolves the corrected Grade 4 %s target', (
         _name,
@@ -171,11 +257,55 @@ describe('FractionArithmeticGenerator spec integration', () => {
         expect(stub!.data.task).toBe(expectedTask);
         const tags = stub!.tags ?? [];
         const labelStrings: readonly string[] = labels;
-        expect(tags).toContain(Scope.CommonDenominator);
+        expect(tags.includes(Scope.CommonDenominator)).toBe(
+            labelStrings.includes(Scope.CommonDenominator)
+        );
         expect(new Set(tags)).toEqual(new Set(labelStrings.filter(label =>
             schemaLabels.includes(label)
         )));
         expect(tags).not.toContain(Scope.VisualNumbers);
         expect(tags).not.toContain(Ability.TextualReception);
+    });
+
+    it('keeps deterministic label extraction on the direct generator RNG path', () => {
+        const legacyLabels = [
+            Area.FractionArithmetic,
+            Area.FractionNotation,
+            Area.Addition,
+            Scope.FractionNumbers,
+            Scope.CommonDenominator,
+            Scope.SingleFrameOfReference,
+            Ability.Interpretation
+        ];
+        setSeed('fraction-arithmetic-label-path');
+        const resolvedLegacy = generateWithLabels(generator, legacyLabels);
+        setSeed('fraction-arithmetic-label-path');
+        const directLegacy = generator.generate({
+            task: 'interpret-operation',
+            usesCommonDenominator: true,
+            operation: 'addition'
+        });
+        expect(resolvedLegacy!.data).toEqual(directLegacy.data);
+
+        const multiplicationLabels = [
+            Area.FractionArithmetic,
+            Area.FractionNotation,
+            Area.Multiplication,
+            Area.IteratedOperation,
+            Area.Equation,
+            Scope.UnitFractions,
+            Scope.IntegerNumbers,
+            Scope.SingleFrameOfReference,
+            Ability.Interpretation
+        ];
+        setSeed('fraction-multiplication-label-path');
+        const resolvedMultiplication = generateWithLabels(generator, multiplicationLabels);
+        setSeed('fraction-multiplication-label-path');
+        const directMultiplication = generator.generate({
+            task: 'unit-fraction-multiple',
+            usesCommonDenominator: false,
+            operation: 'multiplication'
+        });
+        expect(resolvedMultiplication!.data).toEqual(directMultiplication.data);
     });
 });

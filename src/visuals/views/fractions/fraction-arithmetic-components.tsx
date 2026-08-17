@@ -10,10 +10,31 @@ const groupStyles: Record<FractionArithmeticModelGroupRole, string> = {
     remaining: 'border-emerald-600 bg-emerald-200 text-emerald-950',
     removed: 'border-rose-600 bg-[repeating-linear-gradient(135deg,#fecdd3_0,#fecdd3_6px,#fff1f2_6px,#fff1f2_12px)] text-rose-950',
     'decomposition-part': 'border-violet-600 bg-violet-200 text-violet-950',
+    'unit-part': 'border-indigo-600 bg-indigo-200 text-indigo-950',
+    'fraction-group': 'border-orange-600 bg-orange-200 text-orange-950',
     result: 'border-teal-600 bg-teal-200 text-teal-950'
 };
 
 const MIXED_NUMBER = /^\d+ \d+\/\d+$/;
+const GROUP_TOKEN = /^group-(\d+)$/;
+const DECOMPOSITION_TOKEN = /^decomposition-\d+-part-(\d+)$/;
+type DiagramPresentation = 'legacy-local' | 'legacy-stable' | 'named-groups' | 'neutral-given';
+
+const alphaToken = (index: number): string => String.fromCharCode(65 + index);
+
+const groupToken = (
+    groupId: string,
+    localIndex: number,
+    presentation: DiagramPresentation
+): string | null => {
+    if (presentation === 'neutral-given') return null;
+    if (presentation === 'legacy-local') return alphaToken(localIndex);
+    if (groupId === 'first' || groupId === 'remaining') return 'A';
+    if (groupId === 'second' || groupId === 'removed') return 'B';
+
+    const indexedGroup = GROUP_TOKEN.exec(groupId) ?? DECOMPOSITION_TOKEN.exec(groupId);
+    return indexedGroup ? alphaToken(Number(indexedGroup[1])) : alphaToken(localIndex);
+};
 
 export const FractionArithmeticText = ({text}: {text: string}) => (
     <>
@@ -35,16 +56,18 @@ export const FractionModelDiagram = ({
     model,
     title,
     ariaLabel,
+    presentation,
     compact = false
 }: {
     model: FractionArithmeticModel;
     title: string;
     ariaLabel: string;
+    presentation: DiagramPresentation;
     compact?: boolean;
 }) => {
     const groupTokens = new Map(model.groups.map((group, index) => [
         group.id,
-        String.fromCharCode(65 + index)
+        groupToken(group.id, index, presentation)
     ]));
     const groupsById = new Map(model.groups.map(group => [group.id, group]));
 
@@ -79,7 +102,7 @@ export const FractionModelDiagram = ({
                                             localIndex > 0 ? 'border-l-2 border-slate-500' : ''
                                         } ${group ? groupStyles[group.role] : 'bg-white text-slate-300'}`}
                                     >
-                                        {cell.groupId === null ? '' : groupTokens.get(cell.groupId)}
+                                        {cell.groupId === null ? '' : (groupTokens.get(cell.groupId) ?? '')}
                                     </div>
                                 );
                             })}
@@ -92,14 +115,22 @@ export const FractionModelDiagram = ({
             </div>
             {model.groups.length > 0 && (
                 <div className="mt-3 flex flex-wrap justify-center gap-2">
-                    {model.groups.map(group => (
-                        <span
-                            key={group.id}
-                            className={`rounded-full border px-2.5 py-1 text-xs font-bold ${groupStyles[group.role]}`}
-                        >
-                            {groupTokens.get(group.id)} · <FractionArithmeticText text={group.label} />
-                        </span>
-                    ))}
+                    {model.groups.map(group => {
+                        const token = groupTokens.get(group.id);
+                        return (
+                            <span
+                                key={group.id}
+                                className={`rounded-full border px-2.5 py-1 text-xs font-bold ${groupStyles[group.role]}`}
+                            >
+                                {presentation === 'neutral-given'
+                                    ? 'Given amount: '
+                                    : presentation === 'named-groups'
+                                        ? `Group ${token}: `
+                                        : `${token} · `}
+                                <FractionArithmeticText text={group.label} />
+                            </span>
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -128,22 +159,104 @@ const ModelPlaceholder = ({label}: {label: string}) => (
     </div>
 );
 
-const OperandModels = ({data}: {data: Extract<FractionArithmeticProblem, {questionModels: unknown}>}) => (
-    <div className="grid grid-cols-2 gap-4">
-        <FractionModelDiagram
-            model={data.questionModels[0]}
-            title="First given amount"
-            ariaLabel={`The first given amount is ${data.first.notation} of the shared whole, divided into ${data.denominator} equal parts.`}
-            compact
-        />
-        <FractionModelDiagram
-            model={data.questionModels[1]}
-            title="Second given amount"
-            ariaLabel={`The second given amount is ${data.second.notation} of the same shared whole, divided into ${data.denominator} equal parts.`}
-            compact
-        />
-    </div>
-);
+const OperandModels = ({data}: {data: Extract<FractionArithmeticProblem, {questionModels: unknown}>}) => {
+    const presentation = data.task === 'mixed-operation' ? 'legacy-local' : 'legacy-stable';
+    return (
+        <div className="grid grid-cols-2 gap-4">
+            <FractionModelDiagram
+                model={data.questionModels[0]}
+                title="First given amount"
+                ariaLabel={`The first given amount is ${data.first.notation} of the shared whole, divided into ${data.denominator} equal parts.`}
+                presentation={presentation}
+                compact
+            />
+            <FractionModelDiagram
+                model={data.questionModels[1]}
+                title="Second given amount"
+                ariaLabel={`The second given amount is ${data.second.notation} of the same shared whole, divided into ${data.denominator} equal parts.`}
+                presentation={presentation}
+                compact
+            />
+        </div>
+    );
+};
+
+type FractionMultiplicationProblem = Extract<FractionArithmeticProblem, {operation: 'multiplication'}>;
+
+const MultiplicationWork = ({
+    data,
+    isSolutionView
+}: {
+    data: FractionMultiplicationProblem;
+    isSolutionView: boolean;
+}) => {
+    const unitMultiple = data.task === 'unit-fraction-multiple';
+
+    return (
+        <div className="space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-bold text-slate-700">
+                {unitMultiple
+                    ? data.unitSizeStatement
+                    : `${data.wholeFactorDisplay} equal copies · ${data.partsPerGroup} unit parts in each copy`}
+            </div>
+            {unitMultiple ? (
+                <FractionModelDiagram
+                    model={data.questionModel}
+                    title="Given fraction"
+                    ariaLabel={`${data.product.notation} of the shared whole is highlighted in a whole divided into ${data.denominator} equal parts. Each equal part has size ${data.unitFraction.notation}.`}
+                    presentation="neutral-given"
+                />
+            ) : (
+                <div className="grid grid-cols-2 gap-4">
+                    {data.questionGroupModels.map((model, index) => (
+                        <FractionModelDiagram
+                            key={index}
+                            model={model}
+                            title={`Copy ${index + 1} of ${data.groupCount}`}
+                            ariaLabel={`Copy ${index + 1} shows ${model.display} of the shared whole, divided into ${data.denominator} equal parts.`}
+                            presentation="named-groups"
+                            compact
+                        />
+                    ))}
+                </div>
+            )}
+            <EquationPanel
+                equation={isSolutionView ? data.equationChain : data.questionEquation}
+                solved={isSolutionView}
+            />
+            {isSolutionView ? (
+                <>
+                    {data.task !== 'unit-fraction-multiple' && (
+                        <div className="grid grid-cols-2 gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 p-3">
+                            {[data.fractionAsUnitMultipleEquation, data.iteratedUnitEquation].map((step, index) => (
+                                <div key={index} className="rounded-lg bg-white px-3 py-2 text-center font-mono text-sm font-bold text-slate-800 shadow-sm">
+                                    <span className="mr-2 text-amber-700">{index + 1}.</span>
+                                    <FractionArithmeticText text={step} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <FractionModelDiagram
+                        model={data.solutionModel}
+                        title="Combined product"
+                        ariaLabel={`The supplied product model combines ${data.groupCount} equal copies into ${data.product.notation}, using ${data.totalUnitParts} unit parts of the shared whole.`}
+                        presentation="named-groups"
+                    />
+                    {data.task === 'fraction-multiplication-problem' && (
+                        <div className="rounded-xl border-2 border-violet-300 bg-violet-50 px-4 py-2 text-center text-sm font-extrabold text-violet-950">
+                            Whole-number check: <FractionArithmeticText text={data.boundsStatement} />
+                        </div>
+                    )}
+                </>
+            ) : (
+                <ModelPlaceholder label={unitMultiple
+                    ? 'The multiplier and completed unit-fraction equation are withheld.'
+                    : 'The combined product, unit-part total, and completed equation are withheld.'}
+                />
+            )}
+        </div>
+    );
+};
 
 export const FractionArithmeticWork = ({
     data,
@@ -152,6 +265,10 @@ export const FractionArithmeticWork = ({
     data: FractionArithmeticProblem;
     isSolutionView: boolean;
 }) => {
+    if (data.operation === 'multiplication') {
+        return <MultiplicationWork data={data} isSolutionView={isSolutionView} />;
+    }
+
     if (data.task === 'decompose') {
         return (
             <div className="space-y-4">
@@ -159,6 +276,7 @@ export const FractionArithmeticWork = ({
                     model={data.sourceModel}
                     title="Source amount"
                     ariaLabel={`${data.sourceDisplay} is shown in equal-width whole frames, each divided into ${data.denominator} equal parts.`}
+                    presentation="legacy-local"
                 />
                 <div className="grid grid-cols-2 gap-4">
                     {isSolutionView ? data.decompositions.map((decomposition, index) => (
@@ -167,6 +285,7 @@ export const FractionArithmeticWork = ({
                                 model={decomposition.model}
                                 title={`Decomposition ${index + 1}`}
                                 ariaLabel={`Decomposition ${index + 1} groups the same ${data.sourceDisplay} amount as ${decomposition.equation}.`}
+                                presentation="legacy-local"
                                 compact
                             />
                             <EquationPanel equation={decomposition.equation} solved />
@@ -204,6 +323,7 @@ export const FractionArithmeticWork = ({
                     ariaLabel={data.operation === 'subtraction' && data.task !== 'mixed-operation'
                         ? `${data.solutionModel.display} is separated into ${data.result.notation} remaining and ${data.second.notation} removed.`
                         : `The supplied result model shows ${data.result.notation} using the same whole and ${data.denominator} equal parts.`}
+                    presentation={data.task === 'mixed-operation' ? 'legacy-local' : 'legacy-stable'}
                 />
             ) : (
                 <ModelPlaceholder label={interpretation

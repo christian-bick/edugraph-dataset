@@ -59,11 +59,53 @@ const wordProblemBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
 
+const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.FractionArithmetic,
+    Area.FractionNotation,
+    Area.Multiplication,
+    Area.IteratedOperation,
+    Area.Equation,
+    Scope.UnitFractions,
+    Scope.IntegerNumbers,
+    Scope.SingleFrameOfReference,
+    Ability.Interpretation
+]);
+
+const wholeNumberFractionProductBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionArithmetic,
+        Area.FractionNotation,
+        Area.Multiplication,
+        Area.IteratedOperation,
+        Area.Equation,
+        Scope.IntegerNumbers,
+        Scope.SingleFrameOfReference,
+        Ability.ProcedureUnderstanding
+    ])
+    .applyLabelVariants([[Scope.ProperFractions], [Scope.ImproperFractions]]);
+
+const fractionMultiplicationProblemBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionArithmetic,
+        Area.FractionNotation,
+        Area.Multiplication,
+        Area.IteratedOperation,
+        Area.Equation,
+        Scope.IntegerNumbers,
+        Scope.SingleFrameOfReference,
+        Ability.ProcedureExecution,
+        Ability.TextualReception
+    ])
+    .applyLabelVariants([[Scope.ProperFractions], [Scope.ImproperFractions]]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-grade4-interpret-fraction-arithmetic', interpretationBuilder),
     ...toTargets('test-grade4-decompose-fractions', decompositionBuilder),
     ...toTargets('test-grade4-mixed-number-arithmetic', mixedOperationBuilder),
-    ...toTargets('test-grade4-fraction-word-problems', wordProblemBuilder)
+    ...toTargets('test-grade4-fraction-word-problems', wordProblemBuilder),
+    ...toTargets('test-grade4-unit-fraction-multiples', unitFractionMultipleBuilder),
+    ...toTargets('test-grade4-whole-number-fraction-products', wholeNumberFractionProductBuilder),
+    ...toTargets('test-grade4-fraction-multiplication-problems', fractionMultiplicationProblemBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [];
