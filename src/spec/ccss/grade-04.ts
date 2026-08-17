@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const grade4MeasurementProblemsImplementation = defineImplementationPackage({
-    id: 'grade4-measurement-problems',
-    description: 'Solve the complete Grade 4 family of integer, fraction, and decimal measurement word problems across the four operations.',
-    generators: [{ module: 'measurement-word-problems', strategy: 'new' }],
-    views: [{ module: 'measurement-word-problem-grade4', strategy: 'new' }]
-});
-
 const grade4MeasurementNumberLinesImplementation = defineImplementationPackage({
     id: 'grade4-measurement-number-lines',
     description: 'Represent fractional and decimal measurements on scaled number lines with explicit units.',
@@ -467,21 +460,21 @@ const twoColumnConversionTableBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants(measurementUnitPairs);
 
 const measurementKinds = [
-    [Scope.LengthMeasurement],
-    [Scope.TimeMeasurement],
-    [Scope.VolumeMeasurement, Scope.LiquidVolumes],
-    [Scope.WeightMeasurement],
+    [Area.MeasuringWithUnits, Scope.LengthMeasurement],
+    [Area.MeasuringWithUnits, Scope.TimeMeasurement],
+    [Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes],
+    [Area.MeasuringWithUnits, Scope.WeightMeasurement],
     [Scope.Dollar]
 ];
 
 const grade4MeasurementWordProblemsBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringWithUnits, Scope.SingleStep, Ability.TextualReception])
+    .addLabels([Scope.SingleStep, Scope.TwoOperands, Ability.TextualReception])
     .applyLabelVariants(measurementKinds)
     .applyLabelVariants([[Scope.IntegerNumbers], [Scope.FractionNumbers], [Scope.DecimalNumbers]])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction], [Area.Multiplication], [Area.Division]]);
 
 const grade4MeasurementNumberLinesBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringWithUnits, Scope.Numberline, Ability.VisualArticulation])
+    .addLabels([Scope.Numberline, Ability.VisualArticulation])
     .applyLabelVariants(measurementKinds)
     .applyLabelVariants([[Scope.FractionNumbers], [Scope.DecimalNumbers]]);
 
@@ -819,11 +812,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder),
     ...toTargets('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder),
     ...toTargets('4.MD.A.1-convert-larger-to-smaller', convertLargerToSmallerUnitsBuilder),
-    ...toTargets('4.MD.A.1-two-column-tables', twoColumnConversionTableBuilder)
+    ...toTargets('4.MD.A.1-two-column-tables', twoColumnConversionTableBuilder),
+    ...toTargets('4.MD.A.2-measurement-word-problems', grade4MeasurementWordProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.MD.A.2-measurement-word-problems', grade4MeasurementWordProblemsBuilder, grade4MeasurementProblemsImplementation, 'Keep units, any required conversion, story relation, equation, unknown, and answer consistent across the complete Grade 4 family.'),
     ...toImplementationTodos('4.MD.A.2-measurement-number-lines', grade4MeasurementNumberLinesBuilder, grade4MeasurementNumberLinesImplementation, 'Show the reference point, equal scale intervals, unit, plotted quantity, and measurement label.'),
     ...toImplementationTodos('4.MD.A.3-rectangle-area-formula', rectangleAreaFormulaBuilder, rectangleFormulasImplementation, 'Explicitly elicit A = l × w with rectangle dimensions, square units, and computed area.'),
     ...toImplementationTodos('4.MD.A.3-rectangle-perimeter-formula', rectanglePerimeterFormulaBuilder, rectangleFormulasImplementation, 'Show all dimensions, the perimeter formula or equivalent repeated-side equation, units, and total.'),

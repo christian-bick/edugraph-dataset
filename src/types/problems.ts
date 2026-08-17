@@ -697,6 +697,86 @@ export type MeasurementConversionProblem =
     | LargerToSmallerConversionProblem
     | MeasurementConversionTableProblem;
 
+export type MeasurementWordProblemKind =
+    | 'length'
+    | 'time'
+    | 'liquid-volume'
+    | 'weight'
+    | 'money';
+
+export type MeasurementWordProblemNumberKind = 'integer' | 'fraction' | 'decimal';
+
+export type MeasurementWordProblemUnitId =
+    | 'meter'
+    | 'hour'
+    | 'liter'
+    | 'kilogram'
+    | 'dollar';
+
+export type MeasurementWordProblemUnit = {
+    id: MeasurementWordProblemUnitId;
+    singular: string;
+    plural: string;
+    symbol: string;
+    symbolPlacement: 'prefix' | 'suffix';
+};
+
+/** Exact measured value. Its numeric value is numerator / denominator; display text is generator-authored. */
+export type MeasurementWordProblemValue = {
+    numerator: number;
+    denominator: number;
+    display: string;
+    quantityText: string;
+    equationTerm: string;
+};
+
+export type MeasurementWordProblemMeasuredOperand = {
+    role: 'measured';
+    label: string;
+    value: MeasurementWordProblemValue;
+};
+
+export type MeasurementWordProblemGroupOperand = {
+    role: 'group-count';
+    label: string;
+    count: number;
+    display: string;
+};
+
+type MeasurementWordProblemBase = {
+    task: 'grade4-measurement-word-problem';
+    measurementKind: MeasurementWordProblemKind;
+    numberKind: MeasurementWordProblemNumberKind;
+    unit: MeasurementWordProblemUnit;
+    story: string;
+    question: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answer: MeasurementWordProblemValue;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type MeasurementWordProblemAdditive = MeasurementWordProblemBase & {
+    operation: 'addition' | 'subtraction';
+    operands: readonly [MeasurementWordProblemMeasuredOperand, MeasurementWordProblemMeasuredOperand];
+};
+
+export type MeasurementWordProblemMultiplication = MeasurementWordProblemBase & {
+    operation: 'multiplication';
+    operands: readonly [MeasurementWordProblemGroupOperand, MeasurementWordProblemMeasuredOperand];
+};
+
+export type MeasurementWordProblemDivision = MeasurementWordProblemBase & {
+    operation: 'division';
+    operands: readonly [MeasurementWordProblemMeasuredOperand, MeasurementWordProblemGroupOperand];
+};
+
+export type MeasurementWordProblemGrade4 =
+    | MeasurementWordProblemAdditive
+    | MeasurementWordProblemMultiplication
+    | MeasurementWordProblemDivision;
+
 export type MeasurementLengthDifferenceProblem = {lengthA: number; lengthB: number; difference: number; unit: 'cm'};
 
 export type MeasurementAttributeProblem = {
@@ -1440,6 +1520,7 @@ export interface ViewTypeMap {
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
+    'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
     'data-picture-graph': StatisticalGraphProblem;
     'data-bar-graph': StatisticalGraphProblem;
 

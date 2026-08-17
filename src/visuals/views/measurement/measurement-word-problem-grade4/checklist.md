@@ -1,0 +1,2 @@
+- **Identity:** The same-unit story visibly identifies the measured quantities, measurement unit, one-step operation, equation, unknown, and interpreted answer without changing the supplied numeric notation.
+- **Modes:** Question Mode preserves every given story quantity and the supplied unknown-form equation while withholding the solved equation, numerical answer, and answer statement; Solution Mode retains the givens and reveals those supplied response fields.

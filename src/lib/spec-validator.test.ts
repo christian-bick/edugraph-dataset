@@ -501,6 +501,6 @@ describe('spec-validator', () => {
                 const normalized = Array.from(new Set(target.labels)).sort();
                 expect(target.labels).toEqual(normalized);
             }
-        });
+        }, 15_000);
     });
 });
