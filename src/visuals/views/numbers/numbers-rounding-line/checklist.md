@@ -1,2 +1,2 @@
-- **Identity:** The original whole number, requested rounding place, neighboring multiples, midpoint, and exact position are all visible on one number line.
-- **Modes:** Question Mode leaves the rounded value unresolved; Solution Mode highlights the selected endpoint, shows both distances, and states the midpoint or nearest-neighbor rule used.
+- **Identity:** The source numeral has a clear leader to its exact point and a legible adjacent-tick scale cue, distinct from the named rounding place, bounding multiples, and midpoint through the hundred-thousands place.
+- **Modes:** Question Mode shows the supplied unresolved equation without the rounded value, distances, or decision; Solution Mode highlights the selected endpoint and reveals both distances, the solved equation, rounding statement, and supplied midpoint-or-distance decision.

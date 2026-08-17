@@ -15,10 +15,16 @@ export const spec: GeneratorSpec = {
 
 export const IntegerRoundingGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
+        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
         resolveRangeFromLabels
     ],
-    roundingMagnitude: [Scope.StepsOf10, Scope.StepsOf100]
+    roundingMagnitude: [
+        Scope.StepsOf10,
+        Scope.StepsOf100,
+        Scope.StepsOf1000,
+        Scope.StepsOf10000,
+        Scope.StepsOf100000
+    ]
 } as const;
 
 export type IntegerRoundingGeneratorConfig = ConfigFromSchema<

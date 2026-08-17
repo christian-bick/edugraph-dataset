@@ -9,8 +9,7 @@ export const spec: ViewSpec = {
         Ability.ProcedureExecution
     ],
     rejectedLabels: [
-        ...deductAdmitting([Scope.NumbersWithNegatives]),
-        ...deductAdmitting([Scope.NumbersLarger1000])
+        ...deductAdmitting([Scope.NumbersWithNegatives])
     ]
 };
 
