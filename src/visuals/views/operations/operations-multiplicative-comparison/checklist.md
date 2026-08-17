@@ -1,0 +1,2 @@
+- **Identity:** The reference quantity, scale factor, compared quantity, multiplication equation, equal-size comparison model, and “times as many” relationship visibly describe one multiplicative comparison.
+- **Modes:** Question Mode withholds the completed comparison statement; Solution Mode reveals it while retaining the model and equation.

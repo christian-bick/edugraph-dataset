@@ -1,0 +1,2 @@
+- **Identity:** The story, named reference and compared quantities, comparison direction, unknown role, and equation describe the same multiplicative comparison.
+- **Modes:** Question Mode replaces the unknown quantity with a question mark and withholds the numeric answer and solution equation; Solution Mode reveals and highlights the answer and complete solution equation while preserving the story and model.

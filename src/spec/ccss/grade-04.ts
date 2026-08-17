@@ -16,16 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const multiplicativeComparisonImplementation = defineImplementationPackage({
-    id: 'multiplicative-comparison',
-    description: 'Represent and solve multiplicative comparisons while making the reference quantity, scale factor, compared quantity, and unknown role explicit.',
-    generators: [{ module: 'multiplicative-comparison', strategy: 'new' }],
-    views: [
-        { module: 'operations-multiplicative-comparison', strategy: 'new' },
-        { module: 'operations-multiplicative-comparison-word-problem', strategy: 'new' }
-    ]
-});
-
 const grade4MultistepWordProblemsImplementation = defineImplementationPackage({
     id: 'grade4-multistep-word-problems',
     description: 'Extend multistep word problems with interpreted remainders, letter-unknown equations, and visible answer-reasonableness checks.',
@@ -885,12 +875,12 @@ const compareDecimalsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([[Scope.Greater], [Scope.Equal], [Scope.Less]]);
 
 export const spec: CompetencyTarget[] = [
+    ...toTargets('4.OA.A.1-multiplicative-comparison-equation', multiplicativeComparisonEquationBuilder),
+    ...toTargets('4.OA.A.2-multiplicative-comparison-word-problems', multiplicativeComparisonWordProblemBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.OA.A.1-multiplicative-comparison-equation', multiplicativeComparisonEquationBuilder, multiplicativeComparisonImplementation, 'Show the reference quantity, scale factor, compared quantity, verbal comparison, and multiplication equation.'),
-    ...toImplementationTodos('4.OA.A.2-multiplicative-comparison-word-problems', multiplicativeComparisonWordProblemBuilder, multiplicativeComparisonImplementation, 'Make comparison direction and the unknown role explicit in the story, model, and equation.'),
     ...toImplementationTodos('4.OA.A.3-interpret-remainders', interpretedRemainderBuilder, grade4MultistepWordProblemsImplementation, 'Show how the story context determines the treatment of a nonzero remainder.'),
     ...toImplementationTodos('4.OA.A.3-multistep-letter-equations', multistepLetterEquationBuilder, grade4MultistepWordProblemsImplementation, 'Keep the story, intermediate and final equations, visible letter unknown, operation order, and solution consistent.'),
     ...toImplementationTodos('4.OA.A.3-answer-reasonableness', multistepReasonablenessBuilder, grade4MultistepWordProblemsImplementation, 'Expose a visible estimate or check and a justified reasonableness conclusion without claiming an unobservable mental strategy.'),

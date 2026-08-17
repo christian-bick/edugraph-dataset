@@ -35,6 +35,22 @@ export type ArithmeticFourProblem = ArithmeticProblemBase & {
 /** Shared payload accepted by arithmetic views that render both pairs and triples. */
 export type ArithmeticProblem = ArithmeticPairProblem | ArithmeticTripleProblem | ArithmeticFourProblem;
 
+export type MultiplicativeComparisonProblem = {
+    referenceQuantity: number;
+    scaleFactor: number;
+    comparedQuantity: number;
+    operation: 'multiplication' | 'division';
+    unknownRole: 'reference' | 'scale-factor' | 'compared';
+    answer: number;
+    referenceEntity: string;
+    comparedEntity: string;
+    story: string;
+    question: string;
+    givenEquation: string;
+    solutionEquation: string;
+    comparisonStatement: string;
+};
+
 export type ArithmeticWordProblemTwoStep = {
     kind: 'two-step';
     num1: number;
@@ -799,6 +815,8 @@ export type ShapePartitionEquivalenceProblem = {
  */
 export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
+    'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
+    'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticPairProblem;
     'operations-word-problem': ArithmeticProblem;
