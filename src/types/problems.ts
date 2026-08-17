@@ -1715,6 +1715,62 @@ export type SketchAngleProblem = {
 
 export type AngleMeasurementProblem = MeasureAngleProblem | SketchAngleProblem;
 
+export type AngleArithmeticGeometry = {
+    vertexLabel: 'O';
+    startPointLabel: 'A';
+    dividerPointLabel: 'B';
+    endPointLabel: 'C';
+    leftAngleName: 'AOB';
+    rightAngleName: 'BOC';
+    wholeAngleName: 'AOC';
+    startDegrees: 0;
+    dividerDegrees: number;
+    endDegrees: number;
+    leftSweepDegrees: number;
+    rightSweepDegrees: number;
+    wholeSweepDegrees: number;
+    direction: 'counterclockwise';
+};
+
+type AngleArithmeticProblemBase = {
+    prompt: string;
+    geometry: AngleArithmeticGeometry;
+    leftMeasure: number;
+    rightMeasure: number;
+    wholeMeasure: number;
+    relationStatement: 'm∠AOB + m∠BOC = m∠AOC';
+    questionEquation: string;
+    solutionEquation: string;
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type ExplainAngleAdditionProblem = AngleArithmeticProblemBase & {
+    task: 'explain-angle-addition';
+    operation: 'addition';
+    unknownRole: 'none';
+};
+
+export type SolveUnknownWholeAngleProblem = AngleArithmeticProblemBase & {
+    task: 'solve-unknown-angle';
+    operation: 'addition';
+    unknownRole: 'whole';
+    wholePartEquation: string;
+};
+
+export type SolveUnknownComponentAngleProblem = AngleArithmeticProblemBase & {
+    task: 'solve-unknown-angle';
+    operation: 'subtraction';
+    unknownRole: 'left-component' | 'right-component';
+    wholePartEquation: string;
+};
+
+export type AngleArithmeticProblem =
+    | ExplainAngleAdditionProblem
+    | SolveUnknownWholeAngleProblem
+    | SolveUnknownComponentAngleProblem;
+
 
 /**
  * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
@@ -1824,6 +1880,7 @@ export interface ViewTypeMap {
     'geometry-angle-concepts': AngleConceptProblem;
     'geometry-protractor': AngleMeasurementProblem;
     'geometry-angle-drawing': AngleMeasurementProblem;
+    'geometry-angle-arithmetic': AngleArithmeticProblem;
     'fractions-equivalence-model': FractionEquivalenceProblem;
     'fractions-whole-equivalence': FractionEquivalenceProblem;
     'fractions-compare-models': FractionComparisonProblem;

@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const angleAdditionUnknownsImplementation = defineImplementationPackage({
-    id: 'angle-addition-unknowns',
-    description: 'Represent additive angle composition and solve for unknown component or whole angles.',
-    generators: [{ module: 'angle-arithmetic', strategy: 'new' }],
-    views: [{ module: 'geometry-angle-arithmetic', strategy: 'new' }]
-});
-
 const geometryPrimitivesImplementation = defineImplementationPackage({
     id: 'geometry-primitives',
     description: 'Draw and identify points, lines, segments, rays, angle types, and parallel or perpendicular line relations.',
@@ -528,23 +521,25 @@ const sketchAnglesBuilder = new DatasetPermutationBuilder().addLabels([
 ]);
 
 const additiveAngleMeasureBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.AngleRelations,
     Area.AdjacentAngles,
     Area.AngleCalculation,
     Area.Addition,
+    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.ProcedureUnderstanding
 ]);
 
 const unknownAnglesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.AngleRelations,
         Area.AdjacentAngles,
         Area.AngleCalculation,
+        Scope.AngleMeasurement,
         Scope.DegreeScale,
-        Ability.ProcedureInversion
     ])
-    .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
+    .applyLabelVariants([
+        [Area.Addition, Ability.ProcedureExecution],
+        [Area.Subtraction, Ability.ProcedureInversion]
+    ]);
 
 // ==========================================
 // Geometry (4.G)
@@ -789,12 +784,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.MD.C.5a-one-degree-turn', deriveOneDegreeBuilder),
     ...toTargets('4.MD.C.5b-iterate-degrees', interpretDegreeIterationBuilder),
     ...toTargets('4.MD.C.6-measure-angles', measureAnglesBuilder),
-    ...toTargets('4.MD.C.6-sketch-angles', sketchAnglesBuilder)
+    ...toTargets('4.MD.C.6-sketch-angles', sketchAnglesBuilder),
+    ...toTargets('4.MD.C.7-additive-angle-measure', additiveAngleMeasureBuilder),
+    ...toTargets('4.MD.C.7-unknown-angles', unknownAnglesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.MD.C.7-additive-angle-measure', additiveAngleMeasureBuilder, angleAdditionUnknownsImplementation, 'Show non-overlapping component arcs, component measures, the whole angle, and their sum equation.'),
-    ...toImplementationTodos('4.MD.C.7-unknown-angles', unknownAnglesBuilder, angleAdditionUnknownsImplementation, 'Keep the diagram, known measures, whole-part relation, unknown, equation, and solved degree value consistent.'),
     ...toImplementationTodos('4.G.A.1-draw-geometric-primitives', drawGeometricPrimitivesBuilder, geometryPrimitivesImplementation, 'Require learner-produced primitives or relations with inspectable endpoints, arrows, intersections, angles, or spacing.'),
     ...toImplementationTodos('4.G.A.1-identify-geometric-primitives', identifyGeometricPrimitivesBuilder, geometryPrimitivesImplementation, 'Require the exact requested primitive or relation to be highlighted and named in a two-dimensional figure.'),
     ...toImplementationTodos('4.G.A.2-classify-line-relations', classifyByLineRelationsBuilder, lineAngleShapeClassificationImplementation, 'Expose marked or measurable line relations that justify the selected category.'),
