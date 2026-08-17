@@ -2,10 +2,13 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {
     FractionNumberLineStep,
+    FractionScalingNumberLineTick,
+    FractionScalingProblem,
     ProperFractionEquivalenceProblem,
     WholeNumberFractionEquivalenceProblem
 } from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {isValidFractionScalingProblem} from '../../../helpers/fraction-equivalence-scaling.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {NumbersFractionLineViewConfig, NumbersFractionLineViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
@@ -20,6 +23,139 @@ interface CoreProps {
     config: NumbersFractionLineViewConfig;
     payload: ViewRenderPayload<'numbers-fraction-line'>;
 }
+
+const scalingTickX = (tick: FractionScalingNumberLineTick) =>
+    LEFT + tick.xPercent / 100 * (RIGHT - LEFT);
+
+const ScalingEquivalenceLine = ({
+    data,
+    isSolutionView
+}: {
+    data: FractionScalingProblem;
+    isSolutionView: boolean;
+}) => {
+    const pointX = LEFT + data.numberLineModel.coLocatedXPercent / 100 * (RIGHT - LEFT);
+    const scaledPointLabel = isSolutionView
+        ? data.numberLineModel.secondPoint.label
+        : `?/${data.second.denominator}`;
+
+    return (
+        <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
+            <div className="text-center text-[1.42rem] font-bold text-slate-800">
+                Scale both the numerator and denominator by {data.scaleFactor}.
+            </div>
+            <div className="mt-2 text-center text-[1.08rem] font-semibold text-slate-600">
+                Complete <span className="font-extrabold text-blue-700">{data.questionEquation}</span> on one shared 0–1 scale.
+            </div>
+
+            <svg
+                viewBox="0 0 840 310"
+                className="mt-1 h-[310px] w-full"
+                role="img"
+                aria-label={isSolutionView
+                    ? `${data.first.notation} and ${data.second.notation} occupy the same point on one zero-to-one number line with refined equal partitions`
+                    : `${data.first.notation} and an unknown scaled numerator occupy the same point on one zero-to-one number line; the scale factor is ${data.scaleFactor}`}
+            >
+                <text x={LEFT} y="49" className="fill-blue-700 text-[15px] font-bold">
+                    {data.first.denominator} original equal parts
+                </text>
+                <text x={LEFT} y="268" className="fill-emerald-700 text-[15px] font-bold">
+                    {data.second.denominator} smaller equal parts
+                </text>
+
+                <line x1={LEFT} y1={AXIS_Y} x2={RIGHT} y2={AXIS_Y} stroke="#334155" strokeWidth="4" />
+
+                {data.numberLineModel.firstTicks.map(tick => {
+                    const x = scalingTickX(tick);
+                    const isEndpoint = tick.index === 0 || tick.index === data.first.denominator;
+                    return (
+                        <g key={`first-${tick.index}`}>
+                            <line
+                                x1={x}
+                                y1={AXIS_Y - (isEndpoint ? 31 : 25)}
+                                x2={x}
+                                y2={AXIS_Y - 3}
+                                stroke="#2563eb"
+                                strokeWidth={isEndpoint ? 3 : 2.5}
+                            />
+                            {tick.label && (
+                                <text x={x} y={AXIS_Y - 42} textAnchor="middle" className="fill-slate-700 text-[17px] font-bold">
+                                    {tick.label}
+                                </text>
+                            )}
+                        </g>
+                    );
+                })}
+
+                {data.numberLineModel.secondTicks.map(tick => {
+                    const x = scalingTickX(tick);
+                    const isOriginalBoundary = tick.index % data.scaleFactor === 0;
+                    const isEndpoint = tick.index === 0 || tick.index === data.second.denominator;
+                    return (
+                        <g key={`second-${tick.index}`}>
+                            <line
+                                x1={x}
+                                y1={AXIS_Y + 3}
+                                x2={x}
+                                y2={AXIS_Y + (isEndpoint ? 31 : isOriginalBoundary ? 25 : 17)}
+                                stroke={isOriginalBoundary ? '#059669' : '#64748b'}
+                                strokeWidth={isEndpoint ? 3 : isOriginalBoundary ? 2.5 : 1.5}
+                            />
+                            {tick.label && (
+                                <text x={x} y={AXIS_Y + 51} textAnchor="middle" className="fill-slate-700 text-[17px] font-bold">
+                                    {tick.label}
+                                </text>
+                            )}
+                        </g>
+                    );
+                })}
+
+                <line
+                    x1={pointX}
+                    y1="64"
+                    x2={pointX}
+                    y2="245"
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeDasharray="6 5"
+                />
+                <circle cx={pointX} cy={AXIS_Y} r="13" fill="#dbeafe" stroke="#2563eb" strokeWidth="4" />
+                <circle cx={pointX} cy={AXIS_Y} r="6" fill="#059669" />
+                <text x={pointX - 14} y="82" textAnchor="end" className="fill-blue-700 text-[20px] font-bold">
+                    {data.numberLineModel.firstPoint.label}
+                </text>
+                <text x={pointX + 14} y="82" textAnchor="start" className="fill-emerald-700 text-[20px] font-bold">
+                    {scaledPointLabel}
+                </text>
+                <text x={pointX} y="238" textAnchor="middle" className="fill-slate-600 text-[15px] font-semibold">
+                    same point
+                </text>
+            </svg>
+
+            <div className="flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-[0.92rem] font-bold text-blue-800">
+                <span>{data.numeratorScale.from} × {data.scaleFactor} = {isSolutionView ? data.numeratorScale.result : '?'}</span>
+                <span className="text-blue-300">•</span>
+                <span>{data.denominatorScale.equation}</span>
+            </div>
+
+            <div className={`mt-4 rounded-xl border-2 px-5 py-4 text-center ${
+                isSolutionView
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                    : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
+            }`}>
+                {isSolutionView ? (
+                    <>
+                        <div className="text-[1.08rem] font-extrabold">{data.scalingEquation}</div>
+                        <div className="mt-2 text-[0.95rem] font-bold">{data.answerStatement}</div>
+                        <div className="mt-1 text-[0.88rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                    </>
+                ) : (
+                    <div className="text-[1.05rem] font-bold">{data.questionEquation}</div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 const validateSteps = (steps: FractionNumberLineStep[], numerator: number) => {
     if (steps.length !== numerator) {
@@ -297,14 +433,45 @@ const FractionEquivalenceLine = ({
     );
 };
 
-const NumbersFractionLineCore = ({config: _config, payload}: CoreProps) => {
+const NumbersFractionLineCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData(VIEW_ID, data, ['task']);
+    if (data.task === 'scale-equivalence') {
+        validateProblemData(VIEW_ID, data, [
+            'task',
+            'first',
+            'second',
+            'scaleFactor',
+            'sharedWhole',
+            'numeratorScale',
+            'denominatorScale',
+            'questionEquation',
+            'scalingEquation',
+            'firstUnitPart',
+            'secondUnitPart',
+            'barModel',
+            'numberLineModel',
+            'relation',
+            'answer',
+            'answerStatement',
+            'explanation'
+        ]);
+        if (config.visualArticulation === true || !isValidFractionScalingProblem(data)) {
+            throw new ViewValidationError(VIEW_ID, 'Grade 4 scaling requires one coherent shared-scale model and equation.');
+        }
+        return <ScalingEquivalenceLine data={data} isSolutionView={isSolutionView} />;
+    }
     if (data.task === 'represent-whole-as-fraction') {
+        if (config.visualArticulation === true) {
+            throw new ViewValidationError(VIEW_ID, 'Whole-number equivalence does not use visual articulation.');
+        }
         return <WholeFractionEquivalenceLine data={data} isSolutionView={isSolutionView} />;
     }
     if (data.task === 'recognize-equivalence' || data.task === 'generate-equivalence') {
+        if (config.visualArticulation === true) {
+            throw new ViewValidationError(VIEW_ID, 'Fraction equivalence does not use visual articulation.');
+        }
         return <FractionEquivalenceLine data={data} isSolutionView={isSolutionView} />;
     }
     validateProblemData(VIEW_ID, data, [
@@ -320,6 +487,9 @@ const NumbersFractionLineCore = ({config: _config, payload}: CoreProps) => {
 
     if (data.task !== 'locate-fraction') {
         throw new ViewValidationError(VIEW_ID, 'Expected a fraction-location task.');
+    }
+    if (config.visualArticulation !== true) {
+        throw new ViewValidationError(VIEW_ID, 'Fraction-location tasks require visual articulation.');
     }
     if (!Number.isInteger(data.numerator) || data.numerator < 1 || data.numerator > 15) {
         throw new ViewValidationError(VIEW_ID, 'The numerator must be an integer from 1 through 15.');

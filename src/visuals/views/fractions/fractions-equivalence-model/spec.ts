@@ -4,7 +4,10 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'fractions-equivalence-model',
-    generalLabels: [Scope.VisualNumbers]
+    generalLabels: [
+        Scope.VisualNumbers,
+        Scope.SingleFrameOfReference
+    ]
 };
 
 export const FractionsEquivalenceModelViewSchema = {} as const;

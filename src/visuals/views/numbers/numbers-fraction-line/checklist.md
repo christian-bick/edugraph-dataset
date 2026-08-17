@@ -1,2 +1,2 @@
-- **Identity:** A horizontal number line locates a fraction by iterated unit lengths or co-locates equal fraction/fraction or whole-number/fraction notations.
-- **Modes:** Question Mode withholds the requested endpoint, verdict, or numerator while retaining the needed line evidence; Solution Mode reveals it with the equal-step, scaling, or whole-composition explanation that proves the result.
+- **Identity:** One horizontal reference scale locates fractions by equal steps and, for scaling, aligns the original b-part ticks with the refined bn-part ticks at one co-located point.
+- **Modes:** Question Mode withholds only the requested endpoint, verdict, or scaled numerator while retaining the factor and shared-scale evidence. Solution Mode reveals it and explains the increased number of smaller parts, unchanged point, or whole composition.

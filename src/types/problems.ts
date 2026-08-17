@@ -1521,9 +1521,63 @@ export type WholeNumberFractionEquivalenceProblem = {
     answer: string;
 };
 
+export type FractionScalingStep = {
+    from: number;
+    factor: 2 | 3 | 4;
+    result: number;
+    equation: string;
+};
+
+export type FractionScalingBar = {
+    partCount: FractionParts;
+    shadedCount: number;
+};
+
+export type FractionScalingNumberLineTick = {
+    index: number;
+    xPercent: number;
+    label: string;
+};
+
+export type FractionScalingNumberLinePoint = {
+    tickIndex: number;
+    xPercent: number;
+    label: string;
+};
+
+export type FractionScalingProblem = {
+    task: 'scale-equivalence';
+    first: FractionValue;
+    second: FractionValue;
+    scaleFactor: 2 | 3 | 4;
+    sharedWhole: 1;
+    numeratorScale: FractionScalingStep;
+    denominatorScale: FractionScalingStep;
+    questionEquation: string;
+    scalingEquation: string;
+    firstUnitPart: string;
+    secondUnitPart: string;
+    barModel: {
+        first: FractionScalingBar;
+        second: FractionScalingBar;
+    };
+    numberLineModel: {
+        firstTicks: FractionScalingNumberLineTick[];
+        secondTicks: FractionScalingNumberLineTick[];
+        firstPoint: FractionScalingNumberLinePoint;
+        secondPoint: FractionScalingNumberLinePoint;
+        coLocatedXPercent: number;
+    };
+    relation: 'equal';
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
 export type FractionEquivalenceProblem =
     | ProperFractionEquivalenceProblem
-    | WholeNumberFractionEquivalenceProblem;
+    | WholeNumberFractionEquivalenceProblem
+    | FractionScalingProblem;
 
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
 

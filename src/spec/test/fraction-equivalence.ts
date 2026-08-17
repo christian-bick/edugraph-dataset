@@ -1,6 +1,12 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
-import {CompetencyTarget} from '../../types/ml-engine.ts';
+import {
+    BeyondScopeEntry,
+    CompetencyTarget,
+    ImplementationTodo,
+    OntologyTodo,
+    TargetEquivalence
+} from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
@@ -23,7 +29,26 @@ const wholeNumberBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.ArabicNumerals], [Scope.Numberline]]);
 
+const grade4ScalingBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionEquivalence,
+        Area.FractionNotation,
+        Area.Multiplication,
+        Scope.EqualShares,
+        Scope.Equal,
+        Scope.SingleFrameOfReference,
+        Ability.ProcedureUnderstanding,
+        Ability.Formalization
+    ])
+    .applyLabelVariants([[Scope.VisualNumbers], [Scope.Numberline]]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-fraction-equivalence', builder),
-    ...toTargets('test-whole-number-fraction', wholeNumberBuilder)
+    ...toTargets('test-whole-number-fraction', wholeNumberBuilder),
+    ...toTargets('test-grade4-fraction-equivalence-scaling', grade4ScalingBuilder)
 ];
+
+export const implementationTodos: ImplementationTodo[] = [];
+export const ontologyTodos: OntologyTodo[] = [];
+export const beyondScope: BeyondScopeEntry[] = [];
+export const equivalentTargets: TargetEquivalence[] = [];

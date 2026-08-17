@@ -1,12 +1,13 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {FractionValue} from '../../../../types/problems.ts';
+import {FractionScalingBar, FractionScalingProblem, FractionValue} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
     FractionsEquivalenceModelViewConfig,
     FractionsEquivalenceModelViewSchema
 } from './spec.ts';
+import {isValidFractionScalingProblem} from '../../../helpers/fraction-equivalence-scaling.ts';
 import '../../../../tailwind.css';
 
 const VIEW_ID = 'fractions-equivalence-model';
@@ -46,6 +47,115 @@ const FractionBar = ({fraction}: {fraction: FractionValue}) => (
     </div>
 );
 
+const ScalingFractionBar = ({
+    model,
+    groupSize,
+    label,
+    revealCount
+}: {
+    model: FractionScalingBar;
+    groupSize: number;
+    label: string;
+    revealCount: boolean;
+}) => (
+    <div className="space-y-2">
+        <div
+            className="grid h-[76px] w-[650px] overflow-hidden rounded-lg border-[3px] border-slate-700 bg-white"
+            style={{gridTemplateColumns: `repeat(${model.partCount}, minmax(0, 1fr))`}}
+            role="img"
+            aria-label={revealCount
+                ? `${model.shadedCount} of ${model.partCount} equal parts shaded in ${label}`
+                : `${label} uses smaller equal parts and preserves the same shaded length; the missing scaled numerator is not stated`}
+        >
+            {Array.from({length: model.partCount}, (_, index) => (
+                <div
+                    key={index}
+                    className={`${index < model.shadedCount ? 'bg-blue-500' : 'bg-white'} ${
+                        index > 0
+                            ? index % groupSize === 0
+                                ? 'border-l-[4px] border-slate-700'
+                                : 'border-l border-slate-500'
+                            : ''
+                    }`}
+                />
+            ))}
+        </div>
+        <div className="text-center text-[0.78rem] font-semibold text-slate-500">
+            {label}
+        </div>
+    </div>
+);
+
+const ScalingEquivalenceModel = ({
+    data,
+    isSolutionView
+}: {
+    data: FractionScalingProblem;
+    isSolutionView: boolean;
+}) => (
+    <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
+        <div className="text-center text-[1.42rem] font-bold text-slate-800">
+            Scale both the numerator and denominator by {data.scaleFactor}.
+        </div>
+        <div className="mt-2 text-center text-[1.08rem] font-semibold text-slate-600">
+            Complete <span className="font-extrabold text-blue-700">{data.questionEquation}</span> using one shared whole.
+        </div>
+
+        <div className="mt-6 space-y-5">
+            <div className="grid grid-cols-[120px_1fr] items-center gap-5">
+                <div className="flex flex-col items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Original</span>
+                    <FractionNotation numerator={data.first.numerator} denominator={data.first.denominator} />
+                </div>
+                <ScalingFractionBar
+                    model={data.barModel.first}
+                    groupSize={1}
+                    label={`${data.first.denominator} equal parts; each part is ${data.firstUnitPart}`}
+                    revealCount
+                />
+            </div>
+
+            <div className="grid grid-cols-[120px_1fr] items-center gap-5">
+                <div className="flex flex-col items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Scaled</span>
+                    <FractionNotation
+                        numerator={isSolutionView ? data.second.numerator : '?'}
+                        denominator={data.second.denominator}
+                    />
+                </div>
+                <ScalingFractionBar
+                    model={data.barModel.second}
+                    groupSize={data.scaleFactor}
+                    label={`Each original part becomes ${data.scaleFactor} smaller equal parts of size ${data.secondUnitPart}`}
+                    revealCount={isSolutionView}
+                />
+            </div>
+        </div>
+
+        <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-[0.92rem] font-bold text-blue-800">
+            <span>{data.numeratorScale.from} × {data.scaleFactor} = {isSolutionView ? data.numeratorScale.result : '?'}</span>
+            <span className="text-blue-300">•</span>
+            <span>{data.denominatorScale.equation}</span>
+        </div>
+
+        <div className={`mt-4 rounded-xl border-2 px-5 py-4 text-center ${
+            isSolutionView
+                ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
+        }`}>
+            {isSolutionView ? (
+                <>
+                    <div className="text-[1.08rem] font-extrabold">{data.scalingEquation}</div>
+                    <div className="mt-2 text-[0.95rem] font-bold">{data.answerStatement}</div>
+                    <div className="mt-1 text-[0.88rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                </>
+            ) : (
+                <div className="text-[1.05rem] font-bold">{data.questionEquation}</div>
+            )}
+        </div>
+    </div>
+);
+
 const validateFraction = (name: string, fraction: FractionValue) => {
     if (!fraction || typeof fraction !== 'object') {
         throw new ViewValidationError(VIEW_ID, `${name} fraction is missing.`);
@@ -65,6 +175,31 @@ const validateFraction = (name: string, fraction: FractionValue) => {
 const FractionsEquivalenceModelCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
+    if (data.task === 'scale-equivalence') {
+        validateProblemData(VIEW_ID, data, [
+            'task',
+            'first',
+            'second',
+            'scaleFactor',
+            'sharedWhole',
+            'numeratorScale',
+            'denominatorScale',
+            'questionEquation',
+            'scalingEquation',
+            'firstUnitPart',
+            'secondUnitPart',
+            'barModel',
+            'numberLineModel',
+            'relation',
+            'answer',
+            'answerStatement',
+            'explanation'
+        ]);
+        if (!isValidFractionScalingProblem(data)) {
+            throw new ViewValidationError(VIEW_ID, 'Grade 4 scaling requires one coherent shared-whole model and equation.');
+        }
+        return <ScalingEquivalenceModel data={data} isSolutionView={isSolutionView} />;
+    }
     validateProblemData(VIEW_ID, data, [
         'task',
         'first',

@@ -16,16 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const fractionEquivalenceScalingImplementation = defineImplementationPackage({
-    id: 'fraction-equivalence-scaling',
-    description: 'Explain, recognize, and generate equivalent fractions through common numerator-and-denominator scaling.',
-    generators: [{ module: 'fraction-equivalence', strategy: 'expand' }],
-    views: [
-        { module: 'fractions-equivalence-model', strategy: 'expand' },
-        { module: 'numbers-fraction-line', strategy: 'expand' }
-    ]
-});
-
 const unlikeFractionComparisonImplementation = defineImplementationPackage({
     id: 'unlike-fraction-comparison',
     description: 'Compare fractions with unlike numerators and denominators and justify the result using a same-whole strategy.',
@@ -594,6 +584,7 @@ const equivalentFractionScalingBuilder = new DatasetPermutationBuilder()
         Area.Multiplication,
         Scope.EqualShares,
         Scope.Equal,
+        Scope.SingleFrameOfReference,
         Ability.ProcedureUnderstanding,
         Ability.Formalization
     ])
@@ -779,11 +770,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.G.A.2-classify-angle-size', classifyByAngleSizeBuilder),
     ...toTargets('4.G.A.2-right-triangle-category', recognizeRightTrianglesBuilder),
     ...toTargets('4.G.A.3-identify-line-symmetry', identifyLineSymmetryBuilder),
-    ...toTargets('4.G.A.3-draw-line-symmetry', drawLineSymmetryBuilder)
+    ...toTargets('4.G.A.3-draw-line-symmetry', drawLineSymmetryBuilder),
+    ...toTargets('4.NF.A.1-equivalent-fraction-scaling', equivalentFractionScalingBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NF.A.1-equivalent-fraction-scaling', equivalentFractionScalingBuilder, fractionEquivalenceScalingImplementation, 'Require scaling, recognition of equality, and an explanation of changed part count and size but unchanged amount.'),
     ...toImplementationTodos('4.NF.A.2-unlike-fraction-comparison', unlikeFractionComparisonBuilder, unlikeFractionComparisonImplementation, 'Show unlike original fractions, a same-whole comparison strategy, the relation symbol, and visual justification.'),
     ...toImplementationTodos('4.NF.B.3a-interpret-fraction-arithmetic', interpretFractionAdditionSubtractionBuilder, grade4FractionArithmeticImplementation, 'Make the same-whole join or separate model agree with the fraction equation.'),
     ...toImplementationTodos('4.NF.B.3b-decompose-fractions', decomposeFractionsBuilder, grade4FractionArithmeticImplementation, 'Show multiple distinct same-denominator decompositions that reconstruct the source fraction.'),

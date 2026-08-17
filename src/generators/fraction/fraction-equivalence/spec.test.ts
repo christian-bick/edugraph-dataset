@@ -1,7 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
 import {FractionEquivalenceGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
@@ -56,5 +56,58 @@ describe('FractionEquivalenceGenerator spec integration', () => {
             Ability.Formalization
         ]));
         expect(stub!.tags).not.toContain(Scope.EqualShares);
+    });
+
+    it.each([
+        [Scope.VisualNumbers, 'd2b490fc'],
+        [Scope.Numberline, '9db6415f']
+    ] as const)('resolves the corrected Grade 4 %s scaling target', (representation, hash) => {
+        const labels = [
+            Area.FractionEquivalence,
+            Area.FractionNotation,
+            Area.Multiplication,
+            Scope.EqualShares,
+            Scope.Equal,
+            Scope.SingleFrameOfReference,
+            Ability.ProcedureUnderstanding,
+            Ability.Formalization,
+            representation
+        ];
+        expect(labelSetHash(labels)).toBe(hash);
+        setSeed(hash);
+        const stub = generateWithLabels(generator, labels);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.task).toBe('scale-equivalence');
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            Area.Multiplication,
+            Ability.ProcedureUnderstanding,
+            Ability.Formalization
+        ]));
+        expect(stub!.tags).not.toContain(Scope.SingleFrameOfReference);
+        expect(stub!.tags).not.toContain(representation);
+    });
+
+    it('keeps legacy label extraction on the identical random path', () => {
+        const labels = [
+            Area.FractionEquivalence,
+            Area.FractionNotation,
+            Scope.EqualShares,
+            Scope.Equal,
+            Ability.ConceptDerivation
+        ];
+        setSeed('legacy-label-extraction');
+        const resolved = generateWithLabels(generator, labels);
+        setSeed('legacy-label-extraction');
+        const direct = generator.generate({
+            taskAbilities: [Ability.ConceptDerivation],
+            usesMultiplication: false,
+            usesEqualShares: true,
+            usesImproperFractions: false,
+            usesIntegerNumbers: false
+        });
+
+        expect(resolved!.data).toEqual(direct.data);
+        expect(resolved!.tags).not.toContain(Area.Multiplication);
     });
 });
