@@ -1,0 +1,2 @@
+- **Identity:** An equal-interval number line visibly identifies its measurement unit, labeled reference values, and the requested fraction or decimal measurement to plot.
+- **Modes:** Question Mode shows the complete scale and requested measurement but withholds its plotted position; Solution Mode retains the scale and reveals the exact point, measurement label, and supplied conclusion.

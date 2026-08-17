@@ -777,6 +777,40 @@ export type MeasurementWordProblemGrade4 =
     | MeasurementWordProblemMultiplication
     | MeasurementWordProblemDivision;
 
+export type MeasurementNumberLineKind = MeasurementWordProblemKind;
+export type MeasurementNumberLineUnit = MeasurementWordProblemUnit;
+
+/** Exact number-line value. Its numeric value is numerator / denominator. */
+export type MeasurementNumberLineValue = {
+    numerator: number;
+    denominator: number;
+    display: string;
+    quantityText: string;
+};
+
+export type MeasurementNumberLineTick = {
+    index: number;
+    value: MeasurementNumberLineValue;
+};
+
+export type MeasurementNumberLineProblem = {
+    task: 'grade4-measurement-number-line';
+    measurementKind: MeasurementNumberLineKind;
+    numberKind: 'fraction' | 'decimal';
+    unit: MeasurementNumberLineUnit;
+    tickCount: 4 | 8 | 10;
+    ticks: readonly MeasurementNumberLineTick[];
+    labeledTickIndices: readonly [number, number, number];
+    start: MeasurementNumberLineValue;
+    end: MeasurementNumberLineValue;
+    interval: MeasurementNumberLineValue;
+    target: MeasurementNumberLineTick;
+    prompt: string;
+    scaleStatement: string;
+    answerStatement: string;
+    explanation: string;
+};
+
 export type MeasurementLengthDifferenceProblem = {lengthA: number; lengthB: number; difference: number; unit: 'cm'};
 
 export type MeasurementAttributeProblem = {
@@ -1521,6 +1555,7 @@ export interface ViewTypeMap {
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
     'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
+    'measurement-number-line': MeasurementNumberLineProblem;
     'data-picture-graph': StatisticalGraphProblem;
     'data-bar-graph': StatisticalGraphProblem;
 
