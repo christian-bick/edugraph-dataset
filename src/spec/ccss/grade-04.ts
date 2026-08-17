@@ -3,7 +3,6 @@ import DatasetPermutationBuilder, {
     toImplementationTodos,
     toTargets
 } from '../../lib/dataset-permutation-builder.ts';
-import { defineOntologyPackage, toOntologyTodo } from '../../lib/ontology-todo.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -80,9 +79,23 @@ const multiDigitNumerationImplementation = defineImplementationPackage({
 
 const grade4IntegerRoundingImplementation = defineImplementationPackage({
     id: 'grade4-integer-rounding',
-    description: 'Extend integer rounding through one million for currently expressible place magnitudes.',
+    description: 'Extend integer rounding through one million to every place from tens through hundred-thousands.',
     generators: [{ module: 'integer-rounding', strategy: 'expand' }],
     views: [{ module: 'numbers-rounding-line', strategy: 'expand' }]
+});
+
+const grade4MultiDigitMultiplicationImplementation = defineImplementationPackage({
+    id: 'grade4-multi-digit-multiplication',
+    description: 'Multiply the complete Grade 4 operand-digit profiles with visible place-value decomposition and partial products.',
+    generators: [{ module: 'multi-digit-multiplication', strategy: 'new' }],
+    views: [{ module: 'operations-multiplication-area-model', strategy: 'new' }]
+});
+
+const grade4MultiDigitDivisionImplementation = defineImplementationPackage({
+    id: 'grade4-multi-digit-division',
+    description: 'Find quotients and remainders for the complete Grade 4 dividend/divisor digit profiles with visible place-value reasoning.',
+    generators: [{ module: 'multi-digit-division', strategy: 'new' }],
+    views: [{ module: 'operations-division-area-model', strategy: 'new' }]
 });
 
 const measurementConversionsImplementation = defineImplementationPackage({
@@ -246,43 +259,6 @@ const decimalComparisonGrade4Implementation = defineImplementationPackage({
 });
 
 // ==========================================
-// Ontology packages
-// ==========================================
-
-const factorPrimeCompositeOntology = defineOntologyPackage({
-    id: 'factor-prime-composite-classification',
-    description: 'Add a truthful complementary category for classifying composite whole numbers.',
-    changes: [{ dimension: 'Area', entities: ['CompositeNumbers'] }]
-});
-
-const higherPlaceRoundingOntology = defineOntologyPackage({
-    id: 'higher-place-rounding-magnitudes',
-    description: 'Add step magnitudes for rounding to the ten-thousands and hundred-thousands places.',
-    changes: [{ dimension: 'Scope', entities: ['StepsOf10000', 'StepsOf100000'] }]
-});
-
-const operandDigitProfilesOntology = defineOntologyPackage({
-    id: 'whole-number-operand-digit-profiles',
-    description: 'Add exact digit-count scopes for role-neutral operands and role-specific division operands.',
-    changes: [{
-        dimension: 'Scope',
-        entities: [
-            'OneDigitSmallestOperand',
-            'TwoDigitSmallestOperand',
-            'OneDigitLargestOperand',
-            'TwoDigitLargestOperand',
-            'ThreeDigitLargestOperand',
-            'FourDigitLargestOperand',
-            'OneDigitDivisor',
-            'OneDigitDividend',
-            'TwoDigitDividend',
-            'ThreeDigitDividend',
-            'FourDigitDividend'
-        ]
-    }]
-});
-
-// ==========================================
 // Operations and Algebraic Thinking (4.OA)
 // ==========================================
 
@@ -370,6 +346,13 @@ const oneDigitMultipleTestBuilder = new DatasetPermutationBuilder().addLabels([
 
 const primeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PrimeNumbers,
+    Area.Factorization,
+    Scope.NumbersSmaller100,
+    Ability.ConceptClassification
+]);
+
+const compositeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.CompositeNumbers,
     Area.Factorization,
     Scope.NumbersSmaller100,
     Ability.ConceptClassification
@@ -489,7 +472,13 @@ const grade4IntegerRoundingBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller1000000,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Scope.StepsOf10], [Scope.StepsOf100], [Scope.StepsOf1000]]);
+    .applyLabelVariants([
+        [Scope.StepsOf10],
+        [Scope.StepsOf100],
+        [Scope.StepsOf1000],
+        [Scope.StepsOf10000],
+        [Scope.StepsOf100000]
+    ]);
 
 const standardAlgorithmAddSubtractBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -503,6 +492,45 @@ const standardAlgorithmAddSubtractBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
+
+const grade4MultiDigitMultiplicationBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Multiplication,
+        Scope.IntegerNumbers,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Ability.ProcedureExecution,
+        Ability.ProcedureUnderstanding
+    ])
+    .applyLabelVariants([
+        [Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand],
+        [Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
+        [Scope.SingleDigitSmallestOperand, Scope.ThreeDigitLargestOperand],
+        [Scope.SingleDigitSmallestOperand, Scope.FourDigitLargestOperand],
+        [Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]
+    ]);
+
+const grade4MultiDigitDivisionBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Division,
+        Area.Modulo,
+        Scope.IntegerNumbers,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.SingleDigitDivisor,
+        Ability.ProcedureExecution,
+        Ability.ProcedureUnderstanding
+    ])
+    .applyLabelVariants([
+        [Scope.SingleDigitDividend],
+        [Scope.TwoDigitDividend],
+        [Scope.ThreeDigitDividend],
+        [Scope.FourDigitDividend]
+    ]);
 
 // ==========================================
 // Measurement and Data (4.MD)
@@ -869,6 +897,7 @@ export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos('4.OA.B.4-factor-pairs', factorPairsBuilder, factorsMultiplesPrimesImplementation, 'List or model every factor pair exactly once and reconstruct the source number.'),
     ...toImplementationTodos('4.OA.B.4-multiple-test', oneDigitMultipleTestBuilder, factorsMultiplesPrimesImplementation, 'Expose the candidate, one-digit divisor, quotient or factor evidence, and conclusion.'),
     ...toImplementationTodos('4.OA.B.4-prime-classification', primeClassificationBuilder, factorsMultiplesPrimesImplementation, 'Use exhaustive factor evidence to justify that the number has exactly two positive factors.'),
+    ...toImplementationTodos('4.OA.B.4-composite-classification', compositeClassificationBuilder, factorsMultiplesPrimesImplementation, 'Use exhaustive factor evidence to justify that the number has more than two positive factors.'),
     ...toImplementationTodos('4.OA.C.5-generate-number-pattern', generateNumberPatternBuilder, patternGenerationAnalysisImplementation, 'Show the starting value, rule, generated terms, and response.'),
     ...toImplementationTodos('4.OA.C.5-identify-number-pattern-feature', identifyGeneratedNumberPatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Expose a feature supported by generated terms but not stated directly by the rule.'),
     ...toImplementationTodos('4.OA.C.5-explain-number-pattern-feature', explainGeneratedNumberPatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Require a written causal explanation of why the generated feature continues.'),
@@ -880,7 +909,9 @@ export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos('4.NBT.A.2-write-number-names', writeNumberNamesBuilder, multiDigitNumerationImplementation, 'Map every digit and place to the correctly written English number name.'),
     ...toImplementationTodos('4.NBT.A.2-expanded-form', writeExpandedFormBuilder, multiDigitNumerationImplementation, 'Expand every nonzero digit into its place-value addend and recompose the source numeral.'),
     ...toImplementationTodos('4.NBT.A.2-compare-multi-digit-numbers', compareMultiDigitNumbersBuilder, multiDigitNumerationImplementation, 'Expose the first differing place, comparison symbol, and conclusion.'),
-    ...toImplementationTodos('4.NBT.A.3-round-through-thousands', grade4IntegerRoundingBuilder, grade4IntegerRoundingImplementation, 'Show bounding multiples, the midpoint rule, selected value, and named rounding place.'),
+    ...toImplementationTodos('4.NBT.A.3-round-to-any-place', grade4IntegerRoundingBuilder, grade4IntegerRoundingImplementation, 'Show bounding multiples, the midpoint rule, selected value, and named rounding place.'),
+    ...toImplementationTodos('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder, grade4MultiDigitMultiplicationImplementation, 'Show operand place-value decomposition, partial products, an equation or area model, the final product, and an explanation that agree.'),
+    ...toImplementationTodos('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder, grade4MultiDigitDivisionImplementation, 'Show dividend and divisor place-value decomposition, partial quotients, multiplication checks, quotient, and remainder that agree.'),
     ...toImplementationTodos('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder, measurementConversionsImplementation, 'Show both units, one common quantity, their relative-size relation, and numerical factor.'),
     ...toImplementationTodos('4.MD.A.1-convert-larger-to-smaller', convertLargerToSmallerUnitsBuilder, measurementConversionsImplementation, 'Show the source measure, conversion factor, multiplication equation, destination unit, and result.'),
     ...toImplementationTodos('4.MD.A.1-two-column-tables', twoColumnConversionTableBuilder, measurementConversionsImplementation, 'Show labeled columns, ordered equivalent pairs, the constant factor, and completed entries.'),
@@ -922,32 +953,7 @@ export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos('4.NF.C.7-compare-decimals', compareDecimalsBuilder, decimalComparisonGrade4Implementation, 'Show same-whole decimal models or place values, hundredths precision, the comparison symbol, and justification.')
 ];
 
-export const ontologyTodos: OntologyTodo[] = [
-    toOntologyTodo(
-        '4.OA.B.4',
-        'Classify composite numbers',
-        factorPrimeCompositeOntology,
-        'Add CompositeNumbers rather than mislabeling the complementary category as PrimeNumbers.'
-    ),
-    toOntologyTodo(
-        '4.NBT.A.3',
-        'Round to the ten-thousands and hundred-thousands places',
-        higherPlaceRoundingOntology,
-        'Add exact StepMagnitude leaves beyond the currently available StepsOf1000.'
-    ),
-    toOntologyTodo(
-        '4.NBT.B.5',
-        'Constrain multiplication operand digit profiles',
-        operandDigitProfilesOntology,
-        'Use exact smallest- and largest-operand digit counts for role-neutral multiplication.'
-    ),
-    toOntologyTodo(
-        '4.NBT.B.6',
-        'Constrain division operand digit profiles',
-        operandDigitProfilesOntology,
-        'Use exact divisor and dividend digit counts for role-specific division.'
-    )
-];
+export const ontologyTodos: OntologyTodo[] = [];
 
 export const beyondScope: BeyondScopeEntry[] = [];
 
