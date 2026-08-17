@@ -1,6 +1,2 @@
-- **Identity:** A closed triangle, quadrilateral, pentagon, or hexagon is shown with one integer length on every side.
-- **Question mode:** Every side length and unit are visible, while the perimeter total and calculation remain unrevealed.
-- **Solution mode:** The complete boundary is highlighted and every visible side length appears in the addition equation.
-- **Perimeter result:** The sum, perimeter total, and linear unit agree with the generated polygon data.
-- **Unknown-side question:** The total perimeter and all but exactly one side length are visible; the hidden side is marked with a question mark.
-- **Unknown-side solution:** The missing length is recovered by subtracting the sum of the known sides from the perimeter.
+- **Identity:** A closed polygon or rectangle shows the side evidence needed to add every boundary length, with rectangle tasks visibly accounting for both equal length sides and both equal width sides.
+- **Modes:** Question mode withholds the perimeter or both opposite labels of an unknown rectangle dimension; Solution mode retains the shape and reveals the supplied addition or inverse equation, the linear-unit result, and both recovered side labels.

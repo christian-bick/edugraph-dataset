@@ -3,6 +3,12 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ShapeSquareArrayProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
+import {
+    Grade4RectangleAreaProblem,
+    getAreaTilePrompt,
+    isGrade4RectangleAreaProblem,
+    isValidGrade4RectangleAreaProblem
+} from './helpers.ts';
 import {ShapeSquareArrayViewConfig, ShapeSquareArrayViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -147,6 +153,86 @@ function SquareArray({
     );
 }
 
+function RectangleAreaDiagram({
+    data,
+    isSolutionView
+}: {
+    data: Grade4RectangleAreaProblem;
+    isSolutionView: boolean;
+}) {
+    const isInverse = data.task === 'find-missing-area-dimension';
+    const lengthLabel = isInverse && data.unknownDimension === 'length' && !isSolutionView
+        ? '? units'
+        : `${data.length} units`;
+    const widthLabel = isInverse && data.unknownDimension === 'width' && !isSolutionView
+        ? '? units'
+        : `${data.width} units`;
+    const accessibleDescription = isInverse && !isSolutionView
+        ? `Rectangle with known ${data.knownDimension} ${data.knownValue} units and unknown ${data.unknownDimension}`
+        : `Rectangle with length ${data.length} units and width ${data.width} units`;
+
+    return (
+        <svg viewBox="0 0 440 245" className="h-[245px] w-[440px]" aria-label={accessibleDescription}>
+            <rect x="88" y="30" width="292" height="170" rx="5" fill="#ede9fe" stroke="#6d28d9" strokeWidth="5" />
+            <line x1="88" y1="218" x2="380" y2="218" stroke="#475569" strokeWidth="2" />
+            <line x1="88" y1="211" x2="88" y2="225" stroke="#475569" strokeWidth="2" />
+            <line x1="380" y1="211" x2="380" y2="225" stroke="#475569" strokeWidth="2" />
+            <text x="234" y="240" textAnchor="middle" className="fill-slate-700 text-[16px] font-extrabold">
+                length: {lengthLabel}
+            </text>
+            <line x1="62" y1="30" x2="62" y2="200" stroke="#475569" strokeWidth="2" />
+            <line x1="55" y1="30" x2="69" y2="30" stroke="#475569" strokeWidth="2" />
+            <line x1="55" y1="200" x2="69" y2="200" stroke="#475569" strokeWidth="2" />
+            <text x="26" y="115" textAnchor="middle" transform="rotate(-90 26 115)" className="fill-slate-700 text-[16px] font-extrabold">
+                width: {widthLabel}
+            </text>
+            <text x="234" y="122" textAnchor="middle" className="fill-violet-800 text-[18px] font-extrabold">
+                {isInverse ? `Area: ${data.area} square units` : 'rectangle'}
+            </text>
+        </svg>
+    );
+}
+
+function RectangleAreaFormulaTask({
+    data,
+    isSolutionView
+}: {
+    data: Grade4RectangleAreaProblem;
+    isSolutionView: boolean;
+}) {
+    const isInverse = data.task === 'find-missing-area-dimension';
+    return (
+        <div className="w-[650px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="text-center text-[1.25rem] font-bold leading-snug text-slate-700">
+                {data.prompt}
+            </div>
+            <div className="mt-4 flex justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
+                <RectangleAreaDiagram data={data} isSolutionView={isSolutionView} />
+            </div>
+            <div className="mt-4 grid grid-cols-[245px_1fr] gap-3">
+                <div className="flex items-center justify-center rounded-xl border-2 border-violet-200 bg-violet-50 px-3 py-3 font-mono text-[0.95rem] font-extrabold text-violet-800">
+                    {data.formula}
+                </div>
+                <div className="flex min-h-[54px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-center font-mono text-[1.05rem] font-bold text-slate-700">
+                    {data.questionEquation}
+                </div>
+            </div>
+            {isInverse && !isSolutionView && (
+                <div className="mt-3 rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-3 text-center font-mono text-[1.05rem] font-bold text-blue-800">
+                    Inverse step: {data.inverseEquation}
+                </div>
+            )}
+            {isSolutionView && (
+                <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
+                    <div className="font-mono text-[1.08rem] font-extrabold">{data.solutionEquation}</div>
+                    <div className="mt-1 text-[1.05rem] font-extrabold">{data.answerStatement}</div>
+                    <div className="mt-2 text-[0.92rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 const ShapeSquareArrayCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     validateProblemData('shape-square-array', problem.data, [
@@ -155,6 +241,36 @@ const ShapeSquareArrayCore = ({config, payload}: CoreProps) => {
         'columns',
         'squareCount'
     ]);
+    if (isGrade4RectangleAreaProblem(problem.data)) {
+        validateProblemData('shape-square-array', problem.data, [
+            'length',
+            'width',
+            'area',
+            'areaUnit',
+            'formula',
+            'prompt',
+            'questionEquation',
+            'solutionEquation',
+            'answerStatement',
+            'explanation'
+        ]);
+        if (problem.data.task === 'find-missing-area-dimension') {
+            validateProblemData('shape-square-array', problem.data, [
+                'unknownDimension',
+                'knownDimension',
+                'knownValue',
+                'missingValue',
+                'inverseEquation'
+            ]);
+        }
+        if (!isValidGrade4RectangleAreaProblem(problem.data)) {
+            throw new ViewValidationError(
+                'shape-square-array',
+                'The rectangle dimensions, area formula, and supplied equations must be consistent.'
+            );
+        }
+        return <RectangleAreaFormulaTask data={problem.data} isSolutionView={isSolutionView} />;
+    }
     validateArray(problem.data);
 
     const isUnitInterpretation = problem.data.task === 'interpret-unit';
@@ -168,13 +284,16 @@ const ShapeSquareArrayCore = ({config, payload}: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-8 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="w-[520px] h-[450px] flex flex-col items-center gap-4">
-                <div className="h-[58px] px-5 flex items-start justify-center text-center text-[1.3rem] leading-snug font-bold text-slate-700">
+                <div className={`${isAreaCount
+                    ? 'h-[82px] text-[1.1rem] leading-tight'
+                    : 'h-[58px] text-[1.3rem] leading-snug'
+                } px-5 flex items-start justify-center text-center font-bold text-slate-700`}>
                     {isUnitInterpretation
                         ? 'This square tile has side length 1 unit. What area does it represent?'
                         : isCoverageInterpretation
                             ? 'Unit squares cover this figure exactly. What does the count tell you?'
                             : isAreaCount
-                                ? `Count the ${problem.data.areaUnit} that cover this figure. What is its area?`
+                                ? getAreaTilePrompt(problem.data.areaUnit!)
                                 : isProductExplanation
                                     ? 'Why does multiplying the side lengths give the area of this tiled rectangle?'
                                     : isAreaCalculation

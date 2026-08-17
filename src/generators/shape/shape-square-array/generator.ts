@@ -72,6 +72,41 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
             };
         }
 
+        if (config.taskAbility === Ability.ProcedureExecution) {
+            const appliesRectangleFormula = [
+                Area.AreaCalculation,
+                Area.Equation,
+                Area.Multiplication,
+                Area.Rectangle,
+                Scope.IntegerNumbers,
+                Scope.TwoOperands
+            ].every(label => config.modelFeatures?.includes(label));
+            if (appliesRectangleFormula) {
+                const [width, length] = ARRAY_DIMENSIONS[
+                    Math.floor(random() * ARRAY_DIMENSIONS.length)
+                ];
+                const area = length * width;
+                return {
+                    data: {
+                        task: 'rectangle-area-formula',
+                        rows: width,
+                        columns: length,
+                        squareCount: area,
+                        length,
+                        width,
+                        area,
+                        areaUnit: 'square units',
+                        formula: 'A = length × width',
+                        prompt: `Find the area of a rectangle with length ${length} units and width ${width} units.`,
+                        questionEquation: `A = ${length} × ${width} = ?`,
+                        solutionEquation: `A = ${length} × ${width} = ${area}`,
+                        answerStatement: `The area is ${area} square units.`,
+                        explanation: `The area formula is A = length × width. Multiply ${length} units by ${width} units to get ${area} square units.`
+                    }
+                };
+            }
+        }
+
         if (config.taskAbility === Ability.ProcedureUnderstanding) {
             const connectsTilingToProduct = [
                 Area.AreaCalculation,
@@ -91,6 +126,52 @@ export class ShapeSquareArrayGenerator implements ProblemGenerator<
                     columns,
                     squareCount: rows * columns,
                     areaUnit: 'square units'
+                }
+            };
+        }
+
+        if (config.taskAbility === Ability.ProcedureInversion) {
+            const findsMissingDimension = [
+                Area.AreaCalculation,
+                Area.Equation,
+                Area.Multiplication,
+                Area.Rectangle,
+                Scope.IntegerNumbers,
+                Scope.TwoOperands
+            ].every(label => config.modelFeatures?.includes(label));
+            if (!findsMissingDimension) return null;
+            const [width, length] = ARRAY_DIMENSIONS[
+                Math.floor(random() * ARRAY_DIMENSIONS.length)
+            ];
+            const area = length * width;
+            const unknownDimension = random() < 0.5 ? 'length' : 'width';
+            const knownDimension = unknownDimension === 'length' ? 'width' : 'length';
+            const knownValue = knownDimension === 'length' ? length : width;
+            const missingValue = unknownDimension === 'length' ? length : width;
+            const questionEquation = unknownDimension === 'length'
+                ? `${area} = ? × ${width}`
+                : `${area} = ${length} × ?`;
+            return {
+                data: {
+                    task: 'find-missing-area-dimension',
+                    rows: width,
+                    columns: length,
+                    squareCount: area,
+                    length,
+                    width,
+                    area,
+                    areaUnit: 'square units',
+                    formula: 'A = length × width',
+                    unknownDimension,
+                    knownDimension,
+                    knownValue,
+                    missingValue,
+                    prompt: `A rectangle has an area of ${area} square units and a ${knownDimension} of ${knownValue} units. Find its ${unknownDimension}.`,
+                    questionEquation,
+                    inverseEquation: `${area} ÷ ${knownValue} = ?`,
+                    solutionEquation: `${area} ÷ ${knownValue} = ${missingValue}`,
+                    answerStatement: `The ${unknownDimension} is ${missingValue} units.`,
+                    explanation: `Because area equals length times width, divide ${area} by the known ${knownDimension}, ${knownValue}, to get the missing ${unknownDimension}, ${missingValue} units.`
                 }
             };
         }

@@ -16,19 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const rectangleFormulasImplementation = defineImplementationPackage({
-    id: 'rectangle-formulas',
-    description: 'Apply rectangle area and perimeter formulas and invert them to recover an unknown dimension.',
-    generators: [
-        { module: 'shape-square-array', strategy: 'expand' },
-        { module: 'geometry-perimeter', strategy: 'expand' }
-    ],
-    views: [
-        { module: 'shape-square-array', strategy: 'expand' },
-        { module: 'geometry-perimeter', strategy: 'expand' }
-    ]
-});
-
 const fractionLinePlotArithmeticImplementation = defineImplementationPackage({
     id: 'fraction-line-plot-arithmetic',
     description: 'Construct fractional-measurement line plots and solve fraction addition or subtraction problems from their data.',
@@ -477,20 +464,23 @@ const rectangleAreaFormulaBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Rectangle,
     Area.Multiplication,
     Scope.IntegerNumbers,
-    Ability.ProcedureUnderstanding
+    Scope.TwoOperands,
+    Ability.ProcedureExecution
 ]);
 
 const rectanglePerimeterFormulaBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PerimeterCalculation,
+    Area.Equation,
     Area.Rectangle,
+    Area.Addition,
     Scope.IntegerNumbers,
     Ability.ProcedureExecution
 ]);
 
 const unknownRectangleDimensionBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.Rectangle, Scope.IntegerNumbers, Ability.ProcedureInversion])
+    .addLabels([Area.Equation, Area.Rectangle, Scope.IntegerNumbers, Ability.ProcedureInversion])
     .applyLabelVariants([
-        [Area.AreaCalculation, Area.Multiplication],
+        [Area.AreaCalculation, Area.Multiplication, Scope.TwoOperands],
         [Area.PerimeterCalculation, Area.Addition]
     ]);
 
@@ -807,13 +797,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.MD.A.1-convert-larger-to-smaller', convertLargerToSmallerUnitsBuilder),
     ...toTargets('4.MD.A.1-two-column-tables', twoColumnConversionTableBuilder),
     ...toTargets('4.MD.A.2-measurement-word-problems', grade4MeasurementWordProblemsBuilder),
-    ...toTargets('4.MD.A.2-measurement-number-lines', grade4MeasurementNumberLinesBuilder)
+    ...toTargets('4.MD.A.2-measurement-number-lines', grade4MeasurementNumberLinesBuilder),
+    ...toTargets('4.MD.A.3-rectangle-area-formula', rectangleAreaFormulaBuilder),
+    ...toTargets('4.MD.A.3-rectangle-perimeter-formula', rectanglePerimeterFormulaBuilder),
+    ...toTargets('4.MD.A.3-unknown-rectangle-dimension', unknownRectangleDimensionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.MD.A.3-rectangle-area-formula', rectangleAreaFormulaBuilder, rectangleFormulasImplementation, 'Explicitly elicit A = l × w with rectangle dimensions, square units, and computed area.'),
-    ...toImplementationTodos('4.MD.A.3-rectangle-perimeter-formula', rectanglePerimeterFormulaBuilder, rectangleFormulasImplementation, 'Show all dimensions, the perimeter formula or equivalent repeated-side equation, units, and total.'),
-    ...toImplementationTodos('4.MD.A.3-unknown-rectangle-dimension', unknownRectangleDimensionBuilder, rectangleFormulasImplementation, 'Show the given measure, known dimensions, formula with an unknown side, inverse calculation, and recovered length.'),
     ...toImplementationTodos('4.MD.B.4-construct-fractional-line-plot', constructFractionalLinePlotBuilder, fractionLinePlotArithmeticImplementation, 'Require a learner-produced plot that preserves every measurement and uses the required fractional-unit scale.'),
     ...toImplementationTodos('4.MD.B.4-line-plot-fraction-arithmetic', fractionLinePlotArithmeticBuilder, fractionLinePlotArithmeticImplementation, 'Show selected plot marks, extracted fraction values, equation, unit, and interpreted result.'),
     ...toImplementationTodos('4.MD.C.5a-angle-from-arc', recognizeAngleArcBuilder, angleConceptsImplementation, 'Show two rays, their shared endpoint, a centered circular reference, and the highlighted turn.'),

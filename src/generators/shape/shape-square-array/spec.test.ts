@@ -121,4 +121,38 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
         expect(stub.data.areaUnit).toBe('square units');
         expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
     });
+
+    it('resolves the Grade 4 rectangle area formula separately from legacy calculation', () => {
+        const stub = generateWithLabels(generator, [
+            Area.AreaCalculation,
+            Area.Equation,
+            Area.Rectangle,
+            Area.Multiplication,
+            Scope.IntegerNumbers,
+            Scope.TwoOperands,
+            Ability.ProcedureExecution
+        ])!;
+
+        expect(stub.data.task).toBe('rectangle-area-formula');
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Area.Equation,
+            Scope.TwoOperands,
+            Ability.ProcedureExecution
+        ]));
+    });
+
+    it('resolves Grade 4 inverse rectangle area to a missing dimension', () => {
+        const stub = generateWithLabels(generator, [
+            Area.AreaCalculation,
+            Area.Equation,
+            Area.Rectangle,
+            Area.Multiplication,
+            Scope.IntegerNumbers,
+            Scope.TwoOperands,
+            Ability.ProcedureInversion
+        ])!;
+
+        expect(stub.data.task).toBe('find-missing-area-dimension');
+        expect(stub.tags).toContain(Ability.ProcedureInversion);
+    });
 });

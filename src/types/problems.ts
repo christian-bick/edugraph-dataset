@@ -1376,13 +1376,47 @@ export type ShapePatternProblem = ShapePatternProblemBase & (
     }
 );
 
-export type ShapeSquareArrayProblem = {
+export type LegacyShapeSquareArrayProblem = {
     task: 'interpret-unit' | 'interpret-coverage' | 'partition' | 'count' | 'count-area' | 'explain-product' | 'calculate-area';
     rows: 1 | 2 | 3 | 4 | 5;
     columns: 1 | 2 | 3 | 4 | 5;
     squareCount: number;
     areaUnit?: 'square units' | 'square centimeters' | 'square meters' | 'square inches' | 'square feet';
 };
+
+type RectangleAreaFormulaBase = {
+    rows: 2 | 3 | 4 | 5;
+    columns: 2 | 3 | 4 | 5;
+    squareCount: number;
+    length: number;
+    width: number;
+    area: number;
+    areaUnit: 'square units';
+    formula: 'A = length × width';
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type RectangleAreaFormulaProblem = RectangleAreaFormulaBase & {
+    task: 'rectangle-area-formula';
+};
+
+export type FindMissingRectangleAreaDimensionProblem = RectangleAreaFormulaBase & {
+    task: 'find-missing-area-dimension';
+    unknownDimension: 'length' | 'width';
+    knownDimension: 'length' | 'width';
+    knownValue: number;
+    missingValue: number;
+    inverseEquation: string;
+};
+
+export type ShapeSquareArrayProblem =
+    | LegacyShapeSquareArrayProblem
+    | RectangleAreaFormulaProblem
+    | FindMissingRectangleAreaDimensionProblem;
 
 export type DistributiveAreaDecompositionProblem = {
     kind: 'distributive';
@@ -1433,9 +1467,41 @@ export type FindMissingPolygonSideProblem = GeometryPerimeterProblemBase & {
     knownSideTotal: number;
 };
 
+type RectanglePerimeterFormulaBase = {
+    shape: 'rectangle';
+    vertices: PolygonVertex[];
+    sideLengths: [number, number, number, number];
+    length: number;
+    width: number;
+    perimeter: number;
+    unit: 'units';
+    formula: 'P = length + width + length + width';
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type RectanglePerimeterFormulaProblem = RectanglePerimeterFormulaBase & {
+    task: 'rectangle-perimeter-formula';
+};
+
+export type FindMissingRectanglePerimeterDimensionProblem = RectanglePerimeterFormulaBase & {
+    task: 'find-missing-perimeter-dimension';
+    unknownDimension: 'length' | 'width';
+    knownDimension: 'length' | 'width';
+    knownValue: number;
+    missingValue: number;
+    knownSideTotal: number;
+    inverseEquation: string;
+};
+
 export type GeometryPerimeterProblem =
     | FindPolygonPerimeterProblem
-    | FindMissingPolygonSideProblem;
+    | FindMissingPolygonSideProblem
+    | RectanglePerimeterFormulaProblem
+    | FindMissingRectanglePerimeterDimensionProblem;
 
 export type RectangleMeasures = {
     width: number;

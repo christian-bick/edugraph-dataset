@@ -1,8 +1,17 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {GeometryPerimeterProblem, PolygonVertex} from '../../../../types/problems.ts';
+import {
+    FindMissingPolygonSideProblem,
+    FindPolygonPerimeterProblem,
+    PolygonVertex
+} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
+import {
+    Grade4RectanglePerimeterProblem,
+    isGrade4RectanglePerimeterProblem,
+    isValidGrade4RectanglePerimeterProblem
+} from './helpers.ts';
 import {GeometryPerimeterViewConfig, GeometryPerimeterViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -13,15 +22,9 @@ interface CoreProps {
 
 type ScreenVertex = PolygonVertex;
 
-function validatePerimeter(data: GeometryPerimeterProblem) {
-    validateProblemData('geometry-perimeter', data, [
-        'task',
-        'shape',
-        'vertices',
-        'sideLengths',
-        'perimeter',
-        'unit'
-    ]);
+type LegacyGeometryPerimeterProblem = FindPolygonPerimeterProblem | FindMissingPolygonSideProblem;
+
+function validatePerimeter(data: LegacyGeometryPerimeterProblem) {
     const expectedSideCounts = {triangle: 3, quadrilateral: 4, pentagon: 5, hexagon: 6};
     const sideCount = expectedSideCounts[data.shape];
     if (
@@ -50,6 +53,79 @@ function validatePerimeter(data: GeometryPerimeterProblem) {
             'An inverse perimeter task must hide one valid side and total the remaining sides.'
         );
     }
+}
+
+function RectanglePerimeterDiagram({
+    data,
+    isSolutionView
+}: {
+    data: Grade4RectanglePerimeterProblem;
+    isSolutionView: boolean;
+}) {
+    const isInverse = data.task === 'find-missing-perimeter-dimension';
+    const lengthLabel = isInverse && data.unknownDimension === 'length' && !isSolutionView
+        ? '? units'
+        : `${data.length} units`;
+    const widthLabel = isInverse && data.unknownDimension === 'width' && !isSolutionView
+        ? '? units'
+        : `${data.width} units`;
+    const accessibleDescription = isInverse && !isSolutionView
+        ? `Rectangle with known ${data.knownDimension} ${data.knownValue} units and unknown ${data.unknownDimension}`
+        : `Rectangle with length ${data.length} units and width ${data.width} units`;
+
+    return (
+        <svg viewBox="0 0 560 270" className="h-[270px] w-[560px]" aria-label={accessibleDescription}>
+            <rect x="112" y="42" width="336" height="178" rx="5" fill="#e0f2fe" stroke="#334155" strokeWidth="5" />
+            {isSolutionView && (
+                <rect x="112" y="42" width="336" height="178" rx="5" fill="none" stroke="#0f766e" strokeWidth="9" />
+            )}
+            <text x="280" y="31" textAnchor="middle" className="fill-slate-800 text-[16px] font-extrabold">{lengthLabel}</text>
+            <text x="280" y="250" textAnchor="middle" className="fill-slate-800 text-[16px] font-extrabold">{lengthLabel}</text>
+            <text x="75" y="132" textAnchor="middle" transform="rotate(-90 75 132)" className="fill-slate-800 text-[16px] font-extrabold">{widthLabel}</text>
+            <text x="485" y="132" textAnchor="middle" transform="rotate(90 485 132)" className="fill-slate-800 text-[16px] font-extrabold">{widthLabel}</text>
+            <text x="280" y="138" textAnchor="middle" className="fill-sky-900 text-[18px] font-extrabold">
+                {isInverse ? `Perimeter: ${data.perimeter} units` : 'rectangle boundary'}
+            </text>
+        </svg>
+    );
+}
+
+function RectanglePerimeterFormulaTask({
+    data,
+    isSolutionView
+}: {
+    data: Grade4RectanglePerimeterProblem;
+    isSolutionView: boolean;
+}) {
+    const isInverse = data.task === 'find-missing-perimeter-dimension';
+    return (
+        <div className="w-[700px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="text-center text-[1.25rem] font-bold leading-snug text-slate-700">{data.prompt}</div>
+            <div className="mt-4 flex justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
+                <RectanglePerimeterDiagram data={data} isSolutionView={isSolutionView} />
+            </div>
+            <div className="mt-4 grid grid-cols-[355px_1fr] gap-3">
+                <div className="flex items-center justify-center rounded-xl border-2 border-sky-200 bg-sky-50 px-2 py-3 text-center font-mono text-[0.78rem] font-extrabold whitespace-nowrap text-sky-900">
+                    {data.formula}
+                </div>
+                <div className="flex min-h-[54px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-3 py-3 text-center font-mono text-[0.92rem] font-bold text-slate-700">
+                    {data.questionEquation}
+                </div>
+            </div>
+            {isInverse && !isSolutionView && (
+                <div className="mt-3 rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-3 text-center font-mono text-[1.02rem] font-bold text-blue-800">
+                    Inverse step: {data.inverseEquation}
+                </div>
+            )}
+            {isSolutionView && (
+                <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
+                    <div className="font-mono text-[1.04rem] font-extrabold">{data.solutionEquation}</div>
+                    <div className="mt-1 text-[1.05rem] font-extrabold">{data.answerStatement}</div>
+                    <div className="mt-2 text-[0.92rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 function fitVertices(vertices: PolygonVertex[]): ScreenVertex[] {
@@ -83,7 +159,7 @@ function labelPosition(start: ScreenVertex, end: ScreenVertex, center: ScreenVer
 }
 
 function PolygonDiagram({data, traceBoundary, hideUnknown}: {
-    data: GeometryPerimeterProblem;
+    data: LegacyGeometryPerimeterProblem;
     traceBoundary: boolean;
     hideUnknown: boolean;
 }) {
@@ -153,6 +229,43 @@ function PolygonDiagram({data, traceBoundary, hideUnknown}: {
 const GeometryPerimeterCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
+    validateProblemData('geometry-perimeter', data, [
+        'task',
+        'shape',
+        'vertices',
+        'sideLengths',
+        'perimeter',
+        'unit'
+    ]);
+    if (isGrade4RectanglePerimeterProblem(data)) {
+        validateProblemData('geometry-perimeter', data, [
+            'length',
+            'width',
+            'formula',
+            'prompt',
+            'questionEquation',
+            'solutionEquation',
+            'answerStatement',
+            'explanation'
+        ]);
+        if (data.task === 'find-missing-perimeter-dimension') {
+            validateProblemData('geometry-perimeter', data, [
+                'unknownDimension',
+                'knownDimension',
+                'knownValue',
+                'missingValue',
+                'knownSideTotal',
+                'inverseEquation'
+            ]);
+        }
+        if (!isValidGrade4RectanglePerimeterProblem(data)) {
+            throw new ViewValidationError(
+                'geometry-perimeter',
+                'The rectangle dimensions, perimeter formula, and supplied equations must be consistent.'
+            );
+        }
+        return <RectanglePerimeterFormulaTask data={data} isSolutionView={isSolutionView} />;
+    }
     validatePerimeter(data);
     const addition = data.sideLengths.join(' + ');
     const isInverse = data.task === 'find-missing-side';

@@ -8,7 +8,11 @@ import {
     GeometryPerimeterGeneratorSchema
 } from './spec.ts';
 
-type PolygonTemplate = Omit<GeometryPerimeterProblem, 'task' | 'perimeter' | 'unit'>;
+type PolygonTemplate = {
+    shape: 'triangle' | 'quadrilateral' | 'pentagon' | 'hexagon';
+    vertices: PolygonVertex[];
+    sideLengths: number[];
+};
 
 const POLYGONS = new Map<string, PolygonTemplate>([
     [Area.Triangle, {
@@ -33,6 +37,17 @@ const POLYGONS = new Map<string, PolygonTemplate>([
     }]
 ]);
 
+const RECTANGLE_DIMENSIONS = [
+    [4, 3],
+    [5, 2],
+    [6, 4],
+    [7, 3],
+    [8, 5],
+    [9, 4],
+    [10, 6],
+    [12, 5]
+] as const;
+
 function scaleVertex(vertex: PolygonVertex, factor: number): PolygonVertex {
     return {x: vertex.x * factor, y: vertex.y * factor};
 }
@@ -47,11 +62,78 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
     generate(
         config: GeometryPerimeterGeneratorConfig
     ): ProblemStub<GeometryPerimeterProblem> | null {
-        validateConfigFields('geometry-perimeter', config, ['polygonShape', 'taskAbility']);
+        validateConfigFields('geometry-perimeter', config, [
+            'polygonShape',
+            'taskAbility'
+        ]);
         if (
             config.taskAbility !== Ability.ProcedureExecution
             && config.taskAbility !== Ability.ProcedureInversion
         ) return null;
+
+        if (config.polygonShape === Area.Rectangle) {
+            const [length, width] = RECTANGLE_DIMENSIONS[
+                Math.floor(random() * RECTANGLE_DIMENSIONS.length)
+            ];
+            const perimeter = 2 * (length + width);
+            const sideLengths: [number, number, number, number] = [length, width, length, width];
+            const common = {
+                shape: 'rectangle' as const,
+                vertices: [{x: 0, y: 0}, {x: length, y: 0}, {x: length, y: width}, {x: 0, y: width}],
+                sideLengths,
+                length,
+                width,
+                perimeter,
+                unit: 'units' as const,
+                formula: 'P = length + width + length + width' as const
+            };
+            if (config.taskAbility === Ability.ProcedureExecution) {
+                if (
+                    !config.operationFeatures?.includes(Area.Addition)
+                    || !config.operationFeatures.includes(Area.Equation)
+                ) return null;
+                return {
+                    data: {
+                        ...common,
+                        task: 'rectangle-perimeter-formula',
+                        prompt: `Find the perimeter of a rectangle with length ${length} units and width ${width} units.`,
+                        questionEquation: `P = ${length} + ${width} + ${length} + ${width} = ?`,
+                        solutionEquation: `P = ${length} + ${width} + ${length} + ${width} = ${perimeter}`,
+                        answerStatement: `The perimeter is ${perimeter} units.`,
+                        explanation: `A rectangle has two lengths and two widths. Add ${length} + ${width} + ${length} + ${width} to get ${perimeter} units.`
+                    }
+                };
+            }
+            if (
+                !config.operationFeatures?.includes(Area.Addition)
+                || !config.operationFeatures.includes(Area.Equation)
+            ) return null;
+            const unknownDimension = random() < 0.5 ? 'length' : 'width';
+            const knownDimension = unknownDimension === 'length' ? 'width' : 'length';
+            const knownValue = knownDimension === 'length' ? length : width;
+            const missingValue = unknownDimension === 'length' ? length : width;
+            const knownSideTotal = knownValue * 2;
+            const questionEquation = unknownDimension === 'length'
+                ? `P = ? + ${width} + ? + ${width} = ${perimeter}`
+                : `P = ${length} + ? + ${length} + ? = ${perimeter}`;
+            return {
+                data: {
+                    ...common,
+                    task: 'find-missing-perimeter-dimension',
+                    unknownDimension,
+                    knownDimension,
+                    knownValue,
+                    missingValue,
+                    knownSideTotal,
+                    prompt: `A rectangle has a perimeter of ${perimeter} units and a ${knownDimension} of ${knownValue} units. Find its ${unknownDimension}.`,
+                    questionEquation,
+                    inverseEquation: `(${perimeter} - ${knownSideTotal}) ÷ 2 = ?`,
+                    solutionEquation: `(${perimeter} - ${knownSideTotal}) ÷ 2 = ${missingValue}`,
+                    answerStatement: `The ${unknownDimension} is ${missingValue} units.`,
+                    explanation: `The two known ${knownDimension} sides total ${knownSideTotal} units. Subtract them from ${perimeter}, then divide the remaining length equally between the two ${unknownDimension} sides to get ${missingValue} units.`
+                }
+            };
+        }
 
         const template = POLYGONS.get(config.polygonShape!);
         if (!template) return null;

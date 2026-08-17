@@ -12,8 +12,10 @@ export const ShapeSquareArrayGeneratorSchema = {
     modelFeatures: [
         [
             Area.AreaCalculation,
+            Area.Equation,
             Area.Iteration,
             Area.Multiplication,
+            Area.Rectangle,
             Area.Square,
             Area.ShapeDecomposition,
             Scope.BoxArrangement,
@@ -33,6 +35,7 @@ export const ShapeSquareArrayGeneratorSchema = {
             Ability.Interpretation,
             Ability.VisualArticulation,
             Ability.ProcedureExecution,
+            Ability.ProcedureInversion,
             Ability.ProcedureUnderstanding
         ],
         selectExactMatch

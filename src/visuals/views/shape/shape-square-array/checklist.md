@@ -1,10 +1,2 @@
-- **Identity:** The artifact shows either one dimensioned unit square or a non-square rectangle composed from same-size square cells.
-- **Unit-square interpretation:** A single square tile has both side lengths marked `1 unit`; the solution explicitly identifies its area as `1 square unit`.
-- **Coverage interpretation:** Equal unit squares cover the entire figure without gaps or overlaps; the solution states that the tile count is the area in square units.
-- **Area count:** The question withholds the total while showing a complete square-unit cover; the solution numbers every tile and reports the area using the payload's generic or named square unit.
-- **Tiling/product connection:** A fully tiled rectangle has both side lengths labeled in units; the solution aligns rows, columns, multiplication, and square-unit area.
-- **Rectangular area:** Mathematical and story prompts share a tiled rectangle with visible side lengths; the solution multiplies those lengths and reports square-unit area.
-- **Partition question mode:** The correctly proportioned outer rectangle is shown without internal divisions while the requested row and column counts remain visible.
-- **Partition solution mode:** Square cell boundaries appear with no gaps or overlaps, and the row-by-column arrangement is stated without revealing a counting result.
-- **Count question mode:** The complete square array remains visible while its total is withheld.
-- **Count solution mode:** Every square receives a counting index and the multiplication statement reveals the total.
+- **Identity:** The artifact shows a unit square, a square-cell array, or an ungridded rectangle whose visible dimensions and supplied area formula make the requested area task identifiable.
+- **Modes:** Question mode leaves the requested partition, count, area, or unknown dimension unrevealed; Solution mode preserves the rectangle context and reveals the matching square-unit result or supplied inverse calculation without exposing an unknown side through Question-mode labels or proportions.

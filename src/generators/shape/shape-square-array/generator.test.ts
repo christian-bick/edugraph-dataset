@@ -116,6 +116,64 @@ describe('ShapeSquareArrayGenerator', () => {
         expect(data.squareCount).toBe(data.rows * data.columns);
     });
 
+    it('authors the rectangle area formula and complete numeric solution', () => {
+        for (let seed = 0; seed < 30; seed++) {
+            setSeed(`rectangle-area-formula-${seed}`);
+            const data = generator.generate({
+                modelFeatures: [
+                    Area.AreaCalculation,
+                    Area.Equation,
+                    Area.Multiplication,
+                    Area.Rectangle,
+                    Scope.IntegerNumbers,
+                    Scope.TwoOperands
+                ],
+                taskAbility: Ability.ProcedureExecution
+            })!.data;
+            expect(data.task).toBe('rectangle-area-formula');
+            if (data.task !== 'rectangle-area-formula') throw new Error('Expected area formula data.');
+            expect(data.length).toBe(data.columns);
+            expect(data.width).toBe(data.rows);
+            expect(data.area).toBe(data.length * data.width);
+            expect(data.squareCount).toBe(data.area);
+            expect(data.formula).toBe('A = length × width');
+            expect(data.prompt).toBe(`Find the area of a rectangle with length ${data.length} units and width ${data.width} units.`);
+            expect(data.questionEquation).toBe(`A = ${data.length} × ${data.width} = ?`);
+            expect(data.solutionEquation).toBe(`A = ${data.length} × ${data.width} = ${data.area}`);
+            expect(data.answerStatement).toBe(`The area is ${data.area} square units.`);
+        }
+    });
+
+    it('inverts the area formula to recover either missing dimension', () => {
+        const unknowns = new Set<string>();
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(`missing-area-dimension-${seed}`);
+            const data = generator.generate({
+                modelFeatures: [
+                    Area.AreaCalculation,
+                    Area.Equation,
+                    Area.Multiplication,
+                    Area.Rectangle,
+                    Scope.IntegerNumbers,
+                    Scope.TwoOperands
+                ],
+                taskAbility: Ability.ProcedureInversion
+            })!.data;
+            expect(data.task).toBe('find-missing-area-dimension');
+            if (data.task !== 'find-missing-area-dimension') throw new Error('Expected inverse area data.');
+            unknowns.add(data.unknownDimension);
+            expect(data.knownDimension).not.toBe(data.unknownDimension);
+            expect(data.missingValue).toBe(data.unknownDimension === 'length' ? data.length : data.width);
+            expect(data.knownValue).toBe(data.knownDimension === 'length' ? data.length : data.width);
+            expect(data.area).toBe(data.length * data.width);
+            expect(data.inverseEquation).toBe(`${data.area} ÷ ${data.knownValue} = ?`);
+            expect(data.solutionEquation).toBe(`${data.area} ÷ ${data.knownValue} = ${data.missingValue}`);
+            expect(data.questionEquation).toContain('?');
+            expect(data.answerStatement).toBe(`The ${data.unknownDimension} is ${data.missingValue} units.`);
+        }
+        expect(unknowns).toEqual(new Set(['length', 'width']));
+    });
+
     it('rejects abilities without their required model features', () => {
         expect(generator.generate({
             modelFeatures: [Scope.TileScale],
@@ -124,6 +182,14 @@ describe('ShapeSquareArrayGenerator', () => {
         expect(generator.generate({
             modelFeatures: [Area.ShapeDecomposition],
             taskAbility: Ability.Interpretation
+        })).toBeNull();
+        expect(generator.generate({
+            modelFeatures: [Area.AreaCalculation],
+            taskAbility: Ability.ProcedureUnderstanding
+        })).toBeNull();
+        expect(generator.generate({
+            modelFeatures: [Area.AreaCalculation, Area.Multiplication],
+            taskAbility: Ability.ProcedureInversion
         })).toBeNull();
     });
 
