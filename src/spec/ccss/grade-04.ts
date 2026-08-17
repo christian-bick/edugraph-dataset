@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const angleConceptsImplementation = defineImplementationPackage({
-    id: 'angle-concepts',
-    description: 'Model angles as circular turns, derive the one-degree unit, and interpret repeated one-degree turns.',
-    generators: [{ module: 'angle-concepts', strategy: 'new' }],
-    views: [{ module: 'geometry-angle-concepts', strategy: 'new' }]
-});
-
 const angleMeasurementDrawingImplementation = defineImplementationPackage({
     id: 'angle-measurement-drawing',
     description: 'Measure whole-number angles with a protractor and draw angles of specified measure.',
@@ -504,15 +497,19 @@ const recognizeAngleArcBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
     Area.RayConcept,
     Area.ArchConcept,
+    Area.Circle,
+    Area.FractionInterpretation,
     Scope.AngleMeasurement,
     Ability.Interpretation
 ]);
 
 const deriveOneDegreeBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
-    Area.AngleCalculation,
+    Area.Circle,
     Area.FractionInterpretation,
+    Scope.AngleMeasurement,
     Scope.DegreeScale,
+    Scope.UnitFractions,
     Ability.ConceptDerivation
 ]);
 
@@ -520,6 +517,7 @@ const interpretDegreeIterationBuilder = new DatasetPermutationBuilder().addLabel
     Area.AngleConcept,
     Area.AngleCalculation,
     Area.Iteration,
+    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.Interpretation
 ]);
@@ -796,13 +794,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.MD.A.3-rectangle-perimeter-formula', rectanglePerimeterFormulaBuilder),
     ...toTargets('4.MD.A.3-unknown-rectangle-dimension', unknownRectangleDimensionBuilder),
     ...toTargets('4.MD.B.4-construct-fractional-line-plot', constructFractionalLinePlotBuilder),
-    ...toTargets('4.MD.B.4-line-plot-fraction-arithmetic', fractionLinePlotArithmeticBuilder)
+    ...toTargets('4.MD.B.4-line-plot-fraction-arithmetic', fractionLinePlotArithmeticBuilder),
+    ...toTargets('4.MD.C.5a-angle-from-arc', recognizeAngleArcBuilder),
+    ...toTargets('4.MD.C.5a-one-degree-turn', deriveOneDegreeBuilder),
+    ...toTargets('4.MD.C.5b-iterate-degrees', interpretDegreeIterationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.MD.C.5a-angle-from-arc', recognizeAngleArcBuilder, angleConceptsImplementation, 'Show two rays, their shared endpoint, a centered circular reference, and the highlighted turn.'),
-    ...toImplementationTodos('4.MD.C.5a-one-degree-turn', deriveOneDegreeBuilder, angleConceptsImplementation, 'Show a full circle, a 1/360 partition or turn, the degree symbol, and the one-degree conclusion.'),
-    ...toImplementationTodos('4.MD.C.5b-iterate-degrees', interpretDegreeIterationBuilder, angleConceptsImplementation, 'Show repeated one-degree units, accumulated turn, and the resulting numerical degree measure.'),
     ...toImplementationTodos('4.MD.C.6-measure-angles', measureAnglesBuilder, angleMeasurementDrawingImplementation, 'Expose protractor alignment, the correct scale, rays, and whole-number reading.'),
     ...toImplementationTodos('4.MD.C.6-sketch-angles', sketchAnglesBuilder, angleMeasurementDrawingImplementation, 'Make the requested measure and completed angle agree with a checkable degree annotation.'),
     ...toImplementationTodos('4.MD.C.7-additive-angle-measure', additiveAngleMeasureBuilder, angleAdditionUnknownsImplementation, 'Show non-overlapping component arcs, component measures, the whole angle, and their sum equation.'),

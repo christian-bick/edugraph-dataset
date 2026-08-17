@@ -1602,6 +1602,66 @@ export type ShapePartitionEquivalenceProblem = {
     conclusion: 'equal shares can have different shapes';
 };
 
+export type AngleConceptFraction =
+    | {numerator: 1; denominator: 6; display: '1/6'}
+    | {numerator: 1; denominator: 4; display: '1/4'}
+    | {numerator: 1; denominator: 3; display: '1/3'}
+    | {numerator: 1; denominator: 2; display: '1/2'};
+
+export type AngleConceptGeometry = {
+    centerLabel: 'O';
+    startPointLabel: 'A';
+    endPointLabel: 'B';
+    fullTurnDegrees: 360;
+    startDegrees: 0;
+    endDegrees: number;
+    sweepDegrees: number;
+    direction: 'counterclockwise';
+    tickDegrees: number[];
+};
+
+type AngleConceptProblemBase = {
+    prompt: string;
+    geometry: AngleConceptGeometry;
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type RecognizeAngleFromArcProblem = AngleConceptProblemBase & {
+    task: 'recognize-angle-from-arc';
+    arcFraction: AngleConceptFraction;
+    questionRelation: string;
+    solutionRelation: string;
+    rayStatement: string;
+};
+
+export type DeriveOneDegreeProblem = AngleConceptProblemBase & {
+    task: 'derive-one-degree';
+    partitionCount: 360;
+    selectedParts: 1;
+    unitFraction: {numerator: 1; denominator: 360; display: '1/360'};
+    degreeMeasure: 1;
+    questionRelation: '1/360 of a full turn = ?';
+    solutionRelation: '1/360 of a full turn = 1°';
+    fractionStatement: 'One equal turn is 1/360 of a full circle.';
+};
+
+export type InterpretDegreeIterationProblem = AngleConceptProblemBase & {
+    task: 'interpret-degree-iteration';
+    unitDegree: 1;
+    iterationCount: number;
+    angleMeasure: number;
+    questionRelation: string;
+    solutionRelation: string;
+    unitStatement: 'Each marked interval is a 1° turn.';
+};
+
+export type AngleConceptProblem =
+    | RecognizeAngleFromArcProblem
+    | DeriveOneDegreeProblem
+    | InterpretDegreeIterationProblem;
+
 
 /**
  * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
@@ -1708,6 +1768,7 @@ export interface ViewTypeMap {
     'geometry-perimeter': GeometryPerimeterProblem;
     'area-perimeter-comparison': AreaPerimeterRelationProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
+    'geometry-angle-concepts': AngleConceptProblem;
     'fractions-equivalence-model': FractionEquivalenceProblem;
     'fractions-whole-equivalence': FractionEquivalenceProblem;
     'fractions-compare-models': FractionComparisonProblem;

@@ -1,0 +1,4 @@
+- **Identity:** A centered circular reference shows two rays and the counterclockwise turn between them; arc-fraction, one-degree, and repeated-degree tasks remain visually distinguishable.
+- **Modes:** Question mode keeps the requested degree result hidden while preserving the needed fraction, arc, or repeated 1° evidence; Solution mode retains that evidence and reveals the supplied relation, answer, and explanation.
+- **Arc evidence:** The highlighted portion follows the circumference rather than filling a sector.
+- **One-degree evidence:** The full circle and a legible magnified 1-of-360 sliver appear without a dense field of 360 spokes.
