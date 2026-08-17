@@ -1,0 +1,2 @@
+- **Identity:** Equal-width, denominator-partitioned frames use one shared whole to show the supplied fraction operation, decomposition, or mixed-number transformation without relying on color alone.
+- **Modes:** Question Mode retains the given operands, action, or source fraction while withholding result-bearing groups, equations, and steps; Solution Mode reveals the complete supplied model, equation, and explanation.

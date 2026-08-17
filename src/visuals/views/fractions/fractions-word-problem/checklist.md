@@ -1,0 +1,2 @@
+- **Identity:** A concise same-whole story, named unit, and denominator-partitioned model keep every given quantity and the requested fraction operation coherent.
+- **Modes:** Question Mode withholds the branch's requested operation, decompositions, or result from text, model, equation, and accessible description; Solution Mode restores the supplied answer and explanation without changing the context or reference whole.

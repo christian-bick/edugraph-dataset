@@ -1634,6 +1634,145 @@ export type FractionComparisonProblem =
     | LegacyFractionComparisonProblem
     | UnlikeFractionComparisonProblem;
 
+export type FractionArithmeticOperation = 'addition' | 'subtraction';
+
+export type LikeDenominatorFractionValue = {
+    numerator: number;
+    denominator: FractionParts;
+    notation: string;
+};
+
+export type MixedFractionValue = {
+    whole: number;
+    numerator: number;
+    denominator: FractionParts;
+    notation: string;
+    improperNumerator: number;
+    improperNotation: string;
+};
+
+export type FractionArithmeticModelGroupRole =
+    | 'first-addend'
+    | 'second-addend'
+    | 'remaining'
+    | 'removed'
+    | 'decomposition-part'
+    | 'result';
+
+export type FractionArithmeticModelGroup = {
+    id: string;
+    role: FractionArithmeticModelGroupRole;
+    label: string;
+    startPart: number;
+    partCount: number;
+};
+
+export type FractionArithmeticModelCell = {
+    partIndex: number;
+    groupId: string | null;
+};
+
+export type FractionArithmeticModelFrame = {
+    frameIndex: number;
+    cells: FractionArithmeticModelCell[];
+};
+
+export type FractionArithmeticModel = {
+    denominator: FractionParts;
+    display: string;
+    totalNumerator: number;
+    frameCount: 1 | 2 | 3 | 4;
+    groups: FractionArithmeticModelGroup[];
+    frames: FractionArithmeticModelFrame[];
+};
+
+export type FractionArithmeticStory = {
+    storyKind:
+        | 'poster-join'
+        | 'poster-separate'
+        | 'mosaic-decomposition'
+        | 'route-combination'
+        | 'route-difference';
+    context: string;
+    question: string;
+    wholeLabel: string;
+    unitLabel: string;
+    givenDisplays: [string] | [string, string];
+    unknownRole: 'operation' | 'decompositions' | 'result';
+};
+
+export type FractionArithmeticCommon = {
+    operation: FractionArithmeticOperation;
+    denominator: FractionParts;
+    sharedWhole: 1;
+    referenceId: 'same-whole';
+    story: FractionArithmeticStory;
+    prompt: string;
+    questionEquation: string;
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type FractionBinaryOperationProblem = FractionArithmeticCommon & {
+    task: 'interpret-operation' | 'fraction-operation';
+    symbol: '+' | '−';
+    action: 'join' | 'separate';
+    first: LikeDenominatorFractionValue;
+    second: LikeDenominatorFractionValue;
+    result: LikeDenominatorFractionValue;
+    questionModels: [FractionArithmeticModel, FractionArithmeticModel];
+    solutionEquation: string;
+    solutionModel: FractionArithmeticModel;
+};
+
+export type FractionDecomposition = {
+    terms: LikeDenominatorFractionValue[];
+    equation: string;
+    model: FractionArithmeticModel;
+};
+
+export type FractionDecompositionProblem = Omit<FractionArithmeticCommon, 'operation'> & {
+    task: 'decompose';
+    operation: 'addition';
+    sourceKind: 'proper' | 'mixed';
+    sourceFraction: LikeDenominatorFractionValue;
+    sourceMixed: MixedFractionValue | null;
+    sourceDisplay: string;
+    sourceModel: FractionArithmeticModel;
+    decompositions: [FractionDecomposition, FractionDecomposition];
+    solutionEquations: [string, string];
+};
+
+export type MixedFractionOperationStrategy =
+    | 'addition-with-carry'
+    | 'addition-without-carry'
+    | 'subtraction-with-borrow'
+    | 'subtraction-without-borrow';
+
+export type MixedFractionOperationProblem = FractionArithmeticCommon & {
+    task: 'mixed-operation';
+    symbol: '+' | '−';
+    strategy: MixedFractionOperationStrategy;
+    requiresRegrouping: boolean;
+    first: MixedFractionValue;
+    second: MixedFractionValue;
+    result: MixedFractionValue;
+    questionModels: [FractionArithmeticModel, FractionArithmeticModel];
+    operandConversionEquations: [string, string];
+    regroupingEquation: string | null;
+    improperOperationEquation: string;
+    normalizationEquation: string;
+    transformationSteps: string[];
+    solutionEquation: string;
+    solutionModel: FractionArithmeticModel;
+};
+
+export type FractionArithmeticProblem =
+    | FractionBinaryOperationProblem
+    | FractionDecompositionProblem
+    | MixedFractionOperationProblem;
+
 export type ShapePartitionProblem =
     | {
         task: 'partition';
@@ -2268,5 +2407,7 @@ export interface ViewTypeMap {
     'fractions-equivalence-model': FractionEquivalenceProblem;
     'fractions-whole-equivalence': FractionEquivalenceProblem;
     'fractions-compare-models': FractionComparisonProblem;
+    'fractions-operation-model': FractionArithmeticProblem;
+    'fractions-word-problem': FractionArithmeticProblem;
     'shape-draw-shape': ShapeBuildShapeProblem;
 }

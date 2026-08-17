@@ -16,16 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const grade4FractionArithmeticImplementation = defineImplementationPackage({
-    id: 'grade4-fraction-arithmetic',
-    description: 'Model like-denominator fraction addition, subtraction, decomposition, mixed-number arithmetic, and related word problems.',
-    generators: [{ module: 'fraction-arithmetic', strategy: 'new' }],
-    views: [
-        { module: 'fractions-operation-model', strategy: 'new' },
-        { module: 'fractions-word-problem', strategy: 'new' }
-    ]
-});
-
 const grade4FractionMultiplicationImplementation = defineImplementationPackage({
     id: 'grade4-fraction-multiplication',
     description: 'Interpret and solve whole-number-by-fraction multiplication with unit-fraction reasoning and visual models.',
@@ -601,6 +591,7 @@ const interpretFractionAdditionSubtractionBuilder = new DatasetPermutationBuilde
     .addLabels([
         Area.FractionArithmetic,
         Area.FractionNotation,
+        Scope.FractionNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
         Ability.Interpretation
@@ -612,7 +603,9 @@ const decomposeFractionsBuilder = new DatasetPermutationBuilder()
         Area.FractionArithmetic,
         Area.FractionNotation,
         Area.Addition,
+        Area.Equation,
         Scope.CommonDenominator,
+        Scope.SingleFrameOfReference,
         Ability.ProcedureUnderstanding,
         Ability.Formalization
     ])
@@ -624,6 +617,7 @@ const mixedNumberArithmeticBuilder = new DatasetPermutationBuilder()
         Area.FractionNotation,
         Scope.MixedNumbers,
         Scope.CommonDenominator,
+        Scope.SingleFrameOfReference,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
@@ -632,9 +626,12 @@ const fractionArithmeticWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
         Area.FractionNotation,
+        Area.Equation,
+        Scope.FractionNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
-        Ability.TextualReception
+        Ability.TextualReception,
+        Ability.ProcedureExecution
     ])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
 
@@ -768,14 +765,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.G.A.3-identify-line-symmetry', identifyLineSymmetryBuilder),
     ...toTargets('4.G.A.3-draw-line-symmetry', drawLineSymmetryBuilder),
     ...toTargets('4.NF.A.1-equivalent-fraction-scaling', equivalentFractionScalingBuilder),
-    ...toTargets('4.NF.A.2-unlike-fraction-comparison', unlikeFractionComparisonBuilder)
+    ...toTargets('4.NF.A.2-unlike-fraction-comparison', unlikeFractionComparisonBuilder),
+    ...toTargets('4.NF.B.3a-interpret-fraction-arithmetic', interpretFractionAdditionSubtractionBuilder),
+    ...toTargets('4.NF.B.3b-decompose-fractions', decomposeFractionsBuilder),
+    ...toTargets('4.NF.B.3c-mixed-number-arithmetic', mixedNumberArithmeticBuilder),
+    ...toTargets('4.NF.B.3d-fraction-word-problems', fractionArithmeticWordProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NF.B.3a-interpret-fraction-arithmetic', interpretFractionAdditionSubtractionBuilder, grade4FractionArithmeticImplementation, 'Make the same-whole join or separate model agree with the fraction equation.'),
-    ...toImplementationTodos('4.NF.B.3b-decompose-fractions', decomposeFractionsBuilder, grade4FractionArithmeticImplementation, 'Show multiple distinct same-denominator decompositions that reconstruct the source fraction.'),
-    ...toImplementationTodos('4.NF.B.3c-mixed-number-arithmetic', mixedNumberArithmeticBuilder, grade4FractionArithmeticImplementation, 'Expose any conversion or regrouping and the final like-denominator result.'),
-    ...toImplementationTodos('4.NF.B.3d-fraction-word-problems', fractionArithmeticWordProblemsBuilder, grade4FractionArithmeticImplementation, 'Keep the story, same-whole model, equation, unknown, unit, and answer consistent.'),
     ...toImplementationTodos('4.NF.B.4a-unit-fraction-multiples', unitFractionMultipleBuilder, grade4FractionMultiplicationImplementation, 'Show a equal unit fractions, a × (1/b), and a/b as the same value.'),
     ...toImplementationTodos('4.NF.B.4b-whole-number-fraction-products', wholeNumberFractionMultiplicationBuilder, grade4FractionMultiplicationImplementation, 'Show the whole-number factor, repeated fractional groups, unit-fraction rewrite, product, and result.'),
     ...toImplementationTodos('4.NF.B.4c-fraction-multiplication-word-problems', fractionMultiplicationWordProblemsBuilder, grade4FractionMultiplicationImplementation, 'Keep story groups, visual model, equation, bounds where relevant, and answer consistent.'),
