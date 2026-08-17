@@ -1,0 +1,283 @@
+import {createRoot} from 'react-dom/client';
+import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
+import {
+    FactorClassificationProblem,
+    FactorMultipleRelationsProblem,
+    FactorPairsProblem,
+    OneDigitMultipleTestProblem,
+    PositiveFactorEvidence
+} from '../../../../types/problems.ts';
+import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {withConfig} from '../../withConfig.tsx';
+import {hasCompletePositiveFactorEvidence} from './helpers.ts';
+import {
+    NumbersFactorsMultiplesViewConfig,
+    NumbersFactorsMultiplesViewSchema
+} from './spec.ts';
+import '../../../../tailwind.css';
+
+interface CoreProps {
+    config: NumbersFactorsMultiplesViewConfig;
+    payload: ViewRenderPayload<'numbers-factors-multiples'>;
+}
+
+const VIEW_ID = 'numbers-factors-multiples';
+
+function fail(message: string): never {
+    throw new ViewValidationError(VIEW_ID, message);
+}
+
+function assertText(values: readonly string[], message: string) {
+    if (values.some(value => typeof value !== 'string' || value.trim().length === 0)) fail(message);
+}
+
+function assertPositiveIntegers(values: readonly number[], message: string) {
+    if (values.some(value => !Number.isInteger(value) || value < 1 || value >= 100)) fail(message);
+}
+
+function validateFactorEvidence(data: PositiveFactorEvidence) {
+    validateProblemData(VIEW_ID, data, ['number', 'factors', 'factorCount', 'factorPairs']);
+    if (!hasCompletePositiveFactorEvidence(data)) {
+        fail('Factor evidence must list every positive factor in ascending order and every unique factor pair exactly once.');
+    }
+}
+
+function validateFactorPairs(data: FactorPairsProblem) {
+    validateProblemData(VIEW_ID, data, ['prompt', 'number', 'factors', 'factorCount', 'factorPairs', 'conclusion']);
+    validateFactorEvidence(data);
+    assertText([data.prompt, data.conclusion], 'The factor-pair task requires a prompt and conclusion.');
+}
+
+function validateMultipleTest(data: OneDigitMultipleTestProblem) {
+    validateProblemData(VIEW_ID, data, [
+        'candidate',
+        'divisor',
+        'quotient',
+        'remainder',
+        'isMultiple',
+        'prompt',
+        'multiplicationEquation',
+        'divisionEquation',
+        'conclusion'
+    ]);
+    assertPositiveIntegers([data.candidate, data.divisor, data.quotient], 'Multiple-test values must be positive whole numbers below 100.');
+    assertText(
+        [data.prompt, data.multiplicationEquation, data.divisionEquation, data.conclusion],
+        'The multiple test requires a prompt, both supplied equations, and a conclusion.'
+    );
+    if (data.divisor > 9
+        || data.remainder !== 0
+        || data.isMultiple !== true
+        || data.candidate !== data.divisor * data.quotient
+        || data.multiplicationEquation !== `${data.divisor} × ${data.quotient} = ${data.candidate}`
+        || data.divisionEquation !== `${data.candidate} ÷ ${data.divisor} = ${data.quotient}`) {
+        fail('The affirmative one-digit multiple evidence is mathematically inconsistent.');
+    }
+}
+
+function validateClassification(data: FactorClassificationProblem) {
+    validateProblemData(VIEW_ID, data, [
+        'prompt',
+        'number',
+        'factors',
+        'factorCount',
+        'factorPairs',
+        'classification',
+        'explanation',
+        'conclusion'
+    ]);
+    validateFactorEvidence(data);
+    assertText(
+        [data.prompt, data.explanation, data.conclusion],
+        'The classification task requires a prompt, explanation, and conclusion.'
+    );
+    if (data.number === 1
+        || (data.kind === 'prime-classification' && (data.classification !== 'prime' || data.factorCount !== 2))
+        || (data.kind === 'composite-classification' && (data.classification !== 'composite' || data.factorCount <= 2))) {
+        fail('The supplied prime or composite classification does not agree with its exhaustive factor evidence.');
+    }
+}
+
+function NumberPrompt({eyebrow, prompt, number}: {eyebrow: string; prompt: string; number: number}) {
+    return (
+        <>
+            <div className="text-center text-sm font-bold uppercase tracking-[0.16em] text-sky-700">{eyebrow}</div>
+            <div className="mx-auto mt-3 max-w-[650px] text-center text-xl font-bold leading-relaxed text-slate-800">{prompt}</div>
+            <div className="mx-auto mt-5 flex h-[104px] w-[150px] items-center justify-center rounded-2xl border-2 border-sky-300 bg-sky-50 font-mono text-[3rem] font-extrabold text-sky-950">
+                {number}
+            </div>
+        </>
+    );
+}
+
+function ResponseBlank({label}: {label: string}) {
+    return (
+        <div className="mt-6 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 px-6 py-5 text-center">
+            <div className="text-xs font-bold uppercase tracking-wide text-emerald-700">Your response</div>
+            <div className="mt-3 text-lg font-bold text-emerald-900">{label}</div>
+            <div className="mx-auto mt-4 h-px w-4/5 bg-emerald-300" />
+        </div>
+    );
+}
+
+function FactorEvidence({data}: {data: PositiveFactorEvidence}) {
+    return (
+        <div className="mt-6 space-y-4">
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-4">
+                <div className="text-center text-xs font-bold uppercase tracking-wide text-indigo-700">
+                    All positive factors · {data.factorCount} total
+                </div>
+                <div className="mt-3 flex flex-wrap justify-center gap-2">
+                    {data.factors.map(factor => (
+                        <div className="min-w-[44px] rounded-lg border border-indigo-200 bg-white px-3 py-2 text-center font-mono text-lg font-bold text-indigo-950" key={factor}>
+                            {factor}
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="rounded-xl border border-violet-200 bg-violet-50 px-5 py-4">
+                <div className="text-center text-xs font-bold uppercase tracking-wide text-violet-700">Unique factor pairs</div>
+                <div
+                    className="mt-3 grid gap-3"
+                    style={{gridTemplateColumns: data.factorPairs.length === 1 ? '1fr' : 'repeat(2, minmax(0, 1fr))'}}
+                >
+                    {data.factorPairs.map(pair => (
+                        <div className="rounded-lg border border-violet-200 bg-white px-4 py-3 text-center font-mono text-lg font-bold text-violet-950" key={`${pair.lowerFactor}-${pair.upperFactor}`}>
+                            {pair.equation}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function Conclusion({children}: {children: React.ReactNode}) {
+    return (
+        <div className="mt-5 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-6 py-4 text-center text-lg font-bold text-emerald-950">
+            {children}
+        </div>
+    );
+}
+
+function FactorPairsTask({data, isSolutionView}: {data: FactorPairsProblem; isSolutionView: boolean}) {
+    return (
+        <>
+            <NumberPrompt eyebrow="Find every factor pair" prompt={data.prompt} number={data.number} />
+            {isSolutionView ? (
+                <>
+                    <FactorEvidence data={data} />
+                    <Conclusion>{data.conclusion}</Conclusion>
+                </>
+            ) : (
+                <ResponseBlank label="List every factor pair exactly once." />
+            )}
+        </>
+    );
+}
+
+function MultipleTestTask({data, isSolutionView}: {data: OneDigitMultipleTestProblem; isSolutionView: boolean}) {
+    return (
+        <>
+            <NumberPrompt eyebrow="Test a multiple" prompt={data.prompt} number={data.candidate} />
+            <div className="mt-5 grid grid-cols-2 gap-4">
+                <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-center">
+                    <div className="text-xs font-bold uppercase tracking-wide text-sky-700">Candidate</div>
+                    <div className="mt-1 font-mono text-2xl font-bold text-sky-950">{data.candidate}</div>
+                </div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center">
+                    <div className="text-xs font-bold uppercase tracking-wide text-amber-700">One-digit divisor</div>
+                    <div className="mt-1 font-mono text-2xl font-bold text-amber-950">{data.divisor}</div>
+                </div>
+            </div>
+            {isSolutionView ? (
+                <>
+                    <div className="mt-5 grid grid-cols-2 gap-4">
+                        {[data.multiplicationEquation, data.divisionEquation].map((equation, index) => (
+                            <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-4 text-center" key={equation}>
+                                <div className="text-xs font-bold uppercase tracking-wide text-indigo-700">{index === 0 ? 'Factor evidence' : 'Division check'}</div>
+                                <div className="mt-2 font-mono text-xl font-bold text-indigo-950">{equation}</div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-center font-bold text-slate-800">
+                            Quotient: <span className="font-mono text-lg">{data.quotient}</span>
+                        </div>
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-center font-bold text-slate-800">
+                            Remainder: <span className="font-mono text-lg">{data.remainder}</span>
+                        </div>
+                    </div>
+                    <Conclusion>{data.conclusion}</Conclusion>
+                </>
+            ) : (
+                <ResponseBlank label={`Is ${data.candidate} a multiple of ${data.divisor}? Explain.`} />
+            )}
+        </>
+    );
+}
+
+function ClassificationTask({data, isSolutionView}: {data: FactorClassificationProblem; isSolutionView: boolean}) {
+    return (
+        <>
+            <NumberPrompt eyebrow="Prime or composite?" prompt={data.prompt} number={data.number} />
+            {isSolutionView ? (
+                <>
+                    <div className="mx-auto mt-5 w-fit rounded-full border-2 border-amber-300 bg-amber-50 px-8 py-3 text-center text-xl font-extrabold capitalize text-amber-950">
+                        {data.classification}
+                    </div>
+                    <FactorEvidence data={data} />
+                    <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 px-6 py-4 text-center text-base font-semibold leading-relaxed text-amber-950">
+                        {data.explanation}
+                    </div>
+                    <Conclusion>{data.conclusion}</Conclusion>
+                </>
+            ) : (
+                <ResponseBlank label="Classification: __________  Evidence: __________" />
+            )}
+        </>
+    );
+}
+
+function renderTask(data: FactorMultipleRelationsProblem, isSolutionView: boolean) {
+    if (data.kind === 'factor-pairs') {
+        validateFactorPairs(data);
+        return <FactorPairsTask data={data} isSolutionView={isSolutionView} />;
+    }
+    if (data.kind === 'one-digit-multiple-test') {
+        validateMultipleTest(data);
+        return <MultipleTestTask data={data} isSolutionView={isSolutionView} />;
+    }
+    if (data.kind === 'prime-classification' || data.kind === 'composite-classification') {
+        validateClassification(data);
+        return <ClassificationTask data={data} isSolutionView={isSolutionView} />;
+    }
+    return fail('Unsupported factor-and-multiple task kind.');
+}
+
+const NumbersFactorsMultiplesCore = ({config: _config, payload}: CoreProps) => {
+    const {problem, isSolutionView} = payload;
+    const data = problem.data;
+    validateProblemData(VIEW_ID, data, ['kind', 'prompt']);
+
+    return (
+        <div className="w-[790px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            {renderTask(data, isSolutionView)}
+        </div>
+    );
+};
+
+export const NumbersFactorsMultiples = withConfig(
+    NumbersFactorsMultiplesViewSchema,
+    NumbersFactorsMultiplesCore
+);
+
+let root: ReturnType<typeof createRoot> | null = null;
+
+window.renderView = (payload: ViewRenderPayload<'numbers-factors-multiples'>) => {
+    const container = document.getElementById('view');
+    if (container) {
+        if (!root) root = createRoot(container);
+        root.render(<NumbersFactorsMultiples payload={payload} />);
+    }
+};

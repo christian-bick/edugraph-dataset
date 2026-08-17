@@ -1,0 +1,2 @@
+- **Identity:** The source number and prompt make a factor-pair, multiple-test, prime, or composite task identifiable.
+- **Modes:** Question Mode withholds the requested pairs, divisibility conclusion, or classification; Solution Mode reveals it with exhaustive, nonduplicated factor or divisibility evidence.

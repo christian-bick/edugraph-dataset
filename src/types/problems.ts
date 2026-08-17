@@ -51,6 +51,65 @@ export type MultiplicativeComparisonProblem = {
     comparisonStatement: string;
 };
 
+export type PositiveFactorPair = {
+    lowerFactor: number;
+    upperFactor: number;
+    equation: string;
+};
+
+export type PositiveFactorEvidence = {
+    number: number;
+    /** Complete ascending list of the number's positive factors. */
+    factors: readonly number[];
+    factorCount: number;
+    /** Unique factor pairs, ordered from the smallest lower factor upward. */
+    factorPairs: readonly PositiveFactorPair[];
+};
+
+export type FactorPairsProblem = PositiveFactorEvidence & {
+    kind: 'factor-pairs';
+    prompt: string;
+    conclusion: string;
+};
+
+export type OneDigitMultipleTestProblem = {
+    kind: 'one-digit-multiple-test';
+    candidate: number;
+    divisor: number;
+    quotient: number;
+    remainder: 0;
+    isMultiple: true;
+    prompt: string;
+    multiplicationEquation: string;
+    divisionEquation: string;
+    conclusion: string;
+};
+
+export type PrimeClassificationProblem = PositiveFactorEvidence & {
+    kind: 'prime-classification';
+    classification: 'prime';
+    prompt: string;
+    explanation: string;
+    conclusion: string;
+};
+
+export type CompositeClassificationProblem = PositiveFactorEvidence & {
+    kind: 'composite-classification';
+    classification: 'composite';
+    prompt: string;
+    explanation: string;
+    conclusion: string;
+};
+
+export type FactorClassificationProblem =
+    | PrimeClassificationProblem
+    | CompositeClassificationProblem;
+
+export type FactorMultipleRelationsProblem =
+    | FactorPairsProblem
+    | OneDigitMultipleTestProblem
+    | FactorClassificationProblem;
+
 export type ArithmeticWordProblemTwoStep = {
     kind: 'two-step';
     num1: number;
@@ -877,6 +936,7 @@ export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
+    'numbers-factors-multiples': FactorMultipleRelationsProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-representation': ArithmeticPairProblem;
     'operations-word-problem': ArithmeticProblem;

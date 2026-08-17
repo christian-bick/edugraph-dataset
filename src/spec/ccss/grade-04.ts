@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const factorsMultiplesPrimesImplementation = defineImplementationPackage({
-    id: 'factors-multiples-primes',
-    description: 'Generate exhaustive factor evidence for factor pairs, multiple tests, and prime classification.',
-    generators: [{ module: 'factor-multiple-relations', strategy: 'new' }],
-    views: [{ module: 'numbers-factors-multiples', strategy: 'new' }]
-});
-
 const patternGenerationAnalysisImplementation = defineImplementationPackage({
     id: 'pattern-generation-analysis',
     description: 'Generate number and shape patterns, identify non-explicit features, and explain why those features continue.',
@@ -873,14 +866,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.OA.A.3-interpret-remainders', interpretedRemainderBuilder),
     ...toTargets('4.OA.A.3-multistep-letter-equations', multistepLetterEquationBuilder),
     ...toTargets('4.OA.A.3-answer-reasonableness', multistepReasonablenessBuilder),
+    ...toTargets('4.OA.B.4-factor-pairs', factorPairsBuilder),
+    ...toTargets('4.OA.B.4-multiple-test', oneDigitMultipleTestBuilder),
+    ...toTargets('4.OA.B.4-prime-classification', primeClassificationBuilder),
+    ...toTargets('4.OA.B.4-composite-classification', compositeClassificationBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.OA.B.4-factor-pairs', factorPairsBuilder, factorsMultiplesPrimesImplementation, 'List or model every factor pair exactly once and reconstruct the source number.'),
-    ...toImplementationTodos('4.OA.B.4-multiple-test', oneDigitMultipleTestBuilder, factorsMultiplesPrimesImplementation, 'Expose the candidate, one-digit divisor, quotient or factor evidence, and conclusion.'),
-    ...toImplementationTodos('4.OA.B.4-prime-classification', primeClassificationBuilder, factorsMultiplesPrimesImplementation, 'Use exhaustive factor evidence to justify that the number has exactly two positive factors.'),
-    ...toImplementationTodos('4.OA.B.4-composite-classification', compositeClassificationBuilder, factorsMultiplesPrimesImplementation, 'Use exhaustive factor evidence to justify that the number has more than two positive factors.'),
     ...toImplementationTodos('4.OA.C.5-generate-number-pattern', generateNumberPatternBuilder, patternGenerationAnalysisImplementation, 'Show the starting value, rule, generated terms, and response.'),
     ...toImplementationTodos('4.OA.C.5-identify-number-pattern-feature', identifyGeneratedNumberPatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Expose a feature supported by generated terms but not stated directly by the rule.'),
     ...toImplementationTodos('4.OA.C.5-explain-number-pattern-feature', explainGeneratedNumberPatternFeatureBuilder, patternGenerationAnalysisImplementation, 'Require a written causal explanation of why the generated feature continues.'),
