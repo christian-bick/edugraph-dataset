@@ -1581,7 +1581,7 @@ export type FractionEquivalenceProblem =
 
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
 
-export type FractionComparisonProblem = {
+export type LegacyFractionComparisonProblem = {
     task: 'compare-fractions';
     first: FractionValue;
     second: FractionValue;
@@ -1593,6 +1593,46 @@ export type FractionComparisonProblem = {
     answer: string;
     rationale: string;
 };
+
+export type FractionComparisonBarModel = {
+    partCount: FractionParts;
+    shadedCount: number;
+    filledPercent: number;
+    benchmarkXPercent: 50;
+};
+
+export type UnlikeFractionComparisonProblem = {
+    task: 'compare-unlike-fractions';
+    first: FractionValue;
+    second: FractionValue;
+    comparisonKind: 'inequality' | 'equality';
+    relation: 'greater' | 'equal' | 'less';
+    symbol: '>' | '=' | '<';
+    strategy: 'benchmark-half';
+    sharedWhole: 1;
+    benchmark: {
+        numerator: 1;
+        denominator: 2;
+        notation: '1/2';
+        xPercent: 50;
+    };
+    firstModel: FractionComparisonBarModel;
+    secondModel: FractionComparisonBarModel;
+    firstBenchmarkRelation: 'greater' | 'equal' | 'less';
+    secondBenchmarkRelation: 'greater' | 'equal' | 'less';
+    firstBenchmarkStatement: string;
+    secondBenchmarkStatement: string;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answer: string;
+    answerStatement: string;
+    rationale: string;
+};
+
+export type FractionComparisonProblem =
+    | LegacyFractionComparisonProblem
+    | UnlikeFractionComparisonProblem;
 
 export type ShapePartitionProblem =
     | {
