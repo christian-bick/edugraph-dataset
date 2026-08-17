@@ -16,16 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const angleMeasurementDrawingImplementation = defineImplementationPackage({
-    id: 'angle-measurement-drawing',
-    description: 'Measure whole-number angles with a protractor and draw angles of specified measure.',
-    generators: [{ module: 'angle-measurement', strategy: 'new' }],
-    views: [
-        { module: 'geometry-protractor', strategy: 'new' },
-        { module: 'geometry-angle-drawing', strategy: 'new' }
-    ]
-});
-
 const angleAdditionUnknownsImplementation = defineImplementationPackage({
     id: 'angle-addition-unknowns',
     description: 'Represent additive angle composition and solve for unknown component or whole angles.',
@@ -524,7 +514,6 @@ const interpretDegreeIterationBuilder = new DatasetPermutationBuilder().addLabel
 
 const measureAnglesBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleCalculation,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Scope.Protractor,
     Ability.ProcedureExecution
@@ -532,6 +521,7 @@ const measureAnglesBuilder = new DatasetPermutationBuilder().addLabels([
 
 const sketchAnglesBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
+    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.ConceptSpecification,
     Ability.VisualArticulation
@@ -797,12 +787,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.MD.B.4-line-plot-fraction-arithmetic', fractionLinePlotArithmeticBuilder),
     ...toTargets('4.MD.C.5a-angle-from-arc', recognizeAngleArcBuilder),
     ...toTargets('4.MD.C.5a-one-degree-turn', deriveOneDegreeBuilder),
-    ...toTargets('4.MD.C.5b-iterate-degrees', interpretDegreeIterationBuilder)
+    ...toTargets('4.MD.C.5b-iterate-degrees', interpretDegreeIterationBuilder),
+    ...toTargets('4.MD.C.6-measure-angles', measureAnglesBuilder),
+    ...toTargets('4.MD.C.6-sketch-angles', sketchAnglesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.MD.C.6-measure-angles', measureAnglesBuilder, angleMeasurementDrawingImplementation, 'Expose protractor alignment, the correct scale, rays, and whole-number reading.'),
-    ...toImplementationTodos('4.MD.C.6-sketch-angles', sketchAnglesBuilder, angleMeasurementDrawingImplementation, 'Make the requested measure and completed angle agree with a checkable degree annotation.'),
     ...toImplementationTodos('4.MD.C.7-additive-angle-measure', additiveAngleMeasureBuilder, angleAdditionUnknownsImplementation, 'Show non-overlapping component arcs, component measures, the whole angle, and their sum equation.'),
     ...toImplementationTodos('4.MD.C.7-unknown-angles', unknownAnglesBuilder, angleAdditionUnknownsImplementation, 'Keep the diagram, known measures, whole-part relation, unknown, equation, and solved degree value consistent.'),
     ...toImplementationTodos('4.G.A.1-draw-geometric-primitives', drawGeometricPrimitivesBuilder, geometryPrimitivesImplementation, 'Require learner-produced primitives or relations with inspectable endpoints, arrows, intersections, angles, or spacing.'),

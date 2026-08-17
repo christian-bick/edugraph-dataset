@@ -1,0 +1,2 @@
+- **Identity:** Two rays share vertex O on a semicircular protractor whose center, baseline, 1° ticks, dual scales, and selected zero side are visibly aligned.
+- **Modes:** Question mode leaves the whole-degree reading unknown while retaining the complete instrument evidence; Solution mode keeps that alignment and reveals the selected-scale reading and supplied explanation.

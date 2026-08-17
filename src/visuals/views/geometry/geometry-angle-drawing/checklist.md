@@ -1,0 +1,2 @@
+- **Identity:** A specified whole-degree angle is presented as a drawing task from vertex O and starting ray OA.
+- **Modes:** Question mode shows only the request, vertex, and starting ray with no terminal-ray geometry; Solution mode reveals the supplied terminal ray, counterclockwise arc, endpoint B, and exact degree annotation.
