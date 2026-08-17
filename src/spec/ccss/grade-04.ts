@@ -16,16 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const geometryPrimitivesImplementation = defineImplementationPackage({
-    id: 'geometry-primitives',
-    description: 'Draw and identify points, lines, segments, rays, angle types, and parallel or perpendicular line relations.',
-    generators: [{ module: 'geometry-primitives', strategy: 'new' }],
-    views: [
-        { module: 'geometry-primitives-drawing', strategy: 'new' },
-        { module: 'geometry-primitives-identification', strategy: 'new' }
-    ]
-});
-
 const lineAngleShapeClassificationImplementation = defineImplementationPackage({
     id: 'line-angle-shape-classification',
     description: 'Extend shape classification to parallel and perpendicular lines, angle sizes, and right-triangle subsumption.',
@@ -557,12 +547,24 @@ const geometricPrimitiveVariants = [
     [Area.ParallelismRelation]
 ];
 
+const geometricPrimitiveDrawingVariants = [
+    [Area.PointConcept],
+    [Area.LinearDrawing, Area.LineConcept],
+    [Area.LinearDrawing, Area.LineSegment],
+    [Area.LinearDrawing, Area.RayConcept],
+    [Area.LinearDrawing, Area.RightAngle],
+    [Area.LinearDrawing, Area.AcuteAngle],
+    [Area.LinearDrawing, Area.ObtuseAngle],
+    [Area.LinearDrawing, Area.PerpendicularityRelation],
+    [Area.LinearDrawing, Area.ParallelismRelation]
+];
+
 const drawGeometricPrimitivesBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.LinearDrawing, Ability.VisualArticulation])
-    .applyLabelVariants(geometricPrimitiveVariants);
+    .addLabels([Ability.VisualArticulation])
+    .applyLabelVariants(geometricPrimitiveDrawingVariants);
 
 const identifyGeometricPrimitivesBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.LinearDrawing, Ability.VisualRecognition])
+    .addLabels([Ability.VisualRecognition])
     .applyLabelVariants(geometricPrimitiveVariants);
 
 const classifyByLineRelationsBuilder = new DatasetPermutationBuilder()
@@ -786,12 +788,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.MD.C.6-measure-angles', measureAnglesBuilder),
     ...toTargets('4.MD.C.6-sketch-angles', sketchAnglesBuilder),
     ...toTargets('4.MD.C.7-additive-angle-measure', additiveAngleMeasureBuilder),
-    ...toTargets('4.MD.C.7-unknown-angles', unknownAnglesBuilder)
+    ...toTargets('4.MD.C.7-unknown-angles', unknownAnglesBuilder),
+    ...toTargets('4.G.A.1-draw-geometric-primitives', drawGeometricPrimitivesBuilder),
+    ...toTargets('4.G.A.1-identify-geometric-primitives', identifyGeometricPrimitivesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.G.A.1-draw-geometric-primitives', drawGeometricPrimitivesBuilder, geometryPrimitivesImplementation, 'Require learner-produced primitives or relations with inspectable endpoints, arrows, intersections, angles, or spacing.'),
-    ...toImplementationTodos('4.G.A.1-identify-geometric-primitives', identifyGeometricPrimitivesBuilder, geometryPrimitivesImplementation, 'Require the exact requested primitive or relation to be highlighted and named in a two-dimensional figure.'),
     ...toImplementationTodos('4.G.A.2-classify-line-relations', classifyByLineRelationsBuilder, lineAngleShapeClassificationImplementation, 'Expose marked or measurable line relations that justify the selected category.'),
     ...toImplementationTodos('4.G.A.2-classify-angle-size', classifyByAngleSizeBuilder, lineAngleShapeClassificationImplementation, 'Expose angle-size evidence that justifies the selected category.'),
     ...toImplementationTodos('4.G.A.2-right-triangle-category', recognizeRightTrianglesBuilder, lineAngleShapeClassificationImplementation, 'Show a right-angle marker and make the triangle-category relationship explicit.'),

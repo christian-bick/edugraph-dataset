@@ -1,0 +1,2 @@
+- **Identity:** Four labeled diagrams present distinct points, line primitives, angle types, or line relations for the requested visual identification.
+- **Modes:** Question Mode keeps every candidate neutral; Solution Mode highlights and names only the correct supplied diagram.

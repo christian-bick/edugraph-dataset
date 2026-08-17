@@ -1,0 +1,2 @@
+- **Identity:** A requested point, line-based primitive, angle type, or line relation is constructed on a drawing canvas with inspectable endpoints, arrows, angle marks, or relation marks.
+- **Modes:** Question Mode shows only the supplied construction guide; Solution Mode reveals the completed primitive and its explanation.

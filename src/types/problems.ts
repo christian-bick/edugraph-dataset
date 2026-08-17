@@ -1771,6 +1771,101 @@ export type AngleArithmeticProblem =
     | SolveUnknownWholeAngleProblem
     | SolveUnknownComponentAngleProblem;
 
+export type GeometryPrimitiveKind =
+    | 'point'
+    | 'line'
+    | 'line-segment'
+    | 'ray'
+    | 'right-angle'
+    | 'acute-angle'
+    | 'obtuse-angle'
+    | 'perpendicular-lines'
+    | 'parallel-lines';
+
+export type GeometryPrimitiveCoordinate = {
+    x: number;
+    y: number;
+};
+
+export type GeometryPrimitivePoint = GeometryPrimitiveCoordinate & {
+    id: string;
+    label: string;
+    labelPosition: GeometryPrimitiveCoordinate;
+};
+
+export type GeometryPrimitiveStroke = {
+    id: string;
+    start: GeometryPrimitiveCoordinate;
+    end: GeometryPrimitiveCoordinate;
+    arrowStart: boolean;
+    arrowEnd: boolean;
+};
+
+export type GeometryPrimitiveMarker =
+    | {
+        kind: 'angle-arc';
+        center: GeometryPrimitiveCoordinate;
+        radius: number;
+        startDegrees: number;
+        endDegrees: number;
+    }
+    | {
+        kind: 'right-angle';
+        points: [
+            GeometryPrimitiveCoordinate,
+            GeometryPrimitiveCoordinate,
+            GeometryPrimitiveCoordinate
+        ];
+    }
+    | {
+        kind: 'parallel';
+        strokes: [
+            [GeometryPrimitiveCoordinate, GeometryPrimitiveCoordinate],
+            [GeometryPrimitiveCoordinate, GeometryPrimitiveCoordinate]
+        ];
+    };
+
+export type GeometryPrimitiveScene = {
+    points: GeometryPrimitivePoint[];
+    strokes: GeometryPrimitiveStroke[];
+    markers: GeometryPrimitiveMarker[];
+};
+
+export type GeometryPrimitiveCandidateId = 'A' | 'B' | 'C' | 'D';
+
+export type GeometryPrimitiveCandidate = {
+    id: GeometryPrimitiveCandidateId;
+    kind: GeometryPrimitiveKind;
+    scene: GeometryPrimitiveScene;
+};
+
+export type GeometryPrimitivesProblem = {
+    primitiveKind: GeometryPrimitiveKind;
+    displayName: string;
+    definition: string;
+    drawing: {
+        prompt: string;
+        guideScene: GeometryPrimitiveScene;
+        solutionScene: GeometryPrimitiveScene;
+        answer: string;
+        answerStatement: string;
+        explanation: string;
+    };
+    identification: {
+        prompt: string;
+        candidates: [
+            GeometryPrimitiveCandidate,
+            GeometryPrimitiveCandidate,
+            GeometryPrimitiveCandidate,
+            GeometryPrimitiveCandidate
+        ];
+        correctCandidateId: GeometryPrimitiveCandidateId;
+        answer: string;
+        answerStatement: string;
+        explanation: string;
+    };
+};
+
 
 /**
  * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
@@ -1881,6 +1976,8 @@ export interface ViewTypeMap {
     'geometry-protractor': AngleMeasurementProblem;
     'geometry-angle-drawing': AngleMeasurementProblem;
     'geometry-angle-arithmetic': AngleArithmeticProblem;
+    'geometry-primitives-drawing': GeometryPrimitivesProblem;
+    'geometry-primitives-identification': GeometryPrimitivesProblem;
     'fractions-equivalence-model': FractionEquivalenceProblem;
     'fractions-whole-equivalence': FractionEquivalenceProblem;
     'fractions-compare-models': FractionComparisonProblem;
