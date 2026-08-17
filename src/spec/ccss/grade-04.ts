@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const fractionLinePlotArithmeticImplementation = defineImplementationPackage({
-    id: 'fraction-line-plot-arithmetic',
-    description: 'Construct fractional-measurement line plots and solve fraction addition or subtraction problems from their data.',
-    generators: [{ module: 'measurement-data', strategy: 'expand' }],
-    views: [{ module: 'measurement-line-plot', strategy: 'expand' }]
-});
-
 const angleConceptsImplementation = defineImplementationPackage({
     id: 'angle-concepts',
     description: 'Model angles as circular turns, derive the one-degree unit, and interpret repeated one-degree turns.',
@@ -496,6 +489,7 @@ const constructFractionalLinePlotBuilder = new DatasetPermutationBuilder().addLa
 
 const fractionLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.FractionArithmetic,
         Area.Statistics,
         Area.MeasuringObjects,
         Scope.LengthMeasurement,
@@ -800,12 +794,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.MD.A.2-measurement-number-lines', grade4MeasurementNumberLinesBuilder),
     ...toTargets('4.MD.A.3-rectangle-area-formula', rectangleAreaFormulaBuilder),
     ...toTargets('4.MD.A.3-rectangle-perimeter-formula', rectanglePerimeterFormulaBuilder),
-    ...toTargets('4.MD.A.3-unknown-rectangle-dimension', unknownRectangleDimensionBuilder)
+    ...toTargets('4.MD.A.3-unknown-rectangle-dimension', unknownRectangleDimensionBuilder),
+    ...toTargets('4.MD.B.4-construct-fractional-line-plot', constructFractionalLinePlotBuilder),
+    ...toTargets('4.MD.B.4-line-plot-fraction-arithmetic', fractionLinePlotArithmeticBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.MD.B.4-construct-fractional-line-plot', constructFractionalLinePlotBuilder, fractionLinePlotArithmeticImplementation, 'Require a learner-produced plot that preserves every measurement and uses the required fractional-unit scale.'),
-    ...toImplementationTodos('4.MD.B.4-line-plot-fraction-arithmetic', fractionLinePlotArithmeticBuilder, fractionLinePlotArithmeticImplementation, 'Show selected plot marks, extracted fraction values, equation, unit, and interpreted result.'),
     ...toImplementationTodos('4.MD.C.5a-angle-from-arc', recognizeAngleArcBuilder, angleConceptsImplementation, 'Show two rays, their shared endpoint, a centered circular reference, and the highlighted turn.'),
     ...toImplementationTodos('4.MD.C.5a-one-degree-turn', deriveOneDegreeBuilder, angleConceptsImplementation, 'Show a full circle, a 1/360 partition or turn, the degree symbol, and the one-degree conclusion.'),
     ...toImplementationTodos('4.MD.C.5b-iterate-degrees', interpretDegreeIterationBuilder, angleConceptsImplementation, 'Show repeated one-degree units, accumulated turn, and the resulting numerical degree measure.'),

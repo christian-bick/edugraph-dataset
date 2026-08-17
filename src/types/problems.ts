@@ -1006,11 +1006,77 @@ export type MeasurementObservation = {
     length: number;
 };
 
-export type MeasurementDataProblem = {
+export type LegacyMeasurementDataProblem = {
     unit: 'cm' | 'in';
     subdivisions: 1 | 4;
     observations: MeasurementObservation[];
 };
+
+export type FractionLinePlotValue = {
+    eighths: number;
+    numerator: number;
+    denominator: 1 | 2 | 4 | 8;
+    display: string;
+    quantityText: string;
+};
+
+export type FractionLinePlotObservation = {
+    object: MeasurementObservation['object'];
+    value: FractionLinePlotValue;
+};
+
+export type FractionLinePlotTick = {
+    index: number;
+    value: FractionLinePlotValue;
+};
+
+export type FractionLinePlotFrequency = {
+    value: FractionLinePlotValue;
+    count: number;
+};
+
+type Grade4FractionLinePlotBase = {
+    unit: 'in';
+    subdivisions: 8;
+    observations: MeasurementObservation[];
+    fractionObservations: FractionLinePlotObservation[];
+    axisStart: FractionLinePlotValue;
+    axisEnd: FractionLinePlotValue;
+    interval: FractionLinePlotValue;
+    axisTicks: FractionLinePlotTick[];
+    frequencies: FractionLinePlotFrequency[];
+    scaleStatement: string;
+};
+
+export type ConstructFractionLinePlotProblem = Grade4FractionLinePlotBase & {
+    task: 'construct-fraction-line-plot';
+    prompt: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type FractionLinePlotArithmeticProblem = Grade4FractionLinePlotBase & {
+    task: 'fraction-line-plot-arithmetic';
+    operation: 'addition' | 'subtraction';
+    shortest: FractionLinePlotValue;
+    longest: FractionLinePlotValue;
+    leftOperand: FractionLinePlotValue;
+    rightOperand: FractionLinePlotValue;
+    answer: FractionLinePlotValue;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type Grade4FractionLinePlotProblem =
+    | ConstructFractionLinePlotProblem
+    | FractionLinePlotArithmeticProblem;
+
+export type MeasurementDataProblem =
+    | LegacyMeasurementDataProblem
+    | Grade4FractionLinePlotProblem;
 
 export type StatisticalCategory = {
     label: 'Apples' | 'Books' | 'Kites';

@@ -5,15 +5,19 @@ import {ConfigFromSchema} from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measurement-line-plot',
-    generalLabels: [Scope.LinePlot, Ability.VisualArticulation]
+    generalLabels: [Scope.LinePlot]
 };
 
 export const MeasurementLinePlotViewSchema = {
+    constructPlot: [
+        [Ability.VisualArticulation],
+        hasLabel(Ability.VisualArticulation)
+    ],
     usesUnitSteps: [
         [Scope.StepsOf1],
         hasLabel(Scope.StepsOf1)
     ],
-    plotCollectedMeasurements: [
+    executeProcedure: [
         [Ability.ProcedureExecution],
         hasLabel(Ability.ProcedureExecution)
     ]

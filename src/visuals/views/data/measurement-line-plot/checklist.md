@@ -1,4 +1,2 @@
-- **Identity:** A list of measurements accompanies a numerical line plot whose visible ticks match the payload: whole centimeters or quarter inches.
-- **Modes:** Question Mode shows an empty plotting area above the numbered scale; Solution Mode places one frequency mark for every listed measurement at the matching value.
-- **Fractional scale:** Whole, half, and quarter-inch values are labeled as mixed numbers, and every frequency mark is centered over its exact tick.
-- **Collected measurements:** `Ability.ProcedureExecution` changes the prompt to identify the source values as measurements the learner collected.
+- **Identity:** Six object lengths accompany a single numerical line plot whose complete tick scale makes whole, quarter-inch, or eighth-inch measurements readable.
+- **Modes:** A plotting question shows the measurements above an empty line plot and its solution adds one mark per measurement; an arithmetic question keeps the completed plot visible while withholding selected numeric operands and the result, then its solution reveals the supplied fraction equation, unit-bearing answer, and explanation.
