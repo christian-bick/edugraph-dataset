@@ -353,6 +353,41 @@ export type PlaceValueArithmeticProblem = {
     strategySteps: string[];
 };
 
+export type PlaceValueName =
+    | 'ones'
+    | 'tens'
+    | 'hundreds'
+    | 'thousands'
+    | 'ten-thousands'
+    | 'hundred-thousands';
+
+export type PlaceValueScalingPlace = {
+    name: PlaceValueName;
+    exponent: 0 | 1 | 2 | 3 | 4 | 5;
+    /** Zero-based index in the left-to-right `digits` array. */
+    digitIndex: number;
+    value: number;
+};
+
+export type PlaceValueScalingProblem = {
+    task: 'adjacent-place-scaling';
+    number: number;
+    /** Six base-ten digits ordered from hundred-thousands through ones. */
+    digits: readonly [number, number, number, number, number, number];
+    repeatedDigit: number;
+    leftPlace: PlaceValueScalingPlace;
+    rightPlace: PlaceValueScalingPlace;
+    scaleFactor: 10;
+    prompt: string;
+    questionMultiplicationEquation: string;
+    questionDivisionEquation: string;
+    multiplicationEquation: string;
+    divisionEquation: string;
+    comparisonStatement: string;
+    /** The value represented by the repeated digit in `leftPlace`. */
+    answer: number;
+};
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -1052,6 +1087,7 @@ export interface ViewTypeMap {
     'place-value-expanded-form': PlaceValueExpandedProblem;
     'place-value-arithmetic-model': PlaceValueArithmeticProblem;
     'place-value-arithmetic-explanation': PlaceValueArithmeticProblem;
+    'place-value-scaling': PlaceValueScalingProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;

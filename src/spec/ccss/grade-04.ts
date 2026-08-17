@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const multiDigitPlaceValueImplementation = defineImplementationPackage({
-    id: 'multi-digit-place-value',
-    description: 'Expose the same digit in adjacent places and derive the factor-ten relationship between its values.',
-    generators: [{ module: 'place-value-scaling', strategy: 'new' }],
-    views: [{ module: 'place-value-scaling', strategy: 'new' }]
-});
-
 const multiDigitNumerationImplementation = defineImplementationPackage({
     id: 'multi-digit-numeration',
     description: 'Extend reading, writing, expanded form, and comparison to whole numbers through one million.',
@@ -863,11 +856,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.OA.C.5-generate-shape-pattern', generateShapePatternBuilder),
     ...toTargets('4.OA.C.5-identify-shape-pattern-feature', identifyShapePatternFeatureBuilder),
     ...toTargets('4.OA.C.5-explain-shape-pattern-feature', explainShapePatternFeatureBuilder),
+    ...toTargets('4.NBT.A.1-adjacent-place-scaling', adjacentPlaceScalingBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NBT.A.1-adjacent-place-scaling', adjacentPlaceScalingBuilder, multiDigitPlaceValueImplementation, 'Highlight the same digit in adjacent places and show both place values and their factor-ten equation.'),
     ...toImplementationTodos('4.NBT.A.2-read-write-base-ten-numerals', readWriteBaseTenNumeralsBuilder, multiDigitNumerationImplementation, 'Expose the complete numeral and the direction of transcription through one million.'),
     ...toImplementationTodos('4.NBT.A.2-write-number-names', writeNumberNamesBuilder, multiDigitNumerationImplementation, 'Map every digit and place to the correctly written English number name.'),
     ...toImplementationTodos('4.NBT.A.2-expanded-form', writeExpandedFormBuilder, multiDigitNumerationImplementation, 'Expand every nonzero digit into its place-value addend and recompose the source numeral.'),

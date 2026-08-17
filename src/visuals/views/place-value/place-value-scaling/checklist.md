@@ -1,0 +1,2 @@
+- **Identity:** A six-digit numeral highlights the same digit in adjacent places and pairs each occurrence with its named place and value.
+- **Modes:** Question Mode shows factor 10 and the lower value but withholds the higher value in its card and both equations; Solution Mode reveals the higher value, both solved inverse equations, and the verbal comparison.
