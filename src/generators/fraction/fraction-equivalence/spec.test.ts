@@ -88,6 +88,32 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         expect(stub!.tags).not.toContain(representation);
     });
 
+    it('resolves the corrected denominator-ten to denominator-hundred target', () => {
+        const labels = [
+            Area.FractionEquivalence,
+            Area.FractionNotation,
+            Area.Multiplication,
+            Scope.EqualShares,
+            Scope.Equal,
+            Scope.SingleFrameOfReference,
+            Scope.VisualNumbers,
+            Ability.Formalization
+        ];
+        expect(labelSetHash(labels)).toBe('4b26e9d5');
+        setSeed('4b26e9d5');
+        const stub = generateWithLabels(generator, labels);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.task).toBe('tenths-to-hundredths');
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            Area.Multiplication,
+            Scope.EqualShares,
+            Ability.Formalization
+        ]));
+        expect(stub!.tags).not.toContain(Scope.SingleFrameOfReference);
+        expect(stub!.tags).not.toContain(Scope.VisualNumbers);
+    });
+
     it('keeps legacy label extraction on the identical random path', () => {
         const labels = [
             Area.FractionEquivalence,

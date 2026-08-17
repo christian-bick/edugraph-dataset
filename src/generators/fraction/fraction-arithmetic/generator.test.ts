@@ -7,7 +7,8 @@ import {
     FractionArithmeticProblem,
     FractionParts,
     LikeDenominatorFractionValue,
-    MixedFractionValue
+    MixedFractionValue,
+    TenthsHundredthsGridModel
 } from '../../../types/problems.ts';
 import {FractionArithmeticGenerator} from './generator.ts';
 import {FractionArithmeticGeneratorConfig} from './spec.ts';
@@ -55,6 +56,11 @@ const configs = {
         task: `${task}-${productKind}`,
         usesCommonDenominator: false,
         operation: 'multiplication'
+    }),
+    tenthsHundredths: (): FractionArithmeticGeneratorConfig => ({
+        task: 'tenths-hundredths-addition',
+        usesCommonDenominator: true,
+        operation: 'addition'
     })
 };
 
@@ -172,13 +178,24 @@ const expectStrictStory = (problem: FractionArithmeticProblem): void => {
         expect(problem.story.question).toBe(problem.operation === 'addition'
             ? 'How many miles long are the two sections altogether?'
             : 'How many miles remain?');
+    } else if (problem.task === 'tenths-hundredths-addition') {
+        expect(problem.story).toEqual({
+            storyKind: 'hundred-grid-addition',
+            context: `A mosaic uses ${problem.firstTenths.notation} of a unit square in blue and a non-overlapping ${problem.secondHundredths.notation} of the same-sized unit square in gold.`,
+            question: 'How much of one unit square is used altogether when the amount is expressed in hundredths?',
+            wholeLabel: 'one unit square',
+            unitLabel: 'of a unit square',
+            givenDisplays: [problem.firstTenths.notation, problem.secondHundredths.notation],
+            unknownRole: 'result'
+        });
     } else {
         throw new Error(`Unexpected multiplication task ${problem.task}.`);
     }
 };
 
 const expectCommon = (problem: FractionArithmeticProblem): void => {
-    expect(denominators).toContain(problem.denominator);
+    if (problem.task === 'tenths-hundredths-addition') expect(problem.denominator).toBe(100);
+    else expect(denominators).toContain(problem.denominator);
     expect(problem.sharedWhole).toBe(1);
     expect(problem.referenceId).toBe('same-whole');
     expect(problem.prompt.length).toBeGreaterThan(10);
@@ -187,6 +204,29 @@ const expectCommon = (problem: FractionArithmeticProblem): void => {
     expect(problem.answerStatement.length).toBeGreaterThan(10);
     expect(problem.explanation.length).toBeGreaterThan(30);
     expectStrictStory(problem);
+};
+
+const expectDecimalGrid = (model: TenthsHundredthsGridModel): void => {
+    expect(model.cells).toHaveLength(model.partCount);
+    expect(model.cells.filter(cell => cell.shaded)).toHaveLength(model.shadedCount);
+    model.cells.forEach((cell, index) => {
+        expect(cell.index).toBe(index);
+        expect(cell.shaded).toBe(index < model.shadedCount);
+        if (model.partCount === 100) {
+            expect(cell.column).toBe(Math.floor(index / 10));
+            expect(cell.row).toBe(index % 10);
+            expect(cell.tenthGroupIndex).toBe(cell.column);
+        }
+    });
+    for (const group of model.groups) {
+        expect(group.cellCount).toBeGreaterThan(0);
+        expect(group.startCell).toBeGreaterThanOrEqual(0);
+        expect(group.startCell + group.cellCount).toBeLessThanOrEqual(model.shadedCount);
+        expect(group.label.length).toBeGreaterThan(0);
+        for (let index = group.startCell; index < group.startCell + group.cellCount; index++) {
+            expect(model.cells[index].source).toBe(group.source);
+        }
+    }
 };
 
 describe('FractionArithmeticGenerator', () => {
@@ -585,6 +625,98 @@ describe('FractionArithmeticGenerator', () => {
         const first = generator.generate(config);
         setSeed('fraction-arithmetic-determinism');
         expect(generator.generate(config)).toEqual(first);
+    });
+
+    it('converts tenths to hundredths before adding with exact Q/S evidence', () => {
+        const tenthsSeen = new Set<number>();
+        let sawTinyHundredths = false;
+        let sawTenthBoundaryCarry = false;
+        let sawExactWhole = false;
+        for (let seed = 0; seed < 120; seed++) {
+            setSeed(`tenths-hundredths-${seed}`);
+            const problem = generator.generate(configs.tenthsHundredths()).data;
+            expect(problem.task).toBe('tenths-hundredths-addition');
+            if (problem.task !== 'tenths-hundredths-addition') {
+                throw new Error('Expected tenths-hundredths addition.');
+            }
+            expectCommon(problem);
+            const a = problem.firstTenths.numerator;
+            const b = problem.secondHundredths.numerator;
+            const converted = a * 10;
+            const result = converted + b;
+            expect(a).toBeGreaterThanOrEqual(1);
+            expect(a).toBeLessThanOrEqual(9);
+            expect(b).toBeGreaterThanOrEqual(1);
+            expect(b).toBeLessThanOrEqual(100 - converted);
+            expect(problem.convertedFirst.numerator).toBe(converted);
+            expect(problem.result.numerator).toBe(result);
+            expect(result).toBeLessThanOrEqual(100);
+            expect(problem.conversion).toEqual({
+                factor: 10,
+                numeratorEquation: `${a} × 10 = ${converted}`,
+                denominatorEquation: '10 × 10 = 100',
+                equation: `${a}/10 = ${converted}/100`
+            });
+            expect(problem.prompt).toBe('Express the tenths as hundredths, then add.');
+            expect(problem.questionEquation).toBe(`${a}/10 + ${b}/100 = ?/100`);
+            expect(problem.conversionEquation).toBe(`${a}/10 = ${converted}/100`);
+            expect(problem.solutionEquation).toBe(`${converted}/100 + ${b}/100 = ${result}/100`);
+            expect(problem.equationChain).toBe(
+                `${a}/10 + ${b}/100 = ${converted}/100 + ${b}/100 = ${result}/100`
+            );
+            expect(problem.answer).toBe(String(result));
+            expect(problem.answerStatement).toBe(`${a}/10 + ${b}/100 = ${result}/100.`);
+            expectDecimalGrid(problem.questionModels.firstTenths);
+            expectDecimalGrid(problem.questionModels.secondHundredths);
+            expectDecimalGrid(problem.solutionModels.convertedFirst);
+            expectDecimalGrid(problem.solutionModels.result);
+            expect(problem.questionModels.firstTenths.shadedCount).toBe(a);
+            expect(problem.questionModels.secondHundredths.shadedCount).toBe(b);
+            expect(problem.solutionModels.convertedFirst.shadedCount).toBe(converted);
+            expect(problem.solutionModels.result.shadedCount).toBe(result);
+            expect(problem.questionModels.firstTenths.groups).toEqual([{
+                source: 'first-addend', label: `${a}/10`, startCell: 0, cellCount: a
+            }]);
+            expect(problem.questionModels.secondHundredths.groups).toEqual([{
+                source: 'second-addend', label: `${b}/100`, startCell: 0, cellCount: b
+            }]);
+            expect(problem.solutionModels.result.groups).toEqual([{
+                source: 'first-addend', label: `${converted}/100`, startCell: 0, cellCount: converted
+            }, {
+                source: 'second-addend', label: `${b}/100`, startCell: converted, cellCount: b
+            }]);
+            tenthsSeen.add(a);
+            sawTinyHundredths ||= b === 1;
+            sawTenthBoundaryCarry ||= b >= 10;
+            sawExactWhole ||= result === 100;
+        }
+        expect(tenthsSeen).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]));
+        expect(sawTinyHundredths).toBe(true);
+        expect(sawTenthBoundaryCarry).toBe(true);
+        expect(sawExactWhole).toBe(true);
+    });
+
+    it.each([
+        ['tiny hundredths', 'tenths-stress-52', 4, 1, 41],
+        ['cross-tenth addition', 'tenths-stress-1', 2, 66, 86],
+        ['near-full grid', 'tenths-stress-2', 8, 19, 99],
+        ['exact whole', 'tenths-stress-0', 6, 40, 100]
+    ] as const)('locks the deterministic %s stress payload', (
+        _stress,
+        seed,
+        tenthsNumerator,
+        hundredthsNumerator,
+        resultNumerator
+    ) => {
+        setSeed(seed);
+        const problem = generator.generate(configs.tenthsHundredths()).data;
+        expect(problem.task).toBe('tenths-hundredths-addition');
+        if (problem.task !== 'tenths-hundredths-addition') throw new Error('Expected decimal-grid addition.');
+        expect([
+            problem.firstTenths.numerator,
+            problem.secondHundredths.numerator,
+            problem.result.numerator
+        ]).toEqual([tenthsNumerator, hundredthsNumerator, resultNumerator]);
     });
 
     it.each([

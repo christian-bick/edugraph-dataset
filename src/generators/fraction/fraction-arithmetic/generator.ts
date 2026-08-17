@@ -15,6 +15,7 @@ import {
     LikeDenominatorFractionValue,
     MixedFractionOperationProblem,
     MixedFractionValue,
+    TenthsHundredthsAdditionProblem,
     UnitFractionMultipleProblem,
     WholeNumberFractionProductProblem
 } from '../../../types/problems.ts';
@@ -22,6 +23,7 @@ import {
     FractionArithmeticGeneratorConfig,
     FractionArithmeticGeneratorSchema
 } from './spec.ts';
+import {toDecimalFraction, toTenthsHundredthsGrid} from '../tenths-hundredths.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
 const NON_BINARY_DENOMINATORS = [3, 4, 6, 8] as const satisfies readonly FractionParts[];
@@ -209,6 +211,95 @@ const productStory = (
     givenDisplays: [`${wholeFactor} craft kits`, fractionFactor.notation],
     unknownRole: 'product'
 });
+
+const TENTHS_HUNDREDTHS_ADDITION_SAMPLES = Array.from({length: 9}, (_, index) => index + 1)
+    .flatMap(tenthsNumerator => {
+        const maximumHundredths = 100 - tenthsNumerator * 10;
+        return Array.from({length: maximumHundredths}, (_, hundredthsIndex) => ({
+            tenthsNumerator,
+            hundredthsNumerator: hundredthsIndex + 1
+        }));
+    });
+
+const generateTenthsHundredthsAddition = (): TenthsHundredthsAdditionProblem => {
+    const {tenthsNumerator, hundredthsNumerator} = pick(TENTHS_HUNDREDTHS_ADDITION_SAMPLES);
+    const convertedNumerator = tenthsNumerator * 10;
+    const resultNumerator = convertedNumerator + hundredthsNumerator;
+    const firstTenths = toDecimalFraction(tenthsNumerator, 10);
+    const secondHundredths = toDecimalFraction(hundredthsNumerator, 100);
+    const convertedFirst = toDecimalFraction(convertedNumerator, 100);
+    const result = toDecimalFraction(resultNumerator, 100);
+    const conversionEquation = `${firstTenths.notation} = ${convertedFirst.notation}`;
+    const solutionEquation = `${convertedFirst.notation} + ${secondHundredths.notation} = ${result.notation}`;
+
+    return {
+        task: 'tenths-hundredths-addition',
+        operation: 'addition',
+        denominator: 100,
+        sharedWhole: 1,
+        referenceId: 'same-whole',
+        story: {
+            storyKind: 'hundred-grid-addition',
+            context: `A mosaic uses ${firstTenths.notation} of a unit square in blue and a non-overlapping ${secondHundredths.notation} of the same-sized unit square in gold.`,
+            question: 'How much of one unit square is used altogether when the amount is expressed in hundredths?',
+            wholeLabel: 'one unit square',
+            unitLabel: 'of a unit square',
+            givenDisplays: [firstTenths.notation, secondHundredths.notation],
+            unknownRole: 'result'
+        },
+        firstTenths,
+        secondHundredths,
+        convertedFirst,
+        result,
+        conversion: {
+            factor: 10,
+            numeratorEquation: `${tenthsNumerator} × 10 = ${convertedNumerator}`,
+            denominatorEquation: '10 × 10 = 100',
+            equation: conversionEquation
+        },
+        prompt: 'Express the tenths as hundredths, then add.',
+        questionEquation: `${firstTenths.notation} + ${secondHundredths.notation} = ?/100`,
+        conversionEquation,
+        solutionEquation,
+        equationChain: `${firstTenths.notation} + ${secondHundredths.notation} = ${convertedFirst.notation} + ${secondHundredths.notation} = ${result.notation}`,
+        questionModels: {
+            firstTenths: toTenthsHundredthsGrid(tenthsNumerator, 10, [{
+                source: 'first-addend',
+                label: firstTenths.notation,
+                startCell: 0,
+                cellCount: tenthsNumerator
+            }]),
+            secondHundredths: toTenthsHundredthsGrid(hundredthsNumerator, 100, [{
+                source: 'second-addend',
+                label: secondHundredths.notation,
+                startCell: 0,
+                cellCount: hundredthsNumerator
+            }])
+        },
+        solutionModels: {
+            convertedFirst: toTenthsHundredthsGrid(convertedNumerator, 100, [{
+                source: 'first-addend',
+                label: convertedFirst.notation,
+                startCell: 0,
+                cellCount: convertedNumerator
+            }]),
+            result: toTenthsHundredthsGrid(resultNumerator, 100, [{
+                source: 'first-addend',
+                label: convertedFirst.notation,
+                startCell: 0,
+                cellCount: convertedNumerator
+            }, {
+                source: 'second-addend',
+                label: secondHundredths.notation,
+                startCell: convertedNumerator,
+                cellCount: hundredthsNumerator
+            }])
+        },
+        answer: String(resultNumerator),
+        answerStatement: `${firstTenths.notation} + ${secondHundredths.notation} = ${result.notation}.`,
+        explanation: `${conversionEquation} because multiplying its numerator and denominator by 10 makes hundredths without changing the amount. Then ${solutionEquation}.`
+    };
+};
 
 const generateUnitFractionMultiple = (): UnitFractionMultipleProblem => {
     const denominator = pick(DENOMINATORS);
@@ -796,6 +887,9 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
                 'fraction-arithmetic',
                 'CommonDenominator is required for like-denominator fraction arithmetic.'
             );
+        }
+        if (config.task === 'tenths-hundredths-addition' && operation === 'addition') {
+            return {data: generateTenthsHundredthsAddition()};
         }
         if (config.task === 'interpret-operation') {
             return {data: generateBinaryOperation('interpret-operation', operation)};

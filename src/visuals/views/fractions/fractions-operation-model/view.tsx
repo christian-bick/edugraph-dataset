@@ -35,7 +35,20 @@ const validateData = (data: FractionArithmeticProblem) => {
         'answerStatement',
         'explanation'
     ]);
-    if (data.operation === 'multiplication') {
+    if (data.task === 'tenths-hundredths-addition') {
+        validateProblemData(VIEW_ID, data, [
+            'firstTenths',
+            'secondHundredths',
+            'convertedFirst',
+            'result',
+            'conversion',
+            'conversionEquation',
+            'solutionEquation',
+            'equationChain',
+            'questionModels',
+            'solutionModels'
+        ]);
+    } else if (data.operation === 'multiplication') {
         validateProblemData(VIEW_ID, data, [
             'productKind',
             'wholeFactor',
@@ -126,7 +139,9 @@ const FractionsOperationModelCore = ({config: _config, payload}: CoreProps) => {
                 <FractionArithmeticText text={data.prompt} />
             </div>
             <div className="mt-3 text-center text-sm font-bold text-slate-500">
-                Every frame represents {data.story.wholeLabel} divided into {data.denominator} equal parts.
+                {data.task === 'tenths-hundredths-addition'
+                    ? `Both grids represent ${data.story.wholeLabel}, shown first in tenths and then in hundredths.`
+                    : `Every frame represents ${data.story.wholeLabel} divided into ${data.denominator} equal parts.`}
             </div>
 
             <div className="mt-5">

@@ -1,2 +1,2 @@
-- **Identity:** Two aligned, equal-length bars use one shared whole; factor-grouped subdivisions show the same shaded length with the original and scaled equal parts.
-- **Modes:** Question Mode withholds only the requested verdict or scaled numerator while retaining the factor and grouping evidence. Solution Mode reveals the complete equality and explains the increased number of smaller parts and unchanged shaded amount.
+- **Identity:** Aligned, equal-size models use one shared whole; factor-grouped bars or a supplied 1×10 and 10×10 grid pair show the same shaded amount with the original and scaled equal parts.
+- **Modes:** Question Mode withholds only the requested verdict or scaled numerator while retaining the factor and grouping evidence. Solution Mode reveals the complete equality and explains the increased number of smaller parts and unchanged shaded amount, including each tenth becoming ten hundredths.

@@ -35,7 +35,20 @@ const validateData = (data: FractionArithmeticProblem) => {
         'answerStatement',
         'explanation'
     ]);
-    if (data.operation === 'multiplication') {
+    if (data.task === 'tenths-hundredths-addition') {
+        validateProblemData(VIEW_ID, data, [
+            'firstTenths',
+            'secondHundredths',
+            'convertedFirst',
+            'result',
+            'conversion',
+            'conversionEquation',
+            'solutionEquation',
+            'equationChain',
+            'questionModels',
+            'solutionModels'
+        ]);
+    } else if (data.operation === 'multiplication') {
         validateProblemData(VIEW_ID, data, [
             'productKind',
             'wholeFactor',

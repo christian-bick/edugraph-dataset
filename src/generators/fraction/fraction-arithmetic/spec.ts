@@ -20,6 +20,7 @@ const fractionArithmeticTaskLabels = [
 export type FractionArithmeticTaskConfig =
     | 'interpret-operation'
     | 'fraction-operation'
+    | 'tenths-hundredths-addition'
     | 'decompose-proper'
     | 'decompose-mixed'
     | 'mixed-operation'
@@ -32,8 +33,14 @@ export type FractionArithmeticTaskConfig =
 const sameLabels = (actual: readonly string[], expected: readonly string[]): boolean =>
     actual.length === expected.length && expected.every(label => actual.includes(label));
 
-const resolveTask: ResolverFn<FractionArithmeticTaskConfig | undefined> = labels => {
+const resolveTask: ResolverFn<FractionArithmeticTaskConfig | null> = labels => {
     const taskLabels = fractionArithmeticTaskLabels.filter(label => labels.includes(label));
+    const operationLabels = [Area.Addition, Area.Subtraction, Area.Multiplication]
+        .filter(label => labels.includes(label));
+    if (sameLabels(taskLabels, [Ability.ProcedureExecution])
+        && sameLabels(operationLabels, [Area.Addition, Area.Multiplication])) {
+        return 'tenths-hundredths-addition';
+    }
     if (sameLabels(taskLabels, [Ability.Interpretation, Scope.FractionNumbers])) {
         return 'interpret-operation';
     }
@@ -98,7 +105,7 @@ const resolveTask: ResolverFn<FractionArithmeticTaskConfig | undefined> = labels
     ])) {
         return 'fraction-multiplication-problem-improper';
     }
-    return undefined;
+    return null;
 };
 
 export const spec: GeneratorSpec = {

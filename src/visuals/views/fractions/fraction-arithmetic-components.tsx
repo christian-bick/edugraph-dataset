@@ -1,8 +1,12 @@
 import {
     FractionArithmeticModel,
     FractionArithmeticModelGroupRole,
-    FractionArithmeticProblem
+    FractionArithmeticProblem,
+    FractionBinaryOperationProblem,
+    MixedFractionOperationProblem,
+    TenthsHundredthsAdditionProblem
 } from '../../../types/problems.ts';
+import {TenthsHundredthsGrid} from './tenths-hundredths-grid.tsx';
 
 const groupStyles: Record<FractionArithmeticModelGroupRole, string> = {
     'first-addend': 'border-sky-600 bg-sky-200 text-sky-950',
@@ -159,7 +163,11 @@ const ModelPlaceholder = ({label}: {label: string}) => (
     </div>
 );
 
-const OperandModels = ({data}: {data: Extract<FractionArithmeticProblem, {questionModels: unknown}>}) => {
+const OperandModels = ({
+    data
+}: {
+    data: FractionBinaryOperationProblem | MixedFractionOperationProblem;
+}) => {
     const presentation = data.task === 'mixed-operation' ? 'legacy-local' : 'legacy-stable';
     return (
         <div className="grid grid-cols-2 gap-4">
@@ -258,6 +266,62 @@ const MultiplicationWork = ({
     );
 };
 
+const TenthsHundredthsAdditionWork = ({
+    data,
+    isSolutionView
+}: {
+    data: TenthsHundredthsAdditionProblem;
+    isSolutionView: boolean;
+}) => (
+    <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+            <TenthsHundredthsGrid
+                model={data.questionModels.firstTenths}
+                title="First addend: tenths"
+                ariaLabel={`${data.firstTenths.notation} of the shared unit square, divided into 10 equal vertical tenths.`}
+                compact
+            />
+            <TenthsHundredthsGrid
+                model={data.questionModels.secondHundredths}
+                title="Second addend: hundredths"
+                ariaLabel={`${data.secondHundredths.notation} of the same-sized unit square, divided into 100 equal parts grouped into tenths.`}
+                compact
+            />
+        </div>
+
+        <EquationPanel
+            equation={isSolutionView ? data.equationChain : data.questionEquation}
+            solved={isSolutionView}
+        />
+
+        {isSolutionView ? (
+            <>
+                <div className="grid grid-cols-2 gap-3 rounded-xl border-2 border-blue-200 bg-blue-50 p-3 text-center text-sm font-bold text-blue-950">
+                    <div>{data.conversion.numeratorEquation}</div>
+                    <div>{data.conversion.denominatorEquation}</div>
+                    <div className="col-span-2 font-mono text-base">{data.conversionEquation}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <TenthsHundredthsGrid
+                        model={data.solutionModels.convertedFirst}
+                        title="First addend converted"
+                        ariaLabel={`${data.convertedFirst.notation} represents the unchanged first addend in 100 equal parts of the same unit square.`}
+                        compact
+                    />
+                    <TenthsHundredthsGrid
+                        model={data.solutionModels.result}
+                        title="Sum in hundredths"
+                        ariaLabel={`The supplied result model shows ${data.result.notation} of the same unit square, with ${data.solutionModels.result.groups[0]?.label} from the first addend followed by the non-overlapping ${data.solutionModels.result.groups[1]?.label} from the second addend.`}
+                        compact
+                    />
+                </div>
+            </>
+        ) : (
+            <ModelPlaceholder label="The converted tenths, combined result grid, and completed equation are withheld." />
+        )}
+    </div>
+);
+
 export const FractionArithmeticWork = ({
     data,
     isSolutionView
@@ -265,6 +329,10 @@ export const FractionArithmeticWork = ({
     data: FractionArithmeticProblem;
     isSolutionView: boolean;
 }) => {
+    if (data.task === 'tenths-hundredths-addition') {
+        return <TenthsHundredthsAdditionWork data={data} isSolutionView={isSolutionView} />;
+    }
+
     if (data.operation === 'multiplication') {
         return <MultiplicationWork data={data} isSolutionView={isSolutionView} />;
     }

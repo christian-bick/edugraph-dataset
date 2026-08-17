@@ -98,6 +98,17 @@ const fractionMultiplicationProblemBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.ProperFractions], [Scope.ImproperFractions]]);
 
+const tenthsHundredthsAdditionBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.FractionArithmetic,
+    Area.FractionNotation,
+    Area.Addition,
+    Area.Multiplication,
+    Area.Equation,
+    Scope.CommonDenominator,
+    Scope.SingleFrameOfReference,
+    Ability.ProcedureExecution
+]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-grade4-interpret-fraction-arithmetic', interpretationBuilder),
     ...toTargets('test-grade4-decompose-fractions', decompositionBuilder),
@@ -105,7 +116,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('test-grade4-fraction-word-problems', wordProblemBuilder),
     ...toTargets('test-grade4-unit-fraction-multiples', unitFractionMultipleBuilder),
     ...toTargets('test-grade4-whole-number-fraction-products', wholeNumberFractionProductBuilder),
-    ...toTargets('test-grade4-fraction-multiplication-problems', fractionMultiplicationProblemBuilder)
+    ...toTargets('test-grade4-fraction-multiplication-problems', fractionMultiplicationProblemBuilder),
+    ...toTargets('test-grade4-tenths-hundredths-addition', tenthsHundredthsAdditionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [];

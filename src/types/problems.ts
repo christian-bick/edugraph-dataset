@@ -1574,10 +1574,78 @@ export type FractionScalingProblem = {
     explanation: string;
 };
 
+export type DecimalFractionValue = {
+    numerator: number;
+    denominator: 10 | 100;
+    notation: string;
+};
+
+export type TenthsHundredthsGridCell = {
+    index: number;
+    row: number;
+    column: number;
+    tenthGroupIndex: number;
+    xPercent: number;
+    yPercent: number;
+    widthPercent: 10;
+    heightPercent: 10 | 100;
+    shaded: boolean;
+    source: 'first-addend' | 'second-addend' | null;
+};
+
+export type TenthsHundredthsGridGroup = {
+    source: 'first-addend' | 'second-addend';
+    label: string;
+    startCell: number;
+    cellCount: number;
+};
+
+export type TenthsHundredthsGridModel = {
+    display: string;
+    rows: 1 | 10;
+    columns: 10;
+    partCount: 10 | 100;
+    shadedCount: number;
+    groups: TenthsHundredthsGridGroup[];
+    cells: TenthsHundredthsGridCell[];
+};
+
+export type TenthsToHundredthsProblem = {
+    task: 'tenths-to-hundredths';
+    tenths: DecimalFractionValue & {denominator: 10};
+    hundredths: DecimalFractionValue & {denominator: 100};
+    scaleFactor: 10;
+    sharedWhole: 1;
+    numeratorScale: {
+        from: number;
+        factor: 10;
+        result: number;
+        equation: string;
+    };
+    denominatorScale: {
+        from: 10;
+        factor: 10;
+        result: 100;
+        equation: string;
+    };
+    questionPrompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    models: {
+        tenths: TenthsHundredthsGridModel;
+        hundredths: TenthsHundredthsGridModel;
+    };
+    relation: 'equal';
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
 export type FractionEquivalenceProblem =
     | ProperFractionEquivalenceProblem
     | WholeNumberFractionEquivalenceProblem
-    | FractionScalingProblem;
+    | FractionScalingProblem
+    | TenthsToHundredthsProblem;
 
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
 
@@ -1696,7 +1764,8 @@ export type FractionArithmeticStory = {
         | 'route-combination'
         | 'route-difference'
         | 'ribbon-unit-multiple'
-        | 'equal-fraction-groups';
+        | 'equal-fraction-groups'
+        | 'hundred-grid-addition';
     context: string;
     question: string;
     wholeLabel: string;
@@ -1823,13 +1892,53 @@ export type FractionMultiplicationWordProblem = WholeNumberFractionProductCommon
     boundsStatement: string;
 };
 
+export type TenthsHundredthsAdditionProblem = {
+    task: 'tenths-hundredths-addition';
+    operation: 'addition';
+    denominator: 100;
+    sharedWhole: 1;
+    referenceId: 'same-whole';
+    story: FractionArithmeticStory & {
+        storyKind: 'hundred-grid-addition';
+        givenDisplays: [string, string];
+        unknownRole: 'result';
+    };
+    firstTenths: DecimalFractionValue & {denominator: 10};
+    secondHundredths: DecimalFractionValue & {denominator: 100};
+    convertedFirst: DecimalFractionValue & {denominator: 100};
+    result: DecimalFractionValue & {denominator: 100};
+    conversion: {
+        factor: 10;
+        numeratorEquation: string;
+        denominatorEquation: string;
+        equation: string;
+    };
+    prompt: string;
+    questionEquation: string;
+    conversionEquation: string;
+    solutionEquation: string;
+    equationChain: string;
+    questionModels: {
+        firstTenths: TenthsHundredthsGridModel;
+        secondHundredths: TenthsHundredthsGridModel;
+    };
+    solutionModels: {
+        convertedFirst: TenthsHundredthsGridModel;
+        result: TenthsHundredthsGridModel;
+    };
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
 export type FractionArithmeticProblem =
     | FractionBinaryOperationProblem
     | FractionDecompositionProblem
     | MixedFractionOperationProblem
     | UnitFractionMultipleProblem
     | WholeNumberFractionProductProblem
-    | FractionMultiplicationWordProblem;
+    | FractionMultiplicationWordProblem
+    | TenthsHundredthsAdditionProblem;
 
 export type ShapePartitionProblem =
     | {

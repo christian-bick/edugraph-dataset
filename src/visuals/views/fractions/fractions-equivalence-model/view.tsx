@@ -1,6 +1,10 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {FractionScalingBar, FractionScalingProblem, FractionValue} from '../../../../types/problems.ts';
+import {
+    FractionScalingBar,
+    FractionScalingProblem,
+    FractionValue
+} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
@@ -8,6 +12,10 @@ import {
     FractionsEquivalenceModelViewSchema
 } from './spec.ts';
 import {isValidFractionScalingProblem} from '../../../helpers/fraction-equivalence-scaling.ts';
+import {
+    isValidTenthsToHundredthsProblem,
+    TenthsToHundredthsModel
+} from '../tenths-hundredths-grid.tsx';
 import '../../../../tailwind.css';
 
 const VIEW_ID = 'fractions-equivalence-model';
@@ -175,6 +183,32 @@ const validateFraction = (name: string, fraction: FractionValue) => {
 const FractionsEquivalenceModelCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
+    if (data.task === 'tenths-to-hundredths') {
+        validateProblemData(VIEW_ID, data, [
+            'task',
+            'tenths',
+            'hundredths',
+            'scaleFactor',
+            'sharedWhole',
+            'numeratorScale',
+            'denominatorScale',
+            'questionPrompt',
+            'questionEquation',
+            'solutionEquation',
+            'models',
+            'relation',
+            'answer',
+            'answerStatement',
+            'explanation'
+        ]);
+        if (!isValidTenthsToHundredthsProblem(data)) {
+            throw new ViewValidationError(
+                VIEW_ID,
+                'Tenths-to-hundredths data must contain one coherent shared whole, ×10 scaling, equation, and answer.'
+            );
+        }
+        return <TenthsToHundredthsModel data={data} isSolutionView={isSolutionView} />;
+    }
     if (data.task === 'scale-equivalence') {
         validateProblemData(VIEW_ID, data, [
             'task',

@@ -6,12 +6,14 @@ import {
     FractionEquivalenceProblem,
     FractionParts,
     FractionScalingNumberLineTick,
-    FractionValue
+    FractionValue,
+    TenthsToHundredthsProblem
 } from '../../../types/problems.ts';
 import {
     FractionEquivalenceGeneratorConfig,
     FractionEquivalenceGeneratorSchema
 } from './spec.ts';
+import {toDecimalFraction, toTenthsHundredthsGrid} from '../tenths-hundredths.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
 const SCALE_FACTORS = [2, 3, 4] as const;
@@ -57,6 +59,44 @@ const toNumberLineTicks = (denominator: FractionParts): FractionScalingNumberLin
         label: index === 0 ? '0' : index === denominator ? '1' : ''
     }));
 
+const generateTenthsToHundredths = (): TenthsToHundredthsProblem => {
+    const numerator = Math.floor(random() * 10) + 1;
+    const scaledNumerator = numerator * 10;
+    const tenths = toDecimalFraction(numerator, 10);
+    const hundredths = toDecimalFraction(scaledNumerator, 100);
+
+    return {
+        task: 'tenths-to-hundredths',
+        tenths,
+        hundredths,
+        scaleFactor: 10,
+        sharedWhole: 1,
+        numeratorScale: {
+            from: numerator,
+            factor: 10,
+            result: scaledNumerator,
+            equation: `${numerator} × 10 = ${scaledNumerator}`
+        },
+        denominatorScale: {
+            from: 10,
+            factor: 10,
+            result: 100,
+            equation: '10 × 10 = 100'
+        },
+        questionPrompt: 'Complete the equivalent fraction by expressing the tenths as hundredths.',
+        questionEquation: `${tenths.notation} = ?/100`,
+        solutionEquation: `${tenths.notation} = (${numerator} × 10)/(10 × 10) = ${hundredths.notation}`,
+        models: {
+            tenths: toTenthsHundredthsGrid(numerator, 10),
+            hundredths: toTenthsHundredthsGrid(scaledNumerator, 100)
+        },
+        relation: 'equal',
+        answer: String(scaledNumerator),
+        answerStatement: `${tenths.notation} is equivalent to ${hundredths.notation}.`,
+        explanation: `Multiplying the numerator and denominator of ${tenths.notation} by 10 makes 10 times as many equal parts. Each tenth becomes 10 hundredths, so ${hundredths.notation} shades the same amount.`
+    };
+};
+
 export class FractionEquivalenceGenerator implements ProblemGenerator<
     FractionEquivalenceProblem,
     FractionEquivalenceGeneratorConfig
@@ -95,6 +135,10 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
         const usesWholeNumberMode = config.usesEqualShares === false
             && config.usesImproperFractions === true
             && config.usesIntegerNumbers === true;
+
+        if (usesProperFractionMode && representsWhole && usesMultiplication) {
+            return {data: generateTenthsToHundredths()};
+        }
 
         if (usesWholeNumberMode && representsWhole && !usesMultiplication) {
             const wholeNumber = randomItem(WHOLE_NUMBERS);

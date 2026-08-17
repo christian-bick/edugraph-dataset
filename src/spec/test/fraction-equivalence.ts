@@ -42,10 +42,22 @@ const grade4ScalingBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.VisualNumbers], [Scope.Numberline]]);
 
+const tenthsToHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.FractionEquivalence,
+    Area.FractionNotation,
+    Area.Multiplication,
+    Scope.EqualShares,
+    Scope.Equal,
+    Scope.SingleFrameOfReference,
+    Scope.VisualNumbers,
+    Ability.Formalization
+]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-fraction-equivalence', builder),
     ...toTargets('test-whole-number-fraction', wholeNumberBuilder),
-    ...toTargets('test-grade4-fraction-equivalence-scaling', grade4ScalingBuilder)
+    ...toTargets('test-grade4-fraction-equivalence-scaling', grade4ScalingBuilder),
+    ...toTargets('test-grade4-tenths-to-hundredths', tenthsToHundredthsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [];

@@ -16,19 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const tenthsHundredthsArithmeticImplementation = defineImplementationPackage({
-    id: 'tenths-hundredths-arithmetic',
-    description: 'Convert tenths to hundredths and add fractions expressed in tenths and hundredths.',
-    generators: [
-        { module: 'fraction-equivalence', strategy: 'expand' },
-        { module: 'fraction-arithmetic', strategy: 'new' }
-    ],
-    views: [
-        { module: 'fractions-equivalence-model', strategy: 'expand' },
-        { module: 'fractions-operation-model', strategy: 'new' }
-    ]
-});
-
 const decimalNotationGrade4Implementation = defineImplementationPackage({
     id: 'decimal-notation-grade4',
     description: 'Relate denominator-ten or denominator-hundred fractions to decimals, measurements, and number-line locations.',
@@ -666,15 +653,23 @@ const fractionMultiplicationWordProblemsBuilder = new DatasetPermutationBuilder(
 
 const tenthsToHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionEquivalence,
-    Area.DecimalEquivalence,
     Area.FractionNotation,
+    Area.Multiplication,
+    Scope.EqualShares,
+    Scope.Equal,
+    Scope.SingleFrameOfReference,
+    Scope.VisualNumbers,
     Ability.Formalization
 ]);
 
 const addTenthsHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionArithmetic,
     Area.Addition,
+    Area.Multiplication,
     Area.FractionNotation,
+    Area.Equation,
+    Scope.CommonDenominator,
+    Scope.SingleFrameOfReference,
     Ability.ProcedureExecution
 ]);
 
@@ -773,12 +768,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NF.B.3d-fraction-word-problems', fractionArithmeticWordProblemsBuilder),
     ...toTargets('4.NF.B.4a-unit-fraction-multiples', unitFractionMultipleBuilder),
     ...toTargets('4.NF.B.4b-whole-number-fraction-products', wholeNumberFractionMultiplicationBuilder),
-    ...toTargets('4.NF.B.4c-fraction-multiplication-word-problems', fractionMultiplicationWordProblemsBuilder)
+    ...toTargets('4.NF.B.4c-fraction-multiplication-word-problems', fractionMultiplicationWordProblemsBuilder),
+    ...toTargets('4.NF.C.5-tenths-to-hundredths', tenthsToHundredthsBuilder),
+    ...toTargets('4.NF.C.5-add-tenths-hundredths', addTenthsHundredthsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NF.C.5-tenths-to-hundredths', tenthsToHundredthsBuilder, tenthsHundredthsArithmeticImplementation, 'Show denominator-ten and denominator-hundred fractions, common scaling, equality, and model or place-value evidence.'),
-    ...toImplementationTodos('4.NF.C.5-add-tenths-hundredths', addTenthsHundredthsBuilder, tenthsHundredthsArithmeticImplementation, 'Show the conversion to a common denominator, addition equation, and result.'),
     ...toImplementationTodos('4.NF.C.6-fraction-decimal-conversion', fractionDecimalConversionBuilder, decimalNotationGrade4Implementation, 'Show the fraction, decimal, place-value evidence, equality, and prompted conversion direction.'),
     ...toImplementationTodos('4.NF.C.6-decimal-number-line', decimalNumberLineBuilder, decimalNotationGrade4Implementation, 'Show tenths or hundredths tick spacing, the decimal label, and plotted location.'),
     ...toImplementationTodos('4.NF.C.6-decimal-measurement-notation', decimalMeasurementNotationBuilder, decimalNotationGrade4Implementation, 'Show equivalent fractional and decimal measures with a concrete unit.'),

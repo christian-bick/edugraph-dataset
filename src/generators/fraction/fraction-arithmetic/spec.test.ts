@@ -242,6 +242,21 @@ describe('FractionArithmeticGenerator spec integration', () => {
             ],
             '29b60da5',
             'fraction-multiplication-problem'
+        ],
+        [
+            '5 tenths and hundredths addition',
+            [
+                Area.FractionArithmetic,
+                Area.FractionNotation,
+                Area.Addition,
+                Area.Multiplication,
+                Area.Equation,
+                Scope.CommonDenominator,
+                Scope.SingleFrameOfReference,
+                Ability.ProcedureExecution
+            ],
+            '8b2eb048',
+            'tenths-hundredths-addition'
         ]
     ] as const)('resolves the corrected Grade 4 %s target', (
         _name,
@@ -307,5 +322,25 @@ describe('FractionArithmeticGenerator spec integration', () => {
             operation: 'multiplication'
         });
         expect(resolvedMultiplication!.data).toEqual(directMultiplication.data);
+
+        const tenthsHundredthsLabels = [
+            Area.FractionArithmetic,
+            Area.FractionNotation,
+            Area.Addition,
+            Area.Multiplication,
+            Area.Equation,
+            Scope.CommonDenominator,
+            Scope.SingleFrameOfReference,
+            Ability.ProcedureExecution
+        ];
+        setSeed('tenths-hundredths-label-path');
+        const resolvedTenthsHundredths = generateWithLabels(generator, tenthsHundredthsLabels);
+        setSeed('tenths-hundredths-label-path');
+        const directTenthsHundredths = generator.generate({
+            task: 'tenths-hundredths-addition',
+            usesCommonDenominator: true,
+            operation: 'addition'
+        });
+        expect(resolvedTenthsHundredths!.data).toEqual(directTenthsHundredths.data);
     });
 });

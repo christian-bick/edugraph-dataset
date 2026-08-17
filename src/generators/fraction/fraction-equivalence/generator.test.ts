@@ -4,7 +4,9 @@ import {setSeed} from '../../../lib/random.ts';
 import {
     FractionParts,
     FractionScalingProblem,
-    ProperFractionEquivalenceProblem
+    ProperFractionEquivalenceProblem,
+    TenthsHundredthsGridModel,
+    TenthsToHundredthsProblem
 } from '../../../types/problems.ts';
 import {FractionEquivalenceGenerator} from './generator.ts';
 import {FractionEquivalenceGeneratorConfig} from './spec.ts';
@@ -53,6 +55,70 @@ const wholeConfig: FractionEquivalenceGeneratorConfig = {
 const scalingConfig: FractionEquivalenceGeneratorConfig = {
     ...properConfig([Ability.Formalization, Ability.ProcedureUnderstanding]),
     usesMultiplication: true
+};
+
+const tenthsConfig: FractionEquivalenceGeneratorConfig = {
+    ...properConfig([Ability.Formalization]),
+    usesMultiplication: true
+};
+
+const expectGrid = (model: TenthsHundredthsGridModel): void => {
+    expect(model.cells).toHaveLength(model.partCount);
+    expect(model.cells.filter(cell => cell.shaded)).toHaveLength(model.shadedCount);
+    expect(model.groups).toEqual([]);
+    model.cells.forEach((cell, index) => {
+        expect(cell.index).toBe(index);
+        expect(cell.widthPercent).toBe(10);
+        expect(cell.shaded).toBe(index < model.shadedCount);
+        expect(cell.source).toBeNull();
+        if (model.partCount === 10) {
+            expect(cell).toMatchObject({row: 0, column: index, tenthGroupIndex: index});
+            expect(cell.xPercent).toBe(index * 10);
+            expect(cell.yPercent).toBe(0);
+            expect(cell.heightPercent).toBe(100);
+        } else {
+            expect(cell.column).toBe(Math.floor(index / 10));
+            expect(cell.row).toBe(index % 10);
+            expect(cell.tenthGroupIndex).toBe(cell.column);
+            expect(cell.xPercent).toBe(cell.column * 10);
+            expect(cell.yPercent).toBe(cell.row * 10);
+            expect(cell.heightPercent).toBe(10);
+        }
+    });
+};
+
+const expectTenthsProblem = (problem: TenthsToHundredthsProblem): void => {
+    const n = problem.tenths.numerator;
+    expect(n).toBeGreaterThanOrEqual(1);
+    expect(n).toBeLessThanOrEqual(10);
+    expect(problem.hundredths.numerator).toBe(n * 10);
+    expect(problem.tenths).toEqual({numerator: n, denominator: 10, notation: `${n}/10`});
+    expect(problem.hundredths).toEqual({
+        numerator: n * 10,
+        denominator: 100,
+        notation: `${n * 10}/100`
+    });
+    expect(problem.numeratorScale).toEqual({
+        from: n,
+        factor: 10,
+        result: n * 10,
+        equation: `${n} × 10 = ${n * 10}`
+    });
+    expect(problem.denominatorScale).toEqual({
+        from: 10,
+        factor: 10,
+        result: 100,
+        equation: '10 × 10 = 100'
+    });
+    expect(problem.questionPrompt).toBe(
+        'Complete the equivalent fraction by expressing the tenths as hundredths.'
+    );
+    expect(problem.questionEquation).toBe(`${n}/10 = ?/100`);
+    expect(problem.solutionEquation).toBe(`${n}/10 = (${n} × 10)/(10 × 10) = ${n * 10}/100`);
+    expect(problem.answer).toBe(String(n * 10));
+    expect(problem.answerStatement).toBe(`${n}/10 is equivalent to ${n * 10}/100.`);
+    expectGrid(problem.models.tenths);
+    expectGrid(problem.models.hundredths);
 };
 
 const expectScalingProblem = (problem: FractionScalingProblem) => {
@@ -237,6 +303,19 @@ describe('FractionEquivalenceGenerator', () => {
         }
 
         expect(scaleFactors).toEqual(new Set([2, 3, 4]));
+    });
+
+    it('expresses every nonzero tenth as equivalent hundredths with exact grids', () => {
+        const seen = new Set<number>();
+        for (let seed = 0; seed < 200; seed++) {
+            setSeed(`tenths-${seed}`);
+            const problem = generator.generate(tenthsConfig).data;
+            expect(problem.task).toBe('tenths-to-hundredths');
+            if (problem.task !== 'tenths-to-hundredths') throw new Error('Expected tenths mode.');
+            expectTenthsProblem(problem);
+            seen.add(problem.tenths.numerator);
+        }
+        expect(seen).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     });
 
     it('preserves every legacy payload and random draw for fixed seeds', () => {

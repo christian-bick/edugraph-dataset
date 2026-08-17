@@ -14,6 +14,7 @@ import {
     WholeNumberFractionProductCommon,
     WholeNumberFractionProductProblem
 } from '../../../types/problems.ts';
+import {isValidTenthsHundredthsAdditionProblem} from './tenths-hundredths-grid.tsx';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const;
 
@@ -527,10 +528,12 @@ const validWholeNumberFractionProduct = (
 export const isValidFractionArithmeticProblem = (data: FractionArithmeticProblem): boolean =>
     typeof data === 'object'
     && data !== null
-    && validDenominator(data.denominator)
-    && data.sharedWhole === 1
-    && data.referenceId === 'same-whole'
-    && (data.task === 'unit-fraction-multiple'
+    && (data.task === 'tenths-hundredths-addition'
+        ? isValidTenthsHundredthsAdditionProblem(data)
+        : validDenominator(data.denominator)
+        && data.sharedWhole === 1
+        && data.referenceId === 'same-whole'
+        && (data.task === 'unit-fraction-multiple'
         ? validUnitFractionMultiple(data)
         : data.task === 'whole-number-fraction-product'
             || data.task === 'fraction-multiplication-problem'
@@ -539,4 +542,4 @@ export const isValidFractionArithmeticProblem = (data: FractionArithmeticProblem
         ? validBinary(data)
         : data.task === 'decompose'
             ? validDecomposition(data)
-            : data.task === 'mixed-operation' && validMixedOperation(data));
+            : data.task === 'mixed-operation' && validMixedOperation(data)));
