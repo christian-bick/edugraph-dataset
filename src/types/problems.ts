@@ -62,8 +62,68 @@ export type ArithmeticWordProblemTwoStep = {
     blankPart: 'solution';
 };
 
-/** Shared payload for within-100 one-step and connected two-step word problems. */
-export type ArithmeticWordProblemWithin100 = ArithmeticPairProblem | ArithmeticWordProblemTwoStep;
+export type RemainderInterpretation = 'use-quotient' | 'round-up' | 'use-remainder';
+
+export type ArithmeticWordProblemInterpretedRemainder = {
+    kind: 'interpreted-remainder';
+    dividend: number;
+    divisor: number;
+    quotient: number;
+    remainder: number;
+    interpretation: RemainderInterpretation;
+    answer: number;
+    story: string;
+    question: string;
+    divisionEquation: string;
+    contextDecision: string;
+    interpretationExplanation: string;
+    answerStatement: string;
+};
+
+export type ArithmeticWordProblemLetterEquation = {
+    kind: 'letter-equation';
+    operands: readonly [number, number, number];
+    operations: readonly [ArithmeticOperation, ArithmeticOperation];
+    intermediate: number;
+    answer: number;
+    unknownSymbol: 'n';
+    story: string;
+    question: string;
+    stepEquations: readonly [string, string];
+    combinedEquation: string;
+    solutionEquation: string;
+    answerStatement: string;
+};
+
+export type ArithmeticWordProblemReasonableness = {
+    kind: 'reasonableness';
+    operands: readonly [number, number, number];
+    operations: readonly [ArithmeticOperation, ArithmeticOperation];
+    intermediate: number;
+    exactAnswer: number;
+    proposedAnswer: number;
+    roundingPlace: 10;
+    roundedExactAnswer: number;
+    roundedProposedAnswer: number;
+    isReasonable: boolean;
+    story: string;
+    question: string;
+    exactEquations: readonly [string, string];
+    roundingCheck: string;
+    reasonablenessExplanation: string;
+    answerStatement: string;
+};
+
+export type ArithmeticWordProblemGrade4 =
+    | ArithmeticWordProblemInterpretedRemainder
+    | ArithmeticWordProblemLetterEquation
+    | ArithmeticWordProblemReasonableness;
+
+/** Generator contract shared by legacy and Grade 4 multi-step word problems. */
+export type ArithmeticWordProblemMultistep = ArithmeticWordProblemTwoStep | ArithmeticWordProblemGrade4;
+
+/** Shared payload accepted by the reusable one-step and multi-step word-problem view. */
+export type ArithmeticWordProblemWithin100 = ArithmeticPairProblem | ArithmeticWordProblemMultistep;
 
 export type ArithmeticDecomposeProblem = {
     targetNumber: number;

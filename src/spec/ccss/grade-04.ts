@@ -16,13 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const grade4MultistepWordProblemsImplementation = defineImplementationPackage({
-    id: 'grade4-multistep-word-problems',
-    description: 'Extend multistep word problems with interpreted remainders, letter-unknown equations, and visible answer-reasonableness checks.',
-    generators: [{ module: 'arithmetic-word-problems-two-step', strategy: 'expand' }],
-    views: [{ module: 'operations-word-problem-within-100', strategy: 'expand' }]
-});
-
 const factorsMultiplesPrimesImplementation = defineImplementationPackage({
     id: 'factors-multiples-primes',
     description: 'Generate exhaustive factor evidence for factor pairs, multiple tests, and prime classification.',
@@ -877,13 +870,13 @@ const compareDecimalsBuilder = new DatasetPermutationBuilder()
 export const spec: CompetencyTarget[] = [
     ...toTargets('4.OA.A.1-multiplicative-comparison-equation', multiplicativeComparisonEquationBuilder),
     ...toTargets('4.OA.A.2-multiplicative-comparison-word-problems', multiplicativeComparisonWordProblemBuilder),
+    ...toTargets('4.OA.A.3-interpret-remainders', interpretedRemainderBuilder),
+    ...toTargets('4.OA.A.3-multistep-letter-equations', multistepLetterEquationBuilder),
+    ...toTargets('4.OA.A.3-answer-reasonableness', multistepReasonablenessBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.OA.A.3-interpret-remainders', interpretedRemainderBuilder, grade4MultistepWordProblemsImplementation, 'Show how the story context determines the treatment of a nonzero remainder.'),
-    ...toImplementationTodos('4.OA.A.3-multistep-letter-equations', multistepLetterEquationBuilder, grade4MultistepWordProblemsImplementation, 'Keep the story, intermediate and final equations, visible letter unknown, operation order, and solution consistent.'),
-    ...toImplementationTodos('4.OA.A.3-answer-reasonableness', multistepReasonablenessBuilder, grade4MultistepWordProblemsImplementation, 'Expose a visible estimate or check and a justified reasonableness conclusion without claiming an unobservable mental strategy.'),
     ...toImplementationTodos('4.OA.B.4-factor-pairs', factorPairsBuilder, factorsMultiplesPrimesImplementation, 'List or model every factor pair exactly once and reconstruct the source number.'),
     ...toImplementationTodos('4.OA.B.4-multiple-test', oneDigitMultipleTestBuilder, factorsMultiplesPrimesImplementation, 'Expose the candidate, one-digit divisor, quotient or factor evidence, and conclusion.'),
     ...toImplementationTodos('4.OA.B.4-prime-classification', primeClassificationBuilder, factorsMultiplesPrimesImplementation, 'Use exhaustive factor evidence to justify that the number has exactly two positive factors.'),

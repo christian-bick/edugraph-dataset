@@ -1,5 +1,9 @@
 import {describe, expect, it} from 'vitest';
-import {ArithmeticPairProblem, ArithmeticWordProblemTwoStep} from '../../../../types/problems.ts';
+import {
+    ArithmeticOperation,
+    ArithmeticPairProblem,
+    ArithmeticWordProblemTwoStep
+} from '../../../../types/problems.ts';
 import {getPairUnknown, getWordProblemStory, isTwoStepProblem, operationSymbol} from './helpers.ts';
 
 describe('operations-word-problem-within-100 helpers', () => {
@@ -56,7 +60,8 @@ describe('operations-word-problem-within-100 helpers', () => {
     });
 
     it('maps every supported operation to a symbol', () => {
-        expect(['addition', 'subtraction', 'multiplication', 'division'].map(operationSymbol))
+        const operations: ArithmeticOperation[] = ['addition', 'subtraction', 'multiplication', 'division'];
+        expect(operations.map(operationSymbol))
             .toEqual(['+', '−', '×', '÷']);
     });
 });

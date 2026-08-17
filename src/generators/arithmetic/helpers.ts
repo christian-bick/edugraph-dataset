@@ -14,6 +14,12 @@ export type AddSubtractOperationLabel = typeof Area.Addition | typeof Area.Subtr
 
 export type TwoStepOperationLabels = readonly [ArithmeticOperationLabel, ArithmeticOperationLabel];
 
+export type ArithmeticWordProblemTask =
+    | 'two-step'
+    | 'interpreted-remainder'
+    | 'letter-equation'
+    | 'reasonableness';
+
 /** Resolves only an explicitly requested operation, never a related ontology label. */
 export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
     // Preserve the schema-array resolver's single RNG draw for stable pair samples.
@@ -48,6 +54,18 @@ export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabe
     if (hasMultiplication) return [Area.Multiplication, Area.Multiplication];
     if (hasDivision) return [Area.Division, Area.Division];
     return 'unsupported';
+}
+
+/** Resolves the Grade 4 mathematical task while preserving the legacy two-step default. */
+export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWordProblemTask {
+    if (labels.includes(Area.Estimation) || labels.includes(Area.IntegerRounding)) {
+        return 'reasonableness';
+    }
+    if (labels.includes(Area.ImperfectDivisibility) || labels.includes(Area.Modulo)) {
+        return 'interpreted-remainder';
+    }
+    if (labels.includes(Area.Equation)) return 'letter-equation';
+    return 'two-step';
 }
 
 export const operationNames: Record<ArithmeticOperationLabel, 'addition' | 'subtraction' | 'multiplication' | 'division'> = {

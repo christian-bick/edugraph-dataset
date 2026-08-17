@@ -1,13 +1,10 @@
-import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {hasLabel} from '../../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-word-problem-within-100',
-    rejectedLabels: [
-        ...deductAdmitting([Scope.NumbersLarger100])
-    ],
     generalLabels: [
         Ability.TextualReception,
         Scope.ArabicNumerals

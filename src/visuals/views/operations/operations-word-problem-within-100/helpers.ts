@@ -1,4 +1,5 @@
 import {
+    ArithmeticOperation,
     ArithmeticPairProblem,
     ArithmeticWordProblemTwoStep,
     ArithmeticWordProblemWithin100
@@ -25,7 +26,7 @@ function noun(count: number, singular: string): string {
 }
 
 export function getWordProblemStory(
-    data: ArithmeticWordProblemWithin100,
+    data: ArithmeticPairProblem | ArithmeticWordProblemTwoStep,
     useLengthContext: boolean
 ): string {
     if (isTwoStepProblem(data)) {
@@ -84,12 +85,12 @@ export function getWordProblemStory(
     return `${first} items are shared equally among ${second} groups. ${answer}`;
 }
 
-export function operationSymbol(operation: string): string {
-    const symbols: Record<string, string> = {
+export function operationSymbol(operation: ArithmeticOperation): string {
+    const symbols: Record<ArithmeticOperation, string> = {
         addition: '+',
         subtraction: '−',
         multiplication: '×',
         division: '÷'
     };
-    return symbols[operation] ?? '';
+    return symbols[operation];
 }

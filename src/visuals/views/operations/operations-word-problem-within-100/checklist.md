@@ -1,2 +1,2 @@
-- **Identity:** The visible story, combined expression, and equation steps describe the same one-step or connected two-step problem; a two-step task shows all three operands together, and length stories retain their shared centimeter unit.
-- **Modes:** Question Mode withholds the designated result and any intermediate working value; Solution Mode reveals and highlights them while preserving the complete story and equation context.
+- **Identity:** The story and visible equations describe the same one-step, connected two-step, remainder-interpretation, letter-equation, or reasonableness task; a remainder task visibly separates dividing and identifying its quotient/remainder from applying the supplied context decision.
+- **Modes:** Question Mode withholds the requested value, letter solution, remainder decision, or reasonableness verdict; Solution Mode reveals the requested response and its supplied equation or explanation while preserving the story.
