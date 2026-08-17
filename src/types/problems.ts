@@ -591,6 +591,112 @@ export type MeasurementUnitScaleProblem = {
     smallUnitCount: number;
     unitsPerLarge: number;
 };
+
+export type MeasurementConversionPairId =
+    | 'kilometer-meter'
+    | 'meter-centimeter'
+    | 'kilogram-gram'
+    | 'pound-ounce'
+    | 'liter-milliliter'
+    | 'hour-minute'
+    | 'minute-second';
+
+export type MeasurementConversionUnitId =
+    | 'kilometer'
+    | 'meter'
+    | 'centimeter'
+    | 'kilogram'
+    | 'gram'
+    | 'pound'
+    | 'ounce'
+    | 'liter'
+    | 'milliliter'
+    | 'hour'
+    | 'minute'
+    | 'second';
+
+export type MeasurementConversionUnit = {
+    id: MeasurementConversionUnitId;
+    singular: string;
+    plural: string;
+    symbol: string;
+};
+
+export type MeasurementConversionPair = {
+    id: MeasurementConversionPairId;
+    quantityKind: 'length' | 'weight' | 'liquid-volume' | 'time';
+    scalingKind: 'magnitude' | 'factor';
+    largerUnit: MeasurementConversionUnit;
+    smallerUnit: MeasurementConversionUnit;
+    factor: 16 | 60 | 100 | 1000;
+    equivalenceEquation: string;
+    factorStatement: string;
+    relativeSizeStatement: string;
+};
+
+type MeasurementConversionProblemBase = {
+    pair: MeasurementConversionPair;
+    prompt: string;
+};
+
+export type GenericUnitScaleRelationProblem = {
+    task: 'generic-unit-scale';
+    largeUnitCount: number;
+    smallUnitCount: number;
+    unitsPerLarge: number;
+    prompt: string;
+    equivalentLengthStatement: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type RelativeUnitSizeProblem = MeasurementConversionProblemBase & {
+    task: 'relative-unit-size';
+    exampleLargerValue: number;
+    exampleSmallerValue: number;
+    exampleEquation: string;
+    answer: number;
+    questionEquation: string;
+    solutionEquation: string;
+    comparisonStatement: string;
+    explanation: string;
+};
+
+export type LargerToSmallerConversionProblem = MeasurementConversionProblemBase & {
+    task: 'convert-larger-to-smaller';
+    sourceValue: number;
+    convertedValue: number;
+    answer: number;
+    questionEquation: string;
+    solutionEquation: string;
+    measurementEquation: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type MeasurementConversionTableRow = {
+    largerValue: number;
+    smallerValue: number;
+    measurementEquation: string;
+};
+
+export type MeasurementConversionTableProblem = MeasurementConversionProblemBase & {
+    task: 'conversion-table';
+    rows: readonly MeasurementConversionTableRow[];
+    hiddenRowIndices: readonly number[];
+    columnHeaders: readonly [string, string];
+    constantFactorStatement: string;
+    explanation: string;
+};
+
+export type MeasurementConversionProblem =
+    | GenericUnitScaleRelationProblem
+    | RelativeUnitSizeProblem
+    | LargerToSmallerConversionProblem
+    | MeasurementConversionTableProblem;
+
 export type MeasurementLengthDifferenceProblem = {lengthA: number; lengthB: number; difference: number; unit: 'cm'};
 
 export type MeasurementAttributeProblem = {
@@ -1303,6 +1409,8 @@ export interface ViewTypeMap {
     'measure-length-decimal': MeasurementStandardProblem;
     'measure-select-tool': MeasurementToolSelectionProblem;
     'measure-unit-scale-relation': MeasurementUnitScaleProblem;
+    'measure-conversion': MeasurementConversionProblem;
+    'measure-conversion-table': MeasurementConversionProblem;
     'measure-length-estimate': MeasurementEstimateProblem;
     'measure-length-difference': MeasurementLengthDifferenceProblem;
     'measure-attributes': MeasurementAttributeProblem;

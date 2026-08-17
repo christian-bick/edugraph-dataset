@@ -16,16 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const measurementConversionsImplementation = defineImplementationPackage({
-    id: 'measurement-conversions',
-    description: 'Relate Grade 4 unit pairs, convert larger units to smaller units, and record conversion sequences in two-column tables.',
-    generators: [{ module: 'measurement-conversion', strategy: 'new' }],
-    views: [
-        { module: 'measure-conversion', strategy: 'new' },
-        { module: 'measure-conversion-table', strategy: 'new' }
-    ]
-});
-
 const grade4MeasurementProblemsImplementation = defineImplementationPackage({
     id: 'grade4-measurement-problems',
     description: 'Solve the complete Grade 4 family of integer, fraction, and decimal measurement word problems across the four operations.',
@@ -473,7 +463,7 @@ const convertLargerToSmallerUnitsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants(measurementUnitPairs);
 
 const twoColumnConversionTableBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringWithUnits, Area.Statistics, Ability.VisualArticulation])
+    .addLabels([Area.MeasuringWithUnits, Ability.Formalization])
     .applyLabelVariants(measurementUnitPairs);
 
 const measurementKinds = [
@@ -826,13 +816,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NBT.A.3-round-to-any-place', grade4IntegerRoundingBuilder),
     ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder),
     ...toTargets('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder),
-    ...toTargets('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder)
+    ...toTargets('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder),
+    ...toTargets('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder),
+    ...toTargets('4.MD.A.1-convert-larger-to-smaller', convertLargerToSmallerUnitsBuilder),
+    ...toTargets('4.MD.A.1-two-column-tables', twoColumnConversionTableBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder, measurementConversionsImplementation, 'Show both units, one common quantity, their relative-size relation, and numerical factor.'),
-    ...toImplementationTodos('4.MD.A.1-convert-larger-to-smaller', convertLargerToSmallerUnitsBuilder, measurementConversionsImplementation, 'Show the source measure, conversion factor, multiplication equation, destination unit, and result.'),
-    ...toImplementationTodos('4.MD.A.1-two-column-tables', twoColumnConversionTableBuilder, measurementConversionsImplementation, 'Show labeled columns, ordered equivalent pairs, the constant factor, and completed entries.'),
     ...toImplementationTodos('4.MD.A.2-measurement-word-problems', grade4MeasurementWordProblemsBuilder, grade4MeasurementProblemsImplementation, 'Keep units, any required conversion, story relation, equation, unknown, and answer consistent across the complete Grade 4 family.'),
     ...toImplementationTodos('4.MD.A.2-measurement-number-lines', grade4MeasurementNumberLinesBuilder, grade4MeasurementNumberLinesImplementation, 'Show the reference point, equal scale intervals, unit, plotted quantity, and measurement label.'),
     ...toImplementationTodos('4.MD.A.3-rectangle-area-formula', rectangleAreaFormulaBuilder, rectangleFormulasImplementation, 'Explicitly elicit A = l × w with rectangle dimensions, square units, and computed area.'),

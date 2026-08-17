@@ -1,0 +1,2 @@
+- **Identity:** Generic tasks show one equal length partitioned into visible large- and small-unit counts; named-unit tasks use an equivalent quantity to derive a factor or multiply a source measure by the given factor.
+- **Modes:** Question Mode withholds the relational conclusion, requested one-unit factor, or converted measure; Solution Mode reveals the supplied relation or conversion equation, conclusion, and explanation.

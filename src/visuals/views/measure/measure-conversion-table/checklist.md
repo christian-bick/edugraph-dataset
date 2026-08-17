@@ -1,0 +1,2 @@
+- **Identity:** Two named unit columns, ordered equivalent-measure rows, and the constant conversion factor form one conversion table.
+- **Modes:** Question Mode leaves exactly the requested smaller-unit entries blank; Solution Mode completes every row and explains the constant factor.
