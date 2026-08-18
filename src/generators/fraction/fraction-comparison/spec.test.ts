@@ -1,6 +1,6 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {random, setSeed} from '../../../lib/random.ts';
+import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
 import {FractionComparisonGenerator} from './generator.ts';
 import {spec} from './spec.ts';
@@ -8,20 +8,18 @@ import {spec} from './spec.ts';
 describe('FractionComparisonGenerator spec integration', () => {
     const generator = new FractionComparisonGenerator();
 
-    const legacyLabels = (
+    const comparisonLabels = (
+        strategy: Area.FractionCommonDenominatorComparison | Area.FractionCommonNumeratorComparison,
         family: Scope.CommonDenominator | Scope.CommonNumerator,
         relation: Scope.Greater | Scope.Less
     ) => [
-        Area.NumericComparison,
+        strategy,
         Area.FractionNotation,
-        family === Scope.CommonDenominator
-            ? Area.FractionNumeratorInterpretation
-            : Area.FractionDenominatorInterpretation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         family,
         relation,
-        Ability.ConceptDerivation
+        Ability.LogicalInference
     ];
 
     it('declares invariant mathematical capabilities without the visual representation', () => {
@@ -30,45 +28,36 @@ describe('FractionComparisonGenerator spec integration', () => {
             generalLabels: [
                 Area.FractionNotation,
                 Scope.ProperFractions,
-                Scope.SingleFrameOfReference,
-                Ability.ConceptDerivation
+                Scope.SingleFrameOfReference
             ]
         });
         expect(spec.generalLabels).not.toContain(Scope.VisualNumbers);
     });
 
     it.each([
-        [Scope.CommonDenominator, Area.FractionNumeratorInterpretation, Scope.Greater, 'common-denominator'],
-        [Scope.CommonDenominator, Area.FractionNumeratorInterpretation, Scope.Less, 'common-denominator'],
-        [Scope.CommonNumerator, Area.FractionDenominatorInterpretation, Scope.Greater, 'common-numerator'],
-        [Scope.CommonNumerator, Area.FractionDenominatorInterpretation, Scope.Less, 'common-numerator']
+        [Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Greater, 'common-denominator'],
+        [Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Less, 'common-denominator'],
+        [Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Greater, 'common-numerator'],
+        [Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Less, 'common-numerator']
     ] as const)('resolves the exact %s / %s / %s mode', (
+        strategy,
         comparisonFamily,
-        interpretation,
         relation,
         expectedFamily
     ) => {
+        const labels = comparisonLabels(strategy, comparisonFamily, relation);
         setSeed(`${comparisonFamily}-${relation}`);
-        const stub = generateWithLabels(generator, [
-            Area.NumericComparison,
-            Area.FractionNotation,
-            Scope.ProperFractions,
-            Scope.SingleFrameOfReference,
-            Ability.ConceptDerivation,
-            comparisonFamily,
-            interpretation,
-            relation
-        ]);
+        const stub = generateWithLabels(generator, labels);
 
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('compare-fractions');
-        if (stub!.data.task !== 'compare-fractions') throw new Error('Expected legacy comparison.');
+        if (stub!.data.task !== 'compare-fractions') throw new Error('Expected common-component comparison.');
         expect(stub!.data.family).toBe(expectedFamily);
         expect(stub!.tags).toEqual(expect.arrayContaining([
-            Area.NumericComparison,
+            strategy,
             comparisonFamily,
-            interpretation,
-            relation
+            relation,
+            Ability.LogicalInference
         ]));
     });
 
@@ -104,105 +93,5 @@ describe('FractionComparisonGenerator spec integration', () => {
         ]));
         expect(stub!.tags).not.toContain(Scope.VisualNumbers);
         expect(stub!.tags).not.toContain(Scope.SingleFrameOfReference);
-    });
-
-    it('preserves the three historical RNG advances at legacy label extraction', () => {
-        const labels = legacyLabels(Scope.CommonDenominator, Scope.Greater);
-        setSeed('legacy-label-extraction');
-        const resolved = generateWithLabels(generator, labels);
-        setSeed('legacy-label-extraction');
-        random();
-        random();
-        random();
-        const direct = generator.generate({
-            comparisonKind: Area.NumericComparison,
-            usesProcedureUnderstanding: false,
-            usesReferenceComparison: false,
-            usesCommonDenominator: true,
-            usesCommonNumerator: false,
-            usesNumeratorInterpretation: true,
-            usesDenominatorInterpretation: false,
-            relation: Scope.Greater
-        });
-
-        expect(resolved!.data).toEqual(direct.data);
-        expect(resolved!.tags).not.toContain(Ability.ProcedureUnderstanding);
-    });
-
-    it.each([
-        [
-            'cbe33771 question',
-            1650889443,
-            Scope.CommonNumerator,
-            Scope.Less,
-            {numerator: 1, denominator: 8, notation: '1/8'},
-            {numerator: 1, denominator: 3, notation: '1/3'}
-        ],
-        [
-            'cbe33771 solution',
-            226733262,
-            Scope.CommonNumerator,
-            Scope.Less,
-            {numerator: 3, denominator: 8, notation: '3/8'},
-            {numerator: 3, denominator: 4, notation: '3/4'}
-        ],
-        [
-            '720d9d72 question',
-            1855377114,
-            Scope.CommonDenominator,
-            Scope.Greater,
-            {numerator: 4, denominator: 6, notation: '4/6'},
-            {numerator: 2, denominator: 6, notation: '2/6'}
-        ],
-        [
-            '720d9d72 solution',
-            420635569,
-            Scope.CommonDenominator,
-            Scope.Greater,
-            {numerator: 5, denominator: 8, notation: '5/8'},
-            {numerator: 2, denominator: 8, notation: '2/8'}
-        ],
-        [
-            '837ef962 validation solution',
-            160312714,
-            Scope.CommonNumerator,
-            Scope.Greater,
-            {numerator: 1, denominator: 2, notation: '1/2'},
-            {numerator: 1, denominator: 4, notation: '1/4'}
-        ]
-    ] as const)('preserves the canonical legacy payload for %s', (
-        _identity,
-        seed,
-        family,
-        relation,
-        first,
-        second
-    ) => {
-        setSeed(seed);
-        const stub = generateWithLabels(generator, legacyLabels(family, relation));
-        const relationWord = relation === Scope.Greater ? 'greater' : 'less';
-        const symbol = relation === Scope.Greater ? '>' : '<';
-        const familyName = family === Scope.CommonDenominator
-            ? 'common-denominator'
-            : 'common-numerator';
-        const sharedComponent = family === Scope.CommonDenominator
-            ? first.denominator
-            : first.numerator;
-        const rationale = family === Scope.CommonDenominator
-            ? `Both ${first.notation} and ${second.notation} refer to the same whole and share denominator ${sharedComponent}; comparing numerators ${first.numerator} and ${second.numerator} shows ${first.notation} is ${relationWord} than ${second.notation}.`
-            : `Both ${first.notation} and ${second.notation} refer to the same whole and share numerator ${sharedComponent}; denominator ${first.denominator} makes ${relation === Scope.Greater ? 'larger' : 'smaller'} parts than denominator ${second.denominator}, so ${first.notation} is ${relationWord} than ${second.notation}.`;
-
-        expect(stub!.data).toEqual({
-            task: 'compare-fractions',
-            first,
-            second,
-            family: familyName,
-            sharedComponent,
-            relation: relationWord,
-            symbol,
-            sharedWhole: 1,
-            answer: `${first.notation} ${symbol} ${second.notation}`,
-            rationale
-        });
     });
 });

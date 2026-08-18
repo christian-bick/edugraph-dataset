@@ -212,7 +212,7 @@ const answerReasonablenessBuilder = new DatasetPermutationBuilder()
 // --- 3.OA.D.9: Identify arithmetic patterns ---
 const identifyArithmeticPatternsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PatternRecognition,
+        Area.GenerativeRuleRecognition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ConceptClassification
@@ -222,7 +222,7 @@ const identifyArithmeticPatternsBuilder = new DatasetPermutationBuilder()
 // --- 3.OA.D.9: Explain arithmetic patterns with operation properties ---
 const explainArithmeticPatternsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PatternRecognition,
+        Area.EmergentFeatureRecognition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ProcedureUnderstanding,
@@ -674,16 +674,15 @@ const wholeNumbersAsFractionsBuilder = new DatasetPermutationBuilder()
 
 const compareFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
         Area.FractionNotation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,
-        Ability.ConceptDerivation
+        Ability.LogicalInference
     ])
     .applyLabelVariants([
-        [Area.FractionNumeratorInterpretation, Scope.CommonDenominator],
-        [Area.FractionDenominatorInterpretation, Scope.CommonNumerator]
+        [Area.FractionCommonDenominatorComparison, Scope.CommonDenominator],
+        [Area.FractionCommonNumeratorComparison, Scope.CommonNumerator]
     ])
     .applyLabelVariants([[Scope.Greater], [Scope.Less]]);
 

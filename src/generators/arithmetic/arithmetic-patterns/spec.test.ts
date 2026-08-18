@@ -29,14 +29,19 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         expect(stub.tags).toEqual(expect.arrayContaining(labels));
     });
 
-    it('keeps ConceptClassification-only targets on the legacy Grade 3 payload', () => {
-        const labels = [Area.Addition, Ability.ConceptClassification];
+    it('resolves generative-rule recognition to the Grade 3 table payload', () => {
+        const labels = [
+            Area.Addition,
+            Area.GenerativeRuleRecognition,
+            Ability.ConceptClassification
+        ];
         setSeed(19);
         const stub = generateWithLabels(generator, labels)!;
 
         expect(stub.data.task).toBeUndefined();
         expect(stub.data.patternAnswer).toBe(`Increase by ${stub.data.patternStep}`);
         expect(stub.tags).toContain(Area.Addition);
+        expect(stub.tags).toContain(Area.GenerativeRuleRecognition);
         expect(stub.tags).not.toContain(Ability.ConceptClassification);
     });
 
@@ -76,6 +81,7 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
             const labels = [
                 operation,
                 law,
+                Area.EmergentFeatureRecognition,
                 Ability.ProcedureUnderstanding,
                 Ability.TextualArticulation
             ];
@@ -85,6 +91,7 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
             expect(stub.data.task).toBeUndefined();
             expect(stub.data.propertyLaw).toBe(propertyLaw);
             expect(stub.tags).toEqual(expect.arrayContaining([operation, law]));
+            expect(stub.tags).toContain(Area.EmergentFeatureRecognition);
             expect(stub.tags).not.toContain(Ability.ProcedureExecution);
         }
     );

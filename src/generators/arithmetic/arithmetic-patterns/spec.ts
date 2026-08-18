@@ -17,6 +17,7 @@ export const ArithmeticPatternsGeneratorSchema = {
     task: [
         [
             Area.PatternGeneration,
+            Area.GenerativeRuleRecognition,
             Area.EmergentFeatureRecognition,
             Ability.ProcedureExecution
         ],

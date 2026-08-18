@@ -141,18 +141,18 @@ export class FractionComparisonGenerator implements ProblemGenerator<
 
     generate(config: FractionComparisonGeneratorConfig): ProblemStub<FractionComparisonProblem> {
         validateConfigFields('fraction-comparison', config, [
-            'comparisonKind',
+            'comparisonMode',
+            'usesLogicalInference',
             'usesProcedureUnderstanding',
             'usesReferenceComparison',
             'usesCommonDenominator',
             'usesCommonNumerator',
-            'usesNumeratorInterpretation',
-            'usesDenominatorInterpretation',
             'relation'
         ]);
 
-        const comparisonKind = config.comparisonKind!;
+        const comparisonMode = config.comparisonMode!;
         const relationLabel = config.relation!;
+        const usesLogicalInference = config.usesLogicalInference === true;
         const usesProcedureUnderstanding = config.usesProcedureUnderstanding === true;
         const usesReferenceComparison = config.usesReferenceComparison === true;
         const relation = relationLabel === Scope.Greater
@@ -172,13 +172,12 @@ export class FractionComparisonGenerator implements ProblemGenerator<
 
         if (usesReferenceComparison) {
             const kindMatchesRelation = relation === 'equal'
-                ? comparisonKind === Area.NumericEquality
-                : comparisonKind === Area.NumericInequality;
+                ? comparisonMode === Area.NumericEquality
+                : comparisonMode === Area.NumericInequality;
             if (!kindMatchesRelation
+                || usesLogicalInference
                 || config.usesCommonDenominator
-                || config.usesCommonNumerator
-                || config.usesNumeratorInterpretation
-                || config.usesDenominatorInterpretation) {
+                || config.usesCommonNumerator) {
                 throw new GeneratorValidationError(
                     'fraction-comparison',
                     'Fraction reference comparison requires NumericEquality with Equal or NumericInequality with Greater/Less, without a common-component family.'
@@ -194,25 +193,24 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             );
         }
 
-        const usesCommonDenominator = config.usesCommonDenominator === true
-            && config.usesCommonNumerator === false
-            && config.usesNumeratorInterpretation === true
-            && config.usesDenominatorInterpretation === false;
-        const usesCommonNumerator = config.usesCommonDenominator === false
-            && config.usesCommonNumerator === true
-            && config.usesNumeratorInterpretation === false
-            && config.usesDenominatorInterpretation === true;
+        const usesCommonDenominator = usesLogicalInference
+            && comparisonMode === Area.FractionCommonDenominatorComparison
+            && config.usesCommonDenominator === true
+            && config.usesCommonNumerator === false;
+        const usesCommonNumerator = usesLogicalInference
+            && comparisonMode === Area.FractionCommonNumeratorComparison
+            && config.usesCommonDenominator === false
+            && config.usesCommonNumerator === true;
         if (!usesCommonDenominator && !usesCommonNumerator) {
             throw new GeneratorValidationError(
                 'fraction-comparison',
-                'CommonDenominator requires FractionNumeratorInterpretation, while CommonNumerator requires FractionDenominatorInterpretation.'
+                'Each common-component scope requires its matching fraction comparison strategy and LogicalInference.'
             );
         }
-        if (comparisonKind !== Area.NumericComparison
-            || (relation !== 'greater' && relation !== 'less')) {
+        if (relation !== 'greater' && relation !== 'less') {
             throw new GeneratorValidationError(
                 'fraction-comparison',
-                'Legacy common-component comparison requires NumericComparison with Greater or Less.'
+                'Common-component comparison requires its strategy with Greater or Less.'
             );
         }
 

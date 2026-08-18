@@ -10,28 +10,26 @@ import {
 
 const commonDenominatorBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
+        Area.FractionCommonDenominatorComparison,
         Area.FractionNotation,
-        Area.FractionNumeratorInterpretation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,
         Scope.CommonDenominator,
         Scope.Greater,
-        Ability.ConceptDerivation
+        Ability.LogicalInference
     ]);
 
 const commonNumeratorBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
+        Area.FractionCommonNumeratorComparison,
         Area.FractionNotation,
-        Area.FractionDenominatorInterpretation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,
         Scope.CommonNumerator,
         Scope.Less,
-        Ability.ConceptDerivation
+        Ability.LogicalInference
     ]);
 
 const grade4UnlikeFractionComparisonBuilder = new DatasetPermutationBuilder()

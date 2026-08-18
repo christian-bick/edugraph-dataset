@@ -35,30 +35,28 @@ const expectCoherentProblem = (problem: LegacyFractionComparisonProblem) => {
 };
 
 const config = (
+    strategy: Area.FractionCommonDenominatorComparison | Area.FractionCommonNumeratorComparison,
     comparisonFamily: Scope.CommonDenominator | Scope.CommonNumerator,
-    interpretation: Area.FractionNumeratorInterpretation | Area.FractionDenominatorInterpretation,
     relation: Scope.Greater | Scope.Less
 ): FractionComparisonGeneratorConfig => ({
-    comparisonKind: Area.NumericComparison,
+    comparisonMode: strategy,
+    usesLogicalInference: true,
     usesProcedureUnderstanding: false,
     usesReferenceComparison: false,
     usesCommonDenominator: comparisonFamily === Scope.CommonDenominator,
     usesCommonNumerator: comparisonFamily === Scope.CommonNumerator,
-    usesNumeratorInterpretation: interpretation === Area.FractionNumeratorInterpretation,
-    usesDenominatorInterpretation: interpretation === Area.FractionDenominatorInterpretation,
     relation
 });
 
 const grade4Config = (
     relation: Scope.Greater | Scope.Equal | Scope.Less
 ): FractionComparisonGeneratorConfig => ({
-    comparisonKind: relation === Scope.Equal ? Area.NumericEquality : Area.NumericInequality,
+    comparisonMode: relation === Scope.Equal ? Area.NumericEquality : Area.NumericInequality,
+    usesLogicalInference: false,
     usesProcedureUnderstanding: true,
     usesReferenceComparison: true,
     usesCommonDenominator: false,
     usesCommonNumerator: false,
-    usesNumeratorInterpretation: false,
-    usesDenominatorInterpretation: false,
     relation
 });
 
@@ -157,26 +155,26 @@ describe('FractionComparisonGenerator', () => {
     it('strictly validates required and cross-family configuration', () => {
         expect(() => generator.generate({} as never)).toThrow();
         expect(() => generator.generate(config(
-            Scope.CommonDenominator,
-            Area.FractionDenominatorInterpretation,
-            Scope.Greater
-        ))).toThrow('CommonDenominator requires');
-        expect(() => generator.generate(config(
+            Area.FractionCommonDenominatorComparison,
             Scope.CommonNumerator,
-            Area.FractionNumeratorInterpretation,
-            Scope.Less
-        ))).toThrow('CommonDenominator requires');
+            Scope.Greater
+        ))).toThrow('matching fraction comparison strategy');
+        expect(() => generator.generate(config(
+            Area.FractionCommonNumeratorComparison,
+            Scope.CommonDenominator,
+            Scope.Greater
+        ))).toThrow('matching fraction comparison strategy');
         expect(() => generator.generate({
             ...config(
+                Area.FractionCommonDenominatorComparison,
                 Scope.CommonDenominator,
-                Area.FractionNumeratorInterpretation,
                 Scope.Greater
             ),
             relation: 'unsupported'
         } as unknown as FractionComparisonGeneratorConfig)).toThrow('Greater, Equal, or Less');
         expect(() => generator.generate({
             ...grade4Config(Scope.Equal),
-            comparisonKind: Area.NumericInequality
+            comparisonMode: Area.NumericInequality
         })).toThrow('Fraction reference comparison requires');
         expect(() => generator.generate({
             ...grade4Config(Scope.Greater),
@@ -184,12 +182,12 @@ describe('FractionComparisonGenerator', () => {
         })).toThrow('without a common-component family');
         expect(() => generator.generate({
             ...config(
+                Area.FractionCommonDenominatorComparison,
                 Scope.CommonDenominator,
-                Area.FractionNumeratorInterpretation,
                 Scope.Greater
             ),
-            comparisonKind: Area.NumericInequality
-        })).toThrow('Legacy common-component comparison requires');
+            comparisonMode: Area.NumericInequality
+        })).toThrow('matching fraction comparison strategy');
     });
 
     it.each([Scope.Greater, Scope.Equal, Scope.Less] as const)(
@@ -210,7 +208,7 @@ describe('FractionComparisonGenerator', () => {
     );
 
     it.each([
-        [101, Scope.CommonDenominator, Area.FractionNumeratorInterpretation, Scope.Greater, {
+        [101, Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Greater, {
             first: {numerator: 2, denominator: 3, notation: '2/3'},
             second: {numerator: 1, denominator: 3, notation: '1/3'},
             family: 'common-denominator',
@@ -220,7 +218,7 @@ describe('FractionComparisonGenerator', () => {
             answer: '2/3 > 1/3',
             rationale: 'Both 2/3 and 1/3 refer to the same whole and share denominator 3; comparing numerators 2 and 1 shows 2/3 is greater than 1/3.'
         }],
-        [102, Scope.CommonDenominator, Area.FractionNumeratorInterpretation, Scope.Less, {
+        [102, Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Less, {
             first: {numerator: 3, denominator: 6, notation: '3/6'},
             second: {numerator: 5, denominator: 6, notation: '5/6'},
             family: 'common-denominator',
@@ -230,7 +228,7 @@ describe('FractionComparisonGenerator', () => {
             answer: '3/6 < 5/6',
             rationale: 'Both 3/6 and 5/6 refer to the same whole and share denominator 6; comparing numerators 3 and 5 shows 3/6 is less than 5/6.'
         }],
-        [103, Scope.CommonNumerator, Area.FractionDenominatorInterpretation, Scope.Greater, {
+        [103, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Greater, {
             first: {numerator: 1, denominator: 3, notation: '1/3'},
             second: {numerator: 1, denominator: 8, notation: '1/8'},
             family: 'common-numerator',
@@ -240,7 +238,7 @@ describe('FractionComparisonGenerator', () => {
             answer: '1/3 > 1/8',
             rationale: 'Both 1/3 and 1/8 refer to the same whole and share numerator 1; denominator 3 makes larger parts than denominator 8, so 1/3 is greater than 1/8.'
         }],
-        [104, Scope.CommonNumerator, Area.FractionDenominatorInterpretation, Scope.Less, {
+        [104, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Less, {
             first: {numerator: 4, denominator: 8, notation: '4/8'},
             second: {numerator: 4, denominator: 6, notation: '4/6'},
             family: 'common-numerator',
@@ -252,13 +250,13 @@ describe('FractionComparisonGenerator', () => {
         }]
     ] as const)('preserves the legacy seed %s payload and random path', (
         seed,
+        strategy,
         family,
-        interpretation,
         relation,
         expected
     ) => {
         setSeed(seed);
-        const problem = generator.generate(config(family, interpretation, relation)).data;
+        const problem = generator.generate(config(strategy, family, relation)).data;
         expect(problem).toEqual({
             task: 'compare-fractions',
             ...expected,
@@ -267,19 +265,19 @@ describe('FractionComparisonGenerator', () => {
     });
 
     it.each([
-        [Scope.CommonDenominator, Area.FractionNumeratorInterpretation, Scope.Greater],
-        [Scope.CommonDenominator, Area.FractionNumeratorInterpretation, Scope.Less],
-        [Scope.CommonNumerator, Area.FractionDenominatorInterpretation, Scope.Greater],
-        [Scope.CommonNumerator, Area.FractionDenominatorInterpretation, Scope.Less]
+        [Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Greater],
+        [Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Less],
+        [Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Greater],
+        [Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Less]
     ] as const)('generates coherent %s / %s / %s comparisons', (
+        strategy,
         comparisonFamily,
-        interpretation,
         relation
     ) => {
         const observed = new Set<string>();
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const problem = generator.generate(config(comparisonFamily, interpretation, relation)).data;
+            const problem = generator.generate(config(strategy, comparisonFamily, relation)).data;
             if (problem.task !== 'compare-fractions') throw new Error('Expected legacy comparison.');
             expectCoherentProblem(problem);
             observed.add(problem.answer);
@@ -299,8 +297,8 @@ describe('FractionComparisonGenerator', () => {
 
     it('is deterministic for the same repository seed', () => {
         const generatorConfig = config(
+            Area.FractionCommonNumeratorComparison,
             Scope.CommonNumerator,
-            Area.FractionDenominatorInterpretation,
             Scope.Less
         );
         setSeed('fraction-comparison');
