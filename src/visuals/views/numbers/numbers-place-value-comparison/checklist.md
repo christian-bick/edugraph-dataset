@@ -1,0 +1,2 @@
+- **Identity:** Two numerals from 10 through 100 are decomposed into tens and ones, with 100 shown as 10 tens and 0 ones and the deciding place visually emphasized.
+- **Modes:** Question Mode leaves the comparison symbol blank; Solution Mode reveals the symbol and identifies how the deciding place determines the comparison.

@@ -37,7 +37,25 @@ const gradeFourBuilder = new DatasetPermutationBuilder()
         [Scope.Greater]
     ]);
 
+const gradeOnePlaceValueBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PlaceValue,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersLarger10,
+        Scope.NumbersSmaller100,
+        Ability.ProcedureUnderstanding
+    ])
+    .applyLabelVariants([
+        [Area.NumericInequality, Scope.Less],
+        [Area.NumericEquality, Scope.Equal],
+        [Area.NumericInequality, Scope.Greater]
+    ]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-comparison', builder),
-    ...toTargets('test-comparison-grade-four', gradeFourBuilder)
+    ...toTargets('test-comparison-grade-four', gradeFourBuilder),
+    ...toTargets('test-place-value-comparison-grade-one', gradeOnePlaceValueBuilder)
 ];

@@ -2737,6 +2737,7 @@ export interface ViewTypeMap {
     'numbers-compare': ComparisonProblem;
     'numbers-compare-matching': ComparisonProblem;
     'numbers-compare-counting': ComparisonProblem;
+    'numbers-place-value-comparison': ComparisonProblem;
 
     'numbers-order': OrderingProblem;
     'numbers-write-stroke': WritingProblem;

@@ -291,14 +291,10 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureUnderstanding
     ]);
 
-const placeValueComparisonImplementation = defineImplementationPackage({
-    id: 'grade1-place-value-comparison',
-    description: 'Add a tens-and-ones comparison presentation for two-digit numbers.',
-    generators: [{ module: 'comparison', strategy: 'reuse' }],
-    views: [{ module: 'numbers-place-value-comparison', strategy: 'new' }]
-});
-
 // --- 1.NBT.B.3: Compare two two-digit numbers by tens and ones ---
+// The ontology range boundaries are inclusive, so this target admits 10 through 100.
+// We intentionally accept 100 as a practical approximation of the standard's arbitrary
+// two-digit cutoff; the view represents it coherently as 10 tens and 0 ones.
 const placeValueComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.PlaceValue,
@@ -714,6 +710,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder),
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
+    ...toTargets('1.NBT.B.3-place-value-comparison', placeValueComparisonBuilder),
     ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder),
     // 1.MD - Measurement and Data
     ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder),
@@ -736,12 +733,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '1.NBT.B.3-place-value-comparison',
-        placeValueComparisonBuilder,
-        placeValueComparisonImplementation,
-        'Decompose both two-digit numerals into tens and ones before determining the comparison symbol.'
-    ),
     ...toImplementationTodos(
         '1.NBT.C.4-concrete-place-value-addition',
         concretePlaceValueAdditionBuilder,
