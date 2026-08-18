@@ -21,7 +21,7 @@ const largerToSmallerBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants(unitPairs);
 
 const conversionTableBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringWithUnits, Ability.Formalization])
+    .addLabels([Area.MeasuringWithUnits, Scope.ConversionTable, Ability.Formalization])
     .applyLabelVariants(unitPairs);
 
 export const spec: CompetencyTarget[] = [

@@ -82,8 +82,12 @@ export function resolveArithmeticPatternTask(labels: string[]): ArithmeticPatter
         Area.AssociativeLaw,
         Area.DistributiveLaw
     ].some(law => labels.includes(law));
+    const generatesPattern = labels.includes(Area.PatternGeneration);
+    const recognizesEmergentFeature = labels.includes(Area.EmergentFeatureRecognition);
     const classifies = labels.includes(Ability.ConceptClassification);
     const executes = labels.includes(Ability.ProcedureExecution);
+    if (recognizesEmergentFeature) return hasLaw ? 'explain-feature' : 'identify-feature';
+    if (generatesPattern) return 'generate';
     if (hasLaw) return executes ? 'explain-feature' : 'legacy-explain';
     if (classifies && executes) return 'identify-feature';
     if (executes) return 'generate';

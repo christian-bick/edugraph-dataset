@@ -3,19 +3,20 @@ import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutatio
 import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const generateShapePattern = new DatasetPermutationBuilder().addLabels([
-    Area.PatternRecognition,
+    Area.PatternGeneration,
     Scope.VisualGeometry,
     Ability.VisualArticulation
 ]);
 
 const identifyShapePatternFeature = new DatasetPermutationBuilder().addLabels([
-    Area.PatternRecognition,
+    Area.EmergentFeatureRecognition,
     Scope.VisualGeometry,
     Ability.ConceptClassification
 ]);
 
 const explainShapePatternFeature = new DatasetPermutationBuilder().addLabels([
-    Area.PatternRecognition,
+    Area.PatternGeneration,
+    Area.EmergentFeatureRecognition,
     Scope.VisualGeometry,
     Ability.ProcedureUnderstanding,
     Ability.TextualArticulation

@@ -27,7 +27,7 @@ const resolveOperandDigitProfile: ResolverFn<OperandDigitProfile | undefined> = 
 export const spec: GeneratorSpec = {
     generatorId: 'multi-digit-multiplication',
     generalLabels: [
-        Area.Multiplication,
+        Area.MultiplicationPartialProducts,
         Scope.TwoOperands,
         Scope.IntegerNumbers,
         Scope.Base10,

@@ -1,4 +1,8 @@
-import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {
+    defineImplementationPackage,
+    toImplementationTodos,
+    toTargets
+} from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -109,12 +113,12 @@ const compositeClassificationBuilder = new DatasetPermutationBuilder().addLabels
 ]);
 
 const generateNumberPatternBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.PatternRecognition, Scope.ArabicNumerals, Scope.Base10, Ability.ProcedureExecution])
+    .addLabels([Area.PatternGeneration, Scope.ArabicNumerals, Scope.Base10, Ability.ProcedureExecution])
     .applyLabelVariants([[Area.Addition], [Area.Multiplication]]);
 
 const identifyGeneratedNumberPatternFeatureBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PatternRecognition,
+        Area.EmergentFeatureRecognition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ProcedureExecution,
@@ -124,7 +128,8 @@ const identifyGeneratedNumberPatternFeatureBuilder = new DatasetPermutationBuild
 
 const explainGeneratedNumberPatternFeatureBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PatternRecognition,
+        Area.PatternGeneration,
+        Area.EmergentFeatureRecognition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ProcedureExecution,
@@ -140,19 +145,20 @@ const explainGeneratedNumberPatternFeatureBuilder = new DatasetPermutationBuilde
     ]);
 
 const generateShapePatternBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.PatternRecognition,
+    Area.PatternGeneration,
     Scope.VisualGeometry,
     Ability.VisualArticulation
 ]);
 
 const identifyShapePatternFeatureBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.PatternRecognition,
+    Area.EmergentFeatureRecognition,
     Scope.VisualGeometry,
     Ability.ConceptClassification
 ]);
 
 const explainShapePatternFeatureBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.PatternRecognition,
+    Area.PatternGeneration,
+    Area.EmergentFeatureRecognition,
     Scope.VisualGeometry,
     Ability.ProcedureUnderstanding,
     Ability.TextualArticulation
@@ -239,11 +245,21 @@ const standardAlgorithmAddSubtractBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
+    .applyLabelVariants([
+        [Area.AdditionStandardAlgorithm],
+        [Area.SubtractionStandardAlgorithm]
+    ]);
+
+const standardAlgorithmImplementation = defineImplementationPackage({
+    id: 'integer-standard-algorithm-add-subtract',
+    description: 'Expose the aligned place-value steps and regrouping records of the standard addition and subtraction algorithms.',
+    generators: [{module: 'standard-algorithm-add-subtract', strategy: 'new'}],
+    views: [{module: 'operations-standard-algorithm', strategy: 'new'}]
+});
 
 const grade4MultiDigitMultiplicationBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Multiplication,
+        Area.MultiplicationPartialProducts,
         Scope.TwoOperands,
         Scope.IntegerNumbers,
         Scope.ArabicNumerals,
@@ -263,7 +279,7 @@ const grade4MultiDigitMultiplicationBuilder = new DatasetPermutationBuilder()
 
 const grade4MultiDigitDivisionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Division,
+        Area.DivisionPartialQuotients,
         Area.Modulo,
         Scope.TwoOperands,
         Scope.IntegerNumbers,
@@ -305,7 +321,7 @@ const convertLargerToSmallerUnitsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants(measurementUnitPairs);
 
 const twoColumnConversionTableBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringWithUnits, Ability.Formalization])
+    .addLabels([Area.MeasuringWithUnits, Scope.ConversionTable, Ability.Formalization])
     .applyLabelVariants(measurementUnitPairs);
 
 const measurementKinds = [
@@ -526,6 +542,7 @@ const equivalentFractionScalingBuilder = new DatasetPermutationBuilder()
 
 const unlikeFractionComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.FractionReferenceComparison,
         Area.FractionNotation,
         Scope.FractionNumbers,
         Scope.SingleFrameOfReference,
@@ -723,7 +740,6 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NBT.A.2-expanded-form', writeExpandedFormBuilder),
     ...toTargets('4.NBT.A.2-compare-multi-digit-numbers', compareMultiDigitNumbersBuilder),
     ...toTargets('4.NBT.A.3-round-to-any-place', grade4IntegerRoundingBuilder),
-    ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder),
     ...toTargets('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder),
     ...toTargets('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder),
     ...toTargets('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder),
@@ -767,7 +783,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NF.C.7-compare-decimals', compareDecimalsBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [];
+export const implementationTodos: ImplementationTodo[] = [
+    ...toImplementationTodos(
+        '4.NBT.B.4-standard-algorithm-add-subtract',
+        standardAlgorithmAddSubtractBuilder,
+        standardAlgorithmImplementation,
+        'The current equation-only views do not expose aligned algorithm steps or regrouping records.'
+    )
+];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

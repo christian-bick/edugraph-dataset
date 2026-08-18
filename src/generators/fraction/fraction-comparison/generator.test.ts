@@ -41,6 +41,7 @@ const config = (
 ): FractionComparisonGeneratorConfig => ({
     comparisonKind: Area.NumericComparison,
     usesProcedureUnderstanding: false,
+    usesReferenceComparison: false,
     usesCommonDenominator: comparisonFamily === Scope.CommonDenominator,
     usesCommonNumerator: comparisonFamily === Scope.CommonNumerator,
     usesNumeratorInterpretation: interpretation === Area.FractionNumeratorInterpretation,
@@ -53,6 +54,7 @@ const grade4Config = (
 ): FractionComparisonGeneratorConfig => ({
     comparisonKind: relation === Scope.Equal ? Area.NumericEquality : Area.NumericInequality,
     usesProcedureUnderstanding: true,
+    usesReferenceComparison: true,
     usesCommonDenominator: false,
     usesCommonNumerator: false,
     usesNumeratorInterpretation: false,
@@ -175,7 +177,7 @@ describe('FractionComparisonGenerator', () => {
         expect(() => generator.generate({
             ...grade4Config(Scope.Equal),
             comparisonKind: Area.NumericInequality
-        })).toThrow('Grade 4 benchmark comparison requires');
+        })).toThrow('Fraction reference comparison requires');
         expect(() => generator.generate({
             ...grade4Config(Scope.Greater),
             usesCommonDenominator: true

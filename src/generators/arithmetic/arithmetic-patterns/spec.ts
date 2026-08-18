@@ -7,7 +7,6 @@ import {resolveArithmeticPatternTask, resolveExplicitOperation} from '../helpers
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-patterns',
     generalLabels: [
-        Area.PatternRecognition,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives
@@ -16,7 +15,11 @@ export const spec: GeneratorSpec = {
 
 export const ArithmeticPatternsGeneratorSchema = {
     task: [
-        [Ability.ProcedureExecution],
+        [
+            Area.PatternGeneration,
+            Area.EmergentFeatureRecognition,
+            Ability.ProcedureExecution
+        ],
         resolveArithmeticPatternTask
     ],
     operation: [[Area.Addition, Area.Multiplication], resolveExplicitOperation],

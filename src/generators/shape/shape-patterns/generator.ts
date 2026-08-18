@@ -86,21 +86,27 @@ function createFeatureOptions(content: PatternContent): [string, string, string]
 
 function resolveTask(config: ShapePatternsGeneratorConfig): ShapePatternProblem['task'] | null {
     if (
-        config.articulateVisually
+        config.generatesPattern
+        && !config.recognizesEmergentFeature
+        && config.articulateVisually
         && !config.classifyFeature
         && !config.understandProcedure
         && !config.articulateTextually
     ) return 'generate';
 
     if (
-        !config.articulateVisually
+        !config.generatesPattern
+        && config.recognizesEmergentFeature
+        && !config.articulateVisually
         && config.classifyFeature
         && !config.understandProcedure
         && !config.articulateTextually
     ) return 'identify';
 
     if (
-        !config.articulateVisually
+        config.generatesPattern
+        && config.recognizesEmergentFeature
+        && !config.articulateVisually
         && !config.classifyFeature
         && config.understandProcedure
         && config.articulateTextually
@@ -118,12 +124,16 @@ export class ShapePatternsGenerator implements ProblemGenerator<
 
     generate(config: ShapePatternsGeneratorConfig): ProblemStub<ShapePatternProblem> | null {
         validateConfigFields(GENERATOR_ID, config, [
+            'generatesPattern',
+            'recognizesEmergentFeature',
             'articulateVisually',
             'classifyFeature',
             'understandProcedure',
             'articulateTextually'
         ]);
         if ([
+            config.generatesPattern,
+            config.recognizesEmergentFeature,
             config.articulateVisually,
             config.classifyFeature,
             config.understandProcedure,

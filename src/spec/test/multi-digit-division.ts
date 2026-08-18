@@ -4,7 +4,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const multiDigitDivisionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Division,
+        Area.DivisionPartialQuotients,
         Area.Modulo,
         Scope.TwoOperands,
         Scope.IntegerNumbers,

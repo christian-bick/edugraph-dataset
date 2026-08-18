@@ -17,7 +17,7 @@ describe('MultiDigitDivisionGenerator spec integration', () => {
 
     it('declares the truthful imperfect partial-quotient procedure', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([
-            Area.Division,
+            Area.DivisionPartialQuotients,
             Area.Modulo,
             Area.ImperfectDivisibility,
             Area.Multiplication,
@@ -33,7 +33,7 @@ describe('MultiDigitDivisionGenerator spec integration', () => {
     it.each(profiles)('resolves %s exactly', (dividendLabel, dividendDigits) => {
         setSeed(dividendLabel);
         const stub = generateWithLabels(generator, [
-            Area.Division,
+            Area.DivisionPartialQuotients,
             Area.Modulo,
             Scope.TwoOperands,
             Scope.IntegerNumbers,

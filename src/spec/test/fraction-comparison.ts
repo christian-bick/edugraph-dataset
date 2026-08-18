@@ -36,6 +36,7 @@ const commonNumeratorBuilder = new DatasetPermutationBuilder()
 
 const grade4UnlikeFractionComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.FractionReferenceComparison,
         Area.FractionNotation,
         Scope.FractionNumbers,
         Scope.SingleFrameOfReference,

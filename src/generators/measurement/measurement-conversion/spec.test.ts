@@ -18,7 +18,7 @@ const unitPairCases = [
 const taskCases = [
     [[Area.UnitScaleRelation, Ability.ConceptDerivation], 'relative-unit-size'],
     [[Ability.ProcedureExecution], 'convert-larger-to-smaller'],
-    [[Ability.Formalization], 'conversion-table']
+    [[Scope.ConversionTable], 'conversion-table']
 ] as const;
 
 describe('MeasurementConversionGenerator spec integration', () => {
@@ -42,7 +42,7 @@ describe('MeasurementConversionGenerator spec integration', () => {
             if (task === 'relative-unit-size') {
                 expect(stub!.tags).toContain(Area.UnitScaleRelation);
             } else if (task === 'conversion-table') {
-                expect(stub!.tags).toContain(Ability.Formalization);
+                expect(stub!.tags).toContain(Scope.ConversionTable);
             }
             for (const ability of [Ability.ConceptDerivation, Ability.ProcedureExecution]) {
                 expect(stub!.tags).not.toContain(ability);

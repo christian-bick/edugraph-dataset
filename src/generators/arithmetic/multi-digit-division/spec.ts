@@ -16,7 +16,7 @@ const resolveDividendDigits: ResolverFn<1 | 2 | 3 | 4 | undefined> = labels => {
 export const spec: GeneratorSpec = {
     generatorId: 'multi-digit-division',
     generalLabels: [
-        Area.Division,
+        Area.DivisionPartialQuotients,
         Area.Modulo,
         Area.ImperfectDivisibility,
         Area.Multiplication,

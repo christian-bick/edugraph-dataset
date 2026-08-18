@@ -4,7 +4,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const generate = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PatternRecognition,
+        Area.PatternGeneration,
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ProcedureExecution
@@ -13,7 +13,7 @@ const generate = new DatasetPermutationBuilder()
 
 const identify = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PatternRecognition,
+        Area.EmergentFeatureRecognition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ProcedureExecution,
@@ -23,7 +23,8 @@ const identify = new DatasetPermutationBuilder()
 
 const explain = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PatternRecognition,
+        Area.PatternGeneration,
+        Area.EmergentFeatureRecognition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ProcedureExecution,

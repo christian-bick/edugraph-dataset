@@ -18,7 +18,7 @@ describe('MultiDigitMultiplicationGenerator spec integration', () => {
 
     it('declares the invariant two-positive-integer multiplication structure', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([
-            Area.Multiplication,
+            Area.MultiplicationPartialProducts,
             Scope.TwoOperands,
             Scope.IntegerNumbers,
             Scope.Base10,
@@ -35,7 +35,7 @@ describe('MultiDigitMultiplicationGenerator spec integration', () => {
     ) => {
         setSeed(`${smallestLabel}-${largestLabel}`);
         const stub = generateWithLabels(generator, [
-            Area.Multiplication,
+            Area.MultiplicationPartialProducts,
             Scope.IntegerNumbers,
             Scope.ArabicNumerals,
             Scope.Base10,

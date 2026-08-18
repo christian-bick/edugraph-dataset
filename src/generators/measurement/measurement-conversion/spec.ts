@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
 import {
@@ -16,7 +16,7 @@ export type MeasurementConversionUnitPairConfig =
 
 const resolveTask: ResolverFn<MeasurementConversionTask> = labels => {
     if (labels.includes(Area.UnitScaleRelation)) return 'relative-unit-size';
-    if (labels.includes(Ability.Formalization)) return 'conversion-table';
+    if (labels.includes(Scope.ConversionTable)) return 'conversion-table';
     return 'convert-larger-to-smaller';
 };
 
@@ -63,7 +63,7 @@ export const spec: GeneratorSpec = {
 
 export const MeasurementConversionGeneratorSchema = {
     task: [
-        [Area.UnitScaleRelation, Ability.Formalization],
+        [Area.UnitScaleRelation, Scope.ConversionTable],
         resolveTask
     ],
     unitPair: [

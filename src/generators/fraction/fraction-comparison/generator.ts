@@ -143,6 +143,7 @@ export class FractionComparisonGenerator implements ProblemGenerator<
         validateConfigFields('fraction-comparison', config, [
             'comparisonKind',
             'usesProcedureUnderstanding',
+            'usesReferenceComparison',
             'usesCommonDenominator',
             'usesCommonNumerator',
             'usesNumeratorInterpretation',
@@ -153,6 +154,7 @@ export class FractionComparisonGenerator implements ProblemGenerator<
         const comparisonKind = config.comparisonKind!;
         const relationLabel = config.relation!;
         const usesProcedureUnderstanding = config.usesProcedureUnderstanding === true;
+        const usesReferenceComparison = config.usesReferenceComparison === true;
         const relation = relationLabel === Scope.Greater
             ? 'greater' as const
             : relationLabel === Scope.Less
@@ -168,7 +170,7 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             );
         }
 
-        if (usesProcedureUnderstanding) {
+        if (usesReferenceComparison) {
             const kindMatchesRelation = relation === 'equal'
                 ? comparisonKind === Area.NumericEquality
                 : comparisonKind === Area.NumericInequality;
@@ -179,10 +181,17 @@ export class FractionComparisonGenerator implements ProblemGenerator<
                 || config.usesDenominatorInterpretation) {
                 throw new GeneratorValidationError(
                     'fraction-comparison',
-                    'Grade 4 benchmark comparison requires NumericEquality with Equal or NumericInequality with Greater/Less, without a common-component family.'
+                    'Fraction reference comparison requires NumericEquality with Equal or NumericInequality with Greater/Less, without a common-component family.'
                 );
             }
             return {data: generateUnlikeComparison(relation)};
+        }
+
+        if (usesProcedureUnderstanding) {
+            throw new GeneratorValidationError(
+                'fraction-comparison',
+                'ProcedureUnderstanding alone does not select a fraction comparison strategy.'
+            );
         }
 
         const usesCommonDenominator = config.usesCommonDenominator === true

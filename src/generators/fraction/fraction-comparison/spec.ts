@@ -39,6 +39,9 @@ export const FractionComparisonGeneratorSchema = {
     usesProcedureUnderstanding: [[
         Ability.ProcedureUnderstanding
     ], hasLabel(Ability.ProcedureUnderstanding)],
+    usesReferenceComparison: [[
+        Area.FractionReferenceComparison
+    ], hasLabel(Area.FractionReferenceComparison)],
     usesCommonDenominator: [[Scope.CommonDenominator], hasLabel(Scope.CommonDenominator)],
     usesCommonNumerator: [[Scope.CommonNumerator], hasLabel(Scope.CommonNumerator)],
     usesNumeratorInterpretation: [[

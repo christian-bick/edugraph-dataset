@@ -73,9 +73,9 @@ describe('FractionComparisonGenerator spec integration', () => {
     });
 
     it.each([
-        [Area.NumericInequality, Scope.Greater, '8a106aab'],
-        [Area.NumericEquality, Scope.Equal, 'e05e575c'],
-        [Area.NumericInequality, Scope.Less, '85a09810']
+        [Area.NumericInequality, Scope.Greater, 'f401dab7'],
+        [Area.NumericEquality, Scope.Equal, '386d3640'],
+        [Area.NumericInequality, Scope.Less, '8481a534']
     ] as const)('resolves the corrected Grade 4 %s / %s target', (
         comparisonKind,
         relation,
@@ -83,6 +83,7 @@ describe('FractionComparisonGenerator spec integration', () => {
     ) => {
         const labels = [
             comparisonKind,
+            Area.FractionReferenceComparison,
             Area.FractionNotation,
             Scope.FractionNumbers,
             Scope.SingleFrameOfReference,
@@ -116,6 +117,7 @@ describe('FractionComparisonGenerator spec integration', () => {
         const direct = generator.generate({
             comparisonKind: Area.NumericComparison,
             usesProcedureUnderstanding: false,
+            usesReferenceComparison: false,
             usesCommonDenominator: true,
             usesCommonNumerator: false,
             usesNumeratorInterpretation: true,

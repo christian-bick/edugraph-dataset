@@ -10,18 +10,18 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
 
     it('declares the invariant integer pattern capabilities', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([
-            Area.PatternRecognition,
             Scope.IntegerNumbers,
             Scope.Base10,
             Scope.NumbersWithoutNegatives
         ]));
+        expect(spec.generalLabels).not.toContain(Area.PatternRecognition);
     });
 
     it.each([
         [Area.Addition, 'generate'],
         [Area.Multiplication, 'generate']
-    ] as const)('resolves %s procedure execution into generation', (operation, task) => {
-        const labels = [operation, Ability.ProcedureExecution];
+    ] as const)('resolves %s pattern generation', (operation, task) => {
+        const labels = [operation, Area.PatternGeneration, Ability.ProcedureExecution];
         setSeed(17);
         const stub = generateWithLabels(generator, labels)!;
 
@@ -48,6 +48,7 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         (operation, task) => {
             const labels = [
                 operation,
+                Area.EmergentFeatureRecognition,
                 Ability.ProcedureExecution,
                 Ability.ConceptClassification
             ];
@@ -98,6 +99,8 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         const labels = [
             operation,
             law,
+            Area.PatternGeneration,
+            Area.EmergentFeatureRecognition,
             Ability.ProcedureExecution,
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation

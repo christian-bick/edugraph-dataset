@@ -9,18 +9,24 @@ const generator = new ShapePatternsGenerator();
 
 const configs = {
     generate: {
+        generatesPattern: true,
+        recognizesEmergentFeature: false,
         articulateVisually: true,
         classifyFeature: false,
         understandProcedure: false,
         articulateTextually: false
     },
     identify: {
+        generatesPattern: false,
+        recognizesEmergentFeature: true,
         articulateVisually: false,
         classifyFeature: true,
         understandProcedure: false,
         articulateTextually: false
     },
     explain: {
+        generatesPattern: true,
+        recognizesEmergentFeature: true,
         articulateVisually: false,
         classifyFeature: false,
         understandProcedure: true,
@@ -124,24 +130,32 @@ describe('ShapePatternsGenerator', () => {
 
     it('rejects incomplete and conflicting task combinations', () => {
         expect(generator.generate({
+            generatesPattern: false,
+            recognizesEmergentFeature: true,
             articulateVisually: false,
             classifyFeature: false,
             understandProcedure: true,
             articulateTextually: false
         })).toBeNull();
         expect(generator.generate({
+            generatesPattern: true,
+            recognizesEmergentFeature: true,
             articulateVisually: true,
             classifyFeature: true,
             understandProcedure: false,
             articulateTextually: false
         })).toBeNull();
         expect(generator.generate({
+            generatesPattern: false,
+            recognizesEmergentFeature: false,
             articulateVisually: false,
             classifyFeature: false,
             understandProcedure: false,
             articulateTextually: false
         })).toBeNull();
         expect(generator.generate({
+            generatesPattern: true,
+            recognizesEmergentFeature: false,
             articulateVisually: 'true' as unknown as boolean,
             classifyFeature: false,
             understandProcedure: false,

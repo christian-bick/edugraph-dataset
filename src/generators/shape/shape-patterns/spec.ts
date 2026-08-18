@@ -6,12 +6,19 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'shape-patterns',
     generalLabels: [
-        Area.PatternRecognition,
         Scope.VisualGeometry
     ]
 };
 
 export const ShapePatternsGeneratorSchema = {
+    generatesPattern: [
+        [Area.PatternGeneration],
+        hasLabel(Area.PatternGeneration)
+    ],
+    recognizesEmergentFeature: [
+        [Area.EmergentFeatureRecognition],
+        hasLabel(Area.EmergentFeatureRecognition)
+    ],
     articulateVisually: [
         [Ability.VisualArticulation],
         hasLabel(Ability.VisualArticulation)
