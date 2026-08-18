@@ -50,7 +50,7 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
             };
         }
 
-        if (config.notationFamily === Area.NumberNotation) {
+        if (config.notationFamily === Area.NumberNameNotation) {
             return {
                 data: {
                     task: 'multi-digit-number-name',

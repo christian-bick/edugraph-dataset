@@ -76,7 +76,7 @@ describe('WritingGenerator', () => {
     it('supplies canonical Grade 4 number-name data without changing legacy payloads', () => {
         setSeed(81);
         const data = generator.generate({
-            notationFamily: Area.NumberNotation,
+            notationFamily: Area.NumberNameNotation,
             range: {min: 1001, max: 999_999},
             requireZero: false
         })!.data;

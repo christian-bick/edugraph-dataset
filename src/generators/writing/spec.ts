@@ -16,7 +16,7 @@ export const spec: GeneratorSpec = {
 
 export const WritingGeneratorSchema = {
     notationFamily: [
-        [Area.DigitNotation, Area.NumerationWithIntegers, Area.NumberNotation],
+        [Area.DigitNotation, Area.NumerationWithIntegers, Area.NumberNameNotation],
         selectExactMatch
     ],
     requireZero: [

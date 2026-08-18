@@ -169,7 +169,7 @@ const baseTenNumeralsBuilder = new DatasetPermutationBuilder()
 // --- 2.NBT.A.3: Write number names ---
 const numberNamesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumberNotation,
+        Area.NumberNameNotation,
         Scope.Base10,
         Scope.NumbersSmaller1000,
         Ability.TextualArticulation
@@ -273,7 +273,6 @@ const writtenAddSubtractBuilder = new DatasetPermutationBuilder()
 // --- 2.NBT.B.7: Concrete place-value regrouping ---
 const concreteRegroupingBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PlaceValue,
         Area.IntegerRegrouping,
         Scope.PhysicalNumbers,
         Scope.TwoOperands,
@@ -281,14 +280,13 @@ const concreteRegroupingBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([
-        [Area.Addition],
-        [Area.Subtraction]
+        [Area.AdditionPlaceValuePartitioning],
+        [Area.SubtractionPlaceValuePartitioning]
     ]);
 
 // --- 2.NBT.B.7: Relate a concrete model to a written method ---
 const modelToWrittenMethodBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PlaceValue,
         Area.IntegerRegrouping,
         Scope.PhysicalNumbers,
         Scope.TwoOperands,
@@ -297,8 +295,8 @@ const modelToWrittenMethodBuilder = new DatasetPermutationBuilder()
         Ability.Formalization
     ])
     .applyLabelVariants([
-        [Area.Addition],
-        [Area.Subtraction]
+        [Area.AdditionPlaceValuePartitioning],
+        [Area.SubtractionPlaceValuePartitioning]
     ]);
 
 // --- 2.NBT.B.8: Ten or one hundred more or less ---
@@ -322,15 +320,14 @@ const placeValueOffsetsBuilder = new DatasetPermutationBuilder()
 // --- 2.NBT.B.9: Explain addition and subtraction strategies ---
 const explainStrategiesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.PlaceValue,
         Scope.TwoOperands,
         Scope.NumbersSmaller1000,
         Ability.TextualArticulation,
         Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([
-        [Area.Addition],
-        [Area.Subtraction]
+        [Area.AdditionPlaceValuePartitioning],
+        [Area.SubtractionPlaceValuePartitioning]
     ]);
 
 // ==========================================
@@ -698,4 +695,7 @@ export const beyondScope: BeyondScopeEntry[] = [{
 export const equivalentTargets: TargetEquivalence[] = [{
     targets: ['1.OA.D.8-unknown-number', '2.OA.B.2-fluency'],
     reason: 'The Grade 1 missing-result slice and the visible Grade 2 computation slice both require direct procedure execution within 20; ProcedureInversion continues to distinguish missing-operand tasks.'
+}, {
+    targets: ['2.NBT.B.7-concrete-regrouping', '3.NBT.A.2-place-value-partitioning'],
+    reason: 'The visible concrete place-value partitioning slice is the same competency in both standards: decompose an addition or subtraction by place value, including required regrouping, and explain the represented procedure.'
 }];

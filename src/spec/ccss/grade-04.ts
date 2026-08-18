@@ -185,7 +185,7 @@ const readWriteBaseTenNumeralsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([[Ability.TextualReception], [Ability.VisualArticulation]]);
 
 const writeNumberNamesBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.NumberNotation,
+    Area.NumberNameNotation,
     Scope.Base10,
     Scope.NumbersLarger1000,
     Scope.NumbersSmaller1000000,

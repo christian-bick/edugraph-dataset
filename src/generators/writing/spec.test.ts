@@ -68,7 +68,7 @@ describe('WritingGenerator Spec Integration', () => {
 
     it.each([
         [Area.DigitNotation, 'multi-digit-base-ten-numeral'],
-        [Area.NumberNotation, 'multi-digit-number-name']
+        [Area.NumberNameNotation, 'multi-digit-number-name']
     ] as const)('resolves Grade 4 %s through one million', (notationFamily, task) => {
         setSeed(404);
         const stub = generateWithLabels(generator, [

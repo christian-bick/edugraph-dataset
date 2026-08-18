@@ -49,7 +49,7 @@ const gradeTwoNumeralBuilder = new DatasetPermutationBuilder()
 
 const numberNameBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumberNotation,
+        Area.NumberNameNotation,
         Scope.Base10,
         Scope.NumbersSmaller1000,
         Ability.TextualArticulation
@@ -70,7 +70,7 @@ const gradeFourNumeralBuilder = new DatasetPermutationBuilder()
 
 const gradeFourNumberNameBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumberNotation,
+        Area.NumberNameNotation,
         Scope.Base10,
         Scope.NumbersLarger1000,
         Scope.NumbersSmaller1000000,
