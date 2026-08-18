@@ -53,7 +53,7 @@ const interpretFractionBuilder = new DatasetPermutationBuilder()
         Area.FractionNotation,
         Area.ProportionSense,
         Scope.EqualShares,
-        Ability.ConceptDerivation
+        Ability.Interpretation
     ])
     .applyLabelVariants([[Scope.UnitFractions], [Scope.NonUnitFractions]])
     .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);

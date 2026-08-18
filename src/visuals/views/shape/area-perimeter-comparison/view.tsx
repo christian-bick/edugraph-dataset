@@ -1,4 +1,5 @@
 import {createRoot} from 'react-dom/client';
+import {Ability} from 'edugraph-ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {AreaPerimeterRelationProblem, RectangleMeasures} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
@@ -108,29 +109,51 @@ function RectangleCard({name, rectangle, showCalculations}: {
     );
 }
 
-const AreaPerimeterComparisonCore = ({config: _config, payload}: CoreProps) => {
+function BlankRectangleCard({constraint}: {constraint: string}) {
+    return (
+        <div className="w-[300px] rounded-xl border-2 border-dashed border-sky-400 bg-white px-3 pb-3 pt-2 text-center">
+            <div className="text-[1rem] font-extrabold text-slate-700">Rectangle B</div>
+            <div className="mx-auto mt-3 flex h-[210px] w-[260px] items-center justify-center rounded-lg bg-[linear-gradient(to_right,#dbeafe_1px,transparent_1px),linear-gradient(to_bottom,#dbeafe_1px,transparent_1px)] bg-[size:22px_22px] text-base font-bold text-sky-700">
+                Draw a different rectangle
+            </div>
+            <div className="mt-2 min-h-[48px] text-sm font-bold leading-snug text-slate-600">{constraint}</div>
+        </div>
+    );
+}
+
+const AreaPerimeterComparisonCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateRelation(data);
     const samePerimeter = data.task === 'same-perimeter';
+    const isConstruction = config.taskAbilities!.includes(Ability.VisualArticulation);
+    const equalValue = samePerimeter ? data.first.perimeter : data.first.area;
+    const equalUnit = samePerimeter ? data.unit : data.areaUnit;
+    const constructionConstraint = `Keep ${samePerimeter ? 'perimeter' : 'area'} equal to ${equalValue} ${equalUnit}; change the ${samePerimeter ? 'area' : 'perimeter'}.`;
 
     return (
         <div className="w-[740px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="text-center text-[1.3rem] font-bold text-slate-700">
-                {samePerimeter
-                    ? 'These rectangles have the same perimeter. Compare their areas.'
-                    : 'These rectangles have the same area. Compare their perimeters.'}
+                {isConstruction
+                    ? `Exhibit two rectangles with the same ${samePerimeter ? 'perimeter' : 'area'} and different ${samePerimeter ? 'areas' : 'perimeters'}.`
+                    : samePerimeter
+                        ? 'These rectangles have the same perimeter. Compare their areas.'
+                        : 'These rectangles have the same area. Compare their perimeters.'}
             </div>
             <div className="mt-4 flex justify-center gap-5 rounded-xl bg-slate-50 p-4">
                 <RectangleCard name="A" rectangle={data.first} showCalculations={isSolutionView} />
-                <RectangleCard name="B" rectangle={data.second} showCalculations={isSolutionView} />
+                {isConstruction && !isSolutionView
+                    ? <BlankRectangleCard constraint={constructionConstraint} />
+                    : <RectangleCard name="B" rectangle={data.second} showCalculations={isSolutionView} />}
             </div>
             <div className={`mt-4 min-h-[60px] rounded-xl border-2 px-5 py-3 text-center font-mono text-[1.05rem] font-bold ${
                 isSolutionView
                     ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
                     : 'border-slate-300 bg-white text-slate-600'
             }`}>
-                {isSolutionView
+                {isConstruction && !isSolutionView
+                    ? constructionConstraint
+                    : isSolutionView
                     ? samePerimeter
                         ? `Perimeters: ${data.first.perimeter} = ${data.second.perimeter} ${data.unit}. Areas: ${data.first.area} ≠ ${data.second.area} ${data.areaUnit}.`
                         : `Areas: ${data.first.area} = ${data.second.area} ${data.areaUnit}. Perimeters: ${data.first.perimeter} ≠ ${data.second.perimeter} ${data.unit}.`

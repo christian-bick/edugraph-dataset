@@ -122,7 +122,7 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
         }
 
         const recognizesEquivalence = taskAbilities.length === 1
-            && taskAbilities.includes(Ability.ConceptDerivation);
+            && taskAbilities.includes(Ability.ConceptClassification);
         const generatesEquivalence = taskAbilities.length === 2
             && taskAbilities.includes(Ability.Formalization)
             && taskAbilities.includes(Ability.ProcedureUnderstanding);
@@ -164,7 +164,7 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
             || (usesMultiplication && !generatesEquivalence)) {
             throw new GeneratorValidationError(
                 'fraction-equivalence',
-                'Select EqualShares with ConceptDerivation or Formalization plus ProcedureUnderstanding, or select ImproperFractions and IntegerNumbers with Formalization.'
+                'Select EqualShares with ConceptClassification or Formalization plus ProcedureUnderstanding, or select ImproperFractions and IntegerNumbers with Formalization.'
             );
         }
 

@@ -95,7 +95,7 @@ describe('ShapePartitionGenerator spec integration', () => {
             Area.FractionNotation,
             Scope.EqualShares,
             fractionType,
-            Ability.ConceptDerivation,
+            Ability.Interpretation,
             shape
         ];
         const stub = generateWithLabels(generator, labels)!;
@@ -105,7 +105,7 @@ describe('ShapePartitionGenerator spec integration', () => {
             shape,
             fractionType,
             Area.FractionNotation,
-            Ability.ConceptDerivation
+            Ability.Interpretation
         ]));
     });
 });

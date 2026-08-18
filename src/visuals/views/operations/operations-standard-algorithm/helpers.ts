@@ -93,7 +93,7 @@ export const isValidStandardAlgorithmProblem = (
         || data.bottomValue <= 0
         || data.result <= 0
         || !Array.isArray(data.columns)
-        || data.columns.length < 4
+        || data.columns.length < 3
         || data.columns.length > 6) return false;
 
     const expectedResult = data.operation === 'addition'

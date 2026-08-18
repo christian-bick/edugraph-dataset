@@ -45,4 +45,24 @@ describe('StandardAlgorithmAddSubtractGenerator spec integration', () => {
             Scope.NumbersSmaller1000000
         ]));
     });
+
+    it.each([
+        [Area.AdditionStandardAlgorithm, 'addition'],
+        [Area.SubtractionStandardAlgorithm, 'subtraction']
+    ] as const)('resolves %s for the Grade 3 three-digit range', (operationLabel, operation) => {
+        setSeed(`grade-3-${operation}`);
+        const stub = generateWithLabels(generator, [
+            operationLabel,
+            ...invariantLabels,
+            Scope.ArabicNumerals,
+            Scope.NumbersLarger100,
+            Scope.NumbersSmaller1000
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.operation).toBe(operation);
+        expect(stub!.data.columns).toHaveLength(3);
+        expect(stub!.data.topValue).toBeGreaterThanOrEqual(100);
+        expect(stub!.data.topValue).toBeLessThan(1000);
+    });
 });

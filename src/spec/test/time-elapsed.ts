@@ -5,7 +5,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringTime,
-        Scope.TimeIntervals,
+        Area.Difference,
         Scope.MinuteIntervals,
         Scope.IntegerNumbers,
         Ability.ProcedureExecution

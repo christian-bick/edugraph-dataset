@@ -7,7 +7,9 @@ const areaPerimeterRelationsBuilder = new DatasetPermutationBuilder().addLabels(
     Area.AreaCalculation,
     Area.Rectangle,
     Scope.Equal,
-    Ability.ConceptDerivation
+]).applyLabelVariants([
+    [Ability.ConceptClassification],
+    [Ability.ProcedureUnderstanding, Ability.VisualArticulation]
 ]);
 
 export const spec: CompetencyTarget[] = [

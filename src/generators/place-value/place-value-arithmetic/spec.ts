@@ -1,8 +1,13 @@
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveExplicitOperation} from '../../arithmetic/helpers.ts';
+
+const resolveOperation = selectCanonicalLabel([
+    [[Area.AdditionPlaceValuePartitioning, Area.Addition], Area.Addition],
+    [[Area.SubtractionPlaceValuePartitioning, Area.Subtraction], Area.Subtraction]
+] as const);
 
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-arithmetic',
@@ -16,7 +21,12 @@ export const spec: GeneratorSpec = {
 };
 
 export const PlaceValueArithmeticGeneratorSchema = {
-    operation: [[Area.Addition, Area.Subtraction], resolveExplicitOperation],
+    operation: [[
+        Area.AdditionPlaceValuePartitioning,
+        Area.SubtractionPlaceValuePartitioning,
+        Area.Addition,
+        Area.Subtraction
+    ], resolveOperation],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
         resolveRangeFromLabels

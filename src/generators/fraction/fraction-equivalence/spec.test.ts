@@ -20,7 +20,7 @@ describe('FractionEquivalenceGenerator spec integration', () => {
     });
 
     it.each([
-        [[Ability.ConceptDerivation], 'recognize-equivalence'],
+        [[Ability.ConceptClassification], 'recognize-equivalence'],
         [[Ability.Formalization, Ability.ProcedureUnderstanding], 'generate-equivalence']
     ] as const)('resolves the exact %j mode', (taskAbilities, expectedTask) => {
         setSeed(expectedTask);
@@ -114,19 +114,19 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         expect(stub!.tags).not.toContain(Scope.VisualNumbers);
     });
 
-    it('keeps legacy label extraction on the identical random path', () => {
+    it('keeps classification label extraction on the identical random path', () => {
         const labels = [
             Area.FractionEquivalence,
             Area.FractionNotation,
             Scope.EqualShares,
             Scope.Equal,
-            Ability.ConceptDerivation
+            Ability.ConceptClassification
         ];
         setSeed('legacy-label-extraction');
         const resolved = generateWithLabels(generator, labels);
         setSeed('legacy-label-extraction');
         const direct = generator.generate({
-            taskAbilities: [Ability.ConceptDerivation],
+            taskAbilities: [Ability.ConceptClassification],
             usesMultiplication: false,
             usesEqualShares: true,
             usesImproperFractions: false,

@@ -7,7 +7,7 @@ describe('TimeElapsedGenerator spec integration', () => {
     it('supports the elapsed-minute target labels', () => {
         const labels = [
             Area.MeasuringTime,
-            Scope.TimeIntervals,
+            Area.Difference,
             Scope.MinuteIntervals,
             Scope.IntegerNumbers,
             Scope.AnalogClock,

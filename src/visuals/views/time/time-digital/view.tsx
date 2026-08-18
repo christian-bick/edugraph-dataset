@@ -1,4 +1,5 @@
 import {createRoot} from 'react-dom/client';
+import {Ability} from 'edugraph-ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
@@ -100,7 +101,10 @@ const TimeDigitalCore = ({config, payload}: CoreProps) => {
     const formattedTime = formatDigitalTime(timeParts);
     const timeClue = formatTimeClue(timeParts);
     const displayValue = isSolutionView ? formattedTime : formattedTime.replace(/\d/g, '–');
-    const prompt = config.isReverse ? 'Build the digital time.' : 'Set the digital clock.';
+    const prompt = config.taskAbilities!.includes(Ability.Formalization)
+        || config.taskAbilities!.includes(Ability.VisualArticulation)
+        ? 'Build the digital time.'
+        : 'Set the digital clock.';
 
     return (
         <div className="flex w-full items-center justify-center bg-white p-6 font-sans">

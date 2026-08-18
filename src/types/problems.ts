@@ -71,6 +71,54 @@ export type StandardAlgorithmProblem = {
     explanation: string;
 };
 
+export type KnownFactDerivationStrategy =
+    | 'commutative'
+    | 'associative'
+    | 'inverse-division'
+    | 'place-value-scaling';
+
+export type KnownMultiplicationFact = {
+    firstFactor: number;
+    secondFactor: number;
+    product: number;
+    equation: string;
+};
+
+export type KnownFactDerivationProblem = {
+    task: 'known-fact-derivation';
+    strategy: KnownFactDerivationStrategy;
+    operation: 'multiplication' | 'division';
+    knownFact: KnownMultiplicationFact;
+    derivedOperands: readonly [number, number] | readonly [number, number, number];
+    answer: number;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    relationEquation: string;
+    explanation: string;
+};
+
+export type IntegerAddSubtractStrategy =
+    | 'addition-compensation'
+    | 'subtraction-compensation'
+    | 'subtraction-think-addition';
+
+export type IntegerAddSubtractStrategyProblem = {
+    task: 'integer-add-subtract-strategy';
+    strategy: IntegerAddSubtractStrategy;
+    operation: 'addition' | 'subtraction';
+    leftOperand: number;
+    rightOperand: number;
+    answer: number;
+    adjustment: number;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    transformedEquation: string;
+    steps: readonly [string, string, string];
+    explanation: string;
+};
+
 export type MultiplicativeComparisonProblem = {
     referenceQuantity: number;
     scaleFactor: number;
@@ -2624,6 +2672,8 @@ export type GeometryPrimitivesProblem = {
 export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
     'operations-standard-algorithm': StandardAlgorithmProblem;
+    'operations-known-fact-derivation': KnownFactDerivationProblem;
+    'operations-add-subtract-strategy': IntegerAddSubtractStrategyProblem;
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;

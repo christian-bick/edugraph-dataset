@@ -18,4 +18,21 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         expect(stub!.data.operation).toBe(operation === Area.Addition ? 'addition' : 'subtraction');
         expect(stub!.tags).toContain(operation);
     });
+
+    it.each([
+        [Area.AdditionPlaceValuePartitioning, 'addition'],
+        [Area.SubtractionPlaceValuePartitioning, 'subtraction']
+    ] as const)('resolves the specific %s strategy', (strategy, operation) => {
+        const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [
+            strategy,
+            Area.IntegerRegrouping,
+            Scope.PhysicalNumbers,
+            Scope.TwoOperands,
+            Scope.NumbersSmaller1000,
+            Ability.ProcedureUnderstanding
+        ]);
+        expect(stub).not.toBeNull();
+        expect(stub!.data.operation).toBe(operation);
+        expect(stub!.tags).toContain(strategy);
+    });
 });

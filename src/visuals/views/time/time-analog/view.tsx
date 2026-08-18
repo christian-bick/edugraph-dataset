@@ -1,5 +1,6 @@
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
+import {Ability} from 'edugraph-ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {formatTime, getClockAngles, getTickMarks} from './helpers.ts';
 import { TimeAnalogViewConfig, TimeAnalogViewSchema } from './spec.ts';
@@ -21,7 +22,7 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
         throw new ViewValidationError('time-analog', `Unsupported day period: ${data.period}`);
     }
 
-    const isReverse = config.isReverse;
+    const isReverse = config.taskAbilities!.includes(Ability.VisualArticulation);
 
     const showHands = !isReverse || isSolutionView;
     const showTime = isReverse || isSolutionView;

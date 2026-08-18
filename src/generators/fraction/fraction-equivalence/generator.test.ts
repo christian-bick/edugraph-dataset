@@ -207,15 +207,15 @@ describe('FractionEquivalenceGenerator', () => {
         expect(() => generator.generate(properConfig([]))).toThrow();
         expect(() => generator.generate(
             {
-                ...properConfig([Ability.ConceptDerivation]),
-                taskAbilities: Ability.ConceptDerivation
+                ...properConfig([Ability.ConceptClassification]),
+                taskAbilities: Ability.ConceptClassification
             } as unknown as FractionEquivalenceGeneratorConfig
         )).toThrow('must be an array');
         expect(() => generator.generate(properConfig([
             Ability.Formalization
         ]))).toThrow('Select EqualShares');
         expect(() => generator.generate(properConfig([
-            Ability.ConceptDerivation,
+            Ability.ConceptClassification,
             Ability.ProcedureUnderstanding
         ]))).toThrow('Select EqualShares');
         expect(() => generator.generate({
@@ -223,7 +223,7 @@ describe('FractionEquivalenceGenerator', () => {
             usesIntegerNumbers: false
         })).toThrow('Select EqualShares');
         expect(() => generator.generate({
-            ...properConfig([Ability.ConceptDerivation]),
+            ...properConfig([Ability.ConceptClassification]),
             usesMultiplication: true
         })).toThrow('Select EqualShares');
         expect(() => generator.generate({
@@ -236,7 +236,7 @@ describe('FractionEquivalenceGenerator', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
             const problem = generator.generate(properConfig([
-                Ability.ConceptDerivation
+                Ability.ConceptClassification
             ])).data;
 
             expect(problem.task).toBe('recognize-equivalence');
@@ -318,9 +318,9 @@ describe('FractionEquivalenceGenerator', () => {
         expect(seen).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     });
 
-    it('preserves every legacy payload and random draw for fixed seeds', () => {
+    it('preserves every existing payload and random draw for fixed seeds', () => {
         setSeed('legacy-0');
-        expect(generator.generate(properConfig([Ability.ConceptDerivation]))).toEqual({
+        expect(generator.generate(properConfig([Ability.ConceptClassification]))).toEqual({
             data: {
                 task: 'recognize-equivalence',
                 first: {numerator: 1, denominator: 4, notation: '1/4'},
@@ -371,11 +371,11 @@ describe('FractionEquivalenceGenerator', () => {
         for (let seed = 0; seed < 200; seed++) {
             setSeed(seed);
             const problem = generator.generate(properConfig([
-                Ability.ConceptDerivation
+                Ability.ConceptClassification
             ])).data;
             if (problem.task !== 'recognize-equivalence'
                 && problem.task !== 'generate-equivalence') {
-                throw new Error('Expected legacy proper-fraction mode.');
+                throw new Error('Expected proper-fraction mode.');
             }
             scaleFactors.add(problem.scaleFactor);
             equations.add(problem.equation);

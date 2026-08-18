@@ -182,7 +182,7 @@ describe('ShapePartitionGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generator.generate(config({
-                taskAbilities: [Ability.ConceptDerivation],
+                taskAbilities: [Ability.Interpretation],
                 fractionTypes: [fractionType],
                 fractionNotation: true
             }))!;

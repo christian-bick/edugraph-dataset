@@ -15,7 +15,7 @@ export const spec: GeneratorSpec = {
 export const FractionEquivalenceGeneratorSchema = {
     taskAbilities: [
         [
-            Ability.ConceptDerivation,
+            Ability.ConceptClassification,
             Ability.Formalization,
             Ability.ProcedureUnderstanding
         ],

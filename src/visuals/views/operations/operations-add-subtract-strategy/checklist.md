@@ -1,0 +1,2 @@
+- **Identity:** A named compensation or think-addition strategy visibly rewrites the original two-number equation and organizes three ordered equations that preserve the sum, preserve the difference, or build the missing addend.
+- **Modes:** Question Mode keeps the original equation, strategy rewrite, and left sides of all three steps visible while withholding their results; Solution Mode reveals every completed step, the final equation, and a concise explanation of why the strategy works.

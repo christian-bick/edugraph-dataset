@@ -74,12 +74,23 @@ describe('isValidStandardAlgorithmProblem', () => {
         expect(isValidStandardAlgorithmProblem(revealedQuestion)).toBe(false);
     });
 
-    it('rejects payloads outside the four-to-six-column layout capacity', () => {
-        const tooShort = structuredClone(addition);
-        tooShort.topValue = 567;
-        tooShort.bottomValue = 189;
-        tooShort.result = 756;
-        tooShort.columns = tooShort.columns.slice(0, 3);
-        expect(isValidStandardAlgorithmProblem(tooShort)).toBe(false);
+    it('accepts three columns and rejects payloads outside the three-to-six-column layout capacity', () => {
+        const threeColumn: StandardAlgorithmProblem = {
+            ...structuredClone(addition),
+            topValue: 567,
+            bottomValue: 189,
+            result: 756,
+            questionEquation: '567 + 189 = ?',
+            solutionEquation: '567 + 189 = 756',
+            columns: [
+                {placeValue: 1, placeName: 'ones', topDigit: 7, bottomDigit: 9, regroupIn: 0, regroupOut: 1, workingValue: 16, resultDigit: 6, calculation: '7 + 9 + 0 = 16', regroupingRecord: 'Carry 1 ten.'},
+                {placeValue: 10, placeName: 'tens', topDigit: 6, bottomDigit: 8, regroupIn: 1, regroupOut: 1, workingValue: 15, resultDigit: 5, calculation: '6 + 8 + 1 = 15', regroupingRecord: 'Carry 1 hundred.'},
+                {placeValue: 100, placeName: 'hundreds', topDigit: 5, bottomDigit: 1, regroupIn: 1, regroupOut: 0, workingValue: 7, resultDigit: 7, calculation: '5 + 1 + 1 = 7', regroupingRecord: 'No new carry.'}
+            ]
+        };
+        expect(isValidStandardAlgorithmProblem(threeColumn)).toBe(true);
+
+        threeColumn.columns = threeColumn.columns.slice(0, 2);
+        expect(isValidStandardAlgorithmProblem(threeColumn)).toBe(false);
     });
 });

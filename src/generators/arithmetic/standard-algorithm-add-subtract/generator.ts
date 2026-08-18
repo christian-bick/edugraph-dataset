@@ -51,6 +51,8 @@ const randomRegroupingOperand = (minimum: number, maximum: number): number | nul
 const digitAt = (value: number, placeValue: number): number =>
     Math.floor(value / placeValue) % 10;
 
+const hasNoZeroDigit = (value: number): boolean => !String(value).includes('0');
+
 const buildAdditionColumns = (
     topValue: number,
     bottomValue: number,
@@ -65,7 +67,9 @@ const buildAdditionColumns = (
         const resultDigit = workingValue % 10;
         const regroupOut = (workingValue >= 10 ? 1 : 0) as 0 | 1;
         const nextPlace = placeColumns[index + 1];
-        const calculation = `${topDigit} + ${bottomDigit} + ${regroupIn} = ${workingValue}`;
+        const calculation = regroupIn === 1
+            ? `${topDigit} + ${bottomDigit} + 1 = ${workingValue}`
+            : `${topDigit} + ${bottomDigit} = ${workingValue}`;
         const regroupingRecord = regroupOut === 1
             ? `Write ${resultDigit} in the ${place.placeName} place and carry 1 to the ${nextPlace.placeName} place.`
             : regroupIn === 1
@@ -103,7 +107,9 @@ const buildSubtractionColumns = (
         const workingValue = availableTopDigit + 10 * regroupOut;
         const resultDigit = workingValue - bottomDigit;
         const nextPlace = placeColumns[index + 1];
-        const calculation = `${topDigit} - ${regroupIn} + ${10 * regroupOut} - ${bottomDigit} = ${resultDigit}`;
+        const adjustedTop = regroupIn === 1 ? `${topDigit} - 1` : `${topDigit}`;
+        const borrowedTen = regroupOut === 1 ? ' + 10' : '';
+        const calculation = `${adjustedTop}${borrowedTen} - ${bottomDigit} = ${resultDigit}`;
         const regroupingRecord = regroupOut === 1
             ? `Borrow 1 from the ${nextPlace.placeName} place, then write ${resultDigit} in the ${place.placeName} place.`
             : regroupIn === 1
@@ -191,13 +197,22 @@ export class StandardAlgorithmAddSubtractGenerator implements ProblemGenerator<
         if (maximumDigitCount > placeColumns.length) return null;
 
         // Keeping both operands at the maximum permitted digit width prevents a leading
-        // overflow column while still giving the view four to six aligned Grade 4 columns.
+        // overflow column while still giving the view three to six aligned columns.
         const fullWidthMinimum = Math.max(minimum, 10 ** (maximumDigitCount - 1));
-        const firstOperand = randomRegroupingOperand(fullWidthMinimum, Math.floor(maximum / 2));
-        if (firstOperand === null) return null;
-        const secondOperand = randomRegroupingOperand(fullWidthMinimum, maximum - firstOperand);
-        if (secondOperand === null) return null;
+        for (let attempt = 0; attempt < 100; attempt++) {
+            const firstOperand = randomRegroupingOperand(fullWidthMinimum, Math.floor(maximum / 2));
+            if (firstOperand === null) return null;
+            const secondOperand = randomRegroupingOperand(fullWidthMinimum, maximum - firstOperand);
+            if (secondOperand === null) continue;
+            const sum = firstOperand + secondOperand;
 
-        return {data: buildProblem(operation, firstOperand, secondOperand)};
+            // NumbersWithoutZero excludes zero as a number. Keeping every displayed
+            // numeral zero-free also prevents a result-place zero from visually
+            // suggesting that zero is an operand of the authored procedure.
+            if ([firstOperand, secondOperand, sum].every(hasNoZeroDigit)) {
+                return {data: buildProblem(operation, firstOperand, secondOperand)};
+            }
+        }
+        return null;
     }
 }

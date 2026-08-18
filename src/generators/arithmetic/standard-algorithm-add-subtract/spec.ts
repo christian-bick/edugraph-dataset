@@ -26,7 +26,7 @@ export const StandardAlgorithmAddSubtractGeneratorSchema = {
         resolveOperation
     ],
     range: [
-        deductCompatible([Scope.NumbersLarger1000, Scope.NumbersSmaller1000000]),
+        deductCompatible([Scope.NumbersLarger100, Scope.NumbersSmaller1000000]),
         resolveRangeFromLabels
     ]
 } as const;

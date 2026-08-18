@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measurement-line-plot',
-    generalLabels: [Scope.LinePlot]
+    generalLabels: [Scope.LinePlot, Scope.LengthMeasurement]
 };
 
 export const MeasurementLinePlotViewSchema = {
@@ -20,6 +20,10 @@ export const MeasurementLinePlotViewSchema = {
     executeProcedure: [
         [Ability.ProcedureExecution],
         hasLabel(Ability.ProcedureExecution)
+    ],
+    useInchScale: [
+        [Scope.InchScale],
+        hasLabel(Scope.InchScale)
     ]
 } as const;
 export type MeasurementLinePlotViewConfig = ConfigFromSchema<typeof MeasurementLinePlotViewSchema>;

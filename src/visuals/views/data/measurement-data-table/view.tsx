@@ -1,12 +1,14 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {MeasurementDataProblem, MeasurementObservation} from '../../../../types/problems.ts';
+import {ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {formatMeasurement, validateMeasurementData} from '../helpers.ts';
-import {MeasurementDataTableViewSchema} from './spec.ts';
+import {MeasurementDataTableViewConfig, MeasurementDataTableViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
+    config: MeasurementDataTableViewConfig;
     payload: ViewRenderPayload<'measurement-data-table'>;
 }
 
@@ -46,10 +48,16 @@ function MeasurementRow({observation, data, reveal}: {observation: MeasurementOb
     );
 }
 
-const MeasurementDataTableCore = ({payload}: CoreProps) => {
+const MeasurementDataTableCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateMeasurementData(data, 'measurement-data-table');
+    if (config.useInchScale && data.unit !== 'in') {
+        throw new ViewValidationError(
+            'measurement-data-table',
+            'An inch-scale measurement table requires inch observations.'
+        );
+    }
 
     return (
         <div className="w-[690px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">

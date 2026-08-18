@@ -143,6 +143,9 @@ const MeasurementLinePlotCore = ({config, payload}: CoreProps) => {
         return <Grade4FractionLinePlotTask data={data} isSolutionView={isSolutionView} />;
     }
     validateMeasurementData(data, 'measurement-line-plot');
+    if (config.useInchScale && data.unit !== 'in') {
+        throw new ViewValidationError('measurement-line-plot', 'An inch-scale line plot requires inch observations.');
+    }
     if (config.usesUnitSteps && data.subdivisions !== 1) {
         throw new ViewValidationError('measurement-line-plot', 'Unit-step line plots require whole-unit subdivisions.');
     }

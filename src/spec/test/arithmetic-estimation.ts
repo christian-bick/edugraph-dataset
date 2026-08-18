@@ -7,7 +7,7 @@ const builder = new DatasetPermutationBuilder()
         Area.Estimation,
         Area.IntegerRounding,
         Scope.NumbersSmaller1000,
-        Ability.ConceptDerivation
+        Ability.PlausibilityEvaluation
     ])
     .applyLabelVariants([
         [Area.Addition],

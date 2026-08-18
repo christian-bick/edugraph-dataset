@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -691,89 +687,6 @@ const compareFractionsBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.Greater], [Scope.Less]]);
 
-const knownFactDerivationImplementation = defineImplementationPackage({
-    id: 'grade-3-known-fact-derivation',
-    description: 'Show how a supplied multiplication fact, operation property, inverse relationship, or place-value scaling step derives a related multiplication or division result.',
-    generators: [{module: 'arithmetic-known-fact-derivation', strategy: 'new'}],
-    views: [{module: 'operations-known-fact-derivation', strategy: 'new'}]
-});
-
-const answerReasonablenessImplementation = defineImplementationPackage({
-    id: 'grade-3-answer-reasonableness-evaluation',
-    description: 'Classify whether a proposed arithmetic answer is plausible by comparing it with a visible rounded estimate.',
-    generators: [{module: 'arithmetic-estimation', strategy: 'reuse'}],
-    views: [{module: 'operations-answer-reasonableness', strategy: 'expand'}]
-});
-
-const placeValuePartitioningImplementation = defineImplementationPackage({
-    id: 'grade-3-place-value-partitioning',
-    description: 'Expose addition and subtraction by decomposing, regrouping, and recomposing visible base-ten place-value parts.',
-    generators: [{module: 'place-value-arithmetic', strategy: 'expand'}],
-    views: [{module: 'place-value-arithmetic-model', strategy: 'reuse'}]
-});
-
-const standardAlgorithmWithin1000Implementation = defineImplementationPackage({
-    id: 'grade-3-standard-algorithms-within-1000',
-    description: 'Extend the conventional addition and subtraction algorithm artifact to aligned three-digit operands and results below 1000.',
-    generators: [{module: 'standard-algorithm-add-subtract', strategy: 'expand'}],
-    views: [{module: 'operations-standard-algorithm', strategy: 'expand'}]
-});
-
-const flexibleAddSubtractStrategiesImplementation = defineImplementationPackage({
-    id: 'grade-3-flexible-add-subtract-strategies',
-    description: 'Build visible step-by-step compensation and inverse-operation strategies for addition and subtraction within 1000.',
-    generators: [{module: 'integer-add-subtract-strategies', strategy: 'new'}],
-    views: [{module: 'operations-add-subtract-strategy', strategy: 'new'}]
-});
-
-const elapsedTimeDifferenceImplementation = defineImplementationPackage({
-    id: 'grade-3-elapsed-time-difference',
-    description: 'Declare and validate elapsed minutes as the difference between two visible clock times.',
-    generators: [{module: 'time-elapsed', strategy: 'expand'}],
-    views: [{module: 'time-elapsed', strategy: 'reuse'}]
-});
-
-const nearestMinuteRepresentationsImplementation = defineImplementationPackage({
-    id: 'grade-3-nearest-minute-representations',
-    description: 'Separate analog-clock interpretation, analog construction, and written digital-time formalization by their observable response abilities.',
-    generators: [{module: 'time', strategy: 'reuse'}],
-    views: [
-        {module: 'time-analog', strategy: 'expand'},
-        {module: 'time-digital', strategy: 'expand'}
-    ]
-});
-
-const fractionalMeasurementDataImplementation = defineImplementationPackage({
-    id: 'grade-3-fractional-measurement-data',
-    description: 'Distinguish ruler-based quarter-inch data collection in a data table from constructing a line plot of the recorded measurements.',
-    generators: [{module: 'measurement-data', strategy: 'expand'}],
-    views: [
-        {module: 'measurement-data-table', strategy: 'expand'},
-        {module: 'measurement-line-plot', strategy: 'expand'}
-    ]
-});
-
-const fractionInterpretationClassificationImplementation = defineImplementationPackage({
-    id: 'grade-3-fraction-interpretation-classification',
-    description: 'Route fraction-of-a-whole interpretation and equivalence classification through their precise observable abilities.',
-    generators: [
-        {module: 'shape-partition', strategy: 'expand'},
-        {module: 'fraction-equivalence', strategy: 'expand'}
-    ],
-    views: [
-        {module: 'shape-partition-equal', strategy: 'reuse'},
-        {module: 'fractions-equivalence-model', strategy: 'reuse'},
-        {module: 'numbers-fraction-line', strategy: 'reuse'}
-    ]
-});
-
-const areaPerimeterRelationsImplementation = defineImplementationPackage({
-    id: 'grade-3-area-perimeter-relations',
-    description: 'Classify the unequal companion measure for provided rectangle pairs and elicit construction of a rectangle pair with one equal and one unequal measure.',
-    generators: [{module: 'area-perimeter-relations', strategy: 'expand'}],
-    views: [{module: 'area-perimeter-comparison', strategy: 'expand'}]
-});
-
 // ==========================================
 // 7. Target-spec exports
 // ==========================================
@@ -818,119 +731,28 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('3.NF.A.3d-compare-fractions', compareFractionsBuilder),
     ...toTargets('3.OA.C.7-compute-within-100', computeWithin100Builder),
     ...toTargets('3.NBT.A.2-add-subtract-within-1000', addSubtractWithin1000Builder),
-    ...toTargets('3.MD.A.1-construct-analog-nearest-minute', constructAnalogTimeBuilder)
+    ...toTargets('3.MD.A.1-construct-analog-nearest-minute', constructAnalogTimeBuilder),
+    ...toTargets('3.OA.B.5-multiplication-known-fact-properties', multiplicationKnownFactPropertiesBuilder),
+    ...toTargets('3.OA.B.6-division-as-unknown-factor', divisionUnknownFactorBuilder),
+    ...toTargets('3.OA.C.7-multiplication-known-fact-fluency', multiplicationKnownFactFluencyBuilder),
+    ...toTargets('3.OA.C.7-division-known-fact-fluency', divisionKnownFactFluencyBuilder),
+    ...toTargets('3.NBT.A.3-one-digit-times-multiple-of-ten', oneDigitTimesMultipleOfTenBuilder),
+    ...toTargets('3.OA.D.8-answer-reasonableness', answerReasonablenessBuilder),
+    ...toTargets('3.NBT.A.2-place-value-partitioning', placeValuePartitioningWithin1000Builder),
+    ...toTargets('3.NBT.A.2-standard-algorithms', standardAlgorithmWithin1000Builder),
+    ...toTargets('3.NBT.A.2-flexible-strategies', flexibleAddSubtractStrategiesBuilder),
+    ...toTargets('3.MD.A.1-elapsed-minutes', elapsedTimeBuilder),
+    ...toTargets('3.MD.A.1-read-analog-nearest-minute', readAnalogTimeBuilder),
+    ...toTargets('3.MD.A.1-write-digital-nearest-minute', writeDigitalTimeBuilder),
+    ...toTargets('3.MD.B.4-generate-fractional-measurements', generateFractionalMeasurementsBuilder),
+    ...toTargets('3.MD.B.4-plot-fractional-measurements', plotFractionalMeasurementsBuilder),
+    ...toTargets('3.NF.A.1-fractions-of-a-whole', interpretFractionsOfWholeBuilder),
+    ...toTargets('3.NF.A.3a-recognize-equivalent-fractions', recognizeEquivalentFractionsBuilder),
+    ...toTargets('3.MD.D.8-area-perimeter-relations', areaPerimeterRelationsBuilder),
+    ...toTargets('3.MD.D.8-exhibit-area-perimeter-relations', exhibitAreaPerimeterRelationsBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '3.OA.B.5-multiplication-known-fact-properties',
-        multiplicationKnownFactPropertiesBuilder,
-        knownFactDerivationImplementation,
-        'Supply a known multiplication fact and visibly derive the related result using the named operation property.'
-    ),
-    ...toImplementationTodos(
-        '3.OA.B.6-division-as-unknown-factor',
-        divisionUnknownFactorBuilder,
-        knownFactDerivationImplementation,
-        'Show the division equation together with the related multiplication unknown-factor equation.'
-    ),
-    ...toImplementationTodos(
-        '3.OA.C.7-multiplication-known-fact-fluency',
-        multiplicationKnownFactFluencyBuilder,
-        knownFactDerivationImplementation,
-        'Derive an unknown product from an explicitly supplied multiplication fact or relationship.'
-    ),
-    ...toImplementationTodos(
-        '3.OA.C.7-division-known-fact-fluency',
-        divisionKnownFactFluencyBuilder,
-        knownFactDerivationImplementation,
-        'Derive an unknown quotient from an explicitly supplied multiplication or division fact.'
-    ),
-    ...toImplementationTodos(
-        '3.NBT.A.3-one-digit-times-multiple-of-ten',
-        oneDigitTimesMultipleOfTenBuilder,
-        knownFactDerivationImplementation,
-        'Show the one-digit fact and the base-ten scaling step that derives its related multiple-of-ten product.'
-    ),
-    ...toImplementationTodos(
-        '3.OA.D.8-answer-reasonableness',
-        answerReasonablenessBuilder,
-        answerReasonablenessImplementation,
-        'Require a plausible/not-plausible judgment supported by the visible rounded estimate.'
-    ),
-    ...toImplementationTodos(
-        '3.NBT.A.2-place-value-partitioning',
-        placeValuePartitioningWithin1000Builder,
-        placeValuePartitioningImplementation,
-        'Show the operands decomposed into place-value parts and visibly coordinate the regrouping and recomposition.'
-    ),
-    ...toImplementationTodos(
-        '3.NBT.A.2-standard-algorithms',
-        standardAlgorithmWithin1000Builder,
-        standardAlgorithmWithin1000Implementation,
-        'Show every aligned column step and carry or borrow record for a three-digit computation.'
-    ),
-    ...toImplementationTodos(
-        '3.NBT.A.2-flexible-strategies',
-        flexibleAddSubtractStrategiesBuilder,
-        flexibleAddSubtractStrategiesImplementation,
-        'Expose each adjustment or inverse relationship as an explicit, checkable sequence of equations.'
-    ),
-    ...toImplementationTodos(
-        '3.MD.A.1-elapsed-minutes',
-        elapsedTimeBuilder,
-        elapsedTimeDifferenceImplementation,
-        'Determine the minute difference between two visible times and show a coherent interval decomposition.'
-    ),
-    ...toImplementationTodos(
-        '3.MD.A.1-read-analog-nearest-minute',
-        readAnalogTimeBuilder,
-        nearestMinuteRepresentationsImplementation,
-        'Interpret visible analog hands and formalize the represented time in written notation.'
-    ),
-    ...toImplementationTodos(
-        '3.MD.A.1-write-digital-nearest-minute',
-        writeDigitalTimeBuilder,
-        nearestMinuteRepresentationsImplementation,
-        'Formalize a textual time clue as a digital-clock display.'
-    ),
-    ...toImplementationTodos(
-        '3.MD.B.4-generate-fractional-measurements',
-        generateFractionalMeasurementsBuilder,
-        fractionalMeasurementDataImplementation,
-        'Show each object aligned to a quarter-inch ruler and record its value in a data table.'
-    ),
-    ...toImplementationTodos(
-        '3.MD.B.4-plot-fractional-measurements',
-        plotFractionalMeasurementsBuilder,
-        fractionalMeasurementDataImplementation,
-        'Provide recorded quarter-inch lengths and require one line-plot mark per observation.'
-    ),
-    ...toImplementationTodos(
-        '3.NF.A.1-fractions-of-a-whole',
-        interpretFractionsOfWholeBuilder,
-        fractionInterpretationClassificationImplementation,
-        'Interpret the fraction represented by highlighted equal parts of one whole.'
-    ),
-    ...toImplementationTodos(
-        '3.NF.A.3a-recognize-equivalent-fractions',
-        recognizeEquivalentFractionsBuilder,
-        fractionInterpretationClassificationImplementation,
-        'Classify whether two visual or number-line fraction representations are equivalent.'
-    ),
-    ...toImplementationTodos(
-        '3.MD.D.8-area-perimeter-relations',
-        areaPerimeterRelationsBuilder,
-        areaPerimeterRelationsImplementation,
-        'Classify whether the companion area or perimeter measure is equal for two supplied rectangles.'
-    ),
-    ...toImplementationTodos(
-        '3.MD.D.8-exhibit-area-perimeter-relations',
-        exhibitAreaPerimeterRelationsBuilder,
-        areaPerimeterRelationsImplementation,
-        'Construct a second rectangle that preserves the requested measure while changing the other.'
-    )
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

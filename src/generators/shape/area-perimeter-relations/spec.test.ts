@@ -9,8 +9,7 @@ describe('AreaPerimeterRelationsGenerator spec integration', () => {
         Area.PerimeterCalculation,
         Area.AreaCalculation,
         Area.Rectangle,
-        Scope.Equal,
-        Ability.ConceptDerivation
+        Scope.Equal
     ];
 
     it('declares the reviewed relation labels', () => {
@@ -18,7 +17,10 @@ describe('AreaPerimeterRelationsGenerator spec integration', () => {
     });
 
     it('generates the reviewed area-perimeter relation target', () => {
-        const stub = generateWithLabels(new AreaPerimeterRelationsGenerator(), labels);
+        const stub = generateWithLabels(new AreaPerimeterRelationsGenerator(), [
+            ...labels,
+            Ability.ConceptClassification
+        ]);
 
         expect(stub).not.toBeNull();
         if (stub!.data.task === 'same-perimeter') {

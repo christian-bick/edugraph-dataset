@@ -111,7 +111,7 @@ export class ShapePartitionGenerator implements ProblemGenerator<
         }
 
         const interpretsFraction = abilities.length === 1
-            && abilities[0] === Ability.ConceptDerivation
+            && abilities[0] === Ability.Interpretation
             && config.fractionNotation
             && !config.isLessComparison
             && fractionTypes.length === 1;

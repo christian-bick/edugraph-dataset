@@ -7,6 +7,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'time-elapsed',
     generalLabels: [
         Area.MeasuringTime,
+        Area.Difference,
         Scope.MinuteIntervals
     ]
 };

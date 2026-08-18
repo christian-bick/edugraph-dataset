@@ -9,7 +9,7 @@ const reconstructResult = (columns: readonly StandardAlgorithmColumnStep[]): num
     columns.reduce((value, column) => value + column.resultDigit * column.placeValue, 0);
 
 function expectExactColumns(problem: StandardAlgorithmProblem): void {
-    expect(problem.columns.length).toBeGreaterThanOrEqual(4);
+    expect(problem.columns.length).toBeGreaterThanOrEqual(3);
     expect(problem.columns.length).toBeLessThanOrEqual(6);
     expect(problem.columns[0].placeValue).toBe(1);
     expect(problem.columns.at(-1)!.regroupOut).toBe(0);
@@ -70,6 +70,13 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
                 expect(problem.questionEquation).toContain('?');
                 expect(problem.solutionEquation).toContain(problem.result.toLocaleString('en-US'));
                 expect(problem.explanation.length).toBeGreaterThan(0);
+                expect([problem.topValue, problem.bottomValue, problem.result].every(
+                    value => !String(value).includes('0')
+                )).toBe(true);
+                expect(problem.columns.every(column =>
+                    !column.calculation.includes('+ 0')
+                    && !column.calculation.includes('- 0')
+                )).toBe(true);
 
                 if (operation === 'addition') {
                     expect(problem.topValue + problem.bottomValue).toBe(problem.result);
@@ -79,6 +86,19 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
                 }
                 expectExactColumns(problem);
             }
+        }
+    );
+
+    it.each(['addition', 'subtraction'] as const)(
+        'supports a three-column Grade 3 %s problem',
+        operation => {
+            setSeed(`grade-3-${operation}`);
+            const stub = generator.generate({operation, range: {min: 101, max: 1000}});
+            expect(stub).not.toBeNull();
+            expect(stub!.data.columns).toHaveLength(3);
+            expect(stub!.data.topValue).toBeGreaterThanOrEqual(100);
+            expect(stub!.data.result).toBeLessThan(1000);
+            expectExactColumns(stub!.data);
         }
     );
 

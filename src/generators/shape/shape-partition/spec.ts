@@ -19,7 +19,8 @@ export const ShapePartitionGeneratorSchema = {
             Ability.ActiveVocabulary,
             Ability.ConceptComposition,
             Ability.ConceptDerivation,
-            Ability.Formalization
+            Ability.Formalization,
+            Ability.Interpretation
         ],
         matchAllExactLabels
     ],

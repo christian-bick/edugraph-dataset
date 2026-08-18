@@ -15,7 +15,7 @@ const builder = new DatasetPermutationBuilder()
         Scope.EqualShares,
         Scope.Equal,
         Scope.VisualNumbers,
-        Ability.ConceptDerivation
+        Ability.ConceptClassification
     ]);
 
 const wholeNumberBuilder = new DatasetPermutationBuilder()

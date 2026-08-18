@@ -6,7 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'operations-answer-reasonableness',
     generalLabels: [
         Scope.ArabicNumerals,
-        Ability.ConceptDerivation
+        Ability.PlausibilityEvaluation
     ],
     rejectedLabels: [
         ...deductAdmitting([Scope.NumbersLarger1000])

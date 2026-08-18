@@ -1,23 +1,27 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
-import { hasLabel } from '../../../../lib/resolvers.ts';
+import { matchAllExactLabels } from '../../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'time-analog',
     generalLabels: [
         Scope.AnalogClock,
         Scope.ArabicNumerals,
-        Ability.ProcedureExecution,
         Ability.VisualReception
     ]
 };
 
 
 export const TimeAnalogViewSchema = {
-    isReverse: [
-        [Ability.VisualArticulation],
-        hasLabel(Ability.VisualArticulation)
+    taskAbilities: [
+        [
+            Ability.ProcedureExecution,
+            Ability.VisualArticulation,
+            Ability.Interpretation,
+            Ability.Formalization
+        ],
+        matchAllExactLabels
     ]
 } as const;
 
