@@ -86,10 +86,24 @@ describe('ShapePartitionGenerator', () => {
                 expect(stub.data.shape).toBe(shape === Area.Circle ? 'circle' : 'rectangle');
                 if (stub.data.task === 'partition') {
                     expect([2, 4]).toContain(stub.data.parts);
+                    expect(stub.data.unitFraction).toBeNull();
                     seenParts.add(stub.data.parts);
                 }
             }
             expect(seenParts).toEqual(new Set([2, 4]));
+        }
+    });
+
+    it('authors the matching fraction constraint for unit-fraction partition targets', () => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const stub = generator.generate(config({
+                fractionTypes: [Scope.UnitFractions]
+            }))!;
+
+            expect(stub.data.task).toBe('partition');
+            if (stub.data.task !== 'partition') continue;
+            expect(stub.data.unitFraction).toBe(`1/${stub.data.parts}`);
         }
     });
 

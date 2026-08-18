@@ -272,18 +272,28 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
 
     switch (data.task) {
         case 'partition': {
-            validateProblemData('shape-partition-equal', data, ['parts']);
+            validateProblemData('shape-partition-equal', data, ['parts', 'unitFraction']);
             validateLegacyParts(data.parts);
+            const expectedUnitFraction = `1/${data.parts}`;
+            if (data.unitFraction !== null && data.unitFraction !== expectedUnitFraction) {
+                throw new ViewValidationError(
+                    'shape-partition-equal',
+                    'Expected a unit fraction matching the number of equal parts.'
+                );
+            }
+            const prompt = data.unitFraction === null
+                ? `Partition the shape into ${PART_WORDS[data.parts]} equal parts.`
+                : `Partition the shape into ${PART_WORDS[data.parts]} equal parts so each part is ${data.unitFraction} of the whole.`;
             return (
                 <ViewFrame>
-                    <PromptSlot isSolutionView={isSolutionView}>
-                        {`Partition the shape into ${PART_WORDS[data.parts]} equal parts.`}
-                    </PromptSlot>
+                    <PromptSlot isSolutionView={isSolutionView}>{prompt}</PromptSlot>
                     <div className="w-[420px] h-[260px] bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-center box-border">
                         <PartitionedShape shape={data.shape} parts={data.parts} showDivisions={isSolutionView} solvedHighlight={isSolutionView} />
                     </div>
                     <div className="h-[52px] px-6 rounded-xl bg-slate-100 text-[1.15rem] font-bold text-slate-600 flex items-center">
-                        {PART_WORDS[data.parts]} equal parts
+                        {data.unitFraction === null
+                            ? `${PART_WORDS[data.parts]} equal parts`
+                            : `Each part is ${data.unitFraction} of the whole`}
                     </div>
                 </ViewFrame>
             );

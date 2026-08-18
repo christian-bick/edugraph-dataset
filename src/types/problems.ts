@@ -2239,6 +2239,7 @@ export type ShapePartitionProblem =
         task: 'partition';
         shape: FractionShape;
         parts: 2 | 4;
+        unitFraction: '1/2' | '1/4' | null;
     }
     | {
         task: 'name-share';

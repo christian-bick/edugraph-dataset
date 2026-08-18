@@ -167,7 +167,16 @@ export class ShapePartitionGenerator implements ProblemGenerator<
 
         const parts = pickLegacyParts();
         if (task === 'partition') {
-            return {data: {task, shape, parts}};
+            return {
+                data: {
+                    task,
+                    shape,
+                    parts,
+                    unitFraction: fractionTypes[0] === Scope.UnitFractions
+                        ? `1/${parts}`
+                        : null
+                }
+            };
         }
 
         if (task === 'compose-whole') {
