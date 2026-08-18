@@ -35,6 +35,42 @@ export type ArithmeticFourProblem = ArithmeticProblemBase & {
 /** Shared payload accepted by arithmetic views that render both pairs and triples. */
 export type ArithmeticProblem = ArithmeticPairProblem | ArithmeticTripleProblem | ArithmeticFourProblem;
 
+export type StandardAlgorithmOperation = 'addition' | 'subtraction';
+
+export type StandardAlgorithmPlaceName =
+    | 'ones'
+    | 'tens'
+    | 'hundreds'
+    | 'thousands'
+    | 'ten-thousands'
+    | 'hundred-thousands';
+
+export type StandardAlgorithmColumnStep = {
+    placeValue: 1 | 10 | 100 | 1000 | 10000 | 100000;
+    placeName: StandardAlgorithmPlaceName;
+    topDigit: number;
+    bottomDigit: number;
+    regroupIn: 0 | 1;
+    regroupOut: 0 | 1;
+    workingValue: number;
+    resultDigit: number;
+    calculation: string;
+    regroupingRecord: string;
+};
+
+export type StandardAlgorithmProblem = {
+    task: 'standard-algorithm';
+    operation: StandardAlgorithmOperation;
+    topValue: number;
+    bottomValue: number;
+    result: number;
+    columns: readonly StandardAlgorithmColumnStep[];
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    explanation: string;
+};
+
 export type MultiplicativeComparisonProblem = {
     referenceQuantity: number;
     scaleFactor: number;
@@ -2587,6 +2623,7 @@ export type GeometryPrimitivesProblem = {
  */
 export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
+    'operations-standard-algorithm': StandardAlgorithmProblem;
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;

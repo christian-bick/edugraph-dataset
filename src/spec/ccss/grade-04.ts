@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -249,13 +245,6 @@ const standardAlgorithmAddSubtractBuilder = new DatasetPermutationBuilder()
         [Area.AdditionStandardAlgorithm],
         [Area.SubtractionStandardAlgorithm]
     ]);
-
-const standardAlgorithmImplementation = defineImplementationPackage({
-    id: 'integer-standard-algorithm-add-subtract',
-    description: 'Expose the aligned place-value steps and regrouping records of the standard addition and subtraction algorithms.',
-    generators: [{module: 'standard-algorithm-add-subtract', strategy: 'new'}],
-    views: [{module: 'operations-standard-algorithm', strategy: 'new'}]
-});
 
 const grade4MultiDigitMultiplicationBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -740,6 +729,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NBT.A.2-expanded-form', writeExpandedFormBuilder),
     ...toTargets('4.NBT.A.2-compare-multi-digit-numbers', compareMultiDigitNumbersBuilder),
     ...toTargets('4.NBT.A.3-round-to-any-place', grade4IntegerRoundingBuilder),
+    ...toTargets('4.NBT.B.4-standard-algorithm-add-subtract', standardAlgorithmAddSubtractBuilder),
     ...toTargets('4.NBT.B.5-multi-digit-multiplication', grade4MultiDigitMultiplicationBuilder),
     ...toTargets('4.NBT.B.6-multi-digit-division', grade4MultiDigitDivisionBuilder),
     ...toTargets('4.MD.A.1-relative-unit-sizes', relativeUnitSizesBuilder),
@@ -783,14 +773,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NF.C.7-compare-decimals', compareDecimalsBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '4.NBT.B.4-standard-algorithm-add-subtract',
-        standardAlgorithmAddSubtractBuilder,
-        standardAlgorithmImplementation,
-        'The current equation-only views do not expose aligned algorithm steps or regrouping records.'
-    )
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

@@ -1,0 +1,2 @@
+- **Identity:** A four- to six-column workspace aligns both operands under named base-ten places and visibly separates regrouping records, result digits, and per-column calculations.
+- **Modes:** Question Mode keeps the operands and place headings visible while every regrouping record, result digit, and column calculation is blank; Solution Mode reveals those records and calculations together with the completed equation and explanation.
