@@ -312,16 +312,6 @@ const placeValueComparisonBuilder = new DatasetPermutationBuilder()
         [Area.NumericEquality, Scope.Equal]
     ]);
 
-const placeValueArithmeticImplementation = defineImplementationPackage({
-    id: 'grade1-place-value-add-subtract',
-    description: 'Expand place-value arithmetic for Grade 1 operand shapes, conditional regrouping, written-method alignment, and explanation.',
-    generators: [{ module: 'place-value-arithmetic', strategy: 'expand' }],
-    views: [
-        { module: 'place-value-arithmetic-model', strategy: 'expand' },
-        { module: 'place-value-arithmetic-explanation', strategy: 'expand' }
-    ]
-});
-
 const addAdditionOperandVariants = (builder: DatasetPermutationBuilder): DatasetPermutationBuilder => builder
     .applyLabelVariants([
         [Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
@@ -711,7 +701,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
     ...toTargets('1.NBT.B.3-place-value-comparison', placeValueComparisonBuilder),
+    ...toTargets('1.NBT.C.4-concrete-place-value-addition', concretePlaceValueAdditionBuilder),
+    ...toTargets('1.NBT.C.4-model-to-written-method', modelToWrittenAdditionBuilder),
+    ...toTargets('1.NBT.C.4-explain-place-value-addition', explainPlaceValueAdditionBuilder),
     ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder),
+    ...toTargets('1.NBT.C.6-concrete-place-value-subtraction', concretePlaceValueSubtractionBuilder),
+    ...toTargets('1.NBT.C.6-model-to-written-method', modelToWrittenSubtractionBuilder),
+    ...toTargets('1.NBT.C.6-explain-place-value-subtraction', explainPlaceValueSubtractionBuilder),
     // 1.MD - Measurement and Data
     ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder),
     ...toTargets('1.MD.A.1-mediated-length-comparison', mediatedLengthComparisonBuilder),
@@ -733,42 +729,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '1.NBT.C.4-concrete-place-value-addition',
-        concretePlaceValueAdditionBuilder,
-        placeValueArithmeticImplementation,
-        'Show both operands as tens and ones, including composition of ten ones when required.'
-    ),
-    ...toImplementationTodos(
-        '1.NBT.C.4-model-to-written-method',
-        modelToWrittenAdditionBuilder,
-        placeValueArithmeticImplementation,
-        'Align the concrete place-value model with a complete written addition method.'
-    ),
-    ...toImplementationTodos(
-        '1.NBT.C.4-explain-place-value-addition',
-        explainPlaceValueAdditionBuilder,
-        placeValueArithmeticImplementation,
-        'Explain tens-with-tens, ones-with-ones, and any composed ten in authored steps.'
-    ),
-    ...toImplementationTodos(
-        '1.NBT.C.6-concrete-place-value-subtraction',
-        concretePlaceValueSubtractionBuilder,
-        placeValueArithmeticImplementation,
-        'Show tens bundles being removed or matched, including an equal-operands zero result.'
-    ),
-    ...toImplementationTodos(
-        '1.NBT.C.6-model-to-written-method',
-        modelToWrittenSubtractionBuilder,
-        placeValueArithmeticImplementation,
-        'Align the tens model with a complete written subtraction method.'
-    ),
-    ...toImplementationTodos(
-        '1.NBT.C.6-explain-place-value-subtraction',
-        explainPlaceValueSubtractionBuilder,
-        placeValueArithmeticImplementation,
-        'Explain subtraction through tens and the resulting positive or zero difference.'
-    ),
     ...toImplementationTodos(
         '1.MD.B.3-read-digital-time',
         digitalTimeReadingBuilder,

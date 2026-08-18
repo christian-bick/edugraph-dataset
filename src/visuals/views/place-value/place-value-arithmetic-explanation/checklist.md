@@ -1,3 +1,2 @@
-- **Identity:** A two-operand equation, separate hundreds/tens/ones evidence, and an explanation response area make the place-value strategy prompt assessable.
-- **Question mode:** The numerical answer and prose response are withheld, while the equation operands and place-value evidence remain visible.
-- **Solution mode:** The answer and three ordered strategy statements are revealed and mathematically agree with the equation.
+- **Identity:** A two-operand equation, each operand's relevant place values, and a written-response area elicit an explanation of a place-value arithmetic strategy.
+- **Modes:** Question Mode withholds the numerical answer and all authored reasoning; Solution Mode reveals the answer, regrouping evidence, and exactly three ordered reasoning steps. A positive whole-tens difference verbalizes trivial no-ones work, while a zero-result task retains explicit zero equations as evidence.

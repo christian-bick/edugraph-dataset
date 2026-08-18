@@ -1,4 +1,2 @@
-- **Identity:** Both operands are decomposed into visibly separate hundreds, tens, and ones blocks, with an explicit ones-place regrouping prompt.
-- **Question mode:** The regrouping result and answer are withheld while both complete operand models remain visible.
-- **Solution mode:** The regrouping statement and answer are revealed and agree with the unchanged models.
-- **Formalization:** When requested, the same operand values appear in a written arithmetic equation beneath the concrete model.
+- **Identity:** Both operands appear as separate place-value block models; the solution visibly combines, composes, matches, or removes the exact represented quantities and shows the resulting blocks.
+- **Modes:** Question Mode withholds the operation process and result while retaining both operands; Solution Mode reveals the process, result, and—when requested—a vertically aligned written method using the same quantities.

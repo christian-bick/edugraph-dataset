@@ -570,16 +570,38 @@ export type PlaceValueExpandedProblem =
 
 export type PlaceValueDigits = {hundreds: number; tens: number; ones: number};
 
+export type PlaceValueArithmeticOperandProfile =
+    | 'general'
+    | 'two-digit-single-digit'
+    | 'two-digit-multiple-of-ten'
+    | 'multiples-of-ten';
+
+export type PlaceValueRegroupingEvidence = {
+    kind: 'none' | 'compose-ten' | 'decompose-ten';
+    onesBefore: number;
+    onesAfter: number;
+    tensExchanged: 0 | 1;
+    statement: string;
+};
+
+export type PlaceValueArithmeticStep = {
+    kind: 'combine-ones' | 'compose-ten' | 'decompose-ten' | 'combine-tens' | 'subtract-ones' | 'subtract-tens' | 'result';
+    place: 'ones' | 'tens' | 'hundreds' | 'result';
+    equation: string;
+    explanation: string;
+};
+
 export type PlaceValueArithmeticProblem = {
     num1: number;
     num2: number;
     answer: number;
     operation: 'addition' | 'subtraction';
+    operandProfile: PlaceValueArithmeticOperandProfile;
     operands: [PlaceValueDigits, PlaceValueDigits];
     result: PlaceValueDigits;
-    regrouping: string;
+    regrouping: PlaceValueRegroupingEvidence;
     equation: string;
-    strategySteps: string[];
+    strategySteps: readonly [PlaceValueArithmeticStep, PlaceValueArithmeticStep, PlaceValueArithmeticStep];
 };
 
 export type PlaceValueName =

@@ -1,6 +1,6 @@
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {hasLabel, selectCanonicalLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -13,10 +13,10 @@ export const spec: GeneratorSpec = {
     generatorId: 'place-value-arithmetic',
     generalLabels: [
         Area.PlaceValue,
-        Area.IntegerRegrouping,
         Scope.TwoOperands,
         Scope.IntegerNumbers,
-        Scope.Base10
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives
     ]
 };
 
@@ -27,6 +27,26 @@ export const PlaceValueArithmeticGeneratorSchema = {
         Area.Addition,
         Area.Subtraction
     ], resolveOperation],
+    requireRegrouping: [
+        [Area.IntegerRegrouping],
+        hasLabel(Area.IntegerRegrouping)
+    ],
+    requireSingleDigitSmallest: [
+        [Scope.SingleDigitSmallestOperand],
+        hasLabel(Scope.SingleDigitSmallestOperand)
+    ],
+    requireTwoDigitLargest: [
+        [Scope.TwoDigitLargestOperand],
+        hasLabel(Scope.TwoDigitLargestOperand)
+    ],
+    requireMultipleOf10: [
+        [Scope.MultiplesOf10],
+        hasLabel(Scope.MultiplesOf10)
+    ],
+    requireZero: [
+        [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
+        hasLabel(Scope.NumbersWithZero)
+    ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
         resolveRangeFromLabels
