@@ -4,7 +4,7 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.ShapeProperties,
+        Scope.ShapeAttributes,
         Area.ShapeIdentity,
         Ability.VisualArticulation
     ])
@@ -22,12 +22,12 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Area.Circle],
-        [Area.Square],
-        [Area.Triangle],
-        [Area.Sphere],
-        [Area.Cube],
-        [Area.Cone]
+        [Area.Circle, Scope.TwoDimensional],
+        [Area.Square, Scope.TwoDimensional],
+        [Area.Triangle, Scope.TwoDimensional],
+        [Area.Sphere, Scope.ThreeDimensional],
+        [Area.Cube, Scope.ThreeDimensional],
+        [Area.Cone, Scope.ThreeDimensional]
     ]);
 
 const classifyAttributesBuilder = new DatasetPermutationBuilder()
@@ -83,9 +83,11 @@ const drawFromAttributesBuilder = new DatasetPermutationBuilder()
 
 const compareAttrBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.ShapeProperties,
+        Scope.ShapeAttributes,
         Area.ShapeIdentity,
         Area.NumericComparison,
+        Area.ShapeRotationConservation,
+        Area.ShapeResizingConservation,
         Ability.VisualReception
     ])
     .applyLabelVariants([
@@ -93,7 +95,11 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
         [Area.Square],
         [Area.Rectangle],
         [Area.Hexagon],
-        [Area.Circle]
+        [Area.Circle],
+        [Area.Cube],
+        [Area.Cone],
+        [Area.Cylinder],
+        [Area.Sphere]
     ]);
 
 const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
@@ -130,6 +136,7 @@ const identityNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeNaming,
         Area.ShapeRotationConservation,
+        Area.ShapeResizingConservation,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([

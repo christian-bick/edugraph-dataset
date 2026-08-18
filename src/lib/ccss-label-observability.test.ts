@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { Ability, Area, Scope } from 'edugraph-ts';
-import { spec as kindergarten } from '../spec/ccss/kindergarten.ts';
+import {
+    implementationTodos as kindergartenImplementationTodos,
+    spec as kindergarten
+} from '../spec/ccss/kindergarten.ts';
 import { spec as gradeOne } from '../spec/ccss/grade-01.ts';
 
 const targets = (spec: typeof kindergarten, idPrefix: string) =>
@@ -87,7 +90,10 @@ describe('CCSS observable-label contracts', () => {
     });
 
     it('uses drawing labels rather than coordinate-plane plotting for shape tracing', () => {
-        const drawingTargets = targets(kindergarten, 'K.G.B.5-draw-shapes');
+        const drawingTargets = targets(
+            [...kindergarten, ...kindergartenImplementationTodos],
+            'K.G.B.5-draw-shapes'
+        );
 
         expectAll(drawingTargets, [Area.ShapeRotationConservation, Ability.VisualArticulation]);
         expectNone(drawingTargets, [Area.ShapePlotting]);

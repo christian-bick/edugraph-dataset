@@ -1,4 +1,8 @@
-import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {
+    defineImplementationPackage,
+    toImplementationTodos,
+    toTargets
+} from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -406,6 +410,7 @@ const shapeNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeNaming,
         Area.ShapeRotationConservation,
+        Area.ShapeResizingConservation,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -428,15 +433,15 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Area.Circle],
-        [Area.Square],
-        [Area.Rectangle],
-        [Area.Triangle],
-        [Area.Hexagon],
-        [Area.Cube],
-        [Area.Cone],
-        [Area.Cylinder],
-        [Area.Sphere]
+        [Area.Circle, Scope.TwoDimensional],
+        [Area.Square, Scope.TwoDimensional],
+        [Area.Rectangle, Scope.TwoDimensional],
+        [Area.Triangle, Scope.TwoDimensional],
+        [Area.Hexagon, Scope.TwoDimensional],
+        [Area.Cube, Scope.ThreeDimensional],
+        [Area.Cone, Scope.ThreeDimensional],
+        [Area.Cylinder, Scope.ThreeDimensional],
+        [Area.Sphere, Scope.ThreeDimensional]
     ]);
 
 // --- K.G.B.4: Analyze and compare shapes ---
@@ -444,7 +449,9 @@ const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
         Area.NumericComparison,
-        Scope.ShapeProperties,
+        Area.ShapeRotationConservation,
+        Area.ShapeResizingConservation,
+        Scope.ShapeAttributes,
         Ability.VisualReception
     ])
     .applyLabelVariants([
@@ -452,7 +459,11 @@ const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
         [Area.Square],
         [Area.Rectangle],
         [Area.Hexagon],
-        [Area.Circle]
+        [Area.Circle],
+        [Area.Cube],
+        [Area.Cone],
+        [Area.Cylinder],
+        [Area.Sphere]
     ]);
 
 // --- K.G.B.4: Find shapes sharing an attribute ---
@@ -471,7 +482,7 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
 const buildShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeIdentity,
-        Scope.ShapeProperties,
+        Scope.ShapeAttributes,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
@@ -516,6 +527,37 @@ const composeShapesOtherBuilder = new DatasetPermutationBuilder()
         [Area.Hexagon]
     ]);
 
+const shapeNamingVariationImplementation = defineImplementationPackage({
+    id: 'kindergarten-shape-naming-invariance',
+    description: 'Show the same named shape at observably different rotations and sizes.',
+    generators: [{ module: 'shape-identity', strategy: 'reuse' }],
+    views: [{ module: 'shape-naming', strategy: 'expand' }]
+});
+
+const shapeDimensionImplementation = defineImplementationPackage({
+    id: 'kindergarten-shape-dimensional-classification',
+    description: 'Consume an explicit two- or three-dimensional scope and validate it against the selected shape.',
+    generators: [{ module: 'shape-classify-dim', strategy: 'expand' }],
+    views: [{ module: 'shape-classify-dim', strategy: 'expand' }]
+});
+
+const shapeAttributeComparisonImplementation = defineImplementationPackage({
+    id: 'kindergarten-shape-attribute-comparison',
+    description: 'Compare visible structural attributes of two- and three-dimensional shapes shown at different rotations and sizes.',
+    generators: [{ module: 'shape-compare-attributes', strategy: 'expand' }],
+    views: [{ module: 'shape-compare-attributes', strategy: 'expand' }]
+});
+
+const shapeConstructionImplementation = defineImplementationPackage({
+    id: 'kindergarten-shape-construction-and-drawing',
+    description: 'Make building visibly assemble supplied components and make drawing use an initially blank response workspace.',
+    generators: [{ module: 'shape-build-shape', strategy: 'expand' }],
+    views: [
+        { module: 'shape-build-shape', strategy: 'expand' },
+        { module: 'shape-draw-shape', strategy: 'expand' }
+    ]
+});
+
 // Standard exports following universal convention
 export const spec: CompetencyTarget[] = [
     // K.CC - Counting and Cardinality
@@ -548,17 +590,43 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('K.G.A.1-env-shapes-other', envShapesOtherBuilder),
     ...toTargets('K.G.A.1-positions', positionsBuilder),
     ...toTargets('K.G.A.1-positions-ahead', positionsAheadBuilder),
-    ...toTargets('K.G.A.2-shape-naming', shapeNamingBuilder),
-    ...toTargets('K.G.A.3-classify-dim', classifyDimBuilder),
-    ...toTargets('K.G.B.4-compare-shape-attributes', compareShapeAttributesBuilder),
     ...toTargets('K.G.B.4-same-attribute', sameAttributeBuilder),
-    ...toTargets('K.G.B.5-build-shapes', buildShapesBuilder),
-    ...toTargets('K.G.B.5-draw-shapes', drawShapesBuilder),
     ...toTargets('K.G.B.6-compose-shapes', composeShapesBuilder),
     ...toTargets('K.G.B.6-compose-shapes-other', composeShapesOtherBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [];
+export const implementationTodos: ImplementationTodo[] = [
+    ...toImplementationTodos(
+        'K.G.A.2-shape-naming',
+        shapeNamingBuilder,
+        shapeNamingVariationImplementation,
+        'Require both orientation and overall size to vary while the shape name remains invariant.'
+    ),
+    ...toImplementationTodos(
+        'K.G.A.3-classify-dim',
+        classifyDimBuilder,
+        shapeDimensionImplementation,
+        'Require the generated shape and explicit dimensional scope to agree.'
+    ),
+    ...toImplementationTodos(
+        'K.G.B.4-compare-shape-attributes',
+        compareShapeAttributesBuilder,
+        shapeAttributeComparisonImplementation,
+        'Compare a visible structural attribute across varied two- and three-dimensional shapes.'
+    ),
+    ...toImplementationTodos(
+        'K.G.B.5-build-shapes',
+        buildShapesBuilder,
+        shapeConstructionImplementation,
+        'Present loose components in Question Mode and their assembled shape in Solution Mode.'
+    ),
+    ...toImplementationTodos(
+        'K.G.B.5-draw-shapes',
+        drawShapesBuilder,
+        shapeConstructionImplementation,
+        'Keep the reference identifiable while withholding the learner drawing in Question Mode.'
+    )
+];
 
 export const ontologyTodos: OntologyTodo[] = [];
 
