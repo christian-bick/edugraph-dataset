@@ -1,79 +1,19 @@
 import {
-    DecimalFractionValue,
     TenthsHundredthsAdditionProblem,
     TenthsHundredthsGridGroup,
-    TenthsHundredthsGridModel,
     TenthsToHundredthsProblem
 } from '../../../types/problems.ts';
+import {TenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
+import {
+    isValidDecimalFraction,
+    isValidTenthsHundredthsGrid
+} from '../../helpers/tenths-hundredths-grid.ts';
 
-const EPSILON = 0.001;
-
-export const isValidDecimalFraction = (
-    value: DecimalFractionValue,
-    denominator: 10 | 100
-): boolean => typeof value === 'object'
-    && value !== null
-    && Number.isInteger(value.numerator)
-    && value.numerator > 0
-    && value.numerator <= denominator
-    && value.denominator === denominator
-    && value.notation === `${value.numerator}/${denominator}`;
-
-const closeTo = (actual: number, expected: number): boolean =>
-    Number.isFinite(actual) && Math.abs(actual - expected) < EPSILON;
-
-export const isValidTenthsHundredthsGrid = (
-    model: TenthsHundredthsGridModel,
-    value: DecimalFractionValue,
-    expectedGroups: readonly TenthsHundredthsGridGroup[] = []
-): boolean => {
-    if (typeof value !== 'object'
-        || value === null
-        || (value.denominator !== 10 && value.denominator !== 100)) return false;
-    const denominator = value.denominator;
-    const rows = denominator === 10 ? 1 : 10;
-    if (typeof model !== 'object'
-        || model === null
-        || model.display !== value.notation
-        || model.rows !== rows
-        || model.columns !== 10
-        || model.partCount !== denominator
-        || model.shadedCount !== value.numerator
-        || !Array.isArray(model.groups)
-        || model.groups.length !== expectedGroups.length
-        || !model.groups.every((group, index) => {
-            const expected = expectedGroups[index];
-            return typeof group === 'object'
-                && group !== null
-                && expected !== undefined
-                && group.source === expected.source
-                && group.label === expected.label
-                && group.startCell === expected.startCell
-                && group.cellCount === expected.cellCount;
-        })
-        || !Array.isArray(model.cells)
-        || model.cells.length !== denominator) return false;
-
-    return model.cells.every((cell, index) => {
-        const column = denominator === 10 ? index : Math.floor(index / 10);
-        const row = denominator === 10 ? 0 : index % 10;
-        const source = expectedGroups.find(group =>
-            index >= group.startCell && index < group.startCell + group.cellCount
-        )?.source ?? null;
-        return typeof cell === 'object'
-            && cell !== null
-            && cell.index === index
-            && cell.row === row
-            && cell.column === column
-            && cell.tenthGroupIndex === column
-            && closeTo(cell.xPercent, column * 10)
-            && closeTo(cell.yPercent, row * (denominator === 10 ? 100 : 10))
-            && cell.widthPercent === 10
-            && cell.heightPercent === (denominator === 10 ? 100 : 10)
-            && cell.shaded === (index < value.numerator)
-            && cell.source === source;
-    });
-};
+export {TenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
+export {
+    isValidDecimalFraction,
+    isValidTenthsHundredthsGrid
+} from '../../helpers/tenths-hundredths-grid.ts';
 
 export const isValidTenthsToHundredthsProblem = (
     data: TenthsToHundredthsProblem
@@ -222,81 +162,6 @@ export const isValidTenthsHundredthsAdditionProblem = (
         )
         && isValidTenthsHundredthsGrid(data.solutionModels.result, result, resultGroups);
 };
-
-export const TenthsHundredthsGrid = ({
-    model,
-    title,
-    ariaLabel,
-    showDisplay = true,
-    compact = false
-}: {
-    model: TenthsHundredthsGridModel;
-    title: string;
-    ariaLabel: string;
-    showDisplay?: boolean;
-    compact?: boolean;
-}) => (
-    <div
-        className={`rounded-xl border-2 border-slate-200 bg-white ${compact ? 'p-3' : 'p-4'}`}
-        role="img"
-        aria-label={ariaLabel}
-    >
-        <div className="mb-3 flex items-center justify-between gap-3">
-            <span className="text-sm font-extrabold uppercase tracking-[0.08em] text-slate-600">
-                {title}
-            </span>
-            {showDisplay && (
-                <span className="rounded-full bg-slate-100 px-3 py-1 font-mono text-sm font-bold text-slate-700">
-                    {model.display}
-                </span>
-            )}
-        </div>
-        <div className={`relative mx-auto overflow-hidden rounded-lg border-[3px] border-slate-700 bg-white ${
-            compact ? 'h-[150px] w-[300px]' : 'h-[190px] w-[380px]'
-        }`} aria-hidden="true">
-            {model.cells.map(cell => (
-                <div
-                    key={cell.index}
-                    className={`absolute border-slate-500 ${
-                        cell.source === 'second-addend'
-                            ? 'bg-amber-300'
-                            : cell.shaded
-                                ? 'bg-sky-300'
-                                : 'bg-white'
-                    }`}
-                    style={{
-                        left: `${cell.xPercent}%`,
-                        top: `${cell.yPercent}%`,
-                        width: `${cell.widthPercent}%`,
-                        height: `${cell.heightPercent}%`,
-                        borderLeftWidth: cell.column === 0 ? 0 : 2,
-                        borderTopWidth: cell.row === 0 ? 0 : 1
-                    }}
-                />
-            ))}
-        </div>
-        <div className="mt-2 text-center text-xs font-bold text-slate-500">
-            {model.rows} × {model.columns} grid · {model.partCount} equal parts
-        </div>
-        {model.groups.length > 0 && (
-            <div className="mt-2 flex flex-wrap justify-center gap-2">
-                {model.groups.map(group => (
-                    <span
-                        key={`${group.source}-${group.startCell}`}
-                        className={`rounded-full border px-2.5 py-1 text-xs font-bold ${
-                            group.source === 'first-addend'
-                                ? 'border-sky-600 bg-sky-100 text-sky-950'
-                                : 'border-amber-600 bg-amber-100 text-amber-950'
-                        }`}
-                    >
-                        {group.source === 'first-addend' ? 'First addend: ' : 'Second addend: '}
-                        {group.label}
-                    </span>
-                ))}
-            </div>
-        )}
-    </div>
-);
 
 export const TenthsToHundredthsModel = ({
     data,

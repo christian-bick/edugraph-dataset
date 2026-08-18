@@ -1931,6 +1931,95 @@ export type TenthsHundredthsAdditionProblem = {
     explanation: string;
 };
 
+export type DecimalNotationValue = {
+    numerator: number;
+    denominator: 10 | 100;
+    fractionNotation: string;
+    decimalNotation: string;
+    precision: 'tenths' | 'hundredths';
+    wholeDigit: 0;
+    tenthsDigit: number;
+    hundredthsDigit: number | null;
+    hundredthsNumerator: number;
+};
+
+export type DecimalPlaceValueColumn = {
+    place: 'ones' | 'tenths' | 'hundredths';
+    digit: number;
+    unitFraction: '1' | '1/10' | '1/100';
+};
+
+export type DecimalNotationTask = {
+    unknown: 'decimal' | 'fraction';
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
+export type DecimalScaleTick = {
+    index: number;
+    xPercent: number;
+    kind: 'endpoint' | 'major' | 'minor';
+    label: string;
+};
+
+export type DecimalNotationProblem = {
+    task: 'decimal-notation';
+    sharedWhole: 1;
+    relation: 'equal';
+    value: DecimalNotationValue;
+    equality: string;
+    placeValue: {
+        columns: [DecimalPlaceValueColumn, DecimalPlaceValueColumn, DecimalPlaceValueColumn];
+        placeValueEquation: string;
+    };
+    models: {
+        fractionGrid: TenthsHundredthsGridModel;
+        hundredthsGrid: TenthsHundredthsGridModel;
+    };
+    notationTasks: {
+        fractionToDecimal: DecimalNotationTask & {unknown: 'decimal'};
+        decimalToFraction: DecimalNotationTask & {unknown: 'fraction'};
+    };
+    numberLine: {
+        prompt: string;
+        start: 0;
+        end: 1;
+        subdivisionCount: 10 | 100;
+        ticks: DecimalScaleTick[];
+        point: {
+            tickIndex: number;
+            xPercent: number;
+            label: string;
+        };
+        answerStatement: string;
+        explanation: string;
+    };
+    measurement: {
+        prompt: string;
+        unit: 'meter';
+        unitSymbol: 'm';
+        start: 0;
+        end: 1;
+        subdivisionCount: 10 | 100;
+        ticks: DecimalScaleTick[];
+        measuredEndpoint: {
+            tickIndex: number;
+            xPercent: number;
+        };
+        fractionalMeasure: string;
+        decimalMeasure: string;
+        questionEquation: string;
+        solutionEquation: string;
+        answer: string;
+        answerStatement: string;
+        explanation: string;
+    };
+};
+
 export type FractionArithmeticProblem =
     | FractionBinaryOperationProblem
     | FractionDecompositionProblem
@@ -2576,5 +2665,8 @@ export interface ViewTypeMap {
     'fractions-compare-models': FractionComparisonProblem;
     'fractions-operation-model': FractionArithmeticProblem;
     'fractions-word-problem': FractionArithmeticProblem;
+    'numbers-decimal-notation': DecimalNotationProblem;
+    'numbers-decimal-line': DecimalNotationProblem;
+    'numbers-decimal-measurement': DecimalNotationProblem;
     'shape-draw-shape': ShapeBuildShapeProblem;
 }

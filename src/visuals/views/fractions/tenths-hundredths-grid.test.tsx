@@ -4,6 +4,7 @@ import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
 import {FractionEquivalenceGenerator} from '../../../generators/fraction/fraction-equivalence/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {TenthsHundredthsGrid as SharedTenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
 import {
     TenthsHundredthsAdditionProblem,
     TenthsToHundredthsProblem
@@ -12,6 +13,7 @@ import {FractionArithmeticWork} from './fraction-arithmetic-components.tsx';
 import {
     isValidTenthsHundredthsAdditionProblem,
     isValidTenthsToHundredthsProblem,
+    TenthsHundredthsGrid as CompatibilityTenthsHundredthsGrid,
     TenthsToHundredthsModel
 } from './tenths-hundredths-grid.tsx';
 
@@ -42,6 +44,10 @@ const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view'): Tenth
 };
 
 describe('tenths/hundredths view contract', () => {
+    it('keeps the legacy category export on the identical shared renderer', () => {
+        expect(CompatibilityTenthsHundredthsGrid).toBe(SharedTenthsHundredthsGrid);
+    });
+
     it('accepts generator-supplied 1×10 and 10×10 shared-whole models', () => {
         let sawWholeEquivalence = false;
         let sawOneHundredth = false;

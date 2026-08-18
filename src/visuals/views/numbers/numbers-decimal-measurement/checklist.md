@@ -1,0 +1,2 @@
+- **Identity:** A one-meter scale aligns the supplied fractional length and decimal endpoint on the same subdivided reference.
+- **Modes:** Question Mode shows the measured fractional length and unit while withholding its decimal notation; Solution Mode reveals the decimal measure, equality, and unit-based explanation.

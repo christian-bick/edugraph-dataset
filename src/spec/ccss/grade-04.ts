@@ -16,17 +16,6 @@ import {
 // Implementation packages
 // ==========================================
 
-const decimalNotationGrade4Implementation = defineImplementationPackage({
-    id: 'decimal-notation-grade4',
-    description: 'Relate denominator-ten or denominator-hundred fractions to decimals, measurements, and number-line locations.',
-    generators: [{ module: 'decimal-notation', strategy: 'new' }],
-    views: [
-        { module: 'numbers-decimal-notation', strategy: 'new' },
-        { module: 'numbers-decimal-line', strategy: 'new' },
-        { module: 'numbers-decimal-measurement', strategy: 'new' }
-    ]
-});
-
 const decimalComparisonGrade4Implementation = defineImplementationPackage({
     id: 'decimal-comparison-grade4',
     description: 'Compare decimals to hundredths within the same whole and justify the comparison with visible place-value evidence.',
@@ -678,7 +667,12 @@ const fractionDecimalConversionBuilder = new DatasetPermutationBuilder()
         Area.DecimalNotation,
         Area.DecimalEquivalence,
         Area.FractionNotation,
-        Scope.DecimalNumbers
+        Scope.DecimalNumbers,
+        Scope.FractionNumbers,
+        Scope.EqualShares,
+        Scope.Equal,
+        Scope.SingleFrameOfReference,
+        Scope.VisualNumbers
     ])
     .applyLabelVariants([[Ability.Formalization], [Ability.Interpretation]]);
 
@@ -687,14 +681,22 @@ const decimalNumberLineBuilder = new DatasetPermutationBuilder().addLabels([
     Area.DecimalNotation,
     Scope.DecimalNumbers,
     Scope.Numberline,
+    Scope.SingleFrameOfReference,
     Ability.VisualArticulation
 ]);
 
 const decimalMeasurementNotationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.DecimalNotation,
     Area.DecimalEquivalence,
+    Area.FractionNotation,
     Area.MeasuringWithUnits,
     Scope.DecimalNumbers,
+    Scope.FractionNumbers,
+    Scope.LengthMeasurement,
+    Scope.MeterScale,
+    Scope.EqualShares,
+    Scope.Equal,
+    Scope.SingleFrameOfReference,
     Ability.Formalization
 ]);
 
@@ -770,13 +772,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NF.B.4b-whole-number-fraction-products', wholeNumberFractionMultiplicationBuilder),
     ...toTargets('4.NF.B.4c-fraction-multiplication-word-problems', fractionMultiplicationWordProblemsBuilder),
     ...toTargets('4.NF.C.5-tenths-to-hundredths', tenthsToHundredthsBuilder),
-    ...toTargets('4.NF.C.5-add-tenths-hundredths', addTenthsHundredthsBuilder)
+    ...toTargets('4.NF.C.5-add-tenths-hundredths', addTenthsHundredthsBuilder),
+    ...toTargets('4.NF.C.6-fraction-decimal-conversion', fractionDecimalConversionBuilder),
+    ...toTargets('4.NF.C.6-decimal-number-line', decimalNumberLineBuilder),
+    ...toTargets('4.NF.C.6-decimal-measurement-notation', decimalMeasurementNotationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NF.C.6-fraction-decimal-conversion', fractionDecimalConversionBuilder, decimalNotationGrade4Implementation, 'Show the fraction, decimal, place-value evidence, equality, and prompted conversion direction.'),
-    ...toImplementationTodos('4.NF.C.6-decimal-number-line', decimalNumberLineBuilder, decimalNotationGrade4Implementation, 'Show tenths or hundredths tick spacing, the decimal label, and plotted location.'),
-    ...toImplementationTodos('4.NF.C.6-decimal-measurement-notation', decimalMeasurementNotationBuilder, decimalNotationGrade4Implementation, 'Show equivalent fractional and decimal measures with a concrete unit.'),
     ...toImplementationTodos('4.NF.C.7-compare-decimals', compareDecimalsBuilder, decimalComparisonGrade4Implementation, 'Show same-whole decimal models or place values, hundredths precision, the comparison symbol, and justification.')
 ];
 

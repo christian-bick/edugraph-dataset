@@ -1,0 +1,2 @@
+- **Identity:** One shared whole aligns the supplied equal-parts model, fraction notation, decimal place-value columns, and conversion direction.
+- **Modes:** Question Mode shows the given notation and visual amount while withholding only the requested equivalent notation; Solution Mode reveals the complete equality and place-value explanation.
