@@ -53,13 +53,6 @@ const propertiesBuilder = new DatasetPermutationBuilder()
         [Area.AssociativeLaw]
     ]);
 
-const arithmeticStrategyImplementation = defineImplementationPackage({
-    id: 'grade1-add-subtract-strategies',
-    description: 'Expand visible addition and subtraction strategy support within 20.',
-    generators: [{ module: 'integer-add-subtract-strategies', strategy: 'expand' }],
-    views: [{ module: 'operations-add-subtract-strategy', strategy: 'expand' }]
-});
-
 const arithmeticStrategyConstraints = [
     Scope.TwoOperands,
     Scope.ArabicNumerals,
@@ -702,8 +695,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.OA.A.1-word-problems', wordProblemsBuilder),
     ...toTargets('1.OA.A.2-three-addend-word-problems', threeAddendsBuilder),
     ...toTargets('1.OA.B.3-properties', propertiesBuilder),
+    ...toTargets('1.OA.B.4-unknown-addend-strategy', unknownAddendStrategyBuilder),
+    ...toTargets('1.OA.C.5-counting-operation-relationship', relateCountingStrategyBuilder),
     ...toTargets('1.OA.C.6-fluency', fluencyBuilder),
+    ...toTargets('1.OA.C.6-addition-counting-on', additionCountingOnBuilder),
+    ...toTargets('1.OA.C.6-addition-make-ten', additionMakeTenBuilder),
     ...toTargets('1.OA.C.6-subtraction-make-ten', subtractionMakeTenBuilder),
+    ...toTargets('1.OA.C.6-subtraction-think-addition', subtractionThinkAdditionBuilder),
+    ...toTargets('1.OA.C.6-addition-near-doubles', additionNearDoublesBuilder),
     ...toTargets('1.OA.D.7-equal-sign', equalSignBuilder),
     ...toTargets('1.OA.D.8-unknown-number', unknownNumberBuilder),
     ...toTargets('1.OA.D.8-unknown-operand', unknownOperandBuilder),
@@ -737,42 +736,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '1.OA.B.4-unknown-addend-strategy',
-        unknownAddendStrategyBuilder,
-        arithmeticStrategyImplementation,
-        'Show subtraction transformed into its related missing-addend equation and solved by counting up.'
-    ),
-    ...toImplementationTodos(
-        '1.OA.C.5-counting-operation-relationship',
-        relateCountingStrategyBuilder,
-        arithmeticStrategyImplementation,
-        'Explicitly connect a count sequence to its corresponding addition or subtraction equation.'
-    ),
-    ...toImplementationTodos(
-        '1.OA.C.6-addition-counting-on',
-        additionCountingOnBuilder,
-        arithmeticStrategyImplementation,
-        'Show visible count-on steps beginning at one addend and ending at the sum.'
-    ),
-    ...toImplementationTodos(
-        '1.OA.C.6-addition-make-ten',
-        additionMakeTenBuilder,
-        arithmeticStrategyImplementation,
-        'Decompose one addend, form ten, and add the remainder in visible steps.'
-    ),
-    ...toImplementationTodos(
-        '1.OA.C.6-subtraction-think-addition',
-        subtractionThinkAdditionBuilder,
-        arithmeticStrategyImplementation,
-        'Show the related missing-addend equation and the count-up decomposition.'
-    ),
-    ...toImplementationTodos(
-        '1.OA.C.6-addition-near-doubles',
-        additionNearDoublesBuilder,
-        arithmeticStrategyImplementation,
-        'Transform a near-double into a known double plus or minus one.'
-    ),
     ...toImplementationTodos(
         '1.NBT.B.3-place-value-comparison',
         placeValueComparisonBuilder,
@@ -848,4 +811,7 @@ export const beyondScope: BeyondScopeEntry[] = [];
 export const equivalentTargets: TargetEquivalence[] = [{
     targets: ['1.OA.C.6-subtraction-make-ten', '2.OA.B.2-subtraction-make-ten'],
     reason: 'Both standards require the same observable within-20 subtraction strategy: decompose the subtrahend, reach ten, and subtract the remainder.'
+}, {
+    targets: ['1.OA.B.4-unknown-addend-strategy', '1.OA.C.6-subtraction-think-addition'],
+    reason: 'Both competency slices require the same observable strategy: rewrite subtraction as a missing-addend equation and determine that addend within 20.'
 }];

@@ -18,6 +18,10 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
 
     it('declares only invariant mathematical capabilities as general labels', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining(invariantLabels));
+        expect(spec.generalLabels).not.toContain(Area.AdditionCountingOn);
+        expect(spec.generalLabels).not.toContain(Area.SubtractionCountingBack);
+        expect(spec.generalLabels).not.toContain(Area.AdditionMakeTen);
+        expect(spec.generalLabels).not.toContain(Area.AdditionNearDoubles);
         expect(spec.generalLabels).not.toContain(Area.AdditionCompensation);
         expect(spec.generalLabels).not.toContain(Area.SubtractionCompensation);
         expect(spec.generalLabels).not.toContain(Area.SubtractionMakeTen);
@@ -25,6 +29,10 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
     });
 
     it.each([
+        [Area.AdditionCountingOn, 'addition-counting-on'],
+        [Area.SubtractionCountingBack, 'subtraction-counting-back'],
+        [Area.AdditionMakeTen, 'addition-make-ten'],
+        [Area.AdditionNearDoubles, 'addition-near-doubles'],
         [Area.AdditionCompensation, 'addition-compensation'],
         [Area.SubtractionCompensation, 'subtraction-compensation'],
         [Area.SubtractionMakeTen, 'subtraction-make-ten'],
@@ -47,5 +55,33 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
             strategyLabel,
             Scope.NumbersSmaller1000
         ]));
+    });
+
+    it.each([
+        [Area.AdditionCountingOn, 'addition-counting-on', Scope.NumbersSmaller10],
+        [Area.AdditionCountingOn, 'addition-counting-on', Scope.NumbersSmaller20],
+        [Area.SubtractionCountingBack, 'subtraction-counting-back', Scope.NumbersSmaller10],
+        [Area.SubtractionCountingBack, 'subtraction-counting-back', Scope.NumbersSmaller20],
+        [Area.AdditionNearDoubles, 'addition-near-doubles', Scope.NumbersSmaller10],
+        [Area.AdditionNearDoubles, 'addition-near-doubles', Scope.NumbersSmaller20],
+        [Area.AdditionMakeTen, 'addition-make-ten', Scope.NumbersSmaller20],
+        [Area.SubtractionMakeTen, 'subtraction-make-ten', Scope.NumbersSmaller20],
+        [Area.SubtractionThinkAddition, 'subtraction-think-addition', Scope.NumbersSmaller20]
+    ] as const)('resolves Grade 1 %s as %s for %s', (strategyLabel, strategy, rangeLabel) => {
+        setSeed(`${strategy}-${rangeLabel}`);
+        const stub = generateWithLabels(generator, [
+            strategyLabel,
+            ...invariantLabels,
+            Scope.ArabicNumerals,
+            rangeLabel
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.strategy).toBe(strategy);
+        const upperBound = rangeLabel === Scope.NumbersSmaller10 ? 10 : 20;
+        expect(stub!.data.leftOperand).toBeLessThan(upperBound);
+        expect(stub!.data.rightOperand).toBeLessThan(upperBound);
+        expect(stub!.data.answer).toBeLessThan(upperBound);
+        expect(stub!.tags).toEqual(expect.arrayContaining([strategyLabel, rangeLabel]));
     });
 });

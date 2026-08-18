@@ -5,6 +5,10 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
 const resolveStrategy = selectCanonicalLabel([
+    [[Area.AdditionCountingOn], 'addition-counting-on'],
+    [[Area.SubtractionCountingBack], 'subtraction-counting-back'],
+    [[Area.AdditionMakeTen], 'addition-make-ten'],
+    [[Area.AdditionNearDoubles], 'addition-near-doubles'],
     [[Area.AdditionCompensation], 'addition-compensation'],
     [[Area.SubtractionCompensation], 'subtraction-compensation'],
     [[Area.SubtractionMakeTen], 'subtraction-make-ten'],
@@ -24,6 +28,10 @@ export const spec: GeneratorSpec = {
 
 export const IntegerAddSubtractStrategiesGeneratorSchema = {
     strategy: [[
+        Area.AdditionCountingOn,
+        Area.SubtractionCountingBack,
+        Area.AdditionMakeTen,
+        Area.AdditionNearDoubles,
         Area.AdditionCompensation,
         Area.SubtractionCompensation,
         Area.SubtractionMakeTen,

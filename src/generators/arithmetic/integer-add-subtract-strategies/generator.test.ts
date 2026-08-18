@@ -18,7 +18,8 @@ const expectCommonInvariants = (problem: IntegerAddSubtractStrategyProblem): voi
     expect(problem.answer).toBeLessThan(1000);
     expect(problem.adjustment).toBeGreaterThanOrEqual(1);
     expect(problem.adjustment).toBeLessThanOrEqual(9);
-    expect(problem.steps).toHaveLength(3);
+    expect(problem.steps.length).toBeGreaterThanOrEqual(1);
+    expect(problem.steps.length).toBeLessThanOrEqual(3);
     expect(problem.steps.every(step => step.includes(' = '))).toBe(true);
     expect(problem.questionEquation).toContain('?');
     expect(problem.solutionEquation).toContain(`= ${problem.answer}`);
@@ -28,6 +29,62 @@ const expectCommonInvariants = (problem: IntegerAddSubtractStrategyProblem): voi
 
 const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void => {
     const {leftOperand, rightOperand, answer, adjustment} = problem;
+
+    if (problem.strategy === 'addition-counting-on') {
+        expect(problem.operation).toBe('addition');
+        expect(rightOperand).toBeGreaterThanOrEqual(1);
+        expect(rightOperand).toBeLessThanOrEqual(3);
+        expect(adjustment).toBe(rightOperand);
+        expect(answer).toBe(leftOperand + rightOperand);
+        expect(problem.steps).toEqual(Array.from(
+            {length: rightOperand},
+            (_, index) => `${leftOperand + index} + 1 = ${leftOperand + index + 1}`
+        ));
+        return;
+    }
+
+    if (problem.strategy === 'subtraction-counting-back') {
+        expect(problem.operation).toBe('subtraction');
+        expect(rightOperand).toBeGreaterThanOrEqual(1);
+        expect(rightOperand).toBeLessThanOrEqual(3);
+        expect(adjustment).toBe(rightOperand);
+        expect(answer).toBe(leftOperand - rightOperand);
+        expect(problem.steps).toEqual(Array.from(
+            {length: rightOperand},
+            (_, index) => `${leftOperand - index} − 1 = ${leftOperand - index - 1}`
+        ));
+        return;
+    }
+
+    if (problem.strategy === 'addition-make-ten') {
+        const remainder = rightOperand - adjustment;
+        expect(problem.operation).toBe('addition');
+        expect(leftOperand).toBeGreaterThanOrEqual(6);
+        expect(leftOperand).toBeLessThan(10);
+        expect(answer).toBe(leftOperand + rightOperand);
+        expect(adjustment).toBe(10 - leftOperand);
+        expect(remainder).toBeGreaterThan(0);
+        expect(problem.steps).toEqual([
+            `${rightOperand} = ${adjustment} + ${remainder}`,
+            `${leftOperand} + ${adjustment} = 10`,
+            `10 + ${remainder} = ${answer}`
+        ]);
+        return;
+    }
+
+    if (problem.strategy === 'addition-near-doubles') {
+        const base = Math.min(leftOperand, rightOperand);
+        const knownDouble = 2 * base;
+        expect(problem.operation).toBe('addition');
+        expect(Math.abs(leftOperand - rightOperand)).toBe(1);
+        expect(adjustment).toBe(1);
+        expect(answer).toBe(leftOperand + rightOperand);
+        expect(problem.steps).toEqual([
+            `${base} + ${base} = ${knownDouble}`,
+            `${knownDouble} + 1 = ${answer}`
+        ]);
+        return;
+    }
 
     if (problem.strategy === 'addition-compensation') {
         const adjustedLeft = leftOperand - adjustment;
@@ -88,8 +145,7 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
     expect(answer).toBe(leftOperand - rightOperand);
     expect(friendlyTen % 10).toBe(0);
     expect(remainingDifference).toBeGreaterThan(0);
-    expect(remainingDifference % 10).toBe(0);
-    expect(leftOperand % 10).toBe(0);
+    expect(friendlyTen).toBeGreaterThan(rightOperand);
     expect(problem.transformedEquation).toBe(`${rightOperand} + ? = ${leftOperand}`);
     expect(problem.steps).toEqual([
         `${rightOperand} + ${adjustment} = ${friendlyTen}`,
@@ -108,6 +164,10 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     });
 
     it.each([
+        'addition-counting-on',
+        'subtraction-counting-back',
+        'addition-make-ten',
+        'addition-near-doubles',
         'addition-compensation',
         'subtraction-compensation',
         'subtraction-make-ten',
@@ -124,6 +184,10 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     });
 
     it.each([
+        'addition-counting-on',
+        'subtraction-counting-back',
+        'addition-make-ten',
+        'addition-near-doubles',
         'addition-compensation',
         'subtraction-compensation',
         'subtraction-make-ten',
@@ -132,9 +196,56 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
         expect(generator.generate({strategy, range: {min: 9, max: 10}})).toBeNull();
     });
 
+    it.each([
+        'addition-counting-on',
+        'subtraction-counting-back',
+        'addition-near-doubles'
+    ] as const)('generates %s inside both Grade 1 ranges', strategy => {
+        for (const range of [{min: 0, max: 10}, {min: 0, max: 20}]) {
+            for (let seed = 0; seed < 100; seed++) {
+                setSeed(seed);
+                const stub = generator.generate({strategy, range});
+                expect(stub).not.toBeNull();
+                expect(stub!.data.leftOperand).toBeLessThan(range.max);
+                expect(stub!.data.rightOperand).toBeLessThan(range.max);
+                expect(stub!.data.answer).toBeLessThan(range.max);
+                expectExactStrategy(stub!.data);
+            }
+        }
+    });
+
+    it.each([
+        'addition-make-ten',
+        'subtraction-make-ten',
+        'subtraction-think-addition'
+    ] as const)('generates %s inside NumbersSmaller20', strategy => {
+        for (let seed = 0; seed < 100; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({strategy, range: {min: 0, max: 20}});
+            expect(stub).not.toBeNull();
+            expect(stub!.data.leftOperand).toBeLessThan(20);
+            expect(stub!.data.rightOperand).toBeLessThan(20);
+            expect(stub!.data.answer).toBeLessThan(20);
+            expectExactStrategy(stub!.data);
+        }
+    });
+
+    it('retains multi-digit Grade 3 think-addition operands', () => {
+        const generated = Array.from({length: 100}, (_, seed) => {
+            setSeed(seed);
+            return generator.generate({
+                strategy: 'subtraction-think-addition',
+                range: targetRange
+            })!.data;
+        });
+
+        expect(generated.some(problem => problem.rightOperand >= 10)).toBe(true);
+        generated.forEach(expectExactStrategy);
+    });
+
     it('rejects unsupported strategy configurations', () => {
         expect(() => generator.generate({
-            strategy: 'addition-counting-on' as IntegerAddSubtractStrategy,
+            strategy: 'unsupported' as IntegerAddSubtractStrategy,
             range: targetRange
         })).toThrow();
     });

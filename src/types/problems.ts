@@ -99,6 +99,10 @@ export type KnownFactDerivationProblem = {
 };
 
 export type IntegerAddSubtractStrategy =
+    | 'addition-counting-on'
+    | 'subtraction-counting-back'
+    | 'addition-make-ten'
+    | 'addition-near-doubles'
     | 'addition-compensation'
     | 'subtraction-compensation'
     | 'subtraction-make-ten'
@@ -116,7 +120,7 @@ export type IntegerAddSubtractStrategyProblem = {
     questionEquation: string;
     solutionEquation: string;
     transformedEquation: string;
-    steps: readonly [string, string, string];
+    steps: readonly string[];
     explanation: string;
 };
 

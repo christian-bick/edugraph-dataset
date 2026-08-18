@@ -1,6 +1,12 @@
 import {describe, expect, it} from 'vitest';
 import {IntegerAddSubtractStrategyProblem} from '../../../../types/problems.ts';
-import {isValidIntegerAddSubtractStrategyProblem, maskEquationResult} from './helpers.ts';
+import {
+    formatOperationRelationship,
+    isCountingRelationStrategy,
+    isValidIntegerAddSubtractStrategyProblem,
+    maskEquationResult,
+    validateCountingRelationStrategy
+} from './helpers.ts';
 
 const additionProblem: IntegerAddSubtractStrategyProblem = {
     task: 'integer-add-subtract-strategy',
@@ -66,13 +72,94 @@ const makeTenProblem: IntegerAddSubtractStrategyProblem = {
     explanation: 'Decompose 5 as 3 + 2, reach 10, then subtract 2.'
 };
 
+const countingOnProblem: IntegerAddSubtractStrategyProblem = {
+    task: 'integer-add-subtract-strategy',
+    strategy: 'addition-counting-on',
+    operation: 'addition',
+    leftOperand: 7,
+    rightOperand: 3,
+    answer: 10,
+    adjustment: 3,
+    prompt: 'Count on to solve 7 + 3 = ?',
+    questionEquation: '7 + 3 = ?',
+    solutionEquation: '7 + 3 = 10',
+    transformedEquation: '7 + 3 = 7 + (1 + 1 + 1)',
+    steps: ['7 + 1 = 8', '8 + 1 = 9', '9 + 1 = 10'],
+    explanation: 'Start at 7 and count forward 3 steps to reach 10.'
+};
+
+const countingBackProblem: IntegerAddSubtractStrategyProblem = {
+    task: 'integer-add-subtract-strategy',
+    strategy: 'subtraction-counting-back',
+    operation: 'subtraction',
+    leftOperand: 9,
+    rightOperand: 2,
+    answer: 7,
+    adjustment: 2,
+    prompt: 'Count back to solve 9 − 2 = ?',
+    questionEquation: '9 − 2 = ?',
+    solutionEquation: '9 − 2 = 7',
+    transformedEquation: '9 − 2 = 9 − 1 − 1',
+    steps: ['9 − 1 = 8', '8 − 1 = 7'],
+    explanation: 'Start at 9 and count backward 2 steps to reach 7.'
+};
+
+const additionMakeTenProblem: IntegerAddSubtractStrategyProblem = {
+    task: 'integer-add-subtract-strategy',
+    strategy: 'addition-make-ten',
+    operation: 'addition',
+    leftOperand: 8,
+    rightOperand: 5,
+    answer: 13,
+    adjustment: 2,
+    prompt: 'Make ten to solve 8 + 5 = ?',
+    questionEquation: '8 + 5 = ?',
+    solutionEquation: '8 + 5 = 13',
+    transformedEquation: '8 + 5 = 8 + (2 + 3)',
+    steps: ['5 = 2 + 3', '8 + 2 = 10', '10 + 3 = 13'],
+    explanation: 'Decompose 5 as 2 + 3, reach 10, then add 3.'
+};
+
+const nearDoublesProblem: IntegerAddSubtractStrategyProblem = {
+    task: 'integer-add-subtract-strategy',
+    strategy: 'addition-near-doubles',
+    operation: 'addition',
+    leftOperand: 6,
+    rightOperand: 7,
+    answer: 13,
+    adjustment: 1,
+    prompt: 'Use a near double to solve 6 + 7 = ?',
+    questionEquation: '6 + 7 = ?',
+    solutionEquation: '6 + 7 = 13',
+    transformedEquation: '6 + 7 = 6 + 6 + 1',
+    steps: ['6 + 6 = 12', '12 + 1 = 13'],
+    explanation: 'Use the known double 6 + 6, then add 1.'
+};
+
 describe('operations-add-subtract-strategy helpers', () => {
     it('accepts an exact strategy payload and masks only equation results', () => {
         expect(isValidIntegerAddSubtractStrategyProblem(additionProblem)).toBe(true);
         expect(isValidIntegerAddSubtractStrategyProblem(subtractionCompensationProblem)).toBe(true);
         expect(isValidIntegerAddSubtractStrategyProblem(makeTenProblem)).toBe(true);
         expect(isValidIntegerAddSubtractStrategyProblem(thinkAdditionProblem)).toBe(true);
+        expect(isValidIntegerAddSubtractStrategyProblem(countingOnProblem)).toBe(true);
+        expect(isValidIntegerAddSubtractStrategyProblem(countingBackProblem)).toBe(true);
+        expect(isValidIntegerAddSubtractStrategyProblem(additionMakeTenProblem)).toBe(true);
+        expect(isValidIntegerAddSubtractStrategyProblem(nearDoublesProblem)).toBe(true);
         expect(maskEquationResult(additionProblem.steps[2])).toBe('244 + 180 = ?');
+        expect(maskEquationResult(additionMakeTenProblem.steps[0])).toBe('5 = 2 + ?');
+        expect(maskEquationResult(makeTenProblem.steps[0])).toBe('5 = 3 + ?');
+        expect(maskEquationResult('16 = 6 + 10')).toBe('16 = 6 + ?');
+        expect(formatOperationRelationship(countingOnProblem, false)).toBe('7 □ 3 = 10');
+        expect(formatOperationRelationship(countingOnProblem, true)).toBe('7 + 3 = 10');
+        expect(formatOperationRelationship(countingBackProblem, true)).toBe('9 − 2 = 7');
+        expect(isCountingRelationStrategy(countingOnProblem.strategy)).toBe(true);
+        expect(isCountingRelationStrategy(countingBackProblem.strategy)).toBe(true);
+        expect(isCountingRelationStrategy(additionMakeTenProblem.strategy)).toBe(false);
+        expect(validateCountingRelationStrategy(countingOnProblem.strategy)).toBe('addition-counting-on');
+        expect(() => validateCountingRelationStrategy(additionMakeTenProblem.strategy)).toThrow(
+            'Concept derivation mode supports only counting-on and counting-back relationships.'
+        );
     });
 
     it('rejects an incorrect invariant, result, or visible step equation', () => {
@@ -92,6 +179,24 @@ describe('operations-add-subtract-strategy helpers', () => {
         expect(isValidIntegerAddSubtractStrategyProblem({
             ...makeTenProblem,
             steps: ['5 = 4 + 1', '13 − 3 = 10', '10 − 2 = 8']
+        })).toBe(false);
+        expect(isValidIntegerAddSubtractStrategyProblem({
+            ...countingOnProblem,
+            steps: ['7 + 1 = 8', '8 + 2 = 10']
+        })).toBe(false);
+        expect(isValidIntegerAddSubtractStrategyProblem({
+            ...additionMakeTenProblem,
+            adjustment: 3
+        })).toBe(false);
+        expect(isValidIntegerAddSubtractStrategyProblem({
+            ...nearDoublesProblem,
+            rightOperand: 8,
+            answer: 14,
+            solutionEquation: '6 + 8 = 14'
+        })).toBe(false);
+        expect(isValidIntegerAddSubtractStrategyProblem({
+            ...countingOnProblem,
+            steps: 3 as unknown as readonly string[]
         })).toBe(false);
     });
 });
