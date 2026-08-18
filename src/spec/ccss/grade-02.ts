@@ -719,9 +719,6 @@ export const beyondScope: BeyondScopeEntry[] = [{
 }];
 
 export const equivalentTargets: TargetEquivalence[] = [{
-    targets: ['1.OA.D.8-unknown-number', '2.OA.B.2-fluency'],
-    reason: 'The Grade 1 missing-result slice and the visible Grade 2 computation slice both require direct procedure execution within 20; ProcedureInversion continues to distinguish missing-operand tasks.'
-}, {
     targets: ['2.NBT.B.7-concrete-regrouping', '3.NBT.A.2-place-value-partitioning'],
     reason: 'The visible concrete place-value partitioning slice is the same competency in both standards: decompose an addition or subtraction by place value, including required regrouping, and explain the represented procedure.'
 }];

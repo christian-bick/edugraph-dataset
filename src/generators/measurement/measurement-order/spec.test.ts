@@ -14,7 +14,7 @@ describe('MeasurementOrderGenerator spec integration', () => {
     it('resolves ascending and descending ordering', () => {
         for (const direction of [Scope.AscendingOrder, Scope.DescendingOrder] as const) {
             const stub = generateWithLabels(generator, [
-                Area.Measurement,
+                Area.MeasuringObjects,
                 Scope.LengthMeasurement,
                 Scope.DirectRelation,
                 direction

@@ -16,7 +16,7 @@ describe('MeasurementMediatedComparisonGenerator spec integration', () => {
     it('resolves greater and less comparison targets', () => {
         for (const relation of [Scope.Greater, Scope.Less] as const) {
             const stub = generateWithLabels(generator, [
-                Area.Measurement,
+                Area.MeasuringObjects,
                 Scope.LengthMeasurement,
                 Scope.MediatedRelation,
                 relation

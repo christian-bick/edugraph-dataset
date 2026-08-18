@@ -54,8 +54,11 @@ describe('ShapePartitionGenerator', () => {
                         fractionTypes: unitFractions ? [Scope.UnitFractions] : [],
                         isLessComparison
                     }));
+                    const invalidFractionLabels = taskAbility === Ability.VisualArticulation
+                        ? false
+                        : unitFractions !== expectedUnitFractions;
                     expect(stub === null).toBe(
-                        unitFractions !== expectedUnitFractions ||
+                        invalidFractionLabels ||
                         isLessComparison !== expectedLess
                     );
                 }

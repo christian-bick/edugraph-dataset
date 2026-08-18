@@ -7,31 +7,37 @@ import {ShapePartitionGeneratorSchema, spec} from './spec.ts';
 const generator = new ShapePartitionGenerator();
 
 describe('ShapePartitionGenerator spec integration', () => {
-    it('declares proportional equal-share structure and conditionally consumes fraction notation', () => {
+    it('declares equal-share structure and conditionally consumes task areas and fraction notation', () => {
         expect(spec.generalLabels).toEqual([
-            Area.ProportionSense,
             Scope.EqualShares
         ]);
+        expect(extractSchemaLabels(ShapePartitionGeneratorSchema)).toEqual(expect.arrayContaining([
+            Area.ProportionSense,
+            Area.ShapeDecomposition,
+            Area.FractionInterpretation,
+            Area.FractionCommonNumeratorComparison
+        ]));
         expect(extractSchemaLabels(ShapePartitionGeneratorSchema)).toContain(
             Area.FractionNotation
         );
     });
 
     it.each([
-        [Ability.VisualArticulation, [], 'partition'],
-        [Ability.ActiveVocabulary, [Scope.UnitFractions], 'name-share'],
-        [Ability.ConceptComposition, [Scope.UnitFractions], 'compose-whole'],
+        [Area.ShapeDecomposition, Ability.VisualArticulation, [Scope.UnitFractions], 'partition'],
+        [Area.FractionInterpretation, Ability.ActiveVocabulary, [Scope.UnitFractions], 'name-share'],
+        [Area.FractionInterpretation, Ability.ConceptComposition, [Scope.UnitFractions], 'compose-whole'],
         [
+            Area.FractionCommonNumeratorComparison,
             Ability.ConceptDerivation,
             [Scope.UnitFractions, Scope.Less],
             'compare-share-size'
         ]
     ] as const)(
-        'resolves %s to the matching mathematical task',
-        (taskAbility, conditionalLabels, expectedTask) => {
+        'resolves %s with %s to the matching mathematical task',
+        (taskArea, taskAbility, conditionalLabels, expectedTask) => {
             for (const shape of [Area.Circle, Area.Rectangle] as const) {
                 const stub = generateWithLabels(generator, [
-                    Area.ProportionSense,
+                    taskArea,
                     Scope.EqualShares,
                     taskAbility,
                     shape,
@@ -51,7 +57,7 @@ describe('ShapePartitionGenerator spec integration', () => {
 
     it('does not consume unit-fraction or less labels for a partition task', () => {
         const stub = generateWithLabels(generator, [
-            Area.ProportionSense,
+            Area.ShapeDecomposition,
             Scope.EqualShares,
             Ability.VisualArticulation,
             Area.Circle
@@ -65,7 +71,7 @@ describe('ShapePartitionGenerator spec integration', () => {
         'combines partitioning and unit-fraction labeling for %s models',
         shape => {
             const labels = [
-                Area.ProportionSense,
+                Area.ShapeDecomposition,
                 Scope.EqualShares,
                 Scope.UnitFractions,
                 Ability.VisualArticulation,
@@ -91,7 +97,7 @@ describe('ShapePartitionGenerator spec integration', () => {
         [Scope.NonUnitFractions, Area.Rectangle]
     ] as const)('interprets %s using a %s model', (fractionType, shape) => {
         const labels = [
-            Area.ProportionSense,
+            Area.FractionInterpretation,
             Area.FractionNotation,
             Scope.EqualShares,
             fractionType,

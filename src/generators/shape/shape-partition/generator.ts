@@ -42,10 +42,14 @@ function hasValidLegacyCapabilities(
     fractionNotation: boolean,
     isLessComparison: boolean
 ): boolean {
-    const requiresUnitFractions = task !== 'partition';
     const requiresLessComparison = task === 'compare-share-size';
-    return fractionTypes.includes(Scope.UnitFractions) === requiresUnitFractions &&
-        !fractionTypes.includes(Scope.NonUnitFractions) &&
+    const supportsFractionType = task === 'partition'
+        ? fractionTypes.length === 0 || (
+            fractionTypes.length === 1 &&
+            fractionTypes[0] === Scope.UnitFractions
+        )
+        : fractionTypes.length === 1 && fractionTypes[0] === Scope.UnitFractions;
+    return supportsFractionType &&
         !fractionNotation &&
         isLessComparison === requiresLessComparison;
 }

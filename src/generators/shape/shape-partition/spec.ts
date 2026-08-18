@@ -6,12 +6,20 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'shape-partition',
     generalLabels: [
-        Area.ProportionSense,
         Scope.EqualShares
     ]
 };
 
 export const ShapePartitionGeneratorSchema = {
+    taskAreas: [
+        [
+            Area.ProportionSense,
+            Area.ShapeDecomposition,
+            Area.FractionInterpretation,
+            Area.FractionCommonNumeratorComparison
+        ],
+        matchAllExactLabels
+    ],
     shape: [Area.Circle, Area.Rectangle],
     taskAbilities: [
         [

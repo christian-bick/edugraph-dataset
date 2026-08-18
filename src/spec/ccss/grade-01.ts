@@ -108,6 +108,7 @@ const fluencyBuilder = new DatasetPermutationBuilder()
 // --- 1.OA.D.7: Meaning of the equal sign, judge equations as true or false ---
 const equalSignBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.Equation,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -122,13 +123,14 @@ const equalSignBuilder = new DatasetPermutationBuilder()
 // --- 1.OA.D.8: Determine the unknown whole number in an equation ---
 const unknownNumberBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.Equation,
         Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller20,
-        Ability.ProcedureExecution
+        Ability.Formalization
     ])
     .applyLabelVariants([
         [Area.Addition],
@@ -137,6 +139,7 @@ const unknownNumberBuilder = new DatasetPermutationBuilder()
 
 const unknownOperandBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.Equation,
         Scope.TwoOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
@@ -277,6 +280,7 @@ const addWithin100Builder = new DatasetPermutationBuilder()
 const tenMoreLessBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
+        Area.PlaceValue,
         Scope.Base10,
         Scope.StepsOf10,
         Scope.NumbersLarger10,
@@ -312,7 +316,7 @@ const subtractTensBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.A.1: Directly order three objects by length ---
 const directLengthComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Measurement,
+        Area.MeasuringObjects,
         Scope.LengthMeasurement,
         Scope.DirectRelation,
         Ability.ProcedureExecution
@@ -325,7 +329,7 @@ const directLengthComparisonBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.A.1: Compare two lengths through a third object ---
 const mediatedLengthComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Measurement,
+        Area.MeasuringObjects,
         Scope.LengthMeasurement,
         Scope.MediatedRelation,
         Ability.ConceptDerivation
@@ -334,7 +338,7 @@ const mediatedLengthComparisonBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.A.2: Express length as a whole number of iterated units ---
 const measureLengthBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Measurement,
+        Area.MeasuringObjects,
         Scope.LengthMeasurement,
         Scope.IntegerNumbers
     ])
@@ -355,7 +359,7 @@ const hourTimeBuilder = new DatasetPermutationBuilder()
         Scope.HourIntervals
     ])
     .applyLabelVariants([
-        [Ability.ProcedureExecution],
+        [Ability.VisualReception, Ability.Interpretation, Ability.Formalization],
         [Ability.VisualArticulation]
     ]);
 
@@ -367,7 +371,7 @@ const halfHourTimeBuilder = new DatasetPermutationBuilder()
         Scope.HalfHourIntervals
     ])
     .applyLabelVariants([
-        [Ability.ProcedureExecution],
+        [Ability.VisualReception, Ability.Interpretation, Ability.Formalization],
         [Ability.VisualArticulation]
     ]);
 
@@ -512,8 +516,9 @@ const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Partition circles and rectangles into equal shares ---
 const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.ShapeDecomposition,
         Scope.EqualShares,
+        Scope.UnitFractions,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
@@ -524,7 +529,7 @@ const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Name individual shares as halves, fourths, or quarters ---
 const nameUnitSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.FractionInterpretation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ActiveVocabulary
@@ -537,7 +542,7 @@ const nameUnitSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Describe a whole as all of its equal shares ---
 const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.FractionInterpretation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ConceptComposition
@@ -550,7 +555,7 @@ const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
 // --- 1.G.A.3: Infer that more equal shares produce smaller shares ---
 const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.FractionCommonNumeratorComparison,
         Scope.EqualShares,
         Scope.UnitFractions,
         Scope.Less,
@@ -612,7 +617,4 @@ export const ontologyTodos: OntologyTodo[] = [];
 
 export const beyondScope: BeyondScopeEntry[] = [];
 
-export const equivalentTargets: TargetEquivalence[] = [{
-    targets: ['1.OA.B.4-unknown-addend', '1.OA.D.8-unknown-operand'],
-    reason: 'At the supported level, both standards require the same addition/subtraction inversion task; their conceptual framing is not distinguishable by the ontology.'
-}];
+export const equivalentTargets: TargetEquivalence[] = [];
