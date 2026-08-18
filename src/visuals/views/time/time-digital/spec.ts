@@ -1,5 +1,5 @@
 import {Ability, Scope} from 'edugraph-ts';
-import {matchAllExactLabels} from '../../../../lib/resolvers.ts';
+import {selectCanonicalLabel} from '../../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -8,15 +8,17 @@ export const spec: ViewSpec = {
     generalLabels: [
         Scope.DigitalClock,
         Scope.ArabicNumerals,
-        Ability.VisualReception,
-        Ability.TextualReception
+        Ability.Formalization
     ]
 };
 
 export const TimeDigitalViewSchema = {
-    taskAbilities: [
-        [Ability.ProcedureExecution, Ability.VisualArticulation, Ability.Formalization],
-        matchAllExactLabels
+    direction: [
+        [Ability.VisualReception, Ability.Interpretation, Ability.TextualReception, Ability.VisualArticulation],
+        selectCanonicalLabel([
+            [[Ability.VisualReception, Ability.Interpretation], 'reading'],
+            [[Ability.TextualReception, Ability.VisualArticulation], 'construction']
+        ])
     ]
 } as const;
 

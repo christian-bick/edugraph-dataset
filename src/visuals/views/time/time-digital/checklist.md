@@ -1,3 +1,3 @@
-- **Identity:** A digital-clock task requires a meaningful visual response and never asks the learner merely to copy a time already visible in the same notation.
-- **Modes:** Question Mode preserves the clue that defines the target time while withholding the digital response; Solution Mode reveals the response without duplicating it as an identical adjacent value.
-- **Essential specifics:** When a day period is supplied, the digital display keeps the literal `a.m.` or `p.m.` visible in both modes.
+- **Identity:** The task has one unambiguous direction: either construct a digital display from a textual time clue, or read a completed digital display into a written time response.
+- **Modes:** Construction Question Mode keeps the clue visible and withholds the display digits; reading Question Mode keeps the completed display visible and withholds the written response. Solution Mode reveals the withheld conclusion in its original context.
+- **Essential specifics:** When supplied, the literal `a.m.` or `p.m.` remains attached to the represented time in both modes.

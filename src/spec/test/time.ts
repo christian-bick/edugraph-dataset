@@ -37,13 +37,28 @@ const digitalBuilder = new DatasetPermutationBuilder()
         [Scope.HourIntervals],
         [Scope.HalfHourIntervals]
     ])
+    .addLabels([
+        Ability.TextualReception,
+        Ability.Formalization,
+        Ability.VisualArticulation
+    ]);
+
+const digitalReadingBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.MeasuringTime,
+        Scope.DigitalClock,
+        Ability.VisualReception,
+        Ability.Interpretation,
+        Ability.Formalization
+    ])
     .applyLabelVariants([
-        [Ability.ProcedureExecution],
-        [Ability.VisualArticulation]
+        [Scope.HourIntervals],
+        [Scope.HalfHourIntervals]
     ]);
 
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-time', builder),
     ...toTargets('test-time-half-hour', halfHourBuilder),
-    ...toTargets('test-time-digital', digitalBuilder)
+    ...toTargets('test-time-digital-construction', digitalBuilder),
+    ...toTargets('test-time-digital-reading', digitalReadingBuilder)
 ];

@@ -443,13 +443,6 @@ const halfHourTimeBuilder = new DatasetPermutationBuilder()
         [Ability.VisualArticulation]
     ]);
 
-const digitalTimeReadingImplementation = defineImplementationPackage({
-    id: 'grade1-digital-time-reading',
-    description: 'Add a digital-clock reading direction that exposes the display and withholds the answer.',
-    generators: [{ module: 'time', strategy: 'reuse' }],
-    views: [{ module: 'time-digital', strategy: 'expand' }]
-});
-
 // --- 1.MD.B.3: Construct a digital display from textual time ---
 const digitalTimeConstructionBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -715,6 +708,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.MD.B.3-time', hourTimeBuilder),
     ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder),
     ...toTargets('1.MD.B.3-digital-construction', digitalTimeConstructionBuilder),
+    ...toTargets('1.MD.B.3-read-digital-time', digitalTimeReadingBuilder),
     ...toTargets('1.MD.C.4-bar-comparison', categoricalDataComparisonBuilder),
     // 1.G - Geometry
     ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder),
@@ -729,12 +723,6 @@ export const spec: CompetencyTarget[] = [
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '1.MD.B.3-read-digital-time',
-        digitalTimeReadingBuilder,
-        digitalTimeReadingImplementation,
-        'Show a completed digital display in Question Mode while withholding the formalized time response.'
-    ),
     ...toImplementationTodos(
         '1.MD.C.4-organize-represent-data',
         organizeCategoricalDataBuilder,
