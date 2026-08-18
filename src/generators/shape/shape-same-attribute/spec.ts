@@ -6,8 +6,7 @@ import {matchAllExactLabels} from '../../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'shape-same-attribute',
     generalLabels: [
-        Area.ObjectSorting,
-        Scope.ShapeProperties,
+        Area.ObjectSorting
     ]
 };
 
@@ -15,6 +14,10 @@ export const spec: GeneratorSpec = {
 export const ShapeSameAttributeGeneratorSchema = {
     shapes: [
         [Area.Sphere, Area.Cube, Area.Rectangle],
+        matchAllExactLabels
+    ],
+    property: [
+        [Scope.Rollable, Scope.Stackable, Scope.Foldable],
         matchAllExactLabels
     ]
 } as const;

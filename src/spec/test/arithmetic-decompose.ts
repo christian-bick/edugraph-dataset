@@ -6,6 +6,7 @@ const builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumberNotation,
         Area.Addition,
+        Area.PartitionOfCollections,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,

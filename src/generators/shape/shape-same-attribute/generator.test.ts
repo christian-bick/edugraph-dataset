@@ -2,6 +2,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 import {ShapeSameAttributeGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
+import {Scope} from 'edugraph-ts';
 
 describe('ShapeSameAttributeGenerator', () => {
     let generator: ShapeSameAttributeGenerator;
@@ -17,29 +18,39 @@ describe('ShapeSameAttributeGenerator', () => {
 
     it('should throw validation error when shapes is missing or empty', () => {
         expect(() => generator.generate({} as any)).toThrow(GeneratorValidationError);
-        expect(() => generator.generate({ shapes: [] })).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({ shapes: [], property: [] })).toThrow(GeneratorValidationError);
     });
 
     it('should validate same-attribute rolls/stacks/folds properties', () => {
         const stubRoll = generator.generate({
-            shapes: ['sphere']
+            shapes: ['sphere'],
+            property: [Scope.Rollable]
         });
         expect(stubRoll).not.toBeNull();
         expect(stubRoll!.data.answer).toBe('sphere');
         expect(stubRoll!.data.attribute).toBe('rollable');
 
         const stubStack = generator.generate({
-            shapes: ['cube']
+            shapes: ['cube'],
+            property: [Scope.Stackable]
         });
         expect(stubStack).not.toBeNull();
         expect(stubStack!.data.answer).toBe('cube');
         expect(stubStack!.data.attribute).toBe('stackable');
 
         const stubFold = generator.generate({
-            shapes: ['rectangle']
+            shapes: ['rectangle'],
+            property: [Scope.Foldable]
         });
         expect(stubFold).not.toBeNull();
         expect(stubFold!.data.answer).toBe('rectangle');
         expect(stubFold!.data.attribute).toBe('foldable');
+    });
+
+    it('rejects a property that does not belong to the selected shape', () => {
+        expect(generator.generate({
+            shapes: ['sphere'],
+            property: [Scope.Stackable]
+        })).toBeNull();
     });
 });

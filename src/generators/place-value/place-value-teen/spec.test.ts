@@ -16,7 +16,7 @@ describe('PlaceValueTeenGenerator Spec Integration', () => {
     it('should generate place value teen problems from general labels', () => {
         for (let i = 0; i < 20; i++) {
             const stub = generateWithLabels(generator, [
-                Area.Sum,
+                Area.PlaceValue,
                 Scope.NumbersSmaller20
             ]);
             expect(stub).not.toBeNull();
@@ -26,9 +26,11 @@ describe('PlaceValueTeenGenerator Spec Integration', () => {
         }
     });
 
-    it('declares sum rather than difference', () => {
-        expect(spec.generalLabels).toContain(Area.Sum);
-        expect(spec.generalLabels).not.toContain(Area.Difference);
+    it('leaves composition direction to the consuming view', () => {
+        expect(spec.generalLabels).toContain(Area.PlaceValue);
+        expect(spec.generalLabels).not.toContain(Area.Sum);
+        expect(spec.generalLabels).not.toContain(Area.UnionOfCollections);
+        expect(spec.generalLabels).not.toContain(Area.PartitionOfCollections);
     });
 
     it('supports both bounds of the teen-number range', () => {
@@ -38,7 +40,7 @@ describe('PlaceValueTeenGenerator Spec Integration', () => {
         ]));
 
         const stub = generateWithLabels(generator, [
-            Area.Sum,
+            Area.PlaceValue,
             Scope.NumbersLarger10,
             Scope.NumbersSmaller20
         ]);

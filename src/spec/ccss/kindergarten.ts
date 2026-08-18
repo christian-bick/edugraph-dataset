@@ -1,6 +1,12 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { BeyondScopeEntry, CompetencyTarget, ImplementationTodo, OntologyTodo } from '../../types/ml-engine.ts';
+import {
+    BeyondScopeEntry,
+    CompetencyTarget,
+    ImplementationTodo,
+    OntologyTodo,
+    TargetEquivalence
+} from '../../types/ml-engine.ts';
 
 // ==========================================
 // 1. Counting and Cardinality (K.CC)
@@ -23,7 +29,12 @@ const countTo100Builder = new DatasetPermutationBuilder()
         [Scope.StepsOf10, Scope.MultiplesOf10] // count by tens through decade values
     ]);
 
-// --- K.CC.A.2: Start from a given number (5) ---
+// --- K.CC.A.2: Start from a given number ---
+// `NumbersLarger5` is an intentional pragmatic approximation: the standard
+// permits any supplied starting number in the known sequence, while the
+// ontology has no separate given-start scope. Requiring values from 5 onward
+// keeps the generated task visibly distinct from counting from the beginning
+// without claiming that 5 is a pedagogically meaningful boundary.
 const countFrom5Builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
@@ -129,21 +140,32 @@ const howManyBuilder = new DatasetPermutationBuilder()
         [Scope.BoxArrangement, Scope.NumbersSmaller10]
     ]);
 
-// --- K.CC.C.6: Compare the number of objects in two groups (up to 10 objects) ---
-const compareGroupsBuilder = new DatasetPermutationBuilder()
+const createCompareGroupsBuilder = (strategyLabels: string[]): DatasetPermutationBuilder =>
+    new DatasetPermutationBuilder()
     .addLabels([
-        Area.SetComparison,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller10,
         Scope.PhysicalNumbers,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        ...strategyLabels
     ])
     .applyLabelVariants([
         [Area.NumericInequality, Scope.Greater],
         [Area.NumericInequality, Scope.Less],
         [Area.NumericEquality, Scope.Equal]
     ]);
+
+// --- K.CC.C.6: Compare groups by counting each quantity ---
+const compareGroupsByCountingBuilder = createCompareGroupsBuilder([
+    Area.NumerationWithIntegers,
+    Scope.AdditiveCount
+]);
+
+// --- K.CC.C.6: Compare groups by matching objects one-to-one ---
+const compareGroupsByMatchingBuilder = createCompareGroupsBuilder([
+    Area.SetComparison
+]);
 
 // --- K.CC.C.7: Compare two numbers between 1 and 10 presented as written numerals ---
 const compareNumeralsBuilder = new DatasetPermutationBuilder()
@@ -202,6 +224,7 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
 const decomposeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Addition,
+        Area.PartitionOfCollections,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -244,10 +267,10 @@ const fluencyBuilder = new DatasetPermutationBuilder()
 // 3. Number and Operations in Base Ten (K.NBT)
 // ==========================================
 
-// --- K.NBT.A.1: Teen numbers ---
-const teenNumbersBuilder = new DatasetPermutationBuilder()
+const createTeenNumbersBuilder = (direction: string): DatasetPermutationBuilder =>
+    new DatasetPermutationBuilder()
     .addLabels([
-        Area.Sum,
+        direction,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -256,6 +279,12 @@ const teenNumbersBuilder = new DatasetPermutationBuilder()
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
     ]);
+
+// --- K.NBT.A.1: Compose teen numbers from ten ones and further ones ---
+const composeTeenNumbersBuilder = createTeenNumbersBuilder(Area.UnionOfCollections);
+
+// --- K.NBT.A.1: Decompose teen numbers into ten ones and further ones ---
+const decomposeTeenNumbersBuilder = createTeenNumbersBuilder(Area.PartitionOfCollections);
 
 // ==========================================
 // 4. Measurement and Data (K.MD)
@@ -292,7 +321,6 @@ const classifyCountBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Area.ObjectSorting,
-        Area.CollectionSense,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutZero,
@@ -354,7 +382,7 @@ const envShapesOtherBuilder = new DatasetPermutationBuilder()
 // --- K.G.A.1: Describe relative positions of objects ---
 const positionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.SpatialModelling,
+        Area.SpatialPosition,
         Ability.SpatialInterpretation
     ])
     .applyLabelVariants([
@@ -366,7 +394,7 @@ const positionsBuilder = new DatasetPermutationBuilder()
 
 const positionsAheadBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.SpatialModelling,
+        Area.SpatialPosition,
         Ability.SpatialInterpretation
     ])
     .applyLabelVariants([
@@ -377,7 +405,7 @@ const positionsAheadBuilder = new DatasetPermutationBuilder()
 const shapeNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeNaming,
-        Area.ShapeRecognition,
+        Area.ShapeRotationConservation,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -431,13 +459,12 @@ const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
 const sameAttributeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ObjectSorting,
-        Scope.ShapeProperties,
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Area.Sphere],
-        [Area.Cube],
-        [Area.Rectangle]
+        [Area.Sphere, Scope.Rollable],
+        [Area.Cube, Scope.Stackable],
+        [Area.Rectangle, Scope.Foldable]
     ]);
 
 // --- K.G.B.5: Model shapes by building them ---
@@ -499,7 +526,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('K.CC.B.4b-conservation', conservationBuilder),
     ...toTargets('K.CC.B.4c-one-larger', oneLargerBuilder),
     ...toTargets('K.CC.B.5-how-many', howManyBuilder),
-    ...toTargets('K.CC.C.6-compare-groups', compareGroupsBuilder),
+    ...toTargets('K.CC.C.6-compare-groups-by-counting', compareGroupsByCountingBuilder),
+    ...toTargets('K.CC.C.6-compare-groups-by-matching', compareGroupsByMatchingBuilder),
     ...toTargets('K.CC.C.7-compare-numerals', compareNumeralsBuilder),
     // K.OA - Operations and Algebraic Thinking
     ...toTargets('K.OA.A.1-represent-operations', representOperationsBuilder),
@@ -508,7 +536,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('K.OA.A.4-make-ten', makeTenBuilder),
     ...toTargets('K.OA.A.5-fluency', fluencyBuilder),
     // K.NBT - Number and Operations in Base Ten
-    ...toTargets('K.NBT.A.1-teen-numbers', teenNumbersBuilder),
+    ...toTargets('K.NBT.A.1-compose-teen-numbers', composeTeenNumbersBuilder),
+    ...toTargets('K.NBT.A.1-decompose-teen-numbers', decomposeTeenNumbersBuilder),
     // K.MD - Measurement and Data
     ...toTargets('K.MD.A.1-measurable-attributes', measurableAttributesBuilder),
     ...toTargets('K.MD.A.2-compare-attributes', compareAttributesBuilder),
@@ -542,3 +571,5 @@ export const beyondScope: BeyondScopeEntry[] = [{
     title: 'Spoken cardinality',
     description: 'Requires evidence that the learner understands the last number name said as the cardinality of the counted set; the conservation component remains represented in spec.'
 }];
+
+export const equivalentTargets: TargetEquivalence[] = [];

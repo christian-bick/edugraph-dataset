@@ -8,7 +8,8 @@ export const spec: ViewSpec = {
         ...deductAdmitting([Scope.NumbersLarger10])
     ],
     generalLabels: [
-        Area.SetComparison,
+        Area.NumerationWithIntegers,
+        Scope.AdditiveCount,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution
     ]

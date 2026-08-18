@@ -2,10 +2,11 @@ import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutat
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
-const teenBuilder = new DatasetPermutationBuilder()
+const createTeenBuilder = (direction: string): DatasetPermutationBuilder =>
+    new DatasetPermutationBuilder()
     .addLabels([
-        Area.Sum,
         Area.PlaceValue,
+        direction,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -14,6 +15,9 @@ const teenBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution,
         Scope.NumbersSmaller20
     ]);
+
+const composeTeenBuilder = createTeenBuilder(Area.UnionOfCollections);
+const decomposeTeenBuilder = createTeenBuilder(Area.PartitionOfCollections);
 
 const multipleTensBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -28,6 +32,7 @@ const multipleTensBuilder = new DatasetPermutationBuilder()
     ]);
 
 export const spec: CompetencyTarget[] = [
-    ...toTargets('test-place-value-teen', teenBuilder),
+    ...toTargets('test-place-value-compose-teen', composeTeenBuilder),
+    ...toTargets('test-place-value-decompose-teen', decomposeTeenBuilder),
     ...toTargets('test-place-value-multiple-tens', multipleTensBuilder)
 ];

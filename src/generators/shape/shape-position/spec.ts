@@ -6,7 +6,7 @@ import {matchAllExactLabels} from '../../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'shape-position',
     generalLabels: [
-        Area.SpatialModelling
+        Area.SpatialPosition
     ]
 };
 

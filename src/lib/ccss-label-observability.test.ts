@@ -23,10 +23,16 @@ const expectNone = (specTargets: typeof kindergarten, labels: string[]) => {
 
 describe('CCSS observable-label contracts', () => {
     it('separates physical group comparison from written-numeral comparison', () => {
-        const groups = targets(kindergarten, 'K.CC.C.6-compare-groups');
+        const countingGroups = targets(kindergarten, 'K.CC.C.6-compare-groups-by-counting');
+        const matchingGroups = targets(kindergarten, 'K.CC.C.6-compare-groups-by-matching');
+        const groups = [...countingGroups, ...matchingGroups];
         const numerals = targets(kindergarten, 'K.CC.C.7-compare-numerals');
 
-        expectAll(groups, [Area.SetComparison, Scope.PhysicalNumbers]);
+        expectAll(groups, [Scope.PhysicalNumbers]);
+        expectAll(countingGroups, [Area.NumerationWithIntegers, Scope.AdditiveCount]);
+        expectNone(countingGroups, [Area.SetComparison]);
+        expectAll(matchingGroups, [Area.SetComparison]);
+        expectNone(matchingGroups, [Area.NumerationWithIntegers, Scope.AdditiveCount]);
         expectNone(groups, [Area.NumericComparison, Scope.ArabicNumerals, Scope.Base10]);
         expectAll(numerals, [Scope.ArabicNumerals, Scope.Base10]);
         expectNone(numerals, [Area.NumericComparison, Area.SetComparison, Scope.PhysicalNumbers]);
@@ -59,14 +65,18 @@ describe('CCSS observable-label contracts', () => {
         expectNone(wordProblems, [Scope.PhysicalNumbers]);
     });
 
-    it('describes teen composition as a bounded sum without a global lower-bound claim', () => {
-        const teenNumbers = [
-            ...targets(kindergarten, 'K.NBT.A.1-teen-numbers'),
-            ...targets(gradeOne, '1.NBT.B.2b-teen-numbers')
-        ];
+    it('distinguishes composing and decomposing teen quantities', () => {
+        const kindergartenCompose = targets(kindergarten, 'K.NBT.A.1-compose-teen-numbers');
+        const kindergartenDecompose = targets(kindergarten, 'K.NBT.A.1-decompose-teen-numbers');
+        const gradeOneTeenNumbers = targets(gradeOne, '1.NBT.B.2b-teen-numbers');
 
-        expectAll(teenNumbers, [Area.Sum, Scope.NumbersSmaller20]);
-        expectNone(teenNumbers, [Area.Difference, Scope.NumbersLarger10]);
+        expectAll(kindergartenCompose, [Area.UnionOfCollections, Scope.NumbersSmaller20]);
+        expectAll(kindergartenDecompose, [Area.PartitionOfCollections, Scope.NumbersSmaller20]);
+        expectAll(gradeOneTeenNumbers, [Area.Sum, Scope.NumbersSmaller20]);
+        expectNone(
+            [...kindergartenCompose, ...kindergartenDecompose, ...gradeOneTeenNumbers],
+            [Area.Difference, Scope.NumbersLarger10]
+        );
     });
 
     it('keeps pairwise measurement comparison distinct from object sorting', () => {

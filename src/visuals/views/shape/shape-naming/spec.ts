@@ -6,6 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'shape-naming',
     generalLabels: [
         Area.ShapeRecognition,
+        Area.ShapeRotationConservation,
         Ability.VisualRecognition
     ]
 };

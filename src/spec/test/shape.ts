@@ -129,7 +129,7 @@ const envShapesBuilder = new DatasetPermutationBuilder()
 const identityNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeNaming,
-        Area.ShapeRecognition,
+        Area.ShapeRotationConservation,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
@@ -187,7 +187,7 @@ const otherQuadrilateralDrawingBuilder = new DatasetPermutationBuilder()
 
 const identityPositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.SpatialModelling,
+        Area.SpatialPosition,
         Ability.SpatialInterpretation
     ])
     .applyLabelVariants([
@@ -201,13 +201,12 @@ const identityPositionBuilder = new DatasetPermutationBuilder()
 const sameAttributeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ObjectSorting,
-        Ability.ConceptClassification,
-        Scope.ShapeProperties
+        Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Area.Sphere],
-        [Area.Cube],
-        [Area.Rectangle]
+        [Area.Sphere, Scope.Rollable],
+        [Area.Cube, Scope.Stackable],
+        [Area.Rectangle, Scope.Foldable]
     ]);
 
 export const spec: CompetencyTarget[] = [

@@ -37,7 +37,6 @@ const classifyBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Area.ObjectSorting,
-        Area.CollectionSense,
         Scope.ArabicNumerals,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,

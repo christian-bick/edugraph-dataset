@@ -3,14 +3,16 @@ import {ShapeSameAttributeProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
 import {ShapeSameAttributeGeneratorConfig, ShapeSameAttributeGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
+import {Scope} from 'edugraph-ts';
 
 export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAttributeProblem, ShapeSameAttributeGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeSameAttributeGeneratorSchema;
 
     generate(config: ShapeSameAttributeGeneratorConfig): ProblemStub | null {
-        validateConfigFields('shape-same-attribute', config, ['shapes']);
+        validateConfigFields('shape-same-attribute', config, ['shapes', 'property']);
         const shapes = config.shapes!;
+        const properties = config.property!;
 
         const selectedShape = shapes[Math.floor(random() * shapes.length)];
         const shape = selectedShape.split('/').pop()!.toLowerCase();
@@ -24,6 +26,16 @@ export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAt
             attribute = 'foldable';
         }
 
+        const expectedProperty = {
+            rollable: Scope.Rollable,
+            stackable: Scope.Stackable,
+            foldable: Scope.Foldable
+        }[attribute];
+
+        if (!properties.includes(expectedProperty)) {
+            return null;
+        }
+
         const answer = shape;
 
         return {
@@ -31,7 +43,7 @@ export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAt
                 attribute,
                 answer
             },
-            tags: [selectedShape]
+            tags: [selectedShape, expectedProperty]
         };
     }
 }
