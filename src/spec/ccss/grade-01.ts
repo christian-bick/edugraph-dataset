@@ -1,4 +1,8 @@
-import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {
+    defineImplementationPackage,
+    toImplementationTodos,
+    toTargets
+} from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { BeyondScopeEntry, CompetencyTarget, ImplementationTodo, OntologyTodo, TargetEquivalence } from '../../types/ml-engine.ts';
 
@@ -49,37 +53,39 @@ const propertiesBuilder = new DatasetPermutationBuilder()
         [Area.AssociativeLaw]
     ]);
 
+const arithmeticStrategyImplementation = defineImplementationPackage({
+    id: 'grade1-add-subtract-strategies',
+    description: 'Expand visible addition and subtraction strategy support within 20.',
+    generators: [{ module: 'integer-add-subtract-strategies', strategy: 'expand' }],
+    views: [{ module: 'operations-add-subtract-strategy', strategy: 'expand' }]
+});
+
+const arithmeticStrategyConstraints = [
+    Scope.TwoOperands,
+    Scope.ArabicNumerals,
+    Scope.Base10,
+    Scope.NumbersWithoutNegatives,
+    Scope.NumbersWithoutZero
+];
+
 // --- 1.OA.B.4: Understand subtraction as an unknown-addend problem ---
-// This reverses the operation to recover a missing input, so the competency is
-// explicitly scoped to procedure inversion rather than procedure execution.
-const unknownAddendBuilder = new DatasetPermutationBuilder()
+const unknownAddendStrategyBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.TwoOperands,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersWithoutZero,
+        Area.SubtractionThinkAddition,
+        ...arithmeticStrategyConstraints,
         Scope.NumbersSmaller20,
-        Ability.ProcedureInversion
-    ])
-    .applyLabelVariants([
-        [Area.Addition],
-        [Area.Subtraction]
+        Ability.ProcedureUnderstanding
     ]);
 
 // --- 1.OA.C.5: Relate counting to addition and subtraction ---
-const relateCountingBuilder = new DatasetPermutationBuilder()
+const relateCountingStrategyBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumerationWithIntegers,
-        Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
-        Scope.PhysicalNumbers,
-        Ability.ProcedureExecution
+        ...arithmeticStrategyConstraints,
+        Ability.ConceptDerivation
     ])
     .applyLabelVariants([
-        [Scope.AdditiveCount, Scope.After],
-        [Scope.SubtractiveCount, Scope.Before]
+        [Area.AdditionCountingOn],
+        [Area.SubtractionCountingBack]
     ])
     .applyLabelVariants([
         [Scope.NumbersSmaller10],
@@ -99,6 +105,52 @@ const fluencyBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersSmaller10],
+        [Scope.NumbersSmaller20]
+    ]);
+
+const subtractionMakeTenBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.SubtractionMakeTen,
+        ...arithmeticStrategyConstraints,
+        Scope.NumbersSmaller20,
+        Ability.ProcedureUnderstanding
+    ]);
+
+const additionCountingOnBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.AdditionCountingOn,
+        ...arithmeticStrategyConstraints,
+        Ability.ProcedureUnderstanding
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersSmaller10],
+        [Scope.NumbersSmaller20]
+    ]);
+
+const additionMakeTenBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.AdditionMakeTen,
+        ...arithmeticStrategyConstraints,
+        Scope.NumbersSmaller20,
+        Ability.ProcedureUnderstanding
+    ]);
+
+const subtractionThinkAdditionBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.SubtractionThinkAddition,
+        ...arithmeticStrategyConstraints,
+        Scope.NumbersSmaller20,
+        Ability.ProcedureUnderstanding
+    ]);
+
+const additionNearDoublesBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.AdditionNearDoubles,
+        ...arithmeticStrategyConstraints,
+        Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([
         [Scope.NumbersSmaller10],
@@ -246,16 +298,24 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureUnderstanding
     ]);
 
-// --- 1.NBT.B.3: Compare two two-digit numbers ---
-const compareTwoDigitBuilder = new DatasetPermutationBuilder()
+const placeValueComparisonImplementation = defineImplementationPackage({
+    id: 'grade1-place-value-comparison',
+    description: 'Add a tens-and-ones comparison presentation for two-digit numbers.',
+    generators: [{ module: 'comparison', strategy: 'reuse' }],
+    views: [{ module: 'numbers-place-value-comparison', strategy: 'new' }]
+});
+
+// --- 1.NBT.B.3: Compare two two-digit numbers by tens and ones ---
+const placeValueComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Area.PlaceValue,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersLarger10,
         Scope.NumbersSmaller100,
-        Ability.ProcedureExecution
+        Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([
         [Area.NumericInequality, Scope.Greater],
@@ -263,18 +323,40 @@ const compareTwoDigitBuilder = new DatasetPermutationBuilder()
         [Area.NumericEquality, Scope.Equal]
     ]);
 
-// --- 1.NBT.C.4: Add within 100 ---
-const addWithin100Builder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.Addition,
-        Scope.TwoOperands,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersSmaller100,
-        Ability.ProcedureExecution
+const placeValueArithmeticImplementation = defineImplementationPackage({
+    id: 'grade1-place-value-add-subtract',
+    description: 'Expand place-value arithmetic for Grade 1 operand shapes, conditional regrouping, written-method alignment, and explanation.',
+    generators: [{ module: 'place-value-arithmetic', strategy: 'expand' }],
+    views: [
+        { module: 'place-value-arithmetic-model', strategy: 'expand' },
+        { module: 'place-value-arithmetic-explanation', strategy: 'expand' }
+    ]
+});
+
+const addAdditionOperandVariants = (builder: DatasetPermutationBuilder): DatasetPermutationBuilder => builder
+    .applyLabelVariants([
+        [Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
+        [Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Area.IntegerRegrouping],
+        [Scope.MultiplesOf10, Scope.TwoDigitLargestOperand]
     ]);
+
+const createPlaceValueAdditionBuilder = (presentationLabels: string[]): DatasetPermutationBuilder =>
+    addAdditionOperandVariants(new DatasetPermutationBuilder()
+        .addLabels([
+            Area.AdditionPlaceValuePartitioning,
+            Scope.TwoOperands,
+            Scope.NumbersSmaller100,
+            Ability.ProcedureUnderstanding,
+            ...presentationLabels
+        ]));
+
+// --- 1.NBT.C.4: Add within 100 using place-value models and explanations ---
+const concretePlaceValueAdditionBuilder = createPlaceValueAdditionBuilder([Scope.PhysicalNumbers]);
+const modelToWrittenAdditionBuilder = createPlaceValueAdditionBuilder([
+    Scope.PhysicalNumbers,
+    Ability.Formalization
+]);
+const explainPlaceValueAdditionBuilder = createPlaceValueAdditionBuilder([Ability.TextualArticulation]);
 
 // --- 1.NBT.C.5: Mentally find 10 more or 10 less ---
 const tenMoreLessBuilder = new DatasetPermutationBuilder()
@@ -292,22 +374,29 @@ const tenMoreLessBuilder = new DatasetPermutationBuilder()
         [Area.Decrement]
     ]);
 
-// --- 1.NBT.C.6: Subtract multiples of 10 from multiples of 10 ---
-const subtractTensBuilder = new DatasetPermutationBuilder()
-    .addLabels([
-        Area.Subtraction,
-        Scope.TwoOperands,
-        Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.MultiplesOf10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller100,
-        Ability.ProcedureExecution
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersWithoutZero],
-        [Scope.NumbersWithZero]
-    ]);
+const createPlaceValueSubtractionBuilder = (presentationLabels: string[]): DatasetPermutationBuilder =>
+    new DatasetPermutationBuilder()
+        .addLabels([
+            Area.SubtractionPlaceValuePartitioning,
+            Scope.TwoOperands,
+            Scope.MultiplesOf10,
+            Scope.NumbersSmaller100,
+            Scope.NumbersWithoutNegatives,
+            Ability.ProcedureUnderstanding,
+            ...presentationLabels
+        ])
+        .applyLabelVariants([
+            [Scope.NumbersWithoutZero],
+            [Scope.NumbersWithZero]
+        ]);
+
+// --- 1.NBT.C.6: Subtract multiples of 10 using place-value models and explanations ---
+const concretePlaceValueSubtractionBuilder = createPlaceValueSubtractionBuilder([Scope.PhysicalNumbers]);
+const modelToWrittenSubtractionBuilder = createPlaceValueSubtractionBuilder([
+    Scope.PhysicalNumbers,
+    Ability.Formalization
+]);
+const explainPlaceValueSubtractionBuilder = createPlaceValueSubtractionBuilder([Ability.TextualArticulation]);
 
 // ==========================================
 // 3. Measurement and Data (1.MD)
@@ -375,62 +464,103 @@ const halfHourTimeBuilder = new DatasetPermutationBuilder()
         [Ability.VisualArticulation]
     ]);
 
-// --- 1.MD.B.3: Tell and write time using digital clocks ---
-const digitalTimeBuilder = new DatasetPermutationBuilder()
+const digitalTimeReadingImplementation = defineImplementationPackage({
+    id: 'grade1-digital-time-reading',
+    description: 'Add a digital-clock reading direction that exposes the display and withholds the answer.',
+    generators: [{ module: 'time', strategy: 'reuse' }],
+    views: [{ module: 'time-digital', strategy: 'expand' }]
+});
+
+// --- 1.MD.B.3: Construct a digital display from textual time ---
+const digitalTimeConstructionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringTime,
-        Scope.DigitalClock
+        Scope.DigitalClock,
+        Ability.TextualReception,
+        Ability.Formalization,
+        Ability.VisualArticulation
     ])
     .applyLabelVariants([
         [Scope.HourIntervals],
         [Scope.HalfHourIntervals]
-    ])
-    .applyLabelVariants([
-        [Ability.ProcedureExecution],
-        [Ability.VisualArticulation]
     ]);
 
-// --- 1.MD.C.4: Organize, represent and interpret data ---
-const interpretDataBuilder = new DatasetPermutationBuilder()
+const digitalTimeReadingBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumerationWithIntegers,
-        Area.ObjectSorting,
-        Area.CollectionSense,
-        Scope.ArabicNumerals,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
-        Ability.ConceptClassification
+        Area.MeasuringTime,
+        Scope.DigitalClock,
+        Ability.VisualReception,
+        Ability.Interpretation,
+        Ability.Formalization
     ])
     .applyLabelVariants([
-        [Scope.ShapeProperties],
-        []
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.HourIntervals],
+        [Scope.HalfHourIntervals]
     ]);
 
-// --- 1.MD.C.4: How many more or less in one category than in another ---
-const compareDataBuilder = new DatasetPermutationBuilder()
+const categoricalDataImplementation = defineImplementationPackage({
+    id: 'grade1-categorical-data',
+    description: 'Expand unscaled three-category graph tasks for organization, category counts, and totals.',
+    generators: [{ module: 'statistical-graphs', strategy: 'expand' }],
+    views: [
+        { module: 'data-picture-graph', strategy: 'expand' },
+        { module: 'data-bar-graph', strategy: 'expand' }
+    ]
+});
+
+// --- 1.MD.C.4: Organize and represent data in three categories ---
+const organizeCategoricalDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumerationWithIntegers,
+        Area.Statistics,
         Area.ObjectSorting,
-        Area.NumericOrder,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
+        Scope.IntegerNumbers,
+        Scope.StepsOf1,
+        Ability.ConceptClassification,
+        Ability.VisualArticulation
+    ])
+    .applyLabelVariants([
+        [Scope.PictureGraph],
+        [Scope.BarGraph]
+    ]);
+
+// --- 1.MD.C.4: Read the count in one category ---
+const readCategoryCountBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Scope.IntegerNumbers,
+        Scope.StepsOf1,
+        Ability.Interpretation
+    ])
+    .applyLabelVariants([
+        [Scope.PictureGraph],
+        [Scope.BarGraph]
+    ]);
+
+// --- 1.MD.C.4: Find the total across three categories ---
+const categoricalDataTotalBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.Addition,
+        Scope.IntegerNumbers,
+        Scope.ThreeOperands,
+        Scope.StepsOf1,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Least],
-        [Scope.Most]
-    ])
-    .applyLabelVariants([
-        [Scope.ShapeProperties],
-        []
-    ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.PictureGraph],
+        [Scope.BarGraph]
+    ]);
+
+// --- 1.MD.C.4: Compare two categories in an unscaled bar graph ---
+const categoricalDataComparisonBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.Subtraction,
+        Scope.IntegerNumbers,
+        Scope.BarGraph,
+        Scope.StepsOf1,
+        Scope.SingleStep,
+        Ability.ProcedureExecution
     ]);
 
 // ==========================================
@@ -572,9 +702,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.OA.A.1-word-problems', wordProblemsBuilder),
     ...toTargets('1.OA.A.2-three-addend-word-problems', threeAddendsBuilder),
     ...toTargets('1.OA.B.3-properties', propertiesBuilder),
-    ...toTargets('1.OA.B.4-unknown-addend', unknownAddendBuilder),
-    ...toTargets('1.OA.C.5-relate-counting', relateCountingBuilder),
     ...toTargets('1.OA.C.6-fluency', fluencyBuilder),
+    ...toTargets('1.OA.C.6-subtraction-make-ten', subtractionMakeTenBuilder),
     ...toTargets('1.OA.D.7-equal-sign', equalSignBuilder),
     ...toTargets('1.OA.D.8-unknown-number', unknownNumberBuilder),
     ...toTargets('1.OA.D.8-unknown-operand', unknownOperandBuilder),
@@ -586,19 +715,15 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.NBT.B.2a-ten-bundle', tenBundleBuilder),
     ...toTargets('1.NBT.B.2b-teen-numbers', teenNumbersBuilder),
     ...toTargets('1.NBT.B.2c-multiples-of-ten', multiplesOfTenBuilder),
-    ...toTargets('1.NBT.B.3-compare-two-digit', compareTwoDigitBuilder),
-    ...toTargets('1.NBT.C.4-add-within-100', addWithin100Builder),
     ...toTargets('1.NBT.C.5-ten-more-less', tenMoreLessBuilder),
-    ...toTargets('1.NBT.C.6-subtract-tens', subtractTensBuilder),
     // 1.MD - Measurement and Data
     ...toTargets('1.MD.A.1-direct-length-order', directLengthComparisonBuilder),
     ...toTargets('1.MD.A.1-mediated-length-comparison', mediatedLengthComparisonBuilder),
     ...toTargets('1.MD.A.2-measure-length', measureLengthBuilder),
     ...toTargets('1.MD.B.3-time', hourTimeBuilder),
     ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder),
-    ...toTargets('1.MD.B.3-digital-clocks', digitalTimeBuilder),
-    ...toTargets('1.MD.C.4-interpret-data', interpretDataBuilder),
-    ...toTargets('1.MD.C.4-compare-data', compareDataBuilder),
+    ...toTargets('1.MD.B.3-digital-construction', digitalTimeConstructionBuilder),
+    ...toTargets('1.MD.C.4-bar-comparison', categoricalDataComparisonBuilder),
     // 1.G - Geometry
     ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder),
     ...toTargets('1.G.A.1-build-from-defining-attributes', buildShapesBuilder),
@@ -611,10 +736,116 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.G.A.3-compare-unit-share-sizes', compareUnitShareSizesBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [];
+export const implementationTodos: ImplementationTodo[] = [
+    ...toImplementationTodos(
+        '1.OA.B.4-unknown-addend-strategy',
+        unknownAddendStrategyBuilder,
+        arithmeticStrategyImplementation,
+        'Show subtraction transformed into its related missing-addend equation and solved by counting up.'
+    ),
+    ...toImplementationTodos(
+        '1.OA.C.5-counting-operation-relationship',
+        relateCountingStrategyBuilder,
+        arithmeticStrategyImplementation,
+        'Explicitly connect a count sequence to its corresponding addition or subtraction equation.'
+    ),
+    ...toImplementationTodos(
+        '1.OA.C.6-addition-counting-on',
+        additionCountingOnBuilder,
+        arithmeticStrategyImplementation,
+        'Show visible count-on steps beginning at one addend and ending at the sum.'
+    ),
+    ...toImplementationTodos(
+        '1.OA.C.6-addition-make-ten',
+        additionMakeTenBuilder,
+        arithmeticStrategyImplementation,
+        'Decompose one addend, form ten, and add the remainder in visible steps.'
+    ),
+    ...toImplementationTodos(
+        '1.OA.C.6-subtraction-think-addition',
+        subtractionThinkAdditionBuilder,
+        arithmeticStrategyImplementation,
+        'Show the related missing-addend equation and the count-up decomposition.'
+    ),
+    ...toImplementationTodos(
+        '1.OA.C.6-addition-near-doubles',
+        additionNearDoublesBuilder,
+        arithmeticStrategyImplementation,
+        'Transform a near-double into a known double plus or minus one.'
+    ),
+    ...toImplementationTodos(
+        '1.NBT.B.3-place-value-comparison',
+        placeValueComparisonBuilder,
+        placeValueComparisonImplementation,
+        'Decompose both two-digit numerals into tens and ones before determining the comparison symbol.'
+    ),
+    ...toImplementationTodos(
+        '1.NBT.C.4-concrete-place-value-addition',
+        concretePlaceValueAdditionBuilder,
+        placeValueArithmeticImplementation,
+        'Show both operands as tens and ones, including composition of ten ones when required.'
+    ),
+    ...toImplementationTodos(
+        '1.NBT.C.4-model-to-written-method',
+        modelToWrittenAdditionBuilder,
+        placeValueArithmeticImplementation,
+        'Align the concrete place-value model with a complete written addition method.'
+    ),
+    ...toImplementationTodos(
+        '1.NBT.C.4-explain-place-value-addition',
+        explainPlaceValueAdditionBuilder,
+        placeValueArithmeticImplementation,
+        'Explain tens-with-tens, ones-with-ones, and any composed ten in authored steps.'
+    ),
+    ...toImplementationTodos(
+        '1.NBT.C.6-concrete-place-value-subtraction',
+        concretePlaceValueSubtractionBuilder,
+        placeValueArithmeticImplementation,
+        'Show tens bundles being removed or matched, including an equal-operands zero result.'
+    ),
+    ...toImplementationTodos(
+        '1.NBT.C.6-model-to-written-method',
+        modelToWrittenSubtractionBuilder,
+        placeValueArithmeticImplementation,
+        'Align the tens model with a complete written subtraction method.'
+    ),
+    ...toImplementationTodos(
+        '1.NBT.C.6-explain-place-value-subtraction',
+        explainPlaceValueSubtractionBuilder,
+        placeValueArithmeticImplementation,
+        'Explain subtraction through tens and the resulting positive or zero difference.'
+    ),
+    ...toImplementationTodos(
+        '1.MD.B.3-read-digital-time',
+        digitalTimeReadingBuilder,
+        digitalTimeReadingImplementation,
+        'Show a completed digital display in Question Mode while withholding the formalized time response.'
+    ),
+    ...toImplementationTodos(
+        '1.MD.C.4-organize-represent-data',
+        organizeCategoricalDataBuilder,
+        categoricalDataImplementation,
+        'Sort raw observations into three categories and represent them in the selected graph.'
+    ),
+    ...toImplementationTodos(
+        '1.MD.C.4-read-category-count',
+        readCategoryCountBuilder,
+        categoricalDataImplementation,
+        'Ask for the count in one named category of a completed three-category graph.'
+    ),
+    ...toImplementationTodos(
+        '1.MD.C.4-find-total',
+        categoricalDataTotalBuilder,
+        categoricalDataImplementation,
+        'Ask for and solve the total across all three categories of a completed graph.'
+    )
+];
 
 export const ontologyTodos: OntologyTodo[] = [];
 
 export const beyondScope: BeyondScopeEntry[] = [];
 
-export const equivalentTargets: TargetEquivalence[] = [];
+export const equivalentTargets: TargetEquivalence[] = [{
+    targets: ['1.OA.C.6-subtraction-make-ten', '2.OA.B.2-subtraction-make-ten'],
+    reason: 'Both standards require the same observable within-20 subtraction strategy: decompose the subtrahend, reach ten, and subtract the remainder.'
+}];
