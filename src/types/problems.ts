@@ -2020,6 +2020,39 @@ export type DecimalNotationProblem = {
     };
 };
 
+export type DecimalComparisonOperand = {
+    role: 'left' | 'right';
+    decimalNotation: string;
+    normalizedHundredthsNotation: string;
+    precision: 'tenths' | 'hundredths';
+    wholeDigit: 0;
+    tenthsDigit: number;
+    hundredthsDigit: number | null;
+    normalizedHundredths: number;
+    placeValueRow: {
+        ones: '0';
+        tenths: string;
+        hundredths: string;
+    };
+    model: TenthsHundredthsGridModel;
+};
+
+export type DecimalComparisonProblem = {
+    task: 'compare-decimals';
+    sharedWhole: 1;
+    relation: 'greater' | 'equal' | 'less';
+    symbol: '>' | '=' | '<';
+    left: DecimalComparisonOperand & {role: 'left'};
+    right: DecimalComparisonOperand & {role: 'right'};
+    firstDecidingPlace: 'tenths' | 'hundredths' | 'equal';
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answer: string;
+    answerStatement: string;
+    explanation: string;
+};
+
 export type FractionArithmeticProblem =
     | FractionBinaryOperationProblem
     | FractionDecompositionProblem
@@ -2668,5 +2701,6 @@ export interface ViewTypeMap {
     'numbers-decimal-notation': DecimalNotationProblem;
     'numbers-decimal-line': DecimalNotationProblem;
     'numbers-decimal-measurement': DecimalNotationProblem;
+    'numbers-decimal-comparison': DecimalComparisonProblem;
     'shape-draw-shape': ShapeBuildShapeProblem;
 }

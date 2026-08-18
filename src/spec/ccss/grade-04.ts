@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -11,17 +7,6 @@ import {
     OntologyTodo,
     TargetEquivalence
 } from '../../types/ml-engine.ts';
-
-// ==========================================
-// Implementation packages
-// ==========================================
-
-const decimalComparisonGrade4Implementation = defineImplementationPackage({
-    id: 'decimal-comparison-grade4',
-    description: 'Compare decimals to hundredths within the same whole and justify the comparison with visible place-value evidence.',
-    generators: [{ module: 'decimal-comparison', strategy: 'new' }],
-    views: [{ module: 'numbers-decimal-comparison', strategy: 'new' }]
-});
 
 // ==========================================
 // Operations and Algebraic Thinking (4.OA)
@@ -702,7 +687,6 @@ const decimalMeasurementNotationBuilder = new DatasetPermutationBuilder().addLab
 
 const compareDecimalsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
         Area.NumerationWithDecimals,
         Area.DecimalNotation,
         Area.DecimalPrecission,
@@ -711,7 +695,11 @@ const compareDecimalsBuilder = new DatasetPermutationBuilder()
         Scope.VisualNumbers,
         Ability.ConceptDerivation
     ])
-    .applyLabelVariants([[Scope.Greater], [Scope.Equal], [Scope.Less]]);
+    .applyLabelVariants([
+        [Area.NumericInequality, Scope.Greater],
+        [Area.NumericEquality, Scope.Equal],
+        [Area.NumericInequality, Scope.Less]
+    ]);
 
 export const spec: CompetencyTarget[] = [
     ...toTargets('4.OA.A.1-multiplicative-comparison-equation', multiplicativeComparisonEquationBuilder),
@@ -775,12 +763,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('4.NF.C.5-add-tenths-hundredths', addTenthsHundredthsBuilder),
     ...toTargets('4.NF.C.6-fraction-decimal-conversion', fractionDecimalConversionBuilder),
     ...toTargets('4.NF.C.6-decimal-number-line', decimalNumberLineBuilder),
-    ...toTargets('4.NF.C.6-decimal-measurement-notation', decimalMeasurementNotationBuilder)
+    ...toTargets('4.NF.C.6-decimal-measurement-notation', decimalMeasurementNotationBuilder),
+    ...toTargets('4.NF.C.7-compare-decimals', compareDecimalsBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos('4.NF.C.7-compare-decimals', compareDecimalsBuilder, decimalComparisonGrade4Implementation, 'Show same-whole decimal models or place values, hundredths precision, the comparison symbol, and justification.')
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

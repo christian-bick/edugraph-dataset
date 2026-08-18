@@ -1,0 +1,2 @@
+- **Identity:** Two decimals are aligned by place value and shown on identical hundred-part models of one shared whole.
+- **Modes:** Question Mode leaves the comparison symbol and deciding-place justification hidden; Solution Mode reveals the supplied symbol, deciding place or equality evidence, and justification without changing the models.
