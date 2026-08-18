@@ -13,6 +13,7 @@ describe('statistical-graphs spec', () => {
             Ability.VisualArticulation
         ])!.data;
         expect(data.scale).toBe(1);
+        expect(data.task).toBe('construct');
         expect(data.operation).toBeUndefined();
     });
 
@@ -91,5 +92,53 @@ describe('statistical-graphs spec', () => {
         expect(result.data.intermediate).toBe(first - second);
         expect(result.data.answer).toBe(result.data.intermediate! - third);
         expect(result.tags).toEqual(expect.arrayContaining([Area.Subtraction, Scope.MultiStep]));
+    });
+
+    it('resolves object sorting plus concept classification as organize', () => {
+        const result = generateWithLabels(new StatisticalGraphsGenerator(), [
+            Area.Statistics,
+            Area.ObjectSorting,
+            Scope.IntegerNumbers,
+            Scope.PictureGraph,
+            Scope.StepsOf1,
+            Ability.ConceptClassification,
+            Ability.VisualArticulation
+        ])!;
+        expect(result.data.task).toBe('organize');
+        expect(result.data.rawObservations).toBeDefined();
+        expect(result.tags).toEqual(expect.arrayContaining([
+            Area.ObjectSorting,
+            Ability.ConceptClassification
+        ]));
+    });
+
+    it('resolves interpretation as read-category-count', () => {
+        const result = generateWithLabels(new StatisticalGraphsGenerator(), [
+            Area.Statistics,
+            Scope.IntegerNumbers,
+            Scope.BarGraph,
+            Scope.StepsOf1,
+            Ability.Interpretation
+        ])!;
+        expect(result.data.task).toBe('read-category-count');
+        expect(result.data.answer).toBe(
+            result.data.categories[result.data.selectedCategoryIndex!].count
+        );
+        expect(result.tags).toContain(Ability.Interpretation);
+    });
+
+    it('resolves three-operand addition as find-total', () => {
+        const result = generateWithLabels(new StatisticalGraphsGenerator(), [
+            Area.Statistics,
+            Area.Addition,
+            Scope.IntegerNumbers,
+            Scope.PictureGraph,
+            Scope.ThreeOperands,
+            Scope.StepsOf1,
+            Ability.ProcedureExecution
+        ])!;
+        expect(result.data.task).toBe('find-total');
+        expect(result.data.operandIndices).toEqual([0, 1, 2]);
+        expect(result.tags).toEqual(expect.arrayContaining([Area.Addition, Scope.ThreeOperands]));
     });
 });

@@ -1,6 +1,2 @@
-- **Identity:** Three labeled category totals appear as bars against a visibly numbered axis whose intervals equal the selected 1, 2, 5, or 10 scale.
-- **Drawing question mode:** Source counts remain visible while outlined bar regions are left unresolved.
-- **Drawing solution mode:** Every bar reaches the tick matching its source total, and the axis states the scale step.
-- **Interpretation question mode:** Completed bars remain visible while the arithmetic result is withheld.
-- **Interpretation solution mode:** The same graph remains visible and the addition or subtraction result is revealed.
-- **Two-step comparison:** Three distinct bars feed two connected subtraction equations; Question Mode withholds both calculated results, while Solution Mode shows the intermediate and final answer consistently.
+- **Identity:** Exactly three labeled categories appear against a numbered bar-graph axis whose intervals visibly use the selected scale.
+- **Modes:** Construction Question Mode shows source data with unresolved bars and Solution Mode completes every bar. Reading and arithmetic modes keep the completed graph visible: Question Mode withholds the requested category count, three-addend total, or arithmetic result, while Solution Mode reveals it; a two-step comparison reveals both connected results only in Solution Mode.

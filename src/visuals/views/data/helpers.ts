@@ -49,7 +49,7 @@ export function formatMeasurement(length: number, unit: MeasurementDataProblem['
 }
 
 export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: string) {
-    validateProblemData(viewId, data, ['categories', 'scale']);
+    validateProblemData(viewId, data, ['task', 'graphState', 'categories', 'scale']);
     if (![1, 2, 5, 10].includes(data.scale)) {
         throw new ViewValidationError(viewId, 'Graph scale must be 1, 2, 5, or 10.');
     }
@@ -62,47 +62,112 @@ export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: 
     if (data.categories.some(({count}) => !Number.isInteger(count) || count < 0 || count > 8 * data.scale || count % data.scale !== 0)) {
         throw new ViewValidationError(viewId, 'Category totals must be whole-number multiples of the graph scale through eight steps.');
     }
-    if (data.operation === undefined) {
-        if (data.operandIndices !== undefined || data.intermediate !== undefined || data.answer !== undefined) {
-            throw new ViewValidationError(viewId, 'Presentation-only graph data cannot include a partial arithmetic question.');
+
+    const rejectFields = (fields: (keyof StatisticalGraphProblem)[]) => {
+        const present = fields.find(field => data[field] !== undefined);
+        if (present !== undefined) {
+            throw new ViewValidationError(viewId, `Task ${data.task} cannot include field ${present}.`);
         }
-        return;
-    }
-    if (!['addition', 'subtraction'].includes(data.operation)
-        || !Array.isArray(data.operandIndices)
-        || ![2, 3].includes(data.operandIndices.length)
-        || !Number.isInteger(data.answer)) {
-        throw new ViewValidationError(viewId, 'Arithmetic graph question fields are incomplete.');
-    }
-    const [firstIndex, secondIndex, thirdIndex] = data.operandIndices;
-    const first = data.categories[firstIndex]?.count;
-    const second = data.categories[secondIndex]?.count;
-    if (first === undefined || second === undefined || new Set(data.operandIndices).size !== data.operandIndices.length) {
-        throw new ViewValidationError(viewId, 'Arithmetic operands must reference distinct graph categories.');
-    }
-    if (data.operandIndices.length === 3) {
-        const third = data.categories[thirdIndex!]?.count;
-        const intermediate = first - second;
-        if (data.operation !== 'subtraction'
-            || third === undefined
-            || data.intermediate !== intermediate
-            || data.answer !== intermediate - third
-            || data.answer < 0) {
-            throw new ViewValidationError(viewId, 'Two-step graph subtraction is inconsistent.');
+    };
+    const validatePrompt = (prompt: string) => {
+        if (typeof prompt !== 'string' || prompt.trim().length === 0) {
+            throw new ViewValidationError(viewId, `Task ${data.task} requires a non-empty prompt.`);
         }
-        return;
-    }
-    if (data.intermediate !== undefined) {
-        throw new ViewValidationError(viewId, 'One-step graph questions cannot include an intermediate result.');
-    }
-    const expected = data.operation === 'addition' ? first + second : first - second;
-    if (!Number.isFinite(expected) || expected !== data.answer || expected < 0) {
-        throw new ViewValidationError(viewId, 'Arithmetic graph question is inconsistent.');
+    };
+    const validateOperands = (indices: readonly number[]) => {
+        if (indices.some(index => !Number.isInteger(index) || index < 0 || index > 2)
+            || new Set(indices).size !== indices.length) {
+            throw new ViewValidationError(viewId, 'Arithmetic operands must reference distinct graph categories.');
+        }
+        return indices.map(index => data.categories[index].count);
+    };
+
+    switch (data.task) {
+        case 'construct':
+            if (data.graphState !== 'to-construct') {
+                throw new ViewValidationError(viewId, 'Construct tasks require a graph to construct.');
+            }
+            rejectFields(['operation', 'operandIndices', 'intermediate', 'answer', 'rawObservations', 'selectedCategoryIndex', 'selectedCategory', 'prompt']);
+            return;
+        case 'organize': {
+            if (data.graphState !== 'to-construct' || data.scale !== 1) {
+                throw new ViewValidationError(viewId, 'Organize tasks require a graph to construct.');
+            }
+            validatePrompt(data.prompt);
+            rejectFields(['operation', 'operandIndices', 'intermediate', 'answer', 'selectedCategoryIndex', 'selectedCategory']);
+            if (!Array.isArray(data.rawObservations)
+                || data.rawObservations.some(label => !expectedLabels.includes(label))) {
+                throw new ViewValidationError(viewId, 'Organize observations must use the three graph category labels.');
+            }
+            for (const category of data.categories) {
+                const frequency = data.rawObservations.filter(label => label === category.label).length;
+                if (frequency !== category.count) {
+                    throw new ViewValidationError(viewId, 'Raw observation frequencies must equal the category totals.');
+                }
+            }
+            return;
+        }
+        case 'read-category-count':
+            if (data.graphState !== 'complete' || data.scale !== 1) {
+                throw new ViewValidationError(viewId, 'Read tasks require a complete graph.');
+            }
+            validatePrompt(data.prompt);
+            rejectFields(['operation', 'operandIndices', 'intermediate', 'rawObservations']);
+            if (![0, 1, 2].includes(data.selectedCategoryIndex)
+                || data.selectedCategory !== data.categories[data.selectedCategoryIndex].label
+                || !Number.isInteger(data.answer)
+                || data.answer !== data.categories[data.selectedCategoryIndex].count) {
+                throw new ViewValidationError(viewId, 'Selected category and count answer are inconsistent.');
+            }
+            return;
+        case 'find-total': {
+            if (data.graphState !== 'complete'
+                || data.scale !== 1
+                || data.operation !== 'addition'
+                || data.operandIndices.length !== 3
+                || data.operandIndices.some((index, position) => index !== position)) {
+                throw new ViewValidationError(viewId, 'Find-total tasks require all three categories in order.');
+            }
+            validatePrompt(data.prompt);
+            rejectFields(['intermediate', 'rawObservations', 'selectedCategoryIndex', 'selectedCategory']);
+            const total = data.categories.reduce((sum, category) => sum + category.count, 0);
+            if (!Number.isInteger(data.answer) || data.answer !== total) {
+                throw new ViewValidationError(viewId, 'Find-total answer must equal all three category totals.');
+            }
+            return;
+        }
+        case 'single-step-arithmetic': {
+            if (data.graphState !== 'complete' || !['addition', 'subtraction'].includes(data.operation)) {
+                throw new ViewValidationError(viewId, 'Single-step graph arithmetic requires a complete graph and operation.');
+            }
+            rejectFields(['intermediate', 'rawObservations', 'selectedCategoryIndex', 'selectedCategory', 'prompt']);
+            const [first, second] = validateOperands(data.operandIndices);
+            const expected = data.operation === 'addition' ? first + second : first - second;
+            if (!Number.isInteger(data.answer) || data.answer !== expected || data.answer < 0) {
+                throw new ViewValidationError(viewId, 'Single-step graph arithmetic is inconsistent.');
+            }
+            return;
+        }
+        case 'multi-step-arithmetic': {
+            if (data.graphState !== 'complete' || data.operation !== 'subtraction') {
+                throw new ViewValidationError(viewId, 'Multi-step graph arithmetic requires complete subtraction data.');
+            }
+            rejectFields(['rawObservations', 'selectedCategoryIndex', 'selectedCategory', 'prompt']);
+            const [first, second, third] = validateOperands(data.operandIndices);
+            if (data.intermediate !== first - second
+                || data.answer !== data.intermediate - third
+                || data.answer < 0) {
+                throw new ViewValidationError(viewId, 'Multi-step graph subtraction is inconsistent.');
+            }
+            return;
+        }
+        default:
+            throw new ViewValidationError(viewId, 'Unsupported statistical graph task.');
     }
 }
 
 export function graphQuestion(data: StatisticalGraphProblem): string {
-    if (!data.operation || !data.operandIndices) {
+    if (data.task !== 'single-step-arithmetic' && data.task !== 'multi-step-arithmetic') {
         throw new Error('graphQuestion requires an arithmetic graph problem.');
     }
     const [firstIndex, secondIndex, thirdIndex] = data.operandIndices;

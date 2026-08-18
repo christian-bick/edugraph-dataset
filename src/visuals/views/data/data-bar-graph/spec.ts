@@ -1,5 +1,5 @@
 import {Ability, Scope} from 'edugraph-ts';
-import {selectExactMatch} from '../../../../lib/resolvers.ts';
+import {hasLabel} from '../../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -9,7 +9,8 @@ export const spec: ViewSpec = {
 };
 
 export const DataBarGraphViewSchema = {
-    taskAbility: [[Ability.VisualArticulation, Ability.ProcedureExecution], selectExactMatch]
+    showConstructionTask: [[Ability.VisualArticulation], hasLabel(Ability.VisualArticulation)],
+    showArithmeticTask: [[Ability.ProcedureExecution], hasLabel(Ability.ProcedureExecution)]
 } as const;
 
 export type DataBarGraphViewConfig = ConfigFromSchema<typeof DataBarGraphViewSchema>;

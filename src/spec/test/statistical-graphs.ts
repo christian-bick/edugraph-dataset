@@ -56,10 +56,44 @@ const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
 
+const grade1OrganizeBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.ObjectSorting,
+        Scope.IntegerNumbers,
+        Scope.StepsOf1,
+        Ability.ConceptClassification,
+        Ability.VisualArticulation
+    ])
+    .applyLabelVariants([[Scope.PictureGraph], [Scope.BarGraph]]);
+
+const grade1ReadCategoryBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Scope.IntegerNumbers,
+        Scope.StepsOf1,
+        Ability.Interpretation
+    ])
+    .applyLabelVariants([[Scope.PictureGraph], [Scope.BarGraph]]);
+
+const grade1FindTotalBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Statistics,
+        Area.Addition,
+        Scope.IntegerNumbers,
+        Scope.ThreeOperands,
+        Scope.StepsOf1,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([[Scope.PictureGraph], [Scope.BarGraph]]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-picture-graph', pictureGraphBuilder),
     ...toTargets('test-bar-graph', barGraphBuilder),
     ...toTargets('test-bar-graph-problems', barGraphProblemsBuilder),
     ...toTargets('test-scaled-bar-comparisons', scaledBarComparisonBuilder),
-    ...toTargets('test-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder)
+    ...toTargets('test-two-step-scaled-bar-comparisons', twoStepScaledBarComparisonBuilder),
+    ...toTargets('test-grade1-organize-categorical-data', grade1OrganizeBuilder),
+    ...toTargets('test-grade1-read-category-count', grade1ReadCategoryBuilder),
+    ...toTargets('test-grade1-find-categorical-total', grade1FindTotalBuilder)
 ];

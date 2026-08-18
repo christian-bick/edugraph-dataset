@@ -1,4 +1,3 @@
-- **Identity:** Three labeled category totals are represented by repeated picture markers and a visible one-picture-equals-scale key.
-- **Question mode:** The source counts remain visible while every graph row is blank for drawing.
-- **Solution mode:** Each row contains exactly `category total ÷ scale` picture markers.
-- **Scale:** The key visibly states whether each marker represents 1, 2, 5, or 10 items, and every category total is an exact multiple of that value.
+- **Identity:** Three labeled categories are represented by repeated picture markers and a visible one-picture-equals-scale key; the prompt clearly asks to construct, organize, read one category, or total all categories.
+- **Modes:** Construction and organization questions keep their source data visible while graph rows are blank; reading and total questions keep the completed graph visible while only the requested numeric response is blank. Solutions reveal the completed graph or requested result in the same context.
+- **Essential specifics:** Organization questions show the ungrouped observations without category totals, and total questions show all three category addends.

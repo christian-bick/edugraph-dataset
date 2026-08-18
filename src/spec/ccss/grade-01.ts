@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import { BeyondScopeEntry, CompetencyTarget, ImplementationTodo, OntologyTodo, TargetEquivalence } from '../../types/ml-engine.ts';
 
@@ -470,16 +466,6 @@ const digitalTimeReadingBuilder = new DatasetPermutationBuilder()
         [Scope.HalfHourIntervals]
     ]);
 
-const categoricalDataImplementation = defineImplementationPackage({
-    id: 'grade1-categorical-data',
-    description: 'Expand unscaled three-category graph tasks for organization, category counts, and totals.',
-    generators: [{ module: 'statistical-graphs', strategy: 'expand' }],
-    views: [
-        { module: 'data-picture-graph', strategy: 'expand' },
-        { module: 'data-bar-graph', strategy: 'expand' }
-    ]
-});
-
 // --- 1.MD.C.4: Organize and represent data in three categories ---
 const organizeCategoricalDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -709,6 +695,9 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.MD.B.3-half-hour-time', halfHourTimeBuilder),
     ...toTargets('1.MD.B.3-digital-construction', digitalTimeConstructionBuilder),
     ...toTargets('1.MD.B.3-read-digital-time', digitalTimeReadingBuilder),
+    ...toTargets('1.MD.C.4-organize-represent-data', organizeCategoricalDataBuilder),
+    ...toTargets('1.MD.C.4-read-category-count', readCategoryCountBuilder),
+    ...toTargets('1.MD.C.4-find-total', categoricalDataTotalBuilder),
     ...toTargets('1.MD.C.4-bar-comparison', categoricalDataComparisonBuilder),
     // 1.G - Geometry
     ...toTargets('1.G.A.1-classify-shape-attributes', classifyShapeAttributesBuilder),
@@ -722,26 +711,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('1.G.A.3-compare-unit-share-sizes', compareUnitShareSizesBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '1.MD.C.4-organize-represent-data',
-        organizeCategoricalDataBuilder,
-        categoricalDataImplementation,
-        'Sort raw observations into three categories and represent them in the selected graph.'
-    ),
-    ...toImplementationTodos(
-        '1.MD.C.4-read-category-count',
-        readCategoryCountBuilder,
-        categoricalDataImplementation,
-        'Ask for the count in one named category of a completed three-category graph.'
-    ),
-    ...toImplementationTodos(
-        '1.MD.C.4-find-total',
-        categoricalDataTotalBuilder,
-        categoricalDataImplementation,
-        'Ask for and solve the total across all three categories of a completed graph.'
-    )
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 
