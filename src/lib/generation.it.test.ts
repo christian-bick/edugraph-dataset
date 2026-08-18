@@ -35,8 +35,8 @@ describe('catalogs and end-to-end matching', () => {
         expect(viewsFor('K.CC.C.7-compare-numerals')).toEqual(new Set([
             'numbers-compare'
         ]));
-        expect(viewsFor('1.NBT.B.3-compare-two-digit')).toEqual(new Set([
-            'numbers-compare'
+        expect(viewsFor('1.NBT.B.3-place-value-comparison')).toEqual(new Set([
+            'numbers-place-value-comparison'
         ]));
     }, 90000);
 
