@@ -63,6 +63,25 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         return;
     }
 
+    if (problem.strategy === 'subtraction-make-ten') {
+        const remainder = rightOperand - adjustment;
+        expect(problem.operation).toBe('subtraction');
+        expect(leftOperand).toBeGreaterThan(10);
+        expect(leftOperand).toBeLessThan(20);
+        expect(answer).toBe(leftOperand - rightOperand);
+        expect(adjustment).toBe(leftOperand - 10);
+        expect(remainder).toBeGreaterThan(0);
+        expect(problem.transformedEquation).toBe(
+            `${leftOperand} − ${rightOperand} = ${leftOperand} − (${adjustment} + ${remainder})`
+        );
+        expect(problem.steps).toEqual([
+            `${rightOperand} = ${adjustment} + ${remainder}`,
+            `${leftOperand} − ${adjustment} = 10`,
+            `10 − ${remainder} = ${answer}`
+        ]);
+        return;
+    }
+
     const friendlyTen = rightOperand + adjustment;
     const remainingDifference = answer - adjustment;
     expect(problem.operation).toBe('subtraction');
@@ -91,6 +110,7 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     it.each([
         'addition-compensation',
         'subtraction-compensation',
+        'subtraction-make-ten',
         'subtraction-think-addition'
     ] as const)('generates 100 exact and checkable %s problems', strategy => {
         for (let seed = 0; seed < 100; seed++) {
@@ -106,6 +126,7 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     it.each([
         'addition-compensation',
         'subtraction-compensation',
+        'subtraction-make-ten',
         'subtraction-think-addition'
     ] as const)('returns null when the numeric interval cannot support %s', strategy => {
         expect(generator.generate({strategy, range: {min: 9, max: 10}})).toBeNull();

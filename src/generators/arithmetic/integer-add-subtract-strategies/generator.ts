@@ -120,6 +120,43 @@ const subtractionCompensation = ({minimum, maximum}: Bounds): IntegerAddSubtract
     };
 };
 
+const subtractionMakeTen = ({minimum, maximum}: Bounds): IntegerAddSubtractStrategyProblem | null => {
+    const minimumLeft = Math.max(11, minimum);
+    const maximumLeft = Math.min(19, maximum);
+    if (minimum > 9 || minimumLeft > maximumLeft) return null;
+
+    const leftOperand = integerBetween(minimumLeft, maximumLeft);
+
+    const adjustment = leftOperand - 10;
+    const rightOperand = integerBetween(adjustment + 1, leftOperand - minimum);
+    const remainder = rightOperand - adjustment;
+    const answer = leftOperand - rightOperand;
+    const questionEquation = `${leftOperand} − ${rightOperand} = ?`;
+    const solutionEquation = `${leftOperand} − ${rightOperand} = ${answer}`;
+    const transformedEquation = `${leftOperand} − ${rightOperand} = ${leftOperand} − (${adjustment} + ${remainder})`;
+    const steps = [
+        `${rightOperand} = ${adjustment} + ${remainder}`,
+        `${leftOperand} − ${adjustment} = 10`,
+        `10 − ${remainder} = ${answer}`
+    ] as const;
+
+    return {
+        task: 'integer-add-subtract-strategy',
+        strategy: 'subtraction-make-ten',
+        operation: 'subtraction',
+        leftOperand,
+        rightOperand,
+        answer,
+        adjustment,
+        prompt: `Make ten to solve ${questionEquation}`,
+        questionEquation,
+        solutionEquation,
+        transformedEquation,
+        steps,
+        explanation: `Decompose ${rightOperand} as ${adjustment} + ${remainder}. Subtract ${adjustment} from ${leftOperand} to reach 10, then subtract the remaining ${remainder} to get ${answer}.`
+    };
+};
+
 const subtractionThinkAddition = ({minimum, maximum}: Bounds): IntegerAddSubtractStrategyProblem | null => {
     const rightOperand = choose(eligibleValues(minimum, maximum, candidate => {
         if (candidate % 10 === 0) return false;
@@ -171,6 +208,7 @@ const builders: Record<
 > = {
     'addition-compensation': additionCompensation,
     'subtraction-compensation': subtractionCompensation,
+    'subtraction-make-ten': subtractionMakeTen,
     'subtraction-think-addition': subtractionThinkAddition
 };
 

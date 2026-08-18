@@ -9,12 +9,17 @@ import {
     ShapeClassificationFigure,
     ShapeClassificationMarker,
     ShapeClassificationStroke,
+    ShapeCountAttribute,
     ShapeCountOption,
     ShapeLineRelationClassificationProblem,
     ShapeSubsumptionProblem
 } from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
-import {getShapeAppearance, ShapeAppearance} from '../helpers.ts';
+import {
+    countClassificationMatchesRenderedPolygons,
+    getShapeAppearance,
+    ShapeAppearance
+} from '../helpers.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
     ShapeClassifyAttributesViewConfig,
@@ -360,18 +365,55 @@ const VERTICES: Readonly<Record<string, readonly [number, number][]>> = {
     hexagon: [[50, 8], [87, 29], [87, 71], [50, 92], [13, 71], [13, 29]]
 };
 
-function VertexShape({shape}: {shape: ShapeCountOption['shape']}) {
+function angleArcPath(
+    vertex: readonly [number, number],
+    previous: readonly [number, number],
+    next: readonly [number, number]
+): string {
+    const pointOnRay = (end: readonly [number, number]) => {
+        const dx = end[0] - vertex[0];
+        const dy = end[1] - vertex[1];
+        const length = Math.hypot(dx, dy);
+        return [vertex[0] + dx / length * 14, vertex[1] + dy / length * 14] as const;
+    };
+    const start = pointOnRay(previous);
+    const end = pointOnRay(next);
+    return `M ${start[0]} ${start[1]} Q ${vertex[0]} ${vertex[1]} ${end[0]} ${end[1]}`;
+}
+
+function PolygonCountShape({
+    shape,
+    attribute
+}: {
+    shape: ShapeCountOption['shape'];
+    attribute: Extract<ShapeCountAttribute, 'vertices' | 'angles'>;
+}) {
     const vertices = VERTICES[shape];
     if (!vertices) {
-        throw new ViewValidationError('shape-classify-attributes', `Unsupported vertex-count shape: ${shape}`);
+        throw new ViewValidationError('shape-classify-attributes', `Unsupported polygon-count shape: ${shape}`);
     }
     const points = vertices.map(([x, y]) => `${x},${y}`).join(' ');
     return (
-        <svg width="82" height="82" viewBox="0 0 100 100" aria-label={`${vertices.length}-vertex shape`}>
+        <svg width="82" height="82" viewBox="0 0 100 100" aria-label={`Polygon with countable ${attribute}`}>
             <polygon points={points} fill="#dbeafe" stroke="#2563eb" strokeWidth="4" />
-            {vertices.map(([x, y], index) => (
-                <circle key={index} cx={x} cy={y} r="5" fill="#f43f5e" stroke="#9f1239" strokeWidth="1.5" />
-            ))}
+            {attribute === 'vertices'
+                ? vertices.map(([x, y], index) => (
+                    <circle key={index} cx={x} cy={y} r="5" fill="#f43f5e" stroke="#9f1239" strokeWidth="1.5" />
+                ))
+                : vertices.map((vertex, index) => (
+                    <path
+                        key={index}
+                        d={angleArcPath(
+                            vertex,
+                            vertices[(index - 1 + vertices.length) % vertices.length],
+                            vertices[(index + 1) % vertices.length]
+                        )}
+                        fill="none"
+                        stroke="#ea580c"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                    />
+                ))}
         </svg>
     );
 }
@@ -435,8 +477,20 @@ function validateCountClassificationProblem(data: Extract<ShapeAttributeClassifi
     if (ids.size !== 4 || satisfying.length !== 1 || satisfying[0].id !== data.answer) {
         throw new ViewValidationError('shape-classify-attributes', 'The answer must identify one satisfying shape.');
     }
-    if (data.attribute === 'vertices' && data.options.some(option => !VERTICES[option.shape])) {
-        throw new ViewValidationError('shape-classify-attributes', 'Vertex-count options must be supported polygons.');
+    if (
+        (data.attribute === 'vertices' || data.attribute === 'angles')
+        && data.options.some(option => !VERTICES[option.shape])
+    ) {
+        throw new ViewValidationError('shape-classify-attributes', 'Polygon-count options must be supported polygons.');
+    }
+    if (!countClassificationMatchesRenderedPolygons(
+        data,
+        shape => VERTICES[shape]?.length ?? null
+    )) {
+        throw new ViewValidationError(
+            'shape-classify-attributes',
+            'Each polygon count and membership must match the rendered shape.'
+        );
     }
 }
 
@@ -449,13 +503,15 @@ function CountClassificationLayout({
 }) {
     const prompt = data.attribute === 'vertices'
         ? `Which shape has ${data.requiredCount} vertices?`
+        : data.attribute === 'angles'
+            ? `Which shape has ${data.requiredCount} angles?`
         : `Which shape has ${data.requiredCount} equal faces?`;
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit mx-auto font-sans">
             <div className="flex flex-col items-center w-[520px]">
                 <div className="h-[58px] flex items-start justify-center text-[1.3rem] font-bold text-slate-700 text-center leading-normal">
-                    {!isSolutionView && prompt}
+                    {prompt}
                 </div>
                 <div className="grid grid-cols-2 gap-3 w-full">
                     {data.options.map(option => {
@@ -471,8 +527,8 @@ function CountClassificationLayout({
                                 <div className="absolute left-3 top-3 flex size-7 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600">
                                     {option.id}
                                 </div>
-                                {data.attribute === 'vertices'
-                                    ? <VertexShape shape={option.shape} />
+                                {data.attribute === 'vertices' || data.attribute === 'angles'
+                                    ? <PolygonCountShape shape={option.shape} attribute={data.attribute} />
                                     : <FaceNet shape={option.shape} />}
                                 <div className="text-[0.9rem] font-semibold text-slate-700">
                                     {countOptionName(option.shape)}

@@ -9,7 +9,13 @@ export const spec: ViewSpec = {
         Area.CircularShapeDrawing,
         Ability.VisualArticulation
     ],
-    rejectedLabels: [Area.Hexagon, Scope.ShapeProperties, Scope.VertexCount, Scope.FaceCount]
+    rejectedLabels: [
+        Area.Hexagon,
+        Scope.ShapeProperties,
+        Scope.VertexCount,
+        Scope.AngleCount,
+        Scope.FaceCount
+    ]
 };
 
 

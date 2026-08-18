@@ -18,12 +18,14 @@ interface CoreProps {
 const strategyTitles: Record<IntegerAddSubtractStrategy, string> = {
     'addition-compensation': 'Addition compensation',
     'subtraction-compensation': 'Subtraction compensation',
+    'subtraction-make-ten': 'Make ten for subtraction',
     'subtraction-think-addition': 'Think addition for subtraction'
 };
 
 const strategyDirections: Record<IntegerAddSubtractStrategy, string> = {
     'addition-compensation': 'Move the adjustment from one addend to the other so the sum stays equal.',
     'subtraction-compensation': 'Add the same adjustment to both numbers so the difference stays equal.',
+    'subtraction-make-ten': 'Decompose the subtrahend so the first subtraction reaches 10, then subtract the remainder.',
     'subtraction-think-addition': 'Count up through the next multiple of ten, then combine both increases.'
 };
 

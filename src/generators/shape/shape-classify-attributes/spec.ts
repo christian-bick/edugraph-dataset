@@ -38,7 +38,7 @@ export const ShapeClassifyAttributesGeneratorSchema = {
         matchAllExactLabels
     ],
     attributeCounts: [
-        [Scope.VertexCount, Scope.FaceCount, Scope.Equal],
+        [Scope.VertexCount, Scope.AngleCount, Scope.FaceCount, Scope.Equal],
         matchAllExactLabels
     ]
 } as const;

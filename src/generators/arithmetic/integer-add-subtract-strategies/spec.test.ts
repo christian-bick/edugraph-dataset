@@ -20,12 +20,14 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining(invariantLabels));
         expect(spec.generalLabels).not.toContain(Area.AdditionCompensation);
         expect(spec.generalLabels).not.toContain(Area.SubtractionCompensation);
+        expect(spec.generalLabels).not.toContain(Area.SubtractionMakeTen);
         expect(spec.generalLabels).not.toContain(Area.SubtractionThinkAddition);
     });
 
     it.each([
         [Area.AdditionCompensation, 'addition-compensation'],
         [Area.SubtractionCompensation, 'subtraction-compensation'],
+        [Area.SubtractionMakeTen, 'subtraction-make-ten'],
         [Area.SubtractionThinkAddition, 'subtraction-think-addition']
     ] as const)('resolves %s within 1000', (strategyLabel, strategy) => {
         setSeed(strategy);

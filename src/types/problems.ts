@@ -101,6 +101,7 @@ export type KnownFactDerivationProblem = {
 export type IntegerAddSubtractStrategy =
     | 'addition-compensation'
     | 'subtraction-compensation'
+    | 'subtraction-make-ten'
     | 'subtraction-think-addition';
 
 export type IntegerAddSubtractStrategyProblem = {
@@ -1247,7 +1248,7 @@ export type ShapeDefiningAttributeClassificationProblem = {
     task?: undefined;
 };
 
-export type ShapeCountAttribute = 'vertices' | 'equal-faces';
+export type ShapeCountAttribute = 'vertices' | 'angles' | 'equal-faces';
 
 export type ShapeCountOptionName =
     | PlaneShapeName

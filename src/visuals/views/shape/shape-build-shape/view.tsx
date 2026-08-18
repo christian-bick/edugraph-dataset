@@ -1,12 +1,37 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {ShapeDefinition} from '../../../../types/problems.ts';
+import {ShapeCountAttribute, ShapeDefinition} from '../../../../types/problems.ts';
 import {ShapeBuildShapeViewConfig, ShapeBuildShapeViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {angleConstructionMatchesRenderedPolygon} from '../helpers.ts';
 import '../../../../tailwind.css';
 
-function ShapeSVG({shape, size = 100, solved = false}: {shape: string; size?: number; solved?: boolean}) {
+function interiorAngleMarker(
+    vertex: {x: number; y: number},
+    previous: {x: number; y: number},
+    next: {x: number; y: number}
+) {
+    const pointOnRay = (end: {x: number; y: number}, distance: number) => {
+        const dx = end.x - vertex.x;
+        const dy = end.y - vertex.y;
+        const length = Math.hypot(dx, dy);
+        return {x: vertex.x + dx / length * distance, y: vertex.y + dy / length * distance};
+    };
+    const start = pointOnRay(previous, 13);
+    const end = pointOnRay(next, 13);
+    const centroidDirection = {
+        x: (previous.x + next.x) / 2,
+        y: (previous.y + next.y) / 2
+    };
+    const label = pointOnRay(centroidDirection, 19);
+    return {
+        path: `M ${start.x} ${start.y} Q ${vertex.x} ${vertex.y} ${end.x} ${end.y}`,
+        label
+    };
+}
+
+function verticesForShape(shape: string): Array<{x: number; y: number}> {
     let vertices: Array<{ x: number; y: number }> = [];
 
     if (shape === 'square') {
@@ -28,16 +53,67 @@ function ShapeSVG({shape, size = 100, solved = false}: {shape: string; size?: nu
         throw new ViewValidationError('shape-build-shape', `Unsupported shape: ${shape}`);
     }
 
+    return vertices;
+}
+
+function ShapeSVG({
+    shape,
+    size = 100,
+    solved = false,
+    markAngles = false
+}: {
+    shape: string;
+    size?: number;
+    solved?: boolean;
+    markAngles?: boolean;
+}) {
+    const vertices = verticesForShape(shape);
+
     const pointsStr = vertices.map(v => `${v.x},${v.y}`).join(' ');
 
     return (
-        <svg width={size} height={size} viewBox="0 0 100 100" className="overflow-visible">
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 100 100"
+            className="overflow-visible"
+            aria-label={markAngles ? `${vertices.length} marked interior angles` : undefined}
+        >
             {/* Sticks (sides) */}
             <polygon points={pointsStr} fill="none" stroke={solved ? 'forestgreen' : '#64748b'} strokeWidth="5" strokeLinejoin="miter" />
             {/* Clay balls (corners) */}
-            {vertices.map((v, i) => (
+            {!markAngles && vertices.map((v, i) => (
                 <circle key={i} cx={v.x} cy={v.y} r="7" fill={solved ? '#dcfce7' : '#e11d48'} stroke={solved ? 'forestgreen' : '#be123c'} strokeWidth="1.5" />
             ))}
+            {markAngles && vertices.map((vertex, index) => {
+                const marker = interiorAngleMarker(
+                    vertex,
+                    vertices[(index - 1 + vertices.length) % vertices.length],
+                    vertices[(index + 1) % vertices.length]
+                );
+                return (
+                    <g key={index}>
+                        <path
+                            d={marker.path}
+                            fill="none"
+                            stroke="#ea580c"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                        />
+                        <text
+                            x={marker.label.x}
+                            y={marker.label.y}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fill="#9a3412"
+                            fontSize="8"
+                            fontWeight="800"
+                        >
+                            {index + 1}
+                        </text>
+                    </g>
+                );
+            })}
         </svg>
     );
 }
@@ -132,14 +208,35 @@ function EqualFaceMaterials({assembled}: {assembled: boolean}) {
     );
 }
 
-function CountRequirementCard({attribute, requiredCount}: {attribute: 'vertices' | 'equal-faces'; requiredCount: number}) {
+function CountRequirementCard({attribute, requiredCount}: {attribute: ShapeCountAttribute; requiredCount: number}) {
     const text = attribute === 'vertices'
         ? `${requiredCount} vertices`
-        : `${requiredCount} equal square faces`;
+        : attribute === 'angles'
+            ? `${requiredCount} angles`
+            : `${requiredCount} equal square faces`;
     return (
         <div className="w-[420px] bg-blue-50 border-2 border-blue-200 rounded-xl px-5 py-3 text-center box-border">
             <div className="text-[0.82rem] font-bold uppercase tracking-wide text-blue-700 mb-1">Required attribute</div>
             <div className="text-[1.15rem] font-bold text-slate-700">{text}</div>
+        </div>
+    );
+}
+
+function AngleDrawingCanvas() {
+    return (
+        <div className="flex h-[170px] w-[330px] items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-base font-semibold text-slate-400">
+            Draw your shape here
+        </div>
+    );
+}
+
+function AngleCountSolution({target, requiredCount}: {target: string; requiredCount: number}) {
+    return (
+        <div className="flex flex-col items-center gap-3">
+            <ShapeSVG shape={target} size={165} solved markAngles />
+            <div className="rounded-full border-2 border-orange-300 bg-orange-50 px-4 py-1.5 text-base font-extrabold text-orange-800">
+                {requiredCount} angles counted
+            </div>
         </div>
     );
 }
@@ -155,7 +252,7 @@ function CountSpecificationLayout({
     target: string;
     sides: number;
     corners: number;
-    attribute: 'vertices' | 'equal-faces';
+    attribute: ShapeCountAttribute;
     requiredCount: number;
     isSolutionView: boolean;
 }) {
@@ -163,7 +260,11 @@ function CountSpecificationLayout({
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
             <div className="flex flex-col items-center w-[480px] gap-5">
                 <div className="h-[42px] flex items-start justify-center text-[1.25rem] font-bold text-slate-700 text-center leading-normal">
-                    {!isSolutionView && 'Draw a shape with the required attribute.'}
+                    {attribute === 'angles'
+                        ? isSolutionView
+                            ? `A shape with ${requiredCount} angles`
+                            : `Draw a shape with ${requiredCount} angles.`
+                        : !isSolutionView && 'Draw a shape with the required attribute.'}
                 </div>
                 <CountRequirementCard attribute={attribute} requiredCount={requiredCount} />
                 <div className="flex justify-center items-center w-[420px] h-[230px] bg-slate-50 border-2 border-slate-200 rounded-xl p-[15px] box-border">
@@ -171,7 +272,11 @@ function CountSpecificationLayout({
                         ? isSolutionView
                             ? <ShapeSVG shape={target} size={155} solved />
                             : <MaterialTray sides={sides} corners={corners} />
-                        : <EqualFaceMaterials assembled={isSolutionView} />}
+                        : attribute === 'angles'
+                            ? isSolutionView
+                                ? <AngleCountSolution target={target} requiredCount={requiredCount} />
+                                : <AngleDrawingCanvas />
+                            : <EqualFaceMaterials assembled={isSolutionView} />}
                 </div>
             </div>
         </div>
@@ -223,6 +328,12 @@ const ShapeBuildShapeCore = ({ config: _config, payload }: CoreProps) => {
         validateProblemData('shape-build-shape', data, ['task', 'attribute', 'requiredCount']);
         if (data.attribute === 'vertices' && corners !== data.requiredCount) {
             throw new ViewValidationError('shape-build-shape', 'Vertex materials must match the required count.');
+        }
+        if (data.attribute === 'angles' && !angleConstructionMatchesRenderedPolygon(
+            data,
+            verticesForShape(target).length
+        )) {
+            throw new ViewValidationError('shape-build-shape', 'The polygon must match the required angle count.');
         }
         if (data.attribute === 'equal-faces' && (target !== 'cube' || data.requiredCount !== 6)) {
             throw new ViewValidationError('shape-build-shape', 'Equal-face construction requires a six-faced cube.');

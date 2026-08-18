@@ -6,7 +6,7 @@ import {GeneratorValidationError, validateConfigFields} from "../../../lib/error
 import {getShapeDefinition, shapeNameFromLabel} from '../helpers.ts';
 import {random} from '../../../lib/random.ts';
 
-const VERTEX_TARGETS = [
+const POLYGON_COUNT_TARGETS = [
     {target: 'triangle', label: Area.Triangle, count: 3},
     {target: 'quadrilateral', label: Area.Quadrilateral, count: 4},
     {target: 'pentagon', label: Area.Pentagon, count: 5},
@@ -29,21 +29,27 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         }
 
         const useVertexCount = config.attributeCounts!.includes(Scope.VertexCount);
+        const useAngleCount = config.attributeCounts!.includes(Scope.AngleCount);
         const useFaceCount = config.attributeCounts!.includes(Scope.FaceCount);
         const requireEqualFaces = config.attributeCounts!.includes(Scope.Equal);
         const isAttributeSpecification = config.specifyAttributes
             && config.shapeArea === Area.ShapeClassification
             && !config.constructionScopes!.includes(Scope.ShapeProperties);
 
-        if (isAttributeSpecification && useVertexCount && !useFaceCount && !requireEqualFaces) {
-            const selected = VERTEX_TARGETS[Math.floor(random() * VERTEX_TARGETS.length)];
+        if (
+            isAttributeSpecification
+            && (useVertexCount !== useAngleCount)
+            && !useFaceCount
+            && !requireEqualFaces
+        ) {
+            const selected = POLYGON_COUNT_TARGETS[Math.floor(random() * POLYGON_COUNT_TARGETS.length)];
             return {
                 data: {
                     target: selected.target,
                     sides: selected.count,
                     corners: selected.count,
                     task: 'specify-count',
-                    attribute: 'vertices',
+                    attribute: useAngleCount ? 'angles' : 'vertices',
                     requiredCount: selected.count
                 },
                 tags: [selected.label]
@@ -64,10 +70,10 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
             };
         }
 
-        if (useVertexCount || useFaceCount || requireEqualFaces) {
+        if (useVertexCount || useAngleCount || useFaceCount || requireEqualFaces) {
             throw new GeneratorValidationError(
                 'shape-build-shape',
-                'Attribute-count labels must select either vertex count or equal face count.'
+                'Attribute-count labels must select vertex count, angle count, or equal face count.'
             );
         }
 

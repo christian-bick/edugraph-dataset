@@ -69,6 +69,21 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         expect(stub.tags).toContain(Scope.VertexCount);
     });
 
+    it('resolves the angle-count classification path', () => {
+        const stub = generateWithLabels(generator, [
+            Area.ShapeClassification,
+            Scope.ShapeAttributes,
+            Scope.AngleCount,
+            Ability.ConceptClassification
+        ])!;
+
+        expect(stub.data.task).toBe('classify-count');
+        if (stub.data.task !== 'classify-count') return;
+        expect(stub.data.attribute).toBe('angles');
+        expect(stub.tags).toContain(Scope.AngleCount);
+        expect(stub.data.options.filter(option => option.satisfies)).toHaveLength(1);
+    });
+
     it('resolves the equal-face-count classification path', () => {
         const stub = generateWithLabels(generator, [
             Area.ShapeClassification,

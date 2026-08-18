@@ -168,6 +168,33 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(stub.tags).toHaveLength(1);
     });
 
+    it('specifies a polygon from its required angle count', () => {
+        const stub = generator.generate({
+            targets: [],
+            constructionScopes: [],
+            specifyAttributes: true,
+            shapeArea: Area.ShapeClassification,
+            attributeCounts: [Scope.AngleCount]
+        })!;
+
+        expect(stub.data.task).toBe('specify-count');
+        if (stub.data.task !== 'specify-count') return;
+        expect(stub.data.attribute).toBe('angles');
+        expect(stub.data.sides).toBe(stub.data.requiredCount);
+        expect(stub.data.corners).toBe(stub.data.requiredCount);
+        expect(stub.tags).toHaveLength(1);
+    });
+
+    it('rejects mixed angle and vertex count requirements', () => {
+        expect(() => generator.generate({
+            targets: [],
+            constructionScopes: [],
+            specifyAttributes: true,
+            shapeArea: Area.ShapeClassification,
+            attributeCounts: [Scope.VertexCount, Scope.AngleCount]
+        })).toThrow('Attribute-count labels must select vertex count, angle count, or equal face count.');
+    });
+
     it('specifies a cube from six equal faces', () => {
         const stub = generator.generate({
             targets: [],

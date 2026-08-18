@@ -7,6 +7,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 const resolveStrategy = selectCanonicalLabel([
     [[Area.AdditionCompensation], 'addition-compensation'],
     [[Area.SubtractionCompensation], 'subtraction-compensation'],
+    [[Area.SubtractionMakeTen], 'subtraction-make-ten'],
     [[Area.SubtractionThinkAddition], 'subtraction-think-addition']
 ] as const);
 
@@ -25,6 +26,7 @@ export const IntegerAddSubtractStrategiesGeneratorSchema = {
     strategy: [[
         Area.AdditionCompensation,
         Area.SubtractionCompensation,
+        Area.SubtractionMakeTen,
         Area.SubtractionThinkAddition
     ], resolveStrategy],
     range: [

@@ -152,6 +152,25 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(stub.tags).toEqual([Area.Pentagon]);
     });
 
+    it('classifies simple polygons by a visibly countable angle total', () => {
+        const stub = generator.generate({
+            subsumption: false,
+            shapes: [],
+            attributeCounts: [Scope.AngleCount],
+            criteria: []
+        })!;
+
+        expect(stub.data.task).toBe('classify-count');
+        if (stub.data.task !== 'classify-count') return;
+        const data = stub.data;
+        expect(data.attribute).toBe('angles');
+        expect(data.options).toHaveLength(4);
+        expect(data.options.filter(option => option.satisfies)).toHaveLength(1);
+        expect(data.options.find(option => option.id === data.answer)?.count)
+            .toBe(data.requiredCount);
+        expect(data.options.every(option => option.count >= 3 && option.count <= 6)).toBe(true);
+    });
+
     it('classifies a cube from inspectable equal-face alternatives', () => {
         const stub = generator.generate({
             subsumption: false,
@@ -213,7 +232,13 @@ describe('ShapeClassifyAttributesGenerator', () => {
             shapes: [],
             attributeCounts: [Scope.VertexCount, Scope.FaceCount, Scope.Equal],
             criteria: []
-        })).toThrow('Attribute-count labels must select either vertex count or equal face count.');
+        })).toThrow('Attribute-count labels must select vertex count, angle count, or equal face count.');
+        expect(() => generator.generate({
+            subsumption: false,
+            shapes: [],
+            attributeCounts: [Scope.VertexCount, Scope.AngleCount],
+            criteria: []
+        })).toThrow('Attribute-count labels must select vertex count, angle count, or equal face count.');
     });
 
     it('requires a no-fallback criterion array and rejects contradictory criteria', () => {

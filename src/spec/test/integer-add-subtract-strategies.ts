@@ -18,7 +18,19 @@ const builder = new DatasetPermutationBuilder()
         [Area.SubtractionThinkAddition]
     ]);
 
-export const spec: CompetencyTarget[] = toTargets(
-    'test-integer-add-subtract-strategies',
-    builder
-);
+const subtractionMakeTenBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.SubtractionMakeTen,
+        Scope.TwoOperands,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller20,
+        Ability.ProcedureUnderstanding
+    ]);
+
+export const spec: CompetencyTarget[] = [
+    ...toTargets('test-integer-add-subtract-strategies', builder),
+    ...toTargets('test-subtraction-make-ten', subtractionMakeTenBuilder)
+];

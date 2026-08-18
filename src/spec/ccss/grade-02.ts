@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -76,13 +72,6 @@ const subtractionMakeTenBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller20,
         Ability.ProcedureUnderstanding
     ]);
-
-const subtractionMakeTenImplementation = defineImplementationPackage({
-    id: 'grade-02-subtraction-make-ten',
-    description: 'Extend the visible integer-strategy path with subtraction that decomposes the subtrahend, reaches ten, and then subtracts the remainder.',
-    generators: [{module: 'integer-add-subtract-strategies', strategy: 'expand'}],
-    views: [{module: 'operations-add-subtract-strategy', strategy: 'expand'}]
-});
 
 // --- 2.OA.C.3: Classify a collection as evenly or unevenly divisible into two groups ---
 const objectGroupParityBuilder = new DatasetPermutationBuilder()
@@ -622,19 +611,6 @@ const drawAngleCountBuilder = new DatasetPermutationBuilder()
         Ability.VisualArticulation
     ]);
 
-const angleCountImplementation = defineImplementationPackage({
-    id: 'grade-02-angle-count',
-    description: 'Extend shape classification and construction so angle counts are explicitly requested and rendered instead of being approximated through vertex counts.',
-    generators: [
-        {module: 'shape-classify-attributes', strategy: 'expand'},
-        {module: 'shape-build-shape', strategy: 'expand'}
-    ],
-    views: [
-        {module: 'shape-classify-attributes', strategy: 'expand'},
-        {module: 'shape-build-shape', strategy: 'expand'}
-    ]
-});
-
 // --- 2.G.A.2: Partition a rectangle into rows and columns of squares ---
 const rectangularSquarePartitionBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -674,6 +650,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.OA.A.1-one-step-word-problems', oneStepWordProblemsBuilder),
     ...toTargets('2.OA.A.1-two-step-word-problems', twoStepWordProblemsBuilder),
     ...toTargets('2.OA.B.2-fluency', fluencyWithin20Builder),
+    ...toTargets('2.OA.B.2-subtraction-make-ten', subtractionMakeTenBuilder),
     ...toTargets('2.OA.C.3-object-group-parity', objectGroupParityBuilder),
     ...toTargets('2.OA.C.3-even-equal-addends', evenEqualAddendsBuilder),
     ...toTargets('2.OA.C.4-number-array-total', numberArrayTotalBuilder),
@@ -715,32 +692,15 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('2.G.A.1-identify-supported-shapes', identifySupportedShapesBuilder),
     ...toTargets('2.G.A.1-identify-additional-shapes', identifyAdditionalShapesBuilder),
     ...toTargets('2.G.A.1-recognize-attribute-counts', recognizeShapeAttributeCountsBuilder),
+    ...toTargets('2.G.A.1-recognize-angle-count', recognizeAngleCountBuilder),
     ...toTargets('2.G.A.1-draw-attribute-counts', drawShapeAttributeCountsBuilder),
+    ...toTargets('2.G.A.1-draw-angle-count', drawAngleCountBuilder),
     ...toTargets('2.G.A.2-partition-rectangle', rectangularSquarePartitionBuilder),
     ...toTargets('2.G.A.2-count-squares', rectangularSquareCountBuilder),
     ...toTargets('2.G.A.3-equal-shares-different-shapes', equalShareShapeEquivalenceBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '2.OA.B.2-subtraction-make-ten',
-        subtractionMakeTenBuilder,
-        subtractionMakeTenImplementation,
-        'Show the subtrahend decomposition and both subtraction steps explicitly; the artifact may evidence the formed strategy but must not claim unobservable mental use.'
-    ),
-    ...toImplementationTodos(
-        '2.G.A.1-recognize-angle-count',
-        recognizeAngleCountBuilder,
-        angleCountImplementation,
-        'Ask for a specified number of angles and make those angles visually countable in every option.'
-    ),
-    ...toImplementationTodos(
-        '2.G.A.1-draw-angle-count',
-        drawAngleCountBuilder,
-        angleCountImplementation,
-        'Ask the learner to construct a shape with the specified number of angles and visibly verify the angle count in the solution.'
-    )
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

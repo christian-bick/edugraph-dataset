@@ -45,6 +45,7 @@ const classifyAttributeCountsBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.VertexCount],
+        [Scope.AngleCount],
         [Scope.FaceCount, Scope.Equal]
     ]);
 
@@ -57,6 +58,7 @@ const specifyAttributeCountsBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Scope.VertexCount],
+        [Scope.AngleCount],
         [Scope.FaceCount, Scope.Equal]
     ]);
 

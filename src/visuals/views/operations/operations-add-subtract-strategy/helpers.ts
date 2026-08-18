@@ -65,6 +65,20 @@ export const isValidIntegerAddSubtractStrategyProblem = (
             && data.steps[2] === `${adjustedLeft} − ${friendlyRight} = ${answer}`;
     }
 
+    if (data.strategy === 'subtraction-make-ten') {
+        const remainder = rightOperand - adjustment;
+        return data.operation === 'subtraction'
+            && leftOperand > 10
+            && leftOperand < 20
+            && answer === leftOperand - rightOperand
+            && adjustment === leftOperand - 10
+            && remainder > 0
+            && data.transformedEquation === `${leftOperand} − ${rightOperand} = ${leftOperand} − (${adjustment} + ${remainder})`
+            && data.steps[0] === `${rightOperand} = ${adjustment} + ${remainder}`
+            && data.steps[1] === `${leftOperand} − ${adjustment} = 10`
+            && data.steps[2] === `10 − ${remainder} = ${answer}`;
+    }
+
     if (data.strategy === 'subtraction-think-addition') {
         const friendlyTen = rightOperand + adjustment;
         const remainingDifference = answer - adjustment;

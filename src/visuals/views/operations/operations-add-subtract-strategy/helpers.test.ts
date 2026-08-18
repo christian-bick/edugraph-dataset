@@ -50,10 +50,27 @@ const thinkAdditionProblem: IntegerAddSubtractStrategyProblem = {
     explanation: 'Count up from 303 to 620.'
 };
 
+const makeTenProblem: IntegerAddSubtractStrategyProblem = {
+    task: 'integer-add-subtract-strategy',
+    strategy: 'subtraction-make-ten',
+    operation: 'subtraction',
+    leftOperand: 13,
+    rightOperand: 5,
+    answer: 8,
+    adjustment: 3,
+    prompt: 'Make ten to solve 13 − 5 = ?',
+    questionEquation: '13 − 5 = ?',
+    solutionEquation: '13 − 5 = 8',
+    transformedEquation: '13 − 5 = 13 − (3 + 2)',
+    steps: ['5 = 3 + 2', '13 − 3 = 10', '10 − 2 = 8'],
+    explanation: 'Decompose 5 as 3 + 2, reach 10, then subtract 2.'
+};
+
 describe('operations-add-subtract-strategy helpers', () => {
     it('accepts an exact strategy payload and masks only equation results', () => {
         expect(isValidIntegerAddSubtractStrategyProblem(additionProblem)).toBe(true);
         expect(isValidIntegerAddSubtractStrategyProblem(subtractionCompensationProblem)).toBe(true);
+        expect(isValidIntegerAddSubtractStrategyProblem(makeTenProblem)).toBe(true);
         expect(isValidIntegerAddSubtractStrategyProblem(thinkAdditionProblem)).toBe(true);
         expect(maskEquationResult(additionProblem.steps[2])).toBe('244 + 180 = ?');
     });
@@ -71,6 +88,10 @@ describe('operations-add-subtract-strategy helpers', () => {
         expect(isValidIntegerAddSubtractStrategyProblem({
             ...additionProblem,
             steps: ['246 − 2 = 244', '178 + 2 = 180', '244 + 180 = 425']
+        })).toBe(false);
+        expect(isValidIntegerAddSubtractStrategyProblem({
+            ...makeTenProblem,
+            steps: ['5 = 4 + 1', '13 − 3 = 10', '10 − 2 = 8']
         })).toBe(false);
     });
 });

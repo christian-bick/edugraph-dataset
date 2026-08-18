@@ -33,7 +33,7 @@ import {
 
 const OPTION_IDS: ShapeAttributeOption['id'][] = ['A', 'B', 'C', 'D'];
 
-const VERTEX_SHAPES = [
+const POLYGON_COUNT_SHAPES = [
     {shape: 'triangle', label: Area.Triangle, count: 3},
     {shape: 'quadrilateral', label: Area.Quadrilateral, count: 4},
     {shape: 'pentagon', label: Area.Pentagon, count: 5},
@@ -540,13 +540,14 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
         }
 
         const useVertexCount = config.attributeCounts!.includes(Scope.VertexCount);
+        const useAngleCount = config.attributeCounts!.includes(Scope.AngleCount);
         const useFaceCount = config.attributeCounts!.includes(Scope.FaceCount);
         const requireEqualFaces = config.attributeCounts!.includes(Scope.Equal);
 
-        if (useVertexCount && !useFaceCount && !requireEqualFaces) {
-            const requestedShapes = VERTEX_SHAPES.filter(option => config.shapes!.includes(option.label));
-            const selected = pickRandom(requestedShapes.length > 0 ? requestedShapes : VERTEX_SHAPES);
-            const options = shuffleCountOptions(VERTEX_SHAPES.map(option => ({
+        if ((useVertexCount !== useAngleCount) && !useFaceCount && !requireEqualFaces) {
+            const requestedShapes = POLYGON_COUNT_SHAPES.filter(option => config.shapes!.includes(option.label));
+            const selected = pickRandom(requestedShapes.length > 0 ? requestedShapes : POLYGON_COUNT_SHAPES);
+            const options = shuffleCountOptions(POLYGON_COUNT_SHAPES.map(option => ({
                 shape: option.shape,
                 count: option.count,
                 satisfies: option.count === selected.count
@@ -555,7 +556,7 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
             return {
                 data: {
                     task: 'classify-count',
-                    attribute: 'vertices',
+                    attribute: useAngleCount ? 'angles' : 'vertices',
                     requiredCount: selected.count,
                     options,
                     answer: options.find(option => option.satisfies)!.id
@@ -578,10 +579,10 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
             };
         }
 
-        if (useVertexCount || useFaceCount || requireEqualFaces) {
+        if (useVertexCount || useAngleCount || useFaceCount || requireEqualFaces) {
             throw new GeneratorValidationError(
                 'shape-classify-attributes',
-                'Attribute-count labels must select either vertex count or equal face count.'
+                'Attribute-count labels must select vertex count, angle count, or equal face count.'
             );
         }
 

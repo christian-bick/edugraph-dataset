@@ -120,6 +120,28 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         ]));
     });
 
+    it('resolves an angle-count construction without substituting the vertex scope', () => {
+        const labels = [
+            Area.ShapeClassification,
+            Scope.ShapeAttributes,
+            Scope.AngleCount,
+            Ability.ConceptSpecification,
+            Ability.VisualArticulation
+        ];
+        const stub = generateWithLabels(generator, labels)!;
+
+        expect(stub.data.task).toBe('specify-count');
+        if (stub.data.task !== 'specify-count') return;
+        expect(stub.data.attribute).toBe('angles');
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            Area.ShapeClassification,
+            Scope.ShapeAttributes,
+            Scope.AngleCount,
+            Ability.ConceptSpecification
+        ]));
+        expect(stub.tags).not.toContain(Scope.VertexCount);
+    });
+
     it('resolves the equal-face construction path without a named target label', () => {
         const labels = [
             Area.ShapeClassification,
