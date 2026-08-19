@@ -1,0 +1,2 @@
+- **Identity:** Same-whole fraction models require the learner to infer a joining or separating operation, or interpret a fraction as an integer multiple of a unit fraction.
+- **Modes:** Question Mode withholds the interpreted operation or multiplier and its equation; Solution Mode supplies the completed model, equation, and interpretation.

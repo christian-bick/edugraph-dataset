@@ -1,2 +1,2 @@
-- **Identity:** A vertical arithmetic equation contains exactly one visually identifiable unknown value.
-- **Modes:** Question Mode leaves that value empty; Solution Mode reveals it in the same equation position.
+- **Identity:** A vertical arithmetic equation presents all operands and makes the result the single visible unknown.
+- **Modes:** Question Mode leaves the result empty; Solution Mode reveals it below the rule.

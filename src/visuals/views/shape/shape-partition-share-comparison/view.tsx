@@ -1,0 +1,5 @@
+import {createRoot} from 'react-dom/client'; import {ViewRenderPayload} from '../../../../types/ml-engine.ts'; import {withConfig} from '../../withConfig.tsx'; import {ShapePartitionView} from '../shape-partition-view.tsx';
+import {ShapePartitionShareComparisonViewConfig, ShapePartitionShareComparisonViewSchema} from './spec.ts'; import '../../../../tailwind.css';
+const VIEW_ID = 'shape-partition-share-comparison'; interface CoreProps {config: ShapePartitionShareComparisonViewConfig; payload: ViewRenderPayload<'shape-partition-share-comparison'>}
+const Core = ({payload}: CoreProps) => <ShapePartitionView payload={payload} task="compare-share-size" viewId={VIEW_ID} />; export const ShapePartitionShareComparison = withConfig(ShapePartitionShareComparisonViewSchema, Core); let root: ReturnType<typeof createRoot> | null = null;
+window.renderView = (payload: ViewRenderPayload<'shape-partition-share-comparison'>) => {const container = document.getElementById('view'); if (!container) return; if (!root) root = createRoot(container); root.render(<ShapePartitionShareComparison payload={payload} />);};

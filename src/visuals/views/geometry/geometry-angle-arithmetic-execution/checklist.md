@@ -1,0 +1,2 @@
+- **Identity:** Two adjacent component angles and their measures require adding the parts to determine the unknown outer angle.
+- **Modes:** Question Mode withholds the whole measure; Solution Mode reveals the addition equation, measure, and explanation without changing the partition.

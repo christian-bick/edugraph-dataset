@@ -1,2 +1,2 @@
-- **Identity:** Three rays form two visibly adjacent, non-overlapping component angles and one outer whole angle, with colors and point labels distinguishing AOB, BOC, and AOC.
-- **Modes:** The resolved task Ability selects explanation, unknown-whole, or unknown-component presentation. Question mode keeps only the requested measure unknown while preserving every known measure and a coherent whole-part equation; explanation tasks retain all given measures and withhold the numeric explanation. Solution mode reveals the view-derived equation, answer, and explanation without changing the angle partition.
+- **Identity:** Three rays form two adjacent component angles and one outer angle, requiring explanation of how the non-overlapping parts combine into the whole.
+- **Modes:** Question Mode preserves every measure and the whole-part relation while withholding the explanation; Solution Mode reveals the supplied equation and explanation without changing the partition.

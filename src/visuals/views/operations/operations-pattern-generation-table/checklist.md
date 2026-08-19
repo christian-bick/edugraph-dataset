@@ -1,0 +1,2 @@
+- **Identity:** A starting value, stated rule, and ordered terms require applying the rule to generate one missing term.
+- **Modes:** Question Mode withholds the requested term; Solution Mode reveals it while preserving the same rule and sequence.

@@ -1,2 +1,2 @@
-- **Identity:** The artifact shows a unit square, a square-cell array, or an ungridded rectangle whose visible dimensions and supplied area formula make the requested area task identifiable.
-- **Modes:** Question mode leaves the requested partition, count, area, or unknown dimension unrevealed; Solution mode preserves the rectangle context and reveals the matching square-unit result or supplied inverse calculation without exposing an unknown side through Question-mode labels or proportions.
+- **Identity:** A square-cell array or dimensioned rectangle requires counting unit squares or multiplying dimensions to determine its area.
+- **Modes:** Question Mode withholds the requested count or area; Solution Mode reveals the square-unit result while preserving the same array or rectangle.

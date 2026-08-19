@@ -12,10 +12,6 @@ export const spec: ViewSpec = {
 };
 
 export const OperationsWordProblemWithin100ViewSchema = {
-    invertProcedure: [
-        [Ability.ProcedureInversion],
-        hasLabel(Ability.ProcedureInversion)
-    ],
     useLengthContext: [
         [Scope.LengthMeasurement],
         hasLabel(Scope.LengthMeasurement)

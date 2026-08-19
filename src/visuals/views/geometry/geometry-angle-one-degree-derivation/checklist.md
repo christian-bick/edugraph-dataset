@@ -1,0 +1,2 @@
+- **Identity:** A full circular turn and a magnified one-of-360 sliver require deriving one degree as one equal part of the turn.
+- **Modes:** Question Mode preserves the full-turn partition evidence while withholding the degree result; Solution Mode reveals the one-degree relation, answer, and explanation.

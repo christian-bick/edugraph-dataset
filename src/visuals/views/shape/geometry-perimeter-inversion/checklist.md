@@ -1,0 +1,2 @@
+- **Identity:** A closed polygon or rectangle supplies its perimeter and all but one independent side length, requiring recovery of the missing length.
+- **Modes:** Question Mode withholds the missing side label; Solution Mode retains the shape and reveals the inverse equation, linear-unit result, and recovered labels.

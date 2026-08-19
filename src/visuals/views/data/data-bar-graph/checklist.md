@@ -1,2 +1,2 @@
-- **Identity:** Exactly three labeled categories appear against a numbered bar-graph axis whose intervals visibly use the selected scale.
-- **Modes:** Construction Question Mode shows source data with unresolved bars and Solution Mode completes every bar. Reading and arithmetic modes keep the completed graph visible: Question Mode withholds the requested category count, three-addend total, or arithmetic result, while Solution Mode reveals it; a two-step comparison reveals both connected results only in Solution Mode.
+- **Identity:** Exactly three category totals and a numbered bar-graph axis require drawing bars at the supplied scale.
+- **Modes:** Question Mode shows the source totals with unresolved bars; Solution Mode completes every bar without changing the categories, axis, or scale.

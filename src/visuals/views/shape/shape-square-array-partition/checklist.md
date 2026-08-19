@@ -1,0 +1,2 @@
+- **Identity:** A rectangle and supplied row and column counts require partitioning it into an equal square-cell array.
+- **Modes:** Question Mode withholds the cell boundaries; Solution Mode reveals the requested rows and columns without changing the rectangle.

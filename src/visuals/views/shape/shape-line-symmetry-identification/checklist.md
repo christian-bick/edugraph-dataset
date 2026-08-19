@@ -1,0 +1,2 @@
+- **Identity:** Four closed figures require classification by whether a valid fold line produces exactly matching halves.
+- **Modes:** Question Mode withholds classifications and fold axes; Solution Mode classifies every figure and shows each valid axis with corresponding points meeting on the fold.

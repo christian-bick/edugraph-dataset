@@ -1,0 +1,2 @@
+- **Identity:** Six ordered physical-shape figures and a named emergent feature require explaining why the feature persists as the generation rule is repeated.
+- **Modes:** Question Mode withholds the causal explanation; Solution Mode supplies positional evidence and the explanation while preserving the same sequence and feature.

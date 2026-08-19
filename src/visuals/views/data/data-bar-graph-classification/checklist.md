@@ -1,0 +1,2 @@
+- **Identity:** Unsorted observations require classification into three named categories and construction of their bar graph.
+- **Modes:** Question Mode shows the observations with unresolved bars; Solution Mode reveals the grouped category bars without changing the source observations.

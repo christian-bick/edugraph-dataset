@@ -1,0 +1,5 @@
+import {createRoot} from 'react-dom/client'; import {ViewRenderPayload} from '../../../../types/ml-engine.ts'; import {withConfig} from '../../withConfig.tsx'; import {ShapePartitionView} from '../shape-partition-view.tsx';
+import {ShapePartitionWholeCompositionViewConfig, ShapePartitionWholeCompositionViewSchema} from './spec.ts'; import '../../../../tailwind.css';
+const VIEW_ID = 'shape-partition-whole-composition'; interface CoreProps {config: ShapePartitionWholeCompositionViewConfig; payload: ViewRenderPayload<'shape-partition-whole-composition'>}
+const Core = ({payload}: CoreProps) => <ShapePartitionView payload={payload} task="compose-whole" viewId={VIEW_ID} />; export const ShapePartitionWholeComposition = withConfig(ShapePartitionWholeCompositionViewSchema, Core); let root: ReturnType<typeof createRoot> | null = null;
+window.renderView = (payload: ViewRenderPayload<'shape-partition-whole-composition'>) => {const container = document.getElementById('view'); if (!container) return; if (!root) root = createRoot(container); root.render(<ShapePartitionWholeComposition payload={payload} />);};

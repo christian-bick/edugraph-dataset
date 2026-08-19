@@ -1,0 +1,2 @@
+- **Identity:** A one-step story fixes the result and makes one contributing quantity the unknown, optionally in a length context.
+- **Modes:** Question Mode withholds that contributing quantity; Solution Mode restores it in the unchanged story and equation.

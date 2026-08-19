@@ -1,0 +1,2 @@
+- **Identity:** A completed picture graph and visible scale require reading the count represented by one named category row.
+- **Modes:** Question Mode keeps the graph visible while withholding the requested count; Solution Mode reveals that count without changing the graph.

@@ -1,0 +1,2 @@
+- **Identity:** One number line presents two fraction notations at the same point and asks whether they are equivalent.
+- **Modes:** Question Mode withholds the equivalence verdict; Solution Mode reveals it while retaining the shared-scale evidence.

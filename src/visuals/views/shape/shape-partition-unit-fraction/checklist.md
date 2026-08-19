@@ -1,0 +1,2 @@
+- **Identity:** One whole and a supplied unit-fraction constraint require drawing equal regions and labeling one region as `1/n` of the whole.
+- **Modes:** Question Mode shows the unpartitioned whole and unit-fraction constraint; Solution Mode reveals the equal boundaries and matching unit-fraction statement.

@@ -1,0 +1,2 @@
+- **Identity:** A concise physical-quantity scenario fixes the result and makes one contributing quantity the unknown in both pictorial and equation representations.
+- **Modes:** Question Mode withholds that scenario quantity; Solution Mode restores it while preserving the scenario and equation.

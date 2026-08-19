@@ -1,2 +1,2 @@
-- **Identity:** Aligned, equal-size fraction bars or a 1×10 and 10×10 grid pair use one shared whole and show the same shaded amount with the original and equivalent equal parts.
-- **Modes:** Question Mode withholds only the requested verdict or numerator; explanatory scaling tasks also retain the ×10 evidence. Solution Mode reveals the equality and, when explanation is requested, connects the increased number of smaller parts to the unchanged shaded amount.
+- **Identity:** Aligned equal-size fraction bars show two partitions of one shared whole and require classifying the represented fractions as equivalent or not equivalent.
+- **Modes:** Question Mode withholds the verdict; Solution Mode reveals the supplied equivalence while preserving both shaded models.

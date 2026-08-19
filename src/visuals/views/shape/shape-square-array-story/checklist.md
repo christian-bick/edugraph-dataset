@@ -1,0 +1,2 @@
+- **Identity:** A textual rectangular-array context and visible rows, columns, tiles, or dimensions require determining the count or area.
+- **Modes:** Question Mode withholds the requested count or area; Solution Mode reveals it while preserving the same story and rectangle.

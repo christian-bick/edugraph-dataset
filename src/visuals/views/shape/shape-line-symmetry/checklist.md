@@ -1,2 +1,0 @@
-- **Identity:** Closed figures and fold evidence make line-symmetry classification or construction identifiable.
-- **Modes:** Question Mode withholds every classification or learner-drawn axis; Solution Mode labels both symmetric and non-symmetric figures or shows every valid axis with corresponding points meeting on the fold.

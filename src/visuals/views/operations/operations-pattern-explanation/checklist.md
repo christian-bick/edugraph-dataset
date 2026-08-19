@@ -1,2 +1,2 @@
-- **Identity:** A visible rule and ordered terms identify a term-generation or causal feature-explanation task; explanations also show the named law and equation evidence.
-- **Modes:** Question Mode withholds the missing term or written explanation; Solution Mode reveals it with the supplied pattern evidence.
+- **Identity:** Selected operation-table cells, a named property law, and equivalent expressions require a written explanation of the relationship.
+- **Modes:** Question Mode withholds the explanation; Solution Mode reveals it while preserving the same table and equation evidence.

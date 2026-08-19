@@ -1,21 +1,14 @@
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {extractConfig} from '../../../../lib/utils.ts';
-import {OperationsVerticalViewSchema} from './spec.ts';
+import {Scope} from 'edugraph-ts';
+import {spec} from './spec.ts';
 
-describe('OperationsVerticalViewSchema', () => {
-    it('owns ProcedureInversion as visible blank placement', () => {
-        const {config, consumedLabels} = extractConfig(
-            OperationsVerticalViewSchema,
-            [Ability.ProcedureInversion]
-        );
-
-        expect(config.invertProcedure).toBe(true);
-        expect(consumedLabels).toContain(Ability.ProcedureInversion);
-    });
-
-    it('keeps ordinary execution in direct-answer mode', () => {
-        expect(extractConfig(OperationsVerticalViewSchema, []).config.invertProcedure)
-            .toBe(false);
+describe('operations-vertical view spec', () => {
+    it('owns invariant direct vertical execution', () => {
+        expect(spec.generalLabels).toEqual([
+            Scope.ArabicNumerals,
+            Ability.ProcedureExecution
+        ]);
+        expect(spec.rejectedLabels).toBeUndefined();
     });
 });

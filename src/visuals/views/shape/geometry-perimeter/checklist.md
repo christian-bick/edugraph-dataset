@@ -1,2 +1,2 @@
-- **Identity:** A closed polygon or rectangle shows the side evidence needed to add every boundary length, with rectangle tasks visibly accounting for both equal length sides and both equal width sides.
-- **Modes:** Question mode withholds the perimeter or both opposite labels of an unknown rectangle dimension; Solution mode retains the shape and reveals the supplied addition or inverse equation, the linear-unit result, and both recovered side labels.
+- **Identity:** A closed polygon or rectangle supplies every boundary length and requires adding those lengths to determine its perimeter.
+- **Modes:** Question Mode withholds the perimeter result; Solution Mode retains the shape and reveals the supplied boundary addition and linear-unit result.

@@ -1,0 +1,2 @@
+- **Identity:** A supplied multiplication fact and division question require rewriting division as a missing-factor multiplication relationship.
+- **Modes:** Question Mode leaves the related factor unknown; Solution Mode completes the division equation and explains the missing-factor inversion.

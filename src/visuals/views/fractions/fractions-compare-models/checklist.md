@@ -1,2 +1,2 @@
-- **Identity:** Two equal-length bars represent the same whole and compare fractions through a shared component or aligned half-benchmark marker and filled endpoints.
-- **Modes:** Question Mode retains the partition and same-whole evidence but withholds the comparison symbol; Solution Mode reveals the complete comparison and its shared-component or benchmark rationale.
+- **Identity:** Two equal-length bars represent the same whole and require comparison by a shared numerator or denominator.
+- **Modes:** Question Mode retains the partitions and emphasized shared component while withholding the comparison symbol; Solution Mode reveals the comparison and shared-component inference.

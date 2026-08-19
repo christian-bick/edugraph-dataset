@@ -1,0 +1,2 @@
+- **Identity:** Unsorted observations require classification into three named categories and construction of their picture graph at the visible scale.
+- **Modes:** Question Mode shows observations with blank graph rows; Solution Mode reveals the grouped picture markers without changing the source observations.

@@ -1,0 +1,2 @@
+- **Identity:** A stated number-pattern rule, generated terms, and a named emergent feature require a causal written explanation supported by property-law equations.
+- **Modes:** Question Mode withholds the explanation; Solution Mode reveals it while preserving the supplied terms, feature, and equation evidence.

@@ -1,2 +1,2 @@
-- **Identity:** Six ordered physical-shape figures, the stated rule, and the requested pattern task agree; every rotated triangle has an unmistakable pointing direction.
-- **Modes:** Generation Question Mode shows figures 1–4 and withholds figures 5–6; identification keeps neutral options but withholds the selection and evidence; explanation keeps the feature but withholds its cause. Solution Mode reveals the supplied continuation, selected feature with evidence, or causal explanation.
+- **Identity:** Four supplied physical-shape figures and a stated rule require drawing the next two figures in the pattern.
+- **Modes:** Question Mode withholds figures 5 and 6; Solution Mode reveals the supplied continuation while preserving the same rule and preceding figures.

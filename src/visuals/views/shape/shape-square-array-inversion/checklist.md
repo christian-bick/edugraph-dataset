@@ -1,0 +1,2 @@
+- **Identity:** A rectangle's area and one dimension require inverting the area formula to determine the missing dimension.
+- **Modes:** Question Mode withholds one side length; Solution Mode reveals the inverse calculation and recovered dimension without changing the rectangle context.

@@ -1,2 +1,2 @@
-- **Identity:** A supplied multiplication fact, a named or visibly stated relationship, and a related unknown multiplication or division fact form one coherent derivation pathway; inversion tasks explicitly rewrite division as missing-factor multiplication.
-- **Modes:** Question Mode keeps the known fact and relationship visible while leaving the related equation incomplete; Solution Mode completes that equation and explains the derivation or missing-factor inversion.
+- **Identity:** A supplied multiplication fact, a stated relationship, and a related unknown fact form one coherent procedural derivation pathway.
+- **Modes:** Question Mode keeps the known fact and relationship visible while leaving the related equation incomplete; Solution Mode completes that equation and explains the derivation.

@@ -1,0 +1,2 @@
+- **Identity:** Two aligned fraction models of one shared whole require completing the missing numerator in an equivalence equation.
+- **Modes:** Question Mode withholds the requested numerator; Solution Mode reveals it while preserving the same shaded amount and partition relation.

@@ -1,11 +1,9 @@
-import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
 import {FractionArithmeticGeneratorConfig} from '../../../generators/fraction/fraction-arithmetic/spec.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {extractConfig} from '../../../lib/utils.ts';
 import {
-    FractionArithmeticViewSchema,
+    FractionArithmeticPresentation,
     presentFractionArithmeticProblem
 } from './fraction-arithmetic-presentation.ts';
 import {isValidFractionArithmeticProblem} from './fraction-arithmetic-helpers.ts';
@@ -19,15 +17,16 @@ const generate = (config: FractionArithmeticGeneratorConfig) => {
 
 describe('fraction arithmetic view presentation', () => {
     it.each([
-        [[Ability.Interpretation], 'interpret-operation'],
-        [[Ability.ProcedureExecution], 'fraction-operation']
-    ] as const)('resolves binary arithmetic for %j', (abilities, task) => {
+        ['interpretation', 'interpret-operation'],
+        ['execution-model', 'fraction-operation'],
+        ['execution-word', 'fraction-operation']
+    ] as const)('resolves binary arithmetic for %s', (presentation, task) => {
         const neutral = generate({
             task: 'fraction-operation',
             usesCommonDenominator: true,
             operation: 'addition'
         });
-        const presented = presentFractionArithmeticProblem(neutral, abilities);
+        const presented = presentFractionArithmeticProblem(neutral, presentation);
 
         expect(neutral.task).toBe('fraction-operation');
         expect(presented?.task).toBe(task);
@@ -35,15 +34,16 @@ describe('fraction arithmetic view presentation', () => {
     });
 
     it.each([
-        [[Ability.ProcedureUnderstanding], 'whole-number-fraction-product'],
-        [[Ability.ProcedureExecution], 'fraction-multiplication-problem']
-    ] as const)('resolves fraction products for %j', (abilities, task) => {
+        ['understanding', 'whole-number-fraction-product'],
+        ['execution-model', 'whole-number-fraction-product'],
+        ['execution-word', 'fraction-multiplication-problem']
+    ] as const)('resolves fraction products for %s', (presentation, task) => {
         const neutral = generate({
             task: 'whole-number-fraction-product-improper',
             usesCommonDenominator: false,
             operation: 'multiplication'
         });
-        const presented = presentFractionArithmeticProblem(neutral, abilities);
+        const presented = presentFractionArithmeticProblem(neutral, presentation);
 
         expect(neutral.task).toBe('whole-number-fraction-product');
         expect(presented?.task).toBe(task);
@@ -57,7 +57,7 @@ describe('fraction arithmetic view presentation', () => {
                 usesCommonDenominator: true,
                 operation: 'addition'
             },
-            [Ability.ProcedureUnderstanding, Ability.Formalization]
+            'understanding'
         ],
         [
             {
@@ -65,7 +65,7 @@ describe('fraction arithmetic view presentation', () => {
                 usesCommonDenominator: true,
                 operation: 'subtraction'
             },
-            [Ability.ProcedureExecution]
+            'execution-model'
         ],
         [
             {
@@ -73,7 +73,7 @@ describe('fraction arithmetic view presentation', () => {
                 usesCommonDenominator: false,
                 operation: 'multiplication'
             },
-            [Ability.Interpretation]
+            'interpretation'
         ],
         [
             {
@@ -81,28 +81,23 @@ describe('fraction arithmetic view presentation', () => {
                 usesCommonDenominator: true,
                 operation: 'addition'
             },
-            [Ability.ProcedureExecution]
+            'execution-word'
         ]
-    ] as const)('accepts the ability contract for task $0.task', (config, abilities) => {
+    ] as const)('accepts the fixed presentation for task $0.task', (config, presentation) => {
         const neutral = generate(config);
-        expect(presentFractionArithmeticProblem(neutral, abilities)).toBe(neutral);
+        expect(presentFractionArithmeticProblem(neutral, presentation)).toBe(neutral);
     });
 
-    it('rejects abilities that do not apply to the generated mathematical route', () => {
+    it('rejects presentations that do not apply to the generated mathematical route', () => {
         const mixed = generate({
             task: 'mixed-operation',
             usesCommonDenominator: true,
             operation: 'addition'
         });
 
-        expect(presentFractionArithmeticProblem(mixed, [Ability.Interpretation])).toBeNull();
-    });
-
-    it('resolves and consumes abilities only in the view schema', () => {
-        const labels = [Ability.ProcedureUnderstanding, Ability.Formalization];
-        const resolved = extractConfig(FractionArithmeticViewSchema, labels);
-
-        expect(resolved.config.abilities).toEqual(labels);
-        expect(resolved.consumedLabels).toEqual(expect.arrayContaining(labels));
+        expect(presentFractionArithmeticProblem(
+            mixed,
+            'interpretation' satisfies FractionArithmeticPresentation
+        )).toBeNull();
     });
 });

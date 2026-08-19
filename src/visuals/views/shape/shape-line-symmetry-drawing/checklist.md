@@ -1,0 +1,2 @@
+- **Identity:** One closed symmetric figure requires drawing every valid fold line that produces exactly matching halves.
+- **Modes:** Question Mode withholds all learner-drawn axes; Solution Mode shows every valid axis with corresponding points meeting on the fold.

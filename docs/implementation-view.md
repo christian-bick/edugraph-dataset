@@ -102,6 +102,17 @@ Scope tests to the module during iteration:
 npm run test -- src/visuals/views/[<category>/]<view>/
 ```
 
+### IMPL-V9 — Related task identities share parent-level rendering code
+
+When [SPEC-V6](spec-view.md#spec-v6--an-ability-driven-task-identity-is-a-leaf-view)
+creates multiple leaf views, keep each leaf's `spec.ts`, `checklist.md`, `view.html`, and
+thin `withConfig` wrapper in its own directory. Place their reusable renderer, helpers,
+and tests directly in the category parent directory with descriptive filenames; a
+`components/` subdirectory is not required.
+
+The leaf wrapper fixes the task mode passed to the shared renderer. The shared renderer
+must not inspect ontology labels or import one leaf's spec to recover that decision.
+
 ---
 
 ## Audit
@@ -114,4 +125,5 @@ npm run test -- src/visuals/views/[<category>/]<view>/
 - [ ] **IMPL-V6** — grep the view for `Math.random`, unseeded `random(`, and `problem.id`: all three must be absent. Every visual random decision traces back to `payload.seed`.
 - [ ] **IMPL-V7** — no reliance on animation state; every async resource the view loads resolves.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.
+- [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code, and the shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.
 - [ ] `npm run report:churn -- --spec=test` shows churn only in the views actually touched.

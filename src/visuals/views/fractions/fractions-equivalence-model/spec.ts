@@ -1,5 +1,4 @@
 import {Ability, Scope} from 'edugraph-ts';
-import {matchAllExactLabels} from '../../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -7,17 +6,12 @@ export const spec: ViewSpec = {
     viewId: 'fractions-equivalence-model',
     generalLabels: [
         Scope.VisualNumbers,
-        Scope.SingleFrameOfReference
+        Scope.SingleFrameOfReference,
+        Ability.ConceptClassification
     ]
 };
 
-export const FractionsEquivalenceModelViewSchema = {
-    taskAbilities: [[
-        Ability.ConceptClassification,
-        Ability.Formalization,
-        Ability.ProcedureUnderstanding
-    ], matchAllExactLabels]
-} as const;
+export const FractionsEquivalenceModelViewSchema = {} as const;
 
 export type FractionsEquivalenceModelViewConfig = ConfigFromSchema<
     typeof FractionsEquivalenceModelViewSchema

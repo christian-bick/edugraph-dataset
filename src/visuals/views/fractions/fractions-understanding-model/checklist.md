@@ -1,0 +1,2 @@
+- **Identity:** Partitioned models require the learner to express the same fraction as different addition equations or relate repeated equal fractional groups through an equation chain.
+- **Modes:** Question Mode withholds the decompositions or product relation; Solution Mode supplies the complete grouping models and equivalent equations.

@@ -1,23 +1,20 @@
 import {Ability} from 'edugraph-ts';
+import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {extractConfig} from '../../../../lib/utils.ts';
-import {OperationsWordProblemWithin100ViewSchema} from './spec.ts';
+import {extractConfig, extractSchemaLabels} from '../../../../lib/utils.ts';
+import {spec, OperationsWordProblemWithin100ViewSchema} from './spec.ts';
 
-describe('OperationsWordProblemWithin100ViewSchema', () => {
-    it('owns ProcedureInversion as the one-step scenario unknown', () => {
-        const {config, consumedLabels} = extractConfig(
-            OperationsWordProblemWithin100ViewSchema,
-            [Ability.ProcedureInversion]
-        );
-
-        expect(config.invertProcedure).toBe(true);
-        expect(consumedLabels).toContain(Ability.ProcedureInversion);
-    });
-
-    it('keeps ordinary execution in direct-answer mode', () => {
+describe('operations-word-problem-within-100 view spec', () => {
+    it('keeps only the non-Ability length-context parameter', () => {
+        expect(spec.generalLabels).toEqual([
+            Ability.TextualReception,
+            Scope.ArabicNumerals
+        ]);
+        expect(extractSchemaLabels(OperationsWordProblemWithin100ViewSchema))
+            .toEqual([Scope.LengthMeasurement]);
         expect(extractConfig(
             OperationsWordProblemWithin100ViewSchema,
-            []
-        ).config.invertProcedure).toBe(false);
+            [Scope.LengthMeasurement]
+        ).config.useLengthContext).toBe(true);
     });
 });

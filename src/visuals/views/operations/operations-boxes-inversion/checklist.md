@@ -1,0 +1,2 @@
+- **Identity:** A horizontal arithmetic equation fixes the result and makes an operand the single visible unknown.
+- **Modes:** Question Mode leaves that operand empty; Solution Mode reveals it in the same equation position.

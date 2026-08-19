@@ -1,0 +1,2 @@
+- **Identity:** A tiled rectangle with visible rows and columns requires explaining why their product equals the number of unit squares and therefore the area.
+- **Modes:** Question Mode withholds the explanation; Solution Mode reveals the multiplication relation and square-unit result without changing the array.

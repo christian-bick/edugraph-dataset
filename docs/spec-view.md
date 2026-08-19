@@ -96,6 +96,21 @@ The view spec declares labels that decide visual mode, layout, or interaction. A
 ability that instead changes the generated mathematics belongs to the generator and must
 not be redeclared by the view ([SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair)).
 
+### SPEC-V6 — An Ability-driven task identity is a leaf view
+
+When an Ability changes the observable task itself — for example which equation part is
+unknown, whether the learner classifies or completes a relation, or whether an explanation
+is requested — represent each identity as a separate leaf view. Declare its Ability as an
+invariant `generalLabels` capability; do not resolve the Ability through a schema parameter.
+
+Each leaf must use the narrowest payload type it actually accepts in `ViewTypeMap`. This
+keeps generator compatibility truthful when a reusable renderer supports a union but one
+task identity accepts only one member. Declare only the most specific Ability required by
+the task: a specialization already satisfies targets asking for its ancestor.
+
+Pure presentation parameters that do not change task identity remain valid schema
+configuration under [SPEC-V2](#spec-v2--the-schema-maps-to-visual-configuration-only).
+
 ---
 
 ## Audit
@@ -105,4 +120,5 @@ not be redeclared by the view ([SPEC-8](spec-general.md#spec-8--no-duplicate-par
 - [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, not a competency the view merely does not want.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — view-owned labels are declared positively in `generalLabels` or as parameters, are directly evidenced by the rendered task, are not listed in `rejectedLabels`, and do not redeclare generator-owned labels.
+- [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than resolved by a schema parameter; only its most specific required Ability is declared.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

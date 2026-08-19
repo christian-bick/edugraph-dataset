@@ -1,0 +1,2 @@
+- **Identity:** One number line requires completing an equivalent-fraction relation and explaining the shared scaling that preserves the point.
+- **Modes:** Question Mode withholds the requested value and explanation; Solution Mode reveals both while retaining the aligned partition evidence.

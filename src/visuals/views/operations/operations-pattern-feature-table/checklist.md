@@ -1,0 +1,2 @@
+- **Identity:** A stated number-pattern rule and generated terms require classifying an emergent feature into one of the supplied categories.
+- **Modes:** Question Mode keeps all feature options neutral; Solution Mode selects the supplied feature and reveals its evidence.

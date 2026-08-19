@@ -6,7 +6,8 @@ describe('fractions-word-problem view spec', () => {
     it('owns its invariant story reception and visual-number representation', () => {
         expect(spec.generalLabels).toEqual([
             Ability.TextualReception,
-            Scope.VisualNumbers
+            Scope.VisualNumbers,
+            Ability.ProcedureExecution
         ]);
         expect(spec.rejectedLabels).toBeUndefined();
     });

@@ -4,12 +4,10 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-angle-concepts',
-    generalLabels: []
+    generalLabels: [Ability.Interpretation]
 };
 
-export const GeometryAngleConceptsViewSchema = {
-    abilityMode: [Ability.Interpretation, Ability.ConceptDerivation]
-} as const;
+export const GeometryAngleConceptsViewSchema = {} as const;
 
 export type GeometryAngleConceptsViewConfig = ConfigFromSchema<
     typeof GeometryAngleConceptsViewSchema

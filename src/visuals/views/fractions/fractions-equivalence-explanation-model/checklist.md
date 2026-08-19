@@ -1,0 +1,2 @@
+- **Identity:** Two aligned fraction models of one shared whole and visible scaling evidence require completing and explaining the equivalence relation.
+- **Modes:** Question Mode withholds the numerator and explanation; Solution Mode reveals both and connects the increased part count to the unchanged amount.

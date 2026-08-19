@@ -1,0 +1,1 @@
+import {Ability} from 'edugraph-ts'; import {describe, expect, it} from 'vitest'; import {spec} from './spec.ts'; describe('shape-square-array-understanding view spec', () => {it('owns invariant area-product understanding', () => {expect(spec.generalLabels).toEqual([Ability.ProcedureUnderstanding]); expect(spec.rejectedLabels).toBeUndefined();});});

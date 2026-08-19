@@ -1,0 +1,2 @@
+- **Identity:** Equal-sized wholes partitioned into halves and fourths require deriving which unit share is smaller.
+- **Modes:** Question Mode withholds the comparison; Solution Mode reveals it while preserving both aligned partition models.

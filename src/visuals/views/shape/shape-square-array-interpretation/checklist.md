@@ -1,0 +1,2 @@
+- **Identity:** A unit square or exhaustive unit-square coverage requires interpreting one tile or the tile count as area.
+- **Modes:** Question Mode withholds the area interpretation; Solution Mode reveals it while preserving the same square-unit evidence.

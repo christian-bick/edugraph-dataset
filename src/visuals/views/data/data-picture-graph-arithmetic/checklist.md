@@ -1,0 +1,2 @@
+- **Identity:** A completed picture graph and visible scale supply all three category counts needed to calculate their total.
+- **Modes:** Question Mode shows all three addends while withholding the total; Solution Mode reveals the total without changing the graph.

@@ -1,4 +1,3 @@
-import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
 import {
@@ -8,7 +7,10 @@ import {
 import {setSeed} from '../../../lib/random.ts';
 import {FractionArithmeticProblem} from '../../../types/problems.ts';
 import {isValidFractionArithmeticProblem} from './fraction-arithmetic-helpers.ts';
-import {presentFractionArithmeticProblem} from './fraction-arithmetic-presentation.ts';
+import {
+    FractionArithmeticPresentation,
+    presentFractionArithmeticProblem
+} from './fraction-arithmetic-presentation.ts';
 
 const generator = new FractionArithmeticGenerator();
 
@@ -27,14 +29,14 @@ const generate = (
 
 const present = (
     data: FractionArithmeticProblem,
-    abilities: readonly string[]
-): FractionArithmeticProblem => presentFractionArithmeticProblem(data, abilities)!;
+    presentation: FractionArithmeticPresentation
+): FractionArithmeticProblem => presentFractionArithmeticProblem(data, presentation)!;
 
 const fixtures = [
-    present(generate('interpret-add', 'fraction-operation', 'addition'), [Ability.Interpretation]),
-    present(generate('interpret-subtract', 'fraction-operation', 'subtraction'), [Ability.Interpretation]),
-    present(generate('word-add', 'fraction-operation', 'addition'), [Ability.ProcedureExecution]),
-    present(generate('word-subtract', 'fraction-operation', 'subtraction'), [Ability.ProcedureExecution]),
+    present(generate('interpret-add', 'fraction-operation', 'addition'), 'interpretation'),
+    present(generate('interpret-subtract', 'fraction-operation', 'subtraction'), 'interpretation'),
+    present(generate('word-add', 'fraction-operation', 'addition'), 'execution-word'),
+    present(generate('word-subtract', 'fraction-operation', 'subtraction'), 'execution-word'),
     generate('proper-decompose', 'decompose-proper', 'addition'),
     generate('mixed-decompose', 'decompose-mixed', 'addition'),
     ...Array.from({length: 24}, (_, index) => generate(
@@ -52,11 +54,11 @@ const fixtures = [
     generate('improper-product', 'whole-number-fraction-product-improper', 'multiplication'),
     present(
         generate('proper-word-product', 'whole-number-fraction-product-proper', 'multiplication'),
-        [Ability.ProcedureExecution]
+        'execution-word'
     ),
     present(
         generate('improper-word-product', 'whole-number-fraction-product-improper', 'multiplication'),
-        [Ability.ProcedureExecution]
+        'execution-word'
     )
 ];
 

@@ -1,0 +1,2 @@
+- **Identity:** A completed scaled bar graph supplies the category values needed for the requested one- or two-step arithmetic result.
+- **Modes:** Question Mode withholds every requested numeric result; Solution Mode reveals the supplied result or connected results without changing the graph.

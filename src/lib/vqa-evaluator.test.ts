@@ -195,7 +195,7 @@ describe('vqa-evaluator', () => {
         expect(request.config.systemInstruction).toContain('senior Visual QA engineer');
         expect(request.config.systemInstruction).not.toContain('Global Visual QA Checklist');
         expect(prompt).toContain('## View-specific checklist');
-        expect(prompt).toContain('A vertical arithmetic equation contains exactly one visually identifiable unknown value.');
+        expect(prompt).toContain('A vertical arithmetic equation presents all operands and makes the result the single visible unknown.');
         expect(prompt).toContain('## Global Visual QA Checklist');
         expect(prompt).toContain('NumbersWithZero: Involves zero as a number.');
         expect(prompt).not.toContain('Generator:');

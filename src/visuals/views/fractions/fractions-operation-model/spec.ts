@@ -1,14 +1,16 @@
-import {Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {FractionArithmeticViewSchema} from '../fraction-arithmetic-presentation.ts';
 
 export const spec: ViewSpec = {
     viewId: 'fractions-operation-model',
-    generalLabels: [Scope.VisualNumbers]
+    generalLabels: [
+        Scope.VisualNumbers,
+        Ability.ProcedureExecution
+    ]
 };
 
-export const FractionsOperationModelViewSchema = FractionArithmeticViewSchema;
+export const FractionsOperationModelViewSchema = {} as const;
 
 export type FractionsOperationModelViewConfig = ConfigFromSchema<
     typeof FractionsOperationModelViewSchema

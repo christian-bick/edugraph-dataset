@@ -1,0 +1,2 @@
+- **Identity:** Highlighted equal regions of one whole require interpreting their count and partition denominator as a fraction.
+- **Modes:** Question Mode withholds the fraction notation; Solution Mode reveals it while preserving the same highlighted regions and equal partition.

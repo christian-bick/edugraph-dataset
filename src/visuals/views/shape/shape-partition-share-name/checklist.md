@@ -1,0 +1,2 @@
+- **Identity:** A highlighted equal share of a partitioned whole requires naming the share as a half or fourth.
+- **Modes:** Question Mode withholds the share name; Solution Mode reveals it while preserving the same highlighted region and partition.

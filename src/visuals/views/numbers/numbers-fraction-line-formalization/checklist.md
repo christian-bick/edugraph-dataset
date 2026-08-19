@@ -1,0 +1,2 @@
+- **Identity:** One number line requires completing a fraction equality from aligned points or a whole-number composition.
+- **Modes:** Question Mode withholds the requested notation; Solution Mode reveals it while retaining the same partitions and co-located values.

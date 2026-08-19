@@ -1,2 +1,2 @@
-- **Identity:** Generation shows a starting value, rule, and ordered terms; classification explicitly asks learners to classify generated terms into supplied feature categories or a highlighted table row into supplied rule categories.
-- **Modes:** Question Mode withholds the missing term or selected feature; Solution Mode reveals it with the supplied pattern evidence while retained table choices highlight only the correct rule.
+- **Identity:** A highlighted operation-table row requires classifying its arithmetic pattern into one of the supplied rule categories.
+- **Modes:** Question Mode keeps all rule choices neutral; Solution Mode highlights only the supplied classification.

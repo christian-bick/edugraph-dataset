@@ -1,0 +1,2 @@
+- **Identity:** Two equal-length fraction bars align with a one-half benchmark and require comparison from each endpoint's position relative to that benchmark.
+- **Modes:** Question Mode retains the benchmark evidence while withholding the comparison symbol; Solution Mode reveals the comparison and benchmark rationale.

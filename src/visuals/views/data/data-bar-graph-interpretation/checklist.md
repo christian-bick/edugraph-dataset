@@ -1,0 +1,2 @@
+- **Identity:** A completed scaled bar graph requires reading the count represented by one named category bar.
+- **Modes:** Question Mode keeps the graph visible while withholding the requested count; Solution Mode reveals that count without changing the graph.

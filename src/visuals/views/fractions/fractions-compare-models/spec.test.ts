@@ -1,19 +1,14 @@
 import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {extractConfig} from '../../../../lib/utils.ts';
-import {FractionsCompareModelsViewSchema, spec} from './spec.ts';
+import {spec} from './spec.ts';
 
 describe('FractionsCompareModelsViewSpec', () => {
-    it('owns only the visual-number representation', () => {
-        expect(spec.generalLabels).toEqual([Scope.VisualNumbers]);
+    it('owns invariant common-component inference', () => {
+        expect(spec.generalLabels).toEqual([
+            Scope.VisualNumbers,
+            Ability.LogicalInference
+        ]);
         expect(spec.generalLabels).not.toContain(Scope.SingleFrameOfReference);
-    });
-
-    it.each([
-        Ability.LogicalInference,
-        Ability.ProcedureUnderstanding
-    ])('resolves %s as a view-owned comparison mode', ability => {
-        expect(extractConfig(FractionsCompareModelsViewSchema, [ability]).config.abilityMode)
-            .toBe(ability);
+        expect(spec.rejectedLabels).toBeUndefined();
     });
 });

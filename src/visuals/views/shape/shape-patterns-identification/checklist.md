@@ -1,0 +1,2 @@
+- **Identity:** Six ordered physical-shape figures require selecting an emergent feature that remains true although the stated generation rule does not name it.
+- **Modes:** Question Mode keeps the options neutral and withholds evidence; Solution Mode marks the supplied feature and reveals its positional evidence.

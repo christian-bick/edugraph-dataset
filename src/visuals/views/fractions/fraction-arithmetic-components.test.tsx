@@ -1,4 +1,3 @@
-import {Ability} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
@@ -129,7 +128,7 @@ describe('fraction arithmetic typography', () => {
             usesCommonDenominator: true,
             operation: 'addition'
         }).data;
-        const data = presentFractionArithmeticProblem(neutral, [Ability.Interpretation])!;
+        const data = presentFractionArithmeticProblem(neutral, 'interpretation')!;
         if (data.task !== 'interpret-operation') throw new Error('Expected interpretation.');
 
         const first = renderToStaticMarkup(
