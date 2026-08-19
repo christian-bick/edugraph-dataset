@@ -165,18 +165,30 @@ describe('FractionEquivalenceGenerator', () => {
         expect(denominatorsSeen).toEqual(new Set(denominators));
     });
 
-    it('standardizes multiplication-mode equivalence on tenths and hundredths', () => {
-        const seen = new Set<number>();
+    it('uses seeded variation across generic and base-ten multiplication models', () => {
+        const tasks = new Set<string>();
+        const scaleFactors = new Set<number>();
+        const tenthsNumerators = new Set<number>();
         for (let seed = 0; seed < 200; seed++) {
-            setSeed(`tenths-${seed}`);
+            setSeed(`multiplication-${seed}`);
             const problem = generator.generate(multiplicationConfig).data;
-            if (problem.task !== 'tenths-to-hundredths') {
-                throw new Error('Expected tenths-to-hundredths mode.');
+            tasks.add(problem.task);
+            if (problem.task === 'tenths-to-hundredths') {
+                expectTenthsProblem(problem);
+                tenthsNumerators.add(problem.tenths.numerator);
+            } else if (problem.task === 'relate-equivalent-fractions') {
+                expectCoherentPair(problem);
+                scaleFactors.add(problem.scaleFactor);
+            } else {
+                throw new Error('Expected a proper-fraction scaling model.');
             }
-            expectTenthsProblem(problem);
-            seen.add(problem.tenths.numerator);
         }
-        expect(seen).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+        expect(tasks).toEqual(new Set([
+            'relate-equivalent-fractions',
+            'tenths-to-hundredths'
+        ]));
+        expect(scaleFactors).toEqual(new Set([2, 3, 4]));
+        expect(tenthsNumerators).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     });
 
     it('preserves deterministic mathematical draws for fixed seeds', () => {

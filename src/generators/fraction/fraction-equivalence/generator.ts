@@ -5,6 +5,7 @@ import {
     FractionEquivalenceProblem,
     FractionParts,
     FractionValue,
+    ProperFractionEquivalenceProblem,
     TenthsToHundredthsProblem
 } from '../../../types/problems.ts';
 import {
@@ -77,6 +78,23 @@ const generateTenthsToHundredths = (): TenthsToHundredthsProblem => {
     };
 };
 
+const generateProperEquivalence = (): ProperFractionEquivalenceProblem => {
+    const pair = randomItem(EQUIVALENT_PAIRS);
+    const secondNumerator = pair.firstNumerator * pair.scaleFactor;
+    const secondDenominator = pair.firstDenominator * pair.scaleFactor as FractionParts;
+    const first = toFractionValue(pair.firstNumerator, pair.firstDenominator);
+    const second = toFractionValue(secondNumerator, secondDenominator);
+
+    return {
+        task: 'relate-equivalent-fractions',
+        first,
+        second,
+        scaleFactor: pair.scaleFactor,
+        relation: 'equal',
+        equation: `${first.notation} = ${second.notation}`
+    };
+};
+
 export class FractionEquivalenceGenerator implements ProblemGenerator<
     FractionEquivalenceProblem,
     FractionEquivalenceGeneratorConfig
@@ -100,8 +118,11 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
             && config.usesImproperFractions === true
             && config.usesIntegerNumbers === true;
 
-        if (usesProperFractionMode && usesMultiplication) {
-            return {data: generateTenthsToHundredths()};
+        if (usesProperFractionMode) {
+            const data = usesMultiplication && random() < 0.5
+                ? generateTenthsToHundredths()
+                : generateProperEquivalence();
+            return {data};
         }
 
         if (usesWholeNumberMode && !usesMultiplication) {
@@ -120,27 +141,9 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
             };
         }
 
-        if (!usesProperFractionMode || usesMultiplication) {
-            throw new GeneratorValidationError(
-                'fraction-equivalence',
-                'Select EqualShares for proper-fraction equivalence, or select ImproperFractions and IntegerNumbers for whole-number equivalence.'
-            );
-        }
-
-        const pair = randomItem(EQUIVALENT_PAIRS);
-        const secondNumerator = pair.firstNumerator * pair.scaleFactor;
-        const secondDenominator = pair.firstDenominator * pair.scaleFactor as FractionParts;
-        const first = toFractionValue(pair.firstNumerator, pair.firstDenominator);
-        const second = toFractionValue(secondNumerator, secondDenominator);
-        return {
-            data: {
-                task: 'relate-equivalent-fractions',
-                first,
-                second,
-                scaleFactor: pair.scaleFactor,
-                relation: 'equal',
-                equation: `${first.notation} = ${second.notation}`
-            }
-        };
+        throw new GeneratorValidationError(
+            'fraction-equivalence',
+            'Select EqualShares for proper-fraction equivalence, or select ImproperFractions and IntegerNumbers for whole-number equivalence.'
+        );
     }
 }

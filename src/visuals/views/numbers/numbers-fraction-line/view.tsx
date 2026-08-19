@@ -26,10 +26,12 @@ interface CoreProps {
 
 const TenthsHundredthsEquivalenceLine = ({
     data,
-    isSolutionView
+    isSolutionView,
+    explainScaling
 }: {
     data: TenthsToHundredthsProblem;
     isSolutionView: boolean;
+    explainScaling: boolean;
 }) => {
     const toX = (hundredths: number) => LEFT + hundredths / 100 * (RIGHT - LEFT);
     const pointX = toX(data.hundredths.numerator);
@@ -43,10 +45,12 @@ const TenthsHundredthsEquivalenceLine = ({
     return (
         <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
             <div className="text-center text-[1.42rem] font-bold text-slate-800">
-                Scale both the numerator and denominator by 10.
+                {explainScaling
+                    ? 'Scale both the numerator and denominator by 10.'
+                    : 'Complete the equivalent fraction.'}
             </div>
             <div className="mt-2 text-center text-[1.08rem] font-semibold text-slate-600">
-                Complete <span className="font-extrabold text-blue-700">{data.tenths.notation} = ?/100</span> on one shared 0–1 scale and explain why the point stays fixed.
+                Complete <span className="font-extrabold text-blue-700">{data.tenths.notation} = ?/100</span> on one shared 0–1 scale{explainScaling ? ' and explain why the point stays fixed' : ''}.
             </div>
 
             <svg
@@ -133,11 +137,13 @@ const TenthsHundredthsEquivalenceLine = ({
                 </text>
             </svg>
 
-            <div className="flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-[0.92rem] font-bold text-blue-800">
-                <span>{data.numeratorScale.from} × 10 = {isSolutionView ? data.numeratorScale.result : '?'}</span>
-                <span className="text-blue-300">•</span>
-                <span>{data.denominatorScale.equation}</span>
-            </div>
+            {explainScaling && (
+                <div className="flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-[0.92rem] font-bold text-blue-800">
+                    <span>{data.numeratorScale.from} × 10 = {isSolutionView ? data.numeratorScale.result : '?'}</span>
+                    <span className="text-blue-300">•</span>
+                    <span>{data.denominatorScale.equation}</span>
+                </div>
+            )}
 
             <div className={`mt-4 rounded-xl border-2 px-5 py-4 text-center ${
                 isSolutionView
@@ -146,9 +152,13 @@ const TenthsHundredthsEquivalenceLine = ({
             }`}>
                 {isSolutionView ? (
                     <>
-                        <div className="text-[1.08rem] font-extrabold">{scalingEquation}</div>
-                        <div className="mt-2 text-[0.95rem] font-bold">{data.equation}.</div>
-                        <div className="mt-1 text-[0.88rem] font-semibold leading-snug text-slate-700">{explanation}</div>
+                        {explainScaling && (
+                            <div className="text-[1.08rem] font-extrabold">{scalingEquation}</div>
+                        )}
+                        <div className={`${explainScaling ? 'mt-2' : ''} text-[0.95rem] font-bold`}>{data.equation}.</div>
+                        {explainScaling && (
+                            <div className="mt-1 text-[0.88rem] font-semibold leading-snug text-slate-700">{explanation}</div>
+                        )}
                     </>
                 ) : (
                     <div className="text-[1.05rem] font-bold">{data.tenths.notation} = ?/100</div>
@@ -330,11 +340,13 @@ const validateEquivalenceProblem = (data: ProperFractionEquivalenceProblem) => {
 const FractionEquivalenceLine = ({
     data,
     isSolutionView,
-    isClassification
+    isClassification,
+    explainScaling
 }: {
     data: ProperFractionEquivalenceProblem;
     isSolutionView: boolean;
     isClassification: boolean;
+    explainScaling: boolean;
 }) => {
     validateEquivalenceProblem(data);
 
@@ -349,7 +361,9 @@ const FractionEquivalenceLine = ({
         : data.second.notation;
     const prompt = isClassification
         ? `Do ${data.first.notation} and ${data.second.notation} locate the same point?`
-        : `Complete ${data.first.notation} = ${unknownNotation}. Use the number line to explain why the value stays the same.`;
+        : explainScaling
+            ? `Complete ${data.first.notation} = ${unknownNotation}. Use the number line to explain why the value stays the same.`
+            : `Complete ${data.first.notation} = ${unknownNotation}. Use the number line.`;
     const explanation = `${data.first.notation} and ${data.second.notation} locate the same point because both fraction terms are multiplied by ${data.scaleFactor}.`;
 
     return (
@@ -415,7 +429,9 @@ const FractionEquivalenceLine = ({
                 {isSolutionView
                     ? isClassification
                         ? `${data.equation}. The fractions are equivalent.`
-                        : `${data.equation}. ${explanation}`
+                        : explainScaling
+                            ? `${data.equation}. ${explanation}`
+                            : data.equation
                     : isClassification
                         ? 'Equivalent or not equivalent?'
                         : `Count the equal parts to complete ${data.first.notation} = ${unknownNotation}.`}
@@ -448,13 +464,25 @@ const NumbersFractionLineCore = ({config, payload}: CoreProps) => {
             'relation',
             'equation'
         ]);
-        if (!hasExactAbilities(
+        const formalizationOnly = hasExactAbilities(
+            config.taskAbilities,
+            [Ability.Formalization]
+        );
+        const explainsProcedure = hasExactAbilities(
             config.taskAbilities,
             [Ability.Formalization, Ability.ProcedureUnderstanding]
-        ) || !isValidTenthsToHundredthsProblem(data)) {
-            throw new ViewValidationError(VIEW_ID, 'Grade 4 scaling requires Formalization with ProcedureUnderstanding and one coherent shared-scale model.');
+        );
+        if ((!formalizationOnly && !explainsProcedure)
+            || !isValidTenthsToHundredthsProblem(data)) {
+            throw new ViewValidationError(VIEW_ID, 'Grade 4 scaling requires Formalization, optionally with ProcedureUnderstanding, and one coherent shared-scale model.');
         }
-        return <TenthsHundredthsEquivalenceLine data={data} isSolutionView={isSolutionView} />;
+        return (
+            <TenthsHundredthsEquivalenceLine
+                data={data}
+                isSolutionView={isSolutionView}
+                explainScaling={explainsProcedure}
+            />
+        );
     }
     if (data.task === 'represent-whole-as-fraction') {
         if (!hasExactAbilities(config.taskAbilities, [Ability.Formalization])) {
@@ -467,18 +495,24 @@ const NumbersFractionLineCore = ({config, payload}: CoreProps) => {
             config.taskAbilities,
             [Ability.ConceptClassification]
         );
-        const isGeneration = hasExactAbilities(
+        const formalizationOnly = hasExactAbilities(
+            config.taskAbilities,
+            [Ability.Formalization]
+        );
+        const explainsProcedure = hasExactAbilities(
             config.taskAbilities,
             [Ability.Formalization, Ability.ProcedureUnderstanding]
         );
-        if (!isClassification && !isGeneration) {
-            throw new ViewValidationError(VIEW_ID, 'Proper-fraction equivalence requires classification or explanatory formalization.');
+        const requestsCompletion = formalizationOnly || explainsProcedure;
+        if (!isClassification && !requestsCompletion) {
+            throw new ViewValidationError(VIEW_ID, 'Proper-fraction equivalence requires classification or formalization, optionally with procedural explanation.');
         }
         return (
             <FractionEquivalenceLine
                 data={data}
                 isSolutionView={isSolutionView}
                 isClassification={isClassification}
+                explainScaling={explainsProcedure}
             />
         );
     }

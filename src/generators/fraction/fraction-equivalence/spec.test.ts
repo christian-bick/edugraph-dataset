@@ -61,7 +61,7 @@ describe('FractionEquivalenceGenerator spec integration', () => {
     it.each([
         [Scope.VisualNumbers, 'd2b490fc'],
         [Scope.Numberline, '9db6415f']
-    ] as const)('uses one base-ten scaling model for the Grade 4 %s target', (representation, hash) => {
+    ] as const)('uses a deterministic seeded scaling model for the Grade 4 %s target', (representation, hash) => {
         const labels = [
             Area.FractionEquivalence,
             Area.FractionNotation,
@@ -76,9 +76,19 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         expect(labelSetHash(labels)).toBe(hash);
         setSeed(hash);
         const stub = generateWithLabels(generator, labels);
+        setSeed(hash);
+        const repeated = generateWithLabels(generator, labels);
 
         expect(stub).not.toBeNull();
-        expect(stub!.data.task).toBe('tenths-to-hundredths');
+        expect(repeated!.data).toEqual(stub!.data);
+        expect([
+            'relate-equivalent-fractions',
+            'tenths-to-hundredths'
+        ]).toContain(stub!.data.task);
+        if (stub!.data.task === 'represent-whole-as-fraction') {
+            throw new Error('Expected a proper-fraction multiplication model.');
+        }
+        expect([2, 3, 4, 10]).toContain(stub!.data.scaleFactor);
         expect(stub!.tags).toContain(Area.Multiplication);
         expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
         expect(stub!.tags).not.toContain(Ability.Formalization);
@@ -86,7 +96,7 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         expect(stub!.tags).not.toContain(representation);
     });
 
-    it('resolves the denominator-ten to denominator-hundred target identically', () => {
+    it('keeps the seeded multiplication model independent of the requested Ability', () => {
         const labels = [
             Area.FractionEquivalence,
             Area.FractionNotation,
@@ -107,7 +117,6 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         ]);
 
         expect(formalization).not.toBeNull();
-        expect(formalization!.data.task).toBe('tenths-to-hundredths');
         expect(procedure!.data).toEqual(formalization!.data);
         expect(formalization!.tags).not.toContain(Ability.Formalization);
     });

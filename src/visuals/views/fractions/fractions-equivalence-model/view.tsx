@@ -152,21 +152,28 @@ const FractionsEquivalenceModelCore = ({config, payload}: CoreProps) => {
         config.taskAbilities,
         [Ability.ConceptClassification]
     );
-    const isGeneration = hasExactAbilities(
+    const formalizationOnly = hasExactAbilities(
+        config.taskAbilities,
+        [Ability.Formalization]
+    );
+    const explainsProcedure = hasExactAbilities(
         config.taskAbilities,
         [Ability.Formalization, Ability.ProcedureUnderstanding]
     );
-    if (!isClassification && !isGeneration) {
+    const requestsCompletion = formalizationOnly || explainsProcedure;
+    if (!isClassification && !requestsCompletion) {
         throw new ViewValidationError(
             VIEW_ID,
-            'Proper-fraction equivalence requires ConceptClassification or Formalization with ProcedureUnderstanding.'
+            'Proper-fraction equivalence requires ConceptClassification or Formalization, optionally with ProcedureUnderstanding.'
         );
     }
 
-    const secondNumerator = isGeneration && !isSolutionView ? '?' : data.second.numerator;
-    const prompt = isGeneration
-        ? 'Complete the equivalent fraction. Then explain why the value stays the same.'
-        : 'Are these fractions equivalent?';
+    const secondNumerator = requestsCompletion && !isSolutionView ? '?' : data.second.numerator;
+    const prompt = isClassification
+        ? 'Are these fractions equivalent?'
+        : explainsProcedure
+            ? 'Complete the equivalent fraction. Then explain why the value stays the same.'
+            : 'Complete the equivalent fraction.';
 
     return (
         <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -202,10 +209,14 @@ const FractionsEquivalenceModelCore = ({config, payload}: CoreProps) => {
                             <FractionNotation numerator={data.second.numerator} denominator={data.second.denominator} />
                         </div>
                         <div className="mt-3 text-[1.05rem] font-semibold">
-                            {isGeneration ? equivalenceExplanation(data) : 'The two fractions are equivalent.'}
+                            {explainsProcedure
+                                ? equivalenceExplanation(data)
+                                : isClassification
+                                    ? 'The two fractions are equivalent.'
+                                    : `The missing numerator is ${data.second.numerator}.`}
                         </div>
                     </>
-                ) : isGeneration ? (
+                ) : requestsCompletion ? (
                     <div className="flex items-center justify-center gap-3 text-xl font-bold">
                         <FractionNotation numerator={data.first.numerator} denominator={data.first.denominator} />
                         <span>=</span>

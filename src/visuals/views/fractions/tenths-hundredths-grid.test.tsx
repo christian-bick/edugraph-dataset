@@ -30,17 +30,17 @@ const generateAddition = (seed = 'tenths-hundredths-addition-view'): TenthsHundr
 };
 
 const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view'): TenthsToHundredthsProblem => {
-    setSeed(seed);
-    const data = new FractionEquivalenceGenerator().generate({
-        usesMultiplication: true,
-        usesEqualShares: true,
-        usesImproperFractions: false,
-        usesIntegerNumbers: false
-    }).data;
-    if (data.task !== 'tenths-to-hundredths') {
-        throw new Error('Expected equivalence payload.');
+    for (let attempt = 0; attempt < 50; attempt++) {
+        setSeed(`${seed}-${attempt}`);
+        const data = new FractionEquivalenceGenerator().generate({
+            usesMultiplication: true,
+            usesEqualShares: true,
+            usesImproperFractions: false,
+            usesIntegerNumbers: false
+        }).data;
+        if (data.task === 'tenths-to-hundredths') return data;
     }
-    return data;
+    throw new Error('Expected seeded generation to produce a tenths-to-hundredths payload.');
 };
 
 describe('tenths/hundredths view contract', () => {
