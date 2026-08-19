@@ -11,3 +11,12 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/*
+ * Playwright screenshots this shared mount point. Shrink it to the rendered
+ * view's natural width while retaining the canonical viewport as the ceiling.
+ */
+#view {
+  width: fit-content;
+  max-width: 100vw;
+}

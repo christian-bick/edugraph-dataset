@@ -113,6 +113,19 @@ and tests directly in the category parent directory with descriptive filenames; 
 The leaf wrapper fixes the task mode passed to the shared renderer. The shared renderer
 must not inspect ontology labels or import one leaf's spec to recover that decision.
 
+### IMPL-V10 — The screenshot root shrink-wraps content up to the viewport
+
+The render harness screenshots `#view`, whose shared stylesheet uses `width: fit-content`
+and `max-width: 100vw`. A normal view's outermost rendered element must therefore expose a
+natural width through its content, an explicit width, or an intrinsic layout. The captured
+PNG contracts to that width instead of retaining transparent space across the canonical
+viewport.
+
+Views that intentionally require the full canvas must make that decision visible by giving
+their outermost element a viewport width such as `width: 100vw`. Do not make ordinary view
+roots full-width merely to center a smaller fixed-width card; center within the card or its
+intrinsically sized wrapper instead.
+
 ---
 
 ## Audit
@@ -126,4 +139,5 @@ must not inspect ontology labels or import one leaf's spec to recover that decis
 - [ ] **IMPL-V7** — no reliance on animation state; every async resource the view loads resolves.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.
 - [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code, and the shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.
+- [ ] **IMPL-V10** — the outermost rendered element has a natural width; only an intentionally full-canvas view requests viewport width, so `#view` screenshots contain no accidental transparent remainder.
 - [ ] `npm run report:churn -- --spec=test` shows churn only in the views actually touched.

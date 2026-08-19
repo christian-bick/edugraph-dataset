@@ -6,6 +6,7 @@ import {
     CANONICAL_RENDERER_IMAGE,
     CANONICAL_RENDERER_PLATFORM,
     PLAYWRIGHT_VERSION,
+    RENDER_CONTEXT_OPTIONS,
     RENDERER_ENVIRONMENT_VARIABLE,
     currentRendererEnvironment
 } from './render-environment.ts';
@@ -16,6 +17,10 @@ describe('render environment', () => {
         expect(packageJson.devDependencies.playwright).toBe(PLAYWRIGHT_VERSION);
         expect(CANONICAL_RENDERER_IMAGE).toContain(`playwright:v${PLAYWRIGHT_VERSION}-noble@sha256:`);
         expect(CANONICAL_RENDERER_PLATFORM).toBe('linux/amd64');
+    });
+
+    it('keeps the screenshot ceiling at the canonical 1280px viewport width', () => {
+        expect(RENDER_CONTEXT_OPTIONS.viewport).toEqual({width: 1280, height: 720});
     });
 
     it('uses the explicit environment identity when generation is containerized', () => {
@@ -29,4 +34,3 @@ describe('render environment', () => {
         }
     });
 });
-
