@@ -149,11 +149,12 @@ async function main() {
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
     let reportOnly = process.env.npm_config_report_only === 'true' || process.env.npm_config_report_only === '';
     let logPrompts = process.env.npm_config_log_prompts === 'true' || process.env.npm_config_log_prompts === '';
+    let evaluationConcurrency = 10;
     
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('❌ Error: The --spec parameter is required.');
-        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force] [--log-prompts] [--report-only] [--report=<path>]');
+        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force] [--concurrency=N] [--log-prompts] [--report-only] [--report=<path>]');
         process.exit(1);
     }
     if (isUnionSpec(specName)) {
@@ -178,6 +179,12 @@ async function main() {
             reportOnly = true;
         } else if (arg === '--log-prompts') {
             logPrompts = true;
+        } else if (arg.startsWith('--concurrency=')) {
+            const value = Number.parseInt(arg.slice('--concurrency='.length), 10);
+            if (!Number.isInteger(value) || value < 1) {
+                throw new Error(`Invalid --concurrency value "${arg.slice('--concurrency='.length)}"; expected a positive integer.`);
+            }
+            evaluationConcurrency = value;
         }
     }
     if (auditMode && (targetGenerator || targetView)) {
@@ -410,7 +417,7 @@ async function main() {
             if (!apiKey) {
                 console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
             } else {
-                const evaluationConcurrency = logPrompts ? 1 : 10;
+                evaluationConcurrency = logPrompts ? 1 : evaluationConcurrency;
                 console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to ${evaluationConcurrency} parallel request${evaluationConcurrency === 1 ? '' : 's'})...`);
                 let processed = 0;
                 let evalPassed = cachedPassed;
