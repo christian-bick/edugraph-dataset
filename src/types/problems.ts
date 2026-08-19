@@ -1558,10 +1558,6 @@ export type LineSymmetryIdentificationOption = {
 };
 
 export type IdentifyLineSymmetryProblem = {
-    task: 'identify-line-symmetry';
-    prompt: 'Classify each figure by whether it can be folded along a line into exactly matching halves.';
-    positiveLabel: 'has line symmetry';
-    negativeLabel: 'does not have line symmetry';
     options: [
         LineSymmetryIdentificationOption,
         LineSymmetryIdentificationOption,
@@ -1569,21 +1565,17 @@ export type IdentifyLineSymmetryProblem = {
         LineSymmetryIdentificationOption
     ];
     answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
-    answerStatement: string;
-    explanation: 'Each selected figure can be folded along a valid line so its matching parts coincide.';
 };
 
 export type DrawLineSymmetryProblem = {
-    task: 'draw-line-symmetry';
-    prompt: 'Draw every line where folding the figure makes exactly matching halves.';
     figure: LineSymmetryFigure;
     completedAxes: LineSymmetryAxis[];
-    answer: string;
-    answerStatement: string;
-    explanation: string;
 };
 
-export type ShapeLineSymmetryProblem = IdentifyLineSymmetryProblem | DrawLineSymmetryProblem;
+export type ShapeLineSymmetryProblem = {
+    identification: IdentifyLineSymmetryProblem;
+    drawing: DrawLineSymmetryProblem;
+};
 
 export type ShapePartsConstructionProblem = {
     target: PlaneShapeName;

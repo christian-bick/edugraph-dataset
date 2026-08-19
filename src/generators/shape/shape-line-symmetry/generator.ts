@@ -1,6 +1,5 @@
-import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
-import {Ability} from 'edugraph-ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     LineSymmetryAxis,
@@ -177,7 +176,7 @@ const DRAWING_FIGURES = [ISOSCELES_TRIANGLE, RECTANGLE, SQUARE] as const;
 
 function shuffleOptions(
     figures: readonly LineSymmetryFigure[]
-): Extract<ShapeLineSymmetryProblem, {task: 'identify-line-symmetry'}>['options'] {
+): ShapeLineSymmetryProblem['identification']['options'] {
     const shuffled = [...figures];
     for (let index = shuffled.length - 1; index > 0; index--) {
         const swapIndex = Math.floor(random() * (index + 1));
@@ -187,11 +186,7 @@ function shuffleOptions(
         id: OPTION_IDS[index],
         figure,
         hasLineSymmetry: figure.axisCount > 0
-    })) as Extract<ShapeLineSymmetryProblem, {task: 'identify-line-symmetry'}>['options'];
-}
-
-function lineCountPhrase(count: LineSymmetryFigure['axisCount']): string {
-    return `${count} ${count === 1 ? 'line' : 'lines'} of symmetry`;
+    })) as ShapeLineSymmetryProblem['identification']['options'];
 }
 
 export class ShapeLineSymmetryGenerator implements ProblemGenerator<
@@ -203,56 +198,19 @@ export class ShapeLineSymmetryGenerator implements ProblemGenerator<
 
     generate(config: ShapeLineSymmetryGeneratorConfig): ProblemStub<ShapeLineSymmetryProblem> | null {
         validateConfigFields('shape-line-symmetry', config, []);
-        if (!Array.isArray(config.abilities) || config.abilities.length === 0) {
-            throw new GeneratorValidationError(
-                'shape-line-symmetry',
-                'The abilities field must be a non-empty array.'
-            );
-        }
-
-        const identify = config.abilities.length === 2
-            && config.abilities.includes(Ability.ConceptClassification)
-            && config.abilities.includes(Ability.VisualRecognition);
-        if (identify) {
-            const options = shuffleOptions(IDENTIFICATION_FIGURES);
-            const answerIds = options
-                .filter(option => option.hasLineSymmetry)
-                .map(option => option.id) as Extract<
-                    ShapeLineSymmetryProblem,
-                    {task: 'identify-line-symmetry'}
-                >['answerIds'];
-            return {
-                data: {
-                    task: 'identify-line-symmetry',
-                    prompt: 'Classify each figure by whether it can be folded along a line into exactly matching halves.',
-                    positiveLabel: 'has line symmetry',
-                    negativeLabel: 'does not have line symmetry',
-                    options,
-                    answerIds,
-                    answerStatement: `Figures ${answerIds.join(' and ')} have at least one line of symmetry.`,
-                    explanation: 'Each selected figure can be folded along a valid line so its matching parts coincide.'
-                }
-            };
-        }
-
-        const draw = config.abilities.length === 1
-            && config.abilities[0] === Ability.VisualArticulation;
-        if (draw) {
-            const drawingFigure = DRAWING_FIGURES[Math.floor(random() * DRAWING_FIGURES.length)];
-            const answer = lineCountPhrase(drawingFigure.axisCount);
-            return {
-                data: {
-                    task: 'draw-line-symmetry',
-                    prompt: 'Draw every line where folding the figure makes exactly matching halves.',
+        const options = shuffleOptions(IDENTIFICATION_FIGURES);
+        const answerIds = options
+            .filter(option => option.hasLineSymmetry)
+            .map(option => option.id) as ShapeLineSymmetryProblem['identification']['answerIds'];
+        const drawingFigure = DRAWING_FIGURES[Math.floor(random() * DRAWING_FIGURES.length)];
+        return {
+            data: {
+                identification: {options, answerIds},
+                drawing: {
                     figure: drawingFigure,
-                    completedAxes: drawingFigure.validAxes,
-                    answer,
-                    answerStatement: `The figure has ${answer}.`,
-                    explanation: 'Folding along each completed line maps every supplied pair of points onto each other.'
+                    completedAxes: drawingFigure.validAxes
                 }
-            };
-        }
-
-        return null;
+            }
+        };
     }
 }

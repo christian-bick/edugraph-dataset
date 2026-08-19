@@ -101,14 +101,18 @@ function IdentificationLayout({
     isSolutionView: boolean;
     seed: number;
 }) {
+    const prompt = 'Classify each figure by whether it can be folded along a line into exactly matching halves.';
+    const positiveLabel = 'has line symmetry';
+    const negativeLabel = 'does not have line symmetry';
+    const answerStatement = `Figures ${data.answerIds.join(' and ')} have at least one line of symmetry.`;
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[62px] items-center justify-center px-5 text-center text-[1.18rem] font-extrabold leading-snug text-slate-700">
-                {data.prompt}
+                {prompt}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3">
                 {data.options.map((option, index) => {
-                    const membership = option.hasLineSymmetry ? data.positiveLabel : data.negativeLabel;
+                    const membership = option.hasLineSymmetry ? positiveLabel : negativeLabel;
                     const cardClass = !isSolutionView
                         ? 'border-slate-200 bg-slate-50'
                         : option.hasLineSymmetry
@@ -149,8 +153,10 @@ function IdentificationLayout({
             </div>
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="text-[0.98rem] font-extrabold">{data.answerStatement}</div>
-                    <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                    <div className="text-[0.98rem] font-extrabold">{answerStatement}</div>
+                    <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">
+                        Each selected figure can be folded along a valid line so its matching parts coincide.
+                    </div>
                 </div>
             )}
         </div>
@@ -167,10 +173,11 @@ function DrawingLayout({
     seed: number;
 }) {
     const axes = isSolutionView ? data.completedAxes : [];
+    const answer = `${data.figure.axisCount} ${data.figure.axisCount === 1 ? 'line' : 'lines'} of symmetry`;
     return (
         <div className="w-[620px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[58px] items-center justify-center px-5 text-center text-[1.22rem] font-extrabold leading-snug text-slate-700">
-                {data.prompt}
+                Draw every line where folding the figure makes exactly matching halves.
             </div>
             <div
                 role="img"
@@ -190,8 +197,10 @@ function DrawingLayout({
             </div>
             {isSolutionView && (
                 <div className="mt-4 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="text-[1rem] font-extrabold">{data.answerStatement}</div>
-                    <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                    <div className="text-[1rem] font-extrabold">The figure has {answer}.</div>
+                    <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">
+                        Folding along each completed line maps every supplied pair of points onto each other.
+                    </div>
                 </div>
             )}
         </div>
@@ -203,42 +212,34 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-line-symmetry'>;
 }
 
-const ShapeLineSymmetryCore = ({config: _config, payload}: CoreProps) => {
+const ShapeLineSymmetryCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
-    validateProblemData('shape-line-symmetry', data, ['task']);
-
-    if (data.task === 'identify-line-symmetry') {
-        validateProblemData('shape-line-symmetry', data, [
-            'task',
-            'prompt',
-            'positiveLabel',
-            'negativeLabel',
-            'options',
-            'answerIds',
-            'answerStatement',
-            'explanation'
-        ]);
-    } else {
-        validateProblemData('shape-line-symmetry', data, [
-            'task',
-            'prompt',
-            'figure',
-            'completedAxes',
-            'answer',
-            'answerStatement',
-            'explanation'
-        ]);
-    }
+    validateProblemData('shape-line-symmetry', data, ['identification', 'drawing']);
+    validateProblemData('shape-line-symmetry', data.identification, [
+        'options',
+        'answerIds'
+    ]);
+    validateProblemData('shape-line-symmetry', data.drawing, [
+        'figure',
+        'completedAxes'
+    ]);
     if (!isValidShapeLineSymmetryProblem(data)) {
         throw new ViewValidationError(
             'shape-line-symmetry',
-            'The outline, complete fold axes, correspondence proof, membership, and prose must agree.'
+            'The outline, complete fold axes, correspondence proof, and membership must agree.'
         );
     }
-    return data.task === 'identify-line-symmetry'
-        ? <IdentificationLayout data={data} isSolutionView={isSolutionView} seed={seed} />
-        : <DrawingLayout data={data} isSolutionView={isSolutionView} seed={seed} />;
+    if (config.taskMode === 'identify') {
+        return <IdentificationLayout data={data.identification} isSolutionView={isSolutionView} seed={seed} />;
+    }
+    if (config.taskMode === 'draw') {
+        return <DrawingLayout data={data.drawing} isSolutionView={isSolutionView} seed={seed} />;
+    }
+    throw new ViewValidationError(
+        'shape-line-symmetry',
+        'The resolved task mode must be identify or draw.'
+    );
 };
 
 export const ShapeLineSymmetry = withConfig(

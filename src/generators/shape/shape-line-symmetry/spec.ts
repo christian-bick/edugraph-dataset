@@ -1,5 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
-import {matchAllExactLabels} from '../../../lib/resolvers.ts';
+import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -8,13 +7,7 @@ export const spec: GeneratorSpec = {
     generalLabels: [Area.ShapeReflection, Scope.Foldable]
 };
 
-export const ShapeLineSymmetryGeneratorSchema = {
-    abilities: [[
-        Ability.ConceptClassification,
-        Ability.VisualRecognition,
-        Ability.VisualArticulation
-    ], matchAllExactLabels]
-} as const;
+export const ShapeLineSymmetryGeneratorSchema = {} as const;
 
 export type ShapeLineSymmetryGeneratorConfig = ConfigFromSchema<
     typeof ShapeLineSymmetryGeneratorSchema

@@ -21,11 +21,9 @@ describe('ShapeLineSymmetryGenerator spec integration', () => {
         expect(labelSetHash(labels)).toBe('245bc791');
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
-        expect(stub!.data.task).toBe('identify-line-symmetry');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
-            Ability.ConceptClassification,
-            Ability.VisualRecognition
-        ]));
+        expect(stub!.data.identification.answerIds).toHaveLength(2);
+        expect(stub!.tags).not.toContain(Ability.ConceptClassification);
+        expect(stub!.tags).not.toContain(Ability.VisualRecognition);
     });
 
     it('resolves the corrected Grade 4 drawing target', () => {
@@ -37,7 +35,7 @@ describe('ShapeLineSymmetryGenerator spec integration', () => {
         expect(labelSetHash(labels)).toBe('4b67d8c7');
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
-        expect(stub!.data.task).toBe('draw-line-symmetry');
-        expect(stub!.tags).toContain(Ability.VisualArticulation);
+        expect(stub!.data.drawing.completedAxes).toEqual(stub!.data.drawing.figure.validAxes);
+        expect(stub!.tags).not.toContain(Ability.VisualArticulation);
     });
 });

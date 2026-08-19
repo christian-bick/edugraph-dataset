@@ -1,4 +1,3 @@
-import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -8,18 +7,9 @@ import {
     LineSymmetryFigure
 } from '../../../types/problems.ts';
 import {ShapeLineSymmetryGenerator} from './generator.ts';
-import {ShapeLineSymmetryGeneratorConfig} from './spec.ts';
 
 const generator = new ShapeLineSymmetryGenerator();
 const EPSILON = 1e-8;
-
-function identifyConfig(): ShapeLineSymmetryGeneratorConfig {
-    return {abilities: [Ability.ConceptClassification, Ability.VisualRecognition]};
-}
-
-function drawConfig(): ShapeLineSymmetryGeneratorConfig {
-    return {abilities: [Ability.VisualArticulation]};
-}
 
 function onAxis(point: LineSymmetryCoordinate, axis: LineSymmetryAxis): number {
     return axis.equation.a * point.x + axis.equation.b * point.y + axis.equation.c;
@@ -183,36 +173,20 @@ function expectVisibleAsymmetry(figure: LineSymmetryFigure): void {
 }
 
 describe('ShapeLineSymmetryGenerator', () => {
-    it('strictly requires a non-empty ability array', () => {
+    it('accepts only its empty neutral configuration', () => {
         expect(() => generator.generate(null as never)).toThrow(GeneratorValidationError);
-        expect(() => generator.generate({})).toThrow(GeneratorValidationError);
-        expect(() => generator.generate({abilities: []})).toThrow(
-            'The abilities field must be a non-empty array.'
-        );
+        expect(generator.generate({})).not.toBeNull();
     });
 
     it('classifies balanced no-, one-, and multiple-axis figures by fold validity', () => {
         setSeed('identify-line-symmetry');
-        const data = generator.generate(identifyConfig())!.data;
-        expect(data.task).toBe('identify-line-symmetry');
-        if (data.task !== 'identify-line-symmetry') return;
-        expect(data.prompt).toBe(
-            'Classify each figure by whether it can be folded along a line into exactly matching halves.'
-        );
-        expect(data.positiveLabel).toBe('has line symmetry');
-        expect(data.negativeLabel).toBe('does not have line symmetry');
+        const data = generator.generate({})!.data.identification;
         expect(data.options.map(option => option.id)).toEqual(['A', 'B', 'C', 'D']);
         expect(data.options.filter(option => option.hasLineSymmetry)).toHaveLength(2);
         expect(data.options.filter(option => !option.hasLineSymmetry)).toHaveLength(2);
         expect(data.options.map(option => option.figure.axisCount).sort()).toEqual([0, 0, 1, 2]);
         expect(data.answerIds).toEqual(
             data.options.filter(option => option.hasLineSymmetry).map(option => option.id)
-        );
-        expect(data.answerStatement).toBe(
-            `Figures ${data.answerIds.join(' and ')} have at least one line of symmetry.`
-        );
-        expect(data.explanation).toBe(
-            'Each selected figure can be folded along a valid line so its matching parts coincide.'
         );
         for (const option of data.options) {
             expect(option.hasLineSymmetry).toBe(option.figure.axisCount > 0);
@@ -225,50 +199,19 @@ describe('ShapeLineSymmetryGenerator', () => {
         const counts = new Set<number>();
         for (let seed = 0; seed < 100; seed++) {
             setSeed(`draw-line-symmetry-${seed}`);
-            const data = generator.generate(drawConfig())!.data;
-            expect(data.task).toBe('draw-line-symmetry');
-            if (data.task !== 'draw-line-symmetry') throw new Error('Expected drawing task.');
-            expect(data.prompt).toBe(
-                'Draw every line where folding the figure makes exactly matching halves.'
-            );
+            const data = generator.generate({})!.data.drawing;
             expect(data.figure.axisCount).toBeGreaterThan(0);
             expect(data.completedAxes).toEqual(data.figure.validAxes);
-            expect(data.answer).toBe(
-                `${data.figure.axisCount} ${data.figure.axisCount === 1 ? 'line' : 'lines'} of symmetry`
-            );
-            expect(data.answerStatement).toBe(`The figure has ${data.answer}.`);
-            expect(data.explanation).toBe(
-                'Folding along each completed line maps every supplied pair of points onto each other.'
-            );
             expectCompleteSymmetryGeometry(data.figure);
             counts.add(data.figure.axisCount);
         }
         expect(counts).toEqual(new Set([1, 2, 4]));
     });
 
-    it.each([
-        {abilities: [Ability.ConceptClassification]},
-        {abilities: [Ability.VisualRecognition]},
-        {abilities: [Ability.ConceptClassification, Ability.VisualArticulation]},
-        {abilities: [Ability.VisualRecognition, Ability.VisualArticulation]},
-        {
-            abilities: [
-                Ability.ConceptClassification,
-                Ability.VisualRecognition,
-                Ability.VisualArticulation
-            ]
-        }
-    ])('rejects unsupported ability combination $abilities', ({abilities}) => {
-        expect(generator.generate({abilities} as ShapeLineSymmetryGeneratorConfig)).toBeNull();
-    });
-
-    it.each([
-        identifyConfig(),
-        drawConfig()
-    ])('is deterministic for ability configuration %j', config => {
-        setSeed(`line-symmetry-${config.abilities!.join('-')}`);
-        const first = generator.generate(config);
-        setSeed(`line-symmetry-${config.abilities!.join('-')}`);
-        expect(generator.generate(config)).toEqual(first);
+    it('is deterministic for the neutral model', () => {
+        setSeed('line-symmetry-neutral');
+        const first = generator.generate({});
+        setSeed('line-symmetry-neutral');
+        expect(generator.generate({})).toEqual(first);
     });
 });

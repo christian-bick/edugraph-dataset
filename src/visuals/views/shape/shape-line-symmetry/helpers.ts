@@ -282,14 +282,11 @@ const axesMatch = (first: readonly LineSymmetryAxis[], second: readonly LineSymm
 );
 
 const identifyProblemIsValid = (data: IdentifyLineSymmetryProblem): boolean => {
-    if (data.prompt !== 'Classify each figure by whether it can be folded along a line into exactly matching halves.'
-        || data.positiveLabel !== 'has line symmetry'
-        || data.negativeLabel !== 'does not have line symmetry'
+    if (!data
         || !Array.isArray(data.options)
         || data.options.length !== 4
         || !Array.isArray(data.answerIds)
-        || data.answerIds.length !== 2
-        || data.explanation !== 'Each selected figure can be folded along a valid line so its matching parts coincide.') {
+        || data.answerIds.length !== 2) {
         return false;
     }
     const ids = data.options.map(option => option.id);
@@ -303,29 +300,23 @@ const identifyProblemIsValid = (data: IdentifyLineSymmetryProblem): boolean => {
         && data.answerIds.every((id, index) => id === positiveIds[index])
         && data.options.some(option => option.hasLineSymmetry && option.figure.axisCount === 1)
         && data.options.some(option => option.hasLineSymmetry && option.figure.axisCount > 1)
-        && data.options.filter(option => !option.hasLineSymmetry).every(option => option.figure.axisCount === 0)
-        && data.answerStatement === `Figures ${data.answerIds.join(' and ')} have at least one line of symmetry.`;
+        && data.options.filter(option => !option.hasLineSymmetry).every(option => option.figure.axisCount === 0);
 };
 
-const lineCountPhrase = (count: number): string => `${count} ${count === 1 ? 'line' : 'lines'} of symmetry`;
-
 const drawProblemIsValid = (data: DrawLineSymmetryProblem): boolean => {
-    if (data.prompt !== 'Draw every line where folding the figure makes exactly matching halves.'
+    if (!data
         || !figureIsValid(data.figure)
         || data.figure.axisCount === 0
         || !Array.isArray(data.completedAxes)
         || !data.completedAxes.every(axis => axisIsValid(axis, data.figure))
         || !axesMatch(data.completedAxes, data.figure.validAxes)) return false;
-    const answer = lineCountPhrase(data.figure.axisCount);
-    return data.answer === answer
-        && data.answerStatement === `The figure has ${answer}.`
-        && data.explanation === 'Folding along each completed line maps every supplied pair of points onto each other.';
+    return true;
 };
 
 export const isValidShapeLineSymmetryProblem = (data: ShapeLineSymmetryProblem): boolean => (
-    data.task === 'identify-line-symmetry'
-        ? identifyProblemIsValid(data)
-        : drawProblemIsValid(data)
+    Boolean(data)
+    && identifyProblemIsValid(data.identification)
+    && drawProblemIsValid(data.drawing)
 );
 
 export const rotationFor = (seed: number, index: number): number => {
