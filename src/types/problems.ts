@@ -2623,44 +2623,14 @@ export type AngleArithmeticGeometry = {
     direction: 'counterclockwise';
 };
 
-type AngleArithmeticProblemBase = {
-    prompt: string;
+export type AngleArithmeticProblem = {
+    operation: 'addition' | 'subtraction';
     geometry: AngleArithmeticGeometry;
     leftMeasure: number;
     rightMeasure: number;
     wholeMeasure: number;
     relationStatement: 'm∠AOB + m∠BOC = m∠AOC';
-    questionEquation: string;
-    solutionEquation: string;
-    answer: string;
-    answerStatement: string;
-    explanation: string;
 };
-
-export type ExplainAngleAdditionProblem = AngleArithmeticProblemBase & {
-    task: 'explain-angle-addition';
-    operation: 'addition';
-    unknownRole: 'none';
-};
-
-export type SolveUnknownWholeAngleProblem = AngleArithmeticProblemBase & {
-    task: 'solve-unknown-angle';
-    operation: 'addition';
-    unknownRole: 'whole';
-    wholePartEquation: string;
-};
-
-export type SolveUnknownComponentAngleProblem = AngleArithmeticProblemBase & {
-    task: 'solve-unknown-angle';
-    operation: 'subtraction';
-    unknownRole: 'left-component' | 'right-component';
-    wholePartEquation: string;
-};
-
-export type AngleArithmeticProblem =
-    | ExplainAngleAdditionProblem
-    | SolveUnknownWholeAngleProblem
-    | SolveUnknownComponentAngleProblem;
 
 export type GeometryPrimitiveKind =
     | 'point'

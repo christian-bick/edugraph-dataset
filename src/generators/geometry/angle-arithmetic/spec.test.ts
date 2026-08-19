@@ -1,13 +1,17 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
+import {
+    extractSchemaLabels,
+    generateWithLabels,
+    labelSetHash
+} from '../../../lib/utils.ts';
 import {AngleArithmeticGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {AngleArithmeticGeneratorSchema, spec} from './spec.ts';
 
 const cases = [
     {
         expectedHash: 'c66ef9e7',
-        task: 'explain-angle-addition',
+        operation: 'addition',
         labels: [
             Area.AdjacentAngles,
             Area.AngleCalculation,
@@ -19,7 +23,7 @@ const cases = [
     },
     {
         expectedHash: 'fb75a29f',
-        task: 'solve-unknown-angle',
+        operation: 'addition',
         labels: [
             Area.AdjacentAngles,
             Area.AngleCalculation,
@@ -31,7 +35,7 @@ const cases = [
     },
     {
         expectedHash: 'cddd5940',
-        task: 'solve-unknown-angle',
+        operation: 'subtraction',
         labels: [
             Area.AdjacentAngles,
             Area.AngleCalculation,
@@ -53,18 +57,29 @@ describe('AngleArithmeticGenerator spec integration', () => {
         ]);
     });
 
-    it.each(cases)('resolves the corrected Grade 4 $expectedHash target', ({
+    it('does not parameterize any Ability', () => {
+        expect(extractSchemaLabels(AngleArithmeticGeneratorSchema)).toEqual([
+            Area.Addition,
+            Area.Subtraction
+        ]);
+    });
+
+    it.each(cases)('resolves the generator side of Grade 4 $expectedHash', ({
         expectedHash,
         labels,
-        task
+        operation
     }) => {
         expect(labelSetHash([...labels])).toBe(expectedHash);
         const stub = generateWithLabels(new AngleArithmeticGenerator(), [...labels]);
         expect(stub).not.toBeNull();
-        expect(stub!.data.task).toBe(task);
-        expect(stub!.tags).toEqual(expect.arrayContaining(
-            labels.filter(label => !spec.generalLabels.includes(label))
-        ));
-        expect([...new Set(stub!.tags)]).toHaveLength(stub!.tags!.length);
+        expect(stub!.data.operation).toBe(operation);
+        expect(stub!.tags).toEqual(expect.arrayContaining([
+            operation === 'addition' ? Area.Addition : Area.Subtraction
+        ]));
+        expect(stub!.tags).not.toEqual(expect.arrayContaining([
+            Ability.ProcedureUnderstanding,
+            Ability.ProcedureExecution,
+            Ability.ProcedureInversion
+        ]));
     });
 });

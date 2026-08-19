@@ -1,11 +1,14 @@
+import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {
     AngleArithmeticGeometry,
-    ExplainAngleAdditionProblem,
-    SolveUnknownComponentAngleProblem,
-    SolveUnknownWholeAngleProblem
+    AngleArithmeticProblem
 } from '../../../../types/problems.ts';
-import {isValidAngleArithmeticProblem} from './helpers.ts';
+import {
+    buildAngleArithmeticPresentation,
+    isValidAngleArithmeticProblem,
+    resolveAngleArithmeticTask
+} from './helpers.ts';
 
 const geometry = (left: number, right: number): AngleArithmeticGeometry => ({
     vertexLabel: 'O',
@@ -24,88 +27,119 @@ const geometry = (left: number, right: number): AngleArithmeticGeometry => ({
     direction: 'counterclockwise'
 });
 
-const common = (left: number, right: number) => ({
+const relation = (
+    operation: AngleArithmeticProblem['operation'],
+    left = 25,
+    right = 35
+): AngleArithmeticProblem => ({
+    operation,
     geometry: geometry(left, right),
     leftMeasure: left,
     rightMeasure: right,
     wholeMeasure: left + right,
-    relationStatement: 'm∠AOB + m∠BOC = m∠AOC' as const
+    relationStatement: 'm∠AOB + m∠BOC = m∠AOC'
 });
 
-const explanation = (left: number, right: number): ExplainAngleAdditionProblem => ({
-    ...common(left, right),
-    task: 'explain-angle-addition',
-    operation: 'addition',
-    unknownRole: 'none',
-    prompt: 'Explain how adjacent angles AOB and BOC combine to form angle AOC.',
-    questionEquation: 'm∠AOB + m∠BOC = m∠AOC',
-    solutionEquation: `${left}° + ${right}° = ${left + right}°`,
-    answer: `${left}° + ${right}° = ${left + right}°`,
-    answerStatement: 'The measure of angle AOC is the sum of the measures of adjacent angles AOB and BOC.',
-    explanation: `Angles AOB and BOC share ray OB and do not overlap. Their measures add: ${left}° + ${right}° = ${left + right}°.`
-});
+describe('angle arithmetic view projection', () => {
+    it('validates the complete neutral relation independently of task Ability', () => {
+        expect(isValidAngleArithmeticProblem(relation('addition'))).toBe(true);
+        expect(isValidAngleArithmeticProblem(relation('subtraction', 80, 75))).toBe(true);
 
-const unknownWhole = (left: number, right: number): SolveUnknownWholeAngleProblem => ({
-    ...common(left, right),
-    task: 'solve-unknown-angle',
-    operation: 'addition',
-    unknownRole: 'whole',
-    prompt: 'Find the measure of angle AOC.',
-    wholePartEquation: `${left}° + ${right}° = ?°`,
-    questionEquation: `${left}° + ${right}° = ?°`,
-    solutionEquation: `${left}° + ${right}° = ${left + right}°`,
-    answer: `${left + right}°`,
-    answerStatement: `Angle AOC measures ${left + right}°.`,
-    explanation: `Angles AOB and BOC are adjacent and form angle AOC. Add ${left}° and ${right}° to get ${left + right}°.`
-});
-
-const unknownComponent = (
-    role: 'left-component' | 'right-component',
-    left: number,
-    right: number
-): SolveUnknownComponentAngleProblem => {
-    const whole = left + right;
-    const unknownLeft = role === 'left-component';
-    const known = unknownLeft ? right : left;
-    const unknown = unknownLeft ? left : right;
-    const unknownAngle = unknownLeft ? 'AOB' : 'BOC';
-    const knownAngle = unknownLeft ? 'BOC' : 'AOB';
-    return {
-        ...common(left, right),
-        task: 'solve-unknown-angle',
-        operation: 'subtraction',
-        unknownRole: role,
-        prompt: `Find the measure of angle ${unknownAngle}.`,
-        wholePartEquation: unknownLeft ? `?° + ${right}° = ${whole}°` : `${left}° + ?° = ${whole}°`,
-        questionEquation: `${whole}° − ${known}° = ?°`,
-        solutionEquation: `${whole}° − ${known}° = ${unknown}°`,
-        answer: `${unknown}°`,
-        answerStatement: `Angle ${unknownAngle} measures ${unknown}°.`,
-        explanation: `Angle AOC is ${whole}°. Subtract angle ${knownAngle}, ${known}°, to find angle ${unknownAngle}: ${unknown}°.`
-    };
-};
-
-describe('angle arithmetic validation', () => {
-    it('accepts understanding, unknown whole, and both unknown component roles', () => {
-        expect(isValidAngleArithmeticProblem(explanation(25, 35))).toBe(true);
-        expect(isValidAngleArithmeticProblem(explanation(45, 45))).toBe(true);
-        expect(isValidAngleArithmeticProblem(unknownWhole(80, 75))).toBe(true);
-        expect(isValidAngleArithmeticProblem(unknownComponent('left-component', 30, 60))).toBe(true);
-        expect(isValidAngleArithmeticProblem(unknownComponent('right-component', 55, 75))).toBe(true);
+        const incoherent = relation('addition', 45, 70);
+        expect(isValidAngleArithmeticProblem({...incoherent, wholeMeasure: 120})).toBe(false);
+        expect(isValidAngleArithmeticProblem({
+            ...incoherent,
+            geometry: {...incoherent.geometry, dividerDegrees: 70}
+        })).toBe(false);
+        expect(isValidAngleArithmeticProblem(relation('addition', 20, 40))).toBe(false);
     });
 
-    it('rejects overlapping/incoherent geometry and unsupported stress pairs', () => {
-        const whole = unknownWhole(45, 70);
-        expect(isValidAngleArithmeticProblem({...whole, wholeMeasure: 120})).toBe(false);
-        expect(isValidAngleArithmeticProblem({...whole, geometry: {...whole.geometry, dividerDegrees: 70}})).toBe(false);
-        expect(isValidAngleArithmeticProblem(unknownWhole(20, 40))).toBe(false);
+    it.each([
+        ['addition', Ability.ProcedureUnderstanding, 'explain-angle-addition'],
+        ['addition', Ability.ProcedureExecution, 'solve-unknown-whole'],
+        ['subtraction', Ability.ProcedureInversion, 'solve-unknown-component']
+    ] as const)('maps %s × %s to %s', (operation, ability, task) => {
+        expect(resolveAngleArithmeticTask(relation(operation), ability)).toBe(task);
     });
 
-    it('rejects answer leakage or contradictions in either component role', () => {
-        const left = unknownComponent('left-component', 65, 85);
-        const right = unknownComponent('right-component', 65, 85);
-        expect(isValidAngleArithmeticProblem({...left, questionEquation: '150° − 85° = 65°'})).toBe(false);
-        expect(isValidAngleArithmeticProblem({...right, wholePartEquation: '?° + 85° = 150°'})).toBe(false);
-        expect(isValidAngleArithmeticProblem({...right, explanation: 'Angle BOC measures 80°.'})).toBe(false);
+    it.each([
+        ['addition', Ability.ProcedureInversion],
+        ['subtraction', Ability.ProcedureUnderstanding],
+        ['subtraction', Ability.ProcedureExecution],
+        ['addition', undefined]
+    ] as const)('rejects unsupported operation/Ability pairing %s × %s', (
+        operation,
+        ability
+    ) => {
+        expect(resolveAngleArithmeticTask(relation(operation), ability)).toBeNull();
+    });
+
+    it('builds the explanation presentation from neutral evidence', () => {
+        const data = relation('addition', 45, 45);
+        expect(buildAngleArithmeticPresentation(
+            data,
+            'explain-angle-addition',
+            7
+        )).toEqual({
+            task: 'explain-angle-addition',
+            unknownRole: 'none',
+            prompt: 'Explain how adjacent angles AOB and BOC combine to form angle AOC.',
+            questionEquation: 'm∠AOB + m∠BOC = m∠AOC',
+            solutionEquation: '45° + 45° = 90°',
+            answer: '45° + 45° = 90°',
+            answerStatement: 'The measure of angle AOC is the sum of the measures of adjacent angles AOB and BOC.',
+            explanation: 'Angles AOB and BOC share ray OB and do not overlap. Their measures add: 45° + 45° = 90°.'
+        });
+        expect(data).not.toHaveProperty('prompt');
+    });
+
+    it('builds the unknown-whole presentation from ProcedureExecution', () => {
+        const data = relation('addition', 45, 70);
+        expect(buildAngleArithmeticPresentation(
+            data,
+            'solve-unknown-whole',
+            9
+        )).toEqual({
+            task: 'solve-unknown-angle',
+            unknownRole: 'whole',
+            prompt: 'Find the measure of angle AOC.',
+            wholePartEquation: '45° + 70° = ?°',
+            questionEquation: '45° + 70° = ?°',
+            solutionEquation: '45° + 70° = 115°',
+            answer: '115°',
+            answerStatement: 'Angle AOC measures 115°.',
+            explanation: 'Angles AOB and BOC are adjacent and form angle AOC. Add 45° and 70° to get 115°.'
+        });
+    });
+
+    it('uses the view seed to choose either hidden component for ProcedureInversion', () => {
+        const data = relation('subtraction', 65, 85);
+        const left = buildAngleArithmeticPresentation(
+            data,
+            'solve-unknown-component',
+            2
+        );
+        const right = buildAngleArithmeticPresentation(
+            data,
+            'solve-unknown-component',
+            3
+        );
+
+        expect(left).toMatchObject({
+            task: 'solve-unknown-angle',
+            unknownRole: 'left-component',
+            prompt: 'Find the measure of angle AOB.',
+            wholePartEquation: '?° + 85° = 150°',
+            questionEquation: '150° − 85° = ?°',
+            answer: '65°'
+        });
+        expect(right).toMatchObject({
+            task: 'solve-unknown-angle',
+            unknownRole: 'right-component',
+            prompt: 'Find the measure of angle BOC.',
+            wholePartEquation: '65° + ?° = 150°',
+            questionEquation: '150° − 65° = ?°',
+            answer: '85°'
+        });
     });
 });

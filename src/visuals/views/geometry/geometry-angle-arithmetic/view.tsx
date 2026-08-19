@@ -1,10 +1,14 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {AngleArithmeticProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {counterclockwiseAngleArc, pointOnAngleCircle} from '../helpers.ts';
-import {isValidAngleArithmeticProblem} from './helpers.ts';
+import {
+    AngleArithmeticViewModel,
+    buildAngleArithmeticPresentation,
+    isValidAngleArithmeticProblem,
+    resolveAngleArithmeticTask
+} from './helpers.ts';
 import {
     GeometryAngleArithmeticViewConfig,
     GeometryAngleArithmeticViewSchema
@@ -28,7 +32,7 @@ const keepEndpointLabelVisible = ({x, y}: {x: number; y: number}) => ({
 });
 
 const roleValue = (
-    data: AngleArithmeticProblem,
+    data: AngleArithmeticViewModel,
     role: MeasureRole,
     isSolutionView: boolean
 ): string => {
@@ -42,7 +46,7 @@ const roleValue = (
 };
 
 const accessibleDiagramName = (
-    data: AngleArithmeticProblem,
+    data: AngleArithmeticViewModel,
     isSolutionView: boolean
 ): string => {
     const left = roleValue(data, 'left-component', isSolutionView);
@@ -66,7 +70,7 @@ function MeasurePill({x, y, value, colors}: {
 }
 
 function AnglePartitionDiagram({data, isSolutionView}: {
-    data: AngleArithmeticProblem;
+    data: AngleArithmeticViewModel;
     isSolutionView: boolean;
 }) {
     const startEnd = pointOnAngleCircle(CENTER_X, CENTER_Y, RAY_RADIUS, data.geometry.startDegrees);
@@ -206,7 +210,7 @@ function AnglePartitionDiagram({data, isSolutionView}: {
     );
 }
 
-function QuestionEquations({data}: {data: AngleArithmeticProblem}) {
+function QuestionEquations({data}: {data: AngleArithmeticViewModel}) {
     const showWholePart = data.task === 'solve-unknown-angle'
         && data.unknownRole !== 'whole';
     return (
@@ -223,53 +227,51 @@ function QuestionEquations({data}: {data: AngleArithmeticProblem}) {
     );
 }
 
-const GeometryAngleArithmeticCore = ({config: _config, payload}: CoreProps) => {
+const GeometryAngleArithmeticCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     validateProblemData('geometry-angle-arithmetic', problem.data, [
-        'task',
         'operation',
-        'unknownRole',
-        'prompt',
         'geometry',
         'leftMeasure',
         'rightMeasure',
         'wholeMeasure',
-        'relationStatement',
-        'questionEquation',
-        'solutionEquation',
-        'answer',
-        'answerStatement',
-        'explanation'
+        'relationStatement'
     ]);
     const data = problem.data;
-    if (data.task === 'solve-unknown-angle') {
-        validateProblemData('geometry-angle-arithmetic', data, ['wholePartEquation']);
-    }
     if (!isValidAngleArithmeticProblem(data)) {
         throw new ViewValidationError(
             'geometry-angle-arithmetic',
-            'The adjacent component arcs, whole-part measures, equations, and supplied prose must agree exactly.'
+            'The adjacent component arcs and whole-part measures must agree exactly.'
         );
     }
+    const task = resolveAngleArithmeticTask(data, config.taskAbility);
+    if (!task) {
+        throw new ViewValidationError(
+            'geometry-angle-arithmetic',
+            `Operation ${data.operation} does not support task Ability ${config.taskAbility}.`
+        );
+    }
+    const presentation = buildAngleArithmeticPresentation(data, task, payload.seed);
+    const viewModel: AngleArithmeticViewModel = {...data, ...presentation};
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[54px] items-center justify-center px-4 text-center text-[1.18rem] font-bold leading-snug text-slate-700">
-                {data.prompt}
+                {viewModel.prompt}
             </div>
             <div className="mt-2 flex h-[340px] items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
-                <AnglePartitionDiagram data={data} isSolutionView={isSolutionView} />
+                <AnglePartitionDiagram data={viewModel} isSolutionView={isSolutionView} />
             </div>
             {!isSolutionView && (
                 <div className="mt-3">
-                    <QuestionEquations data={data} />
+                    <QuestionEquations data={viewModel} />
                 </div>
             )}
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="font-mono text-[1.08rem] font-extrabold">{data.solutionEquation}</div>
-                    <div className="mt-1 text-[0.98rem] font-extrabold">{data.answerStatement}</div>
-                    <div className="mt-1 text-[0.86rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                    <div className="font-mono text-[1.08rem] font-extrabold">{viewModel.solutionEquation}</div>
+                    <div className="mt-1 text-[0.98rem] font-extrabold">{viewModel.answerStatement}</div>
+                    <div className="mt-1 text-[0.86rem] font-semibold leading-snug text-slate-700">{viewModel.explanation}</div>
                 </div>
             )}
         </div>
