@@ -1,5 +1,5 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
-import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -13,14 +13,6 @@ export const spec: GeneratorSpec = {
 };
 
 export const FractionEquivalenceGeneratorSchema = {
-    taskAbilities: [
-        [
-            Ability.ConceptClassification,
-            Ability.Formalization,
-            Ability.ProcedureUnderstanding
-        ],
-        matchAllExactLabels
-    ],
     usesMultiplication: [[Area.Multiplication], hasLabel(Area.Multiplication)],
     usesEqualShares: [[Scope.EqualShares], hasLabel(Scope.EqualShares)],
     usesImproperFractions: [[Scope.ImproperFractions], hasLabel(Scope.ImproperFractions)],

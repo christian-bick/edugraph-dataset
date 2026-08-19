@@ -4,18 +4,24 @@ import {extractConfig} from '../../../../lib/utils.ts';
 import {spec, NumbersFractionLineViewSchema} from './spec.ts';
 
 describe('NumbersFractionLineViewSchema', () => {
-    it('owns one shared frame and scopes articulation to targets that request it', () => {
+    it('owns one shared frame and resolves the requested task Abilities', () => {
         expect(spec.generalLabels).toEqual([
             Scope.Numberline,
             Scope.SingleFrameOfReference
         ]);
         expect(extractConfig(NumbersFractionLineViewSchema, []).config).toEqual({
-            visualArticulation: false
+            taskAbilities: []
         });
-        expect(extractConfig(NumbersFractionLineViewSchema, [
-            Ability.VisualArticulation
-        ]).config).toEqual({
-            visualArticulation: true
-        });
+        for (const taskAbilities of [
+            [Ability.VisualArticulation],
+            [Ability.ConceptClassification],
+            [Ability.Formalization],
+            [Ability.Formalization, Ability.ProcedureUnderstanding]
+        ]) {
+            expect(extractConfig(
+                NumbersFractionLineViewSchema,
+                taskAbilities
+            ).config.taskAbilities).toEqual(taskAbilities);
+        }
     });
 });

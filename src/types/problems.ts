@@ -1700,14 +1700,12 @@ export type FractionValue = {
 };
 
 export type ProperFractionEquivalenceProblem = {
-    task: 'recognize-equivalence' | 'generate-equivalence';
+    task: 'relate-equivalent-fractions';
     first: FractionValue;
     second: FractionValue;
     scaleFactor: 2 | 3 | 4;
     relation: 'equal';
     equation: string;
-    explanation: string;
-    answer: string;
 };
 
 export type WholeNumberFractionEquivalenceProblem = {
@@ -1716,61 +1714,6 @@ export type WholeNumberFractionEquivalenceProblem = {
     fraction: FractionValue;
     relation: 'equal';
     equation: string;
-    explanation: string;
-    answer: string;
-};
-
-export type FractionScalingStep = {
-    from: number;
-    factor: 2 | 3 | 4;
-    result: number;
-    equation: string;
-};
-
-export type FractionScalingBar = {
-    partCount: FractionParts;
-    shadedCount: number;
-};
-
-export type FractionScalingNumberLineTick = {
-    index: number;
-    xPercent: number;
-    label: string;
-};
-
-export type FractionScalingNumberLinePoint = {
-    tickIndex: number;
-    xPercent: number;
-    label: string;
-};
-
-export type FractionScalingProblem = {
-    task: 'scale-equivalence';
-    first: FractionValue;
-    second: FractionValue;
-    scaleFactor: 2 | 3 | 4;
-    sharedWhole: 1;
-    numeratorScale: FractionScalingStep;
-    denominatorScale: FractionScalingStep;
-    questionEquation: string;
-    scalingEquation: string;
-    firstUnitPart: string;
-    secondUnitPart: string;
-    barModel: {
-        first: FractionScalingBar;
-        second: FractionScalingBar;
-    };
-    numberLineModel: {
-        firstTicks: FractionScalingNumberLineTick[];
-        secondTicks: FractionScalingNumberLineTick[];
-        firstPoint: FractionScalingNumberLinePoint;
-        secondPoint: FractionScalingNumberLinePoint;
-        coLocatedXPercent: number;
-    };
-    relation: 'equal';
-    answer: string;
-    answerStatement: string;
-    explanation: string;
 };
 
 export type DecimalFractionValue = {
@@ -1827,23 +1770,17 @@ export type TenthsToHundredthsProblem = {
         result: 100;
         equation: string;
     };
-    questionPrompt: string;
-    questionEquation: string;
-    solutionEquation: string;
     models: {
         tenths: TenthsHundredthsGridModel;
         hundredths: TenthsHundredthsGridModel;
     };
     relation: 'equal';
-    answer: string;
-    answerStatement: string;
-    explanation: string;
+    equation: string;
 };
 
 export type FractionEquivalenceProblem =
     | ProperFractionEquivalenceProblem
     | WholeNumberFractionEquivalenceProblem
-    | FractionScalingProblem
     | TenthsToHundredthsProblem;
 
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;

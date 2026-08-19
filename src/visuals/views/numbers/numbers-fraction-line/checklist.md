@@ -1,2 +1,2 @@
-- **Identity:** One horizontal reference scale locates fractions by equal steps and, for scaling, aligns the original b-part ticks with the refined bn-part ticks at one co-located point.
-- **Modes:** Question Mode withholds only the requested endpoint, verdict, or scaled numerator while retaining the factor and shared-scale evidence. Solution Mode reveals it and explains the increased number of smaller parts, unchanged point, or whole composition.
+- **Identity:** One horizontal reference scale locates fractions by equal steps and, for scaling, aligns tenths with refined hundredths at one co-located point.
+- **Modes:** Question Mode withholds only the requested endpoint, verdict, or numerator while retaining the task's shared-scale evidence. Solution Mode reveals it and, when requested, explains the increased number of smaller parts, unchanged point, or whole composition.

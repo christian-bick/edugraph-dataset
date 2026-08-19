@@ -1,5 +1,5 @@
 import {Ability, Scope} from 'edugraph-ts';
-import {hasLabel} from '../../../../lib/resolvers.ts';
+import {matchAllExactLabels} from '../../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -12,10 +12,12 @@ export const spec: ViewSpec = {
 };
 
 export const NumbersFractionLineViewSchema = {
-    visualArticulation: [
-        [Ability.VisualArticulation],
-        hasLabel(Ability.VisualArticulation)
-    ]
+    taskAbilities: [[
+        Ability.ConceptClassification,
+        Ability.Formalization,
+        Ability.ProcedureUnderstanding,
+        Ability.VisualArticulation
+    ], matchAllExactLabels]
 } as const;
 
 export type NumbersFractionLineViewConfig = ConfigFromSchema<

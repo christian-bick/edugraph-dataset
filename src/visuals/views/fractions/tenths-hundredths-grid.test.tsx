@@ -1,4 +1,3 @@
-import {Ability} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
@@ -33,13 +32,14 @@ const generateAddition = (seed = 'tenths-hundredths-addition-view'): TenthsHundr
 const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view'): TenthsToHundredthsProblem => {
     setSeed(seed);
     const data = new FractionEquivalenceGenerator().generate({
-        taskAbilities: [Ability.Formalization],
         usesMultiplication: true,
         usesEqualShares: true,
         usesImproperFractions: false,
         usesIntegerNumbers: false
     }).data;
-    if (data.task !== 'tenths-to-hundredths') throw new Error('Expected equivalence payload.');
+    if (data.task !== 'tenths-to-hundredths') {
+        throw new Error('Expected equivalence payload.');
+    }
     return data;
 };
 
@@ -71,14 +71,13 @@ describe('tenths/hundredths view contract', () => {
         });
     });
 
-    it('rejects contradictory scaling, geometry, shading, equations, and prose', () => {
+    it('rejects contradictory scaling, geometry, shading, and equations', () => {
         const mutations: Array<(data: TenthsToHundredthsProblem) => void> = [
             data => { data.numeratorScale.result += 1; },
             data => { data.models.hundredths.cells[10]!.column += 1; },
             data => { data.models.hundredths.cells[0]!.shaded = false; },
             data => { data.models.hundredths.cells[0]!.tenthGroupIndex = 2; },
-            data => { data.questionEquation = data.solutionEquation; },
-            data => { data.answerStatement = 'The models look equal.'; }
+            data => { data.equation = `${data.tenths.notation} ≠ ${data.hundredths.notation}`; }
         ];
         for (const mutate of mutations) {
             const data = structuredClone(generateEquivalence());
@@ -142,15 +141,31 @@ describe('tenths/hundredths view contract', () => {
     it('withholds answer-bearing scaling and addition evidence in Question Mode', () => {
         const equivalence = generateEquivalence();
         const equivalenceQuestion = renderToStaticMarkup(
-            <TenthsToHundredthsModel data={equivalence} isSolutionView={false} />
+            <TenthsToHundredthsModel
+                data={equivalence}
+                isSolutionView={false}
+                explainScaling={false}
+            />
         );
         const equivalenceSolution = renderToStaticMarkup(
-            <TenthsToHundredthsModel data={equivalence} isSolutionView />
+            <TenthsToHundredthsModel
+                data={equivalence}
+                isSolutionView
+                explainScaling={false}
+            />
+        );
+        const procedureQuestion = renderToStaticMarkup(
+            <TenthsToHundredthsModel
+                data={equivalence}
+                isSolutionView={false}
+                explainScaling
+            />
         );
         expect(equivalenceQuestion).not.toContain(equivalence.hundredths.notation);
-        expect(equivalenceQuestion).not.toContain(equivalence.answerStatement);
+        expect(equivalenceQuestion).not.toContain('Scale the numerator and denominator');
         expect(equivalenceSolution).toContain(equivalence.hundredths.notation);
-        expect(equivalenceSolution).toContain(equivalence.answerStatement);
+        expect(equivalenceSolution).toContain(equivalence.equation);
+        expect(procedureQuestion).toContain('Scale the numerator and denominator');
 
         const addition = generateAddition();
         const additionQuestion = renderToStaticMarkup(

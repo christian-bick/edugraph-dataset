@@ -46,13 +46,8 @@ export const isValidTenthsToHundredthsProblem = (
         && data.denominatorScale.factor === 10
         && data.denominatorScale.result === 100
         && data.denominatorScale.equation === '10 × 10 = 100'
-        && data.questionPrompt === 'Complete the equivalent fraction by expressing the tenths as hundredths.'
-        && data.questionEquation === `${tenths.notation} = ?/100`
-        && data.solutionEquation === `${tenths.notation} = (${tenths.numerator} × 10)/(10 × 10) = ${hundredths.notation}`
         && data.relation === 'equal'
-        && data.answer === String(scaledNumerator)
-        && data.answerStatement === `${tenths.notation} is equivalent to ${hundredths.notation}.`
-        && data.explanation === `Multiplying the numerator and denominator of ${tenths.notation} by 10 makes 10 times as many equal parts. Each tenth becomes 10 hundredths, so ${hundredths.notation} shades the same amount.`
+        && data.equation === `${tenths.notation} = ${hundredths.notation}`
         && isValidTenthsHundredthsGrid(data.models.tenths, tenths)
         && isValidTenthsHundredthsGrid(data.models.hundredths, hundredths);
 };
@@ -165,56 +160,73 @@ export const isValidTenthsHundredthsAdditionProblem = (
 
 export const TenthsToHundredthsModel = ({
     data,
-    isSolutionView
+    isSolutionView,
+    explainScaling
 }: {
     data: TenthsToHundredthsProblem;
     isSolutionView: boolean;
-}) => (
-    <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
-        <div className="text-center text-[1.42rem] font-extrabold text-slate-800">
-            {data.questionPrompt}
-        </div>
-        <div className="mt-2 text-center font-mono text-[1.08rem] font-bold text-blue-700">
-            {isSolutionView ? data.solutionEquation : data.questionEquation}
-        </div>
+    explainScaling: boolean;
+}) => {
+    const questionEquation = `${data.tenths.notation} = ?/100`;
+    const scalingEquation = `${data.tenths.notation} = (${data.tenths.numerator} × 10)/(10 × 10) = ${data.hundredths.notation}`;
+    const explanation = `Multiplying the numerator and denominator of ${data.tenths.notation} by 10 makes 10 times as many equal parts. Each tenth becomes 10 hundredths, so ${data.hundredths.notation} shades the same amount.`;
 
-        <div className="mt-5 grid grid-cols-2 gap-5">
-            <TenthsHundredthsGrid
-                model={data.models.tenths}
-                title="Tenths"
-                ariaLabel={`${data.tenths.notation} shades ${data.tenths.numerator} of 10 equal vertical parts in the shared whole.`}
-            />
-            <TenthsHundredthsGrid
-                model={data.models.hundredths}
-                title="The same whole in hundredths"
-                ariaLabel={isSolutionView
-                    ? `${data.hundredths.notation} shades the same region using 100 equal parts grouped into 10 tenths.`
-                    : 'The same-sized whole is divided into 100 equal parts grouped into tenths. Its shaded region aligns with the tenths model; the scaled numerator is withheld.'}
-                showDisplay={isSolutionView}
-            />
-        </div>
+    return (
+        <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
+            <div className="text-center text-[1.42rem] font-extrabold text-slate-800">
+                {explainScaling
+                    ? 'Scale the numerator and denominator by 10. Complete the equality and explain why the amount stays the same.'
+                    : 'Complete the equivalent fraction by expressing the tenths as hundredths.'}
+            </div>
+            <div className="mt-2 text-center font-mono text-[1.08rem] font-bold text-blue-700">
+                {isSolutionView ? data.equation : questionEquation}
+            </div>
 
-        <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-900">
-            <span>{data.numeratorScale.from} × {data.numeratorScale.factor} = {isSolutionView ? data.numeratorScale.result : '?'}</span>
-            <span className="text-blue-300">•</span>
-            <span>{data.denominatorScale.equation}</span>
-        </div>
+            <div className="mt-5 grid grid-cols-2 gap-5">
+                <TenthsHundredthsGrid
+                    model={data.models.tenths}
+                    title="Tenths"
+                    ariaLabel={`${data.tenths.notation} shades ${data.tenths.numerator} of 10 equal vertical parts in the shared whole.`}
+                />
+                <TenthsHundredthsGrid
+                    model={data.models.hundredths}
+                    title="The same whole in hundredths"
+                    ariaLabel={isSolutionView
+                        ? `${data.hundredths.notation} shades the same region using 100 equal parts grouped into 10 tenths.`
+                        : 'The same-sized whole is divided into 100 equal parts grouped into tenths. Its shaded region aligns with the tenths model; the scaled numerator is withheld.'}
+                    showDisplay={isSolutionView}
+                />
+            </div>
 
-        <div className={`mt-4 min-h-[104px] rounded-xl border-2 px-5 py-4 text-center ${
-            isSolutionView
-                ? 'border-emerald-500 bg-emerald-50 text-emerald-950'
-                : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
-        }`}>
-            {isSolutionView ? (
-                <>
-                    <div className="text-lg font-extrabold">{data.answerStatement}</div>
-                    <div className="mt-2 text-sm font-semibold leading-snug">{data.explanation}</div>
-                </>
-            ) : (
-                <div className="flex min-h-[70px] items-center justify-center font-mono text-lg font-bold">
-                    {data.questionEquation}
+            {explainScaling && (
+                <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-900">
+                    <span>{data.numeratorScale.from} × {data.numeratorScale.factor} = {isSolutionView ? data.numeratorScale.result : '?'}</span>
+                    <span className="text-blue-300">•</span>
+                    <span>{data.denominatorScale.equation}</span>
                 </div>
             )}
+
+            <div className={`mt-4 min-h-[104px] rounded-xl border-2 px-5 py-4 text-center ${
+                isSolutionView
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-950'
+                    : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
+            }`}>
+                {isSolutionView ? (
+                    <>
+                        <div className="text-lg font-extrabold">{data.equation}.</div>
+                        {explainScaling && (
+                            <>
+                                <div className="mt-2 font-mono text-sm font-bold">{scalingEquation}</div>
+                                <div className="mt-2 text-sm font-semibold leading-snug">{explanation}</div>
+                            </>
+                        )}
+                    </>
+                ) : (
+                    <div className="flex min-h-[70px] items-center justify-center font-mono text-lg font-bold">
+                        {questionEquation}
+                    </div>
+                )}
+            </div>
         </div>
-    </div>
-);
+    );
+};

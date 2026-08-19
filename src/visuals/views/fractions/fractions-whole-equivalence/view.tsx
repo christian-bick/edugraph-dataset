@@ -36,9 +36,7 @@ const validateWholeFraction = (data: WholeNumberFractionEquivalenceProblem) => {
         'wholeNumber',
         'fraction',
         'relation',
-        'equation',
-        'explanation',
-        'answer'
+        'equation'
     ]);
 
     if (data.task !== 'represent-whole-as-fraction'
@@ -57,19 +55,8 @@ const validateWholeFraction = (data: WholeNumberFractionEquivalenceProblem) => {
         throw new ViewValidationError(VIEW_ID, 'The fraction must contain one denominator-sized group for each whole.');
     }
     if (data.relation !== 'equal'
-        || data.equation !== `${data.wholeNumber} = ${data.fraction.notation}`
-        || data.answer !== data.fraction.notation) {
-        throw new ViewValidationError(VIEW_ID, 'The equality, equation, and answer must agree with the whole and fraction.');
-    }
-    if (typeof data.explanation !== 'string') {
-        throw new ViewValidationError(VIEW_ID, 'The whole-number equivalence explanation must be text.');
-    }
-
-    const explanation = data.explanation.toLowerCase();
-    if (!explanation.includes(String(data.wholeNumber))
-        || !explanation.includes(data.fraction.notation.toLowerCase())
-        || !explanation.includes(`${data.fraction.denominator}/${data.fraction.denominator}`)) {
-        throw new ViewValidationError(VIEW_ID, 'The explanation must connect the whole and fraction through complete denominator-sized groups.');
+        || data.equation !== `${data.wholeNumber} = ${data.fraction.notation}`) {
+        throw new ViewValidationError(VIEW_ID, 'The equality and equation must agree with the whole and fraction.');
     }
 };
 
@@ -83,6 +70,8 @@ const FractionsWholeEquivalenceCore = ({config: _config, payload}: CoreProps) =>
     validateWholeFraction(data);
 
     const unitWhole = `${data.fraction.denominator}/${data.fraction.denominator}`;
+    const groupWord = data.wholeNumber === 1 ? 'group' : 'groups';
+    const explanation = `${data.fraction.notation} contains ${data.wholeNumber} ${groupWord} of ${unitWhole}, so it equals ${data.wholeNumber}.`;
     const wholeParts = Array.from({length: data.wholeNumber}, (_, index) => index);
 
     return (
@@ -125,7 +114,7 @@ const FractionsWholeEquivalenceCore = ({config: _config, payload}: CoreProps) =>
                     : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
             }`}>
                 {isSolutionView
-                    ? `${data.equation}. ${data.explanation}`
+                    ? `${data.equation}. ${explanation}`
                     : `Count the numerator parts needed for ${data.wholeNumber} complete ${data.wholeNumber === 1 ? 'whole' : 'wholes'}.`}
             </div>
         </div>
