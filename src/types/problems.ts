@@ -391,71 +391,27 @@ export type ArithmeticEstimationProblem = {
 
 export type ArithmeticPatternProperty = 'commutative' | 'associative' | 'distributive';
 
-export type ArithmeticPatternTableBase = {
+export type ArithmeticPatternProblem = {
     operation: 'addition' | 'multiplication';
     headers: number[];
     table: number[][];
     focusRow: number;
     sequence: number[];
     patternStep: number;
-    patternOptions: string[];
-    patternAnswer: string;
+    startValue: number;
+    ruleOperation: 'add' | 'multiply' | 'multiply-position';
+    ruleValue: number;
+    ruleText: string;
+    terms: readonly number[];
+    inferredFeature: string;
+    featureEvidence: string;
+    explanation: string;
     propertyLaw?: ArithmeticPatternProperty;
     leftExpression?: string;
     rightExpression?: string;
     propertyResult?: number;
-    explanation?: string;
     highlightedCells?: Array<[number, number]>;
 };
-
-export type ArithmeticPatternRuleOperation = 'add' | 'multiply' | 'multiply-position';
-
-export type ArithmeticPatternLegacyProblem = ArithmeticPatternTableBase & {
-    /** Absent on retained lower-grade/legacy table payloads. */
-    task?: undefined;
-};
-
-type ArithmeticPatternGrade4Base = ArithmeticPatternTableBase & {
-    startValue: number;
-    ruleOperation: ArithmeticPatternRuleOperation;
-    ruleValue: number;
-    ruleText: string;
-    terms: readonly number[];
-    prompt: string;
-};
-
-export type ArithmeticPatternGenerateProblem = ArithmeticPatternGrade4Base & {
-    task: 'generate';
-    missingTermIndex: number;
-    response: number;
-};
-
-export type ArithmeticPatternIdentifyFeatureProblem = ArithmeticPatternGrade4Base & {
-    task: 'identify-feature';
-    featureOptions: readonly string[];
-    inferredFeature: string;
-    featureEvidence: string;
-    response: string;
-};
-
-export type ArithmeticPatternExplainFeatureProblem = ArithmeticPatternGrade4Base & {
-    task: 'explain-feature';
-    inferredFeature: string;
-    featureEvidence: string;
-    response: string;
-    propertyLaw: ArithmeticPatternProperty;
-    leftExpression: string;
-    rightExpression: string;
-    propertyResult: number;
-    explanation: string;
-    highlightedCells: Array<[number, number]>;
-};
-
-export type ArithmeticPatternProblem =
-    | ArithmeticPatternLegacyProblem
-    | ArithmeticPatternGenerateProblem
-    | ArithmeticPatternIdentifyFeatureProblem
-    | ArithmeticPatternExplainFeatureProblem;
 
 export type LegacyIntegerRoundingProblem = {
     number: number;

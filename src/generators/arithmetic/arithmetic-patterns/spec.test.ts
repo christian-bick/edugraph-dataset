@@ -8,123 +8,59 @@ import {spec} from './spec.ts';
 describe('ArithmeticPatternsGenerator spec integration', () => {
     const generator = new ArithmeticPatternsGenerator();
 
-    it('declares the invariant integer pattern capabilities', () => {
+    it('declares one canonical model capable of supporting each pattern focus', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([
+            Area.PatternGeneration,
+            Area.GenerativeRuleRecognition,
+            Area.EmergentFeatureRecognition,
             Scope.IntegerNumbers,
             Scope.Base10,
             Scope.NumbersWithoutNegatives
         ]));
-        expect(spec.generalLabels).not.toContain(Area.PatternRecognition);
+        expect(generator.schema).not.toHaveProperty('task');
     });
 
     it.each([
-        [Area.Addition, 'generate'],
-        [Area.Multiplication, 'generate']
-    ] as const)('resolves %s pattern generation', (operation, task) => {
-        const labels = [operation, Area.PatternGeneration, Ability.ProcedureExecution];
+        Area.PatternGeneration,
+        Area.GenerativeRuleRecognition,
+        Area.EmergentFeatureRecognition
+    ] as const)('keeps %s in the target labels without selecting a learner task', patternArea => {
         setSeed(17);
-        const stub = generateWithLabels(generator, labels)!;
+        const stub = generateWithLabels(generator, [
+            Area.Addition,
+            patternArea,
+            Ability.ProcedureExecution
+        ])!;
 
-        expect(stub.data.task).toBe(task);
-        expect(stub.tags).toEqual(expect.arrayContaining([operation, Area.PatternGeneration]));
+        expect(stub.data).not.toHaveProperty('task');
+        expect(stub.data.ruleText).toBeTruthy();
+        expect(stub.data.terms.length).toBeGreaterThanOrEqual(4);
+        expect(stub.data.inferredFeature).toBeTruthy();
+        expect(stub.tags).toContain(Area.Addition);
+        expect(stub.tags).not.toContain(patternArea);
         expect(stub.tags).not.toContain(Ability.ProcedureExecution);
     });
 
-    it('resolves generative-rule recognition to the Grade 3 table payload', () => {
-        const labels = [
-            Area.Addition,
-            Area.GenerativeRuleRecognition,
-            Ability.ConceptClassification
-        ];
-        setSeed(19);
-        const stub = generateWithLabels(generator, labels)!;
-
-        expect(stub.data.task).toBeUndefined();
-        expect(stub.data.patternAnswer).toBe(`Increase by ${stub.data.patternStep}`);
-        expect(stub.tags).toContain(Area.Addition);
-        expect(stub.tags).toContain(Area.GenerativeRuleRecognition);
-        expect(stub.tags).not.toContain(Ability.ConceptClassification);
-    });
-
-    it.each([
-        [Area.Addition, 'identify-feature'],
-        [Area.Multiplication, 'identify-feature']
-    ] as const)(
-        'prioritizes %s classification over the accompanying procedure label',
-        (operation, task) => {
-            const labels = [
-                operation,
-                Area.EmergentFeatureRecognition,
-                Ability.ProcedureExecution,
-                Ability.ConceptClassification
-            ];
-            setSeed(23);
-            const stub = generateWithLabels(generator, labels)!;
-
-            expect(stub.data.task).toBe(task);
-            expect(stub.tags).toEqual(expect.arrayContaining([
-                operation,
-                Area.EmergentFeatureRecognition
-            ]));
-            expect(stub.tags).not.toContain(Ability.ProcedureExecution);
-            expect(stub.tags).not.toContain(Ability.ConceptClassification);
-        }
-    );
-
     it.each([
         [Area.Addition, Area.CommutativeLaw, 'commutative'],
         [Area.Addition, Area.AssociativeLaw, 'associative'],
         [Area.Multiplication, Area.CommutativeLaw, 'commutative'],
         [Area.Multiplication, Area.AssociativeLaw, 'associative'],
         [Area.Multiplication, Area.DistributiveLaw, 'distributive']
-    ] as const)(
-        'keeps Grade 3 %s with %s on the legacy explanation payload',
-        (operation, law, propertyLaw) => {
-            const labels = [
-                operation,
-                law,
-                Area.EmergentFeatureRecognition,
-                Ability.ProcedureUnderstanding,
-                Ability.TextualArticulation
-            ];
-            setSeed(29);
-            const stub = generateWithLabels(generator, labels)!;
-
-            expect(stub.data.task).toBeUndefined();
-            expect(stub.data.propertyLaw).toBe(propertyLaw);
-            expect(stub.tags).toEqual(expect.arrayContaining([operation, law]));
-            expect(stub.tags).toContain(Area.EmergentFeatureRecognition);
-            expect(stub.tags).not.toContain(Ability.ProcedureExecution);
-        }
-    );
-
-    it.each([
-        [Area.Addition, Area.CommutativeLaw, 'commutative'],
-        [Area.Addition, Area.AssociativeLaw, 'associative'],
-        [Area.Multiplication, Area.CommutativeLaw, 'commutative'],
-        [Area.Multiplication, Area.AssociativeLaw, 'associative'],
-        [Area.Multiplication, Area.DistributiveLaw, 'distributive']
-    ] as const)('resolves %s with %s into a causal explanation', (operation, law, propertyLaw) => {
-        const labels = [
+    ] as const)('preserves the %s %s mathematical witness', (operation, law, propertyLaw) => {
+        setSeed(29);
+        const stub = generateWithLabels(generator, [
             operation,
             law,
-            Area.PatternGeneration,
             Area.EmergentFeatureRecognition,
-            Ability.ProcedureExecution,
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation
-        ];
-        setSeed(31);
-        const stub = generateWithLabels(generator, labels)!;
+        ])!;
 
-        expect(stub.data.task).toBe('explain-feature');
-        if (stub.data.task !== 'explain-feature') throw new Error('Unexpected task');
         expect(stub.data.propertyLaw).toBe(propertyLaw);
-        expect(stub.tags).toEqual(expect.arrayContaining([
-            operation,
-            law
-        ]));
-        expect(stub.tags).not.toContain(Ability.ProcedureExecution);
+        expect(stub.data.leftExpression).toBeTruthy();
+        expect(stub.data.rightExpression).toBeTruthy();
+        expect(stub.tags).toEqual(expect.arrayContaining([operation, law]));
         expect(stub.tags).not.toContain(Ability.ProcedureUnderstanding);
         expect(stub.tags).not.toContain(Ability.TextualArticulation);
     });

@@ -20,13 +20,6 @@ export type ArithmeticWordProblemTask =
     | 'letter-equation'
     | 'reasonableness';
 
-export type ArithmeticPatternTask =
-    | 'legacy-identify'
-    | 'legacy-explain'
-    | 'generate'
-    | 'identify-feature'
-    | 'explain-feature';
-
 /** Resolves only an explicitly requested operation, never a related ontology label. */
 export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
     // Preserve the schema-array resolver's single RNG draw for stable pair samples.
@@ -73,26 +66,6 @@ export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWo
     }
     if (labels.includes(Area.Equation)) return 'letter-equation';
     return 'two-step';
-}
-
-/** Keeps Grade 3 table identification distinct from Grade 4 rule generation and analysis. */
-export function resolveArithmeticPatternTask(labels: string[]): ArithmeticPatternTask | undefined {
-    const hasLaw = [
-        Area.CommutativeLaw,
-        Area.AssociativeLaw,
-        Area.DistributiveLaw
-    ].some(law => labels.includes(law));
-    const generatesPattern = labels.includes(Area.PatternGeneration);
-    const recognizesGenerativeRule = labels.includes(Area.GenerativeRuleRecognition);
-    const recognizesEmergentFeature = labels.includes(Area.EmergentFeatureRecognition);
-    if (recognizesGenerativeRule) return 'legacy-identify';
-    if (recognizesEmergentFeature) {
-        if (hasLaw && !generatesPattern) return 'legacy-explain';
-        return hasLaw ? 'explain-feature' : 'identify-feature';
-    }
-    if (generatesPattern) return 'generate';
-    if (hasLaw) return 'legacy-explain';
-    return undefined;
 }
 
 export const operationNames: Record<ArithmeticOperationLabel, 'addition' | 'subtraction' | 'multiplication' | 'division'> = {

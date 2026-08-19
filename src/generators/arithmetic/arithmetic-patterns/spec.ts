@@ -2,11 +2,14 @@ import {Area, Scope} from 'edugraph-ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveArithmeticPatternTask, resolveExplicitOperation} from '../helpers.ts';
+import {resolveExplicitOperation} from '../helpers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-patterns',
     generalLabels: [
+        Area.PatternGeneration,
+        Area.GenerativeRuleRecognition,
+        Area.EmergentFeatureRecognition,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives
@@ -14,14 +17,6 @@ export const spec: GeneratorSpec = {
 };
 
 export const ArithmeticPatternsGeneratorSchema = {
-    task: [
-        [
-            Area.PatternGeneration,
-            Area.GenerativeRuleRecognition,
-            Area.EmergentFeatureRecognition
-        ],
-        resolveArithmeticPatternTask
-    ],
     operation: [[Area.Addition, Area.Multiplication], resolveExplicitOperation],
     useCommutativeLaw: [[Area.CommutativeLaw], hasLabel(Area.CommutativeLaw)],
     useAssociativeLaw: [[Area.AssociativeLaw], hasLabel(Area.AssociativeLaw)],

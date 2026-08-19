@@ -1,4 +1,4 @@
-import {ArithmeticPatternRuleOperation} from '../../../types/problems.ts';
+import {ArithmeticPatternProblem} from '../../../types/problems.ts';
 
 export type PatternTableTask = 'generate' | 'identify-feature' | undefined;
 
@@ -23,7 +23,7 @@ export function getPatternTaskIdentity(task: PatternTableTask) {
 
 export function hasConsistentRuleTerms(
     startValue: number,
-    ruleOperation: ArithmeticPatternRuleOperation,
+    ruleOperation: ArithmeticPatternProblem['ruleOperation'],
     ruleValue: number,
     terms: readonly number[]
 ): boolean {
