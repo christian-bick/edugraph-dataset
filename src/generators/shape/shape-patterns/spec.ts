@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -18,22 +18,6 @@ export const ShapePatternsGeneratorSchema = {
     recognizesEmergentFeature: [
         [Area.EmergentFeatureRecognition],
         hasLabel(Area.EmergentFeatureRecognition)
-    ],
-    articulateVisually: [
-        [Ability.VisualArticulation],
-        hasLabel(Ability.VisualArticulation)
-    ],
-    classifyFeature: [
-        [Ability.ConceptClassification],
-        hasLabel(Ability.ConceptClassification)
-    ],
-    understandProcedure: [
-        [Ability.ProcedureUnderstanding],
-        hasLabel(Ability.ProcedureUnderstanding)
-    ],
-    articulateTextually: [
-        [Ability.TextualArticulation],
-        hasLabel(Ability.TextualArticulation)
     ]
 } as const;
 

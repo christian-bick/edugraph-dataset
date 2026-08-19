@@ -88,28 +88,16 @@ function resolveTask(config: ShapePatternsGeneratorConfig): ShapePatternProblem[
     if (
         config.generatesPattern
         && !config.recognizesEmergentFeature
-        && config.articulateVisually
-        && !config.classifyFeature
-        && !config.understandProcedure
-        && !config.articulateTextually
     ) return 'generate';
 
     if (
         !config.generatesPattern
         && config.recognizesEmergentFeature
-        && !config.articulateVisually
-        && config.classifyFeature
-        && !config.understandProcedure
-        && !config.articulateTextually
     ) return 'identify';
 
     if (
         config.generatesPattern
         && config.recognizesEmergentFeature
-        && !config.articulateVisually
-        && !config.classifyFeature
-        && config.understandProcedure
-        && config.articulateTextually
     ) return 'explain';
 
     return null;
@@ -125,19 +113,11 @@ export class ShapePatternsGenerator implements ProblemGenerator<
     generate(config: ShapePatternsGeneratorConfig): ProblemStub<ShapePatternProblem> | null {
         validateConfigFields(GENERATOR_ID, config, [
             'generatesPattern',
-            'recognizesEmergentFeature',
-            'articulateVisually',
-            'classifyFeature',
-            'understandProcedure',
-            'articulateTextually'
+            'recognizesEmergentFeature'
         ]);
         if ([
             config.generatesPattern,
-            config.recognizesEmergentFeature,
-            config.articulateVisually,
-            config.classifyFeature,
-            config.understandProcedure,
-            config.articulateTextually
+            config.recognizesEmergentFeature
         ].some(value => typeof value !== 'boolean')) return null;
 
         const task = resolveTask(config);

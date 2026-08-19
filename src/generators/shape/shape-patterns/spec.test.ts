@@ -30,12 +30,18 @@ describe('ShapePatternsGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub.data.task).toBe(task);
-        expect(stub.tags).toEqual(expect.arrayContaining([...labels]));
+        expect(stub.tags).toEqual(expect.arrayContaining(
+            labels.filter(label => label === Area.PatternGeneration
+                || label === Area.EmergentFeatureRecognition)
+        ));
+        expect(stub.tags).not.toContain(Ability.VisualArticulation);
+        expect(stub.tags).not.toContain(Ability.ConceptClassification);
+        expect(stub.tags).not.toContain(Ability.ProcedureUnderstanding);
+        expect(stub.tags).not.toContain(Ability.TextualArticulation);
     });
 
-    it('does not accept textual articulation without procedure understanding', () => {
+    it('requires an Area-defined task even when an ability is supplied', () => {
         expect(generateWithLabels(generator, [
-            Area.EmergentFeatureRecognition,
             Scope.VisualGeometry,
             Ability.TextualArticulation
         ])).toBeNull();

@@ -1,7 +1,7 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ShapePatternProblem, ShapePatternToken} from '../../../../types/problems.ts';
-import {validateProblemData} from '../../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
     isTermWithheld,
@@ -170,9 +170,15 @@ function TaskResponse({data, isSolutionView}: {data: ShapePatternProblem; isSolu
     );
 }
 
-const ShapePatternsCore = ({config: _config, payload}: CoreProps) => {
+const ShapePatternsCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
+    if (config.taskMode !== data.task) {
+        throw new ViewValidationError(
+            SHAPE_PATTERNS_VIEW_ID,
+            'The resolved ability mode must agree with the rendered pattern task.'
+        );
+    }
     validateProblemData(SHAPE_PATTERNS_VIEW_ID, data, [
         'task',
         'patternKind',

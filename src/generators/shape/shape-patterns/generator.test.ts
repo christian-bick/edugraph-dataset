@@ -10,27 +10,15 @@ const generator = new ShapePatternsGenerator();
 const configs = {
     generate: {
         generatesPattern: true,
-        recognizesEmergentFeature: false,
-        articulateVisually: true,
-        classifyFeature: false,
-        understandProcedure: false,
-        articulateTextually: false
+        recognizesEmergentFeature: false
     },
     identify: {
         generatesPattern: false,
-        recognizesEmergentFeature: true,
-        articulateVisually: false,
-        classifyFeature: true,
-        understandProcedure: false,
-        articulateTextually: false
+        recognizesEmergentFeature: true
     },
     explain: {
         generatesPattern: true,
-        recognizesEmergentFeature: true,
-        articulateVisually: false,
-        classifyFeature: false,
-        understandProcedure: true,
-        articulateTextually: true
+        recognizesEmergentFeature: true
     }
 } satisfies Record<ShapePatternProblem['task'], ShapePatternsGeneratorConfig>;
 
@@ -38,9 +26,7 @@ describe('ShapePatternsGenerator', () => {
     it('strictly validates every task configuration field', () => {
         expect(() => generator.generate({})).toThrow(GeneratorValidationError);
         expect(() => generator.generate({
-            articulateVisually: true,
-            classifyFeature: false,
-            understandProcedure: false
+            generatesPattern: true
         })).toThrow(GeneratorValidationError);
     });
 
@@ -128,38 +114,14 @@ describe('ShapePatternsGenerator', () => {
         expect(rotation?.explanation).toContain('switches the triangle between a vertical and a horizontal direction');
     });
 
-    it('rejects incomplete and conflicting task combinations', () => {
+    it('rejects absent and invalid Area-defined task combinations', () => {
         expect(generator.generate({
             generatesPattern: false,
-            recognizesEmergentFeature: true,
-            articulateVisually: false,
-            classifyFeature: false,
-            understandProcedure: true,
-            articulateTextually: false
+            recognizesEmergentFeature: false
         })).toBeNull();
         expect(generator.generate({
-            generatesPattern: true,
-            recognizesEmergentFeature: true,
-            articulateVisually: true,
-            classifyFeature: true,
-            understandProcedure: false,
-            articulateTextually: false
-        })).toBeNull();
-        expect(generator.generate({
-            generatesPattern: false,
             recognizesEmergentFeature: false,
-            articulateVisually: false,
-            classifyFeature: false,
-            understandProcedure: false,
-            articulateTextually: false
-        })).toBeNull();
-        expect(generator.generate({
-            generatesPattern: true,
-            recognizesEmergentFeature: false,
-            articulateVisually: 'true' as unknown as boolean,
-            classifyFeature: false,
-            understandProcedure: false,
-            articulateTextually: false
+            generatesPattern: 'true' as unknown as boolean
         })).toBeNull();
     });
 
