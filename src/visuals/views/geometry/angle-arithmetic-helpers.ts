@@ -60,10 +60,7 @@ export const resolveAngleArithmeticTask = (
         data.operation === 'addition'
         && task === 'solve-unknown-whole'
     ) return 'solve-unknown-whole';
-    if (
-        data.operation === 'subtraction'
-        && task === 'solve-unknown-component'
-    ) return 'solve-unknown-component';
+    if (task === 'solve-unknown-component') return 'solve-unknown-component';
     return null;
 };
 

@@ -56,13 +56,13 @@ describe('angle arithmetic view projection', () => {
     it.each([
         ['addition', 'explain-angle-addition'],
         ['addition', 'solve-unknown-whole'],
+        ['addition', 'solve-unknown-component'],
         ['subtraction', 'solve-unknown-component']
     ] as const)('accepts %s × %s', (operation, task) => {
         expect(resolveAngleArithmeticTask(relation(operation), task)).toBe(task);
     });
 
     it.each([
-        ['addition', 'solve-unknown-component'],
         ['subtraction', 'explain-angle-addition'],
         ['subtraction', 'solve-unknown-whole']
     ] as const)('rejects unsupported operation/task pairing %s × %s', (
