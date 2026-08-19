@@ -66,12 +66,11 @@ const evidenceFor = (data: ArithmeticPairProblem, profile: UnitProfile): readonl
 
 const validateProblem = (data: ArithmeticPairProblem) => {
     validateProblemData('measurement-word-problem', data, [
-        'num1', 'num2', 'operation', 'answer', 'blankPart'
+        'num1', 'num2', 'operation', 'answer'
     ]);
     if (!Number.isInteger(data.num1) || data.num1 <= 0
         || !Number.isInteger(data.num2) || data.num2 <= 0
         || !Number.isInteger(data.answer) || data.answer <= 0
-        || data.blankPart !== 'solution'
         || expectedAnswer(data) !== data.answer) {
         throw new ViewValidationError('measurement-word-problem', 'Expected a coherent positive whole-number equation with an unknown solution.');
     }

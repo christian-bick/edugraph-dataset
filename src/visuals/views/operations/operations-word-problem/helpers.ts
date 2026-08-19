@@ -29,9 +29,28 @@ export function selectUnknownPart(seed: number, hasThirdOperand: boolean): Unkno
     return parts[Math.floor(random() * parts.length)];
 }
 
-export function getUnknownPart(data: ArithmeticProblem, seed: number): UnknownPart {
-    if (data.num3 !== undefined) return selectUnknownPart(seed, true);
-    return data.blankPart === 'solution' ? 'answer' : data.blankPart;
+export function selectUnknownOperandPart(
+    seed: number,
+    hasThirdOperand: boolean
+): Exclude<UnknownPart, 'answer'> {
+    setSeed(seed);
+    const parts: Array<Exclude<UnknownPart, 'answer'>> = hasThirdOperand
+        ? ['num1', 'num2', 'num3']
+        : ['num1', 'num2'];
+    return parts[Math.floor(random() * parts.length)];
+}
+
+export function getUnknownPart(
+    data: ArithmeticProblem,
+    seed: number,
+    invertProcedure: boolean
+): UnknownPart {
+    if (data.num3 !== undefined) {
+        return invertProcedure
+            ? selectUnknownOperandPart(seed, true)
+            : selectUnknownPart(seed, true);
+    }
+    return invertProcedure ? 'num2' : 'answer';
 }
 
 export function getWordProblemText(data: ArithmeticProblem, unknownPart: UnknownPart): string {

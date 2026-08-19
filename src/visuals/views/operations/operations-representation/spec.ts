@@ -9,10 +9,7 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.ProcedureExecution
     ],
-    rejectedLabels: [
-        Ability.ProcedureInversion,
-        ...deductAdmitting([Scope.NumbersLarger10])
-    ]
+    rejectedLabels: [...deductAdmitting([Scope.NumbersLarger10])]
 };
 
 export const OperationsRepresentationViewSchema = {} as const;

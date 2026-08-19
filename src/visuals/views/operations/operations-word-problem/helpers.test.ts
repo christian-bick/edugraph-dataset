@@ -4,6 +4,7 @@ import {
     getAppleGroups,
     getUnknownPart,
     getWordProblemText,
+    selectUnknownOperandPart,
     selectUnknownPart
 } from './helpers.ts';
 
@@ -13,8 +14,7 @@ describe('operations-word-problem helpers', () => {
             num1: 3,
             num2: 5,
             operation: 'addition',
-            answer: 8,
-            blankPart: 'num2'
+            answer: 8
         };
 
         expect(getAppleGroups(data)).toEqual([
@@ -52,23 +52,29 @@ describe('operations-word-problem helpers', () => {
         expect(new Set(choices)).toEqual(new Set(['num1', 'num2', 'num3', 'answer']));
     });
 
-    it('uses the generator-designated unknown for pair problems', () => {
-        const inversion: ArithmeticProblem = {
+    it('selects only operand positions for inverted triple tasks', () => {
+        const choices = Array.from(
+            {length: 100},
+            (_, seed) => selectUnknownOperandPart(seed, true)
+        );
+        expect(new Set(choices)).toEqual(new Set(['num1', 'num2', 'num3']));
+    });
+
+    it('uses the view-resolved Ability for pair problems', () => {
+        const pair: ArithmeticProblem = {
             num1: 3,
             num2: 5,
             operation: 'addition',
-            answer: 8,
-            blankPart: 'num2'
+            answer: 8
         };
-        const execution: ArithmeticProblem = {...inversion, blankPart: 'solution'};
 
-        expect(getUnknownPart(inversion, 123)).toBe('num2');
-        expect(getUnknownPart(execution, 123)).toBe('answer');
+        expect(getUnknownPart(pair, 123, true)).toBe('num2');
+        expect(getUnknownPart(pair, 123, false)).toBe('answer');
     });
 
     it('writes binary scenarios around the selected unknown', () => {
-        const addition: ArithmeticProblem = {num1: 3, num2: 5, operation: 'addition', answer: 8, blankPart: 'solution'};
-        const subtraction: ArithmeticProblem = {num1: 9, num2: 4, operation: 'subtraction', answer: 5, blankPart: 'solution'};
+        const addition: ArithmeticProblem = {num1: 3, num2: 5, operation: 'addition', answer: 8};
+        const subtraction: ArithmeticProblem = {num1: 9, num2: 4, operation: 'subtraction', answer: 5};
 
         expect(getWordProblemText(addition, 'num1')).toContain('some apples');
         expect(getWordProblemText(addition, 'num2')).toContain('getting some more');
@@ -125,8 +131,8 @@ describe('operations-word-problem helpers', () => {
     });
 
     it('writes multiplication and division scenarios around each supported unknown', () => {
-        const multiplication: ArithmeticProblem = {num1: 3, num2: 4, operation: 'multiplication', answer: 12, blankPart: 'solution'};
-        const division: ArithmeticProblem = {num1: 12, num2: 3, operation: 'division', answer: 4, blankPart: 'solution'};
+        const multiplication: ArithmeticProblem = {num1: 3, num2: 4, operation: 'multiplication', answer: 12};
+        const division: ArithmeticProblem = {num1: 12, num2: 3, operation: 'division', answer: 4};
 
         for (const part of ['num1', 'num2', 'answer'] as const) {
             expect(getWordProblemText(multiplication, part)).toMatch(/group|groups/);

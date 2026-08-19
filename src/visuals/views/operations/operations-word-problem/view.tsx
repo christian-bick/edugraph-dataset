@@ -47,7 +47,7 @@ const operatorSymbols: Record<string, string> = {
     division: '÷'
 };
 
-const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
+const OperationsWordProblemCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('operations-word-problem', data, ['num1', 'num2', 'operation', 'answer']);
@@ -61,14 +61,6 @@ const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
     const hasThirdOperand = data.num3 !== undefined;
     if (hasThirdOperand) {
         validateProblemData('operations-word-problem', data, ['num3']);
-    } else {
-        validateProblemData('operations-word-problem', data, ['blankPart']);
-        if (!['num1', 'num2', 'solution'].includes(data.blankPart)) {
-            throw new ViewValidationError(
-                'operations-word-problem',
-                `Unsupported binary unknown: ${data.blankPart}`
-            );
-        }
     }
 
     const num1 = data.num1;
@@ -84,7 +76,7 @@ const OperationsWordProblemCore = ({ config: _config, payload }: CoreProps) => {
             'Apple groups require whole-number quantities from 0 through 20.'
         );
     }
-    const unknownPart = getUnknownPart(data, payload.seed);
+    const unknownPart = getUnknownPart(data, payload.seed, config.invertProcedure!);
     const textScenario = getWordProblemText(data, unknownPart);
 
     const getInputClass = (part: UnknownPart, isFinal = false) => {

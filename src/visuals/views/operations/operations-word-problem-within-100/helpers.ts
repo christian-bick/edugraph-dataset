@@ -13,8 +13,11 @@ export function isTwoStepProblem(
     return 'kind' in data && data.kind === 'two-step';
 }
 
-export function getPairUnknown(data: ArithmeticPairProblem): WordProblemPart {
-    return data.blankPart === 'solution' ? 'answer' : data.blankPart;
+export function getPairUnknown(
+    _data: ArithmeticPairProblem,
+    invertProcedure: boolean
+): WordProblemPart {
+    return invertProcedure ? 'num2' : 'answer';
 }
 
 function quantity(value: number, useLengthContext: boolean): string {
@@ -27,7 +30,8 @@ function noun(count: number, singular: string): string {
 
 export function getWordProblemStory(
     data: ArithmeticPairProblem | ArithmeticWordProblemTwoStep,
-    useLengthContext: boolean
+    useLengthContext: boolean,
+    invertProcedure: boolean
 ): string {
     if (isTwoStepProblem(data)) {
         const first = quantity(data.num1, useLengthContext);
@@ -51,7 +55,7 @@ export function getWordProblemStory(
         return `${firstStep} ${secondStep} How many items does the story end with?`;
     }
 
-    const unknown = getPairUnknown(data);
+    const unknown = getPairUnknown(data, invertProcedure);
     const first = unknown === 'num1' ? 'an unknown amount' : quantity(data.num1, useLengthContext);
     const second = unknown === 'num2' ? 'an unknown amount' : quantity(data.num2, useLengthContext);
     if (useLengthContext) {

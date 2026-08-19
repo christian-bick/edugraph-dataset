@@ -164,11 +164,8 @@ function CombinedEquationRow({
 }
 
 function validatePair(data: ArithmeticPairProblem) {
-    validateProblemData(VIEW_ID, data, ['num1', 'num2', 'operation', 'answer', 'blankPart']);
+    validateProblemData(VIEW_ID, data, ['num1', 'num2', 'operation', 'answer']);
     if (!OPERATIONS.includes(data.operation)) fail(`Unsupported operation: ${data.operation}`);
-    if (!['num1', 'num2', 'solution'].includes(data.blankPart)) {
-        fail(`Unsupported unknown: ${data.blankPart}`);
-    }
     assertIntegers([data.num1, data.num2, data.answer], 'One-step values must be whole numbers with magnitudes through one million.');
     const expected = applyOperation(data.num1, data.num2, data.operation);
     if (!Number.isFinite(expected) || expected !== data.answer) fail('The one-step equation is inconsistent.');
@@ -382,8 +379,14 @@ function LegacyProblem({
 }) {
     const twoStep = isTwoStepProblem(data);
     const unit = config.useLengthContext ? ' cm' : '';
-    const story = getWordProblemStory(data, config.useLengthContext!);
-    const pairUnknown = twoStep ? 'answer' : getPairUnknown(data);
+    const story = getWordProblemStory(
+        data,
+        config.useLengthContext!,
+        config.invertProcedure!
+    );
+    const pairUnknown = twoStep
+        ? 'answer'
+        : getPairUnknown(data, config.invertProcedure!);
 
     return (
         <>
@@ -595,6 +598,9 @@ const OperationsWordProblemWithin100Core = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData(VIEW_ID, data, []);
+    if (config.invertProcedure && 'kind' in data) {
+        fail('Procedure inversion requires the complete one-step pair relation.');
+    }
 
     return (
         <div className="w-[780px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">

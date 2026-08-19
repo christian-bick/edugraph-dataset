@@ -29,15 +29,13 @@ describe('ArithmeticOpsPairsGenerator', () => {
             operation: Area.Addition,
             requireNegative: false,
             requireZero: false,
-            requireMultipleOf10: false,
-            invertProcedure: false
+            requireMultipleOf10: false
         } as never)).toThrow();
         expect(() => generator.generate({
             operation: Area.Addition,
             range: {min: 1, max: 10},
             requireZero: false,
-            requireMultipleOf10: false,
-            invertProcedure: false
+            requireMultipleOf10: false
         } as never)).toThrow();
     });
 
@@ -52,7 +50,6 @@ describe('ArithmeticOpsPairsGenerator', () => {
                             requireNegative,
                             requireZero,
                             requireMultipleOf10: false,
-                            invertProcedure: false,
                             requireEqualAddends: false,
                             requireEvenResult: false,
                             range: {min: 1, max: 10}
@@ -79,7 +76,6 @@ describe('ArithmeticOpsPairsGenerator', () => {
                         requireNegative: false,
                         requireZero,
                         requireMultipleOf10: true,
-                        invertProcedure: false,
                         requireEqualAddends: false,
                         requireEvenResult: false,
                         range: {min: 1, max: 1000}
@@ -102,7 +98,6 @@ describe('ArithmeticOpsPairsGenerator', () => {
                 requireNegative: false,
                 requireZero: false,
                 requireMultipleOf10: true,
-                invertProcedure: false,
                 requireEqualAddends: false,
                 requireEvenResult: false,
                 range: {min: 1, max: 1000}
@@ -118,7 +113,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
         }
     });
 
-    it('scopes procedure inversion to the second operand', () => {
+    it('leaves all blank placement to the consuming view', () => {
         const baseConfig = {
             operation: Area.Addition,
             requireNegative: false,
@@ -129,8 +124,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
             range: {min: 1, max: 10}
         } as const;
 
-        expect(generator.generate({...baseConfig, invertProcedure: true})!.data.blankPart).toBe('num2');
-        expect(generator.generate({...baseConfig, invertProcedure: false})!.data.blankPart).toBe('solution');
+        expect(generator.generate(baseConfig)!.data).not.toHaveProperty('blankPart');
     });
 
     it('returns null for an unsupported operation or impossible range', () => {
@@ -138,7 +132,6 @@ describe('ArithmeticOpsPairsGenerator', () => {
             requireNegative: false,
             requireZero: false,
             requireMultipleOf10: false,
-            invertProcedure: false,
             requireEqualAddends: false,
             requireEvenResult: false,
             range: {min: 1, max: 10}
@@ -156,7 +149,6 @@ describe('ArithmeticOpsPairsGenerator', () => {
                 requireNegative: false,
                 requireZero: false,
                 requireMultipleOf10: false,
-                invertProcedure: false,
                 requireEqualAddends: true,
                 requireEvenResult: true,
                 range: {min: 1, max: 20}

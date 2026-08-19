@@ -17,7 +17,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-vertical'>;
 }
 
-const OperationsVerticalCore = ({config: _config, payload}: CoreProps) => {
+const OperationsVerticalCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-vertical', data, ['num1', 'num2', 'operation', 'answer']);
@@ -27,15 +27,13 @@ const OperationsVerticalCore = ({config: _config, payload}: CoreProps) => {
         validateProblemData('operations-vertical', data, ['num3', 'num4']);
     } else if (isTriple) {
         validateProblemData('operations-vertical', data, ['num3']);
-    } else {
-        validateProblemData('operations-vertical', data, ['blankPart']);
     }
 
     const symbol = operatorSymbols[data.operation];
     if (!symbol) {
         throw new ViewValidationError('operations-vertical', `Unsupported operation: ${data.operation}`);
     }
-    const blankPart = isFour || isTriple ? 'solution' : data.blankPart;
+    const blankPart = config.invertProcedure! ? 'num2' : 'solution';
     const operands = isFour
         ? ([['num1', data.num1], ['num2', data.num2], ['num3', data.num3], ['num4', data.num4]] as const)
         : isTriple

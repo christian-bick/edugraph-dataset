@@ -37,15 +37,12 @@ const OperationsNumberLineCore = ({config, payload}: CoreProps) => {
             throw new ViewValidationError('operations-number-line', 'The represented number must be an integer from 0 through 100.');
         }
     } else {
-        validateProblemData('operations-number-line', data, ['num1', 'num2', 'answer', 'operation', 'blankPart']);
+        validateProblemData('operations-number-line', data, ['num1', 'num2', 'answer', 'operation']);
         if (config.responseMode !== Ability.ProcedureExecution) {
             throw new ViewValidationError('operations-number-line', 'Arithmetic payloads require procedure execution mode.');
         }
         if (data.operation !== 'addition' && data.operation !== 'subtraction') {
             throw new ViewValidationError('operations-number-line', `Unsupported operation: ${data.operation}`);
-        }
-        if (data.blankPart !== 'solution') {
-            throw new ViewValidationError('operations-number-line', 'Number-line arithmetic requires the solution to be unknown.');
         }
         const expected = data.operation === 'addition' ? data.num1 + data.num2 : data.num1 - data.num2;
         if ([data.num1, data.num2, data.answer].some(value => !Number.isInteger(value) || value < 0 || value > 100)

@@ -17,7 +17,6 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
             'requireNegative',
             'requireZero',
             'requireMultipleOf10',
-            'invertProcedure',
             'requireEqualAddends',
             'requireEvenResult'
         ]);
@@ -166,16 +165,13 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         if (config.requireEvenResult && answer % 2 !== 0) return null;
 
         const normalizeZero = (value: number) => value === 0 ? 0 : value;
-        const blankPart = config.invertProcedure ? 'num2' : 'solution';
-
         return {
             tags: [operation],
             data: {
                 num1: normalizeZero(num1),
                 num2: normalizeZero(num2),
                 answer: normalizeZero(answer),
-                operation: operationNames[operation],
-                blankPart
+                operation: operationNames[operation]
             }
         };
     }

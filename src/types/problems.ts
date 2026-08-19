@@ -10,7 +10,7 @@ export type ArithmeticPairProblem = ArithmeticProblemBase & {
     num2: number;
     num3?: undefined;
     propertyLaw?: undefined;
-    blankPart: 'num1' | 'num2' | 'solution';
+    blankPart?: undefined;
 };
 
 export type ArithmeticTripleProblem = ArithmeticProblemBase & {

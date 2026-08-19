@@ -17,7 +17,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-boxes'>;
 }
 
-const OperationsBoxesCore = ({config: _config, payload}: CoreProps) => {
+const OperationsBoxesCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-boxes', data, ['num1', 'num2', 'operation', 'answer']);
@@ -28,8 +28,6 @@ const OperationsBoxesCore = ({config: _config, payload}: CoreProps) => {
         validateProblemData('operations-boxes', data, ['num3', 'num4']);
     } else if (isTriple) {
         validateProblemData('operations-boxes', data, ['num3']);
-    } else {
-        validateProblemData('operations-boxes', data, ['blankPart']);
     }
 
     const symbol = operatorSymbols[data.operation];
@@ -37,7 +35,7 @@ const OperationsBoxesCore = ({config: _config, payload}: CoreProps) => {
         throw new ViewValidationError('operations-boxes', `Unsupported operation: ${data.operation}`);
     }
 
-    const blankPart = isFour || isTriple ? 'solution' : data.blankPart;
+    const blankPart = config.invertProcedure! ? 'num2' : 'solution';
     const operands = isFour
         ? ([['num1', data.num1], ['num2', data.num2], ['num3', data.num3], ['num4', data.num4]] as const)
         : isTriple

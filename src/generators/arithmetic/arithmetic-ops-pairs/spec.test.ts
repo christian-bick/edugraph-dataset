@@ -1,9 +1,9 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
 import {ArithmeticOpsPairsGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {ArithmeticOpsPairsGeneratorSchema, spec} from './spec.ts';
 
 const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const;
 
@@ -79,7 +79,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         }
     });
 
-    it('resolves procedure inversion into the pair payload only', () => {
+    it('leaves ProcedureInversion unconsumed for the matching view', () => {
         const stub = generateWithLabels(generator, [
             Area.Addition,
             Ability.ProcedureInversion,
@@ -88,8 +88,10 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             Scope.NumbersSmaller10
         ]);
         expect(stub).not.toBeNull();
-        expect(stub!.data.blankPart).toBe('num2');
-        expect(stub!.tags).toContain(Ability.ProcedureInversion);
+        expect(stub!.data).not.toHaveProperty('blankPart');
+        expect(stub!.tags).not.toContain(Ability.ProcedureInversion);
+        expect(extractSchemaLabels(ArithmeticOpsPairsGeneratorSchema))
+            .not.toContain(Ability.ProcedureInversion);
     });
 
     it('resolves iterated addition into equal addend values and an even result', () => {
