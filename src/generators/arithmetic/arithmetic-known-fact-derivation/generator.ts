@@ -22,8 +22,7 @@ const randomItem = <T>(items: readonly T[]): T =>
 const multiplicationFact = (firstFactor: number, secondFactor: number): KnownMultiplicationFact => ({
     firstFactor,
     secondFactor,
-    product: firstFactor * secondFactor,
-    equation: `${firstFactor} × ${secondFactor} = ${firstFactor * secondFactor}`
+    product: firstFactor * secondFactor
 });
 
 const validPairs = (maximumExclusive: number): FactorPair[] =>
@@ -48,21 +47,12 @@ const buildCommutativeProblem = (maximumExclusive: number): KnownFactDerivationP
 
     const [firstFactor, secondFactor] = randomItem(pairs);
     const knownFact = multiplicationFact(firstFactor, secondFactor);
-    const questionEquation = `${secondFactor} × ${firstFactor} = ?`;
-    const solutionEquation = `${secondFactor} × ${firstFactor} = ${knownFact.product}`;
-
     return {
-        task: 'known-fact-derivation',
         strategy: 'commutative',
         operation: 'multiplication',
         knownFact,
         derivedOperands: [secondFactor, firstFactor],
-        answer: knownFact.product,
-        prompt: `Use the known fact and the commutative property to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        relationEquation: `${firstFactor} × ${secondFactor} = ${secondFactor} × ${firstFactor}`,
-        explanation: `The commutative property changes the order of the factors without changing the product, so ${solutionEquation}.`
+        answer: knownFact.product
     };
 };
 
@@ -73,21 +63,12 @@ const buildAssociativeProblem = (maximumExclusive: number): KnownFactDerivationP
     const [firstFactor, secondFactor, thirdFactor] = randomItem(triples);
     const knownFact = multiplicationFact(secondFactor, thirdFactor);
     const answer = firstFactor * knownFact.product;
-    const questionEquation = `(${firstFactor} × ${secondFactor}) × ${thirdFactor} = ?`;
-    const solutionEquation = `(${firstFactor} × ${secondFactor}) × ${thirdFactor} = ${answer}`;
-
     return {
-        task: 'known-fact-derivation',
         strategy: 'associative',
         operation: 'multiplication',
         knownFact,
         derivedOperands: [firstFactor, secondFactor, thirdFactor],
-        answer,
-        prompt: `Use the known fact and the associative property to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        relationEquation: `(${firstFactor} × ${secondFactor}) × ${thirdFactor} = ${firstFactor} × (${secondFactor} × ${thirdFactor})`,
-        explanation: `The grouped factors give the known fact ${knownFact.equation}. Then multiply ${firstFactor} × ${knownFact.product} to get ${answer}.`
+        answer
     };
 };
 
@@ -97,21 +78,12 @@ const buildInverseDivisionProblem = (maximumExclusive: number): KnownFactDerivat
 
     const [divisor, quotient] = randomItem(pairs);
     const knownFact = multiplicationFact(divisor, quotient);
-    const questionEquation = `${knownFact.product} ÷ ${divisor} = ?`;
-    const solutionEquation = `${knownFact.product} ÷ ${divisor} = ${quotient}`;
-
     return {
-        task: 'known-fact-derivation',
         strategy: 'inverse-division',
         operation: 'division',
         knownFact,
         derivedOperands: [knownFact.product, divisor],
-        answer: quotient,
-        prompt: `Use the known multiplication fact to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        relationEquation: `${divisor} × ? = ${knownFact.product}`,
-        explanation: `Division asks for the missing factor. Since ${knownFact.equation}, ${solutionEquation}.`
+        answer: quotient
     };
 };
 
@@ -130,21 +102,12 @@ const buildPlaceValueScalingProblem = (maximumExclusive: number): KnownFactDeriv
     const scaledFactor = baseFactor * 10;
     const knownFact = multiplicationFact(firstFactor, baseFactor);
     const answer = knownFact.product * 10;
-    const questionEquation = `${firstFactor} × ${scaledFactor} = ?`;
-    const solutionEquation = `${firstFactor} × ${scaledFactor} = ${answer}`;
-
     return {
-        task: 'known-fact-derivation',
         strategy: 'place-value-scaling',
         operation: 'multiplication',
         knownFact,
         derivedOperands: [firstFactor, scaledFactor],
-        answer,
-        prompt: `Use the known one-digit fact and place-value scaling to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        relationEquation: `${firstFactor} × ${scaledFactor} = (${firstFactor} × ${baseFactor}) × 10`,
-        explanation: `${scaledFactor} is 10 times ${baseFactor}, so the known product ${knownFact.product} is also scaled by 10: ${knownFact.product} × 10 = ${answer}.`
+        answer
     };
 };
 

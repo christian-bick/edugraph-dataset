@@ -43,8 +43,10 @@ describe('ArithmeticKnownFactDerivationGenerator', () => {
         expect(second).toBe(problem.knownFact.firstFactor);
         expect(problem.answer).toBe(problem.knownFact.product);
         expect(problem.answer).toBeLessThan(20);
-        expect(problem.questionEquation).toContain('?');
-        expect(problem.solutionEquation).toContain(String(problem.answer));
+        expect(problem).not.toHaveProperty('prompt');
+        expect(problem).not.toHaveProperty('questionEquation');
+        expect(problem).not.toHaveProperty('solutionEquation');
+        expect(problem).not.toHaveProperty('relationEquation');
     });
 
     it('regroups three factors around the supplied known fact with the associative property', () => {
@@ -61,8 +63,6 @@ describe('ArithmeticKnownFactDerivationGenerator', () => {
         expect(problem.knownFact.secondFactor).toBe(third);
         expect(problem.answer).toBe(first * second * third);
         expect(problem.answer).toBeLessThan(20);
-        expect(problem.relationEquation).toContain(') ×');
-        expect(problem.relationEquation).toContain('× (');
     });
 
     it('uses a multiplication fact as the missing-factor evidence for division', () => {
@@ -77,7 +77,6 @@ describe('ArithmeticKnownFactDerivationGenerator', () => {
         expect(divisor).toBe(problem.knownFact.firstFactor);
         expect(dividend / divisor).toBe(problem.answer);
         expect(problem.answer).toBe(problem.knownFact.secondFactor);
-        expect(problem.relationEquation).toBe(`${divisor} × ? = ${dividend}`);
     });
 
     it('uses commutative and inverse derivations as visible manifestations of broad known-fact fluency', () => {

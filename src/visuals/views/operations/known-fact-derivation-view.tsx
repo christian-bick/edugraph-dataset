@@ -10,15 +10,20 @@ interface KnownFactDerivationViewProps {
     viewId: string;
 }
 
-const strategyTitle: Record<KnownFactDerivationProblem['strategy'], string> = {
-    commutative: 'Commutative known-fact strategy',
-    associative: 'Associative known-fact strategy',
-    'inverse-division': 'Multiplication and division are inverse operations',
-    'place-value-scaling': 'Scale a known fact by place value'
+type Presentation = {
+    title: string;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    relationQuestion: string;
+    relationSolution: string;
+    explanation: string;
 };
 
-const isNonEmptyText = (value: unknown): value is string =>
-    typeof value === 'string' && value.trim().length > 0;
+const knownEquation = (data: KnownFactDerivationProblem): string => {
+    const {firstFactor, secondFactor, product} = data.knownFact;
+    return `${firstFactor} × ${secondFactor} = ${product}`;
+};
 
 const isValidKnownFactDerivation = (data: KnownFactDerivationProblem): boolean => {
     const known = data.knownFact;
@@ -29,15 +34,10 @@ const isValidKnownFactDerivation = (data: KnownFactDerivationProblem): boolean =
         || known.firstFactor <= 0
         || known.secondFactor <= 0
         || known.product !== known.firstFactor * known.secondFactor
-        || !isNonEmptyText(known.equation)
         || !Array.isArray(data.derivedOperands)
         || !data.derivedOperands.every(value => Number.isInteger(value) && value > 0)
         || !Number.isInteger(data.answer)
-        || data.answer <= 0
-        || ![data.prompt, data.questionEquation, data.solutionEquation, data.relationEquation, data.explanation]
-            .every(isNonEmptyText)
-        || !data.questionEquation.includes('?')
-        || data.solutionEquation.includes('?')) {
+        || data.answer <= 0) {
         return false;
     }
 
@@ -71,6 +71,122 @@ const isValidKnownFactDerivation = (data: KnownFactDerivationProblem): boolean =
     }
     return false;
 };
+
+function understandingPresentation(data: KnownFactDerivationProblem): Presentation {
+    const known = data.knownFact;
+    if (data.strategy === 'commutative') {
+        const [first, second] = data.derivedOperands;
+        const questionEquation = `${first} × ${second} = ?`;
+        const solutionEquation = `${first} × ${second} = ${data.answer}`;
+        const relation = `${known.firstFactor} × ${known.secondFactor} = ${first} × ${second}`;
+        return {
+            title: 'Commutative known-fact strategy',
+            prompt: `Use the known fact and the commutative property to solve ${questionEquation}`,
+            questionEquation,
+            solutionEquation,
+            relationQuestion: relation,
+            relationSolution: relation,
+            explanation: `Changing the order of the factors does not change the product, so ${solutionEquation}.`
+        };
+    }
+    if (data.strategy === 'associative') {
+        const [first, second, third] = data.derivedOperands;
+        const questionEquation = `(${first} × ${second}) × ${third} = ?`;
+        const solutionEquation = `(${first} × ${second}) × ${third} = ${data.answer}`;
+        const relation = `(${first} × ${second}) × ${third} = ${first} × (${second} × ${third})`;
+        return {
+            title: 'Associative known-fact strategy',
+            prompt: `Regroup the factors around the known fact to solve ${questionEquation}`,
+            questionEquation,
+            solutionEquation,
+            relationQuestion: relation,
+            relationSolution: relation,
+            explanation: `${knownEquation(data)} is the grouped known fact. Then ${first} × ${known.product} = ${data.answer}.`
+        };
+    }
+    if (data.strategy === 'inverse-division') {
+        const [dividend, divisor] = data.derivedOperands;
+        const questionEquation = `${dividend} ÷ ${divisor} = ?`;
+        const solutionEquation = `${dividend} ÷ ${divisor} = ${data.answer}`;
+        const relationQuestion = `${divisor} × ? = ${dividend}`;
+        const relationSolution = `${divisor} × ${data.answer} = ${dividend}`;
+        return {
+            title: 'Multiplication and division are inverse operations',
+            prompt: `Use the known multiplication fact to solve ${questionEquation}`,
+            questionEquation,
+            solutionEquation,
+            relationQuestion,
+            relationSolution,
+            explanation: `Division asks for the missing factor. Since ${knownEquation(data)}, ${solutionEquation}.`
+        };
+    }
+
+    const [first, scaledFactor] = data.derivedOperands;
+    const questionEquation = `${first} × ${scaledFactor} = ?`;
+    const solutionEquation = `${first} × ${scaledFactor} = ${data.answer}`;
+    const relation = `${first} × ${scaledFactor} = (${first} × ${known.secondFactor}) × 10`;
+    return {
+        title: 'Scale a known fact by place value',
+        prompt: `Use the known one-digit fact and place-value scaling to solve ${questionEquation}`,
+        questionEquation,
+        solutionEquation,
+        relationQuestion: relation,
+        relationSolution: relation,
+        explanation: `${scaledFactor} is 10 times ${known.secondFactor}, so ${known.product} scales to ${known.product} × 10 = ${data.answer}.`
+    };
+}
+
+function inversionPresentation(data: KnownFactDerivationProblem): Presentation {
+    const known = data.knownFact;
+    if (data.strategy === 'commutative') {
+        const [first] = data.derivedOperands;
+        const unknown = known.firstFactor;
+        return {
+            title: 'Invert a commutative known-fact derivation',
+            prompt: 'Use the known fact and the commutative relationship to recover the missing factor.',
+            questionEquation: `${first} × ? = ${data.answer}`,
+            solutionEquation: `${first} × ${unknown} = ${data.answer}`,
+            relationQuestion: `${known.firstFactor} × ${known.secondFactor} = ${first} × ?`,
+            relationSolution: `${known.firstFactor} × ${known.secondFactor} = ${first} × ${unknown}`,
+            explanation: `Commutativity reverses the factor order, so the missing factor is ${unknown}.`
+        };
+    }
+    if (data.strategy === 'associative') {
+        const [unknown, second, third] = data.derivedOperands;
+        return {
+            title: 'Invert an associative known-fact derivation',
+            prompt: 'Use the grouped known fact and the total product to recover the missing outer factor.',
+            questionEquation: `? × ${known.product} = ${data.answer}`,
+            solutionEquation: `${unknown} × ${known.product} = ${data.answer}`,
+            relationQuestion: `(? × ${second}) × ${third} = ? × (${second} × ${third})`,
+            relationSolution: `(${unknown} × ${second}) × ${third} = ${unknown} × (${second} × ${third})`,
+            explanation: `The grouped known fact is ${knownEquation(data)}. Reversing ${unknown} × ${known.product} = ${data.answer} recovers ${unknown}.`
+        };
+    }
+    if (data.strategy === 'inverse-division') {
+        const [dividend, divisor] = data.derivedOperands;
+        return {
+            title: 'Division as an unknown factor',
+            prompt: `Rewrite ${dividend} ÷ ${divisor} as missing-factor multiplication, then solve.`,
+            questionEquation: `${divisor} × ? = ${dividend}`,
+            solutionEquation: `${divisor} × ${data.answer} = ${dividend}`,
+            relationQuestion: `${dividend} ÷ ${divisor} = ?  ↔  ${divisor} × ? = ${dividend}`,
+            relationSolution: `${dividend} ÷ ${divisor} = ${data.answer}  ↔  ${divisor} × ${data.answer} = ${dividend}`,
+            explanation: `Multiplication reverses the division procedure, so the unknown factor is ${data.answer}.`
+        };
+    }
+
+    const [first, scaledFactor] = data.derivedOperands;
+    return {
+        title: 'Invert a place-value scaling derivation',
+        prompt: 'Use the known one-digit fact and scaled product to recover the missing multiple of ten.',
+        questionEquation: `${first} × ? = ${data.answer}`,
+        solutionEquation: `${first} × ${scaledFactor} = ${data.answer}`,
+        relationQuestion: `${first} × ? = (${first} × ${known.secondFactor}) × 10`,
+        relationSolution: `${first} × ${scaledFactor} = (${first} × ${known.secondFactor}) × 10`,
+        explanation: `${known.secondFactor} scales by 10 to ${scaledFactor}, matching the product scale from ${known.product} to ${data.answer}.`
+    };
+}
 
 const DerivationCard = ({
     label,
@@ -112,83 +228,59 @@ export const KnownFactDerivationView = ({
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData(viewId, data, [
-        'task',
         'strategy',
         'operation',
         'knownFact',
         'derivedOperands',
-        'answer',
-        'prompt',
-        'questionEquation',
-        'solutionEquation',
-        'relationEquation',
-        'explanation'
+        'answer'
     ]);
-    if (data.task !== 'known-fact-derivation' || !isValidKnownFactDerivation(data)) {
+    if (!isValidKnownFactDerivation(data)) {
         throw new ViewValidationError(
             viewId,
-            'The known fact, relationship, derived operands, answer, and equations must describe one consistent derivation.'
-        );
-    }
-    const invertsProcedure = mode === 'inversion';
-    if (invertsProcedure && data.strategy !== 'inverse-division') {
-        throw new ViewValidationError(
-            viewId,
-            'ProcedureInversion requires an inverse-division derivation.'
+            'The known fact, strategy, derived operands, and answer must describe one consistent derivation.'
         );
     }
 
-    const title = invertsProcedure
-        ? 'Division as an unknown factor'
-        : strategyTitle[data.strategy];
-    const prompt = invertsProcedure
-        ? `Rewrite the division as a missing-factor multiplication equation, then solve ${data.questionEquation}`
-        : data.prompt;
-    const relationshipLabel = invertsProcedure
-        ? 'Missing-factor inversion'
-        : 'Relationship';
+    const invertsProcedure = mode === 'inversion';
+    const presentation = invertsProcedure
+        ? inversionPresentation(data)
+        : understandingPresentation(data);
 
     return (
         <div className="w-[930px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
             <div className="text-center">
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
-                    {title}
+                    {presentation.title}
                 </div>
                 <div className="mt-2 text-xl font-bold leading-snug text-slate-800">
-                    {prompt}
+                    {presentation.prompt}
                 </div>
             </div>
 
             <div className="mt-7 grid grid-cols-[1fr_52px_1.2fr_52px_1fr] items-center gap-3">
-                <DerivationCard
-                    label="Known fact"
-                    equation={data.knownFact.equation}
-                    tone="sky"
-                />
+                <DerivationCard label="Known fact" equation={knownEquation(data)} tone="sky" />
                 <div className="text-center text-3xl font-black text-slate-400" aria-hidden="true">→</div>
                 <DerivationCard
-                    label={relationshipLabel}
-                    equation={data.relationEquation}
+                    label={invertsProcedure ? 'Inverted relationship' : 'Relationship'}
+                    equation={isSolutionView ? presentation.relationSolution : presentation.relationQuestion}
                     tone="violet"
                 />
                 <div className="text-center text-3xl font-black text-slate-400" aria-hidden="true">→</div>
                 <DerivationCard
                     label={isSolutionView ? 'Derived fact' : 'Find the related fact'}
-                    equation={isSolutionView ? data.solutionEquation : data.questionEquation}
+                    equation={isSolutionView ? presentation.solutionEquation : presentation.questionEquation}
                     tone="emerald"
                 />
             </div>
 
             {isSolutionView ? (
                 <div className="mt-6 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-6 py-4 text-center text-base font-semibold leading-relaxed text-emerald-950">
-                    {invertsProcedure
-                        ? `The division equation becomes the missing-factor relationship ${data.relationEquation}. ${data.explanation}`
-                        : data.explanation}
+                    {presentation.explanation}
                 </div>
             ) : (
                 <div className="mt-6 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-4 text-center text-base font-semibold text-slate-600">
                     {invertsProcedure
-                        ? 'Invert the division question into missing-factor multiplication, then determine the unknown factor.'
+                        ? 'Reverse the shown relationship to determine the unknown input.'
                         : 'Follow the relationship from the known fact to determine the missing value.'}
                 </div>
             )}

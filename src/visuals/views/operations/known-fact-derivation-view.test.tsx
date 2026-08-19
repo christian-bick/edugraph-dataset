@@ -4,23 +4,12 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {KnownFactDerivationProblem} from '../../../types/problems.ts';
 import {KnownFactDerivationView} from './known-fact-derivation-view.tsx';
 
-const data: KnownFactDerivationProblem = {
-    task: 'known-fact-derivation',
+const inverseDivision: KnownFactDerivationProblem = {
     strategy: 'inverse-division',
     operation: 'division',
-    knownFact: {
-        firstFactor: 7,
-        secondFactor: 8,
-        product: 56,
-        equation: '7 × 8 = 56'
-    },
+    knownFact: {firstFactor: 7, secondFactor: 8, product: 56},
     derivedOperands: [56, 7],
-    answer: 8,
-    prompt: 'Use the known multiplication fact to solve 56 ÷ 7 = ?',
-    questionEquation: '56 ÷ 7 = ?',
-    solutionEquation: '56 ÷ 7 = 8',
-    relationEquation: '7 × ? = 56',
-    explanation: 'Division asks for the missing factor. Since 7 × 8 = 56, 56 ÷ 7 = 8.'
+    answer: 8
 };
 
 const payload = (
@@ -34,59 +23,73 @@ const payload = (
     seed: 17
 });
 
-describe('operations-known-fact-derivation Ability modes', () => {
-    it('renders ordinary ProcedureUnderstanding as a supplied derivation relationship', () => {
-        const markup = renderToStaticMarkup(
-            <KnownFactDerivationView
-                mode="understanding"
-                payload={payload(data, false)}
-                viewId="operations-known-fact-derivation"
-            />
-        );
+const render = (
+    data: KnownFactDerivationProblem,
+    mode: 'understanding' | 'inversion',
+    isSolutionView = false
+) => renderToStaticMarkup(
+    <KnownFactDerivationView
+        mode={mode}
+        payload={payload(data, isSolutionView)}
+        viewId={mode === 'inversion' ? 'operations-known-fact-inversion' : 'operations-known-fact-derivation'}
+    />
+);
 
+describe('known-fact derivation Ability leaves', () => {
+    it('derives the ProcedureUnderstanding presentation from canonical division mathematics', () => {
+        const markup = render(inverseDivision, 'understanding');
         expect(markup).toContain('Multiplication and division are inverse operations');
+        expect(markup).toContain('56 ÷ 7 = ?');
         expect(markup).toContain('Relationship');
-        expect(markup).not.toContain('Missing-factor inversion');
+        expect(markup).not.toContain('Inverted relationship');
     });
 
-    it('makes ProcedureInversion an explicit missing-factor transformation', () => {
-        const question = renderToStaticMarkup(
-            <KnownFactDerivationView
-                mode="inversion"
-                payload={payload(data, false)}
-                viewId="operations-known-fact-inversion"
-            />
-        );
-        const solution = renderToStaticMarkup(
-            <KnownFactDerivationView
-                mode="inversion"
-                payload={payload(data, true)}
-                viewId="operations-known-fact-inversion"
-            />
-        );
+    it('makes inverse-division ProcedureInversion an explicit missing-factor transformation', () => {
+        const question = render(inverseDivision, 'inversion');
+        const solution = render(inverseDivision, 'inversion', true);
 
         expect(question).toContain('Division as an unknown factor');
-        expect(question).toContain('Missing-factor inversion');
-        expect(question).toContain('Invert the division question');
-        expect(solution).toContain('division equation becomes the missing-factor relationship');
+        expect(question).toContain('Inverted relationship');
+        expect(question).toContain('7 × ? = 56');
+        expect(solution).toContain('7 × 8 = 56');
+        expect(solution).toContain('unknown factor is 8');
     });
 
-    it('rejects ProcedureInversion for non-division mathematics', () => {
-        const commutative = structuredClone(data);
-        commutative.strategy = 'commutative';
-        commutative.operation = 'multiplication';
-        commutative.derivedOperands = [8, 7];
-        commutative.answer = 56;
-        commutative.questionEquation = '8 × 7 = ?';
-        commutative.solutionEquation = '8 × 7 = 56';
-        commutative.relationEquation = '7 × 8 = 8 × 7';
+    it.each([
+        {
+            strategy: 'commutative',
+            operation: 'multiplication',
+            knownFact: {firstFactor: 7, secondFactor: 8, product: 56},
+            derivedOperands: [8, 7],
+            answer: 56,
+            witness: '7 × 8 = 8 × ?'
+        },
+        {
+            strategy: 'associative',
+            operation: 'multiplication',
+            knownFact: {firstFactor: 3, secondFactor: 4, product: 12},
+            derivedOperands: [2, 3, 4],
+            answer: 24,
+            witness: '(? × 3) × 4 = ? × (3 × 4)'
+        },
+        {
+            strategy: 'place-value-scaling',
+            operation: 'multiplication',
+            knownFact: {firstFactor: 3, secondFactor: 4, product: 12},
+            derivedOperands: [3, 40],
+            answer: 120,
+            witness: '3 × ? = (3 × 4) × 10'
+        }
+    ] as const)('makes $strategy inversion observable while preserving its mathematical witness', fixture => {
+        const markup = render(fixture as KnownFactDerivationProblem, 'inversion');
+        expect(markup).toContain('Inverted relationship');
+        expect(markup).toContain(fixture.witness);
+        expect(markup).toContain('?');
+    });
 
-        expect(() => renderToStaticMarkup(
-            <KnownFactDerivationView
-                mode="inversion"
-                payload={payload(commutative, false)}
-                viewId="operations-known-fact-inversion"
-            />
-        )).toThrow('ProcedureInversion requires an inverse-division derivation');
+    it('rejects inconsistent canonical derivation data', () => {
+        expect(() => render({...inverseDivision, answer: 9}, 'inversion')).toThrow(
+            'must describe one consistent derivation'
+        );
     });
 });

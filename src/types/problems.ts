@@ -81,21 +81,14 @@ export type KnownMultiplicationFact = {
     firstFactor: number;
     secondFactor: number;
     product: number;
-    equation: string;
 };
 
 export type KnownFactDerivationProblem = {
-    task: 'known-fact-derivation';
     strategy: KnownFactDerivationStrategy;
     operation: 'multiplication' | 'division';
     knownFact: KnownMultiplicationFact;
     derivedOperands: readonly [number, number] | readonly [number, number, number];
     answer: number;
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    relationEquation: string;
-    explanation: string;
 };
 
 export type IntegerAddSubtractStrategy =
