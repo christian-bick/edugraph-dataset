@@ -1150,9 +1150,7 @@ export type StatisticalCategory = {
     count: number;
 };
 
-type StatisticalGraphBase = {
-    task: 'categorical-data' | 'organize' | 'find-total' | 'single-step-arithmetic' | 'multi-step-arithmetic';
-    graphState: 'to-construct' | 'complete';
+export type StatisticalGraphProblem = {
     categories: readonly [StatisticalCategory, StatisticalCategory, StatisticalCategory];
     scale: 1 | 2 | 5 | 10;
     operation?: 'addition' | 'subtraction';
@@ -1160,58 +1158,7 @@ type StatisticalGraphBase = {
     intermediate?: number;
     answer?: number;
     rawObservations?: readonly StatisticalCategory['label'][];
-    selectedCategoryIndex?: 0 | 1 | 2;
-    selectedCategory?: StatisticalCategory['label'];
-    prompt?: string;
 };
-
-export type StatisticalGraphCategoricalProblem = StatisticalGraphBase & {
-    task: 'categorical-data';
-    graphState: 'complete';
-    selectedCategoryIndex: 0 | 1 | 2;
-    selectedCategory: StatisticalCategory['label'];
-    answer: number;
-};
-
-export type StatisticalGraphOrganizeProblem = StatisticalGraphBase & {
-    task: 'organize';
-    graphState: 'to-construct';
-    rawObservations: readonly StatisticalCategory['label'][];
-    prompt: string;
-};
-
-export type StatisticalGraphFindTotalProblem = StatisticalGraphBase & {
-    task: 'find-total';
-    graphState: 'complete';
-    operation: 'addition';
-    operandIndices: [0, 1, 2];
-    answer: number;
-    prompt: string;
-};
-
-export type StatisticalGraphSingleStepProblem = StatisticalGraphBase & {
-    task: 'single-step-arithmetic';
-    graphState: 'complete';
-    operation: 'addition' | 'subtraction';
-    operandIndices: [number, number];
-    answer: number;
-};
-
-export type StatisticalGraphMultiStepProblem = StatisticalGraphBase & {
-    task: 'multi-step-arithmetic';
-    graphState: 'complete';
-    operation: 'subtraction';
-    operandIndices: [number, number, number];
-    intermediate: number;
-    answer: number;
-};
-
-export type StatisticalGraphProblem =
-    | StatisticalGraphCategoricalProblem
-    | StatisticalGraphOrganizeProblem
-    | StatisticalGraphFindTotalProblem
-    | StatisticalGraphSingleStepProblem
-    | StatisticalGraphMultiStepProblem;
 
 // --- Shape Split Problem Types ---
 

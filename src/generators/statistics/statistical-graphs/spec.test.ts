@@ -13,8 +13,8 @@ describe('statistical-graphs spec', () => {
             Ability.VisualArticulation
         ])!.data;
         expect(data.scale).toBe(1);
-        expect(data.task).toBe('categorical-data');
         expect(data.operation).toBeUndefined();
+        expect(data.answer).toBeUndefined();
     });
 
     it.each([
@@ -94,7 +94,7 @@ describe('statistical-graphs spec', () => {
         expect(result.tags).toEqual(expect.arrayContaining([Area.Subtraction, Scope.MultiStep]));
     });
 
-    it('resolves object sorting plus concept classification as organize', () => {
+    it('resolves object sorting as canonical observation evidence without consuming Ability', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics,
             Area.ObjectSorting,
@@ -104,7 +104,6 @@ describe('statistical-graphs spec', () => {
             Ability.ConceptClassification,
             Ability.VisualArticulation
         ])!;
-        expect(result.data.task).toBe('organize');
         expect(result.data.rawObservations).toBeDefined();
         expect(result.tags).toEqual(expect.arrayContaining([
             Area.ObjectSorting
@@ -112,7 +111,7 @@ describe('statistical-graphs spec', () => {
         expect(result.tags).not.toContain(Ability.ConceptClassification);
     });
 
-    it('resolves interpretation as read-category-count', () => {
+    it('leaves interpretation and category selection to the view', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics,
             Scope.IntegerNumbers,
@@ -120,10 +119,8 @@ describe('statistical-graphs spec', () => {
             Scope.StepsOf1,
             Ability.Interpretation
         ])!;
-        expect(result.data.task).toBe('categorical-data');
-        expect(result.data.answer).toBe(
-            result.data.categories[result.data.selectedCategoryIndex!].count
-        );
+        expect(result.data.operation).toBeUndefined();
+        expect(result.data.answer).toBeUndefined();
         expect(result.tags).not.toContain(Ability.Interpretation);
     });
 
@@ -137,7 +134,6 @@ describe('statistical-graphs spec', () => {
             Scope.StepsOf1,
             Ability.ProcedureExecution
         ])!;
-        expect(result.data.task).toBe('find-total');
         expect(result.data.operandIndices).toEqual([0, 1, 2]);
         expect(result.tags).toEqual(expect.arrayContaining([Area.Addition, Scope.ThreeOperands]));
     });

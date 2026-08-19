@@ -27,9 +27,8 @@ describe('StatisticalGraphsGenerator', () => {
             expect(count).toBeLessThanOrEqual(8);
         }
         expect(problem.data.scale).toBe(1);
-        expect(problem.data.task).toBe('categorical-data');
-        expect(problem.data.graphState).toBe('complete');
         expect(problem.data.operation).toBeUndefined();
+        expect(problem.data.answer).toBeUndefined();
     });
 
     it.each([
@@ -53,8 +52,6 @@ describe('StatisticalGraphsGenerator', () => {
         const second = data.categories[secondIndex].count;
 
         expect(data.operation).toBe(operation);
-        expect(data.task).toBe('single-step-arithmetic');
-        expect(data.graphState).toBe('complete');
         expect(data.answer).toBe(operation === 'addition' ? first + second : first - second);
         if (operation === 'subtraction') expect(first).toBeGreaterThan(second);
     });
@@ -73,7 +70,6 @@ describe('StatisticalGraphsGenerator', () => {
         const third = data.categories[thirdIndex].count;
 
         expect(data.operation).toBe('subtraction');
-        expect(data.task).toBe('multi-step-arithmetic');
         expect(data.intermediate).toBe(first - second);
         expect(data.answer).toBe(data.intermediate! - third);
         expect(data.answer).toBeGreaterThan(0);
@@ -86,8 +82,6 @@ describe('StatisticalGraphsGenerator', () => {
                 ...baseConfig,
                 useObjectSorting: true
             }).data;
-            expect(data.task).toBe('organize');
-            expect(data.graphState).toBe('to-construct');
             expect(data.scale).toBe(1);
             expect(data.categories).toHaveLength(3);
             expect(data.rawObservations).toBeDefined();
@@ -101,23 +95,18 @@ describe('StatisticalGraphsGenerator', () => {
                 Array.from({length: category.count}, () => category.label)
             );
             expect(data.rawObservations).not.toEqual(grouped);
-            expect(data.prompt).toMatch(/sort/i);
         }
     });
 
-    it('selects and answers one named category on a completed graph', () => {
+    it('does not preselect a learner task for canonical categorical data', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
             const data = generator.generate(baseConfig).data;
-            expect(data.task).toBe('categorical-data');
-            expect(data.graphState).toBe('complete');
             expect(data.scale).toBe(1);
-            expect(data.selectedCategoryIndex).toBeGreaterThanOrEqual(0);
-            expect(data.selectedCategoryIndex).toBeLessThanOrEqual(2);
-            const selected = data.categories[data.selectedCategoryIndex!];
-            expect(data.selectedCategory).toBe(selected.label);
-            expect(data.answer).toBe(selected.count);
             expect(data.operation).toBeUndefined();
+            expect(data.operandIndices).toBeUndefined();
+            expect(data.answer).toBeUndefined();
+            expect(data.rawObservations).toBeUndefined();
         }
     });
 
@@ -129,8 +118,6 @@ describe('StatisticalGraphsGenerator', () => {
                 useAddition: true,
                 requireThreeOperands: true
             }).data;
-            expect(data.task).toBe('find-total');
-            expect(data.graphState).toBe('complete');
             expect(data.scale).toBe(1);
             expect(data.operation).toBe('addition');
             expect(data.operandIndices).toEqual([0, 1, 2]);

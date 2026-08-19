@@ -3,9 +3,11 @@ import {StatisticalGraphProblem} from '../../../types/problems.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
 import {categoryStyles, validateStatisticalGraph} from './helpers.ts';
 import {
+    graphObservations,
     revealsBarCounts,
     revealsBars,
     resolveStatisticalGraphTask,
+    selectCategoryIndex,
     StatisticalGraphViewMode,
     taskHeading
 } from './statistical-graph-presentation.ts';
@@ -29,7 +31,7 @@ const AnswerBox = ({answer}: {answer?: number}) => (
 );
 
 export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
-    const {problem, isSolutionView} = payload;
+    const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
     validateStatisticalGraph(data, viewId);
 
@@ -41,14 +43,16 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
         );
     }
 
-    const revealBars = revealsBars(data, isSolutionView, displayTask);
-    const revealCounts = revealsBarCounts(data, isSolutionView, displayTask);
+    const revealBars = revealsBars(isSolutionView, displayTask);
+    const revealCounts = revealsBarCounts(isSolutionView, displayTask);
     const axisValues = Array.from({length: 9}, (_, value) => (8 - value) * data.scale);
+    const selectedCategory = data.categories[selectCategoryIndex(seed)];
+    const observations = graphObservations(data, seed);
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Bar graph</div>
-            <div className="mt-1 text-xl font-bold text-slate-800">{taskHeading(data, isSolutionView, displayTask)}</div>
+            <div className="mt-1 text-xl font-bold text-slate-800">{taskHeading(data, isSolutionView, displayTask, seed)}</div>
 
             {displayTask === 'construct' && (
                 <div className="mt-4 flex justify-center gap-3">
@@ -60,11 +64,11 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
                 </div>
             )}
 
-            {data.task === 'organize' && (
+            {displayTask === 'organize' && (
                 <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Unsorted observations</div>
                     <div className="flex flex-wrap justify-center gap-2">
-                        {data.rawObservations.map((label, index) => (
+                        {observations.map((label, index) => (
                             <span
                                 key={`${label}-${index}`}
                                 className={`rounded-full bg-white px-3 py-1 text-sm font-bold shadow-sm ${observationStyle[label].text}`}
@@ -119,14 +123,14 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
                 </div>
             </div>
 
-            {displayTask === 'read-category-count' && data.task === 'categorical-data' && (
+            {displayTask === 'read-category-count' && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
-                    <span>{data.selectedCategory}</span><span>=</span>
-                    <AnswerBox answer={isSolutionView ? data.answer : undefined} />
+                    <span>{selectedCategory.label}</span><span>=</span>
+                    <AnswerBox answer={isSolutionView ? selectedCategory.count : undefined} />
                 </div>
             )}
 
-            {data.task === 'find-total' && (
+            {displayTask === 'find-total' && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
                     <span>{data.categories[0].count}</span><span>+</span>
                     <span>{data.categories[1].count}</span><span>+</span>
@@ -135,7 +139,7 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
                 </div>
             )}
 
-            {data.task === 'single-step-arithmetic' && (
+            {displayTask === 'single-step-arithmetic' && data.operandIndices?.length === 2 && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
                     <span>{data.categories[data.operandIndices[0]].count}</span>
                     <span>{data.operation === 'addition' ? '+' : '−'}</span>
@@ -144,7 +148,7 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
                 </div>
             )}
 
-            {data.task === 'multi-step-arithmetic' && (
+            {displayTask === 'multi-step-arithmetic' && data.operandIndices?.length === 3 && (
                 <div className="mt-5 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xl font-bold text-slate-700">
                     <div className="flex items-center justify-center gap-2">
                         <span className="font-sans text-xs font-bold uppercase tracking-wide text-slate-500">Step 1</span>

@@ -3,7 +3,9 @@ import {StatisticalGraphProblem} from '../../../types/problems.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
 import {categoryStyles, validateStatisticalGraph} from './helpers.ts';
 import {
+    graphObservations,
     resolveStatisticalGraphTask,
+    selectCategoryIndex,
     StatisticalGraphViewMode
 } from './statistical-graph-presentation.ts';
 
@@ -14,7 +16,7 @@ interface PictureGraphViewProps {
 }
 
 export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps) => {
-    const {problem, isSolutionView} = payload;
+    const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
     validateStatisticalGraph(data, viewId);
 
@@ -25,18 +27,20 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
             `The ${mode} picture-graph view does not support the generated statistical task.`
         );
     }
-    if (data.task === 'single-step-arithmetic' || data.task === 'multi-step-arithmetic') {
+    if (displayTask === 'single-step-arithmetic' || displayTask === 'multi-step-arithmetic') {
         throw new ViewValidationError(viewId, 'This picture-graph layout cannot render the requested arithmetic direction.');
     }
 
     const showMarkers = mode !== 'construction' && mode !== 'classification' || isSolutionView;
+    const selectedCategory = data.categories[selectCategoryIndex(seed)];
+    const observations = graphObservations(data, seed);
     const heading = displayTask === 'construct'
         ? (isSolutionView ? 'Completed picture graph' : 'Draw a picture graph for the data.')
-        : data.task === 'organize'
-            ? (isSolutionView ? 'Grouped picture graph' : data.prompt)
-            : displayTask === 'read-category-count' && data.task === 'categorical-data'
-                ? `How many ${data.selectedCategory.toLowerCase()} are shown?`
-                : data.prompt;
+        : displayTask === 'organize'
+            ? (isSolutionView ? 'Grouped picture graph' : 'Sort the observations into categories, then complete the picture graph.')
+            : displayTask === 'read-category-count'
+                ? `How many ${selectedCategory.label.toLowerCase()} are shown?`
+                : 'How many items are shown across all three categories?';
 
     return (
         <div className="w-[680px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
@@ -54,11 +58,11 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
                 </div>
             )}
 
-            {data.task === 'organize' && (
+            {displayTask === 'organize' && (
                 <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <div className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">Shuffled observations</div>
                     <div className="flex flex-wrap justify-center gap-2">
-                        {data.rawObservations.map((label, observationIndex) => {
+                        {observations.map((label, observationIndex) => {
                             const categoryIndex = data.categories.findIndex(category => category.label === label);
                             return (
                                 <div key={`${label}-${observationIndex}`} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-700">
@@ -88,14 +92,14 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
                 Each symbol = {data.scale} {data.scale === 1 ? 'item' : 'items'}
             </div>
 
-            {displayTask === 'read-category-count' && data.task === 'categorical-data' && (
+            {displayTask === 'read-category-count' && (
                 <div className={`mx-auto mt-5 flex min-h-16 w-[280px] items-center justify-center rounded-xl border-2 px-4 text-center ${isSolutionView ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-dashed border-slate-300 bg-white text-slate-500'}`}>
-                    <span className="mr-3 text-sm font-bold">{data.selectedCategory} count:</span>
-                    <span aria-label="Category count response" data-response="category-count" className="min-w-16 font-mono text-2xl font-black">{isSolutionView ? data.answer : '____'}</span>
+                    <span className="mr-3 text-sm font-bold">{selectedCategory.label} count:</span>
+                    <span aria-label="Category count response" data-response="category-count" className="min-w-16 font-mono text-2xl font-black">{isSolutionView ? selectedCategory.count : '____'}</span>
                 </div>
             )}
 
-            {data.task === 'find-total' && (
+            {displayTask === 'find-total' && data.operandIndices?.length === 3 && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
                     {data.operandIndices.map((categoryIndex, index) => (
                         <span key={categoryIndex} className="contents">

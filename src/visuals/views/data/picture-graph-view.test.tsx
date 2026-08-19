@@ -17,11 +17,9 @@ const payload = (data: StatisticalGraphProblem, isSolutionView: boolean): ViewRe
 const markerCount = (markup: string) => (markup.match(/data-picture-marker="true"/g) ?? []).length;
 
 describe('data-picture-graph modes', () => {
-    it('shows raw observations and withholds the grouped graph for organization', () => {
+    it('derives observations and withholds the grouped graph for classification', () => {
         const data: StatisticalGraphProblem = {
-            task: 'organize', graphState: 'to-construct', categories, scale: 1,
-            rawObservations: ['Books', 'Apples', 'Kites', 'Books', 'Kites', 'Apples', 'Kites', 'Books', 'Kites'],
-            prompt: 'Sort the observations into categories.'
+            categories, scale: 1
         };
         const question = renderToStaticMarkup(<PictureGraphView mode="classification" payload={payload(data, false)} viewId="data-picture-graph-classification" />);
         const solution = renderToStaticMarkup(<PictureGraphView mode="classification" payload={payload(data, true)} viewId="data-picture-graph-classification" />);
@@ -32,20 +30,18 @@ describe('data-picture-graph modes', () => {
 
     it('keeps a complete graph visible while withholding the selected count', () => {
         const data: StatisticalGraphProblem = {
-            task: 'categorical-data', graphState: 'complete', categories, scale: 1,
-            selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 3
+            categories, scale: 1
         };
         const question = renderToStaticMarkup(<PictureGraphView mode="interpretation" payload={payload(data, false)} viewId="data-picture-graph-interpretation" />);
         const solution = renderToStaticMarkup(<PictureGraphView mode="interpretation" payload={payload(data, true)} viewId="data-picture-graph-interpretation" />);
         expect(markerCount(question)).toBe(9);
         expect(question).toMatch(/data-response="category-count"[^>]*>____<\/span>/);
-        expect(solution).toMatch(/data-response="category-count"[^>]*>3<\/span>/);
+        expect(solution).toMatch(/data-response="category-count"[^>]*>4<\/span>/);
     });
 
     it('shows all three addends and withholds only the total', () => {
         const data: StatisticalGraphProblem = {
-            task: 'find-total', graphState: 'complete', categories, scale: 1,
-            operation: 'addition', operandIndices: [0, 1, 2], answer: 9, prompt: 'How many items altogether?'
+            categories, scale: 1, operation: 'addition', operandIndices: [0, 1, 2], answer: 9
         };
         const question = renderToStaticMarkup(<PictureGraphView mode="arithmetic" payload={payload(data, false)} viewId="data-picture-graph-arithmetic" />);
         const solution = renderToStaticMarkup(<PictureGraphView mode="arithmetic" payload={payload(data, true)} viewId="data-picture-graph-arithmetic" />);
@@ -59,9 +55,8 @@ describe('data-picture-graph modes', () => {
 
     it('preserves scaled legacy construction', () => {
         const data: StatisticalGraphProblem = {
-            task: 'categorical-data', graphState: 'complete',
             categories: [{label: 'Apples', count: 4}, {label: 'Books', count: 6}, {label: 'Kites', count: 8}],
-            scale: 2, selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 6
+            scale: 2
         };
         const question = renderToStaticMarkup(<PictureGraphView mode="construction" payload={payload(data, false)} viewId="data-picture-graph" />);
         const solution = renderToStaticMarkup(<PictureGraphView mode="construction" payload={payload(data, true)} viewId="data-picture-graph" />);

@@ -9,43 +9,39 @@ const categories = [
 ] as const;
 
 const problems: StatisticalGraphProblem[] = [
-    {task: 'categorical-data', graphState: 'complete', categories, scale: 1,
-        selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 3},
+    {categories, scale: 1},
     {
-        task: 'organize', graphState: 'to-construct', categories, scale: 1,
-        rawObservations: ['Books', 'Apples', 'Kites', 'Books', 'Kites', 'Apples', 'Kites', 'Books', 'Kites'],
-        prompt: 'Sort the observations.'
+        categories,
+        scale: 1,
+        rawObservations: ['Books', 'Apples', 'Kites', 'Books', 'Kites', 'Apples', 'Kites', 'Books', 'Kites']
     },
+    {categories, scale: 1, operation: 'addition', operandIndices: [0, 1, 2], answer: 9},
+    {categories, scale: 1, operation: 'addition', operandIndices: [0, 1], answer: 5},
     {
-        task: 'find-total', graphState: 'complete', categories, scale: 1,
-        operation: 'addition', operandIndices: [0, 1, 2], answer: 9, prompt: 'How many altogether?'
-    },
-    {
-        task: 'single-step-arithmetic', graphState: 'complete', categories, scale: 1,
-        operation: 'addition', operandIndices: [0, 1], answer: 5
-    },
-    {
-        task: 'multi-step-arithmetic', graphState: 'complete',
         categories: [{label: 'Apples', count: 8}, {label: 'Books', count: 3}, {label: 'Kites', count: 2}],
-        scale: 1, operation: 'subtraction', operandIndices: [0, 1, 2], intermediate: 5, answer: 3
+        scale: 1,
+        operation: 'subtraction',
+        operandIndices: [0, 1, 2],
+        intermediate: 5,
+        answer: 3
     }
 ];
 
 describe('shared statistical graph validation', () => {
-    it.each(problems)('accepts a coherent $task payload', problem => {
+    it.each(problems)('accepts a coherent canonical payload %#', problem => {
         expect(() => validateStatisticalGraph(problem, 'fixture')).not.toThrow();
     });
 
     it.each([
         {...problems[1], scale: 2},
         {...problems[1], rawObservations: ['Apples']},
-        {...problems[0], selectedCategory: 'Kites'},
         {...problems[0], answer: 4},
         {...problems[2], operandIndices: [2, 1, 0]},
         {...problems[2], answer: 8},
         {...problems[3], answer: 6},
-        {...problems[4], intermediate: 4}
-    ])('rejects a malformed task-specific payload %#', problem => {
+        {...problems[4], intermediate: 4},
+        {...problems[0], operation: 'addition'}
+    ])('rejects malformed canonical data %#', problem => {
         expect(() => validateStatisticalGraph(problem as StatisticalGraphProblem, 'fixture')).toThrow();
     });
 });

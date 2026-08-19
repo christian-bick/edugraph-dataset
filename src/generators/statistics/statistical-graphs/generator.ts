@@ -117,44 +117,21 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
             StatisticalCategory,
             StatisticalCategory
         ];
-        if (organizeData) {
-            return {
-                data: {
-                    task: 'organize',
-                    graphState: 'to-construct',
-                    categories,
-                    scale,
-                    rawObservations: shuffledObservations(categories),
-                    prompt: 'Sort the observations into the three categories, then complete the graph.'
-                }
-            };
-        }
+        const base = {
+            categories,
+            scale,
+            ...(organizeData ? {rawObservations: shuffledObservations(categories)} : {})
+        };
         if (!hasOperation && !findTotal) {
-            const selectedCategoryIndex = Math.floor(random() * categories.length) as 0 | 1 | 2;
-            const selectedCategory = categories[selectedCategoryIndex];
-            return {
-                data: {
-                    task: 'categorical-data',
-                    graphState: 'complete',
-                    categories,
-                    scale,
-                    selectedCategoryIndex,
-                    selectedCategory: selectedCategory.label,
-                    answer: selectedCategory.count
-                }
-            };
+            return {data: base};
         }
         if (findTotal) {
             return {
                 data: {
-                    task: 'find-total',
-                    graphState: 'complete',
-                    categories,
-                    scale,
+                    ...base,
                     operation: 'addition',
                     operandIndices: [0, 1, 2],
-                    answer: categories.reduce((total, category) => total + category.count, 0),
-                    prompt: 'How many items are shown across all three categories?'
+                    answer: categories.reduce((total, category) => total + category.count, 0)
                 }
             };
         }
@@ -164,10 +141,7 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
             const intermediate = counts[firstIndex] - counts[secondIndex];
             return {
                 data: {
-                    task: 'multi-step-arithmetic',
-                    graphState: 'complete',
-                    categories,
-                    scale,
+                    ...base,
                     operation: 'subtraction',
                     operandIndices: [firstIndex, secondIndex, thirdIndex],
                     intermediate,
@@ -186,10 +160,7 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
 
         return {
             data: {
-                task: 'single-step-arithmetic',
-                graphState: 'complete',
-                categories,
-                scale,
+                ...base,
                 operation,
                 operandIndices,
                 answer: operation === 'addition' ? first + second : first - second
