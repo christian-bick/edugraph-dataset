@@ -1,4 +1,5 @@
 import {createRoot} from 'react-dom/client';
+import {Ability} from 'edugraph-ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {
     AngleConceptGeometry,
@@ -164,7 +165,7 @@ function SolutionPanel({relation, answerStatement, explanation}: {
     );
 }
 
-const GeometryAngleConceptsCore = ({config: _config, payload}: CoreProps) => {
+const GeometryAngleConceptsCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     validateProblemData('geometry-angle-concepts', problem.data, [
         'task',
@@ -175,6 +176,15 @@ const GeometryAngleConceptsCore = ({config: _config, payload}: CoreProps) => {
         'explanation'
     ]);
     const data = problem.data;
+    const expectedAbility = data.task === 'derive-one-degree'
+        ? Ability.ConceptDerivation
+        : Ability.Interpretation;
+    if (config.abilityMode !== expectedAbility) {
+        throw new ViewValidationError(
+            'geometry-angle-concepts',
+            'The resolved ability mode must agree with the rendered angle task.'
+        );
+    }
     if (data.task === 'recognize-angle-from-arc') {
         validateProblemData('geometry-angle-concepts', data, [
             'arcFraction',

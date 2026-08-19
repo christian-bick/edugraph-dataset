@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -60,8 +60,7 @@ export class AngleConceptsGenerator implements ProblemGenerator<
             if (!hasAllFeatures(features, [
                 Area.RayConcept,
                 Area.Circle,
-                Area.FractionInterpretation,
-                Ability.Interpretation
+                Area.FractionInterpretation
             ])) return null;
 
             const {fraction, degrees} = randomItem(ARC_TURNS);
@@ -111,8 +110,7 @@ export class AngleConceptsGenerator implements ProblemGenerator<
         if (config.task === 'interpret-degree-iteration') {
             if (!hasAllFeatures(features, [
                 Area.AngleCalculation,
-                Scope.DegreeScale,
-                Ability.Interpretation
+                Scope.DegreeScale
             ])) return null;
 
             const iterationCount = randomItem(ITERATION_COUNTS);

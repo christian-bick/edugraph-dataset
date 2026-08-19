@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -13,8 +13,7 @@ const recognitionConfig: AngleConceptsGeneratorConfig = {
     taskFeatures: [
         Area.RayConcept,
         Area.Circle,
-        Area.FractionInterpretation,
-        Ability.Interpretation
+        Area.FractionInterpretation
     ]
 };
 
@@ -30,7 +29,7 @@ const derivationConfig: AngleConceptsGeneratorConfig = {
 
 const iterationConfig: AngleConceptsGeneratorConfig = {
     task: 'interpret-degree-iteration',
-    taskFeatures: [Area.AngleCalculation, Scope.DegreeScale, Ability.Interpretation]
+    taskFeatures: [Area.AngleCalculation, Scope.DegreeScale]
 };
 
 function expectCommonGeometry(data: AngleConceptProblem): void {
