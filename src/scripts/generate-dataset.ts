@@ -247,6 +247,11 @@ interface PageDiagnostics {
     failedRequests: string[];
 }
 
+interface RenderBatchResult {
+    renderedImages: number;
+    failures: Error[];
+}
+
 function attachPageDiagnostics(page: Page, baseUrl: string): PageDiagnostics {
     const diagnostics: PageDiagnostics = { pageErrors: [], consoleErrors: [], failedRequests: [] };
     page.on('pageerror', error => diagnostics.pageErrors.push(error.message || String(error)));
@@ -271,6 +276,12 @@ function formatDiagnostics(diagnostics: PageDiagnostics): string {
         ...diagnostics.consoleErrors.map(error => `console error: ${error}`),
         ...diagnostics.failedRequests.map(error => `request failed: ${error}`)
     ].join('; ');
+}
+
+function resetDiagnostics(diagnostics: PageDiagnostics): void {
+    diagnostics.pageErrors.length = 0;
+    diagnostics.consoleErrors.length = 0;
+    diagnostics.failedRequests.length = 0;
 }
 
 function renderViewUrl(baseUrl: string, relativePath: string): string {
@@ -341,8 +352,8 @@ async function renderSamples(
     samples: RenderSample[],
     concurrency: number,
     viewPathMap: Record<string, string>
-): Promise<number> {
-    if (samples.length === 0) return 0;
+): Promise<RenderBatchResult> {
+    if (samples.length === 0) return { renderedImages: 0, failures: [] };
 
     const splitDirName = SPLIT_DIRS[split];
     console.log(`\n--- Rendering [${moduleName}] Split: ${splitDirName} (${samples.length} samples) ---`);
@@ -355,93 +366,117 @@ async function renderSamples(
         a.identity.viewId.localeCompare(b.identity.viewId) || a.fileName.localeCompare(b.fileName)
     );
     const totalTasks = taskQueue.length;
+    let attemptedTasks = 0;
     let completedTasks = 0;
     const metadata: DatasetRow[] = [];
     const failures: Error[] = [];
-    let failed = false;
 
     const processQueue = async () => {
         const context = await browser.newContext(RENDER_CONTEXT_OPTIONS);
-        const page = await context.newPage();
-        const diagnostics = attachPageDiagnostics(page, baseUrl);
+        let page = await context.newPage();
+        let diagnostics = attachPageDiagnostics(page, baseUrl);
         let currentViewUrl = '';
-        let currentSampleKey = '';
 
         try {
-            while (!failed) {
+            while (true) {
                 const sample = taskQueue.shift();
                 if (!sample) break;
-                currentSampleKey = sample.sampleKey;
+                resetDiagnostics(diagnostics);
 
-                const { identity } = sample;
-                const viewPath = viewPathMap[identity.viewId] || identity.viewId;
-                const url = renderViewUrl(baseUrl, viewPath);
+                try {
+                    const { identity } = sample;
+                    const viewPath = viewPathMap[identity.viewId] || identity.viewId;
+                    const url = renderViewUrl(baseUrl, viewPath);
 
-                if (currentViewUrl !== url) {
-                    const response = await page.goto(url, { waitUntil: 'networkidle' });
-                    if (!response || !response.ok()) {
-                        throw new Error(`View returned HTTP ${response?.status() ?? 'no response'}: ${url}`);
+                    if (currentViewUrl !== url) {
+                        const response = await page.goto(url, { waitUntil: 'networkidle' });
+                        if (!response || !response.ok()) {
+                            throw new Error(`View returned HTTP ${response?.status() ?? 'no response'}: ${url}`);
+                        }
+                        await page.waitForFunction(() => typeof window.renderView === 'function');
+                        // CSS transitions/animations make pixels depend on screenshot
+                        // timing and on the previous render of the reused page —
+                        // disable them so every render settles instantly.
+                        await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
+                        currentViewUrl = url;
                     }
-                    await page.waitForFunction(() => typeof window.renderView === 'function');
-                    // CSS transitions/animations make pixels depend on screenshot
-                    // timing and on the previous render of the reused page —
-                    // disable them so every render settles instantly.
-                    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
-                    currentViewUrl = url;
-                }
 
-                const payload = buildRenderPayload({
-                    problem: sample.problem,
-                    viewId: identity.viewId,
-                    labels: sample.problem.tags || [],
-                    mode: identity.mode,
-                    seed: sample.seed
-                });
+                    const payload = buildRenderPayload({
+                        problem: sample.problem,
+                        viewId: identity.viewId,
+                        labels: sample.problem.tags || [],
+                        mode: identity.mode,
+                        seed: sample.seed
+                    });
 
-                await page.evaluate((p) => window.renderView!(p), payload);
-                // Wait for fonts and images to be fully loaded so pixel output
-                // does not depend on cache warmth of the reused page.
-                await page.waitForFunction(() =>
-                    document.fonts.status === 'loaded'
-                    && Array.from(document.images).every(img => img.complete && img.naturalWidth > 0)
-                );
-                await page.waitForTimeout(60);
-                if (diagnostics.pageErrors.length > 0) {
-                    throw new Error(formatDiagnostics(diagnostics));
-                }
+                    await page.evaluate((p) => window.renderView!(p), payload);
+                    // Wait for fonts and images to be fully loaded so pixel output
+                    // does not depend on cache warmth of the reused page.
+                    await page.waitForFunction(() =>
+                        document.fonts.status === 'loaded'
+                        && Array.from(document.images).every(img => img.complete && img.naturalWidth > 0)
+                    );
+                    await page.waitForTimeout(60);
+                    if (diagnostics.pageErrors.length > 0) {
+                        throw new Error(formatDiagnostics(diagnostics));
+                    }
+                    const viewErrorLocator = page.locator('[data-view-error="true"]');
+                    const viewError = await viewErrorLocator.count() > 0
+                        ? await viewErrorLocator.first().textContent()
+                        : null;
+                    if (viewError) throw new Error(viewError.trim());
 
-                const outPath = resolve(splitOutputDir, sample.fileName);
-                await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
+                    const outPath = resolve(splitOutputDir, sample.fileName);
+                    await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
 
-                metadata.push({
-                    file_name: sample.fileName,
-                    sample_key: sample.sampleKey,
-                    spec: specName,
-                    target_id: identity.targetId,
-                    generator: identity.generatorId,
-                    view: identity.viewId,
-                    mode: identity.mode,
-                    instance: identity.instanceIdx,
-                    attempt: sample.attempt,
-                    seed: sample.seed,
-                    content_fingerprint: sample.contentFingerprint,
-                    task_fingerprint: sample.taskFingerprint,
-                    tags: (sample.problem.tags || []).map(shortenLabel).sort(),
-                    target_associations: [...sample.associatedTargetIds]
-                        .sort()
-                        .map(targetId => ({spec: specName, target_id: targetId}))
-                });
+                    metadata.push({
+                        file_name: sample.fileName,
+                        sample_key: sample.sampleKey,
+                        spec: specName,
+                        target_id: identity.targetId,
+                        generator: identity.generatorId,
+                        view: identity.viewId,
+                        mode: identity.mode,
+                        instance: identity.instanceIdx,
+                        attempt: sample.attempt,
+                        seed: sample.seed,
+                        content_fingerprint: sample.contentFingerprint,
+                        task_fingerprint: sample.taskFingerprint,
+                        tags: (sample.problem.tags || []).map(shortenLabel).sort(),
+                        target_associations: [...sample.associatedTargetIds]
+                            .sort()
+                            .map(targetId => ({spec: specName, target_id: targetId}))
+                    });
 
-                completedTasks++;
-                if (completedTasks % Math.max(1, Math.floor(totalTasks / 10)) === 0) {
-                    console.log(`[${moduleName}:${splitDirName}] Progress: ${Math.floor((completedTasks / totalTasks) * 100)}%`);
+                    completedTasks++;
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    const detail = message.startsWith('Invalid problem data:')
+                        ? ''
+                        : formatDiagnostics(diagnostics);
+                    failures.push(new Error(
+                        `Failed to render ${sample.sampleKey}: ${message}` +
+                        (detail ? `; ${detail}` : '')
+                    ));
+
+                    // An ErrorBoundary remains tripped for the lifetime of its
+                    // React tree. Recreate the page so one invalid sample cannot
+                    // contaminate the next render assigned to this worker.
+                    await page.close().catch(() => undefined);
+                    page = await context.newPage();
+                    diagnostics = attachPageDiagnostics(page, baseUrl);
+                    currentViewUrl = '';
+                } finally {
+                    attemptedTasks++;
+                    if (attemptedTasks % Math.max(1, Math.floor(totalTasks / 10)) === 0) {
+                        console.log(`[${moduleName}:${splitDirName}] Progress: ${Math.floor((attemptedTasks / totalTasks) * 100)}%`);
+                    }
                 }
             }
         } catch (error) {
-            failed = true;
             const detail = formatDiagnostics(diagnostics);
             failures.push(new Error(
-                `Failed to render ${currentSampleKey || `${moduleName}:${splitDirName}`}: ${error instanceof Error ? error.message : error}` +
+                `Render worker failed for ${moduleName}:${splitDirName}: ${error instanceof Error ? error.message : error}` +
                 (detail ? `; ${detail}` : '')
             ));
         } finally {
@@ -454,17 +489,18 @@ async function renderSamples(
         () => processQueue()
     ));
 
-    if (failures.length > 0 || completedTasks !== totalTasks) {
-        if (failures.length === 0) {
-            failures.push(new Error(`Rendered ${completedTasks}/${totalTasks} expected images.`));
-        }
-        throw new AggregateError(failures, `Rendering failed for ${moduleName}:${splitDirName}.`);
+    if (attemptedTasks !== totalTasks) {
+        failures.push(new Error(`Attempted ${attemptedTasks}/${totalTasks} expected renders.`));
     }
 
-    mergeModuleMetadata(splitOutputDir, metadata);
-    console.log(`[${moduleName}:${splitDirName}] Wrote modular metadata to .metadata.jsonl`);
+    if (failures.length === 0) {
+        mergeModuleMetadata(splitOutputDir, metadata);
+        console.log(`[${moduleName}:${splitDirName}] Wrote modular metadata to .metadata.jsonl`);
+    } else {
+        console.error(`[${moduleName}:${splitDirName}] ${failures.length} render failure(s); successful artifacts remain staged only.`);
+    }
 
-    return completedTasks;
+    return { renderedImages: completedTasks, failures };
 }
 
 async function runModulePipeline(
@@ -477,7 +513,7 @@ async function runModulePipeline(
     allTargets: any[],
     trainingOnly: boolean,
     concurrency: number
-): Promise<number> {
+): Promise<RenderBatchResult> {
     const moduleName = genEntry.generatorId;
     console.log(`\n--- Starting Pipeline for Module: ${moduleName} (${genEntry.module.relativePath}) ---`);
 
@@ -522,8 +558,7 @@ async function runModulePipeline(
 
     console.log(`[${moduleName}] Generated samples. Train (${trainSamples.length}), Validation (${valSamples.length})`);
 
-    let moduleImages = 0;
-    moduleImages += await renderSamples(
+    const trainResult = await renderSamples(
         browser,
         outputDir,
         specName,
@@ -534,8 +569,9 @@ async function runModulePipeline(
         concurrency,
         viewPathMap
     );
+    let valResult: RenderBatchResult = { renderedImages: 0, failures: [] };
     if (valSamples.length > 0) {
-        moduleImages += await renderSamples(
+        valResult = await renderSamples(
             browser,
             outputDir,
             specName,
@@ -547,7 +583,10 @@ async function runModulePipeline(
             viewPathMap
         );
     }
-    return moduleImages;
+    return {
+        renderedImages: trainResult.renderedImages + valResult.renderedImages,
+        failures: [...trainResult.failures, ...valResult.failures]
+    };
 }
 
 async function main() {
@@ -638,8 +677,9 @@ async function main() {
         transaction = beginDatasetTransaction(outDir, generationScope);
 
         let totalImages = 0;
+        const renderFailures: Error[] = [];
         for (const genEntry of modulesToRun) {
-            totalImages += await runModulePipeline(
+            const result = await runModulePipeline(
                 browser,
                 transaction.stagingDir,
                 specName,
@@ -650,6 +690,15 @@ async function main() {
                 trainingOnly,
                 concurrency
             );
+            totalImages += result.renderedImages;
+            renderFailures.push(...result.failures);
+        }
+
+        if (renderFailures.length > 0) {
+            renderFailures.sort((a, b) => a.message.localeCompare(b.message));
+            console.error(`\nFAILED! ${renderFailures.length} render(s) failed after ${totalImages} successful image(s):`);
+            for (const failure of renderFailures) console.error(`- ${failure.message}`);
+            throw new AggregateError(renderFailures, 'Dataset rendering completed with failures.');
         }
 
         finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.train);

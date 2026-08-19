@@ -31,8 +31,10 @@ If validation or range checks fail — e.g. coordinates or dimensions exceed vis
 the view must throw a `ViewValidationError`.
 
 **Why:** this is caught by the `ErrorBoundary` in the `withConfig` wrapper, which displays a
-standardized error card. It prevents browser crashes, hangs, and infinite rendering loops
-during headless generation.
+standardized diagnostic card during interactive development. Canonical generation detects
+that card as a failed render, continues collecting failures from the remaining samples, and
+exits non-zero without promoting the staged dataset. It prevents browser crashes, hangs,
+and invalid diagnostic cards from becoming dataset artifacts.
 
 ### IMPL-V4 — No silent fallbacks
 

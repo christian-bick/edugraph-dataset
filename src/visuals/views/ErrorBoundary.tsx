@@ -27,7 +27,10 @@ export class ErrorBoundary extends Component<Props, State> {
     public render() {
         if (this.state.hasError) {
             return (
-                <div className="text-red-500 font-bold p-5 border-2 border-red-500 rounded-lg bg-red-50 font-sans">
+                <div
+                    data-view-error="true"
+                    className="text-red-500 font-bold p-5 border-2 border-red-500 rounded-lg bg-red-50 font-sans"
+                >
                     Invalid problem data: {this.state.error?.message}
                 </div>
             );
