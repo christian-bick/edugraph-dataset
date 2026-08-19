@@ -1,5 +1,5 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
-import {matchAllExactLabels, selectExactMatch} from '../../../lib/resolvers.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -14,10 +14,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const AreaDecompositionGeneratorSchema = {
-    decompositionKind: [
-        [Area.DistributiveLaw, Ability.VisualDecomposition],
-        selectExactMatch
-    ],
+    useDistributiveModel: [[Area.DistributiveLaw], hasLabel(Area.DistributiveLaw)],
     distributiveFeatures: [
         [Area.Multiplication, Scope.ThreeOperands],
         matchAllExactLabels

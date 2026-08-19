@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {AreaDecompositionGenerator} from './generator.ts';
@@ -14,7 +14,7 @@ describe('AreaDecompositionGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const data = generator.generate({
-                decompositionKind: Area.DistributiveLaw,
+                useDistributiveModel: true,
                 distributiveFeatures: [Area.Multiplication, Scope.ThreeOperands]
             })!.data;
 
@@ -37,7 +37,7 @@ describe('AreaDecompositionGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const data = generator.generate({
-                decompositionKind: Ability.VisualDecomposition,
+                useDistributiveModel: false,
                 distributiveFeatures: []
             })!.data;
 
@@ -53,7 +53,7 @@ describe('AreaDecompositionGenerator', () => {
     it('is deterministic for a fixed seed', () => {
         setSeed(27);
         const config = {
-            decompositionKind: Area.DistributiveLaw,
+            useDistributiveModel: true,
             distributiveFeatures: [Area.Multiplication, Scope.ThreeOperands]
         };
         const first = generator.generate(config);

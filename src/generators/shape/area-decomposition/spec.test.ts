@@ -43,5 +43,6 @@ describe('AreaDecompositionGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.kind).toBe('rectilinear');
         expect(stub!.data.totalArea).toBe(stub!.data.leftArea + stub!.data.rightArea);
+        expect(stub!.tags).not.toContain(Ability.VisualDecomposition);
     });
 });

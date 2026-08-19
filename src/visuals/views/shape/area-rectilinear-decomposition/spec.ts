@@ -4,7 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'area-rectilinear-decomposition',
-    generalLabels: [Ability.ProcedureExecution]
+    generalLabels: [Ability.VisualDecomposition, Ability.ProcedureExecution]
 };
 
 export const AreaRectilinearDecompositionViewSchema = {} as const;

@@ -1,5 +1,5 @@
 import {random} from '../../../lib/random.ts';
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {AreaDecompositionProblem} from '../../../types/problems.ts';
@@ -16,9 +16,9 @@ export class AreaDecompositionGenerator implements ProblemGenerator<
     schema = AreaDecompositionGeneratorSchema;
 
     generate(config: AreaDecompositionGeneratorConfig): ProblemStub<AreaDecompositionProblem> | null {
-        validateConfigFields('area-decomposition', config, ['decompositionKind']);
+        validateConfigFields('area-decomposition', config, ['useDistributiveModel']);
 
-        if (config.decompositionKind === Ability.VisualDecomposition) {
+        if (!config.useDistributiveModel) {
             const leftWidth = randomInteger(2, 3);
             const rightWidth = randomInteger(2, 3);
             const totalHeight = randomInteger(3, 5);
@@ -41,7 +41,7 @@ export class AreaDecompositionGenerator implements ProblemGenerator<
 
         const hasDistributiveFeatures = [Area.Multiplication, Scope.ThreeOperands]
             .every(label => config.distributiveFeatures?.includes(label));
-        if (config.decompositionKind !== Area.DistributiveLaw || !hasDistributiveFeatures) return null;
+        if (!hasDistributiveFeatures) return null;
 
         const height = randomInteger(2, 5);
         const leftWidth = randomInteger(2, 3);
