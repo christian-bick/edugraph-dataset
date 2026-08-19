@@ -40,6 +40,7 @@ const TenthsHundredthsEquivalenceLine = ({
     const scaledPointLabel = isSolutionView
         ? data.hundredths.notation
         : '?/100';
+    const scaledLabelAtEdge = pointX > RIGHT - 90;
     const hundredthTicks = Array.from({length: 101}, (_, index) => index);
     const scalingEquation = `${data.tenths.notation} = (${data.tenths.numerator} × 10)/(10 × 10) = ${data.hundredths.notation}`;
     const explanation = `Multiplying the numerator and denominator of ${data.tenths.notation} by 10 creates 10 times as many equal parts without changing the point, so ${data.hundredths.notation} has the same value.`;
@@ -131,7 +132,12 @@ const TenthsHundredthsEquivalenceLine = ({
                 <text x={pointX - 14} y="82" textAnchor="end" className="fill-blue-700 text-[20px] font-bold">
                     {data.tenths.notation}
                 </text>
-                <text x={pointX + 14} y="82" textAnchor="start" className="fill-emerald-700 text-[20px] font-bold">
+                <text
+                    x={scaledLabelAtEdge ? pointX - 14 : pointX + 14}
+                    y={scaledLabelAtEdge ? 110 : 82}
+                    textAnchor={scaledLabelAtEdge ? 'end' : 'start'}
+                    className="fill-emerald-700 text-[20px] font-bold"
+                >
                     {scaledPointLabel}
                 </text>
                 <text x={pointX} y="238" textAnchor="middle" className="fill-slate-600 text-[15px] font-semibold">
@@ -215,10 +221,12 @@ const validateWholeFractionProblem = (data: WholeNumberFractionEquivalenceProble
 
 const WholeFractionEquivalenceLine = ({
     data,
-    isSolutionView
+    isSolutionView,
+    explainEquivalence
 }: {
     data: WholeNumberFractionEquivalenceProblem;
     isSolutionView: boolean;
+    explainEquivalence: boolean;
 }) => {
     validateWholeFractionProblem(data);
 
@@ -236,7 +244,7 @@ const WholeFractionEquivalenceLine = ({
     return (
         <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
             <div className="text-center text-[1.45rem] font-bold text-slate-800">
-                Complete {data.wholeNumber} = ?/{data.fraction.denominator}. Use the number line.
+                Complete {data.wholeNumber} = ?/{data.fraction.denominator}. Use the number line{explainEquivalence ? ' to explain why the values are equal' : ''}.
             </div>
 
             <svg
@@ -301,8 +309,12 @@ const WholeFractionEquivalenceLine = ({
                     : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
             }`}>
                 {isSolutionView
-                    ? `${data.equation}. ${explanation}`
-                    : `Count the 1/${data.fraction.denominator} steps from 0 to ${data.wholeNumber}.`}
+                    ? explainEquivalence
+                        ? `${data.equation}. ${explanation}`
+                        : data.equation
+                    : explainEquivalence
+                        ? `Use groups of ${data.fraction.denominator}/${data.fraction.denominator} to explain the equality.`
+                        : `Count the 1/${data.fraction.denominator} steps from 0 to ${data.wholeNumber}.`}
             </div>
         </div>
     );
@@ -474,10 +486,16 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
         );
     }
     if (data.task === 'represent-whole-as-fraction') {
-        if (mode !== 'formalization') {
-            throw new ViewValidationError(VIEW_ID, 'Whole-number equivalence requires Formalization.');
+        if (mode !== 'formalization' && mode !== 'explanation') {
+            throw new ViewValidationError(VIEW_ID, 'Whole-number equivalence requires formalization or procedural explanation.');
         }
-        return <WholeFractionEquivalenceLine data={data} isSolutionView={isSolutionView} />;
+        return (
+            <WholeFractionEquivalenceLine
+                data={data}
+                isSolutionView={isSolutionView}
+                explainEquivalence={mode === 'explanation'}
+            />
+        );
     }
     if (data.task === 'relate-equivalent-fractions') {
         const isClassification = mode === 'classification';
