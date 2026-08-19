@@ -59,9 +59,9 @@ export class AngleMeasurementGenerator implements ProblemGenerator<
     schema = AngleMeasurementGeneratorSchema;
 
     generate(config: AngleMeasurementGeneratorConfig): ProblemStub<AngleMeasurementProblem> | null {
-        validateConfigFields('angle-measurement', config, ['task']);
+        validateConfigFields('angle-measurement', config, ['useProtractorMeasurement']);
 
-        if (config.task === 'measure-angle') {
+        if (config.useProtractorMeasurement) {
             const angleMeasure = randomItem(PROTRACTOR_MEASURES);
             const baselineSide = random() < 0.5 ? 'right' : 'left';
             const readingScale = baselineSide === 'right' ? 'inner' : 'outer';
@@ -90,24 +90,20 @@ export class AngleMeasurementGenerator implements ProblemGenerator<
             };
         }
 
-        if (config.task === 'sketch-angle') {
-            const requestedMeasure = randomItem(SKETCH_MEASURES);
-            return {
-                data: {
-                    task: 'sketch-angle',
-                    prompt: `Sketch a ${requestedMeasure}° angle with vertex O and starting ray OA.`,
-                    geometry: sketchGeometry(requestedMeasure),
-                    requestedMeasure,
-                    completedMeasure: requestedMeasure,
-                    questionRelation: `m∠AOB = ${requestedMeasure}° (requested)`,
-                    solutionRelation: `m∠AOB = ${requestedMeasure}°`,
-                    answer: `${requestedMeasure}°`,
-                    answerStatement: `The completed angle measures ${requestedMeasure}°.`,
-                    explanation: `Ray OB is placed ${requestedMeasure}° counterclockwise from ray OA, so angle AOB has the specified measure.`
-                }
-            };
-        }
-
-        return null;
+        const requestedMeasure = randomItem(SKETCH_MEASURES);
+        return {
+            data: {
+                task: 'sketch-angle',
+                prompt: `Sketch a ${requestedMeasure}° angle with vertex O and starting ray OA.`,
+                geometry: sketchGeometry(requestedMeasure),
+                requestedMeasure,
+                completedMeasure: requestedMeasure,
+                questionRelation: `m∠AOB = ${requestedMeasure}° (requested)`,
+                solutionRelation: `m∠AOB = ${requestedMeasure}°`,
+                answer: `${requestedMeasure}°`,
+                answerStatement: `The completed angle measures ${requestedMeasure}°.`,
+                explanation: `Ray OB is placed ${requestedMeasure}° counterclockwise from ray OA, so angle AOB has the specified measure.`
+            }
+        };
     }
 }

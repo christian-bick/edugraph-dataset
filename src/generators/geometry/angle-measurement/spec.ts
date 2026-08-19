@@ -1,5 +1,5 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -9,13 +9,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const AngleMeasurementGeneratorSchema = {
-    task: [
-        [Area.AngleCalculation, Ability.ConceptSpecification],
-        selectCanonicalLabel([
-            [[Area.AngleCalculation], 'measure-angle'],
-            [[Ability.ConceptSpecification], 'sketch-angle']
-        ])
-    ]
+    useProtractorMeasurement: [[Area.AngleCalculation], hasLabel(Area.AngleCalculation)]
 } as const;
 
 export type AngleMeasurementGeneratorConfig = ConfigFromSchema<

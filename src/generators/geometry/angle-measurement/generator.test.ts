@@ -16,7 +16,7 @@ describe('AngleMeasurementGenerator', () => {
         const observedSides = new Set<string>();
         for (let seed = 0; seed < 240; seed++) {
             setSeed(`protractor-measure-${seed}`);
-            const data = generator.generate({task: 'measure-angle'})!.data;
+            const data = generator.generate({useProtractorMeasurement: true})!.data;
             expect(data.task).toBe('measure-angle');
             if (data.task !== 'measure-angle') throw new Error('Expected protractor measurement.');
 
@@ -60,7 +60,7 @@ describe('AngleMeasurementGenerator', () => {
         const observedMeasures = new Set<number>();
         for (let seed = 0; seed < 180; seed++) {
             setSeed(`angle-sketch-${seed}`);
-            const data = generator.generate({task: 'sketch-angle'})!.data;
+            const data = generator.generate({useProtractorMeasurement: false})!.data;
             expect(data.task).toBe('sketch-angle');
             if (data.task !== 'sketch-angle') throw new Error('Expected angle sketch.');
 
@@ -94,19 +94,14 @@ describe('AngleMeasurementGenerator', () => {
         expect(observedMeasures).toEqual(new Set([30, 45, 60, 75, 90, 105, 120, 135, 150]));
     });
 
-    it('rejects an unsupported task', () => {
-        expect(generator.generate({
-            task: 'unsupported'
-        } as unknown as AngleMeasurementGeneratorConfig)).toBeNull();
-    });
-
-    it.each(['measure-angle', 'sketch-angle'] as const)(
-        'is deterministic for %s',
-        task => {
-            setSeed(`angle-measurement-determinism-${task}`);
-            const first = generator.generate({task});
-            setSeed(`angle-measurement-determinism-${task}`);
-            expect(generator.generate({task})).toEqual(first);
+    it.each([true, false] as const)(
+        'is deterministic when protractor measurement is %s',
+        useProtractorMeasurement => {
+            const config: AngleMeasurementGeneratorConfig = {useProtractorMeasurement};
+            setSeed(`angle-measurement-determinism-${useProtractorMeasurement}`);
+            const first = generator.generate(config);
+            setSeed(`angle-measurement-determinism-${useProtractorMeasurement}`);
+            expect(generator.generate(config)).toEqual(first);
         }
     );
 });

@@ -26,7 +26,7 @@ const cases = [
             Ability.ConceptSpecification,
             Ability.VisualArticulation
         ],
-        generatorLabels: [Ability.ConceptSpecification]
+        generatorLabels: []
     }
 ] as const;
 
@@ -49,6 +49,7 @@ describe('AngleMeasurementGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe(task);
         expect(stub!.tags).toEqual(expect.arrayContaining([...generatorLabels]));
+        expect(stub!.tags).not.toContain(Ability.ConceptSpecification);
         expect([...new Set(stub!.tags)]).toHaveLength(stub!.tags!.length);
     });
 });

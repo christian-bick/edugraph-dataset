@@ -4,7 +4,11 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'geometry-angle-drawing',
-    generalLabels: [Scope.AngleMeasurement, Ability.VisualArticulation]
+    generalLabels: [
+        Scope.AngleMeasurement,
+        Ability.ConceptSpecification,
+        Ability.VisualArticulation
+    ]
 };
 
 export const GeometryAngleDrawingViewSchema = {} as const;
