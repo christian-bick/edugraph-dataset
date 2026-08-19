@@ -1,4 +1,4 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Scope} from 'edugraph-ts';
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -163,7 +163,6 @@ export class ArithmeticKnownFactDerivationGenerator implements ProblemGenerator<
             'arity',
             'useCommutativeLaw',
             'useAssociativeLaw',
-            'taskAbilities',
             'usePlaceValueScaling',
             'range'
         ]);
@@ -173,7 +172,6 @@ export class ArithmeticKnownFactDerivationGenerator implements ProblemGenerator<
             arity,
             useCommutativeLaw,
             useAssociativeLaw,
-            taskAbilities,
             usePlaceValueScaling,
             range
         } = config;
@@ -193,15 +191,11 @@ export class ArithmeticKnownFactDerivationGenerator implements ProblemGenerator<
         const explicitStrategies = [
             useCommutativeLaw,
             useAssociativeLaw,
-            taskAbilities!.includes(Ability.ProcedureInversion),
             usePlaceValueScaling
         ].filter(Boolean).length;
         if (explicitStrategies > 1) return null;
         if (useCommutativeLaw && (operation !== 'multiplication' || arity !== Scope.TwoOperands)) return null;
         if (useAssociativeLaw && (operation !== 'multiplication' || arity !== Scope.ThreeOperands)) return null;
-        if (!taskAbilities!.includes(Ability.ProcedureUnderstanding)) return null;
-        if (taskAbilities!.includes(Ability.ProcedureInversion)
-            && (operation !== 'division' || arity !== Scope.TwoOperands)) return null;
         if (usePlaceValueScaling && (operation !== 'multiplication' || arity !== Scope.TwoOperands)) return null;
         if (arity === Scope.ThreeOperands && !useAssociativeLaw) return null;
 

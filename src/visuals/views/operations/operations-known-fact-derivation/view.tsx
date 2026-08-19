@@ -1,3 +1,4 @@
+import {Ability} from 'edugraph-ts';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {KnownFactDerivationProblem} from '../../../../types/problems.ts';
@@ -25,6 +26,13 @@ const strategyTitle: Record<KnownFactDerivationProblem['strategy'], string> = {
 
 const isNonEmptyText = (value: unknown): value is string =>
     typeof value === 'string' && value.trim().length > 0;
+
+const hasExactAbilities = (
+    actual: readonly string[] | undefined,
+    expected: readonly string[]
+): boolean => Array.isArray(actual)
+    && actual.length === expected.length
+    && expected.every(ability => actual.includes(ability));
 
 const isValidKnownFactDerivation = (data: KnownFactDerivationProblem): boolean => {
     const known = data.knownFact;
@@ -110,7 +118,7 @@ const DerivationCard = ({
     );
 };
 
-const OperationsKnownFactDerivationCore = ({config: _config, payload}: CoreProps) => {
+export const OperationsKnownFactDerivationCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData(VIEW_ID, data, [
@@ -132,15 +140,45 @@ const OperationsKnownFactDerivationCore = ({config: _config, payload}: CoreProps
             'The known fact, relationship, derived operands, answer, and equations must describe one consistent derivation.'
         );
     }
+    const understandsProcedure = hasExactAbilities(
+        config.taskAbilities,
+        [Ability.ProcedureUnderstanding]
+    );
+    const invertsProcedure = hasExactAbilities(
+        config.taskAbilities,
+        [Ability.ProcedureUnderstanding, Ability.ProcedureInversion]
+    );
+    if (!understandsProcedure && !invertsProcedure) {
+        throw new ViewValidationError(
+            VIEW_ID,
+            'Known-fact derivation requires ProcedureUnderstanding, optionally with ProcedureInversion.'
+        );
+    }
+    if (invertsProcedure && data.strategy !== 'inverse-division') {
+        throw new ViewValidationError(
+            VIEW_ID,
+            'ProcedureInversion requires an inverse-division derivation.'
+        );
+    }
+
+    const title = invertsProcedure
+        ? 'Division as an unknown factor'
+        : strategyTitle[data.strategy];
+    const prompt = invertsProcedure
+        ? `Rewrite the division as a missing-factor multiplication equation, then solve ${data.questionEquation}`
+        : data.prompt;
+    const relationshipLabel = invertsProcedure
+        ? 'Missing-factor inversion'
+        : 'Relationship';
 
     return (
         <div className="w-[930px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
             <div className="text-center">
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
-                    {strategyTitle[data.strategy]}
+                    {title}
                 </div>
                 <div className="mt-2 text-xl font-bold leading-snug text-slate-800">
-                    {data.prompt}
+                    {prompt}
                 </div>
             </div>
 
@@ -152,7 +190,7 @@ const OperationsKnownFactDerivationCore = ({config: _config, payload}: CoreProps
                 />
                 <div className="text-center text-3xl font-black text-slate-400" aria-hidden="true">→</div>
                 <DerivationCard
-                    label="Relationship"
+                    label={relationshipLabel}
                     equation={data.relationEquation}
                     tone="violet"
                 />
@@ -166,11 +204,15 @@ const OperationsKnownFactDerivationCore = ({config: _config, payload}: CoreProps
 
             {isSolutionView ? (
                 <div className="mt-6 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-6 py-4 text-center text-base font-semibold leading-relaxed text-emerald-950">
-                    {data.explanation}
+                    {invertsProcedure
+                        ? `The division equation becomes the missing-factor relationship ${data.relationEquation}. ${data.explanation}`
+                        : data.explanation}
                 </div>
             ) : (
                 <div className="mt-6 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-4 text-center text-base font-semibold text-slate-600">
-                    Follow the relationship from the known fact to determine the missing value.
+                    {invertsProcedure
+                        ? 'Invert the division question into missing-factor multiplication, then determine the unknown factor.'
+                        : 'Follow the relationship from the known fact to determine the missing value.'}
                 </div>
             )}
         </div>
@@ -184,10 +226,12 @@ export const OperationsKnownFactDerivation = withConfig(
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: ViewRenderPayload<'operations-known-fact-derivation'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) root = createRoot(container);
-        root.render(<OperationsKnownFactDerivation payload={payload} />);
-    }
-};
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'operations-known-fact-derivation'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) root = createRoot(container);
+            root.render(<OperationsKnownFactDerivation payload={payload} />);
+        }
+    };
+}

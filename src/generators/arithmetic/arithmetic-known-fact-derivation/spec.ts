@@ -1,8 +1,7 @@
-import {Ability, Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {
     hasLabel,
-    matchAllExactLabels,
     selectCanonicalLabel,
     selectExactMatch
 } from '../../../lib/resolvers.ts';
@@ -42,10 +41,6 @@ export const ArithmeticKnownFactDerivationGeneratorSchema = {
     useAssociativeLaw: [
         [Area.AssociativeLaw],
         hasLabel(Area.AssociativeLaw)
-    ],
-    taskAbilities: [
-        [Ability.ProcedureUnderstanding, Ability.ProcedureInversion],
-        matchAllExactLabels
     ],
     usePlaceValueScaling: [
         [

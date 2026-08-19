@@ -1,4 +1,4 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {KnownFactDerivationProblem} from '../../../types/problems.ts';
@@ -10,7 +10,6 @@ const baseConfig: ArithmeticKnownFactDerivationGeneratorConfig = {
     arity: Scope.TwoOperands,
     useCommutativeLaw: false,
     useAssociativeLaw: false,
-    taskAbilities: [Ability.ProcedureUnderstanding],
     usePlaceValueScaling: false,
     range: {min: 0, max: 100}
 };
@@ -68,8 +67,7 @@ describe('ArithmeticKnownFactDerivationGenerator', () => {
 
     it('uses a multiplication fact as the missing-factor evidence for division', () => {
         const problem = generate({
-            operation: 'division',
-            taskAbilities: [Ability.ProcedureUnderstanding, Ability.ProcedureInversion]
+            operation: 'division'
         })!;
         const [dividend, divisor] = problem.derivedOperands;
 
@@ -110,11 +108,6 @@ describe('ArithmeticKnownFactDerivationGenerator', () => {
         expect(generate({arity: Scope.ThreeOperands})).toBeNull();
         expect(generate({useCommutativeLaw: true, usePlaceValueScaling: true})).toBeNull();
         expect(generate({operation: 'division', usePlaceValueScaling: true})).toBeNull();
-        expect(() => generate({taskAbilities: []})).toThrow();
-        expect(generate({taskAbilities: [Ability.TextualReception]})).toBeNull();
-        expect(generate({
-            taskAbilities: [Ability.ProcedureUnderstanding, Ability.ProcedureInversion]
-        })).toBeNull();
     });
 
     it('returns null when the requested range cannot contain a valid positive known fact', () => {
