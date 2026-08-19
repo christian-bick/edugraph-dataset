@@ -1,9 +1,13 @@
 import {describe, expect, it} from 'vitest';
-import {Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {extractSchemaLabels} from '../../../../lib/utils.ts';
 import {ShapeBuildShapeViewSchema, spec} from './spec.ts';
 
 describe('shape-build-shape view spec', () => {
+    it('owns the observable attribute-specification ability', () => {
+        expect(spec.generalLabels).toContain(Ability.ConceptSpecification);
+    });
+
     it('owns the geometry-stick representation as a configurable view capability', () => {
         expect(extractSchemaLabels(ShapeBuildShapeViewSchema)).toContain(Scope.GeometrySticks);
         expect(spec.generalLabels).not.toContain(Scope.GeometrySticks);

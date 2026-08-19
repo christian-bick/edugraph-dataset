@@ -26,7 +26,6 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
 
     generate(config: ShapeBuildShapeGeneratorConfig): ProblemStub<ShapeBuildShapeProblem> | null {
         validateConfigFields('shape-build-shape', config, [
-            'specifyAttributes',
             'shapeArea'
         ]);
         if (!Array.isArray(config.targets) || !Array.isArray(config.constructionScopes) || !Array.isArray(config.attributeCounts)) {
@@ -40,8 +39,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         const useAngleCount = config.attributeCounts!.includes(Scope.AngleCount);
         const useFaceCount = config.attributeCounts!.includes(Scope.FaceCount);
         const requireEqualFaces = config.attributeCounts!.includes(Scope.Equal);
-        const isAttributeSpecification = config.specifyAttributes
-            && config.shapeArea === Area.ShapeClassification
+        const isAttributeSpecification = config.shapeArea === Area.ShapeClassification
             && !config.constructionScopes!.includes(Scope.ShapeProperties);
 
         if (
@@ -96,7 +94,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
             corners: definition.vertexCount
         };
 
-        if (config.shapeArea === Area.ShapeSubsumption && !config.specifyAttributes) {
+        if (config.shapeArea === Area.ShapeSubsumption) {
             if (target !== 'quadrilateral') return null;
             return {
                 data: {
@@ -118,7 +116,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
             };
         }
 
-        if (config.shapeArea === Area.ShapeRotationConservation && !config.specifyAttributes) {
+        if (config.shapeArea === Area.ShapeRotationConservation) {
             return {
                 data: {...construction, task: 'rotation-conservation'},
                 tags: []
@@ -127,7 +125,6 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
 
         if (
             config.shapeArea === Area.ShapeIdentity
-            && !config.specifyAttributes
             && config.constructionScopes!.includes(Scope.ShapeAttributes)
         ) {
             if (!(target in LOOSE_PART_COUNTS)) return null;
@@ -144,7 +141,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
             };
         }
 
-        if (!config.specifyAttributes) {
+        if (config.shapeArea === Area.ShapeIdentity) {
             return {data: construction, tags: []};
         }
 

@@ -6,6 +6,7 @@ import {hasLabel} from '../../../../lib/resolvers.ts';
 export const spec: ViewSpec = {
     viewId: 'shape-build-shape',
     generalLabels: [
+        Ability.ConceptSpecification,
         Ability.VisualArticulation
     ],
 };

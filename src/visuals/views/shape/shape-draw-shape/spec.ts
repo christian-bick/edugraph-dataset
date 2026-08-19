@@ -7,6 +7,7 @@ export const spec: ViewSpec = {
     generalLabels: [
         Area.LinearShapeDrawing,
         Area.CircularShapeDrawing,
+        Ability.ConceptSpecification,
         Ability.VisualArticulation
     ],
     rejectedLabels: [

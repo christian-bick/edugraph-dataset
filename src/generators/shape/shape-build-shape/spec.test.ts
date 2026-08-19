@@ -69,7 +69,12 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
                 boundary: 'curved'
             }
         });
-        expect(stub?.tags).toEqual(expect.arrayContaining(labels));
+        expect(stub?.tags).toEqual(expect.arrayContaining([
+            Area.Circle,
+            Area.ShapeClassification,
+            Scope.ShapeAttributes
+        ]));
+        expect(stub?.tags).not.toContain(Ability.ConceptSpecification);
         expect(new Set(stub!.tags).size).toBe(stub!.tags!.length);
     });
 
@@ -139,9 +144,9 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub.tags).toEqual(expect.arrayContaining([
             Area.ShapeClassification,
             Scope.ShapeAttributes,
-            Scope.VertexCount,
-            Ability.ConceptSpecification
+            Scope.VertexCount
         ]));
+        expect(stub.tags).not.toContain(Ability.ConceptSpecification);
     });
 
     it('resolves an angle-count construction without substituting the vertex scope', () => {
@@ -160,9 +165,9 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub.tags).toEqual(expect.arrayContaining([
             Area.ShapeClassification,
             Scope.ShapeAttributes,
-            Scope.AngleCount,
-            Ability.ConceptSpecification
+            Scope.AngleCount
         ]));
+        expect(stub.tags).not.toContain(Ability.ConceptSpecification);
         expect(stub.tags).not.toContain(Scope.VertexCount);
     });
 
@@ -188,8 +193,8 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
             Scope.ShapeAttributes,
             Scope.FaceCount,
             Scope.Equal,
-            Ability.ConceptSpecification,
             Area.Cube
         ]));
+        expect(stub.tags).not.toContain(Ability.ConceptSpecification);
     });
 });

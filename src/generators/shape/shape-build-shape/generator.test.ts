@@ -29,7 +29,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             ...configFor(target),
             constructionScopes: [Scope.ShapeProperties],
-            specifyAttributes: false,
             shapeArea: Area.ShapeIdentity
         });
 
@@ -43,7 +42,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             ...configFor(Area.Triangle),
             constructionScopes: [],
-            specifyAttributes: false,
             shapeArea: Area.ShapeRotationConservation
         });
 
@@ -67,7 +65,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             ...configFor(label),
             constructionScopes: [Scope.ShapeAttributes],
-            specifyAttributes: false,
             shapeArea: Area.ShapeIdentity
         });
 
@@ -86,7 +83,6 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.generate({
             ...configFor(Area.Circle),
             constructionScopes: [Scope.ShapeAttributes],
-            specifyAttributes: false,
             shapeArea: Area.ShapeIdentity
         })).toBeNull();
     });
@@ -95,7 +91,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             ...configFor(Area.Quadrilateral),
             constructionScopes: [Scope.ShapeAttributes],
-            specifyAttributes: false,
             shapeArea: Area.ShapeSubsumption
         });
 
@@ -123,7 +118,6 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.generate({
             ...configFor(Area.Square),
             constructionScopes: [Scope.ShapeAttributes],
-            specifyAttributes: false,
             shapeArea: Area.ShapeSubsumption
         })).toBeNull();
     });
@@ -151,7 +145,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             ...configFor(target),
             constructionScopes: [],
-            specifyAttributes: true,
             shapeArea: Area.ShapeClassification
         });
 
@@ -171,7 +164,6 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.generate({
             ...configFor(Area.Cube),
             constructionScopes: [Scope.ShapeProperties],
-            specifyAttributes: false,
             shapeArea: Area.ShapeIdentity
         })).toBeNull();
     });
@@ -180,7 +172,6 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.generate({
             ...configFor(Area.Triangle),
             constructionScopes: [Scope.ShapeProperties],
-            specifyAttributes: true,
             shapeArea: Area.ShapeClassification
         })).toBeNull();
     });
@@ -189,7 +180,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             targets: [],
             constructionScopes: [],
-            specifyAttributes: true,
             shapeArea: Area.ShapeClassification,
             attributeCounts: [Scope.VertexCount]
         })!;
@@ -205,7 +195,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             targets: [],
             constructionScopes: [],
-            specifyAttributes: true,
             shapeArea: Area.ShapeClassification,
             attributeCounts: [Scope.AngleCount]
         })!;
@@ -222,7 +211,6 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(() => generator.generate({
             targets: [],
             constructionScopes: [],
-            specifyAttributes: true,
             shapeArea: Area.ShapeClassification,
             attributeCounts: [Scope.VertexCount, Scope.AngleCount]
         })).toThrow('Attribute-count labels must select vertex count, angle count, or equal face count.');
@@ -232,7 +220,6 @@ describe('ShapeBuildShapeGenerator', () => {
         const stub = generator.generate({
             targets: [],
             constructionScopes: [],
-            specifyAttributes: true,
             shapeArea: Area.ShapeClassification,
             attributeCounts: [Scope.FaceCount, Scope.Equal]
         });
