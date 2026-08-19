@@ -17,11 +17,6 @@ const generator = new FractionArithmeticGenerator();
 const denominators = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
 
 const configs = {
-    interpret: (operation: FractionArithmeticOperation): FractionArithmeticGeneratorConfig => ({
-        task: 'interpret-operation',
-        usesCommonDenominator: true,
-        operation
-    }),
     fractionOperation: (
         operation: FractionArithmeticOperation
     ): FractionArithmeticGeneratorConfig => ({
@@ -49,11 +44,8 @@ const configs = {
         usesCommonDenominator: false,
         operation: 'multiplication'
     }),
-    fractionProduct: (
-        task: 'whole-number-fraction-product' | 'fraction-multiplication-problem',
-        productKind: 'proper' | 'improper'
-    ): FractionArithmeticGeneratorConfig => ({
-        task: `${task}-${productKind}`,
+    fractionProduct: (productKind: 'proper' | 'improper'): FractionArithmeticGeneratorConfig => ({
+        task: `whole-number-fraction-product-${productKind}`,
         usesCommonDenominator: false,
         operation: 'multiplication'
     }),
@@ -234,7 +226,7 @@ describe('FractionArithmeticGenerator', () => {
         expect(() => generator.generate({} as never))
             .toThrow('Required field "task" is missing.');
         expect(() => generator.generate({
-            task: 'interpret-operation',
+            task: 'fraction-operation',
             usesCommonDenominator: true,
             operation: undefined
         })).toThrow('Required field "operation" is missing.');
@@ -244,50 +236,46 @@ describe('FractionArithmeticGenerator', () => {
             operation: 'addition'
         })).toThrow('Required field "task" is missing.');
         expect(() => generator.generate({
-            ...configs.interpret('addition'),
+            ...configs.fractionOperation('addition'),
             operation: 'unsupported'
         } as never)).toThrow('Operation must be addition, subtraction, or multiplication.');
         expect(() => generator.generate({
             task: 'unsupported',
             usesCommonDenominator: true,
             operation: 'addition'
-        } as never)).toThrow('Unsupported task ability');
+        } as never)).toThrow('Unsupported fraction form');
         expect(() => generator.generate({
-            ...configs.interpret('addition'),
+            ...configs.fractionOperation('addition'),
             usesCommonDenominator: false
         })).toThrow('CommonDenominator is required');
         expect(() => generator.generate({
             ...configs.decomposeProper(),
             operation: 'subtraction'
-        })).toThrow('Unsupported task ability');
+        })).toThrow('Unsupported fraction form');
         expect(() => generator.generate({
             ...configs.decomposeProper(),
             task: 'unsupported'
-        } as never)).toThrow('Unsupported task ability');
+        } as never)).toThrow('Unsupported fraction form');
         expect(() => generator.generate({
             ...configs.unitMultiple(),
-            task: 'interpret-operation'
+            task: 'fraction-operation'
         })).toThrow('Unsupported multiplication task');
         expect(() => generator.generate({
             ...configs.unitMultiple(),
             operation: 'addition',
             usesCommonDenominator: true
-        })).toThrow('Unsupported task ability');
+        })).toThrow('Unsupported fraction form');
     });
 
     it.each([
-        ['interpret-operation', 'addition'],
-        ['interpret-operation', 'subtraction'],
-        ['fraction-operation', 'addition'],
-        ['fraction-operation', 'subtraction']
-    ] as const)('generates coherent %s / %s binary tasks', (task, operationLabel) => {
+        'addition',
+        'subtraction'
+    ] as const)('generates a coherent neutral %s binary task', operationLabel => {
         for (let seed = 0; seed < 100; seed++) {
-            setSeed(`${task}-${operationLabel}-${seed}`);
-            const problem = generator.generate(task === 'interpret-operation'
-                ? configs.interpret(operationLabel)
-                : configs.fractionOperation(operationLabel)).data;
-            expect(problem.task).toBe(task);
-            if (problem.task !== 'interpret-operation' && problem.task !== 'fraction-operation') {
+            setSeed(`fraction-operation-${operationLabel}-${seed}`);
+            const problem = generator.generate(configs.fractionOperation(operationLabel)).data;
+            expect(problem.task).toBe('fraction-operation');
+            if (problem.task !== 'fraction-operation') {
                 throw new Error('Expected a binary fraction operation.');
             }
             expectCommon(problem);
@@ -306,12 +294,10 @@ describe('FractionArithmeticGenerator', () => {
             expect(problem.solutionEquation).toBe(
                 `${problem.first.notation} ${problem.symbol} ${problem.second.notation} = ${problem.result.notation}`
             );
-            expect(problem.questionEquation).toBe(task === 'interpret-operation'
-                ? `${problem.first.notation} ? ${problem.second.notation} = ?`
-                : `${problem.first.notation} ${problem.symbol} ${problem.second.notation} = ?/${problem.denominator}`);
-            expect(problem.answer).toBe(task === 'interpret-operation'
-                ? problem.solutionEquation
-                : problem.result.notation);
+            expect(problem.questionEquation).toBe(
+                `${problem.first.notation} ${problem.symbol} ${problem.second.notation} = ?/${problem.denominator}`
+            );
+            expect(problem.answer).toBe(problem.result.notation);
             problem.questionModels.forEach(expectModel);
             expectModel(problem.solutionModel);
             if (problem.operation === 'addition') {
@@ -517,20 +503,14 @@ describe('FractionArithmeticGenerator', () => {
     });
 
     it.each([
-        ['whole-number-fraction-product', 'proper'],
-        ['whole-number-fraction-product', 'improper'],
-        ['fraction-multiplication-problem', 'proper'],
-        ['fraction-multiplication-problem', 'improper']
-    ] as const)('generates coherent %s / %s products and exact unit chains', (
-        task,
-        productKind
-    ) => {
+        'proper',
+        'improper'
+    ] as const)('generates a coherent neutral %s product and exact unit chain', productKind => {
         for (let seed = 0; seed < 200; seed++) {
-            setSeed(`${task}-${productKind}-${seed}`);
-            const problem = generator.generate(configs.fractionProduct(task, productKind)).data;
-            expect(problem.task).toBe(task);
-            if (problem.task !== 'whole-number-fraction-product'
-                && problem.task !== 'fraction-multiplication-problem') {
+            setSeed(`whole-number-fraction-product-${productKind}-${seed}`);
+            const problem = generator.generate(configs.fractionProduct(productKind)).data;
+            expect(problem.task).toBe('whole-number-fraction-product');
+            if (problem.task !== 'whole-number-fraction-product') {
                 throw new Error('Expected a whole-number fraction product.');
             }
             expect(problem.operation).toBe('multiplication');
@@ -597,25 +577,19 @@ describe('FractionArithmeticGenerator', () => {
                 problem.fractionFactor.notation
             ]);
             expect(problem.story.unknownRole).toBe('product');
-            if (problem.task === 'fraction-multiplication-problem') {
-                expect(problem.lowerWhole).toBe(Math.floor(
-                    problem.product.numerator / problem.denominator
-                ));
-                expect(problem.upperWhole).toBe(Math.ceil(
-                    problem.product.numerator / problem.denominator
-                ));
-                expect(problem.upperWhole).toBe(problem.lowerWhole + 1);
-                expect(problem.boundsStatement).toBe(
-                    `${problem.lowerWhole} < ${problem.product.notation} < ${problem.upperWhole}`
-                );
-                expect(problem.story.question).toBe(
-                    'How many meters of ribbon do the craft kits use altogether?'
-                );
-            } else {
-                expect(problem.story.question).toBe(
-                    'Use unit-fraction groups to determine the total ribbon used.'
-                );
-            }
+            expect(problem.lowerWhole).toBe(Math.floor(
+                problem.product.numerator / problem.denominator
+            ));
+            expect(problem.upperWhole).toBe(Math.ceil(
+                problem.product.numerator / problem.denominator
+            ));
+            expect(problem.upperWhole).toBe(problem.lowerWhole + 1);
+            expect(problem.boundsStatement).toBe(
+                `${problem.lowerWhole} < ${problem.product.notation} < ${problem.upperWhole}`
+            );
+            expect(problem.story.question).toBe(
+                'Use unit-fraction groups to determine the total ribbon used.'
+            );
         }
     });
 
@@ -723,8 +697,8 @@ describe('FractionArithmeticGenerator', () => {
         [
             'interpret',
             'legacy-interpret',
-            configs.interpret('addition'),
-            '93d4abb6057f18ef50706661398064f0f106dd0c25d271ef704764e85891ef92'
+            configs.fractionOperation('addition'),
+            'b4d40897e2d663702d62dba3199edb4906be47d4c0da1981e0dd343b675462f9'
         ],
         [
             'decompose',

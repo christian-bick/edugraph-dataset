@@ -1,14 +1,10 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, selectCanonicalLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
 
 const fractionArithmeticTaskLabels = [
     Area.IteratedOperation,
-    Ability.Interpretation,
-    Ability.ProcedureUnderstanding,
-    Ability.Formalization,
-    Ability.ProcedureExecution,
     Scope.FractionNumbers,
     Scope.IntegerNumbers,
     Scope.ProperFractions,
@@ -18,7 +14,6 @@ const fractionArithmeticTaskLabels = [
 ] as const;
 
 export type FractionArithmeticTaskConfig =
-    | 'interpret-operation'
     | 'fraction-operation'
     | 'tenths-hundredths-addition'
     | 'decompose-proper'
@@ -26,9 +21,7 @@ export type FractionArithmeticTaskConfig =
     | 'mixed-operation'
     | 'unit-fraction-multiple'
     | 'whole-number-fraction-product-proper'
-    | 'whole-number-fraction-product-improper'
-    | 'fraction-multiplication-problem-proper'
-    | 'fraction-multiplication-problem-improper';
+    | 'whole-number-fraction-product-improper';
 
 const sameLabels = (actual: readonly string[], expected: readonly string[]): boolean =>
     actual.length === expected.length && expected.every(label => actual.includes(label));
@@ -37,37 +30,27 @@ const resolveTask: ResolverFn<FractionArithmeticTaskConfig | null> = labels => {
     const taskLabels = fractionArithmeticTaskLabels.filter(label => labels.includes(label));
     const operationLabels = [Area.Addition, Area.Subtraction, Area.Multiplication]
         .filter(label => labels.includes(label));
-    if (sameLabels(taskLabels, [Ability.ProcedureExecution])
+    if (taskLabels.length === 0
         && sameLabels(operationLabels, [Area.Addition, Area.Multiplication])) {
         return 'tenths-hundredths-addition';
     }
-    if (sameLabels(taskLabels, [Ability.Interpretation, Scope.FractionNumbers])) {
-        return 'interpret-operation';
-    }
-    if (sameLabels(taskLabels, [Ability.ProcedureExecution, Scope.FractionNumbers])) {
+    if (sameLabels(taskLabels, [Scope.FractionNumbers])) {
         return 'fraction-operation';
     }
-    if (sameLabels(taskLabels, [
-        Ability.ProcedureUnderstanding,
-        Ability.Formalization,
-        Scope.ProperFractions
-    ])) {
+    if (sameLabels(taskLabels, [Scope.ProperFractions])) {
         return 'decompose-proper';
     }
     if (sameLabels(taskLabels, [
-        Ability.ProcedureUnderstanding,
-        Ability.Formalization,
         Scope.ImproperFractions,
         Scope.MixedNumbers
     ])) {
         return 'decompose-mixed';
     }
-    if (sameLabels(taskLabels, [Ability.ProcedureExecution, Scope.MixedNumbers])) {
+    if (sameLabels(taskLabels, [Scope.MixedNumbers])) {
         return 'mixed-operation';
     }
     if (sameLabels(taskLabels, [
         Area.IteratedOperation,
-        Ability.Interpretation,
         Scope.IntegerNumbers,
         Scope.UnitFractions
     ])) {
@@ -75,7 +58,6 @@ const resolveTask: ResolverFn<FractionArithmeticTaskConfig | null> = labels => {
     }
     if (sameLabels(taskLabels, [
         Area.IteratedOperation,
-        Ability.ProcedureUnderstanding,
         Scope.IntegerNumbers,
         Scope.ProperFractions
     ])) {
@@ -83,27 +65,10 @@ const resolveTask: ResolverFn<FractionArithmeticTaskConfig | null> = labels => {
     }
     if (sameLabels(taskLabels, [
         Area.IteratedOperation,
-        Ability.ProcedureUnderstanding,
         Scope.IntegerNumbers,
         Scope.ImproperFractions
     ])) {
         return 'whole-number-fraction-product-improper';
-    }
-    if (sameLabels(taskLabels, [
-        Area.IteratedOperation,
-        Ability.ProcedureExecution,
-        Scope.IntegerNumbers,
-        Scope.ProperFractions
-    ])) {
-        return 'fraction-multiplication-problem-proper';
-    }
-    if (sameLabels(taskLabels, [
-        Area.IteratedOperation,
-        Ability.ProcedureExecution,
-        Scope.IntegerNumbers,
-        Scope.ImproperFractions
-    ])) {
-        return 'fraction-multiplication-problem-improper';
     }
     return null;
 };

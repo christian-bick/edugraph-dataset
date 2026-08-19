@@ -10,7 +10,6 @@ import {
     FractionBinaryOperationProblem,
     FractionDecomposition,
     FractionDecompositionProblem,
-    FractionMultiplicationWordProblem,
     FractionParts,
     LikeDenominatorFractionValue,
     MixedFractionOperationProblem,
@@ -197,15 +196,12 @@ const unitMultipleStory = (
 });
 
 const productStory = (
-    task: WholeNumberFractionProductProblem['task'] | FractionMultiplicationWordProblem['task'],
     wholeFactor: number,
     fractionFactor: LikeDenominatorFractionValue
 ): FractionArithmeticStory => ({
     storyKind: 'equal-fraction-groups',
     context: `${wholeFactor} craft kits each use ${fractionFactor.notation} meter of ribbon from the same kind of roll.`,
-    question: task === 'whole-number-fraction-product'
-        ? 'Use unit-fraction groups to determine the total ribbon used.'
-        : 'How many meters of ribbon do the craft kits use altogether?',
+    question: 'Use unit-fraction groups to determine the total ribbon used.',
     wholeLabel: 'one meter',
     unitLabel: 'meters of ribbon',
     givenDisplays: [`${wholeFactor} craft kits`, fractionFactor.notation],
@@ -353,19 +349,20 @@ const generateUnitFractionMultiple = (): UnitFractionMultipleProblem => {
 };
 
 const generateWholeNumberFractionProduct = (
-    task: WholeNumberFractionProductProblem['task'] | FractionMultiplicationWordProblem['task'],
     productKind: 'proper' | 'improper'
-): WholeNumberFractionProductProblem | FractionMultiplicationWordProblem => {
+): WholeNumberFractionProductProblem => {
     const sample = pick(productSamples(productKind));
     const {denominator, wholeFactor, fractionNumerator, productNumerator} = sample;
     const unitFraction = makeFraction(1, denominator);
     const fractionFactor = makeFraction(fractionNumerator, denominator);
     const product = makeFraction(productNumerator, denominator);
-    const story = productStory(task, wholeFactor, fractionFactor);
+    const story = productStory(wholeFactor, fractionFactor);
     const fractionAsUnitMultipleEquation = `${fractionFactor.notation} = ${fractionNumerator} × (${unitFraction.notation})`;
     const iteratedUnitEquation = `${wholeFactor} × (${fractionFactor.notation}) = ${productNumerator} × (${unitFraction.notation})`;
     const solutionEquation = `${wholeFactor} × (${fractionFactor.notation}) = ${product.notation}`;
     const equationChain = `${wholeFactor} × (${fractionFactor.notation}) = (${wholeFactor} × ${fractionNumerator}) × (${unitFraction.notation}) = ${productNumerator} × (${unitFraction.notation}) = ${product.notation}`;
+    const lowerWhole = Math.floor(productNumerator / denominator);
+    const upperWhole = Math.ceil(productNumerator / denominator);
     const common = {
         operation: 'multiplication' as const,
         denominator,
@@ -395,32 +392,18 @@ const generateWholeNumberFractionProduct = (
         ),
         fractionAsUnitMultipleEquation,
         iteratedUnitEquation,
-        prompt: task === 'whole-number-fraction-product'
-            ? `Use unit fractions to calculate ${wholeFactor} × (${fractionFactor.notation}).`
-            : story.question,
+        lowerWhole,
+        upperWhole,
+        boundsStatement: `${lowerWhole} < ${product.notation} < ${upperWhole}`,
+        prompt: `Use unit fractions to calculate ${wholeFactor} × (${fractionFactor.notation}).`,
         questionEquation: `${wholeFactor} × (${fractionFactor.notation}) = ?/${denominator}`,
         solutionEquation,
         equationChain,
         answer: product.notation,
-        answerStatement: task === 'whole-number-fraction-product'
-            ? `The product is ${product.notation}.`
-            : `The craft kits use ${product.notation} meters of ribbon.`,
+        answerStatement: `The product is ${product.notation}.`,
         explanation: `${fractionAsUnitMultipleEquation}. There are ${wholeFactor} groups of ${fractionNumerator} unit parts, giving ${productNumerator} unit parts in all. Therefore, ${equationChain}.`
     };
-
-    if (task === 'whole-number-fraction-product') {
-        return {task, ...common};
-    }
-
-    const lowerWhole = Math.floor(productNumerator / denominator);
-    const upperWhole = Math.ceil(productNumerator / denominator);
-    return {
-        task,
-        ...common,
-        lowerWhole,
-        upperWhole,
-        boundsStatement: `${lowerWhole} < ${product.notation} < ${upperWhole}`
-    };
+    return {task: 'whole-number-fraction-product', ...common};
 };
 
 const posterStory = (
@@ -482,14 +465,12 @@ const binarySample = (
 };
 
 const generateBinaryOperation = (
-    task: FractionBinaryOperationProblem['task'],
     operation: FractionArithmeticOperation
 ): FractionBinaryOperationProblem => {
     const {denominator, first, second, result} = binarySample(operation);
     const symbol = operationSymbol(operation);
     const action = operation === 'addition' ? 'join' as const : 'separate' as const;
-    const isInterpretation = task === 'interpret-operation';
-    const story = posterStory(operation, first, second, isInterpretation ? 'operation' : 'result');
+    const story = posterStory(operation, first, second, 'result');
     const solutionEquation = `${first.notation} ${symbol} ${second.notation} = ${result.notation}`;
     const solutionModel = operation === 'addition'
         ? makeModel(result.notation, denominator, result.numerator, [
@@ -525,7 +506,7 @@ const generateBinaryOperation = (
         : `The fractions refer to the same whole and have denominator ${denominator}. Separating ${second.numerator} parts from ${first.numerator} parts leaves ${result.numerator} parts, so ${solutionEquation}.`;
 
     return {
-        task,
+        task: 'fraction-operation',
         operation,
         denominator,
         sharedWhole: 1,
@@ -536,22 +517,16 @@ const generateBinaryOperation = (
         first,
         second,
         result,
-        prompt: isInterpretation
-            ? `Interpret the model as ${action === 'join' ? 'joining' : 'separating'} equal parts of the same whole.`
-            : story.question,
-        questionEquation: isInterpretation
-            ? `${first.notation} ? ${second.notation} = ?`
-            : `${first.notation} ${symbol} ${second.notation} = ?/${denominator}`,
+        prompt: story.question,
+        questionEquation: `${first.notation} ${symbol} ${second.notation} = ?/${denominator}`,
         questionModels: [
             singleGroupModel(first.notation, denominator, first.numerator, 'first', 'first-addend'),
             singleGroupModel(second.notation, denominator, second.numerator, 'second', 'second-addend')
         ],
         solutionEquation,
         solutionModel,
-        answer: isInterpretation ? solutionEquation : result.notation,
-        answerStatement: isInterpretation
-            ? `The ${action === 'join' ? 'joining' : 'separating'} operation is ${operation}: ${solutionEquation}.`
-            : `The answer is ${result.notation} ${story.unitLabel}.`,
+        answer: result.notation,
+        answerStatement: `The answer is ${result.notation} ${story.unitLabel}.`,
         explanation
     };
 };
@@ -854,28 +829,10 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
                 return {data: generateUnitFractionMultiple()};
             }
             if (config.task === 'whole-number-fraction-product-proper') {
-                return {data: generateWholeNumberFractionProduct(
-                    'whole-number-fraction-product',
-                    'proper'
-                )};
+                return {data: generateWholeNumberFractionProduct('proper')};
             }
             if (config.task === 'whole-number-fraction-product-improper') {
-                return {data: generateWholeNumberFractionProduct(
-                    'whole-number-fraction-product',
-                    'improper'
-                )};
-            }
-            if (config.task === 'fraction-multiplication-problem-proper') {
-                return {data: generateWholeNumberFractionProduct(
-                    'fraction-multiplication-problem',
-                    'proper'
-                )};
-            }
-            if (config.task === 'fraction-multiplication-problem-improper') {
-                return {data: generateWholeNumberFractionProduct(
-                    'fraction-multiplication-problem',
-                    'improper'
-                )};
+                return {data: generateWholeNumberFractionProduct('improper')};
             }
             throw new GeneratorValidationError(
                 'fraction-arithmetic',
@@ -891,12 +848,8 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
         if (config.task === 'tenths-hundredths-addition' && operation === 'addition') {
             return {data: generateTenthsHundredthsAddition()};
         }
-        if (config.task === 'interpret-operation') {
-            return {data: generateBinaryOperation('interpret-operation', operation)};
-        }
-
         if (config.task === 'fraction-operation') {
-            return {data: generateBinaryOperation('fraction-operation', operation)};
+            return {data: generateBinaryOperation(operation)};
         }
 
         if (config.task === 'decompose-proper' && operation === 'addition') {
@@ -913,7 +866,7 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
 
         throw new GeneratorValidationError(
             'fraction-arithmetic',
-            'Unsupported task ability, fraction form, and operation combination.'
+            'Unsupported fraction form, operation, and task combination.'
         );
     }
 }

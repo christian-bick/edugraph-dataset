@@ -8,6 +8,7 @@ import {
     FractionArithmeticWork
 } from '../fraction-arithmetic-components.tsx';
 import {isValidFractionArithmeticProblem} from '../fraction-arithmetic-helpers.ts';
+import {presentFractionArithmeticProblem} from '../fraction-arithmetic-presentation.ts';
 import {
     FractionsWordProblemViewConfig,
     FractionsWordProblemViewSchema
@@ -128,9 +129,16 @@ const validateData = (data: FractionArithmeticProblem) => {
     }
 };
 
-const FractionsWordProblemCore = ({config: _config, payload}: CoreProps) => {
+const FractionsWordProblemCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
-    const data = problem.data;
+    validateData(problem.data);
+    const data = presentFractionArithmeticProblem(problem.data, config.abilities ?? []);
+    if (!data) {
+        throw new ViewValidationError(
+            VIEW_ID,
+            'The resolved abilities must select a presentation supported by the arithmetic task.'
+        );
+    }
     validateData(data);
 
     return (

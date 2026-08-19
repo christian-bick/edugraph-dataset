@@ -8,10 +8,6 @@ import {spec} from './spec.ts';
 describe('FractionArithmeticGenerator spec integration', () => {
     const generator = new FractionArithmeticGenerator();
     const schemaLabels: readonly string[] = [
-        Ability.Interpretation,
-        Ability.ProcedureUnderstanding,
-        Ability.Formalization,
-        Ability.ProcedureExecution,
         Area.IteratedOperation,
         Scope.FractionNumbers,
         Scope.IntegerNumbers,
@@ -52,7 +48,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.Interpretation
             ],
             '81aa78ff',
-            'interpret-operation'
+            'fraction-operation'
         ],
         [
             '3a subtraction',
@@ -66,7 +62,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.Interpretation
             ],
             'ff302f5d',
-            'interpret-operation'
+            'fraction-operation'
         ],
         [
             '3b proper decomposition',
@@ -224,7 +220,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Scope.ProperFractions
             ],
             '52e7330d',
-            'fraction-multiplication-problem'
+            'whole-number-fraction-product'
         ],
         [
             '4c improper word product',
@@ -241,7 +237,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Scope.ImproperFractions
             ],
             '29b60da5',
-            'fraction-multiplication-problem'
+            'whole-number-fraction-product'
         ],
         [
             '5 tenths and hundredths addition',
@@ -280,6 +276,10 @@ describe('FractionArithmeticGenerator spec integration', () => {
         )));
         expect(tags).not.toContain(Scope.VisualNumbers);
         expect(tags).not.toContain(Ability.TextualReception);
+        expect(tags).not.toContain(Ability.Interpretation);
+        expect(tags).not.toContain(Ability.ProcedureUnderstanding);
+        expect(tags).not.toContain(Ability.Formalization);
+        expect(tags).not.toContain(Ability.ProcedureExecution);
     });
 
     it('keeps deterministic label extraction on the direct generator RNG path', () => {
@@ -296,7 +296,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
         const resolvedLegacy = generateWithLabels(generator, legacyLabels);
         setSeed('fraction-arithmetic-label-path');
         const directLegacy = generator.generate({
-            task: 'interpret-operation',
+            task: 'fraction-operation',
             usesCommonDenominator: true,
             operation: 'addition'
         });

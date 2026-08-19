@@ -1,3 +1,4 @@
+import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
 import {
@@ -7,6 +8,7 @@ import {
 import {setSeed} from '../../../lib/random.ts';
 import {FractionArithmeticProblem} from '../../../types/problems.ts';
 import {isValidFractionArithmeticProblem} from './fraction-arithmetic-helpers.ts';
+import {presentFractionArithmeticProblem} from './fraction-arithmetic-presentation.ts';
 
 const generator = new FractionArithmeticGenerator();
 
@@ -23,11 +25,16 @@ const generate = (
     }).data;
 };
 
+const present = (
+    data: FractionArithmeticProblem,
+    abilities: readonly string[]
+): FractionArithmeticProblem => presentFractionArithmeticProblem(data, abilities)!;
+
 const fixtures = [
-    generate('interpret-add', 'interpret-operation', 'addition'),
-    generate('interpret-subtract', 'interpret-operation', 'subtraction'),
-    generate('word-add', 'fraction-operation', 'addition'),
-    generate('word-subtract', 'fraction-operation', 'subtraction'),
+    present(generate('interpret-add', 'fraction-operation', 'addition'), [Ability.Interpretation]),
+    present(generate('interpret-subtract', 'fraction-operation', 'subtraction'), [Ability.Interpretation]),
+    present(generate('word-add', 'fraction-operation', 'addition'), [Ability.ProcedureExecution]),
+    present(generate('word-subtract', 'fraction-operation', 'subtraction'), [Ability.ProcedureExecution]),
     generate('proper-decompose', 'decompose-proper', 'addition'),
     generate('mixed-decompose', 'decompose-mixed', 'addition'),
     ...Array.from({length: 24}, (_, index) => generate(
@@ -43,8 +50,14 @@ const fixtures = [
     generate('unit-multiple', 'unit-fraction-multiple', 'multiplication'),
     generate('proper-product', 'whole-number-fraction-product-proper', 'multiplication'),
     generate('improper-product', 'whole-number-fraction-product-improper', 'multiplication'),
-    generate('proper-word-product', 'fraction-multiplication-problem-proper', 'multiplication'),
-    generate('improper-word-product', 'fraction-multiplication-problem-improper', 'multiplication')
+    present(
+        generate('proper-word-product', 'whole-number-fraction-product-proper', 'multiplication'),
+        [Ability.ProcedureExecution]
+    ),
+    present(
+        generate('improper-word-product', 'whole-number-fraction-product-improper', 'multiplication'),
+        [Ability.ProcedureExecution]
+    )
 ];
 
 const changed = (

@@ -1,3 +1,4 @@
+import {Ability} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
@@ -8,6 +9,7 @@ import {
     FractionArithmeticWork,
     FractionModelDiagram
 } from './fraction-arithmetic-components.tsx';
+import {presentFractionArithmeticProblem} from './fraction-arithmetic-presentation.ts';
 
 const generator = new FractionArithmeticGenerator();
 
@@ -122,11 +124,12 @@ describe('fraction arithmetic typography', () => {
 
     it('corrects only the legacy binary token identity while retaining its legend layout', () => {
         setSeed('legacy-group-token-coherence');
-        const data = generator.generate({
-            task: 'interpret-operation',
+        const neutral = generator.generate({
+            task: 'fraction-operation',
             usesCommonDenominator: true,
             operation: 'addition'
         }).data;
+        const data = presentFractionArithmeticProblem(neutral, [Ability.Interpretation])!;
         if (data.task !== 'interpret-operation') throw new Error('Expected interpretation.');
 
         const first = renderToStaticMarkup(

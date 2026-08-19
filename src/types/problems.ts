@@ -2000,6 +2000,9 @@ export type WholeNumberFractionProductCommon = FractionMultiplicationCommon & {
     questionGroupModels: FractionArithmeticModel[];
     fractionAsUnitMultipleEquation: string;
     iteratedUnitEquation: string;
+    lowerWhole: number;
+    upperWhole: number;
+    boundsStatement: string;
 };
 
 export type WholeNumberFractionProductProblem = WholeNumberFractionProductCommon & {
@@ -2008,9 +2011,6 @@ export type WholeNumberFractionProductProblem = WholeNumberFractionProductCommon
 
 export type FractionMultiplicationWordProblem = WholeNumberFractionProductCommon & {
     task: 'fraction-multiplication-problem';
-    lowerWhole: number;
-    upperWhole: number;
-    boundsStatement: string;
 };
 
 export type TenthsHundredthsAdditionProblem = {
