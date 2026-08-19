@@ -126,6 +126,11 @@ an ancestor of a more specific target label, before the tuple can match. Require
 applicability constraints, not capabilities: the generator must still declare the Area or
 Scope that satisfies the target.
 
+Every type-compatible generator must support every required label in the same ontology
+direction used by matching. The view must not also provide a required label through
+`generalLabels` or its schema, and the same label cannot appear in both `requiredLabels`
+and `rejectedLabels`. `npm run check:generator-view-specs` verifies this contract.
+
 Only Area and Scope terms belong here. Never put an Ability in `requiredLabels`; the leaf
 must positively own its invariant Ability in `generalLabels`. Prefer a narrower
 `ViewTypeMap` payload whenever static typing alone can express the same boundary. Use
@@ -141,5 +146,5 @@ must positively own its invariant Ability in `generalLabels`. Prefer a narrower
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — every Ability is declared by a view, directly evidenced by its rendered task, absent from all generators, and not parameterized when it changes task identity.
 - [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than resolved by a schema parameter; only its most specific required Ability is declared.
-- [ ] **SPEC-V7** — polymorphic leaf views use non-Ability `requiredLabels` only when a narrower payload type cannot express their mathematical applicability.
+- [ ] **SPEC-V7** — polymorphic leaf views use non-Ability `requiredLabels` only when a narrower payload type cannot express their mathematical applicability; every compatible generator supplies them, while the view neither supplies nor rejects them.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

@@ -5,6 +5,7 @@ import { isSubConceptOf } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from '../lib/type-parser.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
+import {findRequiredLabelContractIssues} from '../lib/spec-contracts.ts';
 import { Ability } from 'edugraph-ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -131,6 +132,7 @@ async function validateSpecs() {
 
                 const generalLabels = spec.generalLabels || [];
                 const requiredLabels = spec.requiredLabels || [];
+                const rejectedLabels = spec.rejectedLabels || [];
                 if (checkRedundantGeneralLabels('view', item, generalLabels)) {
                     hasError = true;
                 }
@@ -142,9 +144,15 @@ async function validateSpecs() {
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                 const schemaName = `${modulePrefix}ViewSchema`;
                 const schema = specModule[schemaName];
+                const paramLabels = schema ? extractSchemaLabels(schema) : [];
+                const problemType = viewToProblemType[item];
+                const matchingGenIds = problemType
+                    ? Object.keys(generatorProblemTypes).filter(
+                        genId => isProblemTypeCompatible(generatorProblemTypes[genId], problemType)
+                    )
+                    : [];
                 
                 if (schema) {
-                    const paramLabels = extractSchemaLabels(schema);
                     viewSchemas[item] = { schema, paramLabels };
 
                     // Self overlap check
@@ -158,13 +166,7 @@ async function validateSpecs() {
                     }
 
                     // Duplicate Parameterization Check
-                    const viewProblemType = viewToProblemType[item];
-                    if (viewProblemType) {
-                        // Find matching generators
-                        const matchingGenIds = Object.keys(generatorProblemTypes).filter(
-                            genId => isProblemTypeCompatible(generatorProblemTypes[genId], viewProblemType)
-                        );
-
+                    if (problemType) {
                         for (const genId of matchingGenIds) {
                             const genSchemaData = generatorSchemas[genId];
                             if (genSchemaData) {
@@ -181,16 +183,37 @@ async function validateSpecs() {
                     }
                 }
 
+                const requiredLabelIssues = findRequiredLabelContractIssues({
+                    requiredLabels,
+                    viewSupportedLabels: [...generalLabels, ...paramLabels],
+                    rejectedLabels,
+                    compatibleGenerators: matchingGenIds.map(generatorId => ({
+                        generatorId,
+                        supportedLabels: [
+                            ...(generatorGeneralLabels[generatorId] || []),
+                            ...(generatorSchemas[generatorId]?.paramLabels || [])
+                        ]
+                    }))
+                });
+                for (const issue of requiredLabelIssues) {
+                    if (issue.kind === 'view-provides-required-label') {
+                        console.error(`❌ [view:${item}] Required label '${issue.label}' is provided by the view capability '${issue.viewLabel}'; requiredLabels must be generator-owned applicability only`);
+                    } else if (issue.kind === 'required-and-rejected-label') {
+                        console.error(`❌ [view:${item}] Required label '${issue.label}' is also rejected, making the view contract impossible`);
+                    } else if (issue.kind === 'no-compatible-generator') {
+                        console.error(`❌ [view:${item}] requiredLabels cannot be established because the view has no compatible generator`);
+                    } else {
+                        console.error(`❌ [view:${item}] Required label '${issue.label}' is not supported by compatible generator '${issue.generatorId}'`);
+                    }
+                    hasError = true;
+                }
+
                 // Double Declaration Check: a view generalLabel that overlaps any
                 // label of a same-problem-type generator (generalLabels or schema)
                 // re-declares generator-owned capability. Since matching accepts a
                 // target label when the generator OR the view supports it, such a
                 // label lets the pair match targets the generator cannot satisfy.
-                const problemType = viewToProblemType[item];
                 if (problemType) {
-                    const matchingGenIds = Object.keys(generatorProblemTypes).filter(
-                        genId => isProblemTypeCompatible(generatorProblemTypes[genId], problemType)
-                    );
                     for (const genId of matchingGenIds) {
                         const genLabels = [
                             ...(generatorGeneralLabels[genId] || []),
