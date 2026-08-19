@@ -35,24 +35,36 @@ const DataBarGraphCore = ({config, payload}: CoreProps) => {
     const data = problem.data;
     validateStatisticalGraph(data, 'data-bar-graph');
 
-    if (config.showConstructionTask !== isConstructionTask(data.task)
-        || config.showArithmeticTask !== isArithmeticTask(data.task)) {
+    const displayTask = data.task === 'categorical-data'
+        ? config.interpretCategory
+            ? 'read-category-count'
+            : 'construct'
+        : data.task;
+    if (config.showConstructionTask !== isConstructionTask(displayTask)
+        || config.showArithmeticTask !== isArithmeticTask(displayTask)) {
         throw new ViewValidationError(
             'data-bar-graph',
             'The view-owned ability presentation does not agree with the statistical task.'
         );
     }
+    if (config.interpretCategory !== (displayTask === 'read-category-count')
+        || config.classifyData !== (data.task === 'organize')) {
+        throw new ViewValidationError(
+            'data-bar-graph',
+            'Interpretation and classification modes must agree with the graph task.'
+        );
+    }
 
-    const revealBars = revealsBars(data, isSolutionView);
-    const revealCounts = revealsBarCounts(data, isSolutionView);
+    const revealBars = revealsBars(data, isSolutionView, displayTask);
+    const revealCounts = revealsBarCounts(data, isSolutionView, displayTask);
     const axisValues = Array.from({length: 9}, (_, value) => (8 - value) * data.scale);
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Bar graph</div>
-            <div className="mt-1 text-xl font-bold text-slate-800">{taskHeading(data, isSolutionView)}</div>
+            <div className="mt-1 text-xl font-bold text-slate-800">{taskHeading(data, isSolutionView, displayTask)}</div>
 
-            {data.task === 'construct' && (
+            {displayTask === 'construct' && (
                 <div className="mt-4 flex justify-center gap-3">
                     {data.categories.map(({label, count}, index) => (
                         <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700">
@@ -121,7 +133,7 @@ const DataBarGraphCore = ({config, payload}: CoreProps) => {
                 </div>
             </div>
 
-            {data.task === 'read-category-count' && (
+            {displayTask === 'read-category-count' && data.task === 'categorical-data' && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
                     <span>{data.selectedCategory}</span><span>=</span>
                     <AnswerBox answer={isSolutionView ? data.answer : undefined} />

@@ -11,6 +11,8 @@ export const spec: ViewSpec = {
 
 export const DataPictureGraphViewSchema = {
     showConstructionTask: [[Ability.VisualArticulation], hasLabel(Ability.VisualArticulation)],
-    showArithmeticTask: [[Ability.ProcedureExecution], hasLabel(Ability.ProcedureExecution)]
+    showArithmeticTask: [[Ability.ProcedureExecution], hasLabel(Ability.ProcedureExecution)],
+    interpretCategory: [[Ability.Interpretation], hasLabel(Ability.Interpretation)],
+    classifyData: [[Ability.ConceptClassification], hasLabel(Ability.ConceptClassification)]
 } as const;
 export type DataPictureGraphViewConfig = ConfigFromSchema<typeof DataPictureGraphViewSchema>;

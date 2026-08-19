@@ -65,8 +65,6 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
             'useAddition',
             'useSubtraction',
             'useObjectSorting',
-            'useConceptClassification',
-            'interpretCategory',
             'requireThreeOperands',
             'isSingleStep',
             'isMultiStep'
@@ -74,16 +72,8 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
         if (config.useAddition && config.useSubtraction) {
             throw new GeneratorValidationError('statistical-graphs', 'A graph question cannot require both addition and subtraction.');
         }
-        if (config.useObjectSorting !== config.useConceptClassification) {
-            throw new GeneratorValidationError(
-                'statistical-graphs',
-                'Organizing data requires both object sorting and concept classification.'
-            );
-        }
-        const organizeData = config.useObjectSorting && config.useConceptClassification;
-        const selectedGrade1Tasks = Number(organizeData)
-            + Number(config.interpretCategory)
-            + Number(config.requireThreeOperands);
+        const organizeData = config.useObjectSorting;
+        const selectedGrade1Tasks = Number(organizeData) + Number(config.requireThreeOperands);
         if (selectedGrade1Tasks > 1) {
             throw new GeneratorValidationError(
                 'statistical-graphs',
@@ -100,7 +90,7 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
         if (config.isMultiStep && !config.useSubtraction) {
             throw new GeneratorValidationError('statistical-graphs', 'Multi-step graph questions require subtraction.');
         }
-        if ((organizeData || config.interpretCategory) && (hasOperation || stepComplexities > 0)) {
+        if (organizeData && (hasOperation || stepComplexities > 0)) {
             throw new GeneratorValidationError(
                 'statistical-graphs',
                 'Organize and read-category tasks cannot include arithmetic configuration.'
@@ -139,19 +129,18 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
                 }
             };
         }
-        if (config.interpretCategory) {
+        if (!hasOperation && !findTotal) {
             const selectedCategoryIndex = Math.floor(random() * categories.length) as 0 | 1 | 2;
             const selectedCategory = categories[selectedCategoryIndex];
             return {
                 data: {
-                    task: 'read-category-count',
+                    task: 'categorical-data',
                     graphState: 'complete',
                     categories,
                     scale,
                     selectedCategoryIndex,
                     selectedCategory: selectedCategory.label,
-                    answer: selectedCategory.count,
-                    prompt: `How many ${selectedCategory.label.toLowerCase()} are shown?`
+                    answer: selectedCategory.count
                 }
             };
         }
@@ -169,10 +158,6 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
                 }
             };
         }
-        if (!hasOperation) {
-            return {data: {task: 'construct', graphState: 'to-construct', categories, scale}};
-        }
-
         if (config.isMultiStep) {
             const firstIndex = counts.indexOf(Math.max(...counts));
             const [secondIndex, thirdIndex] = [0, 1, 2].filter(index => index !== firstIndex);

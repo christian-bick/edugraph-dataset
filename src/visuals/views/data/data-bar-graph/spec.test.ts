@@ -12,7 +12,9 @@ describe('DataBarGraphViewSchema', () => {
     ] as const)('resolves only view-owned presentation for %s', (ability, construction, arithmetic) => {
         expect(extractConfig(DataBarGraphViewSchema, [ability]).config).toEqual({
             showConstructionTask: construction,
-            showArithmeticTask: arithmetic
+            showArithmeticTask: arithmetic,
+            interpretCategory: ability === Ability.Interpretation,
+            classifyData: ability === Ability.ConceptClassification
         });
     });
 });

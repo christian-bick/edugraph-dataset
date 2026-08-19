@@ -1195,7 +1195,7 @@ export type StatisticalCategory = {
 };
 
 type StatisticalGraphBase = {
-    task: 'construct' | 'organize' | 'read-category-count' | 'find-total' | 'single-step-arithmetic' | 'multi-step-arithmetic';
+    task: 'categorical-data' | 'organize' | 'find-total' | 'single-step-arithmetic' | 'multi-step-arithmetic';
     graphState: 'to-construct' | 'complete';
     categories: readonly [StatisticalCategory, StatisticalCategory, StatisticalCategory];
     scale: 1 | 2 | 5 | 10;
@@ -1209,24 +1209,18 @@ type StatisticalGraphBase = {
     prompt?: string;
 };
 
-export type StatisticalGraphConstructProblem = StatisticalGraphBase & {
-    task: 'construct';
-    graphState: 'to-construct';
+export type StatisticalGraphCategoricalProblem = StatisticalGraphBase & {
+    task: 'categorical-data';
+    graphState: 'complete';
+    selectedCategoryIndex: 0 | 1 | 2;
+    selectedCategory: StatisticalCategory['label'];
+    answer: number;
 };
 
 export type StatisticalGraphOrganizeProblem = StatisticalGraphBase & {
     task: 'organize';
     graphState: 'to-construct';
     rawObservations: readonly StatisticalCategory['label'][];
-    prompt: string;
-};
-
-export type StatisticalGraphReadCategoryProblem = StatisticalGraphBase & {
-    task: 'read-category-count';
-    graphState: 'complete';
-    selectedCategoryIndex: 0 | 1 | 2;
-    selectedCategory: StatisticalCategory['label'];
-    answer: number;
     prompt: string;
 };
 
@@ -1257,9 +1251,8 @@ export type StatisticalGraphMultiStepProblem = StatisticalGraphBase & {
 };
 
 export type StatisticalGraphProblem =
-    | StatisticalGraphConstructProblem
+    | StatisticalGraphCategoricalProblem
     | StatisticalGraphOrganizeProblem
-    | StatisticalGraphReadCategoryProblem
     | StatisticalGraphFindTotalProblem
     | StatisticalGraphSingleStepProblem
     | StatisticalGraphMultiStepProblem;

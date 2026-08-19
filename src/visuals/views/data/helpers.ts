@@ -83,11 +83,17 @@ export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: 
     };
 
     switch (data.task) {
-        case 'construct':
-            if (data.graphState !== 'to-construct') {
-                throw new ViewValidationError(viewId, 'Construct tasks require a graph to construct.');
+        case 'categorical-data':
+            if (data.graphState !== 'complete') {
+                throw new ViewValidationError(viewId, 'Categorical graph data must carry complete counts.');
             }
-            rejectFields(['operation', 'operandIndices', 'intermediate', 'answer', 'rawObservations', 'selectedCategoryIndex', 'selectedCategory', 'prompt']);
+            rejectFields(['operation', 'operandIndices', 'intermediate', 'rawObservations', 'prompt']);
+            if (![0, 1, 2].includes(data.selectedCategoryIndex)
+                || data.selectedCategory !== data.categories[data.selectedCategoryIndex].label
+                || !Number.isInteger(data.answer)
+                || data.answer !== data.categories[data.selectedCategoryIndex].count) {
+                throw new ViewValidationError(viewId, 'Selected category and count answer are inconsistent.');
+            }
             return;
         case 'organize': {
             if (data.graphState !== 'to-construct' || data.scale !== 1) {
@@ -107,19 +113,6 @@ export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: 
             }
             return;
         }
-        case 'read-category-count':
-            if (data.graphState !== 'complete' || data.scale !== 1) {
-                throw new ViewValidationError(viewId, 'Read tasks require a complete graph.');
-            }
-            validatePrompt(data.prompt);
-            rejectFields(['operation', 'operandIndices', 'intermediate', 'rawObservations']);
-            if (![0, 1, 2].includes(data.selectedCategoryIndex)
-                || data.selectedCategory !== data.categories[data.selectedCategoryIndex].label
-                || !Number.isInteger(data.answer)
-                || data.answer !== data.categories[data.selectedCategoryIndex].count) {
-                throw new ViewValidationError(viewId, 'Selected category and count answer are inconsistent.');
-            }
-            return;
         case 'find-total': {
             if (data.graphState !== 'complete'
                 || data.scale !== 1

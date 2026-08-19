@@ -12,8 +12,6 @@ describe('StatisticalGraphsGenerator', () => {
         useAddition: false,
         useSubtraction: false,
         useObjectSorting: false,
-        useConceptClassification: false,
-        interpretCategory: false,
         requireThreeOperands: false,
         isSingleStep: false,
         isMultiStep: false
@@ -29,8 +27,8 @@ describe('StatisticalGraphsGenerator', () => {
             expect(count).toBeLessThanOrEqual(8);
         }
         expect(problem.data.scale).toBe(1);
-        expect(problem.data.task).toBe('construct');
-        expect(problem.data.graphState).toBe('to-construct');
+        expect(problem.data.task).toBe('categorical-data');
+        expect(problem.data.graphState).toBe('complete');
         expect(problem.data.operation).toBeUndefined();
     });
 
@@ -86,8 +84,7 @@ describe('StatisticalGraphsGenerator', () => {
             setSeed(seed);
             const data = generator.generate({
                 ...baseConfig,
-                useObjectSorting: true,
-                useConceptClassification: true
+                useObjectSorting: true
             }).data;
             expect(data.task).toBe('organize');
             expect(data.graphState).toBe('to-construct');
@@ -111,8 +108,8 @@ describe('StatisticalGraphsGenerator', () => {
     it('selects and answers one named category on a completed graph', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const data = generator.generate({...baseConfig, interpretCategory: true}).data;
-            expect(data.task).toBe('read-category-count');
+            const data = generator.generate(baseConfig).data;
+            expect(data.task).toBe('categorical-data');
             expect(data.graphState).toBe('complete');
             expect(data.scale).toBe(1);
             expect(data.selectedCategoryIndex).toBeGreaterThanOrEqual(0);
@@ -120,7 +117,6 @@ describe('StatisticalGraphsGenerator', () => {
             const selected = data.categories[data.selectedCategoryIndex!];
             expect(data.selectedCategory).toBe(selected.label);
             expect(data.answer).toBe(selected.count);
-            expect(data.prompt).toContain(selected.label.toLowerCase());
             expect(data.operation).toBeUndefined();
         }
     });
@@ -149,10 +145,7 @@ describe('StatisticalGraphsGenerator', () => {
         expect(() => generator.generate({...baseConfig, isSingleStep: true})).toThrow();
         expect(() => generator.generate({...baseConfig, useSubtraction: true, isSingleStep: true, isMultiStep: true})).toThrow();
         expect(() => generator.generate({...baseConfig, useAddition: true, isMultiStep: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, useObjectSorting: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, useConceptClassification: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, useObjectSorting: true, useConceptClassification: true, interpretCategory: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, interpretCategory: true, useSubtraction: true, isSingleStep: true})).toThrow();
+        expect(() => generator.generate({...baseConfig, useObjectSorting: true, useSubtraction: true, isSingleStep: true})).toThrow();
         expect(() => generator.generate({...baseConfig, useAddition: true, requireThreeOperands: true, isSingleStep: true})).toThrow();
         expect(() => generator.generate({...baseConfig, useAddition: true, requireThreeOperands: true, scale: Scope.StepsOf2})).toThrow();
     });

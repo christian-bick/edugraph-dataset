@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -13,8 +13,6 @@ export const StatisticalGraphsGeneratorSchema = {
     useAddition: [[Area.Addition], hasLabel(Area.Addition)],
     useSubtraction: [[Area.Subtraction], hasLabel(Area.Subtraction)],
     useObjectSorting: [[Area.ObjectSorting], hasLabel(Area.ObjectSorting)],
-    useConceptClassification: [[Ability.ConceptClassification], hasLabel(Ability.ConceptClassification)],
-    interpretCategory: [[Ability.Interpretation], hasLabel(Ability.Interpretation)],
     requireThreeOperands: [[Scope.ThreeOperands], hasLabel(Scope.ThreeOperands)],
     isSingleStep: [[Scope.SingleStep], hasLabel(Scope.SingleStep)],
     isMultiStep: [[Scope.MultiStep], hasLabel(Scope.MultiStep)]

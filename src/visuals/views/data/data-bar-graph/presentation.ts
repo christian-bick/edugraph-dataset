@@ -1,31 +1,42 @@
 import {StatisticalGraphProblem} from '../../../../types/problems.ts';
 import {graphQuestion} from '../helpers.ts';
 
-export const isConstructionTask = (task: StatisticalGraphProblem['task']): boolean =>
+export type StatisticalGraphPresentationTask =
+    | Exclude<StatisticalGraphProblem['task'], 'categorical-data'>
+    | 'construct'
+    | 'read-category-count';
+
+export const isConstructionTask = (task: StatisticalGraphPresentationTask): boolean =>
     task === 'construct' || task === 'organize';
 
-export const isArithmeticTask = (task: StatisticalGraphProblem['task']): boolean =>
+export const isArithmeticTask = (task: StatisticalGraphPresentationTask): boolean =>
     task === 'find-total' || task === 'single-step-arithmetic' || task === 'multi-step-arithmetic';
 
 export const taskHeading = (
     data: StatisticalGraphProblem,
-    isSolutionView: boolean
+    isSolutionView: boolean,
+    task: StatisticalGraphPresentationTask
 ): string => {
-    if (data.task === 'construct') {
+    if (task === 'construct') {
         return isSolutionView ? 'Completed bar graph' : 'Draw a bar graph for the data.';
     }
-    if (data.task === 'organize' || data.task === 'read-category-count' || data.task === 'find-total') {
+    if (task === 'read-category-count' && data.task === 'categorical-data') {
+        return `How many ${data.selectedCategory.toLowerCase()} are shown?`;
+    }
+    if (data.task === 'organize' || data.task === 'find-total') {
         return data.prompt;
     }
     return graphQuestion(data);
 };
 
 export const revealsBars = (
-    data: StatisticalGraphProblem,
-    isSolutionView: boolean
-): boolean => data.graphState === 'complete' || isSolutionView;
+    _data: StatisticalGraphProblem,
+    isSolutionView: boolean,
+    task: StatisticalGraphPresentationTask
+): boolean => task !== 'construct' && task !== 'organize' || isSolutionView;
 
 export const revealsBarCounts = (
-    data: StatisticalGraphProblem,
-    isSolutionView: boolean
-): boolean => data.task !== 'read-category-count' || isSolutionView;
+    _data: StatisticalGraphProblem,
+    isSolutionView: boolean,
+    task: StatisticalGraphPresentationTask
+): boolean => task !== 'read-category-count' || isSolutionView;

@@ -7,15 +7,21 @@ describe('data-picture-graph view spec', () => {
     it('owns only construction and numeric-response presentation abilities', () => {
         expect(extractConfig(DataPictureGraphViewSchema, [Ability.VisualArticulation]).config).toEqual({
             showConstructionTask: true,
-            showArithmeticTask: false
+            showArithmeticTask: false,
+            interpretCategory: false,
+            classifyData: false
         });
         expect(extractConfig(DataPictureGraphViewSchema, [Ability.ProcedureExecution]).config).toEqual({
             showConstructionTask: false,
-            showArithmeticTask: true
+            showArithmeticTask: true,
+            interpretCategory: false,
+            classifyData: false
         });
         expect(extractConfig(DataPictureGraphViewSchema, [Ability.Interpretation]).config).toEqual({
             showConstructionTask: false,
-            showArithmeticTask: false
+            showArithmeticTask: false,
+            interpretCategory: true,
+            classifyData: false
         });
     });
 

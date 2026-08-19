@@ -23,7 +23,7 @@ describe('data-picture-graph modes', () => {
             rawObservations: ['Books', 'Apples', 'Kites', 'Books', 'Kites', 'Apples', 'Kites', 'Books', 'Kites'],
             prompt: 'Sort the observations into categories.'
         };
-        const config = {showConstructionTask: true, showArithmeticTask: false};
+        const config = {showConstructionTask: true, showArithmeticTask: false, interpretCategory: false, classifyData: true};
         const question = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, false)} />);
         const solution = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, true)} />);
         expect(question).toContain('Shuffled observations');
@@ -33,10 +33,10 @@ describe('data-picture-graph modes', () => {
 
     it('keeps a complete graph visible while withholding the selected count', () => {
         const data: StatisticalGraphProblem = {
-            task: 'read-category-count', graphState: 'complete', categories, scale: 1,
-            selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 3, prompt: 'How many books are shown?'
+            task: 'categorical-data', graphState: 'complete', categories, scale: 1,
+            selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 3
         };
-        const config = {showConstructionTask: false, showArithmeticTask: false};
+        const config = {showConstructionTask: false, showArithmeticTask: false, interpretCategory: true, classifyData: false};
         const question = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, false)} />);
         const solution = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, true)} />);
         expect(markerCount(question)).toBe(9);
@@ -49,7 +49,7 @@ describe('data-picture-graph modes', () => {
             task: 'find-total', graphState: 'complete', categories, scale: 1,
             operation: 'addition', operandIndices: [0, 1, 2], answer: 9, prompt: 'How many items altogether?'
         };
-        const config = {showConstructionTask: false, showArithmeticTask: true};
+        const config = {showConstructionTask: false, showArithmeticTask: true, interpretCategory: false, classifyData: false};
         const question = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, false)} />);
         const solution = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, true)} />);
         expect(question).toContain('>2</span>');
@@ -62,11 +62,11 @@ describe('data-picture-graph modes', () => {
 
     it('preserves scaled legacy construction', () => {
         const data: StatisticalGraphProblem = {
-            task: 'construct', graphState: 'to-construct',
+            task: 'categorical-data', graphState: 'complete',
             categories: [{label: 'Apples', count: 4}, {label: 'Books', count: 6}, {label: 'Kites', count: 8}],
-            scale: 2
+            scale: 2, selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 6
         };
-        const config = {showConstructionTask: true, showArithmeticTask: false};
+        const config = {showConstructionTask: true, showArithmeticTask: false, interpretCategory: false, classifyData: false};
         const question = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, false)} />);
         const solution = renderToStaticMarkup(<DataPictureGraphCore config={config} payload={payload(data, true)} />);
         expect(question).toContain('Each symbol = 2 items');

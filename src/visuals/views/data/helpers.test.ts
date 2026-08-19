@@ -9,15 +9,12 @@ const categories = [
 ] as const;
 
 const problems: StatisticalGraphProblem[] = [
-    {task: 'construct', graphState: 'to-construct', categories, scale: 1},
+    {task: 'categorical-data', graphState: 'complete', categories, scale: 1,
+        selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 3},
     {
         task: 'organize', graphState: 'to-construct', categories, scale: 1,
         rawObservations: ['Books', 'Apples', 'Kites', 'Books', 'Kites', 'Apples', 'Kites', 'Books', 'Kites'],
         prompt: 'Sort the observations.'
-    },
-    {
-        task: 'read-category-count', graphState: 'complete', categories, scale: 1,
-        selectedCategoryIndex: 1, selectedCategory: 'Books', answer: 3, prompt: 'How many books?'
     },
     {
         task: 'find-total', graphState: 'complete', categories, scale: 1,
@@ -42,12 +39,12 @@ describe('shared statistical graph validation', () => {
     it.each([
         {...problems[1], scale: 2},
         {...problems[1], rawObservations: ['Apples']},
-        {...problems[2], selectedCategory: 'Kites'},
-        {...problems[2], answer: 4},
-        {...problems[3], operandIndices: [2, 1, 0]},
-        {...problems[3], answer: 8},
-        {...problems[4], answer: 6},
-        {...problems[5], intermediate: 4}
+        {...problems[0], selectedCategory: 'Kites'},
+        {...problems[0], answer: 4},
+        {...problems[2], operandIndices: [2, 1, 0]},
+        {...problems[2], answer: 8},
+        {...problems[3], answer: 6},
+        {...problems[4], intermediate: 4}
     ])('rejects a malformed task-specific payload %#', problem => {
         expect(() => validateStatisticalGraph(problem as StatisticalGraphProblem, 'fixture')).toThrow();
     });

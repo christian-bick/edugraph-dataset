@@ -13,7 +13,7 @@ describe('statistical-graphs spec', () => {
             Ability.VisualArticulation
         ])!.data;
         expect(data.scale).toBe(1);
-        expect(data.task).toBe('construct');
+        expect(data.task).toBe('categorical-data');
         expect(data.operation).toBeUndefined();
     });
 
@@ -107,9 +107,9 @@ describe('statistical-graphs spec', () => {
         expect(result.data.task).toBe('organize');
         expect(result.data.rawObservations).toBeDefined();
         expect(result.tags).toEqual(expect.arrayContaining([
-            Area.ObjectSorting,
-            Ability.ConceptClassification
+            Area.ObjectSorting
         ]));
+        expect(result.tags).not.toContain(Ability.ConceptClassification);
     });
 
     it('resolves interpretation as read-category-count', () => {
@@ -120,11 +120,11 @@ describe('statistical-graphs spec', () => {
             Scope.StepsOf1,
             Ability.Interpretation
         ])!;
-        expect(result.data.task).toBe('read-category-count');
+        expect(result.data.task).toBe('categorical-data');
         expect(result.data.answer).toBe(
             result.data.categories[result.data.selectedCategoryIndex!].count
         );
-        expect(result.tags).toContain(Ability.Interpretation);
+        expect(result.tags).not.toContain(Ability.Interpretation);
     });
 
     it('resolves three-operand addition as find-total', () => {

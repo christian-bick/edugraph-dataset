@@ -3,6 +3,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {categoryStyles, validateStatisticalGraph} from '../helpers.ts';
+import {isArithmeticTask, isConstructionTask} from '../data-bar-graph/presentation.ts';
 import {DataPictureGraphViewConfig, DataPictureGraphViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -16,28 +17,39 @@ export const DataPictureGraphCore = ({config, payload}: CoreProps) => {
     const data = problem.data;
     validateStatisticalGraph(data, 'data-picture-graph');
 
-    const isConstruction = data.task === 'construct' || data.task === 'organize';
-    const isArithmetic = data.task === 'find-total';
+    const displayTask = data.task === 'categorical-data'
+        ? config.interpretCategory
+            ? 'read-category-count'
+            : 'construct'
+        : data.task;
+    const isConstruction = isConstructionTask(displayTask);
+    const isArithmetic = isArithmeticTask(displayTask);
     if (config.showConstructionTask !== isConstruction || config.showArithmeticTask !== isArithmetic) {
         throw new ViewValidationError('data-picture-graph', 'Resolved presentation abilities do not agree with the graph task.');
+    }
+    if (config.interpretCategory !== (displayTask === 'read-category-count')
+        || config.classifyData !== (data.task === 'organize')) {
+        throw new ViewValidationError('data-picture-graph', 'Interpretation and classification modes must agree with the graph task.');
     }
     if (data.task === 'single-step-arithmetic' || data.task === 'multi-step-arithmetic') {
         throw new ViewValidationError('data-picture-graph', 'This picture-graph layout cannot render the requested arithmetic direction.');
     }
 
-    const showMarkers = data.graphState === 'complete' || isSolutionView;
-    const heading = data.task === 'construct'
+    const showMarkers = !isConstruction || isSolutionView;
+    const heading = displayTask === 'construct'
         ? (isSolutionView ? 'Completed picture graph' : 'Draw a picture graph for the data.')
         : data.task === 'organize'
             ? (isSolutionView ? 'Grouped picture graph' : data.prompt)
-            : data.prompt;
+            : displayTask === 'read-category-count' && data.task === 'categorical-data'
+                ? `How many ${data.selectedCategory.toLowerCase()} are shown?`
+                : data.prompt;
 
     return (
         <div className="w-[680px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-rose-700">Picture graph</div>
             <div className="mt-1 text-xl font-bold text-slate-800">{heading}</div>
 
-            {data.task === 'construct' && (
+            {displayTask === 'construct' && (
                 <div className="mt-5 grid grid-cols-3 gap-3">
                     {data.categories.map(({label, count}, index) => (
                         <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-center">
@@ -82,7 +94,7 @@ export const DataPictureGraphCore = ({config, payload}: CoreProps) => {
                 Each symbol = {data.scale} {data.scale === 1 ? 'item' : 'items'}
             </div>
 
-            {data.task === 'read-category-count' && (
+            {displayTask === 'read-category-count' && data.task === 'categorical-data' && (
                 <div className={`mx-auto mt-5 flex min-h-16 w-[280px] items-center justify-center rounded-xl border-2 px-4 text-center ${isSolutionView ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-dashed border-slate-300 bg-white text-slate-500'}`}>
                     <span className="mr-3 text-sm font-bold">{data.selectedCategory} count:</span>
                     <span aria-label="Category count response" data-response="category-count" className="min-w-16 font-mono text-2xl font-black">{isSolutionView ? data.answer : '____'}</span>

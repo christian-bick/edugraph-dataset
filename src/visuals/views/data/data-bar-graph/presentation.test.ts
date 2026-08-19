@@ -16,8 +16,6 @@ const baseConfig = {
     useAddition: false,
     useSubtraction: false,
     useObjectSorting: false,
-    useConceptClassification: false,
-    interpretCategory: false,
     requireThreeOperands: false,
     isSingleStep: false,
     isMultiStep: false
@@ -30,22 +28,22 @@ describe('data-bar-graph presentation', () => {
         setSeed('bar-organize');
         const organize = generator.generate({
             ...baseConfig,
-            useObjectSorting: true,
-            useConceptClassification: true
+            useObjectSorting: true
         }).data;
 
-        for (const data of [construct, organize]) {
-            expect(isConstructionTask(data.task)).toBe(true);
-            expect(isArithmeticTask(data.task)).toBe(false);
-            expect(revealsBars(data, false)).toBe(false);
-            expect(revealsBars(data, true)).toBe(true);
-        }
-        expect(taskHeading(organize, false)).toBe(organize.task === 'organize' ? organize.prompt : '');
+        expect(isConstructionTask('construct')).toBe(true);
+        expect(isArithmeticTask('construct')).toBe(false);
+        expect(revealsBars(construct, false, 'construct')).toBe(false);
+        expect(revealsBars(construct, true, 'construct')).toBe(true);
+        expect(isConstructionTask('organize')).toBe(true);
+        expect(revealsBars(organize, false, 'organize')).toBe(false);
+        expect(revealsBars(organize, true, 'organize')).toBe(true);
+        expect(taskHeading(organize, false, 'organize')).toBe(organize.task === 'organize' ? organize.prompt : '');
     });
 
     it('keeps read and find-total graphs complete while withholding answers in the view', () => {
         setSeed('bar-read');
-        const read = generator.generate({...baseConfig, interpretCategory: true}).data;
+        const read = generator.generate(baseConfig).data;
         setSeed('bar-total');
         const total = generator.generate({
             ...baseConfig,
@@ -53,15 +51,15 @@ describe('data-bar-graph presentation', () => {
             requireThreeOperands: true
         }).data;
 
-        expect(read.task).toBe('read-category-count');
+        expect(read.task).toBe('categorical-data');
         expect(total.task).toBe('find-total');
-        expect(revealsBars(read, false)).toBe(true);
-        expect(revealsBars(total, false)).toBe(true);
-        expect(revealsBarCounts(read, false)).toBe(false);
-        expect(revealsBarCounts(read, true)).toBe(true);
-        expect(revealsBarCounts(total, false)).toBe(true);
-        expect(isConstructionTask(read.task)).toBe(false);
-        expect(isArithmeticTask(total.task)).toBe(true);
+        expect(revealsBars(read, false, 'read-category-count')).toBe(true);
+        expect(revealsBars(total, false, 'find-total')).toBe(true);
+        expect(revealsBarCounts(read, false, 'read-category-count')).toBe(false);
+        expect(revealsBarCounts(read, true, 'read-category-count')).toBe(true);
+        expect(revealsBarCounts(total, false, 'find-total')).toBe(true);
+        expect(isConstructionTask('read-category-count')).toBe(false);
+        expect(isArithmeticTask('find-total')).toBe(true);
         if (total.task === 'find-total') {
             expect(total.operandIndices).toEqual([0, 1, 2]);
             expect(total.answer).toBe(total.categories.reduce((sum, category) => sum + category.count, 0));
@@ -85,9 +83,9 @@ describe('data-bar-graph presentation', () => {
 
         expect(single.task).toBe('single-step-arithmetic');
         expect(multi.task).toBe('multi-step-arithmetic');
-        expect(taskHeading(single, false)).toContain('altogether');
-        expect(taskHeading(multi, false)).toContain('How many more');
-        expect(isArithmeticTask(single.task)).toBe(true);
-        expect(isArithmeticTask(multi.task)).toBe(true);
+        expect(taskHeading(single, false, 'single-step-arithmetic')).toContain('altogether');
+        expect(taskHeading(multi, false, 'multi-step-arithmetic')).toContain('How many more');
+        expect(isArithmeticTask('single-step-arithmetic')).toBe(true);
+        expect(isArithmeticTask('multi-step-arithmetic')).toBe(true);
     });
 });
