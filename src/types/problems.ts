@@ -237,8 +237,6 @@ export type PositiveFactorEvidence = {
 
 export type FactorPairsProblem = PositiveFactorEvidence & {
     kind: 'factor-pairs';
-    prompt: string;
-    conclusion: string;
 };
 
 export type OneDigitMultipleTestProblem = {
@@ -248,26 +246,16 @@ export type OneDigitMultipleTestProblem = {
     quotient: number;
     remainder: 0;
     isMultiple: true;
-    prompt: string;
-    multiplicationEquation: string;
-    divisionEquation: string;
-    conclusion: string;
 };
 
 export type PrimeClassificationProblem = PositiveFactorEvidence & {
     kind: 'prime-classification';
     classification: 'prime';
-    prompt: string;
-    explanation: string;
-    conclusion: string;
 };
 
 export type CompositeClassificationProblem = PositiveFactorEvidence & {
     kind: 'composite-classification';
     classification: 'composite';
-    prompt: string;
-    explanation: string;
-    conclusion: string;
 };
 
 export type FactorClassificationProblem =
@@ -287,7 +275,6 @@ export type ArithmeticWordProblemTwoStep = {
     operations: readonly [ArithmeticOperation, ArithmeticOperation];
     intermediate: number;
     answer: number;
-    blankPart: 'solution';
 };
 
 export type RemainderInterpretation = 'use-quotient' | 'round-up' | 'use-remainder';
@@ -298,14 +285,6 @@ export type ArithmeticWordProblemInterpretedRemainder = {
     divisor: number;
     quotient: number;
     remainder: number;
-    interpretation: RemainderInterpretation;
-    answer: number;
-    story: string;
-    question: string;
-    divisionEquation: string;
-    contextDecision: string;
-    interpretationExplanation: string;
-    answerStatement: string;
 };
 
 export type ArithmeticWordProblemLetterEquation = {
@@ -314,13 +293,6 @@ export type ArithmeticWordProblemLetterEquation = {
     operations: readonly [ArithmeticOperation, ArithmeticOperation];
     intermediate: number;
     answer: number;
-    unknownSymbol: 'n';
-    story: string;
-    question: string;
-    stepEquations: readonly [string, string];
-    combinedEquation: string;
-    solutionEquation: string;
-    answerStatement: string;
 };
 
 export type ArithmeticWordProblemReasonableness = {
@@ -334,12 +306,6 @@ export type ArithmeticWordProblemReasonableness = {
     roundedExactAnswer: number;
     roundedProposedAnswer: number;
     isReasonable: boolean;
-    story: string;
-    question: string;
-    exactEquations: readonly [string, string];
-    roundingCheck: string;
-    reasonablenessExplanation: string;
-    answerStatement: string;
 };
 
 export type ArithmeticWordProblemGrade4 =
@@ -2542,6 +2508,8 @@ export interface ViewTypeMap {
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;
     'operations-division-area-model': MultiDigitDivisionProblem;
     'numbers-factors-multiples': FactorMultipleRelationsProblem;
+    'numbers-prime-classification': FactorMultipleRelationsProblem;
+    'numbers-composite-classification': FactorMultipleRelationsProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-boxes-inversion': ArithmeticProblem;
     'operations-representation': ArithmeticPairProblem;
@@ -2549,6 +2517,9 @@ export interface ViewTypeMap {
     'operations-word-problem-inversion': ArithmeticProblem;
     'operations-word-problem-within-100': ArithmeticWordProblemWithin100;
     'operations-word-problem-within-100-inversion': ArithmeticPairProblem;
+    'operations-word-problem-remainder-interpretation': ArithmeticWordProblemMultistep;
+    'operations-word-problem-equation-formalization': ArithmeticWordProblemMultistep;
+    'operations-word-problem-reasoning': ArithmeticWordProblemMultistep;
     'operations-properties': ArithmeticTripleProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;

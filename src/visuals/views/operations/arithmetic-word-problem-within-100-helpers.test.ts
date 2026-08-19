@@ -25,8 +25,7 @@ describe('operations-word-problem-within-100 helpers', () => {
         num3: 9,
         operations: ['addition', 'subtraction'],
         intermediate: 52,
-        answer: 43,
-        blankPart: 'solution'
+        answer: 43
     };
 
     it('distinguishes pair and connected two-step payloads', () => {

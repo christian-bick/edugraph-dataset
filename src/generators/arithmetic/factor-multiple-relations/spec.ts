@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -20,9 +20,7 @@ export const FactorMultipleRelationsGeneratorSchema = {
             Area.FactorsAndMultiples,
             Area.PerfectDivisibility,
             Area.PrimeNumbers,
-            Area.CompositeNumbers,
-            Ability.ProcedureExecution,
-            Ability.ConceptClassification
+            Area.CompositeNumbers
         ],
         selectCanonicalLabel([
             [[Area.PerfectDivisibility], 'one-digit-multiple-test'],

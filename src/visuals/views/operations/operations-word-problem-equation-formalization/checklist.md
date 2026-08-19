@@ -1,0 +1,2 @@
+- **Identity:** The story explicitly asks the learner to represent the final unknown with a letter equation.
+- **Modes:** Question Mode withholds the value of the letter; Solution Mode reveals the solved equation while preserving both formalization steps.

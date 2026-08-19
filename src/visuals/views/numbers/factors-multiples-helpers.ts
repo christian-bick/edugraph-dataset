@@ -1,4 +1,4 @@
-import {PositiveFactorEvidence} from '../../../../types/problems.ts';
+import {PositiveFactorEvidence} from '../../../types/problems.ts';
 
 export function hasCompletePositiveFactorEvidence(data: PositiveFactorEvidence): boolean {
     if (!Number.isInteger(data.number) || data.number < 1 || data.number >= 100) return false;

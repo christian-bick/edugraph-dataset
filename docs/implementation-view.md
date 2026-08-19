@@ -114,6 +114,9 @@ and tests directly in the category parent directory with descriptive filenames; 
 
 The leaf wrapper fixes the task mode passed to the shared renderer. The shared renderer
 must not inspect ontology labels or import one leaf's spec to recover that decision.
+When [SPEC-V7](spec-view.md#spec-v7--requiredlabels-scopes-payload-applicability) scopes a
+leaf to one member of a canonical discriminated family, the wrapper also fixes the expected
+discriminant and the shared renderer fails strictly if the payload does not match it.
 
 ### IMPL-V10 — The screenshot root shrink-wraps content up to the viewport
 

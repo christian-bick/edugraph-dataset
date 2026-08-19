@@ -7,11 +7,10 @@ import {spec} from './spec.ts';
 const generator = new ShapePartitionEquivalenceGenerator();
 
 describe('ShapePartitionEquivalenceGenerator spec integration', () => {
-    it('declares the invariant derivation task', () => {
+    it('declares only the invariant mathematics', () => {
         expect(spec.generalLabels).toEqual([
             Area.ShapeEquivalenceRelations,
-            Scope.EqualShares,
-            Ability.ConceptDerivation
+            Scope.EqualShares
         ]);
     });
 
@@ -28,5 +27,6 @@ describe('ShapePartitionEquivalenceGenerator spec integration', () => {
 
         expect(stub.data.shape).toBe(expectedShape);
         expect(stub.tags).toContain(shape);
+        expect(stub.tags).not.toContain(Ability.ConceptDerivation);
     });
 });

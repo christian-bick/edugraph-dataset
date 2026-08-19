@@ -97,6 +97,19 @@ structurally distinguishable union. The established arithmetic pattern is
 `ArithmeticPairProblem | ArithmeticTripleProblem` in `ViewTypeMap`: the shared view narrows
 the union through `num3`, validates the corresponding fields, and reuses the common layout.
 
+### IMPL-G8 — Payloads are Ability-neutral mathematical models
+
+A generator payload contains the mathematical objects, relations, evidence, and semantic
+context needed by its consumers. It does not preselect the learner action: no unknown or
+blank position, instruction, prompt direction, requested explanation, hint, or
+Ability-specific answer prose. Those decisions belong to the leaf view under
+[SPEC-V5](spec-view.md#spec-v5--abilities-are-exclusively-view-owned).
+
+Do not merely remove the Ability label while preserving its decision in fields such as
+`blankPart`, `question`, or `explanation`. If multiple views need the same mathematical
+relation, expose that relation canonically and let each view derive its observable task.
+Ontology-irrelevant variation belongs to the view and is derived from `payload.seed`.
+
 ---
 
 ## Audit
@@ -108,4 +121,5 @@ the union through `num3`, validates the corresponding fields, and reuses the com
 - [ ] **IMPL-G5** — `generator.test.ts` covers the mathematical boundaries; `spec.test.ts` covers tag resolution; an empty-config throw is asserted.
 - [ ] **IMPL-G6** — if the payload contract changed, every consuming view found against the real standard via `npm run show:matching` renders the new fields; the test spec also retains a smoke path.
 - [ ] **IMPL-G7** — capability extensions preserve the payload contract; structurally different problem shapes use a separate generator and share a typed-union view where rendering remains simple.
+- [ ] **IMPL-G8** — the payload contains canonical mathematics and semantic context, but no Ability-specific prompt, blank, hint, requested reasoning, or answer prose.
 - [ ] `npm run test` and `npm run check:types` pass.

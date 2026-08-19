@@ -81,12 +81,11 @@ through [SPEC-4](spec-general.md#spec-4--never-declare-a-capability-broader-than
 declare the most specific label that is *actually true* of the output, never an ancestor of
 it, and never a leaf the module does not really satisfy.
 
-Area, Scope and Ability target labels may be covered by the generator **or** the view — see the
-table in [SPEC-1](spec-general.md#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific).
-
-A generator schema **may** map an `Ability` when that ability decides the math logic. That
-declaration participates in matching like every other capability, and a paired view must
-not redeclare it ([SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair)).
+Generator specs contain no `Ability` labels. Abilities depend on the final observable task,
+so they are exclusively owned by views ([SPEC-V5](spec-view.md#spec-v5--abilities-are-exclusively-view-owned)).
+When an apparent Ability choice changes operands, unknowns, wording, hints, or requested
+reasoning, the generator instead emits the canonical mathematical relation and the view
+constructs that task projection.
 
 ---
 
@@ -95,5 +94,5 @@ not redeclare it ([SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization
 - [ ] **SPEC-G1** — `spec`, `GeneratorSchema` and `Config` are all exported, with `Config` extracted from the schema.
 - [ ] **SPEC-G2** — every schema parameter is a mathematical property; no `isReverse`, `layoutStyle`, `themeColor`, `useColor`, `showTenFrame`, or comparable presentation flag.
 - [ ] **SPEC-G3** — declared Area/Scope labels are the most specific true claims about the math produced.
-- [ ] **SPEC-G3** — any mapped ability genuinely decides math logic and is not redeclared by a paired view.
+- [ ] **SPEC-G3** — neither `generalLabels` nor any generator schema parameter contains an Ability.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

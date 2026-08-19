@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {PositiveFactorEvidence} from '../../../../types/problems.ts';
-import {hasCompletePositiveFactorEvidence} from './helpers.ts';
+import {hasCompletePositiveFactorEvidence} from '../factors-multiples-helpers.ts';
 
 const completeEvidence: PositiveFactorEvidence = {
     number: 36,

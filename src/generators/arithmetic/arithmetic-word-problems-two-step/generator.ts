@@ -8,8 +8,7 @@ import {
     ArithmeticWordProblemLetterEquation,
     ArithmeticWordProblemMultistep,
     ArithmeticWordProblemReasonableness,
-    ArithmeticWordProblemTwoStep,
-    RemainderInterpretation
+    ArithmeticWordProblemTwoStep
 } from '../../../types/problems.ts';
 import {
     ArithmeticWordProblemsTwoStepGeneratorConfig,
@@ -34,43 +33,15 @@ const applyOperation = (left: number, right: number, operation: ArithmeticOperat
     return left / right;
 };
 
-const operationSymbol = (operation: ArithmeticOperation): string => ({
-    addition: '+',
-    subtraction: '−',
-    multiplication: '×',
-    division: '÷'
-})[operation];
-
 const randomInteger = (minimum: number, maximum: number): number | null => {
     if (minimum > maximum) return null;
     return minimum + Math.floor(random() * (maximum - minimum + 1));
 };
 
-const countedNoun = (count: number, singular: string): string =>
-    count === 1 ? singular : `${singular}s`;
-
 const valuesInRange = (values: Values, minimum: number, maximum: number): boolean =>
     Object.values(values).every(value =>
         Number.isInteger(value) && value >= minimum && value <= maximum
     );
-
-function buildStory(values: Values, operations: NamedOperations): string {
-    const firstStep = operations[0] === 'addition'
-        ? `A collection starts with ${values.num1} items and receives ${values.num2} more.`
-        : operations[0] === 'subtraction'
-            ? `A collection starts with ${values.num1} items and ${values.num2} are removed.`
-            : operations[0] === 'multiplication'
-                ? `A display has ${values.num1} equal groups with ${values.num2} items in each group.`
-                : `${values.num1} items are shared equally among ${values.num2} groups.`;
-    const secondStep = operations[1] === 'addition'
-        ? `Then ${values.num3} more items are added to that result.`
-        : operations[1] === 'subtraction'
-            ? `Then ${values.num3} items are removed from that result.`
-            : operations[1] === 'multiplication'
-                ? `Then ${values.num3} identical copies of that result are combined.`
-                : `Then that result is shared equally among ${values.num3} groups.`;
-    return `${firstStep} ${secondStep}`;
-}
 
 export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
     ArithmeticWordProblemMultistep,
@@ -126,8 +97,7 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
             data: {
                 kind: 'two-step',
                 ...values,
-                operations: namedOperations,
-                blankPart: 'solution'
+                operations: namedOperations
             }
         };
     }
@@ -260,56 +230,12 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
 
         const dividend = divisor * quotient + remainder;
         if (dividend > maximum) return null;
-        const interpretations: readonly RemainderInterpretation[] = [
-            'use-quotient',
-            'round-up',
-            'use-remainder'
-        ];
-        const interpretation = interpretations[Math.floor(random() * interpretations.length)];
-
-        const common = {
+        return {data: {
             kind: 'interpreted-remainder' as const,
             dividend,
             divisor,
             quotient,
-            remainder,
-            interpretation,
-            divisionEquation: `${dividend} = ${divisor} × ${quotient} + ${remainder}`
-        };
-
-        if (interpretation === 'round-up') {
-            const answer = quotient + 1;
-            return {data: {
-                ...common,
-                answer,
-                story: `A class of ${dividend} students travels in vans that hold ${divisor} students each.`,
-                question: 'How many vans are needed for every student?',
-                contextDecision: 'Round the quotient up because the remaining students need another van.',
-                interpretationExplanation: `${quotient} vans are full and ${remainder} students remain, so one more van is required.`,
-                answerStatement: `${answer} vans are needed.`
-            }};
-        }
-
-        if (interpretation === 'use-remainder') {
-            return {data: {
-                ...common,
-                answer: remainder,
-                story: `${dividend} stickers are shared equally among ${divisor} students.`,
-                question: 'How many stickers are left over?',
-                contextDecision: 'Use the remainder because the question asks what is left over.',
-                interpretationExplanation: `Each student receives ${quotient} ${countedNoun(quotient, 'sticker')} and ${remainder} ${countedNoun(remainder, 'sticker')} ${remainder === 1 ? 'is' : 'are'} left over.`,
-                answerStatement: `${remainder} ${countedNoun(remainder, 'sticker')} ${remainder === 1 ? 'is' : 'are'} left over.`
-            }};
-        }
-
-        return {data: {
-            ...common,
-            answer: quotient,
-            story: `${dividend} markers are packed into boxes that hold ${divisor} markers each. Only full boxes are shipped.`,
-            question: 'How many full boxes can be shipped?',
-            contextDecision: 'Use only the whole-number quotient because a partly filled box is not shipped.',
-            interpretationExplanation: `${quotient} boxes are full and ${remainder} markers do not complete another box.`,
-            answerStatement: `${quotient} full boxes can be shipped.`
+            remainder
         }};
     }
 
@@ -317,24 +243,12 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
         values: Values,
         operations: NamedOperations
     ): ArithmeticWordProblemLetterEquation {
-        const firstSymbol = operationSymbol(operations[0]);
-        const secondSymbol = operationSymbol(operations[1]);
         return {
             kind: 'letter-equation',
             operands: [values.num1, values.num2, values.num3],
             operations,
             intermediate: values.intermediate,
-            answer: values.answer,
-            unknownSymbol: 'n',
-            story: buildStory(values, operations),
-            question: 'What value of n represents the final number of items?',
-            stepEquations: [
-                `${values.num1} ${firstSymbol} ${values.num2} = ${values.intermediate}`,
-                `${values.intermediate} ${secondSymbol} ${values.num3} = n`
-            ],
-            combinedEquation: `(${values.num1} ${firstSymbol} ${values.num2}) ${secondSymbol} ${values.num3} = n`,
-            solutionEquation: `n = ${values.answer}`,
-            answerStatement: `The value of n is ${values.answer}.`
+            answer: values.answer
         };
     }
 
@@ -352,9 +266,6 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
         const roundedExactAnswer = Math.round(values.answer / 10) * 10;
         const roundedProposedAnswer = Math.round(proposedAnswer / 10) * 10;
         const isReasonable = roundedExactAnswer === roundedProposedAnswer;
-        const firstSymbol = operationSymbol(operations[0]);
-        const secondSymbol = operationSymbol(operations[1]);
-
         return {
             kind: 'reasonableness',
             operands: [values.num1, values.num2, values.num3],
@@ -365,20 +276,7 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
             roundingPlace: 10,
             roundedExactAnswer,
             roundedProposedAnswer,
-            isReasonable,
-            story: `${buildStory(values, operations)} A student says the final result is ${proposedAnswer}.`,
-            question: 'Is the student’s answer reasonable? Explain using rounding.',
-            exactEquations: [
-                `${values.num1} ${firstSymbol} ${values.num2} = ${values.intermediate}`,
-                `${values.intermediate} ${secondSymbol} ${values.num3} = ${values.answer}`
-            ],
-            roundingCheck: `${values.answer} rounds to ${roundedExactAnswer}; ${proposedAnswer} rounds to ${roundedProposedAnswer}.`,
-            reasonablenessExplanation: isReasonable
-                ? 'The exact and proposed answers round to the same ten, so the proposal is reasonable.'
-                : 'The exact and proposed answers round to different tens, so the proposal is not reasonable.',
-            answerStatement: isReasonable
-                ? `${proposedAnswer} is a reasonable answer.`
-                : `${proposedAnswer} is not a reasonable answer.`
+            isReasonable
         };
     }
 }

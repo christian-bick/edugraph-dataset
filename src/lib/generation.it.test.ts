@@ -73,7 +73,8 @@ describe('catalogs and end-to-end matching', () => {
         }
 
         for (const rejection of rejections) {
-            expect(['unsupported-label', 'rejected-label']).toContain(rejection.verdict.reason);
+            expect(['unsupported-label', 'missing-required-label', 'rejected-label'])
+                .toContain(rejection.verdict.reason);
         }
 
         const tuple = tuples[0];

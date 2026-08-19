@@ -5,12 +5,14 @@ import { isSubConceptOf } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from '../lib/type-parser.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
+import { Ability } from 'edugraph-ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
 const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
+const abilityLabels = new Set<string>(Object.values(Ability));
 
 /**
  * A generalLabels list must not contain a label together with one of its
@@ -67,6 +69,11 @@ async function validateSpecs() {
                 if (checkRedundantGeneralLabels('generator', item, generalLabels)) {
                     hasError = true;
                 }
+                const generalAbilities = generalLabels.filter((label: string) => abilityLabels.has(label));
+                if (generalAbilities.length > 0) {
+                    console.error(`❌ [generator:${item}] Ability labels belong exclusively to views: ${generalAbilities.join(', ')}`);
+                    hasError = true;
+                }
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                 const schemaName = `${modulePrefix}GeneratorSchema`;
                 const schema = specModule[schemaName];
@@ -74,6 +81,12 @@ async function validateSpecs() {
                 if (schema) {
                     const paramLabels = extractSchemaLabels(schema);
                     generatorSchemas[item] = { schema, paramLabels };
+
+                    const parameterAbilities = paramLabels.filter(label => abilityLabels.has(label));
+                    if (parameterAbilities.length > 0) {
+                        console.error(`❌ [generator:${item}] Ability labels belong exclusively to views: ${parameterAbilities.join(', ')}`);
+                        hasError = true;
+                    }
                     
                     // Self overlap check
                     for (const p of paramLabels) {
@@ -117,7 +130,13 @@ async function validateSpecs() {
                 }
 
                 const generalLabels = spec.generalLabels || [];
+                const requiredLabels = spec.requiredLabels || [];
                 if (checkRedundantGeneralLabels('view', item, generalLabels)) {
+                    hasError = true;
+                }
+                const requiredAbilities = requiredLabels.filter((label: string) => abilityLabels.has(label));
+                if (requiredAbilities.length > 0) {
+                    console.error(`❌ [view:${item}] requiredLabels may scope mathematical applicability but must not contain Ability labels: ${requiredAbilities.join(', ')}`);
                     hasError = true;
                 }
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
@@ -198,7 +217,7 @@ async function validateSpecs() {
         console.error('\n❌ Spec validation failed.');
         process.exit(1);
     } else {
-        console.log('\n✅ Spec validation succeeded! No generalLabels / parameter overlaps or duplicate parameterizations detected.');
+        console.log('\n✅ Spec validation succeeded! Ability ownership, applicability, overlaps, and parameterization are valid.');
     }
 }
 

@@ -27,6 +27,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             Scope.NumbersWithoutNegatives,
             Scope.NumbersWithoutZero
         ]));
+        expect(JSON.stringify(spec)).not.toContain('Ability.');
     });
 
     it('preserves the legacy task while resolving all reviewed operation groups', () => {
@@ -60,6 +61,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             Area.ImperfectDivisibility,
             Area.Modulo
         ]));
+        expect(stub!.tags).not.toContain(Ability.ResultInterpretation);
     });
 
     it('resolves equation-labelled targets across all ten operation groups', () => {
@@ -75,6 +77,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             if (stub!.data.kind !== 'letter-equation') throw new Error('Expected equation payload.');
             expect(stub!.data.operations).toEqual(entry.operations);
             expect(stub!.tags).toEqual(expect.arrayContaining([...entry.labels, Area.Equation]));
+            expect(stub!.tags).not.toContain(Ability.Formalization);
         }
     });
 
@@ -95,6 +98,8 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
                 Area.Estimation,
                 Area.IntegerRounding
             ]));
+            expect(stub!.tags).not.toContain(Ability.ResultInterpretation);
+            expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
         }
     });
 });

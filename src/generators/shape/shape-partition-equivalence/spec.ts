@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -6,8 +6,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'shape-partition-equivalence',
     generalLabels: [
         Area.ShapeEquivalenceRelations,
-        Scope.EqualShares,
-        Ability.ConceptDerivation
+        Scope.EqualShares
     ]
 };
 

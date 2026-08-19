@@ -1,0 +1,2 @@
+- **Identity:** The prompt asks the learner to classify a number as prime using complete factor evidence.
+- **Modes:** Question Mode withholds the classification and evidence; Solution Mode reveals the prime classification with every positive factor.

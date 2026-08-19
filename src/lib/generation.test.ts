@@ -124,10 +124,12 @@ describe('matchesTarget', () => {
     const view = (
         supportedLabels: string[],
         rejectedLabels: string[] = [],
-        problemType: string | null = 'WritingProblem'
+        problemType: string | null = 'WritingProblem',
+        requiredLabels: string[] = []
     ): ViewMatchInfo => ({
         viewId: 'view-a',
         supportedLabels,
+        requiredLabels,
         rejectedLabels,
         problemType
     });
@@ -245,6 +247,35 @@ describe('matchesTarget', () => {
             view([], [Scope.NumbersSmaller100])
         );
         expect(verdict).toEqual({ matched: false, reason: 'rejected-label', label: Scope.NumbersSmaller100 });
+    });
+
+    it('requires every view applicability label without treating it as a capability', () => {
+        const matching = matchesTarget(
+            [Area.Equation, Ability.Formalization],
+            gen([Area.Equation]),
+            view([Ability.Formalization], [], 'WritingProblem', [Area.Equation])
+        );
+        expect(matching).toEqual({matched: true});
+
+        const missing = matchesTarget(
+            [Ability.Formalization],
+            gen([]),
+            view([Ability.Formalization], [], 'WritingProblem', [Area.Equation])
+        );
+        expect(missing).toEqual({
+            matched: false,
+            reason: 'missing-required-label',
+            label: Area.Equation
+        });
+    });
+
+    it('accepts a target specialization of a required view label', () => {
+        const verdict = matchesTarget(
+            [Area.ObjectSorting],
+            gen([Area.ObjectSorting]),
+            view([], [], 'WritingProblem', [Area.CollectionSense])
+        );
+        expect(verdict).toEqual({matched: true});
     });
 
     it('rejects incompatible problem types before label checks', () => {

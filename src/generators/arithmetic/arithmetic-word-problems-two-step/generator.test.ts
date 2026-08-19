@@ -59,7 +59,6 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
                 expect(stub!.data.kind).toBe('two-step');
                 if (stub!.data.kind !== 'two-step') throw new Error('Expected legacy payload.');
                 expectValidSteps(stub!.data);
-                expect(stub!.data.blankPart).toBe('solution');
                 expect([
                     stub!.data.num1,
                     stub!.data.num2,
@@ -91,10 +90,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
         }
     });
 
-    it('interprets every nonzero-remainder context explicitly', () => {
-        const interpretations = new Set<string>();
-        let singularRemainderExample: string | undefined;
-
+    it('creates a canonical nonzero-remainder relation without choosing a context', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
             const stub = generator.generate({
@@ -107,31 +103,17 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
             if (stub!.data.kind !== 'interpreted-remainder') throw new Error('Expected remainder payload.');
 
             const data = stub!.data;
-            interpretations.add(data.interpretation);
             expect(data.dividend).toBe(data.divisor * data.quotient + data.remainder);
             expect(data.remainder).toBeGreaterThan(0);
             expect(data.remainder).toBeLessThan(data.divisor);
-            expect(data.divisionEquation).toBe(
-                `${data.dividend} = ${data.divisor} × ${data.quotient} + ${data.remainder}`
-            );
-            expect(data.contextDecision.length).toBeGreaterThan(20);
-            expect(data.interpretationExplanation.length).toBeGreaterThan(20);
-            expect(data.story).not.toContain(data.answerStatement);
-
-            const expectedAnswer = data.interpretation === 'round-up'
-                ? data.quotient + 1
-                : data.interpretation === 'use-remainder'
-                    ? data.remainder
-                    : data.quotient;
-            expect(data.answer).toBe(expectedAnswer);
-            if (data.interpretation === 'use-remainder' && data.remainder === 1) {
-                singularRemainderExample = `${data.interpretationExplanation} ${data.answerStatement}`;
-            }
+            expect(Object.keys(data).sort()).toEqual([
+                'dividend',
+                'divisor',
+                'kind',
+                'quotient',
+                'remainder'
+            ]);
         }
-
-        expect(interpretations).toEqual(new Set(['use-quotient', 'round-up', 'use-remainder']));
-        expect(singularRemainderExample).toContain('1 sticker is left over.');
-        expect(singularRemainderExample).not.toMatch(/\b1 stickers\b/);
     });
 
     it('creates consistent letter equations for all ten authored operation groups', () => {
@@ -150,10 +132,6 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
                 const data = stub!.data;
                 expect(data.intermediate).toBe(apply(data.operands[0], data.operands[1], data.operations[0]));
                 expect(data.answer).toBe(apply(data.intermediate, data.operands[2], data.operations[1]));
-                expect(data.unknownSymbol).toBe('n');
-                expect(data.stepEquations[1]).toContain('= n');
-                expect(data.combinedEquation).toContain('= n');
-                expect(data.solutionEquation).toBe(`n = ${data.answer}`);
                 expect(data.answer).toBeLessThan(1_000_000);
             }
         }
@@ -202,8 +180,6 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
                 expect(data.roundedExactAnswer).toBe(Math.round(data.exactAnswer / 10) * 10);
                 expect(data.roundedProposedAnswer).toBe(Math.round(data.proposedAnswer / 10) * 10);
                 expect(data.isReasonable).toBe(data.roundedExactAnswer === data.roundedProposedAnswer);
-                expect(data.roundingCheck).toContain('rounds to');
-                expect(data.reasonablenessExplanation).toContain(data.isReasonable ? 'reasonable' : 'not reasonable');
             }
         }
 

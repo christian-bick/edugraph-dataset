@@ -55,12 +55,6 @@ const buildFactorEvidence = (number: number): PositiveFactorEvidence => {
     };
 };
 
-const formatList = (values: readonly (number | string)[]): string => {
-    if (values.length === 1) return `${values[0]}`;
-    if (values.length === 2) return `${values[0]} and ${values[1]}`;
-    return `${values.slice(0, -1).join(', ')}, and ${values.at(-1)}`;
-};
-
 const numbersByClassification = (classification: 'prime' | 'composite'): number[] => {
     const numbers: number[] = [];
     for (let number = MINIMUM_CLASSIFICATION_NUMBER; number <= MAXIMUM_NUMBER; number++) {
@@ -76,14 +70,9 @@ const compositeNumbers = numbersByClassification('composite');
 const generateFactorPairs = (): FactorMultipleRelationsProblem => {
     const number = randomInteger(MINIMUM_FACTOR_PAIR_NUMBER, MAXIMUM_NUMBER);
     const evidence = buildFactorEvidence(number);
-    const pairExpressions = evidence.factorPairs.map(
-        pair => `${pair.lowerFactor} × ${pair.upperFactor}`
-    );
     return {
         kind: 'factor-pairs',
-        prompt: `Find every positive factor pair of ${number}.`,
-        ...evidence,
-        conclusion: `The positive factor pairs of ${number} are ${formatList(pairExpressions)}.`
+        ...evidence
     };
 };
 
@@ -97,11 +86,7 @@ const generateMultipleTest = (): FactorMultipleRelationsProblem => {
         divisor,
         quotient,
         remainder: 0,
-        isMultiple: true,
-        prompt: `Is ${candidate} a multiple of ${divisor}?`,
-        multiplicationEquation: `${divisor} × ${quotient} = ${candidate}`,
-        divisionEquation: `${candidate} ÷ ${divisor} = ${quotient}`,
-        conclusion: `Yes. ${candidate} is a multiple of ${divisor}.`
+        isMultiple: true
     };
 };
 
@@ -110,26 +95,18 @@ const generateClassification = (
 ): FactorMultipleRelationsProblem => {
     const number = randomItem(classification === 'prime' ? primeNumbers : compositeNumbers);
     const evidence = buildFactorEvidence(number);
-    const factors = formatList(evidence.factors);
-
     if (classification === 'prime') {
         return {
             kind: 'prime-classification',
             classification,
-            prompt: `Is ${number} prime or composite?`,
-            ...evidence,
-            explanation: `The complete list of positive factors of ${number} is ${factors}. Because ${number} has exactly two positive factors, it is prime.`,
-            conclusion: `${number} is prime.`
+            ...evidence
         };
     }
 
     return {
         kind: 'composite-classification',
         classification,
-        prompt: `Is ${number} prime or composite?`,
-        ...evidence,
-        explanation: `The complete list of positive factors of ${number} is ${factors}. Because ${number} has more than two positive factors, it is composite.`,
-        conclusion: `${number} is composite.`
+        ...evidence
     };
 };
 

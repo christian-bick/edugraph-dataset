@@ -1,4 +1,4 @@
-import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {
     ArithmeticOperation,
     ArithmeticPairProblem,
@@ -18,15 +18,14 @@ import {
 } from './arithmetic-word-problem-within-100-helpers.ts';
 
 export interface ArithmeticWordProblemWithin100Config {
+    expectedKind?: 'interpreted-remainder' | 'letter-equation' | 'reasonableness';
     invertProcedure: boolean;
     useLengthContext: boolean;
 }
 
 interface ArithmeticWordProblemWithin100ViewProps {
     config: ArithmeticWordProblemWithin100Config;
-    payload: ViewRenderPayload<
-        'operations-word-problem-within-100' | 'operations-word-problem-within-100-inversion'
-    >;
+    payload: RenderPayload<AbstractProblem<ArithmeticWordProblemWithin100>>;
 }
 
 const VIEW_ID = 'operations-word-problem-within-100';
@@ -44,12 +43,6 @@ function fail(message: string): never {
 
 function assertIntegers(values: readonly number[], message: string) {
     if (values.some(value => !Number.isInteger(value) || Math.abs(value) > MAX_MAGNITUDE)) {
-        fail(message);
-    }
-}
-
-function assertStrings(values: readonly string[], message: string) {
-    if (values.some(value => typeof value !== 'string' || value.trim().length === 0)) {
         fail(message);
     }
 }
@@ -173,7 +166,7 @@ function validatePair(data: ArithmeticPairProblem) {
 
 function validateTwoStep(data: ArithmeticWordProblemTwoStep) {
     validateProblemData(VIEW_ID, data, [
-        'kind', 'num1', 'num2', 'num3', 'operations', 'intermediate', 'answer', 'blankPart'
+        'kind', 'num1', 'num2', 'num3', 'operations', 'intermediate', 'answer'
     ]);
     assertOperations(data.operations);
     assertIntegers(
@@ -182,7 +175,7 @@ function validateTwoStep(data: ArithmeticWordProblemTwoStep) {
     );
     const intermediate = applyOperation(data.num1, data.num2, data.operations[0]);
     const answer = applyOperation(intermediate, data.num3, data.operations[1]);
-    if (data.blankPart !== 'solution' || intermediate !== data.intermediate || answer !== data.answer) {
+    if (intermediate !== data.intermediate || answer !== data.answer) {
         fail('The connected two-step equations are inconsistent.');
     }
 }
@@ -193,44 +186,17 @@ function validateRemainder(data: ArithmeticWordProblemInterpretedRemainder) {
         'dividend',
         'divisor',
         'quotient',
-        'remainder',
-        'interpretation',
-        'answer',
-        'story',
-        'question',
-        'divisionEquation',
-        'contextDecision',
-        'interpretationExplanation',
-        'answerStatement'
+        'remainder'
     ]);
     assertIntegers(
-        [data.dividend, data.divisor, data.quotient, data.remainder, data.answer],
+        [data.dividend, data.divisor, data.quotient, data.remainder],
         'Remainder values must be whole numbers with magnitudes through one million.'
     );
-    assertStrings(
-        [
-            data.story,
-            data.question,
-            data.divisionEquation,
-            data.contextDecision,
-            data.interpretationExplanation,
-            data.answerStatement
-        ],
-        'The remainder task requires complete supplied story, equation, decision, explanation, and answer text.'
-    );
-    const expectedAnswer = data.interpretation === 'use-quotient'
-        ? data.quotient
-        : data.interpretation === 'round-up'
-            ? data.quotient + 1
-            : data.interpretation === 'use-remainder'
-                ? data.remainder
-                : NaN;
     if (data.divisor < 2
         || data.remainder < 1
         || data.remainder >= data.divisor
-        || data.dividend !== data.divisor * data.quotient + data.remainder
-        || data.answer !== expectedAnswer) {
-        fail('The interpreted-remainder payload is mathematically inconsistent.');
+        || data.dividend !== data.divisor * data.quotient + data.remainder) {
+        fail('The remainder relation is mathematically inconsistent.');
     }
 }
 
@@ -240,41 +206,19 @@ function validateLetterEquation(data: ArithmeticWordProblemLetterEquation) {
         'operands',
         'operations',
         'intermediate',
-        'answer',
-        'unknownSymbol',
-        'story',
-        'question',
-        'stepEquations',
-        'combinedEquation',
-        'solutionEquation',
-        'answerStatement'
+        'answer'
     ]);
     if (!Array.isArray(data.operands) || data.operands.length !== 3) {
         fail('The letter-equation task requires exactly three operands.');
-    }
-    if (!Array.isArray(data.stepEquations) || data.stepEquations.length !== 2) {
-        fail('The letter-equation task requires exactly two supplied step equations.');
     }
     assertOperations(data.operations);
     assertIntegers(
         [...data.operands, data.intermediate, data.answer],
         'Letter-equation values must be whole numbers with magnitudes through one million.'
     );
-    assertStrings(
-        [
-            data.story,
-            data.question,
-            ...data.stepEquations,
-            data.combinedEquation,
-            data.solutionEquation,
-            data.answerStatement
-        ],
-        'The letter-equation task requires complete supplied story, equation, solution, and answer text.'
-    );
     const intermediate = applyOperation(data.operands[0], data.operands[1], data.operations[0]);
     const answer = applyOperation(intermediate, data.operands[2], data.operations[1]);
-    if (data.unknownSymbol !== 'n'
-        || data.intermediate !== intermediate
+    if (data.intermediate !== intermediate
         || data.answer !== answer) {
         fail('The supplied letter equations are mathematically inconsistent.');
     }
@@ -291,19 +235,10 @@ function validateReasonableness(data: ArithmeticWordProblemReasonableness) {
         'roundingPlace',
         'roundedExactAnswer',
         'roundedProposedAnswer',
-        'isReasonable',
-        'story',
-        'question',
-        'exactEquations',
-        'roundingCheck',
-        'reasonablenessExplanation',
-        'answerStatement'
+        'isReasonable'
     ]);
     if (!Array.isArray(data.operands) || data.operands.length !== 3) {
         fail('The reasonableness task requires exactly three operands.');
-    }
-    if (!Array.isArray(data.exactEquations) || data.exactEquations.length !== 2) {
-        fail('The reasonableness task requires exactly two supplied exact equations.');
     }
     assertOperations(data.operations);
     assertIntegers(
@@ -316,17 +251,6 @@ function validateReasonableness(data: ArithmeticWordProblemReasonableness) {
             data.roundedProposedAnswer
         ],
         'Reasonableness values must be whole numbers with magnitudes through one million.'
-    );
-    assertStrings(
-        [
-            data.story,
-            data.question,
-            ...data.exactEquations,
-            data.roundingCheck,
-            data.reasonablenessExplanation,
-            data.answerStatement
-        ],
-        'The reasonableness task requires complete supplied story, equation, rounding-check, explanation, and answer text.'
     );
     const intermediate = applyOperation(data.operands[0], data.operands[1], data.operations[0]);
     const exactAnswer = applyOperation(intermediate, data.operands[2], data.operations[1]);
@@ -455,18 +379,81 @@ function LegacyProblem({
     );
 }
 
-function RemainderProblem({data, isSolutionView}: {
+function buildMultiStepStory(
+    operands: readonly [number, number, number],
+    operations: readonly [ArithmeticOperation, ArithmeticOperation]
+): string {
+    const [num1, num2, num3] = operands;
+    const firstStep = operations[0] === 'addition'
+        ? `A collection starts with ${num1} items and receives ${num2} more.`
+        : operations[0] === 'subtraction'
+            ? `A collection starts with ${num1} items and ${num2} are removed.`
+            : operations[0] === 'multiplication'
+                ? `A display has ${num1} equal groups with ${num2} items in each group.`
+                : `${num1} items are shared equally among ${num2} groups.`;
+    const secondStep = operations[1] === 'addition'
+        ? `Then ${num3} more items are added to that result.`
+        : operations[1] === 'subtraction'
+            ? `Then ${num3} items are removed from that result.`
+            : operations[1] === 'multiplication'
+                ? `Then ${num3} identical copies of that result are combined.`
+                : `Then that result is shared equally among ${num3} groups.`;
+    return `${firstStep} ${secondStep}`;
+}
+
+function countedNoun(count: number, singular: string): string {
+    return count === 1 ? singular : `${singular}s`;
+}
+
+function resolveRemainderPresentation(
+    data: ArithmeticWordProblemInterpretedRemainder,
+    seed: number
+) {
+    const mode = ['use-quotient', 'round-up', 'use-remainder'][Math.abs(seed) % 3]!;
+    if (mode === 'round-up') {
+        const answer = data.quotient + 1;
+        return {
+            story: `A class of ${data.dividend} students travels in vans that hold ${data.divisor} students each.`,
+            question: 'How many vans are needed for every student?',
+            contextDecision: 'Round the quotient up because the remaining students need another van.',
+            explanation: `${data.quotient} vans are full and ${data.remainder} students remain, so one more van is required.`,
+            answer: `${answer} vans are needed.`
+        };
+    }
+    if (mode === 'use-remainder') {
+        const remainderNoun = countedNoun(data.remainder, 'sticker');
+        return {
+            story: `${data.dividend} stickers are shared equally among ${data.divisor} students.`,
+            question: 'How many stickers are left over?',
+            contextDecision: 'Use the remainder because the question asks what is left over.',
+            explanation: `Each student receives ${data.quotient} ${countedNoun(data.quotient, 'sticker')} and ${data.remainder} ${remainderNoun} ${data.remainder === 1 ? 'is' : 'are'} left over.`,
+            answer: `${data.remainder} ${remainderNoun} ${data.remainder === 1 ? 'is' : 'are'} left over.`
+        };
+    }
+    return {
+        story: `${data.dividend} markers are packed into boxes that hold ${data.divisor} markers each. Only full boxes are shipped.`,
+        question: 'How many full boxes can be shipped?',
+        contextDecision: 'Use only the whole-number quotient because a partly filled box is not shipped.',
+        explanation: `${data.quotient} boxes are full and ${data.remainder} markers do not complete another box.`,
+        answer: `${data.quotient} full boxes can be shipped.`
+    };
+}
+
+function RemainderProblem({data, isSolutionView, seed}: {
     data: ArithmeticWordProblemInterpretedRemainder;
     isSolutionView: boolean;
+    seed: number;
 }) {
+    const presentation = resolveRemainderPresentation(data, seed);
+    const divisionEquation = `${data.dividend} = ${data.divisor} × ${data.quotient} + ${data.remainder}`;
     return (
         <>
             <StoryHeader title="Interpret the remainder" instruction="Use the context to decide what the quotient and remainder mean." />
-            <StoryCard story={data.story} question={data.question} />
+            <StoryCard story={presentation.story} question={presentation.question} />
             <div className="mt-5 rounded-xl border-2 border-indigo-200 bg-indigo-50 px-5 py-4 text-center">
                 <div className="text-xs font-bold uppercase tracking-wide text-indigo-700">Step 1 · Divide</div>
                 <div className="mt-1 text-sm font-semibold text-indigo-800">Find and identify the quotient and remainder.</div>
-                <div className="mt-1 font-mono text-[1.8rem] font-extrabold text-indigo-950">{data.divisionEquation}</div>
+                <div className="mt-1 font-mono text-[1.8rem] font-extrabold text-indigo-950">{divisionEquation}</div>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                     <div className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-bold text-indigo-900">
                         Quotient: <span className="font-mono text-base">{data.quotient}</span>
@@ -480,10 +467,10 @@ function RemainderProblem({data, isSolutionView}: {
                 <>
                     <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 px-5 py-4">
                         <div className="text-xs font-bold uppercase tracking-wide text-amber-700">Step 2 · Apply the context</div>
-                        <div className="mt-1 text-base font-bold text-amber-950">{data.contextDecision}</div>
-                        <div className="mt-2 text-sm font-semibold leading-relaxed text-amber-900">{data.interpretationExplanation}</div>
+                        <div className="mt-1 text-base font-bold text-amber-950">{presentation.contextDecision}</div>
+                        <div className="mt-2 text-sm font-semibold leading-relaxed text-amber-900">{presentation.explanation}</div>
                     </div>
-                    <AnswerCard>{data.answerStatement}</AnswerCard>
+                    <AnswerCard>{presentation.answer}</AnswerCard>
                 </>
             ) : (
                 <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 px-5 py-4">
@@ -504,16 +491,26 @@ function LetterEquationProblem({data, isSolutionView}: {
     data: ArithmeticWordProblemLetterEquation;
     isSolutionView: boolean;
 }) {
+    const firstSymbol = operationSymbol(data.operations[0]);
+    const secondSymbol = operationSymbol(data.operations[1]);
+    const stepEquations = [
+        `${data.operands[0]} ${firstSymbol} ${data.operands[1]} = ${data.intermediate}`,
+        `${data.intermediate} ${secondSymbol} ${data.operands[2]} = n`
+    ];
+    const combinedEquation = `(${data.operands[0]} ${firstSymbol} ${data.operands[1]}) ${secondSymbol} ${data.operands[2]} = n`;
     return (
         <>
             <StoryHeader title="Write and solve an equation" instruction="Use the letter n for the unknown final value." />
-            <StoryCard story={data.story} question={data.question} />
+            <StoryCard
+                story={buildMultiStepStory(data.operands, data.operations)}
+                question="What value of n represents the final number of items?"
+            />
             <div className="mt-5 rounded-xl border-2 border-indigo-200 bg-indigo-50 px-5 py-4 text-center">
                 <div className="text-xs font-bold uppercase tracking-wide text-indigo-700">Combined equation</div>
-                <div className="mt-1 font-mono text-[1.65rem] font-extrabold text-indigo-950">{data.combinedEquation}</div>
+                <div className="mt-1 font-mono text-[1.65rem] font-extrabold text-indigo-950">{combinedEquation}</div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-4">
-                {data.stepEquations.map((equation, index) => (
+                {stepEquations.map((equation, index) => (
                     <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center" key={equation}>
                         <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Step {index + 1}</div>
                         <div className="mt-1 font-mono text-lg font-bold text-slate-800">{equation}</div>
@@ -522,8 +519,8 @@ function LetterEquationProblem({data, isSolutionView}: {
             </div>
             {isSolutionView ? (
                 <AnswerCard>
-                    <div className="font-mono text-xl">{data.solutionEquation}</div>
-                    <div className="mt-1">{data.answerStatement}</div>
+                    <div className="font-mono text-xl">n = {data.answer}</div>
+                    <div className="mt-1">The value of n is {data.answer}.</div>
                 </AnswerCard>
             ) : (
                 <AnswerCard><span className="font-mono text-emerald-700">n = ______</span></AnswerCard>
@@ -536,18 +533,31 @@ function ReasonablenessProblem({data, isSolutionView}: {
     data: ArithmeticWordProblemReasonableness;
     isSolutionView: boolean;
 }) {
+    const firstSymbol = operationSymbol(data.operations[0]);
+    const secondSymbol = operationSymbol(data.operations[1]);
+    const exactEquations = [
+        `${data.operands[0]} ${firstSymbol} ${data.operands[1]} = ${data.intermediate}`,
+        `${data.intermediate} ${secondSymbol} ${data.operands[2]} = ${data.exactAnswer}`
+    ];
+    const roundingCheck = `${data.exactAnswer} rounds to ${data.roundedExactAnswer}; ${data.proposedAnswer} rounds to ${data.roundedProposedAnswer}.`;
+    const reasonablenessExplanation = data.isReasonable
+        ? 'The exact and proposed answers round to the same ten, so the proposal is reasonable.'
+        : 'The exact and proposed answers round to different tens, so the proposal is not reasonable.';
     return (
         <>
             <StoryHeader title="Check answer reasonableness" instruction="Use the rounding check to evaluate the proposed result." />
-            <StoryCard story={data.story} question={data.question} />
+            <StoryCard
+                story={`${buildMultiStepStory(data.operands, data.operations)} A student says the final result is ${data.proposedAnswer}.`}
+                question="Is the student’s answer reasonable? Explain using rounding."
+            />
             <div className="mt-5 rounded-xl border-2 border-violet-200 bg-violet-50 px-5 py-4 text-center">
                 <div className="text-xs font-bold uppercase tracking-wide text-violet-700">Round to the nearest ten</div>
-                <div className="mt-1 text-lg font-extrabold text-violet-950">{data.roundingCheck}</div>
+                <div className="mt-1 text-lg font-extrabold text-violet-950">{roundingCheck}</div>
             </div>
             {isSolutionView ? (
                 <>
                     <div className="mt-4 grid grid-cols-2 gap-4">
-                        {data.exactEquations.map((equation, index) => (
+                        {exactEquations.map((equation, index) => (
                             <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center" key={equation}>
                                 <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Exact step {index + 1}</div>
                                 <div className="mt-1 font-mono text-lg font-bold text-slate-800">{equation}</div>
@@ -555,9 +565,11 @@ function ReasonablenessProblem({data, isSolutionView}: {
                         ))}
                     </div>
                     <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 text-center text-base font-semibold text-amber-950">
-                        {data.reasonablenessExplanation}
+                        {reasonablenessExplanation}
                     </div>
-                    <AnswerCard>{data.answerStatement}</AnswerCard>
+                    <AnswerCard>
+                        {data.proposedAnswer} is {data.isReasonable ? 'a reasonable' : 'not a reasonable'} answer.
+                    </AnswerCard>
                 </>
             ) : (
                 <AnswerCard><span className="text-emerald-700">Verdict: __________</span></AnswerCard>
@@ -569,7 +581,8 @@ function ReasonablenessProblem({data, isSolutionView}: {
 function renderProblem(
     data: ArithmeticWordProblemWithin100,
     config: ArithmeticWordProblemWithin100Config,
-    isSolutionView: boolean
+    isSolutionView: boolean,
+    seed: number
 ) {
     if (!('kind' in data)) {
         validatePair(data);
@@ -581,7 +594,7 @@ function renderProblem(
     }
     if (data.kind === 'interpreted-remainder') {
         validateRemainder(data);
-        return <RemainderProblem data={data} isSolutionView={isSolutionView} />;
+        return <RemainderProblem data={data} isSolutionView={isSolutionView} seed={seed} />;
     }
     if (data.kind === 'letter-equation') {
         validateLetterEquation(data);
@@ -601,13 +614,16 @@ export const ArithmeticWordProblemWithin100View = ({
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData(VIEW_ID, data, []);
+    if (config.expectedKind && (!('kind' in data) || data.kind !== config.expectedKind)) {
+        fail(`Expected the ${config.expectedKind} mathematical payload.`);
+    }
     if (config.invertProcedure && 'kind' in data) {
         fail('Procedure inversion requires the complete one-step pair relation.');
     }
 
     return (
         <div className="w-[780px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-            {renderProblem(data, config, isSolutionView)}
+            {renderProblem(data, config, isSolutionView, payload.seed)}
         </div>
     );
 };

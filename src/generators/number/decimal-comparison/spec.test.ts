@@ -31,8 +31,7 @@ describe('DecimalComparisonGenerator spec integration', () => {
                 Area.NumerationWithDecimals,
                 Area.DecimalNotation,
                 Area.DecimalPrecission,
-                Scope.DecimalNumbers,
-                Ability.ConceptDerivation
+                Scope.DecimalNumbers
             ]
         });
     });
@@ -50,6 +49,7 @@ describe('DecimalComparisonGenerator spec integration', () => {
         expect(stub!.tags).toEqual(relation === 'equal'
             ? [Area.NumericEquality, Scope.Equal]
             : [Area.NumericInequality, relation === 'greater' ? Scope.Greater : Scope.Less]);
+        expect(stub!.tags).not.toContain(Ability.ConceptDerivation);
     });
 
     it('keeps direct and label-driven generation on the same RNG path', () => {

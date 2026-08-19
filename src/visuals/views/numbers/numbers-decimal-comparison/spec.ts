@@ -1,4 +1,4 @@
-import {Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -6,7 +6,8 @@ export const spec: ViewSpec = {
     viewId: 'numbers-decimal-comparison',
     generalLabels: [
         Scope.SingleFrameOfReference,
-        Scope.VisualNumbers
+        Scope.VisualNumbers,
+        Ability.ConceptDerivation
     ]
 };
 

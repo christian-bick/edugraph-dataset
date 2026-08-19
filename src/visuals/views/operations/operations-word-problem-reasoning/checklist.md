@@ -1,0 +1,2 @@
+- **Identity:** The story asks the learner to evaluate a proposed result through a visible rounding procedure.
+- **Modes:** Question Mode withholds the verdict; Solution Mode reveals the exact steps, compares rounded results, and explains the reasonableness decision.

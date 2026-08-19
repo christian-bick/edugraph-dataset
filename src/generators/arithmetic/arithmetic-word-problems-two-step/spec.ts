@@ -1,4 +1,4 @@
-import {Ability, Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -23,10 +23,7 @@ export const ArithmeticWordProblemsTwoStepGeneratorSchema = {
             Area.Modulo,
             Area.Equation,
             Area.Estimation,
-            Area.IntegerRounding,
-            Ability.Formalization,
-            Ability.ResultInterpretation,
-            Ability.ProcedureUnderstanding
+            Area.IntegerRounding
         ],
         resolveArithmeticWordProblemTask
     ],

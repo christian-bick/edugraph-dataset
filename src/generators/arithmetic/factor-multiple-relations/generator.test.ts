@@ -33,19 +33,13 @@ const expectExhaustiveEvidence = (evidence: PositiveFactorEvidence): void => {
 
 const expectValidClassification = (problem: FactorClassificationProblem): void => {
     expectExhaustiveEvidence(problem);
-    expect(problem.prompt).toBe(`Is ${problem.number} prime or composite?`);
-    expect(problem.explanation).toContain('complete list of positive factors');
-    expect(problem.conclusion).toBe(`${problem.number} is ${problem.classification}.`);
-
     if (problem.kind === 'prime-classification') {
         expect(problem.classification).toBe('prime');
         expect(problem.factors).toEqual([1, problem.number]);
         expect(problem.factorCount).toBe(2);
-        expect(problem.explanation).toContain('exactly two positive factors');
     } else {
         expect(problem.classification).toBe('composite');
         expect(problem.factorCount).toBeGreaterThan(2);
-        expect(problem.explanation).toContain('more than two positive factors');
     }
 };
 
@@ -65,8 +59,6 @@ describe('FactorMultipleRelationsGenerator', () => {
             expect(problem.kind).toBe('factor-pairs');
             if (problem.kind !== 'factor-pairs') throw new Error('Unexpected task');
             expectExhaustiveEvidence(problem);
-            expect(problem.prompt).toBe(`Find every positive factor pair of ${problem.number}.`);
-            expect(problem.conclusion).toContain(`${problem.number}`);
         }
     });
 
@@ -112,15 +104,6 @@ describe('FactorMultipleRelationsGenerator', () => {
             expect(problem.candidate).toBeLessThan(100);
             expect(problem.remainder).toBe(0);
             expect(problem.isMultiple).toBe(true);
-            expect(problem.multiplicationEquation).toBe(
-                `${problem.divisor} × ${problem.quotient} = ${problem.candidate}`
-            );
-            expect(problem.divisionEquation).toBe(
-                `${problem.candidate} ÷ ${problem.divisor} = ${problem.quotient}`
-            );
-            expect(problem.conclusion).toBe(
-                `Yes. ${problem.candidate} is a multiple of ${problem.divisor}.`
-            );
         }
         expect(divisors).toEqual(new Set([2, 3, 4, 5, 6, 7, 8, 9]));
     });

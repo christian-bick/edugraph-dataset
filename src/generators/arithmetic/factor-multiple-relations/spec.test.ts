@@ -16,6 +16,7 @@ describe('FactorMultipleRelationsGenerator spec integration', () => {
             Scope.NumbersWithoutZero,
             Scope.NumbersSmaller100
         ]));
+        expect(JSON.stringify(spec)).not.toContain('Ability.');
     });
 
     it.each([
@@ -41,8 +42,12 @@ describe('FactorMultipleRelationsGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.kind).toBe(kind);
-        for (const label of labels.filter(label => label.startsWith('http://edugraph.io/edu/'))) {
+        for (const label of labels.filter(label =>
+            label !== Ability.ProcedureExecution && label !== Ability.ConceptClassification
+        )) {
             expect(stub!.tags).toContain(label);
         }
+        expect(stub!.tags).not.toContain(Ability.ProcedureExecution);
+        expect(stub!.tags).not.toContain(Ability.ConceptClassification);
     });
 });

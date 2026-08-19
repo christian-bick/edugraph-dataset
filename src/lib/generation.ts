@@ -126,11 +126,16 @@ export interface ViewMatchInfo {
     viewId: string;
     /** Union of spec generalLabels and view-schema-extracted labels */
     supportedLabels: string[];
+    requiredLabels?: readonly string[];
     rejectedLabels?: readonly string[];
     problemType?: string | null;
 }
 
-export type MatchFailureReason = 'incompatible-type' | 'unsupported-label' | 'rejected-label';
+export type MatchFailureReason =
+    | 'incompatible-type'
+    | 'unsupported-label'
+    | 'missing-required-label'
+    | 'rejected-label';
 
 export type MatchVerdict =
     | { matched: true }
@@ -150,6 +155,17 @@ function matchesTargetCapabilities(
     generatorInfo: GeneratorMatchInfo,
     viewInfo: ViewMatchInfo
 ): Exclude<MatchVerdict, {matched: false; reason: 'incompatible-type'}> {
+    const missingRequired = viewInfo.requiredLabels?.find(requiredLabel =>
+        !targetLabels.some(targetLabel => isSubConceptOf(targetLabel, requiredLabel))
+    );
+    if (missingRequired) {
+        return {
+            matched: false,
+            reason: 'missing-required-label',
+            label: missingRequired
+        };
+    }
+
     // A target (competency/standard) is legitimately broad. It is satisfied by a
     // generator/view capability that is EQUAL TO or MORE SPECIFIC THAN the target
     // label — i.e. the capability specializes the broad competency:
@@ -401,6 +417,7 @@ export async function loadViewCatalog(
                     ...(spec?.generalLabels || []),
                     ...extractSchemaLabels(viewSchema)
                 ])),
+                requiredLabels: spec?.requiredLabels || [],
                 rejectedLabels: spec?.rejectedLabels || [],
                 problemType: viewToType[spec.viewId] || null
             });

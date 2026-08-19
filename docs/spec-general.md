@@ -34,11 +34,13 @@ capabilities match it as one type-compatible pair.
 This directionality holds for Area, Scope **and** Ability. A target label is satisfied by
 the module that owns the corresponding behavior:
 
-| Target label kind    | Satisfied by                                                       |
-|----------------------|--------------------------------------------------------------------|
-| Area, Scope, Ability | the generator **or** the view — either side's declaration suffices |
+| Target label kind | Satisfied by |
+|-------------------|--------------|
+| Area, Scope | the generator or view that owns the corresponding mathematical or presentational behavior |
+| Ability | the view whose final observable task makes the ability claim true |
 
-A view's `rejectedLabels` is then applied on top, and can veto an otherwise matching tuple
+A view's `requiredLabels` applicability constraints and `rejectedLabels` boundaries are then
+applied on top. They can respectively require a mathematical target context or veto an otherwise matching tuple
 ([SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-physical-boundaries-not-competency-filters)).
 
 **Why:** declaring only an ancestor of what a target needs silently fails to match it — the
@@ -145,7 +147,7 @@ and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmit
 
 ## Audit
 
-- [ ] **SPEC-1** — every target label is satisfied by the combined generator/view capabilities in the correct ontology direction.
+- [ ] **SPEC-1** — every target label is satisfied by the combined generator/view capabilities in the correct ontology direction, with every Ability owned by a view.
 - [ ] **SPEC-2** — no declared label is an ancestor of another declared label.
 - [ ] **SPEC-3** — no leaf label is claimed where the leaf is an instrument/subtype the module does not actually produce.
 - [ ] **SPEC-4** — no declared capability is broader than the module's real output; distinguishable members are enumerated individually.

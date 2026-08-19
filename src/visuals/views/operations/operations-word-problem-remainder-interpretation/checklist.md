@@ -1,0 +1,2 @@
+- **Identity:** The story makes the quotient-and-remainder context decision observable.
+- **Modes:** Question Mode withholds the contextual answer; Solution Mode explains whether the quotient, rounded-up quotient, or remainder answers the story.
