@@ -4,6 +4,7 @@ import { isValTuple, DEFAULT_VAL_RATIO } from './generation.ts';
 import {
     tupleKey,
     indexContent,
+    indexTasks,
     findCrossSplitLeaks,
     findWithinSplitRedundancy,
     analyzeAllocation,
@@ -62,12 +63,25 @@ describe('indexContent', () => {
         expect(index.get('view-a')!.get('fp-1')!.size).toBe(1);
         expect(index.get('view-b')!.get('fp-1')!.size).toBe(1);
     });
+
+    it('keeps task configuration separate from mathematical content', () => {
+        const rows = [
+            row({ content_fingerprint: 'fp-1', task_fingerprint: 'task-a', target_id: 't1' }),
+            row({ content_fingerprint: 'fp-1', task_fingerprint: 'task-b', target_id: 't2' }),
+        ];
+        expect(indexContent(rows).get('view-a')!.get('fp-1')!.size).toBe(2);
+        expect(indexTasks(rows).get('view-a')!.size).toBe(2);
+    });
 });
 
 describe('findCrossSplitLeaks', () => {
     it('flags validation content already present in train for the same view', () => {
-        const train = [row({ view: 'view-a', content_fingerprint: 'fp-1' })];
-        const val = [row({ view: 'view-a', content_fingerprint: 'fp-1', target_id: 't2' })];
+        const train = [row({
+            view: 'view-a', content_fingerprint: 'fp-1', task_fingerprint: 'task-a',
+        })];
+        const val = [row({
+            view: 'view-a', content_fingerprint: 'fp-1', task_fingerprint: 'task-b', target_id: 't2',
+        })];
         const leaks = findCrossSplitLeaks(train, val);
         expect(leaks).toHaveLength(1);
         expect(leaks[0].fingerprint).toBe('fp-1');
@@ -106,7 +120,7 @@ describe('findWithinSplitRedundancy', () => {
         expect(findWithinSplitRedundancy(rows, 'train')).toEqual([]);
     });
 
-    it('flags two different exercises showing the same content', () => {
+    it('flags two different exercises showing the same configured task', () => {
         const rows = [
             row({ target_id: 't1', content_fingerprint: 'fp-1' }),
             row({ target_id: 't2', content_fingerprint: 'fp-1' }),
@@ -115,6 +129,14 @@ describe('findWithinSplitRedundancy', () => {
         expect(found).toHaveLength(1);
         expect(found[0].exercises).toEqual(['t1#gen#view-a#0', 't2#gen#view-a#0']);
         expect(found[0].split).toBe('train');
+    });
+
+    it('accepts the same data rendered as two different configured tasks', () => {
+        const rows = [
+            row({ target_id: 't1', content_fingerprint: 'fp-1', task_fingerprint: 'task-vocabulary' }),
+            row({ target_id: 't2', content_fingerprint: 'fp-1', task_fingerprint: 'task-composition' }),
+        ];
+        expect(findWithinSplitRedundancy(rows, 'train')).toEqual([]);
     });
 });
 

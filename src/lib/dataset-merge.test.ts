@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
     addRowTargetAssociations,
+    claimFingerprint,
     emptyFingerprintIndex,
     exerciseKey,
     groupIntoExercises,
@@ -50,12 +51,13 @@ describe('groupIntoExercises', () => {
         expect(exercises[0].rows).toHaveLength(2);
     });
 
-    it('takes its fingerprint from the question row, as generation does', () => {
+    it('takes both fingerprints from the question row, as generation does', () => {
         const exercises = groupIntoExercises([
-            row({ mode: 'solution', content_fingerprint: 'fp-s' }),
-            row({ mode: 'question', content_fingerprint: 'fp-q' }),
+            row({ mode: 'solution', content_fingerprint: 'fp-s', task_fingerprint: 'task-s' }),
+            row({ mode: 'question', content_fingerprint: 'fp-q', task_fingerprint: 'task-q' }),
         ]);
-        expect(exercises[0].fingerprint).toBe('fp-q');
+        expect(exercises[0].contentFingerprint).toBe('fp-q');
+        expect(exercises[0].taskFingerprint).toBe('task-q');
     });
 
     it('preserves first-seen order across exercises', () => {
@@ -87,6 +89,23 @@ describe('selectUnionExercises', () => {
         expect(dropped).toHaveLength(1);
     });
 
+    it('keeps the same mathematical content when the resolved view task differs', () => {
+        const seen = emptyFingerprintIndex();
+        selectUnionExercises(groupIntoExercises([
+            row({ task_fingerprint: 'task-vocabulary' }),
+        ]), seen);
+
+        const conceptComposition = groupIntoExercises([
+            row({
+                spec: 'nctm',
+                target_id: 'N.1-composition',
+                task_fingerprint: 'task-composition',
+            }),
+        ]);
+
+        expect(selectUnionExercises(conceptComposition, seen).kept).toHaveLength(1);
+    });
+
     it('keeps identical content rendered by a different view', () => {
         const seen = emptyFingerprintIndex();
         selectUnionExercises(groupIntoExercises([row()]), seen);
@@ -108,12 +127,16 @@ describe('selectUnionExercises', () => {
         expect(dropped[0].rows).toHaveLength(2);
     });
 
-    it('keeps validation content out of train content across standards', () => {
+    it('keeps validation content out of train even when its task configuration differs', () => {
         const trainIndex = emptyFingerprintIndex();
-        selectUnionExercises(groupIntoExercises([row({ spec: 'ccss' })]), trainIndex);
+        claimFingerprint(trainIndex, 'counting-objects-simple', 'fp-1');
 
         const valIndex = emptyFingerprintIndex();
-        const val = groupIntoExercises([row({ spec: 'nctm', target_id: 'N.1' })]);
+        const val = groupIntoExercises([row({
+            spec: 'nctm',
+            target_id: 'N.1',
+            task_fingerprint: 'different-task',
+        })]);
         const { kept, dropped } = selectUnionExercises(val, valIndex, trainIndex);
 
         expect(kept).toHaveLength(0);
@@ -122,7 +145,7 @@ describe('selectUnionExercises', () => {
 
     it('does not claim excluded fingerprints into the seen index', () => {
         const excluded = emptyFingerprintIndex();
-        selectUnionExercises(groupIntoExercises([row()]), excluded);
+        claimFingerprint(excluded, 'counting-objects-simple', 'fp-1');
 
         const seen = emptyFingerprintIndex();
         selectUnionExercises(groupIntoExercises([row({ target_id: 'x' })]), seen, excluded);

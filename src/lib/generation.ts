@@ -5,10 +5,11 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import { isSubConceptOf } from './ontology.ts';
 import { findLeafModules, LeafModule } from './module-resolver.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
-import { extractSchemaLabels, generateWithLabels } from './utils.ts';
+import { extractConfig, extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
 import { CompetencyTarget, Implementation, ImplementationTodo, OntologyPackage, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ViewSpec } from '../types/view-spec.ts';
+import { ConfigSchema } from '../types/schema.ts';
 import { defineImplementationPackage } from './dataset-permutation-builder.ts';
 import { defineOntologyPackage, toOntologyTodo } from './ontology-todo.ts';
 
@@ -298,6 +299,8 @@ export interface GeneratorCatalogEntry extends GeneratorMatchInfo {
 export interface ViewCatalogEntry extends ViewMatchInfo {
     module: LeafModule;
     spec: ViewSpec;
+    /** Runtime schema used to resolve the exact configuration rendered by this view. */
+    schema: ConfigSchema;
 }
 
 /**
@@ -388,11 +391,12 @@ export async function loadViewCatalog(
             const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
             const spec: ViewSpec = specModule.spec;
             const schemaName = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'ViewSchema';
-            const viewSchema = specModule[schemaName];
+            const viewSchema: ConfigSchema = specModule[schemaName] ?? {};
             entries.push({
                 viewId: spec.viewId,
                 module: mod,
                 spec,
+                schema: viewSchema,
                 supportedLabels: Array.from(new Set([
                     ...(spec?.generalLabels || []),
                     ...extractSchemaLabels(viewSchema)
@@ -684,7 +688,7 @@ export interface GenerateSampleWithRetryInput {
     sampleKey: string;
     maxAttempts?: number;
     /** Caller-defined dedup scope; return true to reject a draw and retry */
-    isDuplicate?: (stub: ProblemStub) => boolean;
+    isDuplicate?: (stub: ProblemStub, attempt: { attempt: number; seed: number }) => boolean;
 }
 
 export interface RetryResult {
@@ -709,7 +713,7 @@ export function generateSampleWithRetry({
         seed = computeSampleSeed(sampleKey, attempt);
         const stub = generateSample({ generator, labels, seed });
         if (!stub) continue;
-        if (isDuplicate && isDuplicate(stub)) continue;
+        if (isDuplicate && isDuplicate(stub, { attempt, seed })) continue;
         return { stub, attempt, seed };
     }
     return { stub: null, attempt, seed };
@@ -869,6 +873,21 @@ function canonicalJson(value: any): string {
  */
 export function computeContentFingerprint(data: any): string {
     return createHash('sha256').update(canonicalJson(data)).digest('hex').slice(0, 16);
+}
+
+/** Resolves the same seeded view configuration that `withConfig` will render. */
+export function resolveViewConfig(schema: ConfigSchema, labels: string[], seed: number): Record<string, unknown> {
+    setSeed(seed);
+    return extractConfig(schema, labels).config;
+}
+
+/**
+ * Identity of a rendered task within one view. The mathematical payload alone
+ * is insufficient: one view can turn it into distinct tasks through its
+ * resolved configuration (for example, which quantity is left unknown).
+ */
+export function computeTaskFingerprint(data: any, viewConfig: Record<string, unknown>): string {
+    return computeContentFingerprint({ data, viewConfig });
 }
 
 /** Share of matched tuples allocated to the validation split. */

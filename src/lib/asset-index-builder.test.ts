@@ -77,6 +77,39 @@ describe('buildAssetIndexBundle', () => {
             .toEqual(['counting/sample.png', 'counting/sample.png']);
     });
 
+    it('retains the same data as separate samples when resolved view tasks differ', async () => {
+        const moduleDir = resolve(projectRoot, 'out', 'dataset-nctm', 'train', 'counting');
+        mkdirSync(moduleDir, { recursive: true });
+        writeFileSync(resolve(moduleDir, 'composition.png'), 'png');
+        writeFileSync(resolve(moduleDir, '.metadata.jsonl'), `${JSON.stringify({
+            file_name: 'composition.png',
+            sample_key: 'composition#generator#view#train#question#inst:0',
+            spec: 'nctm',
+            target_id: 'composition',
+            generator: 'generator',
+            view: 'view',
+            mode: 'question',
+            instance: 0,
+            content_fingerprint: 'fingerprint',
+            task_fingerprint: 'composition-task',
+            tags: ['Composition'],
+        })}\n`);
+
+        const bundle = await buildAssetIndexBundle({
+            projectRoot,
+            repository: 'local',
+            revision: 'working-tree',
+            specNames: ['ccss', 'nctm'],
+            targetLabels: new Map([
+                [targetLookupKey('ccss', 'target'), ['Counting']],
+                [targetLookupKey('nctm', 'composition'), ['Composition']],
+            ]),
+        });
+
+        expect(bundle.index.label_sets.flatMap(group => group.samples.map(sample => sample.file_name)).sort())
+            .toEqual(['counting/composition.png', 'counting/sample.png']);
+    });
+
     it('requires the merged image only for release-index generation', async () => {
         const options = {
             projectRoot,

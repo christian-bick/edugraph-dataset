@@ -8,6 +8,7 @@ import {
     datasetOutDir,
 } from '../lib/dataset-paths.ts';
 import {
+    claimFingerprint,
     emptyFingerprintIndex,
     groupIntoExercises,
     parseMetadataLines,
@@ -66,9 +67,14 @@ function mergeSplit(
     splitDirName: string,
     unionSpecs: string[],
     unionDir: string,
-    trainIndex?: FingerprintIndex
-): { rows: MetadataRow[]; contributions: SpecContribution[]; index: FingerprintIndex } {
-    const index = emptyFingerprintIndex();
+    trainContentIndex?: FingerprintIndex
+): {
+    rows: MetadataRow[];
+    contributions: SpecContribution[];
+    contentIndex: FingerprintIndex;
+} {
+    const taskIndex = emptyFingerprintIndex();
+    const contentIndex = emptyFingerprintIndex();
     const unionSplitDir = resolve(unionDir, splitDirName);
     const rows: MetadataRow[] = [];
     const contributions: SpecContribution[] = [];
@@ -79,9 +85,10 @@ function mergeSplit(
             datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName)),
             splitDirName
         ));
-        const { kept, dropped } = selectUnionExercises(exercises, index, trainIndex);
+        const { kept, dropped } = selectUnionExercises(exercises, taskIndex, trainContentIndex);
 
         for (const exercise of kept) {
+            claimFingerprint(contentIndex, exercise.view, exercise.contentFingerprint);
             rows.push(...copyExercise(exercise, specSplitDir, unionSplitDir));
         }
 
@@ -102,7 +109,7 @@ function mergeSplit(
         );
     }
 
-    return { rows, contributions, index };
+    return { rows, contributions, contentIndex };
 }
 
 async function main(): Promise<void> {
@@ -134,7 +141,7 @@ async function main(): Promise<void> {
     // Train is merged first so validation can exclude content already in it,
     // mirroring the generation-time rule across standards.
     const train = mergeSplit('train', unionSpecs, unionDir);
-    const validation = mergeSplit('validation', unionSpecs, unionDir, train.index);
+    const validation = mergeSplit('validation', unionSpecs, unionDir, train.contentIndex);
 
     console.log(`\n--- Contribution by Standard ---`);
     console.log(`| Standard | Split | Offered | Merged | Duplicate |`);

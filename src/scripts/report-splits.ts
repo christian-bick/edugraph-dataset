@@ -8,10 +8,10 @@ import { DEFAULT_VAL_RATIO } from '../lib/generation.ts';
 import { buildSplitIntegrityReport, SplitIntegrityReport } from '../lib/split-report.ts';
 
 /**
- * Audits the train/validation split of a generated dataset: cross-split content
- * leakage, within-split redundancy, realized ratio, and per-view/per-label
- * validation coverage. Analysis lives in `src/lib/split-report.ts`; this script
- * is its CLI and formatting shell.
+ * Audits the train/validation split of a generated dataset: cross-split
+ * mathematical-content leakage, within-split task redundancy, realized ratio,
+ * and per-view/per-label validation coverage. Analysis lives in
+ * `src/lib/split-report.ts`; this script is its CLI and formatting shell.
  *
  * Exits non-zero on leakage or redundancy — those make validation metrics wrong
  * rather than merely thin. Coverage gaps are reported as warnings, since a view
@@ -55,9 +55,9 @@ function print(report: SplitIntegrityReport) {
 
     console.log(`\n--- Within-split redundancy ---`);
     if (report.redundancy.length === 0) {
-        console.log(`✅ No content is shown by two exercises of the same view.`);
+        console.log(`✅ No configured task is shown by two exercises of the same view.`);
     } else {
-        console.error(`❌ ${report.redundancy.length} duplicated content item(s):`);
+        console.error(`❌ ${report.redundancy.length} duplicated configured task(s):`);
         for (const dup of report.redundancy.slice(0, MAX_LISTED)) {
             console.error(`    [${dup.split}] ${dup.view} ${dup.fingerprint}: ${dup.exercises.join(', ')}`);
         }
@@ -145,7 +145,7 @@ function main() {
         console.error(`❌ Split integrity FAILED: validation metrics computed on this split would be optimistic.`);
         process.exit(1);
     }
-    console.log(`✅ Split integrity holds: validation content is disjoint from train and free of duplicates.`);
+    console.log(`✅ Split integrity holds: validation content is disjoint from train and configured tasks are non-redundant.`);
 }
 
 main();

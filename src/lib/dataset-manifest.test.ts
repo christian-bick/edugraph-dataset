@@ -68,12 +68,12 @@ describe('datasetFreshnessIssues', () => {
         );
     });
 
-    it('reports changed generated content fingerprints', () => {
+    it('reports changed generated content or task fingerprints', () => {
         const current = {
             'writing#numbers-write-standard': { ...entry, content_hash: 'content-b' }
         };
         expect(datasetFreshnessIssues(manifest(), 'ccss', current)).toContain(
-            'writing#numbers-write-standard content fingerprints changed since generation.'
+            'writing#numbers-write-standard content or task fingerprints changed since generation.'
         );
     });
 });

@@ -12,6 +12,8 @@ import {
     computeSampleFilename,
     computeSampleSeed,
     computeContentFingerprint,
+    computeTaskFingerprint,
+    resolveViewConfig,
     generateSampleWithRetry,
     isValTuple,
     DEFAULT_VAL_RATIO,
@@ -56,7 +58,8 @@ interface RenderSample {
     fileName: string;
     seed: number;
     attempt: number;
-    fingerprint: string;
+    contentFingerprint: string;
+    taskFingerprint: string;
     problem: AbstractProblem;
     associatedTargetIds: Set<string>;
 }
@@ -71,21 +74,21 @@ function samplesForFingerprint(
     return index?.get(viewId)?.get(fingerprint) ?? [];
 }
 
-function claimSample(index: SampleFingerprintIndex, sample: RenderSample): void {
+function claimSample(index: SampleFingerprintIndex, sample: RenderSample, fingerprint: string): void {
     const byFingerprint = index.get(sample.identity.viewId) ?? new Map<string, RenderSample[]>();
-    const samples = byFingerprint.get(sample.fingerprint) ?? [];
+    const samples = byFingerprint.get(fingerprint) ?? [];
     samples.push(sample);
-    byFingerprint.set(sample.fingerprint, samples);
+    byFingerprint.set(fingerprint, samples);
     index.set(sample.identity.viewId, byFingerprint);
 }
 
 /**
  * Generates all samples of one module (generator) for one split.
  *
- * Dedup is scoped per (module, split, view) via content fingerprints, and
- * covers both modes: every drawn content item is claimed for its view, so a
- * question never repeats a solution's content or vice versa. The val split
- * additionally rejects content already claimed by the module's train split.
+ * Dedup is scoped per (module, split, view) via task fingerprints (problem
+ * data plus resolved view configuration), and covers both modes. The val
+ * split separately rejects mathematical content already claimed by train,
+ * even when the view configuration differs.
  *
  * The module scope is deliberate — it keeps `--generator=X` reproducing exactly
  * what a full run produces for that module. It costs nothing in practice
@@ -97,8 +100,10 @@ function generateModuleSamples(
     viewCatalog: ViewCatalogEntry[],
     targets: any[],
     split: SampleSplit,
-    fingerprintsByView: SampleFingerprintIndex,
-    trainFingerprintsByView?: SampleFingerprintIndex
+    taskFingerprintsByView: SampleFingerprintIndex,
+    contentFingerprintsByView: SampleFingerprintIndex,
+    trainTaskFingerprintsByView?: SampleFingerprintIndex,
+    trainContentFingerprintsByView?: SampleFingerprintIndex
 ): RenderSample[] {
     const moduleName = genEntry.generatorId;
     const { tuples } = matchTargets(targets, [genEntry], viewCatalog);
@@ -110,6 +115,8 @@ function generateModuleSamples(
 
         const labels = [...target.labels];
         const instanceIdx = 0;
+        const viewEntry = viewCatalog.find(view => view.viewId === tuple.viewId);
+        if (!viewEntry) throw new Error(`View catalog entry not found: ${tuple.viewId}`);
 
         const makeIdentity = (mode: SampleMode): SampleIdentity => ({
             targetId: target.id,
@@ -120,20 +127,36 @@ function generateModuleSamples(
             instanceIdx
         });
 
-        // Applied to both modes: content already claimed for this view — in
-        // either mode, and in train when drawing val — is rejected, so no two
-        // images of a view ever show the same problem across a split boundary.
-        const duplicateSamples: RenderSample[] = [];
-        const isDuplicate = (stub: ProblemStub) => {
-            const fingerprint = computeContentFingerprint(stub.data);
-            const matches = [
-                ...samplesForFingerprint(fingerprintsByView, tuple.viewId, fingerprint),
-                ...samplesForFingerprint(trainFingerprintsByView, tuple.viewId, fingerprint)
+        const fingerprintStub = (stub: ProblemStub, seed: number) => {
+            const problem = buildProblem({ stub, type: genEntry.generator.type, labels });
+            const contentFingerprint = computeContentFingerprint(problem.data);
+            const viewConfig = resolveViewConfig(viewEntry.schema, problem.tags ?? [], seed);
+            return {
+                problem,
+                contentFingerprint,
+                taskFingerprint: computeTaskFingerprint(problem.data, viewConfig)
+            };
+        };
+
+        // A task-identical sample may represent another target. A train sample
+        // with only the same mathematical payload cannot: it merely excludes
+        // that payload from validation to protect the split boundary.
+        const representingSamples: RenderSample[] = [];
+        const isDuplicate = (stub: ProblemStub, { seed }: { seed: number }) => {
+            const { contentFingerprint, taskFingerprint } = fingerprintStub(stub, seed);
+            const taskMatches = [
+                ...samplesForFingerprint(taskFingerprintsByView, tuple.viewId, taskFingerprint),
+                ...samplesForFingerprint(trainTaskFingerprintsByView, tuple.viewId, taskFingerprint)
             ];
-            for (const sample of matches) {
-                if (!duplicateSamples.includes(sample)) duplicateSamples.push(sample);
+            for (const sample of taskMatches) {
+                if (!representingSamples.includes(sample)) representingSamples.push(sample);
             }
-            return matches.length > 0;
+            const trainContentMatches = samplesForFingerprint(
+                trainContentFingerprintsByView,
+                tuple.viewId,
+                contentFingerprint
+            );
+            return taskMatches.length > 0 || trainContentMatches.length > 0;
         };
 
         const questionIdentity = makeIdentity('question');
@@ -153,7 +176,7 @@ function generateModuleSamples(
             continue;
         }
         if (!question.stub) {
-            const representedBy = duplicateSamples[0];
+            const representedBy = representingSamples[0];
             if (representedBy) {
                 representedBy.associatedTargetIds.add(target.id);
                 console.warn(`[${moduleName}] Linked ${questionKey} to existing sample ${representedBy.sampleKey} after ${MAX_ATTEMPTS} duplicate attempts`);
@@ -163,18 +186,21 @@ function generateModuleSamples(
             continue;
         }
 
+        const questionResult = fingerprintStub(question.stub, question.seed);
         const questionSample: RenderSample = {
             identity: questionIdentity,
             sampleKey: questionKey,
             fileName: computeSampleFilename(questionIdentity),
             seed: question.seed,
             attempt: question.attempt,
-            fingerprint: computeContentFingerprint(question.stub.data),
-            problem: buildProblem({ stub: question.stub, type: genEntry.generator.type, labels }),
+            contentFingerprint: questionResult.contentFingerprint,
+            taskFingerprint: questionResult.taskFingerprint,
+            problem: questionResult.problem,
             associatedTargetIds: new Set()
         };
         samples.push(questionSample);
-        claimSample(fingerprintsByView, questionSample);
+        claimSample(taskFingerprintsByView, questionSample, questionSample.taskFingerprint);
+        claimSample(contentFingerprintsByView, questionSample, questionSample.contentFingerprint);
 
         const solutionIdentity = makeIdentity('solution');
         const solutionKey = computeSampleKey(solutionIdentity);
@@ -194,18 +220,22 @@ function generateModuleSamples(
         // problem falls back to showing the question's content solved. That is
         // the same exercise in the same split — never a cross-split leak.
         const solutionStub = solution.stub || question.stub;
+        const solutionSeed = solution.stub ? solution.seed : question.seed;
+        const solutionResult = fingerprintStub(solutionStub, solutionSeed);
         const solutionSample: RenderSample = {
             identity: solutionIdentity,
             sampleKey: solutionKey,
             fileName: computeSampleFilename(solutionIdentity),
-            seed: solution.stub ? solution.seed : question.seed,
+            seed: solutionSeed,
             attempt: solution.stub ? solution.attempt : question.attempt,
-            fingerprint: computeContentFingerprint(solutionStub.data),
-            problem: buildProblem({ stub: solutionStub, type: genEntry.generator.type, labels }),
+            contentFingerprint: solutionResult.contentFingerprint,
+            taskFingerprint: solutionResult.taskFingerprint,
+            problem: solutionResult.problem,
             associatedTargetIds: new Set()
         };
         samples.push(solutionSample);
-        claimSample(fingerprintsByView, solutionSample);
+        claimSample(taskFingerprintsByView, solutionSample, solutionSample.taskFingerprint);
+        claimSample(contentFingerprintsByView, solutionSample, solutionSample.contentFingerprint);
     }
 
     return samples;
@@ -394,7 +424,8 @@ async function renderSamples(
                     instance: identity.instanceIdx,
                     attempt: sample.attempt,
                     seed: sample.seed,
-                    content_fingerprint: sample.fingerprint,
+                    content_fingerprint: sample.contentFingerprint,
+                    task_fingerprint: sample.taskFingerprint,
                     tags: (sample.problem.tags || []).map(shortenLabel).sort(),
                     target_associations: [...sample.associatedTargetIds]
                         .sort()
@@ -462,13 +493,31 @@ async function runModulePipeline(
     // cannot be had otherwise. Verify with:
     //   generate --spec=test, then generate --spec=test --training-only
     //   → the train split must be byte-identical.
-    const trainFingerprints: SampleFingerprintIndex = new Map();
-    const trainSamples = generateModuleSamples(genEntry, viewCatalog, allTargets, 'train', trainFingerprints);
+    const trainTaskFingerprints: SampleFingerprintIndex = new Map();
+    const trainContentFingerprints: SampleFingerprintIndex = new Map();
+    const trainSamples = generateModuleSamples(
+        genEntry,
+        viewCatalog,
+        allTargets,
+        'train',
+        trainTaskFingerprints,
+        trainContentFingerprints
+    );
 
     let valSamples: RenderSample[] = [];
     if (!trainingOnly) {
-        const valFingerprints: SampleFingerprintIndex = new Map();
-        valSamples = generateModuleSamples(genEntry, viewCatalog, allTargets, 'val', valFingerprints, trainFingerprints);
+        const valTaskFingerprints: SampleFingerprintIndex = new Map();
+        const valContentFingerprints: SampleFingerprintIndex = new Map();
+        valSamples = generateModuleSamples(
+            genEntry,
+            viewCatalog,
+            allTargets,
+            'val',
+            valTaskFingerprints,
+            valContentFingerprints,
+            trainTaskFingerprints,
+            trainContentFingerprints
+        );
     }
 
     console.log(`[${moduleName}] Generated samples. Train (${trainSamples.length}), Validation (${valSamples.length})`);

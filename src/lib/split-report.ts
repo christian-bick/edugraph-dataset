@@ -7,7 +7,7 @@
  * 1. **Disjointness** — no content in validation also appears in train for the
  *    same view. A leak makes validation accuracy an optimistic estimate.
  * 2. **Non-redundancy** — within a split, no two exercises of a view show the
- *    same content. (A question and its own solution sharing content is the
+ *    same configured task. (A question and its own solution sharing a task is the
  *    documented small-content-space fallback, not redundancy.)
  * 3. **Representativeness** — the realized ratio is close to the requested one,
  *    and every view and label carrying train mass also carries val mass.
@@ -19,7 +19,7 @@
  * construction — `show:matching` is the tool that covers matching failures.
  */
 
-import { MetadataRow, exerciseKey } from './dataset-merge.ts';
+import { MetadataRow, exerciseKey, rowTaskFingerprint } from './dataset-merge.ts';
 import { isValTuple } from './generation.ts';
 
 /** The allocation unit: one matched (target, generator, view) tuple. */
@@ -30,15 +30,24 @@ export function tupleKey(row: MetadataRow): string {
 /** Content index of a split: view -> fingerprint -> the exercises claiming it. */
 export type ContentIndex = Map<string, Map<string, Set<string>>>;
 
-export function indexContent(rows: MetadataRow[]): ContentIndex {
+function indexRows(rows: MetadataRow[], fingerprintFor: (row: MetadataRow) => string): ContentIndex {
     const index: ContentIndex = new Map();
     for (const row of rows) {
         if (!index.has(row.view)) index.set(row.view, new Map());
         const byFingerprint = index.get(row.view)!;
-        if (!byFingerprint.has(row.content_fingerprint)) byFingerprint.set(row.content_fingerprint, new Set());
-        byFingerprint.get(row.content_fingerprint)!.add(exerciseKey(row));
+        const fingerprint = fingerprintFor(row);
+        if (!byFingerprint.has(fingerprint)) byFingerprint.set(fingerprint, new Set());
+        byFingerprint.get(fingerprint)!.add(exerciseKey(row));
     }
     return index;
+}
+
+export function indexContent(rows: MetadataRow[]): ContentIndex {
+    return indexRows(rows, row => row.content_fingerprint);
+}
+
+export function indexTasks(rows: MetadataRow[]): ContentIndex {
+    return indexRows(rows, rowTaskFingerprint);
 }
 
 export interface Leak {
@@ -76,14 +85,14 @@ export interface Redundancy {
 }
 
 /**
- * Content shown by more than one exercise of the same view within a split.
+ * The same rendered task shown by more than one exercise of a view within a split.
  * Grouping by exercise is what distinguishes real redundancy from the
  * question/solution fallback, where one exercise legitimately claims a
  * fingerprint in both modes.
  */
 export function findWithinSplitRedundancy(rows: MetadataRow[], split: string): Redundancy[] {
     const redundancies: Redundancy[] = [];
-    for (const [view, byFingerprint] of indexContent(rows)) {
+    for (const [view, byFingerprint] of indexTasks(rows)) {
         for (const [fingerprint, exercises] of byFingerprint) {
             if (exercises.size > 1) {
                 redundancies.push({ split, view, fingerprint, exercises: [...exercises].sort() });

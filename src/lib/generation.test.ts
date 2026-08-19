@@ -16,6 +16,8 @@ import {
     generateSample,
     generateSampleWithRetry,
     computeContentFingerprint,
+    computeTaskFingerprint,
+    resolveViewConfig,
     isValTuple,
     DEFAULT_VAL_RATIO,
     buildRenderPayload,
@@ -393,6 +395,26 @@ describe('generateSampleWithRetry', () => {
         expect(computeContentFingerprint(second.stub!.data)).not.toBe(computeContentFingerprint(first.stub!.data));
     });
 
+    it('passes the exact attempt seed to duplicate classification', () => {
+        const generator = makeStubGenerator(() => ({ data: { value: 1 } }));
+        const attempts: Array<{ attempt: number; seed: number }> = [];
+        generateSampleWithRetry({
+            generator,
+            labels: [],
+            sampleKey,
+            maxAttempts: 2,
+            isDuplicate: (_stub, attempt) => {
+                attempts.push(attempt);
+                return attempt.attempt === 1;
+            },
+        });
+
+        expect(attempts).toEqual([
+            { attempt: 1, seed: computeSampleSeed(sampleKey, 1) },
+            { attempt: 2, seed: computeSampleSeed(sampleKey, 2) },
+        ]);
+    });
+
     it('gives up after maxAttempts with a null stub', () => {
         const generator = makeStubGenerator(() => null);
         const result = generateSampleWithRetry({ generator, labels: [], sampleKey, maxAttempts: 5 });
@@ -413,6 +435,7 @@ describe('findGeneratorsWithoutTestPath', () => {
         supportedLabels: [],
         problemType: 'WritingProblem',
         module,
+        schema: {},
         spec: { viewId: 'fixture-view', generalLabels: [] }
     }];
 
@@ -468,6 +491,31 @@ describe('computeContentFingerprint', () => {
 
     it('ignores undefined object values like JSON.stringify does', () => {
         expect(computeContentFingerprint({ a: 1, b: undefined })).toBe(computeContentFingerprint({ a: 1 }));
+    });
+});
+
+describe('configured task identity', () => {
+    it('distinguishes the same data rendered with different resolved configurations', () => {
+        const data = { parts: [1, 2, 3] };
+        expect(computeTaskFingerprint(data, { prompt: 'vocabulary' }))
+            .not.toBe(computeTaskFingerprint(data, { prompt: 'composition' }));
+    });
+
+    it('is invariant to data and config key order', () => {
+        expect(computeTaskFingerprint(
+            { b: 2, a: 1 },
+            { support: { visual: true, hint: false }, direction: 'forward' },
+        )).toBe(computeTaskFingerprint(
+            { a: 1, b: 2 },
+            { direction: 'forward', support: { hint: false, visual: true } },
+        ));
+    });
+
+    it('resolves view configuration deterministically from labels and render seed', () => {
+        const schema = { layout: ['grid', 'row'] as const };
+        const first = resolveViewConfig(schema, [], 17);
+        const second = resolveViewConfig(schema, [], 17);
+        expect(first).toEqual(second);
     });
 });
 

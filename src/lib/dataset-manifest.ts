@@ -188,7 +188,8 @@ export function buildDatasetManifestEntries(options: {
         const contentSignature = pairRows
             .map(row => ({
                 sample_key: row.sample_key,
-                content_fingerprint: row.content_fingerprint
+                content_fingerprint: row.content_fingerprint,
+                task_fingerprint: row.task_fingerprint
             }))
             .sort((a, b) => a.sample_key.localeCompare(b.sample_key));
         const targetSignature = pairTargets
@@ -267,7 +268,7 @@ export function datasetFreshnessIssues(
         } else if (recorded.input_hash !== current.input_hash) {
             issues.push(`${key} is stale: generation source, target, or ontology inputs changed.`);
         } else if (recorded.content_hash !== current.content_hash) {
-            issues.push(`${key} content fingerprints changed since generation.`);
+            issues.push(`${key} content or task fingerprints changed since generation.`);
         } else if (JSON.stringify(recorded.sample_counts) !== JSON.stringify(current.sample_counts)) {
             issues.push(`${key} metadata counts changed since generation.`);
         }

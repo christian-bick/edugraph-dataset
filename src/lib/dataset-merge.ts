@@ -8,10 +8,10 @@
  * delta.
  *
  * Dedup extends the generation-time rule (`generateModuleSamples`) across
- * standards: by content fingerprint per (split, view), with the validation
- * split additionally rejecting content already present in train. Generation
- * scopes the same rule per module, since a view has only one generator; the
- * merge spans whole standards and so scopes per (split, view).
+ * standards: by task fingerprint per (split, view), with the validation split
+ * additionally rejecting mathematical content already present in train.
+ * Generation scopes the same rule per module, since a view has only one
+ * generator; the merge spans whole standards and so scopes per (split, view).
  */
 
 export interface TargetAssociation {
@@ -28,7 +28,10 @@ export interface MetadataRow {
     view: string;
     mode: string;
     instance: number;
+    /** Mathematical payload identity, independent of presentation. */
     content_fingerprint: string;
+    /** Rendered-task identity: mathematical payload plus resolved view config. */
+    task_fingerprint?: string;
     /** Additional target permutations represented by the same physical sample. */
     target_associations?: TargetAssociation[];
     /** Shortened ontology labels, as written by the pipeline. */
@@ -98,12 +101,19 @@ export function toPublishedMetadataRow(row: MetadataRow): PublishedMetadataRow {
 export interface Exercise {
     key: string;
     view: string;
-    /** The question row's fingerprint, matching what generation records as seen. */
-    fingerprint: string;
+    /** The question row's mathematical payload identity. */
+    contentFingerprint: string;
+    /** The question row's rendered-task identity. */
+    taskFingerprint: string;
     rows: MetadataRow[];
 }
 
 export const QUESTION_MODE = 'question';
+
+/** Older generated datasets predate task fingerprints and use data identity as the conservative fallback. */
+export function rowTaskFingerprint(row: MetadataRow): string {
+    return row.task_fingerprint ?? row.content_fingerprint;
+}
 
 /** Identity of the exercise a row belongs to, ignoring its mode. */
 export function exerciseKey(row: MetadataRow): string {
@@ -119,12 +129,16 @@ export function groupIntoExercises(rows: MetadataRow[]): Exercise[] {
         const existing = byKey.get(key);
         if (existing) {
             existing.rows.push(row);
-            if (row.mode === QUESTION_MODE) existing.fingerprint = row.content_fingerprint;
+            if (row.mode === QUESTION_MODE) {
+                existing.contentFingerprint = row.content_fingerprint;
+                existing.taskFingerprint = rowTaskFingerprint(row);
+            }
         } else {
             byKey.set(key, {
                 key,
                 view: row.view,
-                fingerprint: row.content_fingerprint,
+                contentFingerprint: row.content_fingerprint,
+                taskFingerprint: rowTaskFingerprint(row),
                 rows: [row],
             });
         }
@@ -139,6 +153,11 @@ export function emptyFingerprintIndex(): FingerprintIndex {
     return new Map();
 }
 
+export function claimFingerprint(index: FingerprintIndex, view: string, fingerprint: string): void {
+    if (!index.has(view)) index.set(view, new Set());
+    index.get(view)!.add(fingerprint);
+}
+
 function has(index: FingerprintIndex | undefined, view: string, fingerprint: string): boolean {
     return index?.get(view)?.has(fingerprint) ?? false;
 }
@@ -149,27 +168,28 @@ export interface MergeSelection {
 }
 
 /**
- * Selects the exercises a standard contributes to the union, mutating `seen`
- * with the fingerprints it claims. `excluded` holds fingerprints that
- * disqualify an exercise without being claimed by it — the train index when
- * selecting the validation split, which keeps train content out of validation
- * across standards just as generation does within one.
+ * Selects the exercises a standard contributes to the union, mutating
+ * `seenTasks` with the task fingerprints it claims. `excludedContent` holds
+ * mathematical payload fingerprints that disqualify an exercise without
+ * being claimed by it — the train content index when selecting validation.
  */
 export function selectUnionExercises(
     exercises: Exercise[],
-    seen: FingerprintIndex,
-    excluded?: FingerprintIndex
+    seenTasks: FingerprintIndex,
+    excludedContent?: FingerprintIndex
 ): MergeSelection {
     const kept: Exercise[] = [];
     const dropped: Exercise[] = [];
 
     for (const exercise of exercises) {
-        if (has(seen, exercise.view, exercise.fingerprint) || has(excluded, exercise.view, exercise.fingerprint)) {
+        if (
+            has(seenTasks, exercise.view, exercise.taskFingerprint)
+            || has(excludedContent, exercise.view, exercise.contentFingerprint)
+        ) {
             dropped.push(exercise);
             continue;
         }
-        if (!seen.has(exercise.view)) seen.set(exercise.view, new Set());
-        seen.get(exercise.view)!.add(exercise.fingerprint);
+        claimFingerprint(seenTasks, exercise.view, exercise.taskFingerprint);
         kept.push(exercise);
     }
 
