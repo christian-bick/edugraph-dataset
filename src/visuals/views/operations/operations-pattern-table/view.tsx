@@ -211,15 +211,18 @@ const OperationsPatternTableCore = ({config, payload}: CoreProps) => {
 
     if (data.task === undefined) {
         if (!config.classificationMode) fail('Retained table payloads require classification mode.');
+        if (config.executionMode) fail('Retained classification payloads cannot request execution mode.');
         return <LegacyTable data={data} isSolutionView={isSolutionView} />;
     }
 
     if (data.task === 'generate') {
         if (config.classificationMode) fail('Generated-term payloads cannot use classification mode.');
+        if (!config.executionMode) fail('Generated-term payloads require execution mode.');
         validateGrade4Base(data);
         validateGenerate(data);
     } else if (data.task === 'identify-feature') {
         if (!config.classificationMode) fail('Feature-identification payloads require classification mode.');
+        if (!config.executionMode) fail('Feature-identification payloads require execution mode.');
         validateGrade4Base(data);
         validateIdentify(data);
     } else {

@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -18,8 +18,7 @@ export const ArithmeticPatternsGeneratorSchema = {
         [
             Area.PatternGeneration,
             Area.GenerativeRuleRecognition,
-            Area.EmergentFeatureRecognition,
-            Ability.ProcedureExecution
+            Area.EmergentFeatureRecognition
         ],
         resolveArithmeticPatternTask
     ],

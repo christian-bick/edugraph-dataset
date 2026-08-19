@@ -26,7 +26,8 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels)!;
 
         expect(stub.data.task).toBe(task);
-        expect(stub.tags).toEqual(expect.arrayContaining(labels));
+        expect(stub.tags).toEqual(expect.arrayContaining([operation, Area.PatternGeneration]));
+        expect(stub.tags).not.toContain(Ability.ProcedureExecution);
     });
 
     it('resolves generative-rule recognition to the Grade 3 table payload', () => {
@@ -63,8 +64,9 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
             expect(stub.data.task).toBe(task);
             expect(stub.tags).toEqual(expect.arrayContaining([
                 operation,
-                Ability.ProcedureExecution
+                Area.EmergentFeatureRecognition
             ]));
+            expect(stub.tags).not.toContain(Ability.ProcedureExecution);
             expect(stub.tags).not.toContain(Ability.ConceptClassification);
         }
     );
@@ -120,9 +122,9 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         expect(stub.data.propertyLaw).toBe(propertyLaw);
         expect(stub.tags).toEqual(expect.arrayContaining([
             operation,
-            law,
-            Ability.ProcedureExecution
+            law
         ]));
+        expect(stub.tags).not.toContain(Ability.ProcedureExecution);
         expect(stub.tags).not.toContain(Ability.ProcedureUnderstanding);
         expect(stub.tags).not.toContain(Ability.TextualArticulation);
     });

@@ -1,4 +1,4 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Area} from 'edugraph-ts';
 import {random} from '../../lib/random.ts';
 
 export const arithmeticOperations = [
@@ -85,18 +85,13 @@ export function resolveArithmeticPatternTask(labels: string[]): ArithmeticPatter
     const generatesPattern = labels.includes(Area.PatternGeneration);
     const recognizesGenerativeRule = labels.includes(Area.GenerativeRuleRecognition);
     const recognizesEmergentFeature = labels.includes(Area.EmergentFeatureRecognition);
-    const classifies = labels.includes(Ability.ConceptClassification);
-    const executes = labels.includes(Ability.ProcedureExecution);
     if (recognizesGenerativeRule) return 'legacy-identify';
     if (recognizesEmergentFeature) {
-        if (hasLaw && !generatesPattern && !executes) return 'legacy-explain';
+        if (hasLaw && !generatesPattern) return 'legacy-explain';
         return hasLaw ? 'explain-feature' : 'identify-feature';
     }
     if (generatesPattern) return 'generate';
-    if (hasLaw) return executes ? 'explain-feature' : 'legacy-explain';
-    if (classifies && executes) return 'identify-feature';
-    if (executes) return 'generate';
-    if (classifies) return 'legacy-identify';
+    if (hasLaw) return 'legacy-explain';
     return undefined;
 }
 

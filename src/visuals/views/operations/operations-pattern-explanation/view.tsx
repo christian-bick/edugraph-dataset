@@ -303,6 +303,7 @@ const OperationsPatternExplanationCore = ({config, payload}: CoreProps) => {
 
     if (data.task === 'generate') {
         if (config.explanationMode) fail('Generation and feature-identification tasks cannot request explanation mode.');
+        if (!config.executionMode) fail('Generated-term payloads require execution mode.');
         validateGrade4Practice(data);
         return <Grade4Practice data={data} isSolutionView={isSolutionView} />;
     }
@@ -310,7 +311,11 @@ const OperationsPatternExplanationCore = ({config, payload}: CoreProps) => {
 
     validateProperty(data);
     if (!config.explanationMode) fail('Property-law payloads require explanation mode.');
-    if (data.task === undefined) return <LegacyExplanation data={data} isSolutionView={isSolutionView} />;
+    if (data.task === undefined) {
+        if (config.executionMode) fail('Retained explanations cannot request execution mode.');
+        return <LegacyExplanation data={data} isSolutionView={isSolutionView} />;
+    }
+    if (!config.executionMode) fail('Generated feature explanations require execution mode.');
 
     validateGrade4(data);
     return <Grade4Explanation data={data} isSolutionView={isSolutionView} />;

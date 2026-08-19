@@ -15,4 +15,17 @@ describe('OperationsPatternExplanationViewSchema', () => {
             Ability.ProcedureExecution
         ]).config.explanationMode).toBe(false);
     });
+
+    it('resolves execution independently from explanation presentation', () => {
+        expect(extractConfig(OperationsPatternExplanationViewSchema, [
+            Ability.ProcedureExecution,
+            Ability.ProcedureUnderstanding
+        ]).config).toMatchObject({
+            executionMode: true,
+            explanationMode: true
+        });
+        expect(extractConfig(OperationsPatternExplanationViewSchema, [
+            Ability.ProcedureUnderstanding
+        ]).config.executionMode).toBe(false);
+    });
 });

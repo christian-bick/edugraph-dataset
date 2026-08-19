@@ -12,6 +12,10 @@ export const OperationsPatternTableViewSchema = {
     classificationMode: [
         [Ability.ConceptClassification],
         hasLabel(Ability.ConceptClassification)
+    ],
+    executionMode: [
+        [Ability.ProcedureExecution],
+        hasLabel(Ability.ProcedureExecution)
     ]
 } as const;
 export type OperationsPatternTableViewConfig = ConfigFromSchema<typeof OperationsPatternTableViewSchema>;

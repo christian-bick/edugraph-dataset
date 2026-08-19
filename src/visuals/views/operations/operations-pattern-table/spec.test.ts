@@ -14,4 +14,13 @@ describe('OperationsPatternTableViewSchema', () => {
             Ability.ProcedureExecution
         ]).config.classificationMode).toBe(false);
     });
+
+    it('resolves execution as a view-owned response mode', () => {
+        expect(extractConfig(OperationsPatternTableViewSchema, [
+            Ability.ProcedureExecution
+        ]).config.executionMode).toBe(true);
+        expect(extractConfig(OperationsPatternTableViewSchema, [
+            Ability.ConceptClassification
+        ]).config.executionMode).toBe(false);
+    });
 });

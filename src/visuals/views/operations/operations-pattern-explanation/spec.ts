@@ -12,6 +12,10 @@ export const OperationsPatternExplanationViewSchema = {
     explanationMode: [
         [Ability.ProcedureUnderstanding, Ability.TextualArticulation],
         hasLabel(Ability.ProcedureUnderstanding)
+    ],
+    executionMode: [
+        [Ability.ProcedureExecution],
+        hasLabel(Ability.ProcedureExecution)
     ]
 } as const;
 export type OperationsPatternExplanationViewConfig = ConfigFromSchema<typeof OperationsPatternExplanationViewSchema>;
