@@ -1,5 +1,5 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
-import {matchAllExactLabels, selectCanonicalLabel, selectExactMatch} from '../../../lib/resolvers.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {matchAllExactLabels, selectCanonicalLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -18,10 +18,6 @@ export const GeometryPerimeterGeneratorSchema = {
             [[Area.Pentagon], Area.Pentagon],
             [[Area.Hexagon], Area.Hexagon]
         ])
-    ],
-    taskAbility: [
-        [Ability.ProcedureExecution, Ability.ProcedureInversion],
-        selectExactMatch
     ],
     operationFeatures: [[Area.Addition, Area.Equation], matchAllExactLabels]
 } as const;

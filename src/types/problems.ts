@@ -2342,17 +2342,11 @@ type GeometryPerimeterProblemBase = {
     sideLengths: number[];
     perimeter: number;
     unit: 'units';
-};
-
-export type FindPolygonPerimeterProblem = GeometryPerimeterProblemBase & {
-    task: 'find-perimeter';
-};
-
-export type FindMissingPolygonSideProblem = GeometryPerimeterProblemBase & {
-    task: 'find-missing-side';
     unknownSideIndex: number;
     knownSideTotal: number;
 };
+
+export type PolygonPerimeterProblem = GeometryPerimeterProblemBase;
 
 type RectanglePerimeterFormulaBase = {
     shape: 'rectangle';
@@ -2363,32 +2357,18 @@ type RectanglePerimeterFormulaBase = {
     perimeter: number;
     unit: 'units';
     formula: 'P = length + width + length + width';
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    answerStatement: string;
-    explanation: string;
-};
-
-export type RectanglePerimeterFormulaProblem = RectanglePerimeterFormulaBase & {
-    task: 'rectangle-perimeter-formula';
-};
-
-export type FindMissingRectanglePerimeterDimensionProblem = RectanglePerimeterFormulaBase & {
-    task: 'find-missing-perimeter-dimension';
     unknownDimension: 'length' | 'width';
     knownDimension: 'length' | 'width';
     knownValue: number;
     missingValue: number;
     knownSideTotal: number;
-    inverseEquation: string;
 };
 
+export type RectanglePerimeterProblem = RectanglePerimeterFormulaBase;
+
 export type GeometryPerimeterProblem =
-    | FindPolygonPerimeterProblem
-    | FindMissingPolygonSideProblem
-    | RectanglePerimeterFormulaProblem
-    | FindMissingRectanglePerimeterDimensionProblem;
+    | PolygonPerimeterProblem
+    | RectanglePerimeterProblem;
 
 export type RectangleMeasures = {
     width: number;

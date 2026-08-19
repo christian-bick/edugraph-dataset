@@ -1,4 +1,4 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Area} from 'edugraph-ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -63,13 +63,8 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
         config: GeometryPerimeterGeneratorConfig
     ): ProblemStub<GeometryPerimeterProblem> | null {
         validateConfigFields('geometry-perimeter', config, [
-            'polygonShape',
-            'taskAbility'
+            'polygonShape'
         ]);
-        if (
-            config.taskAbility !== Ability.ProcedureExecution
-            && config.taskAbility !== Ability.ProcedureInversion
-        ) return null;
 
         if (config.polygonShape === Area.Rectangle) {
             const [length, width] = RECTANGLE_DIMENSIONS[
@@ -87,23 +82,6 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
                 unit: 'units' as const,
                 formula: 'P = length + width + length + width' as const
             };
-            if (config.taskAbility === Ability.ProcedureExecution) {
-                if (
-                    !config.operationFeatures?.includes(Area.Addition)
-                    || !config.operationFeatures.includes(Area.Equation)
-                ) return null;
-                return {
-                    data: {
-                        ...common,
-                        task: 'rectangle-perimeter-formula',
-                        prompt: `Find the perimeter of a rectangle with length ${length} units and width ${width} units.`,
-                        questionEquation: `P = ${length} + ${width} + ${length} + ${width} = ?`,
-                        solutionEquation: `P = ${length} + ${width} + ${length} + ${width} = ${perimeter}`,
-                        answerStatement: `The perimeter is ${perimeter} units.`,
-                        explanation: `A rectangle has two lengths and two widths. Add ${length} + ${width} + ${length} + ${width} to get ${perimeter} units.`
-                    }
-                };
-            }
             if (
                 !config.operationFeatures?.includes(Area.Addition)
                 || !config.operationFeatures.includes(Area.Equation)
@@ -113,24 +91,14 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
             const knownValue = knownDimension === 'length' ? length : width;
             const missingValue = unknownDimension === 'length' ? length : width;
             const knownSideTotal = knownValue * 2;
-            const questionEquation = unknownDimension === 'length'
-                ? `P = ? + ${width} + ? + ${width} = ${perimeter}`
-                : `P = ${length} + ? + ${length} + ? = ${perimeter}`;
             return {
                 data: {
                     ...common,
-                    task: 'find-missing-perimeter-dimension',
                     unknownDimension,
                     knownDimension,
                     knownValue,
                     missingValue,
-                    knownSideTotal,
-                    prompt: `A rectangle has a perimeter of ${perimeter} units and a ${knownDimension} of ${knownValue} units. Find its ${unknownDimension}.`,
-                    questionEquation,
-                    inverseEquation: `(${perimeter} - ${knownSideTotal}) ÷ 2 = ?`,
-                    solutionEquation: `(${perimeter} - ${knownSideTotal}) ÷ 2 = ${missingValue}`,
-                    answerStatement: `The ${unknownDimension} is ${missingValue} units.`,
-                    explanation: `The two known ${knownDimension} sides total ${knownSideTotal} units. Subtract them from ${perimeter}, then divide the remaining length equally between the two ${unknownDimension} sides to get ${missingValue} units.`
+                    knownSideTotal
                 }
             };
         }
@@ -141,25 +109,15 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
         const factor = Math.floor(random() * 3) + 1;
         const sideLengths = template.sideLengths.map(length => length * factor);
         const perimeter = sideLengths.reduce((sum, length) => sum + length, 0);
-        const common = {
+        const unknownSideIndex = Math.floor(random() * sideLengths.length);
+        return {data: {
             shape: template.shape,
             vertices: template.vertices.map(vertex => scaleVertex(vertex, factor)),
             sideLengths,
             perimeter,
-            unit: 'units' as const
-        };
-        if (config.taskAbility === Ability.ProcedureInversion) {
-            const unknownSideIndex = Math.floor(random() * sideLengths.length);
-            return {
-                data: {
-                    ...common,
-                    task: 'find-missing-side',
-                    unknownSideIndex,
-                    knownSideTotal: perimeter - sideLengths[unknownSideIndex]
-                }
-            };
-        }
-
-        return {data: {...common, task: 'find-perimeter'}};
+            unit: 'units' as const,
+            unknownSideIndex,
+            knownSideTotal: perimeter - sideLengths[unknownSideIndex]
+        }};
     }
 }
