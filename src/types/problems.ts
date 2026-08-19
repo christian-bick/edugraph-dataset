@@ -2356,15 +2356,35 @@ export type ShapePatternProblem = ShapePatternProblemBase & (
     }
 );
 
-export type LegacyShapeSquareArrayProblem = {
-    task: 'interpret-unit' | 'interpret-coverage' | 'partition' | 'count' | 'count-area' | 'explain-product' | 'calculate-area';
-    rows: 1 | 2 | 3 | 4 | 5;
-    columns: 1 | 2 | 3 | 4 | 5;
-    squareCount: number;
-    areaUnit?: 'square units' | 'square centimeters' | 'square meters' | 'square inches' | 'square feet';
+export type SquareAreaUnit =
+    | 'square units'
+    | 'square centimeters'
+    | 'square meters'
+    | 'square inches'
+    | 'square feet';
+
+export type UnitSquareModel = {
+    model: 'unit-square';
+    rows: 1;
+    columns: 1;
+    squareCount: 1;
+    areaUnit: 'square units';
 };
 
-type RectangleAreaFormulaBase = {
+export type SquareArrayModel = {
+    model:
+        | 'equal-square-array'
+        | 'unit-square-coverage'
+        | 'tiled-area-product'
+        | 'rectangle-area-product';
+    rows: 2 | 3 | 4 | 5;
+    columns: 2 | 3 | 4 | 5;
+    squareCount: number;
+    areaUnit: SquareAreaUnit;
+};
+
+export type RectangleAreaFormulaModel = {
+    model: 'rectangle-area-formula';
     rows: 2 | 3 | 4 | 5;
     columns: 2 | 3 | 4 | 5;
     squareCount: number;
@@ -2373,30 +2393,12 @@ type RectangleAreaFormulaBase = {
     area: number;
     areaUnit: 'square units';
     formula: 'A = length × width';
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    answerStatement: string;
-    explanation: string;
-};
-
-export type RectangleAreaFormulaProblem = RectangleAreaFormulaBase & {
-    task: 'rectangle-area-formula';
-};
-
-export type FindMissingRectangleAreaDimensionProblem = RectangleAreaFormulaBase & {
-    task: 'find-missing-area-dimension';
-    unknownDimension: 'length' | 'width';
-    knownDimension: 'length' | 'width';
-    knownValue: number;
-    missingValue: number;
-    inverseEquation: string;
 };
 
 export type ShapeSquareArrayProblem =
-    | LegacyShapeSquareArrayProblem
-    | RectangleAreaFormulaProblem
-    | FindMissingRectangleAreaDimensionProblem;
+    | UnitSquareModel
+    | SquareArrayModel
+    | RectangleAreaFormulaModel;
 
 export type DistributiveAreaDecompositionProblem = {
     kind: 'distributive';

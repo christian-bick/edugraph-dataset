@@ -1,5 +1,5 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
-import {matchAllExactLabels, selectExactMatch} from '../../../lib/resolvers.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {matchAllExactLabels} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -29,16 +29,6 @@ export const ShapeSquareArrayGeneratorSchema = {
             Scope.TwoOperands
         ],
         matchAllExactLabels
-    ],
-    taskAbility: [
-        [
-            Ability.Interpretation,
-            Ability.VisualArticulation,
-            Ability.ProcedureExecution,
-            Ability.ProcedureInversion,
-            Ability.ProcedureUnderstanding
-        ],
-        selectExactMatch
     ]
 } as const;
 

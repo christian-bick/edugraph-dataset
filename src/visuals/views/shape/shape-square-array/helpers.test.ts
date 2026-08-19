@@ -1,57 +1,140 @@
+import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {FindMissingRectangleAreaDimensionProblem, RectangleAreaFormulaProblem} from '../../../../types/problems.ts';
-import {getAreaTilePrompt, isValidGrade4RectangleAreaProblem} from './helpers.ts';
+import {
+    RectangleAreaFormulaModel,
+    ShapeSquareArrayProblem
+} from '../../../../types/problems.ts';
+import {
+    buildRectangleAreaPresentation,
+    getAreaTilePrompt,
+    isValidShapeSquareArrayProblem,
+    resolveShapeSquareArrayTask
+} from './helpers.ts';
 
-const direct: RectangleAreaFormulaProblem = {
-    task: 'rectangle-area-formula',
-    rows: 4,
-    columns: 5,
-    squareCount: 20,
-    length: 5,
-    width: 4,
-    area: 20,
-    areaUnit: 'square units',
-    formula: 'A = length × width',
-    prompt: 'Find the area of a rectangle with length 5 units and width 4 units.',
-    questionEquation: 'A = 5 × 4 = ?',
-    solutionEquation: 'A = 5 × 4 = 20',
-    answerStatement: 'The area is 20 square units.',
-    explanation: 'The area formula is A = length × width. Multiply 5 units by 4 units to get 20 square units.'
+const models: Record<ShapeSquareArrayProblem['model'], ShapeSquareArrayProblem> = {
+    'unit-square': {
+        model: 'unit-square',
+        rows: 1,
+        columns: 1,
+        squareCount: 1,
+        areaUnit: 'square units'
+    },
+    'equal-square-array': {
+        model: 'equal-square-array',
+        rows: 4,
+        columns: 5,
+        squareCount: 20,
+        areaUnit: 'square units'
+    },
+    'unit-square-coverage': {
+        model: 'unit-square-coverage',
+        rows: 4,
+        columns: 5,
+        squareCount: 20,
+        areaUnit: 'square centimeters'
+    },
+    'tiled-area-product': {
+        model: 'tiled-area-product',
+        rows: 4,
+        columns: 5,
+        squareCount: 20,
+        areaUnit: 'square units'
+    },
+    'rectangle-area-product': {
+        model: 'rectangle-area-product',
+        rows: 4,
+        columns: 5,
+        squareCount: 20,
+        areaUnit: 'square units'
+    },
+    'rectangle-area-formula': {
+        model: 'rectangle-area-formula',
+        rows: 4,
+        columns: 5,
+        squareCount: 20,
+        length: 5,
+        width: 4,
+        area: 20,
+        areaUnit: 'square units',
+        formula: 'A = length × width'
+    }
 };
 
-const inverse: FindMissingRectangleAreaDimensionProblem = {
-    ...direct,
-    task: 'find-missing-area-dimension',
-    unknownDimension: 'length',
-    knownDimension: 'width',
-    knownValue: 4,
-    missingValue: 5,
-    prompt: 'A rectangle has an area of 20 square units and a width of 4 units. Find its length.',
-    questionEquation: '20 = ? × 4',
-    inverseEquation: '20 ÷ 4 = ?',
-    solutionEquation: '20 ÷ 4 = 5',
-    answerStatement: 'The length is 5 units.',
-    explanation: 'Because area equals length times width, divide 20 by the known width, 4, to get the missing length, 5 units.'
-};
-
-describe('Grade 4 rectangle-area view validation', () => {
-    it('accepts direct formula execution and inverse dimension evidence', () => {
-        expect(isValidGrade4RectangleAreaProblem(direct)).toBe(true);
-        expect(isValidGrade4RectangleAreaProblem(inverse)).toBe(true);
+describe('shape-square-array Ability projection', () => {
+    it.each([
+        ['unit-square', Ability.Interpretation, 'interpret-unit'],
+        ['equal-square-array', Ability.VisualArticulation, 'partition'],
+        ['equal-square-array', Ability.ProcedureExecution, 'count'],
+        ['unit-square-coverage', Ability.Interpretation, 'interpret-coverage'],
+        ['unit-square-coverage', Ability.ProcedureExecution, 'count-area'],
+        ['tiled-area-product', Ability.ProcedureUnderstanding, 'explain-product'],
+        ['rectangle-area-product', Ability.ProcedureExecution, 'calculate-area'],
+        ['rectangle-area-formula', Ability.ProcedureExecution, 'rectangle-area-formula'],
+        ['rectangle-area-formula', Ability.ProcedureInversion, 'find-missing-area-dimension']
+    ] as const)('projects %s + %s to %s', (model, ability, task) => {
+        expect(resolveShapeSquareArrayTask(models[model], ability)).toBe(task);
     });
 
-    it('rejects inconsistent products, roles, and supplied equations', () => {
-        expect(isValidGrade4RectangleAreaProblem({...direct, area: 19})).toBe(false);
-        expect(isValidGrade4RectangleAreaProblem({...inverse, knownDimension: 'length'})).toBe(false);
-        expect(isValidGrade4RectangleAreaProblem({...inverse, inverseEquation: '20 ÷ 5 = ?'})).toBe(false);
+    it('rejects an Ability that the mathematical model cannot expose', () => {
+        expect(resolveShapeSquareArrayTask(
+            models['unit-square'],
+            Ability.ProcedureInversion
+        )).toBeNull();
     });
 
-    it('enforces the five-by-five physical capacity and non-square rectangle boundary', () => {
-        expect(isValidGrade4RectangleAreaProblem({...direct, rows: 5, width: 5, area: 25, squareCount: 25})).toBe(false);
+    it('creates direct and inverse presentations from the same rectangle model', () => {
+        const data = models['rectangle-area-formula'] as RectangleAreaFormulaModel;
+        const direct = buildRectangleAreaPresentation(data, 'rectangle-area-formula', 2);
+        const inverse = buildRectangleAreaPresentation(data, 'find-missing-area-dimension', 2);
+
+        expect(direct.questionEquation).toBe('A = 5 × 4 = ?');
+        expect(direct.solutionEquation).toBe('A = 5 × 4 = 20');
+        expect(inverse.task).toBe('find-missing-area-dimension');
+        if (inverse.task !== 'find-missing-area-dimension') {
+            throw new Error('Expected an inverse presentation.');
+        }
+        expect(inverse.unknownDimension).toBe('length');
+        expect(inverse.questionEquation).toBe('20 = ? × 4');
+        expect(inverse.inverseEquation).toBe('20 ÷ 4 = ?');
+        expect(inverse.solutionEquation).toBe('20 ÷ 4 = 5');
+    });
+
+    it('uses the render seed to vary which dimension is unknown', () => {
+        const data = models['rectangle-area-formula'] as RectangleAreaFormulaModel;
+        const even = buildRectangleAreaPresentation(data, 'find-missing-area-dimension', 2);
+        const odd = buildRectangleAreaPresentation(data, 'find-missing-area-dimension', 3);
+
+        expect(even.task === 'find-missing-area-dimension' && even.unknownDimension).toBe('length');
+        expect(odd.task === 'find-missing-area-dimension' && odd.unknownDimension).toBe('width');
     });
 });
 
-describe('legacy area-tile wording', () => {
+describe('shape-square-array problem validation', () => {
+    it('accepts every complete mathematical model', () => {
+        for (const model of Object.values(models)) {
+            expect(isValidShapeSquareArrayProblem(model)).toBe(true);
+        }
+    });
+
+    it('rejects inconsistent products, formula dimensions, and square arrays', () => {
+        expect(isValidShapeSquareArrayProblem({
+            ...models['unit-square-coverage'],
+            squareCount: 19
+        } as ShapeSquareArrayProblem)).toBe(false);
+        expect(isValidShapeSquareArrayProblem({
+            ...models['rectangle-area-formula'],
+            area: 19
+        } as RectangleAreaFormulaModel)).toBe(false);
+        expect(isValidShapeSquareArrayProblem({
+            ...models['equal-square-array'],
+            rows: 5,
+            columns: 5,
+            squareCount: 25
+        } as ShapeSquareArrayProblem)).toBe(false);
+    });
+});
+
+describe('area-tile wording', () => {
     it.each([
         ['square units', '1 square unit'],
         ['square centimeters', '1 square centimeter'],

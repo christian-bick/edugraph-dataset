@@ -1,72 +1,102 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {setSeed} from '../../../lib/random.ts';
+import {extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
 import {ShapeSquareArrayGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {ShapeSquareArrayGeneratorSchema, spec} from './spec.ts';
 
 const generator = new ShapeSquareArrayGenerator();
 
+const generate = (labels: string[], seed: number) => {
+    setSeed(seed);
+    return generateWithLabels(generator, labels)!;
+};
+
 describe('ShapeSquareArrayGenerator spec integration', () => {
-    it('keeps task-specific shape identities in the schema', () => {
+    it('contains no Ability capability or parameter', () => {
+        const labels = extractSchemaLabels(ShapeSquareArrayGeneratorSchema);
+        const abilities = [
+            Ability.Interpretation,
+            Ability.VisualArticulation,
+            Ability.ProcedureExecution,
+            Ability.ProcedureInversion,
+            Ability.ProcedureUnderstanding
+        ];
+
         expect(spec.generalLabels).toEqual([]);
-        expect(spec.generalLabels).not.toContain(Area.Rectangle);
+        for (const ability of abilities) expect(labels).not.toContain(ability);
     });
 
     it.each([
-        [Ability.VisualArticulation, 'partition'],
-        [Ability.ProcedureExecution, 'count']
-    ] as const)('resolves %s to one exact task', (ability, task) => {
-        const stub = generateWithLabels(generator, [
-            Area.Rectangle,
-            Area.Square,
-            Area.ShapeDecomposition,
-            Scope.BoxArrangement,
-            Scope.EqualShares,
-            ability
-        ])!;
+        [
+            [
+                Area.Rectangle,
+                Area.Square,
+                Area.ShapeDecomposition,
+                Scope.BoxArrangement,
+                Scope.EqualShares
+            ],
+            Ability.VisualArticulation,
+            Ability.ProcedureExecution,
+            'equal-square-array'
+        ],
+        [
+            [
+                Area.AreaCalculation,
+                Area.Iteration,
+                Area.Square,
+                Scope.TileScale,
+                Scope.IntegerNumbers
+            ],
+            Ability.Interpretation,
+            Ability.ProcedureExecution,
+            'unit-square-coverage'
+        ],
+        [
+            [
+                Area.AreaCalculation,
+                Area.Equation,
+                Area.Rectangle,
+                Area.Multiplication,
+                Scope.IntegerNumbers,
+                Scope.TwoOperands
+            ],
+            Ability.ProcedureExecution,
+            Ability.ProcedureInversion,
+            'rectangle-area-formula'
+        ]
+    ] as const)(
+        'generates one %s model for either Ability projection',
+        (mathematicalLabels, firstAbility, secondAbility, model) => {
+            const first = generate([...mathematicalLabels, firstAbility], 31);
+            const second = generate([...mathematicalLabels, secondAbility], 31);
 
-        expect(stub.data.task).toBe(task);
-        expect(stub.tags).toContain(ability);
-    });
+            expect(first.data).toEqual(second.data);
+            expect(first.data.model).toBe(model);
+            expect(first.tags).not.toContain(firstAbility);
+            expect(second.tags).not.toContain(secondAbility);
+        }
+    );
 
-    it('resolves tile-scale interpretation to one unit square', () => {
-        const stub = generateWithLabels(generator, [
+    it('resolves tile scale to one complete unit-square model', () => {
+        const stub = generate([
             Area.Square,
             Scope.TileScale,
             Ability.Interpretation
-        ])!;
+        ], 7);
 
         expect(stub.data).toEqual({
-            task: 'interpret-unit',
+            model: 'unit-square',
             rows: 1,
             columns: 1,
-            squareCount: 1
+            squareCount: 1,
+            areaUnit: 'square units'
         });
         expect(stub.tags).toEqual(expect.arrayContaining([
-            Scope.TileScale,
-            Ability.Interpretation
-        ]));
-    });
-
-    it('resolves iterated tile-scale interpretation to exhaustive coverage', () => {
-        const stub = generateWithLabels(generator, [
-            Area.AreaCalculation,
-            Area.Iteration,
             Area.Square,
-            Scope.TileScale,
-            Scope.IntegerNumbers,
-            Ability.Interpretation
-        ])!;
-
-        expect(stub.data.task).toBe('interpret-coverage');
-        expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
-        expect(stub.tags).toEqual(expect.arrayContaining([
-            Area.AreaCalculation,
-            Area.Iteration,
-            Scope.TileScale,
-            Scope.IntegerNumbers,
-            Ability.Interpretation
+            Scope.TileScale
         ]));
+        expect(stub.tags).not.toContain(Ability.Interpretation);
     });
 
     it.each([
@@ -75,8 +105,8 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
         [Scope.SquareMeterScale, 'square meters'],
         [Scope.SquareInchScale, 'square inches'],
         [Scope.SquareFootScale, 'square feet']
-    ] as const)('resolves area counting for %s', (scale, areaUnit) => {
-        const stub = generateWithLabels(generator, [
+    ] as const)('resolves unit-square coverage for %s', (scale, areaUnit) => {
+        const stub = generate([
             Area.AreaCalculation,
             Area.Iteration,
             Area.Square,
@@ -84,15 +114,15 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
             Scope.IntegerNumbers,
             Ability.ProcedureExecution,
             ...(scale ? [scale] : [])
-        ])!;
+        ], 11);
 
-        expect(stub.data.task).toBe('count-area');
+        expect(stub.data.model).toBe('unit-square-coverage');
         expect(stub.data.areaUnit).toBe(areaUnit);
         expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
     });
 
-    it('resolves procedure understanding to a tiled side-length product', () => {
-        const stub = generateWithLabels(generator, [
+    it('resolves tiled and untiled rectangular products from Area and Scope only', () => {
+        const tiled = generate([
             Area.AreaCalculation,
             Area.Rectangle,
             Area.Square,
@@ -100,59 +130,16 @@ describe('ShapeSquareArrayGenerator spec integration', () => {
             Scope.BoxArrangement,
             Scope.TwoOperands,
             Ability.ProcedureUnderstanding
-        ])!;
-
-        expect(stub.data.task).toBe('explain-product');
-        expect(stub.data.areaUnit).toBe('square units');
-        expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
-    });
-
-    it.each([false, true])('resolves rectangular area calculation with story=%s', useStory => {
-        const stub = generateWithLabels(generator, [
+        ], 13);
+        const untiled = generate([
             Area.AreaCalculation,
             Area.Rectangle,
             Area.Multiplication,
-            Scope.TwoOperands,
-            Ability.ProcedureExecution,
-            ...(useStory ? [Ability.TextualReception] : [])
-        ])!;
-
-        expect(stub.data.task).toBe('calculate-area');
-        expect(stub.data.areaUnit).toBe('square units');
-        expect(stub.data.squareCount).toBe(stub.data.rows * stub.data.columns);
-    });
-
-    it('resolves the Grade 4 rectangle area formula separately from legacy calculation', () => {
-        const stub = generateWithLabels(generator, [
-            Area.AreaCalculation,
-            Area.Equation,
-            Area.Rectangle,
-            Area.Multiplication,
-            Scope.IntegerNumbers,
             Scope.TwoOperands,
             Ability.ProcedureExecution
-        ])!;
+        ], 13);
 
-        expect(stub.data.task).toBe('rectangle-area-formula');
-        expect(stub.tags).toEqual(expect.arrayContaining([
-            Area.Equation,
-            Scope.TwoOperands,
-            Ability.ProcedureExecution
-        ]));
-    });
-
-    it('resolves Grade 4 inverse rectangle area to a missing dimension', () => {
-        const stub = generateWithLabels(generator, [
-            Area.AreaCalculation,
-            Area.Equation,
-            Area.Rectangle,
-            Area.Multiplication,
-            Scope.IntegerNumbers,
-            Scope.TwoOperands,
-            Ability.ProcedureInversion
-        ])!;
-
-        expect(stub.data.task).toBe('find-missing-area-dimension');
-        expect(stub.tags).toContain(Ability.ProcedureInversion);
+        expect(tiled.data.model).toBe('tiled-area-product');
+        expect(untiled.data.model).toBe('rectangle-area-product');
     });
 });
