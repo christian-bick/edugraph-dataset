@@ -56,9 +56,9 @@ describe('FractionComparisonGenerator spec integration', () => {
         expect(stub!.tags).toEqual(expect.arrayContaining([
             strategy,
             comparisonFamily,
-            relation,
-            Ability.LogicalInference
+            relation
         ]));
+        expect(stub!.tags).not.toContain(Ability.LogicalInference);
     });
 
     it.each([
@@ -88,9 +88,9 @@ describe('FractionComparisonGenerator spec integration', () => {
         expect(stub!.data.task).toBe('compare-unlike-fractions');
         expect(stub!.tags).toEqual(expect.arrayContaining([
             comparisonKind,
-            Ability.ProcedureUnderstanding,
             relation
         ]));
+        expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
         expect(stub!.tags).not.toContain(Scope.VisualNumbers);
         expect(stub!.tags).not.toContain(Scope.SingleFrameOfReference);
     });

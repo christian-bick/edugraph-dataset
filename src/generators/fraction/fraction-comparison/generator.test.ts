@@ -40,8 +40,6 @@ const config = (
     relation: Scope.Greater | Scope.Less
 ): FractionComparisonGeneratorConfig => ({
     comparisonMode: strategy,
-    usesLogicalInference: true,
-    usesProcedureUnderstanding: false,
     usesReferenceComparison: false,
     usesCommonDenominator: comparisonFamily === Scope.CommonDenominator,
     usesCommonNumerator: comparisonFamily === Scope.CommonNumerator,
@@ -52,8 +50,6 @@ const grade4Config = (
     relation: Scope.Greater | Scope.Equal | Scope.Less
 ): FractionComparisonGeneratorConfig => ({
     comparisonMode: relation === Scope.Equal ? Area.NumericEquality : Area.NumericInequality,
-    usesLogicalInference: false,
-    usesProcedureUnderstanding: true,
     usesReferenceComparison: true,
     usesCommonDenominator: false,
     usesCommonNumerator: false,

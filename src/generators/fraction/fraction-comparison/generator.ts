@@ -142,8 +142,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
     generate(config: FractionComparisonGeneratorConfig): ProblemStub<FractionComparisonProblem> {
         validateConfigFields('fraction-comparison', config, [
             'comparisonMode',
-            'usesLogicalInference',
-            'usesProcedureUnderstanding',
             'usesReferenceComparison',
             'usesCommonDenominator',
             'usesCommonNumerator',
@@ -152,8 +150,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
 
         const comparisonMode = config.comparisonMode!;
         const relationLabel = config.relation!;
-        const usesLogicalInference = config.usesLogicalInference === true;
-        const usesProcedureUnderstanding = config.usesProcedureUnderstanding === true;
         const usesReferenceComparison = config.usesReferenceComparison === true;
         const relation = relationLabel === Scope.Greater
             ? 'greater' as const
@@ -175,7 +171,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
                 ? comparisonMode === Area.NumericEquality
                 : comparisonMode === Area.NumericInequality;
             if (!kindMatchesRelation
-                || usesLogicalInference
                 || config.usesCommonDenominator
                 || config.usesCommonNumerator) {
                 throw new GeneratorValidationError(
@@ -186,25 +181,16 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             return {data: generateUnlikeComparison(relation)};
         }
 
-        if (usesProcedureUnderstanding) {
-            throw new GeneratorValidationError(
-                'fraction-comparison',
-                'ProcedureUnderstanding alone does not select a fraction comparison strategy.'
-            );
-        }
-
-        const usesCommonDenominator = usesLogicalInference
-            && comparisonMode === Area.FractionCommonDenominatorComparison
+        const usesCommonDenominator = comparisonMode === Area.FractionCommonDenominatorComparison
             && config.usesCommonDenominator === true
             && config.usesCommonNumerator === false;
-        const usesCommonNumerator = usesLogicalInference
-            && comparisonMode === Area.FractionCommonNumeratorComparison
+        const usesCommonNumerator = comparisonMode === Area.FractionCommonNumeratorComparison
             && config.usesCommonDenominator === false
             && config.usesCommonNumerator === true;
         if (!usesCommonDenominator && !usesCommonNumerator) {
             throw new GeneratorValidationError(
                 'fraction-comparison',
-                'Each common-component scope requires its matching fraction comparison strategy and LogicalInference.'
+                'Each common-component scope requires its matching fraction comparison strategy.'
             );
         }
         if (relation !== 'greater' && relation !== 'less') {

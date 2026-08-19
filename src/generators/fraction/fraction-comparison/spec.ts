@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, selectExactMatch} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -19,12 +19,6 @@ export const FractionComparisonGeneratorSchema = {
         Area.FractionCommonDenominatorComparison,
         Area.FractionCommonNumeratorComparison
     ], selectExactMatch],
-    usesLogicalInference: [[
-        Ability.LogicalInference
-    ], hasLabel(Ability.LogicalInference)],
-    usesProcedureUnderstanding: [[
-        Ability.ProcedureUnderstanding
-    ], hasLabel(Ability.ProcedureUnderstanding)],
     usesReferenceComparison: [[
         Area.FractionReferenceComparison
     ], hasLabel(Area.FractionReferenceComparison)],

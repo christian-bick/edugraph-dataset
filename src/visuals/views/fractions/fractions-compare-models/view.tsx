@@ -1,4 +1,5 @@
 import {createRoot} from 'react-dom/client';
+import {Ability} from 'edugraph-ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {
     FractionComparisonBarModel,
@@ -264,10 +265,13 @@ const validateComparison = (data: FractionComparisonProblem) => {
     }
 };
 
-const FractionsCompareModelsCore = ({config: _config, payload}: CoreProps) => {
+const FractionsCompareModelsCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     if (data.task === 'compare-unlike-fractions') {
+        if (config.abilityMode !== Ability.ProcedureUnderstanding) {
+            throw new ViewValidationError(VIEW_ID, 'Benchmark comparison requires procedure-understanding mode.');
+        }
         validateProblemData(VIEW_ID, data, [
             'task',
             'first',
@@ -295,6 +299,9 @@ const FractionsCompareModelsCore = ({config: _config, payload}: CoreProps) => {
             throw new ViewValidationError(VIEW_ID, 'Unlike fractions require one coherent half-benchmark comparison.');
         }
         return <UnlikeFractionComparison data={data} isSolutionView={isSolutionView} />;
+    }
+    if (config.abilityMode !== Ability.LogicalInference) {
+        throw new ViewValidationError(VIEW_ID, 'Common-component comparison requires logical-inference mode.');
     }
     validateProblemData(VIEW_ID, data, [
         'task',
