@@ -1,5 +1,7 @@
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {ArithmeticTripleProblem} from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
+import {ArithmeticLawExercise} from './arithmetic-law-view.tsx';
 
 const operatorSymbols: Record<string, string> = {
     addition: '+',
@@ -30,6 +32,15 @@ export const ArithmeticVerticalView = ({invertProcedure, payload}: ArithmeticVer
         throw new ViewValidationError('operations-vertical', `Unsupported operation: ${data.operation}`);
     }
     const blankPart = invertProcedure ? 'num2' : 'solution';
+    if (data.propertyLaw) {
+        return (
+            <ArithmeticLawExercise
+                data={data as ArithmeticTripleProblem}
+                unknown={blankPart}
+                isSolutionView={isSolutionView}
+            />
+        );
+    }
     const operands = isFour
         ? ([['num1', data.num1], ['num2', data.num2], ['num3', data.num3], ['num4', data.num4]] as const)
         : isTriple

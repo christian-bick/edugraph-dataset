@@ -1,5 +1,7 @@
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {ArithmeticTripleProblem} from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
+import {ArithmeticLawExercise} from './arithmetic-law-view.tsx';
 import {
     getAppleGroups,
     getUnknownPart,
@@ -48,6 +50,15 @@ const operatorSymbols: Record<string, string> = {
     division: '÷'
 };
 
+function distributiveStory(
+    data: ArithmeticTripleProblem,
+    unknownPart: UnknownPart
+): string {
+    const visible = (part: UnknownPart, value: number): number | string =>
+        part === unknownPart ? (part === 'answer' ? 'an unknown number of' : 'some') : value;
+    return `A tiled display has ${visible('num1', data.num1)} rows. Each row is split into ${visible('num2', data.num2)} blue squares and ${visible('num3', data.num3)} yellow squares, for ${data.combinedFactor} squares per row. There are ${visible('answer', data.answer)} squares altogether. Find the unknown amount using the distributive property.`;
+}
+
 export const ArithmeticWordProblemView = ({invertProcedure, payload}: ArithmeticWordProblemViewProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
@@ -78,7 +89,9 @@ export const ArithmeticWordProblemView = ({invertProcedure, payload}: Arithmetic
         );
     }
     const unknownPart = getUnknownPart(data, payload.seed, invertProcedure);
-    const textScenario = getWordProblemText(data, unknownPart);
+    const textScenario = data.propertyLaw === 'distributive'
+        ? distributiveStory(data as ArithmeticTripleProblem, unknownPart)
+        : getWordProblemText(data, unknownPart);
 
     const getInputClass = (part: UnknownPart, isFinal = false) => {
         let cls = "w-[60px] h-[60px] border-2 border-slate-500 rounded-lg flex justify-center items-center text-[2rem] font-mono bg-white ";
@@ -106,7 +119,7 @@ export const ArithmeticWordProblemView = ({invertProcedure, payload}: Arithmetic
                     </div>
                 </div>
 
-                <div className="mt-4 flex items-center gap-3">
+                {!data.propertyLaw && <div className="mt-4 flex items-center gap-3">
                     {appleGroups.map(({label, part, value}) => (
                         <AppleGroup
                             key={part}
@@ -116,21 +129,31 @@ export const ArithmeticWordProblemView = ({invertProcedure, payload}: Arithmetic
                             highlighted={isSolutionView && part === unknownPart}
                         />
                     ))}
-                </div>
+                </div>}
 
-                <div className="flex items-center gap-3 mt-4">
-                    <div className={getInputClass('num1')}>{boxContent('num1', num1)}</div>
-                    <div className="text-[2rem] font-extrabold text-slate-500">{symbol}</div>
-                    <div className={getInputClass('num2')}>{boxContent('num2', num2)}</div>
-                    {num3 !== undefined && (
-                        <>
-                            <div className="text-[2rem] font-extrabold text-slate-500">{symbol}</div>
-                            <div className={getInputClass('num3')}>{boxContent('num3', num3)}</div>
-                        </>
-                    )}
-                    <div className="text-[2rem] font-extrabold text-slate-500">=</div>
-                    <div className={getInputClass('answer', true)}>{boxContent('answer', answer)}</div>
-                </div>
+                {data.propertyLaw ? (
+                    <div className="mt-4 w-full">
+                        <ArithmeticLawExercise
+                            data={data as ArithmeticTripleProblem}
+                            unknown={unknownPart}
+                            isSolutionView={isSolutionView}
+                        />
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-3 mt-4">
+                        <div className={getInputClass('num1')}>{boxContent('num1', num1)}</div>
+                        <div className="text-[2rem] font-extrabold text-slate-500">{symbol}</div>
+                        <div className={getInputClass('num2')}>{boxContent('num2', num2)}</div>
+                        {num3 !== undefined && (
+                            <>
+                                <div className="text-[2rem] font-extrabold text-slate-500">{symbol}</div>
+                                <div className={getInputClass('num3')}>{boxContent('num3', num3)}</div>
+                            </>
+                        )}
+                        <div className="text-[2rem] font-extrabold text-slate-500">=</div>
+                        <div className={getInputClass('answer', true)}>{boxContent('answer', answer)}</div>
+                    </div>
+                )}
             </div>
         </div>
     );
