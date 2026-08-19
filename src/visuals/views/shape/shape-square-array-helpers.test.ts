@@ -5,6 +5,7 @@ import {
 } from '../../../types/problems.ts';
 import {
     buildRectangleAreaPresentation,
+    buildSquareArrayInversionPresentation,
     getAreaTilePrompt,
     getSquareArrayStoryPrompt,
     isValidShapeSquareArrayProblem,
@@ -65,10 +66,14 @@ describe('shape-square-array Ability projection', () => {
         ['unit-square', 'interpretation', 'interpret-unit'],
         ['equal-square-array', 'partition', 'partition'],
         ['equal-square-array', 'execution', 'count'],
+        ['equal-square-array', 'inversion', 'find-missing-area-dimension'],
         ['unit-square-coverage', 'interpretation', 'interpret-coverage'],
         ['unit-square-coverage', 'execution', 'count-area'],
+        ['unit-square-coverage', 'inversion', 'find-missing-area-dimension'],
         ['tiled-area-product', 'understanding', 'explain-product'],
+        ['tiled-area-product', 'inversion', 'find-missing-area-dimension'],
         ['rectangle-area-product', 'execution', 'calculate-area'],
+        ['rectangle-area-product', 'inversion', 'find-missing-area-dimension'],
         ['rectangle-area-formula', 'execution', 'rectangle-area-formula'],
         ['rectangle-area-formula', 'inversion', 'find-missing-area-dimension']
     ] as const)('projects %s + %s to %s', (model, mode, task) => {
@@ -106,6 +111,16 @@ describe('shape-square-array Ability projection', () => {
 
         expect(even.task === 'find-missing-area-dimension' && even.unknownDimension).toBe('length');
         expect(odd.task === 'find-missing-area-dimension' && odd.unknownDimension).toBe('width');
+    });
+
+    it('derives the same inverse relation from a tiled square array', () => {
+        const data = models['tiled-area-product'];
+        const presentation = buildSquareArrayInversionPresentation(data, 2);
+
+        expect(presentation.unknownDimension).toBe('length');
+        expect(presentation.questionEquation).toBe('20 = ? × 4');
+        expect(presentation.inverseEquation).toBe('20 ÷ 4 = ?');
+        expect(presentation.solutionEquation).toBe('20 ÷ 4 = 5');
     });
 });
 

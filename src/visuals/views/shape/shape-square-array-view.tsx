@@ -6,8 +6,10 @@ import {
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
     buildRectangleAreaPresentation,
+    buildSquareArrayInversionPresentation,
     getAreaTilePrompt,
     getSquareArrayStoryPrompt,
+    InverseRectangleAreaPresentation,
     isRectangleAreaFormulaModel,
     isValidShapeSquareArrayProblem,
     RectangleAreaPresentation,
@@ -45,12 +47,14 @@ function SquareArray({
     data,
     showCells,
     showCount,
-    showSideLengths
+    showSideLengths,
+    hiddenDimension
 }: {
     data: ShapeSquareArrayProblem;
     showCells: boolean;
     showCount: boolean;
     showSideLengths: boolean;
+    hiddenDimension?: 'length' | 'width';
 }) {
     const width = data.columns * CELL_SIZE;
     const height = data.rows * CELL_SIZE;
@@ -61,7 +65,9 @@ function SquareArray({
         <svg
             viewBox="0 0 340 260"
             className="w-[340px] h-[260px]"
-            aria-label={`${data.rows} rows and ${data.columns} columns of equal squares`}
+            aria-label={hiddenDimension
+                ? `Equal-square array with unknown ${hiddenDimension}`
+                : `${data.rows} rows and ${data.columns} columns of equal squares`}
         >
             <rect
                 x={x}
@@ -106,7 +112,9 @@ function SquareArray({
                 textAnchor="middle"
                 className="fill-slate-600 text-[15px] font-bold"
             >
-                {showSideLengths ? `${data.columns} units` : `${data.columns} columns`}
+                {hiddenDimension === 'length'
+                    ? '? units'
+                    : showSideLengths ? `${data.columns} units` : `${data.columns} columns`}
             </text>
             <text
                 x={x - 16}
@@ -115,7 +123,9 @@ function SquareArray({
                 transform={`rotate(-90 ${x - 16} ${y + height / 2})`}
                 className="fill-slate-600 text-[15px] font-bold"
             >
-                {showSideLengths ? `${data.rows} units` : `${data.rows} rows`}
+                {hiddenDimension === 'width'
+                    ? '? units'
+                    : showSideLengths ? `${data.rows} units` : `${data.rows} rows`}
             </text>
         </svg>
     );
@@ -209,6 +219,55 @@ function RectangleAreaFormulaTask({
     );
 }
 
+function SquareArrayInversionTask({
+    data,
+    presentation,
+    isSolutionView
+}: {
+    data: ShapeSquareArrayProblem;
+    presentation: InverseRectangleAreaPresentation;
+    isSolutionView: boolean;
+}) {
+    return (
+        <div className="w-[650px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="text-center text-[1.25rem] font-bold leading-snug text-slate-700">
+                {presentation.prompt}
+            </div>
+            <div className="mt-4 flex justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
+                <SquareArray
+                    data={data}
+                    showCells
+                    showCount={false}
+                    showSideLengths
+                    hiddenDimension={isSolutionView ? undefined : presentation.unknownDimension}
+                />
+            </div>
+            <div className="mt-4 grid grid-cols-[245px_1fr] gap-3">
+                <div className="flex items-center justify-center rounded-xl border-2 border-violet-200 bg-violet-50 px-3 py-3 font-mono text-[0.95rem] font-extrabold text-violet-800">
+                    Area = length × width
+                </div>
+                <div className="flex min-h-[54px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-center font-mono text-[1.05rem] font-bold text-slate-700">
+                    {isSolutionView
+                        ? presentation.questionEquation.replace('?', String(presentation.missingValue))
+                        : presentation.questionEquation}
+                </div>
+            </div>
+            {!isSolutionView && (
+                <div className="mt-3 rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-3 text-center font-mono text-[1.05rem] font-bold text-blue-800">
+                    Inverse step: {presentation.inverseEquation}
+                </div>
+            )}
+            {isSolutionView && (
+                <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
+                    <div className="font-mono text-[1.08rem] font-extrabold">{presentation.solutionEquation}</div>
+                    <div className="mt-1 text-[1.05rem] font-extrabold">{presentation.answerStatement}</div>
+                    <div className="mt-2 text-[0.92rem] font-semibold leading-snug text-slate-700">{presentation.explanation}</div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export const ShapeSquareArrayView = ({
     mode,
     payload,
@@ -262,6 +321,16 @@ export const ShapeSquareArrayView = ({
             <RectangleAreaFormulaTask
                 data={problem.data}
                 presentation={displayedPresentation}
+                isSolutionView={isSolutionView}
+            />
+        );
+    }
+
+    if (task === 'find-missing-area-dimension') {
+        return (
+            <SquareArrayInversionTask
+                data={problem.data}
+                presentation={buildSquareArrayInversionPresentation(problem.data, payload.seed)}
                 isSolutionView={isSolutionView}
             />
         );

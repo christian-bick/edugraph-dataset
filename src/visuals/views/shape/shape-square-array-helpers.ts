@@ -62,6 +62,9 @@ export const resolveShapeSquareArrayTask = (
     if (data.model === 'unit-square' && mode === 'interpretation') {
         return 'interpret-unit';
     }
+    if (data.model !== 'unit-square' && mode === 'inversion') {
+        return 'find-missing-area-dimension';
+    }
     if (data.model === 'equal-square-array') {
         if (mode === 'partition') return 'partition';
         if (mode === 'execution') return 'count';
@@ -147,6 +150,45 @@ export type RectangleAreaPresentation =
     | DirectRectangleAreaPresentation
     | InverseRectangleAreaPresentation;
 
+const buildInverseAreaPresentation = (
+    length: number,
+    width: number,
+    area: number,
+    seed: number
+): InverseRectangleAreaPresentation => {
+    const unknownDimension = Math.abs(seed) % 2 === 0 ? 'length' : 'width';
+    const knownDimension = unknownDimension === 'length' ? 'width' : 'length';
+    const knownValue = knownDimension === 'length' ? length : width;
+    const missingValue = unknownDimension === 'length' ? length : width;
+    const questionEquation = unknownDimension === 'length'
+        ? `${area} = ? × ${width}`
+        : `${area} = ${length} × ?`;
+
+    return {
+        task: 'find-missing-area-dimension',
+        unknownDimension,
+        knownDimension,
+        knownValue,
+        missingValue,
+        prompt: `A rectangle has an area of ${area} square units and a ${knownDimension} of ${knownValue} units. Find its ${unknownDimension}.`,
+        questionEquation,
+        inverseEquation: `${area} ÷ ${knownValue} = ?`,
+        solutionEquation: `${area} ÷ ${knownValue} = ${missingValue}`,
+        answerStatement: `The ${unknownDimension} is ${missingValue} units.`,
+        explanation: `Because area equals length times width, divide ${area} by the known ${knownDimension}, ${knownValue}, to get the missing ${unknownDimension}, ${missingValue} units.`
+    };
+};
+
+export const buildSquareArrayInversionPresentation = (
+    data: ShapeSquareArrayProblem,
+    seed: number
+): InverseRectangleAreaPresentation => buildInverseAreaPresentation(
+    data.columns,
+    data.rows,
+    data.squareCount,
+    seed
+);
+
 export const buildRectangleAreaPresentation = (
     data: RectangleAreaFormulaModel,
     task: 'rectangle-area-formula' | 'find-missing-area-dimension',
@@ -163,25 +205,5 @@ export const buildRectangleAreaPresentation = (
         };
     }
 
-    const unknownDimension = seed % 2 === 0 ? 'length' : 'width';
-    const knownDimension = unknownDimension === 'length' ? 'width' : 'length';
-    const knownValue = knownDimension === 'length' ? data.length : data.width;
-    const missingValue = unknownDimension === 'length' ? data.length : data.width;
-    const questionEquation = unknownDimension === 'length'
-        ? `${data.area} = ? × ${data.width}`
-        : `${data.area} = ${data.length} × ?`;
-
-    return {
-        task,
-        unknownDimension,
-        knownDimension,
-        knownValue,
-        missingValue,
-        prompt: `A rectangle has an area of ${data.area} square units and a ${knownDimension} of ${knownValue} units. Find its ${unknownDimension}.`,
-        questionEquation,
-        inverseEquation: `${data.area} ÷ ${knownValue} = ?`,
-        solutionEquation: `${data.area} ÷ ${knownValue} = ${missingValue}`,
-        answerStatement: `The ${unknownDimension} is ${missingValue} units.`,
-        explanation: `Because area equals length times width, divide ${data.area} by the known ${knownDimension}, ${knownValue}, to get the missing ${unknownDimension}, ${missingValue} units.`
-    };
+    return buildInverseAreaPresentation(data.length, data.width, data.area, seed);
 };
