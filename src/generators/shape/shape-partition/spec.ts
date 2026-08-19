@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -21,17 +21,6 @@ export const ShapePartitionGeneratorSchema = {
         matchAllExactLabels
     ],
     shape: [Area.Circle, Area.Rectangle],
-    taskAbilities: [
-        [
-            Ability.VisualArticulation,
-            Ability.ActiveVocabulary,
-            Ability.ConceptComposition,
-            Ability.ConceptDerivation,
-            Ability.Formalization,
-            Ability.Interpretation
-        ],
-        matchAllExactLabels
-    ],
     fractionTypes: [
         [Scope.UnitFractions, Scope.NonUnitFractions],
         matchAllExactLabels

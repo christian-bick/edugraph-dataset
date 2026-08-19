@@ -2263,54 +2263,29 @@ export type FractionArithmeticProblem =
 
 export type ShapePartitionProblem =
     | {
-        task: 'partition';
-        shape: FractionShape;
-        parts: 2 | 4;
-        unitFraction: '1/2' | '1/4' | null;
-    }
-    | {
-        task: 'name-share';
-        shape: FractionShape;
-        parts: 2 | 4;
-        shareName: FractionShareName;
-        /** Zero-based index of the share being named. */
-        selectedShare: number;
-        answer: FractionShareName;
-    }
-    | {
-        task: 'compose-whole';
-        shape: FractionShape;
-        parts: 2 | 4;
-        shareName: 'half' | 'fourth';
-        answer: 'one whole';
-    }
-    | {
-        task: 'compare-share-size';
-        shape: FractionShape;
-        shares: [
-            {parts: 2; shareName: 'half'},
-            {parts: 4; shareName: 'fourth'}
-        ];
-        relation: 'less';
-        answer: 'fourth';
-    }
-    | {
-        task: 'partition-and-label-unit-fraction';
+        model: 'equal-share-partition';
         shape: FractionShape;
         parts: FractionParts;
-        selectedShare: number;
-        unitFraction: string;
-        answer: string;
+        wholeCount: 1;
+        unitFraction: string | null;
     }
     | {
-        task: 'interpret-fraction';
+        model: 'unit-share-comparison';
+        shape: FractionShape;
+        unitFractions: [
+            {numerator: 1; denominator: 2; display: '1/2'},
+            {numerator: 1; denominator: 4; display: '1/4'}
+        ];
+        relation: 'less';
+        lesserFraction: '1/4';
+    }
+    | {
+        model: 'fraction-region';
         shape: FractionShape;
         parts: FractionParts;
         numerator: number;
-        highlightedShares: number[];
         unitFraction: string;
         fraction: string;
-        answer: string;
     };
 
 export type ShapePatternToken = {

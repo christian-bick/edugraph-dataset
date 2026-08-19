@@ -4,6 +4,12 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {FractionParts, FractionShape} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
+import {
+    isValidShapePartitionProblem,
+    resolveShapePartitionTask,
+    selectShareIndex,
+    selectShareName
+} from './helpers.ts';
 import {ShapePartitionEqualViewConfig, ShapePartitionEqualViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -19,24 +25,6 @@ const PART_WORDS: Record<FractionParts, string> = {
     6: 'six',
     8: 'eight'
 };
-
-function validateShape(shape: string): asserts shape is FractionShape {
-    if (shape !== 'circle' && shape !== 'rectangle') {
-        throw new ViewValidationError('shape-partition-equal', 'Expected a circle or rectangle.');
-    }
-}
-
-function validateParts(parts: number): asserts parts is FractionParts {
-    if (parts !== 2 && parts !== 3 && parts !== 4 && parts !== 6 && parts !== 8) {
-        throw new ViewValidationError('shape-partition-equal', 'Expected 2, 3, 4, 6, or 8 equal parts.');
-    }
-}
-
-function validateLegacyParts(parts: number): asserts parts is 2 | 4 {
-    if (parts !== 2 && parts !== 4) {
-        throw new ViewValidationError('shape-partition-equal', 'Expected two or four equal parts.');
-    }
-}
 
 function circlePoint(angle: number, radius = 80): {x: number; y: number} {
     const radians = angle * Math.PI / 180;
@@ -264,23 +252,30 @@ function ViewFrame({children}: {children: ReactNode}) {
     );
 }
 
-const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
+const ShapePartitionEqualCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
-    validateProblemData('shape-partition-equal', data, ['task', 'shape']);
-    validateShape(data.shape);
+    validateProblemData('shape-partition-equal', data, ['model', 'shape']);
+    if (!isValidShapePartitionProblem(data)) {
+        throw new ViewValidationError(
+            'shape-partition-equal',
+            'Expected a consistent equal-share, fraction-region, or unit-share comparison model.'
+        );
+    }
+    const task = resolveShapePartitionTask(data, config.taskAbilities);
+    if (!task) {
+        throw new ViewValidationError(
+            'shape-partition-equal',
+            'The requested abilities are not supported by this mathematical model.'
+        );
+    }
 
-    switch (data.task) {
+    switch (task) {
         case 'partition': {
-            validateProblemData('shape-partition-equal', data, ['parts', 'unitFraction']);
-            validateLegacyParts(data.parts);
-            const expectedUnitFraction = `1/${data.parts}`;
-            if (data.unitFraction !== null && data.unitFraction !== expectedUnitFraction) {
-                throw new ViewValidationError(
-                    'shape-partition-equal',
-                    'Expected a unit fraction matching the number of equal parts.'
-                );
+            if (data.model !== 'equal-share-partition') {
+                throw new ViewValidationError('shape-partition-equal', 'Partitioning requires an equal-share model.');
             }
+            validateProblemData('shape-partition-equal', data, ['parts', 'unitFraction']);
             const prompt = data.unitFraction === null
                 ? `Partition the shape into ${PART_WORDS[data.parts]} equal parts.`
                 : `Partition the shape into ${PART_WORDS[data.parts]} equal parts so each part is ${data.unitFraction} of the whole.`;
@@ -299,17 +294,15 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
             );
         }
         case 'name-share': {
-            validateProblemData('shape-partition-equal', data, ['parts', 'shareName', 'selectedShare', 'answer']);
-            validateLegacyParts(data.parts);
-            if (!Number.isInteger(data.selectedShare) || data.selectedShare < 0 || data.selectedShare >= data.parts) {
-                throw new ViewValidationError('shape-partition-equal', 'The selected share must identify one of the equal parts.');
+            if (
+                data.model !== 'equal-share-partition'
+                || (data.parts !== 2 && data.parts !== 4)
+            ) {
+                throw new ViewValidationError('shape-partition-equal', 'Naming a share requires two or four equal parts.');
             }
-            const hasMatchingShareName = data.parts === 2
-                ? data.shareName === 'half'
-                : data.shareName === 'fourth' || data.shareName === 'quarter';
-            if (!hasMatchingShareName || data.answer !== data.shareName) {
-                throw new ViewValidationError('shape-partition-equal', 'Expected a matching half, fourth, or quarter word answer.');
-            }
+            validateProblemData('shape-partition-equal', data, ['parts']);
+            const selectedShare = selectShareIndex(data.parts, payload.seed);
+            const shareName = selectShareName(data.parts, payload.seed);
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>What is the highlighted share called?</PromptSlot>
@@ -318,23 +311,22 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
                             shape={data.shape}
                             parts={data.parts}
                             showDivisions
-                            highlightedShare={data.selectedShare}
+                            highlightedShare={selectedShare}
                         />
                     </div>
-                    <AnswerSlot isSolutionView={isSolutionView} answer={data.answer} />
+                    <AnswerSlot isSolutionView={isSolutionView} answer={shareName} />
                 </ViewFrame>
             );
         }
         case 'compose-whole': {
-            validateProblemData('shape-partition-equal', data, ['parts', 'shareName', 'answer']);
-            validateLegacyParts(data.parts);
-            const hasMatchingShareName = data.parts === 2
-                ? data.shareName === 'half'
-                : data.shareName === 'fourth';
-            if (!hasMatchingShareName || data.answer !== 'one whole') {
-                throw new ViewValidationError('shape-partition-equal', 'Expected halves or fourths that compose one whole.');
+            if (
+                data.model !== 'equal-share-partition'
+                || (data.parts !== 2 && data.parts !== 4)
+            ) {
+                throw new ViewValidationError('shape-partition-equal', 'Composing a whole requires two or four equal parts.');
             }
-            const pluralShareName = data.shareName === 'half' ? 'halves' : 'fourths';
+            validateProblemData('shape-partition-equal', data, ['parts', 'wholeCount']);
+            const pluralShareName = data.parts === 2 ? 'halves' : 'fourths';
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>
@@ -351,29 +343,26 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
                             </div>
                         )}
                     </div>
-                    <AnswerSlot isSolutionView={isSolutionView} answer={data.answer} />
+                    <AnswerSlot isSolutionView={isSolutionView} answer="one whole" />
                 </ViewFrame>
             );
         }
         case 'compare-share-size': {
-            validateProblemData('shape-partition-equal', data, ['shares', 'relation', 'answer']);
-            if (
-                data.shares.length !== 2
-                || data.shares[0].parts !== 2
-                || data.shares[0].shareName !== 'half'
-                || data.shares[1].parts !== 4
-                || data.shares[1].shareName !== 'fourth'
-                || data.relation !== 'less'
-                || data.answer !== 'fourth'
-            ) {
-                throw new ViewValidationError('shape-partition-equal', 'Expected a smaller-share comparison between a half and a fourth.');
+            if (data.model !== 'unit-share-comparison') {
+                throw new ViewValidationError('shape-partition-equal', 'Comparing share sizes requires a unit-share comparison model.');
             }
+            validateProblemData('shape-partition-equal', data, ['unitFractions', 'relation', 'lesserFraction']);
+            const shares = data.unitFractions.map(unitFraction => ({
+                parts: unitFraction.denominator,
+                shareName: unitFraction.display === '1/2' ? 'half' : 'fourth'
+            } as const));
+            const answer = data.lesserFraction === '1/4' ? 'fourth' : 'half';
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>Which share is smaller?</PromptSlot>
                     <div className="w-[480px] h-[260px] flex items-stretch justify-center gap-4">
-                        {data.shares.map(share => {
-                            const isAnswer = share.shareName === data.answer;
+                        {shares.map(share => {
+                            const isAnswer = share.shareName === answer;
                             return (
                                 <div
                                     key={share.shareName}
@@ -403,17 +392,12 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
             );
         }
         case 'partition-and-label-unit-fraction': {
-            validateProblemData('shape-partition-equal', data, ['parts', 'selectedShare', 'unitFraction', 'answer']);
-            validateParts(data.parts);
-            if (
-                !Number.isInteger(data.selectedShare)
-                || data.selectedShare < 0
-                || data.selectedShare >= data.parts
-                || data.unitFraction !== `1/${data.parts}`
-                || data.answer !== `${data.unitFraction} of the whole`
-            ) {
-                throw new ViewValidationError('shape-partition-equal', 'Expected one valid part labeled with its unit fraction.');
+            if (data.model !== 'equal-share-partition' || data.unitFraction === null) {
+                throw new ViewValidationError('shape-partition-equal', 'Labeling a unit fraction requires a partition with a unit fraction.');
             }
+            validateProblemData('shape-partition-equal', data, ['parts', 'unitFraction']);
+            const selectedShare = selectShareIndex(data.parts, payload.seed);
+            const answer = `${data.unitFraction} of the whole`;
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>
@@ -424,38 +408,29 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
                             shape={data.shape}
                             parts={data.parts}
                             showDivisions={isSolutionView}
-                            highlightedShare={isSolutionView ? data.selectedShare : undefined}
-                            shareLabel={isSolutionView ? {index: data.selectedShare, text: data.unitFraction} : undefined}
+                            highlightedShare={isSolutionView ? selectedShare : undefined}
+                            shareLabel={isSolutionView ? {index: selectedShare, text: data.unitFraction} : undefined}
                             solvedHighlight={isSolutionView}
                         />
                     </div>
-                    <AnswerSlot isSolutionView={isSolutionView} answer={data.answer} />
+                    <AnswerSlot isSolutionView={isSolutionView} answer={answer} />
                 </ViewFrame>
             );
         }
         case 'interpret-fraction': {
+            if (data.model !== 'fraction-region') {
+                throw new ViewValidationError('shape-partition-equal', 'Interpreting a fraction requires a fraction-region model.');
+            }
             validateProblemData('shape-partition-equal', data, [
                 'parts',
                 'numerator',
-                'highlightedShares',
                 'unitFraction',
-                'fraction',
-                'answer'
+                'fraction'
             ]);
-            validateParts(data.parts);
-            const expectedShares = Array.from({length: data.numerator}, (_, index) => index);
-            if (
-                !Number.isInteger(data.numerator)
-                || data.numerator < 1
-                || data.numerator >= data.parts
-                || data.highlightedShares.length !== expectedShares.length
-                || data.highlightedShares.some((share, index) => share !== expectedShares[index])
-                || data.unitFraction !== `1/${data.parts}`
-                || data.fraction !== `${data.numerator}/${data.parts}`
-                || data.answer !== data.fraction
-            ) {
-                throw new ViewValidationError('shape-partition-equal', 'Expected a fraction matching the highlighted equal parts.');
-            }
+            const highlightedShares = Array.from(
+                {length: data.numerator},
+                (_, index) => index
+            );
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>What fraction of the whole is highlighted?</PromptSlot>
@@ -464,12 +439,12 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
                             shape={data.shape}
                             parts={data.parts}
                             showDivisions
-                            highlightedShares={data.highlightedShares}
+                            highlightedShares={highlightedShares}
                             solvedHighlight={isSolutionView}
                         />
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                        <AnswerSlot isSolutionView={isSolutionView} answer={data.answer} />
+                        <AnswerSlot isSolutionView={isSolutionView} answer={data.fraction} />
                         <div className={`h-[20px] text-sm font-semibold ${isSolutionView ? 'text-slate-600' : 'text-transparent'}`}>
                             {`${data.numerator} equal ${data.numerator === 1 ? 'part' : 'parts'} of size ${data.unitFraction}`}
                         </div>
@@ -478,7 +453,7 @@ const ShapePartitionEqualCore = ({config: _config, payload}: CoreProps) => {
             );
         }
         default:
-            throw new ViewValidationError('shape-partition-equal', `Unsupported task: ${String((data as {task: unknown}).task)}`);
+            throw new ViewValidationError('shape-partition-equal', `Unsupported task: ${String(task)}`);
     }
 };
 

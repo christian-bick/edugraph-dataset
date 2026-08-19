@@ -4,7 +4,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const partitionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.ShapeDecomposition,
         Scope.EqualShares,
         Ability.VisualArticulation
     ])
@@ -12,7 +12,7 @@ const partitionBuilder = new DatasetPermutationBuilder()
 
 const vocabularyBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.FractionInterpretation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ActiveVocabulary
@@ -21,7 +21,7 @@ const vocabularyBuilder = new DatasetPermutationBuilder()
 
 const compositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.FractionInterpretation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ConceptComposition
@@ -30,7 +30,7 @@ const compositionBuilder = new DatasetPermutationBuilder()
 
 const comparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.FractionCommonNumeratorComparison,
         Scope.EqualShares,
         Scope.UnitFractions,
         Scope.Less,
