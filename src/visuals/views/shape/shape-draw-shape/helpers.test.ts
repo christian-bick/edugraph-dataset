@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {getTracePath} from './helpers.ts';
+import {getTracePath, rotationDrawingPresentation} from './helpers.ts';
 
 describe('shape-draw-shape helpers', () => {
     it('returns correct trace path for target shape', () => {
@@ -12,5 +12,16 @@ describe('shape-draw-shape helpers', () => {
 
     it('provides an irregular quadrilateral trace', () => {
         expect(getTracePath('quadrilateral')).toContain('L 88 12');
+    });
+
+    it('keeps the response workspace blank until Solution Mode', () => {
+        expect(rotationDrawingPresentation('triangle', false)).toEqual({
+            referenceRotation: 180,
+            showCompletedDrawing: false
+        });
+        expect(rotationDrawingPresentation('square', true)).toEqual({
+            referenceRotation: 45,
+            showCompletedDrawing: true
+        });
     });
 });

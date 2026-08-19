@@ -4,7 +4,7 @@ import {ShapeCountAttribute, ShapeDefinition} from '../../../../types/problems.t
 import {ShapeBuildShapeViewConfig, ShapeBuildShapeViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
-import {angleConstructionMatchesRenderedPolygon} from '../helpers.ts';
+import {angleConstructionMatchesRenderedPolygon, shapeConstructionCountsMatch} from '../helpers.ts';
 import '../../../../tailwind.css';
 
 function interiorAngleMarker(
@@ -179,6 +179,51 @@ function MaterialTray({sides, corners}: {sides: number; corners: number}) {
     );
 }
 
+function LoosePartsAssemblyLayout({
+    target,
+    sides,
+    corners,
+    isSolutionView
+}: {
+    target: string;
+    sides: number;
+    corners: number;
+    isSolutionView: boolean;
+}) {
+    return (
+        <div className="flex w-fit items-center justify-center rounded-2xl bg-white p-[30px] font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="flex w-[620px] flex-col items-center gap-5">
+                <div className="text-center text-[1.3rem] font-bold leading-normal text-slate-700">
+                    {isSolutionView
+                        ? `${target[0].toUpperCase()}${target.slice(1)} built from ${sides} sticks and ${corners} corners`
+                        : `Use the loose sticks and corners to build a ${target}.`}
+                </div>
+                <div className="grid w-full grid-cols-2 gap-4">
+                    <div className="flex h-[250px] flex-col items-center justify-center rounded-xl border-2 border-amber-200 bg-amber-50 p-4">
+                        <div className="mb-5 text-sm font-extrabold uppercase tracking-wide text-amber-800">
+                            {isSolutionView ? 'Parts used' : 'Loose parts'}
+                        </div>
+                        {isSolutionView
+                            ? (
+                                <div className="flex flex-col items-center gap-3 text-center font-bold text-emerald-700">
+                                    <span className="text-4xl">✓</span>
+                                    <span>All {sides} sticks and {corners} corners</span>
+                                </div>
+                            )
+                            : <MaterialTray sides={sides} corners={corners} />}
+                    </div>
+                    <div className="flex h-[250px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4">
+                        <div className="mb-3 text-sm font-extrabold uppercase tracking-wide text-slate-500">Assembly area</div>
+                        {isSolutionView
+                            ? <ShapeSVG shape={target} size={175} solved />
+                            : <div className="flex h-[175px] items-center text-lg font-bold text-slate-400">Build here</div>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function EqualFaceMaterials({assembled}: {assembled: boolean}) {
     if (!assembled) {
         return (
@@ -318,11 +363,36 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-build-shape'>;
 }
 
-const ShapeBuildShapeCore = ({ config: _config, payload }: CoreProps) => {
+const ShapeBuildShapeCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     validateProblemData('shape-build-shape', problem.data, ['target', 'sides', 'corners']);
     const data = problem.data;
     const {target, sides, corners} = data;
+
+    if (!shapeConstructionCountsMatch(target, sides, corners)) {
+        throw new ViewValidationError('shape-build-shape', 'The construction counts do not match the named shape.');
+    }
+
+    if (config.useGeometrySticks !== (data.task === 'assemble-from-parts')) {
+        throw new ViewValidationError(
+            'shape-build-shape',
+            'The geometry-stick representation must agree with the loose-part assembly task.'
+        );
+    }
+
+    if (data.task === 'assemble-from-parts') {
+        if (!['triangle', 'square', 'rectangle', 'hexagon'].includes(target)) {
+            throw new ViewValidationError('shape-build-shape', 'Loose-part assembly requires a supported polygon.');
+        }
+        return (
+            <LoosePartsAssemblyLayout
+                target={target}
+                sides={sides}
+                corners={corners}
+                isSolutionView={isSolutionView}
+            />
+        );
+    }
 
     if (data.task === 'specify-count') {
         validateProblemData('shape-build-shape', data, ['task', 'attribute', 'requiredCount']);
@@ -362,6 +432,10 @@ const ShapeBuildShapeCore = ({ config: _config, payload }: CoreProps) => {
                 isSolutionView={isSolutionView}
             />
         );
+    }
+
+    if (data.task !== undefined) {
+        throw new ViewValidationError('shape-build-shape', `Unsupported construction task: ${data.task}`);
     }
 
     const promptText = `To build a ${target}, how many sticks (sides) and clay balls (corners) do you need?`;

@@ -1,6 +1,7 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
+import {hasLabel} from '../../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'shape-build-shape',
@@ -10,6 +11,11 @@ export const spec: ViewSpec = {
 };
 
 
-export const ShapeBuildShapeViewSchema = {} as const;
+export const ShapeBuildShapeViewSchema = {
+    useGeometrySticks: [
+        [Scope.GeometrySticks],
+        hasLabel(Scope.GeometrySticks)
+    ]
+} as const;
 
 export type ShapeBuildShapeViewConfig = ConfigFromSchema<typeof ShapeBuildShapeViewSchema>;

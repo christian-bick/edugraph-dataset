@@ -1288,13 +1288,32 @@ export type ShapeClassifyDimProblem = {
     answer: '2d' | '3d';
 };
 
+export type ShapeComparisonName =
+    | 'triangle'
+    | 'square'
+    | 'rectangle'
+    | 'hexagon'
+    | 'circle'
+    | 'cube'
+    | 'cone'
+    | 'cylinder'
+    | 'sphere';
+
+export type ShapeComparisonAttribute = 'sides' | 'vertices' | 'faces' | 'edges';
+
+export type ShapeComparisonItem = {
+    shape: ShapeComparisonName;
+    count: number;
+};
+
 export type ShapeCompareAttributesProblem = {
-    attribute: 'sides' | 'corners';
-    shape1: string;
-    shape2: string;
-    val1: number;
-    val2: number;
-    answer: string;
+    dimension: '2d' | '3d';
+    attribute: ShapeComparisonAttribute;
+    shapes: readonly [ShapeComparisonItem, ShapeComparisonItem];
+    relation: 'more';
+    answer: ShapeComparisonName;
+    prompt: string;
+    evidence: readonly [string, string, string];
 };
 
 export type ShapeSameAttributeProblem = {
@@ -1581,6 +1600,13 @@ export type ShapePartsConstructionProblem = {
     definition?: undefined;
 };
 
+export type ShapeLoosePartsConstructionProblem = {
+    target: 'triangle' | 'square' | 'rectangle' | 'hexagon';
+    sides: 3 | 4 | 6;
+    corners: 3 | 4 | 6;
+    task: 'assemble-from-parts';
+};
+
 export type ShapeRotationConstructionProblem = {
     target: PlaneShapeName;
     sides: number;
@@ -1616,6 +1642,7 @@ export type ShapeAttributeCountSpecificationProblem = {
 
 export type ShapeBuildShapeProblem =
     | ShapePartsConstructionProblem
+    | ShapeLoosePartsConstructionProblem
     | ShapeRotationConstructionProblem
     | ShapeExcludedQuadrilateralProblem
     | ShapeAttributeSpecificationProblem

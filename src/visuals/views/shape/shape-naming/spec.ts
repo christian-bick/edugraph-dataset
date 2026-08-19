@@ -7,6 +7,7 @@ export const spec: ViewSpec = {
     generalLabels: [
         Area.ShapeRecognition,
         Area.ShapeRotationConservation,
+        Area.ShapeResizingConservation,
         Ability.VisualRecognition
     ]
 };

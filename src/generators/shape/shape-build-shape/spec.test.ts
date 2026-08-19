@@ -24,6 +24,30 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         });
     });
 
+    it('resolves the Kindergarten loose-part assembly path from ShapeAttributes', () => {
+        const labels = [
+            Area.Hexagon,
+            Area.ShapeIdentity,
+            Scope.ShapeAttributes,
+            Scope.GeometrySticks,
+            Ability.VisualArticulation
+        ];
+        const stub = generateWithLabels(generator, labels);
+
+        expect(stub?.data).toEqual({
+            target: 'hexagon',
+            sides: 6,
+            corners: 6,
+            task: 'assemble-from-parts'
+        });
+        expect(stub?.tags).toEqual(expect.arrayContaining([
+            Area.Hexagon,
+            Area.ShapeIdentity,
+            Scope.ShapeAttributes
+        ]));
+        expect(stub?.tags).toHaveLength(3);
+    });
+
     it('resolves the Grade 1 attribute-specification path and records each configured label once', () => {
         const labels = [
             Area.Circle,

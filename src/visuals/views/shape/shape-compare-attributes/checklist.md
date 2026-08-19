@@ -1,2 +1,2 @@
-- **Identity:** Two named shapes and the specific sides-or-corners comparison remain identifiable in both modes.
-- **Modes:** Question Mode leaves both shape choices neutral; Solution Mode identifies the shape with the larger visible attribute count.
+- **Identity:** Two differently rotated and sized shapes, their structural attribute counts, and the requested more-than comparison remain identifiable in both modes.
+- **Modes:** Question Mode leaves both shape cards neutral; Solution Mode identifies the larger count and shows the authored comparison evidence.

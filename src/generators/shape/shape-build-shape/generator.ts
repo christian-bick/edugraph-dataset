@@ -13,13 +13,21 @@ const POLYGON_COUNT_TARGETS = [
     {target: 'hexagon', label: Area.Hexagon, count: 6}
 ] as const;
 
+const LOOSE_PART_COUNTS = {
+    triangle: 3,
+    square: 4,
+    rectangle: 4,
+    hexagon: 6
+} as const;
+
 export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShapeProblem, ShapeBuildShapeGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeBuildShapeGeneratorSchema;
 
     generate(config: ShapeBuildShapeGeneratorConfig): ProblemStub<ShapeBuildShapeProblem> | null {
         validateConfigFields('shape-build-shape', config, [
-            'specifyAttributes'
+            'specifyAttributes',
+            'shapeArea'
         ]);
         if (!Array.isArray(config.targets) || !Array.isArray(config.constructionScopes) || !Array.isArray(config.attributeCounts)) {
             throw new GeneratorValidationError(
@@ -113,6 +121,25 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
         if (config.shapeArea === Area.ShapeRotationConservation && !config.specifyAttributes) {
             return {
                 data: {...construction, task: 'rotation-conservation'},
+                tags: []
+            };
+        }
+
+        if (
+            config.shapeArea === Area.ShapeIdentity
+            && !config.specifyAttributes
+            && config.constructionScopes!.includes(Scope.ShapeAttributes)
+        ) {
+            if (!(target in LOOSE_PART_COUNTS)) return null;
+            const assemblyTarget = target as keyof typeof LOOSE_PART_COUNTS;
+            const count = LOOSE_PART_COUNTS[assemblyTarget];
+            return {
+                data: {
+                    target: assemblyTarget,
+                    sides: count,
+                    corners: count,
+                    task: 'assemble-from-parts'
+                },
                 tags: []
             };
         }

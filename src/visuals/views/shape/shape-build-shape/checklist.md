@@ -1,3 +1,3 @@
-- **Identity:** The image makes either counting construction parts or building from defining attributes identifiable through the completed target or attribute card.
-- **Modes:** Question Mode leaves every choice neutral or the construction unassembled; Solution Mode identifies the required parts or shows the completed construction.
-- **Attribute counts:** Vertex tasks show the requested construction points; angle tasks ask for angles without showing a completed polygon in Question Mode and mark, number, and total every interior angle in Solution Mode; equal-face tasks show six congruent square pieces and a completed cube with its six-face net.
+- **Identity:** Loose sticks and corners, a defining-attribute card, or a required-count card make the requested construction identifiable.
+- **Modes:** Question Mode leaves the assembly area blank, every choice neutral, or the requested construction unfinished; Solution Mode assembles the target or reveals the completed choice or construction.
+- **Attribute counts:** Angle solutions mark and total every interior angle; equal-face tasks show six congruent square pieces and a completed cube with its six-face net.

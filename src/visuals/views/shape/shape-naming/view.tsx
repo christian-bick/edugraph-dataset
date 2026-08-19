@@ -3,6 +3,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ShapeNamingViewConfig, ShapeNamingViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {deriveShapeNamingAppearances} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -10,7 +11,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-naming'>;
 }
 
-function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
+function ShapeSVG({ shape, size }: { shape: string; size: number }) {
     const commonProps = {
         width: size,
         height: size,
@@ -107,7 +108,7 @@ function ShapeSVG({ shape, size = 100 }: { shape: string; size?: number }) {
     throw new ViewValidationError('shape-naming', `Unsupported shape: ${shape}`);
 }
 
-const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
+export const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -116,6 +117,18 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
     const shape = data.shape;
     const answer = data.answer;
 
+    const supportedShapes = [
+        'circle', 'square', 'rhombus', 'rectangle', 'quadrilateral', 'pentagon',
+        'triangle', 'hexagon', 'cube', 'cone', 'cylinder', 'sphere'
+    ];
+    if (!supportedShapes.includes(shape) || answer !== shape) {
+        throw new ViewValidationError('shape-naming', 'Shape and naming answer must agree on a supported shape.');
+    }
+    if (data.attributes !== undefined
+        && (!Array.isArray(data.attributes) || data.attributes.some(attribute => typeof attribute !== 'string' || attribute.length === 0))) {
+        throw new ViewValidationError('shape-naming', 'Shape attributes must be non-empty text statements.');
+    }
+
     const is3D = ['cube', 'cone', 'cylinder', 'sphere'].includes(shape);
     const options = is3D
         ? ['cube', 'cone', 'cylinder', 'sphere']
@@ -123,8 +136,7 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
             ? ['triangle', 'quadrilateral', 'pentagon', 'hexagon']
             : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
 
-    const seed = payload.seed;
-    const rotation = is3D ? 18 : 25 + (seed % 50);
+    const appearances = deriveShapeNamingAppearances(payload.seed, is3D);
 
     const promptText = "What shape are these?";
 
@@ -151,15 +163,22 @@ const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
                 
                 <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
                     <div className="flex items-center justify-center gap-5">
-                        <div className="flex h-[120px] w-[120px] items-center justify-center">
-                            <ShapeSVG shape={shape} size={100} />
+                        <div
+                            data-shape-size={appearances[0].size}
+                            data-shape-rotation={appearances[0].rotation}
+                            style={{transform: `rotate(${appearances[0].rotation}deg)`, transformOrigin: 'center'}}
+                            className="flex h-[145px] w-[145px] items-center justify-center"
+                        >
+                            <ShapeSVG shape={shape} size={appearances[0].size} />
                         </div>
                         <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">same shape</span>
                         <div
-                            style={{transform: `rotate(${rotation}deg)`, transformOrigin: 'center'}}
-                            className="flex h-[120px] w-[120px] items-center justify-center"
+                            data-shape-size={appearances[1].size}
+                            data-shape-rotation={appearances[1].rotation}
+                            style={{transform: `rotate(${appearances[1].rotation}deg)`, transformOrigin: 'center'}}
+                            className="flex h-[145px] w-[145px] items-center justify-center"
                         >
-                            <ShapeSVG shape={shape} size={100} />
+                            <ShapeSVG shape={shape} size={appearances[1].size} />
                         </div>
                     </div>
                 </div>
@@ -190,12 +209,14 @@ export const ShapeNaming = withConfig(ShapeNamingViewSchema, ShapeNamingCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: ViewRenderPayload<'shape-naming'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'shape-naming'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) {
+                root = createRoot(container);
+            }
+            root.render(<ShapeNaming payload={payload} />);
         }
-        root.render(<ShapeNaming payload={payload} />);
-    }
-};
+    };
+}

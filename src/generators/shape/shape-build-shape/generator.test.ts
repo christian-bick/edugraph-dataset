@@ -58,6 +58,39 @@ describe('ShapeBuildShapeGenerator', () => {
         });
     });
 
+    it.each([
+        [Area.Triangle, 'triangle', 3],
+        [Area.Square, 'square', 4],
+        [Area.Rectangle, 'rectangle', 4],
+        [Area.Hexagon, 'hexagon', 6]
+    ] as const)('generates explicit loose-part assembly evidence for %s', (label, target, count) => {
+        const stub = generator.generate({
+            ...configFor(label),
+            constructionScopes: [Scope.ShapeAttributes],
+            specifyAttributes: false,
+            shapeArea: Area.ShapeIdentity
+        });
+
+        expect(stub).toEqual({
+            data: {
+                target,
+                sides: count,
+                corners: count,
+                task: 'assemble-from-parts'
+            },
+            tags: []
+        });
+    });
+
+    it('rejects a curved shape for loose-stick assembly', () => {
+        expect(generator.generate({
+            ...configFor(Area.Circle),
+            constructionScopes: [Scope.ShapeAttributes],
+            specifyAttributes: false,
+            shapeArea: Area.ShapeIdentity
+        })).toBeNull();
+    });
+
     it('generates a quadrilateral that excludes the named subcategories', () => {
         const stub = generator.generate({
             ...configFor(Area.Quadrilateral),

@@ -8,23 +8,26 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.ShapeIdentity,
         Area.NumericComparison,
-        Scope.ShapeProperties,
+        Scope.ShapeAttributes,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller10,
+        Scope.NumbersSmaller20
     ]
 };
 
-
 export const ShapeCompareAttributesGeneratorSchema = {
-    classify: [
+    shape: [
         [
-            Area.Circle,
             Area.Triangle,
             Area.Square,
             Area.Rectangle,
-            Area.Hexagon
+            Area.Hexagon,
+            Area.Circle,
+            Area.Cube,
+            Area.Cone,
+            Area.Cylinder,
+            Area.Sphere
         ],
         selectExactMatch
     ]

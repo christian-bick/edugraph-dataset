@@ -1,7 +1,8 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {ShapeClassifyDimGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
+import {GeneratorValidationError} from '../../../lib/errors.ts';
 
 describe('ShapeClassifyDimGenerator', () => {
     let generator: ShapeClassifyDimGenerator;
@@ -20,7 +21,7 @@ describe('ShapeClassifyDimGenerator', () => {
     });
 
     it('should generate 2D circle when circle is requested', () => {
-        const stub = generator.generate({ classify: Area.Circle });
+        const stub = generator.generate({classify: Area.Circle, dimension: Scope.TwoDimensional});
         expect(stub).not.toBeNull();
         expect(stub!.data.shapeType).toBe('2d');
         expect(stub!.data.shape).toBe('circle');
@@ -35,7 +36,7 @@ describe('ShapeClassifyDimGenerator', () => {
             { label: Area.Hexagon, name: 'hexagon' }
         ];
         shapes.forEach(({ label, name }) => {
-            const stub = generator.generate({ classify: label });
+            const stub = generator.generate({classify: label, dimension: Scope.TwoDimensional});
             expect(stub).not.toBeNull();
             expect(stub!.data.shapeType).toBe('2d');
             expect(stub!.data.shape).toBe(name);
@@ -43,7 +44,7 @@ describe('ShapeClassifyDimGenerator', () => {
     });
 
     it('should generate 3D sphere when sphere is requested', () => {
-        const stub = generator.generate({ classify: Area.Sphere });
+        const stub = generator.generate({classify: Area.Sphere, dimension: Scope.ThreeDimensional});
         expect(stub).not.toBeNull();
         expect(stub!.data.shapeType).toBe('3d');
         expect(stub!.data.shape).toBe('sphere');
@@ -57,15 +58,28 @@ describe('ShapeClassifyDimGenerator', () => {
             { label: Area.Cylinder, name: 'cylinder' }
         ];
         shapes.forEach(({ label, name }) => {
-            const stub = generator.generate({ classify: label });
+            const stub = generator.generate({classify: label, dimension: Scope.ThreeDimensional});
             expect(stub).not.toBeNull();
             expect(stub!.data.shapeType).toBe('3d');
             expect(stub!.data.shape).toBe(name);
         });
     });
 
-    it('should return null for unrecognized classify label', () => {
-        const stub = generator.generate({ classify: 'unrecognized-label' as any });
-        expect(stub).toBeNull();
+    it('rejects a selected dimension that disagrees with the selected shape', () => {
+        expect(() => generator.generate({
+            classify: Area.Circle,
+            dimension: Scope.ThreeDimensional
+        })).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({
+            classify: Area.Cube,
+            dimension: Scope.TwoDimensional
+        })).toThrow(GeneratorValidationError);
+    });
+
+    it('rejects an unsupported shape label', () => {
+        expect(() => generator.generate({
+            classify: 'unrecognized-label' as any,
+            dimension: Scope.TwoDimensional
+        })).toThrow(GeneratorValidationError);
     });
 });

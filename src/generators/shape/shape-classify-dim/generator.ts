@@ -1,70 +1,50 @@
-import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
-import {ShapeClassifyDimProblem} from "../../../types/problems.ts";
-import {ShapeClassifyDimGeneratorConfig, ShapeClassifyDimGeneratorSchema} from "./spec.ts";
-import {Area, Scope} from "edugraph-ts";
-import {validateConfigFields} from "../../../lib/errors.ts";
+import {Area, Scope} from 'edugraph-ts';
+import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
+import {ShapeClassifyDimProblem} from '../../../types/problems.ts';
+import {ShapeClassifyDimGeneratorConfig, ShapeClassifyDimGeneratorSchema} from './spec.ts';
+
+type ShapeDefinition = {
+    shape: ShapeClassifyDimProblem['shape'];
+    dimension: typeof Scope.TwoDimensional | typeof Scope.ThreeDimensional;
+};
+
+const SHAPES: Readonly<Record<string, ShapeDefinition>> = {
+    [Area.Circle]: {shape: 'circle', dimension: Scope.TwoDimensional},
+    [Area.Square]: {shape: 'square', dimension: Scope.TwoDimensional},
+    [Area.Rectangle]: {shape: 'rectangle', dimension: Scope.TwoDimensional},
+    [Area.Triangle]: {shape: 'triangle', dimension: Scope.TwoDimensional},
+    [Area.Hexagon]: {shape: 'hexagon', dimension: Scope.TwoDimensional},
+    [Area.Cube]: {shape: 'cube', dimension: Scope.ThreeDimensional},
+    [Area.Cone]: {shape: 'cone', dimension: Scope.ThreeDimensional},
+    [Area.Cylinder]: {shape: 'cylinder', dimension: Scope.ThreeDimensional},
+    [Area.Sphere]: {shape: 'sphere', dimension: Scope.ThreeDimensional}
+};
 
 export class ShapeClassifyDimGenerator implements ProblemGenerator<ShapeClassifyDimProblem, ShapeClassifyDimGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeClassifyDimGeneratorSchema;
 
-    generate(config: ShapeClassifyDimGeneratorConfig): ProblemStub | null {
-        validateConfigFields('shape-classify-dim', config, ['classify']);
-        let label = config.classify;
-
-        let shape: string;
-        let shapeType: '2d' | '3d';
-
-        switch (label) {
-            case Area.Circle:
-                shape = 'circle';
-                shapeType = '2d';
-                break;
-            case Area.Square:
-                shape = 'square';
-                shapeType = '2d';
-                break;
-            case Area.Rectangle:
-                shape = 'rectangle';
-                shapeType = '2d';
-                break;
-            case Area.Triangle:
-                shape = 'triangle';
-                shapeType = '2d';
-                break;
-            case Area.Hexagon:
-                shape = 'hexagon';
-                shapeType = '2d';
-                break;
-            case Area.Cube:
-                shape = 'cube';
-                shapeType = '3d';
-                break;
-            case Area.Cone:
-                shape = 'cone';
-                shapeType = '3d';
-                break;
-            case Area.Cylinder:
-                shape = 'cylinder';
-                shapeType = '3d';
-                break;
-            case Area.Sphere:
-                shape = 'sphere';
-                shapeType = '3d';
-                break;
-            default:
-                return null;
+    generate(config: ShapeClassifyDimGeneratorConfig): ProblemStub<ShapeClassifyDimProblem> {
+        validateConfigFields('shape-classify-dim', config, ['classify', 'dimension']);
+        const definition = SHAPES[config.classify!];
+        if (definition === undefined) {
+            throw new GeneratorValidationError('shape-classify-dim', `Unsupported shape label: ${config.classify}`);
+        }
+        if (config.dimension !== definition.dimension) {
+            throw new GeneratorValidationError(
+                'shape-classify-dim',
+                `Selected dimension ${config.dimension} does not agree with ${definition.shape}.`
+            );
         }
 
-        const dimLabel = shapeType === '2d' ? Scope.TwoDimensional : Scope.ThreeDimensional;
-
+        const shapeType = config.dimension === Scope.TwoDimensional ? '2d' : '3d';
         return {
             data: {
                 shapeType,
-                shape,
+                shape: definition.shape,
                 answer: shapeType
-            },
-            tags: [dimLabel, label]
+            }
         };
     }
 }

@@ -1,82 +1,115 @@
-import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
-import {ShapeCompareAttributesProblem} from "../../../types/problems.ts";
-import {random} from "../../../lib/random.ts";
-import {ShapeCompareAttributesGeneratorConfig, ShapeCompareAttributesGeneratorSchema} from "./spec.ts";
-import {Area} from "edugraph-ts";
-import {validateConfigFields} from "../../../lib/errors.ts";
+import {Area} from 'edugraph-ts';
+import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {random} from '../../../lib/random.ts';
+import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
+import {
+    ShapeCompareAttributesProblem,
+    ShapeComparisonAttribute,
+    ShapeComparisonName
+} from '../../../types/problems.ts';
+import {ShapeCompareAttributesGeneratorConfig, ShapeCompareAttributesGeneratorSchema} from './spec.ts';
+
+type ShapeDefinition = {
+    dimension: ShapeCompareAttributesProblem['dimension'];
+    counts: Partial<Record<ShapeComparisonAttribute, number>>;
+};
+
+const SHAPES_BY_LABEL: Readonly<Record<string, ShapeComparisonName>> = {
+    [Area.Triangle]: 'triangle',
+    [Area.Square]: 'square',
+    [Area.Rectangle]: 'rectangle',
+    [Area.Hexagon]: 'hexagon',
+    [Area.Circle]: 'circle',
+    [Area.Cube]: 'cube',
+    [Area.Cone]: 'cone',
+    [Area.Cylinder]: 'cylinder',
+    [Area.Sphere]: 'sphere'
+};
+
+const LABELS_BY_SHAPE = Object.fromEntries(
+    Object.entries(SHAPES_BY_LABEL).map(([label, shape]) => [shape, label])
+) as Readonly<Record<ShapeComparisonName, string>>;
+
+const DEFINITIONS: Readonly<Record<ShapeComparisonName, ShapeDefinition>> = {
+    triangle: {dimension: '2d', counts: {sides: 3, vertices: 3}},
+    square: {dimension: '2d', counts: {sides: 4, vertices: 4}},
+    rectangle: {dimension: '2d', counts: {sides: 4, vertices: 4}},
+    hexagon: {dimension: '2d', counts: {sides: 6, vertices: 6}},
+    circle: {dimension: '2d', counts: {sides: 0, vertices: 0}},
+    cube: {dimension: '3d', counts: {faces: 6, vertices: 8, edges: 12}},
+    cone: {dimension: '3d', counts: {faces: 1, vertices: 1, edges: 1}},
+    cylinder: {dimension: '3d', counts: {faces: 2, vertices: 0, edges: 2}},
+    sphere: {dimension: '3d', counts: {faces: 0, vertices: 0, edges: 0}}
+};
+
+const ATTRIBUTES_BY_DIMENSION = {
+    '2d': ['sides', 'vertices'],
+    '3d': ['faces', 'vertices', 'edges']
+} as const satisfies Readonly<Record<ShapeCompareAttributesProblem['dimension'], readonly ShapeComparisonAttribute[]>>;
+
+function titleCase(shape: ShapeComparisonName): string {
+    return shape.charAt(0).toUpperCase() + shape.slice(1);
+}
+
+function attributeText(attribute: ShapeComparisonAttribute, count?: number): string {
+    if (attribute === 'faces') return count === 1 ? 'flat face' : 'flat faces';
+    if (attribute === 'vertices') return count === 1 ? 'vertex' : 'vertices';
+    if (attribute === 'sides') return count === 1 ? 'side' : 'sides';
+    return count === 1 ? 'edge' : 'edges';
+}
 
 export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCompareAttributesProblem, ShapeCompareAttributesGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeCompareAttributesGeneratorSchema;
 
-    generate(config: ShapeCompareAttributesGeneratorConfig): ProblemStub | null {
-        validateConfigFields('shape-compare-attributes', config, ['classify']);
-        const attribute = random() > 0.5 ? 'sides' : 'corners';
-
-        const attrs: Record<string, Record<string, number>> = {
-            circle: { sides: 0, corners: 0 },
-            triangle: { sides: 3, corners: 3 },
-            square: { sides: 4, corners: 4 },
-            rectangle: { sides: 4, corners: 4 },
-            hexagon: { sides: 6, corners: 6 }
-        };
-
-        const allShapes = Object.keys(attrs);
-
-        let shape1: string;
-        const label = config.classify;
-
-        switch (label) {
-            case Area.Circle:
-                shape1 = 'circle';
-                break;
-            case Area.Triangle:
-                shape1 = 'triangle';
-                break;
-            case Area.Square:
-                shape1 = 'square';
-                break;
-            case Area.Rectangle:
-                shape1 = 'rectangle';
-                break;
-            case Area.Hexagon:
-                shape1 = 'hexagon';
-                break;
-            default:
-                return null;
+    generate(config: ShapeCompareAttributesGeneratorConfig): ProblemStub<ShapeCompareAttributesProblem> {
+        validateConfigFields('shape-compare-attributes', config, ['shape']);
+        const shape1 = SHAPES_BY_LABEL[config.shape!];
+        if (!shape1) {
+            throw new GeneratorValidationError('shape-compare-attributes', 'The selected shape is unsupported.');
         }
 
-        const val1 = attrs[shape1][attribute];
-
-        // Filter pool to find shape2 that has a different count of the attribute
-        const pool = allShapes.filter(s => s !== shape1 && attrs[s][attribute] !== val1);
+        const definition = DEFINITIONS[shape1];
+        const attributes = ATTRIBUTES_BY_DIMENSION[definition.dimension];
+        const attribute = attributes[Math.floor(random() * attributes.length)];
+        const val1 = definition.counts[attribute]!;
+        const pool = (Object.keys(DEFINITIONS) as ShapeComparisonName[]).filter(candidate => {
+            const candidateDefinition = DEFINITIONS[candidate];
+            return candidate !== shape1
+                && candidateDefinition.dimension === definition.dimension
+                && candidateDefinition.counts[attribute] !== val1;
+        });
         if (pool.length === 0) {
-            return null;
+            throw new GeneratorValidationError(
+                'shape-compare-attributes',
+                'The selected shape has no same-dimensional comparison partner.'
+            );
         }
-
         const shape2 = pool[Math.floor(random() * pool.length)];
-        const val2 = attrs[shape2][attribute];
-
+        const val2 = DEFINITIONS[shape2].counts[attribute]!;
         const answer = val1 > val2 ? shape1 : shape2;
-
-        const SHAPE_LABELS: Record<string, string> = {
-            circle: Area.Circle,
-            triangle: Area.Triangle,
-            square: Area.Square,
-            rectangle: Area.Rectangle,
-            hexagon: Area.Hexagon
-        };
+        const greaterCount = Math.max(val1, val2);
+        const lesserCount = Math.min(val1, val2);
+        const pluralAttribute = attributeText(attribute);
 
         return {
             data: {
-                attribute: attribute as 'sides' | 'corners',
-                shape1,
-                shape2,
-                val1,
-                val2,
-                answer
+                dimension: definition.dimension,
+                attribute,
+                shapes: [
+                    {shape: shape1, count: val1},
+                    {shape: shape2, count: val2}
+                ],
+                relation: 'more',
+                answer,
+                prompt: `Which shape has more ${pluralAttribute}?`,
+                evidence: [
+                    `${titleCase(shape1)} has ${val1} ${attributeText(attribute, val1)}.`,
+                    `${titleCase(shape2)} has ${val2} ${attributeText(attribute, val2)}.`,
+                    `${greaterCount} > ${lesserCount}, so ${titleCase(answer)} has more ${pluralAttribute}.`
+                ]
             },
-            tags: [label, SHAPE_LABELS[shape2]]
+            tags: [LABELS_BY_SHAPE[shape2]]
         };
     }
 }

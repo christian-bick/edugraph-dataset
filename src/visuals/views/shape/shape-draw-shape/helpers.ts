@@ -6,3 +6,17 @@ export function getTracePath(target: string): string {
     if (target === 'quadrilateral') return 'M 18 20 L 88 12 L 74 86 L 10 70 Z';
     return '';
 }
+
+export function rotationDrawingPresentation(shape: string, isSolutionView: boolean) {
+    const referenceRotation = shape === 'triangle'
+        ? 180
+        : shape === 'rectangle'
+            ? 90
+            : shape === 'square'
+                ? 45
+                : 0;
+    return {
+        referenceRotation,
+        showCompletedDrawing: isSolutionView
+    };
+}

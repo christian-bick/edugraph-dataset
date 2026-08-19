@@ -2,7 +2,8 @@ import {describe, expect, it} from 'vitest';
 import {
     angleConstructionMatchesRenderedPolygon,
     countClassificationMatchesRenderedPolygons,
-    getShapeAppearance
+    getShapeAppearance,
+    shapeConstructionCountsMatch
 } from './helpers.ts';
 import {
     ShapeAttributeCountSpecificationProblem,
@@ -74,5 +75,13 @@ describe('shape count payload validation', () => {
         expect(angleConstructionMatchesRenderedPolygon(construction, 5)).toBe(true);
         expect(angleConstructionMatchesRenderedPolygon({...construction, requiredCount: 4}, 5)).toBe(false);
         expect(angleConstructionMatchesRenderedPolygon({...construction, sides: 4}, 5)).toBe(false);
+    });
+
+    it('requires construction materials to match the named shape exactly', () => {
+        expect(shapeConstructionCountsMatch('triangle', 3, 3)).toBe(true);
+        expect(shapeConstructionCountsMatch('rectangle', 4, 4)).toBe(true);
+        expect(shapeConstructionCountsMatch('hexagon', 6, 6)).toBe(true);
+        expect(shapeConstructionCountsMatch('hexagon', 4, 4)).toBe(false);
+        expect(shapeConstructionCountsMatch('unknown', 4, 4)).toBe(false);
     });
 });

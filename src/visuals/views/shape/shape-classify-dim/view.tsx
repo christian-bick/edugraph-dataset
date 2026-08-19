@@ -89,10 +89,24 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-classify-dim'>;
 }
 
-const ShapeClassifyDimCore = ({ config: _config, payload }: CoreProps) => {
+export const ShapeClassifyDimCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    validateProblemData('shape-classify-dim', data, ['shape', 'answer']);
+    validateProblemData('shape-classify-dim', data, ['shapeType', 'shape', 'answer']);
+
+    const twoDimensionalShapes = ['circle', 'square', 'rectangle', 'triangle', 'hexagon'];
+    const threeDimensionalShapes = ['cube', 'cone', 'cylinder', 'sphere'];
+    const expectedType = twoDimensionalShapes.includes(data.shape)
+        ? '2d'
+        : threeDimensionalShapes.includes(data.shape)
+            ? '3d'
+            : undefined;
+    if (expectedType === undefined) {
+        throw new ViewValidationError('shape-classify-dim', `Unsupported shape: ${data.shape}`);
+    }
+    if (data.shapeType !== expectedType || data.answer !== expectedType) {
+        throw new ViewValidationError('shape-classify-dim', 'Shape, dimensional type, and answer must agree.');
+    }
 
     const shape = data.shape;
     const answer = data.answer;
@@ -145,12 +159,14 @@ export const ShapeClassifyDim = withConfig(ShapeClassifyDimViewSchema, ShapeClas
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: ViewRenderPayload<'shape-classify-dim'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'shape-classify-dim'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) {
+                root = createRoot(container);
+            }
+            root.render(<ShapeClassifyDim payload={payload} />);
         }
-        root.render(<ShapeClassifyDim payload={payload} />);
-    }
-};
+    };
+}

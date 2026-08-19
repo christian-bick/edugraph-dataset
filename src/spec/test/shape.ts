@@ -5,6 +5,7 @@ import { CompetencyTarget } from '../../types/ml-engine.ts';
 const builder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ShapeAttributes,
+        Scope.GeometrySticks,
         Area.ShapeIdentity,
         Ability.VisualArticulation
     ])
@@ -86,8 +87,6 @@ const compareAttrBuilder = new DatasetPermutationBuilder()
         Scope.ShapeAttributes,
         Area.ShapeIdentity,
         Area.NumericComparison,
-        Area.ShapeRotationConservation,
-        Area.ShapeResizingConservation,
         Ability.VisualReception
     ])
     .applyLabelVariants([
@@ -135,20 +134,19 @@ const envShapesBuilder = new DatasetPermutationBuilder()
 const identityNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeNaming,
-        Area.ShapeRotationConservation,
         Area.ShapeResizingConservation,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
-        [Area.Triangle],
-        [Area.Square],
-        [Area.Rectangle],
+        [Area.Triangle, Area.ShapeRotationConservation],
+        [Area.Square, Area.ShapeRotationConservation],
+        [Area.Rectangle, Area.ShapeRotationConservation],
         [Area.Circle],
-        [Area.Hexagon],
-        [Area.Cube],
+        [Area.Hexagon, Area.ShapeRotationConservation],
+        [Area.Cube, Area.ShapeRotationConservation],
         [Area.Sphere],
-        [Area.Cone],
-        [Area.Cylinder]
+        [Area.Cone, Area.ShapeRotationConservation],
+        [Area.Cylinder, Area.ShapeRotationConservation]
     ]);
 
 const extendedIdentityNamingBuilder = new DatasetPermutationBuilder()

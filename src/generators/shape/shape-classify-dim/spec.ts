@@ -7,9 +7,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'shape-classify-dim',
     generalLabels: [
         Area.ShapeClassification,
-        Scope.ShapeProperties,
-        Scope.ThreeDimensional,
-        Scope.TwoDimensional,
+        Scope.ShapeProperties
     ]
 };
 
@@ -29,6 +27,10 @@ export const ShapeClassifyDimGeneratorSchema = {
         ],
         selectExactMatch
     ],
+    dimension: [
+        [Scope.TwoDimensional, Scope.ThreeDimensional],
+        selectExactMatch
+    ]
 } as const;
 
 export type ShapeClassifyDimGeneratorConfig = ConfigFromSchema<typeof ShapeClassifyDimGeneratorSchema>;

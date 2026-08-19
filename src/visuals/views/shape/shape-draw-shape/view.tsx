@@ -1,10 +1,11 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ShapeDefinition, ShapeExcludedQuadrilateralProblem} from '../../../../types/problems.ts';
-import {getTracePath} from './helpers.ts';
+import {getTracePath, rotationDrawingPresentation} from './helpers.ts';
 import {ShapeDrawShapeViewConfig, ShapeDrawShapeViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {shapeConstructionCountsMatch} from '../helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -98,13 +99,7 @@ function LegacyDrawingLayout({
 }) {
     const promptText = `Draw the same ${shape}. Turning it does not change the shape.`;
     const pathD = getTracePath(shape);
-    const referenceRotation = shape === 'triangle'
-        ? 180
-        : shape === 'rectangle'
-            ? 90
-            : shape === 'square'
-                ? 45
-                : 0;
+    const {referenceRotation, showCompletedDrawing} = rotationDrawingPresentation(shape, isSolutionView);
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit mx-auto font-sans">
@@ -124,12 +119,13 @@ function LegacyDrawingLayout({
                     </div>
                     <div className="flex h-[220px] w-[250px] flex-col items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50 p-3">
                         <span className="mb-1 text-sm font-bold text-slate-600">Your drawing</span>
-                        <svg width="150" height="150" viewBox="0 0 100 100">
-                            <path d={pathD} fill="none" stroke="#cbd5e1" strokeWidth="3" strokeDasharray="4 4" />
-                            {isSolutionView && (
+                        {showCompletedDrawing
+                            ? (
+                                <svg width="150" height="150" viewBox="0 0 100 100" aria-label={`Completed ${shape} drawing`}>
                                 <path d={pathD} fill="none" stroke="forestgreen" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                            )}
-                        </svg>
+                                </svg>
+                            )
+                            : <div className="flex h-[150px] items-center text-lg font-bold text-slate-400">Draw here</div>}
                     </div>
                 </div>
             </div>
@@ -223,6 +219,9 @@ const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
 
     validateProblemData('shape-draw-shape', data, ['target', 'sides', 'corners']);
     ensureSupportedShape(data.target);
+    if (!shapeConstructionCountsMatch(data.target, data.sides, data.corners)) {
+        throw new ViewValidationError('shape-draw-shape', 'The construction counts do not match the named shape.');
+    }
 
     if (data.task === 'exclude-quadrilateral-subcategories') {
         validateProblemData('shape-draw-shape', data, ['task', 'definition', 'excludedCategories']);
