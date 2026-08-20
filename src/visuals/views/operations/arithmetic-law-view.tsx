@@ -95,6 +95,13 @@ export function ArithmeticLawExercise({
     isSolutionView: boolean;
 }) {
     const equations = arithmeticLawEquations(data, unknown, isSolutionView);
+    const solvedValue = unknown === 'num1'
+        ? data.num1
+        : unknown === 'num2'
+            ? data.num2
+            : unknown === 'num3'
+                ? data.num3
+                : data.answer;
     return (
         <div className="w-[650px] max-w-full rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.07)]">
             <div className="text-center text-sm font-bold uppercase tracking-[0.15em] text-violet-700">
@@ -115,7 +122,7 @@ export function ArithmeticLawExercise({
                     : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
             }`}>
                 {isSolutionView
-                    ? `${lawNames[data.propertyLaw!]} preserves the value in both forms.`
+                    ? <><span>The missing value is </span><span className="font-mono text-lg font-extrabold text-emerald-700">{solvedValue}</span><span>. {lawNames[data.propertyLaw!]} preserves the value in both forms.</span></>
                     : 'Keep the same unknown in both equivalent forms.'}
             </div>
         </div>

@@ -43,7 +43,7 @@ export const NumbersDecimalLineCore = ({config: _config, payload}: CoreProps) =>
                     } : null}
                     measuredSegment={null}
                     unitSymbol={null}
-                    showInteriorLabels
+                    showInteriorLabels={false}
                 />
             </div>
 

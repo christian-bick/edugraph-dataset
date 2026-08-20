@@ -68,9 +68,13 @@ function validatePattern(viewId: string, data: ArithmeticPatternProblem) {
 
 function PropertyBody({data}: {data: ArithmeticPatternProblem}) {
     if (!data.propertyLaw) {
+        const propertyEquation = data.ruleOperation === 'add'
+            ? 'odd + odd = even  •  even + odd = odd'
+            : 'whole number × even = even';
         return (
-            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-center font-semibold text-amber-950">
-                {data.featureEvidence}
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-center text-amber-950">
+                <div className="font-mono text-base font-extrabold">{propertyEquation}</div>
+                <div className="mt-2 font-semibold">{data.featureEvidence}</div>
             </div>
         );
     }

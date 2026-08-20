@@ -15,27 +15,40 @@ interface ArithmeticWordProblemViewProps {
 }
 
 function AppleGroup({
-    label,
+    title,
+    part,
     value,
     hidden,
     highlighted
 }: {
-    label: string;
+    title: string;
+    part: 'num1' | 'num2' | 'num3';
     value: number;
     hidden: boolean;
     highlighted: boolean;
 }) {
     return (
-        <div className={`flex h-[82px] w-[128px] flex-col items-center justify-center rounded-xl border-2 bg-white px-2 py-1 ${
+        <div className={`flex h-[108px] w-[140px] flex-col items-center justify-center rounded-xl border-2 bg-white px-2 py-2 ${
             highlighted ? 'border-emerald-600 bg-emerald-50' : hidden ? 'border-dashed border-slate-400' : 'border-slate-300'
         }`}>
-            <div className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">Group {label}</div>
+            <div className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">{title}</div>
             {hidden ? (
                 <div className="text-3xl font-bold text-slate-400">?</div>
             ) : (
-                <div className="grid grid-cols-6 gap-[2px]" aria-label={`${value} apples`}>
+                <div className={`grid gap-[3px] ${value <= 12 ? 'grid-cols-4' : 'grid-cols-5'}`} aria-label={`${value} ${title.toLowerCase()}`}>
                     {Array.from({length: value}, (_, index) => (
-                        <span key={index} className="text-[0.9rem] leading-none">🍎</span>
+                        <span
+                            key={index}
+                            className={`relative block size-[13px] rounded-full border border-black/15 ${
+                                part === 'num1'
+                                    ? 'bg-red-500'
+                                    : part === 'num2'
+                                        ? 'bg-green-500'
+                                        : 'bg-yellow-400'
+                            }`}
+                        >
+                            <span className="absolute -right-px -top-[3px] h-[5px] w-[3px] rotate-45 rounded-full bg-green-700" />
+                        </span>
                     ))}
                 </div>
             )}
@@ -92,6 +105,18 @@ export const ArithmeticWordProblemView = ({invertProcedure, payload}: Arithmetic
     const textScenario = data.propertyLaw === 'distributive'
         ? distributiveStory(data as ArithmeticTripleProblem, unknownPart)
         : getWordProblemText(data, unknownPart);
+    const appleGroupTitle = (part: 'num1' | 'num2' | 'num3', label: string): string => {
+        if (operation === 'addition' && hasThirdOperand) {
+            return part === 'num1' ? 'Red apples' : part === 'num2' ? 'Green apples' : 'Yellow apples';
+        }
+        if (!hasThirdOperand && operation === 'subtraction') {
+            return part === 'num1' ? 'Starting apples' : 'Given away';
+        }
+        if (!hasThirdOperand && operation === 'addition') {
+            return part === 'num1' ? 'Starting apples' : 'Added apples';
+        }
+        return `Amount ${label}`;
+    };
 
     const getInputClass = (part: UnknownPart, isFinal = false) => {
         let cls = "w-[60px] h-[60px] border-2 border-slate-500 rounded-lg flex justify-center items-center text-[2rem] font-mono bg-white ";
@@ -123,7 +148,8 @@ export const ArithmeticWordProblemView = ({invertProcedure, payload}: Arithmetic
                     {appleGroups.map(({label, part, value}) => (
                         <AppleGroup
                             key={part}
-                            label={label}
+                            title={appleGroupTitle(part, label)}
+                            part={part}
                             value={value}
                             hidden={!isSolutionView && part === unknownPart}
                             highlighted={isSolutionView && part === unknownPart}

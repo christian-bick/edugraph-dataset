@@ -168,8 +168,8 @@ function inversionPresentation(data: KnownFactDerivationProblem): Presentation {
         return {
             title: 'Division as an unknown factor',
             prompt: `Rewrite ${dividend} ÷ ${divisor} as missing-factor multiplication, then solve.`,
-            questionEquation: `${divisor} × ? = ${dividend}`,
-            solutionEquation: `${divisor} × ${data.answer} = ${dividend}`,
+            questionEquation: `${dividend} ÷ ${divisor} = ?`,
+            solutionEquation: `${dividend} ÷ ${divisor} = ${data.answer}`,
             relationQuestion: `${dividend} ÷ ${divisor} = ?  ↔  ${divisor} × ? = ${dividend}`,
             relationSolution: `${dividend} ÷ ${divisor} = ${data.answer}  ↔  ${divisor} × ${data.answer} = ${dividend}`,
             explanation: `Multiplication reverses the division procedure, so the unknown factor is ${data.answer}.`
@@ -207,13 +207,18 @@ const DerivationCard = ({
         violet: 'text-violet-700',
         emerald: 'text-emerald-700'
     } as const;
+    const equationSize = equation.length > 28
+        ? 'text-[0.95rem]'
+        : equation.length > 20
+            ? 'text-[1.08rem]'
+            : 'text-2xl';
 
     return (
-        <div className={`flex min-h-36 flex-col items-center justify-center rounded-xl border-2 px-5 py-4 text-center ${tones[tone]}`}>
+        <div className={`flex min-h-36 flex-col items-center justify-center rounded-xl border-2 px-3 py-4 text-center ${tones[tone]}`}>
             <div className={`text-xs font-bold uppercase tracking-[0.14em] ${labelTones[tone]}`}>
                 {label}
             </div>
-            <div className="mt-3 font-mono text-2xl font-extrabold leading-snug">
+            <div className={`mt-3 whitespace-nowrap font-mono font-extrabold leading-snug ${equationSize}`}>
                 {equation}
             </div>
         </div>
@@ -247,7 +252,7 @@ export const KnownFactDerivationView = ({
         : understandingPresentation(data);
 
     return (
-        <div className="w-[930px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
+        <div className="w-[1080px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
             <div className="text-center">
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
                     {presentation.title}

@@ -147,7 +147,21 @@ const MeasureLengthEstimateCore = ({config, payload}: CoreProps) => {
             <div className={`mx-auto mt-6 flex items-center justify-center rounded-xl bg-indigo-100 font-extrabold text-indigo-800 ${reference.sizeClass}`}>
                 {reference.name}
             </div>
-            <div className="mt-6 text-center text-lg font-semibold text-slate-700">About how many {profile.unitPlural} long?</div>
+            <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs font-semibold text-slate-700">
+                <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-3">
+                    <span className="block font-extrabold text-sky-800">1. Choose a unit</span>
+                    Use a familiar 1 {profile.unit} length.
+                </div>
+                <div className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-3">
+                    <span className="block font-extrabold text-violet-800">2. Repeat it mentally</span>
+                    Place copies end to end along the {reference.name.toLowerCase()}.
+                </div>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3">
+                    <span className="block font-extrabold text-amber-800">3. Estimate</span>
+                    Decide how many copies fit.
+                </div>
+            </div>
+            <div className="mt-5 text-center text-lg font-semibold text-slate-700">About how many {profile.unitPlural} long?</div>
             <div className="mx-auto mt-4 flex h-16 w-44 items-center justify-center rounded-xl border-2 border-slate-700 font-mono text-2xl font-bold text-emerald-700">
                 {payload.isSolutionView ? `${estimate} ${profile.unit}` : ''}
             </div>

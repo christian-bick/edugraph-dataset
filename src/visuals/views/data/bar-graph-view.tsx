@@ -67,6 +67,9 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
             {displayTask === 'organize' && (
                 <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Unsorted observations</div>
+                    <div className="mb-3 text-center text-xs font-semibold text-slate-600">
+                        Each observation card represents {data.scale} {data.scale === 1 ? 'item' : 'items'}.
+                    </div>
                     <div className="flex flex-wrap justify-center gap-2">
                         {observations.map((label, index) => (
                             <span

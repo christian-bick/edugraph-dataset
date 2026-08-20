@@ -198,13 +198,11 @@ export const TenthsToHundredthsModel = ({
                 />
             </div>
 
-            {explainScaling && (
-                <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-900">
-                    <span>{data.numeratorScale.from} × {data.numeratorScale.factor} = {isSolutionView ? data.numeratorScale.result : '?'}</span>
-                    <span className="text-blue-300">•</span>
-                    <span>{data.denominatorScale.equation}</span>
-                </div>
-            )}
+            <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-900">
+                <span>{data.numeratorScale.from} × {data.numeratorScale.factor} = {isSolutionView ? data.numeratorScale.result : '?'}</span>
+                <span className="text-blue-300">•</span>
+                <span>{data.denominatorScale.equation}</span>
+            </div>
 
             <div className={`mt-4 min-h-[104px] rounded-xl border-2 px-5 py-4 text-center ${
                 isSolutionView

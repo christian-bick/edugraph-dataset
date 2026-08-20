@@ -24,17 +24,17 @@ function MeasurementRow({observation, data, reveal}: {observation: MeasurementOb
                     className="absolute left-0 top-1 h-5 rounded-full border-2 border-sky-600 bg-sky-100"
                     style={{width}}
                 />
-                <div className="absolute bottom-0 left-0 flex">
+                <div className="absolute bottom-4 left-0 flex">
                     {Array.from({length: tickCount + 1}, (_, tick) => (
                         <div
                             key={tick}
                             className={`relative border-l border-slate-500 ${tick % data.subdivisions === 0 ? 'h-6' : tick % 2 === 0 ? 'mt-2 h-4' : 'mt-3 h-3'}`}
                             style={{width: tick === tickCount ? 0 : 28 / data.subdivisions}}
                         >
-                            {tick % data.subdivisions === 0 && <span className="absolute left-0 top-2 -translate-x-1/2 text-[10px] font-semibold text-slate-500">{tick / data.subdivisions}</span>}
+                            {tick % data.subdivisions === 0 && <span className="absolute left-0 top-6 -translate-x-1/2 text-[10px] font-semibold text-slate-500">{tick / data.subdivisions}</span>}
                         </div>
                     ))}
-                    <span className="ml-2 mt-2 text-[10px] font-bold text-slate-500">{data.unit}</span>
+                    <span className="ml-2 mt-6 text-[10px] font-bold text-slate-500">{data.unit}</span>
                 </div>
             </div>
             <div className={`flex h-11 items-center justify-center rounded-lg border-2 font-mono text-lg font-extrabold ${

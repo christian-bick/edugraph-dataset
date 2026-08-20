@@ -52,6 +52,7 @@ describe('known-fact derivation Ability leaves', () => {
         expect(question).toContain('Inverted relationship');
         expect(question).toContain('7 × ? = 56');
         expect(solution).toContain('7 × 8 = 56');
+        expect(solution).toContain('56 ÷ 7 = 8');
         expect(solution).toContain('unknown factor is 8');
     });
 

@@ -48,7 +48,7 @@ export function getUnknownPart(
     if (data.num3 !== undefined) {
         return invertProcedure
             ? selectUnknownOperandPart(seed, true)
-            : selectUnknownPart(seed, true);
+            : 'answer';
     }
     return invertProcedure ? 'num2' : 'answer';
 }

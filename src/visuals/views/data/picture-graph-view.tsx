@@ -61,6 +61,9 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
             {displayTask === 'organize' && (
                 <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <div className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">Shuffled observations</div>
+                    <div className="mb-3 text-center text-xs font-semibold text-slate-600">
+                        Each observation card represents {data.scale} {data.scale === 1 ? 'item' : 'items'}.
+                    </div>
                     <div className="flex flex-wrap justify-center gap-2">
                         {observations.map((label, observationIndex) => {
                             const categoryIndex = data.categories.findIndex(category => category.label === label);

@@ -353,15 +353,15 @@ export const ShapeSquareArrayView = ({
 
     return (
         <div className="flex justify-center items-center p-8 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
-            <div className="w-[520px] h-[450px] flex flex-col items-center gap-4">
-                <div className={`${isAreaCount || useStory
-                    ? 'h-[82px] text-[1.1rem] leading-tight'
+            <div className="flex min-h-[450px] w-[520px] flex-col items-center gap-4">
+                <div className={`${isAreaCount || isCoverageInterpretation || useStory
+                    ? 'min-h-[82px] text-[1.1rem] leading-tight'
                     : 'h-[58px] text-[1.3rem] leading-snug'
-                } px-5 flex items-start justify-center text-center font-bold text-slate-700`}>
+                } flex items-center justify-center px-5 text-center font-bold text-slate-700`}>
                     {storyPrompt ?? (isUnitInterpretation
                         ? 'This square tile has side length 1 unit. What area does it represent?'
                             : isCoverageInterpretation
-                                ? 'Unit squares cover this figure exactly. What does the count tell you?'
+                                ? `Count one row at a time, adding ${problem.data.columns} unit squares for each row. What does the repeated count tell you about area?`
                             : isAreaCount
                                 ? getAreaTilePrompt(problem.data.areaUnit)
                                 : isProductExplanation

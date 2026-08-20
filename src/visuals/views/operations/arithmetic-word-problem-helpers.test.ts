@@ -72,6 +72,19 @@ describe('operations-word-problem helpers', () => {
         expect(getUnknownPart(pair, 123, false)).toBe('answer');
     });
 
+    it('keeps the result unknown for canonical triple tasks unless the view inverts the procedure', () => {
+        const triple: ArithmeticProblem = {
+            num1: 3,
+            num2: 5,
+            num3: 7,
+            operation: 'addition',
+            answer: 15
+        };
+
+        expect(getUnknownPart(triple, 123, false)).toBe('answer');
+        expect(getUnknownPart(triple, 123, true)).not.toBe('answer');
+    });
+
     it('writes binary scenarios around the selected unknown', () => {
         const addition: ArithmeticProblem = {num1: 3, num2: 5, operation: 'addition', answer: 8};
         const subtraction: ArithmeticProblem = {num1: 9, num2: 4, operation: 'subtraction', answer: 5};

@@ -1,2 +1,2 @@
-- **Identity:** One 0-to-1 number line uses supplied tenths and hundredths ticks to locate the requested decimal precisely without dense labels.
+- **Identity:** One 0-to-1 number line uses the supplied decimal subdivision scale to locate the requested decimal precisely without dense interior labels.
 - **Modes:** Question Mode leaves the requested point unlabeled and unplotted while preserving the scale; Solution Mode reveals the exact supplied point, decimal label, and location explanation.

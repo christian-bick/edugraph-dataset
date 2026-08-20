@@ -76,7 +76,7 @@ export const buildAngleArithmeticPresentation = (
         return {
             task,
             unknownRole: 'none',
-            prompt: 'Explain how adjacent angles AOB and BOC combine to form angle AOC.',
+            prompt: 'Use the shown whole-part relationship as evidence. Explain how adjacent angles AOB and BOC combine to form angle AOC.',
             questionEquation: data.relationStatement,
             solutionEquation: numericAddition,
             answer: numericAddition,

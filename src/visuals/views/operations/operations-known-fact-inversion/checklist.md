@@ -1,2 +1,2 @@
-- **Identity:** A supplied multiplication fact and division question require rewriting division as a missing-factor multiplication relationship.
-- **Modes:** Question Mode leaves the related factor unknown; Solution Mode completes the division equation and explains the missing-factor inversion.
+- **Identity:** A supplied multiplication fact and a mathematically derived relationship require recovering an unknown input by reversing that relationship; division cases explicitly use missing-factor multiplication.
+- **Modes:** Question Mode leaves the derived input unknown; Solution Mode restores it and explains the strategy-specific inversion without changing the known fact.

@@ -181,6 +181,11 @@ export const FractionEquivalenceView = ({mode, payload, viewId}: FractionEquival
                             <span>=</span>
                             <FractionNotation numerator={data.second.numerator} denominator={data.second.denominator} />
                         </div>
+                        {requestsCompletion && (
+                            <div className="mt-3 font-mono text-sm font-extrabold">
+                                Scale both terms by {data.scaleFactor}: {data.first.numerator} × {data.scaleFactor} = {data.second.numerator}; {data.first.denominator} × {data.scaleFactor} = {data.second.denominator}
+                            </div>
+                        )}
                         <div className="mt-3 text-[1.05rem] font-semibold">
                             {explainsProcedure
                                 ? equivalenceExplanation(data)
@@ -190,11 +195,16 @@ export const FractionEquivalenceView = ({mode, payload, viewId}: FractionEquival
                         </div>
                     </>
                 ) : requestsCompletion ? (
-                    <div className="flex items-center justify-center gap-3 text-xl font-bold">
-                        <FractionNotation numerator={data.first.numerator} denominator={data.first.denominator} />
-                        <span>=</span>
-                        <FractionNotation numerator="?" denominator={data.second.denominator} />
-                    </div>
+                    <>
+                        <div className="flex items-center justify-center gap-3 text-xl font-bold">
+                            <FractionNotation numerator={data.first.numerator} denominator={data.first.denominator} />
+                            <span>=</span>
+                            <FractionNotation numerator="?" denominator={data.second.denominator} />
+                        </div>
+                        <div className="mt-3 font-mono text-sm font-extrabold">
+                            {data.first.numerator} × {data.scaleFactor} = ?; {data.first.denominator} × {data.scaleFactor} = {data.second.denominator}
+                        </div>
+                    </>
                 ) : (
                     <div className="text-xl font-bold">Equivalent or not equivalent?</div>
                 )}

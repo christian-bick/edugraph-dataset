@@ -28,8 +28,6 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
     const showTime = isReverse || isSolutionView;
 
     const isClockSolution = isReverse && isSolutionView;
-    const isTextSolution = !isReverse && isSolutionView;
-
     const formattedTime = useMemo(() => {
         return formatTime(data.time, data.interval);
     }, [data.time, data.interval]);
@@ -43,7 +41,8 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
         return getTickMarks();
     }, []);
 
-    const handColorClass = isClockSolution ? 'stroke-emerald-600' : 'stroke-neutral-800';
+    const hourHandClass = isClockSolution ? 'stroke-indigo-700' : 'stroke-neutral-800';
+    const minuteHandClass = isClockSolution ? 'stroke-emerald-600' : 'stroke-neutral-800';
 
     const promptText = isReverse ? 'What time should the clock show?' : 'What time is it?';
 
@@ -74,7 +73,7 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
                         <>
                             {/* Hour hand */}
                             <line 
-                                className={`stroke-linecap-round stroke-[4px] ${handColorClass}`} 
+                                className={`stroke-linecap-round stroke-[4px] ${hourHandClass}`} 
                                 x1="50" 
                                 y1="50" 
                                 x2="50" 
@@ -83,7 +82,7 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
                             />
                             {/* Minute hand */}
                             <line 
-                                className={`stroke-linecap-round stroke-[3px] ${handColorClass}`} 
+                                className={`stroke-linecap-round stroke-[3px] ${minuteHandClass}`} 
                                 x1="50" 
                                 y1="50" 
                                 x2="50" 
@@ -93,7 +92,7 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
                             {/* Second hand */}
                             {data.interval < 60 && (
                                 <line 
-                                    className={`stroke-linecap-round stroke-[1.5px] ${handColorClass}`} 
+                                    className="stroke-linecap-round stroke-[1.5px] stroke-rose-500"
                                     x1="50" 
                                     y1="50" 
                                     x2="50" 
@@ -105,10 +104,17 @@ const TimeAnalogCore = ({ config, payload }: CoreProps) => {
                     )}
                 </svg>
 
+                {isClockSolution && (
+                    <div className="flex items-center gap-4 text-xs font-bold">
+                        <span className="text-indigo-700">Short indigo hand = hour</span>
+                        <span className="text-emerald-700">Long green hand = minute</span>
+                    </div>
+                )}
+
                 <div className={`border-2 border-neutral-800 rounded-md py-2 px-[15px] min-w-[100px] min-h-[50px] text-center font-mono flex items-center justify-center text-[1.5rem] ${
-                    isReverse ? 'border-dashed' : ''
+                    isReverse && !isSolutionView ? 'border-dashed' : ''
                 } ${
-                    isTextSolution ? 'text-emerald-700 border-emerald-600 bg-emerald-50 font-bold' : ''
+                    isSolutionView ? 'text-emerald-700 border-emerald-600 bg-emerald-50 font-bold' : ''
                 }`}>
                     {showTime ? displayedTime : ''}
                 </div>

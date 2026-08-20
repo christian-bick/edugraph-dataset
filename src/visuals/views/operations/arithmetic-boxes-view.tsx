@@ -74,9 +74,18 @@ export const ArithmeticBoxesView = ({invertProcedure, payload}: ArithmeticBoxesV
                 </div>
         </div>
     );
+    const repeatedAddend = !isTriple
+        && !isFour
+        && data.operation === 'addition'
+        && data.num1 === data.num2;
 
     return (
-        <div className="flex justify-center items-center p-5 bg-white w-fit">
+        <div className="flex w-fit flex-col items-center justify-center gap-3 bg-white p-5">
+            {repeatedAddend && (
+                <div className="rounded-full bg-sky-50 px-4 py-1.5 text-sm font-bold text-sky-800">
+                    Repeated addition: the same addend is used twice.
+                </div>
+            )}
             {equation}
         </div>
     );

@@ -16,7 +16,6 @@ function FoldAxes({axes}: {axes: readonly LineSymmetryAxis[]}) {
         <>
             {axes.map((axis, axisIndex) => {
                 const color = AXIS_COLORS[axisIndex % AXIS_COLORS.length];
-                const witnesses = axis.correspondences.slice(0, axes.length === 4 ? 1 : 2);
                 return (
                     <g key={axis.id}>
                         <line
@@ -29,21 +28,6 @@ function FoldAxes({axes}: {axes: readonly LineSymmetryAxis[]}) {
                             strokeDasharray="5 3"
                             strokeLinecap="round"
                         />
-                        {witnesses.map((pair, pairIndex) => (
-                            <g key={pairIndex}>
-                                <polyline
-                                    points={`${pair.first.x},${pair.first.y} ${pair.foldPoint.x},${pair.foldPoint.y} ${pair.second.x},${pair.second.y}`}
-                                    fill="none"
-                                    stroke={color}
-                                    strokeWidth="1.25"
-                                    strokeDasharray="2 2"
-                                    opacity="0.62"
-                                />
-                                <circle cx={pair.first.x} cy={pair.first.y} r="2.25" fill={color} />
-                                <circle cx={pair.second.x} cy={pair.second.y} r="2.25" fill={color} />
-                                <circle cx={pair.foldPoint.x} cy={pair.foldPoint.y} r="2" fill="#fff" stroke={color} strokeWidth="1.4" />
-                            </g>
-                        ))}
                     </g>
                 );
             })}
@@ -78,9 +62,6 @@ function SymmetryFigure({
                     strokeLinejoin="round"
                 />
                 <FoldAxes axes={axes} />
-                {figure.vertices.map((point, index) => (
-                    <circle key={index} cx={point.x} cy={point.y} r="1.8" fill="#fff" stroke="#334155" strokeWidth="1.2" />
-                ))}
             </g>
         </svg>
     );
@@ -177,7 +158,7 @@ function DrawingLayout({
                 role="img"
                 aria-label={`Closed polygon with ${data.figure.vertices.length} corners${
                     isSolutionView
-                        ? `; ${data.figure.axisCount} completed fold ${data.figure.axisCount === 1 ? 'line' : 'lines'} and paired fold witnesses shown`
+                        ? `; ${data.figure.axisCount} valid fold ${data.figure.axisCount === 1 ? 'line' : 'lines'} shown`
                         : '; learner-drawn fold lines and their count not shown'
                 }`}
                 className="mt-3 flex h-[340px] items-center justify-center rounded-2xl border-2 border-slate-200 bg-slate-50"
@@ -193,7 +174,7 @@ function DrawingLayout({
                 <div className="mt-4 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
                     <div className="text-[1rem] font-extrabold">The figure has {answer}.</div>
                     <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">
-                        Folding along each completed line maps every supplied pair of points onto each other.
+                        Each completed line divides the figure into matching reflected halves.
                     </div>
                 </div>
             )}

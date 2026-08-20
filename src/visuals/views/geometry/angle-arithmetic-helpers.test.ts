@@ -81,7 +81,7 @@ describe('angle arithmetic view projection', () => {
         )).toEqual({
             task: 'explain-angle-addition',
             unknownRole: 'none',
-            prompt: 'Explain how adjacent angles AOB and BOC combine to form angle AOC.',
+            prompt: 'Use the shown whole-part relationship as evidence. Explain how adjacent angles AOB and BOC combine to form angle AOC.',
             questionEquation: 'm∠AOB + m∠BOC = m∠AOC',
             solutionEquation: '45° + 45° = 90°',
             answer: '45° + 45° = 90°',

@@ -65,6 +65,7 @@ describe('arithmetic law rendering', () => {
         );
         expect(markup).toContain(witness);
         expect(markup).toContain('property');
+        expect(markup).toContain('The missing value is');
     });
 
     it('routes boxes, vertical, and word-problem inversion through the shared law renderer', () => {

@@ -207,6 +207,13 @@ function AnglePartitionDiagram({data, isSolutionView}: {
 }
 
 function QuestionEquations({data}: {data: AngleArithmeticViewModel}) {
+    if (data.task === 'explain-angle-addition') {
+        return (
+            <div className="flex min-h-[58px] items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white px-3 text-center font-semibold text-slate-500">
+                Write an explanation using the adjacent-angle diagram.
+            </div>
+        );
+    }
     const showWholePart = data.task === 'solve-unknown-angle'
         && data.unknownRole !== 'whole';
     return (
