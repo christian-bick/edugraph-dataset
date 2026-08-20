@@ -1,5 +1,4 @@
 import {Ability, Scope} from 'edugraph-ts';
-import {hasLabel} from '../../../../lib/resolvers.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 
@@ -8,11 +7,10 @@ export const spec: ViewSpec = {
     generalLabels: [
         Scope.PhysicalRuler,
         Scope.DataTable,
+        Scope.ObservedMeasurement,
         Ability.ProcedureExecution
     ]
 };
 
-export const MeasurementDataTableViewSchema = {
-    useInchScale: [[Scope.InchScale], hasLabel(Scope.InchScale)]
-} as const;
+export const MeasurementDataTableViewSchema = {} as const;
 export type MeasurementDataTableViewConfig = ConfigFromSchema<typeof MeasurementDataTableViewSchema>;

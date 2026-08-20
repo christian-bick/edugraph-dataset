@@ -5,9 +5,7 @@ import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'shape-identity',
-    generalLabels: [
-        Area.ShapeNaming
-    ]
+    generalLabels: []
 };
 
 export const ShapeIdentityGeneratorSchema = {

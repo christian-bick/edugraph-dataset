@@ -1,7 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {MeasurementDataProblem, MeasurementObservation} from '../../../../types/problems.ts';
-import {ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {formatMeasurement, validateMeasurementData} from '../helpers.ts';
 import {MeasurementDataTableViewConfig, MeasurementDataTableViewSchema} from './spec.ts';
@@ -12,18 +11,43 @@ interface CoreProps {
     payload: ViewRenderPayload<'measurement-data-table'>;
 }
 
+function MeasurementObject({object, width}: {object: MeasurementObservation['object']; width: number}) {
+    const common = {
+        width,
+        height: 22,
+        viewBox: '0 0 100 22',
+        preserveAspectRatio: 'none' as const,
+        'aria-label': `${object} to measure`
+    };
+    if (object === 'pencil') return (
+        <svg {...common}><rect x="1" y="5" width="88" height="12" rx="2" fill="#facc15" stroke="#a16207"/><polygon points="89,5 100,11 89,17" fill="#f5deb3" stroke="#92400e"/><path d="M96 9 L100 11 L96 13 Z" fill="#334155"/></svg>
+    );
+    if (object === 'crayon') return (
+        <svg {...common}><rect x="1" y="4" width="92" height="14" rx="4" fill="#a855f7" stroke="#6b21a8"/><polygon points="93,4 100,11 93,18" fill="#7e22ce"/><rect x="20" y="4" width="5" height="14" fill="#f3e8ff" opacity="0.8"/></svg>
+    );
+    if (object === 'ribbon') return (
+        <svg {...common}><path d="M1 11 C16 1, 29 21, 45 11 S74 1, 99 11" fill="none" stroke="#ef4444" strokeWidth="8" strokeLinecap="round"/><path d="M1 11 C16 1, 29 21, 45 11 S74 1, 99 11" fill="none" stroke="#fecaca" strokeWidth="2"/></svg>
+    );
+    if (object === 'key') return (
+        <svg {...common}><circle cx="12" cy="11" r="9" fill="#cbd5e1" stroke="#475569" strokeWidth="2"/><circle cx="12" cy="11" r="4" fill="white" stroke="#64748b"/><rect x="20" y="8" width="76" height="6" rx="2" fill="#94a3b8" stroke="#475569"/><path d="M78 14 V20 H86 V14 M90 14 V18 H98 V12" fill="none" stroke="#475569" strokeWidth="3"/></svg>
+    );
+    if (object === 'brush') return (
+        <svg {...common}><rect x="1" y="7" width="75" height="8" rx="4" fill="#a16207" stroke="#713f12"/><rect x="74" y="5" width="10" height="12" fill="#94a3b8" stroke="#475569"/><path d="M84 4 L100 7 L100 15 L84 18 Z" fill="#38bdf8" stroke="#0369a1"/></svg>
+    );
+    return (
+        <svg {...common}><rect x="1" y="2" width="98" height="18" rx="3" fill="#60a5fa" stroke="#1d4ed8" strokeWidth="2"/><path d="M8 7 H92 M8 12 H92 M8 17 H92" stroke="#bfdbfe" strokeWidth="1"/></svg>
+    );
+}
+
 function MeasurementRow({observation, data, reveal}: {observation: MeasurementObservation; data: MeasurementDataProblem; reveal: boolean}) {
-    const width = observation.length * 28;
+    const width = observation.value * 28;
     const maxLength = data.unit === 'cm' ? 10 : 8;
     const tickCount = maxLength * data.subdivisions;
     return (
         <div className="grid grid-cols-[90px_1fr_92px] items-center gap-4 border-t border-slate-200 py-3 first:border-t-0">
             <div className="text-base font-bold capitalize text-slate-700">{observation.object}</div>
             <div className="relative h-[54px]">
-                <div
-                    className="absolute left-0 top-1 h-5 rounded-full border-2 border-sky-600 bg-sky-100"
-                    style={{width}}
-                />
+                <div className="absolute left-0 top-1"><MeasurementObject object={observation.object} width={width} /></div>
                 <div className="absolute bottom-4 left-0 flex">
                     {Array.from({length: tickCount + 1}, (_, tick) => (
                         <div
@@ -42,23 +66,16 @@ function MeasurementRow({observation, data, reveal}: {observation: MeasurementOb
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                     : 'border-dashed border-slate-400 bg-white text-slate-400'
             }`}>
-                {reveal ? formatMeasurement(observation.length, data.unit) : `? ${data.unit}`}
+                {reveal ? formatMeasurement(observation.value, data.unit) : `? ${data.unit}`}
             </div>
         </div>
     );
 }
 
-const MeasurementDataTableCore = ({config, payload}: CoreProps) => {
+const MeasurementDataTableCore = ({payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateMeasurementData(data, 'measurement-data-table');
-    if (config.useInchScale && data.unit !== 'in') {
-        throw new ViewValidationError(
-            'measurement-data-table',
-            'An inch-scale measurement table requires inch observations.'
-        );
-    }
-
     return (
         <div className="w-[690px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Collect length data</div>

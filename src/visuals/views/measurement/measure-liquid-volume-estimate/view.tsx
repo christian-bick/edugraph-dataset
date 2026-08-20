@@ -65,8 +65,13 @@ const MeasureLiquidVolumeEstimateCore = ({config: _config, payload}: CoreProps) 
     return <div className="w-[650px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
         <div className="text-sm font-bold uppercase tracking-[0.16em] text-teal-700">Estimate liquid volume</div>
         <div className="mt-1 text-[1.4rem] font-bold text-slate-800">About how many liters can this {profile.name.toLowerCase()} hold?</div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm font-bold text-teal-950">
+            <div className="rounded-lg bg-teal-50 px-2 py-2"><span className="mr-1 text-teal-700">1.</span> Compare sizes</div>
+            <div className="rounded-lg bg-teal-50 px-2 py-2"><span className="mr-1 text-teal-700">2.</span> Judge how many 1 L references fit</div>
+            <div className="rounded-lg bg-teal-50 px-2 py-2"><span className="mr-1 text-teal-700">3.</span> Record an estimate</div>
+        </div>
 
-        <div className="mt-6 grid grid-cols-[1fr_210px] gap-5">
+        <div className="mt-4 grid grid-cols-[1fr_210px] gap-5">
             <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 text-center">
                 <svg viewBox="0 0 300 320" className="mx-auto h-[310px] w-[290px]" role="img" aria-label={profile.name}>
                     <TargetContainer container={data.container} />

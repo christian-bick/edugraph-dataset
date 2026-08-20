@@ -6,7 +6,6 @@ import {
     isValidShapePartitionProblem,
     resolveShapePartitionTask,
     selectShareIndex,
-    selectShareName,
     ShapePartitionTask
 } from './shape-partition-helpers.ts';
 
@@ -300,10 +299,18 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
             }
             validateProblemData(viewId, data, ['parts']);
             const selectedShare = selectShareIndex(data.parts, payload.seed);
-            const shareName = selectShareName(data.parts, payload.seed);
+            const singularNames = data.parts === 2
+                ? 'one half'
+                : 'one fourth (one quarter)';
+            const pluralNames = data.parts === 2
+                ? 'two halves'
+                : 'four fourths (four quarters)';
+            const relationNames = data.parts === 2
+                ? 'one half of the whole'
+                : 'one fourth / one quarter of the whole';
             return (
                 <ViewFrame>
-                    <PromptSlot isSolutionView={isSolutionView}>What is the highlighted share called?</PromptSlot>
+                    <PromptSlot isSolutionView={isSolutionView}>Use fraction words to name the highlighted share and describe the whole.</PromptSlot>
                     <div className="w-[420px] h-[260px] bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-center box-border">
                         <PartitionedShape
                             shape={data.shape}
@@ -312,7 +319,20 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
                             highlightedShare={selectedShare}
                         />
                     </div>
-                    <AnswerSlot isSolutionView={isSolutionView} answer={shareName} />
+                    <div
+                        className={`min-h-[72px] w-[420px] rounded-xl border-2 px-4 py-2 text-center font-bold box-border ${
+                            isSolutionView
+                                ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
+                                : 'border-slate-300 bg-white text-slate-500'
+                        }`}
+                    >
+                        <div>{isSolutionView
+                            ? `${singularNames} · ${pluralNames}`
+                            : 'One share: ______ · All shares: ______'}</div>
+                        <div className="mt-1 text-sm">{isSolutionView
+                            ? relationNames
+                            : 'Use the phrase: ______ of the whole'}</div>
+                    </div>
                 </ViewFrame>
             );
         }

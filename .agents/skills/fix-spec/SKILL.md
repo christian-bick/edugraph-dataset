@@ -50,7 +50,9 @@ Decide *where* the defect lives before touching code. Assigning a failure to the
 |---|---|---|
 | Wrong answer, out-of-bounds value, or generated mathematics contradicts the requested label | `generator.ts` | `IMPL-G4` |
 | A necessary mathematical clue or datum is absent from the payload | `generator.ts` / payload contract | `IMPL-G4`, `IMPL-G6`, `IMPL-V8` |
+| Generator payload preselects a blank, unknown, prompt, hint, or requested reasoning | `generator.ts` plus consuming view adoption | `IMPL-G8`, `IMPL-G6` |
 | Necessary payload evidence exists but is omitted, obscured, or mislabeled in the image | `view.tsx` | `IMPL-V3`, `IMPL-V4` |
+| View makes its Ability observable but erases evidence for another matched label | `view.tsx` | `IMPL-V11` |
 | Correct data renders with overlap, clipping, or `NaN`/`undefined` text | `view.tsx` | `IMPL-V3`, `IMPL-V4` |
 | Answer visible in Question Mode, or layout differs between modes | `view.tsx` | `IMPL-V5` |
 | The rendered task family does not elicit the declared ability | view `spec.ts` or production target | `SPEC-2`, `SPEC-V5`, `TSPEC-6`, `TSPEC-13`; confirm with user |
@@ -60,7 +62,15 @@ Decide *where* the defect lives before touching code. Assigning a failure to the
 | View error card in the rendered image (`ViewValidationError`) | payload mismatch | `IMPL-G6`, `IMPL-V8` |
 | Target matches no generator/view at all | out of scope | hand off to `/implement-spec` |
 
-**A VQA failure is not proof of a code bug.** Inspect the rendered image, ontology definition, generator payload, view spec, and production target together. Judge only evidence available in the image. Before changing a checklist, apply the `CHK-V6` removal question and confirm that the leaf criterion describes an essential observable view contract rather than duplicating the central checklist or a unit test.
+**A VQA failure is not proof of a classification defect.** Inspect the rendered image,
+ontology definition, generator payload, view spec, and production target together. Judge only
+evidence available in the image. Resolve violations in ownership priority: (1) generator
+mathematical truth and Ability-neutral canonical evidence (`IMPL-G4`, `IMPL-G8`); (2) view task
+truth and preservation of the complete matched claim (`SPEC-V5`, `IMPL-V11`); (3) view
+applicability and irreducible physical boundaries (`SPEC-V3`, `SPEC-V7`); (4) declarations,
+targets, ontology, or checklist only when the preceding contracts are sound. Before changing a
+checklist, apply the `CHK-V6` removal question and confirm that the criterion protects an
+essential observable view contract rather than duplicating the central checklist or a unit test.
 
 Group the triaged failures by `(generator, view)` so one fix and one regeneration cycle covers every sample it affects.
 

@@ -405,19 +405,19 @@ const positionsAheadBuilder = new DatasetPermutationBuilder()
 const shapeNamingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeNaming,
-        Area.ShapeResizingConservation,
+        Scope.ShapeSizeVariation,
         Ability.VisualRecognition
     ])
     .applyLabelVariants([
-        [Area.Triangle, Area.ShapeRotationConservation],
-        [Area.Square, Area.ShapeRotationConservation],
-        [Area.Rectangle, Area.ShapeRotationConservation],
+        [Area.Triangle, Scope.ShapeOrientationVariation],
+        [Area.Square, Scope.ShapeOrientationVariation],
+        [Area.Rectangle, Scope.ShapeOrientationVariation],
         [Area.Circle],
-        [Area.Hexagon, Area.ShapeRotationConservation],
-        [Area.Cube, Area.ShapeRotationConservation],
+        [Area.Hexagon, Scope.ShapeOrientationVariation],
+        [Area.Cube, Scope.ShapeOrientationVariation],
         [Area.Sphere],
-        [Area.Cone, Area.ShapeRotationConservation],
-        [Area.Cylinder, Area.ShapeRotationConservation]
+        [Area.Cone, Scope.ShapeOrientationVariation],
+        [Area.Cylinder, Scope.ShapeOrientationVariation]
     ]);
 
 // --- K.G.A.3: Identify shapes as 2D or 3D ---

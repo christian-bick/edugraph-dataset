@@ -194,10 +194,9 @@ const fourOperationTwoStepBuilder = new DatasetPermutationBuilder()
         [Area.Multiplication, Area.Division]
     ]);
 
-// --- 3.OA.D.8: Assess answer reasonableness through visible estimation ---
+// --- 3.OA.D.8: Assess answer reasonableness through visible rounding ---
 const answerReasonablenessBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Estimation,
         Area.IntegerRounding,
         Scope.NumbersSmaller1000,
         Ability.PlausibilityEvaluation

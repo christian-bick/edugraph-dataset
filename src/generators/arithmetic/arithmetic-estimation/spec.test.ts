@@ -7,13 +7,13 @@ import {spec} from './spec.ts';
 describe('ArithmeticEstimationGenerator spec integration', () => {
     const generator = new ArithmeticEstimationGenerator();
 
-    it('declares estimation and integer rounding as invariant mathematics', () => {
+    it('declares formal integer rounding as invariant mathematics', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([
-            Area.Estimation,
             Area.IntegerRounding,
             Scope.IntegerNumbers,
             Scope.NumbersWithoutNegatives
         ]));
+        expect(spec.generalLabels).not.toContain(Area.Estimation);
     });
 
     it('resolves every reviewed operation within 1000', () => {

@@ -317,7 +317,19 @@ const TenthsHundredthsAdditionWork = ({
                 </div>
             </>
         ) : (
-            <ModelPlaceholder label="The converted tenths, combined result grid, and completed equation are withheld." />
+            <div className="flex min-h-[118px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-300 bg-blue-50 px-5 text-center text-blue-950">
+                <div className="text-sm font-extrabold uppercase tracking-wide text-blue-700">
+                    Convert the first addend to hundredths
+                </div>
+                <div className="mt-3 grid w-full max-w-[560px] grid-cols-2 gap-3 font-mono text-base font-bold">
+                    <div className="rounded-lg bg-white px-3 py-2">
+                        {data.firstTenths.numerator} × {data.conversion.factor} = ____
+                    </div>
+                    <div className="rounded-lg bg-white px-3 py-2">
+                        {data.firstTenths.denominator} × {data.conversion.factor} = {data.convertedFirst.denominator}
+                    </div>
+                </div>
+            </div>
         )}
     </div>
 );

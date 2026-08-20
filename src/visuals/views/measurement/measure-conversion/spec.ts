@@ -5,8 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-conversion',
-    generalLabels: [],
-    rejectedLabels: [Ability.Formalization]
+    generalLabels: []
 };
 
 export const MeasureConversionViewSchema = {

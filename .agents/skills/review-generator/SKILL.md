@@ -28,6 +28,12 @@ Without `--file`, review both aspects.
 
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.
 
+Check these explicitly on every generator:
+- `SPEC-G3`: neither `generalLabels` nor schema parameters contain an Ability.
+- `IMPL-G8`: Ability neutrality covers both declarations and the data contract. The payload preserves the mathematical witnesses required by Area/Scope labels but contains no learner-action decision such as a blank, unknown position, prompt, hint, requested explanation, or Ability-specific answer prose.
+- `SPEC-11`: the generator owns the invariant mathematical Area; it does not encode presentation-driven child-Area distinctions that belong to view Scopes.
+- `IMPL-G6`: when neutralization changes the payload contract, identify every real-standard consuming view and verify each projection.
+
 ---
 
 ## Automated Verification Tools

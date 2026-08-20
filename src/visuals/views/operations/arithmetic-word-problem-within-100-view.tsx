@@ -30,6 +30,13 @@ interface ArithmeticWordProblemWithin100ViewProps {
 
 const VIEW_ID = 'operations-word-problem-within-100';
 const MAX_MAGNITUDE = 1_000_000;
+const ROUNDING_PLACE_NAMES: Record<ArithmeticWordProblemReasonableness['roundingPlace'], string> = {
+    10: 'ten',
+    100: 'hundred',
+    1000: 'thousand',
+    10000: 'ten thousand',
+    100000: 'hundred thousand'
+};
 const OPERATIONS: readonly ArithmeticOperation[] = [
     'addition',
     'subtraction',
@@ -256,7 +263,7 @@ function validateReasonableness(data: ArithmeticWordProblemReasonableness) {
     const exactAnswer = applyOperation(intermediate, data.operands[2], data.operations[1]);
     const roundedExact = Math.round(data.exactAnswer / data.roundingPlace) * data.roundingPlace;
     const roundedProposed = Math.round(data.proposedAnswer / data.roundingPlace) * data.roundingPlace;
-    if (data.roundingPlace !== 10
+    if (!Object.hasOwn(ROUNDING_PLACE_NAMES, data.roundingPlace)
         || data.intermediate !== intermediate
         || data.exactAnswer !== exactAnswer
         || data.roundedExactAnswer !== roundedExact
@@ -540,9 +547,10 @@ function ReasonablenessProblem({data, isSolutionView}: {
         `${data.intermediate} ${secondSymbol} ${data.operands[2]} = ${data.exactAnswer}`
     ];
     const roundingCheck = `${data.exactAnswer} rounds to ${data.roundedExactAnswer}; ${data.proposedAnswer} rounds to ${data.roundedProposedAnswer}.`;
+    const roundingPlaceName = ROUNDING_PLACE_NAMES[data.roundingPlace];
     const reasonablenessExplanation = data.isReasonable
-        ? 'The exact and proposed answers round to the same ten, so the proposal is reasonable.'
-        : 'The exact and proposed answers round to different tens, so the proposal is not reasonable.';
+        ? `The exact and proposed answers round to the same ${roundingPlaceName}, so the proposal is reasonable.`
+        : `The exact and proposed answers round to different ${roundingPlaceName}s, so the proposal is not reasonable.`;
     return (
         <>
             <StoryHeader title="Check answer reasonableness" instruction="Use the rounding check to evaluate the proposed result." />
@@ -551,7 +559,9 @@ function ReasonablenessProblem({data, isSolutionView}: {
                 question="Is the student’s answer reasonable? Explain using rounding."
             />
             <div className="mt-5 rounded-xl border-2 border-violet-200 bg-violet-50 px-5 py-4 text-center">
-                <div className="text-xs font-bold uppercase tracking-wide text-violet-700">Round to the nearest ten</div>
+                <div className="text-xs font-bold uppercase tracking-wide text-violet-700">
+                    Round to the nearest {roundingPlaceName}
+                </div>
                 <div className="mt-1 text-lg font-extrabold text-violet-950">{roundingCheck}</div>
             </div>
             {isSolutionView ? (

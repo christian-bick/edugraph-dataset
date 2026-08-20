@@ -14,8 +14,11 @@ const payload = (data: ShapeNamingProblem, seed: number, isSolutionView: boolean
 
 describe('shape-naming view', () => {
     it('renders the same shape at two deterministic sizes and rotations', () => {
-        const data: ShapeNamingProblem = {shape: 'square', answer: 'square'};
-        const markup = renderToStaticMarkup(<ShapeNamingCore config={{}} payload={payload(data, 42, false)} />);
+        const data: ShapeNamingProblem = {shape: 'square'};
+        const markup = renderToStaticMarkup(<ShapeNamingCore
+            config={{varyOrientation: true, varySize: true}}
+            payload={payload(data, 42, false)}
+        />);
         const sizes = [...markup.matchAll(/data-shape-size="(\d+)"/g)].map(match => Number(match[1]));
         const rotations = [...markup.matchAll(/data-shape-rotation="(-?\d+)"/g)].map(match => Number(match[1]));
 
@@ -26,18 +29,24 @@ describe('shape-naming view', () => {
     });
 
     it('reveals only the correct name in Solution Mode', () => {
-        const data: ShapeNamingProblem = {shape: 'sphere', answer: 'sphere'};
-        const solution = renderToStaticMarkup(<ShapeNamingCore config={{}} payload={payload(data, 7, true)} />);
+        const data: ShapeNamingProblem = {shape: 'sphere'};
+        const solution = renderToStaticMarkup(<ShapeNamingCore
+            config={{varyOrientation: false, varySize: false}}
+            payload={payload(data, 7, true)}
+        />);
         expect(solution).toContain('Sphere');
         expect(solution.match(/border-green-600/g)).toHaveLength(1);
     });
 
     it.each([
-        {shape: 'circle', answer: 'square'},
-        {shape: 'star', answer: 'star'}
-    ])('rejects an inconsistent or unsupported naming payload %#', data => {
+        {shape: 'star'},
+        {shape: ''}
+    ])('rejects an unsupported naming payload %#', data => {
         expect(() => renderToStaticMarkup(
-            <ShapeNamingCore config={{}} payload={payload(data as ShapeNamingProblem, 3, false)} />
+            <ShapeNamingCore
+                config={{varyOrientation: false, varySize: false}}
+                payload={payload(data as ShapeNamingProblem, 3, false)}
+            />
         )).toThrow();
     });
 });

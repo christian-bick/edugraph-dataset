@@ -302,7 +302,7 @@ export type ArithmeticWordProblemReasonableness = {
     intermediate: number;
     exactAnswer: number;
     proposedAnswer: number;
-    roundingPlace: 10;
+    roundingPlace: 10 | 100 | 1000 | 10000 | 100000;
     roundedExactAnswer: number;
     roundedProposedAnswer: number;
     isReasonable: boolean;
@@ -1029,80 +1029,24 @@ export type CurrencyArithmeticProblem = {
 
 export type MeasurementObservation = {
     object: 'pencil' | 'crayon' | 'ribbon' | 'key' | 'brush' | 'block';
-    length: number;
+    value: number;
 };
 
-export type LegacyMeasurementDataProblem = {
-    unit: 'cm' | 'in';
-    subdivisions: 1 | 4;
-    observations: MeasurementObservation[];
-};
-
-export type FractionLinePlotValue = {
-    eighths: number;
-    numerator: number;
-    denominator: 1 | 2 | 4 | 8;
-    display: string;
-    quantityText: string;
-};
-
-export type FractionLinePlotObservation = {
-    object: MeasurementObservation['object'];
-    value: FractionLinePlotValue;
-};
-
-export type FractionLinePlotTick = {
-    index: number;
-    value: FractionLinePlotValue;
-};
-
-export type FractionLinePlotFrequency = {
-    value: FractionLinePlotValue;
-    count: number;
-};
-
-type Grade4FractionLinePlotBase = {
-    unit: 'in';
-    subdivisions: 8;
-    observations: MeasurementObservation[];
-    fractionObservations: FractionLinePlotObservation[];
-    axisStart: FractionLinePlotValue;
-    axisEnd: FractionLinePlotValue;
-    interval: FractionLinePlotValue;
-    axisTicks: FractionLinePlotTick[];
-    frequencies: FractionLinePlotFrequency[];
-    scaleStatement: string;
-};
-
-export type ConstructFractionLinePlotProblem = Grade4FractionLinePlotBase & {
-    task: 'construct-fraction-line-plot';
-    prompt: string;
-    answerStatement: string;
-    explanation: string;
-};
-
-export type FractionLinePlotArithmeticProblem = Grade4FractionLinePlotBase & {
-    task: 'fraction-line-plot-arithmetic';
+export type MeasurementExtremaRelation = {
     operation: 'addition' | 'subtraction';
-    shortest: FractionLinePlotValue;
-    longest: FractionLinePlotValue;
-    leftOperand: FractionLinePlotValue;
-    rightOperand: FractionLinePlotValue;
-    answer: FractionLinePlotValue;
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    answerStatement: string;
-    explanation: string;
+    shortest: number;
+    longest: number;
+    leftOperand: number;
+    rightOperand: number;
+    answer: number;
 };
 
-export type Grade4FractionLinePlotProblem =
-    | ConstructFractionLinePlotProblem
-    | FractionLinePlotArithmeticProblem;
-
-export type MeasurementDataProblem =
-    | LegacyMeasurementDataProblem
-    | Grade4FractionLinePlotProblem;
+export type MeasurementDataProblem = {
+    unit: 'cm' | 'in';
+    subdivisions: 1 | 4 | 8;
+    observations: MeasurementObservation[];
+    extremaRelation?: MeasurementExtremaRelation;
+};
 
 export type StatisticalCategory = {
     label: 'Apples' | 'Books' | 'Kites';
@@ -1123,7 +1067,6 @@ export type StatisticalGraphProblem = {
 
 export type ShapeNamingProblem = {
     shape: string;
-    answer: string;
     attributes?: string[];
 };
 
@@ -2596,6 +2539,7 @@ export interface ViewTypeMap {
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
+    'measurement-line-plot-arithmetic': MeasurementDataProblem;
     'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
     'measurement-number-line': MeasurementNumberLineProblem;
     'data-picture-graph': StatisticalGraphProblem;

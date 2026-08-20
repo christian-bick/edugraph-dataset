@@ -58,7 +58,7 @@ export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabe
 
 /** Resolves the Grade 4 mathematical task while preserving the legacy two-step default. */
 export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWordProblemTask {
-    if (labels.includes(Area.Estimation) || labels.includes(Area.IntegerRounding)) {
+    if (labels.includes(Area.IntegerRounding)) {
         return 'reasonableness';
     }
     if (labels.includes(Area.ImperfectDivisibility) || labels.includes(Area.Modulo)) {

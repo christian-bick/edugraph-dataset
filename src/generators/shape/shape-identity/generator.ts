@@ -17,10 +17,7 @@ export class ShapeIdentityGenerator implements ProblemGenerator<ShapeNamingProbl
         const planeShape = shapeNameFromLabel(selectedArea);
         const shape = planeShape ?? selectedArea.split('/').pop()!.toLowerCase();
 
-        const data: ShapeNamingProblem = {
-            shape,
-            answer: shape
-        };
+        const data: ShapeNamingProblem = {shape};
         if (config.includeAttributes && planeShape) {
             data.attributes = getVisibleShapeAttributes(planeShape);
         }

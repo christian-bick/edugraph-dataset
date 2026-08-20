@@ -26,6 +26,16 @@ type NamedOperations = readonly [ArithmeticOperation, ArithmeticOperation];
 const MAX_TWO_STEP_VALUE = 100;
 const MAX_GRADE4_VALUE = 999_999;
 
+type ReasonablenessRoundingPlace = ArithmeticWordProblemReasonableness['roundingPlace'];
+
+const roundingPlaceFor = (value: number): ReasonablenessRoundingPlace => {
+    const exponent = Math.max(1, Math.min(5, Math.floor(Math.log10(Math.max(1, Math.abs(value))))));
+    return 10 ** exponent as ReasonablenessRoundingPlace;
+};
+
+const roundTo = (value: number, place: ReasonablenessRoundingPlace): number =>
+    Math.round(value / place) * place;
+
 const applyOperation = (left: number, right: number, operation: ArithmeticOperation): number => {
     if (operation === 'addition') return left + right;
     if (operation === 'subtraction') return left - right;
@@ -89,7 +99,8 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
             return {data: this.buildLetterEquation(values, namedOperations)};
         }
         if (config.task === 'reasonableness') {
-            return {data: this.buildReasonableness(values, namedOperations, maximum)};
+            const reasonableness = this.buildReasonableness(values, namedOperations, maximum);
+            return reasonableness ? {data: reasonableness} : null;
         }
 
         return {
@@ -256,15 +267,24 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
         values: Values,
         operations: NamedOperations,
         maximum: number
-    ): ArithmeticWordProblemReasonableness {
+    ): ArithmeticWordProblemReasonableness | null {
+        const roundingPlace = roundingPlaceFor(values.answer);
+        const roundedExactAnswer = roundTo(values.answer, roundingPlace);
         const shouldBeReasonable = random() < 0.5;
-        const reasonableOffset = values.answer % 10 <= 4 ? 1 : -1;
-        const unreasonableOffset = values.answer + 20 <= maximum ? 20 : -20;
-        const proposedAnswer = shouldBeReasonable
-            ? Math.max(1, values.answer + reasonableOffset)
-            : Math.max(1, values.answer + unreasonableOffset);
-        const roundedExactAnswer = Math.round(values.answer / 10) * 10;
-        const roundedProposedAnswer = Math.round(proposedAnswer / 10) * 10;
+        const fineStep = Math.max(1, roundingPlace / 10);
+        const offsets = shouldBeReasonable
+            ? [fineStep, -fineStep, 2 * fineStep, -2 * fineStep, 1, -1]
+            : [roundingPlace, -roundingPlace, 2 * roundingPlace, -2 * roundingPlace];
+        const candidates = offsets
+            .map(offset => values.answer + offset)
+            .filter(candidate => {
+                if (!Number.isInteger(candidate) || candidate < 1 || candidate > maximum) return false;
+                return (roundTo(candidate, roundingPlace) === roundedExactAnswer) === shouldBeReasonable;
+            });
+        if (candidates.length === 0) return null;
+
+        const proposedAnswer = candidates[Math.floor(random() * candidates.length)];
+        const roundedProposedAnswer = roundTo(proposedAnswer, roundingPlace);
         const isReasonable = roundedExactAnswer === roundedProposedAnswer;
         return {
             kind: 'reasonableness',
@@ -273,7 +293,7 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
             intermediate: values.intermediate,
             exactAnswer: values.answer,
             proposedAnswer,
-            roundingPlace: 10,
+            roundingPlace,
             roundedExactAnswer,
             roundedProposedAnswer,
             isReasonable

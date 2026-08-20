@@ -108,21 +108,21 @@ function ShapeSVG({ shape, size }: { shape: string; size: number }) {
     throw new ViewValidationError('shape-naming', `Unsupported shape: ${shape}`);
 }
 
-export const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
+export const ShapeNamingCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    validateProblemData('shape-naming', data, ['shape', 'answer']);
+    validateProblemData('shape-naming', data, ['shape']);
 
     const shape = data.shape;
-    const answer = data.answer;
+    const answer = shape;
 
     const supportedShapes = [
         'circle', 'square', 'rhombus', 'rectangle', 'quadrilateral', 'pentagon',
         'triangle', 'hexagon', 'cube', 'cone', 'cylinder', 'sphere'
     ];
-    if (!supportedShapes.includes(shape) || answer !== shape) {
-        throw new ViewValidationError('shape-naming', 'Shape and naming answer must agree on a supported shape.');
+    if (!supportedShapes.includes(shape)) {
+        throw new ViewValidationError('shape-naming', 'The shape must be a supported geometric kind.');
     }
     if (data.attributes !== undefined
         && (!Array.isArray(data.attributes) || data.attributes.some(attribute => typeof attribute !== 'string' || attribute.length === 0))) {
@@ -136,7 +136,13 @@ export const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
             ? ['triangle', 'quadrilateral', 'pentagon', 'hexagon']
             : ['square', 'circle', 'triangle', 'rectangle', 'hexagon'];
 
-    const appearances = deriveShapeNamingAppearances(payload.seed, is3D);
+    const appearances = deriveShapeNamingAppearances(payload.seed, is3D, {
+        varyOrientation: config.varyOrientation === true,
+        varySize: config.varySize === true
+    });
+    const visibleAppearances = config.varyOrientation === true || config.varySize === true
+        ? appearances
+        : appearances.slice(0, 1);
 
     const promptText = "What shape are these?";
 
@@ -163,23 +169,21 @@ export const ShapeNamingCore = ({ config: _config, payload }: CoreProps) => {
                 
                 <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
                     <div className="flex items-center justify-center gap-5">
-                        <div
-                            data-shape-size={appearances[0].size}
-                            data-shape-rotation={appearances[0].rotation}
-                            style={{transform: `rotate(${appearances[0].rotation}deg)`, transformOrigin: 'center'}}
-                            className="flex h-[145px] w-[145px] items-center justify-center"
-                        >
-                            <ShapeSVG shape={shape} size={appearances[0].size} />
-                        </div>
-                        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">same shape</span>
-                        <div
-                            data-shape-size={appearances[1].size}
-                            data-shape-rotation={appearances[1].rotation}
-                            style={{transform: `rotate(${appearances[1].rotation}deg)`, transformOrigin: 'center'}}
-                            className="flex h-[145px] w-[145px] items-center justify-center"
-                        >
-                            <ShapeSVG shape={shape} size={appearances[1].size} />
-                        </div>
+                        {visibleAppearances.map((appearance, index) => (
+                            <div key={`${appearance.size}-${appearance.rotation}-${index}`} className="contents">
+                                {index > 0 && (
+                                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">same shape</span>
+                                )}
+                                <div
+                                    data-shape-size={appearance.size}
+                                    data-shape-rotation={appearance.rotation}
+                                    style={{transform: `rotate(${appearance.rotation}deg)`, transformOrigin: 'center'}}
+                                    className="flex h-[145px] w-[145px] items-center justify-center"
+                                >
+                                    <ShapeSVG shape={shape} size={appearance.size} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 

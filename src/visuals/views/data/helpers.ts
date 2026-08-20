@@ -19,17 +19,27 @@ export function validateMeasurementData(data: MeasurementDataProblem, viewId: st
         throw new ViewValidationError(viewId, 'Measurement objects or their order are invalid.');
     }
     if (data.unit === 'cm' && data.subdivisions === 1) {
-        if (data.observations.some(({length}) => !Number.isInteger(length) || length < 2 || length > 10)) {
+        if (data.observations.some(({value}) => !Number.isInteger(value) || value < 2 || value > 10)) {
             throw new ViewValidationError(viewId, 'Centimeter lengths must be whole numbers from 2 through 10.');
         }
         return;
     }
     if (data.unit === 'in' && data.subdivisions === 4) {
-        const quarterUnits = data.observations.map(({length}) => length * 4);
+        const quarterUnits = data.observations.map(({value}) => value * 4);
         if (quarterUnits.some(value => !Number.isInteger(value) || value < 8 || value > 32)
             || !quarterUnits.some(value => value % 4 === 2)
             || !quarterUnits.some(value => value % 2 === 1)) {
             throw new ViewValidationError(viewId, 'Inch lengths must use quarter-inch ticks and include half- and quarter-inch data.');
+        }
+        return;
+    }
+    if (data.unit === 'in' && data.subdivisions === 8) {
+        const eighthUnits = data.observations.map(({value}) => value * 8);
+        if (eighthUnits.some(value => !Number.isInteger(value) || value < 8 || value > 32)
+            || !eighthUnits.some(value => value % 8 === 1)
+            || !eighthUnits.some(value => value % 8 === 2)
+            || !eighthUnits.some(value => value % 8 === 4)) {
+            throw new ViewValidationError(viewId, 'Inch lengths must use eighth-inch ticks and include eighth-, quarter-, and half-inch data.');
         }
         return;
     }
@@ -38,9 +48,9 @@ export function validateMeasurementData(data: MeasurementDataProblem, viewId: st
 
 export function formatMeasurementValue(length: number, unit: MeasurementDataProblem['unit']): string {
     if (unit === 'cm') return String(length);
-    const quarterUnits = Math.round(length * 4);
-    const whole = Math.floor(quarterUnits / 4);
-    const fraction = ['', '¼', '½', '¾'][quarterUnits % 4];
+    const eighthUnits = Math.round(length * 8);
+    const whole = Math.floor(eighthUnits / 8);
+    const fraction = ['', '⅛', '¼', '⅜', '½', '⅝', '¾', '⅞'][eighthUnits % 8];
     return `${whole}${fraction}`;
 }
 

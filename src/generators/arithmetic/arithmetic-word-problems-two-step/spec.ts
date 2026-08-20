@@ -22,7 +22,6 @@ export const ArithmeticWordProblemsTwoStepGeneratorSchema = {
             Area.ImperfectDivisibility,
             Area.Modulo,
             Area.Equation,
-            Area.Estimation,
             Area.IntegerRounding
         ],
         resolveArithmeticWordProblemTask

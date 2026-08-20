@@ -1,2 +1,2 @@
-- **Identity:** A familiar target container, a separate 1-liter reference vessel, the liter unit, an estimation prompt, and a plausible response are visible and agree.
+- **Identity:** A familiar target container, a separate 1-liter reference vessel, the liter unit, and a three-step compare–judge–record procedure make the requested estimation process observable.
 - **Modes:** Question Mode leaves the estimate unresolved; Solution Mode states the estimated capacity in liters while preserving the same container and 1-liter reference.

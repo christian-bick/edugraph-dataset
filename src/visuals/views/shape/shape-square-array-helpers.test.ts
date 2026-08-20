@@ -7,6 +7,7 @@ import {
     buildRectangleAreaPresentation,
     buildSquareArrayInversionPresentation,
     getAreaTilePrompt,
+    getRectangleDiagramGeometry,
     getSquareArrayStoryPrompt,
     isValidShapeSquareArrayProblem,
     resolveShapeSquareArrayTask
@@ -158,8 +159,24 @@ describe('area-tile wording', () => {
         ['square feet', '1 square foot']
     ] as const)('identifies each %s tile as a unit square measuring %s', (areaUnit, measure) => {
         expect(getAreaTilePrompt(areaUnit)).toBe(
-            `Count the unit-square tiles, each measuring ${measure}, that cover this figure. What is its area?`
+            `Follow the arrows and count every unit-square tile once, increasing the count by 1 at each tile. Each tile measures ${measure}. What is the area?`
         );
+    });
+});
+
+describe('rectangle diagram geometry', () => {
+    it('uses the same visual scale for both dimensions', () => {
+        const geometry = getRectangleDiagramGeometry(2, 3);
+
+        expect(geometry.pixelLength / 2).toBeCloseTo(geometry.pixelWidth / 3);
+        expect(geometry.pixelLength).toBeLessThan(geometry.pixelWidth);
+    });
+
+    it('keeps wide rectangles inside the available diagram area', () => {
+        const geometry = getRectangleDiagramGeometry(9, 2);
+
+        expect(geometry.pixelLength).toBeLessThanOrEqual(292);
+        expect(geometry.pixelWidth).toBeLessThanOrEqual(170);
     });
 });
 

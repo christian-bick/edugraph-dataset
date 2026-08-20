@@ -1,3 +1,3 @@
-- **Identity:** Clearly rendered examples of the same plane or solid shape at observably different sizes and orientations, plus appropriate name choices, make invariant category recognition and naming observable.
+- **Identity:** A clearly rendered plane or solid shape and appropriate name choices make shape naming observable; requested size or orientation variation is visibly present without changing the geometric kind.
 - **Modes:** Question Mode leaves every name neutral; Solution Mode identifies the correct name.
 - **Extended polygons:** Quadrilateral and pentagon tasks show an unambiguous generic example plus visible side and vertex counts.

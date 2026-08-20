@@ -492,8 +492,9 @@ const currencyWordProblemsBuilder = new DatasetPermutationBuilder()
 const measurementDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.MeasuringObjects,
+        Area.Measurement,
         Scope.LengthMeasurement,
+        Scope.ObservedMeasurement,
         Scope.IntegerNumbers,
         Ability.ProcedureExecution
     ]);
@@ -502,8 +503,9 @@ const measurementDataBuilder = new DatasetPermutationBuilder()
 const measurementLinePlotBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.MeasuringObjects,
+        Area.Measurement,
         Scope.LengthMeasurement,
+        Scope.ProvidedMeasurement,
         Scope.IntegerNumbers,
         Scope.LinePlot,
         Scope.StepsOf1,

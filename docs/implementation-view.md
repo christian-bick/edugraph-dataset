@@ -131,6 +131,25 @@ their outermost element a viewport width such as `width: 100vw`. Do not make ord
 roots full-width merely to center a smaller fixed-width card; center within the card or its
 intrinsically sized wrapper instead.
 
+### IMPL-V11 — Preserve the whole matched claim
+
+The final screenshot must provide observable evidence for every target label satisfied by the
+generator/view pair, not only for the Ability contributed by the leaf view. Project the
+generator's canonical payload without discarding the structures that witness its Area and Scope
+claims.
+
+Do not flatten a law-bearing relation until the law is no longer visible, replace a measurable
+or countable object with a text badge naming it, omit a graph scale, or hide a premise needed to
+defend the target. Text that merely asserts an object or property is not a substitute for the
+visual or mathematical evidence when that evidence is what the target claims.
+
+Evidence follows ownership. The generator contract supplies every canonical mathematical
+witness; the view preserves those witnesses while making its Ability observable. When a
+witness is absent from the payload, follow
+[IMPL-V8](#impl-v8--needing-a-new-payload-field-is-a-two-module-change). When the payload
+contains it but the screenshot does not, correct the view. Use `rejectedLabels` only for an
+irreducible physical rendering boundary.
+
 ---
 
 ## Audit
@@ -145,4 +164,5 @@ intrinsically sized wrapper instead.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.
 - [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code, and the shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.
 - [ ] **IMPL-V10** — the outermost rendered element has a natural width; only an intentionally full-canvas view requests viewport width, so `#view` screenshots contain no accidental transparent remainder.
+- [ ] **IMPL-V11** — every leaf projection preserves observable evidence for all generator-owned labels in the matched target; it neither flattens structured witnesses nor substitutes labels or names for the claimed objects and relations.
 - [ ] `npm run report:churn -- --spec=test` shows churn only in the views actually touched.

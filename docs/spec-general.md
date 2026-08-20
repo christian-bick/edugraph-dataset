@@ -78,7 +78,8 @@ parameterization distinctions the dataset labels depend on.
 ### SPEC-5 — Separation of concerns between generator and view specs
 
 - **Generator specs** map ontology labels **only** to abstract mathematical configuration.
-- **View specs** map ontology labels **only** to visual/layout configuration.
+- **View specs** map ontology labels **only** to presentation configuration that preserves
+  learner action. Ability-driven task identities are invariant leaf-view capabilities.
 
 The role-specific parameter lists and worked cases live in
 [spec-generator.md](spec-generator.md) and [spec-view.md](spec-view.md).
@@ -143,6 +144,27 @@ The two deduction operators are duals and are not interchangeable:
 See [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-physical-boundaries-not-competency-filters)
 and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting).
 
+### SPEC-11 — Contextual refinement of an Area is a Scope
+
+A compatible generator and view must not divide ownership by declaring equal or
+taxonomically overlapping Areas. In particular, a view must not specialize a
+generator-owned Area with a descendant Area. The generator declares the invariant area of
+knowledge and understanding; any observable presentation, representation, evidence source,
+or other contextual distinction within that Area is a view-owned Scope.
+
+An unrelated Area may still belong to the view when the learner-facing task genuinely adds
+an independent knowledge domain. For example, an equation view can add `Area.Equation` to
+an arithmetic generator. Independence is the test: replacing the view-owned label with a
+Scope must be rejected when it would erase a different mathematical question, not merely
+because the ontology currently models a contextual distinction as an Area.
+
+If a contextual distinction has no suitable Scope, create an ontology gap instead of using
+Area specialization as polymorphism. If the distinction changes the central mathematical
+question, audit whether the generator owns the wrong Area or whether a separate canonical
+mathematical model is required.
+
+**Verified by:** `npm run check:generator-view-specs`.
+
 ---
 
 ## Audit
@@ -157,4 +179,5 @@ and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmit
 - [ ] **SPEC-8** — no label parameterized by the generator is re-queried by the matching view.
 - [ ] **SPEC-9** — discrete label sets are expressed as plain arrays unless a resolver is genuinely required.
 - [ ] **SPEC-10** — `deductCompatible` appears only in schemas; `deductAdmitting` only in rejection lists.
+- [ ] **SPEC-11** — no compatible generator/view pair shares equal or ancestor/descendant Areas; contextual refinement of one generator-owned Area is expressed with a view-owned Scope, while any view-owned Area is an independent knowledge domain.
 - [ ] `npm run check:generator-view-specs` passes.

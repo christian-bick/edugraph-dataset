@@ -52,12 +52,11 @@ const letterEquationBuilder = new DatasetPermutationBuilder().addLabels([
 
 const reasonablenessBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Division,
-    Area.Estimation,
     Area.IntegerRounding,
     Scope.MultiStep,
     Scope.NumbersSmaller1000000,
     Ability.TextualReception,
-    Ability.ResultInterpretation,
+    Ability.PlausibilityEvaluation,
     Ability.ProcedureUnderstanding
 ]);
 

@@ -1,2 +1,2 @@
-- **Identity:** Two equally numerous groups use the same objects but visibly different spacing, so the task tests conservation of number rather than appearance.
+- **Identity:** Two equally numerous groups use the same objects but a visibly different arrangement or spacing, so the task tests conservation of number rather than appearance.
 - **Modes:** Question Mode leaves all comparison choices neutral; Solution Mode identifies that the groups contain the same number.

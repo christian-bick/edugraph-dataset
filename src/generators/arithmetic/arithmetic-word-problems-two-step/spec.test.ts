@@ -81,24 +81,22 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
         }
     });
 
-    it('resolves estimation and integer rounding into reasonableness checks', () => {
+    it('resolves integer rounding into reasonableness checks', () => {
         for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division]) {
             const stub = generateWithLabels(generator, [
                 operation,
-                Area.Estimation,
                 Area.IntegerRounding,
                 Scope.NumbersSmaller1000000,
-                Ability.ResultInterpretation,
+                Ability.PlausibilityEvaluation,
                 Ability.ProcedureUnderstanding
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.kind).toBe('reasonableness');
             expect(stub!.tags).toEqual(expect.arrayContaining([
                 operation,
-                Area.Estimation,
                 Area.IntegerRounding
             ]));
-            expect(stub!.tags).not.toContain(Ability.ResultInterpretation);
+            expect(stub!.tags).not.toContain(Ability.PlausibilityEvaluation);
             expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
         }
     });

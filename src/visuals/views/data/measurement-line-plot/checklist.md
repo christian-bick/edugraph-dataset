@@ -1,2 +1,2 @@
-- **Identity:** Six object lengths accompany a single numerical line plot whose complete tick scale makes whole, quarter-inch, or eighth-inch measurements readable.
-- **Modes:** A plotting question shows the measurements above an empty line plot and its solution adds one mark per measurement; an arithmetic question keeps the completed plot visible while withholding selected numeric operands and the result, then its solution reveals the supplied fraction equation, unit-bearing answer, and explanation.
+- **Identity:** Six supplied object lengths accompany one empty numerical line plot whose complete tick scale makes every recorded measurement placeable.
+- **Modes:** Question Mode leaves the line plot empty; Solution Mode adds exactly one mark for every supplied measurement, including stacked marks for repeated values.

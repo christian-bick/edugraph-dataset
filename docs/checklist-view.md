@@ -24,7 +24,8 @@ The central checklist is written for a first-time observer and owns broad rules 
 to every rendered exercise: task identifiability, separate Question and Solution mode
 requirements, text economy, mathematical coherence, ontology-label support, layout
 integrity, and rendering integrity. Validation policy belongs here rather than in the
-unhashed evaluator prompt.
+unhashed evaluator prompt. Its label policy distinguishes a rendered witness from text that
+merely names or asserts the claimed object, representation, relation, method, or structure.
 
 Every view must have one heading-free `checklist.md` containing:
 
@@ -47,4 +48,4 @@ A view may make a central rule concrete for its view, but cannot weaken the cent
 
 ## Audit
 
-- [ ] **CHK-V6** — the central checklist contains only checks both standalone task identity and visible/textual support for every supplied label, and owns the label-verdict policy; every leaf view has exactly one checklist with concise **Identity** and **Modes** criteria; any additional criterion passes the removal question, concerns only observable pixels, and does not weaken a central rule.
+- [ ] **CHK-V6** — the central checklist contains only checks both standalone task identity and observable support for every supplied label, rejects names or assertions as substitutes for required structural evidence, and owns the label-verdict policy; every leaf view has exactly one checklist with concise **Identity** and **Modes** criteria; any additional criterion passes the removal question, concerns only observable pixels, and does not weaken a central rule.

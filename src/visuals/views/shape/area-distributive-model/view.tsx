@@ -87,6 +87,22 @@ function SplitRectangle({data, showAreas}: {data: DistributiveAreaDecompositionP
 
             {showAreas && (
                 <>
+                    <rect
+                        x={x + 6}
+                        y={y + height / 2 - 14}
+                        width={data.leftWidth * CELL_SIZE - 12}
+                        height="28"
+                        rx="5"
+                        fill="#dbeafe"
+                    />
+                    <rect
+                        x={splitX + 6}
+                        y={y + height / 2 - 14}
+                        width={data.rightWidth * CELL_SIZE - 12}
+                        height="28"
+                        rx="5"
+                        fill="#fef3c7"
+                    />
                     <text x={x + data.leftWidth * CELL_SIZE / 2} y={y + height / 2 + 5} textAnchor="middle" className="fill-blue-800 text-[14px] font-extrabold">
                         {data.height} × {data.leftWidth} = {data.leftArea}
                     </text>

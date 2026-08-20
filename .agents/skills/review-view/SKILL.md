@@ -31,9 +31,13 @@ Without `--file`, review all three aspects.
 
 Check these explicitly on every view:
 - `CHK-V6`: the central checklist is loaded once, every leaf has exactly one heading-free checklist with concise **Identity** and **Modes** criteria, and every extra sentence is observable and passes the removal question. There are no category or generator checklists.
-- `SPEC-V5`: every label in `generalLabels` is a property elicited by visible or necessary textual clues in the rendered task.
+- `SPEC-V5`: every Ability in `generalLabels` is elicited by the rendered task, and every Ability remains absent from `requiredLabels` and `rejectedLabels`.
+- `SPEC-V6` / `IMPL-V9`: an Ability that changes learner action or task identity is an invariant leaf view; related leaves share parent-level rendering code rather than branching on labels inside one view.
+- `SPEC-V7`: every `requiredLabel` is a generator-established Area/Scope applicability condition, not a capability supplied or rejected by the view.
+- `SPEC-11`: a view never specializes a compatible generator Area; contextual refinement within that Area is a Scope, while a view-owned Area must be an independent knowledge domain.
+- `IMPL-V11`: the projection preserves visible evidence for every generator-owned target label; names or assertions do not replace claimed objects, relations, laws, scales, or premises.
 - Central label support: ontology-label evidence and verdict policy stay in the central checklist, not the leaf checklist or evaluator prompt.
-- `IMPL-V6`: visual randomness is not derived from `payload.seed`.
+- `IMPL-V6`: visual randomness is derived exclusively from `payload.seed`.
 
 ---
 

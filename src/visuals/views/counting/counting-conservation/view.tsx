@@ -14,6 +14,42 @@ interface CoreProps {
     payload: ViewRenderPayload<'counting-conservation'>;
 }
 
+const ObjectChunks = ({
+    count,
+    gap,
+    icon,
+    iconSize,
+    group
+}: {
+    count: number;
+    gap: number;
+    icon: string;
+    iconSize: number;
+    group: 'A' | 'B';
+}) => (
+    <>
+        {Array.from({length: Math.ceil(count / 5)}, (_, chunkIndex) => {
+            const chunkSize = Math.min(5, count - chunkIndex * 5);
+            return (
+                <div
+                    key={chunkIndex}
+                    className="flex rounded-md bg-white/70 ring-1 ring-slate-200"
+                    style={{gap: `${gap}px`}}
+                >
+                    {Array.from({length: chunkSize}, (__, localIndex) => (
+                        <img
+                            key={localIndex}
+                            src={`/icons/counting/${icon}`}
+                            style={{width: `${iconSize}px`, height: `${iconSize}px`}}
+                            alt={`object ${group}`}
+                        />
+                    ))}
+                </div>
+            );
+        })}
+    </>
+);
+
 const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const seed = payload.seed;
@@ -53,30 +89,32 @@ const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
                             className="flex flex-nowrap justify-center py-2 min-w-0"
                             style={{width: `${CONSERVATION_ROW_WIDTH}px`, gap: `${layout.closeGap}px`}}
                         >
-                            {Array.from({ length: number }).map((_, i) => (
-                                <img 
-                                    key={i} 
-                                    src={`/icons/counting/${icon}`} 
-                                    style={{width: `${layout.iconSize}px`, height: `${layout.iconSize}px`}}
-                                    alt="object A" 
-                                />
-                            ))}
+                            <ObjectChunks
+                                count={number}
+                                gap={layout.closeGap}
+                                icon={icon}
+                                iconSize={layout.iconSize}
+                                group="A"
+                            />
                         </div>
                     </div>
                     <div className="flex items-center min-h-[50px]">
                         <span className="text-[1.1rem] font-bold text-slate-600 w-[90px] shrink-0">Group B:</span>
                         <div
-                            className="flex flex-nowrap justify-center py-2 min-w-0"
-                            style={{width: `${CONSERVATION_ROW_WIDTH}px`, gap: `${layout.farGap}px`}}
+                            className="flex flex-nowrap py-2 min-w-0"
+                            style={{
+                                width: `${CONSERVATION_ROW_WIDTH}px`,
+                                gap: `${layout.farGap}px`,
+                                justifyContent: number === 1 ? 'flex-start' : 'center'
+                            }}
                         >
-                            {Array.from({ length: number }).map((_, i) => (
-                                <img 
-                                    key={i} 
-                                    src={`/icons/counting/${icon}`} 
-                                    style={{width: `${layout.iconSize}px`, height: `${layout.iconSize}px`}}
-                                    alt="object B" 
-                                />
-                            ))}
+                            <ObjectChunks
+                                count={number}
+                                gap={layout.farGap}
+                                icon={icon}
+                                iconSize={layout.iconSize}
+                                group="B"
+                            />
                         </div>
                     </div>
                 </div>

@@ -6,7 +6,7 @@ import {ConfigFromSchema} from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'measure-length-estimate',
     generalLabels: [Ability.ProcedureExecution],
-    rejectedLabels: [Area.MeasuringObjects, Ability.VisualReception, Ability.VisualArticulation]
+    rejectedLabels: [Area.MeasuringObjects]
 };
 export const MeasureLengthEstimateViewSchema = {
     scale: [DISTANCE_SCALE_LABELS, resolveDistanceScale]

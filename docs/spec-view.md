@@ -23,15 +23,18 @@ A view `spec.ts` exports three things:
 
 ### SPEC-V2 — The schema maps to visual configuration only
 
-Map ontology labels **only** to visual/layout configuration:
+Map ontology labels **only** to presentation configuration that leaves the learner action
+unchanged:
 
-- `isReverse` — switches between reception and articulation modes, e.g. reading the hands
-  of a clock vs. drawing them.
 - `arrangement`, `showTenFrame` — layout formats, styling modes, button configurations.
 
 The schema must contain **zero** abstract mathematical parameters — no `range`,
 `useDecimals`, `requireZero`, or mathematical operation selectors; those belong to the
 generator ([spec-generator.md](spec-generator.md)).
+
+It also must not use an Ability to select the task identity. Reading, constructing,
+classifying, completing, inverting, and explaining are different learner actions and use
+separate leaf views under [SPEC-V6](#spec-v6--an-ability-driven-task-identity-is-a-leaf-view).
 
 The view must also rely purely on the generated problem payload (`problem.data`) for
 anything the generator already parameterized, rather than querying the ontology itself —
@@ -54,15 +57,20 @@ export const CountingViewSchema = {
 ```
 
 ```typescript
-// 🛑 Bad — deciding which shapes exist is the generator's concern
-export const ShapeIdentityViewSchema = {
-    isReverse: [ ... ],
-    shapeType: [ ... ]
+// 🛑 Bad — one schema switches between two learner actions
+export const ClockViewSchema = {
+    taskMode: [[Ability.VisualReception, Ability.VisualArticulation], resolveTaskMode]
 };
 
-// 🟢 Good — strictly visual rendering parameters
-export const ShapeIdentityViewSchema = {
-    isReverse: [ ... ]   // does the student read the label, or draw/select the shape?
+// 🟢 Good — each leaf owns one task; shared rendering stays outside the specs
+export const clockReadingSpec: ViewSpec = {
+    viewId: 'clock-reading',
+    generalLabels: [Ability.VisualReception]
+};
+
+export const clockDrawingSpec: ViewSpec = {
+    viewId: 'clock-drawing',
+    generalLabels: [Ability.VisualArticulation]
 };
 ```
 
@@ -76,9 +84,11 @@ produce** — the cases the view's layout physically cannot render (e.g. rejecti
 `Scope.NumbersWithZero`, or using `...deductAdmitting([Scope.NumbersLarger20])` to reject
 every target that allows numbers beyond the view's physical rendering capacity).
 
-It is **not** a general competency filter. Do not use it to exclude abilities, and do not
-use it to work around the matching direction. What a view *supports* belongs in the
-positive `generalLabels`/schema declarations
+It is **not** a general competency filter. Never put an Ability in `rejectedLabels`, and
+do not use the list to work around the matching direction. Area/Scope limits may be
+forward-compatible with generator capabilities that do not exist yet; the contract is
+their physical truth, not whether each entry currently changes a match. What a view
+*supports* belongs in the positive `generalLabels`/schema declarations
 ([SPEC-1](spec-general.md#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific)).
 
 ### SPEC-V4 — Expand rejection boundaries with `deductAdmitting`
@@ -101,6 +111,12 @@ presentation choices from the payload and `payload.seed`.
 Area and Scope labels remain owned by the side that determines them. Neither side may
 redeclare a label owned by its paired module
 ([SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair)).
+When a presentation distinction refines the same generator-owned Area, it is a Scope rather
+than a descendant Area; a view-owned Area must contribute an independent knowledge domain
+([SPEC-11](spec-general.md#spec-11--contextual-refinement-of-an-area-is-a-scope)).
+View ownership of the Ability does not narrow the artifact's truth requirement: the final
+projection must preserve observable evidence for every generator-owned label in the matched
+target ([IMPL-V11](implementation-view.md#impl-v11--preserve-the-whole-matched-claim)).
 
 ### SPEC-V6 — An Ability-driven task identity is a leaf view
 
@@ -141,10 +157,11 @@ must positively own its invariant Ability in `generalLabels`. Prefer a narrower
 ## Audit
 
 - [ ] **SPEC-V1** — `spec`, `ViewSchema` and `ViewConfig` are all exported, with `ViewConfig` extracted from the schema.
-- [ ] **SPEC-V2** — every schema parameter is visual/layout; no `range`, `requireZero`, `useDecimals`, `shapeType`, or comparable math parameter.
-- [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, not a competency the view merely does not want.
+- [ ] **SPEC-V2** — every schema parameter is presentational and preserves learner action; no mathematical parameter or Ability-driven task selector appears.
+- [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, never an Ability or a competency the view merely does not want.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — every Ability is declared by a view, directly evidenced by its rendered task, absent from all generators, and not parameterized when it changes task identity.
 - [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than resolved by a schema parameter; only its most specific required Ability is declared.
 - [ ] **SPEC-V7** — polymorphic leaf views use non-Ability `requiredLabels` only when a narrower payload type cannot express their mathematical applicability; every compatible generator supplies them, while the view neither supplies nor rejects them.
+- [ ] **SPEC-11** — every view-owned Area is independent of compatible generator Areas; presentation-driven refinement uses Scope.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

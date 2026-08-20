@@ -18,6 +18,11 @@ Explore its standards coverage and generated tasks:
 
 The pipeline is built on a **Label-Driven Generation** paradigm. Instead of generating a math problem and attempting to label it, the system receives a set of constraints (e.g., "Must include zero", "Uses addition") and generates training artifacts that satisfy those labels and expose the visual or necessary textual clues a classifier needs to defend them.
 
+Generators own canonical, Ability-neutral mathematics; views own the learner-facing task and
+therefore every Ability claim. The final screenshot must defend the complete matched label
+conjunction: a view may change what the learner is asked to do, but it may not erase the
+objects, relations, laws, or other evidence supplied by the generator.
+
 The architecture is split into three main parts:
 *   **The Brain (Generators):** Abstract mathematical constraint satisfiers.
 *   **The Body (Views):** HTML/CSS renderers that turn abstract math into visual DOM elements.

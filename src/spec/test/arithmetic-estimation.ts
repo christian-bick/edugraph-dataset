@@ -4,7 +4,6 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Estimation,
         Area.IntegerRounding,
         Scope.NumbersSmaller1000,
         Ability.PlausibilityEvaluation

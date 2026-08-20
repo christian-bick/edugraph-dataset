@@ -5,7 +5,11 @@ export type ShapeNamingAppearance = {
     rotation: number;
 };
 
-export function deriveShapeNamingAppearances(seed: number, isThreeDimensional: boolean): readonly [ShapeNamingAppearance, ShapeNamingAppearance] {
+export function deriveShapeNamingAppearances(
+    seed: number,
+    isThreeDimensional: boolean,
+    {varyOrientation, varySize}: {varyOrientation: boolean; varySize: boolean}
+): readonly [ShapeNamingAppearance, ShapeNamingAppearance] {
     if (!Number.isSafeInteger(seed)) {
         throw new ViewValidationError('shape-naming', 'Render seed must be a safe integer.');
     }
@@ -16,12 +20,12 @@ export function deriveShapeNamingAppearances(seed: number, isThreeDimensional: b
     const rightRotations = isThreeDimensional ? [8, 14, 20] as const : [19, 33, 47] as const;
 
     const small: ShapeNamingAppearance = {
-        size: smallSizes[normalizedSeed % smallSizes.length],
-        rotation: leftRotations[Math.floor(normalizedSeed / 3) % leftRotations.length]
+        size: varySize ? smallSizes[normalizedSeed % smallSizes.length] : 104,
+        rotation: varyOrientation ? leftRotations[Math.floor(normalizedSeed / 3) % leftRotations.length] : 0
     };
     const large: ShapeNamingAppearance = {
-        size: largeSizes[Math.floor(normalizedSeed / 9) % largeSizes.length],
-        rotation: rightRotations[Math.floor(normalizedSeed / 27) % rightRotations.length]
+        size: varySize ? largeSizes[Math.floor(normalizedSeed / 9) % largeSizes.length] : 104,
+        rotation: varyOrientation ? rightRotations[Math.floor(normalizedSeed / 27) % rightRotations.length] : 0
     };
     return Math.floor(normalizedSeed / 81) % 2 === 0 ? [small, large] : [large, small];
 }

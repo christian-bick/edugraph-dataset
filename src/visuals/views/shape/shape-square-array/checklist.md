@@ -1,2 +1,2 @@
-- **Identity:** A square-cell array or dimensioned rectangle requires counting unit squares or multiplying dimensions to determine its area.
+- **Identity:** A square-cell array or dimensioned rectangle requires counting unit squares or multiplying dimensions to determine its area; iterative counting tasks visibly traverse every tile exactly once.
 - **Modes:** Question Mode withholds the requested count or area; Solution Mode reveals the square-unit result while preserving the same array or rectangle.

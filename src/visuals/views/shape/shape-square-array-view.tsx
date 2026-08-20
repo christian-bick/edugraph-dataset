@@ -8,6 +8,7 @@ import {
     buildRectangleAreaPresentation,
     buildSquareArrayInversionPresentation,
     getAreaTilePrompt,
+    getRectangleDiagramGeometry,
     getSquareArrayStoryPrompt,
     InverseRectangleAreaPresentation,
     isRectangleAreaFormulaModel,
@@ -47,12 +48,14 @@ function SquareArray({
     data,
     showCells,
     showCount,
+    showCountingPath = false,
     showSideLengths,
     hiddenDimension
 }: {
     data: ShapeSquareArrayProblem;
     showCells: boolean;
     showCount: boolean;
+    showCountingPath?: boolean;
     showSideLengths: boolean;
     hiddenDimension?: 'length' | 'width';
 }) {
@@ -82,6 +85,13 @@ function SquareArray({
             {showCells && Array.from({length: data.squareCount}, (_, index) => {
                 const row = Math.floor(index / data.columns);
                 const column = index % data.columns;
+                const isEvenRow = row % 2 === 0;
+                const pathIndex = row * data.columns + (isEvenRow ? column : data.columns - column - 1);
+                const isPathStart = pathIndex === 0;
+                const isPathEnd = pathIndex === data.squareCount - 1;
+                const pathArrow = isPathEnd ? '' : isEvenRow
+                    ? column === data.columns - 1 ? '↓' : '→'
+                    : column === 0 ? '↓' : '←';
                 return (
                     <g key={index}>
                         <rect
@@ -102,6 +112,30 @@ function SquareArray({
                             >
                                 {index + 1}
                             </text>
+                        )}
+                        {showCountingPath && !showCount && (
+                            <>
+                                {isPathStart && (
+                                    <text
+                                        x={x + column * CELL_SIZE + CELL_SIZE / 2}
+                                        y={y + row * CELL_SIZE + 15}
+                                        textAnchor="middle"
+                                        className="fill-blue-700 text-[8px] font-extrabold uppercase"
+                                    >
+                                        start
+                                    </text>
+                                )}
+                                {pathArrow && (
+                                    <text
+                                        x={x + column * CELL_SIZE + CELL_SIZE / 2}
+                                        y={y + row * CELL_SIZE + CELL_SIZE / 2 + 9}
+                                        textAnchor="middle"
+                                        className="fill-blue-700 text-[23px] font-black"
+                                    >
+                                        {pathArrow}
+                                    </text>
+                                )}
+                            </>
                         )}
                     </g>
                 );
@@ -141,6 +175,9 @@ function RectangleAreaDiagram({
     isSolutionView: boolean;
 }) {
     const isInverse = presentation.task === 'find-missing-area-dimension';
+    const {x, y, pixelLength, pixelWidth} = getRectangleDiagramGeometry(data.length, data.width);
+    const horizontalMeasureY = y + pixelWidth + 18;
+    const verticalMeasureX = x - 26;
     const lengthLabel = isInverse && presentation.unknownDimension === 'length' && !isSolutionView
         ? '? units'
         : `${data.length} units`;
@@ -153,20 +190,20 @@ function RectangleAreaDiagram({
 
     return (
         <svg viewBox="0 0 440 245" className="h-[245px] w-[440px]" aria-label={accessibleDescription}>
-            <rect x="88" y="30" width="292" height="170" rx="5" fill="#ede9fe" stroke="#6d28d9" strokeWidth="5" />
-            <line x1="88" y1="218" x2="380" y2="218" stroke="#475569" strokeWidth="2" />
-            <line x1="88" y1="211" x2="88" y2="225" stroke="#475569" strokeWidth="2" />
-            <line x1="380" y1="211" x2="380" y2="225" stroke="#475569" strokeWidth="2" />
-            <text x="234" y="240" textAnchor="middle" className="fill-slate-700 text-[16px] font-extrabold">
+            <rect x={x} y={y} width={pixelLength} height={pixelWidth} rx="5" fill="#ede9fe" stroke="#6d28d9" strokeWidth="5" />
+            <line x1={x} y1={horizontalMeasureY} x2={x + pixelLength} y2={horizontalMeasureY} stroke="#475569" strokeWidth="2" />
+            <line x1={x} y1={horizontalMeasureY - 7} x2={x} y2={horizontalMeasureY + 7} stroke="#475569" strokeWidth="2" />
+            <line x1={x + pixelLength} y1={horizontalMeasureY - 7} x2={x + pixelLength} y2={horizontalMeasureY + 7} stroke="#475569" strokeWidth="2" />
+            <text x={x + pixelLength / 2} y={horizontalMeasureY + 22} textAnchor="middle" className="fill-slate-700 text-[16px] font-extrabold">
                 length: {lengthLabel}
             </text>
-            <line x1="62" y1="30" x2="62" y2="200" stroke="#475569" strokeWidth="2" />
-            <line x1="55" y1="30" x2="69" y2="30" stroke="#475569" strokeWidth="2" />
-            <line x1="55" y1="200" x2="69" y2="200" stroke="#475569" strokeWidth="2" />
-            <text x="26" y="115" textAnchor="middle" transform="rotate(-90 26 115)" className="fill-slate-700 text-[16px] font-extrabold">
+            <line x1={verticalMeasureX} y1={y} x2={verticalMeasureX} y2={y + pixelWidth} stroke="#475569" strokeWidth="2" />
+            <line x1={verticalMeasureX - 7} y1={y} x2={verticalMeasureX + 7} y2={y} stroke="#475569" strokeWidth="2" />
+            <line x1={verticalMeasureX - 7} y1={y + pixelWidth} x2={verticalMeasureX + 7} y2={y + pixelWidth} stroke="#475569" strokeWidth="2" />
+            <text x={verticalMeasureX - 25} y={y + pixelWidth / 2} textAnchor="middle" transform={`rotate(-90 ${verticalMeasureX - 25} ${y + pixelWidth / 2})`} className="fill-slate-700 text-[16px] font-extrabold">
                 width: {widthLabel}
             </text>
-            <text x="234" y="122" textAnchor="middle" className="fill-violet-800 text-[18px] font-extrabold">
+            <text x={x + pixelLength / 2} y={y + pixelWidth / 2 + 7} textAnchor="middle" className="fill-violet-800 text-[18px] font-extrabold">
                 {isInverse ? `Area: ${data.area} square units` : 'rectangle'}
             </text>
         </svg>
@@ -380,6 +417,7 @@ export const ShapeSquareArrayView = ({
                                 data={problem.data}
                                 showCells={showCells}
                                 showCount={!isPartition && !isProductExplanation && !isAreaCalculation && isSolutionView}
+                                showCountingPath={isAreaCount}
                                 showSideLengths={isProductExplanation || isAreaCalculation}
                             />
                         )}

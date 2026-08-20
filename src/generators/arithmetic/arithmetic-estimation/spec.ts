@@ -7,7 +7,6 @@ import {arithmeticOperations, resolveExplicitOperation} from '../helpers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-estimation',
     generalLabels: [
-        Area.Estimation,
         Area.IntegerRounding,
         Scope.IntegerNumbers,
         Scope.Base10,

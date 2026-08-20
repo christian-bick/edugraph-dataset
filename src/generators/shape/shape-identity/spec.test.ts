@@ -14,32 +14,26 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
 
     it('should generate triangle problem from Area.Triangle label', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeNaming,
             Area.Triangle
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.shape).toBe('triangle');
-        expect(stub!.data.answer).toBe('triangle');
     });
 
     it('should generate hexagon problem from Area.Hexagon label', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeNaming,
             Area.Hexagon
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.shape).toBe('hexagon');
-        expect(stub!.data.answer).toBe('hexagon');
     });
 
     it('should generate cylinder problem from Area.Cylinder label', () => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeNaming,
             Area.Cylinder
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.shape).toBe('cylinder');
-        expect(stub!.data.answer).toBe('cylinder');
     });
 
     it.each([
@@ -47,14 +41,12 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
         [Area.Pentagon, 'pentagon']
     ] as const)('generates the extended %s naming problem', (label, shape) => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeNaming,
             Scope.ShapeAttributes,
             label
         ]);
         const count = shape === 'quadrilateral' ? 4 : 5;
         expect(stub!.data).toEqual({
             shape,
-            answer: shape,
             attributes: [`${count} straight sides`, `${count} vertices`]
         });
     });

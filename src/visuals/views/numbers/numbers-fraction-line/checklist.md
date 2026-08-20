@@ -1,2 +1,2 @@
-- **Identity:** One horizontal reference scale locates fractions by equal steps and, for scaling, aligns tenths with refined hundredths at one co-located point.
+- **Identity:** One horizontal reference scale partitions each whole into equal steps and locates the requested fractions at corresponding points; equivalent forms, when shown, remain co-located.
 - **Modes:** Question Mode withholds only the requested endpoint, verdict, or numerator while retaining the task's shared-scale evidence. Solution Mode reveals it and, when requested, explains the increased number of smaller parts, unchanged point, or whole composition.

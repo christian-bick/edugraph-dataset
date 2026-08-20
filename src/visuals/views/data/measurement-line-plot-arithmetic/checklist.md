@@ -1,0 +1,2 @@
+- **Identity:** A completed line plot of supplied fractional measurements remains visible while the learner computes a relation between its shortest and longest values.
+- **Modes:** Question Mode withholds the numeric equation and result; Solution Mode reveals the unit-bearing equation, answer, and a concise explanation grounded in the plotted extrema.

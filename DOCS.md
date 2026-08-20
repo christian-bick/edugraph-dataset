@@ -37,6 +37,39 @@ To ensure end-to-end type safety between problem generators (which run in Node.j
 **Environment Separation & Mapping:**
 Because the Node orchestrator and generator configurations do not statically import the React view files (which are dynamically bundled by Vite and loaded headlessly inside Playwright via URLs), TypeScript cannot automatically inspect `window.renderView` in the browser code from the Node side. `ViewTypeMap` serves as a shared bridge, allowing the compiler to statically verify that generators specify view names compatible with the data structures the views expect to render.
 
+### Capability Ownership and Task Projection
+
+Matching composes a target from generator and view capabilities, but the screenshot must make
+their conjunction true. Generators own canonical mathematical objects, relations, and evidence;
+they never choose a blank, unknown, prompt direction, hint, requested explanation, or other
+Ability-specific learner action (`IMPL-G8`). Views exclusively own Abilities and turn that
+canonical payload into an observable task (`SPEC-V5`).
+
+When an Ability changes task identity, it is represented by a separate leaf view rather than a
+schema branch (`SPEC-V6`). Related leaves reuse a renderer and helpers from their parent category,
+with each thin wrapper fixing its task mode (`IMPL-V9`). Ontology-irrelevant visual variation may
+still be seeded from `payload.seed`; it does not need an ontology parameter.
+
+A view declaration has three distinct roles:
+
+- `generalLabels` and schema labels are capabilities the view positively contributes;
+- `requiredLabels` are Area/Scope applicability preconditions that every type-compatible
+  generator must establish, not capabilities supplied by the view;
+- `rejectedLabels` are physical rendering boundaries, never competency or Ability filters.
+
+The view must preserve observable evidence for generator-owned Area and Scope labels while making
+its Ability observable (`IMPL-V11`). A law-bearing relation cannot be flattened into an unrelated
+equation, and a physical object cannot be replaced by a text badge naming that object. If the
+payload contains the evidence, the view renders it; if the evidence is absent, the payload contract
+must be corrected instead of being reconstructed from labels in the view.
+
+Area ownership also remains non-polymorphic across that boundary. A view does not narrow a
+generator Area with a descendant Area: observable presentation, representation, and evidence-source
+distinctions within the same knowledge domain are Scopes. Views may still contribute an unrelated
+Area when the task adds an independent mathematical domain. This keeps competencies losslessly
+factorized as `Area × Scope × Ability` without making generator/view composition depend on Area
+specialization.
+
 ### Ontology Scale Resolution
 Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in
 `src/lib/ontology.ts` maps the concrete centimeter, meter, inch, foot, or abstract segment
@@ -79,9 +112,9 @@ The consequence: a code change only invalidates the samples whose identity input
 ## 3. Script Reference
 
 ### Standards Explorer
-`src/index.html` is the root Vite entry for the Common Core coverage explorer. The prior
-`src/standards-explorer.html` entry remains as a compatible direct URL. The renderer/view
-directory previously at the root is preserved at `src/modules.html`. The React application
+`src/index.html` is the root Vite entry for the Common Core coverage explorer.
+`src/standards-explorer.html` is a compatible direct URL, and `src/modules.html` hosts the
+renderer/view directory. The React application
 lives under `src/standards-explorer/`, uses Zustand for
 its navigation and selection state, and reads the `preview` coverage routes at runtime.
 In a production build, those routes contain the deployed-main snapshot under
@@ -210,7 +243,7 @@ The container-internal pipeline orchestrator.
 *   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of tuples selected by `isValTuple`. Both use the same identity-based seeding with the split as a key component. Audit the result with `report:splits` — a tuple whose content space is too small to yield a draw disjoint from train produces no validation sample, which that report surfaces.
 *   **Split dependency direction (invariant)**: **train generation never depends on validation generation; validation always depends on train.** Train is generated first into its own fingerprint index, and the val pass only reads that index. The asymmetry is required, not incidental: train is the primary artifact and must be reproducible on its own, while validation cannot be disjoint from train without being constrained by it. Verify with `npm run generate:dataset -- --spec=test` followed by `npm run generate:dataset -- --spec=test --training-only` — the train split must come out byte-identical. The practical consequence is that a generator change shifts train content, which can change which validation draws survive dedup; `report:churn` classifies that as an *attempt shift* and it is expected, not a determinism regression.
 *   **Dedup**: Task fingerprints per (module, split, view), covering **both modes** — a question never repeats a solution's configured task or vice versa. Validation additionally rejects every mathematical content fingerprint already in train. A collision triggers a deterministic retry on the next attempt; the winning attempt is recorded. If every question attempt collides, the target is associated only with an existing physical sample carrying the same task fingerprint; a train content collision with a different task can exclude a validation draw but cannot represent it. A solution that exhausts its retries falls back to the question's task shown solved. The module scope keeps `--generator=X` reproducing exactly what a full run produces for that module, and costs nothing because no view is rendered by more than one generator.
-*   **Metadata**: Each standard image row records its operational identity: `sample_key`, `spec`, `target_id`, optional additional `target_associations`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, `task_fingerprint`, plus `tags`. The association list preserves exact competency provenance when several targets share one physical task. The generator's problem data and resolved view config are used to compute the fingerprints but are not duplicated into metadata. Generators no longer author a separate descriptive id; structural sample identity remains separate from content and task equivalence.
+*   **Metadata**: Each standard image row records its operational identity: `sample_key`, `spec`, `target_id`, optional additional `target_associations`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, `task_fingerprint`, plus `tags`. The association list preserves exact competency provenance when several targets share one physical task. The generator's problem data and resolved view config are used to compute the fingerprints but are not duplicated into metadata. Generators do not author a separate descriptive id; structural sample identity remains separate from content and task equivalence.
 *   **`--training-only` Flag**: If specified, skips validation sample generation, rendering, and metadata writing.
 *   **Output**: `out/dataset-<spec>/` — every spec owns its folder (see *Specs and the Union Dataset*). The released `out/dataset/` is produced by `merge-dataset.ts`, not by this script.
 *   **Transactional output**: Generation writes to a sibling staging directory and atomically swaps it into place only after all selected modules render, root metadata is rebuilt, and `manifest.json` is updated. Any preflight, generation, or render failure removes the staging directory and preserves the previous live dataset.
@@ -290,7 +323,7 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/validate-generator-view-specs.ts`
 *   **Execution**: `npm run check:generator-view-specs`
-*   **Function**: An automated generator and view spec validation script. It checks companion `spec.ts` files across both generators and views, flagging (1) overlapping General Labels / parameter queries, and (2) duplicate parameterizations where a view re-specifies variables already computed by its matching generator. Output goes to the console; redirect it to `temp/` if you need to keep it.
+*   **Function**: Enforces generator/view capability ownership. It rejects redundant declarations, every generator-owned Ability, cross-pair parameter duplication, and view Ability filters in `requiredLabels` or `rejectedLabels`. It also verifies that each `requiredLabel` is an Area/Scope applicability condition supplied by every type-compatible generator, is not supplied by the view, and is not simultaneously rejected. Output goes to the console; redirect it to `temp/` if you need to keep it.
 
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<spec_module>`
@@ -345,12 +378,17 @@ Follow `IMPL-6` and `IMPL-7` in [docs/implementation-general.md](docs/implementa
 ### Step 5: Declaring Capabilities (`spec.ts`)
 Create or update the `spec.ts` files for both your generator and visual view, per [docs/spec-generator.md](docs/spec-generator.md) and [docs/spec-view.md](docs/spec-view.md), with the shared rules in [docs/spec-general.md](docs/spec-general.md).
 
-The decisions that most often go wrong are declaring the most specific label that is actually true (`SPEC-2`, `SPEC-3`), ensuring view-owned abilities are elicited by the rendered task (`SPEC-V5`), and expressing physical limits as rejection boundaries rather than competency filters (`SPEC-V3`, `SPEC-V4`).
+The decisions that most often go wrong are declaring the most specific label that is actually true (`SPEC-2`, `SPEC-3`), keeping every Ability view-owned and invariant when it changes task identity (`SPEC-V5`, `SPEC-V6`), using `requiredLabels` only for generator-established applicability (`SPEC-V7`), and expressing physical limits as rejection boundaries rather than competency filters (`SPEC-V3`, `SPEC-V4`).
 
 ### Step 6: Implementation
 Implement `generator.ts` per [docs/implementation-generator.md](docs/implementation-generator.md) and `view.tsx` per [docs/implementation-view.md](docs/implementation-view.md).
 
-The rule that breaks things silently is `IMPL-V6`: every randomized visual decision must derive from `payload.seed`. Any other entropy source invalidates the VQA cache without failing a check.
+A generator payload contains canonical mathematical evidence and no learner-action decisions
+(`IMPL-G8`). When several Ability leaves need the same content, they share a renderer at the
+parent level (`IMPL-V9`), and every projection preserves each generator-supplied label witness
+(`IMPL-V11`).
+
+The determinism rule that breaks things silently is `IMPL-V6`: every randomized visual decision must derive from `payload.seed`. Any other entropy source invalidates the VQA cache without failing a check.
 
 ### Step 7: Tests (`generator.test.ts`)
 Write unit tests per `IMPL-G5` in [docs/implementation-generator.md](docs/implementation-generator.md), then run `npm run test` to verify.
@@ -371,15 +409,29 @@ Use the isolated `test` spec for fast visual prototyping, debugging, smoke gener
    ```
 
 ### Step 8: Final Verification
-1. Run `npm run check` (or `npm run check:types`, `npm run check:generator-view-specs`, `npm run check:standards-spec`) to verify type safety, spec constraints, label usage, and target standard specs.
-2. Run `npm run show:matching -- --spec=ccss` to confirm the real standard bindings; use `--spec=test` for the isolated smoke path and `--raw` only for source-definition diagnosis.
-3. Canonically regenerate and validate the affected real-standard generator/view scope. A passing `test` sample does not prove the production task or labels:
+
+Validation follows the ownership chain. Earlier gates establish the contracts consumed by
+later ones, so a downstream failure is corrected at the highest-priority owning layer that
+violates its contract:
+
+1. **Source and static truth:** run `npm run check` (or its focused type, generator/view-spec,
+   label, and standards-spec checks). Generators must prove their Area/Scope claims with
+   Ability-neutral canonical models; views must own their Ability and valid applicability.
+2. **Composition truth:** run `npm run show:matching -- --spec=ccss` and confirm every matched
+   generator/view pair is semantically valid. Use `--spec=test` for an isolated smoke path and
+   `--raw` only for source-definition diagnosis.
+3. **Rendered truth:** canonically regenerate and validate the affected real-standard scope.
+   Generation proves render totality; VQA proves that the final artifact observably supports
+   the complete matched conjunction. A passing `test` sample does not prove production labels:
    ```bash
    npm run generate:dataset -- --spec=ccss --generator=X --view=Y
    npm run validate:dataset -- --spec=ccss --generator=X --view=Y
-   npm run report:churn -- --spec=ccss
    ```
-4. Before publishing, run full canonical generation and live validation, `audit:dataset`, `report:splits`, `check`, and then `merge:dataset`.
+4. **Dataset integrity:** run `npm run report:churn -- --spec=ccss` and
+   `npm run report:splits -- --spec=ccss`. Determinism and split integrity are independent of
+   whether individual images look correct.
+5. **Complete gate:** before publishing, run full canonical generation and live validation,
+   `audit:dataset`, `report:splits`, `check`, and then `merge:dataset`.
 
 ## 6. Efficient Development & Debugging Iteration
 
@@ -458,11 +510,11 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Command**: `/fix-spec [{specModule}] [--generator=X] [--view=Y]`
 - **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in the latest timestamped validation report), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
 - **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a declaration or target. An evidence-backed classification correction is different: when the rendered task contradicts the current ability claim, use `SPEC-2`, `SPEC-V5`, `TSPEC-6`, and `TSPEC-13`, explain the evidence, and obtain user confirmation before changing a view spec or production target.
-- **Triage note**: A VQA failure is not proof of a code bug. Inspect the image, ontology definition, generated payload, view spec, and target together. Necessary mathematics belongs to the generator; omitted or muddled visual clues belong to the view; a false task-family ability claim belongs to the view spec or target; and a nonessential leaf criterion belongs to the checklist (`CHK-V6`).
+- **Triage priority**: A VQA failure is not proof of a classification defect. Inspect the image, ontology definition, generated payload, view spec, and target together. Resolve violations by ownership: (1) generator mathematical truth and Ability-neutral canonical evidence (`IMPL-G4`, `IMPL-G8`); (2) view task truth and preservation of the complete matched claim (`SPEC-V5`, `IMPL-V11`); (3) view applicability and irreducible physical boundaries (`SPEC-V3`, `SPEC-V7`); (4) declaration, target, ontology, or checklist correction only when the preceding contracts are sound. Production declaration and target changes require user confirmation. A nonessential leaf criterion belongs to the checklist (`CHK-V6`).
 
 ### Module Update Skills
-- **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews it, updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.
-- **`/update-view {viewName}`** (`.agents/skills/update-view/SKILL.md`): The same for one view module, adopting producing generators when the view needs a payload field it does not have (`IMPL-V8`).
+- **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews its Ability-neutral canonical model (`IMPL-G8`), updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.
+- **`/update-view {viewName}`** (`.agents/skills/update-view/SKILL.md`): The same for one view module, splitting Ability-driven task identities into reusable leaf projections (`SPEC-V6`, `IMPL-V9`), preserving the whole target claim (`IMPL-V11`), and adopting producing generators when genuinely missing mathematics requires a payload change (`IMPL-V8`).
 
 ### Module Review Skills
 - **`/review-gen {moduleName}`** (`.agents/skills/review-generator/SKILL.md`): Audits the generator's `spec.ts`, `generator.ts`, and tests against the Audit sections of the generator references.

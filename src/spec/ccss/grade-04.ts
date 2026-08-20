@@ -70,12 +70,11 @@ const multistepLetterEquationBuilder = new DatasetPermutationBuilder()
 
 const multistepReasonablenessBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Estimation,
         Area.IntegerRounding,
         Scope.MultiStep,
         Scope.NumbersSmaller1000000,
         Ability.TextualReception,
-        Ability.ResultInterpretation,
+        Ability.PlausibilityEvaluation,
         Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction], [Area.Multiplication], [Area.Division]]);
@@ -360,8 +359,9 @@ const unknownRectangleDimensionBuilder = new DatasetPermutationBuilder()
 
 const constructFractionalLinePlotBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Statistics,
-    Area.MeasuringObjects,
+    Area.Measurement,
     Scope.LengthMeasurement,
+    Scope.ProvidedMeasurement,
     Scope.FractionNumbers,
     Scope.LinePlot,
     Scope.SingleFrameOfReference,
@@ -372,8 +372,9 @@ const fractionLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
         Area.Statistics,
-        Area.MeasuringObjects,
+        Area.Measurement,
         Scope.LengthMeasurement,
+        Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
         Scope.LinePlot,
         Scope.SingleFrameOfReference,

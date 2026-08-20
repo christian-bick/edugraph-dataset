@@ -1,2 +1,2 @@
-- **Identity:** A highlighted equal share of a partitioned whole requires naming the share as a half or fourth.
-- **Modes:** Question Mode withholds the share name; Solution Mode reveals it while preserving the same highlighted region and partition.
+- **Identity:** A highlighted equal share requires the learner to produce its singular name, the plural name for all shares, and an "of the whole" phrase, including fourth/quarter synonyms where applicable.
+- **Modes:** Question Mode withholds the requested vocabulary; Solution Mode supplies the terms and phrase while preserving the same highlighted region and partition.

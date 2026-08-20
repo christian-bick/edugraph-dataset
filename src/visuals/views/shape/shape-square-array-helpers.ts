@@ -14,7 +14,22 @@ const AREA_TILE_MEASURES: Record<SquareAreaUnit, string> = {
 
 export const getAreaTilePrompt = (
     areaUnit: SquareAreaUnit
-): string => `Count the unit-square tiles, each measuring ${AREA_TILE_MEASURES[areaUnit]}, that cover this figure. What is its area?`;
+): string => `Follow the arrows and count every unit-square tile once, increasing the count by 1 at each tile. Each tile measures ${AREA_TILE_MEASURES[areaUnit]}. What is the area?`;
+
+export const getRectangleDiagramGeometry = (
+    length: number,
+    width: number
+): {x: number; y: number; pixelLength: number; pixelWidth: number} => {
+    const scale = Math.min(292 / length, 170 / width, 64);
+    const pixelLength = length * scale;
+    const pixelWidth = width * scale;
+    return {
+        x: (440 - pixelLength) / 2,
+        y: 30 + (170 - pixelWidth) / 2,
+        pixelLength,
+        pixelWidth
+    };
+};
 
 export type ShapeSquareArrayTask =
     | 'interpret-unit'

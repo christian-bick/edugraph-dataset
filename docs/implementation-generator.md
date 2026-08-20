@@ -105,10 +105,16 @@ blank position, instruction, prompt direction, requested explanation, hint, or
 Ability-specific answer prose. Those decisions belong to the leaf view under
 [SPEC-V5](spec-view.md#spec-v5--abilities-are-exclusively-view-owned).
 
-Do not merely remove the Ability label while preserving its decision in fields such as
-`blankPart`, `question`, or `explanation`. If multiple views need the same mathematical
-relation, expose that relation canonically and let each view derive its observable task.
-Ontology-irrelevant variation belongs to the view and is derived from `payload.seed`.
+Canonical does not mean flattened. Preserve the structure that proves generator-owned labels:
+law applications, equivalent relations, physical-object identity, graph scale, intermediate
+steps, or other mathematical witnesses must remain available to every consuming view. A view
+cannot preserve evidence it never receives.
+
+Ability neutrality applies to both declarations and the data contract: fields such as
+`blankPart`, `question`, or `explanation` must not encode a learner-action decision. If
+multiple views need the same mathematical relation, expose that relation canonically and
+let each view derive its observable task. Ontology-irrelevant variation belongs to the
+view and is derived from `payload.seed`.
 
 ---
 
@@ -121,5 +127,5 @@ Ontology-irrelevant variation belongs to the view and is derived from `payload.s
 - [ ] **IMPL-G5** — `generator.test.ts` covers the mathematical boundaries; `spec.test.ts` covers tag resolution; an empty-config throw is asserted.
 - [ ] **IMPL-G6** — if the payload contract changed, every consuming view found against the real standard via `npm run show:matching` renders the new fields; the test spec also retains a smoke path.
 - [ ] **IMPL-G7** — capability extensions preserve the payload contract; structurally different problem shapes use a separate generator and share a typed-union view where rendering remains simple.
-- [ ] **IMPL-G8** — the payload contains canonical mathematics and semantic context, but no Ability-specific prompt, blank, hint, requested reasoning, or answer prose.
+- [ ] **IMPL-G8** — the payload preserves the structured witnesses for its mathematical labels and semantic context, but contains no Ability-specific prompt, blank, hint, requested reasoning, or answer prose.
 - [ ] `npm run test` and `npm run check:types` pass.

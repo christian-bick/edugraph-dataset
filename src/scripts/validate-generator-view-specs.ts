@@ -5,15 +5,18 @@ import { isSubConceptOf } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from '../lib/type-parser.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
-import {findRequiredLabelContractIssues} from '../lib/spec-contracts.ts';
-import { Ability } from 'edugraph-ts';
+import {
+    findAbilityLabels,
+    findCrossRoleAreaOverlaps,
+    findRejectedLabelContractIssues,
+    findRequiredLabelContractIssues
+} from '../lib/spec-contracts.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
 const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
-const abilityLabels = new Set<string>(Object.values(Ability));
 
 /**
  * A generalLabels list must not contain a label together with one of its
@@ -70,7 +73,7 @@ async function validateSpecs() {
                 if (checkRedundantGeneralLabels('generator', item, generalLabels)) {
                     hasError = true;
                 }
-                const generalAbilities = generalLabels.filter((label: string) => abilityLabels.has(label));
+                const generalAbilities = findAbilityLabels(generalLabels);
                 if (generalAbilities.length > 0) {
                     console.error(`❌ [generator:${item}] Ability labels belong exclusively to views: ${generalAbilities.join(', ')}`);
                     hasError = true;
@@ -83,7 +86,7 @@ async function validateSpecs() {
                     const paramLabels = extractSchemaLabels(schema);
                     generatorSchemas[item] = { schema, paramLabels };
 
-                    const parameterAbilities = paramLabels.filter(label => abilityLabels.has(label));
+                    const parameterAbilities = findAbilityLabels(paramLabels);
                     if (parameterAbilities.length > 0) {
                         console.error(`❌ [generator:${item}] Ability labels belong exclusively to views: ${parameterAbilities.join(', ')}`);
                         hasError = true;
@@ -136,11 +139,6 @@ async function validateSpecs() {
                 if (checkRedundantGeneralLabels('view', item, generalLabels)) {
                     hasError = true;
                 }
-                const requiredAbilities = requiredLabels.filter((label: string) => abilityLabels.has(label));
-                if (requiredAbilities.length > 0) {
-                    console.error(`❌ [view:${item}] requiredLabels may scope mathematical applicability but must not contain Ability labels: ${requiredAbilities.join(', ')}`);
-                    hasError = true;
-                }
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                 const schemaName = `${modulePrefix}ViewSchema`;
                 const schema = specModule[schemaName];
@@ -179,6 +177,14 @@ async function validateSpecs() {
                                     }
                                 }
                             }
+                            const areaOverlaps = findCrossRoleAreaOverlaps({
+                                generatorLabels: generatorGeneralLabels[genId] || [],
+                                viewLabels: paramLabels
+                            });
+                            for (const overlap of areaOverlaps) {
+                                console.error(`❌ [view:${item}] Cross-role Area refinement: View schema label '${overlap.viewLabel}' overlaps invariant Area '${overlap.generatorLabel}' of matching generator '${genId}'; contextual refinements of one Area belong in Scope`);
+                                hasError = true;
+                            }
                         }
                     }
                 }
@@ -196,7 +202,9 @@ async function validateSpecs() {
                     }))
                 });
                 for (const issue of requiredLabelIssues) {
-                    if (issue.kind === 'view-provides-required-label') {
+                    if (issue.kind === 'invalid-required-label-kind') {
+                        console.error(`❌ [view:${item}] Required label '${issue.label}' is not an Area or Scope; requiredLabels may only scope mathematical applicability`);
+                    } else if (issue.kind === 'view-provides-required-label') {
                         console.error(`❌ [view:${item}] Required label '${issue.label}' is provided by the view capability '${issue.viewLabel}'; requiredLabels must be generator-owned applicability only`);
                     } else if (issue.kind === 'required-and-rejected-label') {
                         console.error(`❌ [view:${item}] Required label '${issue.label}' is also rejected, making the view contract impossible`);
@@ -205,6 +213,14 @@ async function validateSpecs() {
                     } else {
                         console.error(`❌ [view:${item}] Required label '${issue.label}' is not supported by compatible generator '${issue.generatorId}'`);
                     }
+                    hasError = true;
+                }
+
+                const rejectedLabelIssues = findRejectedLabelContractIssues({
+                    rejectedLabels
+                });
+                for (const issue of rejectedLabelIssues) {
+                    console.error(`❌ [view:${item}] Rejected label '${issue.label}' is an Ability; rejectedLabels may only express physical rendering boundaries`);
                     hasError = true;
                 }
 

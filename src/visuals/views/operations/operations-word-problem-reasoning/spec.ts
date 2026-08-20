@@ -6,10 +6,10 @@ export const spec: ViewSpec = {
     viewId: 'operations-word-problem-reasoning',
     generalLabels: [
         Ability.TextualReception,
-        Ability.ResultInterpretation,
+        Ability.PlausibilityEvaluation,
         Ability.ProcedureUnderstanding
     ],
-    requiredLabels: [Area.Estimation, Area.IntegerRounding]
+    requiredLabels: [Area.IntegerRounding]
 };
 
 export const OperationsWordProblemReasoningViewSchema = {} as const;
