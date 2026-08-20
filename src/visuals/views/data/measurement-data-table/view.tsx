@@ -46,8 +46,18 @@ function MeasurementRow({observation, data, reveal}: {observation: MeasurementOb
     return (
         <div className="grid grid-cols-[90px_1fr_92px] items-center gap-4 border-t border-slate-200 py-3 first:border-t-0">
             <div className="text-base font-bold capitalize text-slate-700">{observation.object}</div>
-            <div className="relative h-[54px]">
+            <div className="relative h-[66px]">
                 <div className="absolute left-0 top-1"><MeasurementObject object={observation.object} width={width} /></div>
+                <div
+                    aria-hidden="true"
+                    className="absolute top-[12px] h-[14px] border-l-2 border-dashed border-sky-500"
+                    style={{left: width}}
+                />
+                <div
+                    aria-hidden="true"
+                    className="absolute top-[9px] h-2 w-2 -translate-x-1/2 rounded-full bg-sky-600 ring-2 ring-white"
+                    style={{left: width}}
+                />
                 <div className="absolute bottom-4 left-0 flex">
                     {Array.from({length: tickCount + 1}, (_, tick) => (
                         <div
