@@ -112,6 +112,12 @@ thin `withConfig` wrapper in its own directory. Place their reusable renderer, h
 and tests directly in the category parent directory with descriptive filenames; a
 `components/` subdirectory is not required.
 
+Do not retain those task identities as large config-controlled branches in one view. A resolved
+Ability configuration may drive only small, composable support or presentation differences within
+the same learner action and checklist. If it switches instructions, requested response, unknown
+placement, reasoning request, or question/solution behavior, split the task identities into leaf
+views and share their common rendering code.
+
 The leaf wrapper fixes the task mode passed to the shared renderer. The shared renderer
 must not inspect ontology labels or import one leaf's spec to recover that decision.
 When [SPEC-V7](spec-view.md#spec-v7--requiredlabels-scopes-payload-applicability) scopes a
@@ -162,7 +168,7 @@ irreducible physical rendering boundary.
 - [ ] **IMPL-V6** — grep the view for `Math.random`, unseeded `random(`, and `problem.id`: all three must be absent. Every visual random decision traces back to `payload.seed`.
 - [ ] **IMPL-V7** — no reliance on animation state; every async resource the view loads resolves.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.
-- [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code, and the shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.
+- [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code; no view hides parallel task implementations behind large config-controlled branches, and shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.
 - [ ] **IMPL-V10** — the outermost rendered element has a natural width; only an intentionally full-canvas view requests viewport width, so `#view` screenshots contain no accidental transparent remainder.
 - [ ] **IMPL-V11** — every leaf projection preserves observable evidence for all generator-owned labels in the matched target; it neither flattens structured witnesses nor substitutes labels or names for the claimed objects and relations.
 - [ ] `npm run report:churn -- --spec=test` shows churn only in the views actually touched.

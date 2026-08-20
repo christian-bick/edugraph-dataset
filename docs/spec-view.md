@@ -36,6 +36,13 @@ It also must not use an Ability to select the task identity. Reading, constructi
 classifying, completing, inverting, and explaining are different learner actions and use
 separate leaf views under [SPEC-V6](#spec-v6--an-ability-driven-task-identity-is-a-leaf-view).
 
+An Ability may appear in a view schema when it changes only observable support or another
+presentational property while preserving one coherent learner action. The configuration must
+remain valid for every compatible payload, resolve deterministically from the target, and fit one
+view checklist. Treat every Ability schema parameter as a review signal: it often indicates that
+one view is dispatching between parallel task implementations even though the parameter itself is
+not a violation.
+
 The view must also rely purely on the generated problem payload (`problem.data`) for
 anything the generator already parameterized, rather than querying the ontology itself —
 see [SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair).
@@ -125,6 +132,12 @@ unknown, whether the learner classifies or completes a relation, or whether an e
 is requested — represent each identity as a separate leaf view. Declare its Ability as an
 invariant `generalLabels` capability; do not resolve the Ability through a schema parameter.
 
+A view must not implement such identities as large, mutually exclusive code branches behind one
+configuration. Differences in instructions, requested response, unknown placement, reasoning
+request, or question/solution behavior are parallel task behaviors and require leaves. Small,
+composable branches for support or presentation within the same task remain valid. Ability
+parameterization is a warning sign for this review, not an automatic reason to split.
+
 Each leaf must use the narrowest payload type it actually accepts in `ViewTypeMap`. When a
 single canonical generator intentionally returns a discriminated mathematical family, use
 `requiredLabels` under [SPEC-V7](#spec-v7--requiredlabels-scopes-payload-applicability) and
@@ -147,21 +160,21 @@ direction used by matching. The view must not also provide a required label thro
 `generalLabels` or its schema, and the same label cannot appear in both `requiredLabels`
 and `rejectedLabels`. `npm run check:generator-view-specs` verifies this contract.
 
-Only Area and Scope terms belong here. Never put an Ability in `requiredLabels`; the leaf
-must positively own its invariant Ability in `generalLabels`. Prefer a narrower
-`ViewTypeMap` payload whenever static typing alone can express the same boundary. Use
-`rejectedLabels` for physical rendering limits, not for this positive mathematical context.
+Only Area and Scope terms belong here. Never put an Ability in `requiredLabels`; the view must
+positively own each Ability through `generalLabels` or its schema. Prefer a narrower `ViewTypeMap`
+payload whenever static typing alone can express the same boundary. Use `rejectedLabels` for
+physical rendering limits, not for this positive mathematical context.
 
 ---
 
 ## Audit
 
 - [ ] **SPEC-V1** — `spec`, `ViewSchema` and `ViewConfig` are all exported, with `ViewConfig` extracted from the schema.
-- [ ] **SPEC-V2** — every schema parameter is presentational and preserves learner action; no mathematical parameter or Ability-driven task selector appears.
+- [ ] **SPEC-V2** — every schema parameter is presentational and preserves learner action; no mathematical parameter or Ability-driven task selector appears, and each Ability parameter has been reviewed as a possible parallel-task branch.
 - [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, never an Ability or a competency the view merely does not want.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — every Ability is declared by a view, directly evidenced by its rendered task, absent from all generators, and not parameterized when it changes task identity.
-- [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than resolved by a schema parameter; only its most specific required Ability is declared.
+- [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than implemented through parallel configuration branches; only its most specific required Ability is declared.
 - [ ] **SPEC-V7** — polymorphic leaf views use non-Ability `requiredLabels` only when a narrower payload type cannot express their mathematical applicability; every compatible generator supplies them, while the view neither supplies nor rejects them.
 - [ ] **SPEC-11** — every view-owned Area is independent of compatible generator Areas; presentation-driven refinement uses Scope.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.
