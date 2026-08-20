@@ -417,7 +417,7 @@ export const ShapeSquareArrayView = ({
                                 data={problem.data}
                                 showCells={showCells}
                                 showCount={!isPartition && !isProductExplanation && !isAreaCalculation && isSolutionView}
-                                showCountingPath={isAreaCount}
+                                showCountingPath={isAreaCount && !useStory}
                                 showSideLengths={isProductExplanation || isAreaCalculation}
                             />
                         )}
