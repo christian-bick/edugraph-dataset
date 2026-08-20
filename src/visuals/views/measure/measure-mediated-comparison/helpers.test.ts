@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {MediatedLengthComparisonProblem} from '../../../../types/problems.ts';
 import {
     deriveMediatedAnswer,
+    ribbonWidthsForChain,
     validateMediatedComparisonProblem
 } from './helpers.ts';
 
@@ -22,6 +23,17 @@ function problem(
 }
 
 describe('measure-mediated-comparison helpers', () => {
+    it.each([
+        ['longer', ['A', 'B', 'C']],
+        ['shorter', ['C', 'B', 'A']]
+    ] as const)('maps a %s chain to ordered ribbon lengths with one stable intermediary', (relation, order) => {
+        const widths = ribbonWidthsForChain(relation);
+
+        expect(widths[order[0]]).toBeGreaterThan(widths[order[1]]);
+        expect(widths[order[1]]).toBeGreaterThan(widths[order[2]]);
+        expect(widths.B).toBe(124);
+    });
+
     it.each([
         ['longer', 'longer', 'A'],
         ['longer', 'shorter', 'C'],

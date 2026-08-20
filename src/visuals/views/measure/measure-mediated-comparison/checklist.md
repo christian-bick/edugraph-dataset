@@ -1,2 +1,2 @@
-- **Identity:** Two separate premises compare A with intermediary B and B with C, allowing the requested A-to-C relation to be inferred without directly displaying A against C.
+- **Identity:** Two separate premises visibly compare illustrated ribbon lengths—A with intermediary B, then the same-length B with C—allowing the requested A-to-C relation to be inferred without directly pairing A and C.
 - **Modes:** Question Mode leaves A and C unselected; Solution Mode preserves both premises and identifies the endpoint implied by them.

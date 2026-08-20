@@ -4,6 +4,20 @@ import {
     MediatedLengthComparisonProblem
 } from '../../../../types/problems.ts';
 
+export type MediatedRibbonId = 'A' | 'B' | 'C';
+
+/**
+ * Resolves a stable visual witness for the generated relation chain. Exact pixel lengths
+ * are presentational; their ordering is the mathematics supplied by the payload.
+ */
+export function ribbonWidthsForChain(
+    chainRelation: LengthComparisonRelation
+): Record<MediatedRibbonId, number> {
+    return chainRelation === 'longer'
+        ? {A: 156, B: 124, C: 92}
+        : {A: 92, B: 124, C: 156};
+}
+
 export function deriveMediatedAnswer(
     chainRelation: LengthComparisonRelation,
     askedRelation: LengthComparisonRelation
