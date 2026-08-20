@@ -453,12 +453,9 @@ const nearestFiveMinuteTimeBuilder = new DatasetPermutationBuilder()
         Scope.StepsOf5
     ])
     .applyLabelVariants([
-        [Scope.AnalogClock],
-        [Scope.DigitalClock]
-    ])
-    .applyLabelVariants([
-        [Ability.ProcedureExecution],
-        [Ability.VisualArticulation]
+        [Scope.AnalogClock, Ability.ProcedureExecution],
+        [Scope.AnalogClock, Ability.VisualArticulation],
+        [Scope.DigitalClock, Ability.VisualArticulation]
     ])
     .applyLabelVariants([
         [Scope.AnteMeridiem],

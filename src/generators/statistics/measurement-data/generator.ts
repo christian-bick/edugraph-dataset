@@ -22,7 +22,7 @@ const shuffle = <T>(values: T[]): T[] => {
 const makeObservations = (lengths: readonly number[]): MeasurementObservation[] =>
     objects.map((object, index) => ({object, value: lengths[index]!}));
 
-const makeEighthInchObservations = (): MeasurementObservation[] => {
+const makeEighthUnitObservations = (): MeasurementObservation[] => {
     const axisStartEighths = (1 + Math.floor(random() * 2)) * 8;
     const interiorOffset = 5 + Math.floor(random() * 10);
     const offsets = shuffle([1, 2, 4, 4, interiorOffset, 16]);
@@ -61,6 +61,11 @@ export class MeasurementDataGenerator implements ProblemGenerator<MeasurementDat
         const operation = config.operation === Area.Addition || config.operation === Area.Subtraction
             ? config.operation
             : undefined;
+        const unit = config.unitScale === Scope.InchScale
+            ? 'in'
+            : config.unitScale === Scope.CentimeterScale
+                ? 'cm'
+                : config.numberKind === Scope.FractionNumbers ? 'in' : 'cm';
 
         if (usesSingleFrame && config.numberKind !== Scope.FractionNumbers) {
             throw new GeneratorValidationError('measurement-data', 'A single-frame fractional dataset requires fractional measurements.');
@@ -76,10 +81,10 @@ export class MeasurementDataGenerator implements ProblemGenerator<MeasurementDat
         }
 
         if (usesSingleFrame) {
-            const observations = makeEighthInchObservations();
+            const observations = makeEighthUnitObservations();
             return {
                 data: {
-                    unit: 'in',
+                    unit,
                     subdivisions: 8,
                     observations,
                     ...(operation === undefined ? {} : {extremaRelation: makeExtremaRelation(observations, operation)})
@@ -95,7 +100,7 @@ export class MeasurementDataGenerator implements ProblemGenerator<MeasurementDat
             ];
             return {
                 data: {
-                    unit: 'in',
+                    unit,
                     subdivisions: 4,
                     observations: makeObservations(quarterUnits.map(value => value / 4))
                 }
@@ -104,7 +109,7 @@ export class MeasurementDataGenerator implements ProblemGenerator<MeasurementDat
 
         return {
             data: {
-                unit: 'cm',
+                unit,
                 subdivisions: 1,
                 observations: makeObservations(objects.map(() => 2 + Math.floor(random() * 9)))
             }

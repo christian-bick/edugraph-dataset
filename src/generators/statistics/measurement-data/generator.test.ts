@@ -28,6 +28,21 @@ describe('MeasurementDataGenerator', () => {
         expect(quarterUnits.some(value => value % 2 === 1)).toBe(true);
     });
 
+    it('uses an explicit unit scale independently of the number kind', () => {
+        setSeed(42);
+        const fractionalCentimeters = new MeasurementDataGenerator().generate({
+            numberKind: Scope.FractionNumbers,
+            unitScale: Scope.CentimeterScale
+        }).data;
+        const integerInches = new MeasurementDataGenerator().generate({
+            numberKind: Scope.IntegerNumbers,
+            unitScale: Scope.InchScale
+        }).data;
+
+        expect(fractionalCentimeters).toEqual(expect.objectContaining({unit: 'cm', subdivisions: 4}));
+        expect(integerInches).toEqual(expect.objectContaining({unit: 'in', subdivisions: 1}));
+    });
+
     it('generates neutral eighth-inch observations for one measurement frame', () => {
         for (let seed = 0; seed < 40; seed++) {
             setSeed(`eighth-inch-data-${seed}`);

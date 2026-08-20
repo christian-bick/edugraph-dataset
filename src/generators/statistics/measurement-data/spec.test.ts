@@ -11,6 +11,7 @@ describe('measurement-data spec', () => {
             Scope.LengthMeasurement,
             Scope.ObservedMeasurement,
             Scope.IntegerNumbers,
+            Scope.CentimeterScale,
             Ability.ProcedureExecution
         ]);
 
@@ -26,6 +27,7 @@ describe('measurement-data spec', () => {
             Scope.LengthMeasurement,
             Scope.ProvidedMeasurement,
             Scope.FractionNumbers,
+            Scope.InchScale,
             Scope.LinePlot,
             Scope.SingleFrameOfReference,
             Ability.VisualArticulation
@@ -35,7 +37,8 @@ describe('measurement-data spec', () => {
         expect(result?.data.extremaRelation).toBeUndefined();
         expect(result?.tags).toEqual(expect.arrayContaining([
             Scope.SingleFrameOfReference,
-            Scope.FractionNumbers
+            Scope.FractionNumbers,
+            Scope.InchScale
         ]));
         expect(result?.tags).not.toContain(Ability.VisualArticulation);
         expect(result?.tags).not.toContain(Scope.LinePlot);

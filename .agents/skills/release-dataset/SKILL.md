@@ -61,7 +61,7 @@ Prevent a release tag from becoming the first full canonical test:
    npm run audit:dataset -- --spec=ccss
    ```
 
-3. Run the release-relevant dataset checks:
+3. Run the release-relevant dataset checks and build the merged release artifact:
 
    ```bash
    npm run report:churn -- --spec=ccss
@@ -69,11 +69,23 @@ Prevent a release tag from becoming the first full canonical test:
    npm run merge:dataset
    ```
 
-4. Confirm that the worktree remains clean. Generated files in `out/` are build output and
-   must not be committed.
+4. Generate and validate the release asset index against the merged dataset. Use the
+   proposed release tag as the revision even though the tag does not exist yet:
 
-Do not create or push the release tag unless canonical generation, strict audit, split
-audit, and the exact-HEAD `Validate Main` workflow all pass.
+   ```bash
+   npm run generate:asset-index -- --revision=<candidate-tag> --output=temp/release-assets/asset-index.json
+   npm run validate:asset-index -- --index=temp/release-assets/asset-index.json --dataset-dir=out/dataset --spec=ccss
+   ```
+
+   This inverse coverage gate proves that every exact normalized production target has at
+   least one associated released sample. Successful matching and generation alone are not
+   substitutes for it.
+
+5. Confirm that the worktree remains clean. Generated files in `out/` and `temp/` are build
+   output and must not be committed.
+
+Do not create or push the release tag unless canonical generation, strict VQA audit, split
+audit, merged asset-index validation, and the exact-HEAD `Validate Main` workflow all pass.
 
 ### Repairing VQA Cache Findings
 
@@ -110,6 +122,7 @@ Immediately before publication, present a compact release checkpoint containing:
 - exact-HEAD `Validate Main` result;
 - canonical sample and VQA audit totals;
 - split/churn findings;
+- merged asset-index totals and exact-target coverage result;
 - expected destinations: Hugging Face, GitHub Release, and Firebase explorer.
 
 Ask for explicit confirmation to create and push the tag. A remote tag starts an external,

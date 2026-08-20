@@ -302,6 +302,23 @@ export function matchTargets(
     return { tuples, rejections };
 }
 
+/**
+ * Returns active targets that have no semantically compatible generator/view
+ * pair. This is the inverse coverage check for target specs: every target in
+ * `spec` must have at least one realizable module path before generation.
+ */
+export function findTargetsWithoutMatch(
+    targets: CompetencyTarget[],
+    generatorCatalog: GeneratorMatchInfo[],
+    viewCatalog: ViewMatchInfo[]
+): CompetencyTarget[] {
+    const {orderedPairs} = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
+
+    return targets.filter(target => !orderedPairs.some(({generator, view}) =>
+        matchesTargetCapabilities(target.labels, generator, view).matched
+    ));
+}
+
 // ---------------------------------------------------------------------------
 // Catalog loading
 // ---------------------------------------------------------------------------

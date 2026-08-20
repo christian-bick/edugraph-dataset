@@ -292,7 +292,10 @@ module's `generator.test.ts` and
 
 `npm run check:standards-spec -- --spec=<module>` always runs every check: target ID
 uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set
-normalization, intra-target permutation uniqueness, and definition distinctness.
+normalization, intra-target permutation uniqueness, definition distinctness, and inverse
+matching coverage. Every normalized active target must have at least one semantically
+compatible generator/view path; a zero-match target is invalid even though forward
+generation would otherwise omit it silently.
 
 For `--spec=test`, it also verifies that every generator has at least one matched
 generator-view path whose bounded probe can produce a sample.
@@ -311,7 +314,7 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-6** — no label is broader, narrower, or otherwise adjusted to make a target match; gaps are parked with a TODO or a todo export.
 - [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO references a valid authored definition with explicit module strategies, every ontology TODO references a valid authored ontology package, and matching is confirmed via `npm run show:matching` for addressable competencies.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless their complete source leaf competencies mutually imply one another and the identity is declared in `equivalentTargets` with a reason; partial overlap, containment, current-support coincidence, and missing distinctions are not equivalence.
-- [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` and `npm run check -- --spec=<module>` pass.
+- [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` confirms structural validity and at least one compatible generator/view path for every active target; `npm run check -- --spec=<module>` passes.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
 - [ ] **TSPEC-12** — `test` remains a focused prototyping/regression spec and provides at least one generatable target-view path per generator.
 - [ ] **TSPEC-13** — every active label is reasonably identifiable and defendable from visual or textual evidence in the expected matched artifact; no target relies on hidden context.

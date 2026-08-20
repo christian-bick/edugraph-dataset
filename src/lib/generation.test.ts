@@ -11,6 +11,7 @@ import {
     matchTargets,
     matchesTarget,
     findGeneratorsWithoutTestPath,
+    findTargetsWithoutMatch,
     loadTargets,
     loadSpecTodos,
     generateSample,
@@ -504,6 +505,53 @@ describe('findGeneratorsWithoutTestPath', () => {
             viewCatalog,
             2
         )).toEqual(['null-only', 'type-mismatch']);
+    });
+});
+
+describe('findTargetsWithoutMatch', () => {
+    const generators: GeneratorMatchInfo[] = [{
+        generatorId: 'writing',
+        labels: [Area.DigitNotation, Scope.NumbersSmaller100],
+        problemType: 'WritingProblem'
+    }];
+    const views: ViewMatchInfo[] = [{
+        viewId: 'writing-view',
+        supportedLabels: [Ability.Formalization],
+        problemType: 'WritingProblem'
+    }];
+
+    it('returns only active targets without a compatible generator/view path', () => {
+        const matched = {
+            id: 'matched',
+            labels: [Area.DigitNotation, Ability.Formalization]
+        };
+        const unsupported = {
+            id: 'unsupported',
+            labels: [Area.Addition, Ability.Formalization]
+        };
+
+        expect(findTargetsWithoutMatch(
+            [matched, unsupported],
+            generators,
+            views
+        )).toEqual([unsupported]);
+    });
+
+    it('honors view rejection boundaries when checking target coverage', () => {
+        const rejectedTarget = {
+            id: 'rejected',
+            labels: [Scope.NumbersSmaller100, Ability.Formalization]
+        };
+        const rejectingViews: ViewMatchInfo[] = [{
+            ...views[0],
+            rejectedLabels: [Scope.NumbersSmaller100]
+        }];
+
+        expect(findTargetsWithoutMatch(
+            [rejectedTarget],
+            generators,
+            rejectingViews
+        )).toEqual([rejectedTarget]);
     });
 });
 

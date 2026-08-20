@@ -181,9 +181,12 @@ successful main validation also calls that reusable workflow with the validated 
 SHA. Keeping deployment in a branch-context run satisfies the Google Workload Identity
 provider's branch trust condition without allowing release-tag refs.
 Release asset-index validation loads the normalized CCSS production targets and fails if
-any exact target permutation has no associated released sample. This is the publication
-gate behind the explorer's `Ready` to `Released` transition; successful module matching
-alone is insufficient.
+any exact target permutation has no associated released sample. Run the same validation
+locally against the merged artifact before creating a tag; the release workflow repeats it
+before publication. This is the publication gate behind the explorer's `Ready` to
+`Released` transition. Earlier standards-spec validation proves every active target has a
+compatible generator/view path, while the asset index additionally proves that the exact
+target survived generation, deduplication, splitting, and merge.
 The release workflow's manual trigger accepts an existing `release_tag` and repeats the
 same full gate and publication path; use it to retry or backfill a tag rather than
 constructing Release assets by hand.
@@ -327,7 +330,7 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<spec_module>`
-*   **Function**: Validates competency target standard specs (e.g. `test`, `ccss`) using `normalizeAndValidateSpec` from `src/lib/spec-validator.ts`. All checks always run: target ID uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set normalization, intra-target permutation uniqueness, and definition distinctness — no two target definitions may define an identical *set* of permutations, since such definitions are indistinguishable by the ontology. Definitions that merely *overlap* in some permutations are legitimate (related standards across grades); overlapping permutations are deduplicated to one representative target and reported as warnings, not errors. For `--spec=test`, validation additionally requires a matched target/view tuple that can produce a sample for every generator module.
+*   **Function**: Validates competency target standard specs (e.g. `test`, `ccss`) using `normalizeAndValidateSpec` from `src/lib/spec-validator.ts`. All checks always run: target ID uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set normalization, intra-target permutation uniqueness, definition distinctness, and inverse matching coverage — every normalized active target must have at least one semantically compatible generator/view path. No two target definitions may define an identical *set* of permutations, since such definitions are indistinguishable by the ontology. Definitions that merely *overlap* in some permutations are legitimate (related standards across grades); overlapping permutations are deduplicated to one representative target and reported as warnings, not errors. For `--spec=test`, validation additionally requires a matched target/view tuple whose bounded probe can produce a sample for every generator module.
 
 ### Type Checking (`npm run check:types`)
 *   **Execution**: `npm run check:types` (or `npx tsc --noEmit`)
@@ -430,8 +433,11 @@ violates its contract:
 4. **Dataset integrity:** run `npm run report:churn -- --spec=ccss` and
    `npm run report:splits -- --spec=ccss`. Determinism and split integrity are independent of
    whether individual images look correct.
-5. **Complete gate:** before publishing, run full canonical generation and live validation,
-   `audit:dataset`, `report:splits`, `check`, and then `merge:dataset`.
+5. **Complete gate:** before publishing, run full canonical generation and any required live
+   validation, then require `audit:dataset`, `report:splits`, and `check` to pass. Build the
+   union with `merge:dataset`, generate the release asset index using the candidate tag, and
+   run `validate:asset-index` against `out/dataset`. Tag creation comes only after this exact
+   target-to-released-sample proof passes.
 
 ## 6. Efficient Development & Debugging Iteration
 

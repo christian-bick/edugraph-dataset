@@ -4,8 +4,10 @@ import {
     loadGeneratorCatalog,
     loadViewCatalog,
     findGeneratorsWithoutTestPath,
+    findTargetsWithoutMatch,
     loadSpecTodos
 } from '../lib/generation.ts';
+import {shortenLabel} from '../lib/utils.ts';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -54,11 +56,30 @@ async function main() {
             console.error(`\n❌ Validation failed with ${result.errors.length} error(s).`);
             process.exit(1);
         } else {
+            const [generatorCatalog, viewCatalog] = await Promise.all([
+                loadGeneratorCatalog(),
+                loadViewCatalog()
+            ]);
+            const unmatchedTargets = findTargetsWithoutMatch(
+                result.targets,
+                generatorCatalog,
+                viewCatalog
+            );
+            if (unmatchedTargets.length > 0) {
+                console.error(`\n--- Unmatched Active Targets (${unmatchedTargets.length}) ---`);
+                for (const target of unmatchedTargets) {
+                    console.error(
+                        `❌ ${target.id} [${target.labels.map(shortenLabel).join(', ')}]`
+                    );
+                }
+                console.error(
+                    `\n❌ Spec contains ${unmatchedTargets.length} active target(s) without a compatible generator/view path.`
+                );
+                process.exit(1);
+            }
+            console.log(`\n✅ All ${result.targets.length} active targets have a compatible generator/view path.`);
+
             if (specName === 'test') {
-                const [generatorCatalog, viewCatalog] = await Promise.all([
-                    loadGeneratorCatalog(),
-                    loadViewCatalog()
-                ]);
                 const uncovered = findGeneratorsWithoutTestPath(
                     result.targets,
                     generatorCatalog,
