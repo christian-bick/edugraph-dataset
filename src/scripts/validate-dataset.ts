@@ -22,7 +22,7 @@ import {
 } from "../lib/generation.ts";
 import { validationFailed, validationReportPath } from '../lib/validation-report.ts';
 import {
-    buildDatasetManifestEntries,
+    buildDatasetManifest,
     datasetRendererIssues,
     datasetFreshnessIssues,
     readDatasetManifest
@@ -278,23 +278,31 @@ async function main() {
             || entry.module.relativePath === targetView
             || entry.module.category === targetView)
         : viewCatalog;
-    const currentManifestEntries = buildDatasetManifestEntries({
+    const currentManifestBuild = buildDatasetManifest({
         projectRoot: PROJECT_ROOT,
         datasetDir: DATASET_DIR,
+        specName,
         targets: specValidation.targets,
-        generators: scopedGenerators,
-        views: scopedViews,
-        generatedSplits: presentSplits
+        generators: generatorCatalog,
+        views: viewCatalog,
+        generatedSplits: presentSplits,
+        rendererEnvironment: CANONICAL_RENDERER_ID
     });
+    counters.add('dataset.source_directories_read', currentManifestBuild.source_stats.directories_read);
+    counters.add('dataset.source_files_read', currentManifestBuild.source_stats.files_read);
+    counters.add('dataset.source_bytes_read', currentManifestBuild.source_stats.bytes_read);
     const generatorIds = new Set(scopedGenerators.map(entry => entry.generatorId));
     const viewIds = new Set(scopedViews.map(entry => entry.viewId));
+    const scopedEntries = Object.fromEntries(Object.entries(currentManifestBuild.entries)
+        .filter(([, entry]) => generatorIds.has(entry.generator) && viewIds.has(entry.view)));
+    const scopedBuild = {...currentManifestBuild, entries: scopedEntries};
     const existingManifest = readDatasetManifest(DATASET_DIR);
     const scopedManifest = existingManifest ? {
         ...existingManifest,
         entries: Object.fromEntries(Object.entries(existingManifest.entries)
             .filter(([, entry]) => generatorIds.has(entry.generator) && viewIds.has(entry.view)))
     } : null;
-    const freshnessIssues = datasetFreshnessIssues(scopedManifest, specName, currentManifestEntries);
+    const freshnessIssues = datasetFreshnessIssues(scopedManifest, specName, scopedBuild);
     if (freshnessIssues.length > 0) {
         throw new Error(
             `Dataset freshness check failed:\n${freshnessIssues.map(issue => `- ${issue}`).join('\n')}\n` +

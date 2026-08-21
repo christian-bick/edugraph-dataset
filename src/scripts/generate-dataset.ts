@@ -37,7 +37,13 @@ import {
     finalizeDatasetMetadata,
     mergeModuleMetadata
 } from '../lib/dataset-output.ts';
-import { buildDatasetManifestEntries, updateDatasetManifest } from '../lib/dataset-manifest.ts';
+import {
+    assertDatasetGenerationScope,
+    buildDatasetManifest,
+    readDatasetManifest,
+    updateDatasetManifest
+} from '../lib/dataset-manifest.ts';
+import {SourceContentIndex} from '../lib/content-identity.ts';
 import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -671,6 +677,39 @@ async function main() {
         else tuplesByGenerator.set(tuple.generatorId, [tuple]);
     }
 
+    const generationScope = {
+        fullDataset: !targetModule && !targetView,
+        generatorIds: modulesToRun.map(module => module.generatorId),
+        viewIds: targetView ? viewCatalog.map(view => view.viewId) : undefined
+    };
+    const allMatchedTuples = generationScope.fullDataset
+        ? matchedTuples
+        : matchTargets(allTargets, generatorCatalog, fullViewCatalog, {counters}).tuples;
+    const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
+    if (!generationScope.fullDataset) {
+        const previousManifest = readDatasetManifest(outDir);
+        const planningBuild = buildDatasetManifest({
+            projectRoot: PROJECT_ROOT,
+            datasetDir: outDir,
+            specName,
+            targets: allTargets,
+            generators: generatorCatalog,
+            views: fullViewCatalog,
+            tuples: allMatchedTuples,
+            generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
+            rendererEnvironment: previousManifest?.entries
+                ? Object.values(previousManifest.entries)[0]?.renderer_environment
+                : undefined,
+            sourceIndex,
+            reuseImageIdentityFrom: previousManifest?.dependency_graph
+        });
+        const plan = assertDatasetGenerationScope(previousManifest, planningBuild, generationScope);
+        console.log(
+            `Dependency plan: ${plan.changed_roots.length} changed root(s), `
+            + `${plan.affected_nodes.length} affected node(s), ${plan.reuse_nodes.length} reusable node(s).`
+        );
+    }
+
     const browser = await chromium.launch({ headless: true });
     const startTime = performance.now();
     let transaction: ReturnType<typeof beginDatasetTransaction> | undefined;
@@ -683,11 +722,6 @@ async function main() {
             Math.min(DEFAULT_PREFLIGHT_CONCURRENCY, concurrency)
         );
 
-        const generationScope = {
-            fullDataset: !targetModule && !targetView,
-            generatorIds: modulesToRun.map(module => module.generatorId),
-            viewIds: targetView ? viewCatalog.map(view => view.viewId) : undefined
-        };
         transaction = beginDatasetTransaction(outDir, generationScope);
 
         let totalImages = 0;
@@ -717,20 +751,25 @@ async function main() {
 
         finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.train);
         finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.val);
-        const manifestEntries = buildDatasetManifestEntries({
+        const manifestBuild = buildDatasetManifest({
             projectRoot: PROJECT_ROOT,
             datasetDir: transaction.stagingDir,
+            specName,
             targets: allTargets,
-            generators: modulesToRun,
-            views: viewCatalog,
-            tuples: matchedTuples,
-            generatedSplits: trainingOnly ? ['train'] : ['train', 'val']
+            generators: generatorCatalog,
+            views: fullViewCatalog,
+            tuples: allMatchedTuples,
+            generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
+            sourceIndex
         });
+        counters.add('dataset.source_directories_read', manifestBuild.source_stats.directories_read);
+        counters.add('dataset.source_files_read', manifestBuild.source_stats.files_read);
+        counters.add('dataset.source_bytes_read', manifestBuild.source_stats.bytes_read);
         updateDatasetManifest({
             projectRoot: PROJECT_ROOT,
             datasetDir: transaction.stagingDir,
             specName,
-            entries: manifestEntries,
+            build: manifestBuild,
             scope: generationScope
         });
         transaction.commit();

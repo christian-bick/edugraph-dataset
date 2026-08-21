@@ -123,11 +123,13 @@ The current preview snapshot store contains:
 
 Immutable snapshots should remain, but unchanged assets must be reused through content-addressed storage or filesystem links.
 
-### Manifest invalidation is broader than the dependency graph
+### Dataset invalidation follows an explicit dependency graph
 
-The dataset manifest's global source hash includes the entire `public` directory. Generated coverage files can therefore invalidate dataset rendering even though they are not renderer dependencies.
-
-Generator/view source files and shared dependencies are also rewalked and reread for each pair rather than using memoized file hashes and an explicit dependency graph.
+Phase 4 replaced the aggregate dataset source hash with direct graph edges. Generated coverage
+files, favicons, and unrelated public files are not renderer inputs; public icons, shared renderer
+code, module sources, and VQA checklists participate only in the artifact nodes they can affect.
+A request-local source index memoizes directory discovery and file digests across overlapping
+generator/view dependencies, so each source byte is read once per plan.
 
 ### External standards inputs are mutable and untracked
 
@@ -281,7 +283,7 @@ validates the core when absent, and the shared `.github/actions/coverage-core` a
 exact-key GitHub Actions cache so dependent deployment and later release-tag workflows restore the
 same artifact and pinned CCSS bytes. Preview and Latest then differ only in projection metadata.
 
-#### Phase 4: introduce the dependency and delta foundation
+#### Phase 4: introduce the dependency and delta foundation — complete
 
 Represent generation and validation as a graph containing at least:
 
@@ -306,6 +308,20 @@ The planner must:
 The existing per-pair manifest becomes an execution plan rather than only a stale-result detector.
 Generator/view source dependencies and shared files are memoized instead of being rediscovered and
 reread for every pair.
+
+Implemented in `src/lib/dependency-planner.ts`, `src/lib/content-identity.ts`, and
+`src/lib/dataset-manifest.ts`. The graph uses a closed node-kind contract for sources, modules,
+pairs, targets, ontology and standards records, shards, images, VQA, asset-index, and coverage
+records. Delta planning compares node content and direct edges, combines previous and current
+reverse edges, records removals, produces an affected-only topological schedule, exposes reusable
+content-addressed outputs, and stores compact causal predecessors. Planner work counters and
+synthetic growth tests enforce linear construction and traversal; clean-versus-incremental output
+equivalence and reverse closure are tested for every node kind. Unsupported planner epochs fail
+closed. Dataset generation computes scoped plans before launching Chromium, rejects omitted
+affected pairs, and publishes the complete graph and execution plan last inside the atomically
+promoted dataset transaction. Phase 5 remains responsible for replacing copied mutable dataset
+trees with immutable reusable shards and applying automatic affected-only execution to the other
+development workflows.
 
 #### Phase 5: adopt delta execution across development workflows
 
@@ -464,4 +480,8 @@ No generator/view redesign is required to begin this work. The repository alread
 - immutable explorer snapshots;
 - content-derived VQA validation keys.
 
-The missing layer is a shared, persistent dependency graph and delta scheduler. These primitives should be consolidated around that layer rather than replaced independently.
+Phase 4 supplies the shared, persistent dependency graph and delta scheduler. The remaining work is
+adoption: Phase 5 moves mutable dataset and explorer outputs behind immutable shards and applies
+the affected-only plan to VQA, tests, type checking, and validators; Phase 6 replaces aggregate
+external identities with reliable record/entity deltas. The existing primitives should continue
+to converge on the shared planner rather than growing independent invalidation systems.

@@ -3,6 +3,7 @@ import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
 import {describe, expect, it} from 'vitest';
 import {
+    SourceContentIndex,
     digestContent,
     hashSourceFiles,
     radixSortUtf8
@@ -41,6 +42,36 @@ describe('content identity', () => {
             expect(hashSourceFiles(root, [root], {include})).toBe(directoryHash);
             writeFileSync(resolve(root, 'nested', 'b.ts'), 'changed');
             expect(hashSourceFiles(root, [root], {include})).not.toBe(directoryHash);
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+
+    it('reads overlapping source files only once', () => {
+        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-source-index-'));
+        mkdirSync(resolve(root, 'shared'), {recursive: true});
+        writeFileSync(resolve(root, 'shared', 'one.ts'), 'one');
+        writeFileSync(resolve(root, 'shared', 'two.ts'), 'two');
+
+        try {
+            const index = new SourceContentIndex(root);
+            const complete = index.hash([resolve(root, 'shared')]);
+            const subset = index.hash([resolve(root, 'shared', 'one.ts')]);
+            const identities = index.identities([
+                resolve(root, 'shared'),
+                resolve(root, 'shared', 'one.ts')
+            ]);
+
+            expect(complete).not.toBe(subset);
+            expect(identities.map(identity => identity.path)).toEqual([
+                'shared/one.ts',
+                'shared/two.ts'
+            ]);
+            expect(index.stats()).toEqual({
+                directories_read: 1,
+                files_read: 2,
+                bytes_read: 6
+            });
         } finally {
             rmSync(root, {recursive: true, force: true});
         }

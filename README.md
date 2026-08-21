@@ -81,7 +81,11 @@ npm run merge:dataset
 *   `--training-only`: Skip validation set generation to speed up the process.
 *   `--concurrency=N`: Set the bounded Playwright worker count (default: 8).)*
 
-Scoped generation is transactional. A successful run replaces only the selected generator/view pairs; sibling views and unrelated generators remain unchanged. A preflight, generation, or render failure discards the staged output and leaves the previous dataset intact.
+Scoped generation is transactional and dependency-checked. Before rendering, the persisted graph
+computes the affected generator/view closure; a scope that would leave stale sibling pairs stops
+with a causal-path diagnostic. A successful run replaces only the selected affected pairs, while
+any planning, preflight, generation, or render failure discards staged output and leaves the
+previous dataset intact.
 
 **2. Generate Coverage Report**
 Analyze the generated dataset to ensure proper pedagogical label coverage and distribution.

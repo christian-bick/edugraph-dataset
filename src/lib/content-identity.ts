@@ -66,11 +66,93 @@ export interface HashSourceFilesOptions {
     include?: (path: string) => boolean;
 }
 
-function sourceFiles(path: string, include: (path: string) => boolean): string[] {
-    if (!existsSync(path)) return [];
-    if (!statSync(path).isDirectory()) return include(path) ? [path] : [];
-    return readdirSync(path, {withFileTypes: true})
-        .flatMap(entry => sourceFiles(resolve(path, entry.name), include));
+export interface SourceFileIdentity extends ContentDigest {
+    path: string;
+}
+
+export interface SourceContentIndexStats {
+    directories_read: number;
+    files_read: number;
+    bytes_read: number;
+}
+
+/**
+ * Request-local source index. Overlapping path sets reuse directory discovery
+ * and file digests, so a source byte is read at most once per build plan.
+ */
+export class SourceContentIndex {
+    private readonly filesByPath = new Map<string, string[]>();
+    private readonly digestsByFile = new Map<string, ContentDigest>();
+    private readonly statsValue: SourceContentIndexStats = {
+        directories_read: 0,
+        files_read: 0,
+        bytes_read: 0
+    };
+
+    constructor(private readonly projectRoot: string) {}
+
+    private filesBelow(path: string): string[] {
+        const absolutePath = resolve(path);
+        const cached = this.filesByPath.get(absolutePath);
+        if (cached) return cached;
+        if (!existsSync(absolutePath)) {
+            this.filesByPath.set(absolutePath, []);
+            return [];
+        }
+        if (!statSync(absolutePath).isDirectory()) {
+            const files = [absolutePath];
+            this.filesByPath.set(absolutePath, files);
+            return files;
+        }
+
+        this.statsValue.directories_read++;
+        const files = readdirSync(absolutePath, {withFileTypes: true})
+            .flatMap(entry => this.filesBelow(resolve(absolutePath, entry.name)));
+        this.filesByPath.set(absolutePath, files);
+        return files;
+    }
+
+    private digest(path: string): ContentDigest {
+        const cached = this.digestsByFile.get(path);
+        if (cached) return cached;
+        const content = readFileSync(path);
+        const digest = digestContent(content);
+        this.digestsByFile.set(path, digest);
+        this.statsValue.files_read++;
+        this.statsValue.bytes_read += content.byteLength;
+        return digest;
+    }
+
+    identities(
+        paths: readonly string[],
+        options: HashSourceFilesOptions = {}
+    ): SourceFileIdentity[] {
+        const include = options.include ?? (() => true);
+        const byRelativePath = new Map<string, string>();
+        for (const file of paths.flatMap(path => this.filesBelow(path))) {
+            if (!include(file)) continue;
+            byRelativePath.set(relative(this.projectRoot, file).replaceAll('\\', '/'), file);
+        }
+        return radixSortUtf8([...byRelativePath.keys()]).map(path => ({
+            path,
+            ...this.digest(byRelativePath.get(path)!)
+        }));
+    }
+
+    hash(paths: readonly string[], options: HashSourceFilesOptions = {}): string {
+        const hash = createHash('sha256');
+        for (const identity of this.identities(paths, options)) {
+            hash.update(identity.path);
+            hash.update('\0');
+            hash.update(identity.sha256);
+            hash.update('\0');
+        }
+        return hash.digest('hex');
+    }
+
+    stats(): Readonly<SourceContentIndexStats> {
+        return {...this.statsValue};
+    }
 }
 
 /** Hashes a file set by normalized relative path and bytes in deterministic linear order. */
@@ -79,20 +161,7 @@ export function hashSourceFiles(
     paths: readonly string[],
     options: HashSourceFilesOptions = {}
 ): string {
-    const include = options.include ?? (() => true);
-    const byRelativePath = new Map<string, string>();
-    for (const file of paths.flatMap(path => sourceFiles(path, include))) {
-        byRelativePath.set(relative(projectRoot, file).replaceAll('\\', '/'), file);
-    }
-
-    const hash = createHash('sha256');
-    for (const relativePath of radixSortUtf8([...byRelativePath.keys()])) {
-        hash.update(relativePath);
-        hash.update('\0');
-        hash.update(readFileSync(byRelativePath.get(relativePath)!));
-        hash.update('\0');
-    }
-    return hash.digest('hex');
+    return new SourceContentIndex(projectRoot).hash(paths, options);
 }
 
 export function digestIdentity(value: unknown): string {

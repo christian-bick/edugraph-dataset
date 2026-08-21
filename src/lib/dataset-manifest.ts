@@ -1,10 +1,6 @@
-import { createHash } from 'node:crypto';
-import {
-    existsSync,
-    readFileSync,
-    writeFileSync
-} from 'node:fs';
-import { basename, resolve } from 'node:path';
+import {createHash} from 'node:crypto';
+import {existsSync, readFileSync, writeFileSync} from 'node:fs';
+import {basename, resolve} from 'node:path';
 import {
     GeneratorCatalogEntry,
     MatchTuple,
@@ -13,12 +9,28 @@ import {
     SPLIT_DIRS,
     ViewCatalogEntry
 } from './generation.ts';
-import { CompetencyTarget } from '../types/ml-engine.ts';
-import { currentRendererEnvironment } from './render-environment.ts';
-import {hashSourceFiles} from './content-identity.ts';
+import {CompetencyTarget} from '../types/ml-engine.ts';
+import {partOf, type CompetencyDescriptor} from 'edugraph-ts';
+import {currentRendererEnvironment} from './render-environment.ts';
+import {
+    SourceContentIndex,
+    digestFile,
+    digestIdentity,
+    radixSortUtf8,
+    type SourceContentIndexStats
+} from './content-identity.ts';
+import {
+    DEPENDENCY_PLANNER_EPOCH,
+    createDependencyGraphSnapshot,
+    explainAffectedNode,
+    planDependencyDelta,
+    type DependencyDeltaPlan,
+    type DependencyGraphSnapshot,
+    type DependencyNode
+} from './dependency-planner.ts';
 
-export const DATASET_MANIFEST_SCHEMA_VERSION = 2;
-const GENERATION_PIPELINE_VERSION = 'transactional-render-v1';
+export const DATASET_MANIFEST_SCHEMA_VERSION = 3;
+const GENERATION_PIPELINE_VERSION = 'dependency-plan-v1';
 
 export interface DatasetManifestEntry {
     generator: string;
@@ -28,20 +40,47 @@ export interface DatasetManifestEntry {
     content_hash: string;
     sample_counts: Record<SampleSplit, number>;
     generated_splits: SampleSplit[];
+    /** Pair, shard, image, and VQA nodes owned by this execution unit. */
+    execution_nodes: string[];
 }
+
+export type DatasetExecutionPlan = Omit<DependencyDeltaPlan, 'reusable_outputs'>;
 
 export interface DatasetManifest {
     schema_version: number;
+    planner_epoch: number;
+    complete: true;
     spec: string;
     ontology_dependency: string;
     generated_at: string;
+    dependency_graph: DependencyGraphSnapshot;
+    last_execution: DatasetExecutionPlan;
     entries: Record<string, DatasetManifestEntry>;
+}
+
+export interface DatasetManifestBuild {
+    entries: Record<string, DatasetManifestEntry>;
+    dependency_graph: DependencyGraphSnapshot;
+    source_stats: Readonly<SourceContentIndexStats>;
 }
 
 export interface ManifestUpdateScope {
     fullDataset: boolean;
     generatorIds: string[];
     viewIds?: string[];
+}
+
+interface DatasetManifestRow {
+    file_name: string;
+    sample_key: string;
+    generator: string;
+    view: string;
+    target_id?: string;
+    content_fingerprint?: string;
+    task_fingerprint?: string;
+    tags?: string[];
+    target_associations?: Array<{spec: string; target_id: string}>;
+    _split: SampleSplit;
 }
 
 const SOURCE_EXTENSIONS = new Set([
@@ -54,21 +93,34 @@ function extension(path: string): string {
     return match?.[1] ?? '';
 }
 
+function includeRenderSource(path: string): boolean {
+    return SOURCE_EXTENSIONS.has(extension(path))
+        && !path.endsWith('.test.ts')
+        && !path.endsWith('.test.tsx')
+        && basename(path) !== 'checklist.md';
+}
+
 function hash(value: string): string {
     return createHash('sha256').update(value).digest('hex').slice(0, 16);
 }
 
-function hashFiles(projectRoot: string, paths: string[]): string {
-    return hashSourceFiles(projectRoot, paths, {
-        include: file => SOURCE_EXTENSIONS.has(extension(file))
-            && !file.endsWith('.test.ts')
-            && !file.endsWith('.test.tsx')
-            && basename(file) !== 'checklist.md'
-    });
-}
-
 function pairKey(generator: string, view: string): string {
     return `${generator}#${view}`;
+}
+
+function nodeId(kind: string, identity: string): string {
+    return `${kind}:${identity}`;
+}
+
+function ontologyName(label: string): string {
+    const prefix = 'http://edugraph.io/edu/';
+    return label.startsWith(prefix) ? label.slice(prefix.length) : label;
+}
+
+function ontologyIri(label: string): string {
+    return label.startsWith('http://edugraph.io/edu/')
+        ? label
+        : `http://edugraph.io/edu/${label}`;
 }
 
 function ontologyDependency(projectRoot: string): string {
@@ -76,22 +128,25 @@ function ontologyDependency(projectRoot: string): string {
     return packageJson.dependencies?.['edugraph-ts'] ?? 'unknown';
 }
 
-export function datasetGlobalSourceHash(projectRoot: string): string {
-    return hashFiles(projectRoot, [
+function generatorSharedPaths(projectRoot: string): string[] {
+    return [
+        resolve(projectRoot, 'package.json'),
+        resolve(projectRoot, 'package-lock.json'),
+        resolve(projectRoot, 'src', 'generators', 'helpers.ts'),
+        resolve(projectRoot, 'src', 'lib', 'random.ts'),
+        resolve(projectRoot, 'src', 'lib', 'resolvers.ts'),
+        resolve(projectRoot, 'src', 'lib', 'utils.ts'),
+        resolve(projectRoot, 'src', 'types')
+    ];
+}
+
+function viewSharedPaths(projectRoot: string): string[] {
+    return [
         resolve(projectRoot, 'package.json'),
         resolve(projectRoot, 'package-lock.json'),
         resolve(projectRoot, 'vite.config.js'),
-        resolve(projectRoot, 'src', 'scripts', 'generate-dataset.ts'),
-        resolve(projectRoot, 'src', 'lib', 'dataset-manifest.ts'),
-        resolve(projectRoot, 'src', 'lib', 'dataset-output.ts'),
-        resolve(projectRoot, 'src', 'lib', 'generation.ts'),
-        resolve(projectRoot, 'src', 'lib', 'module-resolver.ts'),
         resolve(projectRoot, 'src', 'lib', 'random.ts'),
         resolve(projectRoot, 'src', 'lib', 'render-environment.ts'),
-        resolve(projectRoot, 'src', 'lib', 'resolvers.ts'),
-        resolve(projectRoot, 'src', 'lib', 'spec-validator.ts'),
-        resolve(projectRoot, 'src', 'lib', 'type-parser.ts'),
-        resolve(projectRoot, 'src', 'lib', 'utils.ts'),
         resolve(projectRoot, 'src', 'types'),
         resolve(projectRoot, 'src', 'visuals', 'components'),
         resolve(projectRoot, 'src', 'visuals', 'helpers'),
@@ -100,96 +155,301 @@ export function datasetGlobalSourceHash(projectRoot: string): string {
         resolve(projectRoot, 'src', 'fonts.css'),
         resolve(projectRoot, 'src', 'tailwind.css'),
         resolve(projectRoot, 'public', 'icons')
-    ]);
-}
-
-function moduleSourcePaths(
-    projectRoot: string,
-    generator: GeneratorCatalogEntry,
-    view: ViewCatalogEntry
-): string[] {
-    return [
-        generator.module.absolutePath,
-        view.module.absolutePath,
-        resolve(projectRoot, 'src', 'generators', 'helpers.ts'),
-        resolve(projectRoot, 'src', 'generators', generator.module.category ?? '', 'helpers.ts'),
-        resolve(projectRoot, 'src', 'visuals', 'views', 'helpers.ts'),
-        resolve(projectRoot, 'src', 'visuals', 'views', view.module.category ?? '', 'helpers.ts'),
     ];
 }
 
-function readDatasetRows(datasetDir: string): any[] {
-    const rows: any[] = [];
+function pairSharedPaths(projectRoot: string): string[] {
+    return [
+        resolve(projectRoot, 'src', 'scripts', 'generate-dataset.ts'),
+        resolve(projectRoot, 'src', 'lib', 'dataset-manifest.ts'),
+        resolve(projectRoot, 'src', 'lib', 'dependency-planner.ts'),
+        resolve(projectRoot, 'src', 'lib', 'dataset-output.ts'),
+        resolve(projectRoot, 'src', 'lib', 'generation.ts'),
+        resolve(projectRoot, 'src', 'lib', 'module-resolver.ts'),
+        resolve(projectRoot, 'src', 'lib', 'spec-validator.ts'),
+        resolve(projectRoot, 'src', 'lib', 'type-parser.ts')
+    ];
+}
+
+function generatorSourcePaths(projectRoot: string, generator: GeneratorCatalogEntry): string[] {
+    return [
+        ...generatorSharedPaths(projectRoot),
+        generator.module.absolutePath,
+        resolve(projectRoot, 'src', 'generators', generator.module.category ?? '', 'helpers.ts')
+    ];
+}
+
+function viewSourcePaths(projectRoot: string, view: ViewCatalogEntry): string[] {
+    return [
+        ...viewSharedPaths(projectRoot),
+        view.module.absolutePath,
+        resolve(projectRoot, 'src', 'visuals', 'views', 'helpers.ts'),
+        resolve(projectRoot, 'src', 'visuals', 'views', view.module.category ?? '', 'helpers.ts')
+    ];
+}
+
+export function datasetGlobalSourceHash(
+    projectRoot: string,
+    sourceIndex = new SourceContentIndex(projectRoot)
+): string {
+    return sourceIndex.hash([
+        ...generatorSharedPaths(projectRoot),
+        ...viewSharedPaths(projectRoot),
+        ...pairSharedPaths(projectRoot)
+    ], {include: includeRenderSource});
+}
+
+function readDatasetRows(datasetDir: string): DatasetManifestRow[] {
+    const rows: DatasetManifestRow[] = [];
     for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
         const metadataPath = resolve(datasetDir, SPLIT_DIRS[split], 'metadata.jsonl');
         if (!existsSync(metadataPath)) continue;
         rows.push(...readFileSync(metadataPath, 'utf-8')
             .split('\n')
             .filter(line => line.trim() !== '')
-            .map(line => ({ ...JSON.parse(line), _split: split })));
+            .map(line => ({...JSON.parse(line), _split: split}) as DatasetManifestRow));
     }
     return rows;
 }
 
-export function buildDatasetManifestEntries(options: {
+function addNode(nodes: Map<string, DependencyNode>, node: DependencyNode): void {
+    const existing = nodes.get(node.id);
+    if (existing && JSON.stringify(existing) !== JSON.stringify(node)) {
+        throw new Error(`Conflicting definitions for dependency node ${node.id}.`);
+    }
+    nodes.set(node.id, node);
+}
+
+function sourceDependencies(
+    nodes: Map<string, DependencyNode>,
+    sourceIndex: SourceContentIndex,
+    paths: readonly string[],
+    include = includeRenderSource
+): {ids: string[]; hash: string} {
+    const identities = sourceIndex.identities(paths, {include});
+    const ids: string[] = [];
+    for (const identity of identities) {
+        const id = nodeId('source', identity.path);
+        ids.push(id);
+        addNode(nodes, {
+            id,
+            kind: 'source-file',
+            input_hash: identity.sha256,
+            dependencies: [],
+            output: {content_hash: identity.sha256, bytes: identity.bytes}
+        });
+    }
+    return {ids, hash: sourceIndex.hash(paths, {include})};
+}
+
+function targetIdsOf(row: DatasetManifestRow): string[] {
+    return radixSortUtf8([...new Set([
+        ...(row.target_id ? [row.target_id] : []),
+        ...(row.target_associations ?? []).map(association => association.target_id)
+    ])]);
+}
+
+export function buildDatasetManifest(options: {
     projectRoot: string;
     datasetDir: string;
+    specName: string;
     targets: CompetencyTarget[];
     generators: GeneratorCatalogEntry[];
     views: ViewCatalogEntry[];
     generatedSplits: SampleSplit[];
     rendererEnvironment?: string;
     tuples?: readonly MatchTuple[];
-}): Record<string, DatasetManifestEntry> {
+    sourceIndex?: SourceContentIndex;
+    reuseImageIdentityFrom?: DependencyGraphSnapshot;
+}): DatasetManifestBuild {
     const {
         projectRoot,
         datasetDir,
+        specName,
         targets,
         generators,
         views,
         generatedSplits,
         rendererEnvironment = currentRendererEnvironment(),
-        tuples: preparedTuples
+        tuples: preparedTuples,
+        sourceIndex = new SourceContentIndex(projectRoot),
+        reuseImageIdentityFrom
     } = options;
     const tuples = preparedTuples ?? matchTargets(targets, generators, views).tuples;
-    const targetsByPair = new Map<string, CompetencyTarget[]>();
-    for (const tuple of tuples) {
-        const key = pairKey(tuple.generatorId, tuple.viewId);
-        if (!targetsByPair.has(key)) targetsByPair.set(key, []);
-        targetsByPair.get(key)!.push(tuple.target);
-    }
-
-    const rowsByPair = new Map<string, any[]>();
-    for (const row of readDatasetRows(datasetDir)) {
-        const key = pairKey(row.generator, row.view);
-        if (!rowsByPair.has(key)) rowsByPair.set(key, []);
-        rowsByPair.get(key)!.push(row);
-    }
-
-    const globalHash = datasetGlobalSourceHash(projectRoot);
     const ontology = ontologyDependency(projectRoot);
+    const nodes = new Map<string, DependencyNode>();
+    const rows = readDatasetRows(datasetDir);
+    const rowsByPair = new Map<string, DatasetManifestRow[]>();
+    for (const row of rows) {
+        const key = pairKey(row.generator, row.view);
+        const group = rowsByPair.get(key);
+        if (group) group.push(row);
+        else rowsByPair.set(key, [row]);
+    }
+
     const generatorById = new Map(generators.map(entry => [entry.generatorId, entry]));
     const viewById = new Map(views.map(entry => [entry.viewId, entry]));
-    const entries: Record<string, DatasetManifestEntry> = {};
+    const targetsByPair = new Map<string, CompetencyTarget[]>();
+    const pairsByTarget = new Map<string, string[]>();
+    for (const tuple of tuples) {
+        const key = pairKey(tuple.generatorId, tuple.viewId);
+        const pairTargets = targetsByPair.get(key);
+        if (pairTargets) pairTargets.push(tuple.target);
+        else targetsByPair.set(key, [tuple.target]);
+        const targetPairs = pairsByTarget.get(tuple.target.id);
+        if (targetPairs) targetPairs.push(key);
+        else pairsByTarget.set(tuple.target.id, [key]);
+    }
 
-    for (const [key, pairTargets] of [...targetsByPair.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    const standardNodeByTarget = new Map<string, string>();
+    const targetNodeByTarget = new Map<string, string>();
+    const ontologyNodeByName = new Map<string, string>();
+    const ontologyNode = (rawLabel: string): string => {
+        const name = ontologyName(rawLabel);
+        const existing = ontologyNodeByName.get(name);
+        if (existing) return existing;
+        const id = nodeId('ontology', name);
+        ontologyNodeByName.set(name, id);
+        addNode(nodes, {
+            id,
+            kind: 'ontology-entity',
+            input_hash: digestIdentity({ontology, entity: name}),
+            dependencies: []
+        });
+        return id;
+    };
+    for (const target of targets) {
+        const standardId = nodeId('standard', `${specName}:${target.id}`);
+        const targetId = nodeId('target', `${specName}:${target.id}`);
+        standardNodeByTarget.set(target.id, standardId);
+        targetNodeByTarget.set(target.id, targetId);
+        addNode(nodes, {
+            id: standardId,
+            kind: 'external-standard',
+            input_hash: digestIdentity({spec: specName, record: target.id}),
+            dependencies: []
+        });
+        const ontologyDependencies: string[] = [];
+        for (const rawLabel of target.labels) {
+            const ontologyId = ontologyNode(rawLabel);
+            ontologyDependencies.push(ontologyId);
+            try {
+                for (const rawParent of partOf(ontologyIri(rawLabel) as CompetencyDescriptor) ?? []) {
+                    const parentId = ontologyNode(rawParent);
+                    const childName = ontologyName(rawLabel);
+                    const parentName = ontologyName(rawParent);
+                    const relationId = nodeId('ontology-relation', `${childName}->${parentName}`);
+                    addNode(nodes, {
+                        id: relationId,
+                        kind: 'ontology-relation',
+                        input_hash: digestIdentity({ontology, relation: 'partOf', childName, parentName}),
+                        dependencies: [ontologyId, parentId]
+                    });
+                    ontologyDependencies.push(relationId);
+                }
+            } catch {
+                // Unknown authored labels are reported by spec validation. They
+                // still remain explicit entity dependencies in this graph.
+            }
+        }
+        addNode(nodes, {
+            id: targetId,
+            kind: 'competency-target',
+            input_hash: digestIdentity({
+                id: target.id,
+                labels: radixSortUtf8([...target.labels]),
+                explanation: target.explanation ?? null
+            }),
+            dependencies: [standardId, ...ontologyDependencies]
+        });
+    }
+
+    const pairPipeline = sourceDependencies(nodes, sourceIndex, pairSharedPaths(projectRoot));
+    const generatorHashes = new Map<string, string>();
+    const generatorNodeIds = new Map<string, string>();
+    for (const generator of generators) {
+        const sources = sourceDependencies(nodes, sourceIndex, generatorSourcePaths(projectRoot, generator));
+        const id = nodeId('generator', generator.generatorId);
+        generatorHashes.set(generator.generatorId, sources.hash);
+        generatorNodeIds.set(generator.generatorId, id);
+        addNode(nodes, {
+            id,
+            kind: 'generator-module',
+            input_hash: digestIdentity({
+                id: generator.generatorId,
+                labels: radixSortUtf8([...generator.labels]),
+                problem_type: generator.problemType ?? null
+            }),
+            dependencies: sources.ids
+        });
+    }
+    const viewHashes = new Map<string, string>();
+    const viewNodeIds = new Map<string, string>();
+    const checklistDependencies = new Map<string, string[]>();
+    for (const view of views) {
+        const sources = sourceDependencies(nodes, sourceIndex, viewSourcePaths(projectRoot, view));
+        const id = nodeId('view', view.viewId);
+        viewHashes.set(view.viewId, sources.hash);
+        viewNodeIds.set(view.viewId, id);
+        addNode(nodes, {
+            id,
+            kind: 'view-module',
+            input_hash: digestIdentity({
+                id: view.viewId,
+                labels: radixSortUtf8([...view.supportedLabels]),
+                required: radixSortUtf8([...(view.requiredLabels ?? [])]),
+                rejected: radixSortUtf8([...(view.rejectedLabels ?? [])]),
+                problem_type: view.problemType ?? null
+            }),
+            dependencies: sources.ids
+        });
+        checklistDependencies.set(view.viewId, sourceDependencies(nodes, sourceIndex, [
+            resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'),
+            resolve(view.module.absolutePath, 'checklist.md')
+        ], path => basename(path) === 'checklist.md').ids);
+    }
+
+    const entries: Record<string, DatasetManifestEntry> = {};
+    const executionNodesByPair = new Map<string, Set<string>>();
+    const imageNodesByTarget = new Map<string, string[]>();
+    for (const key of radixSortUtf8([...targetsByPair.keys()])) {
         const [generatorId, viewId] = key.split('#');
-        const generator = generatorById.get(generatorId)!;
-        const view = viewById.get(viewId)!;
-        const localHash = hashFiles(projectRoot, moduleSourcePaths(projectRoot, generator, view));
+        const generator = generatorById.get(generatorId);
+        const view = viewById.get(viewId);
+        if (!generator || !view) continue;
+        const pairTargets = targetsByPair.get(key)!;
+        const pairNodeId = nodeId('pair', key);
+        const pairTargetNodeIds = radixSortUtf8(pairTargets.map(target => targetNodeByTarget.get(target.id)!));
+        addNode(nodes, {
+            id: pairNodeId,
+            kind: 'generator-view-pair',
+            input_hash: digestIdentity({
+                pipeline: GENERATION_PIPELINE_VERSION,
+                renderer: rendererEnvironment,
+                pair: key
+            }),
+            dependencies: [
+                generatorNodeIds.get(generatorId)!,
+                viewNodeIds.get(viewId)!,
+                ...pairPipeline.ids,
+                ...pairTargetNodeIds
+            ]
+        });
+        const executionNodes = new Set([pairNodeId]);
+        executionNodesByPair.set(key, executionNodes);
         const pairRows = rowsByPair.get(key) ?? [];
-        const sampleCounts: Record<SampleSplit, number> = { train: 0, val: 0 };
-        for (const row of pairRows) sampleCounts[row._split as SampleSplit]++;
-        const contentSignature = pairRows
-            .map(row => ({
-                sample_key: row.sample_key,
-                content_fingerprint: row.content_fingerprint,
-                task_fingerprint: row.task_fingerprint
-            }))
-            .sort((a, b) => a.sample_key.localeCompare(b.sample_key));
-        const targetSignature = pairTargets
-            .map(target => ({ id: target.id, labels: [...target.labels].sort() }))
-            .sort((a, b) => a.id.localeCompare(b.id));
+        const sampleCounts: Record<SampleSplit, number> = {train: 0, val: 0};
+        for (const row of pairRows) sampleCounts[row._split]++;
+        const contentSignature = pairRows.map(row => ({
+            sample_key: row.sample_key,
+            content_fingerprint: row.content_fingerprint,
+            task_fingerprint: row.task_fingerprint
+        }));
+        const targetSignature = pairTargets.map(target => ({
+            id: target.id,
+            labels: radixSortUtf8([...target.labels])
+        }));
+        const pairSplits = radixSortUtf8([...new Set(pairRows.map(row => row._split))]) as SampleSplit[];
         entries[key] = {
             generator: generatorId,
             view: viewId,
@@ -197,16 +457,130 @@ export function buildDatasetManifestEntries(options: {
             input_hash: hash(JSON.stringify({
                 pipeline: GENERATION_PIPELINE_VERSION,
                 ontology,
-                globalHash,
-                localHash,
+                renderer: rendererEnvironment,
+                pair_pipeline: pairPipeline.hash,
+                generator: generatorHashes.get(generatorId),
+                view: viewHashes.get(viewId),
                 targets: targetSignature
             })),
             content_hash: hash(JSON.stringify(contentSignature)),
             sample_counts: sampleCounts,
-            generated_splits: [...generatedSplits].sort()
+            generated_splits: pairSplits.length > 0 ? pairSplits : [...generatedSplits],
+            execution_nodes: []
         };
     }
-    return entries;
+
+    const rowsByShard = new Map<string, DatasetManifestRow[]>();
+    for (const row of rows) {
+        const key = pairKey(row.generator, row.view);
+        const pairNodeId = nodeId('pair', key);
+        const executionNodes = executionNodesByPair.get(key);
+        if (!nodes.has(pairNodeId) || !executionNodes) continue;
+        const imageId = nodeId('image', row.sample_key);
+        const imagePath = resolve(datasetDir, SPLIT_DIRS[row._split], row.file_name);
+        const reusableImage = reuseImageIdentityFrom?.nodes[imageId];
+        const imageDigest = reusableImage?.output
+            ? {
+                sha256: reusableImage.output.content_hash,
+                bytes: reusableImage.output.bytes ?? 0
+            }
+            : existsSync(imagePath)
+                ? digestFile(imagePath)
+                : {sha256: 'missing', bytes: 0};
+        const rowTargetNodes = targetIdsOf(row)
+            .map(targetId => targetNodeByTarget.get(targetId))
+            .filter((id): id is string => Boolean(id));
+        addNode(nodes, {
+            id: imageId,
+            kind: 'image',
+            input_hash: reusableImage?.input_hash ?? digestIdentity({
+                sample_key: row.sample_key,
+                content_fingerprint: row.content_fingerprint ?? null,
+                task_fingerprint: row.task_fingerprint ?? null,
+                image_sha256: imageDigest.sha256
+            }),
+            dependencies: [pairNodeId, ...rowTargetNodes],
+            output: {content_hash: imageDigest.sha256, bytes: imageDigest.bytes}
+        });
+        const labelDependencies = (row.tags ?? [])
+            .map(label => ontologyNodeByName.get(ontologyName(label)))
+            .filter((id): id is string => Boolean(id));
+        const vqaId = nodeId('vqa', row.sample_key);
+        addNode(nodes, {
+            id: vqaId,
+            kind: 'vqa-record',
+            input_hash: digestIdentity({sample_key: row.sample_key, tags: radixSortUtf8([...(row.tags ?? [])])}),
+            dependencies: [
+                imageId,
+                viewNodeIds.get(row.view)!,
+                ...(checklistDependencies.get(row.view) ?? []),
+                ...labelDependencies
+            ]
+        });
+        executionNodes.add(imageId);
+        executionNodes.add(vqaId);
+        for (const targetId of targetIdsOf(row)) {
+            const targetImages = imageNodesByTarget.get(targetId);
+            if (targetImages) targetImages.push(imageId);
+            else imageNodesByTarget.set(targetId, [imageId]);
+        }
+        const shardKey = `${key}#${row._split}`;
+        const shardRows = rowsByShard.get(shardKey);
+        if (shardRows) shardRows.push(row);
+        else rowsByShard.set(shardKey, [row]);
+    }
+
+    for (const shardKey of radixSortUtf8([...rowsByShard.keys()])) {
+        const rowsInShard = rowsByShard.get(shardKey)!;
+        const first = rowsInShard[0];
+        const key = pairKey(first.generator, first.view);
+        const shardId = nodeId('shard', shardKey);
+        const imageIds = radixSortUtf8(rowsInShard.map(row => nodeId('image', row.sample_key)));
+        const shardHash = digestIdentity(rowsInShard.map(row => ({
+            sample_key: row.sample_key,
+            image: nodes.get(nodeId('image', row.sample_key))?.output?.content_hash
+        })));
+        addNode(nodes, {
+            id: shardId,
+            kind: 'dataset-shard',
+            input_hash: shardHash,
+            dependencies: [nodeId('pair', key), ...imageIds],
+            output: {content_hash: shardHash}
+        });
+        executionNodesByPair.get(key)?.add(shardId);
+    }
+
+    for (const target of targets) {
+        const assetId = nodeId('asset-index', `${specName}:${target.id}`);
+        const coverageId = nodeId('coverage', `${specName}:${target.id}`);
+        const targetId = targetNodeByTarget.get(target.id)!;
+        const standardId = standardNodeByTarget.get(target.id)!;
+        const pairIds = radixSortUtf8([...(pairsByTarget.get(target.id) ?? [])]
+            .map(key => nodeId('pair', key))
+            .filter(id => nodes.has(id)));
+        const imageIds = radixSortUtf8([...new Set(imageNodesByTarget.get(target.id) ?? [])]);
+        addNode(nodes, {
+            id: assetId,
+            kind: 'asset-index-record',
+            input_hash: digestIdentity({producer: 'asset-index-v1', target: target.id}),
+            dependencies: [targetId, ...imageIds]
+        });
+        addNode(nodes, {
+            id: coverageId,
+            kind: 'coverage-record',
+            input_hash: digestIdentity({producer: 'coverage-v1', target: target.id}),
+            dependencies: [standardId, targetId, assetId, ...pairIds]
+        });
+    }
+
+    for (const [key, entry] of Object.entries(entries)) {
+        entry.execution_nodes = radixSortUtf8([...(executionNodesByPair.get(key) ?? [])]);
+    }
+    return {
+        entries,
+        dependency_graph: createDependencyGraphSnapshot([...nodes.values()]),
+        source_stats: sourceIndex.stats()
+    };
 }
 
 export function readDatasetManifest(datasetDir: string): DatasetManifest | null {
@@ -215,48 +589,95 @@ export function readDatasetManifest(datasetDir: string): DatasetManifest | null 
     return JSON.parse(readFileSync(path, 'utf-8')) as DatasetManifest;
 }
 
+function selectedPair(
+    entry: DatasetManifestEntry,
+    scope: ManifestUpdateScope,
+    generators: ReadonlySet<string>,
+    views: ReadonlySet<string> | null
+): boolean {
+    if (scope.fullDataset) return true;
+    return generators.has(entry.generator) && (!views || views.has(entry.view));
+}
+
+function executionPlan(plan: DependencyDeltaPlan): DatasetExecutionPlan {
+    const {reusable_outputs: _outputs, ...stored} = plan;
+    return stored;
+}
+
 export function updateDatasetManifest(options: {
     projectRoot: string;
     datasetDir: string;
     specName: string;
-    entries: Record<string, DatasetManifestEntry>;
+    build: DatasetManifestBuild;
     scope: ManifestUpdateScope;
 }): DatasetManifest {
-    const { projectRoot, datasetDir, specName, entries, scope } = options;
-    const previous = scope.fullDataset ? null : readDatasetManifest(datasetDir);
-    const merged = { ...(previous?.entries ?? {}) };
-    const generators = new Set(scope.generatorIds);
-    const views = scope.viewIds ? new Set(scope.viewIds) : null;
-
-    for (const [key, entry] of Object.entries(merged)) {
-        if (generators.has(entry.generator) && (!views || views.has(entry.view))) delete merged[key];
-    }
-    Object.assign(merged, entries);
+    const {projectRoot, datasetDir, specName, build, scope} = options;
+    const previous = readDatasetManifest(datasetDir);
+    const plan = assertDatasetGenerationScope(previous, build, scope);
 
     const manifest: DatasetManifest = {
         schema_version: DATASET_MANIFEST_SCHEMA_VERSION,
+        planner_epoch: DEPENDENCY_PLANNER_EPOCH,
+        complete: true,
         spec: specName,
         ontology_dependency: ontologyDependency(projectRoot),
         generated_at: new Date().toISOString(),
-        entries: Object.fromEntries(Object.entries(merged).sort(([a], [b]) => a.localeCompare(b)))
+        dependency_graph: build.dependency_graph,
+        last_execution: executionPlan(plan),
+        entries: Object.fromEntries(radixSortUtf8(Object.keys(build.entries))
+            .map(key => [key, build.entries[key]]))
     };
+    // This path is inside the dataset transaction's private staging directory.
+    // The complete manifest is written last, then the enclosing directory is
+    // atomically promoted by DatasetTransaction.commit().
     writeFileSync(resolve(datasetDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8');
     return manifest;
+}
+
+/** Fails before rendering when an explicit scope omits part of the affected closure. */
+export function assertDatasetGenerationScope(
+    previous: DatasetManifest | null,
+    build: DatasetManifestBuild,
+    scope: ManifestUpdateScope
+): DependencyDeltaPlan {
+    const plan = planDependencyDelta(previous?.dependency_graph ?? null, build.dependency_graph);
+    if (scope.fullDataset) return plan;
+    const affected = new Set(plan.affected_nodes);
+    const generators = new Set(scope.generatorIds);
+    const views = scope.viewIds ? new Set(scope.viewIds) : null;
+    const outsideScope = Object.entries(build.entries).filter(([, entry]) =>
+        !selectedPair(entry, scope, generators, views)
+        && entry.execution_nodes.some(id => affected.has(id))
+    );
+    if (outsideScope.length > 0) {
+        const first = outsideScope[0];
+        const causeNode = first[1].execution_nodes.find(id => affected.has(id))!;
+        const cause = explainAffectedNode(plan, causeNode) ?? causeNode;
+        throw new Error(
+            `Scoped generation affects ${outsideScope.length} generator/view pair(s) outside its selection; `
+            + `first is ${first[0]} via ${cause}. Run the broader affected scope or a full generation.`
+        );
+    }
+    return plan;
 }
 
 export function datasetFreshnessIssues(
     manifest: DatasetManifest | null,
     specName: string,
-    currentEntries: Record<string, DatasetManifestEntry>
+    currentBuild: DatasetManifestBuild
 ): string[] {
     if (!manifest) return ['manifest.json is missing; regenerate this dataset.'];
     const issues: string[] = [];
     if (manifest.schema_version !== DATASET_MANIFEST_SCHEMA_VERSION) {
         issues.push(`manifest schema ${manifest.schema_version} is not supported (expected ${DATASET_MANIFEST_SCHEMA_VERSION}).`);
     }
+    if (manifest.planner_epoch !== DEPENDENCY_PLANNER_EPOCH || manifest.complete !== true) {
+        issues.push('manifest dependency plan is incomplete or uses an unsupported planner epoch.');
+    }
     if (manifest.spec !== specName) issues.push(`manifest belongs to spec "${manifest.spec}", not "${specName}".`);
+    if (issues.length > 0) return issues;
 
-    for (const [key, current] of Object.entries(currentEntries)) {
+    for (const [key, current] of Object.entries(currentBuild.entries)) {
         const recorded = manifest.entries[key];
         if (!recorded) {
             issues.push(`${key} is missing from the manifest.`);
@@ -269,7 +690,21 @@ export function datasetFreshnessIssues(
         }
     }
     for (const key of Object.keys(manifest.entries)) {
-        if (!currentEntries[key]) issues.push(`${key} remains in the manifest but no longer matches the current spec.`);
+        if (!currentBuild.entries[key]) issues.push(`${key} remains in the manifest but no longer matches the current spec.`);
+    }
+
+    if (manifest.dependency_graph) {
+        const plan = planDependencyDelta(manifest.dependency_graph, currentBuild.dependency_graph);
+        const selectedNodes = new Set(Object.values(currentBuild.entries)
+            .flatMap(entry => entry.execution_nodes));
+        const affected = plan.affected_nodes.filter(id => selectedNodes.has(id));
+        if (affected.length > 0) {
+            const first = affected[0];
+            issues.push(
+                `${affected.length} selected dependency node(s) are stale; first affected path: `
+                + `${explainAffectedNode(plan, first) ?? first}.`
+            );
+        }
     }
     return issues;
 }
