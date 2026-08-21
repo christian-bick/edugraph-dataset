@@ -88,4 +88,8 @@ process.stdout.write(`${JSON.stringify({
     snapshot_id: snapshot.snapshot_id,
     generated_at: snapshot.generated_at,
     asset_count: snapshot.asset_count,
+    asset_blobs_written: snapshot.asset_blobs_written,
+    asset_blobs_reused: snapshot.asset_blobs_reused,
+    asset_links_created: snapshot.asset_links_created,
+    asset_bytes_written: snapshot.asset_bytes_written,
 })}\n`);

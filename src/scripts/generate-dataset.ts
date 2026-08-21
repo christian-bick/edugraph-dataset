@@ -32,18 +32,20 @@ import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
 import {
-    beginDatasetTransaction,
     DatasetRow,
     finalizeDatasetMetadata,
     mergeModuleMetadata
 } from '../lib/dataset-output.ts';
 import {
     assertDatasetGenerationScope,
+    affectedDatasetPairKeys,
     buildDatasetManifest,
+    createDatasetManifest,
     readDatasetManifest,
-    updateDatasetManifest
+    type ManifestUpdateScope,
 } from '../lib/dataset-manifest.ts';
-import {SourceContentIndex} from '../lib/content-identity.ts';
+import {radixSortUtf8, SourceContentIndex} from '../lib/content-identity.ts';
+import {beginDatasetStoreTransaction} from '../lib/dataset-store.ts';
 import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,6 +55,8 @@ const BASE_URL = process.env.RENDER_BASE_URL ?? 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
 const DEFAULT_PREFLIGHT_CONCURRENCY = 4;
 const MAX_ATTEMPTS = 50;
+
+const pairKey = (generatorId: string, viewId: string): string => `${generatorId}#${viewId}`;
 
 /**
  * One fully specified image to render: the sample identity plus everything
@@ -303,7 +307,9 @@ async function preflightViews(
 ): Promise<void> {
     if (views.length === 0) return;
     console.log(`Preflighting ${views.length} renderer view(s) at ${baseUrl}...`);
-    const queue = [...views].sort((a, b) => a.viewId.localeCompare(b.viewId));
+    const viewsById = new Map(views.map(view => [view.viewId, view]));
+    const queue = radixSortUtf8([...viewsById.keys()]).map(id => viewsById.get(id)!);
+    let queueIndex = 0;
     const failures: Error[] = [];
     let failed = false;
 
@@ -311,7 +317,7 @@ async function preflightViews(
         const context = await browser.newContext(RENDER_CONTEXT_OPTIONS);
         try {
             while (!failed) {
-                const view = queue.shift();
+                const view = queue[queueIndex++];
                 if (!view) break;
                 const page = await context.newPage();
                 const diagnostics = attachPageDiagnostics(page, baseUrl);
@@ -369,10 +375,13 @@ async function renderSamples(
 
     // Order by view to minimize page navigations; workers pull from a shared
     // queue, which is safe because every render is fully self-seeded.
-    const taskQueue = [...samples].sort((a, b) =>
-        a.identity.viewId.localeCompare(b.identity.viewId) || a.fileName.localeCompare(b.fileName)
-    );
+    const samplesByOrder = new Map(samples.map(sample => [
+        `${sample.identity.viewId}\0${sample.fileName}`,
+        sample
+    ]));
+    const taskQueue = radixSortUtf8([...samplesByOrder.keys()]).map(key => samplesByOrder.get(key)!);
     const totalTasks = taskQueue.length;
+    let taskIndex = 0;
     let attemptedTasks = 0;
     let completedTasks = 0;
     const metadata: DatasetRow[] = [];
@@ -386,7 +395,7 @@ async function renderSamples(
 
         try {
             while (true) {
-                const sample = taskQueue.shift();
+                const sample = taskQueue[taskIndex++];
                 if (!sample) break;
                 resetDiagnostics(diagnostics);
 
@@ -449,9 +458,8 @@ async function renderSamples(
                         seed: sample.seed,
                         content_fingerprint: sample.contentFingerprint,
                         task_fingerprint: sample.taskFingerprint,
-                        tags: (sample.problem.tags || []).map(shortenLabel).sort(),
-                        target_associations: [...sample.associatedTargetIds]
-                            .sort()
+                        tags: radixSortUtf8((sample.problem.tags || []).map(shortenLabel)),
+                        target_associations: radixSortUtf8([...sample.associatedTargetIds])
                             .map(targetId => ({spec: specName, target_id: targetId}))
                     });
 
@@ -610,7 +618,7 @@ async function main() {
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('Error: The --spec parameter is required.');
-        console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only]');
+        console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--affected] [--training-only]');
         console.error('Example: npm run generate:dataset -- --spec=test');
         console.error('Example: npm run generate:dataset -- --spec=ccss');
         process.exit(1);
@@ -632,6 +640,7 @@ async function main() {
 
     const targetModule = getCliOption(args, 'generator');
     const targetView = getCliOption(args, 'view');
+    const affectedOnly = args.includes('--affected');
     const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.includes('--training-only');
     const concurrencyOption = getCliOption(args, 'concurrency');
     const concurrency = concurrencyOption === undefined ? DEFAULT_CONCURRENCY : Number(concurrencyOption);
@@ -642,52 +651,46 @@ async function main() {
     const generatorCatalog = await loadGeneratorCatalog(undefined, counters);
     const fullViewCatalog = await loadViewCatalog(undefined, counters);
 
-    const modulesToRun = targetModule
+    const requestedModules = targetModule
         ? generatorCatalog.filter(g =>
             g.generatorId === targetModule || g.module.relativePath === targetModule || g.module.category === targetModule)
         : generatorCatalog;
 
-    const viewCatalog = targetView
+    const requestedViews = targetView
         ? fullViewCatalog.filter(v =>
             v.viewId === targetView || v.module.relativePath === targetView || v.module.category === targetView)
         : fullViewCatalog;
 
-    if (modulesToRun.length === 0) {
+    if (requestedModules.length === 0) {
         throw new Error(`No generator modules matched --generator=${targetModule}.`);
     }
-    if (viewCatalog.length === 0) {
+    if (requestedViews.length === 0) {
         throw new Error(`No views matched --view=${targetView}.`);
     }
 
-    const matchedTuples = matchTargets(
+    const requestedMatchedTuples = matchTargets(
         allTargets,
-        modulesToRun,
-        viewCatalog,
+        requestedModules,
+        requestedViews,
         {counters}
     ).tuples;
-    const matchedViewIds = new Set(matchedTuples.map(tuple => tuple.viewId));
-    if (matchedViewIds.size === 0) {
+    if (requestedMatchedTuples.length === 0) {
         throw new Error('The selected generation scope contains no matched generator-view tuples.');
     }
-    const viewsToPreflight = viewCatalog.filter(view => matchedViewIds.has(view.viewId));
-    const tuplesByGenerator = new Map<string, MatchTuple[]>();
-    for (const tuple of matchedTuples) {
-        const group = tuplesByGenerator.get(tuple.generatorId);
-        if (group) group.push(tuple);
-        else tuplesByGenerator.set(tuple.generatorId, [tuple]);
-    }
 
-    const generationScope = {
+    const requestedScope: ManifestUpdateScope = {
         fullDataset: !targetModule && !targetView,
-        generatorIds: modulesToRun.map(module => module.generatorId),
-        viewIds: targetView ? viewCatalog.map(view => view.viewId) : undefined
+        generatorIds: requestedModules.map(module => module.generatorId),
+        viewIds: targetView ? requestedViews.map(view => view.viewId) : undefined
     };
-    const allMatchedTuples = generationScope.fullDataset
-        ? matchedTuples
+    const allMatchedTuples = requestedScope.fullDataset
+        ? requestedMatchedTuples
         : matchTargets(allTargets, generatorCatalog, fullViewCatalog, {counters}).tuples;
     const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
-    if (!generationScope.fullDataset) {
-        const previousManifest = readDatasetManifest(outDir);
+    const previousManifest = readDatasetManifest(outDir);
+    let generationScope = requestedScope;
+    let matchedTuples = requestedMatchedTuples;
+    if (affectedOnly || !requestedScope.fullDataset) {
         const planningBuild = buildDatasetManifest({
             projectRoot: PROJECT_ROOT,
             datasetDir: outDir,
@@ -697,22 +700,60 @@ async function main() {
             views: fullViewCatalog,
             tuples: allMatchedTuples,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
-            rendererEnvironment: previousManifest?.entries
-                ? Object.values(previousManifest.entries)[0]?.renderer_environment
-                : undefined,
             sourceIndex,
             reuseImageIdentityFrom: previousManifest?.dependency_graph
         });
-        const plan = assertDatasetGenerationScope(previousManifest, planningBuild, generationScope);
+        const plan = assertDatasetGenerationScope(previousManifest, planningBuild, requestedScope);
         console.log(
             `Dependency plan: ${plan.changed_roots.length} changed root(s), `
             + `${plan.affected_nodes.length} affected node(s), ${plan.reuse_nodes.length} reusable node(s).`
         );
+        if (affectedOnly) {
+            if (plan.clean) {
+                if (!requestedScope.fullDataset) {
+                    throw new Error(
+                        'Affected-only generation has no trusted prior dependency state. '
+                        + 'Run one unfiltered full generation to establish the shard baseline.'
+                    );
+                }
+                console.log('Dependency delta unavailable; performing the required full baseline generation.');
+            } else {
+                const pairKeys = affectedDatasetPairKeys(plan, planningBuild, previousManifest);
+                if (pairKeys.length === 0) {
+                    console.log('Dependency plan is clean; no dataset pairs require rendering or publication.');
+                    console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
+                    return;
+                }
+                const selectedPairs = new Set(pairKeys);
+                generationScope = {
+                    fullDataset: false,
+                    pairKeys,
+                    generatorIds: radixSortUtf8([...new Set(pairKeys.map(key => key.split('#')[0]))])
+                };
+                matchedTuples = allMatchedTuples.filter(tuple =>
+                    selectedPairs.has(pairKey(tuple.generatorId, tuple.viewId)));
+                console.log(`Affected execution: ${pairKeys.length} exact generator/view pair(s).`);
+            }
+        }
+    }
+
+    const selectedGeneratorIds = new Set(generationScope.fullDataset
+        ? requestedModules.map(module => module.generatorId)
+        : generationScope.generatorIds);
+    const modulesToRun = requestedModules.filter(module => selectedGeneratorIds.has(module.generatorId));
+    const selectedViewIds = new Set(matchedTuples.map(tuple => tuple.viewId));
+    const viewCatalog = requestedViews.filter(view => selectedViewIds.has(view.viewId));
+    const viewsToPreflight = viewCatalog;
+    const tuplesByGenerator = new Map<string, MatchTuple[]>();
+    for (const tuple of matchedTuples) {
+        const group = tuplesByGenerator.get(tuple.generatorId);
+        if (group) group.push(tuple);
+        else tuplesByGenerator.set(tuple.generatorId, [tuple]);
     }
 
     const browser = await chromium.launch({ headless: true });
     const startTime = performance.now();
-    let transaction: ReturnType<typeof beginDatasetTransaction> | undefined;
+    let transaction: ReturnType<typeof beginDatasetStoreTransaction> | undefined;
 
     try {
         await preflightViews(
@@ -722,7 +763,7 @@ async function main() {
             Math.min(DEFAULT_PREFLIGHT_CONCURRENCY, concurrency)
         );
 
-        transaction = beginDatasetTransaction(outDir, generationScope);
+        transaction = beginDatasetStoreTransaction(outDir, generationScope);
 
         let totalImages = 0;
         const renderFailures: Error[] = [];
@@ -743,36 +784,43 @@ async function main() {
         }
 
         if (renderFailures.length > 0) {
-            renderFailures.sort((a, b) => a.message.localeCompare(b.message));
             console.error(`\nFAILED! ${renderFailures.length} render(s) failed after ${totalImages} successful image(s):`);
-            for (const failure of renderFailures) console.error(`- ${failure.message}`);
+            for (const message of radixSortUtf8(renderFailures.map(failure => failure.message))) {
+                console.error(`- ${message}`);
+            }
             throw new AggregateError(renderFailures, 'Dataset rendering completed with failures.');
         }
 
         finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.train);
         finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.val);
+        const candidate = transaction.prepare();
         const manifestBuild = buildDatasetManifest({
             projectRoot: PROJECT_ROOT,
-            datasetDir: transaction.stagingDir,
+            datasetDir: outDir,
             specName,
             targets: allTargets,
             generators: generatorCatalog,
             views: fullViewCatalog,
             tuples: allMatchedTuples,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
-            sourceIndex
+            sourceIndex,
+            datasetSnapshot: candidate
         });
         counters.add('dataset.source_directories_read', manifestBuild.source_stats.directories_read);
         counters.add('dataset.source_files_read', manifestBuild.source_stats.files_read);
         counters.add('dataset.source_bytes_read', manifestBuild.source_stats.bytes_read);
-        updateDatasetManifest({
+        const manifest = createDatasetManifest({
             projectRoot: PROJECT_ROOT,
-            datasetDir: transaction.stagingDir,
             specName,
             build: manifestBuild,
-            scope: generationScope
+            scope: generationScope,
+            previous: previousManifest
         });
-        transaction.commit();
+        transaction.commit(manifest);
+        const storeStats = transaction.stats();
+        counters.add('dataset.shards_written', storeStats.shards_written);
+        counters.add('dataset.shards_reused', storeStats.shards_reused);
+        counters.add('dataset.image_bytes_written', storeStats.image_bytes_written);
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(2);
         console.log(`\nDONE! Generated ${totalImages} images in ${duration}s.`);

@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import {existsSync} from 'node:fs';
 import { resolve } from 'node:path';
 import {
     buildAssetIndex,
@@ -11,7 +11,6 @@ import {
     claimFingerprint,
     emptyFingerprintIndex,
     groupIntoExercises,
-    parseMetadataLines,
     rowTargetAssociations,
     rowTaskFingerprint,
     selectUnionExercises,
@@ -21,6 +20,7 @@ import {
 import { datasetDirForSpec, datasetOutDir, UNION_DATASET_DIR } from './dataset-paths.ts';
 import { listUnionSpecs, loadTargets } from './generation.ts';
 import { normalizeAndValidateSpec, normalizeTargetLabels } from './spec-validator.ts';
+import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
 
 export interface AssetIndexBundle {
     index: AssetIndex;
@@ -38,21 +38,8 @@ interface SelectedRows {
 const localAssetKey = (split: AssetSplit, fileName: string): string =>
     `${split}/${fileName.replaceAll('\\', '/')}`;
 
-function readSpecSplit(projectRoot: string, specName: string, split: AssetSplit): MetadataRow[] {
-    const specDir = datasetOutDir(projectRoot, datasetDirForSpec(specName));
-    const splitDir = resolve(specDir, split);
-    if (!existsSync(splitDir)) return [];
-
-    return readdirSync(splitDir, { withFileTypes: true })
-        .filter(entry => entry.isDirectory())
-        .map(entry => entry.name)
-        .sort()
-        .flatMap(moduleName => {
-            const metadataPath = resolve(splitDir, moduleName, '.metadata.jsonl');
-            if (!existsSync(metadataPath)) return [];
-            return parseMetadataLines(readFileSync(metadataPath, 'utf-8'))
-                .map(row => ({ ...row, file_name: `${moduleName}/${row.file_name}` }));
-        });
+function readSpecSplit(snapshot: DatasetSnapshot, split: AssetSplit): MetadataRow[] {
+    return snapshot.rows(split === 'train' ? 'train' : 'val') as MetadataRow[];
 }
 
 function selectSplitRows(
@@ -70,8 +57,9 @@ function selectSplitRows(
 
     for (const specName of specNames) {
         const specDir = datasetOutDir(projectRoot, datasetDirForSpec(specName));
+        const snapshot = readDatasetSnapshot(specDir);
         const { kept, dropped } = selectUnionExercises(
-            groupIntoExercises(readSpecSplit(projectRoot, specName, split)),
+            groupIntoExercises(readSpecSplit(snapshot, split)),
             taskIndex,
             excludedContent,
         );
@@ -82,7 +70,7 @@ function selectSplitRows(
                 rows.push({ split, row });
                 localAssets.set(
                     localAssetKey(split, row.file_name),
-                    resolve(specDir, split, row.file_name),
+                    snapshot.imagePath(split === 'train' ? 'train' : 'val', row.sample_key),
                 );
             }
         }

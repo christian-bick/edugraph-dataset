@@ -1,11 +1,11 @@
-import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getCliOption } from '../lib/cli.ts';
 import { datasetOutDir, isUnionSpec, resolveDatasetDir } from '../lib/dataset-paths.ts';
-import { parseMetadataLines } from '../lib/dataset-merge.ts';
 import { DEFAULT_VAL_RATIO } from '../lib/generation.ts';
 import { buildSplitIntegrityReport, SplitIntegrityReport } from '../lib/split-report.ts';
+import {readDatasetSnapshot} from '../lib/dataset-store.ts';
+import type {MetadataRow} from '../lib/dataset-merge.ts';
 
 /**
  * Audits the train/validation split of a generated dataset: cross-split
@@ -23,11 +23,6 @@ const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 
 const MAX_LISTED = 12;
-
-function readSplit(outDir: string, splitDirName: string) {
-    const path = resolve(outDir, splitDirName, 'metadata.jsonl');
-    return existsSync(path) ? parseMetadataLines(readFileSync(path, 'utf-8')) : [];
-}
 
 function listCapped(items: string[], render: (item: string) => string) {
     for (const item of items.slice(0, MAX_LISTED)) console.log(render(item));
@@ -121,14 +116,15 @@ function main() {
 
     const datasetFolderName = resolveDatasetDir(specName);
     const outDir = datasetOutDir(PROJECT_ROOT, datasetFolderName);
+    const snapshot = readDatasetSnapshot(outDir);
 
     console.log(`--- Split Integrity Report [${datasetFolderName}] ---\n`);
 
-    const train = readSplit(outDir, 'train');
-    const val = readSplit(outDir, 'validation');
+    const train = snapshot.rows('train') as unknown as MetadataRow[];
+    const val = snapshot.rows('val') as unknown as MetadataRow[];
 
     if (train.length === 0) {
-        console.error(`❌ No train metadata found at ${outDir}/train/metadata.jsonl`);
+        console.error(`❌ No train metadata found in ${outDir}`);
         console.error(`Generate it first: npm run generate:dataset -- --spec=${specName}`);
         process.exit(1);
     }

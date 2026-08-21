@@ -51,6 +51,11 @@ describe('local explorer snapshots', () => {
             payload,
             '2026-08-16T12:01:00.000Z',
         );
+        expect(second).toMatchObject({
+            asset_blobs_written: 0,
+            asset_blobs_reused: 1,
+            asset_bytes_written: 0,
+        });
         const third = publishLocalExplorerSnapshot(
             resolve(root, 'snapshots'),
             payload,
@@ -63,6 +68,8 @@ describe('local explorer snapshots', () => {
         expect(readLatestLocalExplorerSnapshot(resolve(root, 'snapshots'))).toMatchObject({
             snapshot_id: third.snapshot_id,
             asset_count: 1,
+            asset_blobs_reused: 1,
+            asset_bytes_written: 0,
         });
         expect(readFileSync(resolve(third.directory, 'dataset/local/train/writing/sample.png'), 'utf-8'))
             .toBe('png');

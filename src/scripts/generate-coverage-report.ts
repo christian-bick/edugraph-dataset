@@ -1,11 +1,13 @@
-import { readFileSync, readdirSync, existsSync, writeFileSync } from 'fs';
-import { resolve, join } from 'path';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { basename, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { getCliOption } from '../lib/cli.ts';
-import { datasetOutDir, resolveDatasetDir } from '../lib/dataset-paths.ts';
+import { datasetOutDir, isUnionSpec, resolveDatasetDir } from '../lib/dataset-paths.ts';
+import {readDatasetSnapshot} from '../lib/dataset-store.ts';
+import {radixSortUtf8} from '../lib/content-identity.ts';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = join(__filename, '..');
+const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const args = process.argv.slice(2);
 const specName = getCliOption(args, 'spec');
@@ -15,13 +17,27 @@ if (!specName) {
     console.error('Pass --spec=union for the merged dataset across all standards.');
     process.exit(1);
 }
+const selectedSpec = specName;
 
 // A standard's own coverage, or --spec=union for the released dataset's.
-const OUT_DIR = datasetOutDir(PROJECT_ROOT, resolveDatasetDir(specName));
+const OUT_DIR = datasetOutDir(PROJECT_ROOT, resolveDatasetDir(selectedSpec));
 
 interface MetaEntry {
     tags: string[];
     [key: string]: any;
+}
+
+function descendingFrequency(
+    counts: Readonly<Record<string, number>>,
+    maximum: number
+): Array<[string, number]> {
+    const buckets: string[][] = Array.from({length: maximum + 1}, () => []);
+    for (const key of radixSortUtf8(Object.keys(counts))) buckets[counts[key]].push(key);
+    const ordered: Array<[string, number]> = [];
+    for (let count = maximum; count >= 0; count--) {
+        for (const key of buckets[count]) ordered.push([key, count]);
+    }
+    return ordered;
 }
 
 function generateReport() {
@@ -34,33 +50,26 @@ function generateReport() {
     const combinationCounts: Record<string, number> = {};
     let totalEntries = 0;
 
-    const splits = ['train', 'validation'];
-    const modules = readdirSync(join(OUT_DIR, 'train'), { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name);
+    const snapshot = readDatasetSnapshot(OUT_DIR);
+    const entries = [...snapshot.rows('train'), ...snapshot.rows('val')] as unknown as MetaEntry[];
+    const modules = radixSortUtf8([...new Set(entries.map(entry =>
+        typeof entry.generator === 'string'
+            ? entry.generator
+            : String(entry.file_name).split('/')[0]))]);
 
     console.log(`Analyzing dataset across modules: ${modules.join(', ')}...\n`);
 
-    for (const split of splits) {
-        const rootMetaPath = join(OUT_DIR, split, 'metadata.jsonl');
-        if (existsSync(rootMetaPath)) {
-            const fileContent = readFileSync(rootMetaPath, 'utf8');
-            const lines = fileContent.split('\n').filter(line => line.trim() !== '');
-            
-            for (const line of lines) {
-                const entry: MetaEntry = JSON.parse(line);
-                totalEntries++;
-                
-                // Independent Label Counts
-                for (const label of entry.tags) {
-                    labelCounts[label] = (labelCounts[label] || 0) + 1;
-                }
+    for (const entry of entries) {
+        totalEntries++;
 
-                // Combination Counts (sorted to ensure uniqueness)
-                const combo = [...entry.tags].sort().join(' | ');
-                combinationCounts[combo] = (combinationCounts[combo] || 0) + 1;
-            }
+        // Independent Label Counts
+        for (const label of entry.tags) {
+            labelCounts[label] = (labelCounts[label] || 0) + 1;
         }
+
+        // Combination Counts (sorted to ensure uniqueness)
+        const combo = radixSortUtf8(entry.tags).join(' | ');
+        combinationCounts[combo] = (combinationCounts[combo] || 0) + 1;
     }
 
     // --- Output Generation ---
@@ -70,7 +79,7 @@ function generateReport() {
     report += `## 1. Independent Label Frequency\n`;
     report += `| Label | Count | Percentage |\n`;
     report += `| :--- | :--- | :--- |\n`;
-    const sortedLabels = Object.entries(labelCounts).sort((a, b) => b[1] - a[1]);
+    const sortedLabels = descendingFrequency(labelCounts, totalEntries);
     for (const [label, count] of sortedLabels) {
         const percentage = ((count / totalEntries) * 100).toFixed(2);
         const cleanLabel = label.replace(/http:\/\/edugraph\.io\/edu[\/#]/g, '');
@@ -80,7 +89,7 @@ function generateReport() {
     report += `\n## 2. Label Combination Frequency\n`;
     report += `| Combination | Count | Percentage |\n`;
     report += `| :--- | :--- | :--- |\n`;
-    const sortedCombos = Object.entries(combinationCounts).sort((a, b) => b[1] - a[1]);
+    const sortedCombos = descendingFrequency(combinationCounts, totalEntries);
     for (const [combo, count] of sortedCombos) {
         const percentage = ((count / totalEntries) * 100).toFixed(2);
         // Remove the URI prefix and replace the pipe separator with something that doesn't break the Markdown table
@@ -90,7 +99,10 @@ function generateReport() {
         report += `| ${cleanCombo} | ${count} | ${percentage}% |\n`;
     }
 
-    const reportPath = resolve(OUT_DIR, 'coverage-report.md');
+    const reportPath = isUnionSpec(selectedSpec)
+        ? resolve(OUT_DIR, 'coverage-report.md')
+        : resolve(PROJECT_ROOT, 'out', 'reports', basename(OUT_DIR), 'coverage-report.md');
+    mkdirSync(dirname(reportPath), {recursive: true});
     writeFileSync(reportPath, report);
     console.log(`Report generated successfully at ${reportPath}`);
     

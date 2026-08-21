@@ -79,6 +79,7 @@ npm run merge:dataset
 *   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic-ops-pairs`).
 *   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
 *   `--training-only`: Skip validation set generation to speed up the process.
+*   `--affected`: Resolve and render only exact pairs reached from the persisted dependency delta.
 *   `--concurrency=N`: Set the bounded Playwright worker count (default: 8).)*
 
 Scoped generation is transactional and dependency-checked. Before rendering, the persisted graph
@@ -86,6 +87,14 @@ computes the affected generator/view closure; a scope that would leave stale sib
 with a causal-path diagnostic. A successful run replaces only the selected affected pairs, while
 any planning, preflight, generation, or render failure discards staged output and leaves the
 previous dataset intact.
+
+After the first full shard baseline, let the dependency graph select exact changed pairs:
+```bash
+npm run generate:dataset -- --spec=ccss --affected
+```
+An unchanged plan exits before Chromium. Standard datasets expose a tiny
+`out/dataset-<spec>/current.json` pointer to immutable shards under `out/.dataset-store/`; all
+repository readers consume that logical snapshot.
 
 **2. Generate Coverage Report**
 Analyze the generated dataset to ensure proper pedagogical label coverage and distribution.

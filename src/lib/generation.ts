@@ -18,6 +18,7 @@ import { ConfigSchema } from '../types/schema.ts';
 import { defineImplementationPackage } from './dataset-permutation-builder.ts';
 import { defineOntologyPackage, toOntologyTodo } from './ontology-todo.ts';
 import type {WorkCounters} from './work-counters.ts';
+import {radixSortUtf8} from './content-identity.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -470,7 +471,7 @@ export function findGeneratorsWithoutTestPath(
         else tuplesByGenerator.set(tuple.generatorId, [tuple]);
     }
 
-    return generatorCatalog
+    const uncovered = generatorCatalog
         .filter(entry => {
             const candidates = tuplesByGenerator.get(entry.generatorId) ?? [];
             return !candidates.some(tuple => {
@@ -494,19 +495,28 @@ export function findGeneratorsWithoutTestPath(
                 }
             });
         })
-        .map(entry => entry.generatorId)
-        .sort();
+        .map(entry => entry.generatorId);
+    return radixSortUtf8(uncovered);
 }
 
 function camelCase(str: string): string {
     return str.replace(/-([a-z0-9])/g, g => g[1].toUpperCase());
 }
 
+const generatorCatalogCache = new Map<string, readonly GeneratorCatalogEntry[]>();
+const viewCatalogCache = new Map<string, readonly ViewCatalogEntry[]>();
+
 export async function loadGeneratorCatalog(
     generatorsRoot: string = resolve(PROJECT_ROOT, 'src', 'generators'),
     counters?: WorkCounters
 ): Promise<GeneratorCatalogEntry[]> {
     counters?.add('catalog.generator_loads');
+    const catalogKey = resolve(generatorsRoot);
+    const cached = generatorCatalogCache.get(catalogKey);
+    if (cached) {
+        counters?.add('catalog.generator_cache_hits');
+        return [...cached];
+    }
     const entries: GeneratorCatalogEntry[] = [];
     const modules = findLeafModules(generatorsRoot);
     counters?.add('catalog.generator_discoveries');
@@ -540,7 +550,8 @@ export async function loadGeneratorCatalog(
             console.warn(`Could not load generator module ${mod.id}:`, e);
         }
     }
-    return entries;
+    generatorCatalogCache.set(catalogKey, entries);
+    return [...entries];
 }
 
 export async function loadViewCatalog(
@@ -548,6 +559,12 @@ export async function loadViewCatalog(
     counters?: WorkCounters
 ): Promise<ViewCatalogEntry[]> {
     counters?.add('catalog.view_loads');
+    const catalogKey = resolve(viewsRoot);
+    const cached = viewCatalogCache.get(catalogKey);
+    if (cached) {
+        counters?.add('catalog.view_cache_hits');
+        return [...cached];
+    }
     const viewToType = getViewToProblemTypeMap(counters);
     const entries: ViewCatalogEntry[] = [];
     const modules = findLeafModules(viewsRoot);
@@ -576,7 +593,14 @@ export async function loadViewCatalog(
             console.warn(`Could not load view module ${mod.id}:`, e);
         }
     }
-    return entries;
+    viewCatalogCache.set(catalogKey, entries);
+    return [...entries];
+}
+
+/** Clears process-local catalog state for watch-mode invalidation and isolated tests. */
+export function clearGenerationCatalogCaches(): void {
+    generatorCatalogCache.clear();
+    viewCatalogCache.clear();
 }
 
 /**
@@ -603,9 +627,8 @@ function resolveSpecFiles(specName: string, specRoot: string): string[] {
     }
 
     return specDir
-        ? readdirSync(specDir)
-            .filter(f => f.endsWith('.ts') && !f.startsWith(MODULE_META_PREFIX))
-            .sort()
+        ? radixSortUtf8(readdirSync(specDir)
+            .filter(f => f.endsWith('.ts') && !f.startsWith(MODULE_META_PREFIX)))
             .map(f => resolve(specDir, f))
         : [specFile!];
 }
@@ -643,22 +666,26 @@ export async function loadSpecMetadata(
         return { isolated: false, unionOrder: DEFAULT_UNION_ORDER };
     }
     const module = await import(pathToFileURL(metaPath).href);
+    const unionOrder = module.unionOrder ?? DEFAULT_UNION_ORDER;
+    if (!Number.isSafeInteger(unionOrder) || unionOrder < 0) {
+        throw new Error(`Spec unionOrder must be a non-negative safe integer: ${metaPath}.`);
+    }
     return {
         isolated: module.isolated === true,
-        unionOrder: typeof module.unionOrder === 'number' ? module.unionOrder : DEFAULT_UNION_ORDER,
+        unionOrder,
     };
 }
 
 /** Every spec module under the spec root, as directories or bare `.ts` files. */
 export function listSpecModules(specRoot: string = DEFAULT_SPEC_ROOT()): string[] {
     if (!existsSync(specRoot)) return [];
-    return readdirSync(specRoot)
+    const modules = readdirSync(specRoot)
         .filter(entry => {
             const entryPath = resolve(specRoot, entry);
             return lstatSync(entryPath).isDirectory() || entry.endsWith('.ts');
         })
-        .map(entry => entry.replace(/\.ts$/, ''))
-        .sort();
+        .map(entry => entry.replace(/\.ts$/, ''));
+    return radixSortUtf8(modules);
 }
 
 /**
@@ -672,9 +699,15 @@ export async function listUnionSpecs(specRoot: string = DEFAULT_SPEC_ROOT()): Pr
         const { isolated, unionOrder } = await loadSpecMetadata(specName, specRoot);
         if (!isolated) entries.push({ specName, unionOrder });
     }
-    return entries
-        .sort((a, b) => a.unionOrder - b.unionOrder || a.specName.localeCompare(b.specName))
-        .map(entry => entry.specName);
+    const byOrder = new Map<number, string[]>();
+    for (const entry of entries) {
+        const names = byOrder.get(entry.unionOrder);
+        if (names) names.push(entry.specName);
+        else byOrder.set(entry.unionOrder, [entry.specName]);
+    }
+    const orderByKey = new Map([...byOrder.keys()].map(order => [order.toString().padStart(16, '0'), order]));
+    return radixSortUtf8([...orderByKey.keys()]).flatMap(key =>
+        radixSortUtf8(byOrder.get(orderByKey.get(key)!) ?? []));
 }
 
 /**
@@ -1032,7 +1065,7 @@ function canonicalJson(value: any): string {
     if (Array.isArray(value)) {
         return '[' + value.map(v => canonicalJson(v)).join(',') + ']';
     }
-    const keys = Object.keys(value).filter(k => value[k] !== undefined).sort();
+    const keys = radixSortUtf8(Object.keys(value).filter(k => value[k] !== undefined));
     return '{' + keys.map(k => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',') + '}';
 }
 

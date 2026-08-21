@@ -6,6 +6,7 @@ import {
     DATASET_MANIFEST_SCHEMA_VERSION,
     DatasetManifest,
     DatasetManifestEntry,
+    affectedDatasetPairKeys,
     buildDatasetManifest,
     datasetGlobalSourceHash,
     datasetFreshnessIssues,
@@ -139,6 +140,24 @@ describe('datasetGlobalSourceHash', () => {
 });
 
 describe('updateDatasetManifest', () => {
+    it('selects exact current and removed pairs from a delta', () => {
+        const graph = (sourceHash: string, pair: string) => createDependencyGraphSnapshot([
+            {id: 'source:module', kind: 'source-file', input_hash: sourceHash, dependencies: []},
+            {id: `pair:${pair}`, kind: 'generator-view-pair', input_hash: pair, dependencies: ['source:module']}
+        ]);
+        const previousGraph = graph('before', 'writing#old-view');
+        const currentGraph = graph('after', 'writing#new-view');
+        const plan = planDependencyDelta(previousGraph, currentGraph);
+        const oldEntry = {...entry, view: 'old-view', execution_nodes: ['pair:writing#old-view']};
+        const newEntry = {...entry, view: 'new-view', execution_nodes: ['pair:writing#new-view']};
+
+        expect(affectedDatasetPairKeys(
+            plan,
+            build({'writing#new-view': newEntry}, currentGraph),
+            manifest({dependency_graph: previousGraph, entries: {'writing#old-view': oldEntry}})
+        )).toEqual(['writing#new-view', 'writing#old-view']);
+    });
+
     it('replaces only entries inside a scoped generation transaction', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-manifest-'));
         const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');

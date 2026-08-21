@@ -150,11 +150,14 @@ The manifest records only the complete `edugraph-ts` dependency version. An onto
 
 Each generated pair must instead depend on the closure of ontology entities it actually uses: target labels, generator and view capability labels, relevant ancestor relations, and any definitions used by validation. If that closure cannot be compared during development, the external update must not trigger global invalidation.
 
-### Static checks are full-repository operations
+### Static checks have separate development and release entry points
 
-The main quality gate runs the full TypeScript check, test suite, generator/view validation, label validation, documentation validation, standards-spec validation, and reports. Existing command-line scopes are manual filters, not an automatic changed-file dependency plan.
-
-Incremental TypeScript state, affected-test selection, cached module catalogs, and explicit validator dependency sets are required for development deltas.
+`npm run check` remains the complete repository/release gate. Development uses
+`npm run check:affected`, which maps Git or explicit changed files to incremental TypeScript,
+related Vitest tests, contract/label/documentation/generator-coverage validators, and affected
+production specs. The plan prints its causal files and supports `--plan-only`; it never silently
+turns a scoped request into a full check. Module discovery and generator/view catalogs are cached
+for the life of an operation, and multi-spec matching validation shares one catalog load.
 
 ## Implementation plan
 
@@ -218,8 +221,9 @@ earlier active workflow.
    pairs by set intersection instead of testing every compatible pair.
 9. Separate production matching from diagnostic explanation. Matches and existence queries must
    not construct rejection records; explicit diagnostics may request them.
-10. Load each VQA module cache once, resolve and hash each checklist once, read each required image
-   once, and calculate each active validation key once.
+10. Load each VQA module cache once, resolve and hash each checklist once, calculate each active
+    validation key once from immutable identities, and read image bytes only for misses/forced
+    evaluation or the independent release integrity pass.
 11. Build VQA reports from the in-memory validation state rather than rescanning files and caches.
 12. Remove the remaining known input-sized rescans, repeated discovery, `shift()` queues, and
    non-linear ordering operations from active generation and validation paths.
@@ -337,6 +341,23 @@ development workflows.
 8. Cache module discovery, parsed specs, type compatibility, and ontology ancestry.
 9. Run only the affected closure during development while retaining a linear repository-wide
    release check.
+
+**Status: complete.** Standard datasets now publish a tiny atomic `current.json` pointer over
+immutable content-addressed `(generator, view, split)` shards and complete generation manifests.
+Scoped publication stages and writes only selected shards; `--affected` derives exact pair units
+from the dependency graph, exits before Chromium on a clean plan, and visibly requires one full
+baseline when trusted delta state is unavailable. Every dataset consumer used by merge, split and
+coverage reports, asset indexing, VQA, and the repository check reads the logical manifest-backed
+snapshot, while the released union remains a deliberate linear materialization.
+
+VQA constructs cache keys from immutable shard identities and opens PNG bytes only for cache
+misses, forced evaluations, or the separate full audit integrity pass. Local explorer snapshots
+admit each PNG once to a content-addressed pool and hard-link unchanged assets into later
+snapshots. TypeScript uses ignored incremental state; `check:affected` selects related tests and
+validators with explicit reasons. Module discovery and catalogs join the existing type-graph and
+ontology-ancestry caches. Store, planner, snapshot, catalog, and changed-file tests cover exact-pair
+replacement, legacy migration refusal, immutable reuse, corruption detection, and bounded
+classification work.
 
 #### Phase 6: process external updates as semantic deltas
 
@@ -480,8 +501,8 @@ No generator/view redesign is required to begin this work. The repository alread
 - immutable explorer snapshots;
 - content-derived VQA validation keys.
 
-Phase 4 supplies the shared, persistent dependency graph and delta scheduler. The remaining work is
-adoption: Phase 5 moves mutable dataset and explorer outputs behind immutable shards and applies
-the affected-only plan to VQA, tests, type checking, and validators; Phase 6 replaces aggregate
-external identities with reliable record/entity deltas. The existing primitives should continue
-to converge on the shared planner rather than growing independent invalidation systems.
+Phase 4 supplies the shared, persistent dependency graph and delta scheduler. Phase 5 places
+mutable dataset and explorer outputs behind immutable stores and applies affected-only execution
+to rendering, VQA, tests, type checking, and validators. The remaining performance work is Phase 6:
+replace aggregate external identities with reliable record/entity deltas. Existing workflows must
+continue to converge on the shared planner rather than growing independent invalidation systems.

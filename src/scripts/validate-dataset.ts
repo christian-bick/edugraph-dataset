@@ -31,6 +31,11 @@ import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { auditVqaCache, type ExpectedVqaCacheRecord } from '../lib/vqa-cache-audit.ts';
 import { CANONICAL_RENDERER_ID } from '../lib/render-environment.ts';
 import {createWorkCounters} from '../lib/work-counters.ts';
+import {
+    readDatasetSnapshot,
+    verifyDatasetSnapshotIntegrity,
+    type DatasetSnapshot
+} from '../lib/dataset-store.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,6 +45,7 @@ const CACHE_DIR = resolve(PROJECT_ROOT, "cache", "vqa-validation");
 
 /** The dataset's root — every split folder hangs off it. */
 let DATASET_DIR = resolve(PROJECT_ROOT, "out", "dataset");
+let DATASET_SNAPSHOT: DatasetSnapshot;
 
 /**
  * Both splits are validated. The split is not in the filename, so an image is
@@ -51,7 +57,8 @@ function splitDirOf(entry: any): string {
 }
 
 function imagePathFor(entry: any): string {
-    return resolve(DATASET_DIR, splitDirOf(entry), entry.file_name);
+    const split = parseSampleKey(entry.sample_key).split;
+    return DATASET_SNAPSHOT.imagePath(split, entry.sample_key);
 }
 
 /**
@@ -96,11 +103,13 @@ function datasetStructureIssues(entries: any[], missingSplits: SampleSplit[]): s
         if (!existsSync(imagePath)) issues.push(`Metadata image is missing: ${displayPathOf(entry)}.`);
     }
 
-    for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
-        const splitRoot = resolve(DATASET_DIR, SPLIT_DIRS[split]);
-        for (const imagePath of pngFilesBelow(splitRoot)) {
-            if (!imagePaths.has(imagePath)) {
-                issues.push(`Image is not referenced by metadata: ${relative(DATASET_DIR, imagePath).replace(/\\/g, '/')}.`);
+    if (DATASET_SNAPSHOT.generationId === null) {
+        for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
+            const splitRoot = resolve(DATASET_DIR, SPLIT_DIRS[split]);
+            for (const imagePath of pngFilesBelow(splitRoot)) {
+                if (!imagePaths.has(imagePath)) {
+                    issues.push(`Image is not referenced by metadata: ${relative(DATASET_DIR, imagePath).replace(/\\/g, '/')}.`);
+                }
             }
         }
     }
@@ -132,9 +141,20 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
 
 async function evaluateSingleSample(
     sample: PreparedVqaSample,
-    logPrompt: boolean
+    logPrompt: boolean,
+    counters: ReturnType<typeof createWorkCounters>
 ): Promise<any> {
     const {entry} = sample;
+    if (!sample.imageBuffer) {
+        sample.imageBuffer = readFileSync(sample.imagePath);
+        counters.add('vqa.image_file_reads');
+        counters.add('vqa.image_bytes_read', sample.imageBuffer.byteLength);
+        const actualSha256 = computeImageSha256(sample.imageBuffer);
+        if (sample.imageSha256 && sample.imageSha256 !== actualSha256) {
+            throw new Error(`Dataset image changed after manifest resolution: ${displayPathOf(entry)}.`);
+        }
+        sample.imageSha256 = actualSha256;
+    }
     const result = await evaluateSampleVqa({
         imagePath: sample.imagePath,
         sampleKey: entry.sample_key,
@@ -213,6 +233,7 @@ async function main() {
     }
 
     DATASET_DIR = resolve(PROJECT_ROOT, 'out', datasetFolderName);
+    DATASET_SNAPSHOT = readDatasetSnapshot(DATASET_DIR);
 
     console.log(`--- Starting Automated Modular VQA ${auditMode ? '(AUDIT MODE)' : ''} [Dataset: ${datasetFolderName}] ---`);
 
@@ -221,10 +242,9 @@ async function main() {
     const entries: any[] = [];
     const presentSplits: SampleSplit[] = [];
     for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
-        const metaPath = resolve(DATASET_DIR, SPLIT_DIRS[split], 'metadata.jsonl');
-        if (!existsSync(metaPath)) continue;
-        const lines = readFileSync(metaPath, 'utf-8').split('\n').filter(l => l.trim() !== '');
-        entries.push(...lines.map(l => JSON.parse(l)));
+        const rows = DATASET_SNAPSHOT.rows(split);
+        if (rows.length === 0) continue;
+        entries.push(...rows);
         presentSplits.push(split);
     }
 
@@ -354,10 +374,8 @@ async function main() {
         const imagePath = imagePathFor(entry);
         if (!existsSync(imagePath)) return {entry, imagePath};
 
-        const imageBuffer = readFileSync(imagePath);
-        counters.add('vqa.image_file_reads');
-        counters.add('vqa.image_bytes_read', imageBuffer.byteLength);
-        const imageSha256 = computeImageSha256(imageBuffer);
+        const split = parseSampleKey(entry.sample_key).split;
+        const imageSha256 = DATASET_SNAPSHOT.imageIdentity(split, entry.sample_key).sha256;
         const checklist = checklistFor(entry.view);
         const validationContext = validationContextResolver.resolve(
             imageSha256,
@@ -368,7 +386,6 @@ async function main() {
         return {
             entry,
             imagePath,
-            imageBuffer,
             imageSha256,
             checklistPaths: checklist.paths,
             checklistContents: checklist.contents,
@@ -398,7 +415,13 @@ async function main() {
     }
 
     if (auditMode) {
-        const structureIssues = datasetStructureIssues(filtered, missingSplits);
+        const integrity = verifyDatasetSnapshotIntegrity(DATASET_SNAPSHOT);
+        counters.add('dataset.integrity_files_read', integrity.files_verified);
+        counters.add('dataset.integrity_bytes_read', integrity.bytes_read);
+        const structureIssues = [
+            ...datasetStructureIssues(filtered, missingSplits),
+            ...integrity.issues
+        ];
         const cacheAudit = auditVqaCache(
             resolve(CACHE_DIR, datasetFolderName),
             expectedCacheRecords,
@@ -517,7 +540,7 @@ async function main() {
             renderProgressBar(0, toEvaluate.length, evalPassed, evalFailed);
 
             await runPool(toEvaluate, evaluationConcurrency, async (sample) => {
-                const record = await evaluateSingleSample(sample, logPrompts);
+                const record = await evaluateSingleSample(sample, logPrompts, counters);
                 processed++;
                 if (record) {
                     const mgr = cacheManagerFor(record.moduleName);

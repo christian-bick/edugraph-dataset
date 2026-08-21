@@ -1,5 +1,5 @@
 import {createHash} from 'node:crypto';
-import {existsSync, readFileSync, writeFileSync} from 'node:fs';
+import {readFileSync, writeFileSync} from 'node:fs';
 import {basename, resolve} from 'node:path';
 import {
     GeneratorCatalogEntry,
@@ -14,7 +14,6 @@ import {partOf, type CompetencyDescriptor} from 'edugraph-ts';
 import {currentRendererEnvironment} from './render-environment.ts';
 import {
     SourceContentIndex,
-    digestFile,
     digestIdentity,
     radixSortUtf8,
     type SourceContentIndexStats
@@ -28,6 +27,7 @@ import {
     type DependencyGraphSnapshot,
     type DependencyNode
 } from './dependency-planner.ts';
+import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
 
 export const DATASET_MANIFEST_SCHEMA_VERSION = 3;
 const GENERATION_PIPELINE_VERSION = 'dependency-plan-v1';
@@ -68,6 +68,7 @@ export interface ManifestUpdateScope {
     fullDataset: boolean;
     generatorIds: string[];
     viewIds?: string[];
+    pairKeys?: string[];
 }
 
 interface DatasetManifestRow {
@@ -199,15 +200,11 @@ export function datasetGlobalSourceHash(
     ], {include: includeRenderSource});
 }
 
-function readDatasetRows(datasetDir: string): DatasetManifestRow[] {
+function readDatasetRows(snapshot: DatasetSnapshot): DatasetManifestRow[] {
     const rows: DatasetManifestRow[] = [];
     for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
-        const metadataPath = resolve(datasetDir, SPLIT_DIRS[split], 'metadata.jsonl');
-        if (!existsSync(metadataPath)) continue;
-        rows.push(...readFileSync(metadataPath, 'utf-8')
-            .split('\n')
-            .filter(line => line.trim() !== '')
-            .map(line => ({...JSON.parse(line), _split: split}) as DatasetManifestRow));
+        rows.push(...snapshot.rows(split)
+            .map(row => ({...row, _split: split}) as DatasetManifestRow));
     }
     return rows;
 }
@@ -261,6 +258,7 @@ export function buildDatasetManifest(options: {
     tuples?: readonly MatchTuple[];
     sourceIndex?: SourceContentIndex;
     reuseImageIdentityFrom?: DependencyGraphSnapshot;
+    datasetSnapshot?: DatasetSnapshot;
 }): DatasetManifestBuild {
     const {
         projectRoot,
@@ -273,12 +271,13 @@ export function buildDatasetManifest(options: {
         rendererEnvironment = currentRendererEnvironment(),
         tuples: preparedTuples,
         sourceIndex = new SourceContentIndex(projectRoot),
-        reuseImageIdentityFrom
+        reuseImageIdentityFrom,
+        datasetSnapshot = readDatasetSnapshot(datasetDir)
     } = options;
     const tuples = preparedTuples ?? matchTargets(targets, generators, views).tuples;
     const ontology = ontologyDependency(projectRoot);
     const nodes = new Map<string, DependencyNode>();
-    const rows = readDatasetRows(datasetDir);
+    const rows = readDatasetRows(datasetSnapshot);
     const rowsByPair = new Map<string, DatasetManifestRow[]>();
     for (const row of rows) {
         const key = pairKey(row.generator, row.view);
@@ -477,16 +476,13 @@ export function buildDatasetManifest(options: {
         const executionNodes = executionNodesByPair.get(key);
         if (!nodes.has(pairNodeId) || !executionNodes) continue;
         const imageId = nodeId('image', row.sample_key);
-        const imagePath = resolve(datasetDir, SPLIT_DIRS[row._split], row.file_name);
         const reusableImage = reuseImageIdentityFrom?.nodes[imageId];
         const imageDigest = reusableImage?.output
             ? {
                 sha256: reusableImage.output.content_hash,
                 bytes: reusableImage.output.bytes ?? 0
             }
-            : existsSync(imagePath)
-                ? digestFile(imagePath)
-                : {sha256: 'missing', bytes: 0};
+            : datasetSnapshot.imageIdentity(row._split, row.sample_key);
         const rowTargetNodes = targetIdsOf(row)
             .map(targetId => targetNodeByTarget.get(targetId))
             .filter((id): id is string => Boolean(id));
@@ -584,18 +580,19 @@ export function buildDatasetManifest(options: {
 }
 
 export function readDatasetManifest(datasetDir: string): DatasetManifest | null {
-    const path = resolve(datasetDir, 'manifest.json');
-    if (!existsSync(path)) return null;
-    return JSON.parse(readFileSync(path, 'utf-8')) as DatasetManifest;
+    return (readDatasetSnapshot(datasetDir).buildManifest as DatasetManifest | null) ?? null;
 }
 
 function selectedPair(
+    key: string,
     entry: DatasetManifestEntry,
     scope: ManifestUpdateScope,
     generators: ReadonlySet<string>,
-    views: ReadonlySet<string> | null
+    views: ReadonlySet<string> | null,
+    pairs: ReadonlySet<string> | null
 ): boolean {
     if (scope.fullDataset) return true;
+    if (pairs) return pairs.has(key);
     return generators.has(entry.generator) && (!views || views.has(entry.view));
 }
 
@@ -613,9 +610,21 @@ export function updateDatasetManifest(options: {
 }): DatasetManifest {
     const {projectRoot, datasetDir, specName, build, scope} = options;
     const previous = readDatasetManifest(datasetDir);
-    const plan = assertDatasetGenerationScope(previous, build, scope);
+    const manifest = createDatasetManifest({projectRoot, specName, build, scope, previous});
+    writeFileSync(resolve(datasetDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8');
+    return manifest;
+}
 
-    const manifest: DatasetManifest = {
+export function createDatasetManifest(options: {
+    projectRoot: string;
+    specName: string;
+    build: DatasetManifestBuild;
+    scope: ManifestUpdateScope;
+    previous: DatasetManifest | null;
+}): DatasetManifest {
+    const {projectRoot, specName, build, scope, previous} = options;
+    const plan = assertDatasetGenerationScope(previous, build, scope);
+    return {
         schema_version: DATASET_MANIFEST_SCHEMA_VERSION,
         planner_epoch: DEPENDENCY_PLANNER_EPOCH,
         complete: true,
@@ -627,11 +636,26 @@ export function updateDatasetManifest(options: {
         entries: Object.fromEntries(radixSortUtf8(Object.keys(build.entries))
             .map(key => [key, build.entries[key]]))
     };
-    // This path is inside the dataset transaction's private staging directory.
-    // The complete manifest is written last, then the enclosing directory is
-    // atomically promoted by DatasetTransaction.commit().
-    writeFileSync(resolve(datasetDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8');
-    return manifest;
+}
+
+/** Resolves exact current and removed pair units reached by a dependency delta. */
+export function affectedDatasetPairKeys(
+    plan: DependencyDeltaPlan,
+    build: DatasetManifestBuild,
+    previous: DatasetManifest | null
+): string[] {
+    const affected = new Set(plan.affected_nodes);
+    const keys = new Set<string>();
+    for (const [key, entry] of new Map([
+        ...Object.entries(previous?.entries ?? {}),
+        ...Object.entries(build.entries)
+    ])) {
+        if (entry.execution_nodes.some(node => affected.has(node))) keys.add(key);
+    }
+    for (const node of plan.removed_nodes) {
+        if (node.startsWith('pair:')) keys.add(node.slice('pair:'.length));
+    }
+    return radixSortUtf8([...keys]);
 }
 
 /** Fails before rendering when an explicit scope omits part of the affected closure. */
@@ -641,12 +665,17 @@ export function assertDatasetGenerationScope(
     scope: ManifestUpdateScope
 ): DependencyDeltaPlan {
     const plan = planDependencyDelta(previous?.dependency_graph ?? null, build.dependency_graph);
-    if (scope.fullDataset) return plan;
+    if (scope.fullDataset || plan.clean) return plan;
     const affected = new Set(plan.affected_nodes);
     const generators = new Set(scope.generatorIds);
     const views = scope.viewIds ? new Set(scope.viewIds) : null;
-    const outsideScope = Object.entries(build.entries).filter(([, entry]) =>
-        !selectedPair(entry, scope, generators, views)
+    const pairs = scope.pairKeys ? new Set(scope.pairKeys) : null;
+    const entries = new Map([
+        ...Object.entries(previous?.entries ?? {}),
+        ...Object.entries(build.entries)
+    ]);
+    const outsideScope = [...entries].filter(([key, entry]) =>
+        !selectedPair(key, entry, scope, generators, views, pairs)
         && entry.execution_nodes.some(id => affected.has(id))
     );
     if (outsideScope.length > 0) {

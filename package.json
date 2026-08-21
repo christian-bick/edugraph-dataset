@@ -15,6 +15,7 @@
     "test:all": "vitest --run",
     "test:coverage": "vitest run --coverage && npx vite-node src/scripts/check-generator-coverage.ts",
     "check": "vite-node src/scripts/check-all.ts",
+    "check:affected": "vite-node src/scripts/check-affected.ts",
     "check:labels": "vite-node src/scripts/check-labels.ts",
     "check:generator-view-specs": "vite-node src/scripts/validate-generator-view-specs.ts",
     "check:standards-spec": "vite-node src/scripts/validate-standards-spec.ts",
