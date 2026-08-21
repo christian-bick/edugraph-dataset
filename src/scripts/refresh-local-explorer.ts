@@ -15,9 +15,11 @@ import {
 } from '../lib/coverage-identity.ts';
 import {digestIdentity} from '../lib/content-identity.ts';
 import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
+import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const snapshotRoot = resolve(projectRoot, 'temp', 'standards-explorer-preview');
+const coreCacheRoot = resolve(projectRoot, 'temp', 'coverage-core');
 const generatedAt = new Date().toISOString();
 const reportProgress = (message: string): void => {
     process.stdout.write(`${JSON.stringify({type: 'progress', message})}\n`);
@@ -31,20 +33,13 @@ const pinnedStandards = await loadPinnedStandardsSource({
     projectRoot,
     report: message => console.error(`[External input] ${message}`)
 });
-const tree = pinnedStandards.tree;
+const sourceTree = pinnedStandards.tree;
 const ontology = resolveOntologyProvenance(projectRoot);
 reportProgress('Indexing generated samples and target labels…');
 const assets = await buildAssetIndexBundle({
     projectRoot,
     repository: 'local',
     revision: 'working-tree',
-});
-reportProgress('Computing current standards coverage…');
-const coverage = await buildCurrentStandardsCoverage({
-    standardsMap: tree.standardsMap,
-    ontologyVersion: ontology.version,
-    generatedAt,
-    knownAssets: assets.index,
 });
 const inputs = buildCoverageInputIdentity({
     projectRoot,
@@ -54,6 +49,23 @@ const inputs = buildCoverageInputIdentity({
     ontology,
     knownAssetsSha256: digestIdentity(assets.index)
 });
+reportProgress('Resolving current standards coverage…');
+const core = await resolveCoverageCore({
+    root: coreCacheRoot,
+    inputs,
+    build: async () => ({
+        tree: sourceTree,
+        coverage: await buildCurrentStandardsCoverage({
+            standardsMap: sourceTree.standardsMap,
+            ontologyVersion: ontology.version,
+            generatedAt,
+            knownAssets: assets.index,
+        })
+    })
+});
+console.error(`[Coverage core] ${core.reused ? 'HIT' : 'MISS'} ${core.artifact.core_input_key}`);
+const tree = core.artifact.tree;
+const coverage = projectCoverageData(core.artifact.coverage, generatedAt);
 const manifest = buildCoverageManifest({
     channel: 'preview',
     inputs,

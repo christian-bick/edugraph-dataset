@@ -1,0 +1,40 @@
+name: Prepare immutable coverage core
+description: Resolve and restore the exact-key standards coverage core shared by CI, release, and deployment.
+
+inputs:
+  source-ref:
+    description: Human-readable repository ref for the output projection.
+    required: true
+  source-sha:
+    description: Exact repository commit represented by the coverage core.
+    required: true
+
+outputs:
+  core-input-key:
+    description: Complete immutable input key for the core coverage artifact.
+    value: ${{ steps.identity.outputs.core_input_key }}
+  cache-hit:
+    description: Whether the exact immutable core was restored.
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - id: identity
+      name: Resolve complete coverage input key
+      shell: bash
+      run: >-
+        npm run resolve:coverage-key --
+        --source-ref="${{ inputs.source-ref }}"
+        --source-sha="${{ inputs.source-sha }}"
+        --github-output="$GITHUB_OUTPUT"
+
+    - id: cache
+      name: Restore immutable coverage core
+      uses: actions/cache@v5
+      with:
+        path: |
+          temp/coverage-core/${{ steps.identity.outputs.core_input_key }}
+          temp/common-core/standards.jsonl
+          temp/common-core/domain_groups.json
+        key: coverage-core-v1-${{ steps.identity.outputs.core_input_key }}

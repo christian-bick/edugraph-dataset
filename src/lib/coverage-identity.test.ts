@@ -78,6 +78,35 @@ describe('coverage input identity', () => {
         }
     });
 
+    it('treats source refs as projections while retaining immutable source identity', () => {
+        const root = fixture();
+        try {
+            const main = buildCoverageInputIdentity({
+                projectRoot: root,
+                sourceRef: 'main',
+                sourceSha: 'd'.repeat(40),
+                standards
+            });
+            const release = buildCoverageInputIdentity({
+                projectRoot: root,
+                sourceRef: 'v1.2.3',
+                sourceSha: 'd'.repeat(40),
+                standards
+            });
+            expect(coverageInputKey(main)).toBe(coverageInputKey(release));
+
+            const differentCommit = buildCoverageInputIdentity({
+                projectRoot: root,
+                sourceRef: 'main',
+                sourceSha: 'e'.repeat(40),
+                standards
+            });
+            expect(coverageInputKey(differentCommit)).not.toBe(coverageInputKey(main));
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+
     it('ignores tests but changes identity for runtime source changes', () => {
         const root = fixture();
         try {

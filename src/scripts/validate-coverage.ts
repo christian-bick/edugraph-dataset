@@ -3,8 +3,14 @@ import path from 'path';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import {
   coverageManifestIdentityIssues,
-  resolveOntologyProvenance
+  resolveOntologyProvenance,
+  toCoverageCoreInputIdentity
 } from '../lib/coverage-identity.ts';
+import {
+  projectCoverageData,
+  readCoverageCoreArtifact
+} from '../lib/coverage-core.ts';
+import {digestIdentity} from '../lib/content-identity.ts';
 import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
 
@@ -14,7 +20,12 @@ const coverageDirArg = process.argv.slice(2)
   ?.slice('--coverage-dir='.length);
 const COVERAGE_DIR = path.resolve(PROJECT_ROOT, coverageDirArg || path.join('public', 'coverage', 'preview'));
 const COVERAGE_PATH = path.join(COVERAGE_DIR, 'ccss-coverage.json');
+const TREE_PATH = path.join(COVERAGE_DIR, 'ccss-tree.json');
 const MANIFEST_PATH = path.join(COVERAGE_DIR, 'coverage-manifest.json');
+const coreCacheDirArg = process.argv.slice(2)
+  .find(arg => arg.startsWith('--core-cache-dir='))
+  ?.slice('--core-cache-dir='.length);
+const CORE_CACHE_DIR = path.resolve(PROJECT_ROOT, coreCacheDirArg || path.join('temp', 'coverage-core'));
 
 interface ValidationResult {
   passed: boolean;
@@ -33,6 +44,12 @@ async function runValidation() {
     printReport(result);
     return;
   }
+  if (!fs.existsSync(TREE_PATH)) {
+    result.errors.push(`Coverage tree not found at: ${TREE_PATH}`);
+    result.passed = false;
+    printReport(result);
+    return;
+  }
   if (!fs.existsSync(MANIFEST_PATH)) {
     result.errors.push(`Coverage manifest not found at: ${MANIFEST_PATH}`);
     result.passed = false;
@@ -47,6 +64,7 @@ async function runValidation() {
 
   // 2. Load data
   const coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
+  const treeData = JSON.parse(fs.readFileSync(TREE_PATH, 'utf-8'));
   const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) as CoverageManifest;
   const standardsLines = fs.readFileSync(standardsPath, 'utf-8').split('\n');
 
@@ -58,6 +76,29 @@ async function runValidation() {
   });
   result.errors.push(...identityIssues);
   if (identityIssues.length > 0) result.passed = false;
+  if (manifest.schema_version === 3 && manifest.inputs && manifest.core_input_key) {
+    const core = readCoverageCoreArtifact({
+      root: CORE_CACHE_DIR,
+      key: manifest.core_input_key,
+      expectedInputs: toCoverageCoreInputIdentity(manifest.inputs)
+    });
+    if (!core) {
+      result.errors.push(
+        `Coverage core ${manifest.core_input_key} is missing from ${CORE_CACHE_DIR}.`
+      );
+      result.passed = false;
+    } else {
+      const projectedCoverage = projectCoverageData(core.coverage, manifest.generated_at);
+      if (digestIdentity(core.tree) !== digestIdentity(treeData)) {
+        result.errors.push('Coverage tree does not match its immutable core artifact.');
+        result.passed = false;
+      }
+      if (digestIdentity(projectedCoverage) !== digestIdentity(coverageData)) {
+        result.errors.push('Coverage data does not match its immutable core artifact projection.');
+        result.passed = false;
+      }
+    }
+  }
   if (manifest.channel !== 'latest' && manifest.channel !== 'preview') {
     result.errors.push(`Invalid coverage manifest channel: ${manifest.channel}`);
     result.passed = false;

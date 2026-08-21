@@ -37,6 +37,15 @@ export interface CoverageInputIdentity {
     selection: CoverageSelectionIdentity;
 }
 
+export interface CoverageCoreInputIdentity {
+    schema_version: number;
+    producer_epoch: string;
+    repository: Omit<RepositoryProvenance, 'ref'>;
+    standards: StandardsProvenance;
+    ontology: OntologyProvenance;
+    selection: CoverageSelectionIdentity;
+}
+
 const isRuntimeSource = (path: string): boolean =>
     !path.endsWith('.test.ts')
     && !path.endsWith('.test.tsx')
@@ -108,8 +117,28 @@ export function buildCoverageInputIdentity(options: {
     };
 }
 
-export function coverageInputKey(identity: CoverageInputIdentity): string {
+export function toCoverageCoreInputIdentity(
+    identity: CoverageInputIdentity
+): CoverageCoreInputIdentity {
+    return {
+        schema_version: identity.schema_version,
+        producer_epoch: identity.producer_epoch,
+        repository: {
+            sha: identity.repository.sha,
+            content_sha256: identity.repository.content_sha256
+        },
+        standards: identity.standards,
+        ontology: identity.ontology,
+        selection: identity.selection
+    };
+}
+
+export function coverageCoreInputKey(identity: CoverageCoreInputIdentity): string {
     return digestIdentity(identity);
+}
+
+export function coverageInputKey(identity: CoverageInputIdentity): string {
+    return coverageCoreInputKey(toCoverageCoreInputIdentity(identity));
 }
 
 export function currentGitSha(projectRoot: string): string | null {

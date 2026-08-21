@@ -31,6 +31,23 @@ jobs:
         with:
           spec: ccss
 
+      - name: Prepare immutable coverage core
+        uses: ./.github/actions/coverage-core
+        with:
+          source-ref: main
+          source-sha: ${{ github.sha }}
+
+      - name: Generate validation coverage projection
+        run: >-
+          npm run generate:standards-explorer --
+          --output-dir=temp/coverage-validation
+          --channel=preview
+          --source-ref=main
+          --source-sha="${{ github.sha }}"
+
+      - name: Validate coverage projection and core
+        run: npm run validate:coverage -- --coverage-dir=temp/coverage-validation
+
   deploy_coverage:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate

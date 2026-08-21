@@ -70,7 +70,7 @@ const isSha256 = (value: unknown): value is string =>
 const isRevision = (value: unknown): value is string =>
     typeof value === 'string' && /^[a-f\d]{40}$/i.test(value);
 
-function readCcssLock(projectRoot: string): StandardsProvenance {
+export function readPinnedStandardsProvenance(projectRoot: string): StandardsProvenance {
     const lockPath = resolve(projectRoot, 'config', 'external-sources.json');
     if (!existsSync(lockPath)) {
         throw new Error(`Pinned external-source lock is missing: ${lockPath}. External updates are ignored.`);
@@ -312,7 +312,7 @@ export function buildStandardsTree(
 export async function loadPinnedStandardsSource(
     options: LoadPinnedStandardsOptions
 ): Promise<PinnedStandardsSource> {
-    const provenance = readCcssLock(options.projectRoot);
+    const provenance = readPinnedStandardsProvenance(options.projectRoot);
     const cacheDir = options.cacheDir ?? resolve(options.projectRoot, 'temp', 'common-core');
     const fetchFile = options.fetchFile ?? defaultFetchFile;
     mkdirSync(cacheDir, {recursive: true});

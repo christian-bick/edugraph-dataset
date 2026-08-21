@@ -47,6 +47,12 @@ jobs:
       - name: Install host dependencies
         run: npm ci
 
+      - name: Prepare immutable coverage core
+        uses: ./.github/actions/coverage-core
+        with:
+          source-ref: ${{ steps.release_source.outputs.tag }}
+          source-sha: ${{ steps.release_source.outputs.sha }}
+
       - name: Run quality gates
         uses: ./.github/actions/quality-gates
         with:

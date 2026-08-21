@@ -172,7 +172,9 @@ persistent Firebase token is stored in GitHub.
 
 GitHub Actions keeps validation and publication separate. Pushes to `main` run the
 build, complete test suite, and repository checks through the local `quality-gates`
-composite action. A version tag repeats those gates, generates CCSS in the pinned
+composite action. Main validation also resolves, computes when absent, and validates the immutable
+coverage core. The exact-key `actions/cache` entry is then available to the dependent deployment
+workflow and to later release-tag runs from the default branch. A version tag repeats those gates, generates CCSS in the pinned
 canonical container, runs the strict read-only cache audit, merges the release dataset,
 generates and validates the released asset index and release coverage snapshot, publishes the dataset to Hugging
 Face, creates or updates the matching GitHub Release with that snapshot, explicitly marks
@@ -216,9 +218,27 @@ Playwright image, so changing the host runtime does not change the renderer iden
   upstream changes are deliberately ignored until an explicit semantic-delta update advances the
   lock. Coverage manifest schema 3 records that standards provenance, the exact `edugraph-ts`
   package resolution and lockfile integrity, repository ref/SHA/content digest, selection options,
-  and optional asset-index digest under one `core_input_key`. `validate:coverage` reconstructs the
+  and optional asset-index digest. Its `core_input_key` excludes only projection metadata—the
+  channel, human-readable source ref, and generation timestamp—so Preview from `main` and Latest
+  from a tag at the same commit resolve to the same core. `validate:coverage` reconstructs the
   expected key from the current checkout and pinned inputs and fails closed on any missing, stale,
   internally inconsistent, or unverifiable identity.
+* **Immutable core and projections**: `src/lib/coverage-core.ts` stores the standards tree and
+  timestamp-free coverage data under `temp/coverage-core/<core_input_key>/`. A completion manifest
+  records the exact core byte length and SHA-256 digest; readers verify both before reuse, and an
+  incomplete or corrupt entry fails rather than being silently overwritten. `latest` and `preview`
+  output directories contain projections that add only channel, source-ref, and generation-time
+  metadata. On a hit the mapper performs no generator/view discovery or target matching. The
+  `.github/actions/coverage-core` action resolves the key before generation and restores/saves the
+  exact directory together with its verified pinned CCSS files, allowing main validation, release,
+  and deployment to share the one computation without prefix or newest-entry fallback.
+
+### `src/scripts/resolve-coverage-key.ts`
+* **Execution**: `npm run resolve:coverage-key -- [--source-ref=<ref>] [--source-sha=<sha>] [--grade=<grade>] [--exclude-hs] [--known-assets=<path>] [--github-output=<path>]`.
+* **Function**: Computes the complete core identity without performing coverage matching or
+  materializing the external snapshot. CI uses `--github-output` to expose `core_input_key` before
+  the cache restore step. The later mapper still verifies every restored standards/core byte before
+  it is admitted; key resolution alone never establishes cache validity.
 
 ### `src/scripts/refresh-local-explorer.ts`
 * **Execution**: Invoked by the local explorer's **Refresh local data** action.
@@ -230,7 +250,8 @@ Playwright image, so changing the host runtime does not change the renderer iden
   an older snapshot remains open in the browser. Refresh retains the newest two completed
   snapshots and best-effort removes older versions after open response streams have closed.
   It builds its standards tree from the same verified pinned source as release/deployment coverage,
-  and includes the selected local asset-index digest in the coverage input identity.
+  includes the selected local asset-index digest in the coverage input identity, and reuses the
+  same immutable core store when that complete input is unchanged.
 
 ### `src/scripts/generate-asset-index.ts`
 * **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> --output=<path> [--repository=<owner/dataset>]`

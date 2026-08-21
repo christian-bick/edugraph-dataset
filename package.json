@@ -40,6 +40,7 @@
     "report:matching-diff": "vite-node src/scripts/report-matching-diff.ts",
     "analyze:target-distinctness": "vite-node src/scripts/analyze-target-distinctness.ts",
     "generate:standards-explorer": "vite-node src/scripts/map-standards.ts",
+    "resolve:coverage-key": "vite-node src/scripts/resolve-coverage-key.ts",
     "map:standards": "vite-node src/scripts/map-standards.ts",
     "validate:coverage": "vite-node src/scripts/validate-coverage.ts"
   },

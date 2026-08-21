@@ -271,6 +271,16 @@ while correctly hashing the SVG and raster assets under `public/icons/` that vie
    source inputs are identical.
 4. Prevent workflows from recomputing an artifact that already exists for the complete input key.
 
+**Status: complete.** Core identity now excludes channel, human-readable source ref, and generation
+timestamp while retaining repository SHA/content, standards, ontology, selection, and asset inputs.
+The timestamp-free standards tree and coverage payload are atomically published under
+`temp/coverage-core/<core_input_key>/` with a completion manifest containing their byte length and
+SHA-256 digest. An exact hit verifies and projects that artifact without loading generator/view
+catalogs or matching targets; a corrupt or partial entry fails closed. Main validation computes and
+validates the core when absent, and the shared `.github/actions/coverage-core` action uses an
+exact-key GitHub Actions cache so dependent deployment and later release-tag workflows restore the
+same artifact and pinned CCSS bytes. Preview and Latest then differ only in projection metadata.
+
 #### Phase 4: introduce the dependency and delta foundation
 
 Represent generation and validation as a graph containing at least:

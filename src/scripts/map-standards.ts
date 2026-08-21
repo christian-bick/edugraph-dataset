@@ -9,6 +9,7 @@ import {
 } from '../lib/standards-coverage.ts';
 import {createWorkCounters} from '../lib/work-counters.ts';
 import {buildCoverageInputIdentity, resolveOntologyProvenance} from '../lib/coverage-identity.ts';
+import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
 import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
 import type {DataView} from '../standards-explorer/types.ts';
 
@@ -17,6 +18,7 @@ const args = process.argv.slice(2);
 const readOption = (name: string): string | undefined =>
     args.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
 const outputDir = path.resolve(projectRoot, readOption('output-dir') || path.join('public', 'coverage', 'preview'));
+const coreCacheDir = path.resolve(projectRoot, readOption('core-cache-dir') || path.join('temp', 'coverage-core'));
 const channel = (readOption('channel') || 'preview') as DataView;
 const sourceRef = readOption('source-ref') || process.env.GITHUB_REF_NAME || 'working-tree';
 const sourceSha = readOption('source-sha') || process.env.GITHUB_SHA || 'working-tree';
@@ -32,20 +34,12 @@ async function main() {
         projectRoot,
         report: message => console.log(`[External input] ${message}`)
     });
-    const tree = parseStandardsTree(pinnedStandards.tree);
+    const sourceTree = parseStandardsTree(pinnedStandards.tree);
     const ontology = resolveOntologyProvenance(projectRoot);
     const ontologyVersion = ontology.version;
     const generatedAt = new Date().toISOString();
     const grade = readOption('grade');
     const excludeHighSchool = args.includes('--k8') || args.includes('--exclude-hs');
-    const coverage = await buildCurrentStandardsCoverage({
-        standardsMap: tree.standardsMap,
-        ontologyVersion,
-        generatedAt,
-        counters,
-        grade,
-        excludeHighSchool
-    });
     const inputs = buildCoverageInputIdentity({
         projectRoot,
         sourceRef,
@@ -55,6 +49,27 @@ async function main() {
         grade,
         excludeHighSchool
     });
+    const core = await resolveCoverageCore({
+        root: coreCacheDir,
+        inputs,
+        counters,
+        build: async () => ({
+            tree: sourceTree,
+            coverage: await buildCurrentStandardsCoverage({
+                standardsMap: sourceTree.standardsMap,
+                ontologyVersion,
+                generatedAt,
+                counters,
+                grade,
+                excludeHighSchool
+            })
+        })
+    });
+    const tree = parseStandardsTree(core.artifact.tree);
+    const coverage = projectCoverageData(core.artifact.coverage, generatedAt);
+    console.log(
+        `[Coverage core] ${core.reused ? 'HIT' : 'MISS'} ${core.artifact.core_input_key} at ${core.directory}`
+    );
     const manifest = buildCoverageManifest({
         channel,
         inputs,

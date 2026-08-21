@@ -161,6 +161,9 @@ Coverage generation consumes the CCSS metadata revision locked in
 length match the lock; mutable upstream changes are ignored until an explicit source update records
 their delta. Every generated coverage manifest records the exact standards, ontology package, and
 repository-content identity used to build it.
+The timestamp-free coverage computation is stored immutably under its complete input key. Local,
+CI, release, and deployment runs reuse that core and generate channel-specific metadata as a cheap
+projection when the underlying source commit and semantic inputs are identical.
 
 On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
 images. Released uses the immutable published asset index; Local uses PNGs served from
