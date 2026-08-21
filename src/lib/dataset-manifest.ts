@@ -2,11 +2,9 @@ import { createHash } from 'node:crypto';
 import {
     existsSync,
     readFileSync,
-    readdirSync,
-    statSync,
     writeFileSync
 } from 'node:fs';
-import { basename, relative, resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import {
     GeneratorCatalogEntry,
     MatchTuple,
@@ -17,6 +15,7 @@ import {
 } from './generation.ts';
 import { CompetencyTarget } from '../types/ml-engine.ts';
 import { currentRendererEnvironment } from './render-environment.ts';
+import {hashSourceFiles} from './content-identity.ts';
 
 export const DATASET_MANIFEST_SCHEMA_VERSION = 2;
 const GENERATION_PIPELINE_VERSION = 'transactional-render-v1';
@@ -45,22 +44,14 @@ export interface ManifestUpdateScope {
     viewIds?: string[];
 }
 
-const SOURCE_EXTENSIONS = new Set(['.css', '.html', '.json', '.md', '.ts', '.tsx']);
+const SOURCE_EXTENSIONS = new Set([
+    '.css', '.html', '.json', '.md', '.ts', '.tsx',
+    '.jpeg', '.jpg', '.png', '.svg', '.webp'
+]);
 
 function extension(path: string): string {
     const match = path.match(/(\.[^.\\/]+)$/);
     return match?.[1] ?? '';
-}
-
-function sourceFiles(path: string): string[] {
-    if (!existsSync(path)) return [];
-    if (!statSync(path).isDirectory()) return SOURCE_EXTENSIONS.has(extension(path)) ? [path] : [];
-    return readdirSync(path, { withFileTypes: true })
-        .flatMap(entry => sourceFiles(resolve(path, entry.name)))
-        .filter(file =>
-            !file.endsWith('.test.ts')
-            && !file.endsWith('.test.tsx')
-            && basename(file) !== 'checklist.md');
 }
 
 function hash(value: string): string {
@@ -68,11 +59,12 @@ function hash(value: string): string {
 }
 
 function hashFiles(projectRoot: string, paths: string[]): string {
-    const files = [...new Set(paths.flatMap(sourceFiles))].sort();
-    const content = files.map(file =>
-        `${relative(projectRoot, file).replace(/\\/g, '/')}\0${readFileSync(file)}`
-    ).join('\0');
-    return hash(content);
+    return hashSourceFiles(projectRoot, paths, {
+        include: file => SOURCE_EXTENSIONS.has(extension(file))
+            && !file.endsWith('.test.ts')
+            && !file.endsWith('.test.tsx')
+            && basename(file) !== 'checklist.md'
+    });
 }
 
 function pairKey(generator: string, view: string): string {
@@ -84,7 +76,7 @@ function ontologyDependency(projectRoot: string): string {
     return packageJson.dependencies?.['edugraph-ts'] ?? 'unknown';
 }
 
-function globalSourceHash(projectRoot: string): string {
+export function datasetGlobalSourceHash(projectRoot: string): string {
     return hashFiles(projectRoot, [
         resolve(projectRoot, 'package.json'),
         resolve(projectRoot, 'package-lock.json'),
@@ -107,7 +99,7 @@ function globalSourceHash(projectRoot: string): string {
         resolve(projectRoot, 'src', 'partials'),
         resolve(projectRoot, 'src', 'fonts.css'),
         resolve(projectRoot, 'src', 'tailwind.css'),
-        resolve(projectRoot, 'public')
+        resolve(projectRoot, 'public', 'icons')
     ]);
 }
 
@@ -174,7 +166,7 @@ export function buildDatasetManifestEntries(options: {
         rowsByPair.get(key)!.push(row);
     }
 
-    const globalHash = globalSourceHash(projectRoot);
+    const globalHash = datasetGlobalSourceHash(projectRoot);
     const ontology = ontologyDependency(projectRoot);
     const generatorById = new Map(generators.map(entry => [entry.generatorId, entry]));
     const viewById = new Map(views.map(entry => [entry.viewId, entry]));

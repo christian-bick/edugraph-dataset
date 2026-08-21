@@ -83,7 +83,7 @@ ambiguous and are not silently converted into a concrete unit.
 A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
 
 *   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` canonically writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples, and generation never depends on a host Vite server.
-*   **Every generated standard has a freshness manifest.** `manifest.json` records each matched `(generator, view)` pair's generation-input hash, aggregate output-content hash, sample counts, and renderer-environment identity. The input hash covers the relevant target labels, ontology dependency, generator/view sources, and shared generation/rendering sources. The content hash aggregates both per-sample `content_fingerprint` and `task_fingerprint` values: the former detects changed mathematical payloads, while the latter also detects changed resolved view configurations. The input hash detects further changes such as view code that can alter pixels without altering either identity. VQA `checklist.md` files are deliberately excluded: checklist changes invalidate the separate VQA validation-context cache but do not make rendered dataset content stale. Every public generation path uses the canonical renderer identity, including scoped development runs.
+*   **Every generated standard has a freshness manifest.** `manifest.json` records each matched `(generator, view)` pair's generation-input hash, aggregate output-content hash, sample counts, and renderer-environment identity. The input hash covers the relevant target labels, ontology dependency, generator/view sources, and shared generation/rendering sources. The content hash aggregates both per-sample `content_fingerprint` and `task_fingerprint` values: the former detects changed mathematical payloads, while the latter also detects changed resolved view configurations. The input hash detects further changes such as view code that can alter pixels without altering either identity. VQA `checklist.md` files are deliberately excluded: checklist changes invalidate the separate VQA validation-context cache but do not make rendered dataset content stale. Public render assets are restricted to `public/icons/`; generated coverage/explorer JSON, favicons, and unrelated public files cannot invalidate dataset pixels, while SVG and raster icon bytes do. Every public generation path uses the canonical renderer identity, including scoped development runs.
 *   **The union dataset (`out/dataset/`) is derived**, built by `npm run merge:dataset` from every non-isolated standard in precedence order. It is the released artifact; treat it as a build output, never as a source of truth — the merge replaces it wholesale. Its public rows are compact projections containing only `file_name`, `tags`, and `solution`; operational identity remains in the source standard datasets.
 *   **The merge deduplicates identical tasks across standards.** The first standard in merge order keeps the exercise and later ones report it as duplicate overlap. Same-split dedup is scoped per view by `task_fingerprint`, the hash of problem data plus the deterministically resolved view configuration. The validation split separately excludes any `content_fingerprint` already in train, even when its configured task differs, so mathematical payloads cannot leak across the split boundary. Generation applies the same two rules within a standard (scoped per module, since a view has only one generator). Question and solution are independent draws of one exercise, so exercises are kept or dropped whole. Operational target associations from a dropped exercise transfer only to a retained sample with the same task fingerprint; a data-only validation collision is excluded but cannot represent the other task. The public row and image remain singular, while the asset index can expose a reused sample under every exact target label set it actually evidences.
 *   **Isolated specs never merge.** `test` declares `isolated = true` in `src/spec/test/_module.ts`; it is a fast prototyping, debugging, smoke-test and retained-regression workspace, not a second curriculum or exhaustive capability matrix. Every generator keeps at least one generatable target-view path there. Files prefixed with `_` describe the module rather than contributing targets, so the target loaders skip them.
@@ -209,6 +209,16 @@ Playwright image, so changing the host runtime does not change the renderer iden
   targets with standards through a shared prefix index. The final structured work-counter line
   reports physical source reads, index builds, posting traversal, candidate checks, and standard
   lookup work for complexity regression diagnosis.
+* **External-input identity**: CCSS source identity is locked in
+  `config/external-sources.json` by full Hugging Face commit, per-file SHA-256 digest, and byte
+  length. The mapper verifies `temp/common-core/` against that contract and downloads only the
+  immutable revision when a file is absent or corrupt; it never falls back to `main`. Unpinned
+  upstream changes are deliberately ignored until an explicit semantic-delta update advances the
+  lock. Coverage manifest schema 3 records that standards provenance, the exact `edugraph-ts`
+  package resolution and lockfile integrity, repository ref/SHA/content digest, selection options,
+  and optional asset-index digest under one `core_input_key`. `validate:coverage` reconstructs the
+  expected key from the current checkout and pinned inputs and fails closed on any missing, stale,
+  internally inconsistent, or unverifiable identity.
 
 ### `src/scripts/refresh-local-explorer.ts`
 * **Execution**: Invoked by the local explorer's **Refresh local data** action.
@@ -219,6 +229,8 @@ Playwright image, so changing the host runtime does not change the renderer iden
   dataset reads, and canonical generation can atomically replace a standard dataset while
   an older snapshot remains open in the browser. Refresh retains the newest two completed
   snapshots and best-effort removes older versions after open response streams have closed.
+  It builds its standards tree from the same verified pinned source as release/deployment coverage,
+  and includes the selected local asset-index digest in the coverage input identity.
 
 ### `src/scripts/generate-asset-index.ts`
 * **Execution**: `npm run generate:asset-index -- --revision=<release_tag_or_commit> --output=<path> [--repository=<owner/dataset>]`

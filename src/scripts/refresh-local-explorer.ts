@@ -1,4 +1,3 @@
-import {readFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildAssetIndexBundle} from '../lib/asset-index-builder.ts';
@@ -9,14 +8,17 @@ import {
 import {
     buildCoverageManifest,
     buildCurrentStandardsCoverage,
-    parseStandardsTree,
-    resolveOntologyVersion,
 } from '../lib/standards-coverage.ts';
+import {
+    buildCoverageInputIdentity,
+    resolveOntologyProvenance
+} from '../lib/coverage-identity.ts';
+import {digestIdentity} from '../lib/content-identity.ts';
+import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const snapshotRoot = resolve(projectRoot, 'temp', 'standards-explorer-preview');
 const generatedAt = new Date().toISOString();
-const readJson = (path: string): unknown => JSON.parse(readFileSync(path, 'utf-8'));
 const reportProgress = (message: string): void => {
     process.stdout.write(`${JSON.stringify({type: 'progress', message})}\n`);
 };
@@ -25,10 +27,12 @@ const reportProgress = (message: string): void => {
 console.log = (...args: unknown[]) => console.error(...args);
 
 reportProgress('Loading Common Core standards and ontology metadata…');
-const tree = parseStandardsTree(readJson(resolve(projectRoot, 'public', 'coverage', 'ccss-tree.json')));
-const ontologyVersion = resolveOntologyVersion(readJson(resolve(projectRoot, 'package.json')) as {
-    dependencies?: Record<string, string>;
+const pinnedStandards = await loadPinnedStandardsSource({
+    projectRoot,
+    report: message => console.error(`[External input] ${message}`)
 });
+const tree = pinnedStandards.tree;
+const ontology = resolveOntologyProvenance(projectRoot);
 reportProgress('Indexing generated samples and target labels…');
 const assets = await buildAssetIndexBundle({
     projectRoot,
@@ -38,15 +42,21 @@ const assets = await buildAssetIndexBundle({
 reportProgress('Computing current standards coverage…');
 const coverage = await buildCurrentStandardsCoverage({
     standardsMap: tree.standardsMap,
-    ontologyVersion,
+    ontologyVersion: ontology.version,
     generatedAt,
     knownAssets: assets.index,
 });
-const manifest = buildCoverageManifest({
-    channel: 'preview',
+const inputs = buildCoverageInputIdentity({
+    projectRoot,
     sourceRef: 'working-tree',
     sourceSha: 'working-tree',
-    ontologyVersion,
+    standards: pinnedStandards.provenance,
+    ontology,
+    knownAssetsSha256: digestIdentity(assets.index)
+});
+const manifest = buildCoverageManifest({
+    channel: 'preview',
+    inputs,
     generatedAt,
 });
 reportProgress('Publishing the immutable local snapshot…');

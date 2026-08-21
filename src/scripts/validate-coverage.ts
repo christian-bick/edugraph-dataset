@@ -1,10 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import { Area, Scope, Ability } from 'edugraph-ts';
+import {
+  coverageManifestIdentityIssues,
+  resolveOntologyProvenance
+} from '../lib/coverage-identity.ts';
+import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
+import type {CoverageManifest} from '../standards-explorer/types.ts';
 
 const PROJECT_ROOT = path.resolve('.');
-const TEMP_DIR = path.join(PROJECT_ROOT, 'temp', 'common-core');
-const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
 const coverageDirArg = process.argv.slice(2)
   .find(arg => arg.startsWith('--coverage-dir='))
   ?.slice('--coverage-dir='.length);
@@ -18,7 +22,7 @@ interface ValidationResult {
   warnings: string[];
 }
 
-function runValidation() {
+async function runValidation() {
   console.log('=== Initiating Standards Coverage Validation ===\n');
   const result: ValidationResult = { passed: true, errors: [], warnings: [] };
 
@@ -35,22 +39,25 @@ function runValidation() {
     printReport(result);
     return;
   }
-  if (!fs.existsSync(STANDARDS_PATH)) {
-    result.errors.push(`Standards definitions not found at: ${STANDARDS_PATH}`);
-    result.passed = false;
-    printReport(result);
-    return;
-  }
+  const pinnedStandards = await loadPinnedStandardsSource({
+    projectRoot: PROJECT_ROOT,
+    report: message => console.log(`[External input] ${message}`)
+  });
+  const standardsPath = pinnedStandards.paths['standards.jsonl'];
 
   // 2. Load data
   const coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
-  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'));
-  const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
+  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) as CoverageManifest;
+  const standardsLines = fs.readFileSync(standardsPath, 'utf-8').split('\n');
 
-  if (manifest.schema_version !== 2) {
-    result.errors.push(`Unsupported coverage manifest schema: ${manifest.schema_version}`);
-    result.passed = false;
-  }
+  const identityIssues = coverageManifestIdentityIssues({
+    projectRoot: PROJECT_ROOT,
+    manifest,
+    standards: pinnedStandards.provenance,
+    ontology: resolveOntologyProvenance(PROJECT_ROOT)
+  });
+  result.errors.push(...identityIssues);
+  if (identityIssues.length > 0) result.passed = false;
   if (manifest.channel !== 'latest' && manifest.channel !== 'preview') {
     result.errors.push(`Invalid coverage manifest channel: ${manifest.channel}`);
     result.passed = false;
@@ -441,4 +448,7 @@ function printReport(result: ValidationResult) {
   process.exit(result.passed ? 0 : 1);
 }
 
-runValidation();
+runValidation().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

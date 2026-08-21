@@ -12,10 +12,41 @@ import {
     buildStandardsCoverage,
     findParentClusterId,
     findStandardIdForTarget,
-    parseStandardsTree,
-    resolveOntologyVersion
+    parseStandardsTree
 } from './standards-coverage.ts';
 import {createWorkCounters} from './work-counters.ts';
+import type {CoverageInputIdentity} from './coverage-identity.ts';
+
+const coverageInputs: CoverageInputIdentity = {
+    schema_version: 1,
+    producer_epoch: 'standards-coverage-v1',
+    repository: {
+        ref: 'working-tree',
+        sha: 'working-tree',
+        content_sha256: 'a'.repeat(64)
+    },
+    standards: {
+        provider: 'huggingface',
+        repository: 'example/standards',
+        revision: 'b'.repeat(40),
+        files: [
+            {path: 'standards.jsonl', sha256: 'c'.repeat(64), bytes: 12},
+            {path: 'domain_groups.json', sha256: 'd'.repeat(64), bytes: 34}
+        ]
+    },
+    ontology: {
+        package: 'edugraph-ts',
+        version: 'v0.15.0',
+        dependency: 'https://example.test/edugraph-ts.tgz',
+        resolved: 'https://example.test/edugraph-ts.tgz',
+        integrity: 'sha512-exact'
+    },
+    selection: {
+        grade: null,
+        exclude_high_school: false,
+        known_assets_sha256: null
+    }
+};
 
 const node = (
     id: string,
@@ -148,23 +179,18 @@ describe('standards coverage', () => {
     it('creates manifests and validates the tracked tree envelope', () => {
         expect(buildCoverageManifest({
             channel: 'preview',
-            sourceRef: 'working-tree',
-            sourceSha: 'working-tree',
-            ontologyVersion: 'v0.15.0',
+            inputs: coverageInputs,
             generatedAt: '2026-08-14T12:00:00.000Z'
-        })).toEqual({
-            schema_version: 2,
+        })).toMatchObject({
+            schema_version: 3,
             channel: 'preview',
             source_ref: 'working-tree',
             source_sha: 'working-tree',
             generated_at: '2026-08-14T12:00:00.000Z',
-            ontology_version: 'v0.15.0'
+            ontology_version: 'v0.15.0',
+            core_input_key: expect.stringMatching(/^[a-f\d]{64}$/),
+            inputs: coverageInputs
         });
-        expect(resolveOntologyVersion({
-            dependencies: {
-                'edugraph-ts': 'https://github.com/example/releases/download/v0.15.0/edugraph-ts.tgz'
-            }
-        })).toBe('v0.15.0');
         expect(parseStandardsTree({tree: {}, standardsMap: {}})).toEqual({tree: {}, standardsMap: {}});
         expect(() => parseStandardsTree({tree: {}})).toThrow('Standards tree data is incomplete.');
     });

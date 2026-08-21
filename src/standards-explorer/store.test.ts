@@ -37,12 +37,43 @@ const jsonResponse = (data: unknown) => ({
 }) as Response;
 
 const previewManifest = {
-    schema_version: 2,
+    schema_version: 3,
     channel: 'preview',
     source_ref: 'main',
     source_sha: '07590c32396405e',
     generated_at: '2026-08-10T00:00:00.000Z',
     ontology_version: 'v0.11.1',
+    core_input_key: 'a'.repeat(64),
+    inputs: {
+        schema_version: 1,
+        producer_epoch: 'standards-coverage-v1',
+        repository: {
+            ref: 'main',
+            sha: '07590c32396405e',
+            content_sha256: 'b'.repeat(64),
+        },
+        standards: {
+            provider: 'huggingface',
+            repository: 'example/standards',
+            revision: 'c'.repeat(40),
+            files: [
+                {path: 'standards.jsonl', sha256: 'd'.repeat(64), bytes: 12},
+                {path: 'domain_groups.json', sha256: 'e'.repeat(64), bytes: 34},
+            ],
+        },
+        ontology: {
+            package: 'edugraph-ts',
+            version: 'v0.11.1',
+            dependency: 'https://example.test/edugraph-ts.tgz',
+            resolved: 'https://example.test/edugraph-ts.tgz',
+            integrity: 'sha512-exact',
+        },
+        selection: {
+            grade: null,
+            exclude_high_school: false,
+            known_assets_sha256: null,
+        },
+    },
 };
 
 describe('standards explorer data and sample sources', () => {

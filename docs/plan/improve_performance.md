@@ -12,15 +12,20 @@ Rule 1 always applies. Rules 2 and 3 must at least apply during development.
 
 Here, linear means `O(input records + dependency edges + necessary output)`. A diagnostic that deliberately emits every rejected target/module combination can have quadratic output. Such exhaustive reporting must be an explicit diagnostic mode and must not determine the complexity of production generation or validation.
 
-## Current verdict
+## Implementation status
 
 | Rule | Current status |
 | --- | --- |
-| Always linear | Failed |
+| Always linear | Primary matching, coverage, generation, and VQA amplification paths are linearized; the remaining command audit is still open. |
 | Content-delta processing | Partially present, but failed system-wide |
-| External-delta processing | Failed, except for the VQA definition-level cache key |
+| External-delta processing | Standards and ontology provenance now fail closed and unverified updates stay pinned; semantic delta planning remains for Phase 6. |
 
-The dominant release delay is not image rendering or Gemini validation. A sparse matching problem is repeatedly reconstructed as a dense problem, and identical coverage work is repeated across workflows.
+## Baseline diagnosis
+
+The measurements and defects below describe the repository before this plan was implemented. The
+dominant release delay was not image rendering or Gemini validation. A sparse matching problem was
+repeatedly reconstructed as a dense problem, and identical coverage work was repeated across
+workflows.
 
 ## Release measurements
 
@@ -247,6 +252,16 @@ the existing dataset correctly becomes stale when these shared generation source
 
 This phase establishes the correctness prerequisite for cross-workflow reuse. A cache hit is valid
 only when the complete input identity is known.
+
+**Status: complete.** `config/external-sources.json` pins the Achieve the Core input to immutable
+commit `a3bc393b31b5cb0f6d3da3077c02d170fff8d5fa` and records the exact SHA-256 digest and byte length
+of both consumed files. Coverage producers verify and reuse that snapshot, never poll mutable
+`main`, and explicitly report that unpinned updates remain ignored until a semantic-delta update
+advances the lock. Coverage manifest schema 3 records repository ref/SHA/content identity, full
+standards provenance, exact ontology package resolution and integrity, coverage selection inputs,
+and the optional local asset-index digest under one `core_input_key`; validation reconstructs the
+key and fails closed. Dataset rendering now ignores generated coverage and unrelated public files
+while correctly hashing the SVG and raster assets under `public/icons/` that views actually render.
 
 #### Phase 3: compute and publish core coverage once
 

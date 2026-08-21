@@ -12,6 +12,10 @@ import {
     type MatchTuple
 } from './generation.ts';
 import type {WorkCounters} from './work-counters.ts';
+import {
+    coverageInputKey,
+    type CoverageInputIdentity
+} from './coverage-identity.ts';
 import {groupOntologyTodos} from './ontology-todo.ts';
 import {
     assetIndexSampleMap,
@@ -68,9 +72,7 @@ export interface BuildCurrentStandardsCoverageOptions {
 
 export interface BuildCoverageManifestOptions {
     channel: CoverageManifest['channel'];
-    sourceRef: string;
-    sourceSha: string;
-    ontologyVersion: string;
+    inputs: CoverageInputIdentity;
     generatedAt: string;
 }
 
@@ -538,24 +540,19 @@ export async function buildCurrentStandardsCoverage(
 
 export function buildCoverageManifest({
     channel,
-    sourceRef,
-    sourceSha,
-    ontologyVersion,
+    inputs,
     generatedAt
 }: BuildCoverageManifestOptions): CoverageManifest {
     return {
-        schema_version: 2,
+        schema_version: 3,
         channel,
-        source_ref: sourceRef,
-        source_sha: sourceSha,
+        source_ref: inputs.repository.ref,
+        source_sha: inputs.repository.sha,
         generated_at: generatedAt,
-        ontology_version: ontologyVersion
+        ontology_version: inputs.ontology.version,
+        core_input_key: coverageInputKey(inputs),
+        inputs
     };
-}
-
-export function resolveOntologyVersion(packageJson: {dependencies?: Record<string, string>}): string {
-    const dependency = packageJson.dependencies?.['edugraph-ts'] ?? '';
-    return dependency.match(/\/releases\/download\/(v[\d.]+)\//)?.[1] ?? 'unknown';
 }
 
 export function parseStandardsTree(value: unknown): StandardsTreeData {

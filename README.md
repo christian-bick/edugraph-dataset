@@ -156,6 +156,12 @@ union dataset and loaded directly from the tag-pinned Hugging Face release. A lo
 builds the equivalent index and copies its selected images into the immutable development
 snapshot; no union-merge command is needed.
 
+Coverage generation consumes the CCSS metadata revision locked in
+`config/external-sources.json`. Cached source files are accepted only when their SHA-256 digest and
+length match the lock; mutable upstream changes are ignored until an explicit source update records
+their delta. Every generated coverage manifest records the exact standards, ontology package, and
+repository-content identity used to build it.
+
 On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
 images. Released uses the immutable published asset index; Local uses PNGs served from
 the latest explicit development snapshot and can be opened at

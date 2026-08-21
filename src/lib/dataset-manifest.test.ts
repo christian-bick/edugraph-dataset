@@ -6,6 +6,7 @@ import {
     DATASET_MANIFEST_SCHEMA_VERSION,
     DatasetManifest,
     DatasetManifestEntry,
+    datasetGlobalSourceHash,
     datasetFreshnessIssues,
     datasetRendererIssues,
     updateDatasetManifest
@@ -84,6 +85,29 @@ describe('datasetRendererIssues', () => {
         expect(datasetRendererIssues(manifest(), 'canonical')).toEqual([
             `writing#numbers-write-standard was rendered by "${currentRendererEnvironment()}" instead of "canonical".`
         ]);
+    });
+});
+
+describe('datasetGlobalSourceHash', () => {
+    it('ignores generated public outputs but retains renderer assets', () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-render-inputs-'));
+        mkdirSync(resolve(projectRoot, 'public', 'coverage'), {recursive: true});
+        mkdirSync(resolve(projectRoot, 'public', 'icons'), {recursive: true});
+        writeFileSync(resolve(projectRoot, 'public', 'coverage', 'ccss-coverage.json'), 'first');
+        writeFileSync(resolve(projectRoot, 'public', 'favicon.png'), 'first');
+        writeFileSync(resolve(projectRoot, 'public', 'icons', 'counter.svg'), 'first');
+
+        try {
+            const initial = datasetGlobalSourceHash(projectRoot);
+            writeFileSync(resolve(projectRoot, 'public', 'coverage', 'ccss-coverage.json'), 'changed');
+            writeFileSync(resolve(projectRoot, 'public', 'favicon.png'), 'changed');
+            expect(datasetGlobalSourceHash(projectRoot)).toBe(initial);
+
+            writeFileSync(resolve(projectRoot, 'public', 'icons', 'counter.svg'), 'changed');
+            expect(datasetGlobalSourceHash(projectRoot)).not.toBe(initial);
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
     });
 });
 
