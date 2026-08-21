@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { VqaCacheEntry } from './vqa-cache.ts';
 import { auditVqaCache, type ExpectedVqaCacheRecord } from './vqa-cache-audit.ts';
+import {createWorkCounters} from './work-counters.ts';
 
 const roots: string[] = [];
 
@@ -53,9 +54,12 @@ describe('auditVqaCache', () => {
     it('accepts exact passing coverage without modifying the cache', () => {
         const root = fixture({ writing: [JSON.stringify(cacheEntry())] });
         const before = readFileSync(resolve(root, 'writing.jsonl'), 'utf-8');
-        const result = auditVqaCache(root, expected);
+        const counters = createWorkCounters();
+        const result = auditVqaCache(root, expected, counters);
         expect(result).toMatchObject({ expected: 1, passed: 1, issues: [] });
         expect(readFileSync(resolve(root, 'writing.jsonl'), 'utf-8')).toBe(before);
+        expect(counters.get('vqa.audit_cache_file_reads')).toBe(1);
+        expect(counters.get('vqa.audit_cache_entries_parsed')).toBe(1);
     });
 
     it('reports missing, failing, and stale records', () => {
@@ -89,4 +93,3 @@ describe('auditVqaCache', () => {
         expect(result.passed).toBe(0);
     });
 });
-

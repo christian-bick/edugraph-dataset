@@ -20,12 +20,14 @@ import {
     buildProblem,
     buildRenderPayload,
     GeneratorCatalogEntry,
+    MatchTuple,
     ViewCatalogEntry,
     SampleIdentity,
     SampleMode,
     SampleSplit,
     SPLIT_DIRS
 } from '../lib/generation.ts';
+import {createWorkCounters} from '../lib/work-counters.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
@@ -97,8 +99,8 @@ function claimSample(index: SampleFingerprintIndex, sample: RenderSample, finger
  */
 function generateModuleSamples(
     genEntry: GeneratorCatalogEntry,
-    viewCatalog: ViewCatalogEntry[],
-    targets: any[],
+    viewsById: ReadonlyMap<string, ViewCatalogEntry>,
+    tuples: readonly MatchTuple[],
     split: SampleSplit,
     taskFingerprintsByView: SampleFingerprintIndex,
     contentFingerprintsByView: SampleFingerprintIndex,
@@ -106,7 +108,6 @@ function generateModuleSamples(
     trainContentFingerprintsByView?: SampleFingerprintIndex
 ): RenderSample[] {
     const moduleName = genEntry.generatorId;
-    const { tuples } = matchTargets(targets, [genEntry], viewCatalog);
     const samples: RenderSample[] = [];
 
     for (const tuple of tuples) {
@@ -115,7 +116,7 @@ function generateModuleSamples(
 
         const labels = [...target.labels];
         const instanceIdx = 0;
-        const viewEntry = viewCatalog.find(view => view.viewId === tuple.viewId);
+        const viewEntry = viewsById.get(tuple.viewId);
         if (!viewEntry) throw new Error(`View catalog entry not found: ${tuple.viewId}`);
 
         const makeIdentity = (mode: SampleMode): SampleIdentity => ({
@@ -510,7 +511,7 @@ async function runModulePipeline(
     baseUrl: string,
     genEntry: GeneratorCatalogEntry,
     viewCatalog: ViewCatalogEntry[],
-    allTargets: any[],
+    tuples: readonly MatchTuple[],
     trainingOnly: boolean,
     concurrency: number
 ): Promise<RenderBatchResult> {
@@ -518,8 +519,10 @@ async function runModulePipeline(
     console.log(`\n--- Starting Pipeline for Module: ${moduleName} (${genEntry.module.relativePath}) ---`);
 
     const viewPathMap: Record<string, string> = {};
+    const viewsById = new Map<string, ViewCatalogEntry>();
     for (const view of viewCatalog) {
         viewPathMap[view.viewId] = view.module.relativePath;
+        viewsById.set(view.viewId, view);
     }
 
     // Train is generated first, into its own index, and val only ever *reads*
@@ -533,8 +536,8 @@ async function runModulePipeline(
     const trainContentFingerprints: SampleFingerprintIndex = new Map();
     const trainSamples = generateModuleSamples(
         genEntry,
-        viewCatalog,
-        allTargets,
+        viewsById,
+        tuples,
         'train',
         trainTaskFingerprints,
         trainContentFingerprints
@@ -546,8 +549,8 @@ async function runModulePipeline(
         const valContentFingerprints: SampleFingerprintIndex = new Map();
         valSamples = generateModuleSamples(
             genEntry,
-            viewCatalog,
-            allTargets,
+            viewsById,
+            tuples,
             'val',
             valTaskFingerprints,
             valContentFingerprints,
@@ -595,6 +598,7 @@ async function main() {
             'Dataset generation is container-only. Run npm run generate:dataset -- --spec=<spec_module>.'
         );
     }
+    const counters = createWorkCounters();
     const args = process.argv.slice(2);
 
     const specName = getCliOption(args, 'spec');
@@ -629,8 +633,8 @@ async function main() {
         throw new Error(`--concurrency must be a positive integer; received "${concurrencyOption}".`);
     }
 
-    const generatorCatalog = await loadGeneratorCatalog();
-    const fullViewCatalog = await loadViewCatalog();
+    const generatorCatalog = await loadGeneratorCatalog(undefined, counters);
+    const fullViewCatalog = await loadViewCatalog(undefined, counters);
 
     const modulesToRun = targetModule
         ? generatorCatalog.filter(g =>
@@ -649,13 +653,23 @@ async function main() {
         throw new Error(`No views matched --view=${targetView}.`);
     }
 
-    const matchedViewIds = new Set(
-        matchTargets(allTargets, modulesToRun, viewCatalog).tuples.map(tuple => tuple.viewId)
-    );
+    const matchedTuples = matchTargets(
+        allTargets,
+        modulesToRun,
+        viewCatalog,
+        {counters}
+    ).tuples;
+    const matchedViewIds = new Set(matchedTuples.map(tuple => tuple.viewId));
     if (matchedViewIds.size === 0) {
         throw new Error('The selected generation scope contains no matched generator-view tuples.');
     }
     const viewsToPreflight = viewCatalog.filter(view => matchedViewIds.has(view.viewId));
+    const tuplesByGenerator = new Map<string, MatchTuple[]>();
+    for (const tuple of matchedTuples) {
+        const group = tuplesByGenerator.get(tuple.generatorId);
+        if (group) group.push(tuple);
+        else tuplesByGenerator.set(tuple.generatorId, [tuple]);
+    }
 
     const browser = await chromium.launch({ headless: true });
     const startTime = performance.now();
@@ -686,7 +700,7 @@ async function main() {
                 BASE_URL,
                 genEntry,
                 viewCatalog,
-                allTargets,
+                tuplesByGenerator.get(genEntry.generatorId) ?? [],
                 trainingOnly,
                 concurrency
             );
@@ -709,6 +723,7 @@ async function main() {
             targets: allTargets,
             generators: modulesToRun,
             views: viewCatalog,
+            tuples: matchedTuples,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val']
         });
         updateDatasetManifest({
@@ -722,6 +737,7 @@ async function main() {
 
         const duration = ((performance.now() - startTime) / 1000).toFixed(2);
         console.log(`\nDONE! Generated ${totalImages} images in ${duration}s.`);
+        console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
     } catch (error) {
         transaction?.rollback();
         throw error;

@@ -2,9 +2,14 @@ import { createHash } from 'crypto';
 import { existsSync, lstatSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { isSubConceptOf } from './ontology.ts';
+import {getConceptAncestors, isSubConceptOf} from './ontology.ts';
 import { findLeafModules, LeafModule } from './module-resolver.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
+import {
+    getAcceptedGeneratorProblemTypes,
+    getGeneratorProblemTypeFromPath,
+    getViewToProblemTypeMap,
+    isProblemTypeCompatible
+} from './type-parser.ts';
 import { extractConfig, extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
 import { CompetencyTarget, Implementation, ImplementationTodo, OntologyPackage, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
@@ -12,6 +17,7 @@ import { ViewSpec } from '../types/view-spec.ts';
 import { ConfigSchema } from '../types/schema.ts';
 import { defineImplementationPackage } from './dataset-permutation-builder.ts';
 import { defineOntologyPackage, toOntologyTodo } from './ontology-todo.ts';
+import type {WorkCounters} from './work-counters.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -223,6 +229,9 @@ export interface MatchRejection {
 
 export interface MatchResult {
     tuples: MatchTuple[];
+}
+
+export interface MatchDiagnosticResult extends MatchResult {
     /** Label-level failures for type-compatible pairs (type mismatches are omitted as noise) */
     rejections: MatchRejection[];
 }
@@ -230,6 +239,8 @@ export interface MatchResult {
 export interface CompatibleModulePair {
     generator: GeneratorMatchInfo;
     view: ViewMatchInfo;
+    /** Capability labels and their ancestors, used as target-label index keys. */
+    supportedTargetLabels: ReadonlySet<string>;
 }
 
 export interface CompatibleModulePairIndex {
@@ -237,6 +248,8 @@ export interface CompatibleModulePairIndex {
     orderedPairs: CompatibleModulePair[];
     /** The same pairs grouped by generator payload type for scoped consumers and diagnostics. */
     byProblemType: Map<string, CompatibleModulePair[]>;
+    /** Compatible pairs grouped by every broad target label their capabilities can satisfy. */
+    bySupportedTargetLabel: Map<string, CompatibleModulePair[]>;
 }
 
 const UNKNOWN_PROBLEM_TYPE = '(unknown)';
@@ -247,26 +260,92 @@ const UNKNOWN_PROBLEM_TYPE = '(unknown)';
  */
 export function buildCompatibleModulePairIndex(
     generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[]
+    viewCatalog: ViewMatchInfo[],
+    counters?: WorkCounters
 ): CompatibleModulePairIndex {
+    counters?.add('match.pair_index_builds');
     const orderedPairs: CompatibleModulePair[] = [];
     const byProblemType = new Map<string, CompatibleModulePair[]>();
+    const bySupportedTargetLabel = new Map<string, CompatibleModulePair[]>();
+    const knownGeneratorTypes = new Set(generatorCatalog
+        .map(generator => generator.problemType)
+        .filter((problemType): problemType is string => problemType !== null && problemType !== undefined));
+    const viewsByGeneratorType = new Map(
+        [...knownGeneratorTypes].map(problemType => [problemType, [] as ViewMatchInfo[]])
+    );
+
+    for (const view of viewCatalog) {
+        if (view.problemType == null) {
+            for (const views of viewsByGeneratorType.values()) views.push(view);
+            continue;
+        }
+        for (const acceptedType of getAcceptedGeneratorProblemTypes(view.problemType, counters)) {
+            viewsByGeneratorType.get(acceptedType)?.push(view);
+        }
+    }
 
     for (const generator of generatorCatalog) {
-        for (const view of viewCatalog) {
-            if (!hasCompatibleProblemTypes(generator, view)) continue;
+        const compatibleViews = generator.problemType == null
+            ? viewCatalog
+            : viewsByGeneratorType.get(generator.problemType) ?? [];
+        for (const view of compatibleViews) {
+            const supportedTargetLabels = new Set<string>();
+            for (const label of [...generator.labels, ...view.supportedLabels]) {
+                for (const ancestor of getConceptAncestors(label)) supportedTargetLabels.add(ancestor);
+            }
 
-            const pair = {generator, view};
+            const pair = {generator, view, supportedTargetLabels};
             orderedPairs.push(pair);
+            counters?.add('match.compatible_pairs');
 
             const problemType = generator.problemType ?? UNKNOWN_PROBLEM_TYPE;
             const group = byProblemType.get(problemType);
             if (group) group.push(pair);
             else byProblemType.set(problemType, [pair]);
+
+            for (const label of supportedTargetLabels) {
+                const labelPairs = bySupportedTargetLabel.get(label);
+                if (labelPairs) labelPairs.push(pair);
+                else bySupportedTargetLabel.set(label, [pair]);
+            }
         }
     }
 
-    return {orderedPairs, byProblemType};
+    return {orderedPairs, byProblemType, bySupportedTargetLabel};
+}
+
+const candidatePairsForTarget = (
+    targetLabels: readonly string[],
+    index: CompatibleModulePairIndex,
+    counters?: WorkCounters
+): CompatibleModulePair[] => {
+    const capabilityLabels = [...new Set(targetLabels.filter(label => label.startsWith(EDU_PREFIX)))];
+    if (capabilityLabels.length === 0) return index.orderedPairs;
+
+    const postings: CompatibleModulePair[][] = [];
+    for (const label of capabilityLabels) {
+        counters?.add('match.target_label_lookups');
+        const pairs = index.bySupportedTargetLabel.get(label);
+        if (!pairs) return [];
+        counters?.add('match.posting_entries', pairs.length);
+        postings.push(pairs);
+    }
+
+    const counts = new Map<CompatibleModulePair, number>();
+    let shortest = postings[0];
+    for (const pairs of postings) {
+        if (pairs.length < shortest.length) shortest = pairs;
+        for (const pair of pairs) counts.set(pair, (counts.get(pair) ?? 0) + 1);
+    }
+
+    const candidates = shortest.filter(pair => counts.get(pair) === postings.length);
+    counters?.add('match.candidate_pairs', candidates.length);
+    return candidates;
+};
+
+export interface MatchOptions {
+    pairIndex?: CompatibleModulePairIndex;
+    counters?: WorkCounters;
 }
 
 /**
@@ -277,17 +356,49 @@ export function buildCompatibleModulePairIndex(
 export function matchTargets(
     targets: CompetencyTarget[],
     generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[]
+    viewCatalog: ViewMatchInfo[],
+    options: MatchOptions = {}
 ): MatchResult {
     const tuples: MatchTuple[] = [];
-    const rejections: MatchRejection[] = [];
-    const {orderedPairs} = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
+    const index = options.pairIndex
+        ?? buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, options.counters);
 
     for (const target of targets) {
-        for (const {generator, view} of orderedPairs) {
+        options.counters?.add('match.targets');
+        for (const {generator, view} of candidatePairsForTarget(target.labels, index, options.counters)) {
+            options.counters?.add('match.capability_checks');
             const verdict = matchesTargetCapabilities(target.labels, generator, view);
             if (verdict.matched) {
                 tuples.push({ target, generatorId: generator.generatorId, viewId: view.viewId });
+            }
+        }
+    }
+
+    return {tuples};
+}
+
+/**
+ * Explicit exhaustive diagnostic mode. Its output can be target/pair sized,
+ * so production coverage and generation must use matchTargets instead.
+ */
+export function diagnoseTargetMatches(
+    targets: CompetencyTarget[],
+    generatorCatalog: GeneratorMatchInfo[],
+    viewCatalog: ViewMatchInfo[],
+    options: MatchOptions = {}
+): MatchDiagnosticResult {
+    const tuples: MatchTuple[] = [];
+    const rejections: MatchRejection[] = [];
+    const {orderedPairs} = options.pairIndex
+        ?? buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, options.counters);
+
+    for (const target of targets) {
+        options.counters?.add('match.diagnostic_targets');
+        for (const {generator, view} of orderedPairs) {
+            options.counters?.add('match.diagnostic_pair_checks');
+            const verdict = matchesTargetCapabilities(target.labels, generator, view);
+            if (verdict.matched) {
+                tuples.push({target, generatorId: generator.generatorId, viewId: view.viewId});
             } else {
                 rejections.push({
                     targetId: target.id,
@@ -295,11 +406,12 @@ export function matchTargets(
                     viewId: view.viewId,
                     verdict
                 });
+                options.counters?.add('match.rejections');
             }
         }
     }
 
-    return { tuples, rejections };
+    return {tuples, rejections};
 }
 
 /**
@@ -310,11 +422,14 @@ export function matchTargets(
 export function findTargetsWithoutMatch(
     targets: CompetencyTarget[],
     generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[]
+    viewCatalog: ViewMatchInfo[],
+    options: MatchOptions = {}
 ): CompetencyTarget[] {
-    const {orderedPairs} = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
+    const index = options.pairIndex
+        ?? buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, options.counters);
 
-    return targets.filter(target => !orderedPairs.some(({generator, view}) =>
+    return targets.filter(target => !candidatePairsForTarget(target.labels, index, options.counters)
+        .some(({generator, view}) =>
         matchesTargetCapabilities(target.labels, generator, view).matched
     ));
 }
@@ -348,10 +463,16 @@ export function findGeneratorsWithoutTestPath(
     maxAttempts = 10
 ): string[] {
     const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
+    const tuplesByGenerator = new Map<string, MatchTuple[]>();
+    for (const tuple of tuples) {
+        const group = tuplesByGenerator.get(tuple.generatorId);
+        if (group) group.push(tuple);
+        else tuplesByGenerator.set(tuple.generatorId, [tuple]);
+    }
 
     return generatorCatalog
         .filter(entry => {
-            const candidates = tuples.filter(tuple => tuple.generatorId === entry.generatorId);
+            const candidates = tuplesByGenerator.get(entry.generatorId) ?? [];
             return !candidates.some(tuple => {
                 const sampleKey = computeSampleKey({
                     targetId: tuple.target.id,
@@ -382,10 +503,15 @@ function camelCase(str: string): string {
 }
 
 export async function loadGeneratorCatalog(
-    generatorsRoot: string = resolve(PROJECT_ROOT, 'src', 'generators')
+    generatorsRoot: string = resolve(PROJECT_ROOT, 'src', 'generators'),
+    counters?: WorkCounters
 ): Promise<GeneratorCatalogEntry[]> {
+    counters?.add('catalog.generator_loads');
     const entries: GeneratorCatalogEntry[] = [];
-    for (const mod of findLeafModules(generatorsRoot)) {
+    const modules = findLeafModules(generatorsRoot);
+    counters?.add('catalog.generator_discoveries');
+    counters?.add('catalog.generator_modules', modules.length);
+    for (const mod of modules) {
         try {
             const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
             const className = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'Generator';
@@ -405,7 +531,10 @@ export async function loadGeneratorCatalog(
                     ...(specModule.spec?.generalLabels || []),
                     ...extractSchemaLabels(generator.schema)
                 ])),
-                problemType: getGeneratorProblemType(mod.id)
+                problemType: getGeneratorProblemTypeFromPath(
+                    resolve(mod.absolutePath, 'generator.ts'),
+                    counters
+                )
             });
         } catch (e) {
             console.warn(`Could not load generator module ${mod.id}:`, e);
@@ -415,11 +544,16 @@ export async function loadGeneratorCatalog(
 }
 
 export async function loadViewCatalog(
-    viewsRoot: string = resolve(PROJECT_ROOT, 'src', 'visuals', 'views')
+    viewsRoot: string = resolve(PROJECT_ROOT, 'src', 'visuals', 'views'),
+    counters?: WorkCounters
 ): Promise<ViewCatalogEntry[]> {
-    const viewToType = getViewToProblemTypeMap();
+    counters?.add('catalog.view_loads');
+    const viewToType = getViewToProblemTypeMap(counters);
     const entries: ViewCatalogEntry[] = [];
-    for (const mod of findLeafModules(viewsRoot)) {
+    const modules = findLeafModules(viewsRoot);
+    counters?.add('catalog.view_discoveries');
+    counters?.add('catalog.view_modules', modules.length);
+    for (const mod of modules) {
         try {
             const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
             const spec: ViewSpec = specModule.spec;
@@ -836,10 +970,11 @@ export function generateTargetSamples(
     const { instancesPerTuple = 1, valRatio = DEFAULT_VAL_RATIO, maxAttempts = 50 } = options;
     const { tuples } = matchTargets([target], generatorCatalog, viewCatalog);
     const modes: SampleMode[] = ['question', 'solution'];
+    const generatorsById = new Map(generatorCatalog.map(entry => [entry.generatorId, entry.generator]));
 
     const samples: TargetSample[] = [];
     for (const tuple of tuples) {
-        const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
+        const generator = generatorsById.get(tuple.generatorId)!;
         const splits: SampleSplit[] = isValTuple(target.id, tuple.generatorId, tuple.viewId, valRatio)
             ? ['train', 'val']
             : ['train'];

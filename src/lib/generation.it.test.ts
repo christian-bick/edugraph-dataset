@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+    buildCompatibleModulePairIndex,
     computeSampleKey,
     computeSampleSeed,
     generateSample,
@@ -8,6 +9,7 @@ import {
     loadGeneratorCatalog,
     loadTargets,
     loadViewCatalog,
+    diagnoseTargetMatches,
     matchTargets,
     SampleIdentity
 } from './generation.ts';
@@ -21,7 +23,33 @@ describe('catalogs and end-to-end matching', () => {
             loadViewCatalog(),
             loadTargets('ccss')
         ]);
-        const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
+        const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
+        const indexedPairs = new Set(pairIndex.orderedPairs.map(({generator, view}) =>
+            `${generator.generatorId}\u0000${view.viewId}`));
+        const exhaustivelyCompatiblePairs = new Set(generatorCatalog.flatMap(generator =>
+            viewCatalog
+                .filter(view => generator.problemType == null
+                    || view.problemType == null
+                    || isProblemTypeCompatible(generator.problemType, view.problemType))
+                .map(view => `${generator.generatorId}\u0000${view.viewId}`)
+        ));
+        expect(indexedPairs).toEqual(exhaustivelyCompatiblePairs);
+
+        const {tuples} = matchTargets(
+            targets,
+            generatorCatalog,
+            viewCatalog,
+            {pairIndex}
+        );
+        const diagnostic = diagnoseTargetMatches(
+            targets,
+            generatorCatalog,
+            viewCatalog,
+            {pairIndex}
+        );
+        const tupleKey = (tuple: typeof tuples[number]) =>
+            `${tuple.target.id}\u0000${tuple.generatorId}\u0000${tuple.viewId}`;
+        expect(tuples.map(tupleKey)).toEqual(diagnostic.tuples.map(tupleKey));
         const viewsFor = (targetPrefix: string) => new Set(
             tuples
                 .filter(tuple => tuple.target.id.startsWith(targetPrefix))
@@ -61,7 +89,7 @@ describe('catalogs and end-to-end matching', () => {
             expect(Array.isArray(gen.labels)).toBe(true);
         }
 
-        const { tuples, rejections } = matchTargets(targets, generatorCatalog, viewCatalog);
+        const { tuples, rejections } = diagnoseTargetMatches(targets, generatorCatalog, viewCatalog);
         expect(tuples.length).toBeGreaterThan(0);
 
         for (const tuple of tuples) {

@@ -9,6 +9,7 @@ import {
     computeImageSha256,
     type VqaLabelCheck,
     type VqaLabelDefinition,
+    type VqaValidationContext,
     type VqaCacheEntry,
     VqaCacheManager
 } from './vqa-cache.ts';
@@ -113,6 +114,12 @@ export interface EvaluateSampleVqaInput {
     apiKey?: string;
     cacheManager?: VqaCacheManager;
     logPrompt?: boolean;
+    /** Prepared single-pass inputs; omitted by one-off callers. */
+    imageBuffer?: Buffer;
+    imageSha256?: string;
+    checklistPaths?: string[];
+    checklistContents?: {global: string; view: string};
+    validationContext?: VqaValidationContext;
 }
 
 export interface EvaluateSampleVqaResult {
@@ -200,20 +207,28 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
         labels,
         apiKey,
         cacheManager,
-        logPrompt = false
+        logPrompt = false,
+        imageBuffer: preparedImageBuffer,
+        imageSha256: preparedImageSha256,
+        checklistPaths: preparedChecklistPaths,
+        checklistContents,
+        validationContext: preparedValidationContext
     } = input;
 
-    if (!existsSync(imagePath)) return null;
+    if (!preparedImageBuffer && !existsSync(imagePath)) return null;
 
-    const imageBuffer = readFileSync(imagePath);
-    const imageSha256 = computeImageSha256(imageBuffer);
-    const checklistPaths = getChecklistPaths(viewId);
+    const imageBuffer = preparedImageBuffer ?? readFileSync(imagePath);
+    const imageSha256 = preparedImageSha256 ?? computeImageSha256(imageBuffer);
+    const checklistPaths = preparedChecklistPaths ?? getChecklistPaths(viewId);
 
     const [globalChecklistPath, viewChecklistPath] = checklistPaths;
-    const globalChecklist = readFileSync(globalChecklistPath, 'utf-8');
-    const viewChecklist = readFileSync(viewChecklistPath, 'utf-8');
+    const globalChecklist = checklistContents?.global
+        ?? readFileSync(globalChecklistPath, 'utf-8');
+    const viewChecklist = checklistContents?.view
+        ?? readFileSync(viewChecklistPath, 'utf-8');
 
-    const validationContext = buildVqaValidationContext(imageSha256, checklistPaths, labels);
+    const validationContext = preparedValidationContext
+        ?? buildVqaValidationContext(imageSha256, checklistPaths, labels);
     const valCacheKey = validationContext.validationCacheKey;
 
     // If cache manager is provided and already has this exact cache key, return cached entry

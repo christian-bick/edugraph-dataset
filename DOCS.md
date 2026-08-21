@@ -204,7 +204,11 @@ Playwright image, so changing the host runtime does not change the renderer iden
   the local refresh script so development and deployment semantics cannot drift. The default output is
   `public/coverage/preview/` for an explicit manual snapshot; release and deployment
   workflows pass explicit output directories and source identity. Normal local preview
-  does not run this command.
+  does not run this command. One run loads the type graph and module catalogs once, builds one
+  compatible generator/view index, matches all unresolved targets in one batch, and associates
+  targets with standards through a shared prefix index. The final structured work-counter line
+  reports physical source reads, index builds, posting traversal, candidate checks, and standard
+  lookup work for complexity regression diagnosis.
 
 ### `src/scripts/refresh-local-explorer.ts`
 * **Execution**: Invoked by the local explorer's **Refresh local data** action.
@@ -240,7 +244,7 @@ Playwright image, so changing the host runtime does not change the renderer iden
 #### `src/scripts/generate-dataset.ts`
 The container-internal pipeline orchestrator.
 *   **Execution**: The canonical wrapper invokes `npm run generate:dataset:internal`; direct host execution is rejected. The public command is `npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--training-only] [--concurrency=<positive_integer>]`.
-*   **Function**: Loads targets and catalogs via `src/lib/generation.ts`, computes the matched `(target, generator, view)` tuples, generates one question and one solution sample per tuple with structural seeds, and renders them headlessly through the Vite server owned by the same Docker container.
+*   **Function**: Loads targets and catalogs via `src/lib/generation.ts`, computes the complete matched `(target, generator, view)` tuple set once, groups it by generator, and reuses it for train generation, validation generation, preflight, and manifest construction. It generates one question and one solution sample per tuple with structural seeds and renders them headlessly through the Vite server owned by the same Docker container. The final structured work-counter line exposes catalog, type-index, and matching amplification.
 *   **Capture bounds**: Playwright screenshots the shared `#view` mount point. Its common stylesheet shrink-wraps ordinary content with `width: fit-content` and caps it at the canonical viewport with `max-width: 100vw`; only views whose outermost element explicitly requests viewport width retain a full-width canvas. See `IMPL-V10` in `docs/implementation-view.md`.
 *   **Renderer preflight and failure collection**: Before opening an output transaction, the pipeline visits only the views matched by the selected scope, verifies a successful document response and the `window.renderView` hook, and rejects page errors or genuine local-resource failures. Preflight uses at most four workers; rendering uses a bounded worker pool (8 by default, configurable with `--concurrency`). A sample-level render or `ViewValidationError` is recorded while sibling samples and modules continue, then the run reports every failed sample, exits non-zero, and rolls back the staged transaction. Diagnostic error cards are never accepted as dataset artifacts.
 *   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of tuples selected by `isValTuple`. Both use the same identity-based seeding with the split as a key component. Audit the result with `report:splits` — a tuple whose content space is too small to yield a draw disjoint from train produces no validation sample, which that report surfaces.
@@ -274,6 +278,12 @@ The only public dataset-generation entry point.
 *   **Freshness gate**: Before inspecting or spending API calls on VQA, validation recomputes the manifest entries for the selected scope and fails if entries are missing, inputs are stale, aggregate content/task fingerprint hashes differ, or sample counts drifted. Regenerate the reported generator/view scope first. A legacy dataset without `manifest.json` must be regenerated once.
 *   **Splits**: **Both `train` and `validation` are validated.** Validation images ship in the released dataset and are subject to the same checklists, so exempting them would let unchecked images reach consumers. Images are located by reading the split back out of the `sample_key` (`SPLIT_DIRS` in `src/lib/generation.ts`) — `file_name` is relative to its split root and does not encode the split, so **the same tuple's train and validation images share a filename**; every human-facing path is qualified with its split. The report breaks results down per split.
 *   **Caching**: Results are cached in `cache/vqa-validation/<dataset>/<module>.jsonl`, keyed by `sha256(image bytes : validation-context hash)`. The validation context combines the applicable checklist hash with the sorted ontology labels and their definitions, so changing an image, checklist, label claim, or definition re-validates exactly the affected samples. The evaluator system instruction, response schema, and model identifier are deliberately excluded from this hash; changing any of them requires a deliberate full live validation with `--force`. Each cache entry also records the component hashes and the sample's full identity (`sample_key`, `attempt`, `seed`, …) for debugging and churn analysis. Failures in every generated timestamped report include a ready-to-run `test:sample` command.
+*   **Single-pass validation state**: After freshness succeeds, validation reads every selected
+    image once, resolves checklist paths and text once per view/path, memoizes label and validation
+    contexts, and loads one `VqaCacheManager` per generator. Pruning, cache-hit classification,
+    live updates, cache normalization, and report generation reuse that state rather than rereading
+    images or cache files. Audit mode independently reads each physical cache file once. Both modes
+    emit structured work counters so cache bytes read can be checked against physical cache size.
 *   **Request concurrency**: Live validation uses up to 10 parallel requests by default. `--concurrency=<positive_integer>` lowers or raises that bound to fit provider rate limits. `--log-prompts` always uses one request at a time so the diagnostic output stays readable. Neither setting affects cache keys or evaluator behavior.
 *   **Prompt diagnostics**: `--log-prompts` prints the system instruction, user prompt, and image path immediately before every live request. The flag does not affect cache keys or evaluator behavior.
 *   **Gate semantics**: Normal validation updates cache records and reports; it exits non-zero for failing or uncached selected samples. Strict `--audit` is full-dataset-only, read-only, and never calls Gemini: it requires both splits, canonical renderer identities, exact metadata/image correspondence, and an exact set of passing cache keys. Missing, failing, stale, duplicate, malformed, orphaned, or obsolete-module records fail the audit. `--report-only` is the explicit diagnostic escape hatch.
@@ -298,7 +308,7 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/show-matching-stats.ts`
 *   **Execution**: `npm run show:matching -- --spec=<spec_module> [--raw]`
-*   **Function**: Prints the matched `(generator, view)` pairs for the same normalized and deduplicated targets used by production generation. Every semantic match is reported; a cheap sample probe is shown as a separate success/failure status and never removes the tuple. Pass `--raw` to inspect every source target definition before overlap deduplication. The shared `matchTargets` predicate remains the authority in both modes.
+*   **Function**: Prints the matched `(generator, view)` pairs for the same normalized and deduplicated targets used by production generation. Every semantic match is reported; a cheap sample probe is shown as a separate success/failure status and never removes the tuple. Pass `--raw` to inspect every source target definition before overlap deduplication. Production `matchTargets` uses capability postings and returns only matches. This diagnostic command explicitly uses `diagnoseTargetMatches`, which traverses every type-compatible pair so it can also report rejection reasons; the potentially target/pair-sized rejection output never burdens production matching.
 
 ### `src/scripts/report-matching-diff.ts`
 *   **Execution**: First capture a baseline with `npm run report:matching-diff -- --spec=<spec_module> --plan=<plan_name> --capture-before`; after target edits, rerun without `--capture-before`.

@@ -10,6 +10,7 @@ import {
     parseStandardsTree,
     resolveOntologyVersion
 } from '../lib/standards-coverage.ts';
+import {createWorkCounters} from '../lib/work-counters.ts';
 import type {
     Cluster,
     DataView,
@@ -191,6 +192,7 @@ async function prepareStandardsTree(): Promise<StandardsTreeData> {
 
 async function main() {
     console.log('--- Initiating CCSS Ontology Mapping Pipeline ---');
+    const counters = createWorkCounters();
     const tree = parseStandardsTree(await prepareStandardsTree());
     const packageJson = JSON.parse(fs.readFileSync(path.resolve(projectRoot, 'package.json'), 'utf-8'));
     const ontologyVersion = resolveOntologyVersion(packageJson);
@@ -199,6 +201,7 @@ async function main() {
         standardsMap: tree.standardsMap,
         ontologyVersion,
         generatedAt,
+        counters,
         grade: readOption('grade'),
         excludeHighSchool: args.includes('--k8') || args.includes('--exclude-hs')
     });
@@ -216,6 +219,7 @@ async function main() {
     fs.writeFileSync(path.join(outputDir, 'coverage-manifest.json'), JSON.stringify(manifest, null, 2));
 
     console.log(`Mapping pipeline complete: ${coverage.metadata.covered_count}/${coverage.metadata.total_leaves_scanned} covered.`);
+    console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
 }
 
 main().catch(error => {

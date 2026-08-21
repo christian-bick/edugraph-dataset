@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import type { VqaCacheEntry } from './vqa-cache.ts';
+import type {WorkCounters} from './work-counters.ts';
 
 export type VqaCacheAuditIssueKind =
     | 'duplicate'
@@ -55,11 +56,14 @@ function isCacheEntry(value: unknown): value is VqaCacheEntry {
         && typeof entry.evaluation?.pass === 'boolean';
 }
 
-function readModuleSnapshot(path: string): CacheModuleSnapshot {
+function readModuleSnapshot(path: string, counters?: WorkCounters): CacheModuleSnapshot {
     const moduleName = basename(path, '.jsonl');
     const entries = new Map<string, VqaCacheEntry>();
     const issues: VqaCacheAuditIssue[] = [];
-    const lines = readFileSync(path, 'utf-8').split('\n');
+    const content = readFileSync(path, 'utf-8');
+    counters?.add('vqa.audit_cache_file_reads');
+    counters?.add('vqa.audit_cache_bytes_read', Buffer.byteLength(content));
+    const lines = content.split('\n');
 
     for (let index = 0; index < lines.length; index++) {
         const line = lines[index].trim();
@@ -81,6 +85,7 @@ function readModuleSnapshot(path: string): CacheModuleSnapshot {
             });
             continue;
         }
+        counters?.add('vqa.audit_cache_entries_parsed');
         if (value.generator !== moduleName) {
             issues.push({
                 kind: 'malformed',
@@ -102,7 +107,8 @@ function readModuleSnapshot(path: string): CacheModuleSnapshot {
 /** Read-only exact-set audit of the committed cache for one generated dataset. */
 export function auditVqaCache(
     datasetCacheDir: string,
-    expectedRecords: readonly ExpectedVqaCacheRecord[]
+    expectedRecords: readonly ExpectedVqaCacheRecord[],
+    counters?: WorkCounters
 ): VqaCacheAuditResult {
     const expectedByModule = new Map<string, Map<string, ExpectedVqaCacheRecord[]>>();
     for (const expected of expectedRecords) {
@@ -115,7 +121,7 @@ export function auditVqaCache(
     const snapshots = existsSync(datasetCacheDir)
         ? readdirSync(datasetCacheDir, { withFileTypes: true })
             .filter(entry => entry.isFile() && entry.name.endsWith('.jsonl'))
-            .map(entry => readModuleSnapshot(resolve(datasetCacheDir, entry.name)))
+            .map(entry => readModuleSnapshot(resolve(datasetCacheDir, entry.name), counters))
         : [];
     const snapshotsByModule = new Map(snapshots.map(snapshot => [snapshot.moduleName, snapshot]));
     const issues = snapshots.flatMap(snapshot => snapshot.issues);
@@ -159,4 +165,3 @@ export function auditVqaCache(
     for (const issue of issues) counts[issue.kind]++;
     return { expected: expectedRecords.length, passed, issues, counts };
 }
-

@@ -4,9 +4,10 @@ import { resolve, dirname, relative } from "path";
 import { fileURLToPath } from "url";
 import { findLeafModules } from "../lib/module-resolver.ts";
 import {
-    buildVqaValidationContext,
     computeImageSha256,
+    createVqaValidationContextResolver,
     pruneObsoleteVqaCacheFiles,
+    type VqaValidationContext,
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
@@ -29,6 +30,7 @@ import {
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { auditVqaCache, type ExpectedVqaCacheRecord } from '../lib/vqa-cache-audit.ts';
 import { CANONICAL_RENDERER_ID } from '../lib/render-environment.ts';
+import {createWorkCounters} from '../lib/work-counters.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -59,6 +61,16 @@ function imagePathFor(entry: any): string {
  */
 function displayPathOf(entry: any): string {
     return `${splitDirOf(entry)}/${entry.file_name}`;
+}
+
+interface PreparedVqaSample {
+    entry: any;
+    imagePath: string;
+    imageBuffer?: Buffer;
+    imageSha256?: string;
+    checklistPaths?: string[];
+    checklistContents?: {global: string; view: string};
+    validationContext?: VqaValidationContext;
 }
 
 function pngFilesBelow(path: string): string[] {
@@ -118,10 +130,13 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
     await Promise.all(workers);
 }
 
-async function evaluateSingleSample(entry: any, _datasetFolderName: string, logPrompt: boolean): Promise<any> {
-    const imagePath = imagePathFor(entry);
+async function evaluateSingleSample(
+    sample: PreparedVqaSample,
+    logPrompt: boolean
+): Promise<any> {
+    const {entry} = sample;
     const result = await evaluateSampleVqa({
-        imagePath,
+        imagePath: sample.imagePath,
         sampleKey: entry.sample_key,
         targetId: entry.target_id,
         generatorId: entry.generator,
@@ -133,7 +148,12 @@ async function evaluateSingleSample(entry: any, _datasetFolderName: string, logP
         fileName: entry.file_name,
         labels: entry.tags,
         apiKey,
-        logPrompt
+        logPrompt,
+        imageBuffer: sample.imageBuffer,
+        imageSha256: sample.imageSha256,
+        checklistPaths: sample.checklistPaths,
+        checklistContents: sample.checklistContents,
+        validationContext: sample.validationContext
     });
 
     if (!result) return null;
@@ -142,6 +162,7 @@ async function evaluateSingleSample(entry: any, _datasetFolderName: string, logP
 
 async function main() {
     const args = process.argv.slice(2);
+    const counters = createWorkCounters();
 
     let targetGenerator: string | undefined = process.env.npm_config_generator;
     let targetView: string | undefined = process.env.npm_config_view;
@@ -239,8 +260,8 @@ async function main() {
 
     const [specValidation, generatorCatalog, viewCatalog] = await Promise.all([
         normalizeAndValidateSpec(specName),
-        loadGeneratorCatalog(),
-        loadViewCatalog()
+        loadGeneratorCatalog(undefined, counters),
+        loadViewCatalog(undefined, counters)
     ]);
     if (specValidation.errors.length > 0) {
         throw new Error(`Cannot validate dataset freshness because spec "${specName}" is invalid.`);
@@ -289,20 +310,73 @@ async function main() {
         );
     }
 
-    // Collect active cache keys per module for auto-pruning
+    const validationContextResolver = createVqaValidationContextResolver(counters);
+    const checklistByView = new Map<string, {
+        paths: string[];
+        contents: {global: string; view: string};
+    }>();
+    const checklistTextByPath = new Map<string, string>();
+    const checklistFor = (viewId: string) => {
+        const cached = checklistByView.get(viewId);
+        if (cached) return cached;
+
+        counters.add('vqa.checklist_path_resolutions');
+        const paths = getChecklistPaths(viewId);
+        const readChecklist = (path: string) => {
+            const existing = checklistTextByPath.get(path);
+            if (existing !== undefined) return existing;
+            const content = readFileSync(path, 'utf-8');
+            checklistTextByPath.set(path, content);
+            counters.add('vqa.checklist_file_reads');
+            counters.add('vqa.checklist_bytes_read', Buffer.byteLength(content));
+            return content;
+        };
+        const checklist = {
+            paths,
+            contents: {
+                global: readChecklist(paths[0]),
+                view: readChecklist(paths[1])
+            }
+        };
+        checklistByView.set(viewId, checklist);
+        return checklist;
+    };
+
+    const preparedSamples: PreparedVqaSample[] = filtered.map(entry => {
+        const imagePath = imagePathFor(entry);
+        if (!existsSync(imagePath)) return {entry, imagePath};
+
+        const imageBuffer = readFileSync(imagePath);
+        counters.add('vqa.image_file_reads');
+        counters.add('vqa.image_bytes_read', imageBuffer.byteLength);
+        const imageSha256 = computeImageSha256(imageBuffer);
+        const checklist = checklistFor(entry.view);
+        const validationContext = validationContextResolver.resolve(
+            imageSha256,
+            checklist.paths,
+            entry.tags,
+            [checklist.contents.global, checklist.contents.view]
+        );
+        return {
+            entry,
+            imagePath,
+            imageBuffer,
+            imageSha256,
+            checklistPaths: checklist.paths,
+            checklistContents: checklist.contents,
+            validationContext
+        };
+    });
+
+    // Collect active cache keys per module for auto-pruning.
     const activeKeysPerModule = new Map<string, Set<string>>();
     const expectedCacheRecords: ExpectedVqaCacheRecord[] = [];
 
-    for (const entry of filtered) {
+    for (const sample of preparedSamples) {
+        const {entry, validationContext} = sample;
         const moduleName = entry.generator;
-        const imagePath = imagePathFor(entry);
-        if (!existsSync(imagePath)) continue;
-
-        const imageBuffer = readFileSync(imagePath);
-        const imageSha256 = computeImageSha256(imageBuffer);
-
-        const checklistPaths = getChecklistPaths(entry.view);
-        const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
+        if (!validationContext) continue;
+        const valCacheKey = validationContext.validationCacheKey;
 
         if (!activeKeysPerModule.has(moduleName)) {
             activeKeysPerModule.set(moduleName, new Set());
@@ -319,7 +393,8 @@ async function main() {
         const structureIssues = datasetStructureIssues(filtered, missingSplits);
         const cacheAudit = auditVqaCache(
             resolve(CACHE_DIR, datasetFolderName),
-            expectedCacheRecords
+            expectedCacheRecords,
+            counters
         );
 
         console.log(`\n--- Strict VQA Cache Audit Summary [${datasetFolderName}] ---`);
@@ -347,8 +422,24 @@ async function main() {
             console.log(`✅ AUDIT PASSED: all ${cacheAudit.expected} generated samples have exact passing cache coverage.`);
         }
         console.log('\nValidation Complete.');
+        console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
         return;
     }
+
+    const cacheManagers = new Map<string, VqaCacheManager>();
+    const cacheManagerFor = (moduleName: string) => {
+        let manager = cacheManagers.get(moduleName);
+        if (!manager) {
+            manager = new VqaCacheManager(
+                CACHE_DIR,
+                datasetFolderName,
+                moduleName,
+                counters
+            );
+            cacheManagers.set(moduleName, manager);
+        }
+        return manager;
+    };
 
     // Perform automatic safe pruning of stale cache entries for this dataset
     // folder. Pruning is only safe when every split is on disk: a dataset built
@@ -365,7 +456,7 @@ async function main() {
         console.log(`ℹ️ Skipping cache pruning (${reasons.join(', ')}) — entries outside this run cannot be confirmed stale.`);
     } else {
         for (const [modName, activeKeys] of activeKeysPerModule.entries()) {
-            const mgr = new VqaCacheManager(CACHE_DIR, datasetFolderName, modName);
+            const mgr = cacheManagerFor(modName);
             const pruned = mgr.prune(activeKeys);
             if (pruned > 0) {
                 console.log(`🧹 Auto-pruned ${pruned} stale cache entries for [${modName}] in cache/vqa-validation/${datasetFolderName}/`);
@@ -380,100 +471,78 @@ async function main() {
         }
     }
 
-    const toEvaluate: any[] = [];
-        let cachedCount = 0;
-        let cachedPassed = 0;
-        let cachedFailed = 0;
+    const toEvaluate: PreparedVqaSample[] = [];
+    let cachedCount = 0;
+    let cachedPassed = 0;
+    let cachedFailed = 0;
 
-        for (const entry of filtered) {
-            const moduleName = entry.generator;
-            const viewId = entry.view;
-            const imagePath = imagePathFor(entry);
+    for (const sample of preparedSamples) {
+        const {entry, validationContext} = sample;
+        if (!validationContext) continue;
 
-            if (!existsSync(imagePath)) continue;
+        const existingCache = cacheManagerFor(entry.generator)
+            .get(validationContext.validationCacheKey);
 
-            const imageBuffer = readFileSync(imagePath);
-            const imageSha256 = computeImageSha256(imageBuffer);
-            const checklistPaths = getChecklistPaths(viewId);
-            const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
-
-            const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
-            const existingCache = cacheManager.get(valCacheKey);
-
-            if (existingCache && !force) {
-                cachedCount++;
-                if (existingCache.evaluation.pass) cachedPassed++;
-                else cachedFailed++;
-            } else {
-                toEvaluate.push(entry);
-            }
+        if (existingCache && !force) {
+            cachedCount++;
+            if (existingCache.evaluation.pass) cachedPassed++;
+            else cachedFailed++;
+        } else {
+            toEvaluate.push(sample);
         }
+    }
 
-        if (cachedCount > 0) {
-            console.log(`ℹ️ Reused ${cachedCount} cached evaluation records (${cachedPassed} passed, ${cachedFailed} failed).`);
-        }
+    if (cachedCount > 0) {
+        console.log(`ℹ️ Reused ${cachedCount} cached evaluation records (${cachedPassed} passed, ${cachedFailed} failed).`);
+    }
 
-        if (toEvaluate.length > 0) {
-            if (!apiKey) {
-                console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
-            } else {
-                evaluationConcurrency = logPrompts ? 1 : evaluationConcurrency;
-                console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to ${evaluationConcurrency} parallel request${evaluationConcurrency === 1 ? '' : 's'})...`);
-                let processed = 0;
-                let evalPassed = cachedPassed;
-                let evalFailed = cachedFailed;
+    if (toEvaluate.length > 0) {
+        if (!apiKey) {
+            console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
+        } else {
+            evaluationConcurrency = logPrompts ? 1 : evaluationConcurrency;
+            console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to ${evaluationConcurrency} parallel request${evaluationConcurrency === 1 ? '' : 's'})...`);
+            let processed = 0;
+            let evalPassed = cachedPassed;
+            let evalFailed = cachedFailed;
 
-                renderProgressBar(0, toEvaluate.length, evalPassed, evalFailed);
+            renderProgressBar(0, toEvaluate.length, evalPassed, evalFailed);
 
-                const cacheManagers = new Map<string, VqaCacheManager>();
-                const getMgr = (mod: string) => {
-                    if (!cacheManagers.has(mod)) {
-                        cacheManagers.set(mod, new VqaCacheManager(CACHE_DIR, datasetFolderName, mod));
-                    }
-                    return cacheManagers.get(mod)!;
-                };
-
-                await runPool(toEvaluate, evaluationConcurrency, async (entry) => {
-                    const record = await evaluateSingleSample(entry, datasetFolderName, logPrompts);
-                    processed++;
-                    if (record) {
-                        const mgr = getMgr(record.moduleName);
-                        mgr.set({
-                            validation_cache_key: record.validation_cache_key,
-                            sample_key: record.sample_key,
-                            target_id: record.target_id,
-                            generator: record.generator,
-                            view: record.view,
-                            mode: record.mode,
-                            instance: record.instance,
-                            attempt: record.attempt,
-                            seed: record.seed,
-                            file_name: record.file_name,
-                            image_sha256: record.image_sha256,
-                            checklist_hash: record.checklist_hash,
-                            label_context_hash: record.label_context_hash,
-                            validation_context_hash: record.validation_context_hash,
-                            validated_at: record.validated_at,
-                            evaluation: record.evaluation
-                        });
-                        if (record.evaluation.pass) evalPassed++;
-                        else evalFailed++;
-                    }
-                    renderProgressBar(processed, toEvaluate.length, evalPassed, evalFailed);
-                });
-
-                // Save all updated cache files
-                for (const mgr of cacheManagers.values()) {
-                    mgr.save();
+            await runPool(toEvaluate, evaluationConcurrency, async (sample) => {
+                const record = await evaluateSingleSample(sample, logPrompts);
+                processed++;
+                if (record) {
+                    const mgr = cacheManagerFor(record.moduleName);
+                    mgr.set({
+                        validation_cache_key: record.validation_cache_key,
+                        sample_key: record.sample_key,
+                        target_id: record.target_id,
+                        generator: record.generator,
+                        view: record.view,
+                        mode: record.mode,
+                        instance: record.instance,
+                        attempt: record.attempt,
+                        seed: record.seed,
+                        file_name: record.file_name,
+                        image_sha256: record.image_sha256,
+                        checklist_hash: record.checklist_hash,
+                        label_context_hash: record.label_context_hash,
+                        validation_context_hash: record.validation_context_hash,
+                        validated_at: record.validated_at,
+                        evaluation: record.evaluation
+                    });
+                    if (record.evaluation.pass) evalPassed++;
+                    else evalFailed++;
                 }
-                console.log('\n');
-            }
+                renderProgressBar(processed, toEvaluate.length, evalPassed, evalFailed);
+            });
+            console.log('\n');
+        }
     }
 
     // Save and sort clean JSONL cache files for all active modules
     for (const modName of activeKeysPerModule.keys()) {
-        const mgr = new VqaCacheManager(CACHE_DIR, datasetFolderName, modName);
-        mgr.save();
+        cacheManagerFor(modName).save();
     }
 
     // Generate Markdown report and failure TODO list
@@ -482,7 +551,12 @@ async function main() {
         view: targetView,
         reportPath: reportOverride
     });
-    const report = generateValidationReport(datasetFolderName, filtered, resolvedReportPath);
+    const report = generateValidationReport(
+        datasetFolderName,
+        preparedSamples,
+        resolvedReportPath,
+        cacheManagerFor
+    );
     const reportPath = report.path;
     console.log(`📄 Validation report & TODO list generated: ${reportPath}`);
 
@@ -497,12 +571,14 @@ async function main() {
     }
 
     console.log('\nValidation Complete.');
+    console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
 }
 
 function generateValidationReport(
     datasetFolderName: string,
-    filteredEntries: any[],
-    reportPath: string
+    preparedSamples: readonly PreparedVqaSample[],
+    reportPath: string,
+    cacheManagerFor: (moduleName: string) => VqaCacheManager
 ): { path: string; counts: { passed: number; failed: number; uncached: number } } {
     const outDir = dirname(reportPath);
     if (!existsSync(outDir)) {
@@ -524,26 +600,19 @@ function generateValidationReport(
         return perSplit.get(splitDir)!;
     };
 
-    for (const entry of filteredEntries) {
+    for (const sample of preparedSamples) {
+        const {entry, validationContext} = sample;
         const moduleName = entry.generator;
-        const viewId = entry.view;
-        const imagePath = imagePathFor(entry);
         const tally = tallyFor(entry);
         tally.total++;
 
-        if (!existsSync(imagePath)) {
+        if (!validationContext) {
             uncachedCount++;
             tally.uncached++;
             continue;
         }
 
-        const imageBuffer = readFileSync(imagePath);
-        const imageSha256 = computeImageSha256(imageBuffer);
-        const checklistPaths = getChecklistPaths(viewId);
-        const valCacheKey = buildVqaValidationContext(imageSha256, checklistPaths, entry.tags).validationCacheKey;
-
-        const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, moduleName);
-        const cache = cacheManager.get(valCacheKey);
+        const cache = cacheManagerFor(moduleName).get(validationContext.validationCacheKey);
 
         if (!cache) {
             uncachedCount++;
@@ -561,7 +630,7 @@ function generateValidationReport(
         }
     }
 
-    const total = filteredEntries.length;
+    const total = preparedSamples.length;
     const passedPct = total > 0 ? ((passedCount / total) * 100).toFixed(1) : '0.0';
     const failedPct = total > 0 ? ((failedCount / total) * 100).toFixed(1) : '0.0';
     const uncachedPct = total > 0 ? ((uncachedCount / total) * 100).toFixed(1) : '0.0';

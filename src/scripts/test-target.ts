@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import {
     loadGeneratorCatalog,
     loadViewCatalog,
-    matchTargets,
+    diagnoseTargetMatches,
     generateTargetSamples,
     buildProblem,
     buildRenderPayload,
@@ -78,7 +78,7 @@ async function main() {
     console.log(`Labels: ${target.labels.map(shortenLabel).join(', ')}\n`);
 
     // 1. Matching
-    const { tuples, rejections } = matchTargets([target], generatorCatalog, viewCatalog);
+    const { tuples, rejections } = diagnoseTargetMatches([target], generatorCatalog, viewCatalog);
     if (tuples.length === 0) {
         console.log(`❌ No (generator, view) tuple matches this target.`);
     } else {

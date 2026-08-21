@@ -9,6 +9,7 @@ import {
 import { basename, relative, resolve } from 'node:path';
 import {
     GeneratorCatalogEntry,
+    MatchTuple,
     matchTargets,
     SampleSplit,
     SPLIT_DIRS,
@@ -146,6 +147,7 @@ export function buildDatasetManifestEntries(options: {
     views: ViewCatalogEntry[];
     generatedSplits: SampleSplit[];
     rendererEnvironment?: string;
+    tuples?: readonly MatchTuple[];
 }): Record<string, DatasetManifestEntry> {
     const {
         projectRoot,
@@ -154,9 +156,10 @@ export function buildDatasetManifestEntries(options: {
         generators,
         views,
         generatedSplits,
-        rendererEnvironment = currentRendererEnvironment()
+        rendererEnvironment = currentRendererEnvironment(),
+        tuples: preparedTuples
     } = options;
-    const tuples = matchTargets(targets, generators, views).tuples;
+    const tuples = preparedTuples ?? matchTargets(targets, generators, views).tuples;
     const targetsByPair = new Map<string, CompetencyTarget[]>();
     for (const tuple of tuples) {
         const key = pairKey(tuple.generatorId, tuple.viewId);

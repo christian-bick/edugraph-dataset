@@ -1,5 +1,6 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {
+    buildCompatibleModulePairIndex,
     computeSampleKey,
     generateSampleWithRetry,
     loadGeneratorCatalog,
@@ -8,8 +9,9 @@ import {
     loadViewCatalog,
     matchTargets,
     type GeneratorCatalogEntry,
-    type ViewCatalogEntry
+    type MatchTuple
 } from './generation.ts';
+import type {WorkCounters} from './work-counters.ts';
 import {groupOntologyTodos} from './ontology-todo.ts';
 import {
     assetIndexSampleMap,
@@ -51,6 +53,7 @@ export interface BuildStandardsCoverageOptions {
     generatedAt?: string;
     grade?: string;
     excludeHighSchool?: boolean;
+    counters?: WorkCounters;
 }
 
 export interface BuildCurrentStandardsCoverageOptions {
@@ -60,6 +63,7 @@ export interface BuildCurrentStandardsCoverageOptions {
     grade?: string;
     excludeHighSchool?: boolean;
     knownAssets?: AssetIndex;
+    counters?: WorkCounters;
 }
 
 export interface BuildCoverageManifestOptions {
@@ -108,11 +112,59 @@ export function findParentClusterId(
 
 export function findStandardIdForTarget(
     targetId: string,
-    sortedLeafIds: readonly string[]
+    leafIds: readonly string[],
+    counters?: WorkCounters
 ): string | null {
-    return sortedLeafIds.find(standardId =>
-        targetId === standardId || targetId.startsWith(`${standardId}-`)) ?? null;
+    counters?.add('coverage.target_standard_lookups');
+    let index = standardIdIndices.get(leafIds);
+    if (!index) {
+        index = buildStandardIdIndex(leafIds, counters);
+        standardIdIndices.set(leafIds, index);
+    }
+
+    let node = index;
+    let matched: string | null = null;
+    for (let position = 0; position < targetId.length; position++) {
+        counters?.add('coverage.target_id_characters');
+        const next = node.children.get(targetId[position]);
+        if (!next) break;
+        node = next;
+        if (node.standardId
+            && (position === targetId.length - 1 || targetId[position + 1] === '-')) {
+            matched = node.standardId;
+        }
+    }
+    return matched;
 }
+
+interface StandardIdIndexNode {
+    children: Map<string, StandardIdIndexNode>;
+    standardId?: string;
+}
+
+const standardIdIndices = new WeakMap<readonly string[], StandardIdIndexNode>();
+
+const buildStandardIdIndex = (
+    leafIds: readonly string[],
+    counters?: WorkCounters
+): StandardIdIndexNode => {
+    counters?.add('coverage.standard_indices');
+    const root: StandardIdIndexNode = {children: new Map()};
+    for (const standardId of leafIds) {
+        let node = root;
+        for (const character of standardId) {
+            counters?.add('coverage.standard_id_characters');
+            let child = node.children.get(character);
+            if (!child) {
+                child = {children: new Map()};
+                node.children.set(character, child);
+            }
+            node = child;
+        }
+        node.standardId = standardId;
+    }
+    return root;
+};
 
 const cloneImplementation = (implementation: EngineImplementationTodo['implementation']): Implementation => ({
     id: implementation.id,
@@ -151,28 +203,23 @@ const buildNamedTodo = (todo: BeyondScopeEntry): NamedTodo => ({
 const buildCoverageEntry = ({
     standard,
     standardsMap,
-    sortedLeafIds,
-    source,
+    targets,
+    sourceImplementationTodos,
+    sourceOntologyTodos,
+    sourceBeyondScope,
     resolveGenerator
 }: {
     standard: StandardNode;
     standardsMap: Record<string, StandardNode>;
-    sortedLeafIds: readonly string[];
-    source: StandardsCoverageSource;
+    targets: CompetencyTarget[];
+    sourceImplementationTodos: EngineImplementationTodo[];
+    sourceOntologyTodos: EngineOntologyTodo[];
+    sourceBeyondScope: BeyondScopeEntry[];
     resolveGenerator: BuildStandardsCoverageOptions['resolveGenerator'];
 }): StandardCoverage => {
-    const belongsToStandard = (target: {id: string}) =>
-        findStandardIdForTarget(target.id, sortedLeafIds) === standard.id;
-    const targets = source.targets.filter(belongsToStandard);
-    const implementationTodos = source.implementationTodos
-        .filter(belongsToStandard)
-        .map(buildImplementationTodo);
-    const ontologyTodos = source.ontologyTodos
-        .filter(todo => todo.standardId === standard.id)
-        .map(buildOntologyTodo);
-    const beyondScope = source.beyondScope
-        .filter(todo => todo.standardId === standard.id)
-        .map(buildNamedTodo);
+    const implementationTodos = sourceImplementationTodos.map(buildImplementationTodo);
+    const ontologyTodos = sourceOntologyTodos.map(buildOntologyTodo);
+    const beyondScope = sourceBeyondScope.map(buildNamedTodo);
     const competencies = targets.map(target => [...target.labels]);
     const specCovered = targets.length > 0
         || implementationTodos.length > 0
@@ -215,7 +262,7 @@ const buildCoverageEntry = ({
 
 const buildImplementationTasks = (
     todos: EngineImplementationTodo[],
-    sortedLeafIds: readonly string[],
+    standardIdByTargetId: ReadonlyMap<string, string>,
     standardsMap: Record<string, StandardNode>
 ): BacklogTask[] => {
     const grouped = new Map<string, EngineImplementationTodo[]>();
@@ -228,7 +275,7 @@ const buildImplementationTasks = (
     return [...grouped.values()].map(targets => {
         const implementation = targets[0].implementation;
         const standards = [...new Set(targets
-            .map(target => findStandardIdForTarget(target.id, sortedLeafIds))
+            .map(target => standardIdByTargetId.get(target.id) ?? null)
             .filter((standardId): standardId is string => standardId !== null))];
         const clusterIds = [...new Set(standards.map(standardId =>
             findParentClusterId(standardId, standardsMap)))];
@@ -333,13 +380,52 @@ export function buildStandardsCoverage({
     resolveGenerator,
     generatedAt = new Date().toISOString(),
     grade,
-    excludeHighSchool = false
+    excludeHighSchool = false,
+    counters
 }: BuildStandardsCoverageOptions): CoverageData {
     const leaves = leafStandards(standardsMap, grade, excludeHighSchool);
-    const sortedLeafIds = leaves.map(standard => standard.id).sort((left, right) => right.length - left.length);
+    const leafIds = leaves.map(standard => standard.id);
+    const standardIdByTargetId = new Map<string, string>();
+    const targetsByStandard = new Map<string, CompetencyTarget[]>();
+    const implementationTodosByStandard = new Map<string, EngineImplementationTodo[]>();
+    const ontologyTodosByStandard = new Map<string, EngineOntologyTodo[]>();
+    const beyondScopeByStandard = new Map<string, BeyondScopeEntry[]>();
+
+    const addToGroup = <T>(groups: Map<string, T[]>, standardId: string, value: T) => {
+        const group = groups.get(standardId);
+        if (group) group.push(value);
+        else groups.set(standardId, [value]);
+    };
+    for (const target of source.targets) {
+        const standardId = findStandardIdForTarget(target.id, leafIds, counters);
+        if (!standardId) continue;
+        standardIdByTargetId.set(target.id, standardId);
+        addToGroup(targetsByStandard, standardId, target);
+    }
+    for (const todo of source.implementationTodos) {
+        const standardId = findStandardIdForTarget(todo.id, leafIds, counters);
+        if (!standardId) continue;
+        standardIdByTargetId.set(todo.id, standardId);
+        addToGroup(implementationTodosByStandard, standardId, todo);
+    }
+    for (const todo of source.ontologyTodos) {
+        addToGroup(ontologyTodosByStandard, todo.standardId, todo);
+    }
+    for (const entry of source.beyondScope) {
+        addToGroup(beyondScopeByStandard, entry.standardId, entry);
+    }
+
     const coverage = Object.fromEntries(leaves.map(standard => [
         standard.id,
-        buildCoverageEntry({standard, standardsMap, sortedLeafIds, source, resolveGenerator})
+        buildCoverageEntry({
+            standard,
+            standardsMap,
+            targets: targetsByStandard.get(standard.id) ?? [],
+            sourceImplementationTodos: implementationTodosByStandard.get(standard.id) ?? [],
+            sourceOntologyTodos: ontologyTodosByStandard.get(standard.id) ?? [],
+            sourceBeyondScope: beyondScopeByStandard.get(standard.id) ?? [],
+            resolveGenerator
+        })
     ]));
     const entries = Object.values(coverage);
 
@@ -366,7 +452,7 @@ export function buildStandardsCoverage({
         },
         coverage,
         tasks: [
-            ...buildImplementationTasks(source.implementationTodos, sortedLeafIds, standardsMap),
+            ...buildImplementationTasks(source.implementationTodos, standardIdByTargetId, standardsMap),
             ...buildOntologyTasks(source.ontologyTodos, standardsMap),
             ...buildAnalysisTasks(coverage, standardsMap)
         ]
@@ -375,12 +461,11 @@ export function buildStandardsCoverage({
 
 const resolveGeneratorForTarget = (
     target: CompetencyTarget,
-    generators: GeneratorCatalogEntry[],
-    views: ViewCatalogEntry[]
+    tuples: readonly MatchTuple[],
+    generatorsById: ReadonlyMap<string, GeneratorCatalogEntry>
 ): string | null => {
-    const {tuples} = matchTargets([target], generators, views);
     for (const tuple of tuples) {
-        const generator = generators.find(entry => entry.generatorId === tuple.generatorId)?.generator;
+        const generator = generatorsById.get(tuple.generatorId)?.generator;
         if (!generator) continue;
         const sampleKey = computeSampleKey({
             targetId: target.id,
@@ -411,12 +496,26 @@ export async function buildCurrentStandardsCoverage(
     const [targets, todos, generators, views] = await Promise.all([
         loadTargets('ccss'),
         loadSpecTodos('ccss'),
-        loadGeneratorCatalog(),
-        loadViewCatalog()
+        loadGeneratorCatalog(undefined, options.counters),
+        loadViewCatalog(undefined, options.counters)
     ]);
     const knownSamples = options.knownAssets
         ? assetIndexSampleMap(options.knownAssets)
         : new Map();
+    const unresolvedTargets = targets.filter(target =>
+        !knownSamples.has(requestedLabelKey(target.labels)));
+    const pairIndex = buildCompatibleModulePairIndex(generators, views, options.counters);
+    const {tuples} = matchTargets(unresolvedTargets, generators, views, {
+        pairIndex,
+        counters: options.counters
+    });
+    const tuplesByTargetId = new Map<string, MatchTuple[]>();
+    for (const tuple of tuples) {
+        const group = tuplesByTargetId.get(tuple.target.id);
+        if (group) group.push(tuple);
+        else tuplesByTargetId.set(tuple.target.id, [tuple]);
+    }
+    const generatorsById = new Map(generators.map(generator => [generator.generatorId, generator]));
     return buildStandardsCoverage({
         ...options,
         source: {
@@ -428,7 +527,11 @@ export async function buildCurrentStandardsCoverage(
         resolveGenerator: target => {
             const generatedSample = knownSamples.get(requestedLabelKey(target.labels))?.samples[0];
             return generatedSample?.generator
-                ?? resolveGeneratorForTarget(target, generators, views);
+                ?? resolveGeneratorForTarget(
+                    target,
+                    tuplesByTargetId.get(target.id) ?? [],
+                    generatorsById
+                );
         }
     });
 }

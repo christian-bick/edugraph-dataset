@@ -220,6 +220,21 @@ earlier active workflow.
 This phase fixes the immediate release bottleneck and the other known Gate A violations. Each
 change must preserve existing matching and validation results exactly.
 
+**Status: in progress.** The first implementation pass now covers the measured standards-coverage
+and VQA amplification paths: operation-local counters, cached type parsing and ontology ancestry,
+type/capability pair indices, batched target matching, indexed standard association, explicit
+diagnostic rejection output, prepared single-pass VQA state, and one cache load per module. The
+current CCSS coverage run completes locally in about 2.1 seconds and reports one problem-type file
+read, one generator discovery, one compatible-pair index build, 180 compatible pairs, and 894 final
+capability checks for 665 loaded source targets (653 unique after production normalization).
+Production tuples are integration-tested against exhaustive
+diagnostic matching, and counter-bound tests exercise growing target and validation-context inputs.
+
+Phase 1 remains open for a counter-guided audit of the other active generation and validation
+commands and removal of any remaining input-sized nested scans or non-linear ordering work. The
+strict VQA audit must also be rerun after the canonical dataset freshness manifest is regenerated;
+the existing dataset correctly becomes stale when these shared generation sources change.
+
 #### Phase 2: establish stable input identity
 
 1. Pin standards sources by immutable upstream revision and content digest.

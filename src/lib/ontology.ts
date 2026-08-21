@@ -17,35 +17,41 @@ export interface DistanceScaleResolution {
     family: DistanceScaleFamily;
 }
 
-/**
- * Returns true if child is equal to parent, or if parent is a transitive 
- * ancestor of child via the taxonomic partOf relation.
- */
-export function isSubConceptOf(child: string, parent: string): boolean {
-    if (child === parent) return true;
+const ancestorCache = new Map<string, ReadonlySet<string>>();
 
-    const visited = new Set<string>();
-    const queue: string[] = [child];
+/** Returns a concept and its transitive taxonomic ancestors. */
+export function getConceptAncestors(concept: string): ReadonlySet<string> {
+    const cached = ancestorCache.get(concept);
+    if (cached) return cached;
 
-    while (queue.length > 0) {
-        const current = queue.shift()!;
-        if (current === parent) return true;
-        if (visited.has(current)) continue;
-        visited.add(current);
+    const ancestors = new Set<string>();
+    const queue: string[] = [concept];
+    let cursor = 0;
+
+    while (cursor < queue.length) {
+        const current = queue[cursor++];
+        if (ancestors.has(current)) continue;
+        ancestors.add(current);
 
         try {
-            const parents = partOf(current as CompetencyDescriptor) || [];
-            for (const p of parents) {
-                if (!visited.has(p)) {
-                    queue.push(p);
-                }
+            for (const parent of partOf(current as CompetencyDescriptor) || []) {
+                if (!ancestors.has(parent)) queue.push(parent);
             }
         } catch {
-            // Handle cases where concept is not defined in edugraph-ts
+            // Unknown concepts have no known ancestors, but still include themselves.
         }
     }
 
-    return false;
+    ancestorCache.set(concept, ancestors);
+    return ancestors;
+}
+
+/**
+ * Returns true if child is equal to parent, or if parent is a transitive
+ * ancestor of child via the taxonomic partOf relation.
+ */
+export function isSubConceptOf(child: string, parent: string): boolean {
+    return getConceptAncestors(child).has(parent);
 }
 
 /** Resolves an exact distance-scale label and classifies it through its ontology parent. */

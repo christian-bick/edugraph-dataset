@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     DISTANCE_SCALE_LABELS,
+    getConceptAncestors,
     isSubConceptOf,
     resolveDistanceScale,
     resolveRangeFromLabels
@@ -23,6 +24,18 @@ describe('Ontology Helper', () => {
 
         it('should return false for unrelated concepts', () => {
             expect(isSubConceptOf(Scope.NumbersSmaller10, Area.Addition)).toBe(false);
+        });
+    });
+
+    describe('getConceptAncestors', () => {
+        it('includes the concept and its transitive parents', () => {
+            const ancestors = getConceptAncestors(Scope.NumbersSmaller10);
+            expect(ancestors.has(Scope.NumbersSmaller10)).toBe(true);
+            expect(ancestors.has(Scope.NumericRange)).toBe(true);
+        });
+
+        it('returns unknown concepts as self-only closures', () => {
+            expect([...getConceptAncestors('urn:unknown')]).toEqual(['urn:unknown']);
         });
     });
 

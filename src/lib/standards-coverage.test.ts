@@ -15,6 +15,7 @@ import {
     parseStandardsTree,
     resolveOntologyVersion
 } from './standards-coverage.ts';
+import {createWorkCounters} from './work-counters.ts';
 
 const node = (
     id: string,
@@ -33,6 +34,7 @@ const node = (
 
 describe('standards coverage', () => {
     it('builds current-label coverage and grouped backlog tasks without generated artifacts', () => {
+        const counters = createWorkCounters();
         const standardsMap = {
             '2.OA.C': node('2.OA.C', 'Cluster', undefined, [
                 '2.OA.C.3',
@@ -88,6 +90,7 @@ describe('standards coverage', () => {
             },
             ontologyVersion: 'v0.15.0',
             generatedAt: '2026-08-14T12:00:00.000Z',
+            counters,
             resolveGenerator: candidate => candidate.id === target.id ? 'parity' : null
         });
 
@@ -127,6 +130,8 @@ describe('standards coverage', () => {
             'task-ontology-relation',
             'task-analysis-2.OA.C'
         ]);
+        expect(counters.get('coverage.standard_indices')).toBe(1);
+        expect(counters.get('coverage.target_standard_lookups')).toBe(2);
     });
 
     it('maps targets to the longest matching leaf and resolves their cluster', () => {
