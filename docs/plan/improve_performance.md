@@ -151,26 +151,97 @@ Incremental TypeScript state, affected-test selection, cached module catalogs, a
 
 ## Implementation plan
 
-### Priority 0: eliminate the release bottleneck
+### Acceptance gates
 
-1. Parse the problem-type graph once.
-2. Load generator and view catalogs once.
-3. Build the compatible generator/view pair index once.
-4. Match all targets once and retain target-to-match and target-to-generator maps.
-5. Make standards coverage consume those maps rather than invoking matching per target.
-6. Build target-to-standard and standard-to-target maps once.
-7. Add performance tests that fail if catalog or type parsing occurs inside target/pair loops.
+The gates define mandatory system properties, not implementation order. A delivery phase may
+advance more than one gate, but no workflow is complete while a gate that applies to it remains
+open.
 
-This phase fixes the immediate algorithmic defect. It must preserve existing matching results exactly.
+#### Gate A: full-work processing is linear
 
-### Priority 0: compute coverage once per source commit
+Every complete generation and validation workflow must process
+`O(input records + dependency edges + necessary output)`. Catalogs, source files, caches, and
+indices are loaded or constructed once per operation. Production matching returns only requested
+results; exhaustive rejection explanations are an explicit diagnostic output whose cost is
+reported separately.
 
-1. Publish an immutable core coverage artifact keyed by source commit and external-input digests.
+Known superlinear behavior in an active workflow is a release-blocking defect. This includes
+repeated input-sized `find()` calls inside input-sized loops, array `shift()` work queues, repeated
+filesystem discovery, and comparison sorting of growing inputs. Deterministic order must be
+preserved during indexed construction or produced through a bounded-domain linear strategy.
+
+#### Gate B: development processing is content-delta proportional
+
+A development workflow must process
+`O(changed inputs + affected dependency closure + necessary output)`. A one-generator or one-view
+change must not read, copy, regenerate, or revalidate the complete dataset. A release may validate
+the complete repository, but that complete pass must still satisfy Gate A.
+
+#### Gate C: development processing is external-delta proportional
+
+Standards and ontology updates must have explicit provenance and a reliable record-, entity-, and
+relation-level delta. Development schedules only the affected closure. If a reliable delta cannot
+be established, the workflow retains the pinned input, ignores the external update, and reports
+why it was ignored.
+
+#### Gate D: identical work is reusable and publication is atomic
+
+Artifacts are keyed by every input that can affect them. Identical input keys reuse immutable
+results across local workflows, validation, release publication, and deployment. A failed affected
+operation leaves the previously published manifest intact.
+
+### Delivery phases
+
+The phases below are dependency ordered. Items within one phase may be implemented independently
+when they do not share code, but a later phase must not be used to postpone a gate required by an
+earlier active workflow.
+
+#### Phase 1: linearize the current pipelines
+
+1. Add structured work counters for type-graph parses, catalog loads, source and cache bytes read,
+   compatibility checks, candidate checks, rejection records, files copied, and emitted records.
+2. Add performance regression tests that assert work-counter bounds as target, pair, cache, and
+   standards input sizes grow.
+3. Parse the problem-type graph once and load generator and view catalogs once.
+4. Build the compatible generator/view pair index once.
+5. Match all targets once and retain target-to-match and target-to-generator maps.
+6. Make standards coverage consume those maps rather than invoking matching per target.
+7. Build target-to-standard and standard-to-target maps once.
+8. Build inverted indices for problem type and ontology capability labels, then derive candidate
+   pairs by set intersection instead of testing every compatible pair.
+9. Separate production matching from diagnostic explanation. Matches and existence queries must
+   not construct rejection records; explicit diagnostics may request them.
+10. Load each VQA module cache once, resolve and hash each checklist once, read each required image
+   once, and calculate each active validation key once.
+11. Build VQA reports from the in-memory validation state rather than rescanning files and caches.
+12. Remove the remaining known input-sized rescans, repeated discovery, `shift()` queues, and
+   non-linear ordering operations from active generation and validation paths.
+
+This phase fixes the immediate release bottleneck and the other known Gate A violations. Each
+change must preserve existing matching and validation results exactly.
+
+#### Phase 2: establish stable input identity
+
+1. Pin standards sources by immutable upstream revision and content digest.
+2. Record the exact standards and ontology provenance consumed by every coverage artifact.
+3. Define the complete immutable key for core coverage, including repository source identity and
+   all external-input digests.
+4. Freeze the current pinned external input during development when a reliable old/new delta is
+   unavailable, with an explicit diagnostic instead of global invalidation.
+5. Remove generated coverage outputs and other unrelated files from dataset-render invalidation.
+
+This phase establishes the correctness prerequisite for cross-workflow reuse. A cache hit is valid
+only when the complete input identity is known.
+
+#### Phase 3: compute and publish core coverage once
+
+1. Publish an immutable core coverage artifact under its complete input key.
 2. Reuse that artifact between main validation, release publication, and deployment.
-3. Treat `latest` and `preview` metadata as projections over the same core artifact when their source inputs are identical.
+3. Treat `latest` and `preview` metadata as projections over the same core artifact when their
+   source inputs are identical.
 4. Prevent workflows from recomputing an artifact that already exists for the complete input key.
 
-### Priority 1: introduce a dependency and delta planner
+#### Phase 4: introduce the dependency and delta foundation
 
 Represent generation and validation as a graph containing at least:
 
@@ -192,68 +263,157 @@ The planner must:
 5. reuse unchanged content-addressed outputs;
 6. atomically publish the new manifest after all affected work succeeds.
 
-The existing per-pair manifest should become an execution plan rather than only a stale-result detector.
+The existing per-pair manifest becomes an execution plan rather than only a stale-result detector.
+Generator/view source dependencies and shared files are memoized instead of being rediscovered and
+reread for every pair.
 
-### Priority 1: make matching output-sensitive
-
-1. Build inverted indices for problem type and ontology capability labels.
-2. Derive candidate generator/view pairs by set intersection instead of testing every compatible pair.
-3. Separate production matching from diagnostic explanation.
-4. Return matches or existence results without constructing rejection records.
-5. Allow explicit diagnostic commands to request rejection explanations and report their output-sensitive complexity.
-
-### Priority 1: make VQA validation a single-pass delta
-
-1. Load each module cache once.
-2. Resolve and hash each checklist once.
-3. Read each required image once.
-4. Calculate the active validation key once per sample.
-5. Evaluate only cache misses or explicitly forced samples.
-6. Build reports from the in-memory validation state instead of rescanning files and caches.
-
-### Priority 1: replace whole-dataset staging
+#### Phase 5: adopt delta execution across development workflows
 
 1. Store generated outputs as immutable generator/view or finer-grained shards.
-2. Reuse unchanged shards by content hash.
-3. Stage only changed shards and manifests.
-4. Publish by atomically replacing a manifest pointer rather than copying the entire dataset.
-5. Apply the same content-addressed reuse to local explorer snapshots.
+2. Reuse unchanged shards by content hash and stage only changed shards and manifests.
+3. Publish datasets by atomically replacing a manifest pointer rather than copying the complete
+   dataset.
+4. Apply the same content-addressed reuse, through content storage or filesystem links, to local
+   explorer snapshots.
+5. Evaluate only VQA cache misses, affected records, or explicitly forced samples.
+6. Enable incremental TypeScript compilation state.
+7. Map changed files to affected tests and validators.
+8. Cache module discovery, parsed specs, type compatibility, and ontology ancestry.
+9. Run only the affected closure during development while retaining a linear repository-wide
+   release check.
 
-### Priority 2: make external updates explicit and reproducible
+#### Phase 6: process external updates as semantic deltas
 
-1. Pin standards sources by immutable upstream revision and content digest.
-2. Add an explicit standards-update command that produces an ID-level diff.
-3. Record the exact standards-source provenance in coverage artifacts.
-4. Compute ontology dependency hashes from used entity closures.
-5. Add an explicit ontology-update diff keyed by entity and relation.
-6. During development, ignore an external update when its delta cannot be established and report why it was ignored.
+1. Add an explicit standards-update command that compares pinned snapshots and produces an
+   ID-level diff.
+2. Add an explicit ontology-update operation that produces an entity- and relation-level diff.
+3. Compute ontology dependency hashes from the closure of entities and relations actually used by
+   each generated pair and validation record.
+4. Schedule only the targets, pairs, artifacts, and validations reached from the changed external
+   records.
+5. Retain the Phase 2 ignore-with-diagnostic behavior whenever reliable provenance or a reliable
+   delta is unavailable during development.
 
-### Priority 2: incremental static validation
+## Stale-cache risk assessment
 
-1. Enable incremental TypeScript compilation state.
-2. Map changed files to affected tests and validators.
-3. Cache module discovery, parsed specs, type compatibility, and ontology ancestry.
-4. Run repository-wide checks for release verification while preserving linear processing.
-5. Run only the affected closure during development.
+Caching introduces two different failure classes:
 
-### Priority 2: remove remaining avoidable superlinear operations
+- A **false hit** reuses an artifact whose effective inputs changed. This is a correctness defect
+  and can silently publish mislabeled, visually outdated, or incompletely validated content.
+- A **false miss** recomputes an artifact whose effective inputs did not change. This normally
+  preserves correctness, but violates the delta rules, slows releases, consumes external validation
+  quota, and repeatedly interrupts development.
 
-Replace array `shift()` work queues, repeated linear `find()` calls, repeated filesystem discovery, and redundant sorting where they occur in input-sized loops. Where deterministic sorting is required, account for its `O(n log n)` behavior explicitly or preserve canonical order during indexed construction.
+False hits are the higher release risk. False misses and broad invalidations are also treated as
+high risk when they make ordinary scoped development behave like a clean rebuild.
+
+### Risk register
+
+| Risk | Severity | Failure and impact | Required measures | Reduced by |
+| --- | --- | --- | --- | --- |
+| Incomplete cache key | Critical | A source, configuration, external definition, or environment change produces a false hit. A release can contain artifacts that do not correspond to its declared inputs. | Define a versioned input contract per artifact kind; include every semantic and rendering input; store dependency keys and output digests in the artifact manifest; treat missing or unknown fields as an untrusted miss. | Phases 2 and 4 |
+| Incorrect affected closure | Critical | A changed node fails to reach a dependent target, pair, image, VQA record, asset index, or coverage record. Development appears fast while retaining stale output, and the same stale output may reach a release. | Make dependencies explicit and directional; test reverse-edge closure for every node kind; compare incremental and clean plans on change fixtures; change the planner epoch and require a clean differential rebuild whenever dependency-planning logic changes. | Phases 4 through 6 |
+| Mutable or unverifiable external input | Critical | Standards or ontology content changes under a stable name, or cached output is reused against a different external snapshot. | Pin immutable revisions and content digests; record provenance in manifests; fail a release when provenance cannot be verified. During development, ignoring an update means continuing to consume the previous pinned input—not consuming the new input with old cached artifacts. | Phases 2 and 6 |
+| Renderer, toolchain, or worktree identity omitted | Critical | The same source commit produces different pixels or behavior because the container image, browser, fonts, lockfile, renderer configuration, seed contract, or dirty worktree differs. | Include the canonical renderer and toolchain identity in render keys; key development work from file content rather than commit alone; namespace local state by workspace and spec; require a clean source identity and canonical environment for release-trusted artifacts. | Phases 2 and 4 |
+| Stale VQA policy | Critical | A cached pass survives a material evaluator-instruction, response-schema, model-policy, ontology-definition, or checklist change. The release audit then proves only compliance with an obsolete validation contract. | Record a versioned validation-policy epoch beside the semantic validation key; require the current epoch at release; force affected revalidation when that epoch or any content-derived validation input changes. A deliberate model or evaluator-policy change must advance the epoch even if it remains outside the content hash. | Phases 2 and 5 |
+| Partial or concurrent publication | High | A process crash or competing writer exposes a manifest that references missing, truncated, or mixed-generation blobs. Developers see intermittent failures; a release may become irreproducible. | Write immutable blobs under content hashes, verify them before admission, publish the complete manifest last through atomic replacement, coordinate writers per namespace, and let readers use only completed immutable generations. | Phases 4 and 5 |
+| Corrupted or missing cache blob | High | One damaged entry causes repeated failures or encourages an engineer to delete the complete cache, creating a miss storm. | Verify stored digests on admission and before release use; quarantine and rebuild only the affected entry or shard; retain enough manifest provenance to identify all dependents; provide targeted eviction rather than requiring directory deletion. | Phases 4 and 5 |
+| Over-broad dependency or key | High for development | An unrelated edit invalidates a complete dataset, ontology, VQA module, or explorer snapshot. Correctness is preserved, but scoped work becomes slow and unpredictable. | Expose the affected closure before execution; explain which changed node and dependency edge caused every miss; reject silent escalation from scoped to global development work unless explicitly forced; use entity-, record-, pair-, and shard-level keys. | Phases 4 through 6 |
+| Unbounded obsolete artifacts | Medium | Immutable generations accumulate, obscure which output is active, and consume disk until engineers manually clean broad directories. | Determine reachability from published and intentionally retained manifests, preview garbage collection before deletion, and collect only unreachable content after a retention window. Garbage collection never determines cache validity. | Phase 5 |
+
+### Cache admission contract
+
+Every reusable artifact must carry or be reachable from a manifest containing:
+
+1. artifact kind and cache-schema version;
+2. producer and dependency-planner epochs;
+3. complete source, configuration, external-input, and canonical-environment keys;
+4. direct dependency keys sufficient to explain the affected closure;
+5. output content digests and sizes;
+6. namespace, spec, and immutable generation identity;
+7. an atomic completion marker that is written only after every referenced output is verified.
+
+A cache hit is valid only when the complete expected key matches, the schema and epochs are
+supported, the generation is complete, and referenced outputs pass the required integrity checks.
+Modification time, file presence, a source commit alone, or a partially matching manifest never
+establishes validity.
+
+### Release safeguards
+
+Releases fail closed. They never fall back to the newest available or last-known cache entry when
+the exact entry is absent or untrusted.
+
+1. Compute the expected input key from the tagged clean source, pinned external inputs, and
+   canonical renderer environment.
+2. Require every released artifact and VQA record to resolve to that key, the current schema, and
+   the current producer, planner, and validation-policy epochs.
+3. Verify manifest completeness and all referenced content digests in one linear pass.
+4. Recompute the complete dependency plan and confirm that the selected immutable artifacts cover
+   it exactly; this validates reuse without regenerating unchanged pixels.
+5. After changes to key construction, dependency planning, cache serialization, or canonical
+   rendering, perform a clean differential rebuild of the affected artifact domain and compare it
+   with incremental output before allowing release reuse.
+6. Publish the release manifest only after generation, integrity, coverage, and VQA gates succeed.
+
+These checks remain linear in the release input, dependency graph, and published output. Reuse
+eliminates duplicate computation, not verification of the release manifest.
+
+### Development safeguards
+
+Cache behavior must be observable without becoming another investigation task for the engineer.
+
+1. Before substantial work, report the changed roots, affected closure size, estimated reused and
+   rebuilt artifacts, and any external update being ignored.
+2. For every miss or invalidation, make the causal path available: changed input, traversed
+   dependency edge, expected key, and actual key or missing contract field.
+3. A scoped command must not silently expand to a global rebuild. It stops with a concise
+   diagnostic unless the engineer explicitly requests the broader operation.
+4. Corruption recovery invalidates the smallest trustworthy entry or shard. The normal remedy is
+   never “delete the cache directory.”
+5. Interrupted work leaves completed immutable entries reusable and discards or quarantines only
+   incomplete generations.
+6. Cache status and cleanup operations use manifests and reachability rather than directory age or
+   filename conventions.
+
+Phase 1 counters expose current false misses and amplification. Phase 2 removes the most dangerous
+provenance and environment false hits before artifacts are shared across workflows in Phase 3.
+Phase 4 introduces the largest new correctness surface—the dependency planner—and therefore carries
+the closure tests and epoch controls. Phases 5 and 6 reduce broad invalidation and developer
+friction by making artifact and external-input dependencies progressively finer-grained.
 
 ## Validation criteria
 
 The work is complete when the following properties hold:
 
-1. One full target-matching pass builds every catalog and type index once.
-2. Coverage time grows linearly with targets, standards, dependency edges, and emitted records.
-3. Coverage for an unchanged source/input key is reused across workflows.
-4. A one-generator or one-view development change reads, generates, validates, and republishes only its affected closure.
-5. An unrelated ontology entity change causes no generation or VQA churn.
-6. An ontology or standards update without a reliable diff is ignored during development with an explicit diagnostic.
-7. A scoped generation does not copy the complete dataset.
-8. VQA cache bytes read remain proportional to the physical cache size, not to cache size multiplied by sample count.
-9. Local explorer refresh reuses unchanged image bytes.
-10. Full release validation remains deterministic and reproducible from repository and external-source digests.
+1. Every major workflow emits structured work counters, and regression tests assert counter bounds
+   as synthetic input sizes grow. Wall-clock measurements remain supporting evidence, not the
+   complexity proof.
+2. One full target-matching pass builds every catalog and type index once; candidate work remains
+   proportional to traversed index postings, candidate edges, and requested output.
+3. Coverage work grows linearly with targets, standards, dependency edges, and emitted records.
+4. Production matching creates no rejected-combination records unless diagnostic output explicitly
+   requests them.
+5. Coverage for an unchanged complete input key is reused across workflows.
+6. A one-generator or one-view development change reads, generates, validates, and republishes only
+   its affected closure.
+7. An unrelated ontology entity change causes no generation or VQA churn.
+8. An ontology or standards update without a reliable diff is ignored during development with an
+   explicit diagnostic.
+9. A scoped generation does not copy the complete dataset.
+10. VQA cache bytes read remain proportional to the physical cache size, not to cache size
+    multiplied by sample count.
+11. Local explorer refresh reuses unchanged image bytes.
+12. Full release validation remains deterministic and reproducible from repository and
+    external-source digests.
+13. A release rejects artifacts with incomplete keys, unsupported epochs, unverifiable provenance,
+    incomplete publication state, or mismatching content digests.
+14. Incremental and clean dependency plans select equivalent outputs for representative changes to
+    every graph-node kind.
+15. A change to cache-key or dependency-planner logic cannot reuse artifacts from the previous
+    epoch without a successful clean differential comparison.
+16. Development diagnostics identify the causal dependency path for a cache miss or invalidation,
+    and a corrupt entry can be repaired without clearing an unrelated cache domain.
+17. Concurrent or interrupted writers cannot expose an incomplete generation to readers.
 
 ## Architectural assessment
 
