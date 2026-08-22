@@ -107,11 +107,17 @@ describe('coverage input identity', () => {
         }
     });
 
-    it('ignores tests but changes identity for runtime source changes', () => {
+    it('ignores tests and nested tool caches but changes identity for runtime source changes', () => {
         const root = fixture();
         try {
             const initial = coverageRepositoryDigest(root);
             writeFileSync(resolve(root, 'src', 'coverage.test.ts'), 'changed test');
+            expect(coverageRepositoryDigest(root)).toBe(initial);
+            mkdirSync(resolve(root, 'src', 'node_modules', '.vite', 'vitest'), {recursive: true});
+            writeFileSync(
+                resolve(root, 'src', 'node_modules', '.vite', 'vitest', 'results.json'),
+                '{"generated":true}'
+            );
             expect(coverageRepositoryDigest(root)).toBe(initial);
             writeFileSync(resolve(root, 'src', 'coverage.ts'), 'changed runtime');
             expect(coverageRepositoryDigest(root)).not.toBe(initial);

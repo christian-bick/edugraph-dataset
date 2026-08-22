@@ -51,7 +51,8 @@ export interface CoverageCoreInputIdentity {
 }
 
 const isRuntimeSource = (path: string): boolean =>
-    !path.endsWith('.test.ts')
+    !path.split(/[\\/]/).includes('node_modules')
+    && !path.endsWith('.test.ts')
     && !path.endsWith('.test.tsx')
     && !path.endsWith('.it.test.ts')
     && !path.endsWith('.it.test.tsx')
