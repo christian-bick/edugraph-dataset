@@ -28,7 +28,7 @@ async function main() {
     console.log(`========================================`);
 
     // 1. TypeScript Type Check
-    console.log(`\n--- [1/6] TypeScript Type Check ---`);
+    console.log(`\n--- [1/7] TypeScript Type Check ---`);
     try {
         execSync('npx tsc --noEmit', { cwd: PROJECT_ROOT, stdio: 'inherit' });
         console.log(`✅ Type check passed.`);
@@ -37,8 +37,17 @@ async function main() {
         hasError = true;
     }
 
-    // 2. Generator & View Spec Audit
-    console.log(`\n--- [2/6] Generator & View Spec Audit ---`);
+    // 2. External semantic provenance and delta baselines
+    console.log(`\n--- [2/7] External Semantic Baselines ---`);
+    try {
+        execSync('npx vite-node src/scripts/validate-external-semantics.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
+    } catch {
+        console.error(`❌ External semantic baseline validation failed.`);
+        hasError = true;
+    }
+
+    // 3. Generator & View Spec Audit
+    console.log(`\n--- [3/7] Generator & View Spec Audit ---`);
     try {
         execSync('npx vite-node src/scripts/validate-generator-view-specs.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -46,8 +55,8 @@ async function main() {
         hasError = true;
     }
 
-    // 3. Label Usage Audit
-    console.log(`\n--- [3/6] Label Usage Audit ---`);
+    // 4. Label Usage Audit
+    console.log(`\n--- [4/7] Label Usage Audit ---`);
     try {
         execSync('npx vite-node src/scripts/check-labels.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -55,8 +64,8 @@ async function main() {
         hasError = true;
     }
 
-    // 4. Documentation Reference Validation
-    console.log(`\n--- [4/6] Documentation Reference Validation ---`);
+    // 5. Documentation Reference Validation
+    console.log(`\n--- [5/7] Documentation Reference Validation ---`);
     try {
         execSync('npx vite-node src/scripts/validate-docs.ts', { cwd: PROJECT_ROOT, stdio: 'inherit' });
     } catch {
@@ -64,8 +73,8 @@ async function main() {
         hasError = true;
     }
 
-    // 5. Standards Spec Validation
-    console.log(`\n--- [5/6] Standards Spec Validation ---`);
+    // 6. Standards Spec Validation
+    console.log(`\n--- [6/7] Standards Spec Validation ---`);
     const specDir = resolve(PROJECT_ROOT, 'src', 'spec');
     let specsToValidate: string[] = [];
 
@@ -128,9 +137,9 @@ async function main() {
         }
     }
 
-    // 6. Split Integrity — only for specs whose dataset has been generated,
+    // 7. Split Integrity — only for specs whose dataset has been generated,
     // so a fresh clone still passes every static check.
-    console.log(`\n--- [6/6] Dataset Split Integrity ---`);
+    console.log(`\n--- [7/7] Dataset Split Integrity ---`);
     const generatedSpecs = specsToValidate.filter(specName => {
         const datasetDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
         return existsSync(datasetDir) && readDatasetSnapshot(datasetDir).rows('train').length > 0;

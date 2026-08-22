@@ -41,6 +41,7 @@ import {
     affectedDatasetPairKeys,
     buildDatasetManifest,
     createDatasetManifest,
+    datasetExternalSemanticIssues,
     readDatasetManifest,
     type ManifestUpdateScope,
 } from '../lib/dataset-manifest.ts';
@@ -625,6 +626,14 @@ async function main() {
     }
 
     const outDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
+    const externalIssues = datasetExternalSemanticIssues(PROJECT_ROOT, specName);
+    if (externalIssues.length > 0) {
+        for (const issue of externalIssues) console.warn(`[External update ignored] ${issue}`);
+        throw new Error(
+            'Reliable external semantic delta state is unavailable. The pinned external update was not consumed; '
+            + 'run the corresponding explicit update command before generation.'
+        );
+    }
 
     const validationResult = await normalizeAndValidateSpec(specName);
     if (validationResult.errors.length > 0) {

@@ -15,6 +15,7 @@ import {currentRendererEnvironment} from './render-environment.ts';
 import {
     SourceContentIndex,
     digestIdentity,
+    hashPackageStateWithoutDependency,
     radixSortUtf8,
     type SourceContentIndexStats
 } from './content-identity.ts';
@@ -28,9 +29,23 @@ import {
     type DependencyNode
 } from './dependency-planner.ts';
 import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
+import {
+    OntologySemanticIndex,
+    StandardsSemanticIndex,
+    buildOntologySemanticSnapshot,
+    diffOntologySemantics,
+    ontologySemanticProvenanceMatches,
+    readOntologySemanticSnapshot,
+    readStandardsSemanticSnapshot,
+    standardsSemanticProvenanceMatches,
+    type OntologySemanticSnapshot,
+    type StandardsSemanticSnapshot
+} from './external-semantics.ts';
+import {resolveOntologyProvenance} from './coverage-identity.ts';
+import {readPinnedStandardsProvenance} from './standards-source.ts';
 
-export const DATASET_MANIFEST_SCHEMA_VERSION = 3;
-const GENERATION_PIPELINE_VERSION = 'dependency-plan-v1';
+export const DATASET_MANIFEST_SCHEMA_VERSION = 4;
+const GENERATION_PIPELINE_VERSION = 'external-semantic-delta-v1';
 
 export interface DatasetManifestEntry {
     generator: string;
@@ -42,6 +57,10 @@ export interface DatasetManifestEntry {
     generated_splits: SampleSplit[];
     /** Pair, shard, image, and VQA nodes owned by this execution unit. */
     execution_nodes: string[];
+    /** Nodes whose invalidation requires regenerating this pair's pixels. */
+    render_nodes: string[];
+    /** Nodes whose invalidation requires semantic validation but not rendering. */
+    validation_nodes: string[];
 }
 
 export type DatasetExecutionPlan = Omit<DependencyDeltaPlan, 'reusable_outputs'>;
@@ -62,6 +81,13 @@ export interface DatasetManifestBuild {
     entries: Record<string, DatasetManifestEntry>;
     dependency_graph: DependencyGraphSnapshot;
     source_stats: Readonly<SourceContentIndexStats>;
+    external_semantics: {
+        trusted: boolean;
+        diagnostics: string[];
+        standards_records: number;
+        ontology_entities: number;
+        ontology_relations: number;
+    };
 }
 
 export interface ManifestUpdateScope {
@@ -131,8 +157,6 @@ function ontologyDependency(projectRoot: string): string {
 
 function generatorSharedPaths(projectRoot: string): string[] {
     return [
-        resolve(projectRoot, 'package.json'),
-        resolve(projectRoot, 'package-lock.json'),
         resolve(projectRoot, 'src', 'generators', 'helpers.ts'),
         resolve(projectRoot, 'src', 'lib', 'random.ts'),
         resolve(projectRoot, 'src', 'lib', 'resolvers.ts'),
@@ -143,8 +167,6 @@ function generatorSharedPaths(projectRoot: string): string[] {
 
 function viewSharedPaths(projectRoot: string): string[] {
     return [
-        resolve(projectRoot, 'package.json'),
-        resolve(projectRoot, 'package-lock.json'),
         resolve(projectRoot, 'vite.config.js'),
         resolve(projectRoot, 'src', 'lib', 'random.ts'),
         resolve(projectRoot, 'src', 'lib', 'render-environment.ts'),
@@ -157,6 +179,89 @@ function viewSharedPaths(projectRoot: string): string[] {
         resolve(projectRoot, 'src', 'tailwind.css'),
         resolve(projectRoot, 'public', 'icons')
     ];
+}
+
+interface ExternalSemanticContext {
+    standards: StandardsSemanticSnapshot | null;
+    ontology: OntologySemanticSnapshot | null;
+    trusted: boolean;
+    diagnostics: string[];
+}
+
+let verifiedOntologySemantics: {key: string; snapshot: OntologySemanticSnapshot} | null = null;
+
+function currentOntologySemantics(projectRoot: string): OntologySemanticSnapshot {
+    const provenance = resolveOntologyProvenance(projectRoot);
+    const key = `${provenance.resolved}:${provenance.integrity}`;
+    if (verifiedOntologySemantics?.key === key) return verifiedOntologySemantics.snapshot;
+    const snapshot = buildOntologySemanticSnapshot({provenance});
+    verifiedOntologySemantics = {key, snapshot};
+    return snapshot;
+}
+
+function externalSemanticContext(projectRoot: string, specName: string): ExternalSemanticContext {
+    const diagnostics: string[] = [];
+    let trusted = true;
+    let ontology = readOntologySemanticSnapshot(projectRoot);
+    try {
+        const provenance = resolveOntologyProvenance(projectRoot);
+        if (!ontology) {
+            trusted = false;
+            diagnostics.push('Ontology semantic snapshot is missing; the pinned package update is ignored until update:ontology-source --apply.');
+        } else if (!ontologySemanticProvenanceMatches(ontology, provenance)) {
+            trusted = false;
+            diagnostics.push(
+                `Ontology semantic snapshot ${ontology.provenance.version} does not match pinned ${provenance.version}; `
+                + 'the package update is ignored until update:ontology-source --apply.'
+            );
+        } else {
+            const actual = currentOntologySemantics(projectRoot);
+            const delta = diffOntologySemantics(ontology, actual);
+            if (delta.entities.added.length > 0
+                || delta.entities.changed.length > 0
+                || delta.entities.removed.length > 0
+                || delta.relations.added.length > 0
+                || delta.relations.changed.length > 0
+                || delta.relations.removed.length > 0) {
+                trusted = false;
+                diagnostics.push(
+                    'Installed ontology semantics differ from the accepted snapshot; '
+                    + 'the package update is ignored until update:ontology-source --apply.'
+                );
+            }
+        }
+    } catch (error) {
+        trusted = false;
+        ontology = null;
+        diagnostics.push(`Ontology semantic provenance is unavailable: ${error instanceof Error ? error.message : error}`);
+    }
+
+    let standards: StandardsSemanticSnapshot | null = null;
+    if (specName === 'ccss') {
+        standards = readStandardsSemanticSnapshot(projectRoot);
+        try {
+            const provenance = readPinnedStandardsProvenance(projectRoot);
+            if (!standards) {
+                trusted = false;
+                diagnostics.push('CCSS semantic snapshot is missing; external changes remain ignored until update:standards-source --apply.');
+            } else if (!standardsSemanticProvenanceMatches(standards, provenance)) {
+                trusted = false;
+                diagnostics.push(
+                    `CCSS semantic snapshot ${standards.provenance.revision} does not match pinned ${provenance.revision}; `
+                    + 'the source update is ignored until update:standards-source --apply.'
+                );
+            }
+        } catch (error) {
+            trusted = false;
+            standards = null;
+            diagnostics.push(`CCSS semantic provenance is unavailable: ${error instanceof Error ? error.message : error}`);
+        }
+    }
+    return {standards, ontology, trusted, diagnostics};
+}
+
+export function datasetExternalSemanticIssues(projectRoot: string, specName: string): string[] {
+    return externalSemanticContext(projectRoot, specName).diagnostics;
 }
 
 function pairSharedPaths(projectRoot: string): string[] {
@@ -259,6 +364,10 @@ export function buildDatasetManifest(options: {
     sourceIndex?: SourceContentIndex;
     reuseImageIdentityFrom?: DependencyGraphSnapshot;
     datasetSnapshot?: DatasetSnapshot;
+    semanticSnapshots?: {
+        standards?: StandardsSemanticSnapshot | null;
+        ontology?: OntologySemanticSnapshot | null;
+    };
 }): DatasetManifestBuild {
     const {
         projectRoot,
@@ -272,10 +381,25 @@ export function buildDatasetManifest(options: {
         tuples: preparedTuples,
         sourceIndex = new SourceContentIndex(projectRoot),
         reuseImageIdentityFrom,
-        datasetSnapshot = readDatasetSnapshot(datasetDir)
+        datasetSnapshot = readDatasetSnapshot(datasetDir),
+        semanticSnapshots
     } = options;
     const tuples = preparedTuples ?? matchTargets(targets, generators, views).tuples;
     const ontology = ontologyDependency(projectRoot);
+    const externalSemantics = semanticSnapshots
+        ? {
+            standards: semanticSnapshots.standards ?? null,
+            ontology: semanticSnapshots.ontology ?? null,
+            trusted: true,
+            diagnostics: []
+        }
+        : externalSemanticContext(projectRoot, specName);
+    const ontologyIndex = externalSemantics.ontology
+        ? new OntologySemanticIndex(externalSemantics.ontology)
+        : null;
+    const standardsIndex = externalSemantics.standards
+        ? new StandardsSemanticIndex(externalSemantics.standards)
+        : null;
     const nodes = new Map<string, DependencyNode>();
     const rows = readDatasetRows(datasetSnapshot);
     const rowsByPair = new Map<string, DatasetManifestRow[]>();
@@ -303,54 +427,111 @@ export function buildDatasetManifest(options: {
     const standardNodeByTarget = new Map<string, string>();
     const targetNodeByTarget = new Map<string, string>();
     const ontologyNodeByName = new Map<string, string>();
+    const ontologyDefinitionNodeByName = new Map<string, string>();
     const ontologyNode = (rawLabel: string): string => {
         const name = ontologyName(rawLabel);
         const existing = ontologyNodeByName.get(name);
         if (existing) return existing;
         const id = nodeId('ontology', name);
         ontologyNodeByName.set(name, id);
+        const semantic = externalSemantics.ontology?.entities[ontologyIri(rawLabel)];
         addNode(nodes, {
             id,
             kind: 'ontology-entity',
-            input_hash: digestIdentity({ontology, entity: name}),
+            input_hash: semantic?.identity_hash ?? digestIdentity({ontology, entity: name}),
             dependencies: []
         });
         return id;
     };
+    const ontologyDefinitionNode = (rawLabel: string): string => {
+        const name = ontologyName(rawLabel);
+        const existing = ontologyDefinitionNodeByName.get(name);
+        if (existing) return existing;
+        const entityId = ontologyNode(rawLabel);
+        const id = nodeId('ontology-definition', name);
+        ontologyDefinitionNodeByName.set(name, id);
+        const semantic = externalSemantics.ontology?.entities[ontologyIri(rawLabel)];
+        addNode(nodes, {
+            id,
+            kind: 'ontology-entity',
+            input_hash: semantic?.definition_hash ?? digestIdentity({ontology, definition: name}),
+            dependencies: [entityId]
+        });
+        return id;
+    };
+    const ontologyDependencies = (labels: readonly string[], includeDefinitions = false): string[] => {
+        if (!ontologyIndex || !externalSemantics.ontology) {
+            const dependencies: string[] = [];
+            const visited = new Set<string>();
+            const queue = [...labels];
+            let cursor = 0;
+            while (cursor < queue.length) {
+                const label = queue[cursor++];
+                if (visited.has(label)) continue;
+                visited.add(label);
+                const entityId = ontologyNode(label);
+                dependencies.push(entityId);
+                try {
+                    for (const parent of partOf(ontologyIri(label) as CompetencyDescriptor) ?? []) {
+                        const parentId = ontologyNode(parent);
+                        const relationId = nodeId(
+                            'ontology-relation',
+                            `partOf:${ontologyName(label)}->${ontologyName(parent)}`
+                        );
+                        addNode(nodes, {
+                            id: relationId,
+                            kind: 'ontology-relation',
+                            input_hash: digestIdentity({ontology, relation: 'partOf', source: label, target: parent}),
+                            dependencies: [entityId, parentId]
+                        });
+                        dependencies.push(relationId);
+                        if (!visited.has(parent)) queue.push(parent);
+                    }
+                } catch {
+                    // Authored unknown labels remain explicit entity dependencies.
+                }
+            }
+            if (includeDefinitions) dependencies.push(...labels.map(ontologyDefinitionNode));
+            return radixSortUtf8([...new Set(dependencies)]);
+        }
+        const closure = ontologyIndex.closure(labels);
+        const dependencies = closure.entities.map(ontologyNode);
+        for (const key of closure.relations) {
+            const relation = externalSemantics.ontology.relations[key];
+            if (!relation) continue;
+            const sourceId = ontologyNode(relation.source);
+            const targetId = ontologyNode(relation.target);
+            const sourceName = ontologyName(relation.source);
+            const targetName = ontologyName(relation.target);
+            const id = nodeId('ontology-relation', `${relation.type}:${sourceName}->${targetName}`);
+            addNode(nodes, {
+                id,
+                kind: 'ontology-relation',
+                input_hash: relation.input_hash,
+                dependencies: [sourceId, targetId]
+            });
+            dependencies.push(id);
+        }
+        if (includeDefinitions) dependencies.push(...labels.map(ontologyDefinitionNode));
+        return radixSortUtf8([...new Set(dependencies)]);
+    };
     for (const target of targets) {
-        const standardId = nodeId('standard', `${specName}:${target.id}`);
+        const resolvedStandard = standardsIndex?.standardForTarget(target.id) ?? null;
+        const standardRecord = resolvedStandard
+            ? externalSemantics.standards?.records[`standard:${resolvedStandard}`]
+            : undefined;
+        const standardIdentity = resolvedStandard ?? target.id;
+        const standardId = nodeId('standard', `${specName}:${standardIdentity}`);
         const targetId = nodeId('target', `${specName}:${target.id}`);
         standardNodeByTarget.set(target.id, standardId);
         targetNodeByTarget.set(target.id, targetId);
         addNode(nodes, {
             id: standardId,
             kind: 'external-standard',
-            input_hash: digestIdentity({spec: specName, record: target.id}),
+            input_hash: standardRecord?.input_hash
+                ?? digestIdentity({spec: specName, record: standardIdentity}),
             dependencies: []
         });
-        const ontologyDependencies: string[] = [];
-        for (const rawLabel of target.labels) {
-            const ontologyId = ontologyNode(rawLabel);
-            ontologyDependencies.push(ontologyId);
-            try {
-                for (const rawParent of partOf(ontologyIri(rawLabel) as CompetencyDescriptor) ?? []) {
-                    const parentId = ontologyNode(rawParent);
-                    const childName = ontologyName(rawLabel);
-                    const parentName = ontologyName(rawParent);
-                    const relationId = nodeId('ontology-relation', `${childName}->${parentName}`);
-                    addNode(nodes, {
-                        id: relationId,
-                        kind: 'ontology-relation',
-                        input_hash: digestIdentity({ontology, relation: 'partOf', childName, parentName}),
-                        dependencies: [ontologyId, parentId]
-                    });
-                    ontologyDependencies.push(relationId);
-                }
-            } catch {
-                // Unknown authored labels are reported by spec validation. They
-                // still remain explicit entity dependencies in this graph.
-            }
-        }
         addNode(nodes, {
             id: targetId,
             kind: 'competency-target',
@@ -359,11 +540,20 @@ export function buildDatasetManifest(options: {
                 labels: radixSortUtf8([...target.labels]),
                 explanation: target.explanation ?? null
             }),
-            dependencies: [standardId, ...ontologyDependencies]
+            dependencies: [standardId, ...ontologyDependencies(target.labels)]
         });
     }
 
     const pairPipeline = sourceDependencies(nodes, sourceIndex, pairSharedPaths(projectRoot));
+    const runtimeDependenciesHash = hashPackageStateWithoutDependency(projectRoot, 'edugraph-ts');
+    const runtimeDependenciesId = nodeId('source', 'runtime-dependencies-without-ontology');
+    addNode(nodes, {
+        id: runtimeDependenciesId,
+        kind: 'source-file',
+        input_hash: runtimeDependenciesHash,
+        dependencies: [],
+        output: {content_hash: runtimeDependenciesHash}
+    });
     const generatorHashes = new Map<string, string>();
     const generatorNodeIds = new Map<string, string>();
     for (const generator of generators) {
@@ -379,7 +569,11 @@ export function buildDatasetManifest(options: {
                 labels: radixSortUtf8([...generator.labels]),
                 problem_type: generator.problemType ?? null
             }),
-            dependencies: sources.ids
+            dependencies: [
+                runtimeDependenciesId,
+                ...sources.ids,
+                ...ontologyDependencies(generator.labels)
+            ]
         });
     }
     const viewHashes = new Map<string, string>();
@@ -400,7 +594,15 @@ export function buildDatasetManifest(options: {
                 rejected: radixSortUtf8([...(view.rejectedLabels ?? [])]),
                 problem_type: view.problemType ?? null
             }),
-            dependencies: sources.ids
+            dependencies: [
+                runtimeDependenciesId,
+                ...sources.ids,
+                ...ontologyDependencies([
+                    ...view.supportedLabels,
+                    ...(view.requiredLabels ?? []),
+                    ...(view.rejectedLabels ?? [])
+                ])
+            ]
         });
         checklistDependencies.set(view.viewId, sourceDependencies(nodes, sourceIndex, [
             resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'),
@@ -410,6 +612,8 @@ export function buildDatasetManifest(options: {
 
     const entries: Record<string, DatasetManifestEntry> = {};
     const executionNodesByPair = new Map<string, Set<string>>();
+    const renderNodesByPair = new Map<string, Set<string>>();
+    const validationNodesByPair = new Map<string, Set<string>>();
     const imageNodesByTarget = new Map<string, string[]>();
     for (const key of radixSortUtf8([...targetsByPair.keys()])) {
         const [generatorId, viewId] = key.split('#');
@@ -436,6 +640,8 @@ export function buildDatasetManifest(options: {
         });
         const executionNodes = new Set([pairNodeId]);
         executionNodesByPair.set(key, executionNodes);
+        renderNodesByPair.set(key, new Set([pairNodeId]));
+        validationNodesByPair.set(key, new Set());
         const pairRows = rowsByPair.get(key) ?? [];
         const sampleCounts: Record<SampleSplit, number> = {train: 0, val: 0};
         for (const row of pairRows) sampleCounts[row._split]++;
@@ -455,8 +661,8 @@ export function buildDatasetManifest(options: {
             renderer_environment: rendererEnvironment,
             input_hash: hash(JSON.stringify({
                 pipeline: GENERATION_PIPELINE_VERSION,
-                ontology,
                 renderer: rendererEnvironment,
+                runtime_dependencies: runtimeDependenciesHash,
                 pair_pipeline: pairPipeline.hash,
                 generator: generatorHashes.get(generatorId),
                 view: viewHashes.get(viewId),
@@ -465,7 +671,9 @@ export function buildDatasetManifest(options: {
             content_hash: hash(JSON.stringify(contentSignature)),
             sample_counts: sampleCounts,
             generated_splits: pairSplits.length > 0 ? pairSplits : [...generatedSplits],
-            execution_nodes: []
+            execution_nodes: [],
+            render_nodes: [],
+            validation_nodes: []
         };
     }
 
@@ -498,9 +706,7 @@ export function buildDatasetManifest(options: {
             dependencies: [pairNodeId, ...rowTargetNodes],
             output: {content_hash: imageDigest.sha256, bytes: imageDigest.bytes}
         });
-        const labelDependencies = (row.tags ?? [])
-            .map(label => ontologyNodeByName.get(ontologyName(label)))
-            .filter((id): id is string => Boolean(id));
+        const labelDependencies = ontologyDependencies(row.tags ?? [], true);
         const vqaId = nodeId('vqa', row.sample_key);
         addNode(nodes, {
             id: vqaId,
@@ -515,6 +721,8 @@ export function buildDatasetManifest(options: {
         });
         executionNodes.add(imageId);
         executionNodes.add(vqaId);
+        renderNodesByPair.get(key)?.add(imageId);
+        validationNodesByPair.get(key)?.add(vqaId);
         for (const targetId of targetIdsOf(row)) {
             const targetImages = imageNodesByTarget.get(targetId);
             if (targetImages) targetImages.push(imageId);
@@ -544,6 +752,7 @@ export function buildDatasetManifest(options: {
             output: {content_hash: shardHash}
         });
         executionNodesByPair.get(key)?.add(shardId);
+        renderNodesByPair.get(key)?.add(shardId);
     }
 
     for (const target of targets) {
@@ -571,11 +780,20 @@ export function buildDatasetManifest(options: {
 
     for (const [key, entry] of Object.entries(entries)) {
         entry.execution_nodes = radixSortUtf8([...(executionNodesByPair.get(key) ?? [])]);
+        entry.render_nodes = radixSortUtf8([...(renderNodesByPair.get(key) ?? [])]);
+        entry.validation_nodes = radixSortUtf8([...(validationNodesByPair.get(key) ?? [])]);
     }
     return {
         entries,
         dependency_graph: createDependencyGraphSnapshot([...nodes.values()]),
-        source_stats: sourceIndex.stats()
+        source_stats: sourceIndex.stats(),
+        external_semantics: {
+            trusted: externalSemantics.trusted,
+            diagnostics: externalSemantics.diagnostics,
+            standards_records: Object.keys(externalSemantics.standards?.records ?? {}).length,
+            ontology_entities: Object.keys(externalSemantics.ontology?.entities ?? {}).length,
+            ontology_relations: Object.keys(externalSemantics.ontology?.relations ?? {}).length
+        }
     };
 }
 
@@ -650,7 +868,7 @@ export function affectedDatasetPairKeys(
         ...Object.entries(previous?.entries ?? {}),
         ...Object.entries(build.entries)
     ])) {
-        if (entry.execution_nodes.some(node => affected.has(node))) keys.add(key);
+        if ((entry.render_nodes ?? entry.execution_nodes).some(node => affected.has(node))) keys.add(key);
     }
     for (const node of plan.removed_nodes) {
         if (node.startsWith('pair:')) keys.add(node.slice('pair:'.length));
@@ -676,11 +894,12 @@ export function assertDatasetGenerationScope(
     ]);
     const outsideScope = [...entries].filter(([key, entry]) =>
         !selectedPair(key, entry, scope, generators, views, pairs)
-        && entry.execution_nodes.some(id => affected.has(id))
+        && (entry.render_nodes ?? entry.execution_nodes).some(id => affected.has(id))
     );
     if (outsideScope.length > 0) {
         const first = outsideScope[0];
-        const causeNode = first[1].execution_nodes.find(id => affected.has(id))!;
+        const causeNode = (first[1].render_nodes ?? first[1].execution_nodes)
+            .find(id => affected.has(id))!;
         const cause = explainAffectedNode(plan, causeNode) ?? causeNode;
         throw new Error(
             `Scoped generation affects ${outsideScope.length} generator/view pair(s) outside its selection; `
@@ -725,7 +944,7 @@ export function datasetFreshnessIssues(
     if (manifest.dependency_graph) {
         const plan = planDependencyDelta(manifest.dependency_graph, currentBuild.dependency_graph);
         const selectedNodes = new Set(Object.values(currentBuild.entries)
-            .flatMap(entry => entry.execution_nodes));
+            .flatMap(entry => entry.render_nodes ?? entry.execution_nodes));
         const affected = plan.affected_nodes.filter(id => selectedNodes.has(id));
         if (affected.length > 0) {
             const first = affected[0];

@@ -8,6 +8,7 @@ import {
 } from '../lib/coverage-identity.ts';
 import {digestIdentity} from '../lib/content-identity.ts';
 import {readPinnedStandardsProvenance} from '../lib/standards-source.ts';
+import {ontologySemanticUsageHash} from '../lib/external-semantics.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const args = process.argv.slice(2);
@@ -25,6 +26,7 @@ const inputs = buildCoverageInputIdentity({
     sourceSha,
     standards: readPinnedStandardsProvenance(projectRoot),
     ontology: resolveOntologyProvenance(projectRoot),
+    ontologyUsageSha256: ontologySemanticUsageHash(projectRoot, 'ccss'),
     grade: readOption('grade'),
     excludeHighSchool: args.includes('--k8') || args.includes('--exclude-hs'),
     knownAssetsSha256

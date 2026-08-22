@@ -55,6 +55,8 @@ export interface PinnedStandardsSource {
     tree: StandardsTreeData;
     provenance: StandardsProvenance;
     paths: Record<CcssSourceFile, string>;
+    standards: StandardNode[];
+    domainGroups: Record<string, {description: string; domain_cats?: string[]}>;
 }
 
 export interface LoadPinnedStandardsOptions {
@@ -343,6 +345,8 @@ export async function loadPinnedStandardsSource(
     return {
         tree: buildStandardsTree(standards, domainGroups),
         provenance,
-        paths
+        paths,
+        standards,
+        domainGroups
     };
 }

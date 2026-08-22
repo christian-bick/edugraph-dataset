@@ -29,7 +29,8 @@ const inputs = (ref = 'main'): CoverageInputIdentity => ({
         version: 'v1.0.0',
         dependency: 'https://example.test/ontology.tgz',
         resolved: 'https://example.test/ontology.tgz',
-        integrity: 'sha512-exact'
+        integrity: 'sha512-exact',
+        semantic_usage_sha256: 'usage-a'
     },
     selection: {grade: null, exclude_high_school: false, known_assets_sha256: null}
 });
@@ -69,6 +70,8 @@ describe('coverage core artifact', () => {
 
             expect(projectCoverageData(second.artifact.coverage, 'release').metadata.generated_at)
                 .toBe('release');
+            expect(projectCoverageData(second.artifact.coverage, 'release', 'v2.0.0').metadata.ontology_version)
+                .toBe('v2.0.0');
             expect(second.artifact.coverage.metadata).not.toHaveProperty('generated_at');
         } finally {
             rmSync(root, {recursive: true, force: true});

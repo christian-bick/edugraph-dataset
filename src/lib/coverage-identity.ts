@@ -1,12 +1,16 @@
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
-import {digestIdentity, hashSourceFiles} from './content-identity.ts';
+import {
+    digestIdentity,
+    hashPackageStateWithoutDependency,
+    hashSourceFiles
+} from './content-identity.ts';
 import type {StandardsProvenance} from './standards-source.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
 
-export const COVERAGE_INPUT_SCHEMA_VERSION = 1;
-export const COVERAGE_PRODUCER_EPOCH = 'standards-coverage-v1';
+export const COVERAGE_INPUT_SCHEMA_VERSION = 2;
+export const COVERAGE_PRODUCER_EPOCH = 'standards-coverage-v2';
 
 export interface RepositoryProvenance {
     ref: string;
@@ -33,7 +37,7 @@ export interface CoverageInputIdentity {
     producer_epoch: string;
     repository: RepositoryProvenance;
     standards: StandardsProvenance;
-    ontology: OntologyProvenance;
+    ontology: OntologyProvenance & {semantic_usage_sha256: string};
     selection: CoverageSelectionIdentity;
 }
 
@@ -42,7 +46,7 @@ export interface CoverageCoreInputIdentity {
     producer_epoch: string;
     repository: Omit<RepositoryProvenance, 'ref'>;
     standards: StandardsProvenance;
-    ontology: OntologyProvenance;
+    ontology: Pick<OntologyProvenance, 'package'> & {semantic_usage_sha256: string};
     selection: CoverageSelectionIdentity;
 }
 
@@ -54,13 +58,15 @@ const isRuntimeSource = (path: string): boolean =>
     && !path.endsWith('checklist.md');
 
 export function coverageRepositoryDigest(projectRoot: string): string {
-    return hashSourceFiles(projectRoot, [
-        resolve(projectRoot, 'package.json'),
-        resolve(projectRoot, 'package-lock.json'),
+    const sourceSha256 = hashSourceFiles(projectRoot, [
         resolve(projectRoot, 'tsconfig.json'),
         resolve(projectRoot, 'vite.config.js'),
         resolve(projectRoot, 'src')
     ], {include: isRuntimeSource});
+    return digestIdentity({
+        source_sha256: sourceSha256,
+        runtime_dependencies_sha256: hashPackageStateWithoutDependency(projectRoot, 'edugraph-ts')
+    });
 }
 
 export function resolveOntologyProvenance(projectRoot: string): OntologyProvenance {
@@ -95,6 +101,7 @@ export function buildCoverageInputIdentity(options: {
     sourceSha: string;
     standards: StandardsProvenance;
     ontology?: OntologyProvenance;
+    ontologyUsageSha256?: string;
     grade?: string;
     excludeHighSchool?: boolean;
     knownAssetsSha256?: string;
@@ -108,7 +115,11 @@ export function buildCoverageInputIdentity(options: {
             content_sha256: coverageRepositoryDigest(options.projectRoot)
         },
         standards: options.standards,
-        ontology: options.ontology ?? resolveOntologyProvenance(options.projectRoot),
+        ontology: {
+            ...(options.ontology ?? resolveOntologyProvenance(options.projectRoot)),
+            semantic_usage_sha256: options.ontologyUsageSha256
+                ?? digestIdentity(options.ontology ?? resolveOntologyProvenance(options.projectRoot))
+        },
         selection: {
             grade: options.grade ?? null,
             exclude_high_school: options.excludeHighSchool ?? false,
@@ -128,7 +139,10 @@ export function toCoverageCoreInputIdentity(
             content_sha256: identity.repository.content_sha256
         },
         standards: identity.standards,
-        ontology: identity.ontology,
+        ontology: {
+            package: identity.ontology.package,
+            semantic_usage_sha256: identity.ontology.semantic_usage_sha256
+        },
         selection: identity.selection
     };
 }
@@ -181,6 +195,7 @@ export function coverageManifestIdentityIssues(options: {
     manifest: CoverageManifest;
     standards: StandardsProvenance;
     ontology?: OntologyProvenance;
+    ontologyUsageSha256?: string;
 }): string[] {
     const {projectRoot, manifest, standards} = options;
     const issues: string[] = [];
@@ -212,6 +227,7 @@ export function coverageManifestIdentityIssues(options: {
         sourceSha: manifest.source_sha,
         standards,
         ontology: options.ontology,
+        ontologyUsageSha256: options.ontologyUsageSha256,
         grade: manifest.inputs.selection.grade ?? undefined,
         excludeHighSchool: manifest.inputs.selection.exclude_high_school,
         knownAssetsSha256: manifest.inputs.selection.known_assets_sha256 ?? undefined

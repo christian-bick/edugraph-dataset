@@ -174,6 +174,19 @@ Coverage generation consumes the CCSS metadata revision locked in
 length match the lock; mutable upstream changes are ignored until an explicit source update records
 their delta. Every generated coverage manifest records the exact standards, ontology package, and
 repository-content identity used to build it.
+External updates are accepted only through dry-run-first semantic update commands:
+```bash
+# Compare a candidate immutable CCSS revision by stable standard ID; add --apply to accept it.
+npm run update:standards-source -- --revision=<40-character-commit>
+
+# After intentionally updating the pinned edugraph-ts dependency, inspect entity/relation changes.
+npm run update:ontology-source
+```
+`--apply` writes integrity-checked semantic baselines under `config/external-semantics/`.
+Generation and repository checks refuse a package or standards lock that does not match those
+baselines. Ontology invalidation follows only the entity definitions and `partOf` closure actually
+used by a target, generator, view, or VQA record; unrelated ontology changes do not churn images or
+validation results.
 The timestamp-free coverage computation is stored immutably under its complete input key. Local,
 CI, release, and deployment runs reuse that core and generate channel-specific metadata as a cheap
 projection when the underlying source commit and semantic inputs are identical.

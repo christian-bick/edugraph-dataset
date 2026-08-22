@@ -16,6 +16,7 @@ import {
 import {digestIdentity} from '../lib/content-identity.ts';
 import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
 import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
+import {ontologySemanticUsageHash} from '../lib/external-semantics.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const snapshotRoot = resolve(projectRoot, 'temp', 'standards-explorer-preview');
@@ -47,6 +48,7 @@ const inputs = buildCoverageInputIdentity({
     sourceSha: 'working-tree',
     standards: pinnedStandards.provenance,
     ontology,
+    ontologyUsageSha256: ontologySemanticUsageHash(projectRoot, 'ccss'),
     knownAssetsSha256: digestIdentity(assets.index)
 });
 reportProgress('Resolving current standards coverage…');
@@ -65,7 +67,7 @@ const core = await resolveCoverageCore({
 });
 console.error(`[Coverage core] ${core.reused ? 'HIT' : 'MISS'} ${core.artifact.core_input_key}`);
 const tree = core.artifact.tree;
-const coverage = projectCoverageData(core.artifact.coverage, generatedAt);
+const coverage = projectCoverageData(core.artifact.coverage, generatedAt, ontology.version);
 const manifest = buildCoverageManifest({
     channel: 'preview',
     inputs,

@@ -70,12 +70,14 @@ export function toCoverageCoreData(coverage: CoverageData): CoverageCoreData {
 
 export function projectCoverageData(
     core: CoverageCoreData,
-    generatedAt: string
+    generatedAt: string,
+    ontologyVersion: string = core.metadata.ontology_version
 ): CoverageData {
     return {
         metadata: {
             generated_at: generatedAt,
-            ...core.metadata
+            ...core.metadata,
+            ontology_version: ontologyVersion
         },
         coverage: core.coverage,
         tasks: core.tasks

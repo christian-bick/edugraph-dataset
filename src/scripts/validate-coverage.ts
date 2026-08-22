@@ -12,6 +12,7 @@ import {
 } from '../lib/coverage-core.ts';
 import {digestIdentity} from '../lib/content-identity.ts';
 import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
+import {ontologySemanticUsageHash} from '../lib/external-semantics.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
 
 const PROJECT_ROOT = path.resolve('.');
@@ -72,7 +73,8 @@ async function runValidation() {
     projectRoot: PROJECT_ROOT,
     manifest,
     standards: pinnedStandards.provenance,
-    ontology: resolveOntologyProvenance(PROJECT_ROOT)
+    ontology: resolveOntologyProvenance(PROJECT_ROOT),
+    ontologyUsageSha256: ontologySemanticUsageHash(PROJECT_ROOT, 'ccss')
   });
   result.errors.push(...identityIssues);
   if (identityIssues.length > 0) result.passed = false;
@@ -88,7 +90,11 @@ async function runValidation() {
       );
       result.passed = false;
     } else {
-      const projectedCoverage = projectCoverageData(core.coverage, manifest.generated_at);
+      const projectedCoverage = projectCoverageData(
+        core.coverage,
+        manifest.generated_at,
+        manifest.ontology_version
+      );
       if (digestIdentity(core.tree) !== digestIdentity(treeData)) {
         result.errors.push('Coverage tree does not match its immutable core artifact.');
         result.passed = false;

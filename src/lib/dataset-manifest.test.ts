@@ -10,6 +10,7 @@ import {
     buildDatasetManifest,
     datasetGlobalSourceHash,
     datasetFreshnessIssues,
+    datasetExternalSemanticIssues,
     datasetRendererIssues,
     updateDatasetManifest
 } from './dataset-manifest.ts';
@@ -20,6 +21,8 @@ import {
     planDependencyDelta,
     type DependencyGraphSnapshot
 } from './dependency-planner.ts';
+import {buildOntologySemanticSnapshot} from './external-semantics.ts';
+import type {OntologyProvenance} from './coverage-identity.ts';
 
 const dependencyGraph = createDependencyGraphSnapshot([]);
 const cleanPlan = planDependencyDelta(null, dependencyGraph);
@@ -33,7 +36,9 @@ const entry: DatasetManifestEntry = {
     content_hash: 'content-a',
     sample_counts: { train: 2, val: 0 },
     generated_splits: ['train', 'val'],
-    execution_nodes: []
+    execution_nodes: [],
+    render_nodes: [],
+    validation_nodes: []
 };
 
 function manifest(overrides: Partial<DatasetManifest> = {}): DatasetManifest {
@@ -58,7 +63,14 @@ function build(
     return {
         entries,
         dependency_graph: graph,
-        source_stats: {directories_read: 0, files_read: 0, bytes_read: 0}
+        source_stats: {directories_read: 0, files_read: 0, bytes_read: 0},
+        external_semantics: {
+            trusted: true,
+            diagnostics: [],
+            standards_records: 0,
+            ontology_entities: 0,
+            ontology_relations: 0
+        }
     };
 }
 
@@ -107,6 +119,48 @@ describe('datasetFreshnessIssues', () => {
     });
 });
 
+describe('external semantic generation gate', () => {
+    it('accepts exact installed ontology semantics and rejects mixed package state', () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-semantic-gate-'));
+        const dependency = 'https://example.test/ontology.tgz';
+        const provenance: OntologyProvenance = {
+            package: 'edugraph-ts',
+            version: 'v1.0.0',
+            dependency,
+            resolved: dependency,
+            integrity: 'sha512-exact'
+        };
+        mkdirSync(resolve(projectRoot, 'config', 'external-semantics'), {recursive: true});
+        writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
+            dependencies: {'edugraph-ts': dependency}
+        }));
+        writeFileSync(resolve(projectRoot, 'package-lock.json'), JSON.stringify({
+            packages: {
+                'node_modules/edugraph-ts': {
+                    version: '1.0.0',
+                    resolved: dependency,
+                    integrity: provenance.integrity
+                }
+            }
+        }));
+        const snapshotPath = resolve(projectRoot, 'config', 'external-semantics', 'ontology.json');
+        try {
+            writeFileSync(snapshotPath, JSON.stringify(buildOntologySemanticSnapshot({provenance})));
+            expect(datasetExternalSemanticIssues(projectRoot, 'test')).toEqual([]);
+
+            writeFileSync(snapshotPath, JSON.stringify(buildOntologySemanticSnapshot({
+                provenance,
+                entityRelations: {}
+            })));
+            expect(datasetExternalSemanticIssues(projectRoot, 'test')).toEqual([
+                expect.stringContaining('Installed ontology semantics differ')
+            ]);
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
+    });
+});
+
 describe('datasetRendererIssues', () => {
     it('requires every generated pair to use the expected renderer', () => {
         expect(datasetRendererIssues(manifest(), currentRendererEnvironment())).toEqual([]);
@@ -140,6 +194,43 @@ describe('datasetGlobalSourceHash', () => {
 });
 
 describe('updateDatasetManifest', () => {
+    it('does not schedule pixel generation for a validation-only ontology definition delta', () => {
+        const graph = (definitionHash: string) => createDependencyGraphSnapshot([
+            {id: 'ontology:Addition', kind: 'ontology-entity', input_hash: 'identity', dependencies: []},
+            {
+                id: 'ontology-definition:Addition',
+                kind: 'ontology-entity',
+                input_hash: definitionHash,
+                dependencies: ['ontology:Addition']
+            },
+            {id: 'pair:demo#view', kind: 'generator-view-pair', input_hash: 'pair', dependencies: []},
+            {
+                id: 'vqa:sample',
+                kind: 'vqa-record',
+                input_hash: 'vqa',
+                dependencies: ['pair:demo#view', 'ontology-definition:Addition']
+            }
+        ]);
+        const previousGraph = graph('before');
+        const currentGraph = graph('after');
+        const pairEntry: DatasetManifestEntry = {
+            ...entry,
+            generator: 'demo',
+            view: 'view',
+            execution_nodes: ['pair:demo#view', 'vqa:sample'],
+            render_nodes: ['pair:demo#view'],
+            validation_nodes: ['vqa:sample']
+        };
+        const plan = planDependencyDelta(previousGraph, currentGraph);
+
+        expect(plan.affected_nodes).toContain('vqa:sample');
+        expect(affectedDatasetPairKeys(
+            plan,
+            build({'demo#view': pairEntry}, currentGraph),
+            manifest({dependency_graph: previousGraph, entries: {'demo#view': pairEntry}})
+        )).toEqual([]);
+    });
+
     it('selects exact current and removed pairs from a delta', () => {
         const graph = (sourceHash: string, pair: string) => createDependencyGraphSnapshot([
             {id: 'source:module', kind: 'source-file', input_hash: sourceHash, dependencies: []},
@@ -148,8 +239,18 @@ describe('updateDatasetManifest', () => {
         const previousGraph = graph('before', 'writing#old-view');
         const currentGraph = graph('after', 'writing#new-view');
         const plan = planDependencyDelta(previousGraph, currentGraph);
-        const oldEntry = {...entry, view: 'old-view', execution_nodes: ['pair:writing#old-view']};
-        const newEntry = {...entry, view: 'new-view', execution_nodes: ['pair:writing#new-view']};
+        const oldEntry = {
+            ...entry,
+            view: 'old-view',
+            execution_nodes: ['pair:writing#old-view'],
+            render_nodes: ['pair:writing#old-view']
+        };
+        const newEntry = {
+            ...entry,
+            view: 'new-view',
+            execution_nodes: ['pair:writing#new-view'],
+            render_nodes: ['pair:writing#new-view']
+        };
 
         expect(affectedDatasetPairKeys(
             plan,
@@ -238,11 +339,13 @@ describe('updateDatasetManifest', () => {
             ...entry,
             generator: 'comparison',
             view: 'numbers-compare',
-            execution_nodes: ['pair:comparison#numbers-compare']
+            execution_nodes: ['pair:comparison#numbers-compare'],
+            render_nodes: ['pair:comparison#numbers-compare']
         };
         const writing = {
             ...entry,
-            execution_nodes: ['pair:writing#numbers-write-standard']
+            execution_nodes: ['pair:writing#numbers-write-standard'],
+            render_nodes: ['pair:writing#numbers-write-standard']
         };
         writeFileSync(resolve(datasetDir, 'manifest.json'), JSON.stringify(manifest({
             dependency_graph: previousGraph,

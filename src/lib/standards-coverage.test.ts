@@ -39,7 +39,8 @@ const coverageInputs: CoverageInputIdentity = {
         version: 'v0.15.0',
         dependency: 'https://example.test/edugraph-ts.tgz',
         resolved: 'https://example.test/edugraph-ts.tgz',
-        integrity: 'sha512-exact'
+        integrity: 'sha512-exact',
+        semantic_usage_sha256: 'usage-a'
     },
     selection: {
         grade: null,

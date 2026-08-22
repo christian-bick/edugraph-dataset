@@ -16,9 +16,9 @@ Here, linear means `O(input records + dependency edges + necessary output)`. A d
 
 | Rule | Current status |
 | --- | --- |
-| Always linear | Primary matching, coverage, generation, and VQA amplification paths are linearized; the remaining command audit is still open. |
-| Content-delta processing | Partially present, but failed system-wide |
-| External-delta processing | Standards and ontology provenance now fail closed and unverified updates stay pinned; semantic delta planning remains for Phase 6. |
+| Always linear | Primary matching, coverage, generation, VQA, semantic-diff, and affected-closure paths carry linear implementations and work counters; release-wide checks remain deliberately linear in complete input. |
+| Content-delta processing | Immutable exact-pair shards, affected development checks, VQA misses, explorer asset reuse, and pointer publication process the changed closure. |
+| External-delta processing | Standards use stable record diffs; ontology uses entity, relation, definition, and project-usage closures. Unreviewed or unverifiable updates remain pinned and are rejected before work. |
 
 ## Baseline diagnosis
 
@@ -371,6 +371,23 @@ classification work.
 5. Retain the Phase 2 ignore-with-diagnostic behavior whenever reliable provenance or a reliable
    delta is unavailable during development.
 
+**Status: complete.** `update:standards-source` compares a candidate immutable CCSS revision by
+stable standard/domain-group ID and advances the lock only with `--apply`.
+`update:ontology-source` compares entity definitions and individual typed relations, then records
+the transitive `partOf` closure actually used by current CCSS targets and generator/view
+capabilities. Both operations are dry-run by default and emit linear work counters.
+
+Dataset manifest schema 4 and planner epoch 2 replace aggregate ontology invalidation with semantic
+nodes. Targets depend on their exact external standard record; target, generator, and view matching
+depends on entity identity and the used ancestor relations; VQA depends separately on exact claimed
+definitions. Render and validation nodes are distinct, so a definition-only change schedules VQA
+without rendering. Raw `edugraph-ts` package state is excluded from the non-ontology runtime key.
+Coverage cores similarly key ontology input by the CCSS usage hash and project the current package
+version, allowing an unrelated entity change to reuse the existing computation. Missing, corrupt,
+or provenance-mismatched semantic state is reported as an ignored external update and blocks
+generation before Chromium. `check`, `check:affected`, coverage mapping, and release validation all
+verify the semantic baselines.
+
 ## Stale-cache risk assessment
 
 Caching introduces two different failure classes:
@@ -503,6 +520,7 @@ No generator/view redesign is required to begin this work. The repository alread
 
 Phase 4 supplies the shared, persistent dependency graph and delta scheduler. Phase 5 places
 mutable dataset and explorer outputs behind immutable stores and applies affected-only execution
-to rendering, VQA, tests, type checking, and validators. The remaining performance work is Phase 6:
-replace aggregate external identities with reliable record/entity deltas. Existing workflows must
-continue to converge on the shared planner rather than growing independent invalidation systems.
+to rendering, VQA, tests, type checking, and validators. Phase 6 replaces aggregate external
+identities with reliable record/entity/relation deltas and closes the planned architecture. Future
+performance work should extend the shared planner and semantic baselines rather than introduce an
+independent invalidation system.

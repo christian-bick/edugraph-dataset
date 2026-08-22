@@ -29,6 +29,7 @@ export interface CoverageInputIdentity {
         dependency: string;
         resolved: string;
         integrity: string;
+        semantic_usage_sha256: string;
     };
     selection: {
         grade: string | null;

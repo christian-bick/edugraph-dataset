@@ -57,8 +57,8 @@ describe('coverage input identity', () => {
                 knownAssetsSha256: 'e'.repeat(64)
             });
             expect(identity).toMatchObject({
-                schema_version: 1,
-                producer_epoch: 'standards-coverage-v1',
+                schema_version: 2,
+                producer_epoch: 'standards-coverage-v2',
                 repository: {ref: 'main', sha: 'd'.repeat(40)},
                 standards,
                 ontology: {
@@ -115,6 +115,45 @@ describe('coverage input identity', () => {
             expect(coverageRepositoryDigest(root)).toBe(initial);
             writeFileSync(resolve(root, 'src', 'coverage.ts'), 'changed runtime');
             expect(coverageRepositoryDigest(root)).not.toBe(initial);
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+
+    it('reuses coverage computation across ontology versions when used semantics are unchanged', () => {
+        const root = fixture();
+        try {
+            const repositoryBefore = coverageRepositoryDigest(root);
+            const before = buildCoverageInputIdentity({
+                projectRoot: root,
+                sourceRef: 'main',
+                sourceSha: 'd'.repeat(40),
+                standards,
+                ontologyUsageSha256: 'f'.repeat(64)
+            });
+            writeFileSync(resolve(root, 'package.json'), JSON.stringify({
+                dependencies: {'edugraph-ts': 'https://example.test/edugraph-ts-v2.tgz'}
+            }));
+            writeFileSync(resolve(root, 'package-lock.json'), JSON.stringify({
+                packages: {
+                    'node_modules/edugraph-ts': {
+                        version: '2.0.0',
+                        resolved: 'https://example.test/edugraph-ts-v2.tgz',
+                        integrity: 'sha512-v2'
+                    }
+                }
+            }));
+            const after = buildCoverageInputIdentity({
+                projectRoot: root,
+                sourceRef: 'main',
+                sourceSha: 'd'.repeat(40),
+                standards,
+                ontologyUsageSha256: 'f'.repeat(64)
+            });
+
+            expect(coverageRepositoryDigest(root)).toBe(repositoryBefore);
+            expect(after.ontology.version).toBe('v2.0.0');
+            expect(coverageInputKey(after)).toBe(coverageInputKey(before));
         } finally {
             rmSync(root, {recursive: true, force: true});
         }

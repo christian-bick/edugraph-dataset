@@ -11,7 +11,7 @@ import {resolve} from 'node:path';
 import {digestContent, radixSortUtf8} from './content-identity.ts';
 
 export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 1;
-export const DEPENDENCY_PLANNER_EPOCH = 1;
+export const DEPENDENCY_PLANNER_EPOCH = 2;
 
 export const DEPENDENCY_NODE_KINDS = [
     'source-file',

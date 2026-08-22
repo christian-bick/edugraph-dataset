@@ -11,6 +11,14 @@ import {createWorkCounters} from '../lib/work-counters.ts';
 import {buildCoverageInputIdentity, resolveOntologyProvenance} from '../lib/coverage-identity.ts';
 import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
 import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
+import {
+    buildOntologySemanticSnapshot,
+    buildStandardsSemanticSnapshot,
+    diffOntologySemantics,
+    ontologySemanticUsageHash,
+    readOntologySemanticSnapshot,
+    readStandardsSemanticSnapshot
+} from '../lib/external-semantics.ts';
 import type {DataView} from '../standards-explorer/types.ts';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -34,8 +42,39 @@ async function main() {
         projectRoot,
         report: message => console.log(`[External input] ${message}`)
     });
+    const recordedStandardsSemantics = readStandardsSemanticSnapshot(projectRoot);
+    const currentStandardsSemantics = buildStandardsSemanticSnapshot({
+        standards: pinnedStandards.standards,
+        domainGroups: pinnedStandards.domainGroups,
+        provenance: pinnedStandards.provenance
+    });
+    if (!recordedStandardsSemantics
+        || recordedStandardsSemantics.semantic_sha256 !== currentStandardsSemantics.semantic_sha256) {
+        throw new Error(
+            'Pinned CCSS bytes do not match the committed semantic snapshot. '
+            + 'Run update:standards-source explicitly before coverage generation.'
+        );
+    }
     const sourceTree = parseStandardsTree(pinnedStandards.tree);
     const ontology = resolveOntologyProvenance(projectRoot);
+    const recordedOntologySemantics = readOntologySemanticSnapshot(projectRoot);
+    const currentOntologySemantics = buildOntologySemanticSnapshot({provenance: ontology});
+    const ontologyDelta = recordedOntologySemantics
+        ? diffOntologySemantics(recordedOntologySemantics, currentOntologySemantics)
+        : null;
+    if (!recordedOntologySemantics
+        || !recordedOntologySemantics.usages?.ccss
+        || ontologyDelta!.entities.added.length > 0
+        || ontologyDelta!.entities.changed.length > 0
+        || ontologyDelta!.entities.removed.length > 0
+        || ontologyDelta!.relations.added.length > 0
+        || ontologyDelta!.relations.changed.length > 0
+        || ontologyDelta!.relations.removed.length > 0) {
+        throw new Error(
+            'Pinned ontology package does not match the committed semantic snapshot. '
+            + 'Run update:ontology-source explicitly before coverage generation.'
+        );
+    }
     const ontologyVersion = ontology.version;
     const generatedAt = new Date().toISOString();
     const grade = readOption('grade');
@@ -46,6 +85,7 @@ async function main() {
         sourceSha,
         standards: pinnedStandards.provenance,
         ontology,
+        ontologyUsageSha256: ontologySemanticUsageHash(projectRoot, 'ccss'),
         grade,
         excludeHighSchool
     });
@@ -66,7 +106,7 @@ async function main() {
         })
     });
     const tree = parseStandardsTree(core.artifact.tree);
-    const coverage = projectCoverageData(core.artifact.coverage, generatedAt);
+    const coverage = projectCoverageData(core.artifact.coverage, generatedAt, ontologyVersion);
     console.log(
         `[Coverage core] ${core.reused ? 'HIT' : 'MISS'} ${core.artifact.core_input_key} at ${core.directory}`
     );
