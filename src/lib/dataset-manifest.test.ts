@@ -175,6 +175,7 @@ describe('datasetGlobalSourceHash', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-render-inputs-'));
         mkdirSync(resolve(projectRoot, 'public', 'coverage'), {recursive: true});
         mkdirSync(resolve(projectRoot, 'public', 'icons'), {recursive: true});
+        writeFileSync(resolve(projectRoot, 'vite.config.js'), 'export default {base: "/"};');
         writeFileSync(resolve(projectRoot, 'public', 'coverage', 'ccss-coverage.json'), 'first');
         writeFileSync(resolve(projectRoot, 'public', 'favicon.png'), 'first');
         writeFileSync(resolve(projectRoot, 'public', 'icons', 'counter.svg'), 'first');
@@ -185,8 +186,12 @@ describe('datasetGlobalSourceHash', () => {
             writeFileSync(resolve(projectRoot, 'public', 'favicon.png'), 'changed');
             expect(datasetGlobalSourceHash(projectRoot)).toBe(initial);
 
-            writeFileSync(resolve(projectRoot, 'public', 'icons', 'counter.svg'), 'changed');
+            writeFileSync(resolve(projectRoot, 'vite.config.js'), 'export default {base: "/changed"};');
             expect(datasetGlobalSourceHash(projectRoot)).not.toBe(initial);
+
+            const changedConfig = datasetGlobalSourceHash(projectRoot);
+            writeFileSync(resolve(projectRoot, 'public', 'icons', 'counter.svg'), 'changed');
+            expect(datasetGlobalSourceHash(projectRoot)).not.toBe(changedConfig);
         } finally {
             rmSync(projectRoot, {recursive: true, force: true});
         }

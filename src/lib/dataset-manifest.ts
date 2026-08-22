@@ -111,7 +111,7 @@ interface DatasetManifestRow {
 }
 
 const SOURCE_EXTENSIONS = new Set([
-    '.css', '.html', '.json', '.md', '.ts', '.tsx',
+    '.cjs', '.css', '.html', '.js', '.json', '.jsx', '.md', '.mjs', '.ts', '.tsx',
     '.jpeg', '.jpg', '.png', '.svg', '.webp'
 ]);
 
