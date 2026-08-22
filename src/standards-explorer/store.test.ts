@@ -37,7 +37,7 @@ const jsonResponse = (data: unknown) => ({
 }) as Response;
 
 const previewManifest = {
-    schema_version: 3,
+    schema_version: 4,
     channel: 'preview',
     source_ref: 'main',
     source_sha: '07590c32396405e',
@@ -45,21 +45,17 @@ const previewManifest = {
     ontology_version: 'v0.11.1',
     core_input_key: 'a'.repeat(64),
     inputs: {
-        schema_version: 1,
-        producer_epoch: 'standards-coverage-v1',
+        schema_version: 3,
+        producer_epoch: 'standards-coverage-v3',
         repository: {
             ref: 'main',
             sha: '07590c32396405e',
             content_sha256: 'b'.repeat(64),
         },
         standards: {
-            provider: 'huggingface',
-            repository: 'example/standards',
-            revision: 'c'.repeat(40),
-            files: [
-                {path: 'standards.jsonl', sha256: 'd'.repeat(64), bytes: 12},
-                {path: 'domain_groups.json', sha256: 'e'.repeat(64), bytes: 34},
-            ],
+            path: 'public/coverage/ccss-tree.json',
+            sha256: 'd'.repeat(64),
+            bytes: 46,
         },
         ontology: {
             package: 'edugraph-ts',
@@ -67,6 +63,7 @@ const previewManifest = {
             dependency: 'https://example.test/edugraph-ts.tgz',
             resolved: 'https://example.test/edugraph-ts.tgz',
             integrity: 'sha512-exact',
+            semantic_usage_sha256: 'e'.repeat(64),
         },
         selection: {
             grade: null,

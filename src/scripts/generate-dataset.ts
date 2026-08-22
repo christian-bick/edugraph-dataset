@@ -41,7 +41,7 @@ import {
     affectedDatasetPairKeys,
     buildDatasetManifest,
     createDatasetManifest,
-    datasetExternalSemanticIssues,
+    datasetOntologySemanticIssues,
     readDatasetManifest,
     type ManifestUpdateScope,
 } from '../lib/dataset-manifest.ts';
@@ -626,12 +626,12 @@ async function main() {
     }
 
     const outDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
-    const externalIssues = datasetExternalSemanticIssues(PROJECT_ROOT, specName);
-    if (externalIssues.length > 0) {
-        for (const issue of externalIssues) console.warn(`[External update ignored] ${issue}`);
+    const ontologyIssues = datasetOntologySemanticIssues(PROJECT_ROOT);
+    if (ontologyIssues.length > 0) {
+        for (const issue of ontologyIssues) console.warn(`[Ontology update ignored] ${issue}`);
         throw new Error(
-            'Reliable external semantic delta state is unavailable. The pinned external update was not consumed; '
-            + 'run the corresponding explicit update command before generation.'
+            'Reliable ontology semantic delta state is unavailable. The pinned ontology update was not consumed; '
+            + 'run update:ontology-source before generation.'
         );
     }
 

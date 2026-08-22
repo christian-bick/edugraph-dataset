@@ -5,23 +5,13 @@ import {
     buildOntologySemanticSnapshot,
     diffOntologySemantics,
     ontologySemanticProvenanceMatches,
-    readOntologySemanticSnapshot,
-    readStandardsSemanticSnapshot,
-    standardsSemanticProvenanceMatches
+    readOntologySemanticSnapshot
 } from '../lib/external-semantics.ts';
-import {readPinnedStandardsProvenance} from '../lib/standards-source.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 async function main(): Promise<void> {
     const issues: string[] = [];
-    const standards = readStandardsSemanticSnapshot(projectRoot);
-    const standardsProvenance = readPinnedStandardsProvenance(projectRoot);
-    if (!standards) issues.push('The committed CCSS semantic snapshot is missing.');
-    else if (!standardsSemanticProvenanceMatches(standards, standardsProvenance)) {
-        issues.push('The CCSS semantic snapshot does not match config/external-sources.json.');
-    }
-
     const ontology = readOntologySemanticSnapshot(projectRoot);
     const ontologyProvenance = resolveOntologyProvenance(projectRoot);
     if (!ontology) issues.push('The committed ontology semantic snapshot is missing.');
@@ -49,8 +39,7 @@ async function main(): Promise<void> {
         return;
     }
     console.log(
-        `✅ External semantic baselines verified: ${Object.keys(standards!.records).length} CCSS records, `
-        + `${Object.keys(ontology!.entities).length} ontology entities, `
+        `✅ Ontology semantic baseline verified: ${Object.keys(ontology!.entities).length} ontology entities, `
         + `${Object.keys(ontology!.relations).length} ontology relations.`
     );
 }

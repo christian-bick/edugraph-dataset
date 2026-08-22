@@ -12,17 +12,13 @@ import {createWorkCounters} from './work-counters.ts';
 import type {CoverageData, StandardsTreeData} from '../standards-explorer/types.ts';
 
 const inputs = (ref = 'main'): CoverageInputIdentity => ({
-    schema_version: 1,
-    producer_epoch: 'standards-coverage-v1',
+    schema_version: 3,
+    producer_epoch: 'standards-coverage-v3',
     repository: {ref, sha: 'a'.repeat(40), content_sha256: 'b'.repeat(64)},
     standards: {
-        provider: 'huggingface',
-        repository: 'example/standards',
-        revision: 'c'.repeat(40),
-        files: [
-            {path: 'standards.jsonl', sha256: 'd'.repeat(64), bytes: 12},
-            {path: 'domain_groups.json', sha256: 'e'.repeat(64), bytes: 34}
-        ]
+        path: 'public/coverage/ccss-tree.json',
+        sha256: 'd'.repeat(64),
+        bytes: 46
     },
     ontology: {
         package: 'edugraph-ts',

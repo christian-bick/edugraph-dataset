@@ -14,7 +14,7 @@ import {
     resolveOntologyProvenance
 } from '../lib/coverage-identity.ts';
 import {digestIdentity} from '../lib/content-identity.ts';
-import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
+import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
 import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
 import {ontologySemanticUsageHash} from '../lib/external-semantics.ts';
 
@@ -29,12 +29,8 @@ const reportProgress = (message: string): void => {
 // Keep stdout machine-readable even if shared loaders add informational logging.
 console.log = (...args: unknown[]) => console.error(...args);
 
-reportProgress('Loading Common Core standards and ontology metadata…');
-const pinnedStandards = await loadPinnedStandardsSource({
-    projectRoot,
-    report: message => console.error(`[External input] ${message}`)
-});
-const sourceTree = pinnedStandards.tree;
+reportProgress('Loading canonical Common Core tree and ontology metadata…');
+const sourceTree = readCanonicalStandardsTree(projectRoot);
 const ontology = resolveOntologyProvenance(projectRoot);
 reportProgress('Indexing generated samples and target labels…');
 const assets = await buildAssetIndexBundle({
@@ -46,7 +42,6 @@ const inputs = buildCoverageInputIdentity({
     projectRoot,
     sourceRef: 'working-tree',
     sourceSha: 'working-tree',
-    standards: pinnedStandards.provenance,
     ontology,
     ontologyUsageSha256: ontologySemanticUsageHash(projectRoot, 'ccss'),
     knownAssetsSha256: digestIdentity(assets.index)

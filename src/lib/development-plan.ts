@@ -29,7 +29,7 @@ const VIEW_PATTERN = /^src\/visuals\/views\/([^/]+\/)?([^/]+)\//;
 const SPEC_PATTERN = /^src\/spec\/([^/]+)(?:\/|\.ts$)/;
 const DOC_PATTERN = /^(?:README\.md|DOCS\.md|AGENTS\.md|docs\/.*\.md|\.agents\/skills\/.*\/SKILL\.md)$/;
 const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|type-parser|ontology|utils|module-resolver))/;
-const EXTERNAL_SEMANTICS_PATTERN = /^(?:config\/external-(?:sources\.json|semantics\/)|src\/(?:lib\/external-semantics|scripts\/(?:update-(?:standards|ontology)-source|validate-external-semantics))\.ts$)/;
+const ONTOLOGY_SEMANTICS_PATTERN = /^(?:config\/external-semantics\/ontology\.json|src\/(?:lib\/external-semantics|scripts\/(?:update-ontology-source|validate-external-semantics))\.ts$)/;
 
 function normalizedFile(path: string): string {
     return path.replaceAll('\\', '/').replace(/^\.\//, '');
@@ -123,19 +123,13 @@ export function planDevelopmentValidation(
         if (file === 'src/scripts/validate-standards-spec.ts') addAllSpecs(file);
 
         classificationSteps++;
-        if (EXTERNAL_SEMANTICS_PATTERN.test(file) || file === 'package.json' || file === 'package-lock.json') {
+        if (ONTOLOGY_SEMANTICS_PATTERN.test(file) || file === 'package.json' || file === 'package-lock.json') {
             addCheck('external-semantics', file);
         }
         if (file === 'config/external-semantics/ontology.json') {
             addCheck('generator-view-specs', file);
             addCheck('labels', file);
             addAllSpecs(file);
-        } else if (file === 'config/external-semantics/ccss.json'
-            || file === 'config/external-sources.json') {
-            if (availableSpecSet.has('ccss')) {
-                specs.add('ccss');
-                add('spec:ccss', file);
-            }
         }
     }
 

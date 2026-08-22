@@ -3,8 +3,8 @@ export type MainTab = 'explorer' | 'backlog';
 export type DataView = 'latest' | 'preview';
 export type AssetSource = 'released' | 'local';
 
-export interface CoverageFileProvenance {
-    path: 'standards.jsonl' | 'domain_groups.json';
+export interface CanonicalStandardsIdentity {
+    path: 'public/coverage/ccss-tree.json';
     sha256: string;
     bytes: number;
 }
@@ -17,12 +17,7 @@ export interface CoverageInputIdentity {
         sha: string;
         content_sha256: string;
     };
-    standards: {
-        provider: 'huggingface';
-        repository: string;
-        revision: string;
-        files: CoverageFileProvenance[];
-    };
+    standards: CanonicalStandardsIdentity;
     ontology: {
         package: 'edugraph-ts';
         version: string;

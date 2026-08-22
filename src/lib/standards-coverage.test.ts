@@ -18,21 +18,17 @@ import {createWorkCounters} from './work-counters.ts';
 import type {CoverageInputIdentity} from './coverage-identity.ts';
 
 const coverageInputs: CoverageInputIdentity = {
-    schema_version: 1,
-    producer_epoch: 'standards-coverage-v1',
+    schema_version: 3,
+    producer_epoch: 'standards-coverage-v3',
     repository: {
         ref: 'working-tree',
         sha: 'working-tree',
         content_sha256: 'a'.repeat(64)
     },
     standards: {
-        provider: 'huggingface',
-        repository: 'example/standards',
-        revision: 'b'.repeat(40),
-        files: [
-            {path: 'standards.jsonl', sha256: 'c'.repeat(64), bytes: 12},
-            {path: 'domain_groups.json', sha256: 'd'.repeat(64), bytes: 34}
-        ]
+        path: 'public/coverage/ccss-tree.json',
+        sha256: 'c'.repeat(64),
+        bytes: 46
     },
     ontology: {
         package: 'edugraph-ts',
@@ -183,7 +179,7 @@ describe('standards coverage', () => {
             inputs: coverageInputs,
             generatedAt: '2026-08-14T12:00:00.000Z'
         })).toMatchObject({
-            schema_version: 3,
+            schema_version: 4,
             channel: 'preview',
             source_ref: 'working-tree',
             source_sha: 'working-tree',

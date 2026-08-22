@@ -131,18 +131,17 @@ code, module sources, and VQA checklists participate only in the artifact nodes 
 A request-local source index memoizes directory discovery and file digests across overlapping
 generator/view dependencies, so each source byte is read once per plan.
 
-### External standards inputs are mutable and untracked
+### External standards files are conversion inputs, not build inputs
 
-The standards mapper downloads `standards.jsonl` and `domain_groups.json` from mutable `raw/main` URLs.
+The explorer consumes the Git-tracked canonical tree at `public/coverage/ccss-tree.json`. Dataset
+generation consumes only the authored target specs under `src/spec/`. Routine development, CI,
+coverage, validation, and release tasks therefore never download or cache raw external standards.
 
-Consequences:
-
-- fresh CI silently consumes the latest external state;
-- local development retains whatever files happen to exist;
-- neither path records the upstream revision or content digest;
-- a release is not reproducible solely from its repository tag.
-
-External standards sources must be pinned by revision and digest. Updating them must be an explicit operation that compares the previous and new snapshots by standard ID. During development, the current pinned snapshot must remain active when old/new provenance or a reliable diff is unavailable.
+The explicit `update:standards-source` operation may fetch `standards.jsonl` and
+`domain_groups.json` from a named immutable revision, but only to build and review a candidate
+canonical tree. It compares the candidate by stable standard ID and replaces the tracked tree only
+with `--apply`. Transport provenance cannot invalidate dataset content because it is outside the
+dataset dependency graph; the tracked converted bytes provide the reproducible explorer input.
 
 ### Ontology invalidation is global
 
@@ -248,26 +247,25 @@ the existing dataset correctly becomes stale when these shared generation source
 
 #### Phase 2: establish stable input identity
 
-1. Pin standards sources by immutable upstream revision and content digest.
-2. Record the exact standards and ontology provenance consumed by every coverage artifact.
-3. Define the complete immutable key for core coverage, including repository source identity and
-   all external-input digests.
-4. Freeze the current pinned external input during development when a reliable old/new delta is
+1. Track the canonical standards tree used by coverage and identify it by content digest.
+2. Record the exact canonical-tree and ontology provenance consumed by every coverage artifact.
+3. Define the complete immutable key for core coverage from repository content and semantic inputs,
+   without using a commit hash as content identity.
+4. Freeze the accepted ontology input during development when a reliable old/new delta is
    unavailable, with an explicit diagnostic instead of global invalidation.
 5. Remove generated coverage outputs and other unrelated files from dataset-render invalidation.
 
 This phase establishes the correctness prerequisite for cross-workflow reuse. A cache hit is valid
 only when the complete input identity is known.
 
-**Status: complete.** `config/external-sources.json` pins the Achieve the Core input to immutable
-commit `a3bc393b31b5cb0f6d3da3077c02d170fff8d5fa` and records the exact SHA-256 digest and byte length
-of both consumed files. Coverage producers verify and reuse that snapshot, never poll mutable
-`main`, and explicitly report that unpinned updates remain ignored until a semantic-delta update
-advances the lock. Coverage manifest schema 3 records repository ref/SHA/content identity, full
-standards provenance, exact ontology package resolution and integrity, coverage selection inputs,
-and the optional local asset-index digest under one `core_input_key`; validation reconstructs the
-key and fails closed. Dataset rendering now ignores generated coverage and unrelated public files
-while correctly hashing the SVG and raster assets under `public/icons/` that views actually render.
+**Status: complete.** Coverage producers read only the tracked canonical tree and record its exact
+SHA-256 digest and byte length. Coverage manifest schema 4 with input schema 3 records repository
+ref/SHA as projection provenance, repository content identity as a core input, canonical-tree
+identity, exact ontology package resolution, the used ontology semantic hash, coverage selection
+inputs, and the optional local asset-index digest. Validation reconstructs the key and fails closed.
+Dataset rendering is independent of the canonical standards tree, generated coverage, and unrelated
+public files while correctly hashing the SVG and raster assets under `public/icons/` that views
+actually render.
 
 #### Phase 3: compute and publish core coverage once
 
@@ -277,15 +275,16 @@ while correctly hashing the SVG and raster assets under `public/icons/` that vie
    source inputs are identical.
 4. Prevent workflows from recomputing an artifact that already exists for the complete input key.
 
-**Status: complete.** Core identity now excludes channel, human-readable source ref, and generation
-timestamp while retaining repository SHA/content, standards, ontology, selection, and asset inputs.
+**Status: complete.** Core identity now excludes channel, human-readable source ref, source SHA,
+package-version projection, and generation timestamp while retaining repository content, canonical
+standards-tree, used ontology semantics, selection, and asset inputs.
 The timestamp-free standards tree and coverage payload are atomically published under
 `temp/coverage-core/<core_input_key>/` with a completion manifest containing their byte length and
 SHA-256 digest. An exact hit verifies and projects that artifact without loading generator/view
 catalogs or matching targets; a corrupt or partial entry fails closed. Main validation computes and
 validates the core when absent, and the shared `.github/actions/coverage-core` action uses an
 exact-key GitHub Actions cache so dependent deployment and later release-tag workflows restore the
-same artifact and pinned CCSS bytes. Preview and Latest then differ only in projection metadata.
+same artifact. Preview and Latest then differ only in projection metadata.
 
 #### Phase 4: introduce the dependency and delta foundation — complete
 
@@ -297,7 +296,6 @@ Represent generation and validation as a graph containing at least:
 - generator/view pairs;
 - competency targets;
 - ontology entities and relevant relations;
-- external standards records;
 - dataset shards, images, VQA records, asset-index records, and coverage records.
 
 The planner must:
@@ -315,7 +313,7 @@ reread for every pair.
 
 Implemented in `src/lib/dependency-planner.ts`, `src/lib/content-identity.ts`, and
 `src/lib/dataset-manifest.ts`. The graph uses a closed node-kind contract for sources, modules,
-pairs, targets, ontology and standards records, shards, images, VQA, asset-index, and coverage
+pairs, targets, ontology entities and relations, shards, images, VQA, asset-index, and coverage
 records. Delta planning compares node content and direct edges, combines previous and current
 reverse edges, records removals, produces an affected-only topological schedule, exposes reusable
 content-addressed outputs, and stores compact causal predecessors. Planner work counters and
@@ -359,34 +357,34 @@ ontology-ancestry caches. Store, planner, snapshot, catalog, and changed-file te
 replacement, legacy migration refusal, immutable reuse, corruption detection, and bounded
 classification work.
 
-#### Phase 6: process external updates as semantic deltas
+#### Phase 6: isolate standards conversion and process ontology updates as semantic deltas
 
-1. Add an explicit standards-update command that compares pinned snapshots and produces an
-   ID-level diff.
+1. Add an explicit standards-update command that compares a named immutable source revision with
+   the tracked canonical tree and produces an ID-level diff.
 2. Add an explicit ontology-update operation that produces an entity- and relation-level diff.
 3. Compute ontology dependency hashes from the closure of entities and relations actually used by
    each generated pair and validation record.
-4. Schedule only the targets, pairs, artifacts, and validations reached from the changed external
-   records.
-5. Retain the Phase 2 ignore-with-diagnostic behavior whenever reliable provenance or a reliable
-   delta is unavailable during development.
+4. Schedule only the targets, pairs, artifacts, and validations reached from changed ontology
+   records; standards conversion never schedules dataset work.
+5. Retain the Phase 2 ignore-with-diagnostic behavior whenever reliable ontology provenance or a
+   reliable delta is unavailable during development.
 
-**Status: complete.** `update:standards-source` compares a candidate immutable CCSS revision by
-stable standard/domain-group ID and advances the lock only with `--apply`.
+**Status: complete.** `update:standards-source` compares a candidate immutable CCSS revision with
+the tracked explorer tree by stable standard ID and atomically replaces that tree only with
+`--apply`; no raw-source lock, snapshot, or dataset dependency exists.
 `update:ontology-source` compares entity definitions and individual typed relations, then records
 the transitive `partOf` closure actually used by current CCSS targets and generator/view
 capabilities. Both operations are dry-run by default and emit linear work counters.
 
-Dataset manifest schema 4 and planner epoch 2 replace aggregate ontology invalidation with semantic
-nodes. Targets depend on their exact external standard record; target, generator, and view matching
-depends on entity identity and the used ancestor relations; VQA depends separately on exact claimed
-definitions. Render and validation nodes are distinct, so a definition-only change schedules VQA
+Dataset manifest schema 5 and planner epoch 2 replace aggregate ontology invalidation with semantic
+nodes. Target, generator, and view matching depends on entity identity and the used ancestor
+relations; VQA depends separately on exact claimed definitions. Render and validation nodes are distinct, so a definition-only change schedules VQA
 without rendering. Raw `edugraph-ts` package state is excluded from the non-ontology runtime key.
 Coverage cores similarly key ontology input by the CCSS usage hash and project the current package
 version, allowing an unrelated entity change to reuse the existing computation. Missing, corrupt,
 or provenance-mismatched semantic state is reported as an ignored external update and blocks
 generation before Chromium. `check`, `check:affected`, coverage mapping, and release validation all
-verify the semantic baselines.
+verify the ontology semantic baseline.
 
 ## Stale-cache risk assessment
 
@@ -407,7 +405,7 @@ high risk when they make ordinary scoped development behave like a clean rebuild
 | --- | --- | --- | --- | --- |
 | Incomplete cache key | Critical | A source, configuration, external definition, or environment change produces a false hit. A release can contain artifacts that do not correspond to its declared inputs. | Define a versioned input contract per artifact kind; include every semantic and rendering input; store dependency keys and output digests in the artifact manifest; treat missing or unknown fields as an untrusted miss. | Phases 2 and 4 |
 | Incorrect affected closure | Critical | A changed node fails to reach a dependent target, pair, image, VQA record, asset index, or coverage record. Development appears fast while retaining stale output, and the same stale output may reach a release. | Make dependencies explicit and directional; test reverse-edge closure for every node kind; compare incremental and clean plans on change fixtures; change the planner epoch and require a clean differential rebuild whenever dependency-planning logic changes. | Phases 4 through 6 |
-| Mutable or unverifiable external input | Critical | Standards or ontology content changes under a stable name, or cached output is reused against a different external snapshot. | Pin immutable revisions and content digests; record provenance in manifests; fail a release when provenance cannot be verified. During development, ignoring an update means continuing to consume the previous pinned input—not consuming the new input with old cached artifacts. | Phases 2 and 6 |
+| Mutable or unverifiable ontology input | Critical | Ontology content changes under a stable name, or cached output is reused against a different accepted semantic snapshot. | Pin exact package provenance and record-addressed semantics; fail a release when provenance cannot be verified. During development, ignoring an update means continuing to consume the accepted snapshot—not consuming new semantics with old cached artifacts. Raw standards are excluded entirely; coverage consumes the tracked converted tree. | Phases 2 and 6 |
 | Renderer, toolchain, or worktree identity omitted | Critical | The same source commit produces different pixels or behavior because the container image, browser, fonts, lockfile, renderer configuration, seed contract, or dirty worktree differs. | Include the canonical renderer and toolchain identity in render keys; key development work from file content rather than commit alone; namespace local state by workspace and spec; require a clean source identity and canonical environment for release-trusted artifacts. | Phases 2 and 4 |
 | Stale VQA policy | Critical | A cached pass survives a material evaluator-instruction, response-schema, model-policy, ontology-definition, or checklist change. The release audit then proves only compliance with an obsolete validation contract. | Record a versioned validation-policy epoch beside the semantic validation key; require the current epoch at release; force affected revalidation when that epoch or any content-derived validation input changes. A deliberate model or evaluator-policy change must advance the epoch even if it remains outside the content hash. | Phases 2 and 5 |
 | Partial or concurrent publication | High | A process crash or competing writer exposes a manifest that references missing, truncated, or mixed-generation blobs. Developers see intermittent failures; a release may become irreproducible. | Write immutable blobs under content hashes, verify them before admission, publish the complete manifest last through atomic replacement, coordinate writers per namespace, and let readers use only completed immutable generations. | Phases 4 and 5 |
@@ -437,8 +435,8 @@ establishes validity.
 Releases fail closed. They never fall back to the newest available or last-known cache entry when
 the exact entry is absent or untrusted.
 
-1. Compute the expected input key from the tagged clean source, pinned external inputs, and
-   canonical renderer environment.
+1. Compute the expected input key from tagged source content, accepted ontology semantics, the
+   tracked canonical standards tree where coverage uses it, and the canonical renderer environment.
 2. Require every released artifact and VQA record to resolve to that key, the current schema, and
    the current producer, planner, and validation-policy epochs.
 3. Verify manifest completeness and all referenced content digests in one linear pass.

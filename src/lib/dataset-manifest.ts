@@ -31,21 +31,16 @@ import {
 import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
 import {
     OntologySemanticIndex,
-    StandardsSemanticIndex,
     buildOntologySemanticSnapshot,
     diffOntologySemantics,
     ontologySemanticProvenanceMatches,
     readOntologySemanticSnapshot,
-    readStandardsSemanticSnapshot,
-    standardsSemanticProvenanceMatches,
-    type OntologySemanticSnapshot,
-    type StandardsSemanticSnapshot
+    type OntologySemanticSnapshot
 } from './external-semantics.ts';
 import {resolveOntologyProvenance} from './coverage-identity.ts';
-import {readPinnedStandardsProvenance} from './standards-source.ts';
 
-export const DATASET_MANIFEST_SCHEMA_VERSION = 4;
-const GENERATION_PIPELINE_VERSION = 'external-semantic-delta-v1';
+export const DATASET_MANIFEST_SCHEMA_VERSION = 5;
+const GENERATION_PIPELINE_VERSION = 'ontology-semantic-delta-v1';
 
 export interface DatasetManifestEntry {
     generator: string;
@@ -81,10 +76,9 @@ export interface DatasetManifestBuild {
     entries: Record<string, DatasetManifestEntry>;
     dependency_graph: DependencyGraphSnapshot;
     source_stats: Readonly<SourceContentIndexStats>;
-    external_semantics: {
+    ontology_semantics: {
         trusted: boolean;
         diagnostics: string[];
-        standards_records: number;
         ontology_entities: number;
         ontology_relations: number;
     };
@@ -181,8 +175,7 @@ function viewSharedPaths(projectRoot: string): string[] {
     ];
 }
 
-interface ExternalSemanticContext {
-    standards: StandardsSemanticSnapshot | null;
+interface OntologySemanticContext {
     ontology: OntologySemanticSnapshot | null;
     trusted: boolean;
     diagnostics: string[];
@@ -199,7 +192,7 @@ function currentOntologySemantics(projectRoot: string): OntologySemanticSnapshot
     return snapshot;
 }
 
-function externalSemanticContext(projectRoot: string, specName: string): ExternalSemanticContext {
+function ontologySemanticContext(projectRoot: string): OntologySemanticContext {
     const diagnostics: string[] = [];
     let trusted = true;
     let ontology = readOntologySemanticSnapshot(projectRoot);
@@ -236,32 +229,11 @@ function externalSemanticContext(projectRoot: string, specName: string): Externa
         diagnostics.push(`Ontology semantic provenance is unavailable: ${error instanceof Error ? error.message : error}`);
     }
 
-    let standards: StandardsSemanticSnapshot | null = null;
-    if (specName === 'ccss') {
-        standards = readStandardsSemanticSnapshot(projectRoot);
-        try {
-            const provenance = readPinnedStandardsProvenance(projectRoot);
-            if (!standards) {
-                trusted = false;
-                diagnostics.push('CCSS semantic snapshot is missing; external changes remain ignored until update:standards-source --apply.');
-            } else if (!standardsSemanticProvenanceMatches(standards, provenance)) {
-                trusted = false;
-                diagnostics.push(
-                    `CCSS semantic snapshot ${standards.provenance.revision} does not match pinned ${provenance.revision}; `
-                    + 'the source update is ignored until update:standards-source --apply.'
-                );
-            }
-        } catch (error) {
-            trusted = false;
-            standards = null;
-            diagnostics.push(`CCSS semantic provenance is unavailable: ${error instanceof Error ? error.message : error}`);
-        }
-    }
-    return {standards, ontology, trusted, diagnostics};
+    return {ontology, trusted, diagnostics};
 }
 
-export function datasetExternalSemanticIssues(projectRoot: string, specName: string): string[] {
-    return externalSemanticContext(projectRoot, specName).diagnostics;
+export function datasetOntologySemanticIssues(projectRoot: string): string[] {
+    return ontologySemanticContext(projectRoot).diagnostics;
 }
 
 function pairSharedPaths(projectRoot: string): string[] {
@@ -365,7 +337,6 @@ export function buildDatasetManifest(options: {
     reuseImageIdentityFrom?: DependencyGraphSnapshot;
     datasetSnapshot?: DatasetSnapshot;
     semanticSnapshots?: {
-        standards?: StandardsSemanticSnapshot | null;
         ontology?: OntologySemanticSnapshot | null;
     };
 }): DatasetManifestBuild {
@@ -386,19 +357,15 @@ export function buildDatasetManifest(options: {
     } = options;
     const tuples = preparedTuples ?? matchTargets(targets, generators, views).tuples;
     const ontology = ontologyDependency(projectRoot);
-    const externalSemantics = semanticSnapshots
+    const ontologySemantics = semanticSnapshots
         ? {
-            standards: semanticSnapshots.standards ?? null,
             ontology: semanticSnapshots.ontology ?? null,
             trusted: true,
             diagnostics: []
         }
-        : externalSemanticContext(projectRoot, specName);
-    const ontologyIndex = externalSemantics.ontology
-        ? new OntologySemanticIndex(externalSemantics.ontology)
-        : null;
-    const standardsIndex = externalSemantics.standards
-        ? new StandardsSemanticIndex(externalSemantics.standards)
+        : ontologySemanticContext(projectRoot);
+    const ontologyIndex = ontologySemantics.ontology
+        ? new OntologySemanticIndex(ontologySemantics.ontology)
         : null;
     const nodes = new Map<string, DependencyNode>();
     const rows = readDatasetRows(datasetSnapshot);
@@ -424,7 +391,6 @@ export function buildDatasetManifest(options: {
         else pairsByTarget.set(tuple.target.id, [key]);
     }
 
-    const standardNodeByTarget = new Map<string, string>();
     const targetNodeByTarget = new Map<string, string>();
     const ontologyNodeByName = new Map<string, string>();
     const ontologyDefinitionNodeByName = new Map<string, string>();
@@ -434,7 +400,7 @@ export function buildDatasetManifest(options: {
         if (existing) return existing;
         const id = nodeId('ontology', name);
         ontologyNodeByName.set(name, id);
-        const semantic = externalSemantics.ontology?.entities[ontologyIri(rawLabel)];
+        const semantic = ontologySemantics.ontology?.entities[ontologyIri(rawLabel)];
         addNode(nodes, {
             id,
             kind: 'ontology-entity',
@@ -450,7 +416,7 @@ export function buildDatasetManifest(options: {
         const entityId = ontologyNode(rawLabel);
         const id = nodeId('ontology-definition', name);
         ontologyDefinitionNodeByName.set(name, id);
-        const semantic = externalSemantics.ontology?.entities[ontologyIri(rawLabel)];
+        const semantic = ontologySemantics.ontology?.entities[ontologyIri(rawLabel)];
         addNode(nodes, {
             id,
             kind: 'ontology-entity',
@@ -460,7 +426,7 @@ export function buildDatasetManifest(options: {
         return id;
     };
     const ontologyDependencies = (labels: readonly string[], includeDefinitions = false): string[] => {
-        if (!ontologyIndex || !externalSemantics.ontology) {
+        if (!ontologyIndex || !ontologySemantics.ontology) {
             const dependencies: string[] = [];
             const visited = new Set<string>();
             const queue = [...labels];
@@ -497,7 +463,7 @@ export function buildDatasetManifest(options: {
         const closure = ontologyIndex.closure(labels);
         const dependencies = closure.entities.map(ontologyNode);
         for (const key of closure.relations) {
-            const relation = externalSemantics.ontology.relations[key];
+            const relation = ontologySemantics.ontology.relations[key];
             if (!relation) continue;
             const sourceId = ontologyNode(relation.source);
             const targetId = ontologyNode(relation.target);
@@ -516,22 +482,8 @@ export function buildDatasetManifest(options: {
         return radixSortUtf8([...new Set(dependencies)]);
     };
     for (const target of targets) {
-        const resolvedStandard = standardsIndex?.standardForTarget(target.id) ?? null;
-        const standardRecord = resolvedStandard
-            ? externalSemantics.standards?.records[`standard:${resolvedStandard}`]
-            : undefined;
-        const standardIdentity = resolvedStandard ?? target.id;
-        const standardId = nodeId('standard', `${specName}:${standardIdentity}`);
         const targetId = nodeId('target', `${specName}:${target.id}`);
-        standardNodeByTarget.set(target.id, standardId);
         targetNodeByTarget.set(target.id, targetId);
-        addNode(nodes, {
-            id: standardId,
-            kind: 'external-standard',
-            input_hash: standardRecord?.input_hash
-                ?? digestIdentity({spec: specName, record: standardIdentity}),
-            dependencies: []
-        });
         addNode(nodes, {
             id: targetId,
             kind: 'competency-target',
@@ -540,7 +492,7 @@ export function buildDatasetManifest(options: {
                 labels: radixSortUtf8([...target.labels]),
                 explanation: target.explanation ?? null
             }),
-            dependencies: [standardId, ...ontologyDependencies(target.labels)]
+            dependencies: ontologyDependencies(target.labels)
         });
     }
 
@@ -759,7 +711,6 @@ export function buildDatasetManifest(options: {
         const assetId = nodeId('asset-index', `${specName}:${target.id}`);
         const coverageId = nodeId('coverage', `${specName}:${target.id}`);
         const targetId = targetNodeByTarget.get(target.id)!;
-        const standardId = standardNodeByTarget.get(target.id)!;
         const pairIds = radixSortUtf8([...(pairsByTarget.get(target.id) ?? [])]
             .map(key => nodeId('pair', key))
             .filter(id => nodes.has(id)));
@@ -774,7 +725,7 @@ export function buildDatasetManifest(options: {
             id: coverageId,
             kind: 'coverage-record',
             input_hash: digestIdentity({producer: 'coverage-v1', target: target.id}),
-            dependencies: [standardId, targetId, assetId, ...pairIds]
+            dependencies: [targetId, assetId, ...pairIds]
         });
     }
 
@@ -787,12 +738,11 @@ export function buildDatasetManifest(options: {
         entries,
         dependency_graph: createDependencyGraphSnapshot([...nodes.values()]),
         source_stats: sourceIndex.stats(),
-        external_semantics: {
-            trusted: externalSemantics.trusted,
-            diagnostics: externalSemantics.diagnostics,
-            standards_records: Object.keys(externalSemantics.standards?.records ?? {}).length,
-            ontology_entities: Object.keys(externalSemantics.ontology?.entities ?? {}).length,
-            ontology_relations: Object.keys(externalSemantics.ontology?.relations ?? {}).length
+        ontology_semantics: {
+            trusted: ontologySemantics.trusted,
+            diagnostics: ontologySemantics.diagnostics,
+            ontology_entities: Object.keys(ontologySemantics.ontology?.entities ?? {}).length,
+            ontology_relations: Object.keys(ontologySemantics.ontology?.relations ?? {}).length
         }
     };
 }

@@ -9,21 +9,19 @@ import {
     coverageRepositoryDigest,
     resolveOntologyProvenance
 } from './coverage-identity.ts';
-import type {StandardsProvenance} from './standards-source.ts';
+import {canonicalStandardsIdentity} from './standards-source.ts';
+import type {CanonicalStandardsIdentity} from './standards-source.ts';
 
-const standards: StandardsProvenance = {
-    provider: 'huggingface',
-    repository: 'example/standards',
-    revision: 'a'.repeat(40),
-    files: [
-        {path: 'standards.jsonl', sha256: 'b'.repeat(64), bytes: 12},
-        {path: 'domain_groups.json', sha256: 'c'.repeat(64), bytes: 34}
-    ]
+const standards: CanonicalStandardsIdentity = {
+    path: 'public/coverage/ccss-tree.json',
+    sha256: 'b'.repeat(64),
+    bytes: 46
 };
 
 function fixture() {
     const root = mkdtempSync(resolve(tmpdir(), 'edugraph-coverage-identity-'));
     mkdirSync(resolve(root, 'src'));
+    mkdirSync(resolve(root, 'public', 'coverage'), {recursive: true});
     writeFileSync(resolve(root, 'src', 'coverage.ts'), 'coverage');
     writeFileSync(resolve(root, 'src', 'coverage.test.ts'), 'test');
     writeFileSync(resolve(root, 'package.json'), JSON.stringify({
@@ -40,6 +38,10 @@ function fixture() {
     }));
     writeFileSync(resolve(root, 'tsconfig.json'), '{}');
     writeFileSync(resolve(root, 'vite.config.js'), 'export default {}');
+    writeFileSync(resolve(root, 'public', 'coverage', 'ccss-tree.json'), JSON.stringify({
+        tree: {},
+        standardsMap: {}
+    }));
     return root;
 }
 
@@ -57,8 +59,8 @@ describe('coverage input identity', () => {
                 knownAssetsSha256: 'e'.repeat(64)
             });
             expect(identity).toMatchObject({
-                schema_version: 2,
-                producer_epoch: 'standards-coverage-v2',
+                schema_version: 3,
+                producer_epoch: 'standards-coverage-v3',
                 repository: {ref: 'main', sha: 'd'.repeat(40)},
                 standards,
                 ontology: {
@@ -101,7 +103,7 @@ describe('coverage input identity', () => {
                 sourceSha: 'e'.repeat(40),
                 standards
             });
-            expect(coverageInputKey(differentCommit)).not.toBe(coverageInputKey(main));
+            expect(coverageInputKey(differentCommit)).toBe(coverageInputKey(main));
         } finally {
             rmSync(root, {recursive: true, force: true});
         }
@@ -182,14 +184,15 @@ describe('coverage input identity', () => {
     it('rejects stale or internally inconsistent coverage manifests', () => {
         const root = fixture();
         try {
+            const canonicalStandards = canonicalStandardsIdentity(root);
             const inputs = buildCoverageInputIdentity({
                 projectRoot: root,
                 sourceRef: 'working-tree',
                 sourceSha: 'working-tree',
-                standards
+                standards: canonicalStandards
             });
             const manifest = {
-                schema_version: 3,
+                schema_version: 4,
                 channel: 'preview' as const,
                 source_ref: 'working-tree',
                 source_sha: 'working-tree',
@@ -198,18 +201,17 @@ describe('coverage input identity', () => {
                 core_input_key: coverageInputKey(inputs),
                 inputs
             };
-            expect(coverageManifestIdentityIssues({projectRoot: root, manifest, standards})).toEqual([]);
+            expect(coverageManifestIdentityIssues({projectRoot: root, manifest})).toEqual([]);
 
             writeFileSync(resolve(root, 'src', 'coverage.ts'), 'stale now');
-            expect(coverageManifestIdentityIssues({projectRoot: root, manifest, standards}))
+            expect(coverageManifestIdentityIssues({projectRoot: root, manifest}))
                 .toEqual(expect.arrayContaining([
                     expect.stringContaining('does not match current inputs'),
                     expect.stringContaining('repository content digest')
                 ]));
             expect(coverageManifestIdentityIssues({
                 projectRoot: root,
-                manifest: {...manifest, core_input_key: '0'.repeat(64)},
-                standards
+                manifest: {...manifest, core_input_key: '0'.repeat(64)}
             })).toEqual(expect.arrayContaining([
                 expect.stringContaining('does not match recorded inputs')
             ]));

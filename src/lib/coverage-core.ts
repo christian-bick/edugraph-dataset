@@ -24,8 +24,8 @@ import type {
     BacklogTask
 } from '../standards-explorer/types.ts';
 
-export const COVERAGE_CORE_SCHEMA_VERSION = 1;
-export const COVERAGE_CORE_MANIFEST_SCHEMA_VERSION = 1;
+export const COVERAGE_CORE_SCHEMA_VERSION = 2;
+export const COVERAGE_CORE_MANIFEST_SCHEMA_VERSION = 2;
 
 export type CoverageCoreMetadata = Omit<CoverageMetadata, 'generated_at'>;
 

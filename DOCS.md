@@ -83,9 +83,9 @@ ambiguous and are not silently converted into a concrete unit.
 A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
 
 *   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` canonically writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples, and generation never depends on a host Vite server.
-*   **Every generated standard has a complete dependency manifest.** `manifest.json` persists a versioned, planner-epoch-bound graph from source files, generator and view modules, targets, ontology and standards records, and matched pairs through shards, images, VQA records, asset-index records, and coverage records. Each pair entry separates render nodes (pair, image, shard) from validation nodes (VQA), alongside its effective input hash, aggregate content/task hash, sample counts, and renderer identity. A definition-only ontology change can therefore invalidate VQA without scheduling pixel generation. Direct edges explain every invalidation; image nodes record byte digests and sizes. `checklist.md` participates only in VQA-node dependencies, while generated explorer files, favicons, and unrelated public files are absent from render dependencies. Public icons and shared render code remain explicit inputs. A request-local source index discovers and digests overlapping generator/view dependencies once.
+*   **Every generated standard has a complete dependency manifest.** `manifest.json` persists a versioned, planner-epoch-bound graph from source files, generator and view modules, targets, ontology entities and relations, and matched pairs through shards, images, VQA records, asset-index records, and coverage records. Each pair entry separates render nodes (pair, image, shard) from validation nodes (VQA), alongside its effective input hash, aggregate content/task hash, sample counts, and renderer identity. A definition-only ontology change can therefore invalidate VQA without scheduling pixel generation. Direct edges explain every invalidation; image nodes record byte digests and sizes. `checklist.md` participates only in VQA-node dependencies, while the canonical standards tree, generated explorer files, favicons, and unrelated public files are absent from dataset dependencies. Public icons and shared render code remain explicit inputs. A request-local source index discovers and digests overlapping generator/view dependencies once.
 *   **Dependency changes are planned before scoped rendering.** The planner compares content hashes and direct edges, then follows reverse edges from both the previous and current graph so removals and rewiring cannot strand stale dependents. It emits an affected-only topological schedule, reusable content-addressed outputs, compact causal predecessor links, and structured linear-work counts. A planner-epoch change is a clean miss. If an explicit generator/view scope omits an affected pair, generation stops before Chromium starts and reports the first causal path instead of silently widening the operation or publishing stale siblings.
-*   **External semantics are record-addressed.** `config/external-semantics/ccss.json` binds the pinned CCSS bytes to stable standard/domain-group hashes; `ontology.json` binds the exact package to entity definitions, individual typed relations, and the CCSS usage closure. Targets depend on their resolved standard record. Targets, generators, and views depend on the transitive `partOf` closure of only their labels; VQA records additionally depend on definitions of the labels they claim. Raw ontology package bytes are excluded from the shared runtime-dependency hash, so a version change cannot bypass this semantic graph and force a global rebuild.
+*   **Ontology semantics are record-addressed.** `config/external-semantics/ontology.json` binds the exact package to entity definitions, individual typed relations, and the CCSS usage closure. Targets, generators, and views depend on the transitive `partOf` closure of only their labels; VQA records additionally depend on definitions of the labels they claim. Raw ontology package bytes are excluded from the shared runtime-dependency hash, so a version change cannot bypass this semantic graph and force a global rebuild. CCSS membership is already authored in `src/spec/ccss/`; the canonical standards tree under `public/coverage/` documents that coverage in the explorer and is not a dataset-generation input.
 *   **The union dataset (`out/dataset/`) is derived**, built by `npm run merge:dataset` from every non-isolated standard in precedence order. It is the released artifact; treat it as a build output, never as a source of truth — the merge replaces it wholesale. Its public rows are compact projections containing only `file_name`, `tags`, and `solution`; operational identity remains in the source standard datasets.
 *   **The merge deduplicates identical tasks across standards.** The first standard in merge order keeps the exercise and later ones report it as duplicate overlap. Same-split dedup is scoped per view by `task_fingerprint`, the hash of problem data plus the deterministically resolved view configuration. The validation split separately excludes any `content_fingerprint` already in train, even when its configured task differs, so mathematical payloads cannot leak across the split boundary. Generation applies the same two rules within a standard (scoped per module, since a view has only one generator). Question and solution are independent draws of one exercise, so exercises are kept or dropped whole. Operational target associations from a dropped exercise transfer only to a retained sample with the same task fingerprint; a data-only validation collision is excluded but cannot represent the other task. The public row and image remain singular, while the asset index can expose a reused sample under every exact target label set it actually evidences.
 *   **Isolated specs never merge.** `test` declares `isolated = true` in `src/spec/test/_module.ts`; it is a fast prototyping, debugging, smoke-test and retained-regression workspace, not a second curriculum or exhaustive capability matrix. Every generator keeps at least one generatable target-view path there. Files prefixed with `_` describe the module rather than contributing targets, so the target loaders skip them.
@@ -202,7 +202,7 @@ Playwright image, so changing the host runtime does not change the renderer iden
 
 ### `src/scripts/map-standards.ts`
 * **Execution**: `npm run generate:standards-explorer -- [--output-dir=<path>] [--channel=latest|preview] [--source-ref=<ref>] [--source-sha=<sha>]` (alias: `npm run map:standards`)
-* **Function**: Regenerates the standards tree, dataset coverage metadata, and authored-package
+* **Function**: Reads the tracked canonical standards tree, regenerates dataset coverage metadata and authored-package
   task backlog consumed by the standards explorer, plus the snapshot manifest. Implementation
   and ontology tasks are grouped by stable package id. It shares the coverage builder with
   the local refresh script so development and deployment semantics cannot drift. The default output is
@@ -213,20 +213,17 @@ Playwright image, so changing the host runtime does not change the renderer iden
   targets with standards through a shared prefix index. The final structured work-counter line
   reports physical source reads, index builds, posting traversal, candidate checks, and standard
   lookup work for complexity regression diagnosis.
-* **External-input identity**: CCSS source identity is locked in
-  `config/external-sources.json` by full Hugging Face commit, per-file SHA-256 digest, and byte
-  length. The mapper verifies `temp/common-core/` against that contract and downloads only the
-  immutable revision when a file is absent or corrupt; it never falls back to `main`. Unpinned
-  upstream changes are deliberately ignored until `update:standards-source` reports an ID-level
-  delta and `--apply` advances the lock and semantic snapshot together. Ontology package updates
-  likewise require `update:ontology-source`, which reports entity-, relation-, and usage-level
-  changes before `--apply`. Coverage manifest schema 3 records that standards provenance, the exact `edugraph-ts`
-  package resolution and lockfile integrity, repository ref/SHA/content digest, selection options,
-  and optional asset-index digest. Its `core_input_key` excludes only projection metadata—the
-  channel, human-readable source ref, and generation timestamp—so Preview from `main` and Latest
-  from a tag at the same commit resolve to the same core. `validate:coverage` reconstructs the
-  expected key from the current checkout and pinned inputs and fails closed on any missing, stale,
-  internally inconsistent, or unverifiable identity.
+* **Input identity**: Routine coverage reads `public/coverage/ccss-tree.json` and records its exact
+  path, byte length, and SHA-256 digest; it performs no network access and retains no raw standards
+  cache. Ontology package updates require `update:ontology-source`, which reports entity-,
+  relation-, and usage-level changes before `--apply`. Coverage manifest schema 4 contains input
+  schema 3: the canonical tree identity, exact `edugraph-ts` package provenance, the used ontology
+  semantic hash, repository ref/SHA/content digest, selection options, and optional asset-index
+  digest. The `core_input_key` uses repository content rather than the Git commit and excludes
+  projection metadata—the channel, human-readable source ref, source SHA, package version, and
+  generation timestamp. Equivalent content from `main` and a release tag therefore resolves to one
+  core. `validate:coverage` reconstructs the expected key from the current checkout and fails closed
+  on any missing, stale, internally inconsistent, or unverifiable identity.
 * **Immutable core and projections**: `src/lib/coverage-core.ts` stores the standards tree and
   timestamp-free coverage data under `temp/coverage-core/<core_input_key>/`. A completion manifest
   records the exact core byte length and SHA-256 digest; readers verify both before reuse, and an
@@ -237,15 +234,16 @@ Playwright image, so changing the host runtime does not change the renderer iden
   projection still records the current ontology version. On a hit the mapper performs no
   generator/view discovery or target matching. The
   `.github/actions/coverage-core` action resolves the key before generation and restores/saves the
-  exact directory together with its verified pinned CCSS files, allowing main validation, release,
-  and deployment to share the one computation without prefix or newest-entry fallback.
+  exact directory, allowing main validation, release, and deployment to share the one computation
+  without prefix or newest-entry fallback.
 
 ### `src/scripts/resolve-coverage-key.ts`
 * **Execution**: `npm run resolve:coverage-key -- [--source-ref=<ref>] [--source-sha=<sha>] [--grade=<grade>] [--exclude-hs] [--known-assets=<path>] [--github-output=<path>]`.
-* **Function**: Computes the complete core identity without performing coverage matching or
-  materializing the external snapshot. CI uses `--github-output` to expose `core_input_key` before
-  the cache restore step. The later mapper still verifies every restored standards/core byte before
-  it is admitted; key resolution alone never establishes cache validity.
+* **Function**: Computes the complete core identity from repository content, the tracked canonical
+  tree, used ontology semantics, and selection inputs without performing coverage matching. CI uses
+  `--github-output` to expose `core_input_key` before the cache restore step. The later mapper still
+  verifies every restored core byte before it is admitted; key resolution alone never establishes
+  cache validity.
 
 ### `src/scripts/refresh-local-explorer.ts`
 * **Execution**: Invoked by the local explorer's **Refresh local data** action.
@@ -256,7 +254,7 @@ Playwright image, so changing the host runtime does not change the renderer iden
   dataset reads, and canonical generation can atomically replace a standard dataset while
   an older snapshot remains open in the browser. Refresh retains the newest two completed
   snapshots and best-effort removes older versions after open response streams have closed.
-  It builds its standards tree from the same verified pinned source as release/deployment coverage,
+  It reads the same tracked canonical standards tree as release/deployment coverage,
   includes the selected local asset-index digest in the coverage input identity, and reuses the
   same immutable core store when that complete input is unchanged. PNGs are admitted once into
   the content-addressed `.assets/` pool and hard-linked into later snapshots (with a copy fallback
@@ -376,11 +374,11 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/check-affected.ts`
 *   **Execution**: `npm run check:affected [-- --base=<git-ref>] [--files=<comma-separated-paths>] [--plan-only]`; use `--full` to delegate explicitly to `npm run check`.
-*   **Function**: The development delta gate. It combines committed changes from `--base`, working-tree changes, and untracked files; maps each changed root to type checking, Vitest's related-test graph, generator/view contracts, label checks, documentation, scoped generator coverage, external semantic verification, and the affected production spec modules; and prints every causal file before executing. A changed `generator.ts` gets a fresh related-test coverage summary and is the only generator subjected to thresholds. Module implementation edits do not trigger unrelated matching checks, while capability/spec and shared matching changes do. Accepted ontology semantics trigger matching/label checks and all production specs; a standards snapshot triggers CCSS only. All affected production specs are validated in one process against one cached generator/view catalog. A requested full check is never an implicit fallback.
+*   **Function**: The development delta gate. It combines committed changes from `--base`, working-tree changes, and untracked files; maps each changed root to type checking, Vitest's related-test graph, generator/view contracts, label checks, documentation, scoped generator coverage, ontology semantic verification, and the affected production spec modules; and prints every causal file before executing. A changed `generator.ts` gets a fresh related-test coverage summary and is the only generator subjected to thresholds. Module implementation edits do not trigger unrelated matching checks, while capability/spec and shared matching changes do. Accepted ontology semantics trigger matching/label checks and all production specs. The explorer-only canonical standards tree does not trigger dataset validation; its update command validates the conversion delta directly. All affected production specs are validated in one process against one cached generator/view catalog. A requested full check is never an implicit fallback.
 
 ### `src/scripts/update-standards-source.ts`
 *   **Execution**: `npm run update:standards-source -- --revision=<40-character-sha> [--source-dir=<path>] [--apply]`.
-*   **Function**: Fetches only the named immutable CCSS revision (or reads an explicit offline source directory), verifies and hashes both files, and compares every standard/domain-group record against the committed baseline by stable ID. The default is a read-only report with linear work counters. `--apply` writes the semantic snapshot first and advances `config/external-sources.json` last as the authoritative commit point.
+*   **Function**: Fetches only the named immutable CCSS revision (or reads an explicit offline source directory), converts its raw standards and domain groups into the explorer's canonical format, and compares the result with `public/coverage/ccss-tree.json` by stable standard ID and tree digest. The default is a read-only report with linear work counters. `--apply` atomically replaces the tracked canonical tree. The raw source, its revision, and its transport metadata are updater inputs only; routine generation, validation, and coverage never consume them.
 
 ### `src/scripts/update-ontology-source.ts`
 *   **Execution**: `npm run update:ontology-source [-- --apply]` after intentionally updating the exact `edugraph-ts` package and lock.
@@ -388,7 +386,7 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/validate-external-semantics.ts`
 *   **Execution**: `npm run check:external-semantics`.
-*   **Function**: Verifies semantic snapshot integrity, standards-lock provenance, exact ontology package provenance and content, and the presence of the accepted CCSS usage closure. The ontology update operation recomputes that closure from current catalogs and targets whenever the package advances; ordinary source changes remain independently keyed by repository content. A mismatch fails closed and directs the engineer to the explicit update operation; generation reports the same condition as an ignored external update and does not render against mixed state.
+*   **Function**: Verifies ontology snapshot integrity, exact package provenance and content, and the presence of the accepted CCSS usage closure. The ontology update operation recomputes that closure from current catalogs and targets whenever the package advances; ordinary source changes remain independently keyed by repository content. A mismatch fails closed and directs the engineer to the explicit ontology update operation; generation reports the same condition as an ignored external update and does not render against mixed state.
 
 ### `src/scripts/validate-docs.ts`
 *   **Execution**: `npm run check:docs`

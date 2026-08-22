@@ -10,7 +10,7 @@ import {
     buildDatasetManifest,
     datasetGlobalSourceHash,
     datasetFreshnessIssues,
-    datasetExternalSemanticIssues,
+    datasetOntologySemanticIssues,
     datasetRendererIssues,
     updateDatasetManifest
 } from './dataset-manifest.ts';
@@ -64,10 +64,9 @@ function build(
         entries,
         dependency_graph: graph,
         source_stats: {directories_read: 0, files_read: 0, bytes_read: 0},
-        external_semantics: {
+        ontology_semantics: {
             trusted: true,
             diagnostics: [],
-            standards_records: 0,
             ontology_entities: 0,
             ontology_relations: 0
         }
@@ -146,13 +145,13 @@ describe('external semantic generation gate', () => {
         const snapshotPath = resolve(projectRoot, 'config', 'external-semantics', 'ontology.json');
         try {
             writeFileSync(snapshotPath, JSON.stringify(buildOntologySemanticSnapshot({provenance})));
-            expect(datasetExternalSemanticIssues(projectRoot, 'test')).toEqual([]);
+            expect(datasetOntologySemanticIssues(projectRoot)).toEqual([]);
 
             writeFileSync(snapshotPath, JSON.stringify(buildOntologySemanticSnapshot({
                 provenance,
                 entityRelations: {}
             })));
-            expect(datasetExternalSemanticIssues(projectRoot, 'test')).toEqual([
+            expect(datasetOntologySemanticIssues(projectRoot)).toEqual([
                 expect.stringContaining('Installed ontology semantics differ')
             ]);
         } finally {

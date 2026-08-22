@@ -4,28 +4,11 @@ import {Ability, Area, ENTITY_RELATIONS, Scope} from 'edugraph-ts';
 import type {DescriptorRelations} from 'edugraph-ts';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import type {OntologyProvenance} from './coverage-identity.ts';
-import type {StandardsProvenance} from './standards-source.ts';
-import type {StandardNode} from '../standards-explorer/types.ts';
 
 export const EXTERNAL_SEMANTICS_SCHEMA_VERSION = 1;
-export const STANDARDS_SEMANTICS_PATH = ['config', 'external-semantics', 'ccss.json'] as const;
 export const ONTOLOGY_SEMANTICS_PATH = ['config', 'external-semantics', 'ontology.json'] as const;
 
 export type OntologyDimension = 'Area' | 'Scope' | 'Ability' | 'unknown';
-
-export interface StandardsSemanticRecord {
-    kind: 'standard' | 'domain-group';
-    input_hash: string;
-}
-
-export interface StandardsSemanticSnapshot {
-    schema_version: number;
-    kind: 'standards';
-    complete: true;
-    provenance: StandardsProvenance;
-    records: Record<string, StandardsSemanticRecord>;
-    semantic_sha256: string;
-}
 
 export interface OntologySemanticEntity {
     dimension: OntologyDimension;
@@ -64,14 +47,6 @@ export interface SemanticChanges {
     removed: string[];
 }
 
-export interface StandardsSemanticDelta {
-    kind: 'standards';
-    from: string | null;
-    to: string;
-    records: SemanticChanges;
-    work: {previous_records: number; current_records: number; records_compared: number};
-}
-
 export interface OntologySemanticDelta {
     kind: 'ontology';
     from: string | null;
@@ -105,20 +80,6 @@ function canonical(value: unknown): JsonValue {
 
 const snapshotHash = (value: unknown): string => digestIdentity(canonical(value));
 
-function completedStandardsSnapshot(
-    provenance: StandardsProvenance,
-    records: Record<string, StandardsSemanticRecord>
-): StandardsSemanticSnapshot {
-    const body = {
-        schema_version: EXTERNAL_SEMANTICS_SCHEMA_VERSION,
-        kind: 'standards' as const,
-        complete: true as const,
-        provenance,
-        records
-    };
-    return {...body, semantic_sha256: snapshotHash(body)};
-}
-
 function completedOntologySnapshot(
     provenance: OntologyProvenance,
     entities: Record<string, OntologySemanticEntity>,
@@ -135,30 +96,6 @@ function completedOntologySnapshot(
         usages
     };
     return {...body, semantic_sha256: snapshotHash(body)};
-}
-
-export function buildStandardsSemanticSnapshot(options: {
-    standards: readonly StandardNode[];
-    domainGroups: Readonly<Record<string, unknown>>;
-    provenance: StandardsProvenance;
-}): StandardsSemanticSnapshot {
-    const records = new Map<string, StandardsSemanticRecord>();
-    for (const standard of options.standards) {
-        const id = `standard:${standard.id}`;
-        if (records.has(id)) throw new Error(`Duplicate external standard id: ${standard.id}.`);
-        records.set(id, {kind: 'standard', input_hash: snapshotHash(standard)});
-    }
-    for (const name of Object.keys(options.domainGroups)) {
-        const id = `domain-group:${name}`;
-        records.set(id, {
-            kind: 'domain-group',
-            input_hash: snapshotHash(options.domainGroups[name])
-        });
-    }
-    return completedStandardsSnapshot(
-        options.provenance,
-        Object.fromEntries(radixSortUtf8([...records.keys()]).map(id => [id, records.get(id)!]))
-    );
 }
 
 const dimensions = new Map<string, OntologyDimension>([
@@ -261,24 +198,6 @@ function changes<T>(
     };
 }
 
-export function diffStandardsSemantics(
-    previous: StandardsSemanticSnapshot | null,
-    current: StandardsSemanticSnapshot
-): StandardsSemanticDelta {
-    const delta = changes(previous?.records ?? {}, current.records, record => record.input_hash);
-    return {
-        kind: 'standards',
-        from: previous?.provenance.revision ?? null,
-        to: current.provenance.revision,
-        records: {added: delta.added, changed: delta.changed, removed: delta.removed},
-        work: {
-            previous_records: Object.keys(previous?.records ?? {}).length,
-            current_records: Object.keys(current.records).length,
-            records_compared: delta.compared
-        }
-    };
-}
-
 export function diffOntologySemantics(
     previous: OntologySemanticSnapshot | null,
     current: OntologySemanticSnapshot
@@ -318,25 +237,12 @@ export function diffOntologySemantics(
     };
 }
 
-function assertSnapshotHash(snapshot: StandardsSemanticSnapshot | OntologySemanticSnapshot): void {
+function assertSnapshotHash(snapshot: OntologySemanticSnapshot): void {
     const {semantic_sha256: recorded, ...body} = snapshot;
     const expected = snapshotHash(body);
     if (recorded !== expected) {
         throw new Error(`${snapshot.kind} semantic snapshot failed integrity verification.`);
     }
-}
-
-export function readStandardsSemanticSnapshot(projectRoot: string): StandardsSemanticSnapshot | null {
-    const path = resolve(projectRoot, ...STANDARDS_SEMANTICS_PATH);
-    if (!existsSync(path)) return null;
-    const snapshot = JSON.parse(readFileSync(path, 'utf-8')) as StandardsSemanticSnapshot;
-    if (snapshot.schema_version !== EXTERNAL_SEMANTICS_SCHEMA_VERSION
-        || snapshot.kind !== 'standards'
-        || snapshot.complete !== true) {
-        throw new Error(`Unsupported or incomplete standards semantic snapshot at ${path}.`);
-    }
-    assertSnapshotHash(snapshot);
-    return snapshot;
 }
 
 export function readOntologySemanticSnapshot(projectRoot: string): OntologySemanticSnapshot | null {
@@ -361,13 +267,6 @@ export function ontologySemanticUsageHash(projectRoot: string, name: string): st
         );
     }
     return usage.input_sha256;
-}
-
-export function standardsSemanticProvenanceMatches(
-    snapshot: StandardsSemanticSnapshot,
-    provenance: StandardsProvenance
-): boolean {
-    return snapshotHash(snapshot.provenance) === snapshotHash(provenance);
 }
 
 export function ontologySemanticProvenanceMatches(
@@ -418,46 +317,5 @@ export class OntologySemanticIndex {
             relations: radixSortUtf8([...relations]),
             work: {entities_visited: entities.size, relations_visited: relationVisits}
         };
-    }
-}
-
-interface StandardIdIndexNode {
-    children: Map<string, StandardIdIndexNode>;
-    standardId?: string;
-}
-
-/** Resolves authored target prefixes to the exact pinned standard record without rescanning IDs. */
-export class StandardsSemanticIndex {
-    private readonly root: StandardIdIndexNode = {children: new Map()};
-
-    constructor(readonly snapshot: StandardsSemanticSnapshot) {
-        for (const recordId of Object.keys(snapshot.records)) {
-            if (!recordId.startsWith('standard:')) continue;
-            const standardId = recordId.slice('standard:'.length);
-            let node = this.root;
-            for (const character of standardId) {
-                let child = node.children.get(character);
-                if (!child) {
-                    child = {children: new Map()};
-                    node.children.set(character, child);
-                }
-                node = child;
-            }
-            node.standardId = standardId;
-        }
-    }
-
-    standardForTarget(targetId: string): string | null {
-        let node = this.root;
-        let matched: string | null = null;
-        for (let index = 0; index < targetId.length; index++) {
-            const child = node.children.get(targetId[index]);
-            if (!child) break;
-            node = child;
-            if (node.standardId && (index === targetId.length - 1 || targetId[index + 1] === '-')) {
-                matched = node.standardId;
-            }
-        }
-        return matched;
     }
 }

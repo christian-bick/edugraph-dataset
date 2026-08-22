@@ -6,11 +6,14 @@ import {
     hashPackageStateWithoutDependency,
     hashSourceFiles
 } from './content-identity.ts';
-import type {StandardsProvenance} from './standards-source.ts';
+import {
+    canonicalStandardsIdentity,
+    type CanonicalStandardsIdentity
+} from './standards-source.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
 
-export const COVERAGE_INPUT_SCHEMA_VERSION = 2;
-export const COVERAGE_PRODUCER_EPOCH = 'standards-coverage-v2';
+export const COVERAGE_INPUT_SCHEMA_VERSION = 3;
+export const COVERAGE_PRODUCER_EPOCH = 'standards-coverage-v3';
 
 export interface RepositoryProvenance {
     ref: string;
@@ -36,7 +39,7 @@ export interface CoverageInputIdentity {
     schema_version: number;
     producer_epoch: string;
     repository: RepositoryProvenance;
-    standards: StandardsProvenance;
+    standards: CanonicalStandardsIdentity;
     ontology: OntologyProvenance & {semantic_usage_sha256: string};
     selection: CoverageSelectionIdentity;
 }
@@ -44,8 +47,8 @@ export interface CoverageInputIdentity {
 export interface CoverageCoreInputIdentity {
     schema_version: number;
     producer_epoch: string;
-    repository: Omit<RepositoryProvenance, 'ref'>;
-    standards: StandardsProvenance;
+    repository: Pick<RepositoryProvenance, 'content_sha256'>;
+    standards: CanonicalStandardsIdentity;
     ontology: Pick<OntologyProvenance, 'package'> & {semantic_usage_sha256: string};
     selection: CoverageSelectionIdentity;
 }
@@ -100,7 +103,7 @@ export function buildCoverageInputIdentity(options: {
     projectRoot: string;
     sourceRef: string;
     sourceSha: string;
-    standards: StandardsProvenance;
+    standards?: CanonicalStandardsIdentity;
     ontology?: OntologyProvenance;
     ontologyUsageSha256?: string;
     grade?: string;
@@ -115,7 +118,7 @@ export function buildCoverageInputIdentity(options: {
             sha: options.sourceSha,
             content_sha256: coverageRepositoryDigest(options.projectRoot)
         },
-        standards: options.standards,
+        standards: options.standards ?? canonicalStandardsIdentity(options.projectRoot),
         ontology: {
             ...(options.ontology ?? resolveOntologyProvenance(options.projectRoot)),
             semantic_usage_sha256: options.ontologyUsageSha256
@@ -136,7 +139,6 @@ export function toCoverageCoreInputIdentity(
         schema_version: identity.schema_version,
         producer_epoch: identity.producer_epoch,
         repository: {
-            sha: identity.repository.sha,
             content_sha256: identity.repository.content_sha256
         },
         standards: identity.standards,
@@ -194,13 +196,12 @@ export function repositoryProvenanceIssues(
 export function coverageManifestIdentityIssues(options: {
     projectRoot: string;
     manifest: CoverageManifest;
-    standards: StandardsProvenance;
     ontology?: OntologyProvenance;
     ontologyUsageSha256?: string;
 }): string[] {
-    const {projectRoot, manifest, standards} = options;
+    const {projectRoot, manifest} = options;
     const issues: string[] = [];
-    if (manifest.schema_version !== 3) {
+    if (manifest.schema_version !== 4) {
         return [`Unsupported coverage manifest schema: ${manifest.schema_version}.`];
     }
     if (!manifest.inputs || manifest.inputs.schema_version !== COVERAGE_INPUT_SCHEMA_VERSION) {
@@ -226,7 +227,6 @@ export function coverageManifestIdentityIssues(options: {
         projectRoot,
         sourceRef: manifest.source_ref,
         sourceSha: manifest.source_sha,
-        standards,
         ontology: options.ontology,
         ontologyUsageSha256: options.ontologyUsageSha256,
         grade: manifest.inputs.selection.grade ?? undefined,

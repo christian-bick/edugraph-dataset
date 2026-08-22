@@ -21,7 +21,6 @@ export const DEPENDENCY_NODE_KINDS = [
     'competency-target',
     'ontology-entity',
     'ontology-relation',
-    'external-standard',
     'dataset-shard',
     'image',
     'vqa-record',

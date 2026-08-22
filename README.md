@@ -169,27 +169,29 @@ union dataset and loaded directly from the tag-pinned Hugging Face release. A lo
 builds the equivalent index and copies its selected images into the immutable development
 snapshot; no union-merge command is needed.
 
-Coverage generation consumes the CCSS metadata revision locked in
-`config/external-sources.json`. Cached source files are accepted only when their SHA-256 digest and
-length match the lock; mutable upstream changes are ignored until an explicit source update records
-their delta. Every generated coverage manifest records the exact standards, ontology package, and
+Coverage generation consumes the canonical CCSS documentation tree tracked at
+`public/coverage/ccss-tree.json`; routine local, CI, and release workflows never download raw
+standards data. Every coverage manifest records the exact tree digest, used ontology semantics, and
 repository-content identity used to build it.
-External updates are accepted only through dry-run-first semantic update commands:
+Source and ontology updates are explicit, dry-run-first operations:
 ```bash
-# Compare a candidate immutable CCSS revision by stable standard ID; add --apply to accept it.
+# Convert a candidate immutable CCSS revision into the tracked tree; add --apply to accept it.
 npm run update:standards-source -- --revision=<40-character-commit>
 
 # After intentionally updating the pinned edugraph-ts dependency, inspect entity/relation changes.
 npm run update:ontology-source
 ```
-`--apply` writes integrity-checked semantic baselines under `config/external-semantics/`.
-Generation and repository checks refuse a package or standards lock that does not match those
-baselines. Ontology invalidation follows only the entity definitions and `partOf` closure actually
+The standards updater fetches only the explicitly named revision, reports the ID-level delta, and
+replaces the tracked canonical tree only with `--apply`. It does not alter dataset generation:
+authored targets under `src/spec/` are the sole standards-side dataset input. The ontology updater
+writes the integrity-checked baseline under `config/external-semantics/`, and generation refuses a
+package that does not match it. Ontology invalidation follows only the entity definitions and
+`partOf` closure actually
 used by a target, generator, view, or VQA record; unrelated ontology changes do not churn images or
 validation results.
 The timestamp-free coverage computation is stored immutably under its complete input key. Local,
 CI, release, and deployment runs reuse that core and generate channel-specific metadata as a cheap
-projection when the underlying source commit and semantic inputs are identical.
+projection when the effective coverage inputs are identical.
 
 On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
 images. Released uses the immutable published asset index; Local uses PNGs served from

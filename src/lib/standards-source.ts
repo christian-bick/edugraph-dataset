@@ -1,11 +1,4 @@
-import {
-    existsSync,
-    mkdirSync,
-    readFileSync,
-    renameSync,
-    rmSync,
-    writeFileSync
-} from 'node:fs';
+import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {digestContent, type ContentDigest} from './content-identity.ts';
 import type {
@@ -18,137 +11,33 @@ import type {
     TreeStandard
 } from '../standards-explorer/types.ts';
 
-export const EXTERNAL_SOURCE_LOCK_SCHEMA_VERSION = 1;
 export const CCSS_SOURCE_FILES = ['standards.jsonl', 'domain_groups.json'] as const;
+export const CCSS_SOURCE_REPOSITORY = 'allenai/achieve-the-core';
+export const CANONICAL_STANDARDS_TREE_PATH = ['public', 'coverage', 'ccss-tree.json'] as const;
 
-type CcssSourceFile = typeof CCSS_SOURCE_FILES[number];
-
-export interface PinnedFileIdentity extends ContentDigest {
-    path: CcssSourceFile;
+export interface CanonicalStandardsIdentity extends ContentDigest {
+    path: 'public/coverage/ccss-tree.json';
 }
 
-export interface StandardsProvenance {
-    provider: 'huggingface';
-    repository: string;
-    revision: string;
-    files: PinnedFileIdentity[];
+export function canonicalStandardsTreePath(projectRoot: string): string {
+    return resolve(projectRoot, ...CANONICAL_STANDARDS_TREE_PATH);
 }
 
-interface LockedFile {
-    sha256: string;
-    bytes: number;
-}
-
-interface ExternalSourceLock {
-    schema_version: number;
-    standards: {
-        ccss: {
-            provider: string;
-            repository: string;
-            revision: string;
-            files: Record<string, LockedFile>;
-        };
-    };
-}
-
-export interface PinnedStandardsSource {
-    tree: StandardsTreeData;
-    provenance: StandardsProvenance;
-    paths: Record<CcssSourceFile, string>;
-    standards: StandardNode[];
-    domainGroups: Record<string, {description: string; domain_cats?: string[]}>;
-}
-
-export interface LoadPinnedStandardsOptions {
-    projectRoot: string;
-    cacheDir?: string;
-    fetchFile?: (url: string) => Promise<Buffer>;
-    report?: (message: string) => void;
-}
-
-const isSha256 = (value: unknown): value is string =>
-    typeof value === 'string' && /^[a-f\d]{64}$/i.test(value);
-
-const isRevision = (value: unknown): value is string =>
-    typeof value === 'string' && /^[a-f\d]{40}$/i.test(value);
-
-export function readPinnedStandardsProvenance(projectRoot: string): StandardsProvenance {
-    const lockPath = resolve(projectRoot, 'config', 'external-sources.json');
-    if (!existsSync(lockPath)) {
-        throw new Error(`Pinned external-source lock is missing: ${lockPath}. External updates are ignored.`);
+export function readCanonicalStandardsTree(projectRoot: string): StandardsTreeData {
+    const path = canonicalStandardsTreePath(projectRoot);
+    const parsed = JSON.parse(readFileSync(path, 'utf-8')) as Partial<StandardsTreeData>;
+    if (!parsed.tree || typeof parsed.tree !== 'object'
+        || !parsed.standardsMap || typeof parsed.standardsMap !== 'object') {
+        throw new Error(`Canonical standards tree is invalid: ${path}.`);
     }
-    const lock = JSON.parse(readFileSync(lockPath, 'utf-8')) as Partial<ExternalSourceLock>;
-    if (lock.schema_version !== EXTERNAL_SOURCE_LOCK_SCHEMA_VERSION) {
-        throw new Error(`Unsupported external-source lock schema: ${lock.schema_version ?? 'missing'}.`);
-    }
-    const source = lock.standards?.ccss;
-    if (!source
-        || source.provider !== 'huggingface'
-        || typeof source.repository !== 'string'
-        || !/^[\w.-]+\/[\w.-]+$/.test(source.repository)
-        || !isRevision(source.revision)) {
-        throw new Error('The CCSS source must name a Hugging Face repository and an immutable 40-character revision.');
-    }
+    return parsed as StandardsTreeData;
+}
 
-    const files = CCSS_SOURCE_FILES.map(path => {
-        const file = source.files?.[path];
-        if (!file || !isSha256(file.sha256) || !Number.isSafeInteger(file.bytes) || file.bytes < 0) {
-            throw new Error(`The pinned CCSS source has no valid digest contract for ${path}.`);
-        }
-        return {path, sha256: file.sha256.toLowerCase(), bytes: file.bytes};
-    });
+export function canonicalStandardsIdentity(projectRoot: string): CanonicalStandardsIdentity {
     return {
-        provider: 'huggingface',
-        repository: source.repository,
-        revision: source.revision.toLowerCase(),
-        files
+        path: 'public/coverage/ccss-tree.json',
+        ...digestContent(readFileSync(canonicalStandardsTreePath(projectRoot)))
     };
-}
-
-function exactFileMatches(path: string, expected: PinnedFileIdentity): boolean {
-    if (!existsSync(path)) return false;
-    const actual = digestContent(readFileSync(path));
-    return actual.bytes === expected.bytes && actual.sha256 === expected.sha256;
-}
-
-const defaultFetchFile = async (url: string): Promise<Buffer> => {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);
-    return Buffer.from(await response.arrayBuffer());
-};
-
-async function materializePinnedFile(options: {
-    destination: string;
-    sourceUrl: string;
-    expected: PinnedFileIdentity;
-    fetchFile: (url: string) => Promise<Buffer>;
-}): Promise<void> {
-    const {destination, sourceUrl, expected, fetchFile} = options;
-    if (exactFileMatches(destination, expected)) return;
-
-    const content = await fetchFile(sourceUrl).catch(error => {
-        throw new Error(
-            `Pinned external input ${expected.path} is unavailable at revision ${sourceUrl}. `
-            + `The previously pinned revision remains authoritative; no mutable upstream fallback was used.`,
-            {cause: error}
-        );
-    });
-    const actual = digestContent(content);
-    if (actual.bytes !== expected.bytes || actual.sha256 !== expected.sha256) {
-        throw new Error(
-            `Pinned external input ${expected.path} failed integrity verification: `
-            + `expected ${expected.sha256}/${expected.bytes}, received ${actual.sha256}/${actual.bytes}.`
-        );
-    }
-
-    const partial = `${destination}.partial-${process.pid}`;
-    writeFileSync(partial, content);
-    try {
-        rmSync(destination, {force: true});
-        renameSync(partial, destination);
-    } finally {
-        rmSync(partial, {force: true});
-    }
 }
 
 const getDomainCategory = (id: string): string => {
@@ -309,44 +198,4 @@ export function buildStandardsTree(
         }
     }
     return {tree, standardsMap};
-}
-
-export async function loadPinnedStandardsSource(
-    options: LoadPinnedStandardsOptions
-): Promise<PinnedStandardsSource> {
-    const provenance = readPinnedStandardsProvenance(options.projectRoot);
-    const cacheDir = options.cacheDir ?? resolve(options.projectRoot, 'temp', 'common-core');
-    const fetchFile = options.fetchFile ?? defaultFetchFile;
-    mkdirSync(cacheDir, {recursive: true});
-
-    const paths = Object.fromEntries(CCSS_SOURCE_FILES.map(path => [path, resolve(cacheDir, path)])) as
-        Record<CcssSourceFile, string>;
-    for (const expected of provenance.files) {
-        const sourceUrl = `https://huggingface.co/datasets/${provenance.repository}`
-            + `/resolve/${provenance.revision}/${expected.path}`;
-        await materializePinnedFile({
-            destination: paths[expected.path],
-            sourceUrl,
-            expected,
-            fetchFile
-        });
-    }
-
-    options.report?.(
-        `Using pinned CCSS source ${provenance.repository}@${provenance.revision}; `
-        + 'unpinned upstream changes are ignored until an explicit delta update advances the lock.'
-    );
-    const standards = readFileSync(paths['standards.jsonl'], 'utf-8')
-        .split('\n')
-        .filter(Boolean)
-        .map(line => JSON.parse(line) as StandardNode);
-    const domainGroups = JSON.parse(readFileSync(paths['domain_groups.json'], 'utf-8')) as
-        Record<string, {description: string; domain_cats?: string[]}>;
-    return {
-        tree: buildStandardsTree(standards, domainGroups),
-        provenance,
-        paths,
-        standards,
-        domainGroups
-    };
 }

@@ -11,7 +11,7 @@ import {
   readCoverageCoreArtifact
 } from '../lib/coverage-core.ts';
 import {digestIdentity} from '../lib/content-identity.ts';
-import {loadPinnedStandardsSource} from '../lib/standards-source.ts';
+import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
 import {ontologySemanticUsageHash} from '../lib/external-semantics.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
 
@@ -57,28 +57,21 @@ async function runValidation() {
     printReport(result);
     return;
   }
-  const pinnedStandards = await loadPinnedStandardsSource({
-    projectRoot: PROJECT_ROOT,
-    report: message => console.log(`[External input] ${message}`)
-  });
-  const standardsPath = pinnedStandards.paths['standards.jsonl'];
-
   // 2. Load data
   const coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
   const treeData = JSON.parse(fs.readFileSync(TREE_PATH, 'utf-8'));
   const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) as CoverageManifest;
-  const standardsLines = fs.readFileSync(standardsPath, 'utf-8').split('\n');
+  const canonicalTree = readCanonicalStandardsTree(PROJECT_ROOT);
 
   const identityIssues = coverageManifestIdentityIssues({
     projectRoot: PROJECT_ROOT,
     manifest,
-    standards: pinnedStandards.provenance,
     ontology: resolveOntologyProvenance(PROJECT_ROOT),
     ontologyUsageSha256: ontologySemanticUsageHash(PROJECT_ROOT, 'ccss')
   });
   result.errors.push(...identityIssues);
   if (identityIssues.length > 0) result.passed = false;
-  if (manifest.schema_version === 3 && manifest.inputs && manifest.core_input_key) {
+  if (manifest.schema_version === 4 && manifest.inputs && manifest.core_input_key) {
     const core = readCoverageCoreArtifact({
       root: CORE_CACHE_DIR,
       key: manifest.core_input_key,
@@ -121,6 +114,10 @@ async function runValidation() {
     result.errors.push('Coverage manifest and data ontology versions do not match.');
     result.passed = false;
   }
+  if (digestIdentity(treeData) !== digestIdentity(canonicalTree)) {
+    result.errors.push('Coverage tree does not match the tracked canonical standards tree.');
+    result.passed = false;
+  }
 
   // Populate rdfNodes dynamically from edugraph-ts enums
   const rdfNodes: Record<string, string> = {};
@@ -135,15 +132,9 @@ async function runValidation() {
   }
   console.log(`[Ontology] Loaded ${Object.keys(rdfNodes).length} valid concepts from edugraph-ts.`);
 
-  // Parse Standards.jsonl
-  const standardsMap: Record<string, any> = {};
-  for (const line of standardsLines) {
-    if (!line.trim()) continue;
-    const std = JSON.parse(line);
-    standardsMap[std.id] = std;
-  }
+  const standardsMap: Record<string, any> = canonicalTree.standardsMap;
 
-  // Find actual leaf nodes in standards.jsonl
+  // Find actual leaf nodes in the tracked canonical tree.
   const actualLeavesMap: Record<string, any> = {};
   for (const std of Object.values(standardsMap)) {
     if (std.children && std.children.length === 0) {
@@ -210,9 +201,9 @@ async function runValidation() {
 
   // --- CHECK 3: Standards and Ontology Integrity inside coverage ---
   for (const [id, std] of Object.entries(coverage) as any) {
-    // A. Verify standard ID exists in standards.jsonl
+    // A. Verify standard ID exists in the tracked canonical tree.
     if (!standardsMap[id]) {
-      result.errors.push(`[Standard ID Error] Standard ID "${id}" in coverage file does not exist in standards.jsonl`);
+      result.errors.push(`[Standard ID Error] Standard ID "${id}" in coverage file does not exist in the canonical standards tree`);
       result.passed = false;
     } else if (standardsMap[id].children && standardsMap[id].children.length > 0) {
       result.errors.push(`[Leaf Node Error] Standard ID "${id}" is evaluated in coverage, but it is not a leaf node (has children)`);
@@ -341,14 +332,14 @@ async function runValidation() {
       result.passed = false;
     }
 
-    // G. Verify cluster_id exists in standards.jsonl
+    // G. Verify cluster_id exists in the tracked canonical tree.
     const clusterId = std.cluster_id;
     if (clusterId && clusterId !== 'Other') {
       if (!standardsMap[clusterId]) {
         result.errors.push(`[Cluster ID Error] Standard "${id}" references non-existent cluster ID "${clusterId}"`);
         result.passed = false;
       } else if (standardsMap[clusterId].level.toLowerCase() !== 'cluster') {
-        result.warnings.push(`[Cluster Level Warning] Standard "${id}" references cluster "${clusterId}", but its level in standards.jsonl is "${standardsMap[clusterId].level}"`);
+        result.warnings.push(`[Cluster Level Warning] Standard "${id}" references cluster "${clusterId}", but its canonical-tree level is "${standardsMap[clusterId].level}"`);
       }
     }
   }

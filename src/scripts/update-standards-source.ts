@@ -1,17 +1,13 @@
 import {mkdirSync, readFileSync, renameSync, rmSync, writeFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {digestContent} from '../lib/content-identity.ts';
+import {digestIdentity, radixSortUtf8} from '../lib/content-identity.ts';
 import {
-    buildStandardsSemanticSnapshot,
-    diffStandardsSemantics,
-    readStandardsSemanticSnapshot,
-    STANDARDS_SEMANTICS_PATH
-} from '../lib/external-semantics.ts';
-import {
+    buildStandardsTree,
+    canonicalStandardsTreePath,
     CCSS_SOURCE_FILES,
-    readPinnedStandardsProvenance,
-    type StandardsProvenance
+    CCSS_SOURCE_REPOSITORY,
+    readCanonicalStandardsTree
 } from '../lib/standards-source.ts';
 import type {StandardNode} from '../standards-explorer/types.ts';
 
@@ -22,6 +18,7 @@ const option = (name: string): string | undefined =>
 const apply = args.includes('--apply');
 const revision = option('revision');
 const sourceDir = option('source-dir');
+const repository = option('repository') ?? CCSS_SOURCE_REPOSITORY;
 
 function isRevision(value: string | undefined): value is string {
     return typeof value === 'string' && /^[a-f\d]{40}$/i.test(value);
@@ -51,61 +48,54 @@ const summarize = (name: string, values: readonly string[]): void => {
 };
 
 async function main(): Promise<void> {
-    const pinned = readPinnedStandardsProvenance(projectRoot);
-    const candidateRevision = revision ?? pinned.revision;
-    if (!isRevision(candidateRevision)) {
+    if (!isRevision(revision)) {
         throw new Error('Usage: npm run update:standards-source -- --revision=<40-char-sha> [--apply].');
     }
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repository)) throw new Error(`Invalid source repository: ${repository}.`);
 
     const contents = new Map<string, Buffer>();
     for (const path of CCSS_SOURCE_FILES) {
         const bytes = sourceDir
             ? readFileSync(resolve(projectRoot, sourceDir, path))
             : await fetchBytes(
-                `https://huggingface.co/datasets/${pinned.repository}/resolve/${candidateRevision}/${path}`
+                `https://huggingface.co/datasets/${repository}/resolve/${revision}/${path}`
             );
         contents.set(path, bytes);
     }
-    const provenance: StandardsProvenance = {
-        provider: 'huggingface',
-        repository: pinned.repository,
-        revision: candidateRevision.toLowerCase(),
-        files: CCSS_SOURCE_FILES.map(path => ({path, ...digestContent(contents.get(path)!)}))
-    };
     const standards = contents.get('standards.jsonl')!.toString('utf-8')
         .split('\n')
         .filter(Boolean)
         .map(line => JSON.parse(line) as StandardNode);
     const domainGroups = JSON.parse(contents.get('domain_groups.json')!.toString('utf-8')) as
-        Record<string, unknown>;
-    const candidate = buildStandardsSemanticSnapshot({standards, domainGroups, provenance});
-    const previous = readStandardsSemanticSnapshot(projectRoot);
-    const delta = diffStandardsSemantics(previous, candidate);
+        Record<string, {description: string; domain_cats?: string[]}>;
+    const candidate = buildStandardsTree(standards, domainGroups);
+    const previous = readCanonicalStandardsTree(projectRoot);
+    const previousIds = new Set(Object.keys(previous.standardsMap));
+    const candidateIds = new Set(Object.keys(candidate.standardsMap));
+    const added = radixSortUtf8([...candidateIds].filter(id => !previousIds.has(id)));
+    const removed = radixSortUtf8([...previousIds].filter(id => !candidateIds.has(id)));
+    const changed = radixSortUtf8([...candidateIds].filter(id =>
+        previousIds.has(id)
+        && digestIdentity(previous.standardsMap[id]) !== digestIdentity(candidate.standardsMap[id])));
+    const treeChanged = digestIdentity(previous.tree) !== digestIdentity(candidate.tree);
 
-    console.log(`Standards semantic delta ${delta.from ?? '<none>'} -> ${delta.to}`);
-    summarize('Added records', delta.records.added);
-    summarize('Changed records', delta.records.changed);
-    summarize('Removed records', delta.records.removed);
-    console.log(`[Work counters] ${JSON.stringify(delta.work)}`);
+    console.log(`Canonical standards-tree delta from ${repository}@${revision.toLowerCase()}`);
+    summarize('Added standards', added);
+    summarize('Changed standards', changed);
+    summarize('Removed standards', removed);
+    console.log(`Tree/documentation structure changed: ${treeChanged ? 'yes' : 'no'}`);
+    console.log(`[Work counters] ${JSON.stringify({
+        previous_standards: previousIds.size,
+        current_standards: candidateIds.size,
+        records_compared: previousIds.size + candidateIds.size
+    })}`);
     if (!apply) {
-        console.log('Dry run only. Pass --apply to advance the pinned lock and semantic snapshot.');
+        console.log('Dry run only. Pass --apply to replace the tracked canonical standards tree.');
         return;
     }
 
-    const lockPath = resolve(projectRoot, 'config', 'external-sources.json');
-    const lock = JSON.parse(readFileSync(lockPath, 'utf-8')) as {
-        standards: {ccss: {revision: string; files: Record<string, {sha256: string; bytes: number}>}};
-    };
-    lock.standards.ccss.revision = provenance.revision;
-    lock.standards.ccss.files = Object.fromEntries(provenance.files.map(file => [file.path, {
-        sha256: file.sha256,
-        bytes: file.bytes
-    }]));
-
-    // The semantic snapshot is staged first; the lock is the authoritative commit point.
-    writeJsonAtomic(resolve(projectRoot, ...STANDARDS_SEMANTICS_PATH), candidate);
-    writeJsonAtomic(lockPath, lock);
-    console.log(`Applied standards update to ${provenance.revision}.`);
+    writeJsonAtomic(canonicalStandardsTreePath(projectRoot), candidate);
+    console.log(`Applied canonical standards-tree update from ${repository}@${revision.toLowerCase()}.`);
 }
 
 main().catch(error => {

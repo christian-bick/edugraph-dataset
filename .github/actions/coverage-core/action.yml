@@ -35,6 +35,4 @@ runs:
       with:
         path: |
           temp/coverage-core/${{ steps.identity.outputs.core_input_key }}
-          temp/common-core/standards.jsonl
-          temp/common-core/domain_groups.json
-        key: coverage-core-v1-${{ steps.identity.outputs.core_input_key }}
+        key: coverage-core-v2-${{ steps.identity.outputs.core_input_key }}

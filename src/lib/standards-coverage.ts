@@ -544,7 +544,7 @@ export function buildCoverageManifest({
     generatedAt
 }: BuildCoverageManifestOptions): CoverageManifest {
     return {
-        schema_version: 3,
+        schema_version: 4,
         channel,
         source_ref: inputs.repository.ref,
         source_sha: inputs.repository.sha,

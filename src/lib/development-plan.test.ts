@@ -53,14 +53,21 @@ describe('development validation plan', () => {
 
     it('routes accepted ontology semantics through external, matching, and production-spec checks', () => {
         const plan = planDevelopmentValidation(
-            [
-                'config/external-semantics/ontology.json',
-                'config/external-semantics/ccss.json'
-            ],
+            ['config/external-semantics/ontology.json'],
             specs,
             ['ccss']
         );
         expect(plan.checks).toEqual(['generator-view-specs', 'labels', 'external-semantics']);
         expect(plan.specs).toEqual(['ccss']);
+    });
+
+    it('does not treat the explorer-only canonical tree as a dataset input', () => {
+        const plan = planDevelopmentValidation(
+            ['public/coverage/ccss-tree.json'],
+            specs,
+            ['ccss']
+        );
+        expect(plan.checks).toEqual([]);
+        expect(plan.specs).toEqual([]);
     });
 });
