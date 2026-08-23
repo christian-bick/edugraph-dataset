@@ -913,10 +913,12 @@ export type WritingProblem =
 /** Shared payload accepted by the number-line view for representation and pair arithmetic. */
 export type NumberLineProblem = WritingProblem | ArithmeticPairProblem;
 
+export type TimeIntervalSeconds = 1 | 60 | 1800 | 3600;
+
 export type TimeProblem = {
-    time: string;
-    interval: number;
-    period?: 'a.m.' | 'p.m.';
+    secondsSinceMidnight: number;
+    intervalSeconds: TimeIntervalSeconds;
+    period?: 'ante-meridiem' | 'post-meridiem';
 };
 
 export type ElapsedTimeProblem = {
@@ -2427,7 +2429,9 @@ export interface ViewTypeMap {
     'numbers-read-standard': WritingProblem;
     'numbers-write-name': WritingProblem;
     'time-analog': TimeProblem;
+    'time-analog-construction': TimeProblem;
     'time-digital': TimeProblem;
+    'time-digital-construction': TimeProblem;
     'time-elapsed': ElapsedTimeProblem;
     'time-interval-word-problem': TimeIntervalWordProblem;
     'measure-liquid-volume': MassVolumeMeasurementProblem;

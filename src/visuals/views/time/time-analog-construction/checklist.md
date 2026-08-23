@@ -1,0 +1,4 @@
+- **Identity:** A numeral time is the source and an analog clock with missing hands is the response representation.
+- **Question:** Keeps the complete numeral time and any day period visible while withholding both clock hands.
+- **Solution:** Preserves the source time and reveals correctly angled hour and minute hands, plus a second hand when the interval requires it.
+- **Clock:** Uses 60 legible minute marks with stronger five-minute positions; numeric hour labels are intentionally unnecessary.

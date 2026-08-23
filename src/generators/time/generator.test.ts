@@ -3,6 +3,12 @@ import {TimeGenerator} from './generator.ts';
 import {setSeed} from '../../lib/random.ts';
 import {Scope} from 'edugraph-ts';
 
+const timeParts = (secondsSinceMidnight: number) => ({
+    hour: Math.floor(secondsSinceMidnight / 3600),
+    minute: Math.floor(secondsSinceMidnight % 3600 / 60),
+    second: secondsSinceMidnight % 60
+});
+
 describe('TimeGenerator', () => {
     let generator: TimeGenerator;
 
@@ -26,12 +32,13 @@ describe('TimeGenerator', () => {
             configs.forEach(config => {
                 const stub = generator.generate(config);
                 expect(stub).not.toBeNull();
-                expect(stub!.data.time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+                expect(stub!.data.secondsSinceMidnight).toBeGreaterThanOrEqual(0);
+                expect(stub!.data.secondsSinceMidnight).toBeLessThan(24 * 3600);
                 let expectedInterval = 3600;
                 if (config.intervalLabel === Scope.SecondIntervals) expectedInterval = 1;
                 else if (config.intervalLabel === Scope.MinuteIntervals) expectedInterval = 60;
                 else if (config.intervalLabel === Scope.HalfHourIntervals) expectedInterval = 1800;
-                expect(stub!.data.interval).toBe(expectedInterval);
+                expect(stub!.data.intervalSeconds).toBe(expectedInterval);
             });
         });
 
@@ -57,7 +64,7 @@ describe('TimeGenerator', () => {
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(config);
                 if (stub) {
-                    const [h, m, s] = stub.data.time.split(':').map(Number);
+                    const {hour: h, minute: m, second: s} = timeParts(stub.data.secondsSinceMidnight);
                     expect(m).toBe(0);
                     expect(s).toBe(0);
                     expect(h).toBeLessThan(24);
@@ -76,7 +83,7 @@ describe('TimeGenerator', () => {
             for (let i = 0; i < 50; i++) {
                 const stub = generator.generate(config);
                 if (stub) {
-                    const [, m, s] = stub.data.time.split(':').map(Number);
+                    const {minute: m, second: s} = timeParts(stub.data.secondsSinceMidnight);
                     expect(m).toBe(30);
                     expect(s).toBe(0);
                 }
@@ -94,7 +101,7 @@ describe('TimeGenerator', () => {
             for (let i = 0; i < 100; i++) {
                 const stub = generator.generate(config);
                 if (stub) {
-                    const [h, m, s] = stub.data.time.split(':').map(Number);
+                    const {hour: h, minute: m, second: s} = timeParts(stub.data.secondsSinceMidnight);
                     expect(h).toBeLessThan(24);
                     expect(m).toBeLessThan(60);
                     expect(s).toBeLessThan(60);
@@ -117,7 +124,7 @@ describe('TimeGenerator', () => {
                     isAnteMeridiem: false,
                     isPostMeridiem: false
                 });
-                const components = stub!.data.time.split(':').map(Number);
+                const components = Object.values(timeParts(stub!.data.secondsSinceMidnight));
 
                 expect(components.some((component: number) => component === 0)).toBe(true);
             }
@@ -133,7 +140,7 @@ describe('TimeGenerator', () => {
                     isAnteMeridiem: false,
                     isPostMeridiem: false
                 });
-                const [, minute, second] = stub!.data.time.split(':').map(Number);
+                const {minute, second} = timeParts(stub!.data.secondsSinceMidnight);
                 expect(minute % 5).toBe(0);
                 expect(minute).toBeGreaterThan(0);
                 expect(second).toBe(0);
@@ -141,8 +148,8 @@ describe('TimeGenerator', () => {
         });
 
         it.each([
-            [true, false, 'a.m.', 0, 11],
-            [false, true, 'p.m.', 12, 23]
+            [true, false, 'ante-meridiem', 0, 11],
+            [false, true, 'post-meridiem', 12, 23]
         ] as const)('should constrain the requested day period', (isAnteMeridiem, isPostMeridiem, period, minHour, maxHour) => {
             for (let seed = 0; seed < 50; seed++) {
                 setSeed(seed);
@@ -153,7 +160,7 @@ describe('TimeGenerator', () => {
                     isAnteMeridiem,
                     isPostMeridiem
                 });
-                const hour = Number(stub!.data.time.slice(0, 2));
+                const {hour} = timeParts(stub!.data.secondsSinceMidnight);
                 expect(hour).toBeGreaterThanOrEqual(minHour);
                 expect(hour).toBeLessThanOrEqual(maxHour);
                 expect(stub!.data.period).toBe(period);

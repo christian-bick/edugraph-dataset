@@ -3,16 +3,18 @@ import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
-    viewId: 'time-digital',
+    viewId: 'time-digital-construction',
     generalLabels: [
         Scope.DigitalClock,
         Scope.ArabicNumerals,
         Ability.Formalization,
-        Ability.VisualReception,
-        Ability.Interpretation
+        Ability.TextualReception,
+        Ability.VisualArticulation
     ]
 };
 
-export const TimeDigitalViewSchema = {} as const;
+export const TimeDigitalConstructionViewSchema = {} as const;
 
-export type TimeDigitalViewConfig = ConfigFromSchema<typeof TimeDigitalViewSchema>;
+export type TimeDigitalConstructionViewConfig = ConfigFromSchema<
+    typeof TimeDigitalConstructionViewSchema
+>;

@@ -1,3 +1,4 @@
-- **Identity:** The task has one unambiguous direction: either construct a digital display from a textual time clue, or read a completed digital display into a written time response.
-- **Modes:** Construction Question Mode keeps the clue visible and withholds the display digits; reading Question Mode keeps the completed display visible and withholds the written response. Solution Mode reveals the withheld conclusion in its original context.
-- **Essential specifics:** When supplied, the literal `a.m.` or `p.m.` remains attached to the represented time in both modes.
+- **Identity:** A completed digital display is the source and written numeral time is the response.
+- **Question:** Keeps the completed display visible while withholding the written response.
+- **Solution:** Preserves the display and reveals the correctly formatted written time.
+- **Day period:** When supplied, the literal `a.m.` or `p.m.` remains attached to the represented time.

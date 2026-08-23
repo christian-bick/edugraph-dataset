@@ -1,0 +1,4 @@
+- **Identity:** A textual time clue is the source and a digital display is the response representation.
+- **Question:** Keeps the complete clue and any day period visible while withholding the display digits.
+- **Solution:** Preserves the clue and reveals the correctly formatted digital time.
+- **Precision:** The displayed fields match the requested hour, half-hour, minute, or second interval.

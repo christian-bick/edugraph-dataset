@@ -203,8 +203,8 @@ known defects:
 | `place-value-arithmetic-model` | 2 | **Migrated:** block procedure understanding and model-to-written-method formalization now use invariant leaves over one shared renderer; the paired generator payload is language-neutral. |
 | `area-perimeter-comparison` | 2 | **Migrated:** classification and constrained rectangle construction now use separate invariant leaves over one shared renderer; the paired generator payload is language-neutral. |
 | `shape-classify-attributes` | 2 | Is recognition observable support within the same classification task? |
-| `time-analog` | 3 | Which modes change task identity rather than presentation support? |
-| `time-digital` | 2 | Are reading and construction distinct learner actions? |
+| `time-analog` | 3 | **Migrated:** analog reading/telling modes share one invariant reading leaf, while clock-hand construction is a separate invariant leaf over the shared analog renderer. |
+| `time-digital` | 2 | **Migrated:** digital reading and display construction are separate invariant leaves over the shared digital renderer; both consume the neutral time payload. |
 
 The table records resolved configurations, not a lower bound on required leaf views. Each result
 must follow rendered task evidence, implementation branch structure, and checklist coherence;

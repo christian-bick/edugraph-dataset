@@ -1,20 +1,20 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
-import {TimeProblem} from "../../types/problems.ts";
+import {TimeIntervalSeconds, TimeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
 import {TimeGeneratorConfig, TimeGeneratorSchema} from "./spec.ts";
 import {GeneratorValidationError, validateConfigFields} from "../../lib/errors.ts";
 
-function resolveInterval(intervalLabel: TimeGeneratorConfig['intervalLabel']): number {
+function resolveInterval(intervalLabel: TimeGeneratorConfig['intervalLabel']): TimeIntervalSeconds {
     switch (intervalLabel) {
         case Scope.SecondIntervals:
             return 1;
         case Scope.MinuteIntervals:
             return 60;
         case Scope.HalfHourIntervals:
-            return 30 * 60;
+            return 1800;
         case Scope.HourIntervals:
-            return 60 * 60;
+            return 3600;
         default:
             throw new GeneratorValidationError('time', `Unsupported interval label: ${intervalLabel}`);
     }
@@ -70,19 +70,12 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
             totalSeconds -= totalSeconds % 60;
         }
 
-        const hour = Math.floor(totalSeconds / 3600);
-        const remainingSeconds = totalSeconds % 3600;
-        const minute = Math.floor(remainingSeconds / 60);
-        const second = remainingSeconds % 60;
-
-        const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
-
         return {
             data: {
-                time: timeStr,
-                interval,
-                ...(config.isAnteMeridiem ? {period: 'a.m.' as const} : {}),
-                ...(config.isPostMeridiem ? {period: 'p.m.' as const} : {})
+                secondsSinceMidnight: totalSeconds,
+                intervalSeconds: interval,
+                ...(config.isAnteMeridiem ? {period: 'ante-meridiem' as const} : {}),
+                ...(config.isPostMeridiem ? {period: 'post-meridiem' as const} : {})
             }
         };
     }

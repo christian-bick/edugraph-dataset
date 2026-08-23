@@ -1,11 +1,23 @@
-export function formatTime(time: string, interval: number): string {
-    const [h, m, s] = time.split(':').map(Number);
-    const hour12 = h % 12 || 12;
-
-    if (interval >= 60) {
-        return `${hour12}:${String(m).padStart(2, '0')}`;
+const partsFromTime = (time: number | string) => {
+    if (typeof time === 'string') {
+        const [hour, minute, second] = time.split(':').map(Number);
+        return {hour, minute, second};
     }
-    return `${hour12}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return {
+        hour: Math.floor(time / 3600),
+        minute: Math.floor(time % 3600 / 60),
+        second: time % 60
+    };
+};
+
+export function formatTime(secondsSinceMidnight: number, intervalSeconds: number): string {
+    const {hour, minute, second} = partsFromTime(secondsSinceMidnight);
+    const hour12 = hour % 12 || 12;
+
+    if (intervalSeconds >= 60) {
+        return `${hour12}:${String(minute).padStart(2, '0')}`;
+    }
+    return `${hour12}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
 }
 
 export interface ClockAngles {
@@ -14,11 +26,11 @@ export interface ClockAngles {
     secondAngle: number;
 }
 
-export function getClockAngles(time: string): ClockAngles {
-    const [h, m, s] = time.split(':').map(Number);
-    const hourAngle = (h % 12 + m / 60) * 30;
-    const minuteAngle = (m + s / 60) * 6;
-    const secondAngle = s * 6;
+export function getClockAngles(time: number | string): ClockAngles {
+    const {hour, minute, second} = partsFromTime(time);
+    const hourAngle = (hour % 12 + minute / 60) * 30;
+    const minuteAngle = (minute + second / 60) * 6;
+    const secondAngle = second * 6;
     return { hourAngle, minuteAngle, secondAngle };
 }
 

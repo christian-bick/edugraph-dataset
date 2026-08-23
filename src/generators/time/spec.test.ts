@@ -4,6 +4,12 @@ import {setSeed} from '../../lib/random.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../lib/utils.ts';
 
+const timeParts = (secondsSinceMidnight: number) => ({
+    hour: Math.floor(secondsSinceMidnight / 3600),
+    minute: Math.floor(secondsSinceMidnight % 3600 / 60),
+    second: secondsSinceMidnight % 60
+});
+
 describe('TimeGenerator Spec Integration', () => {
     let generator: TimeGenerator;
 
@@ -19,9 +25,9 @@ describe('TimeGenerator Spec Integration', () => {
                 Scope.HourIntervals
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.interval).toBe(3600);
+            expect(stub!.data.intervalSeconds).toBe(3600);
             
-            const [, m, s] = stub!.data.time.split(':').map(Number);
+            const {minute: m, second: s} = timeParts(stub!.data.secondsSinceMidnight);
             expect(m).toBe(0);
             expect(s).toBe(0);
         }
@@ -34,9 +40,9 @@ describe('TimeGenerator Spec Integration', () => {
                 Scope.MinuteIntervals
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.interval).toBe(60);
+            expect(stub!.data.intervalSeconds).toBe(60);
             
-            const [, , s] = stub!.data.time.split(':').map(Number);
+            const {second: s} = timeParts(stub!.data.secondsSinceMidnight);
             expect(s).toBe(0);
         }
     });
@@ -48,9 +54,9 @@ describe('TimeGenerator Spec Integration', () => {
                 Scope.HalfHourIntervals
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.interval).toBe(1800);
+            expect(stub!.data.intervalSeconds).toBe(1800);
 
-            const [, m, s] = stub!.data.time.split(':').map(Number);
+            const {minute: m, second: s} = timeParts(stub!.data.secondsSinceMidnight);
             expect([0, 30]).toContain(m);
             expect(s).toBe(0);
         }
@@ -63,7 +69,7 @@ describe('TimeGenerator Spec Integration', () => {
                 Scope.SecondIntervals
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.interval).toBe(1);
+            expect(stub!.data.intervalSeconds).toBe(1);
         }
     });
 
@@ -75,7 +81,7 @@ describe('TimeGenerator Spec Integration', () => {
                 Scope.SecondIntervals,
                 Scope.NumbersWithZero
             ]);
-            const components = stub!.data.time.split(':').map(Number);
+            const components = Object.values(timeParts(stub!.data.secondsSinceMidnight));
 
             expect(stub).not.toBeNull();
             expect(stub!.tags).toContain(Scope.NumbersWithZero);
@@ -84,8 +90,8 @@ describe('TimeGenerator Spec Integration', () => {
     });
 
     it.each([
-        [Scope.AnteMeridiem, 'a.m.', 0, 11],
-        [Scope.PostMeridiem, 'p.m.', 12, 23]
+        [Scope.AnteMeridiem, 'ante-meridiem', 0, 11],
+        [Scope.PostMeridiem, 'post-meridiem', 12, 23]
     ] as const)('should resolve five-minute %s times', (periodLabel, expectedPeriod, minHour, maxHour) => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
@@ -95,7 +101,7 @@ describe('TimeGenerator Spec Integration', () => {
                 Scope.StepsOf5,
                 periodLabel
             ]);
-            const [hour, minute, second] = stub!.data.time.split(':').map(Number);
+            const {hour, minute, second} = timeParts(stub!.data.secondsSinceMidnight);
 
             expect(stub).not.toBeNull();
             expect(stub!.tags).toEqual(expect.arrayContaining([Scope.StepsOf5, periodLabel]));

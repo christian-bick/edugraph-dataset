@@ -1,5 +1,9 @@
 import {TimeProblem} from '../../../../types/problems.ts';
-import {ViewValidationError} from '../../../helpers/validation.ts';
+import {
+    formatDayPeriod,
+    TimeViewId,
+    validateTimeProblem
+} from '../time-presentation.ts';
 
 export interface DigitalTimeParts {
     hour: number;
@@ -7,47 +11,12 @@ export interface DigitalTimeParts {
     second?: number;
 }
 
-const SUPPORTED_INTERVALS = new Set([1, 60, 1800, 3600]);
-
-export function validateDigitalTimeProblem(data: TimeProblem): DigitalTimeParts {
-    if (typeof data.time !== 'string') {
-        throw new ViewValidationError('time-digital', 'Time must be an HH:MM:SS string.');
-    }
-    if (!Number.isSafeInteger(data.interval) || !SUPPORTED_INTERVALS.has(data.interval)) {
-        throw new ViewValidationError('time-digital', `Unsupported interval: ${data.interval}`);
-    }
-
-    const match = /^(\d{2}):(\d{2}):(\d{2})$/.exec(data.time);
-    if (!match) throw new ViewValidationError('time-digital', `Invalid time: ${data.time}`);
-
-    const hour24 = Number(match[1]);
-    const minute = Number(match[2]);
-    const second = Number(match[3]);
-    if (hour24 > 23 || minute > 59 || second > 59) {
-        throw new ViewValidationError('time-digital', `Invalid time: ${data.time}`);
-    }
-
-    const elapsedSeconds = hour24 * 3600 + minute * 60 + second;
-    if (elapsedSeconds % data.interval !== 0) {
-        throw new ViewValidationError('time-digital', `Time ${data.time} is not aligned to interval ${data.interval}.`);
-    }
-
-    if (data.period !== undefined) {
-        if (data.period !== 'a.m.' && data.period !== 'p.m.') {
-            throw new ViewValidationError('time-digital', `Unsupported day period: ${data.period}`);
-        }
-        const expectedPeriod = hour24 < 12 ? 'a.m.' : 'p.m.';
-        if (data.period !== expectedPeriod) {
-            throw new ViewValidationError('time-digital', `Day period ${data.period} does not agree with ${data.time}.`);
-        }
-    }
-
-    const normalizedHour = hour24 % 12;
-    return {
-        hour: normalizedHour === 0 ? 12 : normalizedHour,
-        minute,
-        ...(data.interval === 1 ? {second} : {})
-    };
+export function validateDigitalTimeProblem(
+    data: TimeProblem,
+    viewId: TimeViewId = 'time-digital'
+): DigitalTimeParts {
+    const {hour, minute, second} = validateTimeProblem(viewId, data);
+    return {hour, minute, ...(second === undefined ? {} : {second})};
 }
 
 export function formatDigitalTime(parts: DigitalTimeParts): string {
@@ -67,7 +36,7 @@ function numberToWords(value: number): string {
     return remainder === 0 ? tens[Math.floor(value / 10)] : `${tens[Math.floor(value / 10)]}-${small[remainder]}`;
 }
 
-export function formatTimeClue(parts: DigitalTimeParts, period?: 'a.m.' | 'p.m.'): string {
+export function formatTimeClue(parts: DigitalTimeParts, period?: TimeProblem['period']): string {
     let clue: string;
     if (parts.second !== undefined) {
         clue = `${numberToWords(parts.hour)} hours, ${numberToWords(parts.minute)} minutes, and ${numberToWords(parts.second)} seconds`;
@@ -78,5 +47,6 @@ export function formatTimeClue(parts: DigitalTimeParts, period?: 'a.m.' | 'p.m.'
     } else {
         clue = `${numberToWords(parts.minute)} minutes past ${numberToWords(parts.hour)}`;
     }
-    return period === undefined ? clue : `${clue} ${period}`;
+    const periodLabel = formatDayPeriod(period);
+    return periodLabel === undefined ? clue : `${clue} ${periodLabel}`;
 }
