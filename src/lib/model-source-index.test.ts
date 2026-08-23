@@ -14,6 +14,7 @@ function fixture(): string {
             import {helper} from '../shared/helper.ts';
             import './style.css';
             export const icon = '/icons/cube.svg';
+            export const countIcon = (name: string) => \`/icons/counting/\${name}\`;
             void helper;
         `,
         'src/shared/helper.ts': `export {value} from './value.ts';`,
@@ -22,6 +23,9 @@ function fixture(): string {
         'src/view/theme.css': '.x { color: red; }',
         'public/icons/cube.svg': '<svg/>',
         'public/icons/dot.svg': '<svg/>',
+        'public/icons/counting/circle.svg': '<svg/>',
+        'public/icons/counting/square.svg': '<svg/>',
+        'public/icons/unrelated/clock.svg': '<svg/>',
         'src/lib/pipeline.ts': `export const pipeline = true;`
     };
     for (const [path, content] of Object.entries(files)) {
@@ -41,6 +45,8 @@ describe('ModelSourceIndex', () => {
         const index = new ModelSourceIndex(root);
         expect(index.dependencies([resolve(root, 'src/view/view.tsx')])
             .map(path => path.replace(root, '').replaceAll('\\', '/'))).toEqual([
+            '/public/icons/counting/circle.svg',
+            '/public/icons/counting/square.svg',
             '/public/icons/cube.svg',
             '/public/icons/dot.svg',
             '/src/shared/helper.ts',

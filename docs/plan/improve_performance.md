@@ -334,8 +334,11 @@ ref/SHA as projection provenance, semantic coverage-source content identity as a
 identity, exact ontology package resolution, the used ontology semantic hash, coverage selection
 inputs, and the optional local asset-index digest. Validation reconstructs the key and fails closed.
 Dataset rendering is independent of the canonical standards tree, generated coverage, and unrelated
-public files while correctly hashing the SVG and raster assets under `public/icons/` that views
-actually render. Coverage-source identity is restricted to target specs, generator/view capability
+public files. The public icon library is indexed as record-addressed SVG and raster assets: literal
+references depend on one record, while template references depend on every matching record that the
+view can select at runtime. This gives dynamic asset selection the same reconstruct-and-compare
+semantics as ontology records without making asset choice graph machinery. Coverage-source identity
+is restricted to target specs, generator/view capability
 specs plus their reachable local model imports, and extracted generator/view problem-type declarations;
 renderer and generator implementation bodies are excluded, and coverage does not execute a sample
 generator merely to establish a semantic match. Coverage machinery is intentionally excluded and

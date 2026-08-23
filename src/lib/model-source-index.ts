@@ -1,6 +1,7 @@
 import {existsSync, readFileSync, statSync} from 'node:fs';
 import {dirname, extname, isAbsolute, relative, resolve} from 'node:path';
 import * as ts from 'typescript';
+import {AssetLibraryIndex} from './asset-library.ts';
 import {radixSortUtf8} from './content-identity.ts';
 
 const MODULE_EXTENSIONS = [
@@ -71,15 +72,6 @@ function styleSpecifiers(content: string): string[] {
     return specifiers;
 }
 
-function publicAssets(projectRoot: string, content: string): string[] {
-    const paths: string[] = [];
-    for (const match of content.matchAll(/['"`]\/icons\/([^'"`?#)\s]+)/g)) {
-        const path = existingFile(resolve(projectRoot, 'public', 'icons', match[1]));
-        if (path) paths.push(path);
-    }
-    return paths;
-}
-
 /**
  * Resolves the authored local dependency closure of generator/view entry files.
  * Build, matching, validation, and cache machinery are not roots. External
@@ -88,11 +80,13 @@ function publicAssets(projectRoot: string, content: string): string[] {
  */
 export class ModelSourceIndex {
     private readonly projectRoot: string;
+    private readonly assetLibrary: AssetLibraryIndex;
     private readonly direct = new Map<string, readonly string[]>();
     private readonly closure = new Map<string, readonly string[]>();
 
     constructor(projectRoot: string) {
         this.projectRoot = resolve(projectRoot);
+        this.assetLibrary = new AssetLibraryIndex(this.projectRoot);
     }
 
     private dependenciesOf(rawPath: string): readonly string[] {
@@ -115,7 +109,7 @@ export class ModelSourceIndex {
             .filter((dependency): dependency is string => dependency !== null);
         const dependencies = [
             ...localDependencies,
-            ...publicAssets(this.projectRoot, content)
+            ...this.assetLibrary.filesUsedBy(content)
         ].filter((dependency): dependency is string =>
             within(dependency, this.projectRoot) && !dependency.includes(`${resolve(this.projectRoot, 'node_modules')}`));
         const normalized = radixSortUtf8([...new Set(dependencies)]);

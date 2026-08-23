@@ -9,6 +9,7 @@ import {
 } from './content-identity.ts';
 import type {DependencyGraphSnapshot} from './dependency-planner.ts';
 import {resolveOntologyProvenance} from './coverage-identity.ts';
+import {isAssetLibraryPath} from './asset-library.ts';
 
 export const DEVELOPMENT_OBSERVATION_SCHEMA_VERSION = 4;
 
@@ -78,8 +79,7 @@ function isPotentialNewInput(path: string, specName: string): boolean {
     if (path.startsWith('src/visuals/views/')) {
         return /\.(?:cjs|css|js|json|md|mjs|ts|tsx)$/.test(path);
     }
-    return path.startsWith('public/icons/')
-        && /\.(?:jpeg|jpg|png|svg|webp)$/.test(path);
+    return isAssetLibraryPath(path);
 }
 
 function graphSourceInputs(graph: DependencyGraphSnapshot): {

@@ -59,6 +59,7 @@ import {
     type ManifestUpdateScope,
 } from '../lib/dataset-manifest.ts';
 import {
+    digestIdentity,
     radixSortUtf8,
     SourceContentIndex
 } from '../lib/content-identity.ts';
@@ -882,7 +883,11 @@ async function main() {
         console.log(`Affected execution: ${incrementalSourcePairs.length} exact generator/view pair(s).`);
     }
     let graphOnlyBuild: ReturnType<typeof buildDatasetManifest> | null = null;
-    if (affectedOnly || !requestedScope.fullDataset || authoritativeRebuild) {
+    // The observed-source fast path intentionally holds only the selected
+    // module subgraph. It is merged into the trusted complete baseline after
+    // rendering and must never be compared as though it were a complete graph.
+    if (!incrementalSourcePairs
+        && (affectedOnly || !requestedScope.fullDataset || authoritativeRebuild)) {
         const planningBuild = buildDatasetManifest({
             projectRoot: PROJECT_ROOT,
             datasetDir: outDir,
@@ -916,7 +921,14 @@ async function main() {
                 if (pairKeys.length === 0) {
                     const ontologyMetadataChanged = comparisonManifest?.ontology_provenance_hash
                         !== planningBuild.ontology_semantics.provenance_hash;
-                    if (plan.affected_nodes.length > 0 || ontologyMetadataChanged) {
+                    const developmentObservationChanged = Boolean(
+                        planningBuild.development_observation
+                        && digestIdentity(comparisonManifest?.development_observation ?? null)
+                            !== digestIdentity(planningBuild.development_observation)
+                    );
+                    if (plan.affected_nodes.length > 0
+                        || ontologyMetadataChanged
+                        || developmentObservationChanged) {
                         graphOnlyBuild = planningBuild;
                     } else {
                         console.log('Dependency plan is unchanged; no dataset pairs require rendering or publication.');
