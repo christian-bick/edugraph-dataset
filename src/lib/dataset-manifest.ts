@@ -47,9 +47,6 @@ import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
 import {
     OntologySemanticIndex,
     buildOntologySemanticSnapshot,
-    diffOntologySemantics,
-    ontologySemanticProvenanceMatches,
-    readOntologySemanticSnapshot,
     type OntologySemanticSnapshot
 } from './external-semantics.ts';
 import {resolveOntologyProvenance} from './coverage-identity.ts';
@@ -92,6 +89,7 @@ export interface DatasetManifest {
     complete: true;
     spec: string;
     ontology_dependency: string;
+    ontology_provenance_hash?: string;
     generated_at: string;
     /** Non-authoritative Git-assisted shortcut for exact development no-ops. */
     development_observation?: DevelopmentInputObservation;
@@ -106,10 +104,10 @@ export interface DatasetManifestBuild {
     development_observation?: DevelopmentInputObservation | null;
     source_stats: Readonly<SourceContentIndexStats>;
     ontology_semantics: {
-        trusted: boolean;
-        diagnostics: string[];
         ontology_entities: number;
         ontology_relations: number;
+        dependency?: string;
+        provenance_hash?: string;
     };
 }
 
@@ -185,15 +183,13 @@ function ontologyIri(label: string): string {
         : `http://edugraph.io/edu/${label}`;
 }
 
-function ontologyDependency(projectRoot: string): string {
+export function datasetOntologyDependency(projectRoot: string): string {
     const packageJson = JSON.parse(readFileSync(resolve(projectRoot, 'package.json'), 'utf-8'));
     return packageJson.dependencies?.['edugraph-ts'] ?? 'unknown';
 }
 
-interface OntologySemanticContext {
-    ontology: OntologySemanticSnapshot | null;
-    trusted: boolean;
-    diagnostics: string[];
+export function datasetOntologyProvenanceHash(projectRoot: string): string {
+    return digestIdentity(resolveOntologyProvenance(projectRoot));
 }
 
 let verifiedOntologySemantics: {key: string; snapshot: OntologySemanticSnapshot} | null = null;
@@ -205,50 +201,6 @@ function currentOntologySemantics(projectRoot: string): OntologySemanticSnapshot
     const snapshot = buildOntologySemanticSnapshot({provenance});
     verifiedOntologySemantics = {key, snapshot};
     return snapshot;
-}
-
-function ontologySemanticContext(projectRoot: string): OntologySemanticContext {
-    const diagnostics: string[] = [];
-    let trusted = true;
-    let ontology = readOntologySemanticSnapshot(projectRoot);
-    try {
-        const provenance = resolveOntologyProvenance(projectRoot);
-        if (!ontology) {
-            trusted = false;
-            diagnostics.push('Ontology semantic snapshot is missing; the pinned package update is ignored until update:ontology-source --apply.');
-        } else if (!ontologySemanticProvenanceMatches(ontology, provenance)) {
-            trusted = false;
-            diagnostics.push(
-                `Ontology semantic snapshot ${ontology.provenance.version} does not match pinned ${provenance.version}; `
-                + 'the package update is ignored until update:ontology-source --apply.'
-            );
-        } else {
-            const actual = currentOntologySemantics(projectRoot);
-            const delta = diffOntologySemantics(ontology, actual);
-            if (delta.entities.added.length > 0
-                || delta.entities.changed.length > 0
-                || delta.entities.removed.length > 0
-                || delta.relations.added.length > 0
-                || delta.relations.changed.length > 0
-                || delta.relations.removed.length > 0) {
-                trusted = false;
-                diagnostics.push(
-                    'Installed ontology semantics differ from the accepted snapshot; '
-                    + 'the package update is ignored until update:ontology-source --apply.'
-                );
-            }
-        }
-    } catch (error) {
-        trusted = false;
-        ontology = null;
-        diagnostics.push(`Ontology semantic provenance is unavailable: ${error instanceof Error ? error.message : error}`);
-    }
-
-    return {ontology, trusted, diagnostics};
-}
-
-export function datasetOntologySemanticIssues(projectRoot: string): string[] {
-    return ontologySemanticContext(projectRoot).diagnostics;
 }
 
 function readDatasetRows(snapshot: DatasetSnapshot): DatasetManifestRow[] {
@@ -341,10 +293,10 @@ export function planObservedDatasetSourceDelta(options: {
         dependency_graph: graph,
         source_stats: {directories_read: 0, files_read: patched, bytes_read: 0},
         ontology_semantics: {
-            trusted: true,
-            diagnostics: [],
             ontology_entities: 0,
-            ontology_relations: 0
+            ontology_relations: 0,
+            dependency: options.previous.ontology_dependency,
+            provenance_hash: options.previous.ontology_provenance_hash
         }
     };
     return {
@@ -472,14 +424,14 @@ export function buildDatasetManifest(options: {
     } = options;
     const pairIndex = preparedPairIndex ?? buildCompatibleModulePairIndex(generators, views);
     const tuples = preparedTuples ?? matchTargets(targets, generators, views, {pairIndex}).tuples;
-    const ontology = ontologyDependency(projectRoot);
+    const ontology = datasetOntologyDependency(projectRoot);
     const ontologySemantics = semanticSnapshots
         ? {
-            ontology: semanticSnapshots.ontology ?? null,
-            trusted: true,
-            diagnostics: []
+            ontology: semanticSnapshots.ontology ?? null
         }
-        : ontologySemanticContext(projectRoot);
+        : {
+            ontology: currentOntologySemantics(projectRoot)
+        };
     const ontologyIndex = ontologySemantics.ontology
         ? new OntologySemanticIndex(ontologySemantics.ontology)
         : null;
@@ -968,10 +920,10 @@ export function buildDatasetManifest(options: {
         }),
         source_stats: sourceIndex.stats(),
         ontology_semantics: {
-            trusted: ontologySemantics.trusted,
-            diagnostics: ontologySemantics.diagnostics,
             ontology_entities: Object.keys(ontologySemantics.ontology?.entities ?? {}).length,
-            ontology_relations: Object.keys(ontologySemantics.ontology?.relations ?? {}).length
+            ontology_relations: Object.keys(ontologySemantics.ontology?.relations ?? {}).length,
+            dependency: datasetOntologyDependency(projectRoot),
+            provenance_hash: datasetOntologyProvenanceHash(projectRoot)
         }
     };
 }
@@ -1012,7 +964,8 @@ export function createDatasetManifest(options: {
         planner_epoch: DEPENDENCY_PLANNER_EPOCH,
         complete: true,
         spec: specName,
-        ontology_dependency: ontologyDependency(projectRoot),
+        ontology_dependency: datasetOntologyDependency(projectRoot),
+        ontology_provenance_hash: datasetOntologyProvenanceHash(projectRoot),
         generated_at: new Date().toISOString(),
         ...(build.development_observation
             ? {development_observation: build.development_observation}
@@ -1091,6 +1044,12 @@ export function datasetFreshnessIssues(
         issues.push('manifest dependency plan is incomplete or uses an unsupported planner epoch.');
     }
     if (manifest.spec !== specName) issues.push(`manifest belongs to spec "${manifest.spec}", not "${specName}".`);
+    if ((currentBuild.ontology_semantics.dependency
+            && manifest.ontology_dependency !== currentBuild.ontology_semantics.dependency)
+        || (currentBuild.ontology_semantics.provenance_hash
+            && manifest.ontology_provenance_hash !== currentBuild.ontology_semantics.provenance_hash)) {
+        issues.push('manifest ontology provenance differs from the exact installed ontology.');
+    }
     if (issues.length > 0) return issues;
 
     for (const [key, current] of Object.entries(currentBuild.entries)) {

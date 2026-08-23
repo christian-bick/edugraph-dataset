@@ -1,14 +1,16 @@
 import {execFileSync} from 'node:child_process';
-import {existsSync, readFileSync} from 'node:fs';
+import {existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {
     SourceContentIndex,
     digestFile,
+    digestIdentity,
     radixSortUtf8
 } from './content-identity.ts';
 import type {DependencyGraphSnapshot} from './dependency-planner.ts';
+import {resolveOntologyProvenance} from './coverage-identity.ts';
 
-export const DEVELOPMENT_OBSERVATION_SCHEMA_VERSION = 3;
+export const DEVELOPMENT_OBSERVATION_SCHEMA_VERSION = 4;
 
 export interface DevelopmentInputObservation {
     schema_version: number;
@@ -19,7 +21,7 @@ export interface DevelopmentInputObservation {
     /** Direct module entry files, used to load selected modules without rediscovery. */
     entry_files_by_node: Record<string, string>;
     renderer_environment: string;
-    ontology_semantic_sha256: string | null;
+    ontology_provenance_sha256: string;
 }
 
 export interface DevelopmentObservationResult {
@@ -109,16 +111,8 @@ function graphSourceInputs(graph: DependencyGraphSnapshot): {
     };
 }
 
-function semanticSnapshotHash(projectRoot: string): string | null {
-    const path = resolve(projectRoot, 'config', 'external-semantics', 'ontology.json');
-    if (!existsSync(path)) return null;
-    try {
-        const snapshot = JSON.parse(readFileSync(path, 'utf-8')) as {semantic_sha256?: unknown};
-        return typeof snapshot.semantic_sha256 === 'string' ? snapshot.semantic_sha256 : null;
-    } catch {
-        return null;
-    }
-}
+const ontologyProvenanceHash = (projectRoot: string): string =>
+    digestIdentity(resolveOntologyProvenance(projectRoot));
 
 function specSourcePath(projectRoot: string, specName: string): string {
     const directory = resolve(projectRoot, 'src', 'spec', specName);
@@ -140,8 +134,7 @@ export function captureDevelopmentInputObservation(options: {
 }): DevelopmentInputObservation | null {
     try {
         const extraInputs = options.sourceIndex.identities([
-            specSourcePath(options.projectRoot, options.specName),
-            resolve(options.projectRoot, 'config', 'external-semantics', 'ontology.json')
+            specSourcePath(options.projectRoot, options.specName)
         ], {
             include: path => !path.endsWith('.test.ts') && !path.endsWith('.test.tsx')
         });
@@ -162,7 +155,7 @@ export function captureDevelopmentInputObservation(options: {
                 normalizePath(options.entryFilesByNode![nodeId])
             ])),
             renderer_environment: options.rendererEnvironment,
-            ontology_semantic_sha256: semanticSnapshotHash(options.projectRoot)
+            ontology_provenance_sha256: ontologyProvenanceHash(options.projectRoot)
         };
     } catch {
         return null;
@@ -200,8 +193,8 @@ export function inspectDevelopmentInputObservation(options: {
     if (previous.renderer_environment !== options.rendererEnvironment) {
         return miss('renderer environment changed');
     }
-    if (previous.ontology_semantic_sha256 !== semanticSnapshotHash(options.projectRoot)) {
-        return miss('accepted ontology semantics changed');
+    if (previous.ontology_provenance_sha256 !== ontologyProvenanceHash(options.projectRoot)) {
+        return miss('ontology provenance changed; authoritative graph reconstruction required');
     }
 
     try {

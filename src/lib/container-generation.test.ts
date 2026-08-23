@@ -23,6 +23,9 @@ describe('container generation command', () => {
         expect(normalizedGenerationArgs(['--spec=explicit'], {
             npm_config_rebuild_graph: 'true'
         })).toEqual(['--spec=explicit', '--rebuild-graph']);
+        expect(normalizedGenerationArgs(['--spec=explicit'], {
+            npm_config_reset_graph: 'true'
+        })).toEqual(['--spec=explicit', '--reset-graph']);
     });
 
     it('keys the reusable dependency volume by lockfile and renderer', () => {

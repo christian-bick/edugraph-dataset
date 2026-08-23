@@ -1,12 +1,12 @@
-import {existsSync, readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {Ability, Area, ENTITY_RELATIONS, Scope} from 'edugraph-ts';
 import type {DescriptorRelations} from 'edugraph-ts';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
-import type {OntologyProvenance} from './coverage-identity.ts';
+import {resolveOntologyProvenance, type OntologyProvenance} from './coverage-identity.ts';
+import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
+import {loadTargets} from './spec-catalog.ts';
 
 export const EXTERNAL_SEMANTICS_SCHEMA_VERSION = 1;
-export const ONTOLOGY_SEMANTICS_PATH = ['config', 'external-semantics', 'ontology.json'] as const;
 
 export type OntologyDimension = 'Area' | 'Scope' | 'Ability' | 'unknown';
 
@@ -39,30 +39,6 @@ export interface OntologySemanticSnapshot {
     relations: Record<string, OntologySemanticRelation>;
     usages: Record<string, OntologySemanticUsage>;
     semantic_sha256: string;
-}
-
-export interface SemanticChanges {
-    added: string[];
-    changed: string[];
-    removed: string[];
-}
-
-export interface OntologySemanticDelta {
-    kind: 'ontology';
-    from: string | null;
-    to: string;
-    entities: SemanticChanges;
-    relations: SemanticChanges;
-    usages: SemanticChanges;
-    work: {
-        previous_entities: number;
-        current_entities: number;
-        previous_relations: number;
-        current_relations: number;
-        previous_usages: number;
-        current_usages: number;
-        records_compared: number;
-    };
 }
 
 type JsonValue = null | boolean | number | string | JsonValue[] | {[key: string]: JsonValue};
@@ -171,109 +147,35 @@ export function withOntologySemanticUsage(
         Object.fromEntries(radixSortUtf8(Object.keys(usages)).map(id => [id, usages[id]])));
 }
 
-function changes<T>(
-    previous: Readonly<Record<string, T>>,
-    current: Readonly<Record<string, T>>,
-    identity: (record: T) => string
-): SemanticChanges & {compared: number} {
-    const added: string[] = [];
-    const changed: string[] = [];
-    const removed: string[] = [];
-    let compared = 0;
-    for (const id of Object.keys(current)) {
-        compared++;
-        const old = previous[id];
-        if (!old) added.push(id);
-        else if (identity(old) !== identity(current[id])) changed.push(id);
-    }
-    for (const id of Object.keys(previous)) {
-        compared++;
-        if (!current[id]) removed.push(id);
-    }
-    return {
-        added: radixSortUtf8(added),
-        changed: radixSortUtf8(changed),
-        removed: radixSortUtf8(removed),
-        compared
-    };
-}
-
-export function diffOntologySemantics(
-    previous: OntologySemanticSnapshot | null,
-    current: OntologySemanticSnapshot
-): OntologySemanticDelta {
-    const entityDelta = changes(previous?.entities ?? {}, current.entities, record =>
-        `${record.identity_hash}:${record.definition_hash}`);
-    const relationDelta = changes(previous?.relations ?? {}, current.relations, record => record.input_hash);
-    const usageDelta = changes(previous?.usages ?? {}, current.usages, record => record.input_sha256);
-    return {
-        kind: 'ontology',
-        from: previous?.provenance.version ?? null,
-        to: current.provenance.version,
-        entities: {
-            added: entityDelta.added,
-            changed: entityDelta.changed,
-            removed: entityDelta.removed
-        },
-        relations: {
-            added: relationDelta.added,
-            changed: relationDelta.changed,
-            removed: relationDelta.removed
-        },
-        usages: {
-            added: usageDelta.added,
-            changed: usageDelta.changed,
-            removed: usageDelta.removed
-        },
-        work: {
-            previous_entities: Object.keys(previous?.entities ?? {}).length,
-            current_entities: Object.keys(current.entities).length,
-            previous_relations: Object.keys(previous?.relations ?? {}).length,
-            current_relations: Object.keys(current.relations).length,
-            previous_usages: Object.keys(previous?.usages ?? {}).length,
-            current_usages: Object.keys(current.usages).length,
-            records_compared: entityDelta.compared + relationDelta.compared + usageDelta.compared
-        }
-    };
-}
-
-function assertSnapshotHash(snapshot: OntologySemanticSnapshot): void {
-    const {semantic_sha256: recorded, ...body} = snapshot;
-    const expected = snapshotHash(body);
-    if (recorded !== expected) {
-        throw new Error(`${snapshot.kind} semantic snapshot failed integrity verification.`);
-    }
-}
-
-export function readOntologySemanticSnapshot(projectRoot: string): OntologySemanticSnapshot | null {
-    const path = resolve(projectRoot, ...ONTOLOGY_SEMANTICS_PATH);
-    if (!existsSync(path)) return null;
-    const snapshot = JSON.parse(readFileSync(path, 'utf-8')) as OntologySemanticSnapshot;
-    if (snapshot.schema_version !== EXTERNAL_SEMANTICS_SCHEMA_VERSION
-        || snapshot.kind !== 'ontology'
-        || snapshot.complete !== true) {
-        throw new Error(`Unsupported or incomplete ontology semantic snapshot at ${path}.`);
-    }
-    assertSnapshotHash(snapshot);
-    return snapshot;
-}
-
-export function ontologySemanticUsageHash(projectRoot: string, name: string): string {
-    const snapshot = readOntologySemanticSnapshot(projectRoot);
-    const usage = snapshot?.usages?.[name];
-    if (!usage) {
-        throw new Error(
-            `Ontology semantic usage "${name}" is unavailable. Run update:ontology-source --apply explicitly.`
-        );
-    }
-    return usage.input_sha256;
-}
-
-export function ontologySemanticProvenanceMatches(
-    snapshot: OntologySemanticSnapshot,
-    provenance: OntologyProvenance
-): boolean {
-    return snapshotHash(snapshot.provenance) === snapshotHash(provenance);
+/**
+ * Resolves the semantic closure used by one authored spec directly from the
+ * exact installed ontology. The persisted dependency graph, not a second
+ * checked-in snapshot, retains the prior records needed for delta comparison.
+ */
+export async function resolveOntologySemanticUsage(
+    projectRoot: string,
+    specName: string
+): Promise<{snapshot: OntologySemanticSnapshot; usage: OntologySemanticUsage}> {
+    const [generators, views, targets] = await Promise.all([
+        loadGeneratorModelCatalog(resolve(projectRoot, 'src', 'generators')),
+        loadViewModelCatalog(resolve(projectRoot, 'src', 'visuals', 'views')),
+        loadTargets(specName, resolve(projectRoot, 'src', 'spec'))
+    ]);
+    const labels = [
+        ...generators.flatMap(generator => generator.labels),
+        ...views.flatMap(view => [
+            ...view.supportedLabels,
+            ...(view.requiredLabels ?? []),
+            ...(view.rejectedLabels ?? [])
+        ]),
+        ...targets.flatMap(target => target.labels)
+    ];
+    const snapshot = withOntologySemanticUsage(
+        buildOntologySemanticSnapshot({provenance: resolveOntologyProvenance(projectRoot)}),
+        specName,
+        labels
+    );
+    return {snapshot, usage: snapshot.usages[specName]};
 }
 
 export interface OntologyUsageClosure {

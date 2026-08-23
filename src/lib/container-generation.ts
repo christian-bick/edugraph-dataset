@@ -38,6 +38,10 @@ export function normalizedGenerationArgs(
         const rebuildGraph = env.npm_config_rebuild_graph;
         if (rebuildGraph === '' || rebuildGraph === 'true') normalized.push('--rebuild-graph');
     }
+    if (!normalized.includes('--reset-graph')) {
+        const resetGraph = env.npm_config_reset_graph;
+        if (resetGraph === '' || resetGraph === 'true') normalized.push('--reset-graph');
+    }
     return normalized;
 }
 

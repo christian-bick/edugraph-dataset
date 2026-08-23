@@ -101,18 +101,20 @@ npm run validate:dataset -- --spec=ccss
 ```
 
 Authored model inputs are automatic graph inputs: targets, generator/view specs and schemas,
-generator/view local import and asset closures, accepted ontology semantics, checklists, the
+generator/view local import and asset closures, the used semantic records from the exact pinned ontology, checklists, the
 dedicated evaluator prompt, and canonical environment identities. Build, matching, planning,
 cache, validation, workflow, and unrelated toolchain code are machinery and are deliberately not
 hashed into model identity or inspected for automatic invalidation. The engineer or agent owns the
-decision to use `--rebuild-graph` after a machinery edit. The release workflow always rebuilds the
-complete graph, so never rely on a development observation or incremental graph for release
-admission.
+decision to use `--rebuild-graph` after machinery that can alter graph construction or matching.
+This reconstructs the complete graph and compares it with the previous graph; it does not discard
+reusable artifacts. Use `--reset-graph` only when a hidden behavioral change requires a deliberately
+new full pixel baseline. The release workflow always reconstructs and compares the complete graph,
+so never rely on a development observation for release admission.
 
 Checklist, ontology-context, image, label, and evaluator-prompt changes create automatic VQA cache
 misses. After a response-schema, pass/fail implementation, evaluator model, or validation-pipeline
-behavior change, run validation with `--rebuild-graph --force`; `--rebuild-graph` reconstructs the
-dependency baseline, while `--force` obtains fresh judgments for otherwise unchanged keys. Obtain
+behavior change, run validation with `--rebuild-graph --force`; `--rebuild-graph` reconstructs and
+compares dependency state, while `--force` independently obtains fresh judgments for otherwise unchanged keys. Obtain
 explicit user consent before that external Gemini operation. After validation:
 
 1. Rerun `audit:dataset` and require exact passing coverage.

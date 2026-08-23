@@ -16,7 +16,7 @@ import {
 import {digestIdentity} from '../lib/content-identity.ts';
 import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
 import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
-import {ontologySemanticUsageHash} from '../lib/external-semantics.ts';
+import {resolveOntologySemanticUsage} from '../lib/external-semantics.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const snapshotRoot = resolve(projectRoot, 'temp', 'standards-explorer-preview');
@@ -32,6 +32,7 @@ console.log = (...args: unknown[]) => console.error(...args);
 reportProgress('Loading canonical Common Core tree and ontology metadata…');
 const sourceTree = readCanonicalStandardsTree(projectRoot);
 const ontology = resolveOntologyProvenance(projectRoot);
+const ontologyUsage = await resolveOntologySemanticUsage(projectRoot, 'ccss');
 reportProgress('Indexing generated samples and target labels…');
 const assets = await buildAssetIndexBundle({
     projectRoot,
@@ -43,7 +44,7 @@ const inputs = buildCoverageInputIdentity({
     sourceRef: 'working-tree',
     sourceSha: 'working-tree',
     ontology,
-    ontologyUsageSha256: ontologySemanticUsageHash(projectRoot, 'ccss'),
+    ontologyUsageSha256: ontologyUsage.usage.input_sha256,
     knownAssetsSha256: digestIdentity(assets.index)
 });
 reportProgress('Resolving current standards coverage…');

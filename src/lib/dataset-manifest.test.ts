@@ -5,13 +5,13 @@ import { resolve } from 'node:path';
 import {
     DATASET_MANIFEST_SCHEMA_VERSION,
     DatasetManifest,
+    DatasetManifestBuild,
     DatasetManifestEntry,
     affectedDatasetPairKeys,
     buildDatasetManifest,
     createDatasetManifest,
     dependencyGraphVqaCacheKey,
     datasetFreshnessIssues,
-    datasetOntologySemanticIssues,
     datasetRendererIssues,
     mergeObservedDatasetBuild,
     planObservedDatasetSourceDelta
@@ -23,8 +23,6 @@ import {
     planDependencyDelta,
     type DependencyGraphSnapshot
 } from './dependency-planner.ts';
-import {buildOntologySemanticSnapshot} from './external-semantics.ts';
-import type {OntologyProvenance} from './coverage-identity.ts';
 import {buildVqaValidationContext} from './vqa-cache.ts';
 import {createWorkCounters} from './work-counters.ts';
 
@@ -52,6 +50,7 @@ function manifest(overrides: Partial<DatasetManifest> = {}): DatasetManifest {
         complete: true,
         spec: 'ccss',
         ontology_dependency: 'ontology-v1',
+        ontology_provenance_hash: 'ontology-provenance-v1',
         generated_at: '2026-01-01T00:00:00.000Z',
         dependency_graph: dependencyGraph,
         last_execution: lastExecution,
@@ -69,8 +68,6 @@ function build(
         dependency_graph: graph,
         source_stats: {directories_read: 0, files_read: 0, bytes_read: 0},
         ontology_semantics: {
-            trusted: true,
-            diagnostics: [],
             ontology_entities: 0,
             ontology_relations: 0
         }
@@ -88,6 +85,15 @@ describe('datasetFreshnessIssues', () => {
         expect(datasetFreshnessIssues(null, 'ccss', build({}))).toEqual([
             'manifest.json is missing; regenerate this dataset.'
         ]);
+    });
+
+    it('rejects ontology provenance that differs from the reconstructed graph inputs', () => {
+        const current = build({'writing#numbers-write-standard': entry}) as DatasetManifestBuild;
+        current.ontology_semantics.dependency = 'ontology-v2';
+        current.ontology_semantics.provenance_hash = 'ontology-provenance-v2';
+        expect(datasetFreshnessIssues(manifest(), 'ccss', current)).toContain(
+            'manifest ontology provenance differs from the exact installed ontology.'
+        );
     });
 
     it('reports stale, missing, removed, and count-shifted pairs', () => {
@@ -119,48 +125,6 @@ describe('datasetFreshnessIssues', () => {
         expect(datasetFreshnessIssues(manifest(), 'ccss', build(current))).toContain(
             'writing#numbers-write-standard content or task fingerprints changed since generation.'
         );
-    });
-});
-
-describe('external semantic generation gate', () => {
-    it('accepts exact installed ontology semantics and rejects mixed package state', () => {
-        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-semantic-gate-'));
-        const dependency = 'https://example.test/ontology.tgz';
-        const provenance: OntologyProvenance = {
-            package: 'edugraph-ts',
-            version: 'v1.0.0',
-            dependency,
-            resolved: dependency,
-            integrity: 'sha512-exact'
-        };
-        mkdirSync(resolve(projectRoot, 'config', 'external-semantics'), {recursive: true});
-        writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
-            dependencies: {'edugraph-ts': dependency}
-        }));
-        writeFileSync(resolve(projectRoot, 'package-lock.json'), JSON.stringify({
-            packages: {
-                'node_modules/edugraph-ts': {
-                    version: '1.0.0',
-                    resolved: dependency,
-                    integrity: provenance.integrity
-                }
-            }
-        }));
-        const snapshotPath = resolve(projectRoot, 'config', 'external-semantics', 'ontology.json');
-        try {
-            writeFileSync(snapshotPath, JSON.stringify(buildOntologySemanticSnapshot({provenance})));
-            expect(datasetOntologySemanticIssues(projectRoot)).toEqual([]);
-
-            writeFileSync(snapshotPath, JSON.stringify(buildOntologySemanticSnapshot({
-                provenance,
-                entityRelations: {}
-            })));
-            expect(datasetOntologySemanticIssues(projectRoot)).toEqual([
-                expect.stringContaining('Installed ontology semantics differ')
-            ]);
-        } finally {
-            rmSync(projectRoot, {recursive: true, force: true});
-        }
     });
 });
 
@@ -378,8 +342,18 @@ describe('updateDatasetManifest', () => {
 
     it('rejects a scoped update when a changed dependency also reaches an unselected pair', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-manifest-scope-'));
+        const ontologyDependency = 'https://example.test/ontology-v1.tgz';
         writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
-            dependencies: {'edugraph-ts': 'ontology-v1'}
+            dependencies: {'edugraph-ts': ontologyDependency}
+        }));
+        writeFileSync(resolve(projectRoot, 'package-lock.json'), JSON.stringify({
+            packages: {
+                'node_modules/edugraph-ts': {
+                    version: '1.0.0',
+                    resolved: ontologyDependency,
+                    integrity: 'sha512-v1'
+                }
+            }
         }));
         const graph = (sourceHash: string) => createDependencyGraphSnapshot([
             {
@@ -457,8 +431,18 @@ describe('buildDatasetManifest', () => {
         mkdirSync(viewDir, {recursive: true});
         mkdirSync(resolve(projectRoot, 'src', 'validation', 'vqa'), {recursive: true});
         mkdirSync(resolve(projectRoot, 'src', 'lib'), {recursive: true});
+        const ontologyDependency = 'https://example.test/ontology-v1.tgz';
         writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
-            dependencies: {'edugraph-ts': 'ontology-v1'}
+            dependencies: {'edugraph-ts': ontologyDependency}
+        }));
+        writeFileSync(resolve(projectRoot, 'package-lock.json'), JSON.stringify({
+            packages: {
+                'node_modules/edugraph-ts': {
+                    version: '1.0.0',
+                    resolved: ontologyDependency,
+                    integrity: 'sha512-v1'
+                }
+            }
         }));
         writeFileSync(resolve(generatorDir, 'spec.ts'), 'generator-source');
         writeFileSync(resolve(viewDir, 'spec.ts'), 'view-source');

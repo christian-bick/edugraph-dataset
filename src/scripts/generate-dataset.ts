@@ -52,7 +52,7 @@ import {
     buildDatasetManifest,
     createDatasetManifest,
     DATASET_MANIFEST_SCHEMA_VERSION,
-    datasetOntologySemanticIssues,
+    datasetOntologyProvenanceHash,
     mergeObservedDatasetBuild,
     planObservedDatasetSourceDelta,
     readDatasetManifest,
@@ -67,6 +67,7 @@ import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/re
 import {currentRendererEnvironment} from '../lib/render-environment.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
+import {resolveGraphExecutionMode} from '../lib/graph-execution-mode.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -636,7 +637,7 @@ async function main() {
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('Error: The --spec parameter is required.');
-        console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--affected] [--rebuild-graph] [--training-only]');
+        console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--affected] [--rebuild-graph] [--reset-graph] [--training-only]');
         console.error('Example: npm run generate:dataset -- --spec=test');
         console.error('Example: npm run generate:dataset -- --spec=ccss');
         process.exit(1);
@@ -647,23 +648,37 @@ async function main() {
     const targetView = getCliOption(args, 'view');
     const affectedOnly = args.includes('--affected');
     const rebuildGraph = args.includes('--rebuild-graph');
+    const resetGraph = args.includes('--reset-graph');
     const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.includes('--training-only');
     const previousManifest = readDatasetManifest(outDir);
-    if (rebuildGraph && (affectedOnly || targetModule || targetView || trainingOnly)) {
+    const graphMode = resolveGraphExecutionMode({
+        previous: previousManifest,
+        previousSupported: !previousManifest
+            || (previousManifest.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
+                && previousManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+                && previousManifest.complete === true
+                && previousManifest.spec === specName),
+        previousExternalIdentity: previousManifest?.ontology_provenance_hash,
+        rebuild: rebuildGraph,
+        reset: resetGraph,
+        currentExternalIdentity: datasetOntologyProvenanceHash(PROJECT_ROOT)
+    });
+    if ((rebuildGraph || resetGraph) && (affectedOnly || targetModule || targetView || trainingOnly)) {
         throw new Error(
-            '--rebuild-graph establishes a complete graph baseline and cannot be combined with '
+            `${rebuildGraph ? '--rebuild-graph' : '--reset-graph'} is full-only and cannot be combined with `
             + '--affected, --generator, --view, or --training-only.'
         );
     }
-    const trustedPreviousManifest = rebuildGraph ? null : previousManifest;
+    const ontologyProvenanceChanged = graphMode.externalIdentityChanged;
+    const authoritativeRebuild = graphMode.reconstruct;
+    const comparisonManifest = graphMode.comparison;
+    const trustedPreviousManifest = graphMode.incremental;
     let developmentObservation: ReturnType<typeof inspectDevelopmentInputObservation> | null = null;
-    const ontologyIssues = datasetOntologySemanticIssues(PROJECT_ROOT);
-    if (ontologyIssues.length > 0) {
-        for (const issue of ontologyIssues) console.warn(`[Ontology update ignored] ${issue}`);
-        throw new Error(
-            'Reliable ontology semantic delta state is unavailable. The pinned ontology update was not consumed; '
-            + 'run update:ontology-source before generation.'
-        );
+    if (ontologyProvenanceChanged) {
+        console.log('Ontology provenance changed; reconstructing the complete graph before delta execution.');
+    }
+    if (graphMode.baselineReset && !resetGraph) {
+        console.log('Previous graph schema or planner epoch is unsupported; establishing a new full baseline.');
     }
 
     if (affectedOnly
@@ -865,7 +880,9 @@ async function main() {
         };
         matchedTuples = allMatchedTuples;
         console.log(`Affected execution: ${incrementalSourcePairs.length} exact generator/view pair(s).`);
-    } else if (affectedOnly || !requestedScope.fullDataset) {
+    }
+    let graphOnlyBuild: ReturnType<typeof buildDatasetManifest> | null = null;
+    if (affectedOnly || !requestedScope.fullDataset || authoritativeRebuild) {
         const planningBuild = buildDatasetManifest({
             projectRoot: PROJECT_ROOT,
             datasetDir: outDir,
@@ -877,15 +894,15 @@ async function main() {
             pairIndex,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
-            reuseImageIdentityFrom: trustedPreviousManifest?.dependency_graph,
+            reuseImageIdentityFrom: comparisonManifest?.dependency_graph,
             counters
         });
-        const plan = assertDatasetGenerationScope(trustedPreviousManifest, planningBuild, requestedScope);
+        const plan = assertDatasetGenerationScope(comparisonManifest, planningBuild, requestedScope);
         console.log(
             `Dependency plan: ${plan.changed_roots.length} changed root(s), `
             + `${plan.affected_nodes.length} affected node(s), ${plan.reuse_nodes.length} reusable node(s).`
         );
-        if (affectedOnly) {
+        if (affectedOnly || authoritativeRebuild) {
             if (plan.clean) {
                 if (!requestedScope.fullDataset) {
                     throw new Error(
@@ -893,24 +910,63 @@ async function main() {
                         + 'Run one unfiltered full generation to establish the shard baseline.'
                     );
                 }
-                console.log('Dependency delta unavailable; performing the required full baseline generation.');
+                console.log('Dependency baseline unavailable; performing the required full generation.');
             } else {
-                const pairKeys = affectedDatasetPairKeys(plan, planningBuild, trustedPreviousManifest);
+                const pairKeys = affectedDatasetPairKeys(plan, planningBuild, comparisonManifest);
                 if (pairKeys.length === 0) {
-                    console.log('Dependency plan is clean; no dataset pairs require rendering or publication.');
-                    console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
-                    return;
+                    const ontologyMetadataChanged = comparisonManifest?.ontology_provenance_hash
+                        !== planningBuild.ontology_semantics.provenance_hash;
+                    if (plan.affected_nodes.length > 0 || ontologyMetadataChanged) {
+                        graphOnlyBuild = planningBuild;
+                    } else {
+                        console.log('Dependency plan is unchanged; no dataset pairs require rendering or publication.');
+                        console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
+                        return;
+                    }
+                } else {
+                    const selectedPairs = new Set(pairKeys);
+                    generationScope = {
+                        fullDataset: false,
+                        pairKeys,
+                        generatorIds: radixSortUtf8([...new Set(pairKeys.map(key => key.split('#')[0]))])
+                    };
+                    matchedTuples = allMatchedTuples.filter(tuple =>
+                        selectedPairs.has(modulePairKey(tuple.generatorId, tuple.viewId)));
+                    console.log(`Affected execution: ${pairKeys.length} exact generator/view pair(s).`);
                 }
-                const selectedPairs = new Set(pairKeys);
-                generationScope = {
-                    fullDataset: false,
-                    pairKeys,
-                    generatorIds: radixSortUtf8([...new Set(pairKeys.map(key => key.split('#')[0]))])
-                };
-                matchedTuples = allMatchedTuples.filter(tuple =>
-                    selectedPairs.has(modulePairKey(tuple.generatorId, tuple.viewId)));
-                console.log(`Affected execution: ${pairKeys.length} exact generator/view pair(s).`);
             }
+        }
+    }
+
+    if (graphOnlyBuild) {
+        const graphOnlyScope: ManifestUpdateScope = {
+            fullDataset: false,
+            pairKeys: [],
+            generatorIds: []
+        };
+        const graphTransaction = beginDatasetStoreTransaction(outDir, graphOnlyScope);
+        try {
+            const manifest = createDatasetManifest({
+                projectRoot: PROJECT_ROOT,
+                specName,
+                build: graphOnlyBuild,
+                scope: graphOnlyScope,
+                previous: comparisonManifest
+            });
+            graphTransaction.commit(manifest);
+            const storeStats = graphTransaction.stats();
+            counters.add('dataset.shards_written', storeStats.shards_written);
+            counters.add('dataset.shards_reused', storeStats.shards_reused);
+            counters.add('dataset.image_bytes_written', storeStats.image_bytes_written);
+            console.log(
+                `Published reconstructed graph with ${manifest.last_execution.affected_nodes.length} `
+                + 'affected non-render node(s) and no image rendering.'
+            );
+            console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
+            return;
+        } catch (error) {
+            graphTransaction.rollback();
+            throw error;
         }
     }
 
@@ -1007,7 +1063,7 @@ async function main() {
             specName,
             build: manifestBuild,
             scope: generationScope,
-            previous: trustedPreviousManifest
+            previous: comparisonManifest
         });
         transaction.commit(manifest);
         const storeStats = transaction.stats();

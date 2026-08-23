@@ -73,10 +73,6 @@ function runCheck(check: DevelopmentCheck, sourceFiles: string[], generatorCover
                 'src/scripts/check-generator-coverage.ts',
                 `--files=${generatorCoverageFiles.join(',')}`
             ]);
-        case 'external-semantics':
-            return runNode('node_modules/vite-node/dist/cli.mjs', [
-                'src/scripts/validate-external-semantics.ts'
-            ]);
     }
 }
 

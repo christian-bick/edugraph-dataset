@@ -47,17 +47,17 @@ describe('development validation plan', () => {
     it('classifies work with a constant number of steps per changed file', () => {
         const files = Array.from({length: 100}, (_, index) => `docs/plan/change-${index}.md`);
         const plan = planDevelopmentValidation(files, specs);
-        expect(plan.work).toEqual({files_classified: 100, classification_steps: 700});
+        expect(plan.work).toEqual({files_classified: 100, classification_steps: 600});
         expect(plan.checks).toEqual(['docs']);
     });
 
-    it('routes accepted ontology semantics through external, matching, and production-spec checks', () => {
+    it('routes ontology dependency changes through matching and production-spec checks', () => {
         const plan = planDevelopmentValidation(
-            ['config/external-semantics/ontology.json'],
+            ['package-lock.json'],
             specs,
             ['ccss']
         );
-        expect(plan.checks).toEqual(['generator-view-specs', 'labels', 'external-semantics']);
+        expect(plan.checks).toEqual(['types', 'generator-view-specs', 'labels']);
         expect(plan.specs).toEqual(['ccss']);
     });
 

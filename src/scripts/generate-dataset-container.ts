@@ -8,7 +8,6 @@ import {getCliOption} from '../lib/cli.ts';
 import {datasetDirForSpec, datasetOutDir} from '../lib/dataset-paths.ts';
 import {
     DATASET_MANIFEST_SCHEMA_VERSION,
-    datasetOntologySemanticIssues,
     readDatasetManifest
 } from '../lib/dataset-manifest.ts';
 import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
@@ -39,17 +38,12 @@ async function main(): Promise<void> {
     if (specName
         && generationArgs.includes('--affected')
         && !generationArgs.includes('--rebuild-graph')
+        && !generationArgs.includes('--reset-graph')
         && !getCliOption(generationArgs, 'generator')
         && !getCliOption(generationArgs, 'view')
         && !generationArgs.includes('--training-only')) {
         const outDir = datasetOutDir(projectRoot, datasetDirForSpec(specName));
         const manifest = readDatasetManifest(outDir);
-        const ontologyIssues = datasetOntologySemanticIssues(projectRoot);
-        if (ontologyIssues.length > 0) {
-            throw new Error(
-                `Reliable ontology semantic delta state is unavailable:\n${ontologyIssues.map(issue => `- ${issue}`).join('\n')}`
-            );
-        }
         if (manifest?.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
             && manifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
             && manifest.complete === true

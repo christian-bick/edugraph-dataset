@@ -1,7 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {
     buildOntologySemanticSnapshot,
-    diffOntologySemantics,
     OntologySemanticIndex,
     withOntologySemanticUsage
 } from './external-semantics.ts';
@@ -36,15 +35,9 @@ describe('external semantic deltas', () => {
             }
         });
 
-        const delta = diffOntologySemantics(prior, current);
-        expect(delta.entities.added).toEqual([c]);
-        expect(delta.entities.changed).toEqual([a]);
-        expect(delta.relations.added).toEqual([`partOf|${a}|${c}`]);
-        expect(delta.relations.removed).toEqual([`partOf|${a}|${b}`]);
-        expect(delta.work.records_compared).toBe(
-            delta.work.previous_entities + delta.work.current_entities
-            + delta.work.previous_relations + delta.work.current_relations
-        );
+        expect(prior.entities[a].definition_hash).not.toBe(current.entities[a].definition_hash);
+        expect(prior.relations[`partOf|${a}|${b}`]).toBeDefined();
+        expect(current.relations[`partOf|${a}|${c}`]).toBeDefined();
         const closure = new OntologySemanticIndex(current).closure([a]);
         expect(closure.entities).toEqual([a, c]);
         expect(closure.relations).toEqual([`partOf|${a}|${c}`]);
@@ -55,6 +48,6 @@ describe('external semantic deltas', () => {
         expect(used.usages.ccss.entities).toEqual([a, c]);
         expect(used.usages.ccss.relations).toEqual([`partOf|${a}|${c}`]);
         expect(used.usages.ccss.input_sha256).toMatch(/^[a-f\d]{64}$/);
-        expect(diffOntologySemantics(current, used).usages.added).toEqual(['ccss']);
+        expect(current.usages.ccss).toBeUndefined();
     });
 });

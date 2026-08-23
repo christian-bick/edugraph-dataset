@@ -12,7 +12,7 @@ import {
 } from '../lib/coverage-core.ts';
 import {digestIdentity} from '../lib/content-identity.ts';
 import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
-import {ontologySemanticUsageHash} from '../lib/external-semantics.ts';
+import {resolveOntologySemanticUsage} from '../lib/external-semantics.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
 
 const PROJECT_ROOT = path.resolve('.');
@@ -63,11 +63,12 @@ async function runValidation() {
   const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) as CoverageManifest;
   const canonicalTree = readCanonicalStandardsTree(PROJECT_ROOT);
 
+  const ontologyUsage = await resolveOntologySemanticUsage(PROJECT_ROOT, 'ccss');
   const identityIssues = coverageManifestIdentityIssues({
     projectRoot: PROJECT_ROOT,
     manifest,
     ontology: resolveOntologyProvenance(PROJECT_ROOT),
-    ontologyUsageSha256: ontologySemanticUsageHash(PROJECT_ROOT, 'ccss')
+    ontologyUsageSha256: ontologyUsage.usage.input_sha256
   });
   result.errors.push(...identityIssues);
   if (identityIssues.length > 0) result.passed = false;

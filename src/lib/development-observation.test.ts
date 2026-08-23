@@ -28,9 +28,8 @@ function fixture() {
         'src/generators/demo/generator.ts': 'export const generator = 1;\n',
         'src/spec/ccss/targets.ts': 'export const targets = [];\n',
         'docs/note.md': 'unrelated\n',
-        'package.json': '{"dependencies":{"edugraph-ts":"v1"}}\n',
-        'package-lock.json': '{"lockfileVersion":3,"packages":{}}\n',
-        'config/external-semantics/ontology.json': '{"semantic_sha256":"ontology-a"}\n',
+        'package.json': '{"dependencies":{"edugraph-ts":"https://example.test/ontology-v1.tgz"}}\n',
+        'package-lock.json': '{"lockfileVersion":3,"packages":{"node_modules/edugraph-ts":{"version":"1.0.0","resolved":"https://example.test/ontology-v1.tgz","integrity":"sha512-v1"}}}\n',
         '.gitignore': 'src/visuals/views/**/checklist.md\n'
     };
     for (const [path, content] of Object.entries(files)) {
@@ -119,6 +118,28 @@ describe('development input observation', () => {
         expect(inspect()).toMatchObject({
             clean: true,
             relevant_files_checked: 0
+        });
+    });
+
+    it('requires authoritative reconstruction when locked ontology provenance changes', () => {
+        const {projectRoot, inspect} = fixture();
+        const dependency = 'https://example.test/ontology-v2.tgz';
+        writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
+            dependencies: {'edugraph-ts': dependency}
+        }));
+        writeFileSync(resolve(projectRoot, 'package-lock.json'), JSON.stringify({
+            lockfileVersion: 3,
+            packages: {
+                'node_modules/edugraph-ts': {
+                    version: '2.0.0',
+                    resolved: dependency,
+                    integrity: 'sha512-v2'
+                }
+            }
+        }));
+        expect(inspect()).toMatchObject({
+            clean: false,
+            reason: 'ontology provenance changed; authoritative graph reconstruction required'
         });
     });
 

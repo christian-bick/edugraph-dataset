@@ -6,8 +6,7 @@ export const DEVELOPMENT_CHECKS = [
     'generator-view-specs',
     'labels',
     'docs',
-    'generator-coverage',
-    'external-semantics'
+    'generator-coverage'
 ] as const;
 
 export type DevelopmentCheck = typeof DEVELOPMENT_CHECKS[number];
@@ -29,7 +28,6 @@ const VIEW_PATTERN = /^src\/visuals\/views\/([^/]+\/)?([^/]+)\//;
 const SPEC_PATTERN = /^src\/spec\/([^/]+)(?:\/|\.ts$)/;
 const DOC_PATTERN = /^(?:README\.md|DOCS\.md|AGENTS\.md|docs\/.*\.md|\.agents\/skills\/.*\/SKILL\.md)$/;
 const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|type-parser|ontology|utils|module-resolver))/;
-const ONTOLOGY_SEMANTICS_PATTERN = /^(?:config\/external-semantics\/ontology\.json|src\/(?:lib\/external-semantics|scripts\/(?:update-ontology-source|validate-external-semantics))\.ts$)/;
 
 function normalizedFile(path: string): string {
     return path.replaceAll('\\', '/').replace(/^\.\//, '');
@@ -122,15 +120,6 @@ export function planDevelopmentValidation(
         if (file === 'src/scripts/check-labels.ts') addCheck('labels', file);
         if (file === 'src/scripts/validate-standards-spec.ts') addAllSpecs(file);
 
-        classificationSteps++;
-        if (ONTOLOGY_SEMANTICS_PATTERN.test(file) || file === 'package.json' || file === 'package-lock.json') {
-            addCheck('external-semantics', file);
-        }
-        if (file === 'config/external-semantics/ontology.json') {
-            addCheck('generator-view-specs', file);
-            addCheck('labels', file);
-            addAllSpecs(file);
-        }
     }
 
     const checkList = DEVELOPMENT_CHECKS.filter(check => checks.has(check));

@@ -80,7 +80,8 @@ npm run merge:dataset
 *   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
 *   `--training-only`: Skip validation set generation to speed up the process.
 *   `--affected`: Resolve and render only exact pairs reached from the persisted dependency delta.
-*   `--rebuild-graph`: Reconstruct the complete dependency baseline; cannot be combined with a scoped generation flag.
+*   `--rebuild-graph`: Reconstruct the complete graph authoritatively, compare it with the previous graph, and execute only the changed closure; cannot be combined with a scoped generation flag.
+*   `--reset-graph`: Discard the previous graph and establish a new full baseline by regenerating every pair; cannot be combined with a scoped generation flag.
 *   `--concurrency=N`: Set the bounded Playwright worker count (default: 8).)*
 
 Scoped generation is transactional and dependency-checked. Before rendering, the persisted graph
@@ -104,11 +105,13 @@ the affected model modules, and reuses persisted matching when their capabilitie
 New structure, capability changes, or ambiguous state fall back to a complete linear graph build.
 
 Automatic identity covers authored targets, generator/view specs and schemas, the local imports and
-assets actually reached from generator/view implementations, accepted ontology semantics, view
+assets actually reached from generator/view implementations, the exact pinned ontology's used semantic records, view
 checklists, the VQA system prompt, and canonical environment identities. Build, matching,
 validation, cache, and workflow machinery is deliberately outside automatic identity. Such changes
-are not detected or managed by the graph. The engineer or agent must use a full
-`--rebuild-graph` run when a machinery edit can change behavior. Releases always rebuild the graph.
+are not detected automatically. Use `--rebuild-graph` when machinery can change graph construction
+or matching, and `--reset-graph` when a hidden behavioral change requires a new pixel baseline.
+Releases always reconstruct and compare the graph. VQA `--force` remains separate because it asks
+for new external judgments despite unchanged graph keys.
 Git commits are discovery baselines, never artifact keys. Standard datasets expose a tiny
 `out/dataset-<spec>/current.json` pointer to immutable shards under `out/.dataset-store/`; all
 repository readers consume that logical snapshot.
@@ -190,22 +193,19 @@ Coverage generation consumes the canonical CCSS documentation tree tracked at
 `public/coverage/ccss-tree.json`; routine local, CI, and release workflows never download raw
 standards data. Every coverage manifest records the exact tree digest, used ontology semantics, and
 repository-content identity used to build it.
-Source and ontology updates are explicit, dry-run-first operations:
+Standards-source conversion is an explicit, dry-run-first operation:
 ```bash
 # Convert a candidate immutable CCSS revision into the tracked tree; add --apply to accept it.
 npm run update:standards-source -- --revision=<40-character-commit>
-
-# After intentionally updating the pinned edugraph-ts dependency, inspect entity/relation changes.
-npm run update:ontology-source
 ```
 The standards updater fetches only the explicitly named revision, reports the ID-level delta, and
 replaces the tracked canonical tree only with `--apply`. It does not alter dataset generation:
-authored targets under `src/spec/` are the sole standards-side dataset input. The ontology updater
-writes the integrity-checked baseline under `config/external-semantics/`, and generation refuses a
-package that does not match it. Ontology invalidation follows only the entity definitions and
-`partOf` closure actually
-used by a target, generator, view, or VQA record; unrelated ontology changes do not churn images or
-validation results.
+authored targets under `src/spec/` are the sole standards-side dataset input. Updating the exact
+`edugraph-ts` package and lock changes ontology provenance, which authoritatively reconstructs the
+complete graph. Entity, definition, and `partOf` relation records are then compared with the prior
+graph, so only targets, pairs, or VQA records reached from changed used semantics become stale.
+Unrelated ontology changes do not churn images or validation results; unversioned mutations are not
+development inputs and are eliminated by the exact locked install used for canonical work.
 The timestamp-free coverage computation is stored immutably under its complete input key. Local,
 CI, release, and deployment runs reuse that core and generate channel-specific metadata as a cheap
 projection when the effective coverage inputs are identical.

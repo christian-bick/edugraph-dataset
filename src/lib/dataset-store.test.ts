@@ -92,6 +92,36 @@ describe('dataset store', () => {
         }
     });
 
+    it('publishes graph-only metadata without rewriting image shards', () => {
+        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-store-graph-only-'));
+        const datasetDir = resolve(root, 'out', 'dataset-test');
+        try {
+            const first = beginDatasetStoreTransaction(datasetDir, {
+                fullDataset: true,
+                generatorIds: ['one']
+            }, 'first');
+            writeSelected(first.stagingDir, 'one', 'view-a', 'sample-a', 'image-a');
+            first.commit({graph: 'before'});
+            const original = readDatasetSnapshot(datasetDir);
+            const originalShard = Object.values(original.shardReferences)[0].key;
+
+            const graphOnly = beginDatasetStoreTransaction(datasetDir, {
+                fullDataset: false,
+                pairKeys: [],
+                generatorIds: []
+            }, 'graph-only');
+            graphOnly.commit({graph: 'after'});
+
+            const published = readDatasetSnapshot(datasetDir);
+            expect(published.buildManifest).toEqual({graph: 'after'});
+            expect(Object.values(published.shardReferences)[0].key).toBe(originalShard);
+            expect(published.rows('train').map(row => row.sample_key)).toEqual(['sample-a']);
+            expect(graphOnly.stats()).toMatchObject({shards_written: 0, shards_reused: 1});
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+
     it('replaces an exact pair without selecting sibling views of the same generator', () => {
         const root = mkdtempSync(resolve(tmpdir(), 'edugraph-store-pair-'));
         const datasetDir = resolve(root, 'out', 'dataset-test');

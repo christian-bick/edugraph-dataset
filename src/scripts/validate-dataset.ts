@@ -24,7 +24,7 @@ import {
     buildDatasetManifest,
     DATASET_MANIFEST_SCHEMA_VERSION,
     dependencyGraphVqaCacheKey,
-    datasetOntologySemanticIssues,
+    datasetOntologyProvenanceHash,
     datasetRendererIssues,
     datasetFreshnessIssues,
     readDatasetManifest,
@@ -46,6 +46,7 @@ import {
     type DatasetSnapshot
 } from '../lib/dataset-store.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
+import {resolveGraphExecutionMode} from '../lib/graph-execution-mode.ts';
 import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -296,17 +297,23 @@ async function main() {
     }
 
     const existingManifest = readDatasetManifest(DATASET_DIR);
-    const ontologyIssues = datasetOntologySemanticIssues(PROJECT_ROOT);
-    if (ontologyIssues.length > 0) {
-        throw new Error(
-            `Reliable ontology semantic delta state is unavailable:\n${ontologyIssues.map(issue => `- ${issue}`).join('\n')}`
-        );
-    }
+    const graphMode = resolveGraphExecutionMode({
+        previous: existingManifest,
+        previousSupported: !existingManifest
+            || (existingManifest.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
+                && existingManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+                && existingManifest.complete === true
+                && existingManifest.spec === specName),
+        previousExternalIdentity: existingManifest?.ontology_provenance_hash,
+        rebuild: rebuildGraph,
+        currentExternalIdentity: datasetOntologyProvenanceHash(PROJECT_ROOT)
+    });
+    const authoritativeRebuild = graphMode.reconstruct;
     let currentManifestBuild: DatasetManifestBuild;
     let generatorIds: Set<string>;
     let viewIds: Set<string>;
     const canObserveCleanDevelopment = !auditMode
-        && !rebuildGraph
+        && !authoritativeRebuild
         && !targetGenerator
         && !targetView
         && existingManifest?.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
@@ -332,10 +339,10 @@ async function main() {
             development_observation: existingManifest.development_observation,
             source_stats: {directories_read: 0, files_read: 0, bytes_read: 0},
             ontology_semantics: {
-                trusted: true,
-                diagnostics: [],
                 ontology_entities: 0,
-                ontology_relations: 0
+                ontology_relations: 0,
+                dependency: existingManifest.ontology_dependency,
+                provenance_hash: existingManifest.ontology_provenance_hash
             }
         };
         generatorIds = new Set(Object.values(existingManifest.entries).map(entry => entry.generator));
@@ -374,7 +381,7 @@ async function main() {
             viewCatalog,
             specName,
             policyHash: matchingPolicyInputHash(),
-            previousGraph: rebuildGraph ? null : existingManifest?.dependency_graph ?? null,
+            previousGraph: authoritativeRebuild ? null : existingManifest?.dependency_graph ?? null,
             pairIndex,
             counters
         });
