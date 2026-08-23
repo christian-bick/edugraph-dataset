@@ -1961,15 +1961,12 @@ export type ShapePartitionEquivalenceProblem = {
 };
 
 export type AngleConceptFraction =
-    | {numerator: 1; denominator: 6; display: '1/6'}
-    | {numerator: 1; denominator: 4; display: '1/4'}
-    | {numerator: 1; denominator: 3; display: '1/3'}
-    | {numerator: 1; denominator: 2; display: '1/2'};
+    | {numerator: 1; denominator: 6}
+    | {numerator: 1; denominator: 4}
+    | {numerator: 1; denominator: 3}
+    | {numerator: 1; denominator: 2};
 
 export type AngleConceptGeometry = {
-    centerLabel: 'O';
-    startPointLabel: 'A';
-    endPointLabel: 'B';
     fullTurnDegrees: 360;
     startDegrees: 0;
     endDegrees: number;
@@ -1979,30 +1976,20 @@ export type AngleConceptGeometry = {
 };
 
 type AngleConceptProblemBase = {
-    prompt: string;
     geometry: AngleConceptGeometry;
-    answer: string;
-    answerStatement: string;
-    explanation: string;
 };
 
 export type RecognizeAngleFromArcProblem = AngleConceptProblemBase & {
     task: 'recognize-angle-from-arc';
     arcFraction: AngleConceptFraction;
-    questionRelation: string;
-    solutionRelation: string;
-    rayStatement: string;
 };
 
 export type DeriveOneDegreeProblem = AngleConceptProblemBase & {
     task: 'derive-one-degree';
     partitionCount: 360;
     selectedParts: 1;
-    unitFraction: {numerator: 1; denominator: 360; display: '1/360'};
+    unitFraction: {numerator: 1; denominator: 360};
     degreeMeasure: 1;
-    questionRelation: '1/360 of a full turn = ?';
-    solutionRelation: '1/360 of a full turn = 1°';
-    fractionStatement: 'One equal turn is 1/360 of a full circle.';
 };
 
 export type InterpretDegreeIterationProblem = AngleConceptProblemBase & {
@@ -2010,9 +1997,6 @@ export type InterpretDegreeIterationProblem = AngleConceptProblemBase & {
     unitDegree: 1;
     iterationCount: number;
     angleMeasure: number;
-    questionRelation: string;
-    solutionRelation: string;
-    unitStatement: 'Each marked interval is a 1° turn.';
 };
 
 export type AngleConceptProblem =

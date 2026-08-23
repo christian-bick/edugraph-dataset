@@ -34,9 +34,6 @@ const iterationConfig: AngleConceptsGeneratorConfig = {
 
 function expectCommonGeometry(data: AngleConceptProblem): void {
     expect(data.geometry).toMatchObject({
-        centerLabel: 'O',
-        startPointLabel: 'A',
-        endPointLabel: 'B',
         fullTurnDegrees: 360,
         startDegrees: 0,
         endDegrees: data.geometry.sweepDegrees,
@@ -66,20 +63,7 @@ describe('AngleConceptsGenerator', () => {
             expect(data.geometry.sweepDegrees).toBe(
                 360 * data.arcFraction.numerator / data.arcFraction.denominator
             );
-            expect(data.prompt).toBe('What is the degree measure of the highlighted angle?');
-            expect(data.questionRelation).toBe(`${data.arcFraction.display} of a full turn = ?°`);
-            expect(data.solutionRelation).toBe(
-                `${data.arcFraction.display} of a full turn = ${data.geometry.sweepDegrees}°`
-            );
-            expect(data.rayStatement).toBe('Rays OA and OB share endpoint O.');
-            expect(data.answer).toBe(`${data.geometry.sweepDegrees}°`);
-            expect(data.answerStatement).toBe(
-                `The highlighted angle measures ${data.geometry.sweepDegrees}° because it sweeps ${data.arcFraction.display} of a full turn.`
-            );
-            expect(data.explanation).toBe(
-                `The highlighted arc covers ${data.arcFraction.display} of the 360° full turn, so its angle measure is ${data.geometry.sweepDegrees}°.`
-            );
-            observed.add(data.arcFraction.display);
+            observed.add(`${data.arcFraction.numerator}/${data.arcFraction.denominator}`);
         }
         expect(observed).toEqual(new Set(['1/6', '1/4', '1/3', '1/2']));
     });
@@ -96,19 +80,8 @@ describe('AngleConceptsGenerator', () => {
         });
         expect(data.partitionCount).toBe(360);
         expect(data.selectedParts).toBe(1);
-        expect(data.unitFraction).toEqual({numerator: 1, denominator: 360, display: '1/360'});
+        expect(data.unitFraction).toEqual({numerator: 1, denominator: 360});
         expect(data.degreeMeasure).toBe(1);
-        expect(data.prompt).toBe(
-            'A full circle is partitioned into 360 equal turns. What is the angle measure of one turn?'
-        );
-        expect(data.questionRelation).toBe('1/360 of a full turn = ?');
-        expect(data.solutionRelation).toBe('1/360 of a full turn = 1°');
-        expect(data.fractionStatement).toBe('One equal turn is 1/360 of a full circle.');
-        expect(data.answer).toBe('1°');
-        expect(data.answerStatement).toBe('One equal turn measures 1°.');
-        expect(data.explanation).toBe(
-            'A full turn has 360°. Splitting it into 360 equal parts makes each part a 1° turn.'
-        );
     });
 
     it('iterates a one-degree unit with an inclusive boundary tick for every turn', () => {
@@ -123,19 +96,6 @@ describe('AngleConceptsGenerator', () => {
             expect(data.geometry.sweepDegrees).toBe(data.angleMeasure);
             expect(data.geometry.tickDegrees).toEqual(
                 Array.from({length: data.iterationCount + 1}, (_, degree) => degree)
-            );
-            expect(data.prompt).toBe(
-                `How many degrees are in ${data.iterationCount} one-degree turns?`
-            );
-            expect(data.questionRelation).toBe(`${data.iterationCount} × 1° = ?`);
-            expect(data.solutionRelation).toBe(
-                `${data.iterationCount} × 1° = ${data.angleMeasure}°`
-            );
-            expect(data.answer).toBe(`${data.angleMeasure}°`);
-            expect(data.answerStatement).toBe(`The angle measures ${data.angleMeasure}°.`);
-            expect(data.unitStatement).toBe('Each marked interval is a 1° turn.');
-            expect(data.explanation).toBe(
-                `Each interval measures 1°. Iterating it ${data.iterationCount} times gives ${data.iterationCount} × 1° = ${data.angleMeasure}°.`
             );
             observed.add(data.iterationCount);
         }

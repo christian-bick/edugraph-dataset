@@ -61,7 +61,7 @@ payload type changes.
 
 | Generator | T/V | Reviewed disposition |
 |---|---:|---|
-| `angle-concepts` | 3/2 | **Projection:** `prompt`, `answerStatement`, `explanation`, and adjacent statement/answer prose. **Witness:** replace paired `questionRelation`/`solutionRelation` strings with one typed angle/turn relation; views control masking and reveal. |
+| `angle-concepts` | 3/2 | **Migrated:** each target-selected concept retains a typed fraction, turn, degree, iteration, and geometry witness. Shared view code derives prompts, point labels, fraction notation, question/solution relations, ray and unit statements, answers, and explanations. |
 | `angle-measurement` | 2/2 | **Projection:** prompt and answer/explanation prose. **Witness:** one typed angle-measure relation replaces question/solution strings. The measure-versus-sketch task discriminant is view-owned and must not select parallel payloads. |
 | `comparison` | 18/4 | **Migrated:** legacy comparisons remain the neutral number pair and relation. Grade 4 comparisons add typed first-differing-place or all-equal evidence; the view derives numeral formatting, symbol, prompt, equation, conclusion, and explanation. **Deferred:** reconcile direct range-config boundary semantics with ontology `NumbersLarger*`/`NumbersSmaller*` exclusivity. |
 | `decimal-comparison` | 3/1 | **Migrated:** typed operands, normalized values/models, relation, symbol, and first deciding place remain canonical. The view derives the prompt, hidden and solved comparison equations, answer statement, and place-value explanation. |

@@ -10,6 +10,7 @@ import {validateProblemData, ViewValidationError} from '../../helpers/validation
 import {
     counterclockwiseArcPath,
     isValidAngleConceptProblem,
+    presentAngleConcept,
     pointOnCircle
 } from './angle-concepts-helpers.ts';
 
@@ -54,18 +55,21 @@ function RayAndArcDiagram({geometry}: {geometry: AngleConceptGeometry}) {
             <circle cx={CENTER_X} cy={CENTER_Y} r="7" fill="#1e293b" />
             <circle cx={start.x} cy={start.y} r="6" fill="#0f766e" />
             <circle cx={end.x} cy={end.y} r="6" fill="#0f766e" />
-            <text x={CENTER_X - 14} y={CENTER_Y + 24} className="fill-slate-800 text-[18px] font-extrabold">{geometry.centerLabel}</text>
-            <text x={start.x + 22} y={start.y + 7} className="fill-slate-800 text-[18px] font-extrabold">{geometry.startPointLabel}</text>
-            <text x={labelEnd.x - 6} y={labelEnd.y + 7} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{geometry.endPointLabel}</text>
+            <text x={CENTER_X - 14} y={CENTER_Y + 24} className="fill-slate-800 text-[18px] font-extrabold">O</text>
+            <text x={start.x + 22} y={start.y + 7} className="fill-slate-800 text-[18px] font-extrabold">A</text>
+            <text x={labelEnd.x - 6} y={labelEnd.y + 7} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">B</text>
         </svg>
     );
 }
 
-function RecognitionDiagram({data}: {data: RecognizeAngleFromArcProblem}) {
+function RecognitionDiagram({data, rayStatement}: {
+    data: RecognizeAngleFromArcProblem;
+    rayStatement: string;
+}) {
     return (
         <div className="flex h-[300px] flex-col items-center justify-center">
             <RayAndArcDiagram geometry={data.geometry} />
-            <div className="-mt-6 text-[0.95rem] font-semibold text-slate-600">{data.rayStatement}</div>
+            <div className="-mt-6 text-[0.95rem] font-semibold text-slate-600">{rayStatement}</div>
         </div>
     );
 }
@@ -165,11 +169,7 @@ export const AngleConceptsView = ({mode, payload, viewId}: AngleConceptsViewProp
     const {problem, isSolutionView} = payload;
     validateProblemData(viewId, problem.data, [
         'task',
-        'prompt',
-        'geometry',
-        'answer',
-        'answerStatement',
-        'explanation'
+        'geometry'
     ]);
     const data = problem.data;
     const expectedMode = data.task === 'derive-one-degree'
@@ -183,59 +183,53 @@ export const AngleConceptsView = ({mode, payload, viewId}: AngleConceptsViewProp
     }
     if (data.task === 'recognize-angle-from-arc') {
         validateProblemData(viewId, data, [
-            'arcFraction',
-            'questionRelation',
-            'solutionRelation',
-            'rayStatement'
+            'arcFraction'
         ]);
     } else if (data.task === 'derive-one-degree') {
         validateProblemData(viewId, data, [
             'partitionCount',
             'selectedParts',
             'unitFraction',
-            'degreeMeasure',
-            'questionRelation',
-            'solutionRelation',
-            'fractionStatement'
+            'degreeMeasure'
         ]);
     } else if (data.task === 'interpret-degree-iteration') {
         validateProblemData(viewId, data, [
             'unitDegree',
             'iterationCount',
-            'angleMeasure',
-            'questionRelation',
-            'solutionRelation',
-            'unitStatement'
+            'angleMeasure'
         ]);
     }
     if (!isValidAngleConceptProblem(data)) {
         throw new ViewValidationError(
             viewId,
-            'The angle geometry, unit evidence, and supplied relations must agree exactly.'
+            'The angle geometry, fraction, and unit evidence must agree exactly.'
         );
     }
+    const presentation = presentAngleConcept(data);
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[54px] items-center justify-center px-5 text-center text-[1.22rem] font-bold leading-snug text-slate-700">
-                {data.prompt}
+                {presentation.prompt}
             </div>
             <div className="mt-3 flex h-[310px] items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
-                {data.task === 'recognize-angle-from-arc' && <RecognitionDiagram data={data} />}
+                {data.task === 'recognize-angle-from-arc' && (
+                    <RecognitionDiagram data={data} rayStatement={presentation.rayStatement!} />
+                )}
                 {data.task === 'derive-one-degree' && <OneDegreeDiagram data={data} isSolutionView={isSolutionView} />}
                 {data.task === 'interpret-degree-iteration' && <IterationDiagram data={data} />}
             </div>
             {!isSolutionView && (
                 <div className="mt-3 flex min-h-[58px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-5 text-center font-mono text-[1.05rem] font-extrabold text-slate-700">
-                    {data.questionRelation}
+                    {presentation.questionRelation}
                 </div>
             )}
             {isSolutionView && (
                 <div className="mt-3">
                     <SolutionPanel
-                        relation={data.solutionRelation}
-                        answerStatement={data.answerStatement}
-                        explanation={data.explanation}
+                        relation={presentation.solutionRelation}
+                        answerStatement={presentation.answerStatement}
+                        explanation={presentation.explanation}
                     />
                 </div>
             )}

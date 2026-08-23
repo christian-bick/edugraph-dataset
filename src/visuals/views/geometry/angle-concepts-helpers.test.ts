@@ -7,14 +7,12 @@ import {
 import {
     counterclockwiseArcPath,
     isValidAngleConceptProblem,
+    presentAngleConcept,
     pointOnCircle
 } from './angle-concepts-helpers.ts';
 
 const base = {
     geometry: {
-        centerLabel: 'O' as const,
-        startPointLabel: 'A' as const,
-        endPointLabel: 'B' as const,
         fullTurnDegrees: 360 as const,
         startDegrees: 0 as const,
         direction: 'counterclockwise' as const
@@ -24,48 +22,27 @@ const base = {
 const recognition: RecognizeAngleFromArcProblem = {
     ...base,
     task: 'recognize-angle-from-arc',
-    prompt: 'What is the degree measure of the highlighted angle?',
     geometry: {...base.geometry, endDegrees: 90, sweepDegrees: 90, tickDegrees: [0, 90]},
-    arcFraction: {numerator: 1, denominator: 4, display: '1/4'},
-    questionRelation: '1/4 of a full turn = ?°',
-    solutionRelation: '1/4 of a full turn = 90°',
-    rayStatement: 'Rays OA and OB share endpoint O.',
-    answer: '90°',
-    answerStatement: 'The highlighted angle measures 90° because it sweeps 1/4 of a full turn.',
-    explanation: 'The highlighted arc covers 1/4 of the 360° full turn, so its angle measure is 90°.'
+    arcFraction: {numerator: 1, denominator: 4}
 };
 
 const oneDegree: DeriveOneDegreeProblem = {
     ...base,
     task: 'derive-one-degree',
-    prompt: 'A full circle is partitioned into 360 equal turns. What is the angle measure of one turn?',
     geometry: {...base.geometry, endDegrees: 1, sweepDegrees: 1, tickDegrees: [0, 1]},
     partitionCount: 360,
     selectedParts: 1,
-    unitFraction: {numerator: 1, denominator: 360, display: '1/360'},
-    degreeMeasure: 1,
-    questionRelation: '1/360 of a full turn = ?',
-    solutionRelation: '1/360 of a full turn = 1°',
-    fractionStatement: 'One equal turn is 1/360 of a full circle.',
-    answer: '1°',
-    answerStatement: 'One equal turn measures 1°.',
-    explanation: 'A full turn has 360°. Splitting it into 360 equal parts makes each part a 1° turn.'
+    unitFraction: {numerator: 1, denominator: 360},
+    degreeMeasure: 1
 };
 
 const iteration: InterpretDegreeIterationProblem = {
     ...base,
     task: 'interpret-degree-iteration',
-    prompt: 'How many degrees are in 5 one-degree turns?',
     geometry: {...base.geometry, endDegrees: 5, sweepDegrees: 5, tickDegrees: [0, 1, 2, 3, 4, 5]},
     unitDegree: 1,
     iterationCount: 5,
-    angleMeasure: 5,
-    questionRelation: '5 × 1° = ?',
-    solutionRelation: '5 × 1° = 5°',
-    unitStatement: 'Each marked interval is a 1° turn.',
-    answer: '5°',
-    answerStatement: 'The angle measures 5°.',
-    explanation: 'Each interval measures 1°. Iterating it 5 times gives 5 × 1° = 5°.'
+    angleMeasure: 5
 };
 
 describe('angle concept payload validation', () => {
@@ -75,14 +52,25 @@ describe('angle concept payload validation', () => {
         expect(isValidAngleConceptProblem(iteration)).toBe(true);
     });
 
-    it('rejects inconsistent fractions and answer-bearing relations', () => {
-        expect(isValidAngleConceptProblem({...recognition, arcFraction: {numerator: 1, denominator: 3, display: '1/3'}})).toBe(false);
-        expect(isValidAngleConceptProblem({...recognition, rayStatement: 'Rays OA and OC share endpoint O.'})).toBe(false);
-        expect(isValidAngleConceptProblem({...recognition, answerStatement: 'The highlighted angle measures 60°.'})).toBe(false);
-        expect(isValidAngleConceptProblem({...oneDegree, answer: '360°'})).toBe(false);
-        expect(isValidAngleConceptProblem({...oneDegree, explanation: 'One turn measures 360°.'})).toBe(false);
-        expect(isValidAngleConceptProblem({...iteration, solutionRelation: '5 × 1° = 6°'})).toBe(false);
-        expect(isValidAngleConceptProblem({...iteration, explanation: 'Five turns make 6°.'})).toBe(false);
+    it('rejects inconsistent typed angle and fraction relations', () => {
+        expect(isValidAngleConceptProblem({
+            ...recognition,
+            arcFraction: {numerator: 1, denominator: 3}
+        })).toBe(false);
+        expect(isValidAngleConceptProblem({...oneDegree, degreeMeasure: 2 as 1})).toBe(false);
+        expect(isValidAngleConceptProblem({...iteration, angleMeasure: 6})).toBe(false);
+    });
+
+    it('derives the learner-facing relations and explanations', () => {
+        expect(presentAngleConcept(recognition)).toMatchObject({
+            questionRelation: '1/4 of a full turn = ?°',
+            solutionRelation: '1/4 of a full turn = 90°',
+            rayStatement: 'Rays OA and OB share endpoint O.'
+        });
+        expect(presentAngleConcept(oneDegree).solutionRelation).toBe(
+            '1/360 of a full turn = 1°'
+        );
+        expect(presentAngleConcept(iteration).solutionRelation).toBe('5 × 1° = 5°');
     });
 
     it('rejects missing or non-sequential repeated-degree boundaries', () => {
