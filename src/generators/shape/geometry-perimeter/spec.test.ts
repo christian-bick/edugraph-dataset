@@ -23,9 +23,11 @@ describe('GeometryPerimeterGenerator spec integration', () => {
             ]);
 
             expect(stub).not.toBeNull();
-            expect(stub!.data.vertices).toHaveLength(stub!.data.sideLengths.length);
-            expect(stub!.data.perimeter).toBe(
-                stub!.data.sideLengths.reduce((sum, length) => sum + length, 0)
+            const data = stub!.data;
+            if (data.shape === 'rectangle') throw new Error('Expected polygon perimeter data.');
+            expect(data.vertices).toHaveLength(data.sideLengths.length);
+            expect(data.perimeter).toBe(
+                data.sideLengths.reduce((sum, length) => sum + length, 0)
             );
         }
     );
@@ -55,7 +57,7 @@ describe('GeometryPerimeterGenerator spec integration', () => {
             ]);
 
             expect(stub).not.toBeNull();
-            expect(stub!.data.knownSideTotal).toBeGreaterThan(0);
+            expect(stub!.data.perimeter).toBeGreaterThan(0);
             expect(stub!.tags).not.toContain(Ability.ProcedureInversion);
         }
     );
@@ -71,10 +73,7 @@ describe('GeometryPerimeterGenerator spec integration', () => {
         ]);
 
         expect(stub).not.toBeNull();
-        expect(stub!.data).toMatchObject({
-            shape: 'rectangle',
-            formula: 'P = length + width + length + width'
-        });
+        expect(stub!.data).toMatchObject({shape: 'rectangle'});
         expect(stub!.tags).toEqual(expect.arrayContaining([
             Area.Equation,
             Area.Addition,
@@ -95,7 +94,7 @@ describe('GeometryPerimeterGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shape).toBe('rectangle');
         if (stub!.data.shape !== 'rectangle') throw new Error('Expected rectangle data.');
-        expect(stub!.data.missingValue).toBeGreaterThan(0);
+        expect(stub!.data.perimeter).toBe(2 * (stub!.data.length + stub!.data.width));
         expect(stub!.tags).not.toContain(Ability.ProcedureInversion);
     });
 });

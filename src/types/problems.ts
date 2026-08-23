@@ -1723,27 +1723,15 @@ type GeometryPerimeterProblemBase = {
     vertices: PolygonVertex[];
     sideLengths: number[];
     perimeter: number;
-    unit: 'units';
-    unknownSideIndex: number;
-    knownSideTotal: number;
 };
 
 export type PolygonPerimeterProblem = GeometryPerimeterProblemBase;
 
 type RectanglePerimeterFormulaBase = {
     shape: 'rectangle';
-    vertices: PolygonVertex[];
-    sideLengths: [number, number, number, number];
     length: number;
     width: number;
     perimeter: number;
-    unit: 'units';
-    formula: 'P = length + width + length + width';
-    unknownDimension: 'length' | 'width';
-    knownDimension: 'length' | 'width';
-    knownValue: number;
-    missingValue: number;
-    knownSideTotal: number;
 };
 
 export type RectanglePerimeterProblem = RectanglePerimeterFormulaBase;

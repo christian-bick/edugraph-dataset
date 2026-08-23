@@ -7,8 +7,11 @@ import {
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
     Grade4RectanglePerimeterProblem,
+    RectanglePerimeterProjection,
     isGrade4RectanglePerimeterProblem,
-    isValidGrade4RectanglePerimeterProblem
+    isValidGrade4RectanglePerimeterProblem,
+    projectRectanglePerimeter,
+    projectUnknownSideIndex
 } from './geometry-perimeter-helpers.ts';
 
 export type GeometryPerimeterMode = 'execution' | 'inversion';
@@ -27,8 +30,7 @@ function validatePerimeter(viewId: string, data: LegacyGeometryPerimeterProblem)
     const expectedSideCounts = {triangle: 3, quadrilateral: 4, pentagon: 5, hexagon: 6};
     const sideCount = expectedSideCounts[data.shape];
     if (
-        data.unit !== 'units'
-        || !sideCount
+        !sideCount
         || data.vertices.length !== sideCount
         || data.sideLengths.length !== sideCount
         || data.vertices.some(vertex => !Number.isFinite(vertex.x) || !Number.isFinite(vertex.y))
@@ -40,36 +42,27 @@ function validatePerimeter(viewId: string, data: LegacyGeometryPerimeterProblem)
             'The polygon, side lengths, and perimeter total must be consistent.'
         );
     }
-    if (
-        !Number.isInteger(data.unknownSideIndex)
-        || data.unknownSideIndex < 0
-        || data.unknownSideIndex >= sideCount
-        || data.knownSideTotal !== data.perimeter - data.sideLengths[data.unknownSideIndex]
-    ) {
-        throw new ViewValidationError(
-            viewId,
-            'An inverse perimeter task must hide one valid side and total the remaining sides.'
-        );
-    }
 }
 
 function RectanglePerimeterDiagram({
     data,
+    projection,
     isSolutionView,
     isInverse
 }: {
     data: Grade4RectanglePerimeterProblem;
+    projection: RectanglePerimeterProjection;
     isSolutionView: boolean;
     isInverse: boolean;
 }) {
-    const lengthLabel = isInverse && data.unknownDimension === 'length' && !isSolutionView
+    const lengthLabel = isInverse && projection.unknownDimension === 'length' && !isSolutionView
         ? '? units'
         : `${data.length} units`;
-    const widthLabel = isInverse && data.unknownDimension === 'width' && !isSolutionView
+    const widthLabel = isInverse && projection.unknownDimension === 'width' && !isSolutionView
         ? '? units'
         : `${data.width} units`;
     const accessibleDescription = isInverse && !isSolutionView
-        ? `Rectangle with known ${data.knownDimension} ${data.knownValue} units and unknown ${data.unknownDimension}`
+        ? `Rectangle with known ${projection.knownDimension} ${projection.knownValue} units and unknown ${projection.unknownDimension}`
         : `Rectangle with length ${data.length} units and width ${data.width} units`;
 
     return (
@@ -91,40 +84,42 @@ function RectanglePerimeterDiagram({
 
 function RectanglePerimeterFormulaTask({
     data,
+    projection,
     isSolutionView,
     isInverse
 }: {
     data: Grade4RectanglePerimeterProblem;
+    projection: RectanglePerimeterProjection;
     isSolutionView: boolean;
     isInverse: boolean;
 }) {
     const prompt = isInverse
-        ? `A rectangle has a perimeter of ${data.perimeter} units and a ${data.knownDimension} of ${data.knownValue} units. Find its ${data.unknownDimension}.`
+        ? `A rectangle has a perimeter of ${data.perimeter} units and a ${projection.knownDimension} of ${projection.knownValue} units. Find its ${projection.unknownDimension}.`
         : `Find the perimeter of a rectangle with length ${data.length} units and width ${data.width} units.`;
     const questionEquation = isInverse
-        ? data.unknownDimension === 'length'
+        ? projection.unknownDimension === 'length'
             ? `P = ? + ${data.width} + ? + ${data.width} = ${data.perimeter}`
             : `P = ${data.length} + ? + ${data.length} + ? = ${data.perimeter}`
         : `P = ${data.length} + ${data.width} + ${data.length} + ${data.width} = ?`;
-    const inverseEquation = `(${data.perimeter} - ${data.knownSideTotal}) ÷ 2 = ?`;
+    const inverseEquation = `(${data.perimeter} - ${projection.knownSideTotal}) ÷ 2 = ?`;
     const solutionEquation = isInverse
-        ? `(${data.perimeter} - ${data.knownSideTotal}) ÷ 2 = ${data.missingValue}`
+        ? `(${data.perimeter} - ${projection.knownSideTotal}) ÷ 2 = ${projection.missingValue}`
         : `P = ${data.length} + ${data.width} + ${data.length} + ${data.width} = ${data.perimeter}`;
     const answerStatement = isInverse
-        ? `The ${data.unknownDimension} is ${data.missingValue} units.`
+        ? `The ${projection.unknownDimension} is ${projection.missingValue} units.`
         : `The perimeter is ${data.perimeter} units.`;
     const explanation = isInverse
-        ? `The two known ${data.knownDimension} sides total ${data.knownSideTotal} units. Subtract them from ${data.perimeter}, then divide the remaining length equally between the two ${data.unknownDimension} sides to get ${data.missingValue} units.`
+        ? `The two known ${projection.knownDimension} sides total ${projection.knownSideTotal} units. Subtract them from ${data.perimeter}, then divide the remaining length equally between the two ${projection.unknownDimension} sides to get ${projection.missingValue} units.`
         : `A rectangle has two lengths and two widths. Add ${data.length} + ${data.width} + ${data.length} + ${data.width} to get ${data.perimeter} units.`;
     return (
         <div className="w-[700px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="text-center text-[1.25rem] font-bold leading-snug text-slate-700">{prompt}</div>
             <div className="mt-4 flex justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
-                <RectanglePerimeterDiagram data={data} isSolutionView={isSolutionView} isInverse={isInverse} />
+                <RectanglePerimeterDiagram data={data} projection={projection} isSolutionView={isSolutionView} isInverse={isInverse} />
             </div>
             <div className="mt-4 grid grid-cols-[355px_1fr] gap-3">
                 <div className="flex items-center justify-center rounded-xl border-2 border-sky-200 bg-sky-50 px-2 py-3 text-center font-mono text-[0.78rem] font-extrabold whitespace-nowrap text-sky-900">
-                    {data.formula}
+                    P = length + width + length + width
                 </div>
                 <div className="flex min-h-[54px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-3 py-3 text-center font-mono text-[0.92rem] font-bold text-slate-700">
                     {questionEquation}
@@ -176,8 +171,9 @@ function labelPosition(start: ScreenVertex, end: ScreenVertex, center: ScreenVer
     };
 }
 
-function PolygonDiagram({data, traceBoundary, hideUnknown}: {
+function PolygonDiagram({data, unknownSideIndex, traceBoundary, hideUnknown}: {
     data: LegacyGeometryPerimeterProblem;
+    unknownSideIndex: number;
     traceBoundary: boolean;
     hideUnknown: boolean;
 }) {
@@ -231,7 +227,7 @@ function PolygonDiagram({data, traceBoundary, hideUnknown}: {
                             textAnchor="middle"
                             className="fill-slate-800 text-[14px] font-extrabold"
                         >
-                            {hideUnknown && index === data.unknownSideIndex
+                            {hideUnknown && index === unknownSideIndex
                                 ? '? units'
                                 : `${data.sideLengths[index]} units`}
                         </text>
@@ -251,22 +247,13 @@ export const GeometryPerimeterView = ({
     const data = problem.data;
     validateProblemData(viewId, data, [
         'shape',
-        'vertices',
-        'sideLengths',
-        'perimeter',
-        'unit',
-        'knownSideTotal'
+        'perimeter'
     ]);
     const isInverse = mode === 'inversion';
     if (isGrade4RectanglePerimeterProblem(data)) {
         validateProblemData(viewId, data, [
             'length',
-            'width',
-            'formula',
-            'unknownDimension',
-            'knownDimension',
-            'knownValue',
-            'missingValue'
+            'width'
         ]);
         if (!isValidGrade4RectanglePerimeterProblem(data)) {
             throw new ViewValidationError(
@@ -274,28 +261,32 @@ export const GeometryPerimeterView = ({
                 'The rectangle dimensions, perimeter formula, and supplied equations must be consistent.'
             );
         }
-        return <RectanglePerimeterFormulaTask data={data} isSolutionView={isSolutionView} isInverse={isInverse} />;
+        const projection = projectRectanglePerimeter(data, payload.seed);
+        return <RectanglePerimeterFormulaTask data={data} projection={projection} isSolutionView={isSolutionView} isInverse={isInverse} />;
     }
-    validateProblemData(viewId, data, ['unknownSideIndex']);
+    validateProblemData(viewId, data, ['vertices', 'sideLengths']);
     validatePerimeter(viewId, data);
+    const unknownSideIndex = projectUnknownSideIndex(data.sideLengths.length, payload.seed);
     const addition = data.sideLengths.join(' + ');
     const knownAddition = isInverse
         ? data.sideLengths
-            .filter((_, index) => index !== data.unknownSideIndex)
+            .filter((_, index) => index !== unknownSideIndex)
             .join(' + ')
         : '';
-    const missingSide = isInverse ? data.sideLengths[data.unknownSideIndex] : 0;
+    const missingSide = isInverse ? data.sideLengths[unknownSideIndex] : 0;
+    const knownSideTotal = data.perimeter - data.sideLengths[unknownSideIndex];
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="text-center text-[1.3rem] font-bold text-slate-700">
                 {isInverse
-                    ? `The perimeter is ${data.perimeter} ${data.unit}. Find the missing side length.`
+                    ? `The perimeter is ${data.perimeter} units. Find the missing side length.`
                     : `Find the perimeter of the ${data.shape}.`}
             </div>
             <div className="mt-4 flex justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
                 <PolygonDiagram
                     data={data}
+                    unknownSideIndex={unknownSideIndex}
                     traceBoundary={isSolutionView}
                     hideUnknown={isInverse && !isSolutionView}
                 />
@@ -309,10 +300,10 @@ export const GeometryPerimeterView = ({
             }`}>
                 {isSolutionView
                     ? isInverse
-                        ? `Missing side = ${data.perimeter} - (${knownAddition}) = ${missingSide} ${data.unit}`
-                        : `Perimeter = ${addition} = ${data.perimeter} ${data.unit}`
+                        ? `Missing side = ${data.perimeter} - (${knownAddition}) = ${missingSide} units`
+                        : `Perimeter = ${addition} = ${data.perimeter} units`
                     : isInverse
-                        ? `Known sides total ${data.knownSideTotal} ${data.unit}.`
+                        ? `Known sides total ${knownSideTotal} units.`
                         : `Add the lengths of all ${data.sideLengths.length} sides.`}
             </div>
         </div>

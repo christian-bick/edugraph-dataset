@@ -34,11 +34,6 @@ describe('GeometryPerimeterGenerator', () => {
             expect(Math.max(...data.sideLengths)).toBeLessThanOrEqual(18);
             expect(data.perimeter).toBe(data.sideLengths.reduce((sum, length) => sum + length, 0));
             expect(data.perimeter).toBeLessThan(100);
-            expect(data.unknownSideIndex).toBeGreaterThanOrEqual(0);
-            expect(data.unknownSideIndex).toBeLessThan(data.sideLengths.length);
-            expect(data.knownSideTotal).toBe(
-                data.perimeter - data.sideLengths[data.unknownSideIndex]
-            );
         }
     });
 
@@ -53,8 +48,7 @@ describe('GeometryPerimeterGenerator', () => {
         expect(generator.generate(config)).toEqual(first);
     });
 
-    it('authors a complete rectangle model for both response directions', () => {
-        const unknowns = new Set<string>();
+    it('authors one neutral rectangle perimeter relation', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(`rectangle-perimeter-${seed}`);
             const data = generator.generate({
@@ -63,17 +57,14 @@ describe('GeometryPerimeterGenerator', () => {
             })!.data;
             if (data.shape !== 'rectangle') throw new Error('Expected rectangle perimeter data.');
 
-            expect(data.sideLengths).toEqual([data.length, data.width, data.length, data.width]);
             expect(data.perimeter).toBe(2 * (data.length + data.width));
-            expect(data.formula).toBe('P = length + width + length + width');
-            expect(data.knownDimension).not.toBe(data.unknownDimension);
-            expect(data.knownSideTotal).toBe(2 * data.knownValue);
-            expect(data.missingValue).toBe(
-                data.unknownDimension === 'length' ? data.length : data.width
-            );
-            unknowns.add(data.unknownDimension);
+            expect(data).toEqual({
+                shape: 'rectangle',
+                length: data.length,
+                width: data.width,
+                perimeter: data.perimeter
+            });
         }
-        expect(unknowns).toEqual(new Set(['length', 'width']));
     });
 
     it('requires the authored equation and addition evidence for rectangles', () => {

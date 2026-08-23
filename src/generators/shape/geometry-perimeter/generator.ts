@@ -71,36 +71,17 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
                 Math.floor(random() * RECTANGLE_DIMENSIONS.length)
             ];
             const perimeter = 2 * (length + width);
-            const sideLengths: [number, number, number, number] = [length, width, length, width];
             const common = {
                 shape: 'rectangle' as const,
-                vertices: [{x: 0, y: 0}, {x: length, y: 0}, {x: length, y: width}, {x: 0, y: width}],
-                sideLengths,
                 length,
                 width,
-                perimeter,
-                unit: 'units' as const,
-                formula: 'P = length + width + length + width' as const
+                perimeter
             };
             if (
                 !config.operationFeatures?.includes(Area.Addition)
                 || !config.operationFeatures.includes(Area.Equation)
             ) return null;
-            const unknownDimension = random() < 0.5 ? 'length' : 'width';
-            const knownDimension = unknownDimension === 'length' ? 'width' : 'length';
-            const knownValue = knownDimension === 'length' ? length : width;
-            const missingValue = unknownDimension === 'length' ? length : width;
-            const knownSideTotal = knownValue * 2;
-            return {
-                data: {
-                    ...common,
-                    unknownDimension,
-                    knownDimension,
-                    knownValue,
-                    missingValue,
-                    knownSideTotal
-                }
-            };
+            return {data: common};
         }
 
         const template = POLYGONS.get(config.polygonShape!);
@@ -109,15 +90,11 @@ export class GeometryPerimeterGenerator implements ProblemGenerator<
         const factor = Math.floor(random() * 3) + 1;
         const sideLengths = template.sideLengths.map(length => length * factor);
         const perimeter = sideLengths.reduce((sum, length) => sum + length, 0);
-        const unknownSideIndex = Math.floor(random() * sideLengths.length);
         return {data: {
             shape: template.shape,
             vertices: template.vertices.map(vertex => scaleVertex(vertex, factor)),
             sideLengths,
-            perimeter,
-            unit: 'units' as const,
-            unknownSideIndex,
-            knownSideTotal: perimeter - sideLengths[unknownSideIndex]
+            perimeter
         }};
     }
 }
