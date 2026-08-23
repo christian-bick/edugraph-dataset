@@ -1478,10 +1478,7 @@ export type LegacyFractionComparisonProblem = {
     family: 'common-denominator' | 'common-numerator';
     sharedComponent: number;
     relation: 'greater' | 'less';
-    symbol: '>' | '<';
     sharedWhole: 1;
-    answer: string;
-    rationale: string;
 };
 
 export type FractionComparisonBarModel = {
@@ -1497,7 +1494,6 @@ export type UnlikeFractionComparisonProblem = {
     second: FractionValue;
     comparisonKind: 'inequality' | 'equality';
     relation: 'greater' | 'equal' | 'less';
-    symbol: '>' | '=' | '<';
     strategy: 'benchmark-half';
     sharedWhole: 1;
     benchmark: {
@@ -1510,14 +1506,6 @@ export type UnlikeFractionComparisonProblem = {
     secondModel: FractionComparisonBarModel;
     firstBenchmarkRelation: 'greater' | 'equal' | 'less';
     secondBenchmarkRelation: 'greater' | 'equal' | 'less';
-    firstBenchmarkStatement: string;
-    secondBenchmarkStatement: string;
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    answer: string;
-    answerStatement: string;
-    rationale: string;
 };
 
 export type FractionComparisonProblem =

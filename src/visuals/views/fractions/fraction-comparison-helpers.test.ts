@@ -1,6 +1,9 @@
 import {describe, expect, it} from 'vitest';
 import {UnlikeFractionComparisonProblem} from '../../../types/problems.ts';
-import {isValidUnlikeFractionComparison} from './fraction-comparison-helpers.ts';
+import {
+    isValidUnlikeFractionComparison,
+    unlikeFractionComparisonPresentation
+} from './fraction-comparison-helpers.ts';
 
 const fixtures: UnlikeFractionComparisonProblem[] = [
     {
@@ -9,7 +12,6 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
         second: {numerator: 1, denominator: 3, notation: '1/3'},
         comparisonKind: 'inequality',
         relation: 'greater',
-        symbol: '>',
         strategy: 'benchmark-half',
         sharedWhole: 1,
         benchmark: {numerator: 1, denominator: 2, notation: '1/2', xPercent: 50},
@@ -21,15 +23,7 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
             benchmarkXPercent: 50
         },
         firstBenchmarkRelation: 'greater',
-        secondBenchmarkRelation: 'less',
-        firstBenchmarkStatement: '3/4 is greater than 1/2.',
-        secondBenchmarkStatement: '1/3 is less than 1/2.',
-        prompt: 'Compare 3/4 and 1/3 using 1/2 as a benchmark on the same whole.',
-        questionEquation: '3/4 ? 1/3',
-        solutionEquation: '3/4 > 1/3',
-        answer: '3/4 > 1/3',
-        answerStatement: '3/4 > 1/3.',
-        rationale: 'Both fractions refer to the same whole. 3/4 is greater than 1/2. 1/3 is less than 1/2. Therefore, 3/4 > 1/3.'
+        secondBenchmarkRelation: 'less'
     },
     {
         task: 'compare-unlike-fractions',
@@ -37,22 +31,13 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
         second: {numerator: 3, denominator: 6, notation: '3/6'},
         comparisonKind: 'equality',
         relation: 'equal',
-        symbol: '=',
         strategy: 'benchmark-half',
         sharedWhole: 1,
         benchmark: {numerator: 1, denominator: 2, notation: '1/2', xPercent: 50},
         firstModel: {partCount: 4, shadedCount: 2, filledPercent: 50, benchmarkXPercent: 50},
         secondModel: {partCount: 6, shadedCount: 3, filledPercent: 50, benchmarkXPercent: 50},
         firstBenchmarkRelation: 'equal',
-        secondBenchmarkRelation: 'equal',
-        firstBenchmarkStatement: '2/4 is equal to 1/2.',
-        secondBenchmarkStatement: '3/6 is equal to 1/2.',
-        prompt: 'Compare 2/4 and 3/6 using 1/2 as a benchmark on the same whole.',
-        questionEquation: '2/4 ? 3/6',
-        solutionEquation: '2/4 = 3/6',
-        answer: '2/4 = 3/6',
-        answerStatement: '2/4 = 3/6.',
-        rationale: 'Both fractions refer to the same whole. 2/4 is equal to 1/2. 3/6 is equal to 1/2. Therefore, 2/4 = 3/6.'
+        secondBenchmarkRelation: 'equal'
     },
     {
         task: 'compare-unlike-fractions',
@@ -60,7 +45,6 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
         second: {numerator: 3, denominator: 4, notation: '3/4'},
         comparisonKind: 'inequality',
         relation: 'less',
-        symbol: '<',
         strategy: 'benchmark-half',
         sharedWhole: 1,
         benchmark: {numerator: 1, denominator: 2, notation: '1/2', xPercent: 50},
@@ -72,15 +56,7 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
         },
         secondModel: {partCount: 4, shadedCount: 3, filledPercent: 75, benchmarkXPercent: 50},
         firstBenchmarkRelation: 'less',
-        secondBenchmarkRelation: 'greater',
-        firstBenchmarkStatement: '1/3 is less than 1/2.',
-        secondBenchmarkStatement: '3/4 is greater than 1/2.',
-        prompt: 'Compare 1/3 and 3/4 using 1/2 as a benchmark on the same whole.',
-        questionEquation: '1/3 ? 3/4',
-        solutionEquation: '1/3 < 3/4',
-        answer: '1/3 < 3/4',
-        answerStatement: '1/3 < 3/4.',
-        rationale: 'Both fractions refer to the same whole. 1/3 is less than 1/2. 3/4 is greater than 1/2. Therefore, 1/3 < 3/4.'
+        secondBenchmarkRelation: 'greater'
     }
 ];
 
@@ -95,6 +71,16 @@ const changed = (
 describe('isValidUnlikeFractionComparison', () => {
     it('accepts greater, equal, and less benchmark comparisons', () => {
         expect(fixtures.map(isValidUnlikeFractionComparison)).toEqual([true, true, true]);
+        expect(unlikeFractionComparisonPresentation(fixtures[0])).toEqual({
+            symbol: '>',
+            firstBenchmarkStatement: '3/4 is greater than 1/2.',
+            secondBenchmarkStatement: '1/3 is less than 1/2.',
+            prompt: 'Compare 3/4 and 1/3 using 1/2 as a benchmark on the same whole.',
+            questionEquation: '3/4 ? 1/3',
+            solutionEquation: '3/4 > 1/3',
+            answerStatement: '3/4 > 1/3.',
+            rationale: 'Both fractions refer to the same whole. 3/4 is greater than 1/2. 1/3 is less than 1/2. Therefore, 3/4 > 1/3.'
+        });
     });
 
     it.each([
@@ -107,9 +93,6 @@ describe('isValidUnlikeFractionComparison', () => {
         ['benchmark relation', (data: UnlikeFractionComparisonProblem) => {
             data.firstBenchmarkRelation = 'less';
         }],
-        ['benchmark statement', (data: UnlikeFractionComparisonProblem) => {
-            data.firstBenchmarkStatement = '3/4 is less than 1/2.';
-        }],
         ['same numerator', (data: UnlikeFractionComparisonProblem) => {
             data.second = {numerator: 3, denominator: 8, notation: '3/8'};
             data.secondModel = {
@@ -118,13 +101,6 @@ describe('isValidUnlikeFractionComparison', () => {
                 filledPercent: 37.5,
                 benchmarkXPercent: 50
             };
-            data.secondBenchmarkStatement = '3/8 is less than 1/2.';
-            data.prompt = 'Compare 3/4 and 3/8 using 1/2 as a benchmark on the same whole.';
-            data.questionEquation = '3/4 ? 3/8';
-            data.solutionEquation = '3/4 > 3/8';
-            data.answer = '3/4 > 3/8';
-            data.answerStatement = '3/4 > 3/8.';
-            data.rationale = 'Both fractions refer to the same whole. 3/4 is greater than 1/2. 3/8 is less than 1/2. Therefore, 3/4 > 3/8.';
         }],
         ['same-side benchmark', (data: UnlikeFractionComparisonProblem) => {
             data.second = {numerator: 2, denominator: 3, notation: '2/3'};
@@ -135,22 +111,9 @@ describe('isValidUnlikeFractionComparison', () => {
                 benchmarkXPercent: 50
             };
             data.secondBenchmarkRelation = 'greater';
-            data.secondBenchmarkStatement = '2/3 is greater than 1/2.';
-            data.prompt = 'Compare 3/4 and 2/3 using 1/2 as a benchmark on the same whole.';
-            data.questionEquation = '3/4 ? 2/3';
-            data.solutionEquation = '3/4 > 2/3';
-            data.answer = '3/4 > 2/3';
-            data.answerStatement = '3/4 > 2/3.';
-            data.rationale = 'Both fractions refer to the same whole. 3/4 is greater than 1/2. 2/3 is greater than 1/2. Therefore, 3/4 > 2/3.';
         }],
-        ['question answer leakage', (data: UnlikeFractionComparisonProblem) => {
-            data.questionEquation = data.solutionEquation;
-        }],
-        ['solution equation', (data: UnlikeFractionComparisonProblem) => {
-            data.solutionEquation = '3/4 < 1/3';
-        }],
-        ['rationale', (data: UnlikeFractionComparisonProblem) => {
-            data.rationale = 'The first bar looks longer.';
+        ['comparison kind', (data: UnlikeFractionComparisonProblem) => {
+            data.comparisonKind = 'equality';
         }]
     ])('rejects contradictory %s evidence', (_name, update) => {
         expect(isValidUnlikeFractionComparison(changed(update))).toBe(false);

@@ -6,7 +6,11 @@ import {
     UnlikeFractionComparisonProblem
 } from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
-import {isValidUnlikeFractionComparison} from './fraction-comparison-helpers.ts';
+import {
+    isValidUnlikeFractionComparison,
+    legacyFractionComparisonPresentation,
+    unlikeFractionComparisonPresentation
+} from './fraction-comparison-helpers.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8];
 
@@ -132,9 +136,11 @@ const UnlikeFractionComparison = ({
 }: {
     data: UnlikeFractionComparisonProblem;
     isSolutionView: boolean;
-}) => (
-    <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
-        <div className="text-center text-[1.42rem] font-bold text-slate-800">{data.prompt}</div>
+}) => {
+    const presentation = unlikeFractionComparisonPresentation(data);
+    return (
+        <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
+        <div className="text-center text-[1.42rem] font-bold text-slate-800">{presentation.prompt}</div>
 
         <div className="mt-5 flex items-center justify-center gap-5">
             <PlainFractionNotation fraction={data.first} />
@@ -143,7 +149,7 @@ const UnlikeFractionComparison = ({
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                     : 'border-dashed border-slate-300 bg-slate-50 text-slate-400'
             }`}>
-                {isSolutionView ? data.symbol : '?'}
+                {isSolutionView ? presentation.symbol : '?'}
             </span>
             <PlainFractionNotation fraction={data.second} />
         </div>
@@ -152,8 +158,8 @@ const UnlikeFractionComparison = ({
             className="mt-7 rounded-2xl border-2 border-slate-200 bg-slate-50 px-5 pb-5 pt-9"
             role="img"
             aria-label={isSolutionView
-                ? `Two equal-length bars share one whole. ${data.firstBenchmarkStatement} ${data.secondBenchmarkStatement} Therefore, ${data.solutionEquation}.`
-                : `Two equal-length bars share one whole. ${data.firstBenchmarkStatement} ${data.secondBenchmarkStatement} The comparison symbol remains blank.`}
+                ? `Two equal-length bars share one whole. ${presentation.firstBenchmarkStatement} ${presentation.secondBenchmarkStatement} Therefore, ${presentation.solutionEquation}.`
+                : `Two equal-length bars share one whole. ${presentation.firstBenchmarkStatement} ${presentation.secondBenchmarkStatement} The comparison symbol remains blank.`}
         >
             <div className="mb-7 flex items-center justify-center gap-3 text-sm font-semibold text-slate-600">
                 <span className="rounded-full bg-white px-4 py-1.5 shadow-sm">Both bars represent the same whole</span>
@@ -175,16 +181,17 @@ const UnlikeFractionComparison = ({
 
         {isSolutionView ? (
             <div className="mt-5 rounded-xl border-2 border-emerald-500 bg-emerald-50 px-6 py-4 text-center text-emerald-950">
-                <div className="text-xl font-bold">{data.solutionEquation}</div>
-                <div className="mt-2 text-base font-semibold leading-snug">{data.rationale}</div>
+                <div className="text-xl font-bold">{presentation.solutionEquation}</div>
+                <div className="mt-2 text-base font-semibold leading-snug">{presentation.rationale}</div>
             </div>
         ) : (
             <div className="mt-5 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-4 text-center text-xl font-bold text-slate-500">
-                {data.questionEquation}
+                {presentation.questionEquation}
             </div>
         )}
-    </div>
-);
+        </div>
+    );
+};
 
 const validateFraction = (viewId: string, name: string, fraction: FractionValue) => {
     if (!fraction || typeof fraction !== 'object') {
@@ -234,28 +241,9 @@ const validateComparison = (viewId: string, data: FractionComparisonProblem) => 
     const comparison = data.first.numerator * data.second.denominator
         - data.second.numerator * data.first.denominator;
     const expectedRelation = comparison > 0 ? 'greater' : comparison < 0 ? 'less' : 'equal';
-    const expectedSymbol = expectedRelation === 'greater' ? '>' : expectedRelation === 'less' ? '<' : '=';
     if (expectedRelation === 'equal'
-        || data.relation !== expectedRelation
-        || data.symbol !== expectedSymbol) {
+        || data.relation !== expectedRelation) {
         throw new ViewValidationError(viewId, 'The comparison relation does not match the fractions.');
-    }
-
-    const expectedAnswer = `${data.first.notation} ${data.symbol} ${data.second.notation}`;
-    if (data.answer !== expectedAnswer) {
-        throw new ViewValidationError(viewId, 'The comparison answer is inconsistent.');
-    }
-    if (typeof data.rationale !== 'string') {
-        throw new ViewValidationError(viewId, 'The comparison rationale must be text.');
-    }
-    const rationale = data.rationale.toLowerCase();
-    const familyTerm = isCommonDenominator ? 'denominator' : 'numerator';
-    if (!rationale.includes(data.first.notation)
-        || !rationale.includes(data.second.notation)
-        || !rationale.includes(`${familyTerm} ${data.sharedComponent}`)
-        || !rationale.includes(data.relation)
-        || !rationale.includes('same whole')) {
-        throw new ViewValidationError(viewId, 'The rationale must name both fractions, their shared component, relation, and the same whole.');
     }
 };
 
@@ -276,22 +264,13 @@ export const FractionComparisonView = ({
             'second',
             'comparisonKind',
             'relation',
-            'symbol',
             'strategy',
             'sharedWhole',
             'benchmark',
             'firstModel',
             'secondModel',
             'firstBenchmarkRelation',
-            'secondBenchmarkRelation',
-            'firstBenchmarkStatement',
-            'secondBenchmarkStatement',
-            'prompt',
-            'questionEquation',
-            'solutionEquation',
-            'answer',
-            'answerStatement',
-            'rationale'
+            'secondBenchmarkRelation'
         ]);
         if (!isValidUnlikeFractionComparison(data)) {
             throw new ViewValidationError(viewId, 'Unlike fractions require one coherent half-benchmark comparison.');
@@ -308,10 +287,7 @@ export const FractionComparisonView = ({
         'family',
         'sharedComponent',
         'relation',
-        'symbol',
-        'sharedWhole',
-        'answer',
-        'rationale'
+        'sharedWhole'
     ]);
     validateComparison(viewId, data);
 
@@ -321,6 +297,7 @@ export const FractionComparisonView = ({
     const sharedDescription = data.family === 'common-denominator'
         ? `Same denominator: ${data.sharedComponent} equal parts in each whole`
         : `Same numerator: ${data.sharedComponent} ${data.sharedComponent === 1 ? 'part' : 'parts'} shaded in each whole`;
+    const presentation = legacyFractionComparisonPresentation(data);
 
     return (
         <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -335,7 +312,7 @@ export const FractionComparisonView = ({
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-dashed border-slate-300 bg-slate-50 text-slate-400'
                 }`}>
-                    {isSolutionView ? data.symbol : '?'}
+                    {isSolutionView ? presentation.symbol : '?'}
                 </span>
                 <FractionNotation fraction={data.second} emphasizedTerm={emphasizedTerm} />
             </div>
@@ -359,8 +336,8 @@ export const FractionComparisonView = ({
 
             {isSolutionView && (
                 <div className="mt-5 rounded-xl border-2 border-emerald-500 bg-emerald-50 px-6 py-4 text-center text-emerald-950">
-                    <div className="text-xl font-bold">{data.answer}</div>
-                    <div className="mt-2 text-base font-semibold">{data.rationale}</div>
+                    <div className="text-xl font-bold">{presentation.answer}</div>
+                    <div className="mt-2 text-base font-semibold">{presentation.rationale}</div>
                 </div>
             )}
         </div>

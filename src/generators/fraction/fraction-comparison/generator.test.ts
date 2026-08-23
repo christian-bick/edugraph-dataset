@@ -23,11 +23,6 @@ const expectCoherentProblem = (problem: LegacyFractionComparisonProblem) => {
     expect(problem.second.numerator).toBeLessThan(problem.second.denominator);
     expect(problem.first.notation).not.toBe(problem.second.notation);
     expect(problem.sharedWhole).toBe(1);
-    expect(problem.rationale).toContain('same whole');
-    expect(problem.rationale).toContain(problem.first.notation);
-    expect(problem.rationale).toContain(problem.second.notation);
-    expect(problem.symbol).toBe(problem.relation === 'greater' ? '>' : '<');
-    expect(problem.answer).toBe(`${problem.first.notation} ${problem.symbol} ${problem.second.notation}`);
     const firstValue = problem.first.numerator / problem.first.denominator;
     const secondValue = problem.second.numerator / problem.second.denominator;
     if (problem.relation === 'greater') expect(firstValue).toBeGreaterThan(secondValue);
@@ -80,7 +75,6 @@ const expectCoherentUnlikeProblem = (problem: UnlikeFractionComparisonProblem) =
         xPercent: 50
     });
 
-    const expectedSymbol = problem.relation === 'greater' ? '>' : problem.relation === 'less' ? '<' : '=';
     const crossProductDifference = problem.first.numerator * problem.second.denominator
         - problem.second.numerator * problem.first.denominator;
     const expectedRelation = crossProductDifference > 0
@@ -88,7 +82,6 @@ const expectCoherentUnlikeProblem = (problem: UnlikeFractionComparisonProblem) =
         : crossProductDifference < 0
             ? 'less'
             : 'equal';
-    expect(problem.symbol).toBe(expectedSymbol);
     expect(problem.relation).toBe(expectedRelation);
     expect(problem.comparisonKind).toBe(problem.relation === 'equal' ? 'equality' : 'inequality');
     expect(problem.firstBenchmarkRelation).toBe(benchmarkSign(
@@ -120,29 +113,6 @@ const expectCoherentUnlikeProblem = (problem: UnlikeFractionComparisonProblem) =
         expect(model.benchmarkXPercent).toBe(50);
     }
 
-    const firstPhrase = problem.firstBenchmarkRelation === 'greater'
-        ? 'greater than'
-        : problem.firstBenchmarkRelation === 'less'
-            ? 'less than'
-            : 'equal to';
-    const secondPhrase = problem.secondBenchmarkRelation === 'greater'
-        ? 'greater than'
-        : problem.secondBenchmarkRelation === 'less'
-            ? 'less than'
-            : 'equal to';
-    const solutionEquation = `${problem.first.notation} ${expectedSymbol} ${problem.second.notation}`;
-    expect(problem.firstBenchmarkStatement).toBe(`${problem.first.notation} is ${firstPhrase} 1/2.`);
-    expect(problem.secondBenchmarkStatement).toBe(`${problem.second.notation} is ${secondPhrase} 1/2.`);
-    expect(problem.prompt).toBe(
-        `Compare ${problem.first.notation} and ${problem.second.notation} using 1/2 as a benchmark on the same whole.`
-    );
-    expect(problem.questionEquation).toBe(`${problem.first.notation} ? ${problem.second.notation}`);
-    expect(problem.solutionEquation).toBe(solutionEquation);
-    expect(problem.answer).toBe(solutionEquation);
-    expect(problem.answerStatement).toBe(`${solutionEquation}.`);
-    expect(problem.rationale).toBe(
-        `Both fractions refer to the same whole. ${problem.firstBenchmarkStatement} ${problem.secondBenchmarkStatement} Therefore, ${solutionEquation}.`
-    );
 };
 
 describe('FractionComparisonGenerator', () => {
@@ -197,7 +167,7 @@ describe('FractionComparisonGenerator', () => {
                     throw new Error('Expected an unlike-fraction comparison.');
                 }
                 expectCoherentUnlikeProblem(problem);
-                observed.add(problem.answer);
+                observed.add(`${problem.first.notation}:${problem.second.notation}`);
             }
             expect(observed.size).toBeGreaterThan(1);
         }
@@ -209,40 +179,28 @@ describe('FractionComparisonGenerator', () => {
             second: {numerator: 1, denominator: 3, notation: '1/3'},
             family: 'common-denominator',
             sharedComponent: 3,
-            relation: 'greater',
-            symbol: '>',
-            answer: '2/3 > 1/3',
-            rationale: 'Both 2/3 and 1/3 refer to the same whole and share denominator 3; comparing numerators 2 and 1 shows 2/3 is greater than 1/3.'
+            relation: 'greater'
         }],
         [102, Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Less, {
             first: {numerator: 3, denominator: 6, notation: '3/6'},
             second: {numerator: 5, denominator: 6, notation: '5/6'},
             family: 'common-denominator',
             sharedComponent: 6,
-            relation: 'less',
-            symbol: '<',
-            answer: '3/6 < 5/6',
-            rationale: 'Both 3/6 and 5/6 refer to the same whole and share denominator 6; comparing numerators 3 and 5 shows 3/6 is less than 5/6.'
+            relation: 'less'
         }],
         [103, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Greater, {
             first: {numerator: 1, denominator: 3, notation: '1/3'},
             second: {numerator: 1, denominator: 8, notation: '1/8'},
             family: 'common-numerator',
             sharedComponent: 1,
-            relation: 'greater',
-            symbol: '>',
-            answer: '1/3 > 1/8',
-            rationale: 'Both 1/3 and 1/8 refer to the same whole and share numerator 1; denominator 3 makes larger parts than denominator 8, so 1/3 is greater than 1/8.'
+            relation: 'greater'
         }],
         [104, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Less, {
             first: {numerator: 4, denominator: 8, notation: '4/8'},
             second: {numerator: 4, denominator: 6, notation: '4/6'},
             family: 'common-numerator',
             sharedComponent: 4,
-            relation: 'less',
-            symbol: '<',
-            answer: '4/8 < 4/6',
-            rationale: 'Both 4/8 and 4/6 refer to the same whole and share numerator 4; denominator 8 makes smaller parts than denominator 6, so 4/8 is less than 4/6.'
+            relation: 'less'
         }]
     ] as const)('preserves the legacy seed %s payload and random path', (
         seed,
@@ -276,7 +234,7 @@ describe('FractionComparisonGenerator', () => {
             const problem = generator.generate(config(strategy, comparisonFamily, relation)).data;
             if (problem.task !== 'compare-fractions') throw new Error('Expected legacy comparison.');
             expectCoherentProblem(problem);
-            observed.add(problem.answer);
+            observed.add(`${problem.first.notation}:${problem.second.notation}`);
 
             if (comparisonFamily === Scope.CommonDenominator) {
                 expect(problem.family).toBe('common-denominator');

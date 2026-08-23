@@ -79,9 +79,6 @@ const toFractionValue = (numerator: number, denominator: FractionParts): Fractio
     notation: `${numerator}/${denominator}`
 });
 
-const relationPhrase = (relation: 'greater' | 'equal' | 'less'): string =>
-    relation === 'greater' ? 'greater than' : relation === 'less' ? 'less than' : 'equal to';
-
 const compareToHalf = (fraction: FractionValue): 'greater' | 'equal' | 'less' => {
     const difference = 2 * fraction.numerator - fraction.denominator;
     return difference > 0 ? 'greater' : difference < 0 ? 'less' : 'equal';
@@ -100,12 +97,8 @@ const generateUnlikeComparison = (
     const pair = randomItem(UNLIKE_PAIRS[relation]);
     const first = toFractionValue(pair.first.numerator, pair.first.denominator);
     const second = toFractionValue(pair.second.numerator, pair.second.denominator);
-    const symbol = relation === 'greater' ? '>' as const : relation === 'less' ? '<' as const : '=' as const;
     const firstBenchmarkRelation = compareToHalf(first);
     const secondBenchmarkRelation = compareToHalf(second);
-    const firstBenchmarkStatement = `${first.notation} is ${relationPhrase(firstBenchmarkRelation)} 1/2.`;
-    const secondBenchmarkStatement = `${second.notation} is ${relationPhrase(secondBenchmarkRelation)} 1/2.`;
-    const solutionEquation = `${first.notation} ${symbol} ${second.notation}`;
 
     return {
         task: 'compare-unlike-fractions',
@@ -113,22 +106,13 @@ const generateUnlikeComparison = (
         second,
         comparisonKind: relation === 'equal' ? 'equality' : 'inequality',
         relation,
-        symbol,
         strategy: 'benchmark-half',
         sharedWhole: 1,
         benchmark: BENCHMARK,
         firstModel: toBarModel(first),
         secondModel: toBarModel(second),
         firstBenchmarkRelation,
-        secondBenchmarkRelation,
-        firstBenchmarkStatement,
-        secondBenchmarkStatement,
-        prompt: `Compare ${first.notation} and ${second.notation} using 1/2 as a benchmark on the same whole.`,
-        questionEquation: `${first.notation} ? ${second.notation}`,
-        solutionEquation,
-        answer: solutionEquation,
-        answerStatement: `${solutionEquation}.`,
-        rationale: `Both fractions refer to the same whole. ${firstBenchmarkStatement} ${secondBenchmarkStatement} Therefore, ${solutionEquation}.`
+        secondBenchmarkRelation
     };
 };
 
@@ -200,12 +184,10 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             );
         }
 
-        const symbol = relation === 'greater' ? '>' as const : '<' as const;
         let first: FractionValue;
         let second: FractionValue;
         let family: LegacyFractionComparisonProblem['family'];
         let sharedComponent: number;
-        let rationale: string;
 
         if (usesCommonDenominator) {
             const denominator = randomItem(COMMON_DENOMINATORS);
@@ -220,7 +202,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             second = toFractionValue(secondNumerator, denominator);
             family = 'common-denominator';
             sharedComponent = denominator;
-            rationale = `Both ${first.notation} and ${second.notation} refer to the same whole and share denominator ${denominator}; comparing numerators ${firstNumerator} and ${secondNumerator} shows ${first.notation} is ${relation} than ${second.notation}.`;
         } else {
             const [one, two] = randomDistinctPair(DENOMINATORS);
             const lower = Math.min(one, two) as FractionParts;
@@ -232,8 +213,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             second = toFractionValue(numerator, secondDenominator);
             family = 'common-numerator';
             sharedComponent = numerator;
-            const partSize = relation === 'greater' ? 'larger' : 'smaller';
-            rationale = `Both ${first.notation} and ${second.notation} refer to the same whole and share numerator ${numerator}; denominator ${firstDenominator} makes ${partSize} parts than denominator ${secondDenominator}, so ${first.notation} is ${relation} than ${second.notation}.`;
         }
 
         return {
@@ -244,10 +223,7 @@ export class FractionComparisonGenerator implements ProblemGenerator<
                 family,
                 sharedComponent,
                 relation,
-                symbol,
-                sharedWhole: 1,
-                answer: `${first.notation} ${symbol} ${second.notation}`,
-                rationale
+                sharedWhole: 1
             }
         };
     }

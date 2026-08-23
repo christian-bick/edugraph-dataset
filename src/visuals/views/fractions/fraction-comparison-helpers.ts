@@ -1,6 +1,7 @@
 import {
     FractionComparisonBarModel,
     FractionValue,
+    LegacyFractionComparisonProblem,
     UnlikeFractionComparisonProblem
 } from '../../../types/problems.ts';
 
@@ -30,12 +31,68 @@ const validModel = (
     && Math.abs(model.filledPercent - fraction.numerator / fraction.denominator * 100) < EPSILON
     && model.benchmarkXPercent === 50;
 
+const relationSymbol = (relation: 'greater' | 'equal' | 'less'): '>' | '=' | '<' =>
+    relation === 'greater' ? '>' : relation === 'less' ? '<' : '=';
+
 const benchmarkStatement = (
     notation: string,
     relation: 'greater' | 'equal' | 'less'
 ): string => relation === 'equal'
     ? `${notation} is equal to 1/2.`
     : `${notation} is ${relation} than 1/2.`;
+
+export type UnlikeFractionComparisonPresentation = {
+    symbol: '>' | '=' | '<';
+    firstBenchmarkStatement: string;
+    secondBenchmarkStatement: string;
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    answerStatement: string;
+    rationale: string;
+};
+
+export const unlikeFractionComparisonPresentation = (
+    data: UnlikeFractionComparisonProblem
+): UnlikeFractionComparisonPresentation => {
+    const symbol = relationSymbol(data.relation);
+    const firstBenchmarkStatement = benchmarkStatement(
+        data.first.notation,
+        data.firstBenchmarkRelation
+    );
+    const secondBenchmarkStatement = benchmarkStatement(
+        data.second.notation,
+        data.secondBenchmarkRelation
+    );
+    const solutionEquation = `${data.first.notation} ${symbol} ${data.second.notation}`;
+    return {
+        symbol,
+        firstBenchmarkStatement,
+        secondBenchmarkStatement,
+        prompt: `Compare ${data.first.notation} and ${data.second.notation} using 1/2 as a benchmark on the same whole.`,
+        questionEquation: `${data.first.notation} ? ${data.second.notation}`,
+        solutionEquation,
+        answerStatement: `${solutionEquation}.`,
+        rationale: `Both fractions refer to the same whole. ${firstBenchmarkStatement} ${secondBenchmarkStatement} Therefore, ${solutionEquation}.`
+    };
+};
+
+export type LegacyFractionComparisonPresentation = {
+    symbol: '>' | '<';
+    answer: string;
+    rationale: string;
+};
+
+export const legacyFractionComparisonPresentation = (
+    data: LegacyFractionComparisonProblem
+): LegacyFractionComparisonPresentation => {
+    const symbol = relationSymbol(data.relation) as '>' | '<';
+    const answer = `${data.first.notation} ${symbol} ${data.second.notation}`;
+    const rationale = data.family === 'common-denominator'
+        ? `Both ${data.first.notation} and ${data.second.notation} refer to the same whole and share denominator ${data.sharedComponent}; comparing numerators ${data.first.numerator} and ${data.second.numerator} shows ${data.first.notation} is ${data.relation} than ${data.second.notation}.`
+        : `Both ${data.first.notation} and ${data.second.notation} refer to the same whole and share numerator ${data.sharedComponent}; denominator ${data.first.denominator} makes ${data.relation === 'greater' ? 'larger' : 'smaller'} parts than denominator ${data.second.denominator}, so ${data.first.notation} is ${data.relation} than ${data.second.notation}.`;
+    return {symbol, answer, rationale};
+};
 
 export const isValidUnlikeFractionComparison = (
     data: UnlikeFractionComparisonProblem
@@ -69,16 +126,6 @@ export const isValidUnlikeFractionComparison = (
         data.second.numerator * 2,
         data.second.denominator
     );
-    const symbol = relation === 'greater' ? '>' : relation === 'less' ? '<' : '=';
-    const expectedSolution = `${data.first.notation} ${symbol} ${data.second.notation}`;
-    const expectedFirstBenchmark = benchmarkStatement(
-        data.first.notation,
-        firstBenchmarkRelation
-    );
-    const expectedSecondBenchmark = benchmarkStatement(
-        data.second.notation,
-        secondBenchmarkRelation
-    );
     const benchmarkProvesRelation = relation === 'greater'
         ? firstBenchmarkRelation === 'greater' && secondBenchmarkRelation === 'less'
         : relation === 'less'
@@ -87,16 +134,7 @@ export const isValidUnlikeFractionComparison = (
 
     return benchmarkProvesRelation
         && data.relation === relation
-        && data.symbol === symbol
         && data.comparisonKind === (relation === 'equal' ? 'equality' : 'inequality')
         && data.firstBenchmarkRelation === firstBenchmarkRelation
-        && data.secondBenchmarkRelation === secondBenchmarkRelation
-        && data.firstBenchmarkStatement === expectedFirstBenchmark
-        && data.secondBenchmarkStatement === expectedSecondBenchmark
-        && data.prompt === `Compare ${data.first.notation} and ${data.second.notation} using 1/2 as a benchmark on the same whole.`
-        && data.questionEquation === `${data.first.notation} ? ${data.second.notation}`
-        && data.solutionEquation === expectedSolution
-        && data.answer === expectedSolution
-        && data.answerStatement === `${expectedSolution}.`
-        && data.rationale === `Both fractions refer to the same whole. ${expectedFirstBenchmark} ${expectedSecondBenchmark} Therefore, ${expectedSolution}.`;
+        && data.secondBenchmarkRelation === secondBenchmarkRelation;
 };
