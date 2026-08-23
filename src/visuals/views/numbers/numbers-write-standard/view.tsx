@@ -1,11 +1,13 @@
 import { createRoot } from 'react-dom/client';
 import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
+import type {MultiDigitWritingProblem} from '../../../../types/problems.ts';
 import { NumbersWriteStandardViewConfig, NumbersWriteStandardViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import {ViewValidationError, validateProblemData} from '../../../helpers/validation.ts';
+import {validateProblemData} from '../../../helpers/validation.ts';
 import {validateWritingNumber} from '../helpers.ts';
 import {
     isMultiDigitWritingProblem,
+    presentMultiDigitWriting,
     validateMultiDigitWritingProblem
 } from '../writing-view-helpers.tsx';
 import {legacyNumeralDigits, legacyWritingCue, placeValueResponseDigits} from './helpers.ts';
@@ -20,17 +22,20 @@ function MultiDigitNumeralWritingTask({
     data,
     isSolutionView
 }: {
-    data: Extract<ViewRenderPayload<'numbers-write-standard'>['problem']['data'], {task: 'multi-digit-base-ten-numeral'}>;
+    data: MultiDigitWritingProblem;
     isSolutionView: boolean;
 }) {
     const responseDigits = placeValueResponseDigits(data.placeValues);
+    const {numberName, standardNumeral} = presentMultiDigitWriting(data);
 
     return (
         <div className="w-[760px] rounded-2xl bg-white p-8 font-sans shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
             <div className="flex flex-col items-center gap-5">
-                <div className="text-center text-xl font-semibold text-slate-700">{data.writePrompt}</div>
+                <div className="text-center text-xl font-semibold text-slate-700">
+                    Write the number name as a base-ten numeral.
+                </div>
                 <div className="flex min-h-24 w-full items-center justify-center rounded-2xl border-2 border-sky-300 bg-sky-50 px-8 text-center text-[1.6rem] font-semibold leading-snug text-slate-800">
-                    {data.numberName}
+                    {numberName}
                 </div>
                 <div
                     aria-label="Place-value writing chart"
@@ -63,7 +68,7 @@ function MultiDigitNumeralWritingTask({
                             : 'border-dashed border-slate-400 bg-white text-slate-700'
                     }`}
                 >
-                    {isSolutionView ? data.standardNumeral : ''}
+                    {isSolutionView ? standardNumeral : ''}
                 </div>
             </div>
         </div>
@@ -154,26 +159,11 @@ const NumbersWriteStandardCore = ({ config: _config, payload }: CoreProps) => {
     validateProblemData('numbers-write-standard', data, ['number']);
 
     if (isMultiDigitWritingProblem(data)) {
-        if (data.task !== 'multi-digit-base-ten-numeral') {
-            throw new ViewValidationError(
-                'numbers-write-standard',
-                "Expected task 'multi-digit-base-ten-numeral'."
-            );
-        }
         validateProblemData('numbers-write-standard', data, [
-            'task',
             'number',
-            'standardNumeral',
-            'numberName',
-            'placeValues',
-            'readPrompt',
-            'writePrompt'
+            'placeValues'
         ]);
-        validateMultiDigitWritingProblem(
-            'numbers-write-standard',
-            data,
-            'multi-digit-base-ten-numeral'
-        );
+        validateMultiDigitWritingProblem('numbers-write-standard', data);
         return <MultiDigitNumeralWritingTask data={data} isSolutionView={isSolutionView} />;
     }
 

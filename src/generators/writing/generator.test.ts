@@ -53,7 +53,18 @@ describe('WritingGenerator', () => {
         expect(stub!.data).toEqual({number: 1000});
     });
 
-    it('supplies canonical Grade 4 numeral transcription data through one million', () => {
+    it('selects the payload contract from the sampled value rather than the range', () => {
+        setSeed(0);
+        const stub = generator.generate({
+            ...digitNotation,
+            range: {min: 1000, max: 1001},
+            requireZero: false
+        });
+        expect(stub).not.toBeNull();
+        expect(stub!.data).toEqual({number: 1000});
+    });
+
+    it('supplies canonical Grade 4 place-value evidence through one million', () => {
         const data = generator.generate({
             notationFamily: Area.DigitNotation,
             range: {min: 1_000_000, max: 1_000_000},
@@ -61,40 +72,38 @@ describe('WritingGenerator', () => {
         })!.data;
 
         expect(data).toMatchObject({
-            task: 'multi-digit-base-ten-numeral',
-            number: 1_000_000,
-            standardNumeral: '1,000,000',
-            numberName: 'one million',
-            readPrompt: 'Read the base-ten numeral and give its number name.',
-            writePrompt: 'Write the number name as a base-ten numeral.'
+            number: 1_000_000
         });
-        expect('task' in data && data.task === 'multi-digit-base-ten-numeral'
-            ? data.placeValues
-            : []).toHaveLength(7);
+        expect('placeValues' in data ? data.placeValues : []).toHaveLength(7);
     });
 
-    it('supplies canonical Grade 4 number-name data without changing legacy payloads', () => {
+    it('uses the same neutral Grade 4 payload for every notation family', () => {
         setSeed(81);
-        const data = generator.generate({
+        const numberNameData = generator.generate({
             notationFamily: Area.NumberNameNotation,
             range: {min: 1001, max: 999_999},
             requireZero: false
         })!.data;
+        setSeed(81);
+        const digitData = generator.generate({
+            notationFamily: Area.DigitNotation,
+            range: {min: 1001, max: 999_999},
+            requireZero: false
+        })!.data;
 
-        expect('task' in data && data.task).toBe('multi-digit-number-name');
-        if (!('task' in data) || data.task !== 'multi-digit-number-name') return;
-        expect(data.standardNumeral).toMatch(/^\d{1,3}(,\d{3})+$/);
-        expect(data.numberName).not.toHaveLength(0);
-        expect(data.placeValues.map(place => place.value).reduce((sum, value) => sum + value, 0))
-            .toBe(data.number);
-        expect(data.prompt).toBe('Write the numeral in words.');
+        expect(numberNameData).toEqual(digitData);
+        expect('placeValues' in numberNameData
+            ? numberNameData.placeValues
+                .map(place => place.value)
+                .reduce((sum, value) => sum + value, 0)
+            : 0).toBe(numberNameData.number);
 
-        const fallback = generator.generate({
+        const numerationData = generator.generate({
             notationFamily: Area.NumerationWithIntegers,
             range: {min: 1001, max: 2000},
             requireZero: false
         })!.data;
-        expect(fallback).toEqual({number: fallback.number});
+        expect('placeValues' in numerationData).toBe(true);
     });
 
     it('is deterministic for multi-digit payloads', () => {

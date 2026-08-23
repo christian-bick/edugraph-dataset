@@ -67,9 +67,9 @@ describe('WritingGenerator Spec Integration', () => {
     });
 
     it.each([
-        [Area.DigitNotation, 'multi-digit-base-ten-numeral'],
-        [Area.NumberNameNotation, 'multi-digit-number-name']
-    ] as const)('resolves Grade 4 %s through one million', (notationFamily, task) => {
+        Area.DigitNotation,
+        Area.NumberNameNotation
+    ] as const)('resolves Grade 4 %s through one million', notationFamily => {
         setSeed(404);
         const stub = generateWithLabels(generator, [
             notationFamily,
@@ -79,7 +79,7 @@ describe('WritingGenerator Spec Integration', () => {
         ]);
 
         expect(stub).not.toBeNull();
-        expect('task' in stub!.data && stub!.data.task).toBe(task);
+        expect('placeValues' in stub!.data && stub!.data.placeValues.length).toBeGreaterThanOrEqual(4);
         expect(stub!.data.number).toBeGreaterThanOrEqual(1000);
         expect(stub!.data.number).toBeLessThanOrEqual(1_000_000);
         expect(stub!.tags).toEqual(expect.arrayContaining([

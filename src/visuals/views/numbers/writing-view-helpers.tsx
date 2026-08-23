@@ -1,15 +1,14 @@
 import type {
-    MultiDigitBaseTenNumeralProblem,
-    MultiDigitNumberNameProblem,
+    MultiDigitWritingProblem,
     WholeNumberPlaceName,
     WholeNumberPlaceValue,
     WritingProblem
 } from '../../../types/problems.ts';
+import {
+    formatStandardNumeral,
+    wholeNumberToEnglishName
+} from '../../../lib/whole-number-notation.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
-
-export type MultiDigitWritingProblem =
-    | MultiDigitBaseTenNumeralProblem
-    | MultiDigitNumberNameProblem;
 
 const PLACE_NAMES: readonly WholeNumberPlaceName[] = [
     'ones',
@@ -24,7 +23,14 @@ const PLACE_NAMES: readonly WholeNumberPlaceName[] = [
 export function isMultiDigitWritingProblem(
     data: WritingProblem
 ): data is MultiDigitWritingProblem {
-    return 'task' in data;
+    return 'placeValues' in data;
+}
+
+export function presentMultiDigitWriting(data: MultiDigitWritingProblem) {
+    return {
+        standardNumeral: formatStandardNumeral(data.number),
+        numberName: wholeNumberToEnglishName(data.number)
+    };
 }
 
 function fail(viewId: string, message: string): never {
@@ -66,25 +72,10 @@ function validatePlaceValues(
 
 export function validateMultiDigitWritingProblem(
     viewId: string,
-    data: MultiDigitWritingProblem,
-    expectedTask: MultiDigitWritingProblem['task']
+    data: MultiDigitWritingProblem
 ): void {
-    if (data.task !== expectedTask) {
-        fail(viewId, `Expected task '${expectedTask}', received '${data.task}'.`);
-    }
     if (!Number.isInteger(data.number) || data.number <= 1000 || data.number > 1_000_000) {
         fail(viewId, 'Expected a multi-digit whole number greater than 1000 and at most 1000000.');
-    }
-    if (data.standardNumeral.trim() === '' || data.numberName.trim() === '') {
-        fail(viewId, 'Expected supplied standard-numeral and English-name strings.');
-    }
-
-    if (
-        (data.task === 'multi-digit-base-ten-numeral'
-            && (data.readPrompt.trim() === '' || data.writePrompt.trim() === ''))
-        || (data.task === 'multi-digit-number-name' && data.prompt.trim() === '')
-    ) {
-        fail(viewId, 'Expected a supplied prompt for the multi-digit writing task.');
     }
 
     validatePlaceValues(viewId, data.number, data.placeValues);

@@ -1,10 +1,12 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
+import type {MultiDigitWritingProblem} from '../../../../types/problems.ts';
 import {ViewValidationError, validateProblemData} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
     isMultiDigitWritingProblem,
     PlaceValueStrip,
+    presentMultiDigitWriting,
     validateMultiDigitWritingProblem
 } from '../writing-view-helpers.tsx';
 import {numberToEnglishName} from './helpers.ts';
@@ -20,15 +22,18 @@ function MultiDigitReadingTask({
     data,
     isSolutionView
 }: {
-    data: Extract<ViewRenderPayload<'numbers-read-standard'>['problem']['data'], {task: 'multi-digit-base-ten-numeral'}>;
+    data: MultiDigitWritingProblem;
     isSolutionView: boolean;
 }) {
+    const {numberName, standardNumeral} = presentMultiDigitWriting(data);
     return (
         <div className="w-[760px] rounded-2xl bg-white p-8 font-sans shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
             <div className="flex flex-col items-center gap-5">
-                <div className="text-center text-xl font-semibold text-slate-700">{data.readPrompt}</div>
+                <div className="text-center text-xl font-semibold text-slate-700">
+                    Read the base-ten numeral and give its number name.
+                </div>
                 <div className="flex min-h-28 min-w-72 items-center justify-center rounded-2xl border-2 border-sky-300 bg-sky-50 px-10 font-mono text-6xl font-extrabold tracking-wide text-slate-800">
-                    {data.standardNumeral}
+                    {standardNumeral}
                 </div>
                 <PlaceValueStrip placeValues={data.placeValues} />
                 <div
@@ -39,7 +44,7 @@ function MultiDigitReadingTask({
                             : 'border-dashed border-slate-400 bg-white text-slate-700'
                     }`}
                 >
-                    {isSolutionView ? data.numberName : ''}
+                    {isSolutionView ? numberName : ''}
                 </div>
             </div>
         </div>
@@ -52,26 +57,11 @@ const NumbersReadStandardCore = ({config: _config, payload}: CoreProps) => {
     validateProblemData('numbers-read-standard', data, ['number']);
 
     if (isMultiDigitWritingProblem(data)) {
-        if (data.task !== 'multi-digit-base-ten-numeral') {
-            throw new ViewValidationError(
-                'numbers-read-standard',
-                "Expected task 'multi-digit-base-ten-numeral'."
-            );
-        }
         validateProblemData('numbers-read-standard', data, [
-            'task',
             'number',
-            'standardNumeral',
-            'numberName',
-            'placeValues',
-            'readPrompt',
-            'writePrompt'
+            'placeValues'
         ]);
-        validateMultiDigitWritingProblem(
-            'numbers-read-standard',
-            data,
-            'multi-digit-base-ten-numeral'
-        );
+        validateMultiDigitWritingProblem('numbers-read-standard', data);
         return <MultiDigitReadingTask data={data} isSolutionView={isSolutionView} />;
     }
 

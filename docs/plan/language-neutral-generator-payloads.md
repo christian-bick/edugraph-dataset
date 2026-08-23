@@ -84,7 +84,7 @@ payload type changes.
 | `shape-patterns` | 3/3 | **Projection:** task discriminant, prompt, response positions, feature options, option shuffle, and explanation. **Witness:** replace rule/feature/evidence prose with a typed recurrence, term sequence, emergent property, and evidence observations that all three leaf views can project. |
 | `standard-algorithm-add-subtract` | 4/1 | **Migrated:** the payload contains operands, result, and numeric place-value column steps with the complete carry or borrow chain. The view derives place names, calculations, regrouping instructions, equations, prompt, and explanation. |
 | `time-interval-arithmetic` | 4/1 | **Migrated:** the payload contains the operation constraint, start/end instants, offsets, and elapsed duration. The view selects the requested quantity from the operation and derives the story, masking, equation, and answer language. |
-| `writing` | 16/6 | **Projection:** `prompt`, missed `readPrompt`/`writePrompt`, English `numberName`, and formatted numeral instructions. **Canonical:** integer and place-value decomposition. Notation and language formatting are view/shared-presenter responsibilities. |
+| `writing` | 16/6 | **Migrated:** values through 1,000 retain the legacy integer payload; larger values use one notation-independent payload containing the integer and complete place-value decomposition. The views derive task identity, prompts, formatted numerals, English number names, response layout, and solution text. |
 
 ### Production consumers
 

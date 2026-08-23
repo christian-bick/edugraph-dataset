@@ -822,29 +822,14 @@ export type LegacyWritingProblem = {
     number: number;
 };
 
-export type MultiDigitBaseTenNumeralProblem = {
-    task: 'multi-digit-base-ten-numeral';
+export type MultiDigitWritingProblem = {
     number: number;
-    standardNumeral: string;
-    numberName: string;
     placeValues: WholeNumberPlaceValue[];
-    readPrompt: string;
-    writePrompt: string;
-};
-
-export type MultiDigitNumberNameProblem = {
-    task: 'multi-digit-number-name';
-    number: number;
-    standardNumeral: string;
-    numberName: string;
-    placeValues: WholeNumberPlaceValue[];
-    prompt: string;
 };
 
 export type WritingProblem =
     | LegacyWritingProblem
-    | MultiDigitBaseTenNumeralProblem
-    | MultiDigitNumberNameProblem;
+    | MultiDigitWritingProblem;
 
 /** Shared payload accepted by the number-line view for representation and pair arithmetic. */
 export type NumberLineProblem = WritingProblem | ArithmeticPairProblem;
