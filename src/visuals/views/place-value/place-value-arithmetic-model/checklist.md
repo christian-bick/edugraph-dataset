@@ -1,2 +1,3 @@
-- **Identity:** Both operands appear as separate place-value block models; the solution visibly combines, composes, matches, or removes the exact represented quantities and shows the resulting blocks.
-- **Modes:** Question Mode withholds the operation process and result while retaining both operands; Solution Mode reveals the process, result, and—when requested—a vertically aligned written method using the same quantities.
+- **Identity:** Both operands appear as separate place-value block models; the learner shows how the represented quantities combine, compose, match, or are removed.
+- **Question/Solution contract:** Question Mode withholds the operation process and result while retaining both operands; Solution Mode reveals the place-value process and resulting blocks.
+- **Invariant capability:** Every artifact elicits `ProcedureUnderstanding`; a written-method response is a separate task view.

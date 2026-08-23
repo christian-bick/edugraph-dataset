@@ -4,6 +4,8 @@ export interface ViewSpec {
     generalLabels: readonly string[];
     /** Target labels required for this view's payload projection to apply */
     requiredLabels?: readonly string[];
+    /** View-owned invariant Abilities that must be requested explicitly by the target */
+    requiredTargetAbilities?: readonly string[];
     /** Semantic boundaries this view enforces (e.g. visual capacity labels like Scope.NumbersSmaller20) */
     rejectedLabels?: readonly string[];
 }

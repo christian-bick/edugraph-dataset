@@ -147,6 +147,11 @@ by the task: a specialization already satisfies targets asking for its ancestor.
 Pure presentation parameters that do not change task identity remain valid schema
 configuration under [SPEC-V2](#spec-v2--the-schema-maps-to-visual-configuration-only).
 
+When sibling leaves share the same generator-established mathematical capability set and differ
+only by an invariant Ability conjunction, use `requiredTargetAbilities` under
+[SPEC-V8](#spec-v8--requiredtargetabilities-selects-an-invariant-task-claim) to prevent the
+stronger task from matching a target that did not request it.
+
 ### SPEC-V7 — `requiredLabels` scopes payload applicability
 
 Use `requiredLabels` when a leaf view is valid only for a mathematical member of a
@@ -165,6 +170,21 @@ positively own each Ability through `generalLabels` or its schema. Prefer a narr
 payload whenever static typing alone can express the same boundary. Use `rejectedLabels` for
 physical rendering limits, not for this positive mathematical context.
 
+### SPEC-V8 — `requiredTargetAbilities` selects an invariant task claim
+
+Use `requiredTargetAbilities` only when a leaf view unconditionally exhibits an Ability that a
+weaker sibling task does not, while both leaves necessarily share the same generator-established
+Area/Scope capability set and payload type. Every listed label must be an Ability already declared
+in that leaf's `generalLabels`. The matcher then requires the target to request that Ability before
+the leaf may participate.
+
+This property controls task selection; it does not add a capability and must not influence render
+logic. The wrapper still fixes one local task mode, and the implementation never inspects the
+requirement or raw target labels. Prefer a narrower payload type or generator-owned
+`requiredLabels` when either can express the distinction. Do not use `requiredTargetAbilities` to
+hide an over-broad view, compensate for an inaccurate target, or reproduce multi-task branching
+inside one implementation. `npm run check:generator-view-specs` verifies the contract.
+
 ---
 
 ## Audit
@@ -176,5 +196,6 @@ physical rendering limits, not for this positive mathematical context.
 - [ ] **SPEC-V5** — every Ability is declared by a view, directly evidenced by its rendered task, absent from all generators, and not parameterized when it changes task identity.
 - [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than implemented through parallel configuration branches; only its most specific required Ability is declared.
 - [ ] **SPEC-V7** — polymorphic leaf views use non-Ability `requiredLabels` only when a narrower payload type cannot express their mathematical applicability; every compatible generator supplies them, while the view neither supplies nor rejects them.
+- [ ] **SPEC-V8** — each `requiredTargetAbilities` entry is an invariant Ability in the same leaf's `generalLabels`, selects a genuinely stronger sibling task, and never drives rendering behavior.
 - [ ] **SPEC-11** — every view-owned Area is independent of compatible generator Areas; presentation-driven refinement uses Scope.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

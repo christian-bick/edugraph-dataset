@@ -118,6 +118,12 @@ reference generator-established Area/Scope applicability but do not contribute a
 an Ability, compensate for generator-side presentation logic, suppress an inconvenient match,
 or express that a view merely prefers not to handle a competency.
 
+`requiredTargetAbilities` select an invariant stronger task only when sibling leaf views share the
+same generator-established Area/Scope capability set and payload type. Every entry is an Ability
+already declared in that leaf's `generalLabels`; the property never branches rendering or supplies
+a capability. Prefer a narrower payload type or generator-owned `requiredLabels` whenever either
+can express the distinction.
+
 ### Implementations consume resolved contracts, not raw labels
 
 Ontology labels are inspected by target construction, schema resolution, matching, and
@@ -194,7 +200,7 @@ known defects:
 | `operations-equal-groups` | 1 | **Migrated:** `Interpretation` is invariant for this view, so it is now a fixed capability and the schema is empty. |
 | `operations-number-array` | 3 | **Migrated:** execution, equation formalization, and interpretation now use three invariant leaves over one total renderer; formalization withholds the complete equation rather than merely its result. |
 | `operations-number-line` | 2 | **Migrated:** number-line representation and number-line arithmetic are distinct learner actions and now use invariant leaves over one shared renderer. |
-| `place-value-arithmetic-model` | 2 | Does the written-method variant change the requested response? |
+| `place-value-arithmetic-model` | 2 | **Migrated:** block procedure understanding and model-to-written-method formalization now use invariant leaves over one shared renderer; the paired generator payload is language-neutral. |
 | `area-perimeter-comparison` | 2 | Are classification and construction/explanation separate tasks? |
 | `shape-classify-attributes` | 2 | Is recognition observable support within the same classification task? |
 | `time-analog` | 3 | Which modes change task identity rather than presentation support? |
@@ -498,9 +504,13 @@ The current preferred tools are:
 1. a narrower payload type;
 2. a separate leaf view with shared rendering code;
 3. `requiredLabels` for generator-established Area/Scope applicability.
+4. `requiredTargetAbilities` for a stronger invariant sibling task that otherwise has the same
+   mathematical applicability and payload type.
 
-Do not add pair-conditional capability syntax without a real case where all three mechanisms are
-inadequate. Parameter defaults do not by themselves justify conditional capability semantics.
+The place-value model-to-written-method task is the concrete fourth case: the stronger leaf adds
+an invariant `Formalization` claim, but no mathematical discriminator separates it from the
+concrete-model task. Parameter defaults do not by themselves justify conditional capability
+semantics.
 
 ### Synthetic capability-totality probing
 

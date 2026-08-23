@@ -26,9 +26,6 @@ const digits = (number: number): PlaceValueDigits => ({
     ones: number % 10
 });
 
-const equationSymbol = (operation: Operation): '+' | '−' =>
-    operation === 'addition' ? '+' : '−';
-
 const operandProfile = (
     config: PlaceValueArithmeticGeneratorConfig
 ): PlaceValueArithmeticOperandProfile | null => {
@@ -139,14 +136,9 @@ const additionEvidence = (
     const right = digits(num2);
     const result = digits(answer);
     const onesTotal = left.ones + right.ones;
-    const upperLeft = num1 - left.ones;
-    const upperRight = num2 - right.ones;
-
     const combineOnes: PlaceValueArithmeticStep = {
         kind: 'combine-ones',
-        place: 'ones',
-        equation: `${left.ones} + ${right.ones} = ${onesTotal}`,
-        explanation: `Combine the ones: ${left.ones} + ${right.ones} = ${onesTotal}.`
+        place: 'ones'
     };
 
     if (requireRegrouping) {
@@ -156,22 +148,17 @@ const additionEvidence = (
                 kind: 'compose-ten',
                 onesBefore: onesTotal,
                 onesAfter: remainingOnes,
-                tensExchanged: 1,
-                statement: `Compose 10 of the ${onesTotal} ones as 1 ten, leaving ${remainingOnes} ones.`
+                tensExchanged: 1
             },
             steps: [
                 combineOnes,
                 {
                     kind: 'compose-ten',
-                    place: 'ones',
-                    equation: `${onesTotal} = 10 + ${remainingOnes}`,
-                    explanation: `Compose a ten: ${onesTotal} ones = 1 ten and ${remainingOnes} ones.`
+                    place: 'ones'
                 },
                 {
                     kind: 'result',
-                    place: 'result',
-                    equation: `${upperLeft} + ${upperRight} + 10 + ${remainingOnes} = ${answer}`,
-                    explanation: `Combine the tens, the composed ten, and ${remainingOnes} ones to get ${answer}.`
+                    place: 'result'
                 }
             ]
         };
@@ -182,22 +169,17 @@ const additionEvidence = (
             kind: 'none',
             onesBefore: onesTotal,
             onesAfter: result.ones,
-            tensExchanged: 0,
-            statement: `${onesTotal} ones stay in the ones place; no ten is composed.`
+            tensExchanged: 0
         },
         steps: [
             combineOnes,
             {
                 kind: 'combine-tens',
-                place: 'tens',
-                equation: `${upperLeft} + ${upperRight} = ${answer - result.ones}`,
-                explanation: `Combine the tens and hundreds: ${upperLeft} + ${upperRight} = ${answer - result.ones}.`
+                place: 'tens'
             },
             {
                 kind: 'result',
-                place: 'result',
-                equation: `${upperLeft} + ${upperRight} + ${onesTotal} = ${answer}`,
-                explanation: `Combine the place-value parts: ${upperLeft} + ${upperRight} + ${onesTotal} = ${answer}.`
+                place: 'result'
             }
         ]
     };
@@ -205,45 +187,33 @@ const additionEvidence = (
 
 const subtractionEvidence = (
     num1: number,
-    num2: number,
+    _num2: number,
     answer: number,
     requireRegrouping: boolean
 ): {regrouping: PlaceValueRegroupingEvidence; steps: PlaceValueArithmeticProblem['strategySteps']} => {
     const left = digits(num1);
-    const right = digits(num2);
     const result = digits(answer);
-    const upperLeft = num1 - left.ones;
-    const upperRight = num2 - right.ones;
-
     if (requireRegrouping) {
         const availableOnes = left.ones + 10;
-        const remainingUpper = upperLeft - 10;
         return {
             regrouping: {
                 kind: 'decompose-ten',
                 onesBefore: left.ones,
                 onesAfter: availableOnes,
-                tensExchanged: 1,
-                statement: `Decompose 1 ten as 10 ones, changing ${left.ones} ones to ${availableOnes} ones.`
+                tensExchanged: 1
             },
             steps: [
                 {
                     kind: 'decompose-ten',
-                    place: 'tens',
-                    equation: `${upperLeft} = ${remainingUpper} + 10`,
-                    explanation: `Decompose one ten: ${upperLeft} = ${remainingUpper} + 10.`
+                    place: 'tens'
                 },
                 {
                     kind: 'subtract-ones',
-                    place: 'ones',
-                    equation: `${availableOnes} − ${right.ones} = ${result.ones}`,
-                    explanation: `Subtract the ones: ${availableOnes} − ${right.ones} = ${result.ones}.`
+                    place: 'ones'
                 },
                 {
                     kind: 'result',
-                    place: 'result',
-                    equation: `${remainingUpper} − ${upperRight} + ${result.ones} = ${answer}`,
-                    explanation: `Subtract the remaining place-value parts and combine them to get ${answer}.`
+                    place: 'result'
                 }
             ]
         };
@@ -254,27 +224,20 @@ const subtractionEvidence = (
             kind: 'none',
             onesBefore: left.ones,
             onesAfter: result.ones,
-            tensExchanged: 0,
-            statement: `${left.ones} ones can subtract ${right.ones} ones directly; no ten is decomposed.`
+            tensExchanged: 0
         },
         steps: [
             {
                 kind: 'subtract-ones',
-                place: 'ones',
-                equation: `${left.ones} − ${right.ones} = ${result.ones}`,
-                explanation: `Subtract the ones: ${left.ones} − ${right.ones} = ${result.ones}.`
+                place: 'ones'
             },
             {
                 kind: 'subtract-tens',
-                place: 'tens',
-                equation: `${upperLeft} − ${upperRight} = ${answer - result.ones}`,
-                explanation: `Subtract the tens and hundreds: ${upperLeft} − ${upperRight} = ${answer - result.ones}.`
+                place: 'tens'
             },
             {
                 kind: 'result',
-                place: 'result',
-                equation: `${answer - result.ones} + ${result.ones} = ${answer}`,
-                explanation: `Combine the remaining place-value parts to get ${answer}.`
+                place: 'result'
             }
         ]
     };
@@ -300,7 +263,6 @@ const buildProblem = (
         operands: [digits(num1), digits(num2)],
         result: digits(answer),
         regrouping: evidence.regrouping,
-        equation: `${num1} ${equationSymbol(operation)} ${num2} = ${answer}`,
         strategySteps: evidence.steps
     };
 };

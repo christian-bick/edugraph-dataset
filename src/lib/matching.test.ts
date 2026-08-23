@@ -6,6 +6,7 @@ import {
     buildTargetCapabilityPostingIndex,
     generatorCapabilityInputHash,
     matchTargets,
+    matchesTarget,
     matchTargetsDelta,
     matchingPolicyNodeId,
     matchTupleNodeId,
@@ -64,6 +65,30 @@ const views = (): ViewMatchInfo[] => [
 const tupleIds = (tuples: readonly MatchTuple[]): string[] => tuples.map(tuple =>
     `${tuple.target.id}#${tuple.generatorId}#${tuple.viewId}`
 );
+
+describe('required target Abilities', () => {
+    it('selects an invariant view only when the target requests its Ability', () => {
+        const view: ViewMatchInfo = {
+            viewId: 'written-method',
+            supportedLabels: [Ability.ProcedureUnderstanding, Ability.Formalization],
+            requiredTargetAbilities: [Ability.Formalization]
+        };
+        expect(matchesTarget(
+            [Area.Addition, Ability.ProcedureUnderstanding],
+            generators()[0]!,
+            view
+        )).toEqual({
+            matched: false,
+            reason: 'missing-required-ability',
+            label: Ability.Formalization
+        });
+        expect(matchesTarget(
+            [Area.Addition, Ability.ProcedureUnderstanding, Ability.Formalization],
+            generators()[0]!,
+            view
+        )).toEqual({matched: true});
+    });
+});
 
 function matchingGraph(options: {
     targets: CompetencyTarget[];

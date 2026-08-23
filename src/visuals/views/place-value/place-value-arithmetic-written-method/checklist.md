@@ -1,0 +1,3 @@
+- **Identity:** The learner connects a place-value block operation to the corresponding vertically aligned written method using the same operands and result.
+- **Question/Solution contract:** Question Mode retains both block operands and an unresolved aligned written method; Solution Mode reveals the block process, regrouping annotations where needed, and the completed written method.
+- **Invariant capabilities:** Every artifact elicits both `ProcedureUnderstanding` and `Formalization`; neither Ability is resolved from labels at render time.

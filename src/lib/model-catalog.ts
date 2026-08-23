@@ -124,6 +124,7 @@ export async function loadViewModelCatalog(
                 ...(spec.generalLabels || []),
                 ...extractSchemaLabels(schema)
             ])],
+            requiredTargetAbilities: spec.requiredTargetAbilities || [],
             requiredLabels: spec.requiredLabels || [],
             rejectedLabels: spec.rejectedLabels || [],
             problemType: viewToType[spec.viewId] || null

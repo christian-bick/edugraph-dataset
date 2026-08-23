@@ -28,6 +28,8 @@ export interface ViewMatchInfo {
     viewId: string;
     /** Union of spec generalLabels and view-schema-extracted labels. */
     supportedLabels: string[];
+    /** View-owned Abilities that must be explicit target claims for this view to participate. */
+    requiredTargetAbilities?: readonly string[];
     requiredLabels?: readonly string[];
     rejectedLabels?: readonly string[];
     problemType?: string | null;
@@ -37,6 +39,7 @@ export type MatchFailureReason =
     | 'incompatible-type'
     | 'unsupported-label'
     | 'missing-required-label'
+    | 'missing-required-ability'
     | 'rejected-label';
 
 export type MatchVerdict =
@@ -57,6 +60,17 @@ function matchesTargetCapabilities(
     generatorInfo: GeneratorMatchInfo,
     viewInfo: ViewMatchInfo
 ): Exclude<MatchVerdict, {matched: false; reason: 'incompatible-type'}> {
+    const missingRequiredAbility = viewInfo.requiredTargetAbilities?.find(requiredAbility =>
+        !targetLabels.some(targetLabel => isSubConceptOf(targetLabel, requiredAbility))
+    );
+    if (missingRequiredAbility) {
+        return {
+            matched: false,
+            reason: 'missing-required-ability',
+            label: missingRequiredAbility
+        };
+    }
+
     const missingRequired = viewInfo.requiredLabels?.find(requiredLabel =>
         !targetLabels.some(targetLabel => isSubConceptOf(targetLabel, requiredLabel))
     );
@@ -428,13 +442,14 @@ export function generatorCapabilityInputHash(generator: GeneratorMatchInfo): str
 export function viewCapabilityInputHash(view: ViewMatchInfo): string {
     return digestIdentity({
         supported: matchingClosure(view.supportedLabels),
+        required_abilities: matchingClosure(view.requiredTargetAbilities ?? []),
         required: matchingClosure(view.requiredLabels ?? []),
         rejected: radixSortUtf8([...(view.rejectedLabels ?? [])]),
         problem_type: view.problemType ?? null
     });
 }
 
-export const MATCHING_POLICY_EPOCH = 1;
+export const MATCHING_POLICY_EPOCH = 2;
 
 /**
  * Matching implementation code is deliberately outside automatic cache

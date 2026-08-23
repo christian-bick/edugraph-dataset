@@ -7,7 +7,7 @@ import {
     regroupingPresentation,
     strategyStepPresentation,
     usesWholeTensPresentation
-} from './presentation.ts';
+} from '../place-value-arithmetic-presentation.ts';
 import {PlaceValueArithmeticExplanationViewConfig, PlaceValueArithmeticExplanationViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -28,13 +28,12 @@ const PlaceValueArithmeticExplanationCore = ({config: _config, payload}: CorePro
         'operands',
         'result',
         'regrouping',
-        'equation',
         'strategySteps'
     ]);
     if (!isValidPlaceValueArithmeticProblem(data)) {
         throw new ViewValidationError(
             'place-value-arithmetic-explanation',
-            'The operands, result, regrouping evidence, and three authored strategy steps must agree.'
+            'The operands, result, regrouping evidence, and three typed strategy steps must agree.'
         );
     }
     const symbol = data.operation === 'addition' ? '+' : '−';

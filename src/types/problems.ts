@@ -503,14 +503,11 @@ export type PlaceValueRegroupingEvidence = {
     onesBefore: number;
     onesAfter: number;
     tensExchanged: 0 | 1;
-    statement: string;
 };
 
 export type PlaceValueArithmeticStep = {
     kind: 'combine-ones' | 'compose-ten' | 'decompose-ten' | 'combine-tens' | 'subtract-ones' | 'subtract-tens' | 'result';
     place: 'ones' | 'tens' | 'hundreds' | 'result';
-    equation: string;
-    explanation: string;
 };
 
 export type PlaceValueArithmeticProblem = {
@@ -522,7 +519,6 @@ export type PlaceValueArithmeticProblem = {
     operands: [PlaceValueDigits, PlaceValueDigits];
     result: PlaceValueDigits;
     regrouping: PlaceValueRegroupingEvidence;
-    equation: string;
     strategySteps: readonly [PlaceValueArithmeticStep, PlaceValueArithmeticStep, PlaceValueArithmeticStep];
 };
 
@@ -2393,6 +2389,7 @@ export interface ViewTypeMap {
     'place-value-hundreds-bundles': PlaceValueBundlesProblem;
     'place-value-expanded-form': PlaceValueExpandedProblem;
     'place-value-arithmetic-model': PlaceValueArithmeticProblem;
+    'place-value-arithmetic-written-method': PlaceValueArithmeticProblem;
     'place-value-arithmetic-explanation': PlaceValueArithmeticProblem;
     'place-value-scaling': PlaceValueScalingProblem;
 

@@ -8,7 +8,7 @@ import {
     regroupingPresentation,
     strategyStepPresentation,
     usesWholeTensPresentation
-} from './presentation.ts';
+} from '../place-value-arithmetic-presentation.ts';
 
 const generator = new PlaceValueArithmeticGenerator();
 
@@ -45,7 +45,7 @@ describe('place-value arithmetic explanation payload validation', () => {
         [Area.Subtraction, {multipleOf10: true, zero: true}],
         [Area.Addition, {regrouping: true}],
         [Area.Subtraction, {regrouping: true}]
-    ] as const)('accepts the authored %s profile %#', (operation, options) => {
+    ] as const)('accepts the typed %s profile %#', (operation, options) => {
         expect(isValidPlaceValueArithmeticProblem(generate(operation, options))).toBe(true);
     });
 
@@ -59,11 +59,11 @@ describe('place-value arithmetic explanation payload validation', () => {
         expect(isValidPlaceValueArithmeticProblem({...problem, operandProfile: 'multiples-of-ten'})).toBe(false);
         expect(isValidPlaceValueArithmeticProblem({
             ...problem,
-            regrouping: {...problem.regrouping, statement: 'No regrouping is needed.'}
+            regrouping: {...problem.regrouping, onesAfter: problem.regrouping.onesAfter + 1}
         })).toBe(false);
     });
 
-    it('rejects altered step type, place, equation, or authored explanation', () => {
+    it('rejects altered step type or place', () => {
         const problem = generate(Area.Addition, {
             singleDigit: true,
             twoDigit: true,
@@ -77,14 +77,6 @@ describe('place-value arithmetic explanation payload validation', () => {
         expect(isValidPlaceValueArithmeticProblem({
             ...problem,
             strategySteps: [first, {...second, place: 'tens'}, third]
-        })).toBe(false);
-        expect(isValidPlaceValueArithmeticProblem({
-            ...problem,
-            strategySteps: [first, second, {...third, equation: `${problem.answer} = ${problem.answer}`}]
-        })).toBe(false);
-        expect(isValidPlaceValueArithmeticProblem({
-            ...problem,
-            strategySteps: [first, second, {...third, explanation: 'Use place value.'}]
         })).toBe(false);
     });
 
@@ -115,9 +107,7 @@ describe('place-value arithmetic explanation payload validation', () => {
         ].filter((value): value is string => value !== null);
 
         expect(visibleText).toContain('There are no ones to subtract.');
-        expect(visibleText).toContain(
-            `Subtract the tens: ${problem.strategySteps[1].equation}.`
-        );
+        expect(visibleText).toContain(`Subtract the tens: ${problem.num1} − ${problem.num2} = ${problem.answer}.`);
         expect(visibleText.some(text => text.includes('hundreds'))).toBe(false);
         expect(visibleText).toContain(`Result: ${problem.answer}`);
         expect(visibleText.every(text => !/(^|\D)0(\D|$)/.test(text))).toBe(true);
@@ -128,10 +118,10 @@ describe('place-value arithmetic explanation payload validation', () => {
         const problem = generate(Area.Subtraction, {multipleOf10: true, zero: true});
         expect(problem.answer).toBe(0);
         expect(usesWholeTensPresentation(problem)).toBe(false);
-        expect(regroupingPresentation(problem)).toBe(problem.regrouping.statement);
+        expect(regroupingPresentation(problem)).toBe('0 ones can subtract 0 ones directly; no ten is decomposed.');
         expect(strategyStepPresentation(problem, problem.strategySteps[0])).toEqual({
-            equation: problem.strategySteps[0].equation,
-            explanation: problem.strategySteps[0].explanation
+            equation: '0 − 0 = 0',
+            explanation: 'Subtract the ones: 0 − 0 = 0.'
         });
     });
 });

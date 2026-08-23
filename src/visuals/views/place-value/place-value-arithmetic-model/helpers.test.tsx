@@ -7,7 +7,8 @@ import {setSeed} from '../../../../lib/random.ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {PlaceValueArithmeticProblem} from '../../../../types/problems.ts';
 import {isValidPlaceValueArithmeticProblem} from '../helpers.ts';
-import {PlaceValueArithmeticModelCore} from './view.tsx';
+import {regroupingPresentation} from '../place-value-arithmetic-presentation.ts';
+import {PlaceValueArithmeticModelCore} from '../place-value-arithmetic-model-view.tsx';
 
 const generator = new PlaceValueArithmeticGenerator();
 
@@ -76,28 +77,20 @@ const subtractionWithHundredsBorrowing = (): PlaceValueArithmeticProblem => {
             kind: 'decompose-ten',
             onesBefore: 2,
             onesAfter: 12,
-            tensExchanged: 1,
-            statement: 'Decompose 1 ten as 10 ones, changing 2 ones to 12 ones.'
+            tensExchanged: 1
         },
-        equation: '452 − 158 = 294',
         strategySteps: [
             {
                 kind: 'decompose-ten',
-                place: 'tens',
-                equation: '450 = 440 + 10',
-                explanation: 'Decompose one ten: 450 = 440 + 10.'
+                place: 'tens'
             },
             {
                 kind: 'subtract-ones',
-                place: 'ones',
-                equation: '12 − 8 = 4',
-                explanation: 'Subtract the ones: 12 − 8 = 4.'
+                place: 'ones'
             },
             {
                 kind: 'result',
-                place: 'result',
-                equation: '440 − 150 + 4 = 294',
-                explanation: 'Subtract the remaining place-value parts and combine them to get 294.'
+                place: 'result'
             }
         ]
     };
@@ -118,28 +111,20 @@ const additionWithTwoCarries = (): PlaceValueArithmeticProblem => ({
         kind: 'compose-ten',
         onesBefore: 16,
         onesAfter: 6,
-        tensExchanged: 1,
-        statement: 'Compose 10 of the 16 ones as 1 ten, leaving 6 ones.'
+        tensExchanged: 1
     },
-    equation: '748 + 158 = 906',
     strategySteps: [
         {
             kind: 'combine-ones',
-            place: 'ones',
-            equation: '8 + 8 = 16',
-            explanation: 'Combine the ones: 8 + 8 = 16.'
+            place: 'ones'
         },
         {
             kind: 'compose-ten',
-            place: 'ones',
-            equation: '16 = 10 + 6',
-            explanation: 'Compose a ten: 16 ones = 1 ten and 6 ones.'
+            place: 'ones'
         },
         {
             kind: 'result',
-            place: 'result',
-            equation: '740 + 150 + 10 + 6 = 906',
-            explanation: 'Combine the tens, the composed ten, and 6 ones to get 906.'
+            place: 'result'
         }
     ]
 });
@@ -176,11 +161,11 @@ describe('place-value arithmetic shared validation', () => {
             generalRegrouping(Area.Subtraction)
         ];
         for (const data of supported) {
-            expect(isValidPlaceValueArithmeticProblem(data), data.equation).toBe(true);
+            expect(isValidPlaceValueArithmeticProblem(data)).toBe(true);
         }
     });
 
-    it('rejects contradictory arithmetic, digits, regrouping, profiles, equations, and step records', () => {
+    it('rejects contradictory arithmetic, digits, regrouping, profiles, and step records', () => {
         const source = grade1SingleDigit(true);
         const mutations: Array<(value: PlaceValueArithmeticProblem) => void> = [
             value => { value.answer -= 1; },
@@ -188,12 +173,9 @@ describe('place-value arithmetic shared validation', () => {
             value => { value.result.tens = (value.result.tens + 1) % 10; },
             value => { value.regrouping.onesAfter += 1; },
             value => { value.regrouping.kind = 'none'; },
-            value => { value.regrouping.statement = 'A vague regrouping statement.'; },
             value => { value.operandProfile = 'multiples-of-ten'; },
-            value => { value.equation = `${value.num1} + ${value.num2} = ${value.answer - 1}`; },
             value => { value.strategySteps[1].kind = 'combine-tens'; },
-            value => { value.strategySteps[2].place = 'tens'; },
-            value => { value.strategySteps[0].equation = ''; }
+            value => { value.strategySteps[2].place = 'tens'; }
         ];
         for (const mutate of mutations) {
             expect(isValidPlaceValueArithmeticProblem(changed(source, mutate))).toBe(false);
@@ -204,12 +186,12 @@ describe('place-value arithmetic shared validation', () => {
 describe('place-value arithmetic model modes', () => {
     it('withholds compose-ten evidence and the result in Question Mode, then reveals the exact exchange', () => {
         const data = grade1SingleDigit(true);
-        const question = renderToStaticMarkup(<PlaceValueArithmeticModelCore config={{showWrittenMethod: false}} payload={payload(data, false)} />);
-        const solution = renderToStaticMarkup(<PlaceValueArithmeticModelCore config={{showWrittenMethod: false}} payload={payload(data, true)} />);
+        const question = renderToStaticMarkup(<PlaceValueArithmeticModelCore mode="blocks" payload={payload(data, false)} viewId="place-value-arithmetic-model" />);
+        const solution = renderToStaticMarkup(<PlaceValueArithmeticModelCore mode="blocks" payload={payload(data, true)} viewId="place-value-arithmetic-model" />);
 
         expect(question).toContain(`First operand: ${data.num1}`);
         expect(question).toContain(`Second operand: ${data.num2}`);
-        expect(question).not.toContain(data.regrouping.statement);
+        expect(question).not.toContain(regroupingPresentation(data));
         expect(question).not.toContain('Combined ones');
         expect(question).not.toContain(`Result ${data.answer}`);
         expect(solution).toContain('Combined ones');
@@ -224,10 +206,10 @@ describe('place-value arithmetic model modes', () => {
         const noRegroupData = grade1SingleDigit(false);
         const multipleData = grade1MultipleAddition();
         const noRegroup = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: false}} payload={payload(noRegroupData, true)} />
+            <PlaceValueArithmeticModelCore mode="blocks" payload={payload(noRegroupData, true)} viewId="place-value-arithmetic-model" />
         );
         const multipleOfTen = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: false}} payload={payload(multipleData, true)} />
+            <PlaceValueArithmeticModelCore mode="blocks" payload={payload(multipleData, true)} viewId="place-value-arithmetic-model" />
         );
 
         expect(noRegroup).toContain(`Combine ${noRegroupData.num2}`);
@@ -240,10 +222,10 @@ describe('place-value arithmetic model modes', () => {
         const differenceData = grade1TensSubtraction(false);
         const zeroData = grade1TensSubtraction(true);
         const difference = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: false}} payload={payload(differenceData, true)} />
+            <PlaceValueArithmeticModelCore mode="blocks" payload={payload(differenceData, true)} viewId="place-value-arithmetic-model" />
         );
         const zero = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: false}} payload={payload(zeroData, true)} />
+            <PlaceValueArithmeticModelCore mode="blocks" payload={payload(zeroData, true)} viewId="place-value-arithmetic-model" />
         );
 
         expect(difference).toContain(`${differenceData.num1 / 10} tens`);
@@ -263,8 +245,8 @@ describe('place-value arithmetic model modes', () => {
 
     it('aligns the same quantities vertically and reveals the written result only in Solution Mode', () => {
         const data = grade1SingleDigit(true);
-        const question = renderToStaticMarkup(<PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(data, false)} />);
-        const solution = renderToStaticMarkup(<PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(data, true)} />);
+        const question = renderToStaticMarkup(<PlaceValueArithmeticModelCore mode="written-method" payload={payload(data, false)} viewId="place-value-arithmetic-written-method" />);
+        const solution = renderToStaticMarkup(<PlaceValueArithmeticModelCore mode="written-method" payload={payload(data, true)} viewId="place-value-arithmetic-written-method" />);
 
         expect(question).toContain('Vertical written method');
         expect(question).toContain(`aria-label="First operand ${data.num1}"`);
@@ -276,8 +258,8 @@ describe('place-value arithmetic model modes', () => {
 
     it('uses a complete tens-unit vertical method for positive whole-tens subtraction', () => {
         const data = grade1TensSubtraction(false);
-        const question = renderToStaticMarkup(<PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(data, false)} />);
-        const solution = renderToStaticMarkup(<PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(data, true)} />);
+        const question = renderToStaticMarkup(<PlaceValueArithmeticModelCore mode="written-method" payload={payload(data, false)} viewId="place-value-arithmetic-written-method" />);
+        const solution = renderToStaticMarkup(<PlaceValueArithmeticModelCore mode="written-method" payload={payload(data, true)} viewId="place-value-arithmetic-written-method" />);
 
         expect(question).toContain('Tens-unit vertical method');
         expect(question).toContain(`aria-label="First operand ${data.num1 / 10} tens"`);
@@ -292,10 +274,10 @@ describe('place-value arithmetic model modes', () => {
         const additionData = generalRegrouping(Area.Addition);
         const subtractionData = generalRegrouping(Area.Subtraction);
         const addition = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(additionData, true)} />
+            <PlaceValueArithmeticModelCore mode="written-method" payload={payload(additionData, true)} viewId="place-value-arithmetic-written-method" />
         );
         const subtraction = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(subtractionData, true)} />
+            <PlaceValueArithmeticModelCore mode="written-method" payload={payload(subtractionData, true)} viewId="place-value-arithmetic-written-method" />
         );
 
         expect(addition).toContain(`First operand: ${additionData.num1}`);
@@ -313,7 +295,7 @@ describe('place-value arithmetic model modes', () => {
         const adjustedTens = data.operands[0].tens - 1 + 10;
         const adjustedOnes = data.operands[0].ones + 10;
         const solution = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(data, true)} />
+            <PlaceValueArithmeticModelCore mode="written-method" payload={payload(data, true)} viewId="place-value-arithmetic-written-method" />
         );
 
         expect(solution).toContain('Regrouped top number');
@@ -326,7 +308,7 @@ describe('place-value arithmetic model modes', () => {
         const data = additionWithTwoCarries();
         expect(isValidPlaceValueArithmeticProblem(data)).toBe(true);
         const solution = renderToStaticMarkup(
-            <PlaceValueArithmeticModelCore config={{showWrittenMethod: true}} payload={payload(data, true)} />
+            <PlaceValueArithmeticModelCore mode="written-method" payload={payload(data, true)} viewId="place-value-arithmetic-written-method" />
         );
 
         expect(solution).toContain('Carried values');

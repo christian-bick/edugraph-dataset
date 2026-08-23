@@ -125,6 +125,7 @@ export interface LabelArchitectureAuditReport {
         view_schema_parameters: number;
         ability_parameterized_views: string[];
         views_with_required_labels: string[];
+        views_with_required_target_abilities: string[];
         views_with_rejected_labels: string[];
         views_with_positive_areas: string[];
     };
@@ -795,6 +796,15 @@ export function buildLabelArchitectureAudit(options: {
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
         }
+        if ((view.requiredTargetAbilities ?? []).length > 0) {
+            findings.push(finding({
+                category: 'required-target-ability-review',
+                disposition: 'review',
+                summary: `Review whether ${view.viewId} requires an explicit target Ability to select a distinct task leaf.`,
+                modules: [view.viewId], labels: [...(view.requiredTargetAbilities ?? [])], files: [],
+                affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
+            }));
+        }
         if ((view.rejectedLabels ?? []).length > 0) {
             findings.push(finding({
                 category: 'rejected-label-review',
@@ -912,6 +922,9 @@ export function buildLabelArchitectureAudit(options: {
             ability_parameterized_views: abilityParameterizedViews,
             views_with_required_labels: radixSortUtf8(options.views
                 .filter(view => (view.requiredLabels ?? []).length > 0).map(view => view.viewId)),
+            views_with_required_target_abilities: radixSortUtf8(options.views
+                .filter(view => (view.requiredTargetAbilities ?? []).length > 0)
+                .map(view => view.viewId)),
             views_with_rejected_labels: radixSortUtf8(options.views
                 .filter(view => (view.rejectedLabels ?? []).length > 0).map(view => view.viewId)),
             views_with_positive_areas: radixSortUtf8(options.views
@@ -965,6 +978,7 @@ export function formatLabelArchitectureAudit(report: LabelArchitectureAuditRepor
         `- View schema parameters: ${report.module_inventory.view_schema_parameters}`,
         `- Ability-parameterized views: ${report.module_inventory.ability_parameterized_views.length}`,
         `- Views with required labels: ${report.module_inventory.views_with_required_labels.length}`,
+        `- Views with required target Abilities: ${report.module_inventory.views_with_required_target_abilities.length}`,
         `- Views with rejected labels: ${report.module_inventory.views_with_rejected_labels.length}`,
         `- Views with positive Areas: ${report.module_inventory.views_with_positive_areas.length}`,
         '',

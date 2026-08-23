@@ -4,7 +4,8 @@ import {
     findAbilityLabels,
     findCrossRoleAreaOverlaps,
     findRejectedLabelContractIssues,
-    findRequiredLabelContractIssues
+    findRequiredLabelContractIssues,
+    findRequiredTargetAbilityContractIssues
 } from './spec-contracts.ts';
 
 describe('findAbilityLabels', () => {
@@ -116,5 +117,27 @@ describe('findRejectedLabelContractIssues', () => {
         expect(findRejectedLabelContractIssues({
             rejectedLabels: [Scope.NumbersLarger20, Scope.NumbersLarger100]
         })).toEqual([]);
+    });
+});
+
+describe('findRequiredTargetAbilityContractIssues', () => {
+    it('accepts an invariant Ability used to select an explicit target claim', () => {
+        expect(findRequiredTargetAbilityContractIssues({
+            requiredTargetAbilities: [Ability.Formalization],
+            viewGeneralLabels: [Ability.ProcedureUnderstanding, Ability.Formalization]
+        })).toEqual([]);
+    });
+
+    it('rejects non-Ability and non-invariant requirements', () => {
+        expect(findRequiredTargetAbilityContractIssues({
+            requiredTargetAbilities: [Area.Equation, Ability.Formalization],
+            viewGeneralLabels: [Ability.ProcedureUnderstanding]
+        })).toEqual([
+            {kind: 'invalid-required-target-ability', label: Area.Equation},
+            {
+                kind: 'required-target-ability-not-invariant',
+                label: Ability.Formalization
+            }
+        ]);
     });
 });

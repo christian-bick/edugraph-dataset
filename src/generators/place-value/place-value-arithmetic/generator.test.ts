@@ -18,17 +18,15 @@ const generalConfig = (overrides: Partial<PlaceValueArithmeticGeneratorConfig> =
 
 const expectExactEvidence = (data: PlaceValueArithmeticProblem): void => {
     const [left, right] = data.operands;
-    const upperLeft = data.num1 - left.ones;
-    const upperRight = data.num2 - right.ones;
     expect(data.answer).toBe(data.operation === 'addition'
         ? data.num1 + data.num2
         : data.num1 - data.num2);
-    expect(data.equation).toBe(
-        `${data.num1} ${data.operation === 'addition' ? '+' : '−'} ${data.num2} = ${data.answer}`
-    );
+    expect(data).not.toHaveProperty('equation');
+    expect(data.regrouping).not.toHaveProperty('statement');
+    expect(data.strategySteps.every(step =>
+        !('equation' in step) && !('explanation' in step)
+    )).toBe(true);
     expect(data.strategySteps).toHaveLength(3);
-    expect(data.strategySteps.every(step => step.equation.includes(' = '))).toBe(true);
-    expect(data.strategySteps.every(step => step.explanation.length > 0)).toBe(true);
 
     if (data.regrouping.kind === 'compose-ten') {
         const onesTotal = left.ones + right.ones;
@@ -38,33 +36,30 @@ const expectExactEvidence = (data: PlaceValueArithmeticProblem): void => {
             kind: 'compose-ten',
             onesBefore: onesTotal,
             onesAfter: remainingOnes,
-            tensExchanged: 1,
-            statement: `Compose 10 of the ${onesTotal} ones as 1 ten, leaving ${remainingOnes} ones.`
+            tensExchanged: 1
         });
-        expect(data.strategySteps.map(step => [step.kind, step.place, step.equation])).toEqual([
-            ['combine-ones', 'ones', `${left.ones} + ${right.ones} = ${onesTotal}`],
-            ['compose-ten', 'ones', `${onesTotal} = 10 + ${remainingOnes}`],
-            ['result', 'result', `${upperLeft} + ${upperRight} + 10 + ${remainingOnes} = ${data.answer}`]
+        expect(data.strategySteps.map(step => [step.kind, step.place])).toEqual([
+            ['combine-ones', 'ones'],
+            ['compose-ten', 'ones'],
+            ['result', 'result']
         ]);
         return;
     }
 
     if (data.regrouping.kind === 'decompose-ten') {
         const availableOnes = left.ones + 10;
-        const remainingUpper = upperLeft - 10;
         expect(data.operation).toBe('subtraction');
         expect(left.tens).toBeGreaterThan(0);
         expect(data.regrouping).toEqual({
             kind: 'decompose-ten',
             onesBefore: left.ones,
             onesAfter: availableOnes,
-            tensExchanged: 1,
-            statement: `Decompose 1 ten as 10 ones, changing ${left.ones} ones to ${availableOnes} ones.`
+            tensExchanged: 1
         });
-        expect(data.strategySteps.map(step => [step.kind, step.place, step.equation])).toEqual([
-            ['decompose-ten', 'tens', `${upperLeft} = ${remainingUpper} + 10`],
-            ['subtract-ones', 'ones', `${availableOnes} − ${right.ones} = ${data.result.ones}`],
-            ['result', 'result', `${remainingUpper} − ${upperRight} + ${data.result.ones} = ${data.answer}`]
+        expect(data.strategySteps.map(step => [step.kind, step.place])).toEqual([
+            ['decompose-ten', 'tens'],
+            ['subtract-ones', 'ones'],
+            ['result', 'result']
         ]);
         return;
     }

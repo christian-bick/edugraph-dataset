@@ -9,7 +9,8 @@ import {
     findAbilityLabels,
     findCrossRoleAreaOverlaps,
     findRejectedLabelContractIssues,
-    findRequiredLabelContractIssues
+    findRequiredLabelContractIssues,
+    findRequiredTargetAbilityContractIssues
 } from '../lib/spec-contracts.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -135,6 +136,7 @@ async function validateSpecs() {
 
                 const generalLabels = spec.generalLabels || [];
                 const requiredLabels = spec.requiredLabels || [];
+                const requiredTargetAbilities = spec.requiredTargetAbilities || [];
                 const rejectedLabels = spec.rejectedLabels || [];
                 if (checkRedundantGeneralLabels('view', item, generalLabels)) {
                     hasError = true;
@@ -212,6 +214,19 @@ async function validateSpecs() {
                         console.error(`❌ [view:${item}] requiredLabels cannot be established because the view has no compatible generator`);
                     } else {
                         console.error(`❌ [view:${item}] Required label '${issue.label}' is not supported by compatible generator '${issue.generatorId}'`);
+                    }
+                    hasError = true;
+                }
+
+                const requiredTargetAbilityIssues = findRequiredTargetAbilityContractIssues({
+                    requiredTargetAbilities,
+                    viewGeneralLabels: generalLabels
+                });
+                for (const issue of requiredTargetAbilityIssues) {
+                    if (issue.kind === 'invalid-required-target-ability') {
+                        console.error(`❌ [view:${item}] Required target Ability '${issue.label}' is not an Ability`);
+                    } else {
+                        console.error(`❌ [view:${item}] Required target Ability '${issue.label}' is not an invariant capability in generalLabels`);
                     }
                     hasError = true;
                 }

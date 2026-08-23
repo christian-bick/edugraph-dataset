@@ -1,4 +1,4 @@
-import {PlaceValueArithmeticProblem, PlaceValueDigits} from '../../../../types/problems.ts';
+import {PlaceValueArithmeticProblem, PlaceValueDigits} from '../../../types/problems.ts';
 
 const digitsFor = (value: number): PlaceValueDigits => ({
     hundreds: Math.floor(value / 100),

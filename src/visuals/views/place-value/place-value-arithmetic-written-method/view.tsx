@@ -3,24 +3,24 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {PlaceValueArithmeticModelCore} from '../place-value-arithmetic-model-view.tsx';
 import {
-    PlaceValueArithmeticModelViewConfig,
-    PlaceValueArithmeticModelViewSchema
+    PlaceValueArithmeticWrittenMethodViewConfig,
+    PlaceValueArithmeticWrittenMethodViewSchema
 } from './spec.ts';
 import '../../../../tailwind.css';
 
-const VIEW_ID = 'place-value-arithmetic-model';
+const VIEW_ID = 'place-value-arithmetic-written-method';
 
 interface CoreProps {
-    config: PlaceValueArithmeticModelViewConfig;
+    config: PlaceValueArithmeticWrittenMethodViewConfig;
     payload: ViewRenderPayload<typeof VIEW_ID>;
 }
 
 const Core = ({payload}: CoreProps) => (
-    <PlaceValueArithmeticModelCore mode="blocks" payload={payload} viewId={VIEW_ID} />
+    <PlaceValueArithmeticModelCore mode="written-method" payload={payload} viewId={VIEW_ID} />
 );
 
-export const PlaceValueArithmeticModel = withConfig(
-    PlaceValueArithmeticModelViewSchema,
+export const PlaceValueArithmeticWrittenMethod = withConfig(
+    PlaceValueArithmeticWrittenMethodViewSchema,
     Core
 );
 
@@ -29,5 +29,5 @@ window.renderView = (payload: ViewRenderPayload<typeof VIEW_ID>) => {
     const container = document.getElementById('view');
     if (!container) return;
     if (!root) root = createRoot(container);
-    root.render(<PlaceValueArithmeticModel payload={payload} />);
+    root.render(<PlaceValueArithmeticWrittenMethod payload={payload} />);
 };

@@ -76,10 +76,7 @@ const expectedRegrouping = (
             kind: composed ? 'compose-ten' : 'none',
             onesBefore: onesTotal,
             onesAfter: remainingOnes,
-            tensExchanged: composed ? 1 : 0,
-            statement: composed
-                ? `Compose 10 of the ${onesTotal} ones as 1 ten, leaving ${remainingOnes} ones.`
-                : `${onesTotal} ones stay in the ones place; no ten is composed.`
+            tensExchanged: composed ? 1 : 0
         };
     }
 
@@ -89,10 +86,7 @@ const expectedRegrouping = (
         kind: decomposed ? 'decompose-ten' : 'none',
         onesBefore: left.ones,
         onesAfter: decomposed ? availableOnes : left.ones - right.ones,
-        tensExchanged: decomposed ? 1 : 0,
-        statement: decomposed
-            ? `Decompose 1 ten as 10 ones, changing ${left.ones} ones to ${availableOnes} ones.`
-            : `${left.ones} ones can subtract ${right.ones} ones directly; no ten is decomposed.`
+        tensExchanged: decomposed ? 1 : 0
     };
 };
 
@@ -101,45 +95,27 @@ const matchesRegrouping = (value: unknown, expected: PlaceValueRegroupingEvidenc
     && value.kind === expected.kind
     && value.onesBefore === expected.onesBefore
     && value.onesAfter === expected.onesAfter
-    && value.tensExchanged === expected.tensExchanged
-    && value.statement === expected.statement;
+    && value.tensExchanged === expected.tensExchanged;
 
 const expectedStrategySteps = (
-    num1: number,
-    num2: number,
-    answer: number,
     operation: PlaceValueArithmeticProblem['operation'],
-    left: PlaceValueDigits,
-    right: PlaceValueDigits,
-    result: PlaceValueDigits,
     regrouping: PlaceValueRegroupingEvidence
 ): PlaceValueArithmeticProblem['strategySteps'] => {
-    const upperLeft = num1 - left.ones;
-    const upperRight = num2 - right.ones;
-
     if (operation === 'addition') {
-        const onesTotal = left.ones + right.ones;
         const combineOnes: PlaceValueArithmeticStep = {
             kind: 'combine-ones',
-            place: 'ones',
-            equation: `${left.ones} + ${right.ones} = ${onesTotal}`,
-            explanation: `Combine the ones: ${left.ones} + ${right.ones} = ${onesTotal}.`
+            place: 'ones'
         };
         if (regrouping.kind === 'compose-ten') {
-            const remainingOnes = onesTotal - 10;
             return [
                 combineOnes,
                 {
                     kind: 'compose-ten',
-                    place: 'ones',
-                    equation: `${onesTotal} = 10 + ${remainingOnes}`,
-                    explanation: `Compose a ten: ${onesTotal} ones = 1 ten and ${remainingOnes} ones.`
+                    place: 'ones'
                 },
                 {
                     kind: 'result',
-                    place: 'result',
-                    equation: `${upperLeft} + ${upperRight} + 10 + ${remainingOnes} = ${answer}`,
-                    explanation: `Combine the tens, the composed ten, and ${remainingOnes} ones to get ${answer}.`
+                    place: 'result'
                 }
             ];
         }
@@ -147,61 +123,43 @@ const expectedStrategySteps = (
             combineOnes,
             {
                 kind: 'combine-tens',
-                place: 'tens',
-                equation: `${upperLeft} + ${upperRight} = ${answer - result.ones}`,
-                explanation: `Combine the tens and hundreds: ${upperLeft} + ${upperRight} = ${answer - result.ones}.`
+                place: 'tens'
             },
             {
                 kind: 'result',
-                place: 'result',
-                equation: `${upperLeft} + ${upperRight} + ${onesTotal} = ${answer}`,
-                explanation: `Combine the place-value parts: ${upperLeft} + ${upperRight} + ${onesTotal} = ${answer}.`
+                place: 'result'
             }
         ];
     }
 
     if (regrouping.kind === 'decompose-ten') {
-        const availableOnes = left.ones + 10;
-        const remainingUpper = upperLeft - 10;
         return [
             {
                 kind: 'decompose-ten',
-                place: 'tens',
-                equation: `${upperLeft} = ${remainingUpper} + 10`,
-                explanation: `Decompose one ten: ${upperLeft} = ${remainingUpper} + 10.`
+                place: 'tens'
             },
             {
                 kind: 'subtract-ones',
-                place: 'ones',
-                equation: `${availableOnes} − ${right.ones} = ${result.ones}`,
-                explanation: `Subtract the ones: ${availableOnes} − ${right.ones} = ${result.ones}.`
+                place: 'ones'
             },
             {
                 kind: 'result',
-                place: 'result',
-                equation: `${remainingUpper} − ${upperRight} + ${result.ones} = ${answer}`,
-                explanation: `Subtract the remaining place-value parts and combine them to get ${answer}.`
+                place: 'result'
             }
         ];
     }
     return [
         {
             kind: 'subtract-ones',
-            place: 'ones',
-            equation: `${left.ones} − ${right.ones} = ${result.ones}`,
-            explanation: `Subtract the ones: ${left.ones} − ${right.ones} = ${result.ones}.`
+            place: 'ones'
         },
         {
             kind: 'subtract-tens',
-            place: 'tens',
-            equation: `${upperLeft} − ${upperRight} = ${answer - result.ones}`,
-            explanation: `Subtract the tens and hundreds: ${upperLeft} − ${upperRight} = ${answer - result.ones}.`
+            place: 'tens'
         },
         {
             kind: 'result',
-            place: 'result',
-            equation: `${answer - result.ones} + ${result.ones} = ${answer}`,
-            explanation: `Combine the remaining place-value parts to get ${answer}.`
+            place: 'result'
         }
     ];
 };
@@ -209,9 +167,7 @@ const expectedStrategySteps = (
 const matchesStrategyStep = (value: unknown, expected: PlaceValueArithmeticStep): boolean =>
     isRecord(value)
     && value.kind === expected.kind
-    && value.place === expected.place
-    && value.equation === expected.equation
-    && value.explanation === expected.explanation;
+    && value.place === expected.place;
 
 export const isValidPlaceValueArithmeticProblem = (
     value: unknown
@@ -251,22 +207,13 @@ export const isValidPlaceValueArithmeticProblem = (
         return false;
     }
 
-    const result = digitsFor(value.answer);
     const expectedRegroupingEvidence = expectedRegrouping(operation, left, right);
-    const symbol = operation === 'addition' ? '+' : '−';
-    if (value.equation !== `${value.num1} ${symbol} ${value.num2} = ${value.answer}`
-        || !matchesRegrouping(value.regrouping, expectedRegroupingEvidence)) {
+    if (!matchesRegrouping(value.regrouping, expectedRegroupingEvidence)) {
         return false;
     }
 
     const expectedSteps = expectedStrategySteps(
-        value.num1,
-        value.num2,
-        value.answer,
         operation,
-        left,
-        right,
-        result,
         expectedRegroupingEvidence
     );
     return value.strategySteps.every((step, index) =>

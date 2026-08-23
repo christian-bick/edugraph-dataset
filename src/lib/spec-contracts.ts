@@ -44,6 +44,34 @@ export type RequiredLabelContractIssue =
 export type RejectedLabelContractIssue =
     {kind: 'ability-rejection'; label: string};
 
+export type RequiredTargetAbilityContractIssue =
+    | {kind: 'invalid-required-target-ability'; label: string}
+    | {kind: 'required-target-ability-not-invariant'; label: string};
+
+/**
+ * Target-Ability requirements select among invariant view projections. They
+ * must be Abilities that the same view unconditionally contributes.
+ */
+export function findRequiredTargetAbilityContractIssues({
+    requiredTargetAbilities,
+    viewGeneralLabels
+}: {
+    requiredTargetAbilities: readonly string[];
+    viewGeneralLabels: readonly string[];
+}): RequiredTargetAbilityContractIssue[] {
+    const issues: RequiredTargetAbilityContractIssue[] = [];
+    for (const label of requiredTargetAbilities) {
+        if (!abilityLabels.has(label)) {
+            issues.push({kind: 'invalid-required-target-ability', label});
+            continue;
+        }
+        if (!viewGeneralLabels.some(viewLabel => isSubConceptOf(viewLabel, label))) {
+            issues.push({kind: 'required-target-ability-not-invariant', label});
+        }
+    }
+    return issues;
+}
+
 /**
  * Rejections express physical rendering boundaries. They never filter Abilities.
  * Area/Scope limits may intentionally be forward-compatible with generators that
