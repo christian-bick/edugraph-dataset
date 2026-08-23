@@ -18,19 +18,16 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
         const minTotal = Math.max(possibleCategories.length, minVal);
         const total = Math.floor(random() * (resolvedRange.max - minTotal + 1)) + minTotal;
 
-        const items: string[] = [];
         const counts: Record<string, number> = {};
 
         // Guarantee at least 1 item per category
         possibleCategories.forEach(cat => {
-            items.push(cat);
             counts[cat] = 1;
         });
 
         const remaining = total - possibleCategories.length;
         for (let i = 0; i < remaining; i++) {
             const cat = possibleCategories[Math.floor(random() * possibleCategories.length)];
-            items.push(cat);
             counts[cat]++;
         }
 
@@ -60,7 +57,6 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
 
         return {
             data: {
-                items,
                 categories: counts,
                 relation: relation as 'most' | 'least',
                 answer: targetCategory,

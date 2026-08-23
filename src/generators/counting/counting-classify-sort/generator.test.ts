@@ -28,6 +28,9 @@ describe('CountingClassifySortGenerator', () => {
             const stub = generator.generate(configMost);
             if (stub) {
                 expect(stub.data.relation).toBe('most');
+                expect(stub.data).not.toHaveProperty('items');
+                expect(Object.values(stub.data.categories).reduce((sum, count) => sum + count, 0))
+                    .toBe(stub.data.numObjects);
                 
                 const answer = stub.data.answer;
                 const cats = stub.data.categories;

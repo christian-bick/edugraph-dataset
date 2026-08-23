@@ -520,7 +520,6 @@ export type CountingClassifyCountProblem = {
 };
 
 export type CountingClassifySortProblem = {
-    items: string[];
     categories: Record<string, number>;
     numObjects: number;
     relation: 'most' | 'least';
