@@ -51,6 +51,11 @@ describe('local explorer snapshots', () => {
             payload,
             '2026-08-16T12:01:00.000Z',
         );
+        expect(second).toMatchObject({
+            asset_blobs_written: 0,
+            asset_blobs_reused: 1,
+            asset_bytes_written: 0,
+        });
         const third = publishLocalExplorerSnapshot(
             resolve(root, 'snapshots'),
             payload,
@@ -63,6 +68,8 @@ describe('local explorer snapshots', () => {
         expect(readLatestLocalExplorerSnapshot(resolve(root, 'snapshots'))).toMatchObject({
             snapshot_id: third.snapshot_id,
             asset_count: 1,
+            asset_blobs_reused: 1,
+            asset_bytes_written: 0,
         });
         expect(readFileSync(resolve(third.directory, 'dataset/local/train/writing/sample.png'), 'utf-8'))
             .toBe('png');
@@ -84,6 +91,21 @@ describe('local explorer snapshots', () => {
             index,
             localAssets: new Map([['train/../sample.png', source]]),
         })).toThrow('Invalid local explorer asset key');
+        expect(readLatestLocalExplorerSnapshot(snapshotRoot)).toBeNull();
+    });
+
+    it('ignores snapshots that do not satisfy the current statistics schema', () => {
+        const root = fixtureRoot();
+        const snapshotRoot = resolve(root, 'snapshots');
+        const incomplete = resolve(snapshotRoot, 'incomplete');
+        mkdirSync(incomplete, {recursive: true});
+        writeFileSync(resolve(incomplete, 'snapshot.json'), JSON.stringify({
+            schema_version: 2,
+            snapshot_id: 'incomplete',
+            generated_at: '2026-08-16T12:00:00.000Z',
+            asset_count: 1,
+        }));
+
         expect(readLatestLocalExplorerSnapshot(snapshotRoot)).toBeNull();
     });
 });

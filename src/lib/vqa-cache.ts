@@ -2,6 +2,8 @@ import { createHash } from 'crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { definition, type CompetencyDescriptor } from 'edugraph-ts';
+import type {WorkCounters} from './work-counters.ts';
+import {currentValidationPolicyInputHash} from './vqa-policy.ts';
 
 const EDUGRAPH_NAMESPACE = 'http://edugraph.io/edu/';
 
@@ -23,6 +25,7 @@ export interface VqaValidationContext {
     checklistHash: string;
     labelContextHash: string;
     validationContextHash: string;
+    validationPolicyHash: string;
     validationCacheKey: string;
     labelDefinitions: VqaLabelDefinition[];
 }
@@ -44,6 +47,7 @@ export interface VqaCacheEntry {
     checklist_hash: string;
     label_context_hash: string;
     validation_context_hash: string;
+    validation_policy_hash: string;
     validated_at: string;
     evaluation: {
         pass: boolean;
@@ -61,15 +65,29 @@ export interface VqaCacheEntry {
     };
 }
 
-export function computeChecklistHash(checklistPaths: string[]): string {
+const computeChecklistContentHash = (contents: readonly string[]): string => {
     const hash = createHash('sha256');
-    for (const p of checklistPaths) {
-        if (existsSync(p)) {
-            hash.update(readFileSync(p, 'utf-8'));
-            hash.update('\n---\n');
-        }
+    for (const content of contents) {
+        hash.update(content);
+        hash.update('\n---\n');
     }
     return hash.digest('hex').slice(0, 16);
+};
+
+export function computeChecklistHash(
+    checklistPaths: string[],
+    counters?: WorkCounters
+): string {
+    const contents: string[] = [];
+    for (const p of checklistPaths) {
+        if (existsSync(p)) {
+            const content = readFileSync(p, 'utf-8');
+            counters?.add('vqa.checklist_file_reads');
+            counters?.add('vqa.checklist_bytes_read', Buffer.byteLength(content));
+            contents.push(content);
+        }
+    }
+    return computeChecklistContentHash(contents);
 }
 
 export function resolveVqaLabelDefinitions(labels: readonly string[]): VqaLabelDefinition[] {
@@ -114,28 +132,117 @@ export function computeImageSha256(imageBufferOrPath: Buffer | string): string {
 
 export function computeValidationCacheKey(
     imageSha256: string,
-    validationContextHash: string
+    validationContextHash: string,
+    validationPolicyHash = currentValidationPolicyInputHash()
 ): string {
-    const rawKey = `${imageSha256}:${validationContextHash}`;
-    return createHash('sha256').update(rawKey).digest('hex');
+    return createHash('sha256')
+        .update(`${imageSha256}:${validationContextHash}:${validationPolicyHash}`)
+        .digest('hex');
 }
 
 export function buildVqaValidationContext(
     imageSha256: string,
     checklistPaths: string[],
-    labels: readonly string[]
+    labels: readonly string[],
+    validationPolicyHash = currentValidationPolicyInputHash()
 ): VqaValidationContext {
     const checklistHash = computeChecklistHash(checklistPaths);
     const labelDefinitions = resolveVqaLabelDefinitions(labels);
     const labelContextHash = computeLabelContextHash(labelDefinitions);
     const validationContextHash = computeValidationContextHash(checklistHash, labelContextHash);
-    const validationCacheKey = computeValidationCacheKey(imageSha256, validationContextHash);
+    const validationCacheKey = computeValidationCacheKey(
+        imageSha256,
+        validationContextHash,
+        validationPolicyHash
+    );
     return {
         checklistHash,
         labelContextHash,
         validationContextHash,
+        validationPolicyHash,
         validationCacheKey,
         labelDefinitions
+    };
+}
+
+export interface VqaValidationContextResolver {
+    resolve(
+        imageSha256: string,
+        checklistPaths: string[],
+        labels: readonly string[],
+        checklistContents?: readonly string[]
+    ): VqaValidationContext;
+}
+
+/**
+ * Memoizes checklist, label-definition, and combined-context work for one
+ * validation operation. Image identity remains sample-specific.
+ */
+export function createVqaValidationContextResolver(
+    counters?: WorkCounters,
+    validationPolicyHash = currentValidationPolicyInputHash()
+): VqaValidationContextResolver {
+    const checklistHashes = new Map<string, string>();
+    const labelContexts = new Map<string, {
+        definitions: VqaLabelDefinition[];
+        hash: string;
+    }>();
+    const validationContextHashes = new Map<string, string>();
+
+    return {
+        resolve(imageSha256, checklistPaths, labels, checklistContents) {
+            const checklistKey = checklistPaths.join('\u0000');
+            let checklistHash = checklistHashes.get(checklistKey);
+            if (!checklistHash) {
+                checklistHash = checklistContents
+                    ? computeChecklistContentHash(checklistContents)
+                    : computeChecklistHash(checklistPaths, counters);
+                checklistHashes.set(checklistKey, checklistHash);
+                counters?.add('vqa.checklist_contexts');
+            }
+
+            const normalizedLabels = [...new Set(labels.map(rawLabel =>
+                rawLabel.startsWith(EDUGRAPH_NAMESPACE)
+                    ? rawLabel
+                    : `${EDUGRAPH_NAMESPACE}${rawLabel}`
+            ))].sort();
+            const labelKey = normalizedLabels.join('\u0000');
+            let labelContext = labelContexts.get(labelKey);
+            if (!labelContext) {
+                const definitions = resolveVqaLabelDefinitions(normalizedLabels);
+                labelContext = {
+                    definitions,
+                    hash: computeLabelContextHash(definitions)
+                };
+                labelContexts.set(labelKey, labelContext);
+                counters?.add('vqa.label_contexts');
+                counters?.add('vqa.label_definitions', definitions.length);
+            }
+
+            const combinedKey = `${checklistHash}:${labelContext.hash}`;
+            let validationContextHash = validationContextHashes.get(combinedKey);
+            if (!validationContextHash) {
+                validationContextHash = computeValidationContextHash(
+                    checklistHash,
+                    labelContext.hash
+                );
+                validationContextHashes.set(combinedKey, validationContextHash);
+                counters?.add('vqa.validation_contexts');
+            }
+
+            return {
+                checklistHash,
+                labelContextHash: labelContext.hash,
+                validationContextHash,
+                validationPolicyHash,
+                validationCacheKey: computeValidationCacheKey(
+                    imageSha256,
+                    validationContextHash,
+                    validationPolicyHash
+                ),
+                labelDefinitions: labelContext.definitions
+            };
+        }
     };
 }
 
@@ -159,7 +266,12 @@ export class VqaCacheManager {
     private cacheMap = new Map<string, VqaCacheEntry>();
     private cacheFilePath: string;
 
-    constructor(baseCacheDir: string, datasetFolderName: string, moduleName: string) {
+    constructor(
+        baseCacheDir: string,
+        datasetFolderName: string,
+        moduleName: string,
+        private readonly counters?: WorkCounters
+    ) {
         const cacheDir = resolve(baseCacheDir, datasetFolderName);
         if (!existsSync(cacheDir)) {
             mkdirSync(cacheDir, { recursive: true });
@@ -172,11 +284,14 @@ export class VqaCacheManager {
         if (!existsSync(this.cacheFilePath)) return;
         try {
             const content = readFileSync(this.cacheFilePath, 'utf-8');
+            this.counters?.add('vqa.cache_file_reads');
+            this.counters?.add('vqa.cache_bytes_read', Buffer.byteLength(content));
             const lines = content.split('\n').filter(l => l.trim().length > 0);
             for (const line of lines) {
                 const entry: VqaCacheEntry = JSON.parse(line);
                 if (entry && entry.validation_cache_key) {
                     this.cacheMap.set(entry.validation_cache_key, entry);
+                    this.counters?.add('vqa.cache_entries_parsed');
                 }
             }
         } catch (err) {

@@ -12,6 +12,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "temp/typescript/tsconfig.tsbuildinfo",
     "jsx": "react-jsx",
     "types": ["node", "vite/client"],
 

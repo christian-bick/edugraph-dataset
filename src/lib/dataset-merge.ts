@@ -31,7 +31,7 @@ export interface MetadataRow {
     /** Mathematical payload identity, independent of presentation. */
     content_fingerprint: string;
     /** Rendered-task identity: mathematical payload plus resolved view config. */
-    task_fingerprint?: string;
+    task_fingerprint: string;
     /** Additional target permutations represented by the same physical sample. */
     target_associations?: TargetAssociation[];
     /** Shortened ontology labels, as written by the pipeline. */
@@ -110,9 +110,8 @@ export interface Exercise {
 
 export const QUESTION_MODE = 'question';
 
-/** Older generated datasets predate task fingerprints and use data identity as the conservative fallback. */
 export function rowTaskFingerprint(row: MetadataRow): string {
-    return row.task_fingerprint ?? row.content_fingerprint;
+    return row.task_fingerprint;
 }
 
 /** Identity of the exercise a row belongs to, ignoring its mode. */

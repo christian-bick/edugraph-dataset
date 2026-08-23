@@ -21,6 +21,7 @@ const row = (overrides: Partial<MetadataRow> = {}): MetadataRow => ({
     mode: 'question',
     instance: 0,
     content_fingerprint: 'fp',
+    task_fingerprint: 'task',
     tags: ['Addition', 'Counting'],
     ...overrides,
 });

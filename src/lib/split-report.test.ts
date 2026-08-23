@@ -31,6 +31,7 @@ function row(overrides: Partial<MetadataRow> = {}): MetadataRow {
         mode,
         instance,
         content_fingerprint: 'fp-0',
+        task_fingerprint: overrides.task_fingerprint ?? overrides.content_fingerprint ?? 'task-0',
         ...overrides,
     };
 }

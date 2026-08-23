@@ -21,4 +21,8 @@ runs:
 
     - name: Generate dataset in canonical container
       shell: bash
-      run: npm run generate:dataset -- --spec="${{ inputs.spec }}" --concurrency="${{ inputs.concurrency }}"
+      run: >-
+        npm run generate:dataset --
+        --spec="${{ inputs.spec }}"
+        --concurrency="${{ inputs.concurrency }}"
+        --rebuild-graph

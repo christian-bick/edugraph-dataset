@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
+import {radixSortUtf8} from './content-identity.ts';
 
 export interface LeafModule {
     /** The leaf directory name / module identifier (e.g., 'arithmetic-ops-pairs' or 'ordering') */
@@ -12,12 +13,20 @@ export interface LeafModule {
     category: string | null;
 }
 
+const leafModuleCache = new Map<string, readonly LeafModule[]>();
+
 /**
  * Discovers all leaf modules in a base directory up to 1-level deep.
  * A directory is considered a leaf module if it contains a `spec.ts` file.
  */
 export function findLeafModules(baseDir: string): LeafModule[] {
-    if (!existsSync(baseDir)) return [];
+    const cacheKey = resolve(baseDir);
+    const cached = leafModuleCache.get(cacheKey);
+    if (cached) return [...cached];
+    if (!existsSync(baseDir)) {
+        leafModuleCache.set(cacheKey, []);
+        return [];
+    }
 
     const results: LeafModule[] = [];
     const entries = readdirSync(baseDir, { withFileTypes: true });
@@ -50,5 +59,13 @@ export function findLeafModules(baseDir: string): LeafModule[] {
         }
     }
 
-    return results;
+    const byPath = new Map(results.map(module => [module.relativePath, module]));
+    const stable = radixSortUtf8([...byPath.keys()]).map(path => byPath.get(path)!);
+    leafModuleCache.set(cacheKey, stable);
+    return [...stable];
+}
+
+/** Clears process-local discovery state for watch-mode invalidation and isolated tests. */
+export function clearLeafModuleCache(): void {
+    leafModuleCache.clear();
 }

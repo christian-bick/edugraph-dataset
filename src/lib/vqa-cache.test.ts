@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {createHash} from 'node:crypto';
 import { existsSync, rmSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import {
@@ -7,12 +8,14 @@ import {
     computeValidationContextHash,
     computeImageSha256,
     computeValidationCacheKey,
+    createVqaValidationContextResolver,
     buildVqaValidationContext,
     pruneObsoleteVqaCacheFiles,
     resolveVqaLabelDefinitions,
     VqaCacheManager,
     VqaCacheEntry
 } from './vqa-cache.ts';
+import {createWorkCounters} from './work-counters.ts';
 
 const TEST_CACHE_DIR = resolve(__dirname, '../../temp/test-vqa-cache');
 
@@ -32,6 +35,7 @@ function makeEntry(overrides: Partial<VqaCacheEntry>): VqaCacheEntry {
         checklist_hash: 'check',
         label_context_hash: 'labels',
         validation_context_hash: 'context',
+        validation_policy_hash: contextPolicyHash(),
         validated_at: '2026-07-22T00:00:00Z',
         evaluation: { pass: true, reasoning: '', label_checks: [] },
         ...overrides
@@ -71,9 +75,17 @@ describe('VQA Cache Module', () => {
         const valKey = computeValidationCacheKey(imgHash, validationContextHash);
         expect(valKey.length).toBe(64);
         expect(computeValidationCacheKey(imgHash, validationContextHash)).toBe(valKey);
+        expect(valKey).toBe(
+            createHash('sha256')
+                .update(`${imgHash}:${validationContextHash}:${contextPolicyHash()}`)
+                .digest('hex')
+        );
+        expect(computeValidationCacheKey(imgHash, validationContextHash, 'changed-policy'))
+            .not.toBe(valKey);
 
         const context = buildVqaValidationContext(imgHash, [fileA, fileB], ['NumbersWithZero']);
         expect(context.validationCacheKey).toBe(valKey);
+        expect(context.validationPolicyHash).toHaveLength(64);
         expect(context.labelDefinitions).toEqual([{
             iri: 'http://edugraph.io/edu/NumbersWithZero',
             label: 'NumbersWithZero',
@@ -105,6 +117,25 @@ describe('VQA Cache Module', () => {
         expect(computeLabelContextHash(withZero)).not.toBe(computeLabelContextHash([
             { ...withZero[0], definition: 'Changed definition.' }
         ]));
+    });
+
+    it('should resolve repeated checklist and label contexts once per operation', () => {
+        const fileA = resolve(TEST_CACHE_DIR, 'a.md');
+        const fileB = resolve(TEST_CACHE_DIR, 'b.md');
+        writeFileSync(fileA, '# Global checklist');
+        writeFileSync(fileB, '# View checklist');
+        const counters = createWorkCounters();
+        const resolver = createVqaValidationContextResolver(counters);
+
+        const contexts = Array.from({length: 64}, (_, index) =>
+            resolver.resolve(`image-${index}`, [fileA, fileB], ['NumbersWithZero']));
+
+        expect(new Set(contexts.map(context => context.validationContextHash)).size).toBe(1);
+        expect(new Set(contexts.map(context => context.validationCacheKey)).size).toBe(64);
+        expect(counters.get('vqa.checklist_file_reads')).toBe(2);
+        expect(counters.get('vqa.checklist_contexts')).toBe(1);
+        expect(counters.get('vqa.label_contexts')).toBe(1);
+        expect(counters.get('vqa.validation_contexts')).toBe(1);
     });
 
     it('should store and load VqaCacheEntries in dataset-partitioned folder', () => {
@@ -139,6 +170,25 @@ describe('VQA Cache Module', () => {
         expect(manager2.get('a_val_key')?.evaluation.reasoning).toBe('Sample 1 failed');
         expect(manager2.get('a_val_key')?.sample_key).toBe(entry2.sample_key);
         expect(manager2.get('a_val_key')?.attempt).toBe(1);
+    });
+
+    it('should count one physical cache read for one manager', () => {
+        const writer = new VqaCacheManager(TEST_CACHE_DIR, 'dataset-test', 'test-module');
+        writer.set(makeEntry({validation_cache_key: 'one'}));
+        writer.set(makeEntry({validation_cache_key: 'two'}));
+
+        const counters = createWorkCounters();
+        const reader = new VqaCacheManager(
+            TEST_CACHE_DIR,
+            'dataset-test',
+            'test-module',
+            counters
+        );
+
+        expect(reader.size).toBe(2);
+        expect(counters.get('vqa.cache_file_reads')).toBe(1);
+        expect(counters.get('vqa.cache_entries_parsed')).toBe(2);
+        expect(counters.get('vqa.cache_bytes_read')).toBeGreaterThan(0);
     });
 
     it('should append immediately to disk on set() call for crash resilience', () => {
@@ -190,3 +240,11 @@ describe('VQA Cache Module', () => {
         expect(existsSync(resolve(datasetCacheDir, 'obsolete.jsonl'))).toBe(false);
     });
 });
+
+function contextPolicyHash(): string {
+    return buildVqaValidationContext(
+        computeImageSha256(Buffer.from('fake-png-bytes')),
+        [],
+        []
+    ).validationPolicyHash;
+}

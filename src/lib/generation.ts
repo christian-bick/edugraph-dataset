@@ -1,23 +1,29 @@
 import { createHash } from 'crypto';
-import { existsSync, lstatSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { isSubConceptOf } from './ontology.ts';
-import { findLeafModules, LeafModule } from './module-resolver.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from './type-parser.ts';
-import { extractConfig, extractSchemaLabels, generateWithLabels } from './utils.ts';
+import { extractConfig, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, Implementation, ImplementationTodo, OntologyPackage, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
-import { ViewSpec } from '../types/view-spec.ts';
+import { CompetencyTarget, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ConfigSchema } from '../types/schema.ts';
-import { defineImplementationPackage } from './dataset-permutation-builder.ts';
-import { defineOntologyPackage, toOntologyTodo } from './ontology-todo.ts';
+import type {WorkCounters} from './work-counters.ts';
+import {radixSortUtf8} from './content-identity.ts';
+import {loadTargets} from './spec-catalog.ts';
+import {
+    clearModelCatalogCaches,
+    loadGeneratorModelCatalog,
+    loadViewModelCatalog,
+    type GeneratorModelDescriptor,
+    type ViewModelDescriptor
+} from './model-catalog.ts';
+import {
+    matchTargets,
+    type MatchTuple
+} from './matching.ts';
+export * from './matching.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-
-const EDU_PREFIX = 'http://edugraph.io/edu/';
 
 // ---------------------------------------------------------------------------
 // Sample identity
@@ -112,229 +118,14 @@ export function computeSampleFilename(identity: SampleIdentity): string {
 }
 
 // ---------------------------------------------------------------------------
-// Matching
-// ---------------------------------------------------------------------------
-
-export interface GeneratorMatchInfo {
-    generatorId: string;
-    /** Union of spec generalLabels and schema-extracted labels */
-    labels: string[];
-    problemType?: string | null;
-}
-
-export interface ViewMatchInfo {
-    viewId: string;
-    /** Union of spec generalLabels and view-schema-extracted labels */
-    supportedLabels: string[];
-    requiredLabels?: readonly string[];
-    rejectedLabels?: readonly string[];
-    problemType?: string | null;
-}
-
-export type MatchFailureReason =
-    | 'incompatible-type'
-    | 'unsupported-label'
-    | 'missing-required-label'
-    | 'rejected-label';
-
-export type MatchVerdict =
-    | { matched: true }
-    | { matched: false; reason: MatchFailureReason; label?: string };
-
-function hasCompatibleProblemTypes(
-    generatorInfo: GeneratorMatchInfo,
-    viewInfo: ViewMatchInfo
-): boolean {
-    return generatorInfo.problemType == null
-        || viewInfo.problemType == null
-        || isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType);
-}
-
-function matchesTargetCapabilities(
-    targetLabels: string[],
-    generatorInfo: GeneratorMatchInfo,
-    viewInfo: ViewMatchInfo
-): Exclude<MatchVerdict, {matched: false; reason: 'incompatible-type'}> {
-    const missingRequired = viewInfo.requiredLabels?.find(requiredLabel =>
-        !targetLabels.some(targetLabel => isSubConceptOf(targetLabel, requiredLabel))
-    );
-    if (missingRequired) {
-        return {
-            matched: false,
-            reason: 'missing-required-label',
-            label: missingRequired
-        };
-    }
-
-    // A target (competency/standard) is legitimately broad. It is satisfied by a
-    // generator/view capability that is EQUAL TO or MORE SPECIFIC THAN the target
-    // label — i.e. the capability specializes the broad competency:
-    // `isSubConceptOf(capabilityLabel, targetLabel)`. The reverse (a specific
-    // target met only by a more general capability) must NOT match, because the
-    // general capability may specialize some other way. This is the same
-    // directionality for Area, Scope and Ability. Each capability is owned by
-    // whichever module parameterizes or renders it; the other must not redeclare it.
-    for (const compLabel of targetLabels) {
-        if (!compLabel.startsWith(EDU_PREFIX)) continue;
-        const supportedByGen = generatorInfo.labels.some(genLabel => isSubConceptOf(genLabel, compLabel));
-        const supportedByView = viewInfo.supportedLabels.some(viewLabel => isSubConceptOf(viewLabel, compLabel));
-        if (!supportedByGen && !supportedByView) {
-            return { matched: false, reason: 'unsupported-label', label: compLabel };
-        }
-    }
-
-    const rejected = viewInfo.rejectedLabels?.find(label => targetLabels.includes(label));
-    if (rejected) {
-        return { matched: false, reason: 'rejected-label', label: rejected };
-    }
-
-    return { matched: true };
-}
-
-/**
- * The single matching predicate for (target, generator, view) triples.
- * Covers problem-type compatibility, label support and view rejection in one
- * place so no caller can apply a partial rule set.
- */
-export function matchesTarget(
-    targetLabels: string[],
-    generatorInfo: GeneratorMatchInfo,
-    viewInfo: ViewMatchInfo
-): MatchVerdict {
-    if (!hasCompatibleProblemTypes(generatorInfo, viewInfo)) {
-        return { matched: false, reason: 'incompatible-type' };
-    }
-
-    return matchesTargetCapabilities(targetLabels, generatorInfo, viewInfo);
-}
-
-export interface MatchTuple {
-    target: CompetencyTarget;
-    generatorId: string;
-    viewId: string;
-}
-
-export interface MatchRejection {
-    targetId: string;
-    generatorId: string;
-    viewId: string;
-    verdict: Exclude<MatchVerdict, { matched: true }>;
-}
-
-export interface MatchResult {
-    tuples: MatchTuple[];
-    /** Label-level failures for type-compatible pairs (type mismatches are omitted as noise) */
-    rejections: MatchRejection[];
-}
-
-export interface CompatibleModulePair {
-    generator: GeneratorMatchInfo;
-    view: ViewMatchInfo;
-}
-
-export interface CompatibleModulePairIndex {
-    /** Compatible pairs in the generator-then-view order used by dataset generation. */
-    orderedPairs: CompatibleModulePair[];
-    /** The same pairs grouped by generator payload type for scoped consumers and diagnostics. */
-    byProblemType: Map<string, CompatibleModulePair[]>;
-}
-
-const UNKNOWN_PROBLEM_TYPE = '(unknown)';
-
-/**
- * Computes the payload-compatible generator/view search space once. Target
- * matching can then avoid reconsidering every impossible cross-type pair.
- */
-export function buildCompatibleModulePairIndex(
-    generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[]
-): CompatibleModulePairIndex {
-    const orderedPairs: CompatibleModulePair[] = [];
-    const byProblemType = new Map<string, CompatibleModulePair[]>();
-
-    for (const generator of generatorCatalog) {
-        for (const view of viewCatalog) {
-            if (!hasCompatibleProblemTypes(generator, view)) continue;
-
-            const pair = {generator, view};
-            orderedPairs.push(pair);
-
-            const problemType = generator.problemType ?? UNKNOWN_PROBLEM_TYPE;
-            const group = byProblemType.get(problemType);
-            if (group) group.push(pair);
-            else byProblemType.set(problemType, [pair]);
-        }
-    }
-
-    return {orderedPairs, byProblemType};
-}
-
-/**
- * Produces the full deterministic list of (target, generator, view) tuples
- * the pipeline generates samples for, in stable iteration order
- * (targets in given order, then generators, then views, each in catalog order).
- */
-export function matchTargets(
-    targets: CompetencyTarget[],
-    generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[]
-): MatchResult {
-    const tuples: MatchTuple[] = [];
-    const rejections: MatchRejection[] = [];
-    const {orderedPairs} = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
-
-    for (const target of targets) {
-        for (const {generator, view} of orderedPairs) {
-            const verdict = matchesTargetCapabilities(target.labels, generator, view);
-            if (verdict.matched) {
-                tuples.push({ target, generatorId: generator.generatorId, viewId: view.viewId });
-            } else {
-                rejections.push({
-                    targetId: target.id,
-                    generatorId: generator.generatorId,
-                    viewId: view.viewId,
-                    verdict
-                });
-            }
-        }
-    }
-
-    return { tuples, rejections };
-}
-
-/**
- * Returns active targets that have no semantically compatible generator/view
- * pair. This is the inverse coverage check for target specs: every target in
- * `spec` must have at least one realizable module path before generation.
- */
-export function findTargetsWithoutMatch(
-    targets: CompetencyTarget[],
-    generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[]
-): CompetencyTarget[] {
-    const {orderedPairs} = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
-
-    return targets.filter(target => !orderedPairs.some(({generator, view}) =>
-        matchesTargetCapabilities(target.labels, generator, view).matched
-    ));
-}
-
-// ---------------------------------------------------------------------------
 // Catalog loading
 // ---------------------------------------------------------------------------
 
-export interface GeneratorCatalogEntry extends GeneratorMatchInfo {
-    module: LeafModule;
-    spec: any;
+export interface GeneratorCatalogEntry extends GeneratorModelDescriptor {
     generator: ProblemGenerator;
 }
 
-export interface ViewCatalogEntry extends ViewMatchInfo {
-    module: LeafModule;
-    spec: ViewSpec;
-    /** Runtime schema used to resolve the exact configuration rendered by this view. */
-    schema: ConfigSchema;
-}
+export type ViewCatalogEntry = ViewModelDescriptor;
 
 /**
  * Returns generator IDs that have no semantically compatible target/view path
@@ -348,10 +139,16 @@ export function findGeneratorsWithoutTestPath(
     maxAttempts = 10
 ): string[] {
     const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
+    const tuplesByGenerator = new Map<string, MatchTuple[]>();
+    for (const tuple of tuples) {
+        const group = tuplesByGenerator.get(tuple.generatorId);
+        if (group) group.push(tuple);
+        else tuplesByGenerator.set(tuple.generatorId, [tuple]);
+    }
 
-    return generatorCatalog
+    const uncovered = generatorCatalog
         .filter(entry => {
-            const candidates = tuples.filter(tuple => tuple.generatorId === entry.generatorId);
+            const candidates = tuplesByGenerator.get(entry.generatorId) ?? [];
             return !candidates.some(tuple => {
                 const sampleKey = computeSampleKey({
                     targetId: tuple.target.id,
@@ -373,327 +170,63 @@ export function findGeneratorsWithoutTestPath(
                 }
             });
         })
-        .map(entry => entry.generatorId)
-        .sort();
+        .map(entry => entry.generatorId);
+    return radixSortUtf8(uncovered);
 }
 
 function camelCase(str: string): string {
     return str.replace(/-([a-z0-9])/g, g => g[1].toUpperCase());
 }
 
+const generatorCatalogCache = new Map<string, readonly GeneratorCatalogEntry[]>();
+
 export async function loadGeneratorCatalog(
-    generatorsRoot: string = resolve(PROJECT_ROOT, 'src', 'generators')
+    generatorsRoot: string = resolve(PROJECT_ROOT, 'src', 'generators'),
+    counters?: WorkCounters,
+    entryFiles?: ReadonlyMap<string, string>
 ): Promise<GeneratorCatalogEntry[]> {
+    const catalogKey = resolve(generatorsRoot);
+    const cached = entryFiles ? undefined : generatorCatalogCache.get(catalogKey);
+    if (cached) {
+        counters?.add('catalog.generator_cache_hits');
+        return [...cached];
+    }
+    const descriptors = await loadGeneratorModelCatalog(generatorsRoot, counters, entryFiles);
     const entries: GeneratorCatalogEntry[] = [];
-    for (const mod of findLeafModules(generatorsRoot)) {
+    for (const descriptor of descriptors) {
         try {
-            const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
-            const className = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'Generator';
-            const generatorModule = await import(pathToFileURL(resolve(mod.absolutePath, 'generator.ts')).href);
+            const id = descriptor.generatorId;
+            const className = camelCase(id[0].toUpperCase() + id.slice(1)) + 'Generator';
+            const generatorModule = await import(pathToFileURL(
+                resolve(descriptor.module.absolutePath, 'generator.ts')
+            ).href);
             const GeneratorClass = generatorModule[className];
             if (!GeneratorClass) {
-                console.warn(`Generator class ${className} not found in ${mod.id}, skipping.`);
+                console.warn(`Generator class ${className} not found in ${id}, skipping.`);
                 continue;
             }
             const generator: ProblemGenerator = new GeneratorClass();
-            entries.push({
-                generatorId: mod.id,
-                module: mod,
-                spec: specModule.spec,
-                generator,
-                labels: Array.from(new Set([
-                    ...(specModule.spec?.generalLabels || []),
-                    ...extractSchemaLabels(generator.schema)
-                ])),
-                problemType: getGeneratorProblemType(mod.id)
-            });
+            entries.push({...descriptor, generator});
         } catch (e) {
-            console.warn(`Could not load generator module ${mod.id}:`, e);
+            console.warn(`Could not load generator module ${descriptor.generatorId}:`, e);
         }
     }
-    return entries;
+    if (!entryFiles) generatorCatalogCache.set(catalogKey, entries);
+    return [...entries];
 }
 
 export async function loadViewCatalog(
-    viewsRoot: string = resolve(PROJECT_ROOT, 'src', 'visuals', 'views')
+    viewsRoot: string = resolve(PROJECT_ROOT, 'src', 'visuals', 'views'),
+    counters?: WorkCounters,
+    entryFiles?: ReadonlyMap<string, string>
 ): Promise<ViewCatalogEntry[]> {
-    const viewToType = getViewToProblemTypeMap();
-    const entries: ViewCatalogEntry[] = [];
-    for (const mod of findLeafModules(viewsRoot)) {
-        try {
-            const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
-            const spec: ViewSpec = specModule.spec;
-            const schemaName = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'ViewSchema';
-            const viewSchema: ConfigSchema = specModule[schemaName] ?? {};
-            entries.push({
-                viewId: spec.viewId,
-                module: mod,
-                spec,
-                schema: viewSchema,
-                supportedLabels: Array.from(new Set([
-                    ...(spec?.generalLabels || []),
-                    ...extractSchemaLabels(viewSchema)
-                ])),
-                requiredLabels: spec?.requiredLabels || [],
-                rejectedLabels: spec?.rejectedLabels || [],
-                problemType: viewToType[spec.viewId] || null
-            });
-        } catch (e) {
-            console.warn(`Could not load view module ${mod.id}:`, e);
-        }
-    }
-    return entries;
+    return loadViewModelCatalog(viewsRoot, counters, entryFiles);
 }
 
-/**
- * Resolves the .ts files belonging to a spec module (either a directory of
- * files or a single file) under specRoot, in sorted order so downstream
- * processing is deterministic. Shared by every spec-module loader below.
- */
-/**
- * Reserved filename prefix for spec module metadata. Files starting with `_`
- * describe the module itself rather than contributing targets, so they are
- * excluded from every target-bearing loader — which would otherwise reject
- * them for not exporting `spec`.
- */
-const MODULE_META_PREFIX = '_';
-const MODULE_META_FILE = '_module.ts';
-
-function resolveSpecFiles(specName: string, specRoot: string): string[] {
-    const specPath = resolve(specRoot, specName);
-    const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
-    const specFile = !specDir && existsSync(`${specPath}.ts`) ? `${specPath}.ts` : null;
-
-    if (!specDir && !specFile) {
-        throw new Error(`Spec module not found at: ${specPath}`);
-    }
-
-    return specDir
-        ? readdirSync(specDir)
-            .filter(f => f.endsWith('.ts') && !f.startsWith(MODULE_META_PREFIX))
-            .sort()
-            .map(f => resolve(specDir, f))
-        : [specFile!];
-}
-
-const DEFAULT_SPEC_ROOT = () => resolve(PROJECT_ROOT, 'src', 'spec');
-
-export interface SpecModuleMetadata {
-    /**
-     * An isolated spec never merges into the union dataset. It exists for
-     * development and targeted testing only (`test`), so its targets and
-     * samples stay out of the released data.
-     */
-    isolated: boolean;
-    /**
-     * Merge precedence in the union: lower merges first and therefore wins
-     * when two standards produce identical content. Declare an explicit,
-     * higher value when adding a standard so the established ones keep their
-     * samples and the newcomer contributes only its delta.
-     */
-    unionOrder: number;
-}
-
-const DEFAULT_UNION_ORDER = 100;
-
-/**
- * Loads a spec module's `_module.ts` metadata. Modules without one are
- * ordinary education standards that contribute to the union dataset.
- */
-export async function loadSpecMetadata(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<SpecModuleMetadata> {
-    const metaPath = resolve(specRoot, specName, MODULE_META_FILE);
-    if (!existsSync(metaPath)) {
-        return { isolated: false, unionOrder: DEFAULT_UNION_ORDER };
-    }
-    const module = await import(pathToFileURL(metaPath).href);
-    return {
-        isolated: module.isolated === true,
-        unionOrder: typeof module.unionOrder === 'number' ? module.unionOrder : DEFAULT_UNION_ORDER,
-    };
-}
-
-/** Every spec module under the spec root, as directories or bare `.ts` files. */
-export function listSpecModules(specRoot: string = DEFAULT_SPEC_ROOT()): string[] {
-    if (!existsSync(specRoot)) return [];
-    return readdirSync(specRoot)
-        .filter(entry => {
-            const entryPath = resolve(specRoot, entry);
-            return lstatSync(entryPath).isDirectory() || entry.endsWith('.ts');
-        })
-        .map(entry => entry.replace(/\.ts$/, ''))
-        .sort();
-}
-
-/**
- * The spec modules that make up the union dataset, in merge order: ascending
- * `unionOrder`, ties broken by name. Isolated modules are excluded, so adding
- * one never changes released data.
- */
-export async function listUnionSpecs(specRoot: string = DEFAULT_SPEC_ROOT()): Promise<string[]> {
-    const entries: { specName: string; unionOrder: number }[] = [];
-    for (const specName of listSpecModules(specRoot)) {
-        const { isolated, unionOrder } = await loadSpecMetadata(specName, specRoot);
-        if (!isolated) entries.push({ specName, unionOrder });
-    }
-    return entries
-        .sort((a, b) => a.unionOrder - b.unionOrder || a.specName.localeCompare(b.specName))
-        .map(entry => entry.specName);
-}
-
-/**
- * Loads all competency targets from a spec module. Files are visited in
- * sorted order so the resulting target order is deterministic.
- *
- * Contract: every spec file exports its competency targets as `spec:
- * CompetencyTarget[]` — the sole export this function reads. Unsupported
- * competencies belong in the sibling `implementationTodos` / `ontologyTodos`
- * exports (see DOCS.md and `loadSpecTodos`), which are never touched here —
- * a todo target can never enter the pipeline.
- *
- * Loading is permissive: target ID uniqueness is enforced by
- * `validateUniqueTargetIds` via `normalizeAndValidateSpec`
- * (src/lib/spec-validator.ts), which gates every dataset generation.
- */
-export async function loadTargets(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<CompetencyTarget[]> {
-    const files = resolveSpecFiles(specName, specRoot);
-
-    const targets: CompetencyTarget[] = [];
-    for (const filePath of files) {
-        const module = await import(pathToFileURL(filePath).href);
-        if (!Array.isArray(module.spec)) {
-            throw new Error(`Spec file "${filePath}" does not export a "spec" array of CompetencyTarget.`);
-        }
-        targets.push(...(module.spec as CompetencyTarget[]));
-    }
-    return targets;
-}
-
-export interface SpecTodos {
-    implementationTodos: ImplementationTodo[];
-    ontologyTodos: OntologyTodo[];
-    beyondScope: BeyondScopeEntry[];
-}
-
-/**
- * Loads the documented gaps of a spec module: competencies whose labels are
- * expressible but have no generator/view support yet (`implementationTodos`),
- * and competencies that cannot be expressed because the ontology is missing
- * a label (`ontologyTodos`), and intentional project-medium exclusions
- * (`beyondScope`). All three exports are optional per file. This is the
- * counterpart to `loadTargets` for tooling that reports on dispositions (currently
- * only `map-standards.ts`) — the dataset pipeline never calls this.
- */
-export async function loadSpecTodos(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<SpecTodos> {
-    const files = resolveSpecFiles(specName, specRoot);
-
-    const implementationTodos: ImplementationTodo[] = [];
-    const ontologyTodos: OntologyTodo[] = [];
-    const beyondScope: BeyondScopeEntry[] = [];
-    const normalizedImplementations = new WeakMap<object, Implementation>();
-    const normalizedOntologies = new WeakMap<object, OntologyPackage>();
-    const ontologiesById = new Map<string, OntologyPackage>();
-    for (const filePath of files) {
-        const module = await import(pathToFileURL(filePath).href);
-        if (Array.isArray(module.implementationTodos)) {
-            for (const todo of module.implementationTodos as ImplementationTodo[]) {
-                if (!todo.implementation || typeof todo.implementation !== 'object') {
-                    throw new Error(
-                        `Implementation TODO "${todo.id ?? 'unknown'}" in "${filePath}" must reference an implementation definition.`
-                    );
-                }
-                let implementation = normalizedImplementations.get(todo.implementation);
-                if (!implementation) {
-                    try {
-                        implementation = defineImplementationPackage(todo.implementation);
-                    } catch (error) {
-                        const detail = error instanceof Error ? error.message : String(error);
-                        throw new Error(
-                            `Invalid implementation definition for TODO "${todo.id ?? 'unknown'}" in "${filePath}": ${detail}`
-                        );
-                    }
-                    normalizedImplementations.set(todo.implementation, implementation);
-                }
-                implementationTodos.push({ ...todo, implementation });
-            }
-        }
-        if (Array.isArray(module.ontologyTodos)) {
-            for (const todo of module.ontologyTodos as OntologyTodo[]) {
-                if (!todo.ontology || typeof todo.ontology !== 'object') {
-                    throw new Error(
-                        `Ontology TODO "${todo.standardId ?? 'unknown'}" in "${filePath}" must reference an ontology package.`
-                    );
-                }
-                let ontology = normalizedOntologies.get(todo.ontology);
-                if (!ontology) {
-                    try {
-                        ontology = defineOntologyPackage(todo.ontology);
-                    } catch (error) {
-                        const detail = error instanceof Error ? error.message : String(error);
-                        throw new Error(
-                            `Invalid ontology package for TODO "${todo.standardId ?? 'unknown'}" in "${filePath}": ${detail}`
-                        );
-                    }
-                    normalizedOntologies.set(todo.ontology, ontology);
-                }
-
-                const existing = ontologiesById.get(ontology.id);
-                if (existing && JSON.stringify(existing) !== JSON.stringify(ontology)) {
-                    throw new Error(`Ontology package id "${ontology.id}" has conflicting definitions.`);
-                }
-                const canonicalOntology = existing ?? ontology;
-                ontologiesById.set(canonicalOntology.id, canonicalOntology);
-                try {
-                    ontologyTodos.push(toOntologyTodo(
-                        todo.standardId,
-                        todo.title,
-                        canonicalOntology,
-                        todo.description
-                    ));
-                } catch (error) {
-                    const detail = error instanceof Error ? error.message : String(error);
-                    throw new Error(
-                        `Invalid ontology TODO "${todo.standardId ?? 'unknown'}" in "${filePath}": ${detail}`
-                    );
-                }
-            }
-        }
-        if (Array.isArray(module.beyondScope)) {
-            beyondScope.push(...(module.beyondScope as BeyondScopeEntry[]));
-        }
-    }
-    return { implementationTodos, ontologyTodos, beyondScope };
-}
-
-/**
- * Loads the deliberate target-equivalence declarations of a spec module (the
- * optional `equivalentTargets` export per file, merged in sorted file order).
- * These tell spec validation that specific identical-permutation-set collisions
- * are intentional (see `TargetEquivalence`). Like `loadSpecTodos`, the dataset
- * pipeline never reads this — it only informs validation and reporting.
- */
-export async function loadSpecEquivalences(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<TargetEquivalence[]> {
-    const files = resolveSpecFiles(specName, specRoot);
-
-    const equivalences: TargetEquivalence[] = [];
-    for (const filePath of files) {
-        const module = await import(pathToFileURL(filePath).href);
-        if (Array.isArray(module.equivalentTargets)) {
-            equivalences.push(...(module.equivalentTargets as TargetEquivalence[]));
-        }
-    }
-    return equivalences;
+/** Clears process-local catalog state for watch-mode invalidation and isolated tests. */
+export function clearGenerationCatalogCaches(): void {
+    generatorCatalogCache.clear();
+    clearModelCatalogCaches();
 }
 
 // ---------------------------------------------------------------------------
@@ -836,10 +369,11 @@ export function generateTargetSamples(
     const { instancesPerTuple = 1, valRatio = DEFAULT_VAL_RATIO, maxAttempts = 50 } = options;
     const { tuples } = matchTargets([target], generatorCatalog, viewCatalog);
     const modes: SampleMode[] = ['question', 'solution'];
+    const generatorsById = new Map(generatorCatalog.map(entry => [entry.generatorId, entry.generator]));
 
     const samples: TargetSample[] = [];
     for (const tuple of tuples) {
-        const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
+        const generator = generatorsById.get(tuple.generatorId)!;
         const splits: SampleSplit[] = isValTuple(target.id, tuple.generatorId, tuple.viewId, valRatio)
             ? ['train', 'val']
             : ['train'];
@@ -897,7 +431,7 @@ function canonicalJson(value: any): string {
     if (Array.isArray(value)) {
         return '[' + value.map(v => canonicalJson(v)).join(',') + ']';
     }
-    const keys = Object.keys(value).filter(k => value[k] !== undefined).sort();
+    const keys = radixSortUtf8(Object.keys(value).filter(k => value[k] !== undefined));
     return '{' + keys.map(k => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',') + '}';
 }
 

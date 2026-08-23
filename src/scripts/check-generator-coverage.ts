@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import {getCliOption} from '../lib/cli.ts';
 
 const PROJECT_ROOT = path.resolve('.');
 const COVERAGE_JSON_PATH = path.join(PROJECT_ROOT, 'coverage', 'coverage-summary.json');
@@ -17,6 +18,10 @@ function runCoverageCheck() {
     }
 
     const coverageData = JSON.parse(fs.readFileSync(COVERAGE_JSON_PATH, 'utf-8'));
+    const requested = getCliOption(process.argv.slice(2), 'files');
+    const requestedFiles = requested
+        ? new Set(requested.split(',').filter(Boolean).map(file => path.resolve(PROJECT_ROOT, file)))
+        : null;
     
     let allPassed = true;
     const reportLines: string[] = [];
@@ -26,8 +31,12 @@ function runCoverageCheck() {
     reportLines.push('| Generator | Statement % | Branch % | Status |');
     reportLines.push('| :--- | :---: | :---: | :---: |');
 
+    const coveredFiles = new Set<string>();
     for (const [filePath, metrics] of Object.entries(coverageData) as [string, any][]) {
         if (filePath === 'total') continue;
+        const absolutePath = path.resolve(filePath);
+        if (requestedFiles && !requestedFiles.has(absolutePath)) continue;
+        coveredFiles.add(absolutePath);
 
         // Extract relative file path for clean formatting
         const relativePath = path.relative(PROJECT_ROOT, filePath).replace(/\\/g, '/');
@@ -45,6 +54,14 @@ function runCoverageCheck() {
 
         const statusLabel = passed ? '✅ PASS' : '❌ FAIL';
         reportLines.push(`| [${relativePath}](${relativePath}) | ${stmtPct}% | ${branchPct}% | ${statusLabel} |`);
+    }
+    if (requestedFiles) {
+        for (const missing of requestedFiles) {
+            if (coveredFiles.has(missing)) continue;
+            allPassed = false;
+            const relativePath = path.relative(PROJECT_ROOT, missing).replace(/\\/g, '/');
+            reportLines.push(`| [${relativePath}](${relativePath}) | — | — | ❌ MISSING |`);
+        }
     }
 
     reportLines.push('');

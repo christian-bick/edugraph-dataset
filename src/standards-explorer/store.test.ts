@@ -37,12 +37,40 @@ const jsonResponse = (data: unknown) => ({
 }) as Response;
 
 const previewManifest = {
-    schema_version: 2,
+    schema_version: 4,
     channel: 'preview',
     source_ref: 'main',
     source_sha: '07590c32396405e',
     generated_at: '2026-08-10T00:00:00.000Z',
     ontology_version: 'v0.11.1',
+    core_input_key: 'a'.repeat(64),
+    inputs: {
+        schema_version: 3,
+        producer_epoch: 'standards-coverage-v3',
+        repository: {
+            ref: 'main',
+            sha: '07590c32396405e',
+            content_sha256: 'b'.repeat(64),
+        },
+        standards: {
+            path: 'public/coverage/ccss-tree.json',
+            sha256: 'd'.repeat(64),
+            bytes: 46,
+        },
+        ontology: {
+            package: 'edugraph-ts',
+            version: 'v0.11.1',
+            dependency: 'https://example.test/edugraph-ts.tgz',
+            resolved: 'https://example.test/edugraph-ts.tgz',
+            integrity: 'sha512-exact',
+            semantic_usage_sha256: 'e'.repeat(64),
+        },
+        selection: {
+            grade: null,
+            exclude_high_school: false,
+            known_assets_sha256: null,
+        },
+    },
 };
 
 describe('standards explorer data and sample sources', () => {

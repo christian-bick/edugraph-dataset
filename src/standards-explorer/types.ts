@@ -3,6 +3,36 @@ export type MainTab = 'explorer' | 'backlog';
 export type DataView = 'latest' | 'preview';
 export type AssetSource = 'released' | 'local';
 
+export interface CanonicalStandardsIdentity {
+    path: 'public/coverage/ccss-tree.json';
+    sha256: string;
+    bytes: number;
+}
+
+export interface CoverageInputIdentity {
+    schema_version: number;
+    producer_epoch: string;
+    repository: {
+        ref: string;
+        sha: string;
+        content_sha256: string;
+    };
+    standards: CanonicalStandardsIdentity;
+    ontology: {
+        package: 'edugraph-ts';
+        version: string;
+        dependency: string;
+        resolved: string;
+        integrity: string;
+        semantic_usage_sha256: string;
+    };
+    selection: {
+        grade: string | null;
+        exclude_high_school: boolean;
+        known_assets_sha256: string | null;
+    };
+}
+
 export interface CoverageManifest {
     schema_version: number;
     channel: DataView;
@@ -10,6 +40,8 @@ export interface CoverageManifest {
     source_sha: string;
     generated_at: string;
     ontology_version: string;
+    core_input_key: string;
+    inputs: CoverageInputIdentity;
 }
 
 export interface StandardNode {

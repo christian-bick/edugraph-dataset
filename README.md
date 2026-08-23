@@ -79,9 +79,42 @@ npm run merge:dataset
 *   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic-ops-pairs`).
 *   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
 *   `--training-only`: Skip validation set generation to speed up the process.
+*   `--affected`: Resolve and render only exact pairs reached from the persisted dependency delta.
+*   `--rebuild-graph`: Reconstruct the complete graph authoritatively, compare it with the previous graph, and execute only the changed closure; cannot be combined with a scoped generation flag.
+*   `--reset-graph`: Discard the previous graph and establish a new full baseline by regenerating every pair; cannot be combined with a scoped generation flag.
 *   `--concurrency=N`: Set the bounded Playwright worker count (default: 8).)*
 
-Scoped generation is transactional. A successful run replaces only the selected generator/view pairs; sibling views and unrelated generators remain unchanged. A preflight, generation, or render failure discards the staged output and leaves the previous dataset intact.
+Scoped generation is transactional and dependency-checked. Before rendering, the persisted graph
+reuses unchanged target matches, computes the affected generator/view closure, and defines the
+expected VQA cache identity of every sample. Changed targets are matched through the complete
+capability index; changed compatible generator/view pairs are tested against indexed targets so
+new matches cannot be missed. A scope that would leave stale sibling pairs stops with a causal-path
+diagnostic. A successful run replaces only the selected affected pairs, while any planning,
+preflight, generation, or render failure discards staged output and leaves the previous dataset
+intact.
+
+After the first full shard baseline, let the dependency graph select exact changed pairs:
+```bash
+npm run generate:dataset -- --spec=ccss --affected
+```
+The manifest also records a non-authoritative Git-assisted file-to-node ownership index. When every
+candidate authored input is byte-identical, an unchanged development run exits before catalog
+loading, graph reconstruction, canonical container startup, or Chromium. An existing generator or
+view source change patches its recorded nodes, traverses the reverse dependency closure, loads only
+the affected model modules, and reuses persisted matching when their capabilities are unchanged.
+New structure, capability changes, or ambiguous state fall back to a complete linear graph build.
+
+Automatic identity covers authored targets, generator/view specs and schemas, the local imports and
+assets actually reached from generator/view implementations, the exact pinned ontology's used semantic records, view
+checklists, the VQA system prompt, and canonical environment identities. Build, matching,
+validation, cache, and workflow machinery is deliberately outside automatic identity. Such changes
+are not detected automatically. Use `--rebuild-graph` when machinery can change graph construction
+or matching, and `--reset-graph` when a hidden behavioral change requires a new pixel baseline.
+Releases always reconstruct and compare the graph. VQA `--force` remains separate because it asks
+for new external judgments despite unchanged graph keys.
+Git commits are discovery baselines, never artifact keys. Standard datasets expose a tiny
+`out/dataset-<spec>/current.json` pointer to immutable shards under `out/.dataset-store/`; all
+repository readers consume that logical snapshot.
 
 **2. Generate Coverage Report**
 Analyze the generated dataset to ensure proper pedagogical label coverage and distribution.
@@ -108,10 +141,10 @@ npm run audit:dataset -- --spec=ccss
 ```
 Live Gemini validation is deliberately separate: generate canonically, then run
 `npm run validate:dataset -- --spec=ccss` on a development machine with
-`GEMINI_API_KEY` configured. Checklist and ontology-context edits invalidate affected
-records automatically. Because evaluator system instructions, response schema, and model
-selection are intentionally outside the validation-context hash, follow changes to those
-mechanics with a full `validate:dataset -- --spec=ccss --force` run.
+`GEMINI_API_KEY` configured. Checklist, ontology-context, and dedicated VQA system-prompt edits
+invalidate affected records automatically. Response-schema, pass/fail implementation, evaluator
+model, and validation-pipeline changes are machinery: rebuild the graph when their behavior changed,
+and add `--force` when unchanged images must actually be re-evaluated by Gemini.
 
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
@@ -155,6 +188,32 @@ implemented label combination. Those independent samples are indexed from the me
 union dataset and loaded directly from the tag-pinned Hugging Face release. A local refresh
 builds the equivalent index and copies its selected images into the immutable development
 snapshot; no union-merge command is needed.
+
+Coverage generation consumes the canonical CCSS documentation tree tracked at
+`public/coverage/ccss-tree.json`; routine local, CI, and release workflows never download raw
+standards data. Every coverage manifest records the exact tree digest, used ontology semantics, and
+repository-content identity used to build it.
+Standards-source conversion is an explicit, dry-run-first operation:
+```bash
+# Convert a candidate immutable CCSS revision into the tracked tree; add --apply to accept it.
+npm run update:standards-source -- --revision=<40-character-commit>
+```
+The standards updater fetches only the explicitly named revision, reports the ID-level delta, and
+replaces the tracked canonical tree only with `--apply`. It does not alter dataset generation:
+authored targets under `src/spec/` are the sole standards-side dataset input. Updating the exact
+`edugraph-ts` package and lock changes ontology provenance, which authoritatively reconstructs the
+complete graph. Entity, definition, and `partOf` relation records are then compared with the prior
+graph, so only targets, pairs, or VQA records reached from changed used semantics become stale.
+Unrelated ontology changes do not churn images or validation results; unversioned mutations are not
+development inputs and are eliminated by the exact locked install used for canonical work.
+The timestamp-free coverage computation is stored immutably under its complete input key. Local
+runs reuse that core and generate channel-specific metadata as a cheap projection when the effective
+coverage inputs are identical. CI, release, and deployment reconstruct a job-local core
+authoritatively; they do not share coverage caches between workflows.
+Local development keeps an untracked observation under `temp/coverage-core/.observations/` so
+Git candidate paths and per-file semantic records can prove an unchanged core key before loading
+model catalogs. Use `--rebuild-graph` after relevant coverage machinery changes; CI, release, and
+deployment perform that authoritative reconstruction automatically.
 
 On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
 images. Released uses the immutable published asset index; Local uses PNGs served from

@@ -12,9 +12,38 @@ import {
     buildStandardsCoverage,
     findParentClusterId,
     findStandardIdForTarget,
-    parseStandardsTree,
-    resolveOntologyVersion
+    parseStandardsTree
 } from './standards-coverage.ts';
+import {createWorkCounters} from './work-counters.ts';
+import type {CoverageInputIdentity} from './coverage-identity.ts';
+
+const coverageInputs: CoverageInputIdentity = {
+    schema_version: 3,
+    producer_epoch: 'standards-coverage-v3',
+    repository: {
+        ref: 'working-tree',
+        sha: 'working-tree',
+        content_sha256: 'a'.repeat(64)
+    },
+    standards: {
+        path: 'public/coverage/ccss-tree.json',
+        sha256: 'c'.repeat(64),
+        bytes: 46
+    },
+    ontology: {
+        package: 'edugraph-ts',
+        version: 'v0.15.0',
+        dependency: 'https://example.test/edugraph-ts.tgz',
+        resolved: 'https://example.test/edugraph-ts.tgz',
+        integrity: 'sha512-exact',
+        semantic_usage_sha256: 'usage-a'
+    },
+    selection: {
+        grade: null,
+        exclude_high_school: false,
+        known_assets_sha256: null
+    }
+};
 
 const node = (
     id: string,
@@ -33,6 +62,7 @@ const node = (
 
 describe('standards coverage', () => {
     it('builds current-label coverage and grouped backlog tasks without generated artifacts', () => {
+        const counters = createWorkCounters();
         const standardsMap = {
             '2.OA.C': node('2.OA.C', 'Cluster', undefined, [
                 '2.OA.C.3',
@@ -88,6 +118,7 @@ describe('standards coverage', () => {
             },
             ontologyVersion: 'v0.15.0',
             generatedAt: '2026-08-14T12:00:00.000Z',
+            counters,
             resolveGenerator: candidate => candidate.id === target.id ? 'parity' : null
         });
 
@@ -127,6 +158,8 @@ describe('standards coverage', () => {
             'task-ontology-relation',
             'task-analysis-2.OA.C'
         ]);
+        expect(counters.get('coverage.standard_indices')).toBe(1);
+        expect(counters.get('coverage.target_standard_lookups')).toBe(2);
     });
 
     it('maps targets to the longest matching leaf and resolves their cluster', () => {
@@ -143,23 +176,18 @@ describe('standards coverage', () => {
     it('creates manifests and validates the tracked tree envelope', () => {
         expect(buildCoverageManifest({
             channel: 'preview',
-            sourceRef: 'working-tree',
-            sourceSha: 'working-tree',
-            ontologyVersion: 'v0.15.0',
+            inputs: coverageInputs,
             generatedAt: '2026-08-14T12:00:00.000Z'
-        })).toEqual({
-            schema_version: 2,
+        })).toMatchObject({
+            schema_version: 4,
             channel: 'preview',
             source_ref: 'working-tree',
             source_sha: 'working-tree',
             generated_at: '2026-08-14T12:00:00.000Z',
-            ontology_version: 'v0.15.0'
+            ontology_version: 'v0.15.0',
+            core_input_key: expect.stringMatching(/^[a-f\d]{64}$/),
+            inputs: coverageInputs
         });
-        expect(resolveOntologyVersion({
-            dependencies: {
-                'edugraph-ts': 'https://github.com/example/releases/download/v0.15.0/edugraph-ts.tgz'
-            }
-        })).toBe('v0.15.0');
         expect(parseStandardsTree({tree: {}, standardsMap: {}})).toEqual({tree: {}, standardsMap: {}});
         expect(() => parseStandardsTree({tree: {}})).toThrow('Standards tree data is incomplete.');
     });

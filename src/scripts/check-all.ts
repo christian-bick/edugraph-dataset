@@ -4,13 +4,14 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import {
-    listSpecModules,
     loadGeneratorCatalog,
     loadViewCatalog,
     findGeneratorsWithoutTestPath
 } from '../lib/generation.ts';
+import {listSpecModules} from '../lib/spec-catalog.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
+import {readDatasetSnapshot} from '../lib/dataset-store.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -127,11 +128,13 @@ async function main() {
         }
     }
 
-    // 6. Split Integrity — only for specs whose dataset has been generated,
+    // 7. Split Integrity — only for specs whose dataset has been generated,
     // so a fresh clone still passes every static check.
     console.log(`\n--- [6/6] Dataset Split Integrity ---`);
-    const generatedSpecs = specsToValidate.filter(specName =>
-        existsSync(resolve(datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName)), 'train', 'metadata.jsonl')));
+    const generatedSpecs = specsToValidate.filter(specName => {
+        const datasetDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
+        return existsSync(datasetDir) && readDatasetSnapshot(datasetDir).rows('train').length > 0;
+    });
 
     if (generatedSpecs.length === 0) {
         console.log(`ℹ️ No generated dataset found for [${specsToValidate.join(', ')}] — skipping.`);

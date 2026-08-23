@@ -8,12 +8,11 @@ import {
     computeSampleSeed,
     computeSampleFilename,
     buildCompatibleModulePairIndex,
+    diagnoseTargetMatches,
     matchTargets,
     matchesTarget,
     findGeneratorsWithoutTestPath,
     findTargetsWithoutMatch,
-    loadTargets,
-    loadSpecTodos,
     generateSample,
     generateSampleWithRetry,
     computeContentFingerprint,
@@ -27,8 +26,10 @@ import {
     ViewMatchInfo,
     GeneratorCatalogEntry
 } from './generation.ts';
+import {loadSpecTodos, loadTargets} from './spec-catalog.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ProblemStub } from '../types/ml-engine.ts';
+import {createWorkCounters} from './work-counters.ts';
 
 const IDENTITY: SampleIdentity = {
     targetId: 'test-writing-0',
@@ -340,7 +341,7 @@ describe('compatible module pair indexing', () => {
 
     it('matches targets only against the compatible pair search space', () => {
         const target = {id: 'digit-target', labels: [Area.DigitNotation]};
-        const result = matchTargets([target], generators, views);
+        const result = diagnoseTargetMatches([target], generators, views);
 
         expect(result.tuples.map(tuple => `${tuple.generatorId}:${tuple.viewId}`)).toEqual([
             'writing:writing-view',
@@ -350,6 +351,26 @@ describe('compatible module pair indexing', () => {
         expect(result.rejections.map(rejection =>
             `${rejection.generatorId}:${rejection.viewId}:${rejection.verdict.reason}`
         )).toEqual(['counting:counting-view:unsupported-label']);
+    });
+
+    it('builds one index and visits only indexed candidates in production mode', () => {
+        const target = {id: 'digit-target', labels: [Area.DigitNotation]};
+        for (const targetCount of [1, 16, 64]) {
+            const counters = createWorkCounters();
+            const pairIndex = buildCompatibleModulePairIndex(generators, views, counters);
+            const targets = Array.from({length: targetCount}, (_, index) => ({
+                ...target,
+                id: `digit-target-${index}`
+            }));
+
+            const result = matchTargets(targets, generators, views, {pairIndex, counters});
+
+            expect(result.tuples).toHaveLength(3 * targetCount);
+            expect(counters.get('match.pair_index_builds')).toBe(1);
+            expect(counters.get('match.targets')).toBe(targetCount);
+            expect(counters.get('match.capability_checks')).toBe(3 * targetCount);
+            expect(counters.get('match.rejections')).toBe(0);
+        }
     });
 });
 

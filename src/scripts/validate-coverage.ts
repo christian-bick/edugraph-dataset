@@ -1,16 +1,36 @@
 import fs from 'fs';
 import path from 'path';
 import { Area, Scope, Ability } from 'edugraph-ts';
+import {
+  coverageManifestIdentityIssues,
+  toCoverageCoreInputIdentity
+} from '../lib/coverage-identity.ts';
+import {
+  projectCoverageData,
+  readCoverageCoreArtifact
+} from '../lib/coverage-core.ts';
+import {digestIdentity} from '../lib/content-identity.ts';
+import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
+import {resolveOntologySemanticUsage} from '../lib/external-semantics.ts';
+import {
+  publishCoverageInputObservation,
+  resolveCurrentCoverageInputs
+} from '../lib/coverage-observation.ts';
+import type {CoverageManifest} from '../standards-explorer/types.ts';
 
 const PROJECT_ROOT = path.resolve('.');
-const TEMP_DIR = path.join(PROJECT_ROOT, 'temp', 'common-core');
-const STANDARDS_PATH = path.join(TEMP_DIR, 'standards.jsonl');
 const coverageDirArg = process.argv.slice(2)
   .find(arg => arg.startsWith('--coverage-dir='))
   ?.slice('--coverage-dir='.length);
 const COVERAGE_DIR = path.resolve(PROJECT_ROOT, coverageDirArg || path.join('public', 'coverage', 'preview'));
 const COVERAGE_PATH = path.join(COVERAGE_DIR, 'ccss-coverage.json');
+const TREE_PATH = path.join(COVERAGE_DIR, 'ccss-tree.json');
 const MANIFEST_PATH = path.join(COVERAGE_DIR, 'coverage-manifest.json');
+const coreCacheDirArg = process.argv.slice(2)
+  .find(arg => arg.startsWith('--core-cache-dir='))
+  ?.slice('--core-cache-dir='.length);
+const CORE_CACHE_DIR = path.resolve(PROJECT_ROOT, coreCacheDirArg || path.join('temp', 'coverage-core'));
+const rebuildGraph = process.argv.includes('--rebuild-graph');
 
 interface ValidationResult {
   passed: boolean;
@@ -18,7 +38,7 @@ interface ValidationResult {
   warnings: string[];
 }
 
-function runValidation() {
+async function runValidation() {
   console.log('=== Initiating Standards Coverage Validation ===\n');
   const result: ValidationResult = { passed: true, errors: [], warnings: [] };
 
@@ -29,27 +49,73 @@ function runValidation() {
     printReport(result);
     return;
   }
+  if (!fs.existsSync(TREE_PATH)) {
+    result.errors.push(`Coverage tree not found at: ${TREE_PATH}`);
+    result.passed = false;
+    printReport(result);
+    return;
+  }
   if (!fs.existsSync(MANIFEST_PATH)) {
     result.errors.push(`Coverage manifest not found at: ${MANIFEST_PATH}`);
     result.passed = false;
     printReport(result);
     return;
   }
-  if (!fs.existsSync(STANDARDS_PATH)) {
-    result.errors.push(`Standards definitions not found at: ${STANDARDS_PATH}`);
-    result.passed = false;
-    printReport(result);
-    return;
-  }
-
   // 2. Load data
   const coverageData = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf-8'));
-  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'));
-  const standardsLines = fs.readFileSync(STANDARDS_PATH, 'utf-8').split('\n');
+  const treeData = JSON.parse(fs.readFileSync(TREE_PATH, 'utf-8'));
+  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) as CoverageManifest;
+  const canonicalTree = readCanonicalStandardsTree(PROJECT_ROOT);
 
-  if (manifest.schema_version !== 2) {
-    result.errors.push(`Unsupported coverage manifest schema: ${manifest.schema_version}`);
-    result.passed = false;
+  const resolvedInputs = await resolveCurrentCoverageInputs({
+    projectRoot: PROJECT_ROOT,
+    root: CORE_CACHE_DIR,
+    sourceRef: manifest.source_ref,
+    sourceSha: manifest.source_sha,
+    grade: manifest.inputs.selection.grade ?? undefined,
+    excludeHighSchool: manifest.inputs.selection.exclude_high_school,
+    knownAssetsSha256: manifest.inputs.selection.known_assets_sha256 ?? undefined,
+    rebuildGraph,
+    ontologyUsageSha256: async () =>
+      (await resolveOntologySemanticUsage(PROJECT_ROOT, 'ccss')).usage.input_sha256
+  });
+  console.log(
+    `[Coverage observation] ${resolvedInputs.reused_observation ? 'HIT' : 'MISS'}: `
+    + resolvedInputs.reason
+  );
+  const identityIssues = coverageManifestIdentityIssues({
+    projectRoot: PROJECT_ROOT,
+    manifest,
+    expectedInputs: resolvedInputs.inputs
+  });
+  result.errors.push(...identityIssues);
+  if (identityIssues.length > 0) result.passed = false;
+  if (manifest.schema_version === 4 && manifest.inputs && manifest.core_input_key) {
+    const core = readCoverageCoreArtifact({
+      root: CORE_CACHE_DIR,
+      key: manifest.core_input_key,
+      expectedInputs: toCoverageCoreInputIdentity(manifest.inputs)
+    });
+    if (!core) {
+      result.errors.push(
+        `Coverage core ${manifest.core_input_key} is missing from ${CORE_CACHE_DIR}.`
+      );
+      result.passed = false;
+    } else {
+      const projectedCoverage = projectCoverageData(
+        core.coverage,
+        manifest.generated_at,
+        manifest.ontology_version
+      );
+      if (digestIdentity(core.tree) !== digestIdentity(treeData)) {
+        result.errors.push('Coverage tree does not match its immutable core artifact.');
+        result.passed = false;
+      }
+      if (digestIdentity(projectedCoverage) !== digestIdentity(coverageData)) {
+        result.errors.push('Coverage data does not match its immutable core artifact projection.');
+        result.passed = false;
+      }
+    }
   }
   if (manifest.channel !== 'latest' && manifest.channel !== 'preview') {
     result.errors.push(`Invalid coverage manifest channel: ${manifest.channel}`);
@@ -67,6 +133,10 @@ function runValidation() {
     result.errors.push('Coverage manifest and data ontology versions do not match.');
     result.passed = false;
   }
+  if (digestIdentity(treeData) !== digestIdentity(canonicalTree)) {
+    result.errors.push('Coverage tree does not match the tracked canonical standards tree.');
+    result.passed = false;
+  }
 
   // Populate rdfNodes dynamically from edugraph-ts enums
   const rdfNodes: Record<string, string> = {};
@@ -81,15 +151,9 @@ function runValidation() {
   }
   console.log(`[Ontology] Loaded ${Object.keys(rdfNodes).length} valid concepts from edugraph-ts.`);
 
-  // Parse Standards.jsonl
-  const standardsMap: Record<string, any> = {};
-  for (const line of standardsLines) {
-    if (!line.trim()) continue;
-    const std = JSON.parse(line);
-    standardsMap[std.id] = std;
-  }
+  const standardsMap: Record<string, any> = canonicalTree.standardsMap;
 
-  // Find actual leaf nodes in standards.jsonl
+  // Find actual leaf nodes in the tracked canonical tree.
   const actualLeavesMap: Record<string, any> = {};
   for (const std of Object.values(standardsMap)) {
     if (std.children && std.children.length === 0) {
@@ -156,9 +220,9 @@ function runValidation() {
 
   // --- CHECK 3: Standards and Ontology Integrity inside coverage ---
   for (const [id, std] of Object.entries(coverage) as any) {
-    // A. Verify standard ID exists in standards.jsonl
+    // A. Verify standard ID exists in the tracked canonical tree.
     if (!standardsMap[id]) {
-      result.errors.push(`[Standard ID Error] Standard ID "${id}" in coverage file does not exist in standards.jsonl`);
+      result.errors.push(`[Standard ID Error] Standard ID "${id}" in coverage file does not exist in the canonical standards tree`);
       result.passed = false;
     } else if (standardsMap[id].children && standardsMap[id].children.length > 0) {
       result.errors.push(`[Leaf Node Error] Standard ID "${id}" is evaluated in coverage, but it is not a leaf node (has children)`);
@@ -287,14 +351,14 @@ function runValidation() {
       result.passed = false;
     }
 
-    // G. Verify cluster_id exists in standards.jsonl
+    // G. Verify cluster_id exists in the tracked canonical tree.
     const clusterId = std.cluster_id;
     if (clusterId && clusterId !== 'Other') {
       if (!standardsMap[clusterId]) {
         result.errors.push(`[Cluster ID Error] Standard "${id}" references non-existent cluster ID "${clusterId}"`);
         result.passed = false;
       } else if (standardsMap[clusterId].level.toLowerCase() !== 'cluster') {
-        result.warnings.push(`[Cluster Level Warning] Standard "${id}" references cluster "${clusterId}", but its level in standards.jsonl is "${standardsMap[clusterId].level}"`);
+        result.warnings.push(`[Cluster Level Warning] Standard "${id}" references cluster "${clusterId}", but its canonical-tree level is "${standardsMap[clusterId].level}"`);
       }
     }
   }
@@ -420,6 +484,9 @@ function runValidation() {
     }
   }
 
+  if (result.passed) {
+    publishCoverageInputObservation(CORE_CACHE_DIR, resolvedInputs.observation);
+  }
   printReport(result);
 }
 
@@ -441,4 +508,7 @@ function printReport(result: ValidationResult) {
   process.exit(result.passed ? 0 : 1);
 }
 
-runValidation();
+runValidation().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

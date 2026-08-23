@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findLeafModules } from './module-resolver.ts';
+import {clearLeafModuleCache, findLeafModules} from './module-resolver.ts';
 import { resolve } from 'path';
 
 describe('module-resolver', () => {
@@ -19,5 +19,15 @@ describe('module-resolver', () => {
     it('should return empty array for non-existent path', () => {
         const modules = findLeafModules('/non/existent/path');
         expect(modules).toEqual([]);
+    });
+
+    it('returns isolated arrays from the process-local discovery cache', () => {
+        const generatorsPath = resolve('src/generators');
+        const first = findLeafModules(generatorsPath);
+        const expectedLength = first.length;
+        first.pop();
+        expect(findLeafModules(generatorsPath)).toHaveLength(expectedLength);
+        clearLeafModuleCache();
+        expect(findLeafModules(generatorsPath)).toHaveLength(expectedLength);
     });
 });

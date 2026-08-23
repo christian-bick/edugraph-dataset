@@ -1,68 +1,148 @@
-import { readFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { findLeafModules } from './module-resolver.ts';
+import {existsSync, readFileSync} from 'fs';
+import {dirname, resolve} from 'path';
+import {fileURLToPath} from 'url';
+import {findLeafModules} from './module-resolver.ts';
+import type {WorkCounters} from './work-counters.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-export function getViewToProblemTypeMap(): Record<string, string> {
-    const problemsPath = resolve(PROJECT_ROOT, 'src', 'types', 'problems.ts');
-    if (!existsSync(problemsPath)) {
-        return {};
-    }
-    const content = readFileSync(problemsPath, 'utf8');
-    const interfaceMatch = content.match(/export\s+interface\s+ViewTypeMap\s*\{([\s\S]*?)\}/);
-    if (!interfaceMatch) {
-        return {};
-    }
-    const block = interfaceMatch[1];
-    const map: Record<string, string> = {};
-    const lines = block.split('\n');
-    const regex = /['"]([^'"]+)['"]\s*:\s*(\w+)/;
-    for (const line of lines) {
-        const m = line.match(regex);
-        if (m) {
-            map[m[1]] = m[2];
-        }
-    }
-    return map;
+
+interface ProblemTypeGraph {
+    viewToProblemType: Record<string, string>;
+    unionMembers: Map<string, readonly string[]>;
 }
 
-export function getGeneratorProblemType(genId: string): string | null {
+let problemTypeGraph: ProblemTypeGraph | undefined;
+let generatorProblemTypes: Map<string, string | null> | undefined;
+const generatorProblemTypeFiles = new Map<string, string | null>();
+
+const parseProblemTypeGraph = (content: string): ProblemTypeGraph => {
+    const viewToProblemType: Record<string, string> = {};
+    const interfaceMatch = content.match(/export\s+interface\s+ViewTypeMap\s*\{([\s\S]*?)\}/);
+    if (interfaceMatch) {
+        const regex = /['"]([^'"]+)['"]\s*:\s*(\w+)/;
+        for (const line of interfaceMatch[1].split('\n')) {
+            const match = line.match(regex);
+            if (match) viewToProblemType[match[1]] = match[2];
+        }
+    }
+
+    const unionMembers = new Map<string, readonly string[]>();
+    const unionPattern = /export\s+type\s+(\w+)\s*=\s*((?:\w+\s*\|\s*)+\w+)\s*;/g;
+    for (const match of content.matchAll(unionPattern)) {
+        unionMembers.set(match[1], match[2].split('|').map(member => member.trim()));
+    }
+
+    return {viewToProblemType, unionMembers};
+};
+
+const loadProblemTypeGraph = (counters?: WorkCounters): ProblemTypeGraph => {
+    if (problemTypeGraph) return problemTypeGraph;
+
+    const problemsPath = resolve(PROJECT_ROOT, 'src', 'types', 'problems.ts');
+    if (!existsSync(problemsPath)) {
+        problemTypeGraph = {viewToProblemType: {}, unionMembers: new Map()};
+        return problemTypeGraph;
+    }
+
+    counters?.add('type.problems_file_reads');
+    problemTypeGraph = parseProblemTypeGraph(readFileSync(problemsPath, 'utf8'));
+    return problemTypeGraph;
+};
+
+const loadGeneratorProblemTypes = (counters?: WorkCounters): Map<string, string | null> => {
+    if (generatorProblemTypes) return generatorProblemTypes;
+
+    counters?.add('type.generator_discoveries');
     const generatorsDir = resolve(PROJECT_ROOT, 'src', 'generators');
-    const leafModules = findLeafModules(generatorsDir);
-    const leaf = leafModules.find(m => m.id === genId || m.relativePath === genId);
-    if (!leaf) {
-        return null;
+    const result = new Map<string, string | null>();
+
+    for (const leaf of findLeafModules(generatorsDir)) {
+        const generatorPath = resolve(leaf.absolutePath, 'generator.ts');
+        const problemType = getGeneratorProblemTypeFromPath(generatorPath, counters);
+        result.set(leaf.id, problemType);
+        result.set(leaf.relativePath, problemType);
     }
-    const genPath = resolve(leaf.absolutePath, 'generator.ts');
-    if (!existsSync(genPath)) {
-        return null;
+
+    generatorProblemTypes = result;
+    return result;
+};
+
+export function getGeneratorProblemTypeFromPath(
+    generatorPath: string,
+    counters?: WorkCounters
+): string | null {
+    if (generatorProblemTypeFiles.has(generatorPath)) {
+        return generatorProblemTypeFiles.get(generatorPath) ?? null;
     }
-    const content = readFileSync(genPath, 'utf8');
-    const match = content.match(/implements\s+ProblemGenerator<([^>]+)>/);
-    return match ? match[1].split(',')[0].trim() : null;
+
+    const problemType = readGeneratorProblemTypeFromPath(generatorPath, counters);
+    generatorProblemTypeFiles.set(generatorPath, problemType);
+    return problemType;
+}
+
+/** Parses one generator declaration without consulting process-local caches. */
+export function readGeneratorProblemTypeFromPath(
+    generatorPath: string,
+    counters?: WorkCounters
+): string | null {
+    let problemType: string | null = null;
+    if (existsSync(generatorPath)) {
+        counters?.add('type.generator_file_reads');
+        const content = readFileSync(generatorPath, 'utf8');
+        const match = content.match(/implements\s+ProblemGenerator<([^>]+)>/);
+        problemType = match ? match[1].split(',')[0].trim() : null;
+    }
+    return problemType;
+}
+
+export function getViewToProblemTypeMap(counters?: WorkCounters): Record<string, string> {
+    return loadProblemTypeGraph(counters).viewToProblemType;
+}
+
+/** Parses one explicit type source without consulting or mutating the process cache. */
+export function getViewToProblemTypeMapFromPath(
+    problemsPath: string,
+    counters?: WorkCounters
+): Record<string, string> {
+    if (!existsSync(problemsPath)) return {};
+    counters?.add('type.problems_file_reads');
+    return parseProblemTypeGraph(readFileSync(problemsPath, 'utf8')).viewToProblemType;
+}
+
+export function getGeneratorProblemType(
+    generatorId: string,
+    counters?: WorkCounters
+): string | null {
+    return loadGeneratorProblemTypes(counters).get(generatorId) ?? null;
+}
+
+/** Returns the concrete generator payload types accepted by a view payload type. */
+export function getAcceptedGeneratorProblemTypes(
+    viewType: string,
+    counters?: WorkCounters
+): readonly string[] {
+    const members = loadProblemTypeGraph(counters).unionMembers.get(viewType);
+    return members ? [viewType, ...members] : [viewType];
 }
 
 /**
  * Returns whether a view payload type accepts a generator payload type.
- * Besides exact matches, this recognizes named unions declared in problems.ts,
- * allowing selected views to share a broader contract while generators retain
- * precise payload types.
+ * Parsed type information is shared for the lifetime of the operation.
  */
-export function isProblemTypeCompatible(generatorType: string, viewType: string): boolean {
-    if (generatorType === viewType) return true;
+export function isProblemTypeCompatible(
+    generatorType: string,
+    viewType: string,
+    counters?: WorkCounters
+): boolean {
+    counters?.add('type.compatibility_checks');
+    return getAcceptedGeneratorProblemTypes(viewType, counters).includes(generatorType);
+}
 
-    const problemsPath = resolve(PROJECT_ROOT, 'src', 'types', 'problems.ts');
-    if (!existsSync(problemsPath)) return false;
-
-    const content = readFileSync(problemsPath, 'utf8');
-    const unionPattern = /export\s+type\s+(\w+)\s*=\s*((?:\w+\s*\|\s*)+\w+)\s*;/g;
-    for (const match of content.matchAll(unionPattern)) {
-        if (match[1] !== viewType) continue;
-        return match[2].split('|').map(member => member.trim()).includes(generatorType);
-    }
-
-    return false;
+/** Clears process-local parser state for watch-mode invalidation and isolated tests. */
+export function clearTypeParserCaches(): void {
+    problemTypeGraph = undefined;
+    generatorProblemTypes = undefined;
+    generatorProblemTypeFiles.clear();
 }

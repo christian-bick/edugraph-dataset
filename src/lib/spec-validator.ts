@@ -1,5 +1,5 @@
 import { CompetencyTarget, TargetEquivalence } from '../types/ml-engine.ts';
-import { loadTargets, loadSpecEquivalences } from './generation.ts';
+import {loadSpecEquivalences, loadTargets} from './spec-catalog.ts';
 import { shortenLabel, labelSetKey } from './utils.ts';
 
 export { labelSetKey };

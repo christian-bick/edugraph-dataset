@@ -1,7 +1,8 @@
 import {
     loadGeneratorCatalog,
     loadViewCatalog,
-    matchTargets,
+    buildCompatibleModulePairIndex,
+    diagnoseTargetMatches,
     computeSampleKey,
     generateSampleWithRetry
 } from '../lib/generation.ts';
@@ -35,6 +36,7 @@ async function main() {
     console.log(`Loaded ${generatorCatalog.length} Generator Specifications.`);
     const targetMode = raw ? 'raw source definitions' : 'production-normalized targets';
     console.log(`Loaded ${allTargets.length} ${targetMode} from spec module "${specName}".\n`);
+    const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
 
     let targetCount = 0;
     const generatorStats: Record<string, { targetMatches: number; viewPairs: number }> = {};
@@ -48,7 +50,12 @@ async function main() {
         console.log(`Target ${targetCount}/${allTargets.length}: ${target.id}`);
         console.log(`Labels: ${target.labels.map(shortenLabel).join(', ')}`);
 
-        const { tuples, rejections } = matchTargets([target], generatorCatalog, viewCatalog);
+        const {tuples, rejections} = diagnoseTargetMatches(
+            [target],
+            generatorCatalog,
+            viewCatalog,
+            {pairIndex}
+        );
 
         // Matching and generation are separate facts. Every semantic tuple is
         // reported even when its bounded generation probe cannot produce a stub.

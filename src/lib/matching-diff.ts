@@ -1,5 +1,10 @@
 import { CompetencyTarget } from '../types/ml-engine.ts';
-import { GeneratorMatchInfo, matchTargets, ViewMatchInfo } from './generation.ts';
+import {
+    matchTargets,
+    modulePairKey,
+    type GeneratorMatchInfo,
+    type ViewMatchInfo
+} from './matching.ts';
 import { shortenLabel } from './utils.ts';
 
 export const MATCHING_SNAPSHOT_SCHEMA_VERSION = 1;
@@ -32,10 +37,6 @@ export interface MatchingDiff {
     removedPairs: string[];
 }
 
-function pairKey(generatorId: string, viewId: string): string {
-    return `${generatorId}#${viewId}`;
-}
-
 export function createMatchingSnapshot(
     specName: string,
     targetInputs: MatchingTargetInput[],
@@ -54,7 +55,7 @@ export function createMatchingSnapshot(
     const pairsByTarget = new Map<string, string[]>();
     for (const tuple of matchTargets(targets, generators, views).tuples) {
         if (!pairsByTarget.has(tuple.target.id)) pairsByTarget.set(tuple.target.id, []);
-        pairsByTarget.get(tuple.target.id)!.push(pairKey(tuple.generatorId, tuple.viewId));
+        pairsByTarget.get(tuple.target.id)!.push(modulePairKey(tuple.generatorId, tuple.viewId));
     }
 
     const entries = [...targets]

@@ -89,9 +89,10 @@ jobs:
           --channel=latest
           --source-ref="${{ steps.release_source.outputs.tag }}"
           --source-sha="${{ steps.release_source.outputs.sha }}"
+          --rebuild-graph
 
       - name: Validate release coverage snapshot
-        run: npm run validate:coverage -- --coverage-dir=temp/coverage-release
+        run: npm run validate:coverage -- --coverage-dir=temp/coverage-release --rebuild-graph
 
       - name: Publish dataset to Hugging Face
         uses: ./.github/actions/publish-dataset

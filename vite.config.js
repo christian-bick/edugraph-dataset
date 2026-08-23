@@ -213,6 +213,7 @@ function viewHeadPlugin() {
 export default defineConfig({
     // ✨ Set the project's root to the 'src' directory
     root: 'src',
+    cacheDir: '../temp/vite',
     publicDir: '../public',
     server: {
         proxy: {

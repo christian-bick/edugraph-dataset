@@ -1,7 +1,7 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import {copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync} from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { listUnionSpecs } from '../lib/generation.ts';
+import {listUnionSpecs} from '../lib/spec-catalog.ts';
 import {
     UNION_DATASET_DIR,
     datasetDirForSpec,
@@ -11,13 +11,13 @@ import {
     claimFingerprint,
     emptyFingerprintIndex,
     groupIntoExercises,
-    parseMetadataLines,
     selectUnionExercises,
     toPublishedMetadataRow,
     type Exercise,
     type FingerprintIndex,
     type MetadataRow,
 } from '../lib/dataset-merge.ts';
+import {readDatasetSnapshot, type DatasetSnapshot} from '../lib/dataset-store.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,31 +31,21 @@ interface SpecContribution {
 }
 
 /** Reads one spec's rows for a split, from the module-level metadata files. */
-function readSpecSplit(specDir: string, splitDirName: string): MetadataRow[] {
-    const splitDir = resolve(specDir, splitDirName);
-    if (!existsSync(splitDir)) return [];
-
-    const rows: MetadataRow[] = [];
-    const modules = readdirSync(splitDir, { withFileTypes: true })
-        .filter(entry => entry.isDirectory())
-        .map(entry => entry.name)
-        .sort();
-
-    for (const moduleName of modules) {
-        const modulePath = resolve(splitDir, moduleName, '.metadata.jsonl');
-        if (!existsSync(modulePath)) continue;
-        for (const row of parseMetadataLines(readFileSync(modulePath, 'utf-8'))) {
-            // `file_name` is module-relative on disk; qualify it for the union root.
-            rows.push({ ...row, file_name: `${moduleName}/${row.file_name}` });
-        }
-    }
-    return rows;
+function readSpecSplit(snapshot: DatasetSnapshot, splitDirName: string): MetadataRow[] {
+    const split = splitDirName === 'train' ? 'train' : 'val';
+    return snapshot.rows(split) as MetadataRow[];
 }
 
 /** Copies an exercise's images into the union and returns its rows. */
-function copyExercise(exercise: Exercise, specSplitDir: string, unionSplitDir: string): MetadataRow[] {
+function copyExercise(
+    exercise: Exercise,
+    snapshot: DatasetSnapshot,
+    splitDirName: string,
+    unionSplitDir: string
+): MetadataRow[] {
+    const split = splitDirName === 'train' ? 'train' : 'val';
     for (const row of exercise.rows) {
-        const source = resolve(specSplitDir, row.file_name);
+        const source = snapshot.imagePath(split, row.sample_key);
         const destination = resolve(unionSplitDir, row.file_name);
         mkdirSync(dirname(destination), { recursive: true });
         copyFileSync(source, destination);
@@ -80,16 +70,14 @@ function mergeSplit(
     const contributions: SpecContribution[] = [];
 
     for (const specName of unionSpecs) {
-        const specSplitDir = resolve(datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName)), splitDirName);
-        const exercises = groupIntoExercises(readSpecSplit(
-            datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName)),
-            splitDirName
-        ));
+        const specDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
+        const snapshot = readDatasetSnapshot(specDir);
+        const exercises = groupIntoExercises(readSpecSplit(snapshot, splitDirName));
         const { kept, dropped } = selectUnionExercises(exercises, taskIndex, trainContentIndex);
 
         for (const exercise of kept) {
             claimFingerprint(contentIndex, exercise.view, exercise.contentFingerprint);
-            rows.push(...copyExercise(exercise, specSplitDir, unionSplitDir));
+            rows.push(...copyExercise(exercise, snapshot, splitDirName, unionSplitDir));
         }
 
         contributions.push({

@@ -88,9 +88,13 @@ async function checkLabels() {
 
     if (issues.length > 0) {
         console.log(JSON.stringify(issues, null, 2));
+        process.exitCode = 1;
     } else {
         console.log("ALL GOOD");
     }
 }
 
-checkLabels().catch(console.error);
+checkLabels().catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+});

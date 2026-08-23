@@ -1,8 +1,30 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import {dirname, resolve} from 'node:path';
 import { buildAssetIndexBundle } from './asset-index-builder.ts';
 import { targetLookupKey } from './asset-index.ts';
+import {beginDatasetStoreTransaction, readDatasetSnapshot} from './dataset-store.ts';
+
+function publishDataset(
+    projectRoot: string,
+    spec: string,
+    row: Record<string, unknown>,
+    imageContents = 'png'
+): void {
+    const datasetDir = resolve(projectRoot, 'out', `dataset-${spec}`);
+    const transaction = beginDatasetStoreTransaction(datasetDir, {
+        fullDataset: true,
+        generatorIds: [String(row.generator)]
+    }, `fixture-${spec}`);
+    const imagePath = resolve(transaction.stagingDir, 'train', String(row.file_name));
+    mkdirSync(dirname(imagePath), {recursive: true});
+    writeFileSync(imagePath, imageContents);
+    writeFileSync(
+        resolve(transaction.stagingDir, 'train', 'metadata.jsonl'),
+        `${JSON.stringify(row)}\n`
+    );
+    transaction.commit(null);
+}
 
 describe('buildAssetIndexBundle', () => {
     let projectRoot: string;
@@ -10,11 +32,8 @@ describe('buildAssetIndexBundle', () => {
     beforeEach(() => {
         mkdirSync('temp', { recursive: true });
         projectRoot = mkdtempSync(resolve('temp', 'asset-index-builder-'));
-        const moduleDir = resolve(projectRoot, 'out', 'dataset-ccss', 'train', 'counting');
-        mkdirSync(moduleDir, { recursive: true });
-        writeFileSync(resolve(moduleDir, 'sample.png'), 'png');
-        writeFileSync(resolve(moduleDir, '.metadata.jsonl'), `${JSON.stringify({
-            file_name: 'sample.png',
+        publishDataset(projectRoot, 'ccss', {
+            file_name: 'counting/sample.png',
             sample_key: 'target#generator#view#train#question#inst:0',
             spec: 'ccss',
             target_id: 'target',
@@ -23,8 +42,9 @@ describe('buildAssetIndexBundle', () => {
             mode: 'question',
             instance: 0,
             content_fingerprint: 'fingerprint',
+            task_fingerprint: 'task',
             tags: ['Counting'],
-        })}\n`);
+        });
     });
 
     afterEach(() => rmSync(projectRoot, { recursive: true, force: true }));
@@ -40,16 +60,14 @@ describe('buildAssetIndexBundle', () => {
 
         expect(bundle.index.label_sets[0].samples[0].file_name).toBe('counting/sample.png');
         expect(bundle.localAssets.get('train/counting/sample.png')).toBe(
-            resolve(projectRoot, 'out', 'dataset-ccss', 'train', 'counting', 'sample.png'),
+            readDatasetSnapshot(resolve(projectRoot, 'out', 'dataset-ccss'))
+                .imagePath('train', 'target#generator#view#train#question#inst:0'),
         );
     });
 
     it('preserves target evidence when the union reuses an earlier physical sample', async () => {
-        const moduleDir = resolve(projectRoot, 'out', 'dataset-nctm', 'train', 'counting');
-        mkdirSync(moduleDir, { recursive: true });
-        writeFileSync(resolve(moduleDir, 'duplicate.png'), 'png');
-        writeFileSync(resolve(moduleDir, '.metadata.jsonl'), `${JSON.stringify({
-            file_name: 'duplicate.png',
+        publishDataset(projectRoot, 'nctm', {
+            file_name: 'counting/duplicate.png',
             sample_key: 'other#generator#view#train#question#inst:0',
             spec: 'nctm',
             target_id: 'other',
@@ -58,8 +76,9 @@ describe('buildAssetIndexBundle', () => {
             mode: 'question',
             instance: 0,
             content_fingerprint: 'fingerprint',
+            task_fingerprint: 'task',
             tags: ['Addition', 'Counting'],
-        })}\n`);
+        });
 
         const bundle = await buildAssetIndexBundle({
             projectRoot,
@@ -78,11 +97,8 @@ describe('buildAssetIndexBundle', () => {
     });
 
     it('retains the same data as separate samples when resolved view tasks differ', async () => {
-        const moduleDir = resolve(projectRoot, 'out', 'dataset-nctm', 'train', 'counting');
-        mkdirSync(moduleDir, { recursive: true });
-        writeFileSync(resolve(moduleDir, 'composition.png'), 'png');
-        writeFileSync(resolve(moduleDir, '.metadata.jsonl'), `${JSON.stringify({
-            file_name: 'composition.png',
+        publishDataset(projectRoot, 'nctm', {
+            file_name: 'counting/composition.png',
             sample_key: 'composition#generator#view#train#question#inst:0',
             spec: 'nctm',
             target_id: 'composition',
@@ -93,7 +109,7 @@ describe('buildAssetIndexBundle', () => {
             content_fingerprint: 'fingerprint',
             task_fingerprint: 'composition-task',
             tags: ['Composition'],
-        })}\n`);
+        });
 
         const bundle = await buildAssetIndexBundle({
             projectRoot,

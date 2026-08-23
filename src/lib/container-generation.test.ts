@@ -20,6 +20,12 @@ describe('container generation command', () => {
             npm_config_generator: 'writing',
             npm_config_training_only: 'true'
         })).toEqual(['--spec=explicit', '--generator=writing', '--training-only']);
+        expect(normalizedGenerationArgs(['--spec=explicit'], {
+            npm_config_rebuild_graph: 'true'
+        })).toEqual(['--spec=explicit', '--rebuild-graph']);
+        expect(normalizedGenerationArgs(['--spec=explicit'], {
+            npm_config_reset_graph: 'true'
+        })).toEqual(['--spec=explicit', '--reset-graph']);
     });
 
     it('keys the reusable dependency volume by lockfile and renderer', () => {
@@ -44,6 +50,8 @@ describe('container generation command', () => {
         expect(args).toContain(`type=bind,source=/cache/npm,target=/root/.npm`);
         expect(args).toContain(`${RENDERER_ENVIRONMENT_VARIABLE}=${CANONICAL_RENDERER_ID}`);
         expect(args).toContain(`${RENDERER_PORT_VARIABLE}=${CANONICAL_RENDERER_PORT}`);
+        expect(args).toContain('GIT_DIR=/host-workspace/.git');
+        expect(args).toContain('GIT_WORK_TREE=/workspace');
         expect(args).toContain('EDUGRAPH_HOST_UID=1001');
         expect(args.slice(-2)).toEqual(['--spec=test', '--generator=writing']);
     });
