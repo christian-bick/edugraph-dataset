@@ -3,8 +3,16 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSyn
 import { resolve } from 'path';
 import { definition, type CompetencyDescriptor } from 'edugraph-ts';
 import type {WorkCounters} from './work-counters.ts';
+import {currentValidationPolicyInputHash} from './vqa-policy.ts';
 
 const EDUGRAPH_NAMESPACE = 'http://edugraph.io/edu/';
+/**
+ * The pre-policy-node cache was produced with this exact prompt/schema/pass
+ * policy. Preserve its keys once; any future semantic policy edit gets a new
+ * policy hash and therefore a new cache namespace automatically.
+ */
+const LEGACY_VALIDATION_POLICY_HASH =
+    '83c84b074ae53279b199105ab8a8608b40a27c312a318dba8004f5350782b8e3';
 
 export type VqaLabelVerdict = 'defendable' | 'uncertain' | 'not_defendable';
 
@@ -24,6 +32,7 @@ export interface VqaValidationContext {
     checklistHash: string;
     labelContextHash: string;
     validationContextHash: string;
+    validationPolicyHash: string;
     validationCacheKey: string;
     labelDefinitions: VqaLabelDefinition[];
 }
@@ -45,6 +54,7 @@ export interface VqaCacheEntry {
     checklist_hash: string;
     label_context_hash: string;
     validation_context_hash: string;
+    validation_policy_hash?: string;
     validated_at: string;
     evaluation: {
         pass: boolean;
@@ -129,26 +139,35 @@ export function computeImageSha256(imageBufferOrPath: Buffer | string): string {
 
 export function computeValidationCacheKey(
     imageSha256: string,
-    validationContextHash: string
+    validationContextHash: string,
+    validationPolicyHash = currentValidationPolicyInputHash()
 ): string {
-    const rawKey = `${imageSha256}:${validationContextHash}`;
+    const rawKey = validationPolicyHash === LEGACY_VALIDATION_POLICY_HASH
+        ? `${imageSha256}:${validationContextHash}`
+        : `${imageSha256}:${validationContextHash}:${validationPolicyHash}`;
     return createHash('sha256').update(rawKey).digest('hex');
 }
 
 export function buildVqaValidationContext(
     imageSha256: string,
     checklistPaths: string[],
-    labels: readonly string[]
+    labels: readonly string[],
+    validationPolicyHash = currentValidationPolicyInputHash()
 ): VqaValidationContext {
     const checklistHash = computeChecklistHash(checklistPaths);
     const labelDefinitions = resolveVqaLabelDefinitions(labels);
     const labelContextHash = computeLabelContextHash(labelDefinitions);
     const validationContextHash = computeValidationContextHash(checklistHash, labelContextHash);
-    const validationCacheKey = computeValidationCacheKey(imageSha256, validationContextHash);
+    const validationCacheKey = computeValidationCacheKey(
+        imageSha256,
+        validationContextHash,
+        validationPolicyHash
+    );
     return {
         checklistHash,
         labelContextHash,
         validationContextHash,
+        validationPolicyHash,
         validationCacheKey,
         labelDefinitions
     };
@@ -168,7 +187,8 @@ export interface VqaValidationContextResolver {
  * validation operation. Image identity remains sample-specific.
  */
 export function createVqaValidationContextResolver(
-    counters?: WorkCounters
+    counters?: WorkCounters,
+    validationPolicyHash = currentValidationPolicyInputHash()
 ): VqaValidationContextResolver {
     const checklistHashes = new Map<string, string>();
     const labelContexts = new Map<string, {
@@ -222,7 +242,12 @@ export function createVqaValidationContextResolver(
                 checklistHash,
                 labelContextHash: labelContext.hash,
                 validationContextHash,
-                validationCacheKey: computeValidationCacheKey(imageSha256, validationContextHash),
+                validationPolicyHash,
+                validationCacheKey: computeValidationCacheKey(
+                    imageSha256,
+                    validationContextHash,
+                    validationPolicyHash
+                ),
                 labelDefinitions: labelContext.definitions
             };
         }

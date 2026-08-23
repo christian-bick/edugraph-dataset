@@ -28,6 +28,7 @@ const coreCacheDir = path.resolve(projectRoot, readOption('core-cache-dir') || p
 const channel = (readOption('channel') || 'preview') as DataView;
 const sourceRef = readOption('source-ref') || process.env.GITHUB_REF_NAME || 'working-tree';
 const sourceSha = readOption('source-sha') || process.env.GITHUB_SHA || 'working-tree';
+const rebuildGraph = args.includes('--rebuild-graph');
 
 if (channel !== 'latest' && channel !== 'preview') {
     throw new Error(`Invalid --channel=${channel}. Expected "latest" or "preview".`);
@@ -73,6 +74,7 @@ async function main() {
         root: coreCacheDir,
         inputs,
         counters,
+        rebuildGraph,
         build: async () => ({
             tree: sourceTree,
             coverage: await buildCurrentStandardsCoverage({
@@ -88,7 +90,8 @@ async function main() {
     const tree = parseStandardsTree(core.artifact.tree);
     const coverage = projectCoverageData(core.artifact.coverage, generatedAt, ontologyVersion);
     console.log(
-        `[Coverage core] ${core.reused ? 'HIT' : 'MISS'} ${core.artifact.core_input_key} at ${core.directory}`
+        `[Coverage core] ${core.reused ? 'HIT' : rebuildGraph ? 'REBUILT' : 'MISS'} `
+        + `${core.artifact.core_input_key} at ${core.directory}`
     );
     const manifest = buildCoverageManifest({
         channel,

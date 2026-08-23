@@ -97,4 +97,33 @@ describe('coverage core artifact', () => {
             rmSync(root, {recursive: true, force: true});
         }
     });
+
+    it('rebuilds and atomically replaces the same authored-input key when requested', async () => {
+        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-coverage-core-'));
+        let version = 0;
+        const build = vi.fn(async () => ({
+            tree,
+            coverage: {
+                ...coverage,
+                metadata: {...coverage.metadata, covered_count: ++version}
+            }
+        }));
+        try {
+            const first = await resolveCoverageCore({root, inputs: inputs(), build});
+            const rebuilt = await resolveCoverageCore({
+                root,
+                inputs: inputs(),
+                build,
+                rebuildGraph: true
+            });
+            expect(first.artifact.coverage.metadata.covered_count).toBe(1);
+            expect(rebuilt.reused).toBe(false);
+            expect(rebuilt.artifact.coverage.metadata.covered_count).toBe(2);
+            expect(build).toHaveBeenCalledTimes(2);
+            expect(readCoverageCoreArtifact({root, key: rebuilt.artifact.core_input_key})
+                ?.coverage.metadata.covered_count).toBe(2);
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
 });

@@ -40,12 +40,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Prepare immutable coverage core
-        uses: ./.github/actions/coverage-core
-        with:
-          source-ref: main
-          source-sha: ${{ inputs.preview_sha || github.sha }}
-
       - name: Generate Preview coverage data
         run: >-
           npm run generate:standards-explorer --
@@ -53,6 +47,7 @@ jobs:
           --channel=preview
           --source-ref=main
           --source-sha="${{ inputs.preview_sha || github.sha }}"
+          --rebuild-graph
 
       - name: Validate Preview coverage data
         run: npm run validate:coverage -- --coverage-dir=public/coverage/preview

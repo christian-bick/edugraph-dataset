@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {createHash} from 'node:crypto';
 import { existsSync, rmSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import {
@@ -73,9 +74,17 @@ describe('VQA Cache Module', () => {
         const valKey = computeValidationCacheKey(imgHash, validationContextHash);
         expect(valKey.length).toBe(64);
         expect(computeValidationCacheKey(imgHash, validationContextHash)).toBe(valKey);
+        expect(valKey).toBe(
+            createHash('sha256')
+                .update(`${imgHash}:${validationContextHash}:${contextPolicyHash()}`)
+                .digest('hex')
+        );
+        expect(computeValidationCacheKey(imgHash, validationContextHash, 'changed-policy'))
+            .not.toBe(valKey);
 
         const context = buildVqaValidationContext(imgHash, [fileA, fileB], ['NumbersWithZero']);
         expect(context.validationCacheKey).toBe(valKey);
+        expect(context.validationPolicyHash).toHaveLength(64);
         expect(context.labelDefinitions).toEqual([{
             iri: 'http://edugraph.io/edu/NumbersWithZero',
             label: 'NumbersWithZero',
@@ -230,3 +239,11 @@ describe('VQA Cache Module', () => {
         expect(existsSync(resolve(datasetCacheDir, 'obsolete.jsonl'))).toBe(false);
     });
 });
+
+function contextPolicyHash(): string {
+    return buildVqaValidationContext(
+        computeImageSha256(Buffer.from('fake-png-bytes')),
+        [],
+        []
+    ).validationPolicyHash;
+}

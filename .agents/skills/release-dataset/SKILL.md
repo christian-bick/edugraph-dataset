@@ -52,7 +52,7 @@ Prevent a release tag from becoming the first full canonical test:
    user-owned process.
 
    ```bash
-   npm run generate:dataset -- --spec=ccss
+   npm run generate:dataset -- --spec=ccss --rebuild-graph
    ```
 
 2. Run the strict, offline cache audit:
@@ -100,8 +100,18 @@ before running:
 npm run validate:dataset -- --spec=ccss
 ```
 
-Use `--force` only when evaluator mechanics require a full reevaluation and the user has
-explicitly approved that larger external operation. After validation:
+Authored model inputs are automatic graph inputs: targets, generator/view specs and schemas,
+generator/view local import and asset closures, accepted ontology semantics, checklists, the
+dedicated evaluator prompt, and canonical environment identities. Build, matching, planning,
+cache, validation, workflow, and unrelated toolchain code are machinery and are deliberately not
+hashed into model identity. The release workflow always rebuilds the complete graph, so never rely
+on a development observation or incremental graph for release admission.
+
+Checklist, ontology-context, image, label, and evaluator-prompt changes create automatic VQA cache
+misses. After a response-schema, pass/fail implementation, evaluator model, or validation-pipeline
+behavior change, run validation with `--rebuild-graph --force`; `--rebuild-graph` reconstructs the
+dependency baseline, while `--force` obtains fresh judgments for otherwise unchanged keys. Obtain
+explicit user consent before that external Gemini operation. After validation:
 
 1. Rerun `audit:dataset` and require exact passing coverage.
 2. Run `report:churn` and explain additions, removals, and changed images.

@@ -3,17 +3,23 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {
     digestIdentity,
-    hashPackageStateWithoutDependency,
-    hashSourceFiles
+    radixSortUtf8,
+    SourceContentIndex
 } from './content-identity.ts';
+import {findLeafModules} from './module-resolver.ts';
+import {
+    getGeneratorProblemTypeFromPath,
+    getViewToProblemTypeMapFromPath
+} from './type-parser.ts';
 import {
     canonicalStandardsIdentity,
     type CanonicalStandardsIdentity
 } from './standards-source.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
+import {ModelSourceIndex} from './model-source-index.ts';
 
-export const COVERAGE_INPUT_SCHEMA_VERSION = 3;
-export const COVERAGE_PRODUCER_EPOCH = 'standards-coverage-v3';
+export const COVERAGE_INPUT_SCHEMA_VERSION = 5;
+export const COVERAGE_PRODUCER_EPOCH = 'standards-coverage-v5';
 
 export interface RepositoryProvenance {
     ref: string;
@@ -53,23 +59,45 @@ export interface CoverageCoreInputIdentity {
     selection: CoverageSelectionIdentity;
 }
 
-const isRuntimeSource = (path: string): boolean =>
-    !path.split(/[\\/]/).includes('node_modules')
-    && !path.endsWith('.test.ts')
-    && !path.endsWith('.test.tsx')
-    && !path.endsWith('.it.test.ts')
-    && !path.endsWith('.it.test.tsx')
-    && !path.endsWith('checklist.md');
+const isTypeScript = (path: string): boolean => path.endsWith('.ts') || path.endsWith('.tsx');
+
+/** Authored capability specs and the local model code they inherently import. */
+function capabilitySourceIdentities(
+    projectRoot: string,
+    sourceIndex: SourceContentIndex
+) {
+    const modelSources = new ModelSourceIndex(projectRoot);
+    const specs = [
+        ...findLeafModules(resolve(projectRoot, 'src', 'generators')),
+        ...findLeafModules(resolve(projectRoot, 'src', 'visuals', 'views'))
+    ].map(module => resolve(module.absolutePath, 'spec.ts'));
+    return sourceIndex.identities(modelSources.dependencies(specs));
+}
 
 export function coverageRepositoryDigest(projectRoot: string): string {
-    const sourceSha256 = hashSourceFiles(projectRoot, [
-        resolve(projectRoot, 'tsconfig.json'),
-        resolve(projectRoot, 'vite.config.js'),
-        resolve(projectRoot, 'src')
-    ], {include: isRuntimeSource});
+    const sourceIndex = new SourceContentIndex(projectRoot);
+    const targets = sourceIndex.identities(
+        [resolve(projectRoot, 'src', 'spec', 'ccss')],
+        {include: isTypeScript}
+    );
+    const capabilities = capabilitySourceIdentities(projectRoot, sourceIndex);
+    const generatorProblemTypes = findLeafModules(resolve(projectRoot, 'src', 'generators'))
+        .map(module => ({
+            generator: module.id,
+            problem_type: getGeneratorProblemTypeFromPath(
+                resolve(module.absolutePath, 'generator.ts')
+            )
+        }));
+    const rawViewProblemTypes = getViewToProblemTypeMapFromPath(
+        resolve(projectRoot, 'src', 'types', 'problems.ts')
+    );
+    const viewProblemTypes = Object.fromEntries(radixSortUtf8(Object.keys(rawViewProblemTypes))
+        .map(viewId => [viewId, rawViewProblemTypes[viewId]]));
     return digestIdentity({
-        source_sha256: sourceSha256,
-        runtime_dependencies_sha256: hashPackageStateWithoutDependency(projectRoot, 'edugraph-ts')
+        targets,
+        capabilities,
+        generator_problem_types: generatorProblemTypes,
+        view_problem_types: viewProblemTypes
     });
 }
 

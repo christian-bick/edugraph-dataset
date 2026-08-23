@@ -80,6 +80,7 @@ npm run merge:dataset
 *   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
 *   `--training-only`: Skip validation set generation to speed up the process.
 *   `--affected`: Resolve and render only exact pairs reached from the persisted dependency delta.
+*   `--rebuild-graph`: Reconstruct the complete dependency baseline; cannot be combined with a scoped generation flag.
 *   `--concurrency=N`: Set the bounded Playwright worker count (default: 8).)*
 
 Scoped generation is transactional and dependency-checked. Before rendering, the persisted graph
@@ -95,7 +96,20 @@ After the first full shard baseline, let the dependency graph select exact chang
 ```bash
 npm run generate:dataset -- --spec=ccss --affected
 ```
-An unchanged plan exits before Chromium. Standard datasets expose a tiny
+The manifest also records a non-authoritative Git-assisted file-to-node ownership index. When every
+candidate authored input is byte-identical, an unchanged development run exits before catalog
+loading, graph reconstruction, canonical container startup, or Chromium. An existing generator or
+view source change patches its recorded nodes, traverses the reverse dependency closure, loads only
+the affected model modules, and reuses persisted matching when their capabilities are unchanged.
+New structure, capability changes, or ambiguous state fall back to a complete linear graph build.
+
+Automatic identity covers authored targets, generator/view specs and schemas, the local imports and
+assets actually reached from generator/view implementations, accepted ontology semantics, view
+checklists, the VQA system prompt, and canonical environment identities. Build, matching,
+validation, cache, and workflow machinery is deliberately outside automatic identity. Such changes
+are reported during affected development; use a full `--rebuild-graph` run when they can change
+behavior. Releases always rebuild the graph. Git commits are discovery baselines, never artifact
+keys. Standard datasets expose a tiny
 `out/dataset-<spec>/current.json` pointer to immutable shards under `out/.dataset-store/`; all
 repository readers consume that logical snapshot.
 
@@ -124,10 +138,10 @@ npm run audit:dataset -- --spec=ccss
 ```
 Live Gemini validation is deliberately separate: generate canonically, then run
 `npm run validate:dataset -- --spec=ccss` on a development machine with
-`GEMINI_API_KEY` configured. Checklist and ontology-context edits invalidate affected
-records automatically. Because evaluator system instructions, response schema, and model
-selection are intentionally outside the validation-context hash, follow changes to those
-mechanics with a full `validate:dataset -- --spec=ccss --force` run.
+`GEMINI_API_KEY` configured. Checklist, ontology-context, and dedicated VQA system-prompt edits
+invalidate affected records automatically. Response-schema, pass/fail implementation, evaluator
+model, and validation-pipeline changes are machinery: rebuild the graph when their behavior changed,
+and add `--force` when unchanged images must actually be re-evaluated by Gemini.
 
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.

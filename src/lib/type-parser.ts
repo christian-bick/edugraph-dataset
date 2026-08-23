@@ -92,6 +92,16 @@ export function getViewToProblemTypeMap(counters?: WorkCounters): Record<string,
     return loadProblemTypeGraph(counters).viewToProblemType;
 }
 
+/** Parses one explicit type source without consulting or mutating the process cache. */
+export function getViewToProblemTypeMapFromPath(
+    problemsPath: string,
+    counters?: WorkCounters
+): Record<string, string> {
+    if (!existsSync(problemsPath)) return {};
+    counters?.add('type.problems_file_reads');
+    return parseProblemTypeGraph(readFileSync(problemsPath, 'utf8')).viewToProblemType;
+}
+
 export function getGeneratorProblemType(
     generatorId: string,
     counters?: WorkCounters

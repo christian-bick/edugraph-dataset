@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { existsSync, lstatSync, readdirSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, relative } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { findLeafModules, LeafModule } from './module-resolver.ts';
 import {
@@ -191,24 +191,46 @@ function camelCase(str: string): string {
 const generatorCatalogCache = new Map<string, readonly GeneratorCatalogEntry[]>();
 const viewCatalogCache = new Map<string, readonly ViewCatalogEntry[]>();
 
+function selectedLeafModules(
+    root: string,
+    entryFiles: ReadonlyMap<string, string> | undefined
+): LeafModule[] {
+    if (!entryFiles) return findLeafModules(root);
+    const byId = new Map(entryFiles);
+    return radixSortUtf8([...byId.keys()]).map(id => {
+        const absolutePath = dirname(resolve(byId.get(id)!));
+        const relativePath = relative(root, absolutePath).replaceAll('\\', '/');
+        const segments = relativePath.split('/');
+        return {
+            id,
+            relativePath,
+            absolutePath,
+            category: segments.length > 1 ? segments[0] : null
+        };
+    });
+}
+
 export async function loadGeneratorCatalog(
     generatorsRoot: string = resolve(PROJECT_ROOT, 'src', 'generators'),
-    counters?: WorkCounters
+    counters?: WorkCounters,
+    entryFiles?: ReadonlyMap<string, string>
 ): Promise<GeneratorCatalogEntry[]> {
     counters?.add('catalog.generator_loads');
     const catalogKey = resolve(generatorsRoot);
-    const cached = generatorCatalogCache.get(catalogKey);
+    const cached = entryFiles ? undefined : generatorCatalogCache.get(catalogKey);
     if (cached) {
         counters?.add('catalog.generator_cache_hits');
         return [...cached];
     }
     const entries: GeneratorCatalogEntry[] = [];
-    const modules = findLeafModules(generatorsRoot);
+    const modules = selectedLeafModules(generatorsRoot, entryFiles);
     counters?.add('catalog.generator_discoveries');
     counters?.add('catalog.generator_modules', modules.length);
     for (const mod of modules) {
         try {
             const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
+            const schemaName = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'GeneratorSchema';
+            const generatorSchema: ConfigSchema = specModule[schemaName] ?? {};
             const className = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'Generator';
             const generatorModule = await import(pathToFileURL(resolve(mod.absolutePath, 'generator.ts')).href);
             const GeneratorClass = generatorModule[className];
@@ -224,7 +246,7 @@ export async function loadGeneratorCatalog(
                 generator,
                 labels: Array.from(new Set([
                     ...(specModule.spec?.generalLabels || []),
-                    ...extractSchemaLabels(generator.schema)
+                    ...extractSchemaLabels(generatorSchema)
                 ])),
                 problemType: getGeneratorProblemTypeFromPath(
                     resolve(mod.absolutePath, 'generator.ts'),
@@ -235,24 +257,25 @@ export async function loadGeneratorCatalog(
             console.warn(`Could not load generator module ${mod.id}:`, e);
         }
     }
-    generatorCatalogCache.set(catalogKey, entries);
+    if (!entryFiles) generatorCatalogCache.set(catalogKey, entries);
     return [...entries];
 }
 
 export async function loadViewCatalog(
     viewsRoot: string = resolve(PROJECT_ROOT, 'src', 'visuals', 'views'),
-    counters?: WorkCounters
+    counters?: WorkCounters,
+    entryFiles?: ReadonlyMap<string, string>
 ): Promise<ViewCatalogEntry[]> {
     counters?.add('catalog.view_loads');
     const catalogKey = resolve(viewsRoot);
-    const cached = viewCatalogCache.get(catalogKey);
+    const cached = entryFiles ? undefined : viewCatalogCache.get(catalogKey);
     if (cached) {
         counters?.add('catalog.view_cache_hits');
         return [...cached];
     }
     const viewToType = getViewToProblemTypeMap(counters);
     const entries: ViewCatalogEntry[] = [];
-    const modules = findLeafModules(viewsRoot);
+    const modules = selectedLeafModules(viewsRoot, entryFiles);
     counters?.add('catalog.view_discoveries');
     counters?.add('catalog.view_modules', modules.length);
     for (const mod of modules) {
@@ -278,7 +301,7 @@ export async function loadViewCatalog(
             console.warn(`Could not load view module ${mod.id}:`, e);
         }
     }
-    viewCatalogCache.set(catalogKey, entries);
+    if (!entryFiles) viewCatalogCache.set(catalogKey, entries);
     return [...entries];
 }
 

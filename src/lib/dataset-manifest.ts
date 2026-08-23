@@ -1,6 +1,6 @@
 import {createHash} from 'node:crypto';
-import {readFileSync, writeFileSync} from 'node:fs';
-import {basename, resolve} from 'node:path';
+import {existsSync, readFileSync, writeFileSync} from 'node:fs';
+import {basename, relative, resolve} from 'node:path';
 import {
     GeneratorCatalogEntry,
     MatchTuple,
@@ -10,11 +10,12 @@ import {
 } from './generation.ts';
 import {
     buildCompatibleModulePairIndex,
+    buildDependencyMatchingIndex,
     generatorCapabilityInputHash,
     generatorCapabilityNodeId,
     matchTargets,
+    matchingPolicyInputHash,
     matchingPolicyNodeId,
-    matchingPolicySourcePaths,
     matchTupleNodeId,
     modulePairKey,
     modulePairNodeId,
@@ -29,8 +30,8 @@ import {partOf, type CompetencyDescriptor} from 'edugraph-ts';
 import {currentRendererEnvironment} from './render-environment.ts';
 import {
     SourceContentIndex,
+    digestFile,
     digestIdentity,
-    hashPackageStateWithoutDependency,
     radixSortUtf8,
     type SourceContentIndexStats
 } from './content-identity.ts';
@@ -54,8 +55,18 @@ import {
 } from './external-semantics.ts';
 import {resolveOntologyProvenance} from './coverage-identity.ts';
 import {createVqaValidationContextResolver} from './vqa-cache.ts';
+import {
+    validationPolicyInputHash,
+    validationPolicySourcePaths
+} from './vqa-policy.ts';
+import type {WorkCounters} from './work-counters.ts';
+import {
+    captureDevelopmentInputObservation,
+    type DevelopmentInputObservation
+} from './development-observation.ts';
+import {ModelSourceIndex} from './model-source-index.ts';
 
-export const DATASET_MANIFEST_SCHEMA_VERSION = 6;
+export const DATASET_MANIFEST_SCHEMA_VERSION = 8;
 const GENERATION_PIPELINE_VERSION = 'unified-dependency-graph-v1';
 
 export interface DatasetManifestEntry {
@@ -83,6 +94,8 @@ export interface DatasetManifest {
     spec: string;
     ontology_dependency: string;
     generated_at: string;
+    /** Non-authoritative Git-assisted shortcut for exact development no-ops. */
+    development_observation?: DevelopmentInputObservation;
     dependency_graph: DependencyGraphSnapshot;
     last_execution: DatasetExecutionPlan;
     entries: Record<string, DatasetManifestEntry>;
@@ -91,6 +104,7 @@ export interface DatasetManifest {
 export interface DatasetManifestBuild {
     entries: Record<string, DatasetManifestEntry>;
     dependency_graph: DependencyGraphSnapshot;
+    development_observation?: DevelopmentInputObservation | null;
     source_stats: Readonly<SourceContentIndexStats>;
     ontology_semantics: {
         trusted: boolean;
@@ -98,6 +112,13 @@ export interface DatasetManifestBuild {
         ontology_entities: number;
         ontology_relations: number;
     };
+}
+
+export interface DatasetObservedSourcePlan {
+    graph: DependencyGraphSnapshot;
+    plan: DependencyDeltaPlan;
+    pairKeys: string[];
+    candidateNodes: string[];
 }
 
 /** Returns the graph-owned VQA cache identity for one structural sample. */
@@ -174,32 +195,6 @@ function ontologyDependency(projectRoot: string): string {
     return packageJson.dependencies?.['edugraph-ts'] ?? 'unknown';
 }
 
-function generatorSharedPaths(projectRoot: string): string[] {
-    return [
-        resolve(projectRoot, 'src', 'generators', 'helpers.ts'),
-        resolve(projectRoot, 'src', 'lib', 'random.ts'),
-        resolve(projectRoot, 'src', 'lib', 'resolvers.ts'),
-        resolve(projectRoot, 'src', 'lib', 'utils.ts'),
-        resolve(projectRoot, 'src', 'types')
-    ];
-}
-
-function viewSharedPaths(projectRoot: string): string[] {
-    return [
-        resolve(projectRoot, 'vite.config.js'),
-        resolve(projectRoot, 'src', 'lib', 'random.ts'),
-        resolve(projectRoot, 'src', 'lib', 'render-environment.ts'),
-        resolve(projectRoot, 'src', 'types'),
-        resolve(projectRoot, 'src', 'visuals', 'components'),
-        resolve(projectRoot, 'src', 'visuals', 'helpers'),
-        resolve(projectRoot, 'src', 'visuals', 'withConfig.tsx'),
-        resolve(projectRoot, 'src', 'partials'),
-        resolve(projectRoot, 'src', 'fonts.css'),
-        resolve(projectRoot, 'src', 'tailwind.css'),
-        resolve(projectRoot, 'public', 'icons')
-    ];
-}
-
 interface OntologySemanticContext {
     ontology: OntologySemanticSnapshot | null;
     trusted: boolean;
@@ -261,45 +256,6 @@ export function datasetOntologySemanticIssues(projectRoot: string): string[] {
     return ontologySemanticContext(projectRoot).diagnostics;
 }
 
-function pairSharedPaths(projectRoot: string): string[] {
-    return [
-        resolve(projectRoot, 'src', 'scripts', 'generate-dataset.ts'),
-        resolve(projectRoot, 'src', 'lib', 'dataset-manifest.ts'),
-        resolve(projectRoot, 'src', 'lib', 'dependency-planner.ts'),
-        resolve(projectRoot, 'src', 'lib', 'dataset-output.ts'),
-        resolve(projectRoot, 'src', 'lib', 'generation.ts'),
-        resolve(projectRoot, 'src', 'lib', 'module-resolver.ts')
-    ];
-}
-
-function generatorSourcePaths(projectRoot: string, generator: GeneratorCatalogEntry): string[] {
-    return [
-        ...generatorSharedPaths(projectRoot),
-        generator.module.absolutePath,
-        resolve(projectRoot, 'src', 'generators', generator.module.category ?? '', 'helpers.ts')
-    ];
-}
-
-function viewSourcePaths(projectRoot: string, view: ViewCatalogEntry): string[] {
-    return [
-        ...viewSharedPaths(projectRoot),
-        view.module.absolutePath,
-        resolve(projectRoot, 'src', 'visuals', 'views', 'helpers.ts'),
-        resolve(projectRoot, 'src', 'visuals', 'views', view.module.category ?? '', 'helpers.ts')
-    ];
-}
-
-export function datasetGlobalSourceHash(
-    projectRoot: string,
-    sourceIndex = new SourceContentIndex(projectRoot)
-): string {
-    return sourceIndex.hash([
-        ...generatorSharedPaths(projectRoot),
-        ...viewSharedPaths(projectRoot),
-        ...pairSharedPaths(projectRoot)
-    ], {include: includeRenderSource});
-}
-
 function readDatasetRows(snapshot: DatasetSnapshot): DatasetManifestRow[] {
     const rows: DatasetManifestRow[] = [];
     for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
@@ -346,6 +302,143 @@ function targetIdsOf(row: DatasetManifestRow): string[] {
     ])]);
 }
 
+/**
+ * Patches recorded authored source bytes without reconstructing catalogs. It
+ * is safe only for files already owned by the persisted model graph; semantic
+ * capability changes are checked after loading the selected modules.
+ */
+export function planObservedDatasetSourceDelta(options: {
+    projectRoot: string;
+    previous: DatasetManifest;
+    changedFiles: readonly string[];
+    candidateNodes: readonly string[];
+}): DatasetObservedSourcePlan | null {
+    if (options.changedFiles.length === 0 || options.candidateNodes.length === 0) return null;
+    const nodes = new Map(Object.entries(options.previous.dependency_graph.nodes));
+    let patched = 0;
+    for (const rawPath of options.changedFiles) {
+        const path = rawPath.replaceAll('\\', '/');
+        const id = nodeId('source', path);
+        const previous = nodes.get(id);
+        // Mixed owned/unowned deltas must take the complete planner path; a
+        // partial patch may never conceal a simultaneous target/structure edit.
+        if (!previous || previous.kind !== 'source-file') return null;
+        const absolutePath = resolve(options.projectRoot, path);
+        const digest = existsSync(absolutePath)
+            ? digestFile(absolutePath)
+            : {sha256: digestIdentity({missing: path}), bytes: 0};
+        nodes.set(id, {
+            ...previous,
+            input_hash: digest.sha256,
+            output: {content_hash: digest.sha256, bytes: digest.bytes}
+        });
+        patched++;
+    }
+    if (patched === 0 || patched !== options.changedFiles.length) return null;
+    const graph = createDependencyGraphSnapshot(
+        [...nodes.values()],
+        DEPENDENCY_PLANNER_EPOCH,
+        options.previous.dependency_graph.matching_index
+    );
+    const plan = planDependencyDelta(options.previous.dependency_graph, graph);
+    const build: DatasetManifestBuild = {
+        entries: options.previous.entries,
+        dependency_graph: graph,
+        source_stats: {directories_read: 0, files_read: patched, bytes_read: 0},
+        ontology_semantics: {
+            trusted: true,
+            diagnostics: [],
+            ontology_entities: 0,
+            ontology_relations: 0
+        }
+    };
+    return {
+        graph,
+        plan,
+        pairKeys: affectedDatasetPairKeys(plan, build, options.previous),
+        candidateNodes: radixSortUtf8([...new Set(options.candidateNodes)])
+    };
+}
+
+/**
+ * Replaces only selected pair subgraphs after an observed authored-source
+ * delta. Matching postings remain authoritative because callers admit this
+ * path only after selected capability identities compare equal.
+ */
+export function mergeObservedDatasetBuild(options: {
+    projectRoot: string;
+    specName: string;
+    previous: DatasetManifest;
+    partial: DatasetManifestBuild;
+    pairKeys: readonly string[];
+    sourceIndex?: SourceContentIndex;
+}): DatasetManifestBuild {
+    const sourceIndex = options.sourceIndex ?? new SourceContentIndex(options.projectRoot);
+    const selected = new Set(options.pairKeys);
+    const oldOwned = new Set<string>();
+    const oldImages = new Set<string>();
+    for (const key of selected) {
+        for (const id of options.previous.entries[key]?.execution_nodes ?? []) {
+            oldOwned.add(id);
+            if (id.startsWith('image:')) oldImages.add(id);
+        }
+    }
+    const nodes = new Map(Object.entries(options.previous.dependency_graph.nodes));
+    for (const id of oldOwned) nodes.delete(id);
+
+    const partialSpecial: DependencyNode[] = [];
+    for (const node of Object.values(options.partial.dependency_graph.nodes)) {
+        if (node.kind === 'asset-index-record' || node.kind === 'coverage-record') {
+            partialSpecial.push(node);
+            continue;
+        }
+        nodes.set(node.id, node);
+    }
+    for (const node of partialSpecial) {
+        const previous = options.previous.dependency_graph.nodes[node.id];
+        const retainedDependencies = previous?.dependencies.filter(dependency =>
+            node.kind === 'coverage-record' || !oldImages.has(dependency)) ?? [];
+        nodes.set(node.id, {
+            ...node,
+            dependencies: radixSortUtf8([...new Set([...retainedDependencies, ...node.dependencies])])
+        });
+    }
+
+    const referenced = new Set<string>();
+    for (const node of nodes.values()) {
+        for (const dependency of node.dependencies) referenced.add(dependency);
+    }
+    for (const [id, node] of nodes) {
+        if (node.kind === 'source-file' && !referenced.has(id)) nodes.delete(id);
+    }
+
+    const graph = createDependencyGraphSnapshot(
+        [...nodes.values()],
+        DEPENDENCY_PLANNER_EPOCH,
+        options.previous.dependency_graph.matching_index
+    );
+    const entries = {...options.previous.entries};
+    for (const key of selected) {
+        const entry = options.partial.entries[key];
+        if (entry) entries[key] = entry;
+        else delete entries[key];
+    }
+    return {
+        entries,
+        dependency_graph: graph,
+        development_observation: captureDevelopmentInputObservation({
+            projectRoot: options.projectRoot,
+            specName: options.specName,
+            graph,
+            sourceIndex,
+            rendererEnvironment: currentRendererEnvironment(),
+            entryFilesByNode: options.previous.development_observation?.entry_files_by_node
+        }),
+        source_stats: sourceIndex.stats(),
+        ontology_semantics: options.partial.ontology_semantics
+    };
+}
+
 export function buildDatasetManifest(options: {
     projectRoot: string;
     datasetDir: string;
@@ -359,6 +452,8 @@ export function buildDatasetManifest(options: {
     pairIndex?: CompatibleModulePairIndex;
     sourceIndex?: SourceContentIndex;
     reuseImageIdentityFrom?: DependencyGraphSnapshot;
+    reuseValidationIdentityFrom?: DependencyGraphSnapshot;
+    counters?: WorkCounters;
     datasetSnapshot?: DatasetSnapshot;
     semanticSnapshots?: {
         ontology?: OntologySemanticSnapshot | null;
@@ -377,6 +472,8 @@ export function buildDatasetManifest(options: {
         pairIndex: preparedPairIndex,
         sourceIndex = new SourceContentIndex(projectRoot),
         reuseImageIdentityFrom,
+        reuseValidationIdentityFrom,
+        counters,
         datasetSnapshot = readDatasetSnapshot(datasetDir),
         semanticSnapshots
     } = options;
@@ -393,6 +490,7 @@ export function buildDatasetManifest(options: {
     const ontologyIndex = ontologySemantics.ontology
         ? new OntologySemanticIndex(ontologySemantics.ontology)
         : null;
+    const modelSourceIndex = new ModelSourceIndex(projectRoot);
     const nodes = new Map<string, DependencyNode>();
     const rows = readDatasetRows(datasetSnapshot);
     const rowsByPair = new Map<string, DatasetManifestRow[]>();
@@ -527,33 +625,35 @@ export function buildDatasetManifest(options: {
         });
     }
 
-    const matchingSources = sourceDependencies(
-        nodes,
-        sourceIndex,
-        matchingPolicySourcePaths(projectRoot)
-    );
     addNode(nodes, {
         id: matchingPolicyNodeId(),
         kind: 'matching-policy',
-        input_hash: matchingSources.hash,
-        dependencies: matchingSources.ids
+        input_hash: matchingPolicyInputHash(),
+        dependencies: []
     });
 
-    const pairPipeline = sourceDependencies(nodes, sourceIndex, pairSharedPaths(projectRoot));
-    const runtimeDependenciesHash = hashPackageStateWithoutDependency(projectRoot, 'edugraph-ts');
-    const runtimeDependenciesId = nodeId('source', 'runtime-dependencies-without-ontology');
+    const validationPolicySources = sourceDependencies(
+        nodes,
+        sourceIndex,
+        validationPolicySourcePaths(projectRoot)
+    );
+    const validationPolicyHash = validationPolicyInputHash(projectRoot, sourceIndex);
+    const validationPolicyId = nodeId('validation-policy', 'vqa');
     addNode(nodes, {
-        id: runtimeDependenciesId,
-        kind: 'source-file',
-        input_hash: runtimeDependenciesHash,
-        dependencies: [],
-        output: {content_hash: runtimeDependenciesHash}
+        id: validationPolicyId,
+        kind: 'validation-policy',
+        input_hash: validationPolicyHash,
+        dependencies: validationPolicySources.ids
     });
+
     const generatorHashes = new Map<string, string>();
     const generatorNodeIds = new Map<string, string>();
     const generatorCapabilityNodeIds = new Map<string, string>();
     for (const generator of generators) {
-        const sources = sourceDependencies(nodes, sourceIndex, generatorSourcePaths(projectRoot, generator));
+        const sources = sourceDependencies(nodes, sourceIndex, modelSourceIndex.dependencies([
+            resolve(generator.module.absolutePath, 'generator.ts'),
+            resolve(generator.module.absolutePath, 'spec.ts')
+        ]));
         const id = nodeId('generator', generator.generatorId);
         const capabilityId = generatorCapabilityNodeId(generator.generatorId);
         generatorHashes.set(generator.generatorId, sources.hash);
@@ -571,7 +671,6 @@ export function buildDatasetManifest(options: {
             input_hash: digestIdentity({id: generator.generatorId}),
             dependencies: [
                 capabilityId,
-                runtimeDependenciesId,
                 ...sources.ids
             ]
         });
@@ -581,7 +680,10 @@ export function buildDatasetManifest(options: {
     const viewCapabilityNodeIds = new Map<string, string>();
     const checklistDependencies = new Map<string, {ids: string[]; paths: string[]}>();
     for (const view of views) {
-        const sources = sourceDependencies(nodes, sourceIndex, viewSourcePaths(projectRoot, view));
+        const sources = sourceDependencies(nodes, sourceIndex, modelSourceIndex.dependencies([
+            resolve(view.module.absolutePath, 'view.tsx'),
+            resolve(view.module.absolutePath, 'spec.ts')
+        ]));
         const id = nodeId('view', view.viewId);
         const capabilityId = viewCapabilityNodeId(view.viewId);
         viewHashes.set(view.viewId, sources.hash);
@@ -603,7 +705,7 @@ export function buildDatasetManifest(options: {
             id,
             kind: 'view-module',
             input_hash: digestIdentity({id: view.viewId}),
-            dependencies: [capabilityId, runtimeDependenciesId, ...sources.ids]
+            dependencies: [capabilityId, ...sources.ids]
         });
         const checklistPaths = [
             resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'),
@@ -665,7 +767,10 @@ export function buildDatasetManifest(options: {
     const renderNodesByPair = new Map<string, Set<string>>();
     const validationNodesByPair = new Map<string, Set<string>>();
     const imageNodesByTarget = new Map<string, string[]>();
-    const vqaContextResolver = createVqaValidationContextResolver();
+    const vqaContextResolver = createVqaValidationContextResolver(
+        counters,
+        validationPolicyHash
+    );
     for (const key of radixSortUtf8([...targetsByPair.keys()])) {
         const [generatorId, viewId] = key.split('#');
         const generator = generatorById.get(generatorId);
@@ -687,7 +792,6 @@ export function buildDatasetManifest(options: {
             dependencies: [
                 generatorNodeIds.get(generatorId)!,
                 viewNodeIds.get(viewId)!,
-                ...pairPipeline.ids,
                 ...pairMatchNodeIds
             ]
         });
@@ -715,8 +819,6 @@ export function buildDatasetManifest(options: {
             input_hash: hash(JSON.stringify({
                 pipeline: GENERATION_PIPELINE_VERSION,
                 renderer: rendererEnvironment,
-                runtime_dependencies: runtimeDependenciesHash,
-                pair_pipeline: pairPipeline.hash,
                 generator: generatorHashes.get(generatorId),
                 view: viewHashes.get(viewId),
                 targets: targetSignature
@@ -762,21 +864,42 @@ export function buildDatasetManifest(options: {
         const labelDependencies = ontologyDependencies(row.tags ?? [], true);
         const checklist = checklistDependencies.get(row.view);
         if (!checklist) throw new Error(`VQA checklist dependencies are missing for view ${row.view}.`);
-        const validationContext = vqaContextResolver.resolve(
-            imageDigest.sha256,
-            checklist.paths,
-            row.tags ?? []
-        );
         const vqaId = nodeId('vqa', row.sample_key);
+        const vqaDependencies = radixSortUtf8([
+            imageId,
+            validationPolicyId,
+            ...checklist.ids,
+            ...labelDependencies
+        ]);
+        const reusableVqa = reuseValidationIdentityFrom?.nodes[vqaId];
+        const reusableDependencies = reusableVqa?.dependencies ?? [];
+        const canReuseVqaKey = reusableVqa?.kind === 'vqa-record'
+            && reusableDependencies.length === vqaDependencies.length
+            && reusableDependencies.every((dependency, index) => dependency === vqaDependencies[index])
+            && vqaDependencies.every(dependency => {
+                const current = nodes.get(dependency);
+                const previous = reuseValidationIdentityFrom?.nodes[dependency];
+                return current !== undefined
+                    && previous !== undefined
+                    && current.kind === previous.kind
+                    && current.input_hash === previous.input_hash
+                    && JSON.stringify(radixSortUtf8([...current.dependencies]))
+                        === JSON.stringify(previous.dependencies)
+                    && current.output?.content_hash === previous.output?.content_hash;
+            });
+        const validationCacheKey = canReuseVqaKey
+            ? reusableVqa.input_hash
+            : vqaContextResolver.resolve(
+                imageDigest.sha256,
+                checklist.paths,
+                row.tags ?? []
+            ).validationCacheKey;
+        counters?.add(canReuseVqaKey ? 'vqa.graph_key_reuses' : 'vqa.graph_key_recomputes');
         addNode(nodes, {
             id: vqaId,
             kind: 'vqa-record',
-            input_hash: validationContext.validationCacheKey,
-            dependencies: [
-                imageId,
-                ...checklist.ids,
-                ...labelDependencies
-            ]
+            input_hash: validationCacheKey,
+            dependencies: vqaDependencies
         });
         executionNodes.add(imageId);
         executionNodes.add(vqaId);
@@ -841,9 +964,33 @@ export function buildDatasetManifest(options: {
         entry.render_nodes = radixSortUtf8([...(renderNodesByPair.get(key) ?? [])]);
         entry.validation_nodes = radixSortUtf8([...(validationNodesByPair.get(key) ?? [])]);
     }
+    const dependencyGraph = createDependencyGraphSnapshot(
+        [...nodes.values()],
+        DEPENDENCY_PLANNER_EPOCH,
+        buildDependencyMatchingIndex(targets, tuples)
+    );
     return {
         entries,
-        dependency_graph: createDependencyGraphSnapshot([...nodes.values()]),
+        dependency_graph: dependencyGraph,
+        development_observation: captureDevelopmentInputObservation({
+            projectRoot,
+            specName,
+            graph: dependencyGraph,
+            sourceIndex,
+            rendererEnvironment,
+            entryFilesByNode: Object.fromEntries([
+                ...generators.map(generator => [
+                    nodeId('generator', generator.generatorId),
+                    relative(projectRoot, resolve(generator.module.absolutePath, 'generator.ts'))
+                        .replaceAll('\\', '/')
+                ]),
+                ...views.map(view => [
+                    nodeId('view', view.viewId),
+                    relative(projectRoot, resolve(view.module.absolutePath, 'view.tsx'))
+                        .replaceAll('\\', '/')
+                ])
+            ])
+        }),
         source_stats: sourceIndex.stats(),
         ontology_semantics: {
             trusted: ontologySemantics.trusted,
@@ -906,6 +1053,9 @@ export function createDatasetManifest(options: {
         spec: specName,
         ontology_dependency: ontologyDependency(projectRoot),
         generated_at: new Date().toISOString(),
+        ...(build.development_observation
+            ? {development_observation: build.development_observation}
+            : {}),
         dependency_graph: build.dependency_graph,
         last_execution: executionPlan(plan),
         entries: Object.fromEntries(radixSortUtf8(Object.keys(build.entries))

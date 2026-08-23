@@ -5,7 +5,6 @@ import {describe, expect, it} from 'vitest';
 import {
     SourceContentIndex,
     digestContent,
-    hashPackageStateWithoutDependency,
     hashSourceFiles,
     radixSortUtf8
 } from './content-identity.ts';
@@ -73,32 +72,6 @@ describe('content identity', () => {
                 files_read: 2,
                 bytes_read: 6
             });
-        } finally {
-            rmSync(root, {recursive: true, force: true});
-        }
-    });
-
-    it('separates one semantic package from the shared runtime dependency identity', () => {
-        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-package-identity-'));
-        const writePackages = (ontology: string, renderer: string): void => {
-            writeFileSync(resolve(root, 'package.json'), JSON.stringify({
-                dependencies: {'edugraph-ts': ontology, renderer}
-            }));
-            writeFileSync(resolve(root, 'package-lock.json'), JSON.stringify({
-                lockfileVersion: 3,
-                packages: {
-                    'node_modules/edugraph-ts': {version: ontology},
-                    'node_modules/renderer': {version: renderer}
-                }
-            }));
-        };
-        try {
-            writePackages('v1', 'v1');
-            const initial = hashPackageStateWithoutDependency(root, 'edugraph-ts');
-            writePackages('v2', 'v1');
-            expect(hashPackageStateWithoutDependency(root, 'edugraph-ts')).toBe(initial);
-            writePackages('v2', 'v2');
-            expect(hashPackageStateWithoutDependency(root, 'edugraph-ts')).not.toBe(initial);
         } finally {
             rmSync(root, {recursive: true, force: true});
         }

@@ -34,6 +34,10 @@ export function normalizedGenerationArgs(
         const trainingOnly = env.npm_config_training_only;
         if (trainingOnly === '' || trainingOnly === 'true') normalized.push('--training-only');
     }
+    if (!normalized.includes('--rebuild-graph')) {
+        const rebuildGraph = env.npm_config_rebuild_graph;
+        if (rebuildGraph === '' || rebuildGraph === 'true') normalized.push('--rebuild-graph');
+    }
     return normalized;
 }
 
@@ -66,6 +70,8 @@ export function containerGenerationDockerArgs(options: ContainerGenerationOption
         '--workdir', '/workspace',
         '--env', `${RENDERER_ENVIRONMENT_VARIABLE}=${CANONICAL_RENDERER_ID}`,
         '--env', `${RENDERER_PORT_VARIABLE}=${CANONICAL_RENDERER_PORT}`,
+        '--env', 'GIT_DIR=/host-workspace/.git',
+        '--env', 'GIT_WORK_TREE=/workspace',
         '--env', 'CI=true',
         '--env', 'TZ=UTC',
         '--env', 'LANG=C.UTF-8'

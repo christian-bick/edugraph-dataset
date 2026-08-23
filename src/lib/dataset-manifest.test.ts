@@ -9,10 +9,11 @@ import {
     affectedDatasetPairKeys,
     buildDatasetManifest,
     dependencyGraphVqaCacheKey,
-    datasetGlobalSourceHash,
     datasetFreshnessIssues,
     datasetOntologySemanticIssues,
     datasetRendererIssues,
+    mergeObservedDatasetBuild,
+    planObservedDatasetSourceDelta,
     updateDatasetManifest
 } from './dataset-manifest.ts';
 import { currentRendererEnvironment } from './render-environment.ts';
@@ -25,6 +26,7 @@ import {
 import {buildOntologySemanticSnapshot} from './external-semantics.ts';
 import type {OntologyProvenance} from './coverage-identity.ts';
 import {buildVqaValidationContext} from './vqa-cache.ts';
+import {createWorkCounters} from './work-counters.ts';
 
 const dependencyGraph = createDependencyGraphSnapshot([]);
 const cleanPlan = planDependencyDelta(null, dependencyGraph);
@@ -171,35 +173,144 @@ describe('datasetRendererIssues', () => {
     });
 });
 
-describe('datasetGlobalSourceHash', () => {
-    it('ignores generated public outputs but retains renderer assets', () => {
-        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-render-inputs-'));
-        mkdirSync(resolve(projectRoot, 'public', 'coverage'), {recursive: true});
-        mkdirSync(resolve(projectRoot, 'public', 'icons'), {recursive: true});
-        writeFileSync(resolve(projectRoot, 'vite.config.js'), 'export default {base: "/"};');
-        writeFileSync(resolve(projectRoot, 'public', 'coverage', 'ccss-coverage.json'), 'first');
-        writeFileSync(resolve(projectRoot, 'public', 'favicon.png'), 'first');
-        writeFileSync(resolve(projectRoot, 'public', 'icons', 'counter.svg'), 'first');
+describe('updateDatasetManifest', () => {
+    it('plans an exact pair from a persisted authored-source ownership edge', () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-observed-plan-'));
+        const sourcePath = resolve(projectRoot, 'src', 'generators', 'demo', 'generator.ts');
+        mkdirSync(resolve(sourcePath, '..'), {recursive: true});
+        writeFileSync(sourcePath, 'export const version = 2;\n');
+        const previousGraph = createDependencyGraphSnapshot([
+            {
+                id: 'source:src/generators/demo/generator.ts',
+                kind: 'source-file',
+                input_hash: 'before',
+                dependencies: [],
+                output: {content_hash: 'before', bytes: 26}
+            },
+            {
+                id: 'generator:demo',
+                kind: 'generator-module',
+                input_hash: 'demo',
+                dependencies: ['source:src/generators/demo/generator.ts']
+            },
+            {
+                id: 'pair:demo#view',
+                kind: 'generation-pair',
+                input_hash: 'pair',
+                dependencies: ['generator:demo']
+            }
+        ]);
+        const pairEntry: DatasetManifestEntry = {
+            ...entry,
+            generator: 'demo',
+            view: 'view',
+            execution_nodes: ['pair:demo#view'],
+            render_nodes: ['pair:demo#view']
+        };
 
         try {
-            const initial = datasetGlobalSourceHash(projectRoot);
-            writeFileSync(resolve(projectRoot, 'public', 'coverage', 'ccss-coverage.json'), 'changed');
-            writeFileSync(resolve(projectRoot, 'public', 'favicon.png'), 'changed');
-            expect(datasetGlobalSourceHash(projectRoot)).toBe(initial);
+            const result = planObservedDatasetSourceDelta({
+                projectRoot,
+                previous: manifest({
+                    dependency_graph: previousGraph,
+                    entries: {'demo#view': pairEntry}
+                }),
+                changedFiles: ['src/generators/demo/generator.ts'],
+                candidateNodes: ['generator:demo']
+            });
 
-            writeFileSync(resolve(projectRoot, 'vite.config.js'), 'export default {base: "/changed"};');
-            expect(datasetGlobalSourceHash(projectRoot)).not.toBe(initial);
-
-            const changedConfig = datasetGlobalSourceHash(projectRoot);
-            writeFileSync(resolve(projectRoot, 'public', 'icons', 'counter.svg'), 'changed');
-            expect(datasetGlobalSourceHash(projectRoot)).not.toBe(changedConfig);
+            expect(result?.pairKeys).toEqual(['demo#view']);
+            expect(result?.plan.changed_roots).toEqual([
+                'source:src/generators/demo/generator.ts'
+            ]);
+            expect(result?.plan.affected_nodes).toContain('pair:demo#view');
+            expect(planObservedDatasetSourceDelta({
+                projectRoot,
+                previous: manifest({
+                    dependency_graph: previousGraph,
+                    entries: {'demo#view': pairEntry}
+                }),
+                changedFiles: [
+                    'src/generators/demo/generator.ts',
+                    'src/spec/ccss/targets.ts'
+                ],
+                candidateNodes: ['generator:demo']
+            })).toBeNull();
         } finally {
             rmSync(projectRoot, {recursive: true, force: true});
         }
     });
-});
 
-describe('updateDatasetManifest', () => {
+    it('merges a rebuilt pair subgraph without replacing unrelated entries', () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-observed-merge-'));
+        const previousGraph = createDependencyGraphSnapshot([
+            {id: 'pair:demo#view', kind: 'generation-pair', input_hash: 'old', dependencies: []},
+            {id: 'image:demo-sample', kind: 'image', input_hash: 'old', dependencies: ['pair:demo#view']},
+            {id: 'pair:other#view', kind: 'generation-pair', input_hash: 'other', dependencies: []},
+            {id: 'image:other-sample', kind: 'image', input_hash: 'other', dependencies: ['pair:other#view']},
+            {
+                id: 'asset-index:ccss:target',
+                kind: 'asset-index-record',
+                input_hash: 'asset',
+                dependencies: ['image:demo-sample', 'image:other-sample']
+            }
+        ], undefined, {
+            target_ids_by_label: {},
+            targets_without_ontology_labels: [],
+            matched_pair_keys_by_target: {target: ['demo#view', 'other#view']}
+        });
+        const partialGraph = createDependencyGraphSnapshot([
+            {id: 'pair:demo#view', kind: 'generation-pair', input_hash: 'new', dependencies: []},
+            {id: 'image:demo-sample', kind: 'image', input_hash: 'new', dependencies: ['pair:demo#view']},
+            {
+                id: 'asset-index:ccss:target',
+                kind: 'asset-index-record',
+                input_hash: 'asset',
+                dependencies: ['image:demo-sample']
+            }
+        ]);
+        const demoEntry: DatasetManifestEntry = {
+            ...entry,
+            generator: 'demo',
+            view: 'view',
+            execution_nodes: ['pair:demo#view', 'image:demo-sample'],
+            render_nodes: ['pair:demo#view', 'image:demo-sample']
+        };
+        const otherEntry: DatasetManifestEntry = {
+            ...entry,
+            generator: 'other',
+            view: 'view',
+            execution_nodes: ['pair:other#view', 'image:other-sample'],
+            render_nodes: ['pair:other#view', 'image:other-sample']
+        };
+
+        try {
+            const result = mergeObservedDatasetBuild({
+                projectRoot,
+                specName: 'ccss',
+                previous: manifest({
+                    dependency_graph: previousGraph,
+                    entries: {'demo#view': demoEntry, 'other#view': otherEntry}
+                }),
+                partial: build({
+                    'demo#view': {...demoEntry, input_hash: 'new'}
+                }, partialGraph),
+                pairKeys: ['demo#view']
+            });
+
+            expect(result.entries['demo#view'].input_hash).toBe('new');
+            expect(result.entries['other#view']).toEqual(otherEntry);
+            expect(result.dependency_graph.nodes['pair:demo#view'].input_hash).toBe('new');
+            expect(result.dependency_graph.nodes['pair:other#view'].input_hash).toBe('other');
+            expect(result.dependency_graph.nodes['asset-index:ccss:target'].dependencies)
+                .toEqual(['image:demo-sample', 'image:other-sample']);
+            expect(result.dependency_graph.matching_index)
+                .toEqual(previousGraph.matching_index);
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
+    });
+
     it('does not schedule pixel generation for a validation-only ontology definition delta', () => {
         const graph = (definitionHash: string) => createDependencyGraphSnapshot([
             {id: 'ontology:Addition', kind: 'ontology-entity', input_hash: 'identity', dependencies: []},
@@ -392,12 +503,19 @@ describe('buildDatasetManifest', () => {
         mkdirSync(resolve(datasetDir, 'train', 'demo'), {recursive: true});
         mkdirSync(generatorDir, {recursive: true});
         mkdirSync(viewDir, {recursive: true});
+        mkdirSync(resolve(projectRoot, 'src', 'validation', 'vqa'), {recursive: true});
+        mkdirSync(resolve(projectRoot, 'src', 'lib'), {recursive: true});
         writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
             dependencies: {'edugraph-ts': 'ontology-v1'}
         }));
         writeFileSync(resolve(generatorDir, 'spec.ts'), 'generator-source');
         writeFileSync(resolve(viewDir, 'spec.ts'), 'view-source');
         writeFileSync(resolve(viewDir, 'checklist.md'), 'leaf-checklist');
+        writeFileSync(
+            resolve(projectRoot, 'src', 'validation', 'vqa', 'system-instruction.md'),
+            'validation policy'
+        );
+        writeFileSync(resolve(projectRoot, 'src', 'lib', 'vqa-policy.ts'), 'policy code');
         mkdirSync(resolve(projectRoot, 'src', 'visuals', 'views'), {recursive: true});
         writeFileSync(resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'), 'root-checklist');
         const imageName = 'demo/sample.png';
@@ -497,15 +615,36 @@ describe('buildDatasetManifest', () => {
                     resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'),
                     resolve(viewDir, 'checklist.md')
                 ],
-                target.labels
+                target.labels,
+                result.dependency_graph.nodes['validation-policy:vqa'].input_hash
             ).validationCacheKey;
             expect(dependencyGraphVqaCacheKey(result.dependency_graph, sampleKey))
                 .toBe(expectedVqaKey);
             expect(vqaNode.dependencies).toEqual(expect.arrayContaining([
                 `image:${sampleKey}`,
+                'validation-policy:vqa',
                 'ontology-definition:Addition',
                 'ontology-definition:ProcedureExecution'
             ]));
+
+            const reuseCounters = createWorkCounters();
+            const reused = buildDatasetManifest({
+                projectRoot,
+                datasetDir,
+                specName: 'ccss',
+                targets: [target],
+                generators: [generator],
+                views: [view],
+                generatedSplits: ['train'],
+                rendererEnvironment: 'canonical',
+                tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}],
+                reuseValidationIdentityFrom: result.dependency_graph,
+                counters: reuseCounters
+            });
+            expect(dependencyGraphVqaCacheKey(reused.dependency_graph, sampleKey))
+                .toBe(expectedVqaKey);
+            expect(reuseCounters.get('vqa.graph_key_reuses')).toBe(1);
+            expect(reuseCounters.get('vqa.validation_contexts')).toBe(0);
 
             writeFileSync(resolve(viewDir, 'checklist.md'), 'changed-leaf-checklist');
             const changed = buildDatasetManifest({
@@ -527,6 +666,30 @@ describe('buildDatasetManifest', () => {
             expect(checklistPlan.affected_nodes).not.toContain(`image:${sampleKey}`);
             expect(dependencyGraphVqaCacheKey(changed.dependency_graph, sampleKey))
                 .not.toBe(expectedVqaKey);
+
+            writeFileSync(
+                resolve(projectRoot, 'src', 'validation', 'vqa', 'system-instruction.md'),
+                'changed validation policy'
+            );
+            const changedPolicy = buildDatasetManifest({
+                projectRoot,
+                datasetDir,
+                specName: 'ccss',
+                targets: [target],
+                generators: [generator],
+                views: [view],
+                generatedSplits: ['train'],
+                rendererEnvironment: 'canonical',
+                tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}]
+            });
+            const policyPlan = planDependencyDelta(
+                changed.dependency_graph,
+                changedPolicy.dependency_graph
+            );
+            expect(policyPlan.affected_nodes).toContain(`vqa:${sampleKey}`);
+            expect(policyPlan.affected_nodes).not.toContain(`image:${sampleKey}`);
+            expect(dependencyGraphVqaCacheKey(changedPolicy.dependency_graph, sampleKey))
+                .not.toBe(dependencyGraphVqaCacheKey(changed.dependency_graph, sampleKey));
         } finally {
             rmSync(projectRoot, {recursive: true, force: true});
         }

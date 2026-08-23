@@ -2,6 +2,8 @@ import {describe, expect, it} from 'vitest';
 import {Ability, Area} from 'edugraph-ts';
 import {
     buildCompatibleModulePairIndex,
+    buildDependencyMatchingIndex,
+    buildTargetCapabilityPostingIndex,
     generatorCapabilityInputHash,
     matchTargets,
     matchTargetsDelta,
@@ -122,7 +124,11 @@ function matchingGraph(options: {
             modulePairNodeId(tuple.generatorId, tuple.viewId)
         ]
     });
-    return createDependencyGraphSnapshot(nodes);
+    return createDependencyGraphSnapshot(
+        nodes,
+        undefined,
+        buildDependencyMatchingIndex(options.targets, tuples)
+    );
 }
 
 function delta(options: {
@@ -198,8 +204,12 @@ describe('delta target matching', () => {
 
     it('reevaluates a changed pair and discovers newly possible matches', () => {
         const originalViews = views();
+        const currentTargets = [
+            ...targets(),
+            {id: 'unrelated', labels: [Area.CollectionSense]}
+        ];
         const previousGraph = matchingGraph({
-            targets: targets(), generators: generators(), views: originalViews
+            targets: currentTargets, generators: generators(), views: originalViews
         });
         const currentViews = [
             originalViews[0],
@@ -211,8 +221,8 @@ describe('delta target matching', () => {
                 ]
             }
         ];
-        const result = delta({currentViews, previousGraph});
-        const full = matchTargets(targets(), generators(), currentViews);
+        const result = delta({currentTargets, currentViews, previousGraph});
+        const full = matchTargets(currentTargets, generators(), currentViews);
 
         expect(tupleIds(result.tuples)).toEqual(tupleIds(full.tuples));
         expect(tupleIds(result.tuples)).toContain(
@@ -291,5 +301,39 @@ describe('delta target matching', () => {
 
         expect(work(32)).toEqual({evaluatedTargets: 32, capabilityChecks: 32});
         expect(work(64)).toEqual({evaluatedTargets: 64, capabilityChecks: 64});
+    });
+
+    it('uses target-side postings to skip targets unrelated to a changed pair', () => {
+        const relevant = targets()[0];
+        const unrelated = Array.from({length: 64}, (_, index) => ({
+            id: `unrelated-${index}`,
+            labels: [Area.CollectionSense]
+        }));
+        const currentTargets = [relevant, ...unrelated];
+        const originalViews = views();
+        const previousGraph = matchingGraph({
+            targets: currentTargets,
+            generators: generators(),
+            views: originalViews
+        });
+        const currentViews = [
+            originalViews[0],
+            {...originalViews[1], supportedLabels: [Ability.ProcedureExecution]}
+        ];
+        const counters = createWorkCounters();
+        const result = matchTargetsDelta({
+            targets: currentTargets,
+            generatorCatalog: generators(),
+            viewCatalog: currentViews,
+            specName: SPEC,
+            policyHash: POLICY,
+            previousGraph,
+            targetIndex: buildTargetCapabilityPostingIndex(currentTargets, counters),
+            counters
+        });
+
+        expect(result.evaluatedTargets).toBe(1);
+        expect(counters.get('match.capability_checks')).toBe(1);
+        expect(counters.get('match.delta_pair_candidate_targets')).toBe(1);
     });
 });

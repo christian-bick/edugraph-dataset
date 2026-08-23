@@ -28,8 +28,14 @@ import {
 } from '../lib/generation.ts';
 import {
     buildCompatibleModulePairIndex,
+    generatorCapabilityInputHash,
+    generatorCapabilityNodeId,
     matchingPolicyInputHash,
-    matchTargetsDelta
+    matchTargetsDelta,
+    modulePairKey,
+    subsetCompatibleModulePairIndex,
+    viewCapabilityInputHash,
+    viewCapabilityNodeId
 } from '../lib/matching.ts';
 import {createWorkCounters} from '../lib/work-counters.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
@@ -45,13 +51,25 @@ import {
     affectedDatasetPairKeys,
     buildDatasetManifest,
     createDatasetManifest,
+    DATASET_MANIFEST_SCHEMA_VERSION,
     datasetOntologySemanticIssues,
+    mergeObservedDatasetBuild,
+    planObservedDatasetSourceDelta,
     readDatasetManifest,
     type ManifestUpdateScope,
 } from '../lib/dataset-manifest.ts';
-import {radixSortUtf8, SourceContentIndex} from '../lib/content-identity.ts';
+import {
+    radixSortUtf8,
+    SourceContentIndex
+} from '../lib/content-identity.ts';
 import {beginDatasetStoreTransaction} from '../lib/dataset-store.ts';
 import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
+import {currentRendererEnvironment} from '../lib/render-environment.ts';
+import {
+    inspectDevelopmentInputObservation,
+    summarizeManualRebuildFiles
+} from '../lib/development-observation.ts';
+import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -623,13 +641,27 @@ async function main() {
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('Error: The --spec parameter is required.');
-        console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--affected] [--training-only]');
+        console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--affected] [--rebuild-graph] [--training-only]');
         console.error('Example: npm run generate:dataset -- --spec=test');
         console.error('Example: npm run generate:dataset -- --spec=ccss');
         process.exit(1);
     }
 
     const outDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
+    const targetModule = getCliOption(args, 'generator');
+    const targetView = getCliOption(args, 'view');
+    const affectedOnly = args.includes('--affected');
+    const rebuildGraph = args.includes('--rebuild-graph');
+    const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.includes('--training-only');
+    const previousManifest = readDatasetManifest(outDir);
+    if (rebuildGraph && (affectedOnly || targetModule || targetView || trainingOnly)) {
+        throw new Error(
+            '--rebuild-graph establishes a complete graph baseline and cannot be combined with '
+            + '--affected, --generator, --view, or --training-only.'
+        );
+    }
+    const trustedPreviousManifest = rebuildGraph ? null : previousManifest;
+    let developmentObservation: ReturnType<typeof inspectDevelopmentInputObservation> | null = null;
     const ontologyIssues = datasetOntologySemanticIssues(PROJECT_ROOT);
     if (ontologyIssues.length > 0) {
         for (const issue of ontologyIssues) console.warn(`[Ontology update ignored] ${issue}`);
@@ -637,6 +669,38 @@ async function main() {
             'Reliable ontology semantic delta state is unavailable. The pinned ontology update was not consumed; '
             + 'run update:ontology-source before generation.'
         );
+    }
+
+    if (affectedOnly
+        && !targetModule
+        && !targetView
+        && !trainingOnly
+        && trustedPreviousManifest?.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
+        && trustedPreviousManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+        && trustedPreviousManifest.complete === true
+        && trustedPreviousManifest.spec === specName) {
+        const observation = inspectDevelopmentInputObservation({
+            projectRoot: PROJECT_ROOT,
+            specName,
+            previous: trustedPreviousManifest.development_observation,
+            rendererEnvironment: currentRendererEnvironment()
+        });
+        developmentObservation = observation;
+        counters.add('dataset.development_candidate_files', observation.candidate_files);
+        counters.add('dataset.development_relevant_files_checked', observation.relevant_files_checked);
+        if (observation.clean) {
+            if (observation.manual_rebuild_files.length > 0) {
+                console.warn(
+                    '[Graph cache] Build/matching/validation machinery changed outside automatic identity: '
+                    + `${summarizeManualRebuildFiles(observation.manual_rebuild_files)}. `
+                    + 'Use --rebuild-graph if behavior changed.'
+                );
+            }
+            console.log(`Development delta: clean (${observation.reason}); catalog and graph rebuild skipped.`);
+            console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
+            return;
+        }
+        console.log(`Development delta requires graph planning: ${observation.reason}.`);
     }
 
     const validationResult = await normalizeAndValidateSpec(specName);
@@ -649,20 +713,127 @@ async function main() {
     }
 
     const allTargets = validationResult.targets;
+    const allTargetsById = new Map(allTargets.map(target => [target.id, target]));
     console.log(`Loaded ${allTargets.length} normalized & deduplicated targets for spec "${specName}" (${validationResult.stats.deduplicatedCount} deduplicated).`);
 
-    const targetModule = getCliOption(args, 'generator');
-    const targetView = getCliOption(args, 'view');
-    const affectedOnly = args.includes('--affected');
-    const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.includes('--training-only');
     const concurrencyOption = getCliOption(args, 'concurrency');
     const concurrency = concurrencyOption === undefined ? DEFAULT_CONCURRENCY : Number(concurrencyOption);
     if (!Number.isInteger(concurrency) || concurrency < 1) {
         throw new Error(`--concurrency must be a positive integer; received "${concurrencyOption}".`);
     }
 
-    const generatorCatalog = await loadGeneratorCatalog(undefined, counters);
-    const fullViewCatalog = await loadViewCatalog(undefined, counters);
+    const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
+    const observedSourcePlan = affectedOnly
+        && trustedPreviousManifest
+        && developmentObservation
+        && !targetModule
+        && !targetView
+        && !trainingOnly
+        ? planObservedDatasetSourceDelta({
+            projectRoot: PROJECT_ROOT,
+            previous: trustedPreviousManifest,
+            changedFiles: developmentObservation.changed_files,
+            candidateNodes: developmentObservation.candidate_nodes
+        })
+        : null;
+
+    let generatorCatalog: GeneratorCatalogEntry[] = [];
+    let fullViewCatalog: ViewCatalogEntry[] = [];
+    let pairIndex: ReturnType<typeof buildCompatibleModulePairIndex> | null = null;
+    let allMatchedTuples: MatchTuple[] = [];
+    let incrementalSourcePairs: string[] | null = null;
+
+    if (observedSourcePlan?.pairKeys.length
+        && trustedPreviousManifest?.dependency_graph.matching_index
+        && trustedPreviousManifest.development_observation?.entry_files_by_node) {
+        const selectedPairs = new Set(observedSourcePlan.pairKeys);
+        const generatorIds = new Set(observedSourcePlan.pairKeys.map(key => key.split('#')[0]));
+        const viewIds = new Set(observedSourcePlan.pairKeys.map(key => key.split('#')[1]));
+        const allCandidateModulesSelected = observedSourcePlan.candidateNodes.every(nodeId => {
+            if (nodeId.startsWith('generator:')) {
+                return generatorIds.has(nodeId.slice('generator:'.length));
+            }
+            if (nodeId.startsWith('view:')) {
+                return viewIds.has(nodeId.slice('view:'.length));
+            }
+            return true;
+        });
+        const recordedEntries = trustedPreviousManifest.development_observation.entry_files_by_node;
+        const generatorEntries = new Map([...generatorIds].flatMap(generatorId => {
+            const path = recordedEntries[`generator:${generatorId}`];
+            return path ? [[generatorId, resolve(PROJECT_ROOT, path)] as const] : [];
+        }));
+        const viewEntries = new Map([...viewIds].flatMap(viewId => {
+            const path = recordedEntries[`view:${viewId}`];
+            return path ? [[viewId, resolve(PROJECT_ROOT, path)] as const] : [];
+        }));
+        const [selectedGenerators, selectedViews] = await Promise.all([
+            loadGeneratorCatalog(undefined, counters, generatorEntries),
+            loadViewCatalog(undefined, counters, viewEntries)
+        ]);
+        const capabilitiesUnchanged = allCandidateModulesSelected
+            && generatorEntries.size === generatorIds.size
+            && viewEntries.size === viewIds.size
+            && selectedGenerators.length === generatorIds.size
+            && selectedViews.length === viewIds.size
+            && selectedGenerators.every(generator =>
+                trustedPreviousManifest.dependency_graph.nodes[
+                    generatorCapabilityNodeId(generator.generatorId)
+                ]?.input_hash === generatorCapabilityInputHash(generator))
+            && selectedViews.every(view =>
+                trustedPreviousManifest.dependency_graph.nodes[
+                    viewCapabilityNodeId(view.viewId)
+                ]?.input_hash === viewCapabilityInputHash(view));
+        if (capabilitiesUnchanged) {
+            const tuples: MatchTuple[] = [];
+            for (const [targetId, pairKeys] of Object.entries(
+                trustedPreviousManifest.dependency_graph.matching_index.matched_pair_keys_by_target
+            )) {
+                const target = allTargetsById.get(targetId);
+                if (!target) continue;
+                for (const key of pairKeys) {
+                    if (!selectedPairs.has(key)) continue;
+                    const [generatorId, viewId] = key.split('#');
+                    tuples.push({target, generatorId, viewId});
+                }
+            }
+            const compatible = buildCompatibleModulePairIndex(selectedGenerators, selectedViews, counters);
+            pairIndex = subsetCompatibleModulePairIndex(compatible, pair =>
+                selectedPairs.has(modulePairKey(pair.generator.generatorId, pair.view.viewId)));
+            generatorCatalog = selectedGenerators;
+            fullViewCatalog = selectedViews;
+            allMatchedTuples = tuples;
+            incrementalSourcePairs = observedSourcePlan.pairKeys;
+            console.log(
+                `Incremental source plan: reused persisted matching and loaded `
+                + `${generatorCatalog.length} generator(s), ${fullViewCatalog.length} view(s).`
+            );
+        } else {
+            console.log('Incremental source plan reached a capability change; rebuilding the authored model graph.');
+        }
+    }
+
+    if (!incrementalSourcePairs) {
+        generatorCatalog = await loadGeneratorCatalog(undefined, counters);
+        fullViewCatalog = await loadViewCatalog(undefined, counters);
+        pairIndex = buildCompatibleModulePairIndex(generatorCatalog, fullViewCatalog, counters);
+        const matchDelta = matchTargetsDelta({
+            targets: allTargets,
+            generatorCatalog,
+            viewCatalog: fullViewCatalog,
+            specName,
+            policyHash: matchingPolicyInputHash(),
+            previousGraph: trustedPreviousManifest?.dependency_graph ?? null,
+            pairIndex,
+            counters
+        });
+        allMatchedTuples = matchDelta.tuples;
+        console.log(
+            `Matching plan: ${matchDelta.reusedTuples} tuple(s) reused; `
+            + `${matchDelta.evaluatedTargets} target scan(s), ${matchDelta.evaluatedPairs} changed pair(s).`
+        );
+    }
+    if (!pairIndex) throw new Error('Could not construct the compatible generator/view pair index.');
 
     const requestedModules = targetModule
         ? generatorCatalog.filter(g =>
@@ -681,24 +852,6 @@ async function main() {
         throw new Error(`No views matched --view=${targetView}.`);
     }
 
-    const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
-    const previousManifest = readDatasetManifest(outDir);
-    const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, fullViewCatalog, counters);
-    const matchDelta = matchTargetsDelta({
-        targets: allTargets,
-        generatorCatalog,
-        viewCatalog: fullViewCatalog,
-        specName,
-        policyHash: matchingPolicyInputHash(PROJECT_ROOT, sourceIndex),
-        previousGraph: previousManifest?.dependency_graph ?? null,
-        pairIndex,
-        counters
-    });
-    const allMatchedTuples = matchDelta.tuples;
-    console.log(
-        `Matching plan: ${matchDelta.reusedTuples} tuple(s) reused; `
-        + `${matchDelta.evaluatedTargets} target scan(s), ${matchDelta.evaluatedPairs} changed pair(s).`
-    );
     const requestedGeneratorIds = new Set(requestedModules.map(module => module.generatorId));
     const requestedViewIds = new Set(requestedViews.map(view => view.viewId));
     const requestedMatchedTuples = allMatchedTuples.filter(tuple =>
@@ -714,7 +867,17 @@ async function main() {
     };
     let generationScope = requestedScope;
     let matchedTuples = requestedMatchedTuples;
-    if (affectedOnly || !requestedScope.fullDataset) {
+    if (incrementalSourcePairs) {
+        generationScope = {
+            fullDataset: false,
+            pairKeys: incrementalSourcePairs,
+            generatorIds: radixSortUtf8([
+                ...new Set(incrementalSourcePairs.map(key => key.split('#')[0]))
+            ])
+        };
+        matchedTuples = allMatchedTuples;
+        console.log(`Affected execution: ${incrementalSourcePairs.length} exact generator/view pair(s).`);
+    } else if (affectedOnly || !requestedScope.fullDataset) {
         const planningBuild = buildDatasetManifest({
             projectRoot: PROJECT_ROOT,
             datasetDir: outDir,
@@ -726,9 +889,11 @@ async function main() {
             pairIndex,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
-            reuseImageIdentityFrom: previousManifest?.dependency_graph
+            reuseImageIdentityFrom: trustedPreviousManifest?.dependency_graph,
+            reuseValidationIdentityFrom: trustedPreviousManifest?.dependency_graph,
+            counters
         });
-        const plan = assertDatasetGenerationScope(previousManifest, planningBuild, requestedScope);
+        const plan = assertDatasetGenerationScope(trustedPreviousManifest, planningBuild, requestedScope);
         console.log(
             `Dependency plan: ${plan.changed_roots.length} changed root(s), `
             + `${plan.affected_nodes.length} affected node(s), ${plan.reuse_nodes.length} reusable node(s).`
@@ -743,7 +908,7 @@ async function main() {
                 }
                 console.log('Dependency delta unavailable; performing the required full baseline generation.');
             } else {
-                const pairKeys = affectedDatasetPairKeys(plan, planningBuild, previousManifest);
+                const pairKeys = affectedDatasetPairKeys(plan, planningBuild, trustedPreviousManifest);
                 if (pairKeys.length === 0) {
                     console.log('Dependency plan is clean; no dataset pairs require rendering or publication.');
                     console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
@@ -819,19 +984,35 @@ async function main() {
         finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.train);
         finalizeDatasetMetadata(transaction.stagingDir, SPLIT_DIRS.val);
         const candidate = transaction.prepare();
-        const manifestBuild = buildDatasetManifest({
+        const manifestTargets = incrementalSourcePairs
+            ? radixSortUtf8([...new Set(allMatchedTuples.map(tuple => tuple.target.id))])
+                .map(targetId => allTargetsById.get(targetId)!)
+            : allTargets;
+        const partialManifestBuild = buildDatasetManifest({
             projectRoot: PROJECT_ROOT,
             datasetDir: outDir,
             specName,
-            targets: allTargets,
+            targets: manifestTargets,
             generators: generatorCatalog,
             views: fullViewCatalog,
             tuples: allMatchedTuples,
             pairIndex,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
-            datasetSnapshot: candidate
+            datasetSnapshot: candidate,
+            reuseValidationIdentityFrom: trustedPreviousManifest?.dependency_graph,
+            counters
         });
+        const manifestBuild = incrementalSourcePairs && trustedPreviousManifest
+            ? mergeObservedDatasetBuild({
+                projectRoot: PROJECT_ROOT,
+                specName,
+                previous: trustedPreviousManifest,
+                partial: partialManifestBuild,
+                pairKeys: incrementalSourcePairs,
+                sourceIndex
+            })
+            : partialManifestBuild;
         counters.add('dataset.source_directories_read', manifestBuild.source_stats.directories_read);
         counters.add('dataset.source_files_read', manifestBuild.source_stats.files_read);
         counters.add('dataset.source_bytes_read', manifestBuild.source_stats.bytes_read);
@@ -840,7 +1021,7 @@ async function main() {
             specName,
             build: manifestBuild,
             scope: generationScope,
-            previous: previousManifest
+            previous: trustedPreviousManifest
         });
         transaction.commit(manifest);
         const storeStats = transaction.stats();

@@ -17,7 +17,7 @@ Here, linear means `O(input records + dependency edges + necessary output)`. A d
 | Rule | Current status |
 | --- | --- |
 | Always linear | Primary matching, coverage, generation, VQA, semantic-diff, and affected-closure paths carry linear implementations and work counters; release-wide checks remain deliberately linear in complete input. |
-| Content-delta processing | Immutable exact-pair shards, affected development checks, VQA misses, explorer asset reuse, and pointer publication process the changed closure. |
+| Content-delta processing | Implemented for clean runs and existing generator/view source changes. Immutable exact-pair shards, persisted file-to-node ownership, partial model loading, matching postings, VQA misses, explorer asset reuse, and pointer publication bound ordinary development work to the authored change closure. Capability or repository-structure changes conservatively fall back to one complete linear rebuild. |
 | External-delta processing | Standards use stable record diffs; ontology uses entity, relation, definition, and project-usage closures. Unreviewed or unverifiable updates remain pinned and are rejected before work. |
 
 ## Baseline diagnosis
@@ -126,15 +126,23 @@ Immutable snapshots should remain, but unchanged assets must be reused through c
 ### Dataset invalidation follows an explicit dependency graph
 
 Phase 4 replaced the aggregate dataset source hash with direct graph edges. Generated coverage
-files, favicons, and unrelated public files are not renderer inputs; public icons, shared renderer
-code, module sources, and VQA checklists participate only in the artifact nodes they can affect.
-A request-local source index memoizes directory discovery and file digests across overlapping
-generator/view dependencies, so each source byte is read once per plan.
+files, favicons, and unrelated public files are not renderer inputs. Generator and view entry files
+own the local code, styles, and public assets reachable through their actual import closure;
+checklists participate only in validation nodes. A request-local source index memoizes discovery
+and file digests across overlapping model dependencies, so each source byte is read once per plan.
+
+The automatic boundary is deliberately authored-model based. Targets, generator/view capability
+specs and schemas, generator/view implementation import closures, accepted ontology semantics,
+checklists, the dedicated VQA system prompt, and canonical environment identities participate.
+Build, matching, planning, cache, validation, workflow, and unrelated toolchain implementation code
+does not. When machinery behavior changes, development uses explicit `--rebuild-graph`; releases
+always reconstruct the complete graph. A model file imported by a generator or view remains an
+automatic dependency even when it lives under a shared library directory.
 
 ### Matching, generation, and VQA share one delta graph
 
-Dataset manifest schema 6 and planner epoch 3 make matching an explicit upstream layer of the
-same graph that schedules generated artifacts and validation. Its causal spine is:
+Dataset manifest schema 8 and planner epoch 5 make matching and validation policy explicit layers
+of the same graph that schedules generated artifacts and validation. Its causal spine is:
 
 ```text
 target capability + generator capability + view capability + matching policy
@@ -142,24 +150,52 @@ target capability + generator capability + view capability + matching policy
     -> successful target match tuple
     -> generation pair
     -> image
+image + checklist + ontology definitions + validation policy
     -> VQA record
 ```
 
 Capability nodes contain only matching-relevant labels, constraints, problem types, and ontology
 ancestor closure. Target prose and implementation source live in separate downstream nodes, so
 they cannot cause matching churn. The graph persists successful matches, not every rejected
-target/pair combination. Label/type postings provide the complementary discovery mechanism:
+target/pair combination. It also persists target-label and target-to-successful-pair postings as
+derivable acceleration metadata. Label/type postings provide the discovery mechanism:
 changed targets traverse the complete compatible-pair index, while changed or new pairs traverse
-the relevant targets. Removed pairs simply make their old tuples unreachable. A matching-policy
-source change fails closed to one complete indexed match.
+the relevant targets. Removed pairs simply make their old tuples unreachable. Matching machinery
+is not hashed as model content; after a behavioral machinery change, `--rebuild-graph` runs one
+complete indexed match.
 
 The `input_hash` of each VQA node is the exact existing validation cache key derived from the image
-digest, view checklists, claimed labels, and ontology definitions. Cache lookup, active-key
+digest, view checklists, claimed labels, ontology definitions, and `validation-policy:vqa`. That
+policy node hashes the dedicated authored system-prompt text. Response-schema and pass/fail code
+are validation machinery and use explicit graph rebuild plus forced reevaluation when their
+behavior changes.
+Cache lookup, active-key
 selection, pruning, and strict audit consume this identity. JSONL records remain the persisted
-evaluation results, but no longer decide staleness independently. Unit tests compare clean and
+evaluation results, but no longer decide staleness independently. When every direct dependency is
+unchanged, graph construction reuses the previous VQA key without resolving checklist or ontology
+definition text. Unit tests compare clean and
 delta matching, cover new and removed pairs, bound changed-pair work linearly, require the graph
-key to reproduce the prompt-context key, and prove that checklist-only changes reach VQA without
-reaching image generation.
+key to reproduce the prompt-policy context key, and prove that checklist- or policy-only changes
+reach VQA without reaching image generation.
+
+### Clean development runs reuse the persisted graph
+
+Dataset manifests carry a non-authoritative development observation containing the Git base,
+dirty paths, exact authored-input file hashes, file-to-node ownership, renderer identity, and
+accepted ontology semantic identity. Unscoped affected generation and live validation ask Git for
+only candidate changed paths. If every relevant candidate remains byte-identical, generation exits
+before canonical container startup or catalog/graph construction, and live VQA reuses the persisted
+graph while still auditing or updating the physical VQA cache. For an existing generator/view
+source change, the persisted graph is patched at the changed source nodes, reverse closure selects
+exact pairs, only those model modules load, and unchanged capability hashes admit the persisted
+matching postings. Their rebuilt pair subgraphs are merged back into the complete baseline.
+
+Git identity never participates in an artifact key. The observation is only a safe acceleration
+index over the content-addressed graph. New discovery files, capability changes, relevant ignored
+files, missing Git history, changed environment identities, and any ambiguity fail closed to
+complete linear graph planning. Machinery changes are visible diagnostics, not automatic
+invalidation roots. Strict release audit always reconstructs and verifies the complete graph in
+linear time.
 
 ### External standards files are conversion inputs, not build inputs
 
@@ -285,17 +321,23 @@ the existing dataset correctly becomes stale when these shared generation source
    unavailable, with an explicit diagnostic instead of global invalidation.
 5. Remove generated coverage outputs and other unrelated files from dataset-render invalidation.
 
-This phase establishes the correctness prerequisite for cross-workflow reuse. A cache hit is valid
-only when the complete input identity is known.
+This phase establishes the correctness prerequisite for safe reuse. A cache hit is valid only when
+the complete authored input identity is known; release workflows may still choose a linear rebuild
+when sharing the cache would make its boundary more complex than the work it avoids.
 
 **Status: complete.** Coverage producers read only the tracked canonical tree and record its exact
-SHA-256 digest and byte length. Coverage manifest schema 4 with input schema 3 records repository
-ref/SHA as projection provenance, repository content identity as a core input, canonical-tree
+SHA-256 digest and byte length. Coverage manifest schema 4 with input schema 5 records repository
+ref/SHA as projection provenance, semantic coverage-source content identity as a core input, canonical-tree
 identity, exact ontology package resolution, the used ontology semantic hash, coverage selection
 inputs, and the optional local asset-index digest. Validation reconstructs the key and fails closed.
 Dataset rendering is independent of the canonical standards tree, generated coverage, and unrelated
 public files while correctly hashing the SVG and raster assets under `public/icons/` that views
-actually render.
+actually render. Coverage-source identity is restricted to target specs, generator/view capability
+specs plus their reachable local model imports, and extracted generator/view problem-type declarations;
+renderer and generator implementation bodies are excluded, and coverage does not execute a sample
+generator merely to establish a semantic match. Coverage machinery is intentionally excluded and
+uses explicit `--rebuild-graph`. Its match-only catalogs do not import generator
+classes or view renderers.
 
 #### Phase 3: compute and publish core coverage once
 
@@ -305,16 +347,16 @@ actually render.
    source inputs are identical.
 4. Prevent workflows from recomputing an artifact that already exists for the complete input key.
 
-**Status: complete.** Core identity now excludes channel, human-readable source ref, source SHA,
-package-version projection, and generation timestamp while retaining repository content, canonical
+**Status: complete for local reuse; deliberately not shared between CI workflows.** Core identity now excludes channel, human-readable source ref, source SHA,
+package-version projection, and generation timestamp while retaining semantic coverage-source content, canonical
 standards-tree, used ontology semantics, selection, and asset inputs.
 The timestamp-free standards tree and coverage payload are atomically published under
 `temp/coverage-core/<core_input_key>/` with a completion manifest containing their byte length and
-SHA-256 digest. An exact hit verifies and projects that artifact without loading generator/view
-catalogs or matching targets; a corrupt or partial entry fails closed. Main validation computes and
-validates the core when absent, and the shared `.github/actions/coverage-core` action uses an
-exact-key GitHub Actions cache so dependent deployment and later release-tag workflows restore the
-same artifact. Preview and Latest then differ only in projection metadata.
+SHA-256 digest. An exact local hit verifies and projects that artifact without loading
+generator/view catalogs or matching targets; a corrupt or partial entry fails closed. Coverage
+construction is about two seconds after the matching fix, so validation, deployment, and release
+invoke `--rebuild-graph` instead of maintaining a workflow cache whose invalidation contract would
+pull machinery code into semantic identity. Preview and Latest differ only in projection metadata.
 
 #### Phase 4: introduce the dependency and delta foundation — complete
 
@@ -373,7 +415,7 @@ development workflows.
 9. Run only the affected closure during development while retaining a linear repository-wide
    release check.
 
-**Status: complete.** Standard datasets now publish a tiny atomic `current.json` pointer over
+**Status: complete for the supported authored-source fast path.** Standard datasets now publish a tiny atomic `current.json` pointer over
 immutable content-addressed `(generator, view, split)` shards and complete generation manifests.
 Scoped publication stages and writes only selected shards; `--affected` derives exact pair units
 from the dependency graph, exits before Chromium on a clean plan, and visibly requires one full
@@ -381,16 +423,27 @@ baseline when trusted delta state is unavailable. Every dataset consumer used by
 coverage reports, asset indexing, VQA, and the repository check reads the logical manifest-backed
 snapshot, while the released union remains a deliberate linear materialization.
 
-The graph constructs VQA cache keys from immutable shard identities and exact validation context;
+The graph constructs VQA cache keys from immutable shard identities, exact validation context, and
+the validation-policy node;
 cache lookup, pruning, and audit read those keys rather than applying an independent staleness
 algorithm. PNG bytes open only for cache misses, forced evaluations, or the separate full audit
-integrity pass. Local explorer snapshots
+integrity pass. Unchanged VQA dependencies reuse prior graph keys without rebuilding prompt
+contexts. Persisted target-label, target-to-match, and file-to-model-node postings bound existing
+generator/view source edits to relevant pairs. The selected model modules are loaded and their
+pair subgraphs are merged into the persisted complete graph; a capability or structure change
+falls back to a complete linear build. A conservative Git-assisted observation proves exact clean
+development no-ops without making Git identity authoritative. Local explorer snapshots
 admit each PNG once to a content-addressed pool and hard-link unchanged assets into later
 snapshots. TypeScript uses ignored incremental state; `check:affected` selects related tests and
 validators with explicit reasons. Module discovery and catalogs join the existing type-graph and
 ontology-ancestry caches. Store, planner, snapshot, catalog, and changed-file tests cover exact-pair
 replacement, legacy migration refusal, immutable reuse, corruption detection, and bounded
 classification work.
+
+Target/spec structure changes and capability changes remain conservative full-plan boundaries.
+Target-file ownership postings are a future refinement if spec growth makes the current full
+fallback material; they are not required to keep ordinary generator/view implementation work
+steady. Release-wide graph construction remains the mandatory linear verification path.
 
 #### Phase 6: isolate standards conversion and process ontology updates as semantic deltas
 
@@ -411,7 +464,7 @@ the tracked explorer tree by stable standard ID and atomically replaces that tre
 the transitive `partOf` closure actually used by current CCSS targets and generator/view
 capabilities. Both operations are dry-run by default and emit linear work counters.
 
-Dataset manifest schema 6 and planner epoch 3 replace aggregate ontology invalidation with semantic
+Dataset manifest schema 8 and planner epoch 5 replace aggregate ontology invalidation with semantic
 nodes. Target, generator, and view matching depends on entity identity and the used ancestor
 relations. Successful target/pair tuples connect this matching layer directly to generation;
 VQA depends separately on exact claimed definitions and uses its graph input hash as the cache key.
@@ -442,6 +495,7 @@ high risk when they make ordinary scoped development behave like a clean rebuild
 | --- | --- | --- | --- | --- |
 | Partial or concurrent publication | High | A process crash or competing writer exposes a manifest that references missing, truncated, or mixed-generation blobs. Developers see intermittent failures; a release may become irreproducible. | Write immutable blobs under content hashes, verify them before admission, publish the complete manifest last through atomic replacement, coordinate writers per namespace, and let readers use only completed immutable generations. | Phases 4 and 5 |
 | Corrupted or missing cache blob | High | One damaged entry causes repeated failures or encourages an engineer to delete the complete cache, creating a miss storm. | Verify stored digests on admission and before release use; quarantine and rebuild only the affected entry or shard; retain enough manifest provenance to identify all dependents; provide targeted eviction rather than requiring directory deletion. | Phases 4 and 5 |
+| Machinery behavior changed without an explicit rebuild | High | Automatic keys intentionally exclude build, matching, validation, cache, workflow, and unrelated toolchain code. Reusing a graph after one of those changes can conceal a changed algorithm. | Development diagnostics list changed machinery files and direct the engineer to `--rebuild-graph`. The flag is full-only. Release generation, coverage, and audit always rebuild. Validation-semantics changes additionally require `--force` when existing images need fresh judgments. Skills document this boundary. | Phases 4 and 5 |
 | Over-broad dependency or key | High for development | An unrelated edit invalidates a complete dataset, ontology, VQA module, or explorer snapshot. Correctness is preserved, but scoped work becomes slow and unpredictable. | Expose the affected closure before execution; explain which changed node and dependency edge caused every miss; reject silent escalation from scoped to global development work unless explicitly forced; use entity-, record-, pair-, and shard-level keys. | Phases 4 through 6 |
 | Unbounded obsolete artifacts | Medium | Immutable generations accumulate, obscure which output is active, and consume disk until engineers manually clean broad directories. | Determine reachability from published and intentionally retained manifests, preview garbage collection before deletion, and collect only unreachable content after a retention window. Garbage collection never determines cache validity. | Phase 5 |
 
@@ -467,8 +521,10 @@ establishes validity.
 Releases fail closed. They never fall back to the newest available or last-known cache entry when
 the exact entry is absent or untrusted.
 
-1. Compute the expected input key from tagged source content, accepted ontology semantics, the
-   tracked canonical standards tree where coverage uses it, and the canonical renderer environment.
+1. Rebuild the complete dependency graph and coverage core from tagged authored model content,
+   accepted ontology semantics, the tracked canonical standards tree where coverage uses it, and
+   the canonical renderer environment. Release correctness never depends on a development
+   observation or a cross-workflow coverage cache.
 2. Require every released artifact and VQA record to resolve to that key, the current schema, and
    the current producer, planner, and validation-policy epochs.
 3. Verify manifest completeness and all referenced content digests in one linear pass.
@@ -498,6 +554,9 @@ Cache behavior must be observable without becoming another investigation task fo
    incomplete generations.
 6. Cache status and cleanup operations use manifests and reachability rather than directory age or
    filename conventions.
+7. Changed machinery paths are warnings rather than automatic input hashes. If behavior changed,
+   establish a new complete baseline with `--rebuild-graph`; for evaluator behavior, combine it
+   with `--force` when unchanged samples require new Gemini results.
 
 Phase 1 counters expose current false misses and amplification. Phase 2 removes the most dangerous
 provenance and environment false hits before artifacts are shared across workflows in Phase 3.
@@ -517,7 +576,8 @@ The work is complete when the following properties hold:
 3. Coverage work grows linearly with targets, standards, dependency edges, and emitted records.
 4. Production matching creates no rejected-combination records unless diagnostic output explicitly
    requests them.
-5. Coverage for an unchanged complete input key is reused across workflows.
+5. Coverage for an unchanged complete input key is reusable locally; release and CI rebuild it in
+   linear time instead of maintaining a machinery-sensitive cross-workflow cache.
 6. A one-generator or one-view development change reads, generates, validates, and republishes only
    its affected closure.
 7. An unrelated ontology entity change causes no generation or VQA churn.
@@ -531,18 +591,23 @@ The work is complete when the following properties hold:
     external-source digests.
 13. A release rejects artifacts with incomplete keys, unsupported epochs, unverifiable provenance,
     incomplete publication state, or mismatching content digests.
-14. Incremental and clean dependency plans select equivalent outputs for representative changes to
-    every graph-node kind.
-15. A change to cache-key or dependency-planner logic cannot reuse artifacts from the previous
-    epoch without a successful clean differential comparison.
+14. Incremental and clean dependency plans select equivalent outputs for representative authored
+    graph-input changes.
+15. A change to cache-key, matching, dependency-planner, validation, or workflow machinery is
+    reported during development and requires an explicit complete graph rebuild before reuse.
 16. Development diagnostics identify the causal dependency path for a cache miss or invalidation,
     and a corrupt entry can be repaired without clearing an unrelated cache domain.
 17. Concurrent or interrupted writers cannot expose an incomplete generation to readers.
 18. Incremental matching returns the same ordered successful tuples as a clean indexed match;
     unchanged inputs perform no capability checks, while changed or new pairs can discover new
     matches without a persisted rejection matrix.
-19. Every graph VQA key equals the cache key recomputed from its exact image and prompt context;
+19. Every graph VQA key equals the cache key recomputed from its exact image, checklist/ontology
+    context, and authored system-prompt policy;
     validation lookup, pruning, and audit accept no independently derived staleness identity.
+20. A clean unscoped development run performs no catalog load, capability check, graph rebuild,
+    render, or prompt-context reconstruction. An existing generator/view source delta loads and
+    rebuilds only its affected model closure; structural, capability, or ambiguous candidates fall
+    back to the complete authoritative graph without a false hit.
 
 ## Architectural assessment
 
@@ -554,9 +619,11 @@ No generator/view redesign is required to begin this work. The repository alread
 - content-derived VQA validation keys.
 
 Phase 4 supplies the shared, persistent dependency graph and delta scheduler, including the
-matching-capability and successful-tuple layer. Phase 5 places
+matching-capability, successful-tuple, validation-policy, and persistent-posting layers. Phase 5 places
 mutable dataset and explorer outputs behind immutable stores and applies affected-only execution
-to rendering, graph-owned VQA cache selection, tests, type checking, and validators. Phase 6 replaces aggregate external
-identities with reliable record/entity/relation deltas and closes the planned architecture. Future
-performance work should extend the shared planner and semantic baselines rather than introduce an
-independent invalidation system.
+to rendering, graph-owned VQA cache selection, tests, type checking, and validators. Existing
+generator/view source changes use incremental module loading and pair-subgraph merging; capability
+and structural changes retain a conservative linear fallback. Phase 6 replaces
+aggregate external identities with reliable record/entity/relation deltas. Future performance work
+should extend the shared planner and semantic baselines rather than introduce an independent
+invalidation system.

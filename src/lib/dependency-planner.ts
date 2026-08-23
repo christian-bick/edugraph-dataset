@@ -10,12 +10,13 @@ import {
 import {resolve} from 'node:path';
 import {digestContent, radixSortUtf8} from './content-identity.ts';
 
-export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 2;
-export const DEPENDENCY_PLANNER_EPOCH = 3;
+export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 4;
+export const DEPENDENCY_PLANNER_EPOCH = 5;
 
 export const DEPENDENCY_NODE_KINDS = [
     'source-file',
     'matching-policy',
+    'validation-policy',
     'target-capability',
     'generator-capability',
     'view-capability',
@@ -54,6 +55,13 @@ export interface DependencyGraphSnapshot {
     planner_epoch: number;
     complete: true;
     nodes: Record<string, DependencyNode>;
+    matching_index?: DependencyMatchingIndex;
+}
+
+export interface DependencyMatchingIndex {
+    target_ids_by_label: Record<string, string[]>;
+    targets_without_ontology_labels: string[];
+    matched_pair_keys_by_target: Record<string, string[]>;
 }
 
 export interface DependencyCause {
@@ -114,7 +122,8 @@ function normalizedNode(node: DependencyNode): DependencyNode {
 /** Creates a canonical, complete graph after validating every direct edge. */
 export function createDependencyGraphSnapshot(
     nodes: readonly DependencyNode[],
-    plannerEpoch = DEPENDENCY_PLANNER_EPOCH
+    plannerEpoch = DEPENDENCY_PLANNER_EPOCH,
+    matchingIndex?: DependencyMatchingIndex
 ): DependencyGraphSnapshot {
     const byId = new Map<string, DependencyNode>();
     for (const rawNode of nodes) {
@@ -130,11 +139,29 @@ export function createDependencyGraphSnapshot(
         }
     }
     const ids = radixSortUtf8([...byId.keys()]);
+    const normalizedMatchingIndex = matchingIndex ? {
+        target_ids_by_label: Object.fromEntries(radixSortUtf8(
+            Object.keys(matchingIndex.target_ids_by_label)
+        ).map(label => [
+            label,
+            radixSortUtf8([...new Set(matchingIndex.target_ids_by_label[label])])
+        ])),
+        targets_without_ontology_labels: radixSortUtf8([
+            ...new Set(matchingIndex.targets_without_ontology_labels)
+        ]),
+        matched_pair_keys_by_target: Object.fromEntries(radixSortUtf8(
+            Object.keys(matchingIndex.matched_pair_keys_by_target)
+        ).map(targetId => [
+            targetId,
+            radixSortUtf8([...new Set(matchingIndex.matched_pair_keys_by_target[targetId])])
+        ]))
+    } : undefined;
     return {
         schema_version: DEPENDENCY_GRAPH_SCHEMA_VERSION,
         planner_epoch: plannerEpoch,
         complete: true,
-        nodes: Object.fromEntries(ids.map(id => [id, byId.get(id)!]))
+        nodes: Object.fromEntries(ids.map(id => [id, byId.get(id)!])),
+        ...(normalizedMatchingIndex ? {matching_index: normalizedMatchingIndex} : {})
     };
 }
 

@@ -20,9 +20,30 @@ const standards: CanonicalStandardsIdentity = {
 
 function fixture() {
     const root = mkdtempSync(resolve(tmpdir(), 'edugraph-coverage-identity-'));
-    mkdirSync(resolve(root, 'src'));
+    mkdirSync(resolve(root, 'src', 'lib'), {recursive: true});
+    mkdirSync(resolve(root, 'src', 'types'), {recursive: true});
+    mkdirSync(resolve(root, 'src', 'spec', 'ccss'), {recursive: true});
+    mkdirSync(resolve(root, 'src', 'generators', 'demo'), {recursive: true});
+    mkdirSync(resolve(root, 'src', 'visuals', 'views', 'demo'), {recursive: true});
     mkdirSync(resolve(root, 'public', 'coverage'), {recursive: true});
-    writeFileSync(resolve(root, 'src', 'coverage.ts'), 'coverage');
+    writeFileSync(resolve(root, 'src', 'lib', 'standards-coverage.ts'), 'coverage algorithm');
+    writeFileSync(resolve(root, 'src', 'spec', 'ccss', 'grade.ts'), 'target spec');
+    writeFileSync(
+        resolve(root, 'src', 'generators', 'demo', 'spec.ts'),
+        "import {capability} from './helpers.ts'; export const spec = capability;"
+    );
+    writeFileSync(resolve(root, 'src', 'generators', 'demo', 'helpers.ts'), 'export const capability = 1;');
+    writeFileSync(
+        resolve(root, 'src', 'generators', 'demo', 'generator.ts'),
+        'class DemoGenerator implements ProblemGenerator<DemoProblem> {}'
+    );
+    writeFileSync(resolve(root, 'src', 'visuals', 'views', 'demo', 'spec.ts'), 'view spec');
+    writeFileSync(resolve(root, 'src', 'visuals', 'views', 'demo', 'helpers.ts'), 'unrelated renderer helper');
+    writeFileSync(
+        resolve(root, 'src', 'types', 'problems.ts'),
+        "export interface ViewTypeMap { 'demo': DemoProblem }"
+    );
+    writeFileSync(resolve(root, 'src', 'renderer.ts'), 'unrelated renderer');
     writeFileSync(resolve(root, 'src', 'coverage.test.ts'), 'test');
     writeFileSync(resolve(root, 'package.json'), JSON.stringify({
         dependencies: {'edugraph-ts': 'https://example.test/edugraph-ts.tgz'}
@@ -59,8 +80,8 @@ describe('coverage input identity', () => {
                 knownAssetsSha256: 'e'.repeat(64)
             });
             expect(identity).toMatchObject({
-                schema_version: 3,
-                producer_epoch: 'standards-coverage-v3',
+                schema_version: 5,
+                producer_epoch: 'standards-coverage-v5',
                 repository: {ref: 'main', sha: 'd'.repeat(40)},
                 standards,
                 ontology: {
@@ -109,7 +130,7 @@ describe('coverage input identity', () => {
         }
     });
 
-    it('ignores tests and nested tool caches but changes identity for runtime source changes', () => {
+    it('tracks authored model inputs while leaving coverage machinery outside identity', () => {
         const root = fixture();
         try {
             const initial = coverageRepositoryDigest(root);
@@ -121,8 +142,36 @@ describe('coverage input identity', () => {
                 '{"generated":true}'
             );
             expect(coverageRepositoryDigest(root)).toBe(initial);
-            writeFileSync(resolve(root, 'src', 'coverage.ts'), 'changed runtime');
+            writeFileSync(resolve(root, 'src', 'renderer.ts'), 'changed unrelated renderer');
+            expect(coverageRepositoryDigest(root)).toBe(initial);
+            writeFileSync(
+                resolve(root, 'src', 'generators', 'demo', 'generator.ts'),
+                'class DemoGenerator implements ProblemGenerator<DemoProblem> { changed = true; }'
+            );
+            expect(coverageRepositoryDigest(root)).toBe(initial);
+            writeFileSync(
+                resolve(root, 'src', 'visuals', 'views', 'demo', 'helpers.ts'),
+                'changed unimported renderer helper'
+            );
+            expect(coverageRepositoryDigest(root)).toBe(initial);
+
+            writeFileSync(
+                resolve(root, 'src', 'generators', 'demo', 'helpers.ts'),
+                'export const capability = 2;'
+            );
             expect(coverageRepositoryDigest(root)).not.toBe(initial);
+
+            const changedHelper = coverageRepositoryDigest(root);
+            writeFileSync(resolve(root, 'src', 'generators', 'demo', 'spec.ts'), 'changed capability');
+            expect(coverageRepositoryDigest(root)).not.toBe(changedHelper);
+
+            const changedCapability = coverageRepositoryDigest(root);
+            writeFileSync(resolve(root, 'src', 'spec', 'ccss', 'grade.ts'), 'changed target');
+            expect(coverageRepositoryDigest(root)).not.toBe(changedCapability);
+
+            const changedTarget = coverageRepositoryDigest(root);
+            writeFileSync(resolve(root, 'src', 'lib', 'standards-coverage.ts'), 'changed algorithm');
+            expect(coverageRepositoryDigest(root)).toBe(changedTarget);
         } finally {
             rmSync(root, {recursive: true, force: true});
         }
@@ -203,7 +252,7 @@ describe('coverage input identity', () => {
             };
             expect(coverageManifestIdentityIssues({projectRoot: root, manifest})).toEqual([]);
 
-            writeFileSync(resolve(root, 'src', 'coverage.ts'), 'stale now');
+            writeFileSync(resolve(root, 'src', 'spec', 'ccss', 'grade.ts'), 'stale now');
             expect(coverageManifestIdentityIssues({projectRoot: root, manifest}))
                 .toEqual(expect.arrayContaining([
                     expect.stringContaining('does not match current inputs'),

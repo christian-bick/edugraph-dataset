@@ -1,16 +1,14 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     buildCompatibleModulePairIndex,
-    computeSampleKey,
-    generateSampleWithRetry,
-    loadGeneratorCatalog,
-    loadSpecTodos,
-    loadTargets,
-    loadViewCatalog,
     matchTargets,
-    type GeneratorCatalogEntry,
     type MatchTuple
-} from './generation.ts';
+} from './matching.ts';
+import {
+    loadGeneratorMatchCatalog,
+    loadViewMatchCatalog
+} from './matching-catalog.ts';
+import {loadSpecTodos, loadTargets} from './spec-catalog.ts';
 import type {WorkCounters} from './work-counters.ts';
 import {
     coverageInputKey,
@@ -462,35 +460,9 @@ export function buildStandardsCoverage({
 }
 
 const resolveGeneratorForTarget = (
-    target: CompetencyTarget,
-    tuples: readonly MatchTuple[],
-    generatorsById: ReadonlyMap<string, GeneratorCatalogEntry>
-): string | null => {
-    for (const tuple of tuples) {
-        const generator = generatorsById.get(tuple.generatorId)?.generator;
-        if (!generator) continue;
-        const sampleKey = computeSampleKey({
-            targetId: target.id,
-            generatorId: tuple.generatorId,
-            viewId: tuple.viewId,
-            split: 'train',
-            mode: 'question',
-            instanceIdx: 0
-        });
-        try {
-            const {stub} = generateSampleWithRetry({
-                generator,
-                labels: [...target.labels],
-                sampleKey,
-                maxAttempts: 10
-            });
-            if (stub) return tuple.generatorId;
-        } catch {
-            // Try the next semantically matched tuple.
-        }
-    }
-    return null;
-};
+    _target: CompetencyTarget,
+    tuples: readonly MatchTuple[]
+): string | null => tuples[0]?.generatorId ?? null;
 
 export async function buildCurrentStandardsCoverage(
     options: BuildCurrentStandardsCoverageOptions
@@ -498,8 +470,8 @@ export async function buildCurrentStandardsCoverage(
     const [targets, todos, generators, views] = await Promise.all([
         loadTargets('ccss'),
         loadSpecTodos('ccss'),
-        loadGeneratorCatalog(undefined, options.counters),
-        loadViewCatalog(undefined, options.counters)
+        loadGeneratorMatchCatalog(undefined, options.counters),
+        loadViewMatchCatalog(undefined, options.counters)
     ]);
     const knownSamples = options.knownAssets
         ? assetIndexSampleMap(options.knownAssets)
@@ -517,7 +489,6 @@ export async function buildCurrentStandardsCoverage(
         if (group) group.push(tuple);
         else tuplesByTargetId.set(tuple.target.id, [tuple]);
     }
-    const generatorsById = new Map(generators.map(generator => [generator.generatorId, generator]));
     return buildStandardsCoverage({
         ...options,
         source: {
@@ -531,8 +502,7 @@ export async function buildCurrentStandardsCoverage(
             return generatedSample?.generator
                 ?? resolveGeneratorForTarget(
                     target,
-                    tuplesByTargetId.get(target.id) ?? [],
-                    generatorsById
+                    tuplesByTargetId.get(target.id) ?? []
                 );
         }
     });

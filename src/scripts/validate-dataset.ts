@@ -23,10 +23,13 @@ import {
 import { validationFailed, validationReportPath } from '../lib/validation-report.ts';
 import {
     buildDatasetManifest,
+    DATASET_MANIFEST_SCHEMA_VERSION,
     dependencyGraphVqaCacheKey,
+    datasetOntologySemanticIssues,
     datasetRendererIssues,
     datasetFreshnessIssues,
-    readDatasetManifest
+    readDatasetManifest,
+    type DatasetManifestBuild
 } from '../lib/dataset-manifest.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { auditVqaCache, type ExpectedVqaCacheRecord } from '../lib/vqa-cache-audit.ts';
@@ -43,6 +46,11 @@ import {
     verifyDatasetSnapshotIntegrity,
     type DatasetSnapshot
 } from '../lib/dataset-store.ts';
+import {
+    inspectDevelopmentInputObservation,
+    summarizeManualRebuildFiles
+} from '../lib/development-observation.ts';
+import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -195,6 +203,8 @@ async function main() {
     let targetGenerator: string | undefined = process.env.npm_config_generator;
     let targetView: string | undefined = process.env.npm_config_view;
     let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
+    let rebuildGraph = process.env.npm_config_rebuild_graph === 'true'
+        || process.env.npm_config_rebuild_graph === '';
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
     let reportOnly = process.env.npm_config_report_only === 'true' || process.env.npm_config_report_only === '';
     let logPrompts = process.env.npm_config_log_prompts === 'true' || process.env.npm_config_log_prompts === '';
@@ -203,7 +213,7 @@ async function main() {
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('❌ Error: The --spec parameter is required.');
-        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--force] [--concurrency=N] [--log-prompts] [--report-only] [--report=<path>]');
+        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--rebuild-graph] [--force] [--concurrency=N] [--log-prompts] [--report-only] [--report=<path>]');
         process.exit(1);
     }
     if (isUnionSpec(specName)) {
@@ -220,8 +230,10 @@ async function main() {
             targetGenerator = arg.split('generator=')[1];
         } else if (arg.includes('view=')) {
             targetView = arg.split('view=')[1];
-        } else if (arg === '--force' || arg === '--no-cache') {
+        } else if (arg === '--force') {
             force = true;
+        } else if (arg === '--rebuild-graph') {
+            rebuildGraph = true;
         } else if (arg === '--audit' || arg === '--ci') {
             auditMode = true;
         } else if (arg === '--report-only') {
@@ -239,6 +251,7 @@ async function main() {
     if (auditMode && (targetGenerator || targetView)) {
         throw new Error('Strict --audit requires the complete dataset; remove --generator and --view filters.');
     }
+    if (auditMode) rebuildGraph = true;
 
     DATASET_DIR = resolve(PROJECT_ROOT, 'out', datasetFolderName);
     DATASET_SNAPSHOT = readDatasetSnapshot(DATASET_DIR);
@@ -286,57 +299,117 @@ async function main() {
         throw new Error('No matching dataset images found to validate.');
     }
 
-    const [specValidation, generatorCatalog, viewCatalog] = await Promise.all([
-        normalizeAndValidateSpec(specName),
-        loadGeneratorCatalog(undefined, counters),
-        loadViewCatalog(undefined, counters)
-    ]);
-    if (specValidation.errors.length > 0) {
-        throw new Error(`Cannot validate dataset freshness because spec "${specName}" is invalid.`);
-    }
-    const scopedGenerators = targetGenerator
-        ? generatorCatalog.filter(entry =>
-            entry.generatorId === targetGenerator
-            || entry.module.relativePath === targetGenerator
-            || entry.module.category === targetGenerator)
-        : generatorCatalog;
-    const scopedViews = targetView
-        ? viewCatalog.filter(entry =>
-            entry.viewId === targetView
-            || entry.module.relativePath === targetView
-            || entry.module.category === targetView)
-        : viewCatalog;
     const existingManifest = readDatasetManifest(DATASET_DIR);
-    const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
-    const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, counters);
-    const matchDelta = matchTargetsDelta({
-        targets: specValidation.targets,
-        generatorCatalog,
-        viewCatalog,
-        specName,
-        policyHash: matchingPolicyInputHash(PROJECT_ROOT, sourceIndex),
-        previousGraph: existingManifest?.dependency_graph ?? null,
-        pairIndex,
-        counters
-    });
-    const currentManifestBuild = buildDatasetManifest({
-        projectRoot: PROJECT_ROOT,
-        datasetDir: DATASET_DIR,
-        specName,
-        targets: specValidation.targets,
-        generators: generatorCatalog,
-        views: viewCatalog,
-        tuples: matchDelta.tuples,
-        pairIndex,
-        sourceIndex,
-        generatedSplits: presentSplits,
-        rendererEnvironment: CANONICAL_RENDERER_ID
-    });
-    counters.add('dataset.source_directories_read', currentManifestBuild.source_stats.directories_read);
-    counters.add('dataset.source_files_read', currentManifestBuild.source_stats.files_read);
-    counters.add('dataset.source_bytes_read', currentManifestBuild.source_stats.bytes_read);
-    const generatorIds = new Set(scopedGenerators.map(entry => entry.generatorId));
-    const viewIds = new Set(scopedViews.map(entry => entry.viewId));
+    const ontologyIssues = datasetOntologySemanticIssues(PROJECT_ROOT);
+    if (ontologyIssues.length > 0) {
+        throw new Error(
+            `Reliable ontology semantic delta state is unavailable:\n${ontologyIssues.map(issue => `- ${issue}`).join('\n')}`
+        );
+    }
+    let currentManifestBuild: DatasetManifestBuild;
+    let generatorIds: Set<string>;
+    let viewIds: Set<string>;
+    const canObserveCleanDevelopment = !auditMode
+        && !rebuildGraph
+        && !targetGenerator
+        && !targetView
+        && existingManifest?.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
+        && existingManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+        && existingManifest.complete === true
+        && existingManifest.spec === specName;
+    const observation = canObserveCleanDevelopment
+        ? inspectDevelopmentInputObservation({
+            projectRoot: PROJECT_ROOT,
+            specName,
+            previous: existingManifest.development_observation,
+            rendererEnvironment: CANONICAL_RENDERER_ID
+        })
+        : null;
+
+    if (observation?.clean && existingManifest) {
+        if (observation.manual_rebuild_files.length > 0) {
+            console.warn(
+                '[Graph cache] Build/matching/validation machinery changed outside automatic identity: '
+                + `${summarizeManualRebuildFiles(observation.manual_rebuild_files)}. `
+                + 'Use --rebuild-graph if behavior changed.'
+            );
+        }
+        counters.add('dataset.development_candidate_files', observation.candidate_files);
+        counters.add('dataset.development_relevant_files_checked', observation.relevant_files_checked);
+        console.log(`Development delta: clean (${observation.reason}); reusing the persisted graph for VQA planning.`);
+        currentManifestBuild = {
+            entries: existingManifest.entries,
+            dependency_graph: existingManifest.dependency_graph,
+            development_observation: existingManifest.development_observation,
+            source_stats: {directories_read: 0, files_read: 0, bytes_read: 0},
+            ontology_semantics: {
+                trusted: true,
+                diagnostics: [],
+                ontology_entities: 0,
+                ontology_relations: 0
+            }
+        };
+        generatorIds = new Set(Object.values(existingManifest.entries).map(entry => entry.generator));
+        viewIds = new Set(Object.values(existingManifest.entries).map(entry => entry.view));
+    } else {
+        if (observation) {
+            counters.add('dataset.development_candidate_files', observation.candidate_files);
+            counters.add('dataset.development_relevant_files_checked', observation.relevant_files_checked);
+            console.log(`Development delta requires graph planning: ${observation.reason}.`);
+        }
+        const [specValidation, generatorCatalog, viewCatalog] = await Promise.all([
+            normalizeAndValidateSpec(specName),
+            loadGeneratorCatalog(undefined, counters),
+            loadViewCatalog(undefined, counters)
+        ]);
+        if (specValidation.errors.length > 0) {
+            throw new Error(`Cannot validate dataset freshness because spec "${specName}" is invalid.`);
+        }
+        const scopedGenerators = targetGenerator
+            ? generatorCatalog.filter(entry =>
+                entry.generatorId === targetGenerator
+                || entry.module.relativePath === targetGenerator
+                || entry.module.category === targetGenerator)
+            : generatorCatalog;
+        const scopedViews = targetView
+            ? viewCatalog.filter(entry =>
+                entry.viewId === targetView
+                || entry.module.relativePath === targetView
+                || entry.module.category === targetView)
+            : viewCatalog;
+        const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
+        const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, counters);
+        const matchDelta = matchTargetsDelta({
+            targets: specValidation.targets,
+            generatorCatalog,
+            viewCatalog,
+            specName,
+            policyHash: matchingPolicyInputHash(),
+            previousGraph: rebuildGraph ? null : existingManifest?.dependency_graph ?? null,
+            pairIndex,
+            counters
+        });
+        currentManifestBuild = buildDatasetManifest({
+            projectRoot: PROJECT_ROOT,
+            datasetDir: DATASET_DIR,
+            specName,
+            targets: specValidation.targets,
+            generators: generatorCatalog,
+            views: viewCatalog,
+            tuples: matchDelta.tuples,
+            pairIndex,
+            sourceIndex,
+            reuseValidationIdentityFrom: rebuildGraph ? undefined : existingManifest?.dependency_graph,
+            counters,
+            generatedSplits: presentSplits,
+            rendererEnvironment: CANONICAL_RENDERER_ID
+        });
+        counters.add('dataset.source_directories_read', currentManifestBuild.source_stats.directories_read);
+        counters.add('dataset.source_files_read', currentManifestBuild.source_stats.files_read);
+        counters.add('dataset.source_bytes_read', currentManifestBuild.source_stats.bytes_read);
+        generatorIds = new Set(scopedGenerators.map(entry => entry.generatorId));
+        viewIds = new Set(scopedViews.map(entry => entry.viewId));
+    }
     const scopedEntries = Object.fromEntries(Object.entries(currentManifestBuild.entries)
         .filter(([, entry]) => generatorIds.has(entry.generator) && viewIds.has(entry.view)));
     const scopedBuild = {...currentManifestBuild, entries: scopedEntries};

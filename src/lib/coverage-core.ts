@@ -134,8 +134,9 @@ function writeCoverageCoreArtifact(options: {
     root: string;
     artifact: CoverageCoreArtifact;
     counters?: WorkCounters;
+    replaceExisting?: boolean;
 }): string {
-    const {root, artifact, counters} = options;
+    const {root, artifact, counters, replaceExisting = false} = options;
     const destination = artifactDirectory(root, artifact.core_input_key);
     mkdirSync(root, {recursive: true});
     const stage = resolve(root, `${artifact.core_input_key}.stage-${process.pid}-${randomUUID()}`);
@@ -153,13 +154,28 @@ function writeCoverageCoreArtifact(options: {
     writeFileSync(resolve(stage, 'manifest.json'), json(manifest), 'utf-8');
     counters?.add('coverage_core.files_written', 2);
     counters?.add('coverage_core.bytes_written', digest.bytes + Buffer.byteLength(json(manifest)));
+    const previous = resolve(root, `${artifact.core_input_key}.previous-${process.pid}-${randomUUID()}`);
+    let movedPrevious = false;
     try {
-        renameSync(stage, destination);
+        if (replaceExisting && existsSync(destination)) {
+            renameSync(destination, previous);
+            movedPrevious = true;
+        }
+        try {
+            renameSync(stage, destination);
+        } catch (error) {
+            if (!existsSync(destination)) throw error;
+            rmSync(stage, {recursive: true, force: true});
+        }
+        if (movedPrevious) rmSync(previous, {recursive: true, force: true});
     } catch (error) {
-        if (!existsSync(destination)) throw error;
-        rmSync(stage, {recursive: true, force: true});
+        if (movedPrevious && !existsSync(destination) && existsSync(previous)) {
+            renameSync(previous, destination);
+        }
+        throw error;
     } finally {
         if (existsSync(stage)) rmSync(stage, {recursive: true, force: true});
+        if (existsSync(previous)) rmSync(previous, {recursive: true, force: true});
     }
     return destination;
 }
@@ -169,10 +185,11 @@ export async function resolveCoverageCore(options: {
     inputs: CoverageInputIdentity;
     build: () => Promise<{tree: StandardsTreeData; coverage: CoverageData}>;
     counters?: WorkCounters;
+    rebuildGraph?: boolean;
 }): Promise<ResolvedCoverageCore> {
     const coreInputs = toCoverageCoreInputIdentity(options.inputs);
     const key = coverageCoreInputKey(coreInputs);
-    const existing = readCoverageCoreArtifact({
+    const existing = options.rebuildGraph ? null : readCoverageCoreArtifact({
         root: options.root,
         key,
         expectedInputs: coreInputs,
@@ -192,7 +209,12 @@ export async function resolveCoverageCore(options: {
         tree: built.tree,
         coverage: toCoverageCoreData(built.coverage)
     };
-    const directory = writeCoverageCoreArtifact({root: options.root, artifact, counters: options.counters});
+    const directory = writeCoverageCoreArtifact({
+        root: options.root,
+        artifact,
+        counters: options.counters,
+        replaceExisting: options.rebuildGraph
+    });
     const verified = readCoverageCoreArtifact({
         root: options.root,
         key,

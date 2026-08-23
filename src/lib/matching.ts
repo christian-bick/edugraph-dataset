@@ -1,15 +1,16 @@
-import {resolve} from 'node:path';
 import {getConceptAncestors, isSubConceptOf} from './ontology.ts';
 import {
     getAcceptedGeneratorProblemTypes,
     isProblemTypeCompatible
 } from './type-parser.ts';
 import {
-    SourceContentIndex,
     digestIdentity,
     radixSortUtf8
 } from './content-identity.ts';
-import type {DependencyGraphSnapshot} from './dependency-planner.ts';
+import type {
+    DependencyGraphSnapshot,
+    DependencyMatchingIndex
+} from './dependency-planner.ts';
 import type {WorkCounters} from './work-counters.ts';
 import type {CompetencyTarget} from '../types/ml-engine.ts';
 
@@ -124,6 +125,98 @@ export interface CompatibleModulePairIndex {
     orderedPairs: CompatibleModulePair[];
     byProblemType: Map<string, CompatibleModulePair[]>;
     bySupportedTargetLabel: Map<string, CompatibleModulePair[]>;
+}
+
+export interface TargetCapabilityPostingIndex {
+    orderedTargets: CompetencyTarget[];
+    byRequiredTargetLabel: Map<string, CompetencyTarget[]>;
+    withoutOntologyLabels: CompetencyTarget[];
+}
+
+/** Builds the target-side postings used when one or more module pairs change. */
+export function buildTargetCapabilityPostingIndex(
+    targets: CompetencyTarget[],
+    counters?: WorkCounters
+): TargetCapabilityPostingIndex {
+    counters?.add('match.target_index_builds');
+    const byRequiredTargetLabel = new Map<string, CompetencyTarget[]>();
+    const withoutOntologyLabels: CompetencyTarget[] = [];
+    for (const target of targets) {
+        const labels = [...new Set(target.labels.filter(label => label.startsWith(EDU_PREFIX)))];
+        if (labels.length === 0) withoutOntologyLabels.push(target);
+        for (const label of labels) {
+            const posting = byRequiredTargetLabel.get(label);
+            if (posting) posting.push(target);
+            else byRequiredTargetLabel.set(label, [target]);
+            counters?.add('match.target_posting_entries');
+        }
+    }
+    return {orderedTargets: [...targets], byRequiredTargetLabel, withoutOntologyLabels};
+}
+
+export function buildDependencyMatchingIndex(
+    targets: CompetencyTarget[],
+    tuples: readonly MatchTuple[] = []
+): DependencyMatchingIndex {
+    const targetIndex = buildTargetCapabilityPostingIndex(targets);
+    const matchedPairKeysByTarget = new Map<string, string[]>();
+    for (const tuple of tuples) {
+        const pairs = matchedPairKeysByTarget.get(tuple.target.id);
+        const key = modulePairKey(tuple.generatorId, tuple.viewId);
+        if (pairs) pairs.push(key);
+        else matchedPairKeysByTarget.set(tuple.target.id, [key]);
+    }
+    return {
+        target_ids_by_label: Object.fromEntries([...targetIndex.byRequiredTargetLabel]
+            .map(([label, posting]) => [label, posting.map(target => target.id)])),
+        targets_without_ontology_labels: targetIndex.withoutOntologyLabels.map(target => target.id),
+        matched_pair_keys_by_target: Object.fromEntries(matchedPairKeysByTarget)
+    };
+}
+
+function candidateTargetsForPairs(
+    pairIndex: CompatibleModulePairIndex,
+    targetIndex: TargetCapabilityPostingIndex,
+    counters?: WorkCounters
+): CompetencyTarget[] {
+    const candidates = new Set(targetIndex.withoutOntologyLabels);
+    for (const pair of pairIndex.orderedPairs) {
+        for (const label of pair.supportedTargetLabels) {
+            counters?.add('match.pair_target_label_lookups');
+            const posting = targetIndex.byRequiredTargetLabel.get(label);
+            if (!posting) continue;
+            counters?.add('match.pair_target_posting_entries', posting.length);
+            for (const target of posting) candidates.add(target);
+        }
+    }
+    const ordered = targetIndex.orderedTargets.filter(target => candidates.has(target));
+    counters?.add('match.delta_pair_candidate_targets', ordered.length);
+    return ordered;
+}
+
+function persistedCandidateTargetsForPairs(
+    pairIndex: CompatibleModulePairIndex,
+    matchingIndex: DependencyMatchingIndex,
+    targetsById: ReadonlyMap<string, CompetencyTarget>,
+    counters?: WorkCounters
+): CompetencyTarget[] {
+    const targetIds = new Set(matchingIndex.targets_without_ontology_labels);
+    for (const pair of pairIndex.orderedPairs) {
+        for (const label of pair.supportedTargetLabels) {
+            counters?.add('match.persisted_target_label_lookups');
+            const posting = matchingIndex.target_ids_by_label[label];
+            if (!posting) continue;
+            counters?.add('match.persisted_target_posting_entries', posting.length);
+            for (const targetId of posting) targetIds.add(targetId);
+        }
+    }
+    const targets: CompetencyTarget[] = [];
+    for (const targetId of targetIds) {
+        const target = targetsById.get(targetId);
+        if (target) targets.push(target);
+    }
+    counters?.add('match.delta_pair_candidate_targets', targets.length);
+    return targets;
 }
 
 function indexCompatiblePairs(
@@ -341,19 +434,15 @@ export function viewCapabilityInputHash(view: ViewMatchInfo): string {
     });
 }
 
-export function matchingPolicySourcePaths(projectRoot: string): string[] {
-    return [
-        resolve(projectRoot, 'src', 'lib', 'matching.ts'),
-        resolve(projectRoot, 'src', 'lib', 'ontology.ts'),
-        resolve(projectRoot, 'src', 'lib', 'type-parser.ts')
-    ];
-}
+export const MATCHING_POLICY_EPOCH = 1;
 
-export function matchingPolicyInputHash(
-    projectRoot: string,
-    sourceIndex = new SourceContentIndex(projectRoot)
-): string {
-    return sourceIndex.hash(matchingPolicySourcePaths(projectRoot));
+/**
+ * Matching implementation code is deliberately outside automatic cache
+ * identity. A behavioral machinery change requires --rebuild-graph; this
+ * epoch exists only for an intentional persisted-contract migration.
+ */
+export function matchingPolicyInputHash(): string {
+    return digestIdentity({matching_policy_epoch: MATCHING_POLICY_EPOCH});
 }
 
 export interface DeltaMatchResult extends MatchResult {
@@ -382,6 +471,7 @@ export function matchTargetsDelta(options: {
     policyHash: string;
     previousGraph: DependencyGraphSnapshot | null;
     pairIndex?: CompatibleModulePairIndex;
+    targetIndex?: TargetCapabilityPostingIndex;
     counters?: WorkCounters;
 }): DeltaMatchResult {
     const pairIndex = options.pairIndex ?? buildCompatibleModulePairIndex(
@@ -448,23 +538,42 @@ export function matchTargetsDelta(options: {
     }
 
     const tuples = new Map<string, MatchTuple>();
-    const targetPrefix = `target-capability:${options.specName}:`;
-    for (const node of Object.values(previous.nodes)) {
-        if (node.kind !== 'match-tuple') continue;
-        const targetDependency = node.dependencies.find(id => id.startsWith(targetPrefix));
-        const pairDependency = node.dependencies.find(id => id.startsWith('module-pair:'));
-        if (!targetDependency || !pairDependency) continue;
-        const targetId = targetDependency.slice(targetPrefix.length);
-        const key = pairDependency.slice('module-pair:'.length);
-        const target = targetsById.get(targetId);
-        const pair = currentPairs.get(key);
-        if (!target || !pair || changedTargets.has(targetId) || changedPairs.has(key)) continue;
-        const tuple = {
-            target,
-            generatorId: pair.generator.generatorId,
-            viewId: pair.view.viewId
-        };
-        tuples.set(tupleIdentity(tuple), tuple);
+    if (previous.matching_index) {
+        for (const [targetId, pairKeys] of Object.entries(
+            previous.matching_index.matched_pair_keys_by_target
+        )) {
+            const target = targetsById.get(targetId);
+            if (!target || changedTargets.has(targetId)) continue;
+            for (const key of pairKeys) {
+                const pair = currentPairs.get(key);
+                if (!pair || changedPairs.has(key)) continue;
+                const tuple = {
+                    target,
+                    generatorId: pair.generator.generatorId,
+                    viewId: pair.view.viewId
+                };
+                tuples.set(tupleIdentity(tuple), tuple);
+            }
+        }
+    } else {
+        const targetPrefix = `target-capability:${options.specName}:`;
+        for (const node of Object.values(previous.nodes)) {
+            if (node.kind !== 'match-tuple') continue;
+            const targetDependency = node.dependencies.find(id => id.startsWith(targetPrefix));
+            const pairDependency = node.dependencies.find(id => id.startsWith('module-pair:'));
+            if (!targetDependency || !pairDependency) continue;
+            const targetId = targetDependency.slice(targetPrefix.length);
+            const key = pairDependency.slice('module-pair:'.length);
+            const target = targetsById.get(targetId);
+            const pair = currentPairs.get(key);
+            if (!target || !pair || changedTargets.has(targetId) || changedPairs.has(key)) continue;
+            const tuple = {
+                target,
+                generatorId: pair.generator.generatorId,
+                viewId: pair.view.viewId
+            };
+            tuples.set(tupleIdentity(tuple), tuple);
+        }
     }
     const reusedTuples = tuples.size;
 
@@ -478,7 +587,20 @@ export function matchTargetsDelta(options: {
 
     const changedPairIndex = subsetCompatibleModulePairIndex(pairIndex, pair =>
         changedPairs.has(modulePairKey(pair.generator.generatorId, pair.view.viewId)));
-    const unchangedTargets = options.targets.filter(target => !changedTargets.has(target.id));
+    const pairCandidates = previous.matching_index && !options.targetIndex
+        ? persistedCandidateTargetsForPairs(
+            changedPairIndex,
+            previous.matching_index,
+            targetsById,
+            options.counters
+        )
+        : candidateTargetsForPairs(
+            changedPairIndex,
+            options.targetIndex
+                ?? buildTargetCapabilityPostingIndex(options.targets, options.counters),
+            options.counters
+        );
+    const unchangedTargets = pairCandidates.filter(target => !changedTargets.has(target.id));
     if (changedPairIndex.orderedPairs.length > 0) {
         for (const tuple of matchTargets(
             unchangedTargets,
