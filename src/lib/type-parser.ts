@@ -77,6 +77,16 @@ export function getGeneratorProblemTypeFromPath(
         return generatorProblemTypeFiles.get(generatorPath) ?? null;
     }
 
+    const problemType = readGeneratorProblemTypeFromPath(generatorPath, counters);
+    generatorProblemTypeFiles.set(generatorPath, problemType);
+    return problemType;
+}
+
+/** Parses one generator declaration without consulting process-local caches. */
+export function readGeneratorProblemTypeFromPath(
+    generatorPath: string,
+    counters?: WorkCounters
+): string | null {
     let problemType: string | null = null;
     if (existsSync(generatorPath)) {
         counters?.add('type.generator_file_reads');
@@ -84,7 +94,6 @@ export function getGeneratorProblemTypeFromPath(
         const match = content.match(/implements\s+ProblemGenerator<([^>]+)>/);
         problemType = match ? match[1].split(',')[0].trim() : null;
     }
-    generatorProblemTypeFiles.set(generatorPath, problemType);
     return problemType;
 }
 

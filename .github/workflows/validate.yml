@@ -41,7 +41,7 @@ jobs:
           --rebuild-graph
 
       - name: Validate coverage projection and core
-        run: npm run validate:coverage -- --coverage-dir=temp/coverage-validation
+        run: npm run validate:coverage -- --coverage-dir=temp/coverage-validation --rebuild-graph
 
   deploy_coverage:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

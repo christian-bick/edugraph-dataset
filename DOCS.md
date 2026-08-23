@@ -214,6 +214,13 @@ Playwright image, so changing the host runtime does not change the renderer iden
   targets with standards through a shared prefix index. The final structured work-counter line
   reports physical source reads, index builds, posting traversal, candidate checks, and standard
   lookup work for complexity regression diagnosis.
+  Before those catalogs are loaded, local development consults a selection-addressed observation
+  under `temp/coverage-core/.observations/`. Git identifies only candidate paths since the last
+  successful operation; recorded content hashes and extracted problem-type records then prove
+  whether the semantic coverage inputs are unchanged. A proven-clean observation resolves the
+  immutable core key without catalog loading. New structure, changed semantic records, changed
+  standards or ontology provenance, missing history, or ambiguous observation reconstructs the
+  complete linear identity.
 * **Input identity**: Routine coverage reads `public/coverage/ccss-tree.json` and records its exact
   path, byte length, and SHA-256 digest; it performs no network access and retains no raw standards
   cache. Coverage derives the used ontology closure directly from the exact installed package.
@@ -230,8 +237,10 @@ Playwright image, so changing the host runtime does not change the renderer iden
   `core_input_key` uses this content digest rather than the Git commit and excludes
   projection metadata—the channel, human-readable source ref, source SHA, package version, and
   generation timestamp. Equivalent content from `main` and a release tag therefore resolves to one
-  core. `validate:coverage` reconstructs the expected key from the current checkout and fails closed
-  on any missing, stale, internally inconsistent, or unverifiable identity.
+  core. During development, `validate:coverage` uses the same observation proof before loading
+  catalogs. `--rebuild-graph` reconstructs the expected key from the current checkout; CI,
+  deployment, and release validation always pass it. Both modes fail closed on any missing, stale,
+  internally inconsistent, or unverifiable identity.
 * **Immutable core and projections**: `src/lib/coverage-core.ts` stores the standards tree and
   timestamp-free coverage data under `temp/coverage-core/<core_input_key>/`. A completion manifest
   records the exact core byte length and SHA-256 digest; readers verify both before reuse, and an
@@ -240,9 +249,9 @@ Playwright image, so changing the host runtime does not change the renderer iden
   metadata. The core key uses the semantic hash of the ontology closure actually referenced by
   CCSS rather than the package version; an unrelated entity update reuses the core, while the
   projection still records the current ontology version. On a local hit the mapper performs no
-  generator/view discovery or target matching. CI, release, and deployment pass
-  `--rebuild-graph`: the full coverage computation is linear and small enough that avoiding a
-  machinery-sensitive cross-workflow cache is the simpler contract.
+  generator/view discovery or target matching. The observation is an untracked acceleration index,
+  never part of the core key and only published after a successful operation. CI, release, and
+  deployment pass `--rebuild-graph`: the full coverage computation remains the authoritative gate.
 
 ### `src/scripts/refresh-local-explorer.ts`
 * **Execution**: Invoked by the local explorer's **Refresh local data** action.

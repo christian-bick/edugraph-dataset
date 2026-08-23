@@ -81,12 +81,14 @@ function styleSpecifiers(content: string): string[] {
 export class ModelSourceIndex {
     private readonly projectRoot: string;
     private readonly assetLibrary: AssetLibraryIndex;
+    private readonly includeAssets: boolean;
     private readonly direct = new Map<string, readonly string[]>();
     private readonly closure = new Map<string, readonly string[]>();
 
-    constructor(projectRoot: string) {
+    constructor(projectRoot: string, options: {includeAssets?: boolean} = {}) {
         this.projectRoot = resolve(projectRoot);
         this.assetLibrary = new AssetLibraryIndex(this.projectRoot);
+        this.includeAssets = options.includeAssets ?? true;
     }
 
     private dependenciesOf(rawPath: string): readonly string[] {
@@ -109,7 +111,7 @@ export class ModelSourceIndex {
             .filter((dependency): dependency is string => dependency !== null);
         const dependencies = [
             ...localDependencies,
-            ...this.assetLibrary.filesUsedBy(content)
+            ...(this.includeAssets ? this.assetLibrary.filesUsedBy(content) : [])
         ].filter((dependency): dependency is string =>
             within(dependency, this.projectRoot) && !dependency.includes(`${resolve(this.projectRoot, 'node_modules')}`));
         const normalized = radixSortUtf8([...new Set(dependencies)]);

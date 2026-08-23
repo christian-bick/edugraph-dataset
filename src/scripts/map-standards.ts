@@ -8,8 +8,11 @@ import {
     parseStandardsTree
 } from '../lib/standards-coverage.ts';
 import {createWorkCounters} from '../lib/work-counters.ts';
-import {buildCoverageInputIdentity, resolveOntologyProvenance} from '../lib/coverage-identity.ts';
 import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
+import {
+    publishCoverageInputObservation,
+    resolveCurrentCoverageInputs
+} from '../lib/coverage-observation.ts';
 import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
 import {
     resolveOntologySemanticUsage
@@ -35,21 +38,27 @@ async function main() {
     console.log('--- Initiating CCSS Ontology Mapping Pipeline ---');
     const counters = createWorkCounters();
     const sourceTree = parseStandardsTree(readCanonicalStandardsTree(projectRoot));
-    const ontology = resolveOntologyProvenance(projectRoot);
-    const ontologyUsage = await resolveOntologySemanticUsage(projectRoot, 'ccss');
-    const ontologyVersion = ontology.version;
     const generatedAt = new Date().toISOString();
     const grade = readOption('grade');
     const excludeHighSchool = args.includes('--k8') || args.includes('--exclude-hs');
-    const inputs = buildCoverageInputIdentity({
+    const resolvedInputs = await resolveCurrentCoverageInputs({
         projectRoot,
+        root: coreCacheDir,
         sourceRef,
         sourceSha,
-        ontology,
-        ontologyUsageSha256: ontologyUsage.usage.input_sha256,
         grade,
-        excludeHighSchool
+        excludeHighSchool,
+        rebuildGraph,
+        counters,
+        ontologyUsageSha256: async () =>
+            (await resolveOntologySemanticUsage(projectRoot, 'ccss')).usage.input_sha256
     });
+    const inputs = resolvedInputs.inputs;
+    const ontologyVersion = inputs.ontology.version;
+    console.log(
+        `[Coverage observation] ${resolvedInputs.reused_observation ? 'HIT' : 'MISS'}: `
+        + resolvedInputs.reason
+    );
     const core = await resolveCoverageCore({
         root: coreCacheDir,
         inputs,
@@ -67,6 +76,7 @@ async function main() {
             })
         })
     });
+    publishCoverageInputObservation(coreCacheDir, resolvedInputs.observation);
     const tree = parseStandardsTree(core.artifact.tree);
     const coverage = projectCoverageData(core.artifact.coverage, generatedAt, ontologyVersion);
     console.log(

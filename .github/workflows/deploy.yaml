@@ -50,7 +50,7 @@ jobs:
           --rebuild-graph
 
       - name: Validate Preview coverage data
-        run: npm run validate:coverage -- --coverage-dir=public/coverage/preview
+        run: npm run validate:coverage -- --coverage-dir=public/coverage/preview --rebuild-graph
 
       - name: Download Latest release coverage data
         shell: bash

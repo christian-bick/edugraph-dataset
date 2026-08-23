@@ -1,15 +1,17 @@
-import {execFileSync} from 'node:child_process';
 import {existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {
     SourceContentIndex,
-    digestFile,
     digestIdentity,
     radixSortUtf8
 } from './content-identity.ts';
 import type {DependencyGraphSnapshot} from './dependency-planner.ts';
 import {resolveOntologyProvenance} from './coverage-identity.ts';
 import {isAssetLibraryPath} from './asset-library.ts';
+import {
+    captureGitInputObservation,
+    inspectGitInputObservation
+} from './git-observation.ts';
 
 export const DEVELOPMENT_OBSERVATION_SCHEMA_VERSION = 4;
 
@@ -35,38 +37,6 @@ export interface DevelopmentObservationResult {
 }
 
 const normalizePath = (path: string): string => path.replaceAll('\\', '/');
-
-function gitLines(projectRoot: string, args: string[]): string[] {
-    return execFileSync('git', args, {
-        cwd: projectRoot,
-        encoding: 'utf-8',
-        stdio: ['ignore', 'pipe', 'ignore']
-    }).split(/\r?\n/).map(normalizePath).filter(Boolean);
-}
-
-function gitHead(projectRoot: string): string {
-    return gitLines(projectRoot, ['rev-parse', 'HEAD'])[0] ?? '';
-}
-
-function dirtyFiles(projectRoot: string): string[] {
-    return radixSortUtf8([...new Set([
-        ...gitLines(projectRoot, ['diff', '--name-only', '--no-renames', 'HEAD']),
-        ...gitLines(projectRoot, ['ls-files', '--others', '--exclude-standard'])
-    ])]);
-}
-
-function ignoredPotentialInputs(projectRoot: string, specName: string): string[] {
-    const roots = [
-        `src/spec/${specName}`,
-        `src/spec/${specName}.ts`,
-        'src/generators',
-        'src/visuals/views',
-        'public/icons'
-    ];
-    return gitLines(projectRoot, [
-        'ls-files', '--others', '--ignored', '--exclude-standard', '--', ...roots
-    ]).filter(path => isPotentialNewInput(path, specName));
-}
 
 function isPotentialNewInput(path: string, specName: string): boolean {
     if (path.endsWith('.test.ts') || path.endsWith('.test.tsx')) return false;
@@ -141,12 +111,14 @@ export function captureDevelopmentInputObservation(options: {
         const graphInputs = graphSourceInputs(options.graph);
         const files = new Map(Object.entries(graphInputs.hashes));
         for (const identity of extraInputs) files.set(normalizePath(identity.path), identity.sha256);
+        const workspace = captureGitInputObservation(
+            options.projectRoot,
+            Object.fromEntries(files)
+        );
+        if (!workspace) return null;
         return {
             schema_version: DEVELOPMENT_OBSERVATION_SCHEMA_VERSION,
-            git_head: gitHead(options.projectRoot),
-            dirty_files: dirtyFiles(options.projectRoot),
-            input_files: Object.fromEntries(radixSortUtf8([...files.keys()])
-                .map(path => [path, files.get(path)!])),
+            ...workspace,
             node_ids_by_file: graphInputs.nodeIdsByFile,
             entry_files_by_node: Object.fromEntries(radixSortUtf8(Object.keys(
                 options.entryFilesByNode ?? {}
@@ -197,58 +169,23 @@ export function inspectDevelopmentInputObservation(options: {
         return miss('ontology provenance changed; authoritative graph reconstruction required');
     }
 
-    try {
-        const currentHead = gitHead(options.projectRoot);
-        const currentDirty = dirtyFiles(options.projectRoot);
-        const committed = currentHead === previous.git_head
-            ? []
-            : gitLines(options.projectRoot, [
-                'diff', '--name-only', '--no-renames', previous.git_head, currentHead
-            ]);
-        const candidates = radixSortUtf8([...new Set([
-            ...previous.dirty_files,
-            ...currentDirty,
-            ...committed
-        ])]);
-        const ignored = ignoredPotentialInputs(options.projectRoot, options.specName);
-        if (ignored.length > 0) {
-            return miss(`ignored graph input cannot be observed: ${ignored[0]}`, candidates.length);
-        }
-
-        let checked = 0;
-        const changedFiles: string[] = [];
-        const candidateNodes = new Set<string>();
-        for (const path of candidates) {
-            if (!(path in previous.input_files) && !isPotentialNewInput(path, options.specName)) {
-                continue;
-            }
-            checked++;
-            const absolutePath = resolve(options.projectRoot, path);
-            const currentHash = existsSync(absolutePath) ? digestFile(absolutePath).sha256 : null;
-            const previousHash = previous.input_files[path] ?? null;
-            if (currentHash !== previousHash) {
-                changedFiles.push(path);
-                for (const nodeId of previous.node_ids_by_file[path] ?? []) candidateNodes.add(nodeId);
-            }
-        }
-        if (changedFiles.length > 0) {
-            return miss(
-                `graph input changed: ${changedFiles[0]}`,
-                candidates.length,
-                checked,
-                radixSortUtf8(changedFiles),
-                radixSortUtf8([...candidateNodes])
-            );
-        }
-        return {
-            clean: true,
-            reason: 'all candidate graph inputs are byte-identical',
-            candidate_files: candidates.length,
-            relevant_files_checked: checked,
-            changed_files: [],
-            candidate_nodes: []
-        };
-    } catch (error) {
-        return miss(`Git delta observation unavailable: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    const inspection = inspectGitInputObservation({
+        projectRoot: options.projectRoot,
+        previous,
+        potentialRoots: [
+            `src/spec/${options.specName}`,
+            `src/spec/${options.specName}.ts`,
+            'src/generators',
+            'src/visuals/views',
+            'public/icons'
+        ],
+        isPotentialInput: path => isPotentialNewInput(path, options.specName),
+        inputName: 'graph input'
+    });
+    const candidateNodes = new Set(inspection.changed_files.flatMap(path =>
+        previous.node_ids_by_file[path] ?? []));
+    return {
+        ...inspection,
+        candidate_nodes: radixSortUtf8([...candidateNodes])
+    };
 }

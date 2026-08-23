@@ -56,4 +56,11 @@ describe('ModelSourceIndex', () => {
             '/src/view/view.tsx'
         ]);
     });
+
+    it('can exclude presentation assets from semantic model indexing', () => {
+        const root = fixture();
+        const index = new ModelSourceIndex(root, {includeAssets: false});
+        expect(index.dependencies([resolve(root, 'src/view/view.tsx')])
+            .some(path => path.includes('public'))).toBe(false);
+    });
 });

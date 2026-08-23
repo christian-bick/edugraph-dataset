@@ -7,6 +7,7 @@ import {
     coverageManifestIdentityIssues,
     coverageInputKey,
     coverageRepositoryDigest,
+    coverageRepositorySnapshot,
     resolveOntologyProvenance
 } from './coverage-identity.ts';
 import {canonicalStandardsIdentity} from './standards-source.ts';
@@ -172,6 +173,37 @@ describe('coverage input identity', () => {
             const changedTarget = coverageRepositoryDigest(root);
             writeFileSync(resolve(root, 'src', 'lib', 'standards-coverage.ts'), 'changed algorithm');
             expect(coverageRepositoryDigest(root)).toBe(changedTarget);
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+
+    it('records per-file observation identities without changing repository identity', () => {
+        const root = fixture();
+        try {
+            const snapshot = coverageRepositorySnapshot(root);
+            expect(snapshot.content_sha256).toBe(coverageRepositoryDigest(root));
+            expect(snapshot.files['src/generators/demo/generator.ts']?.generator_problem_type)
+                .toMatchObject({generator: 'demo'});
+            expect(snapshot.files['src/generators/demo/helpers.ts']?.content).toBeDefined();
+            expect(snapshot.files['src/visuals/views/demo/helpers.ts']).toBeUndefined();
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+
+    it('keeps presentation assets outside semantic coverage identity', () => {
+        const root = fixture();
+        try {
+            mkdirSync(resolve(root, 'public', 'icons'), {recursive: true});
+            writeFileSync(resolve(root, 'public', 'icons', 'demo.svg'), '<svg>one</svg>');
+            writeFileSync(
+                resolve(root, 'src', 'generators', 'demo', 'spec.ts'),
+                "export const capability = '/icons/demo.svg';"
+            );
+            const before = coverageRepositoryDigest(root);
+            writeFileSync(resolve(root, 'public', 'icons', 'demo.svg'), '<svg>two</svg>');
+            expect(coverageRepositoryDigest(root)).toBe(before);
         } finally {
             rmSync(root, {recursive: true, force: true});
         }

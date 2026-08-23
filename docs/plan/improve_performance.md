@@ -358,11 +358,14 @@ package-version projection, and generation timestamp while retaining semantic co
 standards-tree, used ontology semantics, selection, and asset inputs.
 The timestamp-free standards tree and coverage payload are atomically published under
 `temp/coverage-core/<core_input_key>/` with a completion manifest containing their byte length and
-SHA-256 digest. An exact local hit verifies and projects that artifact without loading
-generator/view catalogs or matching targets; a corrupt or partial entry fails closed. Coverage
-construction is about two seconds after the matching fix, so validation, deployment, and release
-invoke `--rebuild-graph` instead of maintaining a workflow cache whose invalidation contract would
-pull machinery code into semantic identity. Preview and Latest differ only in projection metadata.
+SHA-256 digest. A selection-addressed observation under `.observations/` records the last successful
+Git candidate baseline and per-file semantic identities. It distinguishes generator problem-type
+declarations from generator bodies, so an implementation-only edit can prove a local hit before
+catalog loading while a type, capability, target, standards-tree, ontology-provenance, selection,
+or asset-input change reconstructs the complete identity. The observation is atomically refreshed
+only after successful core resolution and never participates in the semantic key. A corrupt,
+partial, ambiguous, or missing observation fails closed into the complete linear path. Validation,
+deployment, and release invoke `--rebuild-graph`; Preview and Latest differ only in projection metadata.
 
 #### Phase 4: introduce the dependency and delta foundation — complete
 

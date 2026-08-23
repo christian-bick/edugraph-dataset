@@ -1,15 +1,16 @@
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {relative, resolve} from 'node:path';
 import {
+    type ContentDigest,
     digestIdentity,
     radixSortUtf8,
     SourceContentIndex
 } from './content-identity.ts';
 import {findLeafModules} from './module-resolver.ts';
 import {
-    getGeneratorProblemTypeFromPath,
-    getViewToProblemTypeMapFromPath
+    getViewToProblemTypeMapFromPath,
+    readGeneratorProblemTypeFromPath
 } from './type-parser.ts';
 import {
     canonicalStandardsIdentity,
@@ -59,46 +60,92 @@ export interface CoverageCoreInputIdentity {
     selection: CoverageSelectionIdentity;
 }
 
-const isTypeScript = (path: string): boolean => path.endsWith('.ts') || path.endsWith('.tsx');
+export interface CoverageRepositoryFileRecord {
+    content?: ContentDigest;
+    generator_problem_type?: {generator: string; sha256: string};
+    view_problem_types_sha256?: string;
+}
+
+export interface CoverageRepositorySnapshot {
+    content_sha256: string;
+    files: Record<string, CoverageRepositoryFileRecord>;
+}
+
+const isTypeScript = (path: string): boolean =>
+    (path.endsWith('.ts') || path.endsWith('.tsx'))
+    && !path.endsWith('.test.ts')
+    && !path.endsWith('.test.tsx');
 
 /** Authored capability specs and the local model code they inherently import. */
 function capabilitySourceIdentities(
     projectRoot: string,
-    sourceIndex: SourceContentIndex
+    sourceIndex: SourceContentIndex,
+    specs: readonly string[]
 ) {
-    const modelSources = new ModelSourceIndex(projectRoot);
-    const specs = [
-        ...findLeafModules(resolve(projectRoot, 'src', 'generators')),
-        ...findLeafModules(resolve(projectRoot, 'src', 'visuals', 'views'))
-    ].map(module => resolve(module.absolutePath, 'spec.ts'));
+    const modelSources = new ModelSourceIndex(projectRoot, {includeAssets: false});
     return sourceIndex.identities(modelSources.dependencies(specs));
 }
 
-export function coverageRepositoryDigest(projectRoot: string): string {
+export function coverageRepositorySnapshot(projectRoot: string): CoverageRepositorySnapshot {
     const sourceIndex = new SourceContentIndex(projectRoot);
+    const generatorModules = findLeafModules(resolve(projectRoot, 'src', 'generators'));
+    const viewModules = findLeafModules(resolve(projectRoot, 'src', 'visuals', 'views'));
+    const generatorModuleById = new Map(generatorModules.map(module => [module.id, module]));
     const targets = sourceIndex.identities(
         [resolve(projectRoot, 'src', 'spec', 'ccss')],
         {include: isTypeScript}
     );
-    const capabilities = capabilitySourceIdentities(projectRoot, sourceIndex);
-    const generatorProblemTypes = findLeafModules(resolve(projectRoot, 'src', 'generators'))
-        .map(module => ({
-            generator: module.id,
-            problem_type: getGeneratorProblemTypeFromPath(
-                resolve(module.absolutePath, 'generator.ts')
-            )
-        }));
-    const rawViewProblemTypes = getViewToProblemTypeMapFromPath(
-        resolve(projectRoot, 'src', 'types', 'problems.ts')
-    );
+    const capabilities = capabilitySourceIdentities(projectRoot, sourceIndex, [
+        ...generatorModules,
+        ...viewModules
+    ].map(module => resolve(module.absolutePath, 'spec.ts')));
+    const generatorProblemTypes = generatorModules.map(module => ({
+        generator: module.id,
+        problem_type: readGeneratorProblemTypeFromPath(
+            resolve(module.absolutePath, 'generator.ts')
+        )
+    }));
+    const problemsPath = resolve(projectRoot, 'src', 'types', 'problems.ts');
+    const rawViewProblemTypes = getViewToProblemTypeMapFromPath(problemsPath);
     const viewProblemTypes = Object.fromEntries(radixSortUtf8(Object.keys(rawViewProblemTypes))
         .map(viewId => [viewId, rawViewProblemTypes[viewId]]));
-    return digestIdentity({
+    const contentSha256 = digestIdentity({
         targets,
         capabilities,
         generator_problem_types: generatorProblemTypes,
         view_problem_types: viewProblemTypes
     });
+    const files = new Map<string, CoverageRepositoryFileRecord>();
+    for (const identity of [...targets, ...capabilities]) {
+        files.set(identity.path, {
+            ...files.get(identity.path),
+            content: {sha256: identity.sha256, bytes: identity.bytes}
+        });
+    }
+    for (const record of generatorProblemTypes) {
+        const module = generatorModuleById.get(record.generator)!;
+        const path = relative(projectRoot, resolve(module.absolutePath, 'generator.ts')).replaceAll('\\', '/');
+        files.set(path, {
+            ...files.get(path),
+            generator_problem_type: {
+                generator: record.generator,
+                sha256: digestIdentity(record.problem_type)
+            }
+        });
+    }
+    const relativeProblemsPath = relative(projectRoot, problemsPath).replaceAll('\\', '/');
+    files.set(relativeProblemsPath, {
+        ...files.get(relativeProblemsPath),
+        view_problem_types_sha256: digestIdentity(viewProblemTypes)
+    });
+    return {
+        content_sha256: contentSha256,
+        files: Object.fromEntries(radixSortUtf8([...files.keys()]).map(path => [path, files.get(path)!]))
+    };
+}
+
+export function coverageRepositoryDigest(projectRoot: string): string {
+    return coverageRepositorySnapshot(projectRoot).content_sha256;
 }
 
 export function resolveOntologyProvenance(projectRoot: string): OntologyProvenance {
@@ -137,6 +184,7 @@ export function buildCoverageInputIdentity(options: {
     grade?: string;
     excludeHighSchool?: boolean;
     knownAssetsSha256?: string;
+    repositoryContentSha256?: string;
 }): CoverageInputIdentity {
     return {
         schema_version: COVERAGE_INPUT_SCHEMA_VERSION,
@@ -144,7 +192,8 @@ export function buildCoverageInputIdentity(options: {
         repository: {
             ref: options.sourceRef,
             sha: options.sourceSha,
-            content_sha256: coverageRepositoryDigest(options.projectRoot)
+            content_sha256: options.repositoryContentSha256
+                ?? coverageRepositoryDigest(options.projectRoot)
         },
         standards: options.standards ?? canonicalStandardsIdentity(options.projectRoot),
         ontology: {
@@ -200,10 +249,11 @@ export function currentGitSha(projectRoot: string): string | null {
 
 export function repositoryProvenanceIssues(
     projectRoot: string,
-    provenance: RepositoryProvenance
+    provenance: RepositoryProvenance,
+    expectedContentSha256?: string
 ): string[] {
     const issues: string[] = [];
-    const expectedContent = coverageRepositoryDigest(projectRoot);
+    const expectedContent = expectedContentSha256 ?? coverageRepositoryDigest(projectRoot);
     if (provenance.content_sha256 !== expectedContent) {
         issues.push(
             `Coverage repository content digest ${provenance.content_sha256} does not match ${expectedContent}.`
@@ -226,6 +276,7 @@ export function coverageManifestIdentityIssues(options: {
     manifest: CoverageManifest;
     ontology?: OntologyProvenance;
     ontologyUsageSha256?: string;
+    expectedInputs?: CoverageInputIdentity;
 }): string[] {
     const {projectRoot, manifest} = options;
     const issues: string[] = [];
@@ -251,7 +302,7 @@ export function coverageManifestIdentityIssues(options: {
         issues.push(`Coverage core_input_key ${manifest.core_input_key} does not match recorded inputs ${recordedKey}.`);
     }
 
-    const expected = buildCoverageInputIdentity({
+    const expected = options.expectedInputs ?? buildCoverageInputIdentity({
         projectRoot,
         sourceRef: manifest.source_ref,
         sourceSha: manifest.source_sha,
@@ -265,6 +316,19 @@ export function coverageManifestIdentityIssues(options: {
     if (manifest.core_input_key !== expectedKey) {
         issues.push(`Coverage core_input_key ${manifest.core_input_key} does not match current inputs ${expectedKey}.`);
     }
-    issues.push(...repositoryProvenanceIssues(projectRoot, manifest.inputs.repository));
+    if (digestIdentity(manifest.inputs.standards) !== digestIdentity(expected.standards)) {
+        issues.push('Coverage canonical standards identity does not match current inputs.');
+    }
+    if (digestIdentity(manifest.inputs.ontology) !== digestIdentity(expected.ontology)) {
+        issues.push('Coverage ontology provenance or used semantics do not match current inputs.');
+    }
+    if (digestIdentity(manifest.inputs.selection) !== digestIdentity(expected.selection)) {
+        issues.push('Coverage selection does not match current inputs.');
+    }
+    issues.push(...repositoryProvenanceIssues(
+        projectRoot,
+        manifest.inputs.repository,
+        expected.repository.content_sha256
+    ));
     return issues;
 }

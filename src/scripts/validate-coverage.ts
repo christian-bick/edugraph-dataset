@@ -3,7 +3,6 @@ import path from 'path';
 import { Area, Scope, Ability } from 'edugraph-ts';
 import {
   coverageManifestIdentityIssues,
-  resolveOntologyProvenance,
   toCoverageCoreInputIdentity
 } from '../lib/coverage-identity.ts';
 import {
@@ -13,6 +12,10 @@ import {
 import {digestIdentity} from '../lib/content-identity.ts';
 import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
 import {resolveOntologySemanticUsage} from '../lib/external-semantics.ts';
+import {
+  publishCoverageInputObservation,
+  resolveCurrentCoverageInputs
+} from '../lib/coverage-observation.ts';
 import type {CoverageManifest} from '../standards-explorer/types.ts';
 
 const PROJECT_ROOT = path.resolve('.');
@@ -27,6 +30,7 @@ const coreCacheDirArg = process.argv.slice(2)
   .find(arg => arg.startsWith('--core-cache-dir='))
   ?.slice('--core-cache-dir='.length);
 const CORE_CACHE_DIR = path.resolve(PROJECT_ROOT, coreCacheDirArg || path.join('temp', 'coverage-core'));
+const rebuildGraph = process.argv.includes('--rebuild-graph');
 
 interface ValidationResult {
   passed: boolean;
@@ -63,12 +67,26 @@ async function runValidation() {
   const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')) as CoverageManifest;
   const canonicalTree = readCanonicalStandardsTree(PROJECT_ROOT);
 
-  const ontologyUsage = await resolveOntologySemanticUsage(PROJECT_ROOT, 'ccss');
+  const resolvedInputs = await resolveCurrentCoverageInputs({
+    projectRoot: PROJECT_ROOT,
+    root: CORE_CACHE_DIR,
+    sourceRef: manifest.source_ref,
+    sourceSha: manifest.source_sha,
+    grade: manifest.inputs.selection.grade ?? undefined,
+    excludeHighSchool: manifest.inputs.selection.exclude_high_school,
+    knownAssetsSha256: manifest.inputs.selection.known_assets_sha256 ?? undefined,
+    rebuildGraph,
+    ontologyUsageSha256: async () =>
+      (await resolveOntologySemanticUsage(PROJECT_ROOT, 'ccss')).usage.input_sha256
+  });
+  console.log(
+    `[Coverage observation] ${resolvedInputs.reused_observation ? 'HIT' : 'MISS'}: `
+    + resolvedInputs.reason
+  );
   const identityIssues = coverageManifestIdentityIssues({
     projectRoot: PROJECT_ROOT,
     manifest,
-    ontology: resolveOntologyProvenance(PROJECT_ROOT),
-    ontologyUsageSha256: ontologyUsage.usage.input_sha256
+    expectedInputs: resolvedInputs.inputs
   });
   result.errors.push(...identityIssues);
   if (identityIssues.length > 0) result.passed = false;
@@ -466,6 +484,9 @@ async function runValidation() {
     }
   }
 
+  if (result.passed) {
+    publishCoverageInputObservation(CORE_CACHE_DIR, resolvedInputs.observation);
+  }
   printReport(result);
 }
 

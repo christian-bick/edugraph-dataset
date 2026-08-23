@@ -209,6 +209,10 @@ development inputs and are eliminated by the exact locked install used for canon
 The timestamp-free coverage computation is stored immutably under its complete input key. Local,
 CI, release, and deployment runs reuse that core and generate channel-specific metadata as a cheap
 projection when the effective coverage inputs are identical.
+Local development keeps an untracked observation under `temp/coverage-core/.observations/` so
+Git candidate paths and per-file semantic records can prove an unchanged core key before loading
+model catalogs. Use `--rebuild-graph` after relevant coverage machinery changes; CI, release, and
+deployment perform that authoritative reconstruction automatically.
 
 On `localhost` or `127.0.0.1`, a **Released / Local** switch controls only the sample
 images. Released uses the immutable published asset index; Local uses PNGs served from

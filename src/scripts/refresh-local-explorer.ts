@@ -10,9 +10,9 @@ import {
     buildCurrentStandardsCoverage,
 } from '../lib/standards-coverage.ts';
 import {
-    buildCoverageInputIdentity,
-    resolveOntologyProvenance
-} from '../lib/coverage-identity.ts';
+    publishCoverageInputObservation,
+    resolveCurrentCoverageInputs
+} from '../lib/coverage-observation.ts';
 import {digestIdentity} from '../lib/content-identity.ts';
 import {readCanonicalStandardsTree} from '../lib/standards-source.ts';
 import {projectCoverageData, resolveCoverageCore} from '../lib/coverage-core.ts';
@@ -31,22 +31,27 @@ console.log = (...args: unknown[]) => console.error(...args);
 
 reportProgress('Loading canonical Common Core tree and ontology metadata…');
 const sourceTree = readCanonicalStandardsTree(projectRoot);
-const ontology = resolveOntologyProvenance(projectRoot);
-const ontologyUsage = await resolveOntologySemanticUsage(projectRoot, 'ccss');
 reportProgress('Indexing generated samples and target labels…');
 const assets = await buildAssetIndexBundle({
     projectRoot,
     repository: 'local',
     revision: 'working-tree',
 });
-const inputs = buildCoverageInputIdentity({
+const resolvedInputs = await resolveCurrentCoverageInputs({
     projectRoot,
+    root: coreCacheRoot,
     sourceRef: 'working-tree',
     sourceSha: 'working-tree',
-    ontology,
-    ontologyUsageSha256: ontologyUsage.usage.input_sha256,
-    knownAssetsSha256: digestIdentity(assets.index)
+    knownAssetsSha256: digestIdentity(assets.index),
+    ontologyUsageSha256: async () =>
+        (await resolveOntologySemanticUsage(projectRoot, 'ccss')).usage.input_sha256
 });
+const inputs = resolvedInputs.inputs;
+const ontologyVersion = inputs.ontology.version;
+console.error(
+    `[Coverage observation] ${resolvedInputs.reused_observation ? 'HIT' : 'MISS'}: `
+    + resolvedInputs.reason
+);
 reportProgress('Resolving current standards coverage…');
 const core = await resolveCoverageCore({
     root: coreCacheRoot,
@@ -55,15 +60,16 @@ const core = await resolveCoverageCore({
         tree: sourceTree,
         coverage: await buildCurrentStandardsCoverage({
             standardsMap: sourceTree.standardsMap,
-            ontologyVersion: ontology.version,
+            ontologyVersion,
             generatedAt,
             knownAssets: assets.index,
         })
     })
 });
+publishCoverageInputObservation(coreCacheRoot, resolvedInputs.observation);
 console.error(`[Coverage core] ${core.reused ? 'HIT' : 'MISS'} ${core.artifact.core_input_key}`);
 const tree = core.artifact.tree;
-const coverage = projectCoverageData(core.artifact.coverage, generatedAt, ontology.version);
+const coverage = projectCoverageData(core.artifact.coverage, generatedAt, ontologyVersion);
 const manifest = buildCoverageManifest({
     channel: 'preview',
     inputs,
