@@ -46,7 +46,12 @@ export type AngleArithmeticPresentation =
     | SolveUnknownWholePresentation
     | SolveUnknownComponentPresentation;
 
-export type AngleArithmeticViewModel = AngleArithmeticProblem & AngleArithmeticPresentation;
+export type AngleArithmeticViewModel = AngleArithmeticPresentation & {
+    operation: AngleArithmeticProblem['operation'];
+    leftMeasure: number;
+    rightMeasure: number;
+    wholeMeasure: number;
+};
 
 export const resolveAngleArithmeticTask = (
     data: AngleArithmeticProblem,
@@ -69,7 +74,8 @@ export const buildAngleArithmeticPresentation = (
     task: AngleArithmeticTask,
     seed: number
 ): AngleArithmeticPresentation => {
-    const {leftMeasure, rightMeasure, wholeMeasure} = data;
+    const [leftMeasure, rightMeasure] = data.adjacentAngleMeasures;
+    const wholeMeasure = data.wholeAngleMeasure;
     const numericAddition = `${leftMeasure}° + ${rightMeasure}° = ${wholeMeasure}°`;
 
     if (task === 'explain-angle-addition') {
@@ -77,7 +83,7 @@ export const buildAngleArithmeticPresentation = (
             task,
             unknownRole: 'none',
             prompt: 'Use the shown whole-part relationship as evidence. Explain how adjacent angles AOB and BOC combine to form angle AOC.',
-            questionEquation: data.relationStatement,
+            questionEquation: 'm∠AOB + m∠BOC = m∠AOC',
             solutionEquation: numericAddition,
             answer: numericAddition,
             answerStatement: 'The measure of angle AOC is the sum of the measures of adjacent angles AOB and BOC.',
@@ -128,26 +134,13 @@ export const buildAngleArithmeticPresentation = (
 export const isValidAngleArithmeticProblem = (
     data: AngleArithmeticProblem
 ): boolean => (data.operation === 'addition' || data.operation === 'subtraction')
-    && Number.isInteger(data.leftMeasure)
-    && Number.isInteger(data.rightMeasure)
-    && Number.isInteger(data.wholeMeasure)
-    && data.leftMeasure > 0
-    && data.rightMeasure > 0
-    && data.wholeMeasure < 180
-    && data.leftMeasure + data.rightMeasure === data.wholeMeasure
-    && STRESS_PAIRS.has(`${data.leftMeasure}+${data.rightMeasure}`)
-    && data.geometry.vertexLabel === 'O'
-    && data.geometry.startPointLabel === 'A'
-    && data.geometry.dividerPointLabel === 'B'
-    && data.geometry.endPointLabel === 'C'
-    && data.geometry.leftAngleName === 'AOB'
-    && data.geometry.rightAngleName === 'BOC'
-    && data.geometry.wholeAngleName === 'AOC'
-    && data.geometry.startDegrees === 0
-    && data.geometry.dividerDegrees === data.leftMeasure
-    && data.geometry.endDegrees === data.wholeMeasure
-    && data.geometry.leftSweepDegrees === data.leftMeasure
-    && data.geometry.rightSweepDegrees === data.rightMeasure
-    && data.geometry.wholeSweepDegrees === data.wholeMeasure
-    && data.geometry.direction === 'counterclockwise'
-    && data.relationStatement === 'm∠AOB + m∠BOC = m∠AOC';
+    && Array.isArray(data.adjacentAngleMeasures)
+    && data.adjacentAngleMeasures.length === 2
+    && Number.isInteger(data.adjacentAngleMeasures[0])
+    && Number.isInteger(data.adjacentAngleMeasures[1])
+    && Number.isInteger(data.wholeAngleMeasure)
+    && data.adjacentAngleMeasures[0] > 0
+    && data.adjacentAngleMeasures[1] > 0
+    && data.wholeAngleMeasure < 180
+    && data.adjacentAngleMeasures[0] + data.adjacentAngleMeasures[1] === data.wholeAngleMeasure
+    && STRESS_PAIRS.has(`${data.adjacentAngleMeasures[0]}+${data.adjacentAngleMeasures[1]}`);

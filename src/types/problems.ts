@@ -1834,30 +1834,10 @@ export type AngleMeasurementProblem = {
     angleMeasure: AngleMeasure;
 };
 
-export type AngleArithmeticGeometry = {
-    vertexLabel: 'O';
-    startPointLabel: 'A';
-    dividerPointLabel: 'B';
-    endPointLabel: 'C';
-    leftAngleName: 'AOB';
-    rightAngleName: 'BOC';
-    wholeAngleName: 'AOC';
-    startDegrees: 0;
-    dividerDegrees: number;
-    endDegrees: number;
-    leftSweepDegrees: number;
-    rightSweepDegrees: number;
-    wholeSweepDegrees: number;
-    direction: 'counterclockwise';
-};
-
 export type AngleArithmeticProblem = {
     operation: 'addition' | 'subtraction';
-    geometry: AngleArithmeticGeometry;
-    leftMeasure: number;
-    rightMeasure: number;
-    wholeMeasure: number;
-    relationStatement: 'm∠AOB + m∠BOC = m∠AOC';
+    adjacentAngleMeasures: [number, number];
+    wholeAngleMeasure: number;
 };
 
 export type GeometryPrimitiveKind =

@@ -21,6 +21,11 @@ type MeasureRole = 'left-component' | 'right-component' | 'whole';
 const CENTER_X = 300;
 const CENTER_Y = 225;
 const RAY_RADIUS = 205;
+const START_DEGREES = 0;
+const VERTEX_LABEL = 'O';
+const START_POINT_LABEL = 'A';
+const DIVIDER_POINT_LABEL = 'B';
+const END_POINT_LABEL = 'C';
 
 const keepEndpointLabelVisible = ({x, y}: {x: number; y: number}) => ({
     x: Math.min(630, Math.max(20, x)),
@@ -69,44 +74,46 @@ function AnglePartitionDiagram({data, isSolutionView}: {
     data: AngleArithmeticViewModel;
     isSolutionView: boolean;
 }) {
-    const startEnd = pointOnAngleCircle(CENTER_X, CENTER_Y, RAY_RADIUS, data.geometry.startDegrees);
-    const dividerEnd = pointOnAngleCircle(CENTER_X, CENTER_Y, RAY_RADIUS, data.geometry.dividerDegrees);
-    const wholeEnd = pointOnAngleCircle(CENTER_X, CENTER_Y, RAY_RADIUS, data.geometry.endDegrees);
+    const dividerDegrees = data.leftMeasure;
+    const endDegrees = data.wholeMeasure;
+    const startEnd = pointOnAngleCircle(CENTER_X, CENTER_Y, RAY_RADIUS, START_DEGREES);
+    const dividerEnd = pointOnAngleCircle(CENTER_X, CENTER_Y, RAY_RADIUS, dividerDegrees);
+    const wholeEnd = pointOnAngleCircle(CENTER_X, CENTER_Y, RAY_RADIUS, endDegrees);
     const startLabel = keepEndpointLabelVisible(pointOnAngleCircle(
         CENTER_X,
         CENTER_Y,
         RAY_RADIUS + 28,
-        data.geometry.startDegrees
+        START_DEGREES
     ));
     const dividerLabel = keepEndpointLabelVisible(pointOnAngleCircle(
         CENTER_X,
         CENTER_Y,
         RAY_RADIUS + 28,
-        data.geometry.dividerDegrees
+        dividerDegrees
     ));
     const wholeLabel = keepEndpointLabelVisible(pointOnAngleCircle(
         CENTER_X,
         CENTER_Y,
         RAY_RADIUS + 28,
-        data.geometry.endDegrees
+        endDegrees
     ));
     const leftMeasurePosition = pointOnAngleCircle(
         CENTER_X,
         CENTER_Y,
         112,
-        data.geometry.leftSweepDegrees / 2
+        data.leftMeasure / 2
     );
     const rightMeasurePosition = pointOnAngleCircle(
         CENTER_X,
         CENTER_Y,
         112,
-        data.geometry.dividerDegrees + data.geometry.rightSweepDegrees / 2
+        dividerDegrees + data.rightMeasure / 2
     );
     const wholeMeasurePosition = pointOnAngleCircle(
         CENTER_X,
         CENTER_Y,
         168,
-        data.geometry.wholeSweepDegrees / 2
+        data.wholeMeasure / 2
     );
 
     return (
@@ -137,8 +144,8 @@ function AnglePartitionDiagram({data, isSolutionView}: {
                     CENTER_X,
                     CENTER_Y,
                     78,
-                    data.geometry.startDegrees,
-                    data.geometry.dividerDegrees
+                    START_DEGREES,
+                    dividerDegrees
                 )}
                 fill="none"
                 stroke="#0d9488"
@@ -150,8 +157,8 @@ function AnglePartitionDiagram({data, isSolutionView}: {
                     CENTER_X,
                     CENTER_Y,
                     78,
-                    data.geometry.dividerDegrees,
-                    data.geometry.endDegrees
+                    dividerDegrees,
+                    endDegrees
                 )}
                 fill="none"
                 stroke="#4f46e5"
@@ -163,8 +170,8 @@ function AnglePartitionDiagram({data, isSolutionView}: {
                     CENTER_X,
                     CENTER_Y,
                     142,
-                    data.geometry.startDegrees,
-                    data.geometry.endDegrees
+                    START_DEGREES,
+                    endDegrees
                 )}
                 fill="none"
                 stroke="#d97706"
@@ -172,10 +179,10 @@ function AnglePartitionDiagram({data, isSolutionView}: {
                 strokeLinecap="round"
             />
             <circle cx={CENTER_X} cy={CENTER_Y} r="7" fill="#1e293b" />
-            <text x={CENTER_X - 17} y={CENTER_Y + 29} className="fill-slate-800 text-[18px] font-extrabold">{data.geometry.vertexLabel}</text>
-            <text x={startLabel.x} y={startLabel.y} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{data.geometry.startPointLabel}</text>
-            <text x={dividerLabel.x} y={dividerLabel.y} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{data.geometry.dividerPointLabel}</text>
-            <text x={wholeLabel.x} y={wholeLabel.y} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{data.geometry.endPointLabel}</text>
+            <text x={CENTER_X - 17} y={CENTER_Y + 29} className="fill-slate-800 text-[18px] font-extrabold">{VERTEX_LABEL}</text>
+            <text x={startLabel.x} y={startLabel.y} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{START_POINT_LABEL}</text>
+            <text x={dividerLabel.x} y={dividerLabel.y} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{DIVIDER_POINT_LABEL}</text>
+            <text x={wholeLabel.x} y={wholeLabel.y} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{END_POINT_LABEL}</text>
             <MeasurePill
                 x={leftMeasurePosition.x}
                 y={leftMeasurePosition.y}
@@ -234,11 +241,8 @@ export const AngleArithmeticView = ({payload, task: requestedTask, viewId}: Angl
     const {problem, isSolutionView} = payload;
     validateProblemData(viewId, problem.data, [
         'operation',
-        'geometry',
-        'leftMeasure',
-        'rightMeasure',
-        'wholeMeasure',
-        'relationStatement'
+        'adjacentAngleMeasures',
+        'wholeAngleMeasure'
     ]);
     const data = problem.data;
     if (!isValidAngleArithmeticProblem(data)) {
@@ -255,7 +259,14 @@ export const AngleArithmeticView = ({payload, task: requestedTask, viewId}: Angl
         );
     }
     const presentation = buildAngleArithmeticPresentation(data, task, payload.seed);
-    const viewModel: AngleArithmeticViewModel = {...data, ...presentation};
+    const [leftMeasure, rightMeasure] = data.adjacentAngleMeasures;
+    const viewModel: AngleArithmeticViewModel = {
+        operation: data.operation,
+        leftMeasure,
+        rightMeasure,
+        wholeMeasure: data.wholeAngleMeasure,
+        ...presentation
+    };
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">

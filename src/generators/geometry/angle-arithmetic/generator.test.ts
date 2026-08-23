@@ -8,29 +8,13 @@ import {AngleArithmeticGenerator} from './generator.ts';
 const generator = new AngleArithmeticGenerator();
 
 function expectNeutralRelation(data: AngleArithmeticProblem): void {
-    expect(Number.isInteger(data.leftMeasure)).toBe(true);
-    expect(Number.isInteger(data.rightMeasure)).toBe(true);
-    expect(data.leftMeasure).toBeGreaterThan(0);
-    expect(data.rightMeasure).toBeGreaterThan(0);
-    expect(data.wholeMeasure).toBe(data.leftMeasure + data.rightMeasure);
-    expect(data.wholeMeasure).toBeLessThan(180);
-    expect(data.geometry).toEqual({
-        vertexLabel: 'O',
-        startPointLabel: 'A',
-        dividerPointLabel: 'B',
-        endPointLabel: 'C',
-        leftAngleName: 'AOB',
-        rightAngleName: 'BOC',
-        wholeAngleName: 'AOC',
-        startDegrees: 0,
-        dividerDegrees: data.leftMeasure,
-        endDegrees: data.wholeMeasure,
-        leftSweepDegrees: data.leftMeasure,
-        rightSweepDegrees: data.rightMeasure,
-        wholeSweepDegrees: data.wholeMeasure,
-        direction: 'counterclockwise'
-    });
-    expect(data.relationStatement).toBe('m∠AOB + m∠BOC = m∠AOC');
+    const [leftMeasure, rightMeasure] = data.adjacentAngleMeasures;
+    expect(Number.isInteger(leftMeasure)).toBe(true);
+    expect(Number.isInteger(rightMeasure)).toBe(true);
+    expect(leftMeasure).toBeGreaterThan(0);
+    expect(rightMeasure).toBeGreaterThan(0);
+    expect(data.wholeAngleMeasure).toBe(leftMeasure + rightMeasure);
+    expect(data.wholeAngleMeasure).toBeLessThan(180);
     expect(data).not.toHaveProperty('task');
     expect(data).not.toHaveProperty('unknownRole');
     expect(data).not.toHaveProperty('prompt');
@@ -52,7 +36,7 @@ describe('AngleArithmeticGenerator', () => {
             const data = generator.generate({operation})!.data;
             expectNeutralRelation(data);
             expect(data.operation).toBe(expected);
-            totals.add(data.wholeMeasure);
+            totals.add(data.wholeAngleMeasure);
         }
         expect(totals).toEqual(new Set([60, 90, 115, 130, 150, 155]));
     });

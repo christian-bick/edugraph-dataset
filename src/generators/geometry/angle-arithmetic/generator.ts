@@ -2,10 +2,7 @@ import {Area} from 'edugraph-ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
-import {
-    AngleArithmeticGeometry,
-    AngleArithmeticProblem
-} from '../../../types/problems.ts';
+import {AngleArithmeticProblem} from '../../../types/problems.ts';
 import {AngleArithmeticGeneratorConfig, AngleArithmeticGeneratorSchema} from './spec.ts';
 
 type AnglePair = readonly [leftMeasure: number, rightMeasure: number];
@@ -22,26 +19,6 @@ const ANGLE_PAIRS: readonly AnglePair[] = [
 
 function randomItem<T>(items: readonly T[]): T {
     return items[Math.floor(random() * items.length)];
-}
-
-function geometry(leftMeasure: number, rightMeasure: number): AngleArithmeticGeometry {
-    const wholeMeasure = leftMeasure + rightMeasure;
-    return {
-        vertexLabel: 'O',
-        startPointLabel: 'A',
-        dividerPointLabel: 'B',
-        endPointLabel: 'C',
-        leftAngleName: 'AOB',
-        rightAngleName: 'BOC',
-        wholeAngleName: 'AOC',
-        startDegrees: 0,
-        dividerDegrees: leftMeasure,
-        endDegrees: wholeMeasure,
-        leftSweepDegrees: leftMeasure,
-        rightSweepDegrees: rightMeasure,
-        wholeSweepDegrees: wholeMeasure,
-        direction: 'counterclockwise'
-    };
 }
 
 export class AngleArithmeticGenerator implements ProblemGenerator<
@@ -63,11 +40,8 @@ export class AngleArithmeticGenerator implements ProblemGenerator<
         return {
             data: {
                 operation: config.operation === Area.Addition ? 'addition' : 'subtraction',
-                geometry: geometry(leftMeasure, rightMeasure),
-                leftMeasure,
-                rightMeasure,
-                wholeMeasure,
-                relationStatement: 'm∠AOB + m∠BOC = m∠AOC'
+                adjacentAngleMeasures: [leftMeasure, rightMeasure],
+                wholeAngleMeasure: wholeMeasure
             }
         };
     }

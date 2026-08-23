@@ -1,30 +1,10 @@
 import {describe, expect, it} from 'vitest';
-import {
-    AngleArithmeticGeometry,
-    AngleArithmeticProblem
-} from '../../../types/problems.ts';
+import {AngleArithmeticProblem} from '../../../types/problems.ts';
 import {
     buildAngleArithmeticPresentation,
     isValidAngleArithmeticProblem,
     resolveAngleArithmeticTask
 } from './angle-arithmetic-helpers.ts';
-
-const geometry = (left: number, right: number): AngleArithmeticGeometry => ({
-    vertexLabel: 'O',
-    startPointLabel: 'A',
-    dividerPointLabel: 'B',
-    endPointLabel: 'C',
-    leftAngleName: 'AOB',
-    rightAngleName: 'BOC',
-    wholeAngleName: 'AOC',
-    startDegrees: 0,
-    dividerDegrees: left,
-    endDegrees: left + right,
-    leftSweepDegrees: left,
-    rightSweepDegrees: right,
-    wholeSweepDegrees: left + right,
-    direction: 'counterclockwise'
-});
 
 const relation = (
     operation: AngleArithmeticProblem['operation'],
@@ -32,11 +12,8 @@ const relation = (
     right = 35
 ): AngleArithmeticProblem => ({
     operation,
-    geometry: geometry(left, right),
-    leftMeasure: left,
-    rightMeasure: right,
-    wholeMeasure: left + right,
-    relationStatement: 'm∠AOB + m∠BOC = m∠AOC'
+    adjacentAngleMeasures: [left, right],
+    wholeAngleMeasure: left + right
 });
 
 describe('angle arithmetic view projection', () => {
@@ -45,11 +22,7 @@ describe('angle arithmetic view projection', () => {
         expect(isValidAngleArithmeticProblem(relation('subtraction', 80, 75))).toBe(true);
 
         const incoherent = relation('addition', 45, 70);
-        expect(isValidAngleArithmeticProblem({...incoherent, wholeMeasure: 120})).toBe(false);
-        expect(isValidAngleArithmeticProblem({
-            ...incoherent,
-            geometry: {...incoherent.geometry, dividerDegrees: 70}
-        })).toBe(false);
+        expect(isValidAngleArithmeticProblem({...incoherent, wholeAngleMeasure: 120})).toBe(false);
         expect(isValidAngleArithmeticProblem(relation('addition', 20, 40))).toBe(false);
     });
 
