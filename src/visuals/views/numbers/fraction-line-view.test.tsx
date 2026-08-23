@@ -5,6 +5,7 @@ import {setSeed} from '../../../lib/random.ts';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {
     FractionLineProblem,
+    FractionNumberLineProblem,
     TenthsToHundredthsProblem,
     WholeNumberFractionEquivalenceProblem
 } from '../../../types/problems.ts';
@@ -32,6 +33,17 @@ const wholeNumberData: WholeNumberFractionEquivalenceProblem = {
     equation: '2 = 8/4'
 };
 
+const locationData: FractionNumberLineProblem = {
+    task: 'locate-fraction',
+    numerator: 5,
+    denominator: 4,
+    wholeCount: 2,
+    steps: Array.from({length: 5}, (_, index) => ({
+        fromNumerator: index,
+        toNumerator: index + 1
+    }))
+};
+
 function wholeTenthsData(): TenthsToHundredthsProblem {
     for (let attempt = 0; attempt < 200; attempt++) {
         setSeed(`fraction-line-whole-${attempt}`);
@@ -47,6 +59,15 @@ function wholeTenthsData(): TenthsToHundredthsProblem {
 }
 
 describe('fraction-line Ability projections', () => {
+    it('derives fraction notation from the numeric location relation', () => {
+        const question = render(locationData, 'articulation');
+        const solution = render(locationData, 'articulation', true);
+
+        expect(question).toContain('locate <span class="text-blue-700">5/4</span>');
+        expect(solution).toContain('1/4 each step');
+        expect(solution).toContain('The endpoint is 5/4');
+    });
+
     it('projects whole-number equivalence as distinct formalization and explanation artifacts', () => {
         const formalization = render(wholeNumberData, 'formalization', true);
         const explanationQuestion = render(wholeNumberData, 'explanation');

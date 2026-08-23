@@ -49,22 +49,16 @@ export class FractionNumberLineGenerator implements ProblemGenerator<
             : fractionType === Scope.NonUnitFractions
                 ? randomInteger(2, denominator - 1)
                 : randomInteger(denominator + 1, 2 * denominator - 1);
-        const unitFraction = `1/${denominator}`;
-        const targetFraction = `${numerator}/${denominator}`;
-
         return {
             data: {
                 task: 'locate-fraction',
                 numerator,
                 denominator,
-                unitFraction,
-                targetFraction,
                 wholeCount: numerator > denominator ? 2 : 1,
                 steps: Array.from({length: numerator}, (_, index) => ({
                     fromNumerator: index,
                     toNumerator: index + 1
-                })),
-                answer: targetFraction
+                }))
             }
         };
     }

@@ -10,9 +10,6 @@ const denominators = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[]
 const expectCoherentProblem = (problem: FractionNumberLineProblem) => {
     expect(problem.task).toBe('locate-fraction');
     expect(denominators).toContain(problem.denominator);
-    expect(problem.unitFraction).toBe(`1/${problem.denominator}`);
-    expect(problem.targetFraction).toBe(`${problem.numerator}/${problem.denominator}`);
-    expect(problem.answer).toBe(problem.targetFraction);
     expect(problem.steps).toHaveLength(problem.numerator);
     expect(problem.steps).toEqual(Array.from({length: problem.numerator}, (_, index) => ({
         fromNumerator: index,

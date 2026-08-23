@@ -1312,11 +1312,8 @@ export type FractionNumberLineProblem = {
     task: 'locate-fraction';
     numerator: number;
     denominator: FractionParts;
-    unitFraction: string;
-    targetFraction: string;
     wholeCount: 1 | 2;
     steps: FractionNumberLineStep[];
-    answer: string;
 };
 
 export type FractionValue = {

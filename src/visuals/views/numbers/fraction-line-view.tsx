@@ -518,11 +518,8 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
         'task',
         'numerator',
         'denominator',
-        'unitFraction',
-        'targetFraction',
         'wholeCount',
-        'steps',
-        'answer'
+        'steps'
     ]);
 
     if (data.task !== 'locate-fraction') {
@@ -541,12 +538,10 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
         || data.wholeCount !== Math.ceil(data.numerator / data.denominator)) {
         throw new ViewValidationError(VIEW_ID, 'The number-line extent must end at the whole containing the target.');
     }
-    if (data.unitFraction !== `1/${data.denominator}`
-        || data.targetFraction !== `${data.numerator}/${data.denominator}`
-        || data.answer !== data.targetFraction) {
-        throw new ViewValidationError(VIEW_ID, 'Fraction labels and answer must agree with the numerator and denominator.');
-    }
     validateSteps(data.steps, data.numerator);
+
+    const unitFraction = `1/${data.denominator}`;
+    const targetFraction = `${data.numerator}/${data.denominator}`;
 
     const subdivisionCount = data.denominator * data.wholeCount;
     const toX = (numeratorUnits: number) => LEFT
@@ -559,7 +554,7 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
         <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
             <div className="text-center text-[1.45rem] font-bold text-slate-800">
                 Partition each whole into {data.denominator} equal parts. Then locate{' '}
-                <span className="text-blue-700">{data.targetFraction}</span>.
+                <span className="text-blue-700">{targetFraction}</span>.
             </div>
 
             <svg
@@ -646,7 +641,7 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
                             textAnchor="middle"
                             className="fill-blue-700 text-[15px] font-bold"
                         >
-                            {data.unitFraction} each step
+                            {unitFraction} each step
                         </text>
                         <circle cx={endpointX} cy={AXIS_Y} r="10" fill="#059669" stroke="white" strokeWidth="3" />
                         <text
@@ -655,7 +650,7 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
                             textAnchor="middle"
                             className="fill-emerald-700 text-[20px] font-bold"
                         >
-                            {data.targetFraction}
+                            {targetFraction}
                         </text>
                     </>
                 )}
@@ -667,8 +662,8 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
                     : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
             }`}>
                 {isSolutionView
-                    ? `Start at 0. Make ${data.numerator} equal steps of ${data.unitFraction}. The endpoint is ${data.answer}.`
-                    : `Draw the equal partitions and mark ${data.targetFraction}.`}
+                    ? `Start at 0. Make ${data.numerator} equal steps of ${unitFraction}. The endpoint is ${targetFraction}.`
+                    : `Draw the equal partitions and mark ${targetFraction}.`}
             </div>
         </div>
     );
