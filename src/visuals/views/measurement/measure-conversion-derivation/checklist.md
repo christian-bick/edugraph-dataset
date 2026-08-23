@@ -1,0 +1,2 @@
+- **Identity:** An equivalent measurement or equal-length partition asks the learner to derive a qualitative or exact relation between larger and smaller units.
+- **Modes:** Question Mode withholds the relational conclusion or one-unit factor; Solution Mode reveals that result and the derivation from the visible equivalent quantities.

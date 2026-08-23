@@ -1,6 +1,5 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {
     MeasurementConversionPair,
     MeasurementConversionPairId,
@@ -24,130 +23,61 @@ const tasks = [
     'conversion-table'
 ] as const;
 
-const formatMeasure = (
-    value: number,
-    unit: MeasurementConversionPair['largerUnit']
-): string => `${formatStandardNumeral(value)} ${value === 1 ? unit.singular : unit.plural}`;
-
 const expectValidPair = (pair: MeasurementConversionPair): void => {
     const expected = pairCases.find(([id]) => id === pair.id)!;
     expect([
         pair.id,
         pair.quantityKind,
         pair.scalingKind,
-        pair.largerUnit.id,
-        pair.smallerUnit.id,
+        pair.largerUnit,
+        pair.smallerUnit,
         pair.factor
     ]).toEqual(expected);
-    expect(pair.equivalenceEquation).toBe(
-        `1 ${pair.largerUnit.singular} = ${formatStandardNumeral(pair.factor)} ${pair.smallerUnit.plural}`
-    );
-    expect(pair.factorStatement).toBe(
-        `Multiply a number of ${pair.largerUnit.plural} by ${formatStandardNumeral(pair.factor)} to find the equivalent number of ${pair.smallerUnit.plural}.`
-    );
-    expect(pair.relativeSizeStatement).toMatch(new RegExp(`^One ${pair.largerUnit.singular} .+ one ${pair.smallerUnit.singular}\\.$`));
 };
 
 const expectConsistentProblem = (problem: MeasurementConversionProblem): void => {
     if (problem.task === 'generic-unit-scale') {
-        const largeText = formatStandardNumeral(problem.largeUnitCount);
-        const smallText = formatStandardNumeral(problem.smallUnitCount);
-        const factorText = formatStandardNumeral(problem.unitsPerLarge);
-        const solutionEquation = `${largeText} × ${factorText} = ${smallText}`;
         expect(problem.largeUnitCount).toBeGreaterThanOrEqual(3);
         expect(problem.largeUnitCount).toBeLessThanOrEqual(6);
         expect(problem.unitsPerLarge).toBeGreaterThanOrEqual(2);
         expect(problem.unitsPerLarge).toBeLessThanOrEqual(3);
         expect(problem.smallUnitCount).toBe(problem.largeUnitCount * problem.unitsPerLarge);
-        expect(problem.prompt).toBe(
-            'The same length is measured with large units and small units. Which unit size needs more units?'
-        );
-        expect(problem.equivalentLengthStatement).toBe(
-            `The same length is ${largeText} large units or ${smallText} small units.`
-        );
-        expect(problem.questionEquation).toBe(`${largeText} × ${factorText} = ?`);
-        expect(problem.solutionEquation).toBe(solutionEquation);
-        expect(problem.answerStatement).toBe(
-            `Smaller units need a larger count: ${smallText} > ${largeText}.`
-        );
-        expect(problem.explanation).toBe(
-            `Each large unit covers the same length as ${factorText} small units, so ${solutionEquation}.`
-        );
+        expect(Object.keys(problem).sort()).toEqual([
+            'largeUnitCount',
+            'smallUnitCount',
+            'task',
+            'unitsPerLarge'
+        ]);
         return;
     }
-    expectValidPair(problem.pair);
-    const {pair} = problem;
-    const factorText = formatStandardNumeral(pair.factor);
 
+    expectValidPair(problem.pair);
     if (problem.task === 'relative-unit-size') {
-        const exampleEquation = `${formatMeasure(problem.exampleLargerValue, pair.largerUnit)} = ${formatMeasure(problem.exampleSmallerValue, pair.smallerUnit)}`;
-        const quantity = pair.quantityKind === 'liquid-volume' ? 'liquid volume' : pair.quantityKind;
         expect(problem.exampleLargerValue).toBeGreaterThanOrEqual(2);
         expect(problem.exampleLargerValue).toBeLessThanOrEqual(9);
-        expect(problem.exampleSmallerValue).toBe(problem.exampleLargerValue * pair.factor);
-        expect(problem.exampleEquation).toBe(exampleEquation);
-        expect(problem.answer).toBe(pair.factor);
-        expect(problem.prompt).toBe(
-            `Use the equivalent ${quantity} to determine how many ${pair.smallerUnit.plural} equal 1 ${pair.largerUnit.singular}.`
-        );
-        expect(problem.questionEquation).toBe(
-            `1 ${pair.largerUnit.singular} = ? ${pair.smallerUnit.plural}`
-        );
-        expect(problem.solutionEquation).toBe(pair.equivalenceEquation);
-        expect(problem.comparisonStatement).toBe(
-            `${exampleEquation} names the same ${quantity} with a smaller count of ${pair.largerUnit.plural} and a larger count of ${pair.smallerUnit.plural}.`
-        );
-        expect(problem.explanation).toBe(
-            `${exampleEquation} represents the same ${quantity}. Dividing both counts by ${formatStandardNumeral(problem.exampleLargerValue)} gives ${pair.equivalenceEquation}. ${pair.relativeSizeStatement}`
+        expect(problem.exampleSmallerValue).toBe(
+            problem.exampleLargerValue * problem.pair.factor
         );
         return;
     }
 
     if (problem.task === 'convert-larger-to-smaller') {
-        const source = formatMeasure(problem.sourceValue, pair.largerUnit);
-        const converted = formatMeasure(problem.convertedValue, pair.smallerUnit);
-        const sourceText = formatStandardNumeral(problem.sourceValue);
-        const convertedText = formatStandardNumeral(problem.convertedValue);
-        const solutionEquation = `${sourceText} × ${factorText} = ${convertedText}`;
-        const measurementEquation = `${source} = ${converted}`;
         expect(problem.sourceValue).toBeGreaterThanOrEqual(2);
         expect(problem.sourceValue).toBeLessThanOrEqual(9);
-        expect(problem.convertedValue).toBe(problem.sourceValue * pair.factor);
-        expect(problem.answer).toBe(problem.convertedValue);
-        expect(problem.prompt).toBe(`Convert ${source} to ${pair.smallerUnit.plural}.`);
-        expect(problem.questionEquation).toBe(`${sourceText} × ${factorText} = ?`);
-        expect(problem.solutionEquation).toBe(solutionEquation);
-        expect(problem.measurementEquation).toBe(measurementEquation);
-        expect(problem.answerStatement).toBe(`${source} is equivalent to ${converted}.`);
-        expect(problem.explanation).toBe(
-            `Since ${pair.equivalenceEquation}, multiply ${sourceText} by ${factorText}. ${solutionEquation}, so ${measurementEquation}.`
-        );
+        expect(problem.convertedValue).toBe(problem.sourceValue * problem.pair.factor);
         return;
     }
 
     expect(problem.rows).toHaveLength(5);
-    expect(problem.hiddenRowIndices).toEqual([3, 4]);
-    expect(problem.columnHeaders).toEqual([
-        `${pair.largerUnit.plural[0]!.toUpperCase()}${pair.largerUnit.plural.slice(1)} (${pair.largerUnit.symbol})`,
-        `${pair.smallerUnit.plural[0]!.toUpperCase()}${pair.smallerUnit.plural.slice(1)} (${pair.smallerUnit.symbol})`
-    ]);
-    expect(problem.prompt).toBe(
-        `Complete the two-column conversion table from ${pair.largerUnit.plural} to ${pair.smallerUnit.plural}.`
-    );
-    expect(problem.constantFactorStatement).toBe(pair.factorStatement);
     const startValue = problem.rows[0]!.largerValue;
     expect(startValue).toBeGreaterThanOrEqual(1);
     expect(startValue).toBeLessThanOrEqual(5);
     problem.rows.forEach((row, index) => {
-        expect(row.largerValue).toBe(startValue + index);
-        expect(row.smallerValue).toBe(row.largerValue * pair.factor);
-        expect(row.measurementEquation).toBe(
-            `${formatMeasure(row.largerValue, pair.largerUnit)} = ${formatMeasure(row.smallerValue, pair.smallerUnit)}`
-        );
+        expect(row).toEqual({
+            largerValue: startValue + index,
+            smallerValue: (startValue + index) * problem.pair.factor
+        });
     });
-    expect(problem.explanation).toBe(
-        `Each ${pair.smallerUnit.singular} value equals its ${pair.largerUnit.singular} value multiplied by ${factorText}. For example, ${problem.rows.at(-1)!.measurementEquation}.`
-    );
 };
 
 describe('MeasurementConversionGenerator', () => {
@@ -196,7 +126,7 @@ describe('MeasurementConversionGenerator', () => {
         expect(generator.generate({task, unitPair: 'kilometer-meter'})).toEqual(first);
     });
 
-    it.each(pairCases)('generates all three truthful tasks for %s', pairId => {
+    it.each(pairCases)('generates all three canonical tasks for %s', pairId => {
         for (const task of tasks) {
             for (let seed = 0; seed < 50; seed++) {
                 setSeed(`${pairId}-${task}-${seed}`);
@@ -230,8 +160,12 @@ describe('MeasurementConversionGenerator', () => {
                 task: 'conversion-table',
                 unitPair: 'pound-ounce'
             }).data;
-            if (relative.task === 'relative-unit-size') relativeValues.add(relative.exampleLargerValue);
-            if (conversion.task === 'convert-larger-to-smaller') conversionValues.add(conversion.sourceValue);
+            if (relative.task === 'relative-unit-size') {
+                relativeValues.add(relative.exampleLargerValue);
+            }
+            if (conversion.task === 'convert-larger-to-smaller') {
+                conversionValues.add(conversion.sourceValue);
+            }
             if (table.task === 'conversion-table') tableStarts.add(table.rows[0]!.largerValue);
         }
         expect(relativeValues).toEqual(new Set([2, 3, 4, 5, 6, 7, 8, 9]));

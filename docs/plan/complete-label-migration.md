@@ -182,13 +182,13 @@ This declaration-level part of Ability ownership is complete and already enforce
 
 ### Ability-parameterized views
 
-Eleven views resolve an Ability through their schema. They currently cover 94 production matched
-tuples and at least 23 production-used resolved configurations. These are review candidates, not
+The Phase 2 queue began with eleven views that resolved an Ability through their schema. Completed
+rows below name their invariant replacement leaves; unresolved rows remain review candidates, not
 known defects:
 
 | Existing view | Current resolved modes | Initial review question |
 | --- | ---: | --- |
-| `measure-conversion` | 2 | Does derivation versus execution change the learner action? |
+| `measure-conversion` | 2 | **Migrated:** distinct derivation and execution actions now use `measure-conversion-derivation` and `measure-conversion-execution`, backed by one shared renderer. |
 | `numbers-decimal-notation` | 2 | Are the two conversion directions distinct requested responses? |
 | `operations-add-subtract-strategy` | 2 | Are understanding and derivation parallel task implementations? |
 | `operations-equal-groups` | 1 | Is the schema intentional future capability or merely invariant today? |
@@ -316,7 +316,7 @@ learner action out of the payload.
 
 ### Phase 2: audit Ability-parameterized views and split parallel task behavior
 
-For each of the 11 views:
+For each remaining view in the inventory:
 
 1. enumerate every production-used resolved task mode and Ability conjunction;
 2. inspect representative canonical question and solution images;

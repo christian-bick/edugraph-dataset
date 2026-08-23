@@ -1,0 +1,2 @@
+- **Identity:** A known larger-to-smaller unit relation asks the learner to multiply a source measurement by the visible conversion factor.
+- **Modes:** Question Mode withholds the converted measure and product; Solution Mode reveals both while preserving the source measure and unit relation.
