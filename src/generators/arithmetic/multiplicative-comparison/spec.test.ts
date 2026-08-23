@@ -19,9 +19,9 @@ describe('MultiplicativeComparisonGenerator spec integration', () => {
     });
 
     it.each([
-        [Area.Multiplication, 'multiplication', 'compared'],
-        [Area.Division, 'division', undefined]
-    ] as const)('resolves %s into the required operation', (label, operation, unknownRole) => {
+        [Area.Multiplication, 'multiplication'],
+        [Area.Division, 'division']
+    ] as const)('resolves %s into the required operation', (label, operation) => {
         setSeed(7);
         const stub = generateWithLabels(generator, [
             label,
@@ -34,8 +34,6 @@ describe('MultiplicativeComparisonGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.operation).toBe(operation);
-        if (unknownRole) expect(stub!.data.unknownRole).toBe(unknownRole);
-        else expect(['reference', 'scale-factor']).toContain(stub!.data.unknownRole);
         expect(stub!.tags).toContain(label);
     });
 });

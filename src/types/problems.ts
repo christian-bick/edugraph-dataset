@@ -114,15 +114,6 @@ export type MultiplicativeComparisonProblem = {
     scaleFactor: number;
     comparedQuantity: number;
     operation: 'multiplication' | 'division';
-    unknownRole: 'reference' | 'scale-factor' | 'compared';
-    answer: number;
-    referenceEntity: string;
-    comparedEntity: string;
-    story: string;
-    question: string;
-    givenEquation: string;
-    solutionEquation: string;
-    comparisonStatement: string;
 };
 
 export type MultiplicationPlaceValuePart = {
