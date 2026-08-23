@@ -1,6 +1,5 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {
     MultiplicationOperandDecomposition,
     MultiDigitMultiplicationProblem
@@ -30,12 +29,6 @@ const expectValidDecomposition = (decomposition: MultiplicationOperandDecomposit
         expect(part.digit).toBeLessThanOrEqual(9);
         expect(part.value).toBe(part.digit * part.placeValue);
     }
-    const expression = decomposition.parts
-        .map(part => formatStandardNumeral(part.value))
-        .join(' + ');
-    expect(decomposition.expandedExpression).toBe(expression);
-    expect(decomposition.equation)
-        .toBe(`${formatStandardNumeral(decomposition.operand)} = ${expression}`);
 };
 
 const expectConsistentProblem = (problem: MultiDigitMultiplicationProblem): void => {
@@ -60,30 +53,11 @@ const expectConsistentProblem = (problem: MultiDigitMultiplicationProblem): void
         expect(partialProduct.product).toBe(
             partialProduct.largestPart.value * partialProduct.smallestPart.value
         );
-        const factors = `${formatStandardNumeral(partialProduct.largestPart.value)} × ${formatStandardNumeral(partialProduct.smallestPart.value)}`;
-        expect(partialProduct.questionEquation).toBe(`${factors} = ?`);
-        expect(partialProduct.solutionEquation)
-            .toBe(`${factors} = ${formatStandardNumeral(partialProduct.product)}`);
     });
 
     expect(problem.product).toBe(problem.largestOperand * problem.smallestOperand);
     expect(problem.partialProducts.reduce((sum, item) => sum + item.product, 0))
         .toBe(problem.product);
-    const largestText = formatStandardNumeral(problem.largestOperand);
-    const smallestText = formatStandardNumeral(problem.smallestOperand);
-    const productText = formatStandardNumeral(problem.product);
-    const partialProductsExpression = problem.partialProducts
-        .map(item => formatStandardNumeral(item.product))
-        .join(' + ');
-    expect(problem.prompt)
-        .toBe(`Multiply ${largestText} by ${smallestText} using place-value partial products.`);
-    expect(problem.questionEquation).toBe(`${largestText} × ${smallestText} = ?`);
-    expect(problem.solutionEquation).toBe(`${largestText} × ${smallestText} = ${productText}`);
-    expect(problem.partialProductsSumEquation)
-        .toBe(`${partialProductsExpression} = ${productText}`);
-    expect(problem.explanation).toBe(
-        `Decompose ${largestText} as ${problem.largestDecomposition.expandedExpression} and ${smallestText} as ${problem.smallestDecomposition.expandedExpression}. Multiply each pair of place-value parts, then add the partial products: ${problem.partialProductsSumEquation}. Therefore, ${problem.solutionEquation}.`
-    );
 };
 
 describe('MultiDigitMultiplicationGenerator', () => {

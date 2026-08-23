@@ -1,10 +1,13 @@
 import {createRoot} from 'react-dom/client';
 import {formatStandardNumeral} from '../../../../lib/whole-number-notation.ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {MultiDigitMultiplicationProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidMultiDigitMultiplicationProblem} from './helpers.ts';
+import {
+    isValidMultiDigitMultiplicationProblem,
+    MultiDigitMultiplicationPresentation,
+    multiDigitMultiplicationPresentation
+} from './helpers.ts';
 import {
     OperationsMultiplicationAreaModelViewConfig,
     OperationsMultiplicationAreaModelViewSchema
@@ -17,24 +20,24 @@ interface CoreProps {
 }
 
 const AreaModelGrid = ({
-    data,
+    presentation,
     isSolutionView
 }: {
-    data: MultiDigitMultiplicationProblem;
+    presentation: MultiDigitMultiplicationPresentation;
     isSolutionView: boolean;
 }) => {
-    const columnCount = data.largestDecomposition.parts.length;
+    const columnCount = presentation.largestDecomposition.parts.length;
 
     return (
         <div
             className="grid overflow-hidden rounded-xl border-2 border-indigo-300 bg-white"
             style={{gridTemplateColumns: `132px repeat(${columnCount}, minmax(0, 1fr))`}}
-            aria-label={`${data.smallestDecomposition.parts.length} by ${columnCount} place-value partial-product area model`}
+            aria-label={`${presentation.smallestDecomposition.parts.length} by ${columnCount} place-value partial-product area model`}
         >
             <div className="flex min-h-[76px] items-center justify-center border-b-2 border-r-2 border-indigo-300 bg-indigo-700 text-3xl font-bold text-white">
                 ×
             </div>
-            {data.largestDecomposition.parts.map(part => (
+            {presentation.largestDecomposition.parts.map(part => (
                 <div key={`column-${part.placeValue}`} className="flex min-h-[76px] flex-col items-center justify-center border-b-2 border-r border-indigo-300 bg-indigo-50 px-2 text-center last:border-r-0">
                     <div className="font-mono text-lg font-bold text-indigo-900">
                         {formatStandardNumeral(part.value)}
@@ -45,7 +48,7 @@ const AreaModelGrid = ({
                 </div>
             ))}
 
-            {data.smallestDecomposition.parts.map((rowPart, rowIndex) => (
+            {presentation.smallestDecomposition.parts.map((rowPart, rowIndex) => (
                 <div className="contents" key={`row-${rowPart.placeValue}`}>
                     <div className="flex min-h-[112px] flex-col items-center justify-center border-b border-r-2 border-indigo-300 bg-sky-50 px-2 text-center last:border-b-0">
                         <div className="font-mono text-lg font-bold text-sky-900">
@@ -55,8 +58,8 @@ const AreaModelGrid = ({
                             {rowPart.digit} {rowPart.placeName}
                         </div>
                     </div>
-                    {data.largestDecomposition.parts.map((columnPart, columnIndex) => {
-                        const partialProduct = data.partialProducts[
+                    {presentation.largestDecomposition.parts.map((columnPart, columnIndex) => {
+                        const partialProduct = presentation.partialProducts[
                             rowIndex * columnCount + columnIndex
                         ]!;
                         return (
@@ -93,19 +96,15 @@ const OperationsMultiplicationAreaModelCore = ({config: _config, payload}: CoreP
         'largestDecomposition',
         'smallestDecomposition',
         'partialProducts',
-        'product',
-        'prompt',
-        'questionEquation',
-        'solutionEquation',
-        'partialProductsSumEquation',
-        'explanation'
+        'product'
     ]);
     if (!isValidMultiDigitMultiplicationProblem(data)) {
         throw new ViewValidationError(
             'operations-multiplication-area-model',
-            'The operands, decompositions, partial products, and authored equations must agree.'
+            'The operands, decompositions, and partial products must agree.'
         );
     }
+    const presentation = multiDigitMultiplicationPresentation(data);
 
     return (
         <div className="w-[920px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
@@ -113,9 +112,9 @@ const OperationsMultiplicationAreaModelCore = ({config: _config, payload}: CoreP
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
                     Place-value area model
                 </div>
-                <div className="mt-1 text-xl font-bold text-slate-800">{data.prompt}</div>
+                <div className="mt-1 text-xl font-bold text-slate-800">{presentation.prompt}</div>
                 <div className={`mx-auto mt-3 w-fit rounded-lg border-2 px-6 py-2 font-mono text-2xl font-bold ${isSolutionView ? 'border-emerald-400 bg-emerald-50 text-emerald-900' : 'border-dashed border-slate-300 text-slate-700'}`}>
-                    {isSolutionView ? data.solutionEquation : data.questionEquation}
+                    {isSolutionView ? presentation.solutionEquation : presentation.questionEquation}
                 </div>
             </div>
 
@@ -125,7 +124,7 @@ const OperationsMultiplicationAreaModelCore = ({config: _config, payload}: CoreP
                         Column factor decomposition
                     </div>
                     <div className="mt-1 font-mono text-[1rem] font-bold text-indigo-950">
-                        {data.largestDecomposition.equation}
+                        {presentation.largestDecomposition.equation}
                     </div>
                 </div>
                 <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
@@ -133,13 +132,13 @@ const OperationsMultiplicationAreaModelCore = ({config: _config, payload}: CoreP
                         Row factor decomposition
                     </div>
                     <div className="mt-1 font-mono text-[1rem] font-bold text-sky-950">
-                        {data.smallestDecomposition.equation}
+                        {presentation.smallestDecomposition.equation}
                     </div>
                 </div>
             </div>
 
             <div className="mt-4">
-                <AreaModelGrid data={data} isSolutionView={isSolutionView} />
+                <AreaModelGrid presentation={presentation} isSolutionView={isSolutionView} />
             </div>
 
             {isSolutionView ? (
@@ -148,10 +147,10 @@ const OperationsMultiplicationAreaModelCore = ({config: _config, payload}: CoreP
                         Add all partial products
                     </div>
                     <div className="mt-1 font-mono text-lg font-bold">
-                        {data.partialProductsSumEquation}
+                        {presentation.partialProductsSumEquation}
                     </div>
                     <div className="mt-2 text-sm font-semibold leading-relaxed text-emerald-900">
-                        {data.explanation}
+                        {presentation.explanation}
                     </div>
                 </div>
             ) : (

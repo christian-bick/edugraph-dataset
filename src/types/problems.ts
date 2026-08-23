@@ -128,23 +128,18 @@ export type MultiplicativeComparisonProblem = {
 export type MultiplicationPlaceValuePart = {
     digit: number;
     placeValue: 1 | 10 | 100 | 1000;
-    placeName: 'ones' | 'tens' | 'hundreds' | 'thousands';
     value: number;
 };
 
 export type MultiplicationOperandDecomposition = {
     operand: number;
     parts: readonly MultiplicationPlaceValuePart[];
-    expandedExpression: string;
-    equation: string;
 };
 
 export type MultiplicationPartialProduct = {
     largestPart: MultiplicationPlaceValuePart;
     smallestPart: MultiplicationPlaceValuePart;
     product: number;
-    questionEquation: string;
-    solutionEquation: string;
 };
 
 export type MultiDigitMultiplicationProblem = {
@@ -157,11 +152,6 @@ export type MultiDigitMultiplicationProblem = {
     smallestDecomposition: MultiplicationOperandDecomposition;
     partialProducts: readonly MultiplicationPartialProduct[];
     product: number;
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    partialProductsSumEquation: string;
-    explanation: string;
 };
 
 export type DivisionPlaceValuePart = {

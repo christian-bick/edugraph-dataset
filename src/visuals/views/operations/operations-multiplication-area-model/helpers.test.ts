@@ -1,33 +1,21 @@
 import {describe, expect, it} from 'vitest';
-import {formatStandardNumeral} from '../../../../lib/whole-number-notation.ts';
 import {
     MultiDigitMultiplicationProblem,
     MultiplicationOperandDecomposition,
     MultiplicationPlaceValuePart
 } from '../../../../types/problems.ts';
-import {isValidMultiDigitMultiplicationProblem} from './helpers.ts';
-
-const placeNames = new Map<MultiplicationPlaceValuePart['placeValue'],
-    MultiplicationPlaceValuePart['placeName']>([
-        [1, 'ones'],
-        [10, 'tens'],
-        [100, 'hundreds'],
-        [1000, 'thousands']
-    ]);
+import {
+    isValidMultiDigitMultiplicationProblem,
+    multiDigitMultiplicationPresentation
+} from './helpers.ts';
 
 const decompose = (operand: number): MultiplicationOperandDecomposition => {
     const digits = String(operand).split('').map(Number);
     const parts = digits.map((digit, index): MultiplicationPlaceValuePart => {
         const placeValue = (10 ** (digits.length - index - 1)) as MultiplicationPlaceValuePart['placeValue'];
-        return {digit, placeValue, placeName: placeNames.get(placeValue)!, value: digit * placeValue};
+        return {digit, placeValue, value: digit * placeValue};
     });
-    const expandedExpression = parts.map(part => formatStandardNumeral(part.value)).join(' + ');
-    return {
-        operand,
-        parts,
-        expandedExpression,
-        equation: `${formatStandardNumeral(operand)} = ${expandedExpression}`
-    };
+    return {operand, parts};
 };
 
 const problemFor = (first: number, second: number): MultiDigitMultiplicationProblem => {
@@ -38,22 +26,14 @@ const problemFor = (first: number, second: number): MultiDigitMultiplicationProb
     const partialProducts = smallestDecomposition.parts.flatMap(smallestPart =>
         largestDecomposition.parts.map(largestPart => {
             const product = largestPart.value * smallestPart.value;
-            const factors = `${formatStandardNumeral(largestPart.value)} × ${formatStandardNumeral(smallestPart.value)}`;
             return {
                 largestPart,
                 smallestPart,
-                product,
-                questionEquation: `${factors} = ?`,
-                solutionEquation: `${factors} = ${formatStandardNumeral(product)}`
+                product
             };
         })
     );
     const product = largestOperand * smallestOperand;
-    const largestText = formatStandardNumeral(largestOperand);
-    const smallestText = formatStandardNumeral(smallestOperand);
-    const productText = formatStandardNumeral(product);
-    const solutionEquation = `${largestText} × ${smallestText} = ${productText}`;
-    const partialProductsSumEquation = `${partialProducts.map(item => formatStandardNumeral(item.product)).join(' + ')} = ${productText}`;
     return {
         task: 'multi-digit-multiplication',
         largestOperand,
@@ -63,12 +43,7 @@ const problemFor = (first: number, second: number): MultiDigitMultiplicationProb
         largestDecomposition,
         smallestDecomposition,
         partialProducts,
-        product,
-        prompt: `Multiply ${largestText} by ${smallestText} using place-value partial products.`,
-        questionEquation: `${largestText} × ${smallestText} = ?`,
-        solutionEquation,
-        partialProductsSumEquation,
-        explanation: `Decompose ${largestText} as ${largestDecomposition.expandedExpression} and ${smallestText} as ${smallestDecomposition.expandedExpression}. Multiply each pair of place-value parts, then add the partial products: ${partialProductsSumEquation}. Therefore, ${solutionEquation}.`
+        product
     };
 };
 
@@ -92,6 +67,22 @@ describe('operations-multiplication-area-model validation', () => {
         expect(isValidMultiDigitMultiplicationProblem(problem)).toBe(true);
     });
 
+    it('derives the complete area-model presentation from typed numeric evidence', () => {
+        const presentation = multiDigitMultiplicationPresentation(problemFor(87, 65));
+        expect(presentation).toMatchObject({
+            prompt: 'Multiply 87 by 65 using place-value partial products.',
+            questionEquation: '87 × 65 = ?',
+            solutionEquation: '87 × 65 = 5,655',
+            partialProductsSumEquation: '4,800 + 420 + 400 + 35 = 5,655',
+            explanation: 'Decompose 87 as 80 + 7 and 65 as 60 + 5. Multiply each pair of place-value parts, then add the partial products: 4,800 + 420 + 400 + 35 = 5,655. Therefore, 87 × 65 = 5,655.'
+        });
+        expect(presentation.largestDecomposition.equation).toBe('87 = 80 + 7');
+        expect(presentation.partialProducts[0]).toMatchObject({
+            questionEquation: '80 × 60 = ?',
+            solutionEquation: '80 × 60 = 4,800'
+        });
+    });
+
     it.each([
         ['zero digit', () => problemFor(4021, 7)],
         ['missing region', () => {
@@ -108,16 +99,15 @@ describe('operations-multiplication-area-model validation', () => {
             partialProducts[0] = {...partialProducts[0]!, product: 1};
             return {...problem, partialProducts};
         }],
-        ['leaking cell question', () => {
+        ['wrong place-value identity', () => {
             const problem = problemFor(876, 5);
-            const partialProducts = [...problem.partialProducts];
-            partialProducts[0] = {
-                ...partialProducts[0]!,
-                questionEquation: partialProducts[0]!.solutionEquation
+            const parts = [...problem.largestDecomposition.parts];
+            parts[0] = {...parts[0]!, placeValue: 10};
+            return {
+                ...problem,
+                largestDecomposition: {...problem.largestDecomposition, parts}
             };
-            return {...problem, partialProducts};
-        }],
-        ['wrong explanation', () => ({...problemFor(876, 5), explanation: 'Add the products.'})]
+        }]
     ])('rejects %s', (_description, build) => {
         expect(isValidMultiDigitMultiplicationProblem(
             build() as MultiDigitMultiplicationProblem

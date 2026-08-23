@@ -1,6 +1,5 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
-import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     MultiDigitMultiplicationProblem,
@@ -25,14 +24,6 @@ const profileDigits: Readonly<Record<OperandDigitProfile, {
     'two-by-two': {smallest: 2, largest: 2}
 };
 
-const placeNames = new Map<MultiplicationPlaceValuePart['placeValue'],
-    MultiplicationPlaceValuePart['placeName']>([
-        [1, 'ones'],
-        [10, 'tens'],
-        [100, 'hundreds'],
-        [1000, 'thousands']
-    ]);
-
 const randomNonZeroDigit = (): number => 1 + Math.floor(random() * 9);
 
 const randomOperand = (digitCount: 1 | 2 | 3 | 4): number => {
@@ -50,20 +41,13 @@ const buildDecomposition = (operand: number): MultiplicationOperandDecomposition
         return {
             digit,
             placeValue,
-            placeName: placeNames.get(placeValue)!,
             value: digit * placeValue
         };
     });
-    const operandText = formatStandardNumeral(operand);
-    const expandedExpression = parts
-        .map(part => formatStandardNumeral(part.value))
-        .join(' + ');
 
     return {
         operand,
-        parts,
-        expandedExpression,
-        equation: `${operandText} = ${expandedExpression}`
+        parts
     };
 };
 
@@ -73,13 +57,10 @@ const buildPartialProducts = (
 ): MultiplicationPartialProduct[] => smallestDecomposition.parts.flatMap(smallestPart =>
     largestDecomposition.parts.map(largestPart => {
         const product = largestPart.value * smallestPart.value;
-        const factors = `${formatStandardNumeral(largestPart.value)} × ${formatStandardNumeral(smallestPart.value)}`;
         return {
             largestPart,
             smallestPart,
-            product,
-            questionEquation: `${factors} = ?`,
-            solutionEquation: `${factors} = ${formatStandardNumeral(product)}`
+            product
         };
     })
 );
@@ -115,14 +96,6 @@ export class MultiDigitMultiplicationGenerator implements ProblemGenerator<
             smallestDecomposition
         );
         const product = largestOperand * smallestOperand;
-        const largestText = formatStandardNumeral(largestOperand);
-        const smallestText = formatStandardNumeral(smallestOperand);
-        const productText = formatStandardNumeral(product);
-        const partialProductsExpression = partialProducts
-            .map(partialProduct => formatStandardNumeral(partialProduct.product))
-            .join(' + ');
-        const solutionEquation = `${largestText} × ${smallestText} = ${productText}`;
-        const partialProductsSumEquation = `${partialProductsExpression} = ${productText}`;
 
         return {
             data: {
@@ -134,12 +107,7 @@ export class MultiDigitMultiplicationGenerator implements ProblemGenerator<
                 largestDecomposition,
                 smallestDecomposition,
                 partialProducts,
-                product,
-                prompt: `Multiply ${largestText} by ${smallestText} using place-value partial products.`,
-                questionEquation: `${largestText} × ${smallestText} = ?`,
-                solutionEquation,
-                partialProductsSumEquation,
-                explanation: `Decompose ${largestText} as ${largestDecomposition.expandedExpression} and ${smallestText} as ${smallestDecomposition.expandedExpression}. Multiply each pair of place-value parts, then add the partial products: ${partialProductsSumEquation}. Therefore, ${solutionEquation}.`
+                product
             }
         };
     }
