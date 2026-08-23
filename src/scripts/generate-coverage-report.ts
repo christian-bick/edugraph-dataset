@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'fs';
 import { basename, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { getCliOption } from '../lib/cli.ts';
@@ -23,8 +23,20 @@ const selectedSpec = specName;
 const OUT_DIR = datasetOutDir(PROJECT_ROOT, resolveDatasetDir(selectedSpec));
 
 interface MetaEntry {
+    file_name: string;
     tags: string[];
     [key: string]: any;
+}
+
+function readPublishedUnionEntries(datasetDir: string): MetaEntry[] {
+    return ['train', 'validation'].flatMap(split => {
+        const path = resolve(datasetDir, split, 'metadata.jsonl');
+        if (!existsSync(path)) return [];
+        return readFileSync(path, 'utf-8')
+            .split('\n')
+            .filter(line => line.trim() !== '')
+            .map(line => JSON.parse(line) as MetaEntry);
+    });
 }
 
 function descendingFrequency(
@@ -50,8 +62,12 @@ function generateReport() {
     const combinationCounts: Record<string, number> = {};
     let totalEntries = 0;
 
-    const snapshot = readDatasetSnapshot(OUT_DIR);
-    const entries = [...snapshot.rows('train'), ...snapshot.rows('val')] as unknown as MetaEntry[];
+    const entries = isUnionSpec(selectedSpec)
+        ? readPublishedUnionEntries(OUT_DIR)
+        : (() => {
+            const snapshot = readDatasetSnapshot(OUT_DIR);
+            return [...snapshot.rows('train'), ...snapshot.rows('val')] as unknown as MetaEntry[];
+        })();
     const modules = radixSortUtf8([...new Set(entries.map(entry =>
         typeof entry.generator === 'string'
             ? entry.generator

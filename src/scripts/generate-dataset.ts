@@ -1,7 +1,7 @@
 import { Browser, Page, chromium } from 'playwright';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { mkdirSync } from 'fs';
+import {existsSync, mkdirSync} from 'fs';
 import { AbstractProblem, ProblemStub } from '../types/ml-engine.ts';
 import { shortenLabel } from '../lib/utils.ts';
 import {
@@ -63,7 +63,7 @@ import {
     radixSortUtf8,
     SourceContentIndex
 } from '../lib/content-identity.ts';
-import {beginDatasetStoreTransaction} from '../lib/dataset-store.ts';
+import {beginDatasetStoreTransaction, emptyDatasetSnapshot} from '../lib/dataset-store.ts';
 import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 import {currentRendererEnvironment} from '../lib/render-environment.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
@@ -651,7 +651,14 @@ async function main() {
     const rebuildGraph = args.includes('--rebuild-graph');
     const resetGraph = args.includes('--reset-graph');
     const trainingOnly = process.env.npm_config_training_only === 'true' || process.env.npm_config_training_only === '' || args.includes('--training-only');
-    const previousManifest = readDatasetManifest(outDir);
+    const replacesCompleteDataset = !targetModule && !targetView && !affectedOnly;
+    const replacesPointerlessDataset = replacesCompleteDataset
+        && !existsSync(resolve(outDir, 'current.json'));
+    // A full generation does not consume an obsolete physical layout; it replaces it.
+    // Scoped and affected runs still read the prior snapshot and therefore reject it.
+    const previousManifest = replacesPointerlessDataset
+        ? null
+        : readDatasetManifest(outDir);
     const graphMode = resolveGraphExecutionMode({
         previous: previousManifest,
         previousSupported: !previousManifest
@@ -899,6 +906,9 @@ async function main() {
             pairIndex,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
+            datasetSnapshot: replacesPointerlessDataset
+                ? emptyDatasetSnapshot(outDir)
+                : undefined,
             reuseImageIdentityFrom: comparisonManifest?.dependency_graph,
             counters
         });

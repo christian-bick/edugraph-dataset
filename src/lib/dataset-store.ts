@@ -234,14 +234,15 @@ function snapshotFrom(
     };
 }
 
-function emptySnapshot(datasetDir: string): DatasetSnapshot {
+/** Empty logical input used only while establishing or replacing a complete dataset baseline. */
+export function emptyDatasetSnapshot(datasetDir: string): DatasetSnapshot {
     return snapshotFrom(datasetDir, null, null, {});
 }
 
 export function readDatasetSnapshot(datasetDir: string): DatasetSnapshot {
     const pointerPath = resolve(datasetDir, 'current.json');
     if (!existsSync(pointerPath)) {
-        if (!existsSync(datasetDir)) return emptySnapshot(datasetDir);
+        if (!existsSync(datasetDir)) return emptyDatasetSnapshot(datasetDir);
         throw new Error(
             `Dataset at ${datasetDir} has no current.json pointer; run one full generation to replace it.`
         );
@@ -388,7 +389,7 @@ export function beginDatasetStoreTransaction(
     try {
         mkdirSync(stagingDir, {recursive: true});
         previous = scope.fullDataset && !existsSync(resolve(datasetDir, 'current.json'))
-            ? emptySnapshot(datasetDir)
+            ? emptyDatasetSnapshot(datasetDir)
             : readDatasetSnapshot(datasetDir);
     } catch (error) {
         rmSync(stagingDir, {recursive: true, force: true});
