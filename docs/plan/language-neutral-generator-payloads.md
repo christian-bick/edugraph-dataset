@@ -167,7 +167,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `place-value-make-ten` | 1 | `place-value-make-ten` | **Keep:** addends and composed-ten relation are canonical. |
 | `place-value-teen` | 3 | `place-value-compose-teen`, `place-value-decompose-teen` | **Keep:** teen quantity and ten/ones decomposition are canonical; leaf views own direction. |
 | `area-decomposition` | 2 | `area-distributive-model`, `area-rectilinear-decomposition` | **Keep:** dimensions, partitions, areas, and law-bearing decomposition are canonical witnesses. |
-| `area-perimeter-relations` | 2 | `area-perimeter-comparison` | **Derive:** retain shapes and equal-area/equal-perimeter relations; replace task/formula/unit display strings with typed relation data. |
+| `area-perimeter-relations` | 2 | `area-perimeter-comparison`, `area-perimeter-construction` | **Migrated:** retains rectangle measures plus a typed equal-area/equal-perimeter relation; views derive task wording, formulas, and units. |
 | `geometry-perimeter` | 10 | `geometry-perimeter`, `geometry-perimeter-inversion` | **Project:** retain polygon geometry, side lengths, and perimeter; `unknownDimension`/`unknownSideIndex`, known-side totals, and formula display are inversion projections. |
 | `shape-build-shape` | 17 | `shape-build-shape`, `shape-draw-shape` | **Keep:** its discriminated variants represent materially different generator-owned shape facts and constraints, not parallel Ability behavior. View wording and rendering remain external. |
 | `shape-classify-dim` | 9 | `shape-classify-dim` | **Derive:** retain shape/dimension relation and remove the redundant answer field. |

@@ -2073,18 +2073,14 @@ export type RectangleMeasures = {
 type AreaPerimeterRelationBase = {
     first: RectangleMeasures;
     second: RectangleMeasures;
-    unit: 'units';
-    areaUnit: 'square units';
 };
 
 export type AreaPerimeterRelationProblem = AreaPerimeterRelationBase & (
     | {
-        task: 'same-perimeter';
-        equalMeasure: 'perimeter';
+        relation: 'equal-perimeter';
     }
     | {
-        task: 'same-area';
-        equalMeasure: 'area';
+        relation: 'equal-area';
     }
 );
 
@@ -2485,6 +2481,7 @@ export interface ViewTypeMap {
     'geometry-perimeter': GeometryPerimeterProblem;
     'geometry-perimeter-inversion': GeometryPerimeterProblem;
     'area-perimeter-comparison': AreaPerimeterRelationProblem;
+    'area-perimeter-construction': AreaPerimeterRelationProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
     'geometry-angle-concepts': AngleConceptProblem;
     'geometry-angle-one-degree-derivation': AngleConceptProblem;

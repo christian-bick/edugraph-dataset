@@ -51,20 +51,14 @@ export class AreaPerimeterRelationsGenerator implements ProblemGenerator<
         return {
             data: samePerimeter
                 ? {
-                    task: 'same-perimeter',
-                    equalMeasure: 'perimeter',
+                    relation: 'equal-perimeter',
                     first: rectangle(firstWidth, firstHeight),
-                    second: rectangle(secondWidth, secondHeight),
-                    unit: 'units',
-                    areaUnit: 'square units'
+                    second: rectangle(secondWidth, secondHeight)
                 }
                 : {
-                    task: 'same-area',
-                    equalMeasure: 'area',
+                    relation: 'equal-area',
                     first: rectangle(firstWidth, firstHeight),
-                    second: rectangle(secondWidth, secondHeight),
-                    unit: 'units',
-                    areaUnit: 'square units'
+                    second: rectangle(secondWidth, secondHeight)
                 }
         };
     }

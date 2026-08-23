@@ -3,24 +3,24 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {AreaPerimeterRelationView} from '../area-perimeter-relation-view.tsx';
 import {
-    AreaPerimeterComparisonViewConfig,
-    AreaPerimeterComparisonViewSchema
+    AreaPerimeterConstructionViewConfig,
+    AreaPerimeterConstructionViewSchema
 } from './spec.ts';
 import '../../../../tailwind.css';
 
-const VIEW_ID = 'area-perimeter-comparison';
+const VIEW_ID = 'area-perimeter-construction';
 
 interface CoreProps {
-    config: AreaPerimeterComparisonViewConfig;
+    config: AreaPerimeterConstructionViewConfig;
     payload: ViewRenderPayload<typeof VIEW_ID>;
 }
 
 const Core = ({payload}: CoreProps) => (
-    <AreaPerimeterRelationView mode="comparison" payload={payload} viewId={VIEW_ID} />
+    <AreaPerimeterRelationView mode="construction" payload={payload} viewId={VIEW_ID} />
 );
 
-export const AreaPerimeterComparison = withConfig(
-    AreaPerimeterComparisonViewSchema,
+export const AreaPerimeterConstruction = withConfig(
+    AreaPerimeterConstructionViewSchema,
     Core
 );
 
@@ -30,5 +30,5 @@ window.renderView = (payload: ViewRenderPayload<typeof VIEW_ID>) => {
     const container = document.getElementById('view');
     if (!container) return;
     if (!root) root = createRoot(container);
-    root.render(<AreaPerimeterComparison payload={payload} />);
+    root.render(<AreaPerimeterConstruction payload={payload} />);
 };

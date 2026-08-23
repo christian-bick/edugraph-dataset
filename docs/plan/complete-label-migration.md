@@ -201,7 +201,7 @@ known defects:
 | `operations-number-array` | 3 | **Migrated:** execution, equation formalization, and interpretation now use three invariant leaves over one total renderer; formalization withholds the complete equation rather than merely its result. |
 | `operations-number-line` | 2 | **Migrated:** number-line representation and number-line arithmetic are distinct learner actions and now use invariant leaves over one shared renderer. |
 | `place-value-arithmetic-model` | 2 | **Migrated:** block procedure understanding and model-to-written-method formalization now use invariant leaves over one shared renderer; the paired generator payload is language-neutral. |
-| `area-perimeter-comparison` | 2 | Are classification and construction/explanation separate tasks? |
+| `area-perimeter-comparison` | 2 | **Migrated:** classification and constrained rectangle construction now use separate invariant leaves over one shared renderer; the paired generator payload is language-neutral. |
 | `shape-classify-attributes` | 2 | Is recognition observable support within the same classification task? |
 | `time-analog` | 3 | Which modes change task identity rather than presentation support? |
 | `time-digital` | 2 | Are reading and construction distinct learner actions? |

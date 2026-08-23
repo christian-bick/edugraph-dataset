@@ -1,0 +1,4 @@
+- **Identity:** Shows one complete unit-square rectangle with both side lengths and a blank unit grid for constructing a different rectangle.
+- **Question:** Requires a second rectangle that preserves the named area or perimeter while changing the companion measure.
+- **Solution:** Shows two visibly different rectangles and explicit area and perimeter calculations for both.
+- **Relations:** The constructed pair has either equal linear perimeters and unequal square-unit areas or equal square-unit areas and unequal linear perimeters, stated with the correct units.

@@ -23,7 +23,7 @@ describe('AreaPerimeterRelationsGenerator spec integration', () => {
         ]);
 
         expect(stub).not.toBeNull();
-        if (stub!.data.task === 'same-perimeter') {
+        if (stub!.data.relation === 'equal-perimeter') {
             expect(stub!.data.first.perimeter).toBe(stub!.data.second.perimeter);
             expect(stub!.data.first.area).not.toBe(stub!.data.second.area);
         } else {
