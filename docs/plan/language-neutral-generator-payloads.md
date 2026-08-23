@@ -160,7 +160,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `measurement-mediated-comparison` | 1 | `measure-mediated-comparison` | **Migrated:** the premise graph carries its node identities and intermediary once; the computed transitive answer remains an explicit mathematical result. |
 | `measurement-number-line` | 10 | `measurement-number-line` | **Derive/Project:** retain exact values, unit, interval, scale, ticks, and target; move prompt/answer/explanation prose and view label selection, and derive formatted quantities. |
 | `measurement-order` | 2 | `measure-order` | **Project:** retain magnitudes and requested direction; seed presented order and IDs in the view, then derive the correct order. |
-| `measurement-tool-selection` | 3 | `measure-select-tool` | **Project:** retain a typed object/tool suitability relation; candidate tools, placement, and `correctTool` response framing belong to the view. |
+| `measurement-tool-selection` | 3 | `measure-select-tool` | **Migrated:** retains the typed object and its mathematically suitable tool answer; the view owns the fixed candidate set, placement, labels, and response framing. |
 | `measurement-unit-scale` | 1 | `measure-unit-scale-relation` | **Keep:** counts and unit-size relation are canonical. |
 | `ordering` | 0 | `numbers-order` | **Project:** retain the selected numeric set; the payload array must not encode presentation order. This compatible generator currently has no CCSS production tuple. |
 | `place-value-bundles` | 4 | `place-value-hundreds-bundles`, `place-value-tens-bundles` | **Keep:** quantity and bundle decomposition are canonical. |

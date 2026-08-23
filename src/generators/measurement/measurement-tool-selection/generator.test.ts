@@ -9,6 +9,6 @@ describe('MeasurementToolSelectionGenerator', () => {
     ] as const)('generates an object suited to %s', (label, expected) => {
         const stub = new MeasurementToolSelectionGenerator().generate({tool: label});
         expect(stub?.data.correctTool).toBe(expected);
-        expect(stub?.data.tools).toEqual(['ruler', 'tape']);
+        expect(stub?.data).not.toHaveProperty('tools');
     });
 });

@@ -22,8 +22,7 @@ export class MeasurementToolSelectionGenerator implements ProblemGenerator<Measu
         return {
             data: {
                 object: objects[Math.floor(random() * objects.length)],
-                correctTool,
-                tools: ['ruler', 'tape']
+                correctTool
             }
         };
     }

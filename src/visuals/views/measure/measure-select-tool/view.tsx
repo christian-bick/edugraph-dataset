@@ -11,6 +11,7 @@ interface CoreProps {
 }
 
 const objectNames = {pencil: 'Pencil', book: 'Book', table: 'Table', door: 'Door'} as const;
+const toolChoices = ['ruler', 'tape'] as const;
 
 function Tool({tool, selected}: {tool: 'ruler' | 'tape'; selected: boolean}) {
     return (
@@ -33,10 +34,10 @@ function Tool({tool, selected}: {tool: 'ruler' | 'tape'; selected: boolean}) {
     );
 }
 
-const MeasureSelectToolCore = ({config: _config, payload}: CoreProps) => {
+export const MeasureSelectToolCore = ({config: _config, payload}: CoreProps) => {
     const {data} = payload.problem;
-    validateProblemData('measure-select-tool', data, ['object', 'correctTool', 'tools']);
-    if (!['ruler', 'tape'].includes(data.correctTool) || data.tools.length !== 2) {
+    validateProblemData('measure-select-tool', data, ['object', 'correctTool']);
+    if (!toolChoices.includes(data.correctTool)) {
         throw new ViewValidationError('measure-select-tool', 'Expected ruler and measuring-tape choices.');
     }
 
@@ -47,7 +48,7 @@ const MeasureSelectToolCore = ({config: _config, payload}: CoreProps) => {
                 {objectNames[data.object]}
             </div>
             <div className="mt-6 flex justify-center gap-6">
-                {data.tools.map(tool => <Tool key={tool} tool={tool} selected={payload.isSolutionView && tool === data.correctTool}/>) }
+                {toolChoices.map(tool => <Tool key={tool} tool={tool} selected={payload.isSolutionView && tool === data.correctTool}/>) }
             </div>
         </div>
     );
@@ -56,10 +57,12 @@ const MeasureSelectToolCore = ({config: _config, payload}: CoreProps) => {
 export const MeasureSelectTool = withConfig(MeasureSelectToolViewSchema, MeasureSelectToolCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
-window.renderView = (payload: ViewRenderPayload<'measure-select-tool'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) root = createRoot(container);
-        root.render(<MeasureSelectTool payload={payload}/>);
-    }
-};
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'measure-select-tool'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) root = createRoot(container);
+            root.render(<MeasureSelectTool payload={payload}/>);
+        }
+    };
+}

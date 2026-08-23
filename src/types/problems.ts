@@ -544,7 +544,6 @@ export type MeasurementEstimateProblem = {
 export type MeasurementToolSelectionProblem = {
     object: 'pencil' | 'book' | 'table' | 'door';
     correctTool: 'ruler' | 'tape';
-    tools: ['ruler', 'tape'];
 };
 
 export type MeasurementUnitScaleProblem = {
