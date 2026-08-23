@@ -43,7 +43,11 @@ import {
     type DependencyGraphSnapshot,
     type DependencyNode
 } from './dependency-planner.ts';
-import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
+import {
+    emptyDatasetSnapshot,
+    readDatasetSnapshot,
+    type DatasetSnapshot
+} from './dataset-store.ts';
 import {
     OntologySemanticIndex,
     buildOntologySemanticSnapshot,
@@ -930,6 +934,30 @@ export function buildDatasetManifest(options: {
 
 export function readDatasetManifest(datasetDir: string): DatasetManifest | null {
     return (readDatasetSnapshot(datasetDir).buildManifest as DatasetManifest | null) ?? null;
+}
+
+/**
+ * Resolves the persisted inputs consumed by a generation run.
+ * A complete replacement deliberately ignores an obsolete pointerless layout;
+ * incremental and scoped runs must still reject that layout as an unsafe baseline.
+ */
+export function resolveDatasetGenerationBaseline(
+    datasetDir: string,
+    replacesCompleteDataset: boolean
+): {
+    previousManifest: DatasetManifest | null;
+    datasetSnapshot: DatasetSnapshot | undefined;
+} {
+    const replacesPointerlessDataset = replacesCompleteDataset
+        && !existsSync(resolve(datasetDir, 'current.json'));
+    return {
+        previousManifest: replacesPointerlessDataset
+            ? null
+            : readDatasetManifest(datasetDir),
+        datasetSnapshot: replacesPointerlessDataset
+            ? emptyDatasetSnapshot(datasetDir)
+            : undefined
+    };
 }
 
 function selectedPair(

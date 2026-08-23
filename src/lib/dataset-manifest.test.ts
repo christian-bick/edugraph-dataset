@@ -14,7 +14,8 @@ import {
     datasetFreshnessIssues,
     datasetRendererIssues,
     mergeObservedDatasetBuild,
-    planObservedDatasetSourceDelta
+    planObservedDatasetSourceDelta,
+    resolveDatasetGenerationBaseline
 } from './dataset-manifest.ts';
 import { currentRendererEnvironment } from './render-environment.ts';
 import {
@@ -74,6 +75,26 @@ function build(
         }
     };
 }
+
+describe('resolveDatasetGenerationBaseline', () => {
+    it('ignores a pointerless layout only for a complete replacement', () => {
+        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-generation-baseline-'));
+        const datasetDir = resolve(root, 'dataset');
+        mkdirSync(resolve(datasetDir, 'train'), {recursive: true});
+        writeFileSync(resolve(datasetDir, 'manifest.json'), JSON.stringify({schema_version: 2}));
+
+        try {
+            const replacement = resolveDatasetGenerationBaseline(datasetDir, true);
+            expect(replacement.previousManifest).toBeNull();
+            expect(replacement.datasetSnapshot?.rows('train')).toEqual([]);
+
+            expect(() => resolveDatasetGenerationBaseline(datasetDir, false))
+                .toThrow('has no current.json pointer');
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+});
 
 describe('datasetFreshnessIssues', () => {
     it('accepts matching pair inputs and metadata counts', () => {
