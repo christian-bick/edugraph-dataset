@@ -29,8 +29,7 @@ describe('ArithmeticEquationJudgmentGenerator', () => {
         })).toBeNull();
     });
 
-    it('generates mathematically consistent true and false judgments', () => {
-        const truthValues = new Set<boolean>();
+    it('generates mathematically exact relations without selecting a judgment stimulus', () => {
         for (const operation of [Area.Addition, Area.Subtraction] as const) {
             for (let seed = 0; seed < 50; seed++) {
                 setSeed(seed);
@@ -44,12 +43,12 @@ describe('ArithmeticEquationJudgmentGenerator', () => {
                 const actual = data.operation === 'addition'
                     ? data.num1 + data.num2
                     : data.num1 - data.num2;
-                expect(data.claimedAnswer === actual).toBe(data.isTrue);
-                expect([data.num1, data.num2, data.claimedAnswer].every(value => value > 0 && value <= 20)).toBe(true);
-                truthValues.add(data.isTrue);
+                expect(data.answer).toBe(actual);
+                expect([data.num1, data.num2, data.answer].every(value => value > 0 && value <= 20)).toBe(true);
+                expect(data).not.toHaveProperty('claimedAnswer');
+                expect(data).not.toHaveProperty('isTrue');
             }
         }
-        expect(truthValues).toEqual(new Set([true, false]));
     });
 
     it('includes a zero witness when requested', () => {

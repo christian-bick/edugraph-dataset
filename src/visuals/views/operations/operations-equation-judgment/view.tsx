@@ -3,6 +3,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {OperationsEquationJudgmentViewConfig, OperationsEquationJudgmentViewSchema} from './spec.ts';
+import {resolveEquationClaim} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -10,18 +11,20 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-equation-judgment'>;
 }
 
-const OperationsEquationJudgmentCore = ({config: _config, payload}: CoreProps) => {
+export const OperationsEquationJudgmentCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
-    validateProblemData('operations-equation-judgment', data, ['num1', 'num2', 'operation', 'claimedAnswer', 'isTrue']);
-    if (!['addition', 'subtraction'].includes(data.operation) || typeof data.isTrue !== 'boolean') {
+    validateProblemData('operations-equation-judgment', data, ['num1', 'num2', 'operation', 'answer']);
+    const exactAnswer = data.operation === 'addition' ? data.num1 + data.num2 : data.num1 - data.num2;
+    if (!['addition', 'subtraction'].includes(data.operation) || data.answer !== exactAnswer) {
         throw new ViewValidationError('operations-equation-judgment', 'Unsupported equation judgment payload.');
     }
+    const claim = resolveEquationClaim(data, payload.seed);
 
     const symbol = data.operation === 'addition' ? '+' : '−';
     const choiceClass = (value: boolean) => {
         const base = 'w-[130px] h-[58px] border-2 rounded-xl flex items-center justify-center text-xl font-bold';
-        return isSolutionView && data.isTrue === value
+        return isSolutionView && claim.isTrue === value
             ? `${base} text-emerald-700 border-emerald-700 bg-emerald-50`
             : `${base} text-slate-600 border-slate-400 bg-white`;
     };
@@ -35,7 +38,7 @@ const OperationsEquationJudgmentCore = ({config: _config, payload}: CoreProps) =
                     </div>
                 )}
                 <div className="px-8 py-6 bg-slate-50 border-2 border-slate-200 rounded-xl text-[2.4rem] font-mono font-bold text-slate-800">
-                    {data.num1} {symbol} {data.num2} = {data.claimedAnswer}
+                    {data.num1} {symbol} {data.num2} = {claim.claimedAnswer}
                 </div>
                 <div className="flex gap-5 mt-7">
                     <div className={choiceClass(true)}>True</div>
@@ -49,11 +52,12 @@ const OperationsEquationJudgmentCore = ({config: _config, payload}: CoreProps) =
 export const OperationsEquationJudgment = withConfig(OperationsEquationJudgmentViewSchema, OperationsEquationJudgmentCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
-
-window.renderView = (payload: ViewRenderPayload<'operations-equation-judgment'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) root = createRoot(container);
-        root.render(<OperationsEquationJudgment payload={payload} />);
-    }
-};
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'operations-equation-judgment'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) root = createRoot(container);
+            root.render(<OperationsEquationJudgment payload={payload} />);
+        }
+    };
+}

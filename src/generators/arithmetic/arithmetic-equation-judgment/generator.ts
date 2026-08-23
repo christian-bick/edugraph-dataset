@@ -54,22 +54,12 @@ export class ArithmeticEquationJudgmentGenerator implements ProblemGenerator<Equ
             return null;
         }
 
-        const isTrue = random() < 0.5;
-        let claimedAnswer = answer;
-        if (!isTrue) {
-            const falseCandidates = [answer - 1, answer + 1]
-                .filter(value => value >= (requireZero ? 0 : 1) && value <= max && value !== answer);
-            if (falseCandidates.length === 0) return null;
-            claimedAnswer = falseCandidates[Math.floor(random() * falseCandidates.length)];
-        }
-
         return {
             data: {
                 num1,
                 num2,
                 operation: operation === Area.Addition ? 'addition' : 'subtraction',
-                claimedAnswer,
-                isTrue
+                answer
             }
         };
     }

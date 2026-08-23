@@ -286,8 +286,7 @@ export type EquationJudgmentProblem = {
     num1: number;
     num2: number;
     operation: 'addition' | 'subtraction';
-    claimedAnswer: number;
-    isTrue: boolean;
+    answer: number;
 };
 
 export type ArithmeticEstimationProblem = {

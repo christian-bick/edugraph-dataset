@@ -130,7 +130,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | Generator | Targets | Complete compatible-view set | Disposition |
 |---|---:|---|---|
 | `arithmetic-decompose` | 1 | `operations-decompose` | **Keep:** numeric decomposition is canonical. |
-| `arithmetic-equation-judgment` | 2 | `operations-equation-judgment` | **Project:** keep the exact operation; let the judgment view derive a seeded true/false claim instead of receiving `claimedAnswer` and `isTrue`. |
+| `arithmetic-equation-judgment` | 2 | `operations-equation-judgment` | **Migrated:** retains operands, operation, and the calculated exact answer. The judgment view derives a deterministic bounded true/false claim and its truth from `payload.seed`. |
 | `arithmetic-estimation` | 4 | `operations-answer-reasonableness` | **Project:** exact and estimated relations are canonical; the proposed answer and reasonableness truth are the PlausibilityEvaluation task projection. |
 | `arithmetic-known-fact-derivation` | 6 | `operations-known-fact-derivation`, `operations-known-fact-inversion` | **Keep:** known fact, typed strategy, operands, and result support both views without selecting the unknown. |
 | `arithmetic-ops-four` | 1 | `operations-boxes`, `operations-boxes-inversion`, `operations-vertical`, `operations-vertical-inversion`, `operations-word-problem`, `operations-word-problem-inversion` | **Keep:** canonical operands and result; inversion is already view-owned. |
