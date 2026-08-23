@@ -94,7 +94,6 @@ const generateTenthsHundredthsAddition = (): TenthsHundredthsAdditionProblem => 
         operation: 'addition',
         denominator: 100,
         sharedWhole: 1,
-        referenceId: 'same-whole',
         firstTenths: {numerator: tenthsNumerator, denominator: 10},
         secondHundredths: {numerator: hundredthsNumerator, denominator: 100},
         convertedFirst: {numerator: convertedNumerator, denominator: 100},
@@ -111,7 +110,6 @@ const generateUnitFractionMultiple = (): UnitFractionMultipleProblem => {
         operation: 'multiplication',
         denominator,
         sharedWhole: 1,
-        referenceId: 'same-whole',
         wholeFactor,
         unitFraction: makeFraction(1, denominator),
         product: makeFraction(wholeFactor, denominator)
@@ -127,7 +125,6 @@ const generateWholeNumberFractionProduct = (
         operation: 'multiplication',
         denominator: sample.denominator,
         sharedWhole: 1,
-        referenceId: 'same-whole',
         wholeFactor: sample.wholeFactor,
         fractionFactor: makeFraction(sample.fractionNumerator, sample.denominator),
         product: makeFraction(sample.productNumerator, sample.denominator)
@@ -164,7 +161,6 @@ const generateBinaryOperation = (
     task: 'fraction-operation',
     operation,
     sharedWhole: 1,
-    referenceId: 'same-whole',
     ...binarySample(operation)
 });
 
@@ -201,7 +197,6 @@ const generateDecomposition = (
         operation: 'addition',
         denominator,
         sharedWhole: 1,
-        referenceId: 'same-whole',
         source,
         decompositions: [makeTerms(firstTerms), makeTerms(secondTerms)]
     };
@@ -257,7 +252,6 @@ const generateMixedOperation = (
     task: 'mixed-operation',
     operation,
     sharedWhole: 1,
-    referenceId: 'same-whole',
     ...mixedSample(operation)
 });
 

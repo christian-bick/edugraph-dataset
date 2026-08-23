@@ -59,9 +59,6 @@ describe('isValidFractionArithmeticProblem', () => {
         expect(isValidFractionArithmeticProblem(changed(source, data => {
             data.sharedWhole = 2 as never;
         }))).toBe(false);
-        expect(isValidFractionArithmeticProblem(changed(source, data => {
-            data.referenceId = 'different-whole' as never;
-        }))).toBe(false);
         expect(() => isValidFractionArithmeticProblem(null as never)).not.toThrow();
         expect(isValidFractionArithmeticProblem({task: 'unknown'} as never)).toBe(false);
     });

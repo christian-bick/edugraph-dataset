@@ -25,7 +25,7 @@ const generate = (
 const improperNumerator = (value: MixedFractionValue): number =>
     value.whole * value.denominator + value.numerator;
 
-const forbiddenPresentationKeys = new Set([
+const forbiddenPayloadKeys = new Set([
     'answer',
     'answerStatement',
     'boundsStatement',
@@ -42,18 +42,19 @@ const forbiddenPresentationKeys = new Set([
     'prompt',
     'question',
     'questionEquation',
+    'referenceId',
     'solutionEquation',
     'story',
     'transformationSteps',
     'unknownRole'
 ]);
 
-const presentationKeys = (value: unknown): string[] => {
-    if (Array.isArray(value)) return value.flatMap(presentationKeys);
+const forbiddenKeys = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.flatMap(forbiddenKeys);
     if (typeof value !== 'object' || value === null) return [];
     return Object.entries(value).flatMap(([key, nested]) => [
-        ...(forbiddenPresentationKeys.has(key) ? [key] : []),
-        ...presentationKeys(nested)
+        ...(forbiddenPayloadKeys.has(key) ? [key] : []),
+        ...forbiddenKeys(nested)
     ]);
 };
 
@@ -71,7 +72,6 @@ describe('FractionArithmeticGenerator', () => {
                     ? data.first.numerator + data.second.numerator
                     : data.first.numerator - data.second.numerator);
                 expect(data.sharedWhole).toBe(1);
-                expect(data.referenceId).toBe('same-whole');
             }
         }
     });
@@ -185,7 +185,7 @@ describe('FractionArithmeticGenerator', () => {
         expect(sawWhole).toBe(true);
     });
 
-    it('keeps every payload free of learner-facing presentation fields', () => {
+    it('keeps every payload free of redundant identity and learner-facing fields', () => {
         const fixtures = [
             generate('neutral-binary', 'fraction-operation', 'addition'),
             generate('neutral-decompose', 'decompose-mixed', 'addition'),
@@ -194,7 +194,7 @@ describe('FractionArithmeticGenerator', () => {
             generate('neutral-product', 'whole-number-fraction-product-improper', 'multiplication'),
             generate('neutral-hundredths', 'tenths-hundredths-addition', 'addition')
         ];
-        expect(fixtures.flatMap(presentationKeys)).toEqual([]);
+        expect(fixtures.flatMap(forbiddenKeys)).toEqual([]);
     });
 
     it('is deterministic for the same seed and configuration', () => {

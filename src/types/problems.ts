@@ -1474,7 +1474,6 @@ export type MixedFractionValue = {
 export type FractionArithmeticCommon = {
     denominator: FractionParts;
     sharedWhole: 1;
-    referenceId: 'same-whole';
 };
 
 export type FractionBinaryOperationProblem = FractionArithmeticCommon & {
@@ -1529,7 +1528,6 @@ export type TenthsHundredthsAdditionProblem = {
     operation: 'addition';
     denominator: 100;
     sharedWhole: 1;
-    referenceId: 'same-whole';
     firstTenths: {numerator: number; denominator: 10};
     secondHundredths: {numerator: number; denominator: 100};
     convertedFirst: {numerator: number; denominator: 100};

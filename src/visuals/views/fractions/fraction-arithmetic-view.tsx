@@ -26,8 +26,7 @@ const validateData = (viewId: string, data: FractionArithmeticProblem) => {
         'task',
         'operation',
         'denominator',
-        'sharedWhole',
-        'referenceId'
+        'sharedWhole'
     ]);
     if (data.task === 'tenths-hundredths-addition') {
         validateProblemData(viewId, data, [

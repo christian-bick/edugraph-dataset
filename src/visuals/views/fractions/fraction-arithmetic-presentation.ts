@@ -80,7 +80,6 @@ export type FractionArithmeticStory = {
 type PresentationCommon = {
     denominator: FractionParts;
     sharedWhole: 1;
-    referenceId: 'same-whole';
     story: FractionArithmeticStory;
     prompt: string;
     questionEquation: string;
@@ -407,7 +406,6 @@ const presentBinary = (
         operation: data.operation,
         denominator: data.denominator,
         sharedWhole: data.sharedWhole,
-        referenceId: data.referenceId,
         story,
         symbol,
         action,
@@ -483,7 +481,6 @@ const presentDecomposition = (
         operation: 'addition',
         denominator: data.denominator,
         sharedWhole: data.sharedWhole,
-        referenceId: data.referenceId,
         sourceKind,
         sourceFraction,
         sourceMixed,
@@ -566,7 +563,6 @@ const presentMixedOperation = (
         operation: data.operation,
         denominator: data.denominator,
         sharedWhole: data.sharedWhole,
-        referenceId: data.referenceId,
         story: mixedStory(data.operation, first, second),
         symbol,
         strategy,
@@ -613,7 +609,6 @@ const presentUnitFractionMultiple = (
         operation: 'multiplication',
         denominator: data.denominator,
         sharedWhole: data.sharedWhole,
-        referenceId: data.referenceId,
         story,
         productKind: product.numerator < product.denominator ? 'proper' : 'improper',
         wholeFactor: data.wholeFactor,
@@ -673,7 +668,6 @@ const presentWholeNumberFractionProduct = (
         operation: 'multiplication',
         denominator: data.denominator,
         sharedWhole: data.sharedWhole,
-        referenceId: data.referenceId,
         story,
         productKind: product.numerator < product.denominator ? 'proper' : 'improper',
         wholeFactor: data.wholeFactor,
@@ -743,7 +737,6 @@ const presentTenthsHundredthsAddition = (
         operation: 'addition',
         denominator: 100,
         sharedWhole: data.sharedWhole,
-        referenceId: data.referenceId,
         story: {
             storyKind: 'hundred-grid-addition',
             context: `A mosaic uses ${firstTenths.notation} of a unit square in blue and a non-overlapping ${secondHundredths.notation} of the same-sized unit square in gold.`,

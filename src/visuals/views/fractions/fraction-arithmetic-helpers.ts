@@ -40,8 +40,7 @@ const improperNumerator = (value: MixedFractionValue): number =>
 const validCommon = (
     data: Exclude<FractionArithmeticProblem, {task: 'tenths-hundredths-addition'}>
 ): boolean => validDenominator(data.denominator)
-    && data.sharedWhole === 1
-    && data.referenceId === 'same-whole';
+    && data.sharedWhole === 1;
 
 const validBinary = (
     data: Extract<FractionArithmeticProblem, {task: 'fraction-operation'}>
@@ -153,7 +152,6 @@ const validTenthsHundredthsAddition = (
     && data.operation === 'addition'
     && data.denominator === 100
     && data.sharedWhole === 1
-    && data.referenceId === 'same-whole'
     && data.conversionFactor === 10
     && data.firstTenths.denominator === 10
     && Number.isInteger(data.firstTenths.numerator)

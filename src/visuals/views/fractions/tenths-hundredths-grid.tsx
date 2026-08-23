@@ -110,7 +110,6 @@ export const isValidTenthsHundredthsAdditionProblem = (
         && data.operation === 'addition'
         && data.denominator === 100
         && data.sharedWhole === 1
-        && data.referenceId === 'same-whole'
         && isValidDecimalFraction(firstTenths, 10)
         && firstTenths.numerator < 10
         && isValidDecimalFraction(secondHundredths, 100)
