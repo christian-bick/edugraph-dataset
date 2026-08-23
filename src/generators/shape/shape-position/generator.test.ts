@@ -27,12 +27,12 @@ describe('ShapePositionGenerator', () => {
         });
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('below');
-        expect(stub!.data.answer).toBe('below');
+        expect(stub!.data.relation).toBe('below');
     });
 
     it('should map Scope.Ahead to an in-front-of relation', () => {
         const stub = generator.generate({ relations: [Scope.Ahead] });
         expect(stub).not.toBeNull();
-        expect(stub!.data).toEqual({ relation: 'ahead', answer: 'ahead' });
+        expect(stub!.data).toEqual({relation: 'ahead'});
     });
 });

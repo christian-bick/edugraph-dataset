@@ -940,7 +940,6 @@ export type ShapeNamingProblem = {
 
 export type ShapePositionProblem = {
     relation: 'above' | 'below' | 'beside' | 'nextTo' | 'behind' | 'ahead';
-    answer: string;
 };
 
 export type ShapeEnvShapesProblem = {

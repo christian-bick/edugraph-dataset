@@ -18,7 +18,7 @@ describe('ShapePositionGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('above');
-        expect(stub!.data.answer).toBe('above');
+        expect(stub!.data.relation).toBe('above');
     });
 
     it('should generate below problem from Scope.Below label', () => {
@@ -27,7 +27,7 @@ describe('ShapePositionGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('below');
-        expect(stub!.data.answer).toBe('below');
+        expect(stub!.data.relation).toBe('below');
     });
 
     it('should generate beside problem from Scope.Beside label', () => {
@@ -36,12 +36,12 @@ describe('ShapePositionGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe('beside');
-        expect(stub!.data.answer).toBe('beside');
+        expect(stub!.data.relation).toBe('beside');
     });
 
     it('should generate an in-front-of problem from Scope.Ahead label', () => {
         const stub = generateWithLabels(generator, [Scope.Ahead]);
         expect(stub).not.toBeNull();
-        expect(stub!.data).toEqual({ relation: 'ahead', answer: 'ahead' });
+        expect(stub!.data).toEqual({relation: 'ahead'});
     });
 });

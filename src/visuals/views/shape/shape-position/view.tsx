@@ -14,10 +14,9 @@ interface CoreProps {
 const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    validateProblemData('shape-position', data, ['relation', 'answer']);
+    validateProblemData('shape-position', data, ['relation']);
 
     const relation = data.relation;
-    const answer = data.answer;
 
     if (relation !== 'above' && relation !== 'below' && relation !== 'beside' && relation !== 'nextTo' && relation !== 'behind' && relation !== 'ahead') {
         throw new ViewValidationError('shape-position', `Unsupported relation: ${relation}`);
@@ -35,7 +34,7 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] whitespace-nowrap py-3 px-1.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
-        const isCorrect = opt === answer || (opt === 'nextTo' && answer === 'beside');
+        const isCorrect = opt === relation || (opt === 'nextTo' && relation === 'beside');
         if (isCorrect && isSolutionView) {
             cls += "border-green-600 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(22,163,74,0.2)] font-bold";
         } else {

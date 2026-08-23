@@ -25,12 +25,9 @@ export class ShapePositionGenerator implements ProblemGenerator<ShapePositionPro
         }
 
         const relation = possible[Math.floor(random() * possible.length)];
-        const answer = relation;
-
         return {
             data: {
-                relation,
-                answer
+                relation
             }
         };
     }
