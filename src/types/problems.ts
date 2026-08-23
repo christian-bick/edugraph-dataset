@@ -738,9 +738,8 @@ export type MeasurementCompareProblem = {
 };
 
 export type MeasurementOrderProblem = {
-    objects: Array<{id: string; length: number}>;
+    magnitudes: readonly [number, number, number];
     direction: 'ascending' | 'descending';
-    order: string[];
 };
 
 export type LengthComparisonRelation = 'longer' | 'shorter';

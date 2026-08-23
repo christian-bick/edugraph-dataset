@@ -18,15 +18,14 @@ describe('MeasurementOrderGenerator', () => {
                 const stub = generator.generate({direction});
                 expect(stub).not.toBeNull();
                 const data = stub!.data as MeasurementOrderProblem;
-                expect(new Set(data.objects.map(object => object.length)).size).toBe(3);
-                const sortedLengths = data.objects.map(object => object.length).sort((a, b) => a - b);
-                expect(sortedLengths[1] - sortedLengths[0]).toBeGreaterThanOrEqual(20);
-                expect(sortedLengths[2] - sortedLengths[1]).toBeGreaterThanOrEqual(20);
-                const byId = new Map(data.objects.map(object => [object.id, object.length]));
-                const orderedLengths = data.order.map(id => byId.get(id)!);
-                expect(orderedLengths).toEqual(
-                    [...orderedLengths].sort((a, b) => direction === Scope.AscendingOrder ? a - b : b - a)
+                expect(data.magnitudes).toEqual([...data.magnitudes].sort((a, b) => a - b));
+                expect(data.magnitudes[1] - data.magnitudes[0]).toBeGreaterThanOrEqual(20);
+                expect(data.magnitudes[2] - data.magnitudes[1]).toBeGreaterThanOrEqual(20);
+                expect(data.direction).toBe(
+                    direction === Scope.AscendingOrder ? 'ascending' : 'descending'
                 );
+                expect(data).not.toHaveProperty('objects');
+                expect(data).not.toHaveProperty('order');
             }
         }
     });

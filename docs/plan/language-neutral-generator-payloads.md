@@ -159,7 +159,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `measurement-mass-volume-estimation` | 3 | `measure-liquid-volume-estimate`, `measure-mass-estimate` | **Keep:** container/reference/quantity relations are canonical; identifiers remain non-display semantic values. |
 | `measurement-mediated-comparison` | 1 | `measure-mediated-comparison` | **Migrated:** the premise graph carries its node identities and intermediary once; the computed transitive answer remains an explicit mathematical result. |
 | `measurement-number-line` | 10 | `measurement-number-line` | **Derive/Project:** retain exact values, unit, interval, scale, ticks, and target; move prompt/answer/explanation prose and view label selection, and derive formatted quantities. |
-| `measurement-order` | 2 | `measure-order` | **Project:** retain magnitudes and requested direction; seed presented order and IDs in the view, then derive the correct order. |
+| `measurement-order` | 2 | `measure-order` | **Migrated:** retains a canonical sorted magnitude triple and the requested direction. The view deterministically seeds presentation order, assigns A/B/C identities, and derives the correct letter order. |
 | `measurement-tool-selection` | 3 | `measure-select-tool` | **Migrated:** retains the typed object and its mathematically suitable tool answer; the view owns the fixed candidate set, placement, labels, and response framing. |
 | `measurement-unit-scale` | 1 | `measure-unit-scale-relation` | **Keep:** counts and unit-size relation are canonical. |
 | `ordering` | 0 | `numbers-order` | **Project:** retain the selected numeric set; the payload array must not encode presentation order. This compatible generator currently has no CCSS production tuple. |
