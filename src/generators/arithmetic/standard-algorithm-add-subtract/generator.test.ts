@@ -19,9 +19,6 @@ function expectExactColumns(problem: StandardAlgorithmProblem): void {
         expect(column.topDigit).toBe(Math.floor(problem.topValue / column.placeValue) % 10);
         expect(column.bottomDigit).toBe(Math.floor(problem.bottomValue / column.placeValue) % 10);
         expect(column.regroupIn).toBe(index === 0 ? 0 : problem.columns[index - 1].regroupOut);
-        expect(column.calculation.length).toBeGreaterThan(0);
-        expect(column.regroupingRecord.length).toBeGreaterThan(0);
-
         if (problem.operation === 'addition') {
             expect(column.workingValue).toBe(
                 column.topDigit + column.bottomDigit + column.regroupIn
@@ -67,15 +64,8 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
                 expect(problem.bottomValue).toBeLessThanOrEqual(999999);
                 expect(problem.result).toBeLessThanOrEqual(999999);
                 expect(problem.columns.some(column => column.regroupOut === 1)).toBe(true);
-                expect(problem.questionEquation).toContain('?');
-                expect(problem.solutionEquation).toContain(problem.result.toLocaleString('en-US'));
-                expect(problem.explanation.length).toBeGreaterThan(0);
                 expect([problem.topValue, problem.bottomValue, problem.result].every(
                     value => !String(value).includes('0')
-                )).toBe(true);
-                expect(problem.columns.every(column =>
-                    !column.calculation.includes('+ 0')
-                    && !column.calculation.includes('- 0')
                 )).toBe(true);
 
                 if (operation === 'addition') {

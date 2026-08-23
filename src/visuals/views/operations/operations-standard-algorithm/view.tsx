@@ -1,9 +1,12 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {StandardAlgorithmColumnStep} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidStandardAlgorithmProblem} from './helpers.ts';
+import {
+    isValidStandardAlgorithmProblem,
+    StandardAlgorithmDisplayColumn,
+    standardAlgorithmPresentation
+} from './helpers.ts';
 import {
     OperationsStandardAlgorithmViewConfig,
     OperationsStandardAlgorithmViewSchema
@@ -27,7 +30,7 @@ const PlaceValueTable = ({
     operation,
     isSolutionView
 }: {
-    columns: readonly StandardAlgorithmColumnStep[];
+    columns: readonly StandardAlgorithmDisplayColumn[];
     operation: 'addition' | 'subtraction';
     isSolutionView: boolean;
 }) => {
@@ -124,19 +127,16 @@ const OperationsStandardAlgorithmCore = ({config: _config, payload}: CoreProps) 
         'topValue',
         'bottomValue',
         'result',
-        'columns',
-        'prompt',
-        'questionEquation',
-        'solutionEquation',
-        'explanation'
+        'columns'
     ]);
     if (!isValidStandardAlgorithmProblem(data)) {
         throw new ViewValidationError(
             'operations-standard-algorithm',
-            'The values, ordered place-value columns, regrouping records, calculations, and equations must agree.'
+            'The values and ordered place-value carry or borrow chain must agree.'
         );
     }
 
+    const presentation = standardAlgorithmPresentation(data);
     const operationLabel = data.operation === 'addition' ? 'addition' : 'subtraction';
     return (
         <div className="w-[980px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
@@ -144,15 +144,15 @@ const OperationsStandardAlgorithmCore = ({config: _config, payload}: CoreProps) 
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
                     Standard {operationLabel} algorithm
                 </div>
-                <div className="mt-1 text-xl font-bold text-slate-800">{data.prompt}</div>
+                <div className="mt-1 text-xl font-bold text-slate-800">{presentation.prompt}</div>
                 <div className={`mx-auto mt-3 w-fit rounded-lg border-2 px-6 py-2 font-mono text-2xl font-bold ${isSolutionView ? 'border-emerald-400 bg-emerald-50 text-emerald-900' : 'border-dashed border-slate-300 text-slate-700'}`}>
-                    {isSolutionView ? data.solutionEquation : data.questionEquation}
+                    {isSolutionView ? presentation.solutionEquation : presentation.questionEquation}
                 </div>
             </div>
 
             <div className="mt-5">
                 <PlaceValueTable
-                    columns={data.columns}
+                    columns={presentation.columns}
                     operation={data.operation}
                     isSolutionView={isSolutionView}
                 />
@@ -160,7 +160,7 @@ const OperationsStandardAlgorithmCore = ({config: _config, payload}: CoreProps) 
 
             {isSolutionView ? (
                 <div className="mt-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-3 text-center text-sm font-semibold leading-relaxed text-emerald-950">
-                    {data.explanation}
+                    {presentation.explanation}
                 </div>
             ) : (
                 <div className="mt-4 rounded-xl border-2 border-dashed border-slate-300 px-5 py-3 text-center text-sm font-semibold text-slate-600">

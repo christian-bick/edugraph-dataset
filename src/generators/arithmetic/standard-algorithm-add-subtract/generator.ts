@@ -1,11 +1,9 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
-import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     StandardAlgorithmColumnStep,
     StandardAlgorithmOperation,
-    StandardAlgorithmPlaceName,
     StandardAlgorithmProblem
 } from '../../../types/problems.ts';
 import {
@@ -14,16 +12,13 @@ import {
 } from './spec.ts';
 
 const placeColumns = [
-    {placeValue: 1, placeName: 'ones'},
-    {placeValue: 10, placeName: 'tens'},
-    {placeValue: 100, placeName: 'hundreds'},
-    {placeValue: 1000, placeName: 'thousands'},
-    {placeValue: 10000, placeName: 'ten-thousands'},
-    {placeValue: 100000, placeName: 'hundred-thousands'}
-] as const satisfies readonly {
-    placeValue: StandardAlgorithmColumnStep['placeValue'];
-    placeName: StandardAlgorithmPlaceName;
-}[];
+    1,
+    10,
+    100,
+    1000,
+    10000,
+    100000
+] as const satisfies readonly StandardAlgorithmColumnStep['placeValue'][];
 
 const forcedRegroupingEndDigits = [5, 6, 7, 8, 9] as const;
 
@@ -60,32 +55,21 @@ const buildAdditionColumns = (
 ): StandardAlgorithmColumnStep[] => {
     let regroupIn: 0 | 1 = 0;
 
-    return placeColumns.slice(0, columnCount).map((place, index) => {
-        const topDigit = digitAt(topValue, place.placeValue);
-        const bottomDigit = digitAt(bottomValue, place.placeValue);
+    return placeColumns.slice(0, columnCount).map(placeValue => {
+        const topDigit = digitAt(topValue, placeValue);
+        const bottomDigit = digitAt(bottomValue, placeValue);
         const workingValue = topDigit + bottomDigit + regroupIn;
         const resultDigit = workingValue % 10;
         const regroupOut = (workingValue >= 10 ? 1 : 0) as 0 | 1;
-        const nextPlace = placeColumns[index + 1];
-        const calculation = regroupIn === 1
-            ? `${topDigit} + ${bottomDigit} + 1 = ${workingValue}`
-            : `${topDigit} + ${bottomDigit} = ${workingValue}`;
-        const regroupingRecord = regroupOut === 1
-            ? `Write ${resultDigit} in the ${place.placeName} place and carry 1 to the ${nextPlace.placeName} place.`
-            : regroupIn === 1
-                ? `Include the carried 1, write ${resultDigit} in the ${place.placeName} place, and record no new carry.`
-                : `No regrouping is needed; write ${resultDigit} in the ${place.placeName} place.`;
 
         const column: StandardAlgorithmColumnStep = {
-            ...place,
+            placeValue,
             topDigit,
             bottomDigit,
             regroupIn,
             regroupOut,
             workingValue,
-            resultDigit,
-            calculation,
-            regroupingRecord
+            resultDigit
         };
         regroupIn = regroupOut;
         return column;
@@ -99,33 +83,22 @@ const buildSubtractionColumns = (
 ): StandardAlgorithmColumnStep[] => {
     let regroupIn: 0 | 1 = 0;
 
-    return placeColumns.slice(0, columnCount).map((place, index) => {
-        const topDigit = digitAt(topValue, place.placeValue);
-        const bottomDigit = digitAt(bottomValue, place.placeValue);
+    return placeColumns.slice(0, columnCount).map(placeValue => {
+        const topDigit = digitAt(topValue, placeValue);
+        const bottomDigit = digitAt(bottomValue, placeValue);
         const availableTopDigit = topDigit - regroupIn;
         const regroupOut = (availableTopDigit < bottomDigit ? 1 : 0) as 0 | 1;
         const workingValue = availableTopDigit + 10 * regroupOut;
         const resultDigit = workingValue - bottomDigit;
-        const nextPlace = placeColumns[index + 1];
-        const adjustedTop = regroupIn === 1 ? `${topDigit} - 1` : `${topDigit}`;
-        const borrowedTen = regroupOut === 1 ? ' + 10' : '';
-        const calculation = `${adjustedTop}${borrowedTen} - ${bottomDigit} = ${resultDigit}`;
-        const regroupingRecord = regroupOut === 1
-            ? `Borrow 1 from the ${nextPlace.placeName} place, then write ${resultDigit} in the ${place.placeName} place.`
-            : regroupIn === 1
-                ? `Account for the previous borrow, write ${resultDigit} in the ${place.placeName} place, and record no new borrow.`
-                : `No regrouping is needed; write ${resultDigit} in the ${place.placeName} place.`;
 
         const column: StandardAlgorithmColumnStep = {
-            ...place,
+            placeValue,
             topDigit,
             bottomDigit,
             regroupIn,
             regroupOut,
             workingValue,
-            resultDigit,
-            calculation,
-            regroupingRecord
+            resultDigit
         };
         regroupIn = regroupOut;
         return column;
@@ -145,25 +118,13 @@ const buildProblem = (
     const columns = operation === 'addition'
         ? buildAdditionColumns(topValue, bottomValue, columnCount)
         : buildSubtractionColumns(topValue, bottomValue, columnCount);
-    const symbol = operation === 'addition' ? '+' : '−';
-    const operationName = operation === 'addition' ? 'addition' : 'subtraction';
-    const topText = formatStandardNumeral(topValue);
-    const bottomText = formatStandardNumeral(bottomValue);
-    const resultText = formatStandardNumeral(result);
-    const questionEquation = `${topText} ${symbol} ${bottomText} = ?`;
-    const solutionEquation = `${topText} ${symbol} ${bottomText} = ${resultText}`;
-
     return {
         task: 'standard-algorithm',
         operation,
         topValue,
         bottomValue,
         result,
-        columns,
-        prompt: `Use the standard ${operationName} algorithm to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        explanation: `Work from ones to the highest place, recording every carry or borrow. The completed algorithm gives ${solutionEquation}.`
+        columns
     };
 };
 

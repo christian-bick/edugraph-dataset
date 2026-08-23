@@ -1,11 +1,10 @@
 import {formatStandardNumeral} from '../../../../lib/whole-number-notation.ts';
 import {
     StandardAlgorithmColumnStep,
-    StandardAlgorithmPlaceName,
     StandardAlgorithmProblem
 } from '../../../../types/problems.ts';
 
-const PLACE_NAMES = new Map<number, StandardAlgorithmPlaceName>([
+const PLACE_NAMES = new Map<StandardAlgorithmColumnStep['placeValue'], string>([
     [1, 'ones'],
     [10, 'tens'],
     [100, 'hundreds'],
@@ -16,22 +15,58 @@ const PLACE_NAMES = new Map<number, StandardAlgorithmPlaceName>([
 
 const isDigit = (value: number): boolean => Number.isInteger(value) && value >= 0 && value <= 9;
 
-const hasText = (value: unknown): value is string =>
-    typeof value === 'string' && value.trim().length > 0;
+export type StandardAlgorithmDisplayColumn = StandardAlgorithmColumnStep & {
+    placeName: string;
+    calculation: string;
+    regroupingRecord: string;
+};
 
-const hasValidAuthoredText = (data: StandardAlgorithmProblem): boolean => {
+export type StandardAlgorithmPresentation = {
+    prompt: string;
+    questionEquation: string;
+    solutionEquation: string;
+    explanation: string;
+    columns: readonly StandardAlgorithmDisplayColumn[];
+};
+
+export const standardAlgorithmPresentation = (
+    data: StandardAlgorithmProblem
+): StandardAlgorithmPresentation => {
     const symbol = data.operation === 'addition' ? '+' : '−';
+    const operationName = data.operation === 'addition' ? 'addition' : 'subtraction';
     const top = formatStandardNumeral(data.topValue);
     const bottom = formatStandardNumeral(data.bottomValue);
     const result = formatStandardNumeral(data.result);
+    const questionEquation = `${top} ${symbol} ${bottom} = ?`;
+    const solutionEquation = `${top} ${symbol} ${bottom} = ${result}`;
+    const columns = data.columns.map((column, index): StandardAlgorithmDisplayColumn => {
+        const placeName = PLACE_NAMES.get(column.placeValue)!;
+        const nextPlaceName = PLACE_NAMES.get(data.columns[index + 1]?.placeValue);
+        const calculation = data.operation === 'addition'
+            ? column.regroupIn === 1
+                ? `${column.topDigit} + ${column.bottomDigit} + 1 = ${column.workingValue}`
+                : `${column.topDigit} + ${column.bottomDigit} = ${column.workingValue}`
+            : `${column.regroupIn === 1 ? `${column.topDigit} - 1` : column.topDigit}${column.regroupOut === 1 ? ' + 10' : ''} - ${column.bottomDigit} = ${column.resultDigit}`;
+        const regroupingRecord = column.regroupOut === 1
+            ? data.operation === 'addition'
+                ? `Write ${column.resultDigit} in the ${placeName} place and carry 1 to the ${nextPlaceName} place.`
+                : `Borrow 1 from the ${nextPlaceName} place, then write ${column.resultDigit} in the ${placeName} place.`
+            : column.regroupIn === 1
+                ? data.operation === 'addition'
+                    ? `Include the carried 1, write ${column.resultDigit} in the ${placeName} place, and record no new carry.`
+                    : `Account for the previous borrow, write ${column.resultDigit} in the ${placeName} place, and record no new borrow.`
+                : `No regrouping is needed; write ${column.resultDigit} in the ${placeName} place.`;
 
-    return hasText(data.prompt)
-        && data.questionEquation === `${top} ${symbol} ${bottom} = ?`
-        && data.solutionEquation === `${top} ${symbol} ${bottom} = ${result}`
-        && hasText(data.explanation)
-        && data.columns.every(column =>
-            hasText(column.calculation) && hasText(column.regroupingRecord)
-        );
+        return {...column, placeName, calculation, regroupingRecord};
+    });
+
+    return {
+        prompt: `Use the standard ${operationName} algorithm to solve ${questionEquation}`,
+        questionEquation,
+        solutionEquation,
+        explanation: `Work from ones to the highest place, recording every carry or borrow. The completed algorithm gives ${solutionEquation}.`,
+        columns
+    };
 };
 
 const digitAt = (value: number, placeValue: number): number =>
@@ -44,7 +79,7 @@ const hasValidColumnIdentity = (
 ): boolean => {
     const placeValue = 10 ** index;
     return column.placeValue === placeValue
-        && column.placeName === PLACE_NAMES.get(placeValue)
+        && PLACE_NAMES.has(column.placeValue)
         && isDigit(column.topDigit)
         && isDigit(column.bottomDigit)
         && isDigit(column.resultDigit)
@@ -105,8 +140,7 @@ export const isValidStandardAlgorithmProblem = (
         String(data.result).length
     );
     if (data.result !== expectedResult
-        || data.columns.length !== requiredColumns
-        || !hasValidAuthoredText(data)) return false;
+        || data.columns.length !== requiredColumns) return false;
 
     let expectedRegroupIn: 0 | 1 = 0;
     for (let index = 0; index < data.columns.length; index++) {

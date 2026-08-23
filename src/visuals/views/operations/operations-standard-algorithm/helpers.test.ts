@@ -1,6 +1,9 @@
 import {describe, expect, it} from 'vitest';
 import {StandardAlgorithmProblem} from '../../../../types/problems.ts';
-import {isValidStandardAlgorithmProblem} from './helpers.ts';
+import {
+    isValidStandardAlgorithmProblem,
+    standardAlgorithmPresentation
+} from './helpers.ts';
 
 const addition: StandardAlgorithmProblem = {
     task: 'standard-algorithm',
@@ -9,15 +12,11 @@ const addition: StandardAlgorithmProblem = {
     bottomValue: 3789,
     result: 8356,
     columns: [
-        {placeValue: 1, placeName: 'ones', topDigit: 7, bottomDigit: 9, regroupIn: 0, regroupOut: 1, workingValue: 16, resultDigit: 6, calculation: '7 + 9 = 16; write 6.', regroupingRecord: 'Carry 1 ten.'},
-        {placeValue: 10, placeName: 'tens', topDigit: 6, bottomDigit: 8, regroupIn: 1, regroupOut: 1, workingValue: 15, resultDigit: 5, calculation: '1 + 6 + 8 = 15; write 5.', regroupingRecord: 'Carry 1 hundred.'},
-        {placeValue: 100, placeName: 'hundreds', topDigit: 5, bottomDigit: 7, regroupIn: 1, regroupOut: 1, workingValue: 13, resultDigit: 3, calculation: '1 + 5 + 7 = 13; write 3.', regroupingRecord: 'Carry 1 thousand.'},
-        {placeValue: 1000, placeName: 'thousands', topDigit: 4, bottomDigit: 3, regroupIn: 1, regroupOut: 0, workingValue: 8, resultDigit: 8, calculation: '1 + 4 + 3 = 8; write 8.', regroupingRecord: 'No carry.'}
-    ],
-    prompt: 'Add using the standard algorithm.',
-    questionEquation: '4,567 + 3,789 = ?',
-    solutionEquation: '4,567 + 3,789 = 8,356',
-    explanation: 'Add from ones to thousands and record each carry.'
+        {placeValue: 1, topDigit: 7, bottomDigit: 9, regroupIn: 0, regroupOut: 1, workingValue: 16, resultDigit: 6},
+        {placeValue: 10, topDigit: 6, bottomDigit: 8, regroupIn: 1, regroupOut: 1, workingValue: 15, resultDigit: 5},
+        {placeValue: 100, topDigit: 5, bottomDigit: 7, regroupIn: 1, regroupOut: 1, workingValue: 13, resultDigit: 3},
+        {placeValue: 1000, topDigit: 4, bottomDigit: 3, regroupIn: 1, regroupOut: 0, workingValue: 8, resultDigit: 8}
+    ]
 };
 
 const subtraction: StandardAlgorithmProblem = {
@@ -27,21 +26,37 @@ const subtraction: StandardAlgorithmProblem = {
     bottomValue: 1789,
     result: 3445,
     columns: [
-        {placeValue: 1, placeName: 'ones', topDigit: 4, bottomDigit: 9, regroupIn: 0, regroupOut: 1, workingValue: 14, resultDigit: 5, calculation: '14 − 9 = 5.', regroupingRecord: 'Borrow 1 ten.'},
-        {placeValue: 10, placeName: 'tens', topDigit: 3, bottomDigit: 8, regroupIn: 1, regroupOut: 1, workingValue: 12, resultDigit: 4, calculation: '12 − 8 = 4.', regroupingRecord: 'Borrow 1 hundred.'},
-        {placeValue: 100, placeName: 'hundreds', topDigit: 2, bottomDigit: 7, regroupIn: 1, regroupOut: 1, workingValue: 11, resultDigit: 4, calculation: '11 − 7 = 4.', regroupingRecord: 'Borrow 1 thousand.'},
-        {placeValue: 1000, placeName: 'thousands', topDigit: 5, bottomDigit: 1, regroupIn: 1, regroupOut: 0, workingValue: 4, resultDigit: 3, calculation: '4 − 1 = 3.', regroupingRecord: 'No borrow.'}
-    ],
-    prompt: 'Subtract using the standard algorithm.',
-    questionEquation: '5,234 − 1,789 = ?',
-    solutionEquation: '5,234 − 1,789 = 3,445',
-    explanation: 'Subtract from ones to thousands and record each borrow.'
+        {placeValue: 1, topDigit: 4, bottomDigit: 9, regroupIn: 0, regroupOut: 1, workingValue: 14, resultDigit: 5},
+        {placeValue: 10, topDigit: 3, bottomDigit: 8, regroupIn: 1, regroupOut: 1, workingValue: 12, resultDigit: 4},
+        {placeValue: 100, topDigit: 2, bottomDigit: 7, regroupIn: 1, regroupOut: 1, workingValue: 11, resultDigit: 4},
+        {placeValue: 1000, topDigit: 5, bottomDigit: 1, regroupIn: 1, regroupOut: 0, workingValue: 4, resultDigit: 3}
+    ]
 };
 
 describe('isValidStandardAlgorithmProblem', () => {
     it('accepts consistent addition and subtraction column records', () => {
         expect(isValidStandardAlgorithmProblem(addition)).toBe(true);
         expect(isValidStandardAlgorithmProblem(subtraction)).toBe(true);
+    });
+
+    it('derives all standard-algorithm presentation from the numeric witness', () => {
+        const presentation = standardAlgorithmPresentation(addition);
+        expect(presentation).toMatchObject({
+            prompt: 'Use the standard addition algorithm to solve 4,567 + 3,789 = ?',
+            questionEquation: '4,567 + 3,789 = ?',
+            solutionEquation: '4,567 + 3,789 = 8,356',
+            explanation: 'Work from ones to the highest place, recording every carry or borrow. The completed algorithm gives 4,567 + 3,789 = 8,356.'
+        });
+        expect(presentation.columns[0]).toMatchObject({
+            placeName: 'ones',
+            calculation: '7 + 9 = 16',
+            regroupingRecord: 'Write 6 in the ones place and carry 1 to the tens place.'
+        });
+        expect(presentation.columns[3]).toMatchObject({
+            placeName: 'thousands',
+            calculation: '4 + 3 + 1 = 8',
+            regroupingRecord: 'Include the carried 1, write 8 in the thousands place, and record no new carry.'
+        });
     });
 
     it('rejects columns that are not ordered from ones to the highest place', () => {
@@ -64,14 +79,10 @@ describe('isValidStandardAlgorithmProblem', () => {
         expect(isValidStandardAlgorithmProblem(malformedSubtraction)).toBe(false);
     });
 
-    it('rejects an incorrect result or authored equation', () => {
+    it('rejects an incorrect result', () => {
         const incorrectResult = structuredClone(addition);
         incorrectResult.result = 8355;
         expect(isValidStandardAlgorithmProblem(incorrectResult)).toBe(false);
-
-        const revealedQuestion = structuredClone(subtraction);
-        revealedQuestion.questionEquation = revealedQuestion.solutionEquation;
-        expect(isValidStandardAlgorithmProblem(revealedQuestion)).toBe(false);
     });
 
     it('accepts three columns and rejects payloads outside the three-to-six-column layout capacity', () => {
@@ -80,12 +91,10 @@ describe('isValidStandardAlgorithmProblem', () => {
             topValue: 567,
             bottomValue: 189,
             result: 756,
-            questionEquation: '567 + 189 = ?',
-            solutionEquation: '567 + 189 = 756',
             columns: [
-                {placeValue: 1, placeName: 'ones', topDigit: 7, bottomDigit: 9, regroupIn: 0, regroupOut: 1, workingValue: 16, resultDigit: 6, calculation: '7 + 9 + 0 = 16', regroupingRecord: 'Carry 1 ten.'},
-                {placeValue: 10, placeName: 'tens', topDigit: 6, bottomDigit: 8, regroupIn: 1, regroupOut: 1, workingValue: 15, resultDigit: 5, calculation: '6 + 8 + 1 = 15', regroupingRecord: 'Carry 1 hundred.'},
-                {placeValue: 100, placeName: 'hundreds', topDigit: 5, bottomDigit: 1, regroupIn: 1, regroupOut: 0, workingValue: 7, resultDigit: 7, calculation: '5 + 1 + 1 = 7', regroupingRecord: 'No new carry.'}
+                {placeValue: 1, topDigit: 7, bottomDigit: 9, regroupIn: 0, regroupOut: 1, workingValue: 16, resultDigit: 6},
+                {placeValue: 10, topDigit: 6, bottomDigit: 8, regroupIn: 1, regroupOut: 1, workingValue: 15, resultDigit: 5},
+                {placeValue: 100, topDigit: 5, bottomDigit: 1, regroupIn: 1, regroupOut: 0, workingValue: 7, resultDigit: 7}
             ]
         };
         expect(isValidStandardAlgorithmProblem(threeColumn)).toBe(true);

@@ -37,25 +37,14 @@ export type ArithmeticProblem = ArithmeticPairProblem | ArithmeticTripleProblem 
 
 export type StandardAlgorithmOperation = 'addition' | 'subtraction';
 
-export type StandardAlgorithmPlaceName =
-    | 'ones'
-    | 'tens'
-    | 'hundreds'
-    | 'thousands'
-    | 'ten-thousands'
-    | 'hundred-thousands';
-
 export type StandardAlgorithmColumnStep = {
     placeValue: 1 | 10 | 100 | 1000 | 10000 | 100000;
-    placeName: StandardAlgorithmPlaceName;
     topDigit: number;
     bottomDigit: number;
     regroupIn: 0 | 1;
     regroupOut: 0 | 1;
     workingValue: number;
     resultDigit: number;
-    calculation: string;
-    regroupingRecord: string;
 };
 
 export type StandardAlgorithmProblem = {
@@ -65,10 +54,6 @@ export type StandardAlgorithmProblem = {
     bottomValue: number;
     result: number;
     columns: readonly StandardAlgorithmColumnStep[];
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    explanation: string;
 };
 
 export type KnownFactDerivationStrategy =
