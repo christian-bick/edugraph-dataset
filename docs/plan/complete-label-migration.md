@@ -293,6 +293,12 @@ There were no positive cross-role capability overlaps and no target without an A
 
 This is the highest-priority research and design phase.
 
+The active module-by-module inventory is maintained in
+[language-neutral-generator-payloads.md](language-neutral-generator-payloads.md). Its first deep
+pass classifies the 24 Phase 0 source-scan candidates and records their production consumers. The
+inventory deliberately remains open until the other 55 payload types and every type-compatible
+consumer have been reviewed; absence from the lexical candidate set is not evidence of neutrality.
+
 1. Review all 79 generator payload types, starting with the 24 source-scan candidates.
 2. Trace every candidate field to all consuming views and production targets.
 3. Classify each field using the four-way payload classification above.
