@@ -8,8 +8,8 @@ import {
 const fixtures: UnlikeFractionComparisonProblem[] = [
     {
         task: 'compare-unlike-fractions',
-        first: {numerator: 3, denominator: 4, notation: '3/4'},
-        second: {numerator: 1, denominator: 3, notation: '1/3'},
+        first: {numerator: 3, denominator: 4},
+        second: {numerator: 1, denominator: 3},
         comparisonKind: 'inequality',
         relation: 'greater',
         strategy: 'benchmark-half',
@@ -27,8 +27,8 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
     },
     {
         task: 'compare-unlike-fractions',
-        first: {numerator: 2, denominator: 4, notation: '2/4'},
-        second: {numerator: 3, denominator: 6, notation: '3/6'},
+        first: {numerator: 2, denominator: 4},
+        second: {numerator: 3, denominator: 6},
         comparisonKind: 'equality',
         relation: 'equal',
         strategy: 'benchmark-half',
@@ -41,8 +41,8 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
     },
     {
         task: 'compare-unlike-fractions',
-        first: {numerator: 1, denominator: 3, notation: '1/3'},
-        second: {numerator: 3, denominator: 4, notation: '3/4'},
+        first: {numerator: 1, denominator: 3},
+        second: {numerator: 3, denominator: 4},
         comparisonKind: 'inequality',
         relation: 'less',
         strategy: 'benchmark-half',
@@ -94,7 +94,7 @@ describe('isValidUnlikeFractionComparison', () => {
             data.firstBenchmarkRelation = 'less';
         }],
         ['same numerator', (data: UnlikeFractionComparisonProblem) => {
-            data.second = {numerator: 3, denominator: 8, notation: '3/8'};
+            data.second = {numerator: 3, denominator: 8};
             data.secondModel = {
                 partCount: 8,
                 shadedCount: 3,
@@ -103,7 +103,7 @@ describe('isValidUnlikeFractionComparison', () => {
             };
         }],
         ['same-side benchmark', (data: UnlikeFractionComparisonProblem) => {
-            data.second = {numerator: 2, denominator: 3, notation: '2/3'};
+            data.second = {numerator: 2, denominator: 3};
             data.secondModel = {
                 partCount: 3,
                 shadedCount: 2,

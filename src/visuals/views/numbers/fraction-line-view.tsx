@@ -6,6 +6,7 @@ import {
     WholeNumberFractionEquivalenceProblem
 } from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
+import {formatFraction} from '../../helpers/fraction.ts';
 import {isValidTenthsToHundredthsProblem} from '../fractions/tenths-hundredths-grid.tsx';
 
 const VIEW_ID = 'numbers-fraction-line';
@@ -35,15 +36,18 @@ const TenthsHundredthsEquivalenceLine = ({
     isSolutionView: boolean;
     explainScaling: boolean;
 }) => {
+    const tenthsNotation = formatFraction(data.tenths);
+    const hundredthsNotation = formatFraction(data.hundredths);
+    const equation = `${tenthsNotation} = ${hundredthsNotation}`;
     const toX = (hundredths: number) => LEFT + hundredths / 100 * (RIGHT - LEFT);
     const pointX = toX(data.hundredths.numerator);
     const scaledPointLabel = isSolutionView
-        ? data.hundredths.notation
+        ? hundredthsNotation
         : '?/100';
     const scaledLabelAtEdge = pointX > RIGHT - 90;
     const hundredthTicks = Array.from({length: 101}, (_, index) => index);
-    const scalingEquation = `${data.tenths.notation} = (${data.tenths.numerator} × 10)/(10 × 10) = ${data.hundredths.notation}`;
-    const explanation = `Multiplying the numerator and denominator of ${data.tenths.notation} by 10 creates 10 times as many equal parts without changing the point, so ${data.hundredths.notation} has the same value.`;
+    const scalingEquation = `${tenthsNotation} = (${data.tenths.numerator} × 10)/(10 × 10) = ${hundredthsNotation}`;
+    const explanation = `Multiplying the numerator and denominator of ${tenthsNotation} by 10 creates 10 times as many equal parts without changing the point, so ${hundredthsNotation} has the same value.`;
 
     return (
         <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -53,7 +57,7 @@ const TenthsHundredthsEquivalenceLine = ({
                     : 'Complete the equivalent fraction.'}
             </div>
             <div className="mt-2 text-center text-[1.08rem] font-semibold text-slate-600">
-                Complete <span className="font-extrabold text-blue-700">{data.tenths.notation} = ?/100</span> on one shared 0–1 scale{explainScaling ? ' and explain why the point stays fixed' : ''}.
+                Complete <span className="font-extrabold text-blue-700">{tenthsNotation} = ?/100</span> on one shared 0–1 scale{explainScaling ? ' and explain why the point stays fixed' : ''}.
             </div>
 
             <svg
@@ -61,8 +65,8 @@ const TenthsHundredthsEquivalenceLine = ({
                 className="mt-1 h-[310px] w-full"
                 role="img"
                 aria-label={isSolutionView
-                    ? `${data.tenths.notation} and ${data.hundredths.notation} occupy the same point on one zero-to-one number line with refined equal partitions`
-                    : `${data.tenths.notation} and an unknown scaled numerator occupy the same point on one zero-to-one number line; the scale factor is 10`}
+                    ? `${tenthsNotation} and ${hundredthsNotation} occupy the same point on one zero-to-one number line with refined equal partitions`
+                    : `${tenthsNotation} and an unknown scaled numerator occupy the same point on one zero-to-one number line; the scale factor is 10`}
             >
                 <text x={LEFT} y="49" className="fill-blue-700 text-[15px] font-bold">
                     10 original equal parts
@@ -130,7 +134,7 @@ const TenthsHundredthsEquivalenceLine = ({
                 <circle cx={pointX} cy={AXIS_Y} r="13" fill="#dbeafe" stroke="#2563eb" strokeWidth="4" />
                 <circle cx={pointX} cy={AXIS_Y} r="6" fill="#059669" />
                 <text x={pointX - 14} y="82" textAnchor="end" className="fill-blue-700 text-[20px] font-bold">
-                    {data.tenths.notation}
+                    {tenthsNotation}
                 </text>
                 <text
                     x={scaledLabelAtEdge ? pointX - 14 : pointX + 14}
@@ -147,9 +151,9 @@ const TenthsHundredthsEquivalenceLine = ({
 
             {explainScaling && (
                 <div className="flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-[0.92rem] font-bold text-blue-800">
-                    <span>{data.numeratorScale.from} × 10 = {isSolutionView ? data.numeratorScale.result : '?'}</span>
+                    <span>{data.tenths.numerator} × {data.scaleFactor} = {isSolutionView ? data.hundredths.numerator : '?'}</span>
                     <span className="text-blue-300">•</span>
-                    <span>{data.denominatorScale.equation}</span>
+                    <span>10 × {data.scaleFactor} = 100</span>
                 </div>
             )}
 
@@ -163,13 +167,13 @@ const TenthsHundredthsEquivalenceLine = ({
                         {explainScaling && (
                             <div className="text-[1.08rem] font-extrabold">{scalingEquation}</div>
                         )}
-                        <div className={`${explainScaling ? 'mt-2' : ''} text-[0.95rem] font-bold`}>{data.equation}.</div>
+                        <div className={`${explainScaling ? 'mt-2' : ''} text-[0.95rem] font-bold`}>{equation}.</div>
                         {explainScaling && (
                             <div className="mt-1 text-[0.88rem] font-semibold leading-snug text-slate-700">{explanation}</div>
                         )}
                     </>
                 ) : (
-                    <div className="text-[1.05rem] font-bold">{data.tenths.notation} = ?/100</div>
+                    <div className="text-[1.05rem] font-bold">{tenthsNotation} = ?/100</div>
                 )}
             </div>
         </div>
@@ -196,8 +200,7 @@ const validateWholeFractionProblem = (data: WholeNumberFractionEquivalenceProble
         'task',
         'wholeNumber',
         'fraction',
-        'relation',
-        'equation'
+        'relation'
     ]);
 
     const fraction = data.fraction;
@@ -211,9 +214,7 @@ const validateWholeFractionProblem = (data: WholeNumberFractionEquivalenceProble
         && Number.isInteger(fraction.denominator)
         && DENOMINATORS.includes(fraction.denominator)
         && fraction.numerator === data.wholeNumber * fraction.denominator
-        && fraction.notation === `${fraction.numerator}/${fraction.denominator}`
-        && data.relation === 'equal'
-        && data.equation === `${data.wholeNumber} = ${fraction.notation}`;
+        && data.relation === 'equal';
     if (!coherent) {
         throw new ViewValidationError(VIEW_ID, 'Whole-number and fraction data must describe one coherent equality.');
     }
@@ -230,16 +231,18 @@ const WholeFractionEquivalenceLine = ({
 }) => {
     validateWholeFractionProblem(data);
 
+    const fractionNotation = formatFraction(data.fraction);
+    const equation = `${data.wholeNumber} = ${fractionNotation}`;
     const subdivisionCount = data.wholeNumber * data.fraction.denominator;
     const ticks = Array.from({length: subdivisionCount + 1}, (_, index) => index);
     const toX = (numeratorUnits: number) => LEFT
         + (numeratorUnits / subdivisionCount) * (RIGHT - LEFT);
     const endpointX = toX(data.fraction.numerator);
     const displayedFraction = isSolutionView
-        ? data.fraction.notation
+        ? fractionNotation
         : `?/${data.fraction.denominator}`;
     const groupWord = data.wholeNumber === 1 ? 'group' : 'groups';
-    const explanation = `${data.fraction.notation} contains ${data.wholeNumber} ${groupWord} of ${data.fraction.denominator}/${data.fraction.denominator}, so it equals ${data.wholeNumber}.`;
+    const explanation = `${fractionNotation} contains ${data.wholeNumber} ${groupWord} of ${data.fraction.denominator}/${data.fraction.denominator}, so it equals ${data.wholeNumber}.`;
 
     return (
         <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -310,8 +313,8 @@ const WholeFractionEquivalenceLine = ({
             }`}>
                 {isSolutionView
                     ? explainEquivalence
-                        ? `${data.equation}. ${explanation}`
-                        : data.equation
+                        ? `${equation}. ${explanation}`
+                        : equation
                     : explainEquivalence
                         ? `Use groups of ${data.fraction.denominator}/${data.fraction.denominator} to explain the equality.`
                         : `Count the 1/${data.fraction.denominator} steps from 0 to ${data.wholeNumber}.`}
@@ -326,8 +329,7 @@ const validateEquivalenceProblem = (data: ProperFractionEquivalenceProblem) => {
         'first',
         'second',
         'scaleFactor',
-        'relation',
-        'equation'
+        'relation'
     ]);
 
     const fractions = [data.first, data.second];
@@ -337,15 +339,13 @@ const validateEquivalenceProblem = (data: ProperFractionEquivalenceProblem) => {
         && Number.isInteger(fraction.denominator)
         && DENOMINATORS.includes(fraction.denominator)
         && fraction.numerator < fraction.denominator
-        && fraction.notation === `${fraction.numerator}/${fraction.denominator}`
     );
     const coherent = validFractions
         && data.task === 'relate-equivalent-fractions'
         && (data.scaleFactor === 2 || data.scaleFactor === 3 || data.scaleFactor === 4)
         && data.second.numerator === data.first.numerator * data.scaleFactor
         && data.second.denominator === data.first.denominator * data.scaleFactor
-        && data.relation === 'equal'
-        && data.equation === `${data.first.notation} = ${data.second.notation}`;
+        && data.relation === 'equal';
     if (!coherent) {
         throw new ViewValidationError(VIEW_ID, 'Equivalent fractions must describe one coherent scaling relation.');
     }
@@ -364,6 +364,9 @@ const FractionEquivalenceLine = ({
 }) => {
     validateEquivalenceProblem(data);
 
+    const firstNotation = formatFraction(data.first);
+    const canonicalSecondNotation = formatFraction(data.second);
+    const equation = `${firstNotation} = ${canonicalSecondNotation}`;
     const ticks = Array.from({length: data.second.denominator + 1}, (_, index) => index);
     const toX = (numeratorUnits: number) => LEFT
         + (numeratorUnits / data.second.denominator) * (RIGHT - LEFT);
@@ -372,13 +375,13 @@ const FractionEquivalenceLine = ({
     const unknownNotation = `?/${data.second.denominator}`;
     const secondNotation = !isClassification && !isSolutionView
         ? unknownNotation
-        : data.second.notation;
+        : canonicalSecondNotation;
     const prompt = isClassification
-        ? `Do ${data.first.notation} and ${data.second.notation} locate the same point?`
+        ? `Do ${firstNotation} and ${canonicalSecondNotation} locate the same point?`
         : explainScaling
-            ? `Complete ${data.first.notation} = ${unknownNotation}. Use the number line to explain why the value stays the same.`
-            : `Complete ${data.first.notation} = ${unknownNotation}. Use the number line.`;
-    const explanation = `${data.first.notation} and ${data.second.notation} locate the same point because both fraction terms are multiplied by ${data.scaleFactor}.`;
+            ? `Complete ${firstNotation} = ${unknownNotation}. Use the number line to explain why the value stays the same.`
+            : `Complete ${firstNotation} = ${unknownNotation}. Use the number line.`;
+    const explanation = `${firstNotation} and ${canonicalSecondNotation} locate the same point because both fraction terms are multiplied by ${data.scaleFactor}.`;
 
     return (
         <div className="w-[900px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -425,7 +428,7 @@ const FractionEquivalenceLine = ({
                 <circle cx={endpointX} cy={AXIS_Y} r="13" fill="#dbeafe" stroke="#2563eb" strokeWidth="4" />
                 <circle cx={endpointX} cy={AXIS_Y} r="6" fill="#059669" />
                 <text x={endpointX - 14} y={82} textAnchor="end" className="fill-blue-700 text-[20px] font-bold">
-                    {data.first.notation}
+                    {firstNotation}
                 </text>
                 <text x={endpointX + 14} y={82} textAnchor="start" className="fill-emerald-700 text-[20px] font-bold">
                     {secondNotation}
@@ -442,13 +445,13 @@ const FractionEquivalenceLine = ({
             }`}>
                 {isSolutionView
                     ? isClassification
-                        ? `${data.equation}. The fractions are equivalent.`
+                        ? `${equation}. The fractions are equivalent.`
                         : explainScaling
-                            ? `${data.equation}. ${explanation}`
-                            : data.equation
+                            ? `${equation}. ${explanation}`
+                            : equation
                     : isClassification
                         ? 'Equivalent or not equivalent?'
-                        : `Count the equal parts to complete ${data.first.notation} = ${unknownNotation}.`}
+                        : `Count the equal parts to complete ${firstNotation} = ${unknownNotation}.`}
             </div>
         </div>
     );
@@ -465,11 +468,8 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
             'hundredths',
             'scaleFactor',
             'sharedWhole',
-            'numeratorScale',
-            'denominatorScale',
             'models',
-            'relation',
-            'equation'
+            'relation'
         ]);
         const formalizationOnly = mode === 'formalization';
         const explainsProcedure = mode === 'explanation';

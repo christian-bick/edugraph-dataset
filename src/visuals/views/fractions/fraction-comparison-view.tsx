@@ -6,6 +6,7 @@ import {
     UnlikeFractionComparisonProblem
 } from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
+import {formatFraction} from '../../helpers/fraction.ts';
 import {
     isValidUnlikeFractionComparison,
     legacyFractionComparisonPresentation,
@@ -85,7 +86,7 @@ const BenchmarkBar = ({
 }) => (
     <div className="grid grid-cols-[4rem_600px_5rem] items-center gap-4">
         <span className="text-right text-[1.15rem] font-extrabold text-slate-800">
-            {fraction.notation}
+            {formatFraction(fraction)}
         </span>
         <div className="relative h-[72px] w-[600px] overflow-visible rounded-lg border-[3px] border-slate-700 bg-white">
             <div
@@ -203,9 +204,6 @@ const validateFraction = (viewId: string, name: string, fraction: FractionValue)
         || !DENOMINATORS.includes(fraction.denominator)
         || fraction.numerator >= fraction.denominator) {
         throw new ViewValidationError(viewId, `${name} must be a supported positive proper fraction.`);
-    }
-    if (fraction.notation !== `${fraction.numerator}/${fraction.denominator}`) {
-        throw new ViewValidationError(viewId, `${name} fraction notation is inconsistent.`);
     }
 };
 

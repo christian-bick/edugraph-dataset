@@ -28,9 +28,8 @@ const render = (data: FractionLineProblem, mode: FractionLineMode, isSolutionVie
 const wholeNumberData: WholeNumberFractionEquivalenceProblem = {
     task: 'represent-whole-as-fraction',
     wholeNumber: 2,
-    fraction: {numerator: 8, denominator: 4, notation: '8/4'},
-    relation: 'equal',
-    equation: '2 = 8/4'
+    fraction: {numerator: 8, denominator: 4},
+    relation: 'equal'
 };
 
 const locationData: FractionNumberLineProblem = {
@@ -62,25 +61,36 @@ describe('fraction-line Ability projections', () => {
     it('derives fraction notation from the numeric location relation', () => {
         const question = render(locationData, 'articulation');
         const solution = render(locationData, 'articulation', true);
+        const targetNotation = `${locationData.numerator}/${locationData.denominator}`;
+        const unitNotation = `1/${locationData.denominator}`;
 
-        expect(question).toContain('locate <span class="text-blue-700">5/4</span>');
-        expect(solution).toContain('1/4 each step');
-        expect(solution).toContain('The endpoint is 5/4');
+        expect(question).toContain(`locate <span class="text-blue-700">${targetNotation}</span>`);
+        expect(solution).toContain(`${unitNotation} each step`);
+        expect(solution).toContain(`The endpoint is ${targetNotation}`);
     });
 
     it('projects whole-number equivalence as distinct formalization and explanation artifacts', () => {
         const formalization = render(wholeNumberData, 'formalization', true);
         const explanationQuestion = render(wholeNumberData, 'explanation');
         const explanationSolution = render(wholeNumberData, 'explanation', true);
+        const fractionNotation = `${wholeNumberData.fraction.numerator}/${wholeNumberData.fraction.denominator}`;
+        const equation = `${wholeNumberData.wholeNumber} = ${fractionNotation}`;
+        const wholeGroup = `${wholeNumberData.fraction.denominator}/${wholeNumberData.fraction.denominator}`;
 
-        expect(formalization).toContain('2 = 8/4');
+        expect(formalization).toContain(equation);
         expect(formalization).not.toContain('contains 2 groups');
         expect(explanationQuestion).toContain('explain why the values are equal');
-        expect(explanationSolution).toContain('8/4 contains 2 groups of 4/4');
+        expect(explanationSolution).toContain(
+            `${fractionNotation} contains ${wholeNumberData.wholeNumber} groups of ${wholeGroup}`
+        );
     });
 
     it('keeps the 100/100 endpoint label inside the number-line viewport', () => {
-        const markup = render(wholeTenthsData(), 'explanation', true);
-        expect(markup).toMatch(/text-anchor="end"[^>]*>100\/100<\/text>/);
+        const data = wholeTenthsData();
+        const markup = render(data, 'explanation', true);
+        const endpointNotation = `${data.hundredths.numerator}/${data.hundredths.denominator}`;
+        expect(markup).toContain(
+            `text-anchor="end" class="fill-emerald-700 text-[20px] font-bold">${endpointNotation}</text>`
+        );
     });
 });

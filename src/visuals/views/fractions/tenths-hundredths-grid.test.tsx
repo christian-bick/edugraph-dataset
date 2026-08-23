@@ -77,13 +77,12 @@ describe('tenths/hundredths view contract', () => {
         });
     });
 
-    it('rejects contradictory scaling, geometry, shading, and equations', () => {
+    it('rejects contradictory scaling and grid evidence', () => {
         const mutations: Array<(data: TenthsToHundredthsProblem) => void> = [
-            data => { data.numeratorScale.result += 1; },
+            data => { data.hundredths.numerator += 1; },
             data => { data.models.hundredths.cells[10]!.column += 1; },
             data => { data.models.hundredths.cells[0]!.shaded = false; },
-            data => { data.models.hundredths.cells[0]!.tenthGroupIndex = 2; },
-            data => { data.equation = `${data.tenths.notation} ≠ ${data.hundredths.notation}`; }
+            data => { data.models.hundredths.cells[0]!.tenthGroupIndex = 2; }
         ];
         for (const mutate of mutations) {
             const data = structuredClone(generateEquivalence());
@@ -116,7 +115,7 @@ describe('tenths/hundredths view contract', () => {
 
     it('returns false rather than throwing for missing nested payload objects', () => {
         const malformedEquivalence = structuredClone(generateEquivalence()) as unknown as Record<string, unknown>;
-        malformedEquivalence.numeratorScale = null;
+        malformedEquivalence.hundredths = null;
         expect(() => isValidTenthsToHundredthsProblem(
             malformedEquivalence as unknown as TenthsToHundredthsProblem
         )).not.toThrow();
@@ -146,6 +145,9 @@ describe('tenths/hundredths view contract', () => {
 
     it('withholds answer-bearing scaling and addition evidence in Question Mode', () => {
         const equivalence = generateEquivalence();
+        const tenthsNotation = `${equivalence.tenths.numerator}/${equivalence.tenths.denominator}`;
+        const hundredthsNotation = `${equivalence.hundredths.numerator}/${equivalence.hundredths.denominator}`;
+        const equivalenceEquation = `${tenthsNotation} = ${hundredthsNotation}`;
         const equivalenceQuestion = renderToStaticMarkup(
             <TenthsToHundredthsModel
                 data={equivalence}
@@ -167,10 +169,10 @@ describe('tenths/hundredths view contract', () => {
                 explainScaling
             />
         );
-        expect(equivalenceQuestion).not.toContain(equivalence.hundredths.notation);
+        expect(equivalenceQuestion).not.toContain(hundredthsNotation);
         expect(equivalenceQuestion).not.toContain('Scale the numerator and denominator');
-        expect(equivalenceSolution).toContain(equivalence.hundredths.notation);
-        expect(equivalenceSolution).toContain(equivalence.equation);
+        expect(equivalenceSolution).toContain(hundredthsNotation);
+        expect(equivalenceSolution).toContain(equivalenceEquation);
         expect(procedureQuestion).toContain('Scale the numerator and denominator');
 
         const addition = generateAddition();

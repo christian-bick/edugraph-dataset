@@ -3,6 +3,7 @@ import {
     TenthsHundredthsGridGroup,
     TenthsHundredthsGridModel
 } from '../../types/problems.ts';
+import {formatFraction} from './fraction.ts';
 
 const EPSILON = 0.001;
 
@@ -14,8 +15,7 @@ export const isValidDecimalFraction = (
     && Number.isInteger(value.numerator)
     && value.numerator > 0
     && value.numerator <= denominator
-    && value.denominator === denominator
-    && value.notation === `${value.numerator}/${denominator}`;
+    && value.denominator === denominator;
 
 const closeTo = (actual: number, expected: number): boolean =>
     Number.isFinite(actual) && Math.abs(actual - expected) < EPSILON;
@@ -32,7 +32,7 @@ export const isValidTenthsHundredthsGrid = (
     const rows = denominator === 10 ? 1 : 10;
     if (typeof model !== 'object'
         || model === null
-        || model.display !== value.notation
+        || model.display !== formatFraction(value)
         || model.rows !== rows
         || model.columns !== 10
         || model.partCount !== denominator

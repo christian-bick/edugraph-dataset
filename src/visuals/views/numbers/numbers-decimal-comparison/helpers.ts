@@ -49,8 +49,7 @@ const validOperand = (
 
     const modelValue: DecimalFractionValue = {
         numerator: operand.normalizedHundredths,
-        denominator: 100,
-        notation: `${operand.normalizedHundredths}/100`
+        denominator: 100
     };
     return isValidTenthsHundredthsGrid(operand.model, modelValue);
 };

@@ -8,6 +8,7 @@ import {
     isValidDecimalFraction,
     isValidTenthsHundredthsGrid
 } from '../../helpers/tenths-hundredths-grid.ts';
+import {formatFraction} from '../../helpers/fraction.ts';
 
 export {TenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
 export {
@@ -24,10 +25,6 @@ export const isValidTenthsToHundredthsProblem = (
         || data.tenths === null
         || typeof data.hundredths !== 'object'
         || data.hundredths === null
-        || typeof data.numeratorScale !== 'object'
-        || data.numeratorScale === null
-        || typeof data.denominatorScale !== 'object'
-        || data.denominatorScale === null
         || typeof data.models !== 'object'
         || data.models === null) return false;
     const {tenths, hundredths} = data;
@@ -38,16 +35,7 @@ export const isValidTenthsToHundredthsProblem = (
         && hundredths.numerator === scaledNumerator
         && data.scaleFactor === 10
         && data.sharedWhole === 1
-        && data.numeratorScale.from === tenths.numerator
-        && data.numeratorScale.factor === 10
-        && data.numeratorScale.result === scaledNumerator
-        && data.numeratorScale.equation === `${tenths.numerator} × 10 = ${scaledNumerator}`
-        && data.denominatorScale.from === 10
-        && data.denominatorScale.factor === 10
-        && data.denominatorScale.result === 100
-        && data.denominatorScale.equation === '10 × 10 = 100'
         && data.relation === 'equal'
-        && data.equation === `${tenths.notation} = ${hundredths.notation}`
         && isValidTenthsHundredthsGrid(data.models.tenths, tenths)
         && isValidTenthsHundredthsGrid(data.models.hundredths, hundredths);
 };
@@ -166,9 +154,12 @@ export const TenthsToHundredthsModel = ({
     isSolutionView: boolean;
     explainScaling: boolean;
 }) => {
-    const questionEquation = `${data.tenths.notation} = ?/100`;
-    const scalingEquation = `${data.tenths.notation} = (${data.tenths.numerator} × 10)/(10 × 10) = ${data.hundredths.notation}`;
-    const explanation = `Multiplying the numerator and denominator of ${data.tenths.notation} by 10 makes 10 times as many equal parts. Each tenth becomes 10 hundredths, so ${data.hundredths.notation} shades the same amount.`;
+    const tenthsNotation = formatFraction(data.tenths);
+    const hundredthsNotation = formatFraction(data.hundredths);
+    const equation = `${tenthsNotation} = ${hundredthsNotation}`;
+    const questionEquation = `${tenthsNotation} = ?/100`;
+    const scalingEquation = `${tenthsNotation} = (${data.tenths.numerator} × 10)/(10 × 10) = ${hundredthsNotation}`;
+    const explanation = `Multiplying the numerator and denominator of ${tenthsNotation} by 10 makes 10 times as many equal parts. Each tenth becomes 10 hundredths, so ${hundredthsNotation} shades the same amount.`;
 
     return (
         <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -178,29 +169,29 @@ export const TenthsToHundredthsModel = ({
                     : 'Complete the equivalent fraction by expressing the tenths as hundredths.'}
             </div>
             <div className="mt-2 text-center font-mono text-[1.08rem] font-bold text-blue-700">
-                {isSolutionView ? data.equation : questionEquation}
+                {isSolutionView ? equation : questionEquation}
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-5">
                 <TenthsHundredthsGrid
                     model={data.models.tenths}
                     title="Tenths"
-                    ariaLabel={`${data.tenths.notation} shades ${data.tenths.numerator} of 10 equal vertical parts in the shared whole.`}
+                    ariaLabel={`${tenthsNotation} shades ${data.tenths.numerator} of 10 equal vertical parts in the shared whole.`}
                 />
                 <TenthsHundredthsGrid
                     model={data.models.hundredths}
                     title="The same whole in hundredths"
                     ariaLabel={isSolutionView
-                        ? `${data.hundredths.notation} shades the same region using 100 equal parts grouped into 10 tenths.`
+                        ? `${hundredthsNotation} shades the same region using 100 equal parts grouped into 10 tenths.`
                         : 'The same-sized whole is divided into 100 equal parts grouped into tenths. Its shaded region aligns with the tenths model; the scaled numerator is withheld.'}
                     showDisplay={isSolutionView}
                 />
             </div>
 
             <div className="mt-4 flex items-center justify-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-900">
-                <span>{data.numeratorScale.from} × {data.numeratorScale.factor} = {isSolutionView ? data.numeratorScale.result : '?'}</span>
+                <span>{data.tenths.numerator} × {data.scaleFactor} = {isSolutionView ? data.hundredths.numerator : '?'}</span>
                 <span className="text-blue-300">•</span>
-                <span>{data.denominatorScale.equation}</span>
+                <span>10 × {data.scaleFactor} = 100</span>
             </div>
 
             <div className={`mt-4 min-h-[104px] rounded-xl border-2 px-5 py-4 text-center ${
@@ -210,7 +201,7 @@ export const TenthsToHundredthsModel = ({
             }`}>
                 {isSolutionView ? (
                     <>
-                        <div className="text-lg font-extrabold">{data.equation}.</div>
+                        <div className="text-lg font-extrabold">{equation}.</div>
                         {explainScaling && (
                             <>
                                 <div className="mt-2 font-mono text-sm font-bold">{scalingEquation}</div>

@@ -75,8 +75,7 @@ const randomDistinctPair = <T>(items: readonly T[]): [T, T] => {
 
 const toFractionValue = (numerator: number, denominator: FractionParts): FractionValue => ({
     numerator,
-    denominator,
-    notation: `${numerator}/${denominator}`
+    denominator
 });
 
 const compareToHalf = (fraction: FractionValue): 'greater' | 'equal' | 'less' => {

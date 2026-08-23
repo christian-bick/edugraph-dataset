@@ -41,8 +41,7 @@ const randomItem = <T>(items: readonly T[]): T =>
 
 const toFractionValue = (numerator: number, denominator: FractionParts): FractionValue => ({
     numerator,
-    denominator,
-    notation: `${numerator}/${denominator}`
+    denominator
 });
 
 const generateTenthsToHundredths = (): TenthsToHundredthsProblem => {
@@ -57,24 +56,11 @@ const generateTenthsToHundredths = (): TenthsToHundredthsProblem => {
         hundredths,
         scaleFactor: 10,
         sharedWhole: 1,
-        numeratorScale: {
-            from: numerator,
-            factor: 10,
-            result: scaledNumerator,
-            equation: `${numerator} × 10 = ${scaledNumerator}`
-        },
-        denominatorScale: {
-            from: 10,
-            factor: 10,
-            result: 100,
-            equation: '10 × 10 = 100'
-        },
         models: {
             tenths: toTenthsHundredthsGrid(numerator, 10),
             hundredths: toTenthsHundredthsGrid(scaledNumerator, 100)
         },
-        relation: 'equal',
-        equation: `${tenths.notation} = ${hundredths.notation}`
+        relation: 'equal'
     };
 };
 
@@ -90,8 +76,7 @@ const generateProperEquivalence = (): ProperFractionEquivalenceProblem => {
         first,
         second,
         scaleFactor: pair.scaleFactor,
-        relation: 'equal',
-        equation: `${first.notation} = ${second.notation}`
+        relation: 'equal'
     };
 };
 
@@ -135,8 +120,7 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
                     task: 'represent-whole-as-fraction',
                     wholeNumber,
                     fraction,
-                    relation: 'equal',
-                    equation: `${wholeNumber} = ${fraction.notation}`
+                    relation: 'equal'
                 }
             };
         }

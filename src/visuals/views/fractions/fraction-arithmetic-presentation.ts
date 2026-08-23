@@ -14,6 +14,7 @@ import {
     UnitFractionMultipleProblem,
     WholeNumberFractionProductProblem
 } from '../../../types/problems.ts';
+import {presentFraction, PresentedFraction} from '../../helpers/fraction.ts';
 
 export type FractionArithmeticPresentation =
     | 'interpretation'
@@ -21,7 +22,8 @@ export type FractionArithmeticPresentation =
     | 'execution-model'
     | 'execution-word';
 
-export type PresentedFractionValue = LikeDenominatorFractionValue & {notation: string};
+export type PresentedFractionValue = PresentedFraction<LikeDenominatorFractionValue>;
+export type PresentedDecimalFractionValue = PresentedFraction<DecimalFractionValue>;
 
 export type PresentedMixedFractionValue = MixedFractionValue & {
     notation: string;
@@ -179,10 +181,10 @@ export type TenthsHundredthsAdditionPresentation = Omit<PresentationCommon, 'den
     task: 'tenths-hundredths-addition';
     operation: 'addition';
     denominator: 100;
-    firstTenths: DecimalFractionValue & {denominator: 10};
-    secondHundredths: DecimalFractionValue & {denominator: 100};
-    convertedFirst: DecimalFractionValue & {denominator: 100};
-    result: DecimalFractionValue & {denominator: 100};
+    firstTenths: PresentedDecimalFractionValue & {denominator: 10};
+    secondHundredths: PresentedDecimalFractionValue & {denominator: 100};
+    convertedFirst: PresentedDecimalFractionValue & {denominator: 100};
+    result: PresentedDecimalFractionValue & {denominator: 100};
     conversion: {
         factor: 10;
         numeratorEquation: string;
@@ -218,17 +220,9 @@ const operationSymbol = (operation: FractionArithmeticOperation): '+' | '−' =>
 const countedNoun = (count: number, singular: string): string =>
     count === 1 ? singular : `${singular}s`;
 
-const presentFraction = (value: LikeDenominatorFractionValue): PresentedFractionValue => ({
-    ...value,
-    notation: `${value.numerator}/${value.denominator}`
-});
-
 const presentDecimalFraction = <Denominator extends 10 | 100>(
     value: {numerator: number; denominator: Denominator}
-): DecimalFractionValue & {denominator: Denominator} => ({
-    ...value,
-    notation: `${value.numerator}/${value.denominator}`
-});
+): PresentedDecimalFractionValue & {denominator: Denominator} => presentFraction(value);
 
 const presentMixed = (value: MixedFractionValue): PresentedMixedFractionValue => {
     const improperNumerator = value.whole * value.denominator + value.numerator;
@@ -315,7 +309,7 @@ const fractionGroupAggregate = (
 );
 
 const makeGrid = (
-    value: DecimalFractionValue,
+    value: PresentedDecimalFractionValue,
     groups: readonly TenthsHundredthsGridGroup[]
 ): TenthsHundredthsGridModel => {
     const rows = value.denominator === 10 ? 1 as const : 10 as const;

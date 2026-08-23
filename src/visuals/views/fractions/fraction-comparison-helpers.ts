@@ -4,6 +4,7 @@ import {
     LegacyFractionComparisonProblem,
     UnlikeFractionComparisonProblem
 } from '../../../types/problems.ts';
+import {formatFraction} from '../../helpers/fraction.ts';
 
 const EPSILON = 0.001;
 const DENOMINATORS = [2, 3, 4, 6, 8] as const;
@@ -14,8 +15,7 @@ const validFraction = (fraction: FractionValue): boolean => typeof fraction === 
     && fraction.numerator > 0
     && Number.isInteger(fraction.denominator)
     && DENOMINATORS.includes(fraction.denominator)
-    && fraction.numerator < fraction.denominator
-    && fraction.notation === `${fraction.numerator}/${fraction.denominator}`;
+    && fraction.numerator < fraction.denominator;
 
 const compare = (first: number, second: number): 'greater' | 'equal' | 'less' =>
     first > second ? 'greater' : first < second ? 'less' : 'equal';
@@ -56,21 +56,23 @@ export const unlikeFractionComparisonPresentation = (
     data: UnlikeFractionComparisonProblem
 ): UnlikeFractionComparisonPresentation => {
     const symbol = relationSymbol(data.relation);
+    const firstNotation = formatFraction(data.first);
+    const secondNotation = formatFraction(data.second);
     const firstBenchmarkStatement = benchmarkStatement(
-        data.first.notation,
+        firstNotation,
         data.firstBenchmarkRelation
     );
     const secondBenchmarkStatement = benchmarkStatement(
-        data.second.notation,
+        secondNotation,
         data.secondBenchmarkRelation
     );
-    const solutionEquation = `${data.first.notation} ${symbol} ${data.second.notation}`;
+    const solutionEquation = `${firstNotation} ${symbol} ${secondNotation}`;
     return {
         symbol,
         firstBenchmarkStatement,
         secondBenchmarkStatement,
-        prompt: `Compare ${data.first.notation} and ${data.second.notation} using 1/2 as a benchmark on the same whole.`,
-        questionEquation: `${data.first.notation} ? ${data.second.notation}`,
+        prompt: `Compare ${firstNotation} and ${secondNotation} using 1/2 as a benchmark on the same whole.`,
+        questionEquation: `${firstNotation} ? ${secondNotation}`,
         solutionEquation,
         answerStatement: `${solutionEquation}.`,
         rationale: `Both fractions refer to the same whole. ${firstBenchmarkStatement} ${secondBenchmarkStatement} Therefore, ${solutionEquation}.`
@@ -87,10 +89,12 @@ export const legacyFractionComparisonPresentation = (
     data: LegacyFractionComparisonProblem
 ): LegacyFractionComparisonPresentation => {
     const symbol = relationSymbol(data.relation) as '>' | '<';
-    const answer = `${data.first.notation} ${symbol} ${data.second.notation}`;
+    const firstNotation = formatFraction(data.first);
+    const secondNotation = formatFraction(data.second);
+    const answer = `${firstNotation} ${symbol} ${secondNotation}`;
     const rationale = data.family === 'common-denominator'
-        ? `Both ${data.first.notation} and ${data.second.notation} refer to the same whole and share denominator ${data.sharedComponent}; comparing numerators ${data.first.numerator} and ${data.second.numerator} shows ${data.first.notation} is ${data.relation} than ${data.second.notation}.`
-        : `Both ${data.first.notation} and ${data.second.notation} refer to the same whole and share numerator ${data.sharedComponent}; denominator ${data.first.denominator} makes ${data.relation === 'greater' ? 'larger' : 'smaller'} parts than denominator ${data.second.denominator}, so ${data.first.notation} is ${data.relation} than ${data.second.notation}.`;
+        ? `Both ${firstNotation} and ${secondNotation} refer to the same whole and share denominator ${data.sharedComponent}; comparing numerators ${data.first.numerator} and ${data.second.numerator} shows ${firstNotation} is ${data.relation} than ${secondNotation}.`
+        : `Both ${firstNotation} and ${secondNotation} refer to the same whole and share numerator ${data.sharedComponent}; denominator ${data.first.denominator} makes ${data.relation === 'greater' ? 'larger' : 'smaller'} parts than denominator ${data.second.denominator}, so ${firstNotation} is ${data.relation} than ${secondNotation}.`;
     return {symbol, answer, rationale};
 };
 
@@ -102,7 +106,6 @@ export const isValidUnlikeFractionComparison = (
         || !validFraction(data.second)
         || data.first.denominator === data.second.denominator
         || data.first.numerator === data.second.numerator
-        || data.first.notation === data.second.notation
         || data.strategy !== 'benchmark-half'
         || data.sharedWhole !== 1
         || typeof data.benchmark !== 'object'

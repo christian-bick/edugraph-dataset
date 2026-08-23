@@ -9,8 +9,7 @@ export const toDecimalFraction = <Denominator extends 10 | 100>(
     denominator: Denominator
 ): DecimalFractionValue & {denominator: Denominator} => ({
     numerator,
-    denominator,
-    notation: `${numerator}/${denominator}`
+    denominator
 });
 
 export const toTenthsHundredthsGrid = (

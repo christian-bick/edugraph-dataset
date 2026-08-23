@@ -1319,7 +1319,6 @@ export type FractionNumberLineProblem = {
 export type FractionValue = {
     numerator: number;
     denominator: FractionParts;
-    notation: string;
 };
 
 export type ProperFractionEquivalenceProblem = {
@@ -1328,7 +1327,6 @@ export type ProperFractionEquivalenceProblem = {
     second: FractionValue;
     scaleFactor: 2 | 3 | 4;
     relation: 'equal';
-    equation: string;
 };
 
 export type WholeNumberFractionEquivalenceProblem = {
@@ -1336,13 +1334,11 @@ export type WholeNumberFractionEquivalenceProblem = {
     wholeNumber: 1 | 2 | 3;
     fraction: FractionValue;
     relation: 'equal';
-    equation: string;
 };
 
 export type DecimalFractionValue = {
     numerator: number;
     denominator: 10 | 100;
-    notation: string;
 };
 
 export type TenthsHundredthsGridCell = {
@@ -1381,24 +1377,11 @@ export type TenthsToHundredthsProblem = {
     hundredths: DecimalFractionValue & {denominator: 100};
     scaleFactor: 10;
     sharedWhole: 1;
-    numeratorScale: {
-        from: number;
-        factor: 10;
-        result: number;
-        equation: string;
-    };
-    denominatorScale: {
-        from: 10;
-        factor: 10;
-        result: 100;
-        equation: string;
-    };
     models: {
         tenths: TenthsHundredthsGridModel;
         hundredths: TenthsHundredthsGridModel;
     };
     relation: 'equal';
-    equation: string;
 };
 
 export type FractionEquivalenceProblem =

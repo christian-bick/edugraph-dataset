@@ -11,17 +11,18 @@ import {FractionComparisonGeneratorConfig} from './spec.ts';
 
 const denominators = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
 
+const fractionKey = ({numerator, denominator}: {numerator: number; denominator: number}) =>
+    `${numerator}/${denominator}`;
+
 const expectCoherentProblem = (problem: LegacyFractionComparisonProblem) => {
     expect(problem.task).toBe('compare-fractions');
-    expect(problem.first.notation).toBe(`${problem.first.numerator}/${problem.first.denominator}`);
-    expect(problem.second.notation).toBe(`${problem.second.numerator}/${problem.second.denominator}`);
     expect(denominators).toContain(problem.first.denominator);
     expect(denominators).toContain(problem.second.denominator);
     expect(problem.first.numerator).toBeGreaterThan(0);
     expect(problem.second.numerator).toBeGreaterThan(0);
     expect(problem.first.numerator).toBeLessThan(problem.first.denominator);
     expect(problem.second.numerator).toBeLessThan(problem.second.denominator);
-    expect(problem.first.notation).not.toBe(problem.second.notation);
+    expect(fractionKey(problem.first)).not.toBe(fractionKey(problem.second));
     expect(problem.sharedWhole).toBe(1);
     const firstValue = problem.first.numerator / problem.first.denominator;
     const secondValue = problem.second.numerator / problem.second.denominator;
@@ -60,8 +61,6 @@ const expectCoherentUnlikeProblem = (problem: UnlikeFractionComparisonProblem) =
     expect(problem.task).toBe('compare-unlike-fractions');
     expect(problem.first.numerator).not.toBe(problem.second.numerator);
     expect(problem.first.denominator).not.toBe(problem.second.denominator);
-    expect(problem.first.notation).toBe(`${problem.first.numerator}/${problem.first.denominator}`);
-    expect(problem.second.notation).toBe(`${problem.second.numerator}/${problem.second.denominator}`);
     expect(problem.first.numerator).toBeGreaterThan(0);
     expect(problem.second.numerator).toBeGreaterThan(0);
     expect(problem.first.numerator).toBeLessThan(problem.first.denominator);
@@ -167,7 +166,7 @@ describe('FractionComparisonGenerator', () => {
                     throw new Error('Expected an unlike-fraction comparison.');
                 }
                 expectCoherentUnlikeProblem(problem);
-                observed.add(`${problem.first.notation}:${problem.second.notation}`);
+                observed.add(`${fractionKey(problem.first)}:${fractionKey(problem.second)}`);
             }
             expect(observed.size).toBeGreaterThan(1);
         }
@@ -175,29 +174,29 @@ describe('FractionComparisonGenerator', () => {
 
     it.each([
         [101, Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Greater, {
-            first: {numerator: 2, denominator: 3, notation: '2/3'},
-            second: {numerator: 1, denominator: 3, notation: '1/3'},
+            first: {numerator: 2, denominator: 3},
+            second: {numerator: 1, denominator: 3},
             family: 'common-denominator',
             sharedComponent: 3,
             relation: 'greater'
         }],
         [102, Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Less, {
-            first: {numerator: 3, denominator: 6, notation: '3/6'},
-            second: {numerator: 5, denominator: 6, notation: '5/6'},
+            first: {numerator: 3, denominator: 6},
+            second: {numerator: 5, denominator: 6},
             family: 'common-denominator',
             sharedComponent: 6,
             relation: 'less'
         }],
         [103, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Greater, {
-            first: {numerator: 1, denominator: 3, notation: '1/3'},
-            second: {numerator: 1, denominator: 8, notation: '1/8'},
+            first: {numerator: 1, denominator: 3},
+            second: {numerator: 1, denominator: 8},
             family: 'common-numerator',
             sharedComponent: 1,
             relation: 'greater'
         }],
         [104, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Less, {
-            first: {numerator: 4, denominator: 8, notation: '4/8'},
-            second: {numerator: 4, denominator: 6, notation: '4/6'},
+            first: {numerator: 4, denominator: 8},
+            second: {numerator: 4, denominator: 6},
             family: 'common-numerator',
             sharedComponent: 4,
             relation: 'less'
@@ -234,7 +233,7 @@ describe('FractionComparisonGenerator', () => {
             const problem = generator.generate(config(strategy, comparisonFamily, relation)).data;
             if (problem.task !== 'compare-fractions') throw new Error('Expected legacy comparison.');
             expectCoherentProblem(problem);
-            observed.add(`${problem.first.notation}:${problem.second.notation}`);
+            observed.add(`${fractionKey(problem.first)}:${fractionKey(problem.second)}`);
 
             if (comparisonFamily === Scope.CommonDenominator) {
                 expect(problem.family).toBe('common-denominator');

@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {WholeNumberFractionEquivalenceProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {formatFraction} from '../../../helpers/fraction.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
     FractionsWholeEquivalenceViewConfig,
@@ -35,8 +36,7 @@ const validateWholeFraction = (data: WholeNumberFractionEquivalenceProblem) => {
         'task',
         'wholeNumber',
         'fraction',
-        'relation',
-        'equation'
+        'relation'
     ]);
 
     if (data.task !== 'represent-whole-as-fraction'
@@ -50,13 +50,11 @@ const validateWholeFraction = (data: WholeNumberFractionEquivalenceProblem) => {
         || !Number.isInteger(data.fraction.numerator)
         || !Number.isInteger(data.fraction.denominator)
         || !DENOMINATORS.includes(data.fraction.denominator)
-        || data.fraction.numerator !== data.wholeNumber * data.fraction.denominator
-        || data.fraction.notation !== `${data.fraction.numerator}/${data.fraction.denominator}`) {
+        || data.fraction.numerator !== data.wholeNumber * data.fraction.denominator) {
         throw new ViewValidationError(VIEW_ID, 'The fraction must contain one denominator-sized group for each whole.');
     }
-    if (data.relation !== 'equal'
-        || data.equation !== `${data.wholeNumber} = ${data.fraction.notation}`) {
-        throw new ViewValidationError(VIEW_ID, 'The equality and equation must agree with the whole and fraction.');
+    if (data.relation !== 'equal') {
+        throw new ViewValidationError(VIEW_ID, 'The equality must agree with the whole and fraction.');
     }
 };
 
@@ -69,9 +67,11 @@ const FractionsWholeEquivalenceCore = ({config: _config, payload}: CoreProps) =>
     }
     validateWholeFraction(data);
 
+    const fractionNotation = formatFraction(data.fraction);
+    const equation = `${data.wholeNumber} = ${fractionNotation}`;
     const unitWhole = `${data.fraction.denominator}/${data.fraction.denominator}`;
     const groupWord = data.wholeNumber === 1 ? 'group' : 'groups';
-    const explanation = `${data.fraction.notation} contains ${data.wholeNumber} ${groupWord} of ${unitWhole}, so it equals ${data.wholeNumber}.`;
+    const explanation = `${fractionNotation} contains ${data.wholeNumber} ${groupWord} of ${unitWhole}, so it equals ${data.wholeNumber}.`;
     const wholeParts = Array.from({length: data.wholeNumber}, (_, index) => index);
 
     return (
@@ -114,7 +114,7 @@ const FractionsWholeEquivalenceCore = ({config: _config, payload}: CoreProps) =>
                     : 'border-dashed border-slate-300 bg-slate-50 text-slate-500'
             }`}>
                 {isSolutionView
-                    ? `${data.equation}. ${explanation}`
+                    ? `${equation}. ${explanation}`
                     : `Count the numerator parts needed for ${data.wholeNumber} complete ${data.wholeNumber === 1 ? 'whole' : 'wholes'}.`}
             </div>
         </div>

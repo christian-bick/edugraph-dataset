@@ -43,10 +43,7 @@ const expectCoherentPair = (problem: ProperFractionEquivalenceProblem) => {
     expect(problem.second.numerator).toBe(problem.first.numerator * problem.scaleFactor);
     expect(problem.second.denominator).toBe(problem.first.denominator * problem.scaleFactor);
     expect(problem.second.denominator).toBeLessThanOrEqual(8);
-    expect(problem.first.notation).toBe(`${problem.first.numerator}/${problem.first.denominator}`);
-    expect(problem.second.notation).toBe(`${problem.second.numerator}/${problem.second.denominator}`);
     expect(problem.relation).toBe('equal');
-    expect(problem.equation).toBe(`${problem.first.notation} = ${problem.second.notation}`);
 };
 
 const expectGrid = (model: TenthsHundredthsGridModel): void => {
@@ -80,26 +77,14 @@ const expectTenthsProblem = (problem: TenthsToHundredthsProblem): void => {
     expect(n).toBeGreaterThanOrEqual(1);
     expect(n).toBeLessThanOrEqual(10);
     expect(problem.hundredths.numerator).toBe(n * 10);
-    expect(problem.tenths).toEqual({numerator: n, denominator: 10, notation: `${n}/10`});
+    expect(problem.tenths).toEqual({numerator: n, denominator: 10});
     expect(problem.hundredths).toEqual({
         numerator: n * 10,
-        denominator: 100,
-        notation: `${n * 10}/100`
+        denominator: 100
     });
-    expect(problem.numeratorScale).toEqual({
-        from: n,
-        factor: 10,
-        result: n * 10,
-        equation: `${n} × 10 = ${n * 10}`
-    });
-    expect(problem.denominatorScale).toEqual({
-        from: 10,
-        factor: 10,
-        result: 100,
-        equation: '10 × 10 = 100'
-    });
+    expect(problem.scaleFactor).toBe(10);
+    expect(problem.sharedWhole).toBe(1);
     expect(problem.relation).toBe('equal');
-    expect(problem.equation).toBe(`${n}/10 = ${n * 10}/100`);
     expectGrid(problem.models.tenths);
     expectGrid(problem.models.hundredths);
 };
@@ -150,13 +135,7 @@ describe('FractionEquivalenceGenerator', () => {
             expect(problem.fraction.numerator).toBe(
                 problem.wholeNumber * problem.fraction.denominator
             );
-            expect(problem.fraction.notation).toBe(
-                `${problem.fraction.numerator}/${problem.fraction.denominator}`
-            );
             expect(problem.relation).toBe('equal');
-            expect(problem.equation).toBe(
-                `${problem.wholeNumber} = ${problem.fraction.notation}`
-            );
             wholeNumbers.add(problem.wholeNumber);
             denominatorsSeen.add(problem.fraction.denominator);
         }
@@ -196,11 +175,10 @@ describe('FractionEquivalenceGenerator', () => {
         expect(generator.generate(properConfig)).toEqual({
             data: {
                 task: 'relate-equivalent-fractions',
-                first: {numerator: 1, denominator: 4, notation: '1/4'},
-                second: {numerator: 2, denominator: 8, notation: '2/8'},
+                first: {numerator: 1, denominator: 4},
+                second: {numerator: 2, denominator: 8},
                 scaleFactor: 2,
-                relation: 'equal',
-                equation: '1/4 = 2/8'
+                relation: 'equal'
             }
         });
 
@@ -209,16 +187,15 @@ describe('FractionEquivalenceGenerator', () => {
             data: {
                 task: 'represent-whole-as-fraction',
                 wholeNumber: 3,
-                fraction: {numerator: 12, denominator: 4, notation: '12/4'},
-                relation: 'equal',
-                equation: '3 = 12/4'
+                fraction: {numerator: 12, denominator: 4},
+                relation: 'equal'
             }
         });
     });
 
-    it('covers every proper-fraction scale factor and varies the relation', () => {
+    it('covers every proper-fraction scale factor and varies the fraction pair', () => {
         const scaleFactors = new Set<number>();
-        const equations = new Set<string>();
+        const pairs = new Set<string>();
 
         for (let seed = 0; seed < 200; seed++) {
             setSeed(seed);
@@ -227,11 +204,16 @@ describe('FractionEquivalenceGenerator', () => {
                 throw new Error('Expected proper-fraction mode.');
             }
             scaleFactors.add(problem.scaleFactor);
-            equations.add(problem.equation);
+            pairs.add([
+                problem.first.numerator,
+                problem.first.denominator,
+                problem.second.numerator,
+                problem.second.denominator
+            ].join(':'));
         }
 
         expect(scaleFactors).toEqual(new Set([2, 3, 4]));
-        expect(equations.size).toBeGreaterThan(3);
+        expect(pairs.size).toBeGreaterThan(3);
     });
 
     it('is deterministic for the same repository seed', () => {

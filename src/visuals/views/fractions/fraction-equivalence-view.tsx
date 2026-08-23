@@ -5,6 +5,7 @@ import {
     ProperFractionEquivalenceProblem
 } from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
+import {formatFraction} from '../../helpers/fraction.ts';
 import {
     isValidTenthsToHundredthsProblem,
     TenthsToHundredthsModel
@@ -60,13 +61,10 @@ const validateFraction = (viewId: string, name: string, fraction: FractionValue)
         || fraction.numerator > fraction.denominator) {
         throw new ViewValidationError(viewId, `${name} fraction cannot be rendered as a portion of one whole.`);
     }
-    if (fraction.notation !== `${fraction.numerator}/${fraction.denominator}`) {
-        throw new ViewValidationError(viewId, `${name} fraction notation is inconsistent.`);
-    }
 };
 
 const equivalenceExplanation = (data: ProperFractionEquivalenceProblem): string =>
-    `${data.first.notation} is equivalent to ${data.second.notation} because its numerator and denominator are multiplied by ${data.scaleFactor}.`;
+    `${formatFraction(data.first)} is equivalent to ${formatFraction(data.second)} because its numerator and denominator are multiplied by ${data.scaleFactor}.`;
 
 export const FractionEquivalenceView = ({mode, payload, viewId}: FractionEquivalenceViewProps) => {
     const {problem, isSolutionView} = payload;
@@ -78,11 +76,8 @@ export const FractionEquivalenceView = ({mode, payload, viewId}: FractionEquival
             'hundredths',
             'scaleFactor',
             'sharedWhole',
-            'numeratorScale',
-            'denominatorScale',
             'models',
-            'relation',
-            'equation'
+            'relation'
         ]);
         if (!isValidTenthsToHundredthsProblem(data)) {
             throw new ViewValidationError(
@@ -111,8 +106,7 @@ export const FractionEquivalenceView = ({mode, payload, viewId}: FractionEquival
         'first',
         'second',
         'scaleFactor',
-        'relation',
-        'equation'
+        'relation'
     ]);
 
     if (data.task !== 'relate-equivalent-fractions') {
@@ -125,9 +119,8 @@ export const FractionEquivalenceView = ({mode, payload, viewId}: FractionEquival
         || data.second.denominator !== data.first.denominator * data.scaleFactor) {
         throw new ViewValidationError(viewId, 'The second fraction must scale both terms of the first by the declared factor.');
     }
-    if (data.relation !== 'equal'
-        || data.equation !== `${data.first.notation} = ${data.second.notation}`) {
-        throw new ViewValidationError(viewId, 'The equivalence relation and equation are inconsistent.');
+    if (data.relation !== 'equal') {
+        throw new ViewValidationError(viewId, 'The equivalence relation is inconsistent.');
     }
 
     const isClassification = mode === 'classification';
