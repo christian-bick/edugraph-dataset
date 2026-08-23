@@ -40,8 +40,43 @@ function isShapeForDimension(shape: ShapeComparisonName, dimension: ShapeCompare
     return dimension === '2d' ? TWO_DIMENSIONAL.has(shape) : THREE_DIMENSIONAL.has(shape);
 }
 
-function attributePhrase(attribute: ShapeComparisonAttribute): string {
-    return attribute === 'faces' ? 'flat faces' : attribute;
+export function shapeComparisonTitle(shape: ShapeComparisonName): string {
+    return shape.charAt(0).toUpperCase() + shape.slice(1);
+}
+
+export function shapeComparisonAttributeLabel(
+    attribute: ShapeComparisonAttribute,
+    count?: number
+): string {
+    if (attribute === 'faces') return count === 1 ? 'flat face' : 'flat faces';
+    if (attribute === 'vertices') return count === 1 ? 'vertex' : 'vertices';
+    if (attribute === 'sides') return count === 1 ? 'side' : 'sides';
+    return count === 1 ? 'edge' : 'edges';
+}
+
+export type ShapeComparisonPresentation = {
+    prompt: string;
+    evidence: readonly [string, string, string];
+    answerStatement: string;
+};
+
+export function shapeComparisonPresentation(
+    data: ShapeCompareAttributesProblem
+): ShapeComparisonPresentation {
+    const [first, second] = data.shapes;
+    const attribute = shapeComparisonAttributeLabel(data.attribute);
+    const greaterCount = Math.max(first.count, second.count);
+    const lesserCount = Math.min(first.count, second.count);
+    const answer = shapeComparisonTitle(data.answer);
+    return {
+        prompt: `Which shape has more ${attribute}?`,
+        evidence: [
+            `${shapeComparisonTitle(first.shape)} has ${first.count} ${shapeComparisonAttributeLabel(data.attribute, first.count)}.`,
+            `${shapeComparisonTitle(second.shape)} has ${second.count} ${shapeComparisonAttributeLabel(data.attribute, second.count)}.`,
+            `${greaterCount} > ${lesserCount}, so ${answer} has more ${attribute}.`
+        ],
+        answerStatement: `${answer} has more ${attribute}.`
+    };
 }
 
 export function validateShapeComparison(data: ShapeCompareAttributesProblem): void {
@@ -70,19 +105,4 @@ export function validateShapeComparison(data: ShapeCompareAttributesProblem): vo
     if (data.relation !== 'more') fail('The comparison relation must be more.');
     const expectedAnswer = first.count > second.count ? first.shape : second.shape;
     if (data.answer !== expectedAnswer) fail('The answer must identify the shape with the greater count.');
-    if (typeof data.prompt !== 'string' || data.prompt.trim().length === 0) fail('A comparison prompt is required.');
-    if (!data.prompt.toLowerCase().includes(`more ${attributePhrase(data.attribute)}`)) {
-        fail('The prompt must name the authored more-than attribute comparison.');
-    }
-    if (!Array.isArray(data.evidence) || data.evidence.length !== 3
-        || data.evidence.some(statement => typeof statement !== 'string' || statement.trim().length === 0)) {
-        fail('Exactly three authored evidence statements are required.');
-    }
-    if (!data.evidence[0].toLowerCase().includes(first.shape) || !data.evidence[0].includes(String(first.count))
-        || !data.evidence[1].toLowerCase().includes(second.shape) || !data.evidence[1].includes(String(second.count))) {
-        fail('The evidence must state both authored attribute counts.');
-    }
-    if (!data.evidence[2].includes('>') || !data.evidence[2].toLowerCase().includes(data.answer)) {
-        fail('The concluding evidence must state the comparison and winning shape.');
-    }
 }

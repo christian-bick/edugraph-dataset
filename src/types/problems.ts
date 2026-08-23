@@ -1040,8 +1040,6 @@ export type ShapeCompareAttributesProblem = {
     shapes: readonly [ShapeComparisonItem, ShapeComparisonItem];
     relation: 'more';
     answer: ShapeComparisonName;
-    prompt: string;
-    evidence: readonly [string, string, string];
 };
 
 export type ShapeSameAttributeProblem = {

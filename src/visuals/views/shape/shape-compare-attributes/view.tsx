@@ -1,10 +1,16 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {ShapeComparisonAttribute, ShapeComparisonName} from '../../../../types/problems.ts';
+import {ShapeComparisonName} from '../../../../types/problems.ts';
 import '../../../../tailwind.css';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {comparisonAppearances, validateShapeComparison} from './helpers.ts';
+import {
+    comparisonAppearances,
+    shapeComparisonAttributeLabel,
+    shapeComparisonPresentation,
+    shapeComparisonTitle,
+    validateShapeComparison
+} from './helpers.ts';
 import {ShapeCompareAttributesViewConfig, ShapeCompareAttributesViewSchema} from './spec.ts';
 
 interface CoreProps {
@@ -83,33 +89,23 @@ function ShapeArtwork({
     throw new ViewValidationError('shape-compare-attributes', `Unsupported shape: ${shape}`);
 }
 
-function titleCase(shape: ShapeComparisonName): string {
-    return shape.charAt(0).toUpperCase() + shape.slice(1);
-}
-
-function attributeLabel(attribute: ShapeComparisonAttribute, count?: number): string {
-    if (attribute === 'faces') return count === 1 ? 'flat face' : 'flat faces';
-    if (attribute === 'vertices') return count === 1 ? 'vertex' : 'vertices';
-    if (attribute === 'sides') return count === 1 ? 'side' : 'sides';
-    return count === 1 ? 'edge' : 'edges';
-}
-
 export const ShapeCompareAttributesCore = ({config: _config, payload}: CoreProps) => {
     const data = payload.problem.data;
     validateProblemData('shape-compare-attributes', data, [
-        'dimension', 'attribute', 'shapes', 'relation', 'answer', 'prompt', 'evidence'
+        'dimension', 'attribute', 'shapes', 'relation', 'answer'
     ]);
     validateShapeComparison(data);
 
     const appearances = comparisonAppearances(payload.seed);
+    const presentation = shapeComparisonPresentation(data);
 
     return (
         <div className="flex w-[650px] flex-col items-center rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="mb-2 rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-bold uppercase tracking-wide text-indigo-700">
-                Compare {attributeLabel(data.attribute)}
+                Compare {shapeComparisonAttributeLabel(data.attribute)}
             </div>
             <div className="mb-5 text-center text-[1.35rem] font-bold leading-snug text-slate-800">
-                {data.prompt}
+                {presentation.prompt}
             </div>
 
             <div className="grid w-full grid-cols-2 gap-5">
@@ -130,11 +126,11 @@ export const ShapeCompareAttributesCore = ({config: _config, payload}: CoreProps
                                     <ShapeArtwork shape={item.shape} color={appearance.color} idSuffix={`${payload.seed}-${index}`}/>
                                 </div>
                             </div>
-                            <div className="text-lg font-extrabold text-slate-800">{titleCase(item.shape)}</div>
+                            <div className="text-lg font-extrabold text-slate-800">{shapeComparisonTitle(item.shape)}</div>
                             <div className={`mt-2 rounded-full px-4 py-2 text-base font-bold ${
                                 isAnswer ? 'bg-emerald-600 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300'
                             }`}>
-                                {item.count} {attributeLabel(data.attribute, item.count)}
+                                {item.count} {shapeComparisonAttributeLabel(data.attribute, item.count)}
                             </div>
                         </div>
                     );
@@ -144,10 +140,10 @@ export const ShapeCompareAttributesCore = ({config: _config, payload}: CoreProps
             {payload.isSolutionView && (
                 <div className="mt-5 w-full rounded-xl border-2 border-emerald-200 bg-emerald-50 px-5 py-4 text-center">
                     <div className="mb-2 text-lg font-extrabold text-emerald-800">
-                        {titleCase(data.answer)} has more {attributeLabel(data.attribute)}.
+                        {presentation.answerStatement}
                     </div>
                     <div className="space-y-1 text-sm font-semibold text-slate-700">
-                        {data.evidence.map(statement => <div key={statement}>{statement}</div>)}
+                        {presentation.evidence.map(statement => <div key={statement}>{statement}</div>)}
                     </div>
                 </div>
             )}

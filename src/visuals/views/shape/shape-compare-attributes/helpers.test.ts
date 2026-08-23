@@ -1,6 +1,10 @@
 import {describe, expect, it} from 'vitest';
 import {ShapeCompareAttributesProblem} from '../../../../types/problems.ts';
-import {comparisonAppearances, validateShapeComparison} from './helpers.ts';
+import {
+    comparisonAppearances,
+    shapeComparisonPresentation,
+    validateShapeComparison
+} from './helpers.ts';
 
 const validData: ShapeCompareAttributesProblem = {
     dimension: '3d',
@@ -10,13 +14,7 @@ const validData: ShapeCompareAttributesProblem = {
         {shape: 'cylinder', count: 2}
     ],
     relation: 'more',
-    answer: 'cube',
-    prompt: 'Which shape has more edges?',
-    evidence: [
-        'Cube has 12 edges.',
-        'Cylinder has 2 edges.',
-        '12 > 2, so Cube has more edges.'
-    ]
+    answer: 'cube'
 };
 
 describe('shape comparison helpers', () => {
@@ -34,13 +32,25 @@ describe('shape comparison helpers', () => {
         expect(() => validateShapeComparison(validData)).not.toThrow();
     });
 
+    it('derives observable language from the typed comparison', () => {
+        expect(shapeComparisonPresentation(validData)).toEqual({
+            prompt: 'Which shape has more edges?',
+            evidence: [
+                'Cube has 12 edges.',
+                'Cylinder has 2 edges.',
+                '12 > 2, so Cube has more edges.'
+            ],
+            answerStatement: 'Cube has more edges.'
+        });
+    });
+
     it.each([
         {...validData, dimension: '2d'},
         {...validData, attribute: 'sides'},
         {...validData, shapes: [{shape: 'cube', count: 12}, {shape: 'cube', count: 12}]},
         {...validData, shapes: [{shape: 'cube', count: 2}, {shape: 'cylinder', count: 2}]},
         {...validData, answer: 'cylinder'},
-        {...validData, evidence: ['Cube has edges.']}
+        {...validData, shapes: [{shape: 'cube', count: -1}, {shape: 'cylinder', count: 2}]}
     ])('rejects inconsistent payload %#', data => {
         expect(() => validateShapeComparison(data as ShapeCompareAttributesProblem)).toThrow();
     });

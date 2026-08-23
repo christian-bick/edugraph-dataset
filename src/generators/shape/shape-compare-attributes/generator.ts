@@ -47,17 +47,6 @@ const ATTRIBUTES_BY_DIMENSION = {
     '3d': ['faces', 'vertices', 'edges']
 } as const satisfies Readonly<Record<ShapeCompareAttributesProblem['dimension'], readonly ShapeComparisonAttribute[]>>;
 
-function titleCase(shape: ShapeComparisonName): string {
-    return shape.charAt(0).toUpperCase() + shape.slice(1);
-}
-
-function attributeText(attribute: ShapeComparisonAttribute, count?: number): string {
-    if (attribute === 'faces') return count === 1 ? 'flat face' : 'flat faces';
-    if (attribute === 'vertices') return count === 1 ? 'vertex' : 'vertices';
-    if (attribute === 'sides') return count === 1 ? 'side' : 'sides';
-    return count === 1 ? 'edge' : 'edges';
-}
-
 export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCompareAttributesProblem, ShapeCompareAttributesGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeCompareAttributesGeneratorSchema;
@@ -88,9 +77,6 @@ export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCo
         const shape2 = pool[Math.floor(random() * pool.length)];
         const val2 = DEFINITIONS[shape2].counts[attribute]!;
         const answer = val1 > val2 ? shape1 : shape2;
-        const greaterCount = Math.max(val1, val2);
-        const lesserCount = Math.min(val1, val2);
-        const pluralAttribute = attributeText(attribute);
 
         return {
             data: {
@@ -101,13 +87,7 @@ export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCo
                     {shape: shape2, count: val2}
                 ],
                 relation: 'more',
-                answer,
-                prompt: `Which shape has more ${pluralAttribute}?`,
-                evidence: [
-                    `${titleCase(shape1)} has ${val1} ${attributeText(attribute, val1)}.`,
-                    `${titleCase(shape2)} has ${val2} ${attributeText(attribute, val2)}.`,
-                    `${greaterCount} > ${lesserCount}, so ${titleCase(answer)} has more ${pluralAttribute}.`
-                ]
+                answer
             },
             tags: [LABELS_BY_SHAPE[shape2]]
         };

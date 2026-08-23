@@ -71,10 +71,6 @@ describe('ShapeCompareAttributesGenerator', () => {
             expect(first.count).not.toBe(second.count);
             expect(data.answer).toBe(first.count > second.count ? first.shape : second.shape);
             expect(data.relation).toBe('more');
-            expect(data.prompt).toMatch(/^Which shape has more /);
-            expect(data.evidence).toHaveLength(3);
-            expect(data.evidence[2]).toContain('>');
-            expect(data.evidence[2]).toContain(data.answer.charAt(0).toUpperCase() + data.answer.slice(1));
             expect(stub.tags).toEqual([SHAPE_LABELS[second.shape]]);
         }
 

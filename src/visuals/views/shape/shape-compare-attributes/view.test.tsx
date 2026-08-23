@@ -12,13 +12,7 @@ const data: ShapeCompareAttributesProblem = {
         {shape: 'hexagon', count: 6}
     ],
     relation: 'more',
-    answer: 'hexagon',
-    prompt: 'Which shape has more vertices?',
-    evidence: [
-        'Triangle has 3 vertices.',
-        'Hexagon has 6 vertices.',
-        '6 > 3, so Hexagon has more vertices.'
-    ]
+    answer: 'hexagon'
 };
 
 function payload(problemData: ShapeCompareAttributesProblem, isSolutionView: boolean): ViewRenderPayload<'shape-compare-attributes'> {
@@ -55,9 +49,7 @@ describe('shape-compare-attributes view', () => {
             attribute: 'faces',
             shapes: [{shape: 'cone', count: 1}, {shape: 'cube', count: 6}],
             relation: 'more',
-            answer: 'cube',
-            prompt: 'Which shape has more flat faces?',
-            evidence: ['Cone has 1 flat face.', 'Cube has 6 flat faces.', '6 > 1, so Cube has more flat faces.']
+            answer: 'cube'
         };
         const markup = renderToStaticMarkup(
             <ShapeCompareAttributesCore config={{}} payload={payload(solid, false)}/>
