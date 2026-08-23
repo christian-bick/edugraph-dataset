@@ -1,0 +1,3 @@
+- **Identity:** Given a whole number from 0 through 100, the learner marks its exact endpoint as a length from zero on a horizontal number line.
+- **Question/Solution contract:** Question Mode supplies the numbered line and requested value without marking the length; Solution Mode draws the length from zero and labels its endpoint.
+- **Invariant capability:** Every artifact requires `VisualArticulation`; no Ability is resolved from labels at render time.

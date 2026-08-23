@@ -1,0 +1,4 @@
+- **Identity:** Given a coherent addition or subtraction pair within 0 through 100, the learner executes the operation on a horizontal number line.
+- **Question/Solution contract:** Question Mode shows the start point and unresolved equation; Solution Mode shows the correctly directed jump, signed jump label, endpoint, equation, and answer.
+- **Boundary:** Multiplication, division, negative values, and values above 100 are outside this view's declared capability.
+- **Invariant capability:** Every artifact requires `ProcedureExecution`; no Ability is resolved from labels at render time.

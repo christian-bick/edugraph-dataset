@@ -3,8 +3,8 @@ import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
-    viewId: 'operations-number-line',
-    generalLabels: [Scope.Numberline],
+    viewId: 'operations-number-line-representation',
+    generalLabels: [Scope.Numberline, Ability.VisualArticulation],
     rejectedLabels: [
         Scope.NumbersWithoutZero,
         ...deductAdmitting([Scope.NumbersWithNegatives]),
@@ -12,8 +12,7 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const OperationsNumberLineViewSchema = {
-    responseMode: [Ability.VisualArticulation, Ability.ProcedureExecution]
-} as const;
-
-export type OperationsNumberLineViewConfig = ConfigFromSchema<typeof OperationsNumberLineViewSchema>;
+export const OperationsNumberLineRepresentationViewSchema = {} as const;
+export type OperationsNumberLineRepresentationViewConfig = ConfigFromSchema<
+    typeof OperationsNumberLineRepresentationViewSchema
+>;

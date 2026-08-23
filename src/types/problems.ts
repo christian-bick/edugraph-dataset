@@ -2384,7 +2384,8 @@ export interface ViewTypeMap {
     'operations-number-array-equation-formalization': NumberArrayProblem;
     'operations-number-array-interpretation': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
-    'operations-number-line': NumberLineProblem;
+    'operations-number-line-representation': WritingProblem;
+    'operations-number-line-arithmetic': ArithmeticPairProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;
     'place-value-make-ten': PlaceValueMakeTenProblem;
