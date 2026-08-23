@@ -1787,38 +1787,34 @@ export type ShapePatternToken = {
 export type ShapePatternTerm = {
     position: number;
     tokens: ShapePatternToken[];
-    caption: string;
-};
-
-export type ShapePatternEvidence = {
-    positions: number[];
-    observation: string;
 };
 
 type ShapePatternProblemBase = {
-    patternKind: 'growth-parity' | 'rotation-axis';
-    rule: string;
     sequence: ShapePatternTerm[];
-    givenTermCount: number;
-    feature: string;
-    evidence: ShapePatternEvidence[];
-    explanation: string;
 };
 
 export type ShapePatternProblem = ShapePatternProblemBase & (
     | {
-        task: 'generate';
-        prompt: string;
-        responsePositions: [number, number];
+        patternKind: 'growth-parity';
+        recurrence: {
+            kind: 'add-square';
+            initialSquareCount: 1;
+            squareCountIncrease: 1;
+        };
+        emergentFeature: {
+            kind: 'position-count-parity';
+        };
     }
     | {
-        task: 'identify';
-        prompt: string;
-        featureOptions: [string, string, string];
-    }
-    | {
-        task: 'explain';
-        prompt: string;
+        patternKind: 'rotation-axis';
+        recurrence: {
+            kind: 'quarter-turn-clockwise';
+            initialOrientation: 0;
+            quarterTurnsPerTerm: 1;
+        };
+        emergentFeature: {
+            kind: 'position-axis-parity';
+        };
     }
 );
 

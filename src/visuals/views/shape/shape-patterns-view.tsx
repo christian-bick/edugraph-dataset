@@ -1,15 +1,17 @@
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {ShapePatternProblem, ShapePatternToken} from '../../../types/problems.ts';
-import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
+import {validateProblemData} from '../../helpers/validation.ts';
 import {
+    buildShapePatternPresentation,
     isTermWithheld,
+    ShapePatternPresentation,
+    ShapePatternTask,
     shouldRevealEvidence,
-    shouldRevealExplanation,
-    validateShapePattern
+    shouldRevealExplanation
 } from './shape-patterns-helpers.ts';
 
 interface ShapePatternsViewProps {
-    mode: ShapePatternProblem['task'];
+    mode: ShapePatternTask;
     payload: RenderPayload<AbstractProblem<ShapePatternProblem>>;
     viewId: string;
 }
@@ -46,21 +48,23 @@ function GeometryToken({token}: {token: ShapePatternToken}) {
 
 function FigureCard({
     data,
+    mode,
     position,
     isSolutionView
 }: {
-    data: ShapePatternProblem;
+    data: ShapePatternPresentation;
+    mode: ShapePatternTask;
     position: number;
     isSolutionView: boolean;
 }) {
     const term = data.sequence[position - 1];
-    const withheld = isTermWithheld(data, position, isSolutionView);
+    const withheld = isTermWithheld(mode, position, isSolutionView);
 
     return (
         <div className={`flex h-[150px] w-[132px] flex-col rounded-2xl border-2 p-3 ${
             withheld
                 ? 'border-dashed border-sky-400 bg-sky-50'
-                : isSolutionView && data.task === 'generate' && position > data.givenTermCount
+                : isSolutionView && mode === 'generate' && position > data.givenTermCount
                     ? 'border-emerald-500 bg-emerald-50'
                     : 'border-slate-200 bg-white'
         }`}>
@@ -89,7 +93,7 @@ function FigureCard({
     );
 }
 
-function EvidencePanel({data}: {data: ShapePatternProblem}) {
+function EvidencePanel({data}: {data: ShapePatternPresentation}) {
     return (
         <div className="mt-3 grid grid-cols-2 gap-3">
             {data.evidence.map((item, index) => (
@@ -104,8 +108,16 @@ function EvidencePanel({data}: {data: ShapePatternProblem}) {
     );
 }
 
-function TaskResponse({data, isSolutionView}: {data: ShapePatternProblem; isSolutionView: boolean}) {
-    if (data.task === 'generate') {
+function TaskResponse({
+    data,
+    mode,
+    isSolutionView
+}: {
+    data: ShapePatternPresentation;
+    mode: ShapePatternTask;
+    isSolutionView: boolean;
+}) {
+    if (mode === 'generate') {
         return (
             <div className={`rounded-2xl border-2 px-5 py-3 text-center text-base font-extrabold ${
                 isSolutionView
@@ -119,7 +131,7 @@ function TaskResponse({data, isSolutionView}: {data: ShapePatternProblem; isSolu
         );
     }
 
-    if (data.task === 'identify') {
+    if (mode === 'identify') {
         return (
             <div>
                 <div className="grid grid-cols-3 gap-3">
@@ -141,7 +153,7 @@ function TaskResponse({data, isSolutionView}: {data: ShapePatternProblem; isSolu
                         );
                     })}
                 </div>
-                {shouldRevealEvidence(data, isSolutionView) && <EvidencePanel data={data} />}
+                {shouldRevealEvidence(mode, isSolutionView) && <EvidencePanel data={data} />}
             </div>
         );
     }
@@ -152,13 +164,13 @@ function TaskResponse({data, isSolutionView}: {data: ShapePatternProblem; isSolu
                 <div className="text-xs font-extrabold uppercase tracking-[0.1em] text-violet-700">Feature to explain</div>
                 <div className="mt-1 text-base font-bold leading-snug text-violet-950">{data.feature}</div>
             </div>
-            {shouldRevealEvidence(data, isSolutionView) && <EvidencePanel data={data} />}
+            {shouldRevealEvidence(mode, isSolutionView) && <EvidencePanel data={data} />}
             <div className={`mt-3 min-h-[72px] rounded-xl border-2 px-5 py-4 text-base font-semibold leading-relaxed ${
-                shouldRevealExplanation(data, isSolutionView)
+                shouldRevealExplanation(mode, isSolutionView)
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
                     : 'border-dashed border-slate-300 bg-white text-slate-500'
             }`}>
-                {shouldRevealExplanation(data, isSolutionView)
+                {shouldRevealExplanation(mode, isSolutionView)
                     ? data.explanation
                     : 'Explain why this feature continues as the pattern grows.'}
             </div>
@@ -169,29 +181,13 @@ function TaskResponse({data, isSolutionView}: {data: ShapePatternProblem; isSolu
 export const ShapePatternsView = ({mode, payload, viewId}: ShapePatternsViewProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
-    if (mode !== data.task) {
-        throw new ViewValidationError(
-            viewId,
-            'The fixed view mode must agree with the rendered pattern task.'
-        );
-    }
     validateProblemData(viewId, data, [
-        'task',
         'patternKind',
-        'rule',
+        'recurrence',
         'sequence',
-        'givenTermCount',
-        'feature',
-        'evidence',
-        'explanation',
-        'prompt'
+        'emergentFeature'
     ]);
-    if (data.task === 'generate') {
-        validateProblemData(viewId, data, ['responsePositions']);
-    } else if (data.task === 'identify') {
-        validateProblemData(viewId, data, ['featureOptions']);
-    }
-    validateShapePattern(data, viewId);
+    const presentation = buildShapePatternPresentation(data, mode, payload.seed, viewId);
 
     return (
         <div className="w-[950px] rounded-3xl bg-white p-7 font-sans shadow-[0_12px_34px_rgba(15,23,42,0.1)]">
@@ -200,19 +196,20 @@ export const ShapePatternsView = ({mode, payload, viewId}: ShapePatternsViewProp
                     <div className="text-sm font-extrabold uppercase tracking-[0.15em] text-sky-700">
                         Shape pattern
                     </div>
-                    <div className="mt-1 text-xl font-extrabold leading-snug text-slate-900">{data.prompt}</div>
+                    <div className="mt-1 text-xl font-extrabold leading-snug text-slate-900">{presentation.prompt}</div>
                 </div>
                 <div className="max-w-[480px] rounded-xl border border-sky-200 bg-sky-50 px-5 py-3">
                     <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-sky-700">Rule</div>
-                    <div className="mt-1 text-sm font-bold leading-snug text-sky-950">{data.rule}</div>
+                    <div className="mt-1 text-sm font-bold leading-snug text-sky-950">{presentation.rule}</div>
                 </div>
             </div>
 
             <div className="mt-5 flex justify-center gap-3 rounded-2xl bg-slate-50 p-4">
-                {data.sequence.map(term => (
+                {presentation.sequence.map(term => (
                     <FigureCard
                         key={term.position}
-                        data={data}
+                        data={presentation}
+                        mode={mode}
                         position={term.position}
                         isSolutionView={isSolutionView}
                     />
@@ -220,7 +217,7 @@ export const ShapePatternsView = ({mode, payload, viewId}: ShapePatternsViewProp
             </div>
 
             <div className="mt-5">
-                <TaskResponse data={data} isSolutionView={isSolutionView} />
+                <TaskResponse data={presentation} mode={mode} isSolutionView={isSolutionView} />
             </div>
         </div>
     );

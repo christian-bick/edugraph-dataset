@@ -22,14 +22,15 @@ describe('ShapePatternsGenerator spec integration', () => {
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation
         ], 'explain']
-    ] as const)('resolves %j to the %s task', (labels, task) => {
+    ] as const)('resolves %j through the neutral payload for the %s view role', (labels, _task) => {
         const stub = generateWithLabels(generator, [
             Scope.VisualGeometry,
             ...labels
         ])!;
 
         expect(stub).not.toBeNull();
-        expect(stub.data.task).toBe(task);
+        expect(stub.data.sequence).toHaveLength(6);
+        expect(['growth-parity', 'rotation-axis']).toContain(stub.data.patternKind);
         expect(stub.tags).toEqual(expect.arrayContaining(
             labels.filter(label => label === Area.PatternGeneration
                 || label === Area.EmergentFeatureRecognition)
