@@ -157,29 +157,21 @@ export type MultiDigitMultiplicationProblem = {
 export type DivisionPlaceValuePart = {
     digit: number;
     placeValue: 1 | 10 | 100 | 1000;
-    placeName: 'ones' | 'tens' | 'hundreds' | 'thousands';
     value: number;
 };
 
 export type DivisionOperandDecomposition = {
     operand: number;
     parts: readonly DivisionPlaceValuePart[];
-    expandedExpression: string;
-    equation: string;
 };
 
 export type DivisionPartialQuotientStep = {
     quotientDigit: number;
     placeValue: 1 | 10 | 100 | 1000;
-    placeName: 'ones' | 'tens' | 'hundreds' | 'thousands';
     partialQuotient: number;
     remainingBefore: number;
     partialProduct: number;
     remainingAfter: number;
-    questionMultiplicationEquation: string;
-    solutionMultiplicationEquation: string;
-    questionSubtractionEquation: string;
-    solutionSubtractionEquation: string;
 };
 
 export type MultiDigitDivisionProblem = {
@@ -193,13 +185,6 @@ export type MultiDigitDivisionProblem = {
     dividendDecomposition: DivisionOperandDecomposition;
     divisorDecomposition: DivisionOperandDecomposition;
     partialQuotients: readonly DivisionPartialQuotientStep[];
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    partialQuotientsSumEquation: string;
-    multiplicationCheckEquation: string;
-    remainderStatement: string;
-    explanation: string;
 };
 
 export type PositiveFactorPair = {

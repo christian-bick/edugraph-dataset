@@ -1,34 +1,22 @@
 import {describe, expect, it} from 'vitest';
-import {formatStandardNumeral} from '../../../../lib/whole-number-notation.ts';
 import {
     DivisionOperandDecomposition,
     DivisionPartialQuotientStep,
     DivisionPlaceValuePart,
     MultiDigitDivisionProblem
 } from '../../../../types/problems.ts';
-import {isValidMultiDigitDivisionProblem} from './helpers.ts';
-
-const placeNames = new Map<DivisionPlaceValuePart['placeValue'],
-    DivisionPlaceValuePart['placeName']>([
-        [1, 'ones'],
-        [10, 'tens'],
-        [100, 'hundreds'],
-        [1000, 'thousands']
-    ]);
+import {
+    isValidMultiDigitDivisionProblem,
+    multiDigitDivisionPresentation
+} from './helpers.ts';
 
 const decompose = (operand: number): DivisionOperandDecomposition => {
     const digits = String(operand).split('').map(Number);
     const parts = digits.map((digit, index): DivisionPlaceValuePart => {
         const placeValue = (10 ** (digits.length - index - 1)) as DivisionPlaceValuePart['placeValue'];
-        return {digit, placeValue, placeName: placeNames.get(placeValue)!, value: digit * placeValue};
+        return {digit, placeValue, value: digit * placeValue};
     });
-    const expandedExpression = parts.map(part => formatStandardNumeral(part.value)).join(' + ');
-    return {
-        operand,
-        parts,
-        expandedExpression,
-        equation: `${formatStandardNumeral(operand)} = ${expandedExpression}`
-    };
+    return {operand, parts};
 };
 
 const buildSteps = (
@@ -48,15 +36,10 @@ const buildSteps = (
         return {
             quotientDigit,
             placeValue,
-            placeName: placeNames.get(placeValue)!,
             partialQuotient,
             remainingBefore,
             partialProduct,
-            remainingAfter,
-            questionMultiplicationEquation: `${formatStandardNumeral(divisor)} × ? = ?`,
-            solutionMultiplicationEquation: `${formatStandardNumeral(divisor)} × ${formatStandardNumeral(partialQuotient)} = ${formatStandardNumeral(partialProduct)}`,
-            questionSubtractionEquation: '? − ? = ?',
-            solutionSubtractionEquation: `${formatStandardNumeral(remainingBefore)} − ${formatStandardNumeral(partialProduct)} = ${formatStandardNumeral(remainingAfter)}`
+            remainingAfter
         };
     });
 };
@@ -65,15 +48,6 @@ const problemFor = (dividend: number, divisor: number): MultiDigitDivisionProble
     const quotient = Math.floor(dividend / divisor);
     const remainder = dividend % divisor;
     const partialQuotients = buildSteps(dividend, divisor, quotient);
-    const dividendText = formatStandardNumeral(dividend);
-    const divisorText = formatStandardNumeral(divisor);
-    const quotientText = formatStandardNumeral(quotient);
-    const remainderText = formatStandardNumeral(remainder);
-    const quotientExpression = partialQuotients
-        .map(step => formatStandardNumeral(step.partialQuotient))
-        .join(' + ');
-    const solutionEquation = `${dividendText} ÷ ${divisorText} = ${quotientText} R ${remainderText}`;
-    const multiplicationCheckEquation = `${divisorText} × ${quotientText} + ${remainderText} = ${dividendText}`;
     return {
         task: 'multi-digit-division',
         dividend,
@@ -84,14 +58,7 @@ const problemFor = (dividend: number, divisor: number): MultiDigitDivisionProble
         divisorDigits: 1,
         dividendDecomposition: decompose(dividend),
         divisorDecomposition: decompose(divisor),
-        partialQuotients,
-        prompt: `Divide ${dividendText} by ${divisorText} using place-value partial quotients.`,
-        questionEquation: `${dividendText} ÷ ${divisorText} = ? R ?`,
-        solutionEquation,
-        partialQuotientsSumEquation: `${quotientExpression} = ${quotientText}`,
-        multiplicationCheckEquation,
-        remainderStatement: `The remainder ${remainderText} is positive and less than the divisor ${divisorText}.`,
-        explanation: `Each partial quotient is multiplied by ${divisorText} and subtracted from the running remainder. The partial quotients ${quotientExpression} add to ${quotientText}, and the final subtraction leaves ${remainderText}. Check: ${multiplicationCheckEquation}. Therefore, ${solutionEquation}.`
+        partialQuotients
     };
 };
 
@@ -115,6 +82,26 @@ describe('operations-division-area-model validation', () => {
         expect(isValidMultiDigitDivisionProblem(problem)).toBe(true);
     });
 
+    it('derives the complete division presentation from the numeric witness', () => {
+        const presentation = multiDigitDivisionPresentation(problemFor(987, 8));
+        expect(presentation).toMatchObject({
+            prompt: 'Divide 987 by 8 using place-value partial quotients.',
+            questionEquation: '987 ÷ 8 = ? R ?',
+            solutionEquation: '987 ÷ 8 = 123 R 3',
+            partialQuotientsSumEquation: '100 + 20 + 3 = 123',
+            multiplicationCheckEquation: '8 × 123 + 3 = 987',
+            remainderStatement: 'The remainder 3 is positive and less than the divisor 8.'
+        });
+        expect(presentation.dividendDecomposition.equation).toBe('987 = 900 + 80 + 7');
+        expect(presentation.partialQuotients[0]).toMatchObject({
+            placeName: 'hundreds',
+            questionMultiplicationEquation: '8 × ? = ?',
+            solutionMultiplicationEquation: '8 × 100 = 800',
+            questionSubtractionEquation: '? − ? = ?',
+            solutionSubtractionEquation: '987 − 800 = 187'
+        });
+    });
+
     it.each([
         ['zero dividend digit', () => problemFor(909, 2)],
         ['zero quotient digit', () => problemFor(811, 8)],
@@ -133,29 +120,12 @@ describe('operations-division-area-model validation', () => {
             partialQuotients[1] = {...partialQuotients[1]!, remainingBefore: 1};
             return {...problem, partialQuotients};
         }],
-        ['leaking multiplication question', () => {
+        ['wrong partial product', () => {
             const problem = problemFor(987, 8);
             const partialQuotients = [...problem.partialQuotients];
-            partialQuotients[0] = {
-                ...partialQuotients[0]!,
-                questionMultiplicationEquation: partialQuotients[0]!.solutionMultiplicationEquation
-            };
+            partialQuotients[0] = {...partialQuotients[0]!, partialProduct: 799};
             return {...problem, partialQuotients};
-        }],
-        ['leaking subtraction question', () => {
-            const problem = problemFor(987, 8);
-            const partialQuotients = [...problem.partialQuotients];
-            partialQuotients[0] = {
-                ...partialQuotients[0]!,
-                questionSubtractionEquation: partialQuotients[0]!.solutionSubtractionEquation
-            };
-            return {...problem, partialQuotients};
-        }],
-        ['wrong multiplication check', () => ({
-            ...problemFor(987, 8),
-            multiplicationCheckEquation: '8 × 123 + 2 = 986'
-        })],
-        ['wrong explanation', () => ({...problemFor(987, 8), explanation: 'Use division.'})]
+        }]
     ])('rejects %s', (_description, build) => {
         expect(isValidMultiDigitDivisionProblem(
             build() as MultiDigitDivisionProblem

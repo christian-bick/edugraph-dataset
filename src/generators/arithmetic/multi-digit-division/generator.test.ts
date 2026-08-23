@@ -1,6 +1,5 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {
     DivisionOperandDecomposition,
     MultiDigitDivisionProblem
@@ -22,12 +21,6 @@ const expectValidDecomposition = (decomposition: DivisionOperandDecomposition): 
         expect(part.digit).toBeLessThanOrEqual(9);
         expect(part.value).toBe(part.digit * part.placeValue);
     }
-    const expandedExpression = decomposition.parts
-        .map(part => formatStandardNumeral(part.value))
-        .join(' + ');
-    expect(decomposition.expandedExpression).toBe(expandedExpression);
-    expect(decomposition.equation)
-        .toBe(`${formatStandardNumeral(decomposition.operand)} = ${expandedExpression}`);
 };
 
 const expectConsistentProblem = (problem: MultiDigitDivisionProblem): void => {
@@ -60,42 +53,12 @@ const expectConsistentProblem = (problem: MultiDigitDivisionProblem): void => {
         expect(step.partialProduct).toBe(problem.divisor * step.partialQuotient);
         expect(step.remainingAfter).toBe(step.remainingBefore - step.partialProduct);
         expect(step.remainingAfter).toBeGreaterThan(0);
-        expect(step.questionMultiplicationEquation)
-            .toBe(`${formatStandardNumeral(problem.divisor)} × ? = ?`);
-        expect(step.solutionMultiplicationEquation).toBe(
-            `${formatStandardNumeral(problem.divisor)} × ${formatStandardNumeral(step.partialQuotient)} = ${formatStandardNumeral(step.partialProduct)}`
-        );
-        expect(step.questionSubtractionEquation).toBe('? − ? = ?');
-        expect(step.solutionSubtractionEquation).toBe(
-            `${formatStandardNumeral(step.remainingBefore)} − ${formatStandardNumeral(step.partialProduct)} = ${formatStandardNumeral(step.remainingAfter)}`
-        );
         remaining = step.remainingAfter;
     });
     expect(remaining).toBe(problem.remainder);
     expect(problem.partialQuotients.reduce((sum, step) => sum + step.partialQuotient, 0))
         .toBe(problem.quotient);
 
-    const dividendText = formatStandardNumeral(problem.dividend);
-    const divisorText = formatStandardNumeral(problem.divisor);
-    const quotientText = formatStandardNumeral(problem.quotient);
-    const remainderText = formatStandardNumeral(problem.remainder);
-    const partialQuotientsExpression = problem.partialQuotients
-        .map(step => formatStandardNumeral(step.partialQuotient))
-        .join(' + ');
-    const solutionEquation = `${dividendText} ÷ ${divisorText} = ${quotientText} R ${remainderText}`;
-    const multiplicationCheckEquation = `${divisorText} × ${quotientText} + ${remainderText} = ${dividendText}`;
-    expect(problem.prompt)
-        .toBe(`Divide ${dividendText} by ${divisorText} using place-value partial quotients.`);
-    expect(problem.questionEquation).toBe(`${dividendText} ÷ ${divisorText} = ? R ?`);
-    expect(problem.solutionEquation).toBe(solutionEquation);
-    expect(problem.partialQuotientsSumEquation)
-        .toBe(`${partialQuotientsExpression} = ${quotientText}`);
-    expect(problem.multiplicationCheckEquation).toBe(multiplicationCheckEquation);
-    expect(problem.remainderStatement)
-        .toBe(`The remainder ${remainderText} is positive and less than the divisor ${divisorText}.`);
-    expect(problem.explanation).toBe(
-        `Each partial quotient is multiplied by ${divisorText} and subtracted from the running remainder. The partial quotients ${partialQuotientsExpression} add to ${quotientText}, and the final subtraction leaves ${remainderText}. Check: ${multiplicationCheckEquation}. Therefore, ${solutionEquation}.`
-    );
 };
 
 describe('MultiDigitDivisionGenerator', () => {

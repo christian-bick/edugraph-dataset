@@ -1,10 +1,13 @@
 import {createRoot} from 'react-dom/client';
 import {formatStandardNumeral} from '../../../../lib/whole-number-notation.ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {MultiDigitDivisionProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidMultiDigitDivisionProblem} from './helpers.ts';
+import {
+    isValidMultiDigitDivisionProblem,
+    MultiDigitDivisionPresentation,
+    multiDigitDivisionPresentation
+} from './helpers.ts';
 import {
     OperationsDivisionAreaModelViewConfig,
     OperationsDivisionAreaModelViewSchema
@@ -17,10 +20,10 @@ interface CoreProps {
 }
 
 const PartialQuotientSteps = ({
-    data,
+    presentation,
     isSolutionView
 }: {
-    data: MultiDigitDivisionProblem;
+    presentation: MultiDigitDivisionPresentation;
     isSolutionView: boolean;
 }) => (
     <div className="overflow-hidden rounded-xl border-2 border-indigo-300 bg-white">
@@ -30,7 +33,7 @@ const PartialQuotientSteps = ({
             <div className="bg-indigo-50 px-3 py-3">Subtract partial product</div>
             <div className="bg-indigo-50 px-2 py-3">Amount left</div>
         </div>
-        {data.partialQuotients.map((step, index) => (
+        {presentation.partialQuotients.map((step, index) => (
             <div
                 className="grid grid-cols-[92px_1fr_1fr_126px] gap-px border-t border-indigo-200 bg-indigo-200 text-center"
                 key={`${step.placeValue}-${index}`}
@@ -89,21 +92,15 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
         'divisorDigits',
         'dividendDecomposition',
         'divisorDecomposition',
-        'partialQuotients',
-        'prompt',
-        'questionEquation',
-        'solutionEquation',
-        'partialQuotientsSumEquation',
-        'multiplicationCheckEquation',
-        'remainderStatement',
-        'explanation'
+        'partialQuotients'
     ]);
     if (!isValidMultiDigitDivisionProblem(data)) {
         throw new ViewValidationError(
             'operations-division-area-model',
-            'The operands, decompositions, partial quotients, remainder, and authored equations must agree.'
+            'The operands, decompositions, partial quotients, and remainder must agree.'
         );
     }
+    const presentation = multiDigitDivisionPresentation(data);
 
     return (
         <div className="w-[920px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
@@ -111,9 +108,9 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
                     Place-value division area model
                 </div>
-                <div className="mt-1 text-xl font-bold text-slate-800">{data.prompt}</div>
+                <div className="mt-1 text-xl font-bold text-slate-800">{presentation.prompt}</div>
                 <div className={`mx-auto mt-3 w-fit rounded-lg border-2 px-6 py-2 font-mono text-2xl font-bold ${isSolutionView ? 'border-emerald-400 bg-emerald-50 text-emerald-900' : 'border-dashed border-slate-300 text-slate-700'}`}>
-                    {isSolutionView ? data.solutionEquation : data.questionEquation}
+                    {isSolutionView ? presentation.solutionEquation : presentation.questionEquation}
                 </div>
             </div>
 
@@ -123,7 +120,7 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
                         Dividend by place value
                     </div>
                     <div className="mt-1 font-mono text-[1rem] font-bold text-indigo-950">
-                        {data.dividendDecomposition.equation}
+                        {presentation.dividendDecomposition.equation}
                     </div>
                 </div>
                 <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
@@ -131,7 +128,7 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
                         Divisor by place value
                     </div>
                     <div className="mt-1 font-mono text-[1rem] font-bold text-sky-950">
-                        {data.divisorDecomposition.equation}
+                        {presentation.divisorDecomposition.equation}
                     </div>
                 </div>
             </div>
@@ -140,7 +137,7 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
                 <div className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Equal regions show the ordered partial-quotient steps
                 </div>
-                <PartialQuotientSteps data={data} isSolutionView={isSolutionView} />
+                <PartialQuotientSteps presentation={presentation} isSolutionView={isSolutionView} />
             </div>
 
             {isSolutionView ? (
@@ -148,19 +145,19 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
                     <div className="grid grid-cols-3 gap-3">
                         <div className="rounded-lg bg-white/75 px-3 py-2">
                             <div className="text-[0.68rem] font-bold uppercase tracking-wide text-emerald-700">Add quotient chunks</div>
-                            <div className="mt-1 font-mono text-sm font-bold">{data.partialQuotientsSumEquation}</div>
+                            <div className="mt-1 font-mono text-sm font-bold">{presentation.partialQuotientsSumEquation}</div>
                         </div>
                         <div className="rounded-lg bg-white/75 px-3 py-2">
                             <div className="text-[0.68rem] font-bold uppercase tracking-wide text-emerald-700">Multiply to check</div>
-                            <div className="mt-1 font-mono text-sm font-bold">{data.multiplicationCheckEquation}</div>
+                            <div className="mt-1 font-mono text-sm font-bold">{presentation.multiplicationCheckEquation}</div>
                         </div>
                         <div className="rounded-lg bg-white/75 px-3 py-2">
                             <div className="text-[0.68rem] font-bold uppercase tracking-wide text-emerald-700">Nonzero remainder</div>
-                            <div className="mt-1 text-sm font-bold">{data.remainderStatement}</div>
+                            <div className="mt-1 text-sm font-bold">{presentation.remainderStatement}</div>
                         </div>
                     </div>
                     <div className="mt-3 text-sm font-semibold leading-relaxed text-emerald-900">
-                        {data.explanation}
+                        {presentation.explanation}
                     </div>
                 </div>
             ) : (

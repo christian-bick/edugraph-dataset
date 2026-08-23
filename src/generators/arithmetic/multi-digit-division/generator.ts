@@ -1,6 +1,5 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
-import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     DivisionOperandDecomposition,
@@ -21,14 +20,6 @@ type DivisionCandidate = {
     quotient: number;
     remainder: number;
 };
-
-const placeNames = new Map<DivisionPlaceValuePart['placeValue'],
-    DivisionPlaceValuePart['placeName']>([
-        [1, 'ones'],
-        [10, 'tens'],
-        [100, 'hundreds'],
-        [1000, 'thousands']
-    ]);
 
 const hasNoZeroDigit = (value: number): boolean => !String(value).includes('0');
 
@@ -66,20 +57,11 @@ const buildDecomposition = (operand: number): DivisionOperandDecomposition => {
         return {
             digit,
             placeValue,
-            placeName: placeNames.get(placeValue)!,
             value: digit * placeValue
         };
     });
-    const expandedExpression = parts
-        .map(part => formatStandardNumeral(part.value))
-        .join(' + ');
 
-    return {
-        operand,
-        parts,
-        expandedExpression,
-        equation: `${formatStandardNumeral(operand)} = ${expandedExpression}`
-    };
+    return {operand, parts};
 };
 
 const buildPartialQuotients = (
@@ -101,15 +83,10 @@ const buildPartialQuotients = (
         return {
             quotientDigit,
             placeValue,
-            placeName: placeNames.get(placeValue)!,
             partialQuotient,
             remainingBefore,
             partialProduct,
-            remainingAfter,
-            questionMultiplicationEquation: `${formatStandardNumeral(divisor)} × ? = ?`,
-            solutionMultiplicationEquation: `${formatStandardNumeral(divisor)} × ${formatStandardNumeral(partialQuotient)} = ${formatStandardNumeral(partialProduct)}`,
-            questionSubtractionEquation: '? − ? = ?',
-            solutionSubtractionEquation: `${formatStandardNumeral(remainingBefore)} − ${formatStandardNumeral(partialProduct)} = ${formatStandardNumeral(remainingAfter)}`
+            remainingAfter
         };
     });
 };
@@ -149,16 +126,6 @@ export class MultiDigitDivisionGenerator implements ProblemGenerator<
         const dividendDecomposition = buildDecomposition(dividend);
         const divisorDecomposition = buildDecomposition(divisor);
         const partialQuotients = buildPartialQuotients(dividend, divisor, quotient);
-        const dividendText = formatStandardNumeral(dividend);
-        const divisorText = formatStandardNumeral(divisor);
-        const quotientText = formatStandardNumeral(quotient);
-        const remainderText = formatStandardNumeral(remainder);
-        const partialQuotientsExpression = partialQuotients
-            .map(step => formatStandardNumeral(step.partialQuotient))
-            .join(' + ');
-        const solutionEquation = `${dividendText} ÷ ${divisorText} = ${quotientText} R ${remainderText}`;
-        const partialQuotientsSumEquation = `${partialQuotientsExpression} = ${quotientText}`;
-        const multiplicationCheckEquation = `${divisorText} × ${quotientText} + ${remainderText} = ${dividendText}`;
 
         return {
             data: {
@@ -171,14 +138,7 @@ export class MultiDigitDivisionGenerator implements ProblemGenerator<
                 divisorDigits: 1,
                 dividendDecomposition,
                 divisorDecomposition,
-                partialQuotients,
-                prompt: `Divide ${dividendText} by ${divisorText} using place-value partial quotients.`,
-                questionEquation: `${dividendText} ÷ ${divisorText} = ? R ?`,
-                solutionEquation,
-                partialQuotientsSumEquation,
-                multiplicationCheckEquation,
-                remainderStatement: `The remainder ${remainderText} is positive and less than the divisor ${divisorText}.`,
-                explanation: `Each partial quotient is multiplied by ${divisorText} and subtracted from the running remainder. The partial quotients ${partialQuotientsExpression} add to ${quotientText}, and the final subtraction leaves ${remainderText}. Check: ${multiplicationCheckEquation}. Therefore, ${solutionEquation}.`
+                partialQuotients
             }
         };
     }
