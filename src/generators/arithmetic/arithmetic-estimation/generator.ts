@@ -59,24 +59,11 @@ export class ArithmeticEstimationGenerator implements ProblemGenerator<
             const candidate = this.createCandidate(operation, maximum, randomInteger);
             if (!candidate) continue;
 
-            const tolerance = Math.max(10, Math.ceil(Math.abs(candidate.estimatedAnswer) * 0.1));
-            if (Math.abs(candidate.exactAnswer - candidate.estimatedAnswer) > tolerance) continue;
-
-            const isReasonable = random() < 0.5;
-            const proposedAnswer = isReasonable
-                ? candidate.exactAnswer
-                : this.createUnreasonableAnswer(candidate, tolerance, minimum, maximum, randomInteger);
-            if (proposedAnswer === null) continue;
-
             return {
                 data: {
                     ...candidate,
                     operation: operationNames[operation] as ArithmeticOperation,
-                    roundingPlace: ROUNDING_PLACE,
-                    proposedAnswer,
-                    estimateDifference: Math.abs(proposedAnswer - candidate.estimatedAnswer),
-                    tolerance,
-                    isReasonable
+                    roundingPlace: ROUNDING_PLACE
                 }
             };
         }
@@ -121,27 +108,5 @@ export class ArithmeticEstimationGenerator implements ProblemGenerator<
         if (!values.every(value => Number.isInteger(value) && value >= 0 && value <= maximum)) return null;
 
         return {num1, num2, roundedNum1, roundedNum2, exactAnswer, estimatedAnswer};
-    }
-
-    private createUnreasonableAnswer(
-        candidate: Candidate,
-        tolerance: number,
-        minimum: number,
-        maximum: number,
-        randomInteger: (min: number, max: number) => number | null
-    ): number | null {
-        const distance = tolerance + (randomInteger(10, Math.max(10, tolerance)) ?? 10);
-        const candidates = [
-            candidate.estimatedAnswer + distance,
-            candidate.estimatedAnswer - distance
-        ].filter(value =>
-            Number.isInteger(value)
-            && value >= minimum
-            && value <= maximum
-            && value !== candidate.exactAnswer
-            && Math.abs(value - candidate.estimatedAnswer) > tolerance
-        );
-        if (candidates.length === 0) return null;
-        return candidates[Math.floor(random() * candidates.length)];
     }
 }

@@ -21,8 +21,7 @@ describe('ArithmeticEstimationGenerator', () => {
         expect(() => generator.generate({operation: Area.Addition} as never)).toThrow();
     });
 
-    it('generates coherent exact, rounded, estimated, and proposed values', () => {
-        const verdicts = new Set<boolean>();
+    it('generates coherent exact, rounded, and estimated values', () => {
         for (const operation of operations) {
             for (let seed = 0; seed < 40; seed++) {
                 setSeed(seed);
@@ -37,23 +36,17 @@ describe('ArithmeticEstimationGenerator', () => {
                     data.roundedNum2,
                     data.operation
                 ));
-                expect(data.estimateDifference).toBe(Math.abs(
-                    data.proposedAnswer - data.estimatedAnswer
-                ));
-                expect(data.isReasonable).toBe(data.estimateDifference <= data.tolerance);
+                expect(data.roundingPlace).toBe(10);
                 expect([
                     data.num1,
                     data.num2,
                     data.roundedNum1,
                     data.roundedNum2,
                     data.exactAnswer,
-                    data.estimatedAnswer,
-                    data.proposedAnswer
+                    data.estimatedAnswer
                 ].every(value => Number.isInteger(value) && value >= 0 && value <= 1000)).toBe(true);
-                verdicts.add(data.isReasonable);
             }
         }
-        expect(verdicts).toEqual(new Set([true, false]));
     });
 
     it('returns null for unsupported operations and infeasible ranges', () => {

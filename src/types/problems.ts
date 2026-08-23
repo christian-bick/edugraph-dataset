@@ -298,10 +298,6 @@ export type ArithmeticEstimationProblem = {
     roundingPlace: 10;
     exactAnswer: number;
     estimatedAnswer: number;
-    proposedAnswer: number;
-    estimateDifference: number;
-    tolerance: number;
-    isReasonable: boolean;
 };
 
 export type ArithmeticPatternProperty = 'commutative' | 'associative' | 'distributive';

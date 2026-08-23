@@ -7,6 +7,7 @@ import {
     OperationsAnswerReasonablenessViewConfig,
     OperationsAnswerReasonablenessViewSchema
 } from './spec.ts';
+import {resolveEstimationClaim} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -21,6 +22,13 @@ const symbols: Record<ArithmeticOperation, string> = {
     division: '÷'
 };
 
+function applyOperation(left: number, right: number, operation: ArithmeticOperation): number {
+    if (operation === 'addition') return left + right;
+    if (operation === 'subtraction') return left - right;
+    if (operation === 'multiplication') return left * right;
+    return left / right;
+}
+
 const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
@@ -32,11 +40,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
         'roundedNum2',
         'roundingPlace',
         'exactAnswer',
-        'estimatedAnswer',
-        'proposedAnswer',
-        'estimateDifference',
-        'tolerance',
-        'isReasonable'
+        'estimatedAnswer'
     ]);
 
     if (!Object.hasOwn(symbols, data.operation) || data.roundingPlace !== 10) {
@@ -51,10 +55,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
         data.roundedNum1,
         data.roundedNum2,
         data.exactAnswer,
-        data.estimatedAnswer,
-        data.proposedAnswer,
-        data.estimateDifference,
-        data.tolerance
+        data.estimatedAnswer
     ];
     if (values.some(value => !Number.isInteger(value) || value < 0 || value > 1000)) {
         throw new ViewValidationError(
@@ -62,18 +63,31 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
             'This layout requires whole-number values from 0 through 1000.'
         );
     }
-    if (data.estimateDifference !== Math.abs(data.proposedAnswer - data.estimatedAnswer)
-        || data.isReasonable !== (data.estimateDifference <= data.tolerance)) {
+    const roundedNum1 = Math.round(data.num1 / data.roundingPlace) * data.roundingPlace;
+    const roundedNum2 = Math.round(data.num2 / data.roundingPlace) * data.roundingPlace;
+    const hasZeroDivisor = data.operation === 'division'
+        && (data.num2 === 0 || data.roundedNum2 === 0);
+    const exactAnswer = hasZeroDivisor
+        ? Number.NaN
+        : applyOperation(data.num1, data.num2, data.operation);
+    const estimatedAnswer = hasZeroDivisor
+        ? Number.NaN
+        : applyOperation(data.roundedNum1, data.roundedNum2, data.operation);
+    if (data.roundedNum1 !== roundedNum1
+        || data.roundedNum2 !== roundedNum2
+        || data.exactAnswer !== exactAnswer
+        || data.estimatedAnswer !== estimatedAnswer) {
         throw new ViewValidationError(
             'operations-answer-reasonableness',
-            'The proposed answer and estimate do not support the supplied verdict.'
+            'The supplied exact and estimated relations are mathematically inconsistent.'
         );
     }
+    const claim = resolveEstimationClaim(data, payload.seed);
 
     const symbol = symbols[data.operation];
     const choiceClass = (reasonable: boolean) => {
         const base = 'flex h-[58px] w-[190px] items-center justify-center rounded-xl border-2 text-lg font-bold';
-        return isSolutionView && data.isReasonable === reasonable
+        return isSolutionView && claim.isReasonable === reasonable
             ? `${base} border-emerald-600 bg-emerald-50 text-emerald-700`
             : `${base} border-slate-300 bg-white text-slate-600`;
     };
@@ -97,7 +111,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
                 <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-5">
                     <div className="text-xs font-bold uppercase tracking-wide text-amber-700">Proposed answer</div>
                     <div className="mt-3 font-mono text-[2rem] font-bold text-amber-900">
-                        {data.proposedAnswer}
+                        {claim.proposedAnswer}
                     </div>
                 </div>
             </div>
@@ -120,7 +134,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
 
             {isSolutionView && (
                 <div className="mt-5 rounded-xl border-l-4 border-emerald-500 bg-emerald-50 px-5 py-4 text-center text-lg font-semibold text-emerald-900">
-                    {data.proposedAnswer} is {data.isReasonable ? 'close to' : 'too far from'} the estimate of {data.estimatedAnswer}.
+                    {claim.proposedAnswer} is {claim.isReasonable ? 'close to' : 'too far from'} the estimate of {data.estimatedAnswer}.
                 </div>
             )}
         </div>
