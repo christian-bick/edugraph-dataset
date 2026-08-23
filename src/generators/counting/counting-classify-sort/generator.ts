@@ -9,7 +9,7 @@ export class CountingClassifySortGenerator implements ProblemGenerator<CountingC
     type: AbstractProblem['type'] = 'counting';
     schema = CountingClassifySortGeneratorSchema;
 
-    generate(config: CountingClassifySortGeneratorConfig): ProblemStub | null {
+    generate(config: CountingClassifySortGeneratorConfig): ProblemStub<CountingClassifySortProblem> | null {
         validateConfigFields('counting-classify-sort', config, ['range']);
         const resolvedRange = config.range!;
 
