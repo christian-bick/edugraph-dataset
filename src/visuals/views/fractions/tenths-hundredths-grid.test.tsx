@@ -4,11 +4,12 @@ import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction
 import {FractionEquivalenceGenerator} from '../../../generators/fraction/fraction-equivalence/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {TenthsHundredthsGrid as SharedTenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
-import {
-    TenthsHundredthsAdditionProblem,
-    TenthsToHundredthsProblem
-} from '../../../types/problems.ts';
+import {TenthsToHundredthsProblem} from '../../../types/problems.ts';
 import {FractionArithmeticWork} from './fraction-arithmetic-components.tsx';
+import {
+    presentFractionArithmeticProblem,
+    TenthsHundredthsAdditionPresentation
+} from './fraction-arithmetic-presentation.ts';
 import {
     isValidTenthsHundredthsAdditionProblem,
     isValidTenthsToHundredthsProblem,
@@ -18,14 +19,19 @@ import {
 
 const arithmeticGenerator = new FractionArithmeticGenerator();
 
-const generateAddition = (seed = 'tenths-hundredths-addition-view'): TenthsHundredthsAdditionProblem => {
+const generateAddition = (
+    seed = 'tenths-hundredths-addition-view'
+): TenthsHundredthsAdditionPresentation => {
     setSeed(seed);
-    const data = arithmeticGenerator.generate({
+    const neutral = arithmeticGenerator.generate({
         task: 'tenths-hundredths-addition',
         operation: 'addition',
         usesCommonDenominator: true
     }).data;
-    if (data.task !== 'tenths-hundredths-addition') throw new Error('Expected addition payload.');
+    const data = presentFractionArithmeticProblem(neutral, 'execution-model');
+    if (!data || data.task !== 'tenths-hundredths-addition') {
+        throw new Error('Expected addition payload.');
+    }
     return data;
 };
 
@@ -87,7 +93,7 @@ describe('tenths/hundredths view contract', () => {
     });
 
     it('rejects contradictory addition conversion, result, story, and model evidence', () => {
-        const mutations: Array<(data: TenthsHundredthsAdditionProblem) => void> = [
+        const mutations: Array<(data: TenthsHundredthsAdditionPresentation) => void> = [
             data => { data.conversion.factor = 2 as never; },
             data => { data.result.numerator += 1; },
             data => { data.story.unknownRole = 'operation' as never; },
@@ -121,10 +127,10 @@ describe('tenths/hundredths view contract', () => {
         const malformedAddition = structuredClone(generateAddition()) as unknown as Record<string, unknown>;
         malformedAddition.story = null;
         expect(() => isValidTenthsHundredthsAdditionProblem(
-            malformedAddition as unknown as TenthsHundredthsAdditionProblem
+            malformedAddition as unknown as TenthsHundredthsAdditionPresentation
         )).not.toThrow();
         expect(isValidTenthsHundredthsAdditionProblem(
-            malformedAddition as unknown as TenthsHundredthsAdditionProblem
+            malformedAddition as unknown as TenthsHundredthsAdditionPresentation
         )).toBe(false);
 
         const missingCells = structuredClone(generateAddition());

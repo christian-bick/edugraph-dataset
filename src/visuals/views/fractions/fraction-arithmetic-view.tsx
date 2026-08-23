@@ -7,6 +7,7 @@ import {
 } from './fraction-arithmetic-components.tsx';
 import {isValidFractionArithmeticProblem} from './fraction-arithmetic-helpers.ts';
 import {
+    FractionArithmeticPresentationProblem,
     FractionArithmeticPresentation,
     presentFractionArithmeticProblem
 } from './fraction-arithmetic-presentation.ts';
@@ -26,13 +27,7 @@ const validateData = (viewId: string, data: FractionArithmeticProblem) => {
         'operation',
         'denominator',
         'sharedWhole',
-        'referenceId',
-        'story',
-        'prompt',
-        'questionEquation',
-        'answer',
-        'answerStatement',
-        'explanation'
+        'referenceId'
     ]);
     if (data.task === 'tenths-hundredths-addition') {
         validateProblemData(viewId, data, [
@@ -40,89 +35,31 @@ const validateData = (viewId: string, data: FractionArithmeticProblem) => {
             'secondHundredths',
             'convertedFirst',
             'result',
-            'conversion',
-            'conversionEquation',
-            'solutionEquation',
-            'equationChain',
-            'questionModels',
-            'solutionModels'
+            'conversionFactor'
         ]);
-    } else if (data.operation === 'multiplication') {
+    } else if (data.task === 'unit-fraction-multiple') {
         validateProblemData(viewId, data, [
-            'productKind',
             'wholeFactor',
-            'wholeFactorDisplay',
             'unitFraction',
-            'product',
-            'groupCount',
-            'partsPerGroup',
-            'totalUnitParts',
-            'solutionModel',
-            'solutionEquation',
-            'equationChain'
+            'product'
         ]);
-        if (data.task === 'unit-fraction-multiple') {
-            validateProblemData(viewId, data, [
-                'questionModel',
-                'unitSizeStatement',
-                'unitMultipleEquation'
-            ]);
-        } else {
-            validateProblemData(viewId, data, [
-                'fractionFactor',
-                'questionGroupModels',
-                'fractionAsUnitMultipleEquation',
-                'iteratedUnitEquation'
-            ]);
-        }
-        if (data.task === 'fraction-multiplication-problem') {
-            validateProblemData(viewId, data, [
-                'lowerWhole',
-                'upperWhole',
-                'boundsStatement'
-            ]);
-        }
-    } else if (data.task === 'interpret-operation' || data.task === 'fraction-operation') {
+    } else if (data.task === 'whole-number-fraction-product') {
+        validateProblemData(viewId, data, ['wholeFactor', 'fractionFactor', 'product']);
+    } else if (data.task === 'fraction-operation') {
         validateProblemData(viewId, data, [
-            'symbol',
-            'action',
             'first',
             'second',
-            'result',
-            'questionModels',
-            'solutionEquation',
-            'solutionModel'
+            'result'
         ]);
     } else if (data.task === 'decompose') {
-        validateProblemData(viewId, data, [
-            'sourceKind',
-            'sourceFraction',
-            'sourceDisplay',
-            'sourceModel',
-            'decompositions',
-            'solutionEquations'
-        ]);
+        validateProblemData(viewId, data, ['source', 'decompositions']);
     } else if (data.task === 'mixed-operation') {
-        validateProblemData(viewId, data, [
-            'symbol',
-            'strategy',
-            'requiresRegrouping',
-            'first',
-            'second',
-            'result',
-            'questionModels',
-            'operandConversionEquations',
-            'improperOperationEquation',
-            'normalizationEquation',
-            'transformationSteps',
-            'solutionEquation',
-            'solutionModel'
-        ]);
+        validateProblemData(viewId, data, ['first', 'second', 'result']);
     }
     if (!isValidFractionArithmeticProblem(data)) {
         throw new ViewValidationError(
             viewId,
-            'The story, shared whole, models, equations, and requested answer must agree exactly.'
+            'The canonical same-whole fraction values and mathematical relations must agree exactly.'
         );
     }
 };
@@ -132,7 +69,7 @@ const AnswerPanel = ({
     isSolutionView,
     wordLayout
 }: {
-    data: FractionArithmeticProblem;
+    data: FractionArithmeticPresentationProblem;
     isSolutionView: boolean;
     wordLayout: boolean;
 }) => (
@@ -181,7 +118,6 @@ export const FractionArithmeticView = ({
             `The ${presentation} view does not support the generated arithmetic route.`
         );
     }
-    validateData(viewId, data);
     const wordLayout = layout === 'word';
 
     return (

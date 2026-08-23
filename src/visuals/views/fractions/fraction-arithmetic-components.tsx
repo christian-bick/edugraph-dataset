@@ -1,11 +1,11 @@
 import {
     FractionArithmeticModel,
     FractionArithmeticModelGroupRole,
-    FractionArithmeticProblem,
-    FractionBinaryOperationProblem,
-    MixedFractionOperationProblem,
-    TenthsHundredthsAdditionProblem
-} from '../../../types/problems.ts';
+    FractionArithmeticPresentationProblem,
+    FractionBinaryOperationPresentation,
+    MixedFractionOperationPresentation,
+    TenthsHundredthsAdditionPresentation
+} from './fraction-arithmetic-presentation.ts';
 import {TenthsHundredthsGrid} from './tenths-hundredths-grid.tsx';
 
 const groupStyles: Record<FractionArithmeticModelGroupRole, string> = {
@@ -166,7 +166,7 @@ const ModelPlaceholder = ({label}: {label: string}) => (
 const OperandModels = ({
     data
 }: {
-    data: FractionBinaryOperationProblem | MixedFractionOperationProblem;
+    data: FractionBinaryOperationPresentation | MixedFractionOperationPresentation;
 }) => {
     const presentation = data.task === 'mixed-operation' ? 'legacy-local' : 'legacy-stable';
     return (
@@ -189,7 +189,10 @@ const OperandModels = ({
     );
 };
 
-type FractionMultiplicationProblem = Extract<FractionArithmeticProblem, {operation: 'multiplication'}>;
+type FractionMultiplicationProblem = Extract<
+    FractionArithmeticPresentationProblem,
+    {operation: 'multiplication'}
+>;
 
 const MultiplicationWork = ({
     data,
@@ -270,7 +273,7 @@ const TenthsHundredthsAdditionWork = ({
     data,
     isSolutionView
 }: {
-    data: TenthsHundredthsAdditionProblem;
+    data: TenthsHundredthsAdditionPresentation;
     isSolutionView: boolean;
 }) => (
     <div className="space-y-4">
@@ -338,7 +341,7 @@ export const FractionArithmeticWork = ({
     data,
     isSolutionView
 }: {
-    data: FractionArithmeticProblem;
+    data: FractionArithmeticPresentationProblem;
     isSolutionView: boolean;
 }) => {
     if (data.task === 'tenths-hundredths-addition') {

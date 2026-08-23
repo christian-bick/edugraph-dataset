@@ -63,11 +63,12 @@ describe('fraction arithmetic typography', () => {
 
     it('withholds the unit-fraction multiplier and copy count in Question mode', () => {
         setSeed('unit-multiple-component');
-        const data = generator.generate({
+        const neutral = generator.generate({
             task: 'unit-fraction-multiple',
             usesCommonDenominator: false,
             operation: 'multiplication'
         }).data;
+        const data = presentFractionArithmeticProblem(neutral, 'interpretation')!;
         if (data.task !== 'unit-fraction-multiple') throw new Error('Expected unit multiple.');
 
         const question = renderToStaticMarkup(
@@ -93,11 +94,12 @@ describe('fraction arithmetic typography', () => {
 
     it('keeps separate known groups in Question mode and reveals only the supplied aggregate in Solution mode', () => {
         setSeed('fraction-product-component');
-        const data = generator.generate({
+        const neutral = generator.generate({
             task: 'whole-number-fraction-product-improper',
             usesCommonDenominator: false,
             operation: 'multiplication'
         }).data;
+        const data = presentFractionArithmeticProblem(neutral, 'understanding')!;
         if (data.task !== 'whole-number-fraction-product') throw new Error('Expected fraction product.');
 
         const question = renderToStaticMarkup(
@@ -162,19 +164,24 @@ describe('fraction arithmetic typography', () => {
 
     it('preserves legacy-local dot legends for decompose and mixed-operation SSR', () => {
         setSeed('legacy-decompose-presentation');
-        const decomposition = generator.generate({
+        const neutralDecomposition = generator.generate({
             task: 'decompose-proper',
             usesCommonDenominator: true,
             operation: 'addition'
         }).data;
+        const decomposition = presentFractionArithmeticProblem(
+            neutralDecomposition,
+            'understanding'
+        )!;
         if (decomposition.task !== 'decompose') throw new Error('Expected decomposition.');
 
         setSeed('legacy-mixed-presentation');
-        const mixed = generator.generate({
+        const neutralMixed = generator.generate({
             task: 'mixed-operation',
             usesCommonDenominator: true,
             operation: 'addition'
         }).data;
+        const mixed = presentFractionArithmeticProblem(neutralMixed, 'execution-model')!;
         if (mixed.task !== 'mixed-operation') throw new Error('Expected mixed operation.');
 
         const decompositionMarkup = renderToStaticMarkup(

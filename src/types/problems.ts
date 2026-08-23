@@ -1463,189 +1463,65 @@ export type FractionArithmeticOperation = 'addition' | 'subtraction';
 export type LikeDenominatorFractionValue = {
     numerator: number;
     denominator: FractionParts;
-    notation: string;
 };
 
 export type MixedFractionValue = {
     whole: number;
     numerator: number;
     denominator: FractionParts;
-    notation: string;
-    improperNumerator: number;
-    improperNotation: string;
-};
-
-export type FractionArithmeticModelGroupRole =
-    | 'first-addend'
-    | 'second-addend'
-    | 'remaining'
-    | 'removed'
-    | 'decomposition-part'
-    | 'unit-part'
-    | 'fraction-group'
-    | 'result';
-
-export type FractionArithmeticModelGroup = {
-    id: string;
-    role: FractionArithmeticModelGroupRole;
-    label: string;
-    startPart: number;
-    partCount: number;
-};
-
-export type FractionArithmeticModelCell = {
-    partIndex: number;
-    groupId: string | null;
-};
-
-export type FractionArithmeticModelFrame = {
-    frameIndex: number;
-    cells: FractionArithmeticModelCell[];
-};
-
-export type FractionArithmeticModel = {
-    denominator: FractionParts;
-    display: string;
-    totalNumerator: number;
-    frameCount: 1 | 2 | 3 | 4;
-    groups: FractionArithmeticModelGroup[];
-    frames: FractionArithmeticModelFrame[];
-};
-
-export type FractionArithmeticStory = {
-    storyKind:
-        | 'poster-join'
-        | 'poster-separate'
-        | 'mosaic-decomposition'
-        | 'route-combination'
-        | 'route-difference'
-        | 'ribbon-unit-multiple'
-        | 'equal-fraction-groups'
-        | 'hundred-grid-addition';
-    context: string;
-    question: string;
-    wholeLabel: string;
-    unitLabel: string;
-    givenDisplays: [string] | [string, string];
-    unknownRole: 'operation' | 'decompositions' | 'result' | 'product' | 'multiplier';
 };
 
 export type FractionArithmeticCommon = {
-    operation: FractionArithmeticOperation;
     denominator: FractionParts;
     sharedWhole: 1;
     referenceId: 'same-whole';
-    story: FractionArithmeticStory;
-    prompt: string;
-    questionEquation: string;
-    answer: string;
-    answerStatement: string;
-    explanation: string;
 };
 
 export type FractionBinaryOperationProblem = FractionArithmeticCommon & {
-    task: 'interpret-operation' | 'fraction-operation';
-    symbol: '+' | '−';
-    action: 'join' | 'separate';
+    task: 'fraction-operation';
+    operation: FractionArithmeticOperation;
     first: LikeDenominatorFractionValue;
     second: LikeDenominatorFractionValue;
     result: LikeDenominatorFractionValue;
-    questionModels: [FractionArithmeticModel, FractionArithmeticModel];
-    solutionEquation: string;
-    solutionModel: FractionArithmeticModel;
 };
 
 export type FractionDecomposition = {
     terms: LikeDenominatorFractionValue[];
-    equation: string;
-    model: FractionArithmeticModel;
 };
 
-export type FractionDecompositionProblem = Omit<FractionArithmeticCommon, 'operation'> & {
+export type FractionDecompositionSource =
+    | {kind: 'proper'; value: LikeDenominatorFractionValue}
+    | {kind: 'mixed'; value: MixedFractionValue};
+
+export type FractionDecompositionProblem = FractionArithmeticCommon & {
     task: 'decompose';
     operation: 'addition';
-    sourceKind: 'proper' | 'mixed';
-    sourceFraction: LikeDenominatorFractionValue;
-    sourceMixed: MixedFractionValue | null;
-    sourceDisplay: string;
-    sourceModel: FractionArithmeticModel;
+    source: FractionDecompositionSource;
     decompositions: [FractionDecomposition, FractionDecomposition];
-    solutionEquations: [string, string];
 };
-
-export type MixedFractionOperationStrategy =
-    | 'addition-with-carry'
-    | 'addition-without-carry'
-    | 'subtraction-with-borrow'
-    | 'subtraction-without-borrow';
 
 export type MixedFractionOperationProblem = FractionArithmeticCommon & {
     task: 'mixed-operation';
-    symbol: '+' | '−';
-    strategy: MixedFractionOperationStrategy;
-    requiresRegrouping: boolean;
+    operation: FractionArithmeticOperation;
     first: MixedFractionValue;
     second: MixedFractionValue;
     result: MixedFractionValue;
-    questionModels: [FractionArithmeticModel, FractionArithmeticModel];
-    operandConversionEquations: [string, string];
-    regroupingEquation: string | null;
-    improperOperationEquation: string;
-    normalizationEquation: string;
-    transformationSteps: string[];
-    solutionEquation: string;
-    solutionModel: FractionArithmeticModel;
 };
 
-export type FractionMultiplicationCommon = {
+export type FractionMultiplicationCommon = FractionArithmeticCommon & {
     operation: 'multiplication';
-    denominator: FractionParts;
-    sharedWhole: 1;
-    referenceId: 'same-whole';
-    story: FractionArithmeticStory;
-    productKind: 'proper' | 'improper';
     wholeFactor: number;
-    wholeFactorDisplay: string;
-    unitFraction: LikeDenominatorFractionValue;
     product: LikeDenominatorFractionValue;
-    groupCount: number;
-    partsPerGroup: number;
-    totalUnitParts: number;
-    solutionModel: FractionArithmeticModel;
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    equationChain: string;
-    answer: string;
-    answerStatement: string;
-    explanation: string;
 };
 
 export type UnitFractionMultipleProblem = FractionMultiplicationCommon & {
     task: 'unit-fraction-multiple';
-    productKind: 'proper' | 'improper';
-    partsPerGroup: 1;
-    questionModel: FractionArithmeticModel;
-    unitSizeStatement: string;
-    unitMultipleEquation: string;
+    unitFraction: LikeDenominatorFractionValue;
 };
 
-export type WholeNumberFractionProductCommon = FractionMultiplicationCommon & {
-    fractionFactor: LikeDenominatorFractionValue;
-    questionGroupModels: FractionArithmeticModel[];
-    fractionAsUnitMultipleEquation: string;
-    iteratedUnitEquation: string;
-    lowerWhole: number;
-    upperWhole: number;
-    boundsStatement: string;
-};
-
-export type WholeNumberFractionProductProblem = WholeNumberFractionProductCommon & {
+export type WholeNumberFractionProductProblem = FractionMultiplicationCommon & {
     task: 'whole-number-fraction-product';
-};
-
-export type FractionMultiplicationWordProblem = WholeNumberFractionProductCommon & {
-    task: 'fraction-multiplication-problem';
+    fractionFactor: LikeDenominatorFractionValue;
 };
 
 export type TenthsHundredthsAdditionProblem = {
@@ -1654,37 +1530,11 @@ export type TenthsHundredthsAdditionProblem = {
     denominator: 100;
     sharedWhole: 1;
     referenceId: 'same-whole';
-    story: FractionArithmeticStory & {
-        storyKind: 'hundred-grid-addition';
-        givenDisplays: [string, string];
-        unknownRole: 'result';
-    };
-    firstTenths: DecimalFractionValue & {denominator: 10};
-    secondHundredths: DecimalFractionValue & {denominator: 100};
-    convertedFirst: DecimalFractionValue & {denominator: 100};
-    result: DecimalFractionValue & {denominator: 100};
-    conversion: {
-        factor: 10;
-        numeratorEquation: string;
-        denominatorEquation: string;
-        equation: string;
-    };
-    prompt: string;
-    questionEquation: string;
-    conversionEquation: string;
-    solutionEquation: string;
-    equationChain: string;
-    questionModels: {
-        firstTenths: TenthsHundredthsGridModel;
-        secondHundredths: TenthsHundredthsGridModel;
-    };
-    solutionModels: {
-        convertedFirst: TenthsHundredthsGridModel;
-        result: TenthsHundredthsGridModel;
-    };
-    answer: string;
-    answerStatement: string;
-    explanation: string;
+    firstTenths: {numerator: number; denominator: 10};
+    secondHundredths: {numerator: number; denominator: 100};
+    convertedFirst: {numerator: number; denominator: 100};
+    result: {numerator: number; denominator: 100};
+    conversionFactor: 10;
 };
 
 export type DecimalNotationValue = {
@@ -1736,7 +1586,6 @@ export type FractionArithmeticProblem =
     | MixedFractionOperationProblem
     | UnitFractionMultipleProblem
     | WholeNumberFractionProductProblem
-    | FractionMultiplicationWordProblem
     | TenthsHundredthsAdditionProblem;
 
 export type ShapePartitionProblem =

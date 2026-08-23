@@ -1,8 +1,8 @@
 import {
-    TenthsHundredthsAdditionProblem,
     TenthsHundredthsGridGroup,
     TenthsToHundredthsProblem
 } from '../../../types/problems.ts';
+import {TenthsHundredthsAdditionPresentation} from './fraction-arithmetic-presentation.ts';
 import {TenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
 import {
     isValidDecimalFraction,
@@ -53,7 +53,7 @@ export const isValidTenthsToHundredthsProblem = (
 };
 
 export const isValidTenthsHundredthsAdditionProblem = (
-    data: TenthsHundredthsAdditionProblem
+    data: TenthsHundredthsAdditionPresentation
 ): boolean => {
     if (typeof data !== 'object'
         || data === null
