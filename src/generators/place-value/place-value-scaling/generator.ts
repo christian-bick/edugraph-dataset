@@ -34,8 +34,6 @@ const createOtherDigit = (repeatedDigit: number, isLeading: boolean): number => 
     );
 };
 
-const displayPlaceName = (name: PlaceValueName): string => name.replaceAll('-', ' ');
-
 const createPlace = (
     repeatedDigit: number,
     exponent: 0 | 1 | 2 | 3 | 4 | 5
@@ -84,14 +82,7 @@ export class PlaceValueScalingGenerator implements ProblemGenerator<
                 repeatedDigit,
                 leftPlace,
                 rightPlace,
-                scaleFactor: 10,
-                prompt: `The ${repeatedDigit} in the ${displayPlaceName(rightPlace.name)} place represents ${rightPlace.value}. What value does the same digit represent in the adjacent ${displayPlaceName(leftPlace.name)} place?`,
-                questionMultiplicationEquation: `${rightPlace.value} × 10 = ?`,
-                questionDivisionEquation: `? ÷ 10 = ${rightPlace.value}`,
-                multiplicationEquation: `${rightPlace.value} × 10 = ${leftPlace.value}`,
-                divisionEquation: `${leftPlace.value} ÷ 10 = ${rightPlace.value}`,
-                comparisonStatement: `The ${repeatedDigit} in the ${displayPlaceName(leftPlace.name)} place represents 10 times as much as the ${repeatedDigit} in the ${displayPlaceName(rightPlace.name)} place.`,
-                answer: leftPlace.value
+                scaleFactor: 10
             }
         };
     }

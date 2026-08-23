@@ -47,24 +47,24 @@ export function isValidPlaceValueScalingProblem(data: PlaceValueScalingProblem):
         || !isValidPlace(data.leftPlace, data.repeatedDigit, data.leftPlace.digitIndex)
         || !isValidPlace(data.rightPlace, data.repeatedDigit, data.rightPlace.digitIndex)
         || data.scaleFactor !== 10
-        || data.answer !== data.leftPlace.value
-        || data.leftPlace.value !== data.rightPlace.value * data.scaleFactor
-        || typeof data.prompt !== 'string'
-        || data.prompt.trim().length === 0
-        || typeof data.questionMultiplicationEquation !== 'string'
-        || data.questionMultiplicationEquation !== `${data.rightPlace.value} × ${data.scaleFactor} = ?`
-        || typeof data.questionDivisionEquation !== 'string'
-        || data.questionDivisionEquation !== `? ÷ ${data.scaleFactor} = ${data.rightPlace.value}`
-        || typeof data.multiplicationEquation !== 'string'
-        || data.multiplicationEquation !== `${data.rightPlace.value} × ${data.scaleFactor} = ${data.leftPlace.value}`
-        || typeof data.divisionEquation !== 'string'
-        || data.divisionEquation !== `${data.leftPlace.value} ÷ ${data.scaleFactor} = ${data.rightPlace.value}`
-        || typeof data.comparisonStatement !== 'string'
-        || data.comparisonStatement.trim().length === 0) {
+        || data.leftPlace.value !== data.rightPlace.value * data.scaleFactor) {
         return false;
     }
 
     return true;
+}
+
+export function placeValueScalingPresentation(data: PlaceValueScalingProblem) {
+    const leftName = displayPlaceName(data.leftPlace.name).toLowerCase();
+    const rightName = displayPlaceName(data.rightPlace.name).toLowerCase();
+    return {
+        prompt: `The ${data.repeatedDigit} in the ${rightName} place represents ${data.rightPlace.value}. What value does the same digit represent in the adjacent ${leftName} place?`,
+        questionMultiplicationEquation: `${data.rightPlace.value} × ${data.scaleFactor} = ?`,
+        questionDivisionEquation: `? ÷ ${data.scaleFactor} = ${data.rightPlace.value}`,
+        multiplicationEquation: `${data.rightPlace.value} × ${data.scaleFactor} = ${data.leftPlace.value}`,
+        divisionEquation: `${data.leftPlace.value} ÷ ${data.scaleFactor} = ${data.rightPlace.value}`,
+        comparisonStatement: `The ${data.repeatedDigit} in the ${leftName} place represents ${data.scaleFactor} times as much as the ${data.repeatedDigit} in the ${rightName} place.`
+    };
 }
 
 export function displayPlaceName(name: PlaceValueName): string {

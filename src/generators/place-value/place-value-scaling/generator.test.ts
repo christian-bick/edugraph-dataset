@@ -12,8 +12,6 @@ const PLACE_NAMES = [
     'hundred-thousands'
 ] as const;
 
-const displayPlaceName = (name: string): string => name.replaceAll('-', ' ');
-
 const expectValidScaling = (problem: PlaceValueScalingProblem): void => {
     expect(problem.task).toBe('adjacent-place-scaling');
     expect(problem.number).toBeGreaterThanOrEqual(100000);
@@ -39,25 +37,6 @@ const expectValidScaling = (problem: PlaceValueScalingProblem): void => {
     );
     expect(problem.leftPlace.value).toBe(problem.rightPlace.value * 10);
     expect(problem.scaleFactor).toBe(10);
-    expect(problem.answer).toBe(problem.leftPlace.value);
-    expect(problem.prompt).toBe(
-        `The ${problem.repeatedDigit} in the ${displayPlaceName(problem.rightPlace.name)} place represents ${problem.rightPlace.value}. What value does the same digit represent in the adjacent ${displayPlaceName(problem.leftPlace.name)} place?`
-    );
-    expect(problem.questionMultiplicationEquation).toBe(
-        `${problem.rightPlace.value} × 10 = ?`
-    );
-    expect(problem.questionDivisionEquation).toBe(
-        `? ÷ 10 = ${problem.rightPlace.value}`
-    );
-    expect(problem.multiplicationEquation).toBe(
-        `${problem.rightPlace.value} × 10 = ${problem.leftPlace.value}`
-    );
-    expect(problem.divisionEquation).toBe(
-        `${problem.leftPlace.value} ÷ 10 = ${problem.rightPlace.value}`
-    );
-    expect(problem.comparisonStatement).toBe(
-        `The ${problem.repeatedDigit} in the ${displayPlaceName(problem.leftPlace.name)} place represents 10 times as much as the ${problem.repeatedDigit} in the ${displayPlaceName(problem.rightPlace.name)} place.`
-    );
 };
 
 describe('PlaceValueScalingGenerator', () => {

@@ -36,6 +36,5 @@ describe('PlaceValueScalingGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('adjacent-place-scaling');
         expect(stub!.data.leftPlace.value).toBe(stub!.data.rightPlace.value * 10);
-        expect(stub!.data.answer).toBe(stub!.data.leftPlace.value);
     });
 });

@@ -545,14 +545,6 @@ export type PlaceValueScalingProblem = {
     leftPlace: PlaceValueScalingPlace;
     rightPlace: PlaceValueScalingPlace;
     scaleFactor: 10;
-    prompt: string;
-    questionMultiplicationEquation: string;
-    questionDivisionEquation: string;
-    multiplicationEquation: string;
-    divisionEquation: string;
-    comparisonStatement: string;
-    /** The value represented by the repeated digit in `leftPlace`. */
-    answer: number;
 };
 
 export type CountingProblem = {
