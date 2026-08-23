@@ -15,13 +15,15 @@ interface CoreProps {
 }
 
 function validateEquivalence(data: ShapePartitionEquivalenceProblem) {
-    const expectedSecond = data.shape === 'circle' ? 'curved' : 'diagonal';
+    const comparison = data.partitionComparison;
     if (
         (data.shape !== 'circle' && data.shape !== 'rectangle')
         || data.parts !== 2
-        || data.firstPartition !== 'straight'
-        || data.secondPartition !== expectedSecond
-        || data.conclusion !== 'equal shares can have different shapes'
+        || typeof comparison !== 'object'
+        || comparison === null
+        || comparison.wholes !== 'congruent'
+        || comparison.shareMeasures !== 'equal'
+        || comparison.shareShapes !== 'different'
     ) {
         throw new ViewValidationError('shape-partition-equivalence', 'Expected two valid equal-share partitions with different geometries.');
     }
@@ -82,9 +84,7 @@ const ShapePartitionEquivalenceCore = ({config: _config, payload}: CoreProps) =>
     validateProblemData('shape-partition-equivalence', problem.data, [
         'shape',
         'parts',
-        'firstPartition',
-        'secondPartition',
-        'conclusion'
+        'partitionComparison'
     ]);
     validateEquivalence(problem.data);
 
@@ -105,7 +105,7 @@ const ShapePartitionEquivalenceCore = ({config: _config, payload}: CoreProps) =>
                             ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
                             : 'border-slate-300 bg-white text-transparent'
                     }`}
-                    aria-label={isSolutionView ? `Answer: ${problem.data.conclusion}` : 'Blank answer'}
+                    aria-label={isSolutionView ? 'Answer: equal shares can have different shapes' : 'Blank answer'}
                 >
                     {isSolutionView
                         ? 'Yes. Equal shares can have different shapes.'

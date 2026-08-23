@@ -1764,9 +1764,11 @@ export type AreaPerimeterRelationProblem = AreaPerimeterRelationBase & (
 export type ShapePartitionEquivalenceProblem = {
     shape: FractionShape;
     parts: 2;
-    firstPartition: 'straight';
-    secondPartition: 'diagonal' | 'curved';
-    conclusion: 'equal shares can have different shapes';
+    partitionComparison: {
+        wholes: 'congruent';
+        shareMeasures: 'equal';
+        shareShapes: 'different';
+    };
 };
 
 export type AngleConceptFraction =

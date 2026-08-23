@@ -30,9 +30,11 @@ export class ShapePartitionEquivalenceGenerator implements ProblemGenerator<
             data: {
                 shape,
                 parts: 2,
-                firstPartition: 'straight',
-                secondPartition: shape === 'circle' ? 'curved' : 'diagonal',
-                conclusion: 'equal shares can have different shapes'
+                partitionComparison: {
+                    wholes: 'congruent',
+                    shareMeasures: 'equal',
+                    shareShapes: 'different'
+                }
             }
         };
     }

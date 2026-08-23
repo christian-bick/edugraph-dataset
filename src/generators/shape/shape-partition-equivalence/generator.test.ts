@@ -11,19 +11,20 @@ describe('ShapePartitionEquivalenceGenerator', () => {
     });
 
     it.each([
-        [Area.Circle, 'circle', 'curved'],
-        [Area.Rectangle, 'rectangle', 'diagonal']
+        [Area.Circle, 'circle'],
+        [Area.Rectangle, 'rectangle']
     ] as const)('creates two equal but differently shaped shares for %s', (
         shape,
-        expectedShape,
-        secondPartition
+        expectedShape
     ) => {
         expect(generator.generate({shape})!.data).toEqual({
             shape: expectedShape,
             parts: 2,
-            firstPartition: 'straight',
-            secondPartition,
-            conclusion: 'equal shares can have different shapes'
+            partitionComparison: {
+                wholes: 'congruent',
+                shareMeasures: 'equal',
+                shareShapes: 'different'
+            }
         });
     });
 
