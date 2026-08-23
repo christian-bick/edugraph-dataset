@@ -42,16 +42,12 @@ export class TimeIntervalArithmeticGenerator implements ProblemGenerator<
             tags: [config.operation],
             data: {
                 operation,
-                story: operation === 'addition'
-                    ? `A science club starts at ${Number(startTime.slice(0, 2))}:${startTime.slice(3)} and lasts ${elapsedMinutes} minutes. What time does it end?`
-                    : `Art class starts at ${Number(startTime.slice(0, 2))}:${startTime.slice(3)} and ends at ${Number(endTime.slice(0, 2))}:${endTime.slice(3)}. How many minutes does it last?`,
                 startTime,
                 endTime,
                 elapsedMinutes,
                 referenceHour: startHour,
                 startOffsetMinutes: startMinute,
-                endOffsetMinutes: 60 + endMinute,
-                unknown: operation === 'addition' ? 'end-time' : 'elapsed-minutes'
+                endOffsetMinutes: 60 + endMinute
             }
         };
     }

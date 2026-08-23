@@ -1,6 +1,7 @@
 import {Scope} from 'edugraph-ts';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
+import {TimeIntervalWordProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {getClockAngles, getTickMarks} from '../time-analog/helpers.ts';
@@ -29,6 +30,16 @@ const parseTime = (time: string): {hour: number; minute: number} => {
 const displayTime = (time: string): string => {
     const {hour, minute} = parseTime(time);
     return `${hour}:${String(minute).padStart(2, '0')}`;
+};
+
+const presentTimeInterval = (data: TimeIntervalWordProblem) => {
+    const unknown: 'end-time' | 'elapsed-minutes' = data.operation === 'addition'
+        ? 'end-time'
+        : 'elapsed-minutes';
+    const story = data.operation === 'addition'
+        ? `A science club starts at ${displayTime(data.startTime)} and lasts ${data.elapsedMinutes} minutes. What time does it end?`
+        : `Art class starts at ${displayTime(data.startTime)} and ends at ${displayTime(data.endTime)}. How many minutes does it last?`;
+    return {story, unknown};
 };
 
 function AnalogClock({time, label, reveal}: {time: string; label: string; reveal: boolean}) {
@@ -67,14 +78,12 @@ const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
     const data = problem.data;
     validateProblemData('time-interval-word-problem', data, [
         'operation',
-        'story',
         'startTime',
         'endTime',
         'elapsedMinutes',
         'referenceHour',
         'startOffsetMinutes',
-        'endOffsetMinutes',
-        'unknown'
+        'endOffsetMinutes'
     ]);
 
     const start = parseTime(data.startTime);
@@ -84,14 +93,14 @@ const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
         && end.hour === start.hour + 1
         && data.startOffsetMinutes === start.minute
         && data.endOffsetMinutes === 60 + end.minute
-        && data.endOffsetMinutes - data.startOffsetMinutes === data.elapsedMinutes
-        && data.unknown === (data.operation === 'addition' ? 'end-time' : 'elapsed-minutes');
+        && data.endOffsetMinutes - data.startOffsetMinutes === data.elapsedMinutes;
     if (!coherent) {
         throw new ViewValidationError('time-interval-word-problem', 'Time-interval values are not coherent.');
     }
 
     const Clock = config.clockType === Scope.AnalogClock ? AnalogClock : DigitalClock;
-    const revealEnd = data.unknown !== 'end-time' || isSolutionView;
+    const {story, unknown} = presentTimeInterval(data);
+    const revealEnd = unknown !== 'end-time' || isSolutionView;
     const symbol = data.operation === 'addition' ? '+' : '−';
     const left = data.operation === 'addition' ? data.startOffsetMinutes : data.endOffsetMinutes;
     const right = data.operation === 'addition' ? data.elapsedMinutes : data.startOffsetMinutes;
@@ -101,13 +110,13 @@ const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
     return (
         <div className="w-[780px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-violet-700">Time interval story</div>
-            <div className="mt-2 rounded-xl border border-violet-200 bg-violet-50 px-5 py-4 text-lg font-semibold leading-relaxed text-slate-800">{data.story}</div>
+            <div className="mt-2 rounded-xl border border-violet-200 bg-violet-50 px-5 py-4 text-lg font-semibold leading-relaxed text-slate-800">{story}</div>
 
             <div className="mt-5 flex items-center justify-center gap-8">
                 <Clock time={data.startTime} label="Start" reveal={true} />
                 <div className="rounded-lg bg-sky-50 px-4 py-3 text-center text-sky-800">
                     <div className="text-xs font-bold uppercase tracking-wide">Duration</div>
-                    <div className="mt-1 text-xl font-bold">{data.unknown === 'elapsed-minutes' && !isSolutionView ? '? minutes' : `${data.elapsedMinutes} minutes`}</div>
+                    <div className="mt-1 text-xl font-bold">{unknown === 'elapsed-minutes' && !isSolutionView ? '? minutes' : `${data.elapsedMinutes} minutes`}</div>
                 </div>
                 <Clock time={data.endTime} label="End" reveal={revealEnd} />
             </div>
@@ -116,7 +125,7 @@ const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
                 {isSolutionView ? <>
                     <div className="text-sm font-semibold">Count minutes after {reference}.</div>
                     <div className="mt-1 font-mono text-2xl font-bold">{left} {symbol} {right} = {result}</div>
-                    <div className="mt-1 text-lg font-bold">Answer: {data.unknown === 'end-time' ? displayTime(data.endTime) : `${data.elapsedMinutes} minutes`}</div>
+                    <div className="mt-1 text-lg font-bold">Answer: {unknown === 'end-time' ? displayTime(data.endTime) : `${data.elapsedMinutes} minutes`}</div>
                 </> : <div className="text-xl font-bold">Answer: __________</div>}
             </div>
         </div>

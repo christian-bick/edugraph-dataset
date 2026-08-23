@@ -868,14 +868,12 @@ export type ElapsedTimeProblem = {
 
 export type TimeIntervalWordProblem = {
     operation: 'addition' | 'subtraction';
-    story: string;
     startTime: string;
     endTime: string;
     elapsedMinutes: number;
     referenceHour: number;
     startOffsetMinutes: number;
     endOffsetMinutes: number;
-    unknown: 'end-time' | 'elapsed-minutes';
 };
 
 export type LiquidVolumeMeasurementProblem = {
