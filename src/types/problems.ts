@@ -515,7 +515,6 @@ export type CountingSequenceProblem = {
 
 
 export type CountingClassifyCountProblem = {
-    items: string[];
     categories: Record<string, number>;
     numObjects: number;
 };

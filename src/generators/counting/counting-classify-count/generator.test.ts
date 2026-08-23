@@ -29,12 +29,13 @@ describe('CountingClassifyCountGenerator', () => {
         for (let i = 0; i < 20; i++) {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
-            expect(stub!.data.items.length).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.items.length).toBeLessThanOrEqual(10);
+            expect(stub!.data.numObjects).toBeGreaterThanOrEqual(1);
+            expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
             
             const cats = stub!.data.categories;
             const total = (cats['A'] || 0) + (cats['B'] || 0) + (cats['C'] || 0);
-            expect(total).toBe(stub!.data.items.length);
+            expect(total).toBe(stub!.data.numObjects);
+            expect(stub!.data).not.toHaveProperty('items');
         }
     });
 });

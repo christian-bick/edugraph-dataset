@@ -19,7 +19,7 @@ describe('CountingClassifyCountGenerator Spec Integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.numObjects).toBeGreaterThanOrEqual(0);
         expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
-        expect(stub!.data.items.length).toBe(stub!.data.numObjects);
+        expect(stub!.data).not.toHaveProperty('items');
         
         const categories = stub!.data.categories;
         const total = (categories['A'] || 0) + (categories['B'] || 0) + (categories['C'] || 0);

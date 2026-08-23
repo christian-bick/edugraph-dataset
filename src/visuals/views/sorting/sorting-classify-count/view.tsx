@@ -1,17 +1,12 @@
-import {Scope} from 'edugraph-ts';
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {generateScatteredPositions} from './helpers.ts';
+import {buildShapeClassificationPresentation, ClassificationItem} from '../classification-presentation.ts';
 import { SortingClassifyCountViewConfig, SortingClassifyCountViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import { validateProblemData } from '../../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
-
-interface Item {
-    shape: string;
-    color: string;
-}
 
 const COLOR_MAP: Record<string, string> = {
     red: '#ef4444',
@@ -24,7 +19,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'sorting-classify-count'>;
 }
 
-function ItemSVG({ item, size = 40 }: { item: Item; size?: number }) {
+function ItemSVG({ item, size = 40 }: { item: ClassificationItem; size?: number }) {
     const fill = COLOR_MAP[item.color] || '#334155';
     const stroke = '#1e293b';
     const strokeWidth = 2;
@@ -54,57 +49,29 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    validateProblemData('sorting-classify-count', data, ['items', 'categories']);
+    validateProblemData('sorting-classify-count', data, ['categories', 'numObjects']);
+    const categoryCounts = Object.values(data.categories);
+    if (categoryCounts.length === 0
+        || categoryCounts.length > 3
+        || categoryCounts.some(count => !Number.isInteger(count) || count < 1)
+        || categoryCounts.reduce((sum, count) => sum + count, 0) !== data.numObjects) {
+        throw new ViewValidationError(
+            'sorting-classify-count',
+            'Classification categories must be positive counts summing to numObjects.'
+        );
+    }
 
-    const { items, categories, classifyType, mappedCategories } = useMemo(() => {
-        const itemsList = [...data.items];
+    const {items, categories, mappedCategories} = useMemo(() => {
         const categoriesMap = { ...data.categories };
-
-        // View logic: Randomly decide how to represent the abstract groups visually
-        let seed = payload.seed;
-        const nextRand = () => {
-            const x = Math.sin(seed++) * 10000;
-            return x - Math.floor(x);
-        };
-
-        const chosenClassifyType = payload.labels.includes(Scope.ShapeProperties) ? 'shape' : (nextRand() > 0.5 ? 'shape' : 'color');
-        
-        const shapes = ['circle', 'square', 'triangle'];
-        const colors = ['red', 'blue', 'green'];
-        
-        // Map abstract categories (A, B, C) to the primary sorting trait
-        const activeTraits = chosenClassifyType === 'shape' ? shapes : colors;
-        const mappedCategories: Record<string, string> = {};
-        Object.keys(categoriesMap).forEach((cat, index) => {
-            mappedCategories[cat] = activeTraits[index % activeTraits.length];
-        });
-
-        // Map items to physical objects
-        const physicalItems = itemsList.map(cat => {
-            const primaryTrait = mappedCategories[cat as unknown as string];
-            const secondaryTraits = chosenClassifyType === 'shape' ? colors : shapes;
-            const secondaryTrait = secondaryTraits[Math.floor(nextRand() * secondaryTraits.length)];
-            
-            if (chosenClassifyType === 'shape') {
-                return { shape: primaryTrait, color: secondaryTrait };
-            } else {
-                return { shape: secondaryTrait, color: primaryTrait };
-            }
-        });
-
-        return { 
-            items: physicalItems, 
-            categories: categoriesMap, 
-            classifyType: chosenClassifyType,
-            mappedCategories 
-        };
-    }, [data.items, data.categories, payload.seed]);
+        const presentation = buildShapeClassificationPresentation(categoriesMap, payload.seed);
+        return {items: presentation.items, categories: categoriesMap, mappedCategories: presentation.mappedCategories};
+    }, [data.categories, payload.seed]);
 
     const { positions, itemSize } = useMemo(() => {
         return generateScatteredPositions(items.length, 450, 160, 40);
     }, [items.length]);
 
-    const promptText = `Classify and count the objects by ${classifyType}.`;
+    const promptText = 'Classify and count the objects by shape.';
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
@@ -133,9 +100,7 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
                         const trait = mappedCategories[cat];
                         const labelText = trait.charAt(0).toUpperCase() + trait.slice(1);
                         
-                        const catItem = classifyType === 'shape' 
-                            ? { shape: trait, color: 'blue' } 
-                            : { shape: 'circle', color: trait };
+                        const catItem: ClassificationItem = {shape: trait, color: 'blue'};
 
                         return (
                             <div key={cat} className="flex justify-between items-center bg-slate-50 py-2.5 px-5 border border-slate-200 rounded-lg">

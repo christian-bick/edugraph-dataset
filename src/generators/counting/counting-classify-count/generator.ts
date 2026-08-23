@@ -22,25 +22,21 @@ export class CountingClassifyCountGenerator implements ProblemGenerator<Counting
         const numCategories = Math.min(possibleCategories.length, Math.max(1, total));
         const activeCategories = possibleCategories.slice(0, numCategories);
 
-        const items: string[] = [];
         const counts: Record<string, number> = {};
 
         // Ensure every active category has at least 1 item (positive integer)
         activeCategories.forEach(cat => {
             counts[cat] = 1;
-            items.push(cat);
         });
 
         // Distribute remaining items
-        for (let i = items.length; i < total; i++) {
+        for (let i = activeCategories.length; i < total; i++) {
             const cat = activeCategories[Math.floor(random() * activeCategories.length)];
-            items.push(cat);
             counts[cat]++;
         }
 
         return {
             data: {
-                items,
                 categories: counts,
                 numObjects: total
             }
