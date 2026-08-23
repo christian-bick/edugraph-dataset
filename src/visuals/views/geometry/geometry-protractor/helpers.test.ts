@@ -1,55 +1,36 @@
 import {describe, expect, it} from 'vitest';
-import {MeasureAngleProblem} from '../../../../types/problems.ts';
+import {setSeed} from '../../../../lib/random.ts';
+import type {AngleMeasurementProblem} from '../../../../types/problems.ts';
 import {pointOnAngleCircle} from '../helpers.ts';
-import {isValidMeasureAngleProblem} from './helpers.ts';
+import {isValidMeasureAngleProblem, presentMeasureAngle} from './helpers.ts';
 
-const problem = (side: 'right' | 'left', angleMeasure: 23 | 158): MeasureAngleProblem => {
-    const right = side === 'right';
-    const scale = right ? 'inner' : 'outer';
-    return {
-        task: 'measure-angle',
-        prompt: 'Use the protractor to measure angle AOB.',
-        geometry: {
-            vertexLabel: 'O',
-            baselinePointLabel: 'A',
-            terminalPointLabel: 'B',
-            baselineSide: side,
-            baselineDegrees: right ? 0 : 180,
-            terminalDegrees: right ? angleMeasure : 180 - angleMeasure,
-            sweepDegrees: angleMeasure,
-            direction: right ? 'counterclockwise' : 'clockwise'
-        },
-        protractor: {
-            minimumDegrees: 0,
-            maximumDegrees: 180,
-            tickStepDegrees: 1,
-            labelStepDegrees: 10,
-            centerLabel: 'O',
-            baselinePointLabel: 'A',
-            zeroSide: side,
-            readingScale: scale
-        },
-        angleMeasure,
-        questionRelation: 'm∠AOB = ?°',
-        solutionRelation: `m∠AOB = ${angleMeasure}°`,
-        answer: `${angleMeasure}°`,
-        answerStatement: `Angle AOB measures ${angleMeasure}°.`,
-        explanation: `Ray OA starts at the ${side} 0° mark. Following the ${scale} scale to ray OB gives ${angleMeasure}°.`
-    };
-};
+const problem = (angleMeasure: AngleMeasurementProblem['angleMeasure']): AngleMeasurementProblem => ({
+    angleMeasure
+});
 
-describe('protractor measurement validation', () => {
-    it('accepts right-inner and left-outer stress orientations', () => {
-        expect(isValidMeasureAngleProblem(problem('right', 23))).toBe(true);
-        expect(isValidMeasureAngleProblem(problem('left', 158))).toBe(true);
+describe('protractor measurement presentation', () => {
+    it('accepts every supported neutral measure and rejects unsupported values', () => {
+        expect(isValidMeasureAngleProblem(problem(23))).toBe(true);
+        expect(isValidMeasureAngleProblem(problem(150))).toBe(true);
+        expect(isValidMeasureAngleProblem({angleMeasure: 22 as never})).toBe(false);
     });
 
-    it('rejects incorrect terminal geometry, scale selection, and numeric prose', () => {
-        const left = problem('left', 158);
-        expect(isValidMeasureAngleProblem({...left, geometry: {...left.geometry, terminalDegrees: 158}})).toBe(false);
-        expect(isValidMeasureAngleProblem({...left, protractor: {...left.protractor, readingScale: 'inner'}})).toBe(false);
-        expect(isValidMeasureAngleProblem({...left, solutionRelation: 'm∠AOB = 22°'})).toBe(false);
-        expect(isValidMeasureAngleProblem({...left, explanation: 'The protractor gives 22°.'})).toBe(false);
+    it('seeds both valid protractor orientations and derives their complete presentation', () => {
+        const orientations = new Set<string>();
+        for (let seed = 0; seed < 100; seed++) {
+            setSeed(seed);
+            const presentation = presentMeasureAngle(problem(158));
+            orientations.add(presentation.geometry.baselineSide);
+            expect(presentation.geometry.sweepDegrees).toBe(158);
+            expect(presentation.geometry.terminalDegrees).toBe(
+                presentation.geometry.baselineSide === 'right' ? 158 : 22
+            );
+            expect(presentation.protractor.readingScale).toBe(
+                presentation.geometry.baselineSide === 'right' ? 'inner' : 'outer'
+            );
+            expect(presentation.solutionRelation).toBe('m∠AOB = 158°');
+        }
+        expect(orientations).toEqual(new Set(['right', 'left']));
     });
 });
 

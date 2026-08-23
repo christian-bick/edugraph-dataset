@@ -1,10 +1,13 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {SketchAngleProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {counterclockwiseAngleArc, pointOnAngleCircle} from '../helpers.ts';
-import {isValidSketchAngleProblem} from './helpers.ts';
+import {
+    isValidSketchAngleProblem,
+    presentSketchAngle,
+    SketchAnglePresentation
+} from './helpers.ts';
 import {
     GeometryAngleDrawingViewConfig,
     GeometryAngleDrawingViewSchema
@@ -21,7 +24,7 @@ const CENTER_Y = 225;
 const RAY_RADIUS = 205;
 
 function DrawingCanvas({data, isSolutionView}: {
-    data: SketchAngleProblem;
+    data: SketchAnglePresentation;
     isSolutionView: boolean;
 }) {
     const baselineEnd = pointOnAngleCircle(
@@ -75,8 +78,8 @@ function DrawingCanvas({data, isSolutionView}: {
                 markerEnd="url(#drawing-ray-arrow)"
             />
             <circle cx={CENTER_X} cy={CENTER_Y} r="8" fill="#1e293b" />
-            <text x={CENTER_X - 17} y={CENTER_Y + 28} className="fill-slate-800 text-[18px] font-extrabold">{data.geometry.vertexLabel}</text>
-            <text x={baselineLabel.x} y={baselineLabel.y + 6} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">{data.geometry.baselinePointLabel}</text>
+            <text x={CENTER_X - 17} y={CENTER_Y + 28} className="fill-slate-800 text-[18px] font-extrabold">O</text>
+            <text x={baselineLabel.x} y={baselineLabel.y + 6} textAnchor="middle" className="fill-slate-800 text-[18px] font-extrabold">A</text>
 
             {!isSolutionView && (
                 <g>
@@ -110,9 +113,9 @@ function DrawingCanvas({data, isSolutionView}: {
                         strokeWidth="9"
                         strokeLinecap="round"
                     />
-                    <text x={terminalLabel.x} y={terminalLabel.y + 6} textAnchor="middle" className="fill-teal-800 text-[18px] font-extrabold">{data.geometry.terminalPointLabel}</text>
+                    <text x={terminalLabel.x} y={terminalLabel.y + 6} textAnchor="middle" className="fill-teal-800 text-[18px] font-extrabold">B</text>
                     <rect x={measureLabel.x - 36} y={measureLabel.y - 22} width="72" height="36" rx="16" fill="white" stroke="#10b981" strokeWidth="2" />
-                    <text x={measureLabel.x} y={measureLabel.y + 3} textAnchor="middle" className="fill-emerald-700 text-[18px] font-extrabold">{data.completedMeasure}°</text>
+                    <text x={measureLabel.x} y={measureLabel.y + 3} textAnchor="middle" className="fill-emerald-700 text-[18px] font-extrabold">{data.angleMeasure}°</text>
                 </g>
             )}
         </svg>
@@ -121,49 +124,34 @@ function DrawingCanvas({data, isSolutionView}: {
 
 const GeometryAngleDrawingCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
-    validateProblemData('geometry-angle-drawing', problem.data, [
-        'task',
-        'prompt',
-        'geometry',
-        'answer',
-        'answerStatement',
-        'explanation'
-    ]);
+    validateProblemData('geometry-angle-drawing', problem.data, ['angleMeasure']);
     const data = problem.data;
-    if (data.task !== 'sketch-angle') {
-        throw new ViewValidationError('geometry-angle-drawing', 'Expected an angle sketching task.');
-    }
-    validateProblemData('geometry-angle-drawing', data, [
-        'requestedMeasure',
-        'completedMeasure',
-        'questionRelation',
-        'solutionRelation'
-    ]);
     if (!isValidSketchAngleProblem(data)) {
         throw new ViewValidationError(
             'geometry-angle-drawing',
-            'The requested measure, completed rays, degree annotation, and supplied prose must agree exactly.'
+            'Expected a supported whole-degree angle measure.'
         );
     }
+    const presentation = presentSketchAngle(data);
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[54px] items-center justify-center px-4 text-center text-[1.22rem] font-bold leading-snug text-slate-700">
-                {data.prompt}
+                {presentation.prompt}
             </div>
             <div className="mt-3 flex h-[340px] items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
-                <DrawingCanvas data={data} isSolutionView={isSolutionView} />
+                <DrawingCanvas data={presentation} isSolutionView={isSolutionView} />
             </div>
             {!isSolutionView && (
                 <div className="mt-3 flex min-h-[58px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-5 font-mono text-[1.05rem] font-extrabold text-slate-700">
-                    {data.questionRelation}
+                    {presentation.questionRelation}
                 </div>
             )}
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="font-mono text-[1.08rem] font-extrabold">{data.solutionRelation}</div>
-                    <div className="mt-1 text-[1rem] font-extrabold">{data.answerStatement}</div>
-                    <div className="mt-1 text-[0.87rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                    <div className="font-mono text-[1.08rem] font-extrabold">{presentation.solutionRelation}</div>
+                    <div className="mt-1 text-[1rem] font-extrabold">{presentation.answerStatement}</div>
+                    <div className="mt-1 text-[0.87rem] font-semibold leading-snug text-slate-700">{presentation.explanation}</div>
                 </div>
             )}
         </div>

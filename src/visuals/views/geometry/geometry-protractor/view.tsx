@@ -1,10 +1,13 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {MeasureAngleProblem} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {pointOnAngleCircle} from '../helpers.ts';
-import {isValidMeasureAngleProblem} from './helpers.ts';
+import {
+    isValidMeasureAngleProblem,
+    MeasureAnglePresentation,
+    presentMeasureAngle
+} from './helpers.ts';
 import {
     GeometryProtractorViewConfig,
     GeometryProtractorViewSchema
@@ -30,7 +33,7 @@ function scaleLabelPosition(degrees: number, scale: 'inner' | 'outer') {
 }
 
 function ProtractorDiagram({data, isSolutionView}: {
-    data: MeasureAngleProblem;
+    data: MeasureAnglePresentation;
     isSolutionView: boolean;
 }) {
     const tickDegrees = Array.from(
@@ -134,14 +137,14 @@ function ProtractorDiagram({data, isSolutionView}: {
             <circle cx={CENTER_X} cy={CENTER_Y} r="10" fill="white" stroke="#0f766e" strokeWidth="4" />
             <line x1={CENTER_X - 14} y1={CENTER_Y} x2={CENTER_X + 14} y2={CENTER_Y} stroke="#0f766e" strokeWidth="2" />
             <line x1={CENTER_X} y1={CENTER_Y - 14} x2={CENTER_X} y2={CENTER_Y + 14} stroke="#0f766e" strokeWidth="2" />
-            <text x={CENTER_X} y={CENTER_Y + 33} textAnchor="middle" className="fill-slate-800 text-[17px] font-extrabold">{data.geometry.vertexLabel}</text>
+            <text x={CENTER_X} y={CENTER_Y + 33} textAnchor="middle" className="fill-slate-800 text-[17px] font-extrabold">O</text>
             <text
                 x={baselineLabel.x}
                 y={baselineLabel.y + 6}
                 textAnchor="middle"
                 className="fill-slate-800 text-[18px] font-extrabold"
             >
-                {data.geometry.baselinePointLabel}
+                A
             </text>
             <text
                 x={terminalLabel.x}
@@ -149,7 +152,7 @@ function ProtractorDiagram({data, isSolutionView}: {
                 textAnchor="middle"
                 className="fill-slate-800 text-[18px] font-extrabold"
             >
-                {data.geometry.terminalPointLabel}
+                B
             </text>
             <g transform="translate(325 314)">
                 <rect x="-150" y="-17" width="300" height="34" rx="17" fill="#ecfeff" stroke="#5eead4" strokeWidth="2" />
@@ -163,49 +166,34 @@ function ProtractorDiagram({data, isSolutionView}: {
 
 const GeometryProtractorCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
-    validateProblemData('geometry-protractor', problem.data, [
-        'task',
-        'prompt',
-        'geometry',
-        'answer',
-        'answerStatement',
-        'explanation'
-    ]);
+    validateProblemData('geometry-protractor', problem.data, ['angleMeasure']);
     const data = problem.data;
-    if (data.task !== 'measure-angle') {
-        throw new ViewValidationError('geometry-protractor', 'Expected a protractor measurement task.');
-    }
-    validateProblemData('geometry-protractor', data, [
-        'protractor',
-        'angleMeasure',
-        'questionRelation',
-        'solutionRelation'
-    ]);
     if (!isValidMeasureAngleProblem(data)) {
         throw new ViewValidationError(
             'geometry-protractor',
-            'The rays, protractor scale, whole-degree reading, and supplied prose must agree exactly.'
+            'Expected a supported whole-degree angle measure.'
         );
     }
+    const presentation = presentMeasureAngle(data);
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[48px] items-center justify-center text-center text-[1.22rem] font-bold text-slate-700">
-                {data.prompt}
+                {presentation.prompt}
             </div>
             <div className="mt-2 flex h-[350px] items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
-                <ProtractorDiagram data={data} isSolutionView={isSolutionView} />
+                <ProtractorDiagram data={presentation} isSolutionView={isSolutionView} />
             </div>
             {!isSolutionView && (
                 <div className="mt-3 flex min-h-[58px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-5 font-mono text-[1.08rem] font-extrabold text-slate-700">
-                    {data.questionRelation}
+                    {presentation.questionRelation}
                 </div>
             )}
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="font-mono text-[1.08rem] font-extrabold">{data.solutionRelation}</div>
-                    <div className="mt-1 text-[1rem] font-extrabold">{data.answerStatement}</div>
-                    <div className="mt-1 text-[0.87rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                    <div className="font-mono text-[1.08rem] font-extrabold">{presentation.solutionRelation}</div>
+                    <div className="mt-1 text-[1rem] font-extrabold">{presentation.answerStatement}</div>
+                    <div className="mt-1 text-[0.87rem] font-semibold leading-snug text-slate-700">{presentation.explanation}</div>
                 </div>
             )}
         </div>

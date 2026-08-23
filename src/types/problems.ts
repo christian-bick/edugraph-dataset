@@ -2007,55 +2007,11 @@ export type AngleConceptProblem =
 export type ProtractorAngleMeasure = 23 | 37 | 52 | 68 | 90 | 112 | 127 | 143 | 158;
 export type SketchAngleMeasure = 30 | 45 | 60 | 75 | 90 | 105 | 120 | 135 | 150;
 
-export type AngleMeasurementGeometry = {
-    vertexLabel: 'O';
-    baselinePointLabel: 'A';
-    terminalPointLabel: 'B';
-    baselineSide: 'right' | 'left';
-    baselineDegrees: 0 | 180;
-    terminalDegrees: number;
-    sweepDegrees: number;
-    direction: 'counterclockwise' | 'clockwise';
-};
+export type AngleMeasure = ProtractorAngleMeasure | SketchAngleMeasure;
 
-export type ProtractorReading = {
-    minimumDegrees: 0;
-    maximumDegrees: 180;
-    tickStepDegrees: 1;
-    labelStepDegrees: 10;
-    centerLabel: 'O';
-    baselinePointLabel: 'A';
-    zeroSide: 'right' | 'left';
-    readingScale: 'inner' | 'outer';
+export type AngleMeasurementProblem = {
+    angleMeasure: AngleMeasure;
 };
-
-export type MeasureAngleProblem = {
-    task: 'measure-angle';
-    prompt: 'Use the protractor to measure angle AOB.';
-    geometry: AngleMeasurementGeometry;
-    protractor: ProtractorReading;
-    angleMeasure: ProtractorAngleMeasure;
-    questionRelation: 'm∠AOB = ?°';
-    solutionRelation: string;
-    answer: string;
-    answerStatement: string;
-    explanation: string;
-};
-
-export type SketchAngleProblem = {
-    task: 'sketch-angle';
-    prompt: string;
-    geometry: AngleMeasurementGeometry;
-    requestedMeasure: SketchAngleMeasure;
-    completedMeasure: SketchAngleMeasure;
-    questionRelation: string;
-    solutionRelation: string;
-    answer: string;
-    answerStatement: string;
-    explanation: string;
-};
-
-export type AngleMeasurementProblem = MeasureAngleProblem | SketchAngleProblem;
 
 export type AngleArithmeticGeometry = {
     vertexLabel: 'O';

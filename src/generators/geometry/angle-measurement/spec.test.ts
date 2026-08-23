@@ -7,7 +7,6 @@ import {spec} from './spec.ts';
 const cases = [
     {
         expectedHash: '33195220',
-        task: 'measure-angle',
         labels: [
             Area.AngleCalculation,
             Scope.DegreeScale,
@@ -18,7 +17,6 @@ const cases = [
     },
     {
         expectedHash: 'f158f327',
-        task: 'sketch-angle',
         labels: [
             Area.AngleConcept,
             Scope.AngleMeasurement,
@@ -38,16 +36,15 @@ describe('AngleMeasurementGenerator spec integration', () => {
         ]);
     });
 
-    it.each(cases)('resolves generator-owned labels for the corrected $task target', ({
+    it.each(cases)('resolves generator-owned labels for each corrected angle target', ({
         expectedHash,
         generatorLabels,
-        labels,
-        task
+        labels
     }) => {
         expect(labelSetHash([...labels])).toBe(expectedHash);
         const stub = generateWithLabels(new AngleMeasurementGenerator(), [...labels]);
         expect(stub).not.toBeNull();
-        expect(stub!.data.task).toBe(task);
+        expect(stub!.data).toEqual({angleMeasure: stub!.data.angleMeasure});
         expect(stub!.tags).toEqual(expect.arrayContaining([...generatorLabels]));
         expect(stub!.tags).not.toContain(Ability.ConceptSpecification);
         expect([...new Set(stub!.tags)]).toHaveLength(stub!.tags!.length);
