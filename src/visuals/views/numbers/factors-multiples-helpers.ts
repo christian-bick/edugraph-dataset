@@ -18,14 +18,12 @@ export function hasCompletePositiveFactorEvidence(data: PositiveFactorEvidence):
         .filter(lowerFactor => lowerFactor <= data.number / lowerFactor)
         .map(lowerFactor => ({
             lowerFactor,
-            upperFactor: data.number / lowerFactor,
-            equation: `${lowerFactor} × ${data.number / lowerFactor} = ${data.number}`
+            upperFactor: data.number / lowerFactor
         }));
 
     return data.factorPairs.length === expectedPairs.length
         && data.factorPairs.every((pair, index) => (
             pair.lowerFactor === expectedPairs[index].lowerFactor
             && pair.upperFactor === expectedPairs[index].upperFactor
-            && pair.equation === expectedPairs[index].equation
         ));
 }

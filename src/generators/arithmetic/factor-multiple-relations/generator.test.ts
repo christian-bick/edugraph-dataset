@@ -25,9 +25,6 @@ const expectExhaustiveEvidence = (evidence: PositiveFactorEvidence): void => {
     for (const pair of evidence.factorPairs) {
         expect(pair.lowerFactor).toBeLessThanOrEqual(pair.upperFactor);
         expect(pair.lowerFactor * pair.upperFactor).toBe(evidence.number);
-        expect(pair.equation).toBe(
-            `${pair.lowerFactor} × ${pair.upperFactor} = ${evidence.number}`
-        );
     }
 };
 
@@ -79,7 +76,7 @@ describe('FactorMultipleRelationsGenerator', () => {
         expect(oneProblem).toBeDefined();
         expect(oneProblem!.factors).toEqual([1]);
         expect(oneProblem!.factorPairs).toEqual([
-            {lowerFactor: 1, upperFactor: 1, equation: '1 × 1 = 1'}
+            {lowerFactor: 1, upperFactor: 1}
         ]);
 
         expect(squareProblem).toBeDefined();

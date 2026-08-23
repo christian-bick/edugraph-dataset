@@ -120,7 +120,7 @@ function FactorEvidence({data}: {data: PositiveFactorEvidence}) {
                 >
                     {data.factorPairs.map(pair => (
                         <div className="rounded-lg border border-violet-200 bg-white px-4 py-3 text-center font-mono text-lg font-bold text-violet-950" key={`${pair.lowerFactor}-${pair.upperFactor}`}>
-                            {pair.equation}
+                            {pair.lowerFactor} × {pair.upperFactor} = {data.number}
                         </div>
                     ))}
                 </div>

@@ -181,7 +181,6 @@ export type MultiDigitDivisionProblem = {
 export type PositiveFactorPair = {
     lowerFactor: number;
     upperFactor: number;
-    equation: string;
 };
 
 export type PositiveFactorEvidence = {

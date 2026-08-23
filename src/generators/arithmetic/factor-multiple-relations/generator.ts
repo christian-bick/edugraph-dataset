@@ -38,8 +38,7 @@ const findPositiveFactorPairs = (number: number): PositiveFactorPair[] => {
         const upperFactor = number / lowerFactor;
         pairs.push({
             lowerFactor,
-            upperFactor,
-            equation: `${lowerFactor} × ${upperFactor} = ${number}`
+            upperFactor
         });
     }
     return pairs;

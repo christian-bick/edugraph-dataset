@@ -7,11 +7,11 @@ const completeEvidence: PositiveFactorEvidence = {
     factors: [1, 2, 3, 4, 6, 9, 12, 18, 36],
     factorCount: 9,
     factorPairs: [
-        {lowerFactor: 1, upperFactor: 36, equation: '1 × 36 = 36'},
-        {lowerFactor: 2, upperFactor: 18, equation: '2 × 18 = 36'},
-        {lowerFactor: 3, upperFactor: 12, equation: '3 × 12 = 36'},
-        {lowerFactor: 4, upperFactor: 9, equation: '4 × 9 = 36'},
-        {lowerFactor: 6, upperFactor: 6, equation: '6 × 6 = 36'}
+        {lowerFactor: 1, upperFactor: 36},
+        {lowerFactor: 2, upperFactor: 18},
+        {lowerFactor: 3, upperFactor: 12},
+        {lowerFactor: 4, upperFactor: 9},
+        {lowerFactor: 6, upperFactor: 6}
     ]
 };
 
@@ -29,7 +29,7 @@ describe('hasCompletePositiveFactorEvidence', () => {
         expect(hasCompletePositiveFactorEvidence({
             ...completeEvidence,
             factorPairs: completeEvidence.factorPairs.map((pair, index) => (
-                index === 0 ? {...pair, equation: '36 = 1 × 36'} : pair
+                index === 0 ? {...pair, upperFactor: 35} : pair
             ))
         })).toBe(false);
     });
