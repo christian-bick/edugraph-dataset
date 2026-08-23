@@ -183,7 +183,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `measurement-data` | 7 | `measurement-data-table`, `measurement-line-plot`, `measurement-line-plot-arithmetic` | **Keep:** values, unit, and optional arithmetic relation are canonical data evidence; views choose table or line-plot representation. |
 | `statistical-graphs` | 22 | `data-bar-graph`, `data-bar-graph-arithmetic`, `data-bar-graph-classification`, `data-bar-graph-interpretation`, `data-picture-graph`, `data-picture-graph-arithmetic`, `data-picture-graph-classification`, `data-picture-graph-interpretation` | **Keep/Project:** category counts, scale, and requested arithmetic relation are canonical. Use semantic category IDs and seed raw-observation/category order in views rather than the generator. |
 | `time` | 17 | `time-analog`, `time-analog-construction`, `time-digital`, `time-digital-construction` | **Migrated:** retains seconds since midnight, interval seconds, and a typed day period; shared view presenters derive numeral formatting and `a.m.`/`p.m.` notation. |
-| `time-elapsed` | 2 | `time-elapsed` | **Derive:** retain typed start/end instants and duration decomposition; derive formatted time strings. |
+| `time-elapsed` | 2 | `time-elapsed` | **Migrated:** retains start/end instants as whole minutes since midnight plus the calculated duration decomposition; analog and digital views derive every formatted clock string. |
 
 This pass found two raw resolved-label parsing cases missed by the Phase 0 rule, in
 `shape-identity` and `shape-same-attribute`. The future lint must cover ontology-IRI parsing in

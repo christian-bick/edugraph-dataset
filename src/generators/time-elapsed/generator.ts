@@ -7,9 +7,6 @@ import {TimeElapsedGeneratorConfig, TimeElapsedGeneratorSchema} from './spec.ts'
 const randomInteger = (minimum: number, maximum: number): number =>
     minimum + Math.floor(random() * (maximum - minimum + 1));
 
-const formatTime = (hour: number, minute: number): string =>
-    `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-
 export class TimeElapsedGenerator implements ProblemGenerator<
     ElapsedTimeProblem,
     TimeElapsedGeneratorConfig
@@ -30,8 +27,8 @@ export class TimeElapsedGenerator implements ProblemGenerator<
 
         return {
             data: {
-                startTime: formatTime(startHour, startMinute),
-                endTime: formatTime(endHour, endMinute),
+                startMinutesSinceMidnight: startHour * 60 + startMinute,
+                endMinutesSinceMidnight: endHour * 60 + endMinute,
                 elapsedMinutes: minutesToNextHour + minutesAfterHour,
                 minutesToNextHour,
                 minutesAfterHour,

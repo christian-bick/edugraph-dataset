@@ -816,8 +816,8 @@ export type TimeProblem = {
 };
 
 export type ElapsedTimeProblem = {
-    startTime: string;
-    endTime: string;
+    startMinutesSinceMidnight: number;
+    endMinutesSinceMidnight: number;
     elapsedMinutes: number;
     minutesToNextHour: number;
     minutesAfterHour: number;

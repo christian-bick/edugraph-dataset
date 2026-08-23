@@ -2,11 +2,6 @@ import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../lib/random.ts';
 import {TimeElapsedGenerator} from './generator.ts';
 
-const toMinutes = (time: string): number => {
-    const [hour, minute] = time.split(':').map(Number);
-    return hour * 60 + minute;
-};
-
 describe('TimeElapsedGenerator', () => {
     const generator = new TimeElapsedGenerator();
 
@@ -14,11 +9,11 @@ describe('TimeElapsedGenerator', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
             const data = generator.generate({requireElapsedCount: true})!.data;
-            const start = toMinutes(data.startTime);
-            const end = toMinutes(data.endTime);
+            const start = data.startMinutesSinceMidnight;
+            const end = data.endMinutesSinceMidnight;
 
-            expect(data.startTime).toMatch(/^\d{2}:\d{2}$/);
-            expect(data.endTime).toMatch(/^\d{2}:\d{2}$/);
+            expect(Number.isInteger(start)).toBe(true);
+            expect(Number.isInteger(end)).toBe(true);
             expect(data.crossesHour).toBe(true);
             expect(Math.floor(end / 60)).toBe(Math.floor(start / 60) + 1);
             expect(data.minutesToNextHour).toBe(60 - start % 60);
