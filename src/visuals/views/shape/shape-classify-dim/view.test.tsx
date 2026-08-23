@@ -14,7 +14,7 @@ const payload = (data: ShapeClassifyDimProblem, isSolutionView: boolean): ViewRe
 
 describe('shape-classify-dim view', () => {
     it('keeps both choices neutral in Question Mode and reveals the supplied classification in Solution Mode', () => {
-        const data: ShapeClassifyDimProblem = {shape: 'cube', shapeType: '3d', answer: '3d'};
+        const data: ShapeClassifyDimProblem = {shape: 'cube', shapeType: '3d'};
         const question = renderToStaticMarkup(<ShapeClassifyDimCore config={{}} payload={payload(data, false)} />);
         const solution = renderToStaticMarkup(<ShapeClassifyDimCore config={{}} payload={payload(data, true)} />);
 
@@ -25,9 +25,8 @@ describe('shape-classify-dim view', () => {
     });
 
     it.each([
-        {shape: 'circle', shapeType: '3d', answer: '3d'},
-        {shape: 'sphere', shapeType: '3d', answer: '2d'},
-        {shape: 'star', shapeType: '2d', answer: '2d'}
+        {shape: 'circle', shapeType: '3d'},
+        {shape: 'star', shapeType: '2d'}
     ])('rejects inconsistent or unsupported payload %#', data => {
         expect(() => renderToStaticMarkup(
             <ShapeClassifyDimCore config={{}} payload={payload(data as ShapeClassifyDimProblem, false)} />

@@ -950,7 +950,6 @@ export type ShapeEnvShapesProblem = {
 export type ShapeClassifyDimProblem = {
     shapeType: '2d' | '3d';
     shape: string;
-    answer: '2d' | '3d';
 };
 
 export type ShapeComparisonName =

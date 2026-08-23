@@ -92,7 +92,7 @@ interface CoreProps {
 export const ShapeClassifyDimCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
-    validateProblemData('shape-classify-dim', data, ['shapeType', 'shape', 'answer']);
+    validateProblemData('shape-classify-dim', data, ['shapeType', 'shape']);
 
     const twoDimensionalShapes = ['circle', 'square', 'rectangle', 'triangle', 'hexagon'];
     const threeDimensionalShapes = ['cube', 'cone', 'cylinder', 'sphere'];
@@ -104,12 +104,12 @@ export const ShapeClassifyDimCore = ({ config: _config, payload }: CoreProps) =>
     if (expectedType === undefined) {
         throw new ViewValidationError('shape-classify-dim', `Unsupported shape: ${data.shape}`);
     }
-    if (data.shapeType !== expectedType || data.answer !== expectedType) {
-        throw new ViewValidationError('shape-classify-dim', 'Shape, dimensional type, and answer must agree.');
+    if (data.shapeType !== expectedType) {
+        throw new ViewValidationError('shape-classify-dim', 'Shape and dimensional type must agree.');
     }
 
     const shape = data.shape;
-    const answer = data.answer;
+    const answer = data.shapeType;
 
     const promptText = "Is this shape flat (two-dimensional) or solid (three-dimensional)?";
     const options = ['2d', '3d'];

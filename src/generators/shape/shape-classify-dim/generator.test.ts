@@ -25,7 +25,7 @@ describe('ShapeClassifyDimGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shapeType).toBe('2d');
         expect(stub!.data.shape).toBe('circle');
-        expect(stub!.data.answer).toBe('2d');
+        expect(stub!.data.shapeType).toBe('2d');
     });
 
     it('should generate 2D shapes for square, rectangle, triangle, hexagon', () => {
@@ -48,7 +48,7 @@ describe('ShapeClassifyDimGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shapeType).toBe('3d');
         expect(stub!.data.shape).toBe('sphere');
-        expect(stub!.data.answer).toBe('3d');
+        expect(stub!.data.shapeType).toBe('3d');
     });
 
     it('should generate 3D shapes for cube, cone, cylinder', () => {

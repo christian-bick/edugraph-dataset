@@ -42,8 +42,7 @@ export class ShapeClassifyDimGenerator implements ProblemGenerator<ShapeClassify
         return {
             data: {
                 shapeType,
-                shape: definition.shape,
-                answer: shapeType
+                shape: definition.shape
             }
         };
     }

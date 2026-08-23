@@ -30,7 +30,7 @@ describe('ShapeClassifyDimGenerator Spec Integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shapeType).toBe('2d');
         expect(stub!.data.shape).toBe('circle');
-        expect(stub!.data.answer).toBe('2d');
+        expect(stub!.data.shapeType).toBe('2d');
         expect(stub!.tags).toEqual(expect.arrayContaining([Area.Circle, Scope.TwoDimensional]));
     });
 
@@ -43,7 +43,7 @@ describe('ShapeClassifyDimGenerator Spec Integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shapeType).toBe('3d');
         expect(stub!.data.shape).toBe('sphere');
-        expect(stub!.data.answer).toBe('3d');
+        expect(stub!.data.shapeType).toBe('3d');
         expect(stub!.tags).toEqual(expect.arrayContaining([Area.Sphere, Scope.ThreeDimensional]));
     });
 
