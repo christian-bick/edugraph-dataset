@@ -2,11 +2,35 @@ import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
     IntegerAddSubtractStrategy,
-    IntegerAddSubtractStrategyProblem
+    IntegerAddSubtractStrategyProblem,
+    IntegerAddSubtractStrategyStep
 } from '../../../types/problems.ts';
 import {IntegerAddSubtractStrategiesGenerator} from './generator.ts';
 
 const targetRange = {min: 0, max: 1000};
+
+const operation = (
+    operationType: 'addition' | 'subtraction',
+    leftOperand: number,
+    rightOperand: number,
+    result: number
+): IntegerAddSubtractStrategyStep => ({
+    kind: 'operation',
+    operation: operationType,
+    leftOperand,
+    rightOperand,
+    result
+});
+
+const decomposition = (
+    whole: number,
+    firstPart: number,
+    secondPart: number
+): IntegerAddSubtractStrategyStep => ({
+    kind: 'decomposition',
+    whole,
+    parts: [firstPart, secondPart]
+});
 
 const expectCommonInvariants = (problem: IntegerAddSubtractStrategyProblem): void => {
     expect(problem.task).toBe('integer-add-subtract-strategy');
@@ -20,11 +44,17 @@ const expectCommonInvariants = (problem: IntegerAddSubtractStrategyProblem): voi
     expect(problem.adjustment).toBeLessThanOrEqual(9);
     expect(problem.steps.length).toBeGreaterThanOrEqual(1);
     expect(problem.steps.length).toBeLessThanOrEqual(3);
-    expect(problem.steps.every(step => step.includes(' = '))).toBe(true);
-    expect(problem.questionEquation).toContain('?');
-    expect(problem.solutionEquation).toContain(`= ${problem.answer}`);
-    expect(problem.prompt.length).toBeGreaterThan(0);
-    expect(problem.explanation.length).toBeGreaterThan(0);
+    expect(problem.steps.every(step => typeof step === 'object' && step !== null)).toBe(true);
+    expect(Object.keys(problem).sort()).toEqual([
+        'adjustment',
+        'answer',
+        'leftOperand',
+        'operation',
+        'rightOperand',
+        'steps',
+        'strategy',
+        'task'
+    ]);
 };
 
 const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void => {
@@ -38,7 +68,9 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         expect(answer).toBe(leftOperand + rightOperand);
         expect(problem.steps).toEqual(Array.from(
             {length: rightOperand},
-            (_, index) => `${leftOperand + index} + 1 = ${leftOperand + index + 1}`
+            (_, index) => operation(
+                'addition', leftOperand + index, 1, leftOperand + index + 1
+            )
         ));
         return;
     }
@@ -51,7 +83,9 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         expect(answer).toBe(leftOperand - rightOperand);
         expect(problem.steps).toEqual(Array.from(
             {length: rightOperand},
-            (_, index) => `${leftOperand - index} − 1 = ${leftOperand - index - 1}`
+            (_, index) => operation(
+                'subtraction', leftOperand - index, 1, leftOperand - index - 1
+            )
         ));
         return;
     }
@@ -65,9 +99,9 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         expect(adjustment).toBe(10 - leftOperand);
         expect(remainder).toBeGreaterThan(0);
         expect(problem.steps).toEqual([
-            `${rightOperand} = ${adjustment} + ${remainder}`,
-            `${leftOperand} + ${adjustment} = 10`,
-            `10 + ${remainder} = ${answer}`
+            decomposition(rightOperand, adjustment, remainder),
+            operation('addition', leftOperand, adjustment, 10),
+            operation('addition', 10, remainder, answer)
         ]);
         return;
     }
@@ -80,8 +114,8 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         expect(adjustment).toBe(1);
         expect(answer).toBe(leftOperand + rightOperand);
         expect(problem.steps).toEqual([
-            `${base} + ${base} = ${knownDouble}`,
-            `${knownDouble} + 1 = ${answer}`
+            operation('addition', base, base, knownDouble),
+            operation('addition', knownDouble, 1, answer)
         ]);
         return;
     }
@@ -92,13 +126,10 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         expect(problem.operation).toBe('addition');
         expect(answer).toBe(leftOperand + rightOperand);
         expect(friendlyRight % 10).toBe(0);
-        expect(problem.transformedEquation).toBe(
-            `${leftOperand} + ${rightOperand} = ${adjustedLeft} + ${friendlyRight}`
-        );
         expect(problem.steps).toEqual([
-            `${leftOperand} − ${adjustment} = ${adjustedLeft}`,
-            `${rightOperand} + ${adjustment} = ${friendlyRight}`,
-            `${adjustedLeft} + ${friendlyRight} = ${answer}`
+            operation('subtraction', leftOperand, adjustment, adjustedLeft),
+            operation('addition', rightOperand, adjustment, friendlyRight),
+            operation('addition', adjustedLeft, friendlyRight, answer)
         ]);
         return;
     }
@@ -109,13 +140,10 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         expect(problem.operation).toBe('subtraction');
         expect(answer).toBe(leftOperand - rightOperand);
         expect(friendlyRight % 10).toBe(0);
-        expect(problem.transformedEquation).toBe(
-            `${leftOperand} − ${rightOperand} = ${adjustedLeft} − ${friendlyRight}`
-        );
         expect(problem.steps).toEqual([
-            `${rightOperand} + ${adjustment} = ${friendlyRight}`,
-            `${leftOperand} + ${adjustment} = ${adjustedLeft}`,
-            `${adjustedLeft} − ${friendlyRight} = ${answer}`
+            operation('addition', rightOperand, adjustment, friendlyRight),
+            operation('addition', leftOperand, adjustment, adjustedLeft),
+            operation('subtraction', adjustedLeft, friendlyRight, answer)
         ]);
         return;
     }
@@ -128,13 +156,10 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
         expect(answer).toBe(leftOperand - rightOperand);
         expect(adjustment).toBe(leftOperand - 10);
         expect(remainder).toBeGreaterThan(0);
-        expect(problem.transformedEquation).toBe(
-            `${leftOperand} − ${rightOperand} = ${leftOperand} − (${adjustment} + ${remainder})`
-        );
         expect(problem.steps).toEqual([
-            `${rightOperand} = ${adjustment} + ${remainder}`,
-            `${leftOperand} − ${adjustment} = 10`,
-            `10 − ${remainder} = ${answer}`
+            decomposition(rightOperand, adjustment, remainder),
+            operation('subtraction', leftOperand, adjustment, 10),
+            operation('subtraction', 10, remainder, answer)
         ]);
         return;
     }
@@ -146,11 +171,10 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
     expect(friendlyTen % 10).toBe(0);
     expect(remainingDifference).toBeGreaterThan(0);
     expect(friendlyTen).toBeGreaterThan(rightOperand);
-    expect(problem.transformedEquation).toBe(`${rightOperand} + ? = ${leftOperand}`);
     expect(problem.steps).toEqual([
-        `${rightOperand} + ${adjustment} = ${friendlyTen}`,
-        `${friendlyTen} + ${remainingDifference} = ${leftOperand}`,
-        `${adjustment} + ${remainingDifference} = ${answer}`
+        operation('addition', rightOperand, adjustment, friendlyTen),
+        operation('addition', friendlyTen, remainingDifference, leftOperand),
+        operation('addition', adjustment, remainingDifference, answer)
     ]);
 };
 

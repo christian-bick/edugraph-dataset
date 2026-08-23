@@ -69,7 +69,7 @@ payload type changes.
 | `fraction-arithmetic` | 14/4 | **Projection:** prompts, questions, answer prose, and `unknownRole`. **Witness:** consolidate question/solution model pairs and equation strings into canonical fraction values, operations, decompositions, conversions, and complete models. **Decision:** replace English story context with a typed situation contract before removing it. |
 | `fraction-comparison` | 7/2 | **Projection:** prompt, question equation, answer statement, rationale, and benchmark prose. **Canonical:** fractions, shared whole, relation, benchmark relation, and bar models already carry the proof. |
 | `geometry-primitives` | 18/2 | **Projection:** drawing/identification prompts, answers, prose, candidate shuffle, guide/completed scenes, and the two task subpayloads. **Canonical:** primitive kind and its mathematical properties. Geometry renderers and definitions belong in reusable parent-level view code. |
-| `integer-add-subtract-strategies` | 14/1 | **Projection:** prompt and explanation prose. **Witness:** keep operands, strategy, adjustment, and typed steps; derive question, solution, transformed equations, and step wording rather than storing display strings. |
+| `integer-add-subtract-strategies` | 14/1 | **Migrated:** the payload now contains operands, strategy, adjustment, result, and typed decomposition/operation steps. Shared view code derives prompts, explanations, original and transformed equations, and step notation. |
 | `integer-rounding` | 7/1 | **Projection:** prompt, question/solution equations, rounding statement, and decision explanation are derivable from number, magnitude, bounding multiples, distances, tie state, direction, and result. |
 | `measurement-conversion` | 22/2 | **Migrated:** the payload now contains only typed unit identifiers, quantity/scaling kinds, factors, quantities, and table rows. Views derive all language and equations and choose withheld table cells. |
 | `measurement-word-problems` | 60/1 | **Projection:** story, question, question/solution equation strings, answer statement, and explanation. **Decision/Witness:** operands and units are partly typed; add a typed situation/event contract so the same semantics can produce the story without keeping English as source data. |
@@ -98,7 +98,7 @@ payload type changes.
 | `fraction-arithmetic` | `fractions-interpretation-model`, `fractions-operation-model`, `fractions-understanding-model`, `fractions-word-problem` |
 | `fraction-comparison` | `fractions-compare-benchmark-models`, `fractions-compare-models` |
 | `geometry-primitives` | `geometry-primitives-drawing`, `geometry-primitives-identification` |
-| `integer-add-subtract-strategies` | `operations-add-subtract-strategy` |
+| `integer-add-subtract-strategies` | `operations-add-subtract-strategy-understanding`, `operations-counting-on-operation-derivation`, `operations-counting-back-operation-derivation` |
 | `integer-rounding` | `numbers-rounding-line` |
 | `measurement-conversion` | `measure-conversion-derivation`, `measure-conversion-execution`, `measure-conversion-table` |
 | `measurement-word-problems` | `measurement-word-problem-grade4` |

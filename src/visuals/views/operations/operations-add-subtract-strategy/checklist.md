@@ -1,2 +1,0 @@
-- **Identity:** A named counting, make-ten, near-doubles, compensation, or think-addition strategy is connected to an original two-number equation through visible ordered steps.
-- **Modes:** In procedure mode, Question Mode withholds every step result and the final result, while Solution Mode completes them and explains the strategy. In counting-relationship mode, Question Mode shows the count steps but withholds the related operation; Solution Mode reveals the completed equation.

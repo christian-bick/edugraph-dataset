@@ -101,6 +101,18 @@ export type IntegerAddSubtractStrategy =
     | 'subtraction-make-ten'
     | 'subtraction-think-addition';
 
+export type IntegerAddSubtractStrategyStep = {
+    kind: 'decomposition';
+    whole: number;
+    parts: readonly [number, number];
+} | {
+    kind: 'operation';
+    operation: 'addition' | 'subtraction';
+    leftOperand: number;
+    rightOperand: number;
+    result: number;
+};
+
 export type IntegerAddSubtractStrategyProblem = {
     task: 'integer-add-subtract-strategy';
     strategy: IntegerAddSubtractStrategy;
@@ -109,12 +121,7 @@ export type IntegerAddSubtractStrategyProblem = {
     rightOperand: number;
     answer: number;
     adjustment: number;
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    transformedEquation: string;
-    steps: readonly string[];
-    explanation: string;
+    steps: readonly IntegerAddSubtractStrategyStep[];
 };
 
 export type MultiplicativeComparisonProblem = {
@@ -2338,7 +2345,9 @@ export interface ViewTypeMap {
     'operations-standard-algorithm': StandardAlgorithmProblem;
     'operations-known-fact-derivation': KnownFactDerivationProblem;
     'operations-known-fact-inversion': KnownFactDerivationProblem;
-    'operations-add-subtract-strategy': IntegerAddSubtractStrategyProblem;
+    'operations-add-subtract-strategy-understanding': IntegerAddSubtractStrategyProblem;
+    'operations-counting-on-operation-derivation': IntegerAddSubtractStrategyProblem;
+    'operations-counting-back-operation-derivation': IntegerAddSubtractStrategyProblem;
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;

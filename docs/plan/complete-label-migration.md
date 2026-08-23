@@ -190,7 +190,7 @@ known defects:
 | --- | ---: | --- |
 | `measure-conversion` | 2 | **Migrated:** distinct derivation and execution actions now use `measure-conversion-derivation` and `measure-conversion-execution`, backed by one shared renderer. |
 | `numbers-decimal-notation` | 2 | **Migrated:** distinct fraction-to-decimal formalization and decimal-to-fraction interpretation actions now use `numbers-fraction-to-decimal` and `numbers-decimal-to-fraction`, backed by one shared renderer. |
-| `operations-add-subtract-strategy` | 2 | Are understanding and derivation parallel task implementations? |
+| `operations-add-subtract-strategy` | 2 | **Migrated:** general procedure understanding now uses `operations-add-subtract-strategy-understanding`; counting-on and counting-back concept derivation use separate required-label leaves over the same renderer. |
 | `operations-equal-groups` | 1 | Is the schema intentional future capability or merely invariant today? |
 | `operations-number-array` | 3 | Do execution, formalization, and interpretation require different checklists? |
 | `operations-number-line` | 2 | Is visual articulation additive support or a different task? |

@@ -1,0 +1,3 @@
+- **Identity:** Presents supplied forward counting-on steps as evidence from which the learner derives the related addition operation.
+- **Question:** Keeps every count step and the result visible while replacing only the addition operator in the related equation.
+- **Solution:** Reveals the completed addition equation and explains how counting forward connects the two operands to the result.

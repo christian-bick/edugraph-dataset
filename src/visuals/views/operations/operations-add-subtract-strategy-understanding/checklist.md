@@ -1,0 +1,3 @@
+- **Identity:** Connects a supplied counting, make-ten, near-doubles, compensation, or think-addition strategy to the original two-number equation through visible ordered steps.
+- **Question:** Names and explains the strategy rewrite while withholding every step result and the final result.
+- **Solution:** Completes the original equation and every ordered strategy step, with an explanation grounded in the same numeric witness.

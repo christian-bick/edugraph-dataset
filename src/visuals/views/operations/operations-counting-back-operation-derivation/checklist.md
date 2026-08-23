@@ -1,0 +1,3 @@
+- **Identity:** Presents supplied backward counting steps as evidence from which the learner derives the related subtraction operation.
+- **Question:** Keeps every count step and the result visible while replacing only the subtraction operator in the related equation.
+- **Solution:** Reveals the completed subtraction equation and explains how counting backward connects the two operands to the result.

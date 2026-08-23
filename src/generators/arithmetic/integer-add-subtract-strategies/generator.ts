@@ -3,7 +3,8 @@ import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     IntegerAddSubtractStrategy,
-    IntegerAddSubtractStrategyProblem
+    IntegerAddSubtractStrategyProblem,
+    IntegerAddSubtractStrategyStep
 } from '../../../types/problems.ts';
 import {
     IntegerAddSubtractStrategiesGeneratorConfig,
@@ -32,6 +33,29 @@ const eligibleValues = (
 const choose = (values: readonly number[]): number | null =>
     values.length === 0 ? null : values[Math.floor(random() * values.length)];
 
+const operationStep = (
+    operation: 'addition' | 'subtraction',
+    leftOperand: number,
+    rightOperand: number,
+    result: number
+): IntegerAddSubtractStrategyStep => ({
+    kind: 'operation',
+    operation,
+    leftOperand,
+    rightOperand,
+    result
+});
+
+const decompositionStep = (
+    whole: number,
+    firstPart: number,
+    secondPart: number
+): IntegerAddSubtractStrategyStep => ({
+    kind: 'decomposition',
+    whole,
+    parts: [firstPart, secondPart]
+});
+
 const additionCountingOn = ({minimum, maximum}: Bounds): IntegerAddSubtractStrategyProblem | null => {
     const rightOperand = choose(eligibleValues(1, 3, candidate =>
         candidate >= minimum && minimum + candidate <= maximum
@@ -40,12 +64,14 @@ const additionCountingOn = ({minimum, maximum}: Bounds): IntegerAddSubtractStrat
 
     const leftOperand = integerBetween(minimum, maximum - rightOperand);
     const answer = leftOperand + rightOperand;
-    const questionEquation = `${leftOperand} + ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} + ${rightOperand} = ${answer}`;
-    const unitAddends = Array.from({length: rightOperand}, () => '1').join(' + ');
     const steps = Array.from(
         {length: rightOperand},
-        (_, index) => `${leftOperand + index} + 1 = ${leftOperand + index + 1}`
+        (_, index) => operationStep(
+            'addition',
+            leftOperand + index,
+            1,
+            leftOperand + index + 1
+        )
     );
 
     return {
@@ -56,12 +82,7 @@ const additionCountingOn = ({minimum, maximum}: Bounds): IntegerAddSubtractStrat
         rightOperand,
         answer,
         adjustment: rightOperand,
-        prompt: `Count on to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation: `${leftOperand} + ${rightOperand} = ${leftOperand} + (${unitAddends})`,
-        steps,
-        explanation: `Start at ${leftOperand} and count forward ${rightOperand} ${rightOperand === 1 ? 'step' : 'steps'} to reach ${answer}.`
+        steps
     };
 };
 
@@ -73,12 +94,14 @@ const subtractionCountingBack = ({minimum, maximum}: Bounds): IntegerAddSubtract
 
     const leftOperand = integerBetween(minimum + rightOperand, maximum);
     const answer = leftOperand - rightOperand;
-    const questionEquation = `${leftOperand} − ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} − ${rightOperand} = ${answer}`;
-    const unitSubtrahends = Array.from({length: rightOperand}, () => '1').join(' − ');
     const steps = Array.from(
         {length: rightOperand},
-        (_, index) => `${leftOperand - index} − 1 = ${leftOperand - index - 1}`
+        (_, index) => operationStep(
+            'subtraction',
+            leftOperand - index,
+            1,
+            leftOperand - index - 1
+        )
     );
 
     return {
@@ -89,12 +112,7 @@ const subtractionCountingBack = ({minimum, maximum}: Bounds): IntegerAddSubtract
         rightOperand,
         answer,
         adjustment: rightOperand,
-        prompt: `Count back to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation: `${leftOperand} − ${rightOperand} = ${leftOperand} − ${unitSubtrahends}`,
-        steps,
-        explanation: `Start at ${leftOperand} and count backward ${rightOperand} ${rightOperand === 1 ? 'step' : 'steps'} to reach ${answer}.`
+        steps
     };
 };
 
@@ -112,8 +130,6 @@ const additionMakeTen = ({minimum, maximum}: Bounds): IntegerAddSubtractStrategy
     );
     const remainder = rightOperand - adjustment;
     const answer = leftOperand + rightOperand;
-    const questionEquation = `${leftOperand} + ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} + ${rightOperand} = ${answer}`;
 
     return {
         task: 'integer-add-subtract-strategy',
@@ -123,16 +139,11 @@ const additionMakeTen = ({minimum, maximum}: Bounds): IntegerAddSubtractStrategy
         rightOperand,
         answer,
         adjustment,
-        prompt: `Make ten to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation: `${leftOperand} + ${rightOperand} = ${leftOperand} + (${adjustment} + ${remainder})`,
         steps: [
-            `${rightOperand} = ${adjustment} + ${remainder}`,
-            `${leftOperand} + ${adjustment} = 10`,
-            `10 + ${remainder} = ${answer}`
-        ],
-        explanation: `Decompose ${rightOperand} as ${adjustment} + ${remainder}. Add ${adjustment} to ${leftOperand} to make 10, then add the remaining ${remainder} to get ${answer}.`
+            decompositionStep(rightOperand, adjustment, remainder),
+            operationStep('addition', leftOperand, adjustment, 10),
+            operationStep('addition', 10, remainder, answer)
+        ]
     };
 };
 
@@ -147,8 +158,6 @@ const additionNearDoubles = ({minimum, maximum}: Bounds): IntegerAddSubtractStra
     const rightOperand = ascending ? base + 1 : base;
     const knownDouble = 2 * base;
     const answer = knownDouble + 1;
-    const questionEquation = `${leftOperand} + ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} + ${rightOperand} = ${answer}`;
 
     return {
         task: 'integer-add-subtract-strategy',
@@ -158,15 +167,10 @@ const additionNearDoubles = ({minimum, maximum}: Bounds): IntegerAddSubtractStra
         rightOperand,
         answer,
         adjustment: 1,
-        prompt: `Use a near double to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation: `${leftOperand} + ${rightOperand} = ${base} + ${base} + 1`,
         steps: [
-            `${base} + ${base} = ${knownDouble}`,
-            `${knownDouble} + 1 = ${answer}`
-        ],
-        explanation: `${leftOperand} and ${rightOperand} differ by 1. Use the known double ${base} + ${base} = ${knownDouble}, then add 1 to get ${answer}.`
+            operationStep('addition', base, base, knownDouble),
+            operationStep('addition', knownDouble, 1, answer)
+        ]
     };
 };
 
@@ -187,13 +191,10 @@ const additionCompensation = ({minimum, maximum}: Bounds): IntegerAddSubtractStr
     const adjustedLeft = leftOperand - adjustment;
     const friendlyRight = rightOperand + adjustment;
     const answer = leftOperand + rightOperand;
-    const questionEquation = `${leftOperand} + ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} + ${rightOperand} = ${answer}`;
-    const transformedEquation = `${leftOperand} + ${rightOperand} = ${adjustedLeft} + ${friendlyRight}`;
     const steps = [
-        `${leftOperand} − ${adjustment} = ${adjustedLeft}`,
-        `${rightOperand} + ${adjustment} = ${friendlyRight}`,
-        `${adjustedLeft} + ${friendlyRight} = ${answer}`
+        operationStep('subtraction', leftOperand, adjustment, adjustedLeft),
+        operationStep('addition', rightOperand, adjustment, friendlyRight),
+        operationStep('addition', adjustedLeft, friendlyRight, answer)
     ] as const;
 
     return {
@@ -204,12 +205,7 @@ const additionCompensation = ({minimum, maximum}: Bounds): IntegerAddSubtractStr
         rightOperand,
         answer,
         adjustment,
-        prompt: `Use compensation to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation,
-        steps,
-        explanation: `Move ${adjustment} from ${leftOperand} to ${rightOperand}. This keeps the sum unchanged and creates the friendly addend ${friendlyRight}.`
+        steps
     };
 };
 
@@ -230,13 +226,10 @@ const subtractionCompensation = ({minimum, maximum}: Bounds): IntegerAddSubtract
     const adjustedLeft = leftOperand + adjustment;
     const friendlyRight = rightOperand + adjustment;
     const answer = leftOperand - rightOperand;
-    const questionEquation = `${leftOperand} − ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} − ${rightOperand} = ${answer}`;
-    const transformedEquation = `${leftOperand} − ${rightOperand} = ${adjustedLeft} − ${friendlyRight}`;
     const steps = [
-        `${rightOperand} + ${adjustment} = ${friendlyRight}`,
-        `${leftOperand} + ${adjustment} = ${adjustedLeft}`,
-        `${adjustedLeft} − ${friendlyRight} = ${answer}`
+        operationStep('addition', rightOperand, adjustment, friendlyRight),
+        operationStep('addition', leftOperand, adjustment, adjustedLeft),
+        operationStep('subtraction', adjustedLeft, friendlyRight, answer)
     ] as const;
 
     return {
@@ -247,12 +240,7 @@ const subtractionCompensation = ({minimum, maximum}: Bounds): IntegerAddSubtract
         rightOperand,
         answer,
         adjustment,
-        prompt: `Use compensation to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation,
-        steps,
-        explanation: `Add ${adjustment} to both numbers. Their difference stays unchanged, and the new subtrahend ${friendlyRight} is a multiple of ten.`
+        steps
     };
 };
 
@@ -267,13 +255,10 @@ const subtractionMakeTen = ({minimum, maximum}: Bounds): IntegerAddSubtractStrat
     const rightOperand = integerBetween(adjustment + 1, leftOperand - minimum);
     const remainder = rightOperand - adjustment;
     const answer = leftOperand - rightOperand;
-    const questionEquation = `${leftOperand} − ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} − ${rightOperand} = ${answer}`;
-    const transformedEquation = `${leftOperand} − ${rightOperand} = ${leftOperand} − (${adjustment} + ${remainder})`;
     const steps = [
-        `${rightOperand} = ${adjustment} + ${remainder}`,
-        `${leftOperand} − ${adjustment} = 10`,
-        `10 − ${remainder} = ${answer}`
+        decompositionStep(rightOperand, adjustment, remainder),
+        operationStep('subtraction', leftOperand, adjustment, 10),
+        operationStep('subtraction', 10, remainder, answer)
     ] as const;
 
     return {
@@ -284,12 +269,7 @@ const subtractionMakeTen = ({minimum, maximum}: Bounds): IntegerAddSubtractStrat
         rightOperand,
         answer,
         adjustment,
-        prompt: `Make ten to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation,
-        steps,
-        explanation: `Decompose ${rightOperand} as ${adjustment} + ${remainder}. Subtract ${adjustment} from ${leftOperand} to reach 10, then subtract the remaining ${remainder} to get ${answer}.`
+        steps
     };
 };
 
@@ -308,13 +288,10 @@ const subtractionThinkAddition = ({minimum, maximum}: Bounds): IntegerAddSubtrac
     const remainingDifference = integerBetween(minimumRemaining, maximumRemaining);
     const answer = adjustment + remainingDifference;
     const leftOperand = rightOperand + answer;
-    const questionEquation = `${leftOperand} − ${rightOperand} = ?`;
-    const solutionEquation = `${leftOperand} − ${rightOperand} = ${answer}`;
-    const transformedEquation = `${rightOperand} + ? = ${leftOperand}`;
     const steps = [
-        `${rightOperand} + ${adjustment} = ${friendlyTen}`,
-        `${friendlyTen} + ${remainingDifference} = ${leftOperand}`,
-        `${adjustment} + ${remainingDifference} = ${answer}`
+        operationStep('addition', rightOperand, adjustment, friendlyTen),
+        operationStep('addition', friendlyTen, remainingDifference, leftOperand),
+        operationStep('addition', adjustment, remainingDifference, answer)
     ] as const;
 
     return {
@@ -325,12 +302,7 @@ const subtractionThinkAddition = ({minimum, maximum}: Bounds): IntegerAddSubtrac
         rightOperand,
         answer,
         adjustment,
-        prompt: `Think addition to solve ${questionEquation}`,
-        questionEquation,
-        solutionEquation,
-        transformedEquation,
-        steps,
-        explanation: `Count up from ${rightOperand} to ${leftOperand}: first ${adjustment} to reach ${friendlyTen}, then ${remainingDifference} more. The total increase is ${answer}.`
+        steps
     };
 };
 
