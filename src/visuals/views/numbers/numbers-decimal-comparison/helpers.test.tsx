@@ -5,7 +5,10 @@ import {DecimalComparisonGenerator} from '../../../../generators/number/decimal-
 import {setSeed} from '../../../../lib/random.ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {DecimalComparisonProblem} from '../../../../types/problems.ts';
-import {isValidDecimalComparisonProblem} from './helpers.ts';
+import {
+    decimalComparisonPresentation,
+    isValidDecimalComparisonProblem
+} from './helpers.ts';
 import {NumbersDecimalComparisonCore} from './view.tsx';
 
 const generator = new DecimalComparisonGenerator();
@@ -63,7 +66,7 @@ describe('decimal comparison view contract', () => {
             findPair('0.50', '0.5', 'equal')
         ];
         for (const data of stress) {
-            expect(isValidDecimalComparisonProblem(data), data.solutionEquation).toBe(true);
+            expect(isValidDecimalComparisonProblem(data), data.relation).toBe(true);
         }
     });
 
@@ -76,9 +79,7 @@ describe('decimal comparison view contract', () => {
             data => { data.left.placeValueRow.hundredths = '9'; },
             data => { data.right.normalizedHundredthsNotation = '0.19'; },
             data => { data.left.model.cells[0]!.shaded = false; },
-            data => { data.right.model.cells[0]!.source = 'first-addend'; },
-            data => { data.solutionEquation = data.questionEquation; },
-            data => { data.explanation = 'The left decimal is smaller.'; }
+            data => { data.right.model.cells[0]!.source = 'first-addend'; }
         ];
         for (const mutate of mutations) {
             expect(isValidDecimalComparisonProblem(changed(source, mutate))).toBe(false);
@@ -116,6 +117,7 @@ describe('decimal comparison view contract', () => {
 
     it('withholds the relation and deciding evidence in Question Mode', () => {
         const data = findPair('0.9', '0.91', 'less');
+        const presentation = decimalComparisonPresentation(data);
         const question = renderToStaticMarkup(<NumbersDecimalComparisonCore
             config={{}}
             payload={payload(data, false)}
@@ -125,20 +127,21 @@ describe('decimal comparison view contract', () => {
             payload={payload(data, true)}
         />).replaceAll('&lt;', '<').replaceAll('&gt;', '>');
 
-        expect(question).toContain(data.questionEquation);
-        expect(question).not.toContain(data.solutionEquation);
-        expect(question).not.toContain(data.answerStatement);
-        expect(question).not.toContain(data.explanation);
+        expect(question).toContain(presentation.questionEquation);
+        expect(question).not.toContain(presentation.solutionEquation);
+        expect(question).not.toContain(presentation.answerStatement);
+        expect(question).not.toContain(presentation.explanation);
         expect(question).not.toContain('First deciding place');
         expect(question).not.toContain('less than');
-        expect(solution).toContain(data.solutionEquation);
-        expect(solution).toContain(data.answerStatement);
-        expect(solution).toContain(data.explanation);
+        expect(solution).toContain(presentation.solutionEquation);
+        expect(solution).toContain(presentation.answerStatement);
+        expect(solution).toContain(presentation.explanation);
         expect(solution).toContain('First deciding place: hundredths');
     });
 
     it('reveals normalized equality evidence only in Solution Mode', () => {
         const data = findPair('0.5', '0.50', 'equal');
+        const presentation = decimalComparisonPresentation(data);
         const question = renderToStaticMarkup(<NumbersDecimalComparisonCore
             config={{}}
             payload={payload(data, false)}
@@ -149,8 +152,8 @@ describe('decimal comparison view contract', () => {
         />).replaceAll('&lt;', '<').replaceAll('&gt;', '>');
 
         expect(question).not.toContain(`${data.left.normalizedHundredthsNotation} = ${data.right.normalizedHundredthsNotation}`);
-        expect(question).not.toContain(data.explanation);
+        expect(question).not.toContain(presentation.explanation);
         expect(solution).toContain(`${data.left.normalizedHundredthsNotation} = ${data.right.normalizedHundredthsNotation}`);
-        expect(solution).toContain(data.explanation);
+        expect(solution).toContain(presentation.explanation);
     });
 });

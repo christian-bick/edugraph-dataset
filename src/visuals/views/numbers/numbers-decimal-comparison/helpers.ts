@@ -5,8 +5,6 @@ import {
 } from '../../../../types/problems.ts';
 import {isValidTenthsHundredthsGrid} from '../../../helpers/tenths-hundredths-grid.ts';
 
-const PROMPT = 'Compare the decimals. Use >, =, or <.';
-
 const relationPhrase = (
     relation: DecimalComparisonProblem['relation']
 ): string => relation === 'greater'
@@ -59,15 +57,29 @@ const validOperand = (
 
 const expectedExplanation = (
     data: DecimalComparisonProblem,
-    phrase: string
+    phrase: string,
+    solutionEquation: string
 ): string => {
     if (data.firstDecidingPlace === 'equal') {
-        return `Both models shade ${data.left.normalizedHundredths} of 100 equal parts of the same whole. Therefore, ${data.solutionEquation}.`;
+        return `Both models shade ${data.left.normalizedHundredths} of 100 equal parts of the same whole. Therefore, ${solutionEquation}.`;
     }
     if (data.firstDecidingPlace === 'tenths') {
-        return `Both decimals refer to the same whole. At the tenths place, ${data.left.tenthsDigit} is ${phrase} ${data.right.tenthsDigit}. Therefore, ${data.solutionEquation}.`;
+        return `Both decimals refer to the same whole. At the tenths place, ${data.left.tenthsDigit} is ${phrase} ${data.right.tenthsDigit}. Therefore, ${solutionEquation}.`;
     }
-    return `Both decimals refer to the same whole. Their tenths digits are both ${data.left.tenthsDigit}. At the hundredths place, ${data.left.normalizedHundredths % 10} is ${phrase} ${data.right.normalizedHundredths % 10}. Therefore, ${data.solutionEquation}.`;
+    return `Both decimals refer to the same whole. Their tenths digits are both ${data.left.tenthsDigit}. At the hundredths place, ${data.left.normalizedHundredths % 10} is ${phrase} ${data.right.normalizedHundredths % 10}. Therefore, ${solutionEquation}.`;
+};
+
+export const decimalComparisonPresentation = (data: DecimalComparisonProblem) => {
+    const phrase = relationPhrase(data.relation);
+    const questionEquation = `${data.left.decimalNotation} ? ${data.right.decimalNotation}`;
+    const solutionEquation = `${data.left.decimalNotation} ${data.symbol} ${data.right.decimalNotation}`;
+    return {
+        prompt: 'Compare the decimals. Use >, =, or <.',
+        questionEquation,
+        solutionEquation,
+        answerStatement: `${data.left.decimalNotation} is ${phrase} ${data.right.decimalNotation}, so ${solutionEquation}.`,
+        explanation: expectedExplanation(data, phrase, solutionEquation)
+    };
 };
 
 export const isValidDecimalComparisonProblem = (
@@ -92,19 +104,10 @@ export const isValidDecimalComparisonProblem = (
         : data.left.tenthsDigit === data.right.tenthsDigit
             ? 'hundredths'
             : 'tenths';
-    const phrase = relationPhrase(relation);
     const hundredthsOperand = data.left.precision === 'hundredths' ? data.left : data.right;
-    const questionEquation = `${data.left.decimalNotation} ? ${data.right.decimalNotation}`;
-    const solutionEquation = `${data.left.decimalNotation} ${symbol} ${data.right.decimalNotation}`;
 
     return (relation === 'equal' || hundredthsOperand.normalizedHundredths % 10 !== 0)
         && data.relation === relation
         && data.symbol === symbol
-        && data.firstDecidingPlace === decidingPlace
-        && data.prompt === PROMPT
-        && data.questionEquation === questionEquation
-        && data.solutionEquation === solutionEquation
-        && data.answer === symbol
-        && data.answerStatement === `${data.left.decimalNotation} is ${phrase} ${data.right.decimalNotation}, so ${solutionEquation}.`
-        && data.explanation === expectedExplanation(data, phrase);
+        && data.firstDecidingPlace === decidingPlace;
 };

@@ -1835,12 +1835,6 @@ export type DecimalComparisonProblem = {
     left: DecimalComparisonOperand & {role: 'left'};
     right: DecimalComparisonOperand & {role: 'right'};
     firstDecidingPlace: 'tenths' | 'hundredths' | 'equal';
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    answer: string;
-    answerStatement: string;
-    explanation: string;
 };
 
 export type FractionArithmeticProblem =

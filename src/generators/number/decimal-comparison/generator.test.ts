@@ -78,9 +78,6 @@ const expectOperand = (operand: DecimalComparisonOperand): void => {
     expectGrid(operand.model, normalized);
 };
 
-const relationPhrase = (relation: DecimalComparisonProblem['relation']): string =>
-    relation === 'greater' ? 'greater than' : relation === 'less' ? 'less than' : 'equal to';
-
 const expectExactProblem = (problem: DecimalComparisonProblem): void => {
     expect(problem.task).toBe('compare-decimals');
     expect(problem.sharedWhole).toBe(1);
@@ -100,35 +97,14 @@ const expectExactProblem = (problem: DecimalComparisonProblem): void => {
         : problem.left.tenthsDigit === problem.right.tenthsDigit
             ? 'hundredths'
             : 'tenths';
-    const solutionEquation = `${problem.left.decimalNotation} ${expectedSymbol} ${problem.right.decimalNotation}`;
-
     expect(problem.relation).toBe(expectedRelation);
     expect(problem.symbol).toBe(expectedSymbol);
     expect(problem.firstDecidingPlace).toBe(expectedPlace);
-    expect(problem.prompt).toBe('Compare the decimals. Use >, =, or <.');
-    expect(problem.questionEquation)
-        .toBe(`${problem.left.decimalNotation} ? ${problem.right.decimalNotation}`);
-    expect(problem.solutionEquation).toBe(solutionEquation);
-    expect(problem.answer).toBe(expectedSymbol);
-    expect(problem.answerStatement).toBe(
-        `${problem.left.decimalNotation} is ${relationPhrase(expectedRelation)} ${problem.right.decimalNotation}, so ${solutionEquation}.`
-    );
 
     if (expectedPlace === 'equal') {
         expect(problem.left.decimalNotation).not.toBe(problem.right.decimalNotation);
         expect(problem.left.normalizedHundredths).toBe(problem.right.normalizedHundredths);
         expect(problem.left.model).toEqual(problem.right.model);
-        expect(problem.explanation).toBe(
-            `Both models shade ${problem.left.normalizedHundredths} of 100 equal parts of the same whole. Therefore, ${solutionEquation}.`
-        );
-    } else if (expectedPlace === 'tenths') {
-        expect(problem.explanation).toBe(
-            `Both decimals refer to the same whole. At the tenths place, ${problem.left.tenthsDigit} is ${relationPhrase(expectedRelation)} ${problem.right.tenthsDigit}. Therefore, ${solutionEquation}.`
-        );
-    } else {
-        expect(problem.explanation).toBe(
-            `Both decimals refer to the same whole. Their tenths digits are both ${problem.left.tenthsDigit}. At the hundredths place, ${problem.left.normalizedHundredths % 10} is ${relationPhrase(expectedRelation)} ${problem.right.normalizedHundredths % 10}. Therefore, ${solutionEquation}.`
-        );
     }
 };
 

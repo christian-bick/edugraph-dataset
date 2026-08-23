@@ -7,7 +7,10 @@ import {
 } from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidDecimalComparisonProblem} from './helpers.ts';
+import {
+    decimalComparisonPresentation,
+    isValidDecimalComparisonProblem
+} from './helpers.ts';
 import {
     NumbersDecimalComparisonViewConfig,
     NumbersDecimalComparisonViewSchema
@@ -143,13 +146,7 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
         'symbol',
         'left',
         'right',
-        'firstDecidingPlace',
-        'prompt',
-        'questionEquation',
-        'solutionEquation',
-        'answer',
-        'answerStatement',
-        'explanation'
+        'firstDecidingPlace'
     ]);
     if (!isValidDecimalComparisonProblem(data)) {
         throw new ViewValidationError(
@@ -158,11 +155,12 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
         );
     }
 
+    const presentation = decimalComparisonPresentation(data);
     const decidingPlace = isSolutionView ? data.firstDecidingPlace : null;
     return (
         <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
             <div className="text-center text-[1.4rem] font-extrabold text-slate-800">
-                {data.prompt}
+                {presentation.prompt}
             </div>
             <div className="mt-3 flex items-center justify-center gap-4 font-mono text-3xl font-black text-slate-900">
                 <span>{data.left.decimalNotation}</span>
@@ -180,7 +178,7 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
                 className="mt-5 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4"
                 role="group"
                 aria-label={isSolutionView
-                    ? `The left and right decimals use identical hundred-part models of one shared whole. The supplied comparison is ${data.solutionEquation}.`
+                    ? `The left and right decimals use identical hundred-part models of one shared whole. The supplied comparison is ${presentation.solutionEquation}.`
                     : `The given decimals ${data.left.decimalNotation} and ${data.right.decimalNotation} use identical hundred-part models of one shared whole. The comparison symbol and deciding place are withheld.`}
             >
                 <div className="mb-3 text-center text-sm font-bold text-slate-600">
@@ -204,12 +202,12 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
                                 ? `Equal after writing hundredths: ${data.left.normalizedHundredthsNotation} = ${data.right.normalizedHundredthsNotation}`
                                 : `First deciding place: ${data.firstDecidingPlace}`}
                         </div>
-                        <div className="mt-2 text-lg font-extrabold">{data.answerStatement}</div>
-                        <div className="mt-1 text-sm font-semibold leading-snug">{data.explanation}</div>
+                        <div className="mt-2 text-lg font-extrabold">{presentation.answerStatement}</div>
+                        <div className="mt-1 text-sm font-semibold leading-snug">{presentation.explanation}</div>
                     </>
                 ) : (
                     <div className="flex min-h-[88px] items-center justify-center font-mono text-xl font-bold">
-                        {data.questionEquation}
+                        {presentation.questionEquation}
                     </div>
                 )}
             </div>

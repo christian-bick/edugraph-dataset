@@ -98,25 +98,6 @@ const equalityPair = (): PairSeed => {
         : {left: hundredths, right: tenths};
 };
 
-const relationPhrase = (relation: Relation): string =>
-    relation === 'greater' ? 'greater than' : relation === 'less' ? 'less than' : 'equal to';
-
-const makeExplanation = (
-    left: DecimalComparisonOperand,
-    right: DecimalComparisonOperand,
-    relation: Relation,
-    decidingPlace: DecimalComparisonProblem['firstDecidingPlace'],
-    solutionEquation: string
-): string => {
-    if (decidingPlace === 'equal') {
-        return `Both models shade ${left.normalizedHundredths} of 100 equal parts of the same whole. Therefore, ${solutionEquation}.`;
-    }
-    if (decidingPlace === 'tenths') {
-        return `Both decimals refer to the same whole. At the tenths place, ${left.tenthsDigit} is ${relationPhrase(relation)} ${right.tenthsDigit}. Therefore, ${solutionEquation}.`;
-    }
-    return `Both decimals refer to the same whole. Their tenths digits are both ${left.tenthsDigit}. At the hundredths place, ${left.normalizedHundredths % 10} is ${relationPhrase(relation)} ${right.normalizedHundredths % 10}. Therefore, ${solutionEquation}.`;
-};
-
 const toRelation = (label: string): Relation | null => label === Scope.Greater
     ? 'greater'
     : label === Scope.Equal
@@ -169,9 +150,6 @@ export class DecimalComparisonGenerator implements ProblemGenerator<
             : left.tenthsDigit === right.tenthsDigit
                 ? 'hundredths' as const
                 : 'tenths' as const;
-        const questionEquation = `${left.decimalNotation} ? ${right.decimalNotation}`;
-        const solutionEquation = `${left.decimalNotation} ${symbol} ${right.decimalNotation}`;
-
         return {
             data: {
                 task: 'compare-decimals',
@@ -180,19 +158,7 @@ export class DecimalComparisonGenerator implements ProblemGenerator<
                 symbol,
                 left,
                 right,
-                firstDecidingPlace,
-                prompt: 'Compare the decimals. Use >, =, or <.',
-                questionEquation,
-                solutionEquation,
-                answer: symbol,
-                answerStatement: `${left.decimalNotation} is ${relationPhrase(relation)} ${right.decimalNotation}, so ${solutionEquation}.`,
-                explanation: makeExplanation(
-                    left,
-                    right,
-                    relation,
-                    firstDecidingPlace,
-                    solutionEquation
-                )
+                firstDecidingPlace
             }
         };
     }
