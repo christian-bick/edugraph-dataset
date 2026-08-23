@@ -2,9 +2,8 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import * as shapeHelpers from '../helpers.ts';
 import {
-    getDefiningAttributeStatements,
+    getDefiningAttributes,
     getShapeDefinition,
-    NON_DEFINING_ATTRIBUTE_STATEMENTS
 } from '../helpers.ts';
 import {ShapeClassifyAttributesGenerator} from './generator.ts';
 import {Area, Scope} from 'edugraph-ts';
@@ -33,7 +32,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(generator.generate(legacyConfig)).not.toBeNull();
     });
 
-    it('preserves the exact legacy payload and RNG path for seed 42', () => {
+    it('emits the canonical shape definition and selected defining fact for seed 42', () => {
         setSeed(42);
         expect(generator.generate(legacyConfig)).toEqual({
             data: {
@@ -45,13 +44,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
                     boundary: 'straight',
                     rightAngleCount: 4
                 },
-                options: [
-                    {text: 'is blue', kind: 'non-defining', id: 'A'},
-                    {text: 'has 4 straight sides', kind: 'defining', id: 'B'},
-                    {text: 'points upward', kind: 'non-defining', id: 'C'},
-                    {text: 'is large', kind: 'non-defining', id: 'D'}
-                ],
-                answer: 'B'
+                definingAttribute: {kind: 'side-count', value: 4}
             },
             tags: [Area.Rectangle]
         });
@@ -70,45 +63,30 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(shapeNameSpy).toHaveBeenCalledOnce();
     });
 
-    it('generates exactly one defining option and three non-defining options', () => {
+    it('generates one typed defining fact that follows from the shape definition', () => {
         const stub = generator.generate(legacyConfig)!;
         expect('shape' in stub.data).toBe(true);
         if (stub.data.task !== undefined) return;
-        const {shape, definition, options, answer} = stub.data;
-        const definingOptions = options.filter(option => option.kind === 'defining');
-        const nonDefiningOptions = options.filter(option => option.kind === 'non-defining');
+        const {shape, definition, definingAttribute} = stub.data;
 
-        expect(options).toHaveLength(4);
-        expect(options.map(option => option.id)).toEqual(['A', 'B', 'C', 'D']);
-        expect(definingOptions).toHaveLength(1);
-        expect(nonDefiningOptions).toHaveLength(3);
-        expect(nonDefiningOptions.map(option => option.text).sort()).toEqual(
-            [...NON_DEFINING_ATTRIBUTE_STATEMENTS].sort()
-        );
-        expect(getDefiningAttributeStatements(shape)).toContain(definingOptions[0].text);
+        expect(getDefiningAttributes(shape)).toContainEqual(definingAttribute);
         expect(definition).toEqual(getShapeDefinition(shape));
-        expect(answer).toBe(definingOptions[0].id);
     });
 
-    it('varies shapes, defining statements and answer positions across seeds', () => {
+    it('varies shapes and typed defining facts across seeds', () => {
         const shapes = new Set<string>();
-        const definingStatements = new Set<string>();
-        const answerPositions = new Set<string>();
+        const definingFacts = new Set<string>();
 
         for (let seed = 0; seed < 200; seed++) {
             setSeed(seed);
             const stub = generator.generate(legacyConfig)!;
             if (stub.data.task !== undefined) throw new Error('Expected a legacy classification problem.');
-            const definingOption = stub.data.options.find(option => option.kind === 'defining')!;
-
             shapes.add(stub.data.shape);
-            definingStatements.add(definingOption.text);
-            answerPositions.add(stub.data.answer);
+            definingFacts.add(JSON.stringify(stub.data.definingAttribute));
         }
 
         expect(shapes.size).toBe(5);
-        expect(definingStatements.size).toBeGreaterThanOrEqual(6);
-        expect(answerPositions.size).toBe(4);
+        expect(definingFacts.size).toBeGreaterThanOrEqual(6);
     });
 
     it('is deterministic for the same seed', () => {
@@ -133,8 +111,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(stub.data.attribute).toBe('vertices');
         expect(stub.data.options).toHaveLength(4);
         expect(stub.data.options.filter(option => option.satisfies)).toHaveLength(1);
-        const answer = stub.data.answer;
-        expect(stub.data.options.find(option => option.id === answer)?.count)
+        expect(stub.data.options.find(option => option.satisfies)?.count)
             .toBe(stub.data.requiredCount);
     });
 
@@ -166,7 +143,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(data.attribute).toBe('angles');
         expect(data.options).toHaveLength(4);
         expect(data.options.filter(option => option.satisfies)).toHaveLength(1);
-        expect(data.options.find(option => option.id === data.answer)?.count)
+        expect(data.options.find(option => option.satisfies)?.count)
             .toBe(data.requiredCount);
         expect(data.options.every(option => option.count >= 3 && option.count <= 6)).toBe(true);
     });
@@ -182,8 +159,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(stub.data.task).toBe('classify-count');
         if (stub.data.task !== 'classify-count') return;
         expect(stub.data).toMatchObject({attribute: 'equal-faces', requiredCount: 6});
-        const answer = stub.data.answer;
-        expect(stub.data.options.find(option => option.id === answer)?.shape).toBe('cube');
+        expect(stub.data.options.find(option => option.satisfies)?.shape).toBe('cube');
     });
 
     it.each([
@@ -201,11 +177,8 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(stub.data.task).toBe('classify-quadrilateral-subcategory');
         if (stub.data.task !== 'classify-quadrilateral-subcategory') return;
         expect(stub.data.shape).toBe(shape);
-        expect(stub.data.attributes).toContain('4 straight sides');
+        expect(stub.data.definition).toMatchObject({sideCount: 4, vertexCount: 4, boundary: 'straight'});
         expect(stub.data.category).toBe('quadrilateral');
-        const answer = stub.data.answer;
-        expect(stub.data.options.find(option => option.id === answer))
-            .toMatchObject({category: 'quadrilateral', satisfies: true});
         expect(stub.tags).toEqual([label]);
     });
 
@@ -397,12 +370,8 @@ describe('ShapeClassifyAttributesGenerator Grade 4 classification', () => {
         expect(data.task).toBe('classify-line-relation');
         if (data.task !== 'classify-line-relation') return;
         expect(data.criterion).toBe(criterion);
-        expect(data.prompt).toBe(`Classify each figure by whether it has ${criterion} sides.`);
         expect(data.options.filter(option => option.satisfies)).toHaveLength(2);
-        expect(data.answerIds).toEqual(data.options.filter(option => option.satisfies).map(option => option.id));
-        expect(data.answerStatement).toBe(`Figures ${data.answerIds.join(' and ')} have ${criterion} sides.`);
         for (const option of data.options) {
-            expect(option.figureName).toBe('figure');
             expectValidFigure(option.figure);
             expect(option.relations.slice().sort()).toEqual(relationsIn(option.figure));
             expect(option.satisfies).toBe(option.relations.includes(criterion));
@@ -423,20 +392,17 @@ describe('ShapeClassifyAttributesGenerator Grade 4 classification', () => {
     });
 
     it.each([
-        [Area.RightAngle, 'right', 'a'],
-        [Area.AcuteAngle, 'acute', 'an'],
-        [Area.ObtuseAngle, 'obtuse', 'an']
-    ] as const)('classifies whole figures by %s presence and absence', (label, criterion, article) => {
+        [Area.RightAngle, 'right'],
+        [Area.AcuteAngle, 'acute'],
+        [Area.ObtuseAngle, 'obtuse']
+    ] as const)('classifies whole figures by %s presence and absence', (label, criterion) => {
         setSeed(`angle-class-${criterion}`);
         const data = generator.generate(classificationConfig(label))!.data;
         expect(data.task).toBe('classify-angle-size');
         if (data.task !== 'classify-angle-size') return;
         expect(data.criterion).toBe(criterion);
-        expect(data.prompt).toBe(`Classify each figure by whether it has ${article} ${criterion} angle.`);
         expect(data.options.filter(option => option.satisfies)).toHaveLength(2);
-        expect(data.answerIds).toEqual(data.options.filter(option => option.satisfies).map(option => option.id));
         for (const option of data.options) {
-            expect(option.figureName).toBe('figure');
             expectValidFigure(option.figure);
             expect(option.angleClasses).toEqual(angleClassesIn(option.figure));
             expect(option.satisfies).toBe(option.angleClasses.includes(criterion));
@@ -463,14 +429,10 @@ describe('ShapeClassifyAttributesGenerator Grade 4 classification', () => {
         ))!.data;
         expect(data.task).toBe('classify-right-triangle-category');
         if (data.task !== 'classify-right-triangle-category') return;
-        expect(data.prompt).toBe('Which figures are right triangles?');
         expect(data.options.filter(option => option.satisfies)).toHaveLength(2);
         expect(data.options.filter(option => !option.satisfies)).toHaveLength(2);
-        expect(data.answerIds).toEqual(data.options.filter(option => option.satisfies).map(option => option.id));
-        expect(data.categoryStatement).toBe('Every right triangle is a triangle.');
-        expect(data.attributes).toEqual(['3 straight sides', '1 right angle']);
+        expect(data.category).toBe('triangle');
         for (const option of data.options) {
-            expect(option.figureName).toBe('triangle');
             expect(option.figure.vertices).toHaveLength(3);
             expectValidFigure(option.figure);
             expect(option.angleClasses).toEqual(angleClassesIn(option.figure));

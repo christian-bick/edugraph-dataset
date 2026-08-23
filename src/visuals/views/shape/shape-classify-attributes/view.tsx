@@ -11,6 +11,7 @@ import {
     ShapeClassificationStroke,
     ShapeCountAttribute,
     ShapeCountOption,
+    ShapeDefinition,
     ShapeLineRelationClassificationProblem,
     ShapeSubsumptionProblem
 } from '../../../../types/problems.ts';
@@ -26,16 +27,57 @@ import {
     ShapeClassifyAttributesViewSchema
 } from './spec.ts';
 import {isValidGrade4ShapeClassificationProblem} from './helpers.ts';
+import {
+    countOptions,
+    definingAttributeMatches,
+    definingOptions,
+    grade4Presentation,
+    PresentedOption,
+    subsumptionOptions,
+    visibleAttributes
+} from './presentation.ts';
 import '../../../../tailwind.css';
 
-const SUPPORTED_SHAPES: readonly PlaneShapeName[] = [
+const SUPPORTED_SHAPES = [
     'circle',
     'triangle',
     'rhombus',
     'square',
     'rectangle',
     'hexagon'
-];
+] as const satisfies readonly PlaneShapeName[];
+
+const SHAPE_DEFINITIONS: Readonly<Record<typeof SUPPORTED_SHAPES[number], ShapeDefinition>> = {
+    circle: {sideCount: 0, vertexCount: 0, closed: true, boundary: 'curved'},
+    triangle: {sideCount: 3, vertexCount: 3, closed: true, boundary: 'straight'},
+    rhombus: {sideCount: 4, vertexCount: 4, closed: true, boundary: 'straight', equalSides: true},
+    square: {
+        sideCount: 4,
+        vertexCount: 4,
+        closed: true,
+        boundary: 'straight',
+        equalSides: true,
+        rightAngleCount: 4
+    },
+    rectangle: {
+        sideCount: 4,
+        vertexCount: 4,
+        closed: true,
+        boundary: 'straight',
+        rightAngleCount: 4
+    },
+    hexagon: {sideCount: 6, vertexCount: 6, closed: true, boundary: 'straight'}
+};
+
+function definitionMatchesShape(shape: typeof SUPPORTED_SHAPES[number], definition: ShapeDefinition): boolean {
+    const expected = SHAPE_DEFINITIONS[shape];
+    return definition.sideCount === expected.sideCount
+        && definition.vertexCount === expected.vertexCount
+        && definition.closed === expected.closed
+        && definition.boundary === expected.boundary
+        && definition.equalSides === expected.equalSides
+        && definition.rightAngleCount === expected.rightAngleCount;
+}
 
 const markerPoint = (
     center: ShapeClassificationCoordinate,
@@ -137,10 +179,11 @@ function ClassificationFigure({
     );
 }
 
-type Grade4Option =
+type CanonicalGrade4Option =
     | ShapeLineRelationClassificationProblem['options'][number]
     | ShapeAngleClassificationProblem['options'][number]
     | RightTriangleCategoryProblem['options'][number];
+type Grade4Option = PresentedOption<CanonicalGrade4Option>;
 
 function MembershipOption({
     option,
@@ -203,26 +246,29 @@ function MembershipOption({
 
 function Grade4ClassificationLayout({
     data,
-    isSolutionView
+    isSolutionView,
+    seed
 }: {
     data: ShapeLineRelationClassificationProblem | ShapeAngleClassificationProblem | RightTriangleCategoryProblem;
     isSolutionView: boolean;
+    seed: number;
 }) {
     const isRightTriangle = data.task === 'classify-right-triangle-category';
-    const options: readonly Grade4Option[] = data.options;
+    const presentation = grade4Presentation(data, seed);
+    const options: readonly Grade4Option[] = presentation.options;
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[54px] items-center justify-center px-4 text-center text-[1.2rem] font-extrabold leading-snug text-slate-700">
-                {data.prompt}
+                {presentation.prompt}
             </div>
             {isRightTriangle && (
                 <div className="mt-2 flex items-center justify-center gap-2 rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-2 text-center">
-                    {data.attributes.map(attribute => (
+                    {presentation.attributes.map(attribute => (
                         <span key={attribute} className="rounded-full border border-blue-200 bg-white px-3 py-1 text-[0.78rem] font-bold text-blue-800">
                             {attribute}
                         </span>
                     ))}
-                    <span className="ml-2 text-[0.84rem] font-extrabold text-blue-800">{data.categoryStatement}</span>
+                    <span className="ml-2 text-[0.84rem] font-extrabold text-blue-800">{presentation.categoryStatement}</span>
                 </div>
             )}
             <div className="mt-3 grid grid-cols-2 gap-3">
@@ -232,16 +278,16 @@ function Grade4ClassificationLayout({
                         option={option}
                         evidence={'evidenceStrokes' in option ? option.evidenceStrokes : option.evidenceRays}
                         marker={option.marker}
-                        positiveLabel={data.positiveLabel}
-                        negativeLabel={data.negativeLabel}
+                        positiveLabel={presentation.positiveLabel}
+                        negativeLabel={presentation.negativeLabel}
                         isSolutionView={isSolutionView}
                     />
                 ))}
             </div>
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="text-[0.98rem] font-extrabold">{data.answerStatement}</div>
-                    <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">{data.explanation}</div>
+                    <div className="text-[0.98rem] font-extrabold">{presentation.answerStatement}</div>
+                    <div className="mt-1 text-[0.84rem] font-semibold leading-snug text-slate-700">{presentation.explanation}</div>
                 </div>
             )}
         </div>
@@ -279,21 +325,18 @@ function validateSubsumptionProblem(data: ShapeSubsumptionProblem) {
     if (!['rhombus', 'rectangle', 'square'].includes(data.shape)) {
         throw new ViewValidationError('shape-classify-attributes', `Unsupported hierarchy shape: ${data.shape}`);
     }
-    if (!Array.isArray(data.attributes) || data.attributes.length < 2) {
-        throw new ViewValidationError('shape-classify-attributes', 'Hierarchy attributes must be visible and complete.');
-    }
-    if (!Array.isArray(data.options) || data.options.length !== 4) {
-        throw new ViewValidationError('shape-classify-attributes', 'Exactly four category options are required.');
-    }
-    const ids = new Set(data.options.map(option => option.id));
-    const satisfying = data.options.filter(option => option.satisfies);
-    if (
-        ids.size !== 4
-        || satisfying.length !== 1
-        || satisfying[0].category !== data.category
-        || satisfying[0].id !== data.answer
-    ) {
-        throw new ViewValidationError('shape-classify-attributes', 'The answer must identify quadrilateral as the larger category.');
+    const {definition} = data;
+    const hasQuadrilateralDefinition = definition.closed
+        && definition.boundary === 'straight'
+        && definition.sideCount === 4
+        && definition.vertexCount === 4;
+    const hasSubtypeDefinition = data.shape === 'rhombus'
+        ? definition.equalSides === true
+        : data.shape === 'rectangle'
+            ? definition.rightAngleCount === 4
+            : definition.equalSides === true && definition.rightAngleCount === 4;
+    if (!hasQuadrilateralDefinition || !hasSubtypeDefinition || data.category !== 'quadrilateral') {
+        throw new ViewValidationError('shape-classify-attributes', 'The shape definition must establish its quadrilateral subtype and category.');
     }
 }
 
@@ -308,6 +351,8 @@ function ShapeSubsumptionLayout({
 }) {
     const appearances = Array.from({length: 3}, (_, index) => getShapeAppearance(seed, index));
     const shapeName = titleCase(data.shape);
+    const attributes = visibleAttributes(data.definition);
+    const options = subsumptionOptions(data, seed);
 
     return (
         <div className="w-[680px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
@@ -322,7 +367,7 @@ function ShapeSubsumptionLayout({
                     ))}
                 </div>
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
-                    {data.attributes.map(attribute => (
+                    {attributes.map(attribute => (
                         <span key={attribute} className="rounded-full border border-blue-200 bg-white px-3 py-1 text-sm font-bold text-blue-700">
                             {attribute}
                         </span>
@@ -330,8 +375,8 @@ function ShapeSubsumptionLayout({
                 </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
-                {data.options.map(option => {
-                    const correct = option.id === data.answer;
+                {options.map(option => {
+                    const correct = option.satisfies;
                     return (
                         <div
                             key={option.id}
@@ -464,6 +509,13 @@ function FaceNet({shape}: {shape: ShapeCountOption['shape']}) {
     );
 }
 
+const FACE_NET_FACTS: Readonly<Record<string, {count: number; equal: boolean}>> = {
+    cube: {count: 6, equal: true},
+    'rectangular-prism': {count: 6, equal: false},
+    'triangular-prism': {count: 5, equal: false},
+    'square-pyramid': {count: 5, equal: false}
+};
+
 function countOptionName(shape: ShapeCountOption['shape']): string {
     return shape.split('-').map(word => word[0].toUpperCase() + word.slice(1)).join(' ');
 }
@@ -472,9 +524,16 @@ function validateCountClassificationProblem(data: Extract<ShapeAttributeClassifi
     if (!Array.isArray(data.options) || data.options.length !== 4) {
         throw new ViewValidationError('shape-classify-attributes', 'Exactly four shape options are required.');
     }
-    const ids = new Set(data.options.map(option => option.id));
     const satisfying = data.options.filter(option => option.satisfies);
-    if (ids.size !== 4 || satisfying.length !== 1 || satisfying[0].id !== data.answer) {
+    const membershipIsCoherent = data.attribute === 'equal-faces'
+        ? data.options.every(option => {
+            const fact = FACE_NET_FACTS[option.shape];
+            return fact !== undefined
+                && option.count === fact.count
+                && option.satisfies === (fact.equal && fact.count === data.requiredCount);
+        })
+        : data.options.every(option => option.satisfies === (option.count === data.requiredCount));
+    if (satisfying.length !== 1 || !membershipIsCoherent) {
         throw new ViewValidationError('shape-classify-attributes', 'The answer must identify one satisfying shape.');
     }
     if (
@@ -496,11 +555,14 @@ function validateCountClassificationProblem(data: Extract<ShapeAttributeClassifi
 
 function CountClassificationLayout({
     data,
-    isSolutionView
+    isSolutionView,
+    seed
 }: {
     data: Extract<ShapeAttributeClassificationProblem, {task: 'classify-count'}>;
     isSolutionView: boolean;
+    seed: number;
 }) {
+    const options = countOptions(data, seed);
     const prompt = data.attribute === 'vertices'
         ? `Which shape has ${data.requiredCount} vertices?`
         : data.attribute === 'angles'
@@ -514,8 +576,8 @@ function CountClassificationLayout({
                     {prompt}
                 </div>
                 <div className="grid grid-cols-2 gap-3 w-full">
-                    {data.options.map(option => {
-                        const isCorrect = option.id === data.answer;
+                    {options.map(option => {
+                        const isCorrect = option.satisfies;
                         const solutionClass = isSolutionView && isCorrect
                             ? 'border-green-600 bg-green-50 shadow-[0_0_10px_rgba(22,163,74,0.2)]'
                             : 'border-slate-200 bg-white';
@@ -545,19 +607,12 @@ function CountClassificationLayout({
 function validateClassificationProblem(
     data: Extract<ShapeAttributeClassificationProblem, {task?: undefined}>
 ) {
-    if (!SUPPORTED_SHAPES.includes(data.shape)) {
+    if (!SUPPORTED_SHAPES.includes(data.shape as typeof SUPPORTED_SHAPES[number])) {
         throw new ViewValidationError('shape-classify-attributes', `Unsupported shape: ${data.shape}`);
     }
-    if (!Array.isArray(data.options) || data.options.length !== 4) {
-        throw new ViewValidationError('shape-classify-attributes', 'Exactly four attribute options are required.');
-    }
-    const ids = new Set(data.options.map(option => option.id));
-    if (ids.size !== 4 || data.options.some(option => option.text.trim().length === 0)) {
-        throw new ViewValidationError('shape-classify-attributes', 'Attribute options must have unique IDs and non-empty text.');
-    }
-    const definingOptions = data.options.filter(option => option.kind === 'defining');
-    if (definingOptions.length !== 1 || definingOptions[0].id !== data.answer) {
-        throw new ViewValidationError('shape-classify-attributes', 'The answer must identify the single defining option.');
+    if (!definitionMatchesShape(data.shape as typeof SUPPORTED_SHAPES[number], data.definition)
+        || !definingAttributeMatches(data.definition, data.definingAttribute)) {
+        throw new ViewValidationError('shape-classify-attributes', 'The defining attribute must follow from the canonical shape definition.');
     }
 }
 
@@ -566,43 +621,32 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-classify-attributes'>;
 }
 
-const ShapeClassifyAttributesCore = ({config, payload}: CoreProps) => {
+const ShapeClassifyAttributesCore = ({payload}: CoreProps) => {
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
 
     if (data.task === 'classify-line-relation'
         || data.task === 'classify-angle-size'
         || data.task === 'classify-right-triangle-category') {
-        const requiredFields = [
-            'task',
-            'prompt',
-            'positiveLabel',
-            'negativeLabel',
-            'options',
-            'answerIds',
-            'answerStatement',
-            'explanation'
-        ];
+        const requiredFields = ['task', 'options'];
         validateProblemData('shape-classify-attributes', data, data.task === 'classify-right-triangle-category'
-            ? [...requiredFields, 'attributes', 'category', 'categoryStatement']
+            ? [...requiredFields, 'category']
             : [...requiredFields, 'criterion']);
-        if (!isValidGrade4ShapeClassificationProblem(data, config.visualRecognition)) {
+        if (!isValidGrade4ShapeClassificationProblem(data)) {
             throw new ViewValidationError(
                 'shape-classify-attributes',
                 'Grade 4 classification geometry, evidence, membership, and prose must agree.'
             );
         }
-        return <Grade4ClassificationLayout data={data} isSolutionView={isSolutionView} />;
+        return <Grade4ClassificationLayout data={data} isSolutionView={isSolutionView} seed={seed} />;
     }
 
     if (data.task === 'classify-quadrilateral-subcategory') {
         validateProblemData('shape-classify-attributes', data, [
             'task',
             'shape',
-            'attributes',
-            'category',
-            'options',
-            'answer'
+            'definition',
+            'category'
         ]);
         validateSubsumptionProblem(data);
         return (
@@ -619,20 +663,20 @@ const ShapeClassifyAttributesCore = ({config, payload}: CoreProps) => {
             'task',
             'attribute',
             'requiredCount',
-            'options',
-            'answer'
+            'options'
         ]);
         validateCountClassificationProblem(data);
-        return <CountClassificationLayout data={data} isSolutionView={isSolutionView} />;
+        return <CountClassificationLayout data={data} isSolutionView={isSolutionView} seed={seed} />;
     }
 
     if (!('shape' in data)) {
         throw new ViewValidationError('shape-classify-attributes', 'A defining-attribute problem requires a shape.');
     }
-    validateProblemData('shape-classify-attributes', data, ['shape', 'definition', 'options', 'answer']);
+    validateProblemData('shape-classify-attributes', data, ['shape', 'definition', 'definingAttribute']);
     validateClassificationProblem(data);
 
     const appearances = Array.from({length: 4}, (_, index) => getShapeAppearance(seed, index));
+    const options = definingOptions(data, seed);
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit mx-auto font-sans">
@@ -650,8 +694,8 @@ const ShapeClassifyAttributesCore = ({config, payload}: CoreProps) => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 w-full">
-                    {data.options.map(option => {
-                        const isCorrect = option.id === data.answer;
+                    {options.map(option => {
+                        const isCorrect = option.kind === 'defining';
                         const solutionClass = isSolutionView && isCorrect
                             ? 'border-green-600 bg-green-50 text-green-700 font-bold shadow-[0_0_10px_rgba(22,163,74,0.2)]'
                             : 'border-slate-200 bg-white text-slate-700';

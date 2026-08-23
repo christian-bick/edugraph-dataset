@@ -17,7 +17,6 @@ type LineRelation = 'parallel' | 'perpendicular';
 
 const COORDINATE_EPSILON = 0.001;
 const ANGLE_EPSILON = 0.6;
-const OPTION_IDS = ['A', 'B', 'C', 'D'] as const;
 const RELATION_ORDER: readonly LineRelation[] = ['parallel', 'perpendicular'];
 
 const isCoordinate = (point: ShapeClassificationCoordinate): boolean => typeof point === 'object'
@@ -302,45 +301,16 @@ const angleMarkerMatchesEvidence = (
 const answerPartitionIsValid = (data: Grade4ClassificationProblem): boolean => {
     if (!Array.isArray(data.options)
         || data.options.length !== 4
-        || !Array.isArray(data.answerIds)
-        || data.answerIds.length !== 2
         || data.options.some(option => typeof option !== 'object' || option === null)) {
         return false;
     }
-    const ids = data.options.map(option => option.id);
-    const satisfyingIds = data.options.filter(option => option.satisfies).map(option => option.id).sort();
-    return ids.every((id, index) => id === OPTION_IDS[index])
-        && new Set(ids).size === 4
-        && satisfyingIds.length === 2
-        && new Set(data.answerIds).size === 2
-        && [...data.answerIds].sort().every((id, index) => id === satisfyingIds[index]);
+    return data.options.filter(option => option.satisfies).length === 2;
 };
 
-const commonTextIsValid = (data: Grade4ClassificationProblem): boolean => data.prompt.trim().length > 0
-    && data.positiveLabel.trim().length > 0
-    && data.negativeLabel.trim().length > 0
-    && data.answerStatement === `Figures ${data.answerIds.join(' and ')} ${
-        data.task === 'classify-right-triangle-category'
-            ? 'are right triangles.'
-            : data.task === 'classify-line-relation'
-                ? `have ${data.criterion === 'parallel' ? 'parallel sides' : 'perpendicular sides'}.`
-                : `each have ${data.criterion === 'right' ? 'a' : 'an'} ${data.criterion} angle.`
-    }`
-    && data.explanation.trim().length > 0;
-
 const isValidLineRelationProblem = (data: ShapeLineRelationClassificationProblem): boolean => {
-    const phrase = data.criterion === 'parallel' ? 'parallel sides' : 'perpendicular sides';
     return answerPartitionIsValid(data)
-        && commonTextIsValid(data)
-        && data.prompt === `Classify each figure by whether it has ${phrase}.`
-        && data.positiveLabel === `has ${phrase}`
-        && data.negativeLabel === `does not have ${phrase}`
-        && data.explanation === (data.criterion === 'parallel'
-            ? 'Their marked sides stay the same distance apart and never intersect.'
-            : 'Their marked sides intersect to form a right angle.')
         && data.options.every(option => {
-            if (option.figureName.trim().length === 0
-                || !isSimpleConvexFigure(option.figure)
+            if (!isSimpleConvexFigure(option.figure)
                 || !Array.isArray(option.relations)
                 || !Array.isArray(option.evidenceStrokes)
                 || !evidenceStrokesAreFigureSides(option.evidenceStrokes, option.figure)) return false;
@@ -357,8 +327,7 @@ const angleOptionIsValid = (
     option: ShapeAngleClassificationProblem['options'][number] | RightTriangleCategoryProblem['options'][number],
     criterion: AngleClass
 ): boolean => {
-    if (option.figureName.trim().length === 0
-        || !isSimpleConvexFigure(option.figure)
+    if (!isSimpleConvexFigure(option.figure)
         || !Array.isArray(option.angleClasses)
         || !Array.isArray(option.evidenceRays)
         || !evidenceStrokesAreFigureSides(option.evidenceRays, option.figure)
@@ -373,43 +342,19 @@ const angleOptionIsValid = (
 };
 
 const isValidAngleClassificationProblem = (data: ShapeAngleClassificationProblem): boolean => {
-    const article = data.criterion === 'right' ? 'a' : 'an';
     return answerPartitionIsValid(data)
-        && commonTextIsValid(data)
-        && data.prompt === `Classify each figure by whether it has ${article} ${data.criterion} angle.`
-        && data.positiveLabel === `has ${article} ${data.criterion} angle`
-        && data.negativeLabel === `does not have ${article} ${data.criterion} angle`
-        && data.explanation === (data.criterion === 'right'
-            ? 'Each highlighted angle forms a square corner.'
-            : data.criterion === 'acute'
-                ? 'Each highlighted angle is smaller than a right angle.'
-                : 'Each highlighted angle is larger than a right angle and smaller than a straight angle.')
         && data.options.every(option => angleOptionIsValid(option, data.criterion));
 };
 
-const isValidRightTriangleProblem = (
-    data: RightTriangleCategoryProblem,
-    visualRecognition: boolean | undefined
-): boolean => answerPartitionIsValid(data)
-    && commonTextIsValid(data)
-    && visualRecognition === true
-    && data.prompt === 'Which figures are right triangles?'
-    && data.positiveLabel === 'right triangle'
-    && data.negativeLabel === 'not a right triangle'
-    && Array.isArray(data.attributes)
-    && data.attributes.length === 2
-    && data.attributes[0] === '3 straight sides'
-    && data.attributes[1] === '1 right angle'
+const isValidRightTriangleProblem = (data: RightTriangleCategoryProblem): boolean =>
+    answerPartitionIsValid(data)
     && data.category === 'triangle'
-    && data.categoryStatement === 'Every right triangle is a triangle.'
-    && data.explanation === 'Each has three straight sides and one right angle. Every right triangle is a triangle.'
     && data.options.every(option => option.figure.vertices.length === 3 && angleOptionIsValid(option, 'right'));
 
 export const isValidGrade4ShapeClassificationProblem = (
-    data: Grade4ClassificationProblem,
-    visualRecognition: boolean | undefined
+    data: Grade4ClassificationProblem
 ): boolean => {
     if (data.task === 'classify-line-relation') return isValidLineRelationProblem(data);
     if (data.task === 'classify-angle-size') return isValidAngleClassificationProblem(data);
-    return isValidRightTriangleProblem(data, visualRecognition);
+    return isValidRightTriangleProblem(data);
 };

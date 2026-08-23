@@ -6,7 +6,6 @@ import {
     ShapeAngleClassOption,
     ShapeAngleClassificationProblem,
     ShapeAttributeClassificationProblem,
-    ShapeAttributeOption,
     ShapeClassificationCoordinate,
     ShapeClassificationFigure,
     ShapeClassificationMarker,
@@ -19,9 +18,8 @@ import {
 } from '../../../types/problems.ts';
 import {
     createQuadrilateralSubsumptionProblem,
-    getDefiningAttributeStatements,
+    getDefiningAttributes,
     getShapeDefinition,
-    NON_DEFINING_ATTRIBUTE_STATEMENTS,
     PLANE_SHAPE_LABELS,
     QUADRILATERAL_SUBTYPE_LABELS,
     shapeNameFromLabel
@@ -30,8 +28,6 @@ import {
     ShapeClassifyAttributesGeneratorConfig,
     ShapeClassifyAttributesGeneratorSchema
 } from './spec.ts';
-
-const OPTION_IDS: ShapeAttributeOption['id'][] = ['A', 'B', 'C', 'D'];
 
 const POLYGON_COUNT_SHAPES = [
     {shape: 'triangle', label: Area.Triangle, count: 3},
@@ -47,37 +43,8 @@ const FACE_SHAPES = [
     {shape: 'square-pyramid', count: 5, satisfies: false}
 ] as const;
 
-type UnpositionedOption = Pick<ShapeAttributeOption, 'text' | 'kind'>;
-
 function pickRandom<T>(values: readonly T[]): T {
     return values[Math.floor(random() * values.length)];
-}
-
-function shuffleOptions(options: readonly UnpositionedOption[]): ShapeAttributeOption[] {
-    const shuffled = [...options];
-
-    for (let index = shuffled.length - 1; index > 0; index--) {
-        const swapIndex = Math.floor(random() * (index + 1));
-        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-    }
-
-    return shuffled.map((option, index) => ({
-        ...option,
-        id: OPTION_IDS[index]
-    }));
-}
-
-function shuffleCountOptions(
-    options: readonly Omit<ShapeCountOption, 'id'>[]
-): ShapeCountOption[] {
-    const shuffled = [...options];
-
-    for (let index = shuffled.length - 1; index > 0; index--) {
-        const swapIndex = Math.floor(random() * (index + 1));
-        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-    }
-
-    return shuffled.map((option, index) => ({...option, id: OPTION_IDS[index]}));
 }
 
 function stroke(
@@ -182,51 +149,29 @@ const TOP_LEFT_RIGHT_MARKER: Extract<ShapeClassificationMarker, {kind: 'right-an
     points: [{x: 20, y: 32}, {x: 32, y: 32}, {x: 32, y: 20}]
 };
 
-function shuffleTaskOptions<T>(options: readonly T[]): Array<T & {id: ShapeAttributeOption['id']}> {
-    const shuffled = [...options];
-    for (let index = shuffled.length - 1; index > 0; index--) {
-        const swapIndex = Math.floor(random() * (index + 1));
-        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-    }
-    return shuffled.map((option, index) => ({...option, id: OPTION_IDS[index]}));
-}
-
-function answerIds<T extends {id: ShapeAttributeOption['id']; satisfies: boolean}>(
-    options: readonly T[]
-): [ShapeAttributeOption['id'], ShapeAttributeOption['id']] {
-    return options.filter(option => option.satisfies).map(option => option.id) as [
-        ShapeAttributeOption['id'],
-        ShapeAttributeOption['id']
-    ];
-}
-
-type UnpositionedLineOption = Omit<ShapeLineRelationOption, 'id' | 'satisfies'>;
+type UnpositionedLineOption = Omit<ShapeLineRelationOption, 'satisfies'>;
 
 const LINE_OPTIONS: Record<'parallel' | 'perpendicular', readonly UnpositionedLineOption[]> = {
     parallel: [
         {
-            figureName: 'figure',
             figure: TRAPEZOID,
             relations: ['parallel'],
             evidenceStrokes: [TRAPEZOID.sides[0], TRAPEZOID.sides[2]],
             marker: PARALLEL_MARKER
         },
         {
-            figureName: 'figure',
             figure: PARALLELOGRAM,
             relations: ['parallel'],
             evidenceStrokes: [PARALLELOGRAM.sides[0], PARALLELOGRAM.sides[2]],
             marker: PARALLELOGRAM_PARALLEL_MARKER
         },
         {
-            figureName: 'figure',
             figure: RIGHT_TRIANGLE,
             relations: ['perpendicular'],
             evidenceStrokes: [RIGHT_TRIANGLE.sides[0], RIGHT_TRIANGLE.sides[1]],
             marker: RIGHT_TRIANGLE_MARKER
         },
         {
-            figureName: 'figure',
             figure: IRREGULAR_QUADRILATERAL,
             relations: [],
             evidenceStrokes: [IRREGULAR_QUADRILATERAL.sides[0], IRREGULAR_QUADRILATERAL.sides[1]],
@@ -235,28 +180,24 @@ const LINE_OPTIONS: Record<'parallel' | 'perpendicular', readonly UnpositionedLi
     ],
     perpendicular: [
         {
-            figureName: 'figure',
             figure: RIGHT_TRIANGLE,
             relations: ['perpendicular'],
             evidenceStrokes: [RIGHT_TRIANGLE.sides[0], RIGHT_TRIANGLE.sides[1]],
             marker: RIGHT_TRIANGLE_MARKER
         },
         {
-            figureName: 'figure',
             figure: RECTANGLE,
             relations: ['parallel', 'perpendicular'],
             evidenceStrokes: [RECTANGLE.sides[0], RECTANGLE.sides[3]],
             marker: TOP_LEFT_RIGHT_MARKER
         },
         {
-            figureName: 'figure',
             figure: TRAPEZOID,
             relations: ['parallel'],
             evidenceStrokes: [TRAPEZOID.sides[0], TRAPEZOID.sides[2]],
             marker: PARALLEL_MARKER
         },
         {
-            figureName: 'figure',
             figure: IRREGULAR_QUADRILATERAL,
             relations: [],
             evidenceStrokes: [IRREGULAR_QUADRILATERAL.sides[0], IRREGULAR_QUADRILATERAL.sides[1]],
@@ -268,31 +209,20 @@ const LINE_OPTIONS: Record<'parallel' | 'perpendicular', readonly UnpositionedLi
 function createLineRelationProblem(
     criterion: 'parallel' | 'perpendicular'
 ): ShapeLineRelationClassificationProblem {
-    const options = shuffleTaskOptions(LINE_OPTIONS[criterion].map(option => ({
+    const options = LINE_OPTIONS[criterion].map(option => ({
         ...option,
         satisfies: option.relations.includes(criterion)
-    }))) as ShapeLineRelationClassificationProblem['options'];
-    const answers = answerIds(options);
-    const phrase = criterion === 'parallel' ? 'parallel sides' : 'perpendicular sides';
+    })) as ShapeLineRelationClassificationProblem['options'];
     return {
         task: 'classify-line-relation',
         criterion,
-        prompt: `Classify each figure by whether it has ${phrase}.`,
-        positiveLabel: `has ${phrase}`,
-        negativeLabel: `does not have ${phrase}`,
-        options,
-        answerIds: answers,
-        answerStatement: `Figures ${answers.join(' and ')} have ${phrase}.`,
-        explanation: criterion === 'parallel'
-            ? 'Their marked sides stay the same distance apart and never intersect.'
-            : 'Their marked sides intersect to form a right angle.'
+        options
     };
 }
 
-type UnpositionedAngleOption = Omit<ShapeAngleClassOption, 'id' | 'satisfies'>;
+type UnpositionedAngleOption = Omit<ShapeAngleClassOption, 'satisfies'>;
 
 const RIGHT_TRIANGLE_RIGHT_OPTION: UnpositionedAngleOption = {
-    figureName: 'figure',
     figure: RIGHT_TRIANGLE,
     angleClasses: ['acute', 'right', 'acute'],
     angleClass: 'right',
@@ -304,7 +234,6 @@ const RIGHT_TRIANGLE_RIGHT_OPTION: UnpositionedAngleOption = {
 };
 
 const RIGHT_TRIANGLE_ACUTE_OPTION: UnpositionedAngleOption = {
-    figureName: 'figure',
     figure: RIGHT_TRIANGLE,
     angleClasses: ['acute', 'right', 'acute'],
     angleClass: 'acute',
@@ -316,7 +245,6 @@ const RIGHT_TRIANGLE_ACUTE_OPTION: UnpositionedAngleOption = {
 };
 
 const RECTANGLE_RIGHT_OPTION: UnpositionedAngleOption = {
-    figureName: 'figure',
     figure: RECTANGLE,
     angleClasses: ['right', 'right', 'right', 'right'],
     angleClass: 'right',
@@ -328,7 +256,6 @@ const RECTANGLE_RIGHT_OPTION: UnpositionedAngleOption = {
 };
 
 const SQUARE_RIGHT_OPTION: UnpositionedAngleOption = {
-    figureName: 'figure',
     figure: SQUARE,
     angleClasses: ['right', 'right', 'right', 'right'],
     angleClass: 'right',
@@ -343,7 +270,6 @@ const SQUARE_RIGHT_OPTION: UnpositionedAngleOption = {
 };
 
 const ACUTE_TRIANGLE_OPTION: UnpositionedAngleOption = {
-    figureName: 'figure',
     figure: ACUTE_TRIANGLE,
     angleClasses: ['acute', 'acute', 'acute'],
     angleClass: 'acute',
@@ -355,7 +281,6 @@ const ACUTE_TRIANGLE_OPTION: UnpositionedAngleOption = {
 };
 
 const OBTUSE_TRIANGLE_OPTION: UnpositionedAngleOption = {
-    figureName: 'figure',
     figure: OBTUSE_TRIANGLE,
     angleClasses: ['obtuse', 'acute', 'acute'],
     angleClass: 'obtuse',
@@ -367,7 +292,6 @@ const OBTUSE_TRIANGLE_OPTION: UnpositionedAngleOption = {
 };
 
 const OBTUSE_PARALLELOGRAM_OPTION: UnpositionedAngleOption = {
-    figureName: 'figure',
     figure: PARALLELOGRAM,
     angleClasses: ['obtuse', 'acute', 'obtuse', 'acute'],
     angleClass: 'obtuse',
@@ -402,44 +326,30 @@ const ANGLE_OPTIONS: Record<'right' | 'acute' | 'obtuse', readonly UnpositionedA
 function createAngleClassificationProblem(
     criterion: 'right' | 'acute' | 'obtuse'
 ): ShapeAngleClassificationProblem {
-    const options = shuffleTaskOptions(ANGLE_OPTIONS[criterion].map(option => ({
+    const options = ANGLE_OPTIONS[criterion].map(option => ({
         ...option,
         satisfies: option.angleClasses.includes(criterion)
-    }))) as ShapeAngleClassificationProblem['options'];
-    const answers = answerIds(options);
-    const article = criterion === 'acute' || criterion === 'obtuse' ? 'an' : 'a';
+    })) as ShapeAngleClassificationProblem['options'];
     return {
         task: 'classify-angle-size',
         criterion,
-        prompt: `Classify each figure by whether it has ${article} ${criterion} angle.`,
-        positiveLabel: `has ${article} ${criterion} angle`,
-        negativeLabel: `does not have ${article} ${criterion} angle`,
-        options,
-        answerIds: answers,
-        answerStatement: `Figures ${answers.join(' and ')} each have ${article} ${criterion} angle.`,
-        explanation: criterion === 'right'
-            ? 'Each highlighted angle forms a square corner.'
-            : criterion === 'acute'
-                ? 'Each highlighted angle is smaller than a right angle.'
-                : 'Each highlighted angle is larger than a right angle and smaller than a straight angle.'
+        options
     };
 }
 
 function rightTriangleOption(
-    figureName: string,
     triangle: ShapeClassificationFigure,
     angleClasses: ShapeRightTriangleOption['angleClasses'],
     angleClass: ShapeRightTriangleOption['angleClass'],
     evidenceRays: ShapeRightTriangleOption['evidenceRays'],
     marker: ShapeClassificationMarker
-): Omit<ShapeRightTriangleOption, 'id' | 'satisfies'> {
-    return {figureName, figure: triangle, angleClasses, angleClass, evidenceRays, marker};
+): Omit<ShapeRightTriangleOption, 'satisfies'> {
+    return {figure: triangle, angleClasses, angleClass, evidenceRays, marker};
 }
 
 function createRightTriangleProblem(): RightTriangleCategoryProblem {
     const unpositioned = [
         rightTriangleOption(
-            'triangle',
             RIGHT_TRIANGLE,
             ['acute', 'right', 'acute'],
             'right',
@@ -450,7 +360,6 @@ function createRightTriangleProblem(): RightTriangleCategoryProblem {
             RIGHT_TRIANGLE_MARKER
         ),
         rightTriangleOption(
-            'triangle',
             RIGHT_TRIANGLE_ROTATED,
             ['right', 'acute', 'acute'],
             'right',
@@ -461,7 +370,6 @@ function createRightTriangleProblem(): RightTriangleCategoryProblem {
             TOP_LEFT_RIGHT_MARKER
         ),
         rightTriangleOption(
-            'triangle',
             ACUTE_TRIANGLE,
             ['acute', 'acute', 'acute'],
             'acute',
@@ -472,7 +380,6 @@ function createRightTriangleProblem(): RightTriangleCategoryProblem {
             {kind: 'angle-arc', center: {x: 50, y: 20}, radius: 13, startDegrees: 60, endDegrees: 120}
         ),
         rightTriangleOption(
-            'triangle',
             OBTUSE_TRIANGLE,
             ['obtuse', 'acute', 'acute'],
             'obtuse',
@@ -483,23 +390,14 @@ function createRightTriangleProblem(): RightTriangleCategoryProblem {
             {kind: 'angle-arc', center: {x: 50, y: 30}, radius: 13, startDegrees: 0, endDegrees: 135}
         )
     ];
-    const options = shuffleTaskOptions(unpositioned.map(option => ({
+    const options = unpositioned.map(option => ({
         ...option,
         satisfies: option.angleClasses.includes('right')
-    }))) as RightTriangleCategoryProblem['options'];
-    const answers = answerIds(options);
+    })) as RightTriangleCategoryProblem['options'];
     return {
         task: 'classify-right-triangle-category',
-        prompt: 'Which figures are right triangles?',
-        positiveLabel: 'right triangle',
-        negativeLabel: 'not a right triangle',
         options,
-        answerIds: answers,
-        attributes: ['3 straight sides', '1 right angle'],
-        category: 'triangle',
-        categoryStatement: 'Every right triangle is a triangle.',
-        answerStatement: `Figures ${answers.join(' and ')} are right triangles.`,
-        explanation: 'Each has three straight sides and one right angle. Every right triangle is a triangle.'
+        category: 'triangle'
     };
 }
 
@@ -547,33 +445,30 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
         if ((useVertexCount !== useAngleCount) && !useFaceCount && !requireEqualFaces) {
             const requestedShapes = POLYGON_COUNT_SHAPES.filter(option => config.shapes!.includes(option.label));
             const selected = pickRandom(requestedShapes.length > 0 ? requestedShapes : POLYGON_COUNT_SHAPES);
-            const options = shuffleCountOptions(POLYGON_COUNT_SHAPES.map(option => ({
+            const options: ShapeCountOption[] = POLYGON_COUNT_SHAPES.map(option => ({
                 shape: option.shape,
                 count: option.count,
                 satisfies: option.count === selected.count
-            })));
+            }));
 
             return {
                 data: {
                     task: 'classify-count',
                     attribute: useAngleCount ? 'angles' : 'vertices',
                     requiredCount: selected.count,
-                    options,
-                    answer: options.find(option => option.satisfies)!.id
+                    options
                 },
                 tags: [selected.label]
             };
         }
 
         if (!useVertexCount && useFaceCount && requireEqualFaces) {
-            const options = shuffleCountOptions(FACE_SHAPES);
             return {
                 data: {
                     task: 'classify-count',
                     attribute: 'equal-faces',
                     requiredCount: 6,
-                    options,
-                    answer: options.find(option => option.satisfies)!.id
+                    options: [...FACE_SHAPES]
                 },
                 tags: [Area.Cube]
             };
@@ -619,7 +514,7 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
             const shape = shapeNameFromLabel(subsumptionLabel);
             if (shape !== 'rhombus' && shape !== 'rectangle' && shape !== 'square') return null;
             return {
-                data: createQuadrilateralSubsumptionProblem(shape, Math.floor(random() * OPTION_IDS.length)),
+                data: createQuadrilateralSubsumptionProblem(shape),
                 tags: [subsumptionLabel]
             };
         }
@@ -628,22 +523,11 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
         const shape = shapeNameFromLabel(shapeLabel);
         if (!shape) return null;
 
-        const definingStatement = pickRandom(getDefiningAttributeStatements(shape));
-        const options = shuffleOptions([
-            {text: definingStatement, kind: 'defining'},
-            ...NON_DEFINING_ATTRIBUTE_STATEMENTS.map(text => ({
-                text,
-                kind: 'non-defining' as const
-            }))
-        ]);
-        const answer = options.find(option => option.kind === 'defining')!.id;
-
         return {
             data: {
                 shape,
                 definition: getShapeDefinition(shape),
-                options,
-                answer
+                definingAttribute: pickRandom(getDefiningAttributes(shape))
             },
             tags: [shapeLabel]
         };

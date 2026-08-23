@@ -1115,11 +1115,18 @@ export type ShapeAttributeOption = {
     kind: 'defining' | 'non-defining';
 };
 
+export type ShapeDefiningAttribute =
+    | {kind: 'closed'}
+    | {kind: 'boundary'; value: 'curved' | 'straight'}
+    | {kind: 'side-count'; value: ShapeDefinition['sideCount']}
+    | {kind: 'vertex-count'; value: ShapeDefinition['vertexCount']}
+    | {kind: 'equal-sides'; value: true}
+    | {kind: 'right-angle-count'; value: 4};
+
 export type ShapeDefiningAttributeClassificationProblem = {
     shape: PlaneShapeName;
     definition: ShapeDefinition;
-    options: ShapeAttributeOption[];
-    answer: ShapeAttributeOption['id'];
+    definingAttribute: ShapeDefiningAttribute;
     task?: undefined;
 };
 
@@ -1133,7 +1140,6 @@ export type ShapeCountOptionName =
     | 'square-pyramid';
 
 export type ShapeCountOption = {
-    id: ShapeAttributeOption['id'];
     shape: ShapeCountOptionName;
     count: number;
     satisfies: boolean;
@@ -1144,13 +1150,11 @@ export type ShapeCountClassificationProblem = {
     attribute: ShapeCountAttribute;
     requiredCount: number;
     options: ShapeCountOption[];
-    answer: ShapeCountOption['id'];
 };
 
 export type QuadrilateralSubtypeName = 'rhombus' | 'rectangle' | 'square';
 
 export type ShapeCategoryOption = {
-    id: ShapeAttributeOption['id'];
     category: 'triangle' | 'quadrilateral' | 'pentagon' | 'hexagon';
     satisfies: boolean;
 };
@@ -1158,10 +1162,8 @@ export type ShapeCategoryOption = {
 export type ShapeSubsumptionProblem = {
     task: 'classify-quadrilateral-subcategory';
     shape: QuadrilateralSubtypeName;
-    attributes: string[];
+    definition: ShapeDefinition;
     category: 'quadrilateral';
-    options: ShapeCategoryOption[];
-    answer: ShapeCategoryOption['id'];
 };
 
 export type ShapeClassificationCoordinate = {
@@ -1204,8 +1206,6 @@ export type ShapeClassificationFigure = {
 };
 
 export type ShapeLineRelationOption = {
-    id: ShapeAttributeOption['id'];
-    figureName: string;
     figure: ShapeClassificationFigure;
     relations: Array<'parallel' | 'perpendicular'>;
     evidenceStrokes: [ShapeClassificationStroke, ShapeClassificationStroke];
@@ -1216,23 +1216,15 @@ export type ShapeLineRelationOption = {
 export type ShapeLineRelationClassificationProblem = {
     task: 'classify-line-relation';
     criterion: 'parallel' | 'perpendicular';
-    prompt: string;
-    positiveLabel: string;
-    negativeLabel: string;
     options: [
         ShapeLineRelationOption,
         ShapeLineRelationOption,
         ShapeLineRelationOption,
         ShapeLineRelationOption
     ];
-    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
-    answerStatement: string;
-    explanation: string;
 };
 
 export type ShapeAngleClassOption = {
-    id: ShapeAttributeOption['id'];
-    figureName: string;
     figure: ShapeClassificationFigure;
     angleClasses: Array<'right' | 'acute' | 'obtuse'>;
     angleClass: 'right' | 'acute' | 'obtuse';
@@ -1244,23 +1236,15 @@ export type ShapeAngleClassOption = {
 export type ShapeAngleClassificationProblem = {
     task: 'classify-angle-size';
     criterion: 'right' | 'acute' | 'obtuse';
-    prompt: string;
-    positiveLabel: string;
-    negativeLabel: string;
     options: [
         ShapeAngleClassOption,
         ShapeAngleClassOption,
         ShapeAngleClassOption,
         ShapeAngleClassOption
     ];
-    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
-    answerStatement: string;
-    explanation: string;
 };
 
 export type ShapeRightTriangleOption = {
-    id: ShapeAttributeOption['id'];
-    figureName: string;
     figure: ShapeClassificationFigure;
     angleClasses: Array<'right' | 'acute' | 'obtuse'>;
     angleClass: 'right' | 'acute' | 'obtuse';
@@ -1271,21 +1255,13 @@ export type ShapeRightTriangleOption = {
 
 export type RightTriangleCategoryProblem = {
     task: 'classify-right-triangle-category';
-    prompt: 'Which figures are right triangles?';
-    positiveLabel: 'right triangle';
-    negativeLabel: 'not a right triangle';
     options: [
         ShapeRightTriangleOption,
         ShapeRightTriangleOption,
         ShapeRightTriangleOption,
         ShapeRightTriangleOption
     ];
-    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
-    attributes: ['3 straight sides', '1 right angle'];
     category: 'triangle';
-    categoryStatement: 'Every right triangle is a triangle.';
-    answerStatement: string;
-    explanation: string;
 };
 
 export type ShapeAttributeClassificationProblem =

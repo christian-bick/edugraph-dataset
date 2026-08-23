@@ -30,12 +30,11 @@ describe('shape count payload validation', () => {
         attribute: 'angles',
         requiredCount: 4,
         options: [
-            {id: 'A', shape: 'triangle', count: 3, satisfies: false},
-            {id: 'B', shape: 'quadrilateral', count: 4, satisfies: true},
-            {id: 'C', shape: 'pentagon', count: 5, satisfies: false},
-            {id: 'D', shape: 'hexagon', count: 6, satisfies: false}
-        ],
-        answer: 'B'
+            {shape: 'triangle', count: 3, satisfies: false},
+            {shape: 'quadrilateral', count: 4, satisfies: true},
+            {shape: 'pentagon', count: 5, satisfies: false},
+            {shape: 'hexagon', count: 6, satisfies: false}
+        ]
     };
     const renderedCounts: Partial<Record<ShapeCountOptionName, number>> = {
         triangle: 3,
@@ -50,14 +49,14 @@ describe('shape count payload validation', () => {
 
         expect(countClassificationMatchesRenderedPolygons({
             ...classification,
-            options: classification.options.map(option => option.id === 'B'
+            options: classification.options.map(option => option.shape === 'quadrilateral'
                 ? {...option, count: 5}
                 : option)
         }, renderedCount)).toBe(false);
 
         expect(countClassificationMatchesRenderedPolygons({
             ...classification,
-            options: classification.options.map(option => option.id === 'A'
+            options: classification.options.map(option => option.shape === 'triangle'
                 ? {...option, satisfies: true}
                 : option)
         }, renderedCount)).toBe(false);

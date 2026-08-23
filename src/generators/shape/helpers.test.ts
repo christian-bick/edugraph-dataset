@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {Area} from 'edugraph-ts';
 import {
-    getDefiningAttributeStatements,
+    getDefiningAttributes,
     getShapeDefinition,
     shapeNameFromLabel
 } from './helpers.ts';
@@ -37,16 +37,18 @@ describe('shape attribute helpers', () => {
         expect(getShapeDefinition('rectangle').equalSides).toBeUndefined();
     });
 
-    it('describes sides, vertices, closure, and boundary type as defining', () => {
-        expect(getDefiningAttributeStatements('circle')).toEqual([
-            'is closed',
-            'has one curved boundary',
-            'has 0 vertices'
+    it('describes sides, vertices, closure, and boundary type as typed defining facts', () => {
+        expect(getDefiningAttributes('circle')).toEqual([
+            {kind: 'closed'},
+            {kind: 'boundary', value: 'curved'},
+            {kind: 'side-count', value: 0},
+            {kind: 'vertex-count', value: 0}
         ]);
-        expect(getDefiningAttributeStatements('hexagon')).toEqual([
-            'is closed',
-            'has 6 straight sides',
-            'has 6 vertices'
+        expect(getDefiningAttributes('hexagon')).toEqual([
+            {kind: 'closed'},
+            {kind: 'boundary', value: 'straight'},
+            {kind: 'side-count', value: 6},
+            {kind: 'vertex-count', value: 6}
         ]);
     });
 });
