@@ -13,8 +13,6 @@ import {
     matchesTarget,
     findGeneratorsWithoutTestPath,
     findTargetsWithoutMatch,
-    loadTargets,
-    loadSpecTodos,
     generateSample,
     generateSampleWithRetry,
     computeContentFingerprint,
@@ -28,6 +26,7 @@ import {
     ViewMatchInfo,
     GeneratorCatalogEntry
 } from './generation.ts';
+import {loadSpecTodos, loadTargets} from './spec-catalog.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ProblemStub } from '../types/ml-engine.ts';
 import {createWorkCounters} from './work-counters.ts';

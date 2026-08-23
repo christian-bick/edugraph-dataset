@@ -18,7 +18,7 @@ import {
     type MetadataRow,
 } from './dataset-merge.ts';
 import { datasetDirForSpec, datasetOutDir, UNION_DATASET_DIR } from './dataset-paths.ts';
-import { listUnionSpecs, loadTargets } from './generation.ts';
+import {listUnionSpecs, loadTargets} from './spec-catalog.ts';
 import { normalizeAndValidateSpec, normalizeTargetLabels } from './spec-validator.ts';
 import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
 

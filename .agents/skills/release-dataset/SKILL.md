@@ -104,8 +104,10 @@ Authored model inputs are automatic graph inputs: targets, generator/view specs 
 generator/view local import and asset closures, accepted ontology semantics, checklists, the
 dedicated evaluator prompt, and canonical environment identities. Build, matching, planning,
 cache, validation, workflow, and unrelated toolchain code are machinery and are deliberately not
-hashed into model identity. The release workflow always rebuilds the complete graph, so never rely
-on a development observation or incremental graph for release admission.
+hashed into model identity or inspected for automatic invalidation. The engineer or agent owns the
+decision to use `--rebuild-graph` after a machinery edit. The release workflow always rebuilds the
+complete graph, so never rely on a development observation or incremental graph for release
+admission.
 
 Checklist, ontology-context, image, label, and evaluator-prompt changes create automatic VQA cache
 misses. After a response-schema, pass/fail implementation, evaluator model, or validation-pipeline

@@ -14,12 +14,11 @@ import { getCliOption } from "../lib/cli.ts";
 import { isUnionSpec, resolveDatasetDir } from "../lib/dataset-paths.ts";
 import { evaluateSampleVqa, getChecklistPaths } from "../lib/vqa-evaluator.ts";
 import {
-    loadGeneratorCatalog,
-    loadViewCatalog,
     parseSampleKey,
     SampleSplit,
     SPLIT_DIRS
 } from "../lib/generation.ts";
+import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../lib/model-catalog.ts';
 import { validationFailed, validationReportPath } from '../lib/validation-report.ts';
 import {
     buildDatasetManifest,
@@ -46,10 +45,7 @@ import {
     verifyDatasetSnapshotIntegrity,
     type DatasetSnapshot
 } from '../lib/dataset-store.ts';
-import {
-    inspectDevelopmentInputObservation,
-    summarizeManualRebuildFiles
-} from '../lib/development-observation.ts';
+import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -327,13 +323,6 @@ async function main() {
         : null;
 
     if (observation?.clean && existingManifest) {
-        if (observation.manual_rebuild_files.length > 0) {
-            console.warn(
-                '[Graph cache] Build/matching/validation machinery changed outside automatic identity: '
-                + `${summarizeManualRebuildFiles(observation.manual_rebuild_files)}. `
-                + 'Use --rebuild-graph if behavior changed.'
-            );
-        }
         counters.add('dataset.development_candidate_files', observation.candidate_files);
         counters.add('dataset.development_relevant_files_checked', observation.relevant_files_checked);
         console.log(`Development delta: clean (${observation.reason}); reusing the persisted graph for VQA planning.`);
@@ -359,8 +348,8 @@ async function main() {
         }
         const [specValidation, generatorCatalog, viewCatalog] = await Promise.all([
             normalizeAndValidateSpec(specName),
-            loadGeneratorCatalog(undefined, counters),
-            loadViewCatalog(undefined, counters)
+            loadGeneratorModelCatalog(undefined, counters),
+            loadViewModelCatalog(undefined, counters)
         ]);
         if (specValidation.errors.length > 0) {
             throw new Error(`Cannot validate dataset freshness because spec "${specName}" is invalid.`);
@@ -399,7 +388,6 @@ async function main() {
             tuples: matchDelta.tuples,
             pairIndex,
             sourceIndex,
-            reuseValidationIdentityFrom: rebuildGraph ? undefined : existingManifest?.dependency_graph,
             counters,
             generatedSplits: presentSplits,
             rendererEnvironment: CANONICAL_RENDERER_ID

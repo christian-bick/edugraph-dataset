@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import {
@@ -8,13 +8,13 @@ import {
     DatasetManifestEntry,
     affectedDatasetPairKeys,
     buildDatasetManifest,
+    createDatasetManifest,
     dependencyGraphVqaCacheKey,
     datasetFreshnessIssues,
     datasetOntologySemanticIssues,
     datasetRendererIssues,
     mergeObservedDatasetBuild,
-    planObservedDatasetSourceDelta,
-    updateDatasetManifest
+    planObservedDatasetSourceDelta
 } from './dataset-manifest.ts';
 import { currentRendererEnvironment } from './render-environment.ts';
 import {
@@ -376,56 +376,8 @@ describe('updateDatasetManifest', () => {
         )).toEqual(['writing#new-view', 'writing#old-view']);
     });
 
-    it('replaces only entries inside a scoped generation transaction', () => {
-        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-manifest-'));
-        const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');
-        mkdirSync(datasetDir, { recursive: true });
-        writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
-            dependencies: { 'edugraph-ts': 'ontology-v1' }
-        }));
-        writeFileSync(resolve(datasetDir, 'manifest.json'), JSON.stringify(manifest({
-            entries: {
-                'writing#numbers-write-standard': entry,
-                'comparison#numbers-compare': {
-                    ...entry,
-                    generator: 'comparison',
-                    view: 'numbers-compare'
-                }
-            }
-        })));
-
-        try {
-            updateDatasetManifest({
-                projectRoot,
-                datasetDir,
-                specName: 'ccss',
-                build: build({
-                    'writing#numbers-write-standard': {...entry, input_hash: 'input-new'},
-                    'comparison#numbers-compare': {
-                        ...entry,
-                        generator: 'comparison',
-                        view: 'numbers-compare'
-                    }
-                }),
-                scope: {
-                    fullDataset: false,
-                    generatorIds: ['writing'],
-                    viewIds: ['numbers-write-standard']
-                }
-            });
-
-            const saved = JSON.parse(readFileSync(resolve(datasetDir, 'manifest.json'), 'utf-8'));
-            expect(saved.entries['writing#numbers-write-standard'].input_hash).toBe('input-new');
-            expect(saved.entries['comparison#numbers-compare'].input_hash).toBe('input-a');
-        } finally {
-            rmSync(projectRoot, { recursive: true, force: true });
-        }
-    });
-
     it('rejects a scoped update when a changed dependency also reaches an unselected pair', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-manifest-scope-'));
-        const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');
-        mkdirSync(datasetDir, {recursive: true});
         writeFileSync(resolve(projectRoot, 'package.json'), JSON.stringify({
             dependencies: {'edugraph-ts': 'ontology-v1'}
         }));
@@ -464,19 +416,18 @@ describe('updateDatasetManifest', () => {
             execution_nodes: ['pair:writing#numbers-write-standard'],
             render_nodes: ['pair:writing#numbers-write-standard']
         };
-        writeFileSync(resolve(datasetDir, 'manifest.json'), JSON.stringify(manifest({
+        const previous = manifest({
             dependency_graph: previousGraph,
             last_execution: previousExecution,
             entries: {
                 'writing#numbers-write-standard': writing,
                 'comparison#numbers-compare': comparison
             }
-        })));
+        });
 
         try {
-            expect(() => updateDatasetManifest({
+            expect(() => createDatasetManifest({
                 projectRoot,
-                datasetDir,
                 specName: 'ccss',
                 build: build({
                     'writing#numbers-write-standard': writing,
@@ -486,7 +437,8 @@ describe('updateDatasetManifest', () => {
                     fullDataset: false,
                     generatorIds: ['writing'],
                     viewIds: ['numbers-write-standard']
-                }
+                },
+                previous
             })).toThrow('outside its selection');
         } finally {
             rmSync(projectRoot, {recursive: true, force: true});
@@ -627,8 +579,8 @@ describe('buildDatasetManifest', () => {
                 'ontology-definition:ProcedureExecution'
             ]));
 
-            const reuseCounters = createWorkCounters();
-            const reused = buildDatasetManifest({
+            const rebuiltCounters = createWorkCounters();
+            const rebuilt = buildDatasetManifest({
                 projectRoot,
                 datasetDir,
                 specName: 'ccss',
@@ -638,13 +590,12 @@ describe('buildDatasetManifest', () => {
                 generatedSplits: ['train'],
                 rendererEnvironment: 'canonical',
                 tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}],
-                reuseValidationIdentityFrom: result.dependency_graph,
-                counters: reuseCounters
+                counters: rebuiltCounters
             });
-            expect(dependencyGraphVqaCacheKey(reused.dependency_graph, sampleKey))
+            expect(dependencyGraphVqaCacheKey(rebuilt.dependency_graph, sampleKey))
                 .toBe(expectedVqaKey);
-            expect(reuseCounters.get('vqa.graph_key_reuses')).toBe(1);
-            expect(reuseCounters.get('vqa.validation_contexts')).toBe(0);
+            expect(rebuiltCounters.get('vqa.graph_key_recomputes')).toBe(1);
+            expect(rebuiltCounters.get('vqa.validation_contexts')).toBe(1);
 
             writeFileSync(resolve(viewDir, 'checklist.md'), 'changed-leaf-checklist');
             const changed = buildDatasetManifest({

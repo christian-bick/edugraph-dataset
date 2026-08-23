@@ -65,10 +65,7 @@ import {
 import {beginDatasetStoreTransaction} from '../lib/dataset-store.ts';
 import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 import {currentRendererEnvironment} from '../lib/render-environment.ts';
-import {
-    inspectDevelopmentInputObservation,
-    summarizeManualRebuildFiles
-} from '../lib/development-observation.ts';
+import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -78,8 +75,6 @@ const BASE_URL = process.env.RENDER_BASE_URL ?? 'http://localhost:5173';
 const DEFAULT_CONCURRENCY = 8;
 const DEFAULT_PREFLIGHT_CONCURRENCY = 4;
 const MAX_ATTEMPTS = 50;
-
-const pairKey = (generatorId: string, viewId: string): string => `${generatorId}#${viewId}`;
 
 /**
  * One fully specified image to render: the sample identity plus everything
@@ -689,13 +684,6 @@ async function main() {
         counters.add('dataset.development_candidate_files', observation.candidate_files);
         counters.add('dataset.development_relevant_files_checked', observation.relevant_files_checked);
         if (observation.clean) {
-            if (observation.manual_rebuild_files.length > 0) {
-                console.warn(
-                    '[Graph cache] Build/matching/validation machinery changed outside automatic identity: '
-                    + `${summarizeManualRebuildFiles(observation.manual_rebuild_files)}. `
-                    + 'Use --rebuild-graph if behavior changed.'
-                );
-            }
             console.log(`Development delta: clean (${observation.reason}); catalog and graph rebuild skipped.`);
             console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
             return;
@@ -890,7 +878,6 @@ async function main() {
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
             reuseImageIdentityFrom: trustedPreviousManifest?.dependency_graph,
-            reuseValidationIdentityFrom: trustedPreviousManifest?.dependency_graph,
             counters
         });
         const plan = assertDatasetGenerationScope(trustedPreviousManifest, planningBuild, requestedScope);
@@ -921,7 +908,7 @@ async function main() {
                     generatorIds: radixSortUtf8([...new Set(pairKeys.map(key => key.split('#')[0]))])
                 };
                 matchedTuples = allMatchedTuples.filter(tuple =>
-                    selectedPairs.has(pairKey(tuple.generatorId, tuple.viewId)));
+                    selectedPairs.has(modulePairKey(tuple.generatorId, tuple.viewId)));
                 console.log(`Affected execution: ${pairKeys.length} exact generator/view pair(s).`);
             }
         }
@@ -1000,7 +987,6 @@ async function main() {
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
             datasetSnapshot: candidate,
-            reuseValidationIdentityFrom: trustedPreviousManifest?.dependency_graph,
             counters
         });
         const manifestBuild = incrementalSourcePairs && trustedPreviousManifest

@@ -7,12 +7,12 @@ import {
     generateSampleByKey,
     generateTargetSamples,
     loadGeneratorCatalog,
-    loadTargets,
     loadViewCatalog,
     diagnoseTargetMatches,
     matchTargets,
     SampleIdentity
 } from './generation.ts';
+import {loadTargets} from './spec-catalog.ts';
 import { isProblemTypeCompatible } from './type-parser.ts';
 import {Scope} from 'edugraph-ts';
 

@@ -8,14 +8,14 @@ import {
     loadViewCatalog
 } from './generation.ts';
 import {
-    clearMatchingCatalogCaches,
-    loadGeneratorMatchCatalog,
-    loadViewMatchCatalog
-} from './matching-catalog.ts';
+    clearModelCatalogCaches,
+    loadGeneratorModelCatalog,
+    loadViewModelCatalog
+} from './model-catalog.ts';
 
 beforeEach(() => {
     clearGenerationCatalogCaches();
-    clearMatchingCatalogCaches();
+    clearModelCatalogCaches();
 });
 
 const temporaryRoots: string[] = [];
@@ -24,30 +24,40 @@ afterEach(() => {
     for (const root of temporaryRoots.splice(0)) rmSync(root, {recursive: true, force: true});
 });
 
-describe('matching-only catalogs', () => {
-    it('reproduces full catalog matching semantics without exposing implementations', async () => {
-        const [fullGenerators, matchGenerators, fullViews, matchViews] = await Promise.all([
+describe('model catalogs', () => {
+    it('is the canonical source of full catalog matching semantics', async () => {
+        const [fullGenerators, modelGenerators, fullViews, modelViews] = await Promise.all([
             loadGeneratorCatalog(),
-            loadGeneratorMatchCatalog(),
+            loadGeneratorModelCatalog(),
             loadViewCatalog(),
-            loadViewMatchCatalog()
+            loadViewModelCatalog()
         ]);
-        expect(matchGenerators).toEqual(fullGenerators.map(entry => ({
-            generatorId: entry.generatorId,
-            labels: entry.labels,
-            problemType: entry.problemType
+        expect(modelGenerators.map(({generatorId, labels, problemType}) => ({
+            generatorId,
+            labels,
+            problemType
+        }))).toEqual(fullGenerators.map(({generatorId, labels, problemType}) => ({
+            generatorId,
+            labels,
+            problemType
         })));
-        expect(matchViews).toEqual(fullViews.map(entry => ({
-            viewId: entry.viewId,
-            supportedLabels: entry.supportedLabels,
-            requiredLabels: entry.requiredLabels,
-            rejectedLabels: entry.rejectedLabels,
-            problemType: entry.problemType
+        expect(modelViews.map(({viewId, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
+            viewId,
+            supportedLabels,
+            requiredLabels,
+            rejectedLabels,
+            problemType
+        }))).toEqual(fullViews.map(({viewId, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
+            viewId,
+            supportedLabels,
+            requiredLabels,
+            rejectedLabels,
+            problemType
         })));
     }, 30_000);
 
     it('does not import or execute generator implementations', async () => {
-        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-match-catalog-'));
+        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-model-catalog-'));
         temporaryRoots.push(root);
         const moduleRoot = resolve(root, 'demo');
         mkdirSync(moduleRoot, {recursive: true});
@@ -60,10 +70,11 @@ describe('matching-only catalogs', () => {
             export class DemoGenerator implements ProblemGenerator<DemoProblem> {}
         `, 'utf-8');
 
-        await expect(loadGeneratorMatchCatalog(root)).resolves.toEqual([{
+        const [descriptor] = await loadGeneratorModelCatalog(root);
+        expect(descriptor).toMatchObject({
             generatorId: 'demo',
             labels: ['Capability'],
             problemType: 'DemoProblem'
-        }]);
+        });
     });
 });

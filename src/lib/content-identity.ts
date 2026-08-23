@@ -155,15 +155,6 @@ export class SourceContentIndex {
     }
 }
 
-/** Hashes a file set by normalized relative path and bytes in deterministic linear order. */
-export function hashSourceFiles(
-    projectRoot: string,
-    paths: readonly string[],
-    options: HashSourceFilesOptions = {}
-): string {
-    return new SourceContentIndex(projectRoot).hash(paths, options);
-}
-
 export function digestIdentity(value: unknown): string {
     return digestContent(JSON.stringify(value)).sha256;
 }

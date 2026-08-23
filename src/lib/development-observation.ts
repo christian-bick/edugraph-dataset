@@ -29,7 +29,6 @@ export interface DevelopmentObservationResult {
     relevant_files_checked: number;
     changed_files: string[];
     candidate_nodes: string[];
-    manual_rebuild_files: string[];
 }
 
 const normalizePath = (path: string): string => path.replaceAll('\\', '/');
@@ -110,21 +109,6 @@ function graphSourceInputs(graph: DependencyGraphSnapshot): {
     };
 }
 
-function isPotentialMachinerySource(path: string): boolean {
-    if (path.endsWith('.test.ts') || path.endsWith('.test.tsx') || path.endsWith('.md')) {
-        return false;
-    }
-    if (path.startsWith('docs/')
-        || path.startsWith('.agents/')
-        || path.startsWith('cache/')
-        || path.startsWith('out/')
-        || path.startsWith('temp/')
-        || path.startsWith('public/coverage/')) {
-        return false;
-    }
-    return /(?:^|\/)(?:[^/]+\.)?(?:cjs|js|json|jsx|lock|mjs|toml|ts|tsx|yaml|yml)$/.test(path);
-}
-
 function semanticSnapshotHash(projectRoot: string): string | null {
     const path = resolve(projectRoot, 'config', 'external-semantics', 'ontology.json');
     if (!existsSync(path)) return null;
@@ -139,12 +123,6 @@ function semanticSnapshotHash(projectRoot: string): string | null {
 function specSourcePath(projectRoot: string, specName: string): string {
     const directory = resolve(projectRoot, 'src', 'spec', specName);
     return existsSync(directory) ? directory : `${directory}.ts`;
-}
-
-export function summarizeManualRebuildFiles(paths: readonly string[], limit = 5): string {
-    const shown = paths.slice(0, limit).join(', ');
-    const remaining = paths.length - Math.min(paths.length, limit);
-    return remaining > 0 ? `${shown} (+${remaining} more)` : shown;
 }
 
 /**
@@ -207,16 +185,14 @@ export function inspectDevelopmentInputObservation(options: {
         candidateFiles = 0,
         checked = 0,
         changedFiles: string[] = [],
-        candidateNodes: string[] = [],
-        manualRebuildFiles: string[] = []
+        candidateNodes: string[] = []
     ): DevelopmentObservationResult => ({
         clean: false,
         reason,
         candidate_files: candidateFiles,
         relevant_files_checked: checked,
         changed_files: changedFiles,
-        candidate_nodes: candidateNodes,
-        manual_rebuild_files: manualRebuildFiles
+        candidate_nodes: candidateNodes
     });
     if (!previous || previous.schema_version !== DEVELOPMENT_OBSERVATION_SCHEMA_VERSION) {
         return miss('development observation is missing or unsupported');
@@ -249,10 +225,8 @@ export function inspectDevelopmentInputObservation(options: {
         let checked = 0;
         const changedFiles: string[] = [];
         const candidateNodes = new Set<string>();
-        const manualRebuildFiles: string[] = [];
         for (const path of candidates) {
             if (!(path in previous.input_files) && !isPotentialNewInput(path, options.specName)) {
-                if (isPotentialMachinerySource(path)) manualRebuildFiles.push(path);
                 continue;
             }
             checked++;
@@ -270,8 +244,7 @@ export function inspectDevelopmentInputObservation(options: {
                 candidates.length,
                 checked,
                 radixSortUtf8(changedFiles),
-                radixSortUtf8([...candidateNodes]),
-                radixSortUtf8(manualRebuildFiles)
+                radixSortUtf8([...candidateNodes])
             );
         }
         return {
@@ -280,8 +253,7 @@ export function inspectDevelopmentInputObservation(options: {
             candidate_files: candidates.length,
             relevant_files_checked: checked,
             changed_files: [],
-            candidate_nodes: [],
-            manual_rebuild_files: radixSortUtf8(manualRebuildFiles)
+            candidate_nodes: []
         };
     } catch (error) {
         return miss(`Git delta observation unavailable: ${error instanceof Error ? error.message : String(error)}`);

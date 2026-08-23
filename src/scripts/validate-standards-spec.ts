@@ -5,10 +5,10 @@ import {
     loadViewCatalog,
     findGeneratorsWithoutTestPath,
     findTargetsWithoutMatch,
-    loadSpecTodos,
     type GeneratorCatalogEntry,
     type ViewCatalogEntry
 } from '../lib/generation.ts';
+import {loadSpecTodos} from '../lib/spec-catalog.ts';
 import {shortenLabel} from '../lib/utils.ts';
 import {radixSortUtf8} from '../lib/content-identity.ts';
 

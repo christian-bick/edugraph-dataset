@@ -2,7 +2,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getCliOption } from '../lib/cli.ts';
-import { loadGeneratorCatalog, loadSpecTodos, loadViewCatalog } from '../lib/generation.ts';
+import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../lib/model-catalog.ts';
+import {loadSpecTodos} from '../lib/spec-catalog.ts';
 import { loadMatchingTargets } from '../lib/spec-validator.ts';
 import {
     createMatchingSnapshot,
@@ -28,8 +29,8 @@ async function main(): Promise<void> {
     const [targets, todos, generators, views] = await Promise.all([
         loadMatchingTargets(specName),
         loadSpecTodos(specName),
-        loadGeneratorCatalog(),
-        loadViewCatalog()
+        loadGeneratorModelCatalog(),
+        loadViewModelCatalog()
     ]);
     const current = createMatchingSnapshot(specName, [
         ...targets.map(target => ({ target, disposition: 'spec' as const })),

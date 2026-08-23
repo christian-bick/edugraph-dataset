@@ -1,7 +1,4 @@
 import {describe, expect, it} from 'vitest';
-import {mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
-import {tmpdir} from 'node:os';
-import {resolve} from 'node:path';
 import {digestIdentity} from './content-identity.ts';
 import {
     DEPENDENCY_NODE_KINDS,
@@ -9,8 +6,6 @@ import {
     createDependencyGraphSnapshot,
     explainAffectedNode,
     planDependencyDelta,
-    readDependencySnapshot,
-    writeDependencySnapshot,
     type DependencyGraphSnapshot,
     type DependencyNode,
     type DependencyNodeKind
@@ -174,28 +169,4 @@ describe('dependency graph contracts', () => {
         expect(() => planDependencyDelta(null, cyclic)).toThrow('contains a cycle');
     });
 
-    it('publishes and verifies a completed integrity snapshot', () => {
-        const directory = mkdtempSync(resolve(tmpdir(), 'edugraph-dependency-'));
-        const snapshot = completeGraph();
-        try {
-            expect(readDependencySnapshot(directory)).toBeNull();
-            writeDependencySnapshot(directory, snapshot);
-            expect(readDependencySnapshot(directory)).toEqual(snapshot);
-
-            writeFileSync(resolve(directory, 'dependency-graph.json'), '{}');
-            expect(() => readDependencySnapshot(directory)).toThrow('failed integrity verification');
-        } finally {
-            rmSync(directory, {recursive: true, force: true});
-        }
-    });
-
-    it('fails when only one snapshot file exists', () => {
-        const directory = mkdtempSync(resolve(tmpdir(), 'edugraph-dependency-partial-'));
-        try {
-            writeFileSync(resolve(directory, 'dependency-graph.json'), readFileSync(import.meta.filename));
-            expect(() => readDependencySnapshot(directory)).toThrow('is incomplete');
-        } finally {
-            rmSync(directory, {recursive: true, force: true});
-        }
-    });
 });

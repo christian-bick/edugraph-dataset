@@ -4,7 +4,7 @@ import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {getCliOption} from '../lib/cli.ts';
 import {planDevelopmentValidation, type DevelopmentCheck} from '../lib/development-plan.ts';
-import {listSpecModules, listUnionSpecs} from '../lib/generation.ts';
+import {listSpecModules, listUnionSpecs} from '../lib/spec-catalog.ts';
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const args = process.argv.slice(2);

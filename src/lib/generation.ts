@@ -1,26 +1,23 @@
 import { createHash } from 'crypto';
-import { existsSync, lstatSync, readdirSync } from 'fs';
-import { resolve, dirname, relative } from 'path';
+import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { findLeafModules, LeafModule } from './module-resolver.ts';
-import {
-    getGeneratorProblemTypeFromPath,
-    getViewToProblemTypeMap
-} from './type-parser.ts';
-import { extractConfig, extractSchemaLabels, generateWithLabels } from './utils.ts';
+import { extractConfig, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, Implementation, ImplementationTodo, OntologyPackage, OntologyTodo, BeyondScopeEntry, TargetEquivalence, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
-import { ViewSpec } from '../types/view-spec.ts';
+import { CompetencyTarget, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
 import { ConfigSchema } from '../types/schema.ts';
-import { defineImplementationPackage } from './dataset-permutation-builder.ts';
-import { defineOntologyPackage, toOntologyTodo } from './ontology-todo.ts';
 import type {WorkCounters} from './work-counters.ts';
 import {radixSortUtf8} from './content-identity.ts';
+import {loadTargets} from './spec-catalog.ts';
+import {
+    clearModelCatalogCaches,
+    loadGeneratorModelCatalog,
+    loadViewModelCatalog,
+    type GeneratorModelDescriptor,
+    type ViewModelDescriptor
+} from './model-catalog.ts';
 import {
     matchTargets,
-    type GeneratorMatchInfo,
-    type MatchTuple,
-    type ViewMatchInfo
+    type MatchTuple
 } from './matching.ts';
 export * from './matching.ts';
 
@@ -124,18 +121,11 @@ export function computeSampleFilename(identity: SampleIdentity): string {
 // Catalog loading
 // ---------------------------------------------------------------------------
 
-export interface GeneratorCatalogEntry extends GeneratorMatchInfo {
-    module: LeafModule;
-    spec: any;
+export interface GeneratorCatalogEntry extends GeneratorModelDescriptor {
     generator: ProblemGenerator;
 }
 
-export interface ViewCatalogEntry extends ViewMatchInfo {
-    module: LeafModule;
-    spec: ViewSpec;
-    /** Runtime schema used to resolve the exact configuration rendered by this view. */
-    schema: ConfigSchema;
-}
+export type ViewCatalogEntry = ViewModelDescriptor;
 
 /**
  * Returns generator IDs that have no semantically compatible target/view path
@@ -189,72 +179,36 @@ function camelCase(str: string): string {
 }
 
 const generatorCatalogCache = new Map<string, readonly GeneratorCatalogEntry[]>();
-const viewCatalogCache = new Map<string, readonly ViewCatalogEntry[]>();
-
-function selectedLeafModules(
-    root: string,
-    entryFiles: ReadonlyMap<string, string> | undefined
-): LeafModule[] {
-    if (!entryFiles) return findLeafModules(root);
-    const byId = new Map(entryFiles);
-    return radixSortUtf8([...byId.keys()]).map(id => {
-        const absolutePath = dirname(resolve(byId.get(id)!));
-        const relativePath = relative(root, absolutePath).replaceAll('\\', '/');
-        const segments = relativePath.split('/');
-        return {
-            id,
-            relativePath,
-            absolutePath,
-            category: segments.length > 1 ? segments[0] : null
-        };
-    });
-}
 
 export async function loadGeneratorCatalog(
     generatorsRoot: string = resolve(PROJECT_ROOT, 'src', 'generators'),
     counters?: WorkCounters,
     entryFiles?: ReadonlyMap<string, string>
 ): Promise<GeneratorCatalogEntry[]> {
-    counters?.add('catalog.generator_loads');
     const catalogKey = resolve(generatorsRoot);
     const cached = entryFiles ? undefined : generatorCatalogCache.get(catalogKey);
     if (cached) {
         counters?.add('catalog.generator_cache_hits');
         return [...cached];
     }
+    const descriptors = await loadGeneratorModelCatalog(generatorsRoot, counters, entryFiles);
     const entries: GeneratorCatalogEntry[] = [];
-    const modules = selectedLeafModules(generatorsRoot, entryFiles);
-    counters?.add('catalog.generator_discoveries');
-    counters?.add('catalog.generator_modules', modules.length);
-    for (const mod of modules) {
+    for (const descriptor of descriptors) {
         try {
-            const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
-            const schemaName = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'GeneratorSchema';
-            const generatorSchema: ConfigSchema = specModule[schemaName] ?? {};
-            const className = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'Generator';
-            const generatorModule = await import(pathToFileURL(resolve(mod.absolutePath, 'generator.ts')).href);
+            const id = descriptor.generatorId;
+            const className = camelCase(id[0].toUpperCase() + id.slice(1)) + 'Generator';
+            const generatorModule = await import(pathToFileURL(
+                resolve(descriptor.module.absolutePath, 'generator.ts')
+            ).href);
             const GeneratorClass = generatorModule[className];
             if (!GeneratorClass) {
-                console.warn(`Generator class ${className} not found in ${mod.id}, skipping.`);
+                console.warn(`Generator class ${className} not found in ${id}, skipping.`);
                 continue;
             }
             const generator: ProblemGenerator = new GeneratorClass();
-            entries.push({
-                generatorId: mod.id,
-                module: mod,
-                spec: specModule.spec,
-                generator,
-                labels: Array.from(new Set([
-                    ...(specModule.spec?.generalLabels || []),
-                    ...extractSchemaLabels(generatorSchema)
-                ])),
-                problemType: getGeneratorProblemTypeFromPath(
-                    resolve(mod.absolutePath, 'generator.ts'),
-                    counters
-                )
-            });
+            entries.push({...descriptor, generator});
         } catch (e) {
-            console.warn(`Could not load generator module ${mod.id}:`, e);
+            console.warn(`Could not load generator module ${descriptor.generatorId}:`, e);
         }
     }
     if (!entryFiles) generatorCatalogCache.set(catalogKey, entries);
@@ -266,309 +220,13 @@ export async function loadViewCatalog(
     counters?: WorkCounters,
     entryFiles?: ReadonlyMap<string, string>
 ): Promise<ViewCatalogEntry[]> {
-    counters?.add('catalog.view_loads');
-    const catalogKey = resolve(viewsRoot);
-    const cached = entryFiles ? undefined : viewCatalogCache.get(catalogKey);
-    if (cached) {
-        counters?.add('catalog.view_cache_hits');
-        return [...cached];
-    }
-    const viewToType = getViewToProblemTypeMap(counters);
-    const entries: ViewCatalogEntry[] = [];
-    const modules = selectedLeafModules(viewsRoot, entryFiles);
-    counters?.add('catalog.view_discoveries');
-    counters?.add('catalog.view_modules', modules.length);
-    for (const mod of modules) {
-        try {
-            const specModule = await import(pathToFileURL(resolve(mod.absolutePath, 'spec.ts')).href);
-            const spec: ViewSpec = specModule.spec;
-            const schemaName = camelCase(mod.id[0].toUpperCase() + mod.id.slice(1)) + 'ViewSchema';
-            const viewSchema: ConfigSchema = specModule[schemaName] ?? {};
-            entries.push({
-                viewId: spec.viewId,
-                module: mod,
-                spec,
-                schema: viewSchema,
-                supportedLabels: Array.from(new Set([
-                    ...(spec?.generalLabels || []),
-                    ...extractSchemaLabels(viewSchema)
-                ])),
-                requiredLabels: spec?.requiredLabels || [],
-                rejectedLabels: spec?.rejectedLabels || [],
-                problemType: viewToType[spec.viewId] || null
-            });
-        } catch (e) {
-            console.warn(`Could not load view module ${mod.id}:`, e);
-        }
-    }
-    if (!entryFiles) viewCatalogCache.set(catalogKey, entries);
-    return [...entries];
+    return loadViewModelCatalog(viewsRoot, counters, entryFiles);
 }
 
 /** Clears process-local catalog state for watch-mode invalidation and isolated tests. */
 export function clearGenerationCatalogCaches(): void {
     generatorCatalogCache.clear();
-    viewCatalogCache.clear();
-}
-
-/**
- * Resolves the .ts files belonging to a spec module (either a directory of
- * files or a single file) under specRoot, in sorted order so downstream
- * processing is deterministic. Shared by every spec-module loader below.
- */
-/**
- * Reserved filename prefix for spec module metadata. Files starting with `_`
- * describe the module itself rather than contributing targets, so they are
- * excluded from every target-bearing loader — which would otherwise reject
- * them for not exporting `spec`.
- */
-const MODULE_META_PREFIX = '_';
-const MODULE_META_FILE = '_module.ts';
-
-function resolveSpecFiles(specName: string, specRoot: string): string[] {
-    const specPath = resolve(specRoot, specName);
-    const specDir = existsSync(specPath) && lstatSync(specPath).isDirectory() ? specPath : null;
-    const specFile = !specDir && existsSync(`${specPath}.ts`) ? `${specPath}.ts` : null;
-
-    if (!specDir && !specFile) {
-        throw new Error(`Spec module not found at: ${specPath}`);
-    }
-
-    return specDir
-        ? radixSortUtf8(readdirSync(specDir)
-            .filter(f => f.endsWith('.ts') && !f.startsWith(MODULE_META_PREFIX)))
-            .map(f => resolve(specDir, f))
-        : [specFile!];
-}
-
-const DEFAULT_SPEC_ROOT = () => resolve(PROJECT_ROOT, 'src', 'spec');
-
-export interface SpecModuleMetadata {
-    /**
-     * An isolated spec never merges into the union dataset. It exists for
-     * development and targeted testing only (`test`), so its targets and
-     * samples stay out of the released data.
-     */
-    isolated: boolean;
-    /**
-     * Merge precedence in the union: lower merges first and therefore wins
-     * when two standards produce identical content. Declare an explicit,
-     * higher value when adding a standard so the established ones keep their
-     * samples and the newcomer contributes only its delta.
-     */
-    unionOrder: number;
-}
-
-const DEFAULT_UNION_ORDER = 100;
-
-/**
- * Loads a spec module's `_module.ts` metadata. Modules without one are
- * ordinary education standards that contribute to the union dataset.
- */
-export async function loadSpecMetadata(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<SpecModuleMetadata> {
-    const metaPath = resolve(specRoot, specName, MODULE_META_FILE);
-    if (!existsSync(metaPath)) {
-        return { isolated: false, unionOrder: DEFAULT_UNION_ORDER };
-    }
-    const module = await import(pathToFileURL(metaPath).href);
-    const unionOrder = module.unionOrder ?? DEFAULT_UNION_ORDER;
-    if (!Number.isSafeInteger(unionOrder) || unionOrder < 0) {
-        throw new Error(`Spec unionOrder must be a non-negative safe integer: ${metaPath}.`);
-    }
-    return {
-        isolated: module.isolated === true,
-        unionOrder,
-    };
-}
-
-/** Every spec module under the spec root, as directories or bare `.ts` files. */
-export function listSpecModules(specRoot: string = DEFAULT_SPEC_ROOT()): string[] {
-    if (!existsSync(specRoot)) return [];
-    const modules = readdirSync(specRoot)
-        .filter(entry => {
-            const entryPath = resolve(specRoot, entry);
-            return lstatSync(entryPath).isDirectory() || entry.endsWith('.ts');
-        })
-        .map(entry => entry.replace(/\.ts$/, ''));
-    return radixSortUtf8(modules);
-}
-
-/**
- * The spec modules that make up the union dataset, in merge order: ascending
- * `unionOrder`, ties broken by name. Isolated modules are excluded, so adding
- * one never changes released data.
- */
-export async function listUnionSpecs(specRoot: string = DEFAULT_SPEC_ROOT()): Promise<string[]> {
-    const entries: { specName: string; unionOrder: number }[] = [];
-    for (const specName of listSpecModules(specRoot)) {
-        const { isolated, unionOrder } = await loadSpecMetadata(specName, specRoot);
-        if (!isolated) entries.push({ specName, unionOrder });
-    }
-    const byOrder = new Map<number, string[]>();
-    for (const entry of entries) {
-        const names = byOrder.get(entry.unionOrder);
-        if (names) names.push(entry.specName);
-        else byOrder.set(entry.unionOrder, [entry.specName]);
-    }
-    const orderByKey = new Map([...byOrder.keys()].map(order => [order.toString().padStart(16, '0'), order]));
-    return radixSortUtf8([...orderByKey.keys()]).flatMap(key =>
-        radixSortUtf8(byOrder.get(orderByKey.get(key)!) ?? []));
-}
-
-/**
- * Loads all competency targets from a spec module. Files are visited in
- * sorted order so the resulting target order is deterministic.
- *
- * Contract: every spec file exports its competency targets as `spec:
- * CompetencyTarget[]` — the sole export this function reads. Unsupported
- * competencies belong in the sibling `implementationTodos` / `ontologyTodos`
- * exports (see DOCS.md and `loadSpecTodos`), which are never touched here —
- * a todo target can never enter the pipeline.
- *
- * Loading is permissive: target ID uniqueness is enforced by
- * `validateUniqueTargetIds` via `normalizeAndValidateSpec`
- * (src/lib/spec-validator.ts), which gates every dataset generation.
- */
-export async function loadTargets(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<CompetencyTarget[]> {
-    const files = resolveSpecFiles(specName, specRoot);
-
-    const targets: CompetencyTarget[] = [];
-    for (const filePath of files) {
-        const module = await import(pathToFileURL(filePath).href);
-        if (!Array.isArray(module.spec)) {
-            throw new Error(`Spec file "${filePath}" does not export a "spec" array of CompetencyTarget.`);
-        }
-        targets.push(...(module.spec as CompetencyTarget[]));
-    }
-    return targets;
-}
-
-export interface SpecTodos {
-    implementationTodos: ImplementationTodo[];
-    ontologyTodos: OntologyTodo[];
-    beyondScope: BeyondScopeEntry[];
-}
-
-/**
- * Loads the documented gaps of a spec module: competencies whose labels are
- * expressible but have no generator/view support yet (`implementationTodos`),
- * and competencies that cannot be expressed because the ontology is missing
- * a label (`ontologyTodos`), and intentional project-medium exclusions
- * (`beyondScope`). All three exports are optional per file. This is the
- * counterpart to `loadTargets` for tooling that reports on dispositions (currently
- * only `map-standards.ts`) — the dataset pipeline never calls this.
- */
-export async function loadSpecTodos(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<SpecTodos> {
-    const files = resolveSpecFiles(specName, specRoot);
-
-    const implementationTodos: ImplementationTodo[] = [];
-    const ontologyTodos: OntologyTodo[] = [];
-    const beyondScope: BeyondScopeEntry[] = [];
-    const normalizedImplementations = new WeakMap<object, Implementation>();
-    const normalizedOntologies = new WeakMap<object, OntologyPackage>();
-    const ontologiesById = new Map<string, OntologyPackage>();
-    for (const filePath of files) {
-        const module = await import(pathToFileURL(filePath).href);
-        if (Array.isArray(module.implementationTodos)) {
-            for (const todo of module.implementationTodos as ImplementationTodo[]) {
-                if (!todo.implementation || typeof todo.implementation !== 'object') {
-                    throw new Error(
-                        `Implementation TODO "${todo.id ?? 'unknown'}" in "${filePath}" must reference an implementation definition.`
-                    );
-                }
-                let implementation = normalizedImplementations.get(todo.implementation);
-                if (!implementation) {
-                    try {
-                        implementation = defineImplementationPackage(todo.implementation);
-                    } catch (error) {
-                        const detail = error instanceof Error ? error.message : String(error);
-                        throw new Error(
-                            `Invalid implementation definition for TODO "${todo.id ?? 'unknown'}" in "${filePath}": ${detail}`
-                        );
-                    }
-                    normalizedImplementations.set(todo.implementation, implementation);
-                }
-                implementationTodos.push({ ...todo, implementation });
-            }
-        }
-        if (Array.isArray(module.ontologyTodos)) {
-            for (const todo of module.ontologyTodos as OntologyTodo[]) {
-                if (!todo.ontology || typeof todo.ontology !== 'object') {
-                    throw new Error(
-                        `Ontology TODO "${todo.standardId ?? 'unknown'}" in "${filePath}" must reference an ontology package.`
-                    );
-                }
-                let ontology = normalizedOntologies.get(todo.ontology);
-                if (!ontology) {
-                    try {
-                        ontology = defineOntologyPackage(todo.ontology);
-                    } catch (error) {
-                        const detail = error instanceof Error ? error.message : String(error);
-                        throw new Error(
-                            `Invalid ontology package for TODO "${todo.standardId ?? 'unknown'}" in "${filePath}": ${detail}`
-                        );
-                    }
-                    normalizedOntologies.set(todo.ontology, ontology);
-                }
-
-                const existing = ontologiesById.get(ontology.id);
-                if (existing && JSON.stringify(existing) !== JSON.stringify(ontology)) {
-                    throw new Error(`Ontology package id "${ontology.id}" has conflicting definitions.`);
-                }
-                const canonicalOntology = existing ?? ontology;
-                ontologiesById.set(canonicalOntology.id, canonicalOntology);
-                try {
-                    ontologyTodos.push(toOntologyTodo(
-                        todo.standardId,
-                        todo.title,
-                        canonicalOntology,
-                        todo.description
-                    ));
-                } catch (error) {
-                    const detail = error instanceof Error ? error.message : String(error);
-                    throw new Error(
-                        `Invalid ontology TODO "${todo.standardId ?? 'unknown'}" in "${filePath}": ${detail}`
-                    );
-                }
-            }
-        }
-        if (Array.isArray(module.beyondScope)) {
-            beyondScope.push(...(module.beyondScope as BeyondScopeEntry[]));
-        }
-    }
-    return { implementationTodos, ontologyTodos, beyondScope };
-}
-
-/**
- * Loads the deliberate target-equivalence declarations of a spec module (the
- * optional `equivalentTargets` export per file, merged in sorted file order).
- * These tell spec validation that specific identical-permutation-set collisions
- * are intentional (see `TargetEquivalence`). Like `loadSpecTodos`, the dataset
- * pipeline never reads this — it only informs validation and reporting.
- */
-export async function loadSpecEquivalences(
-    specName: string,
-    specRoot: string = DEFAULT_SPEC_ROOT()
-): Promise<TargetEquivalence[]> {
-    const files = resolveSpecFiles(specName, specRoot);
-
-    const equivalences: TargetEquivalence[] = [];
-    for (const filePath of files) {
-        const module = await import(pathToFileURL(filePath).href);
-        if (Array.isArray(module.equivalentTargets)) {
-            equivalences.push(...(module.equivalentTargets as TargetEquivalence[]));
-        }
-    }
-    return equivalences;
+    clearModelCatalogCaches();
 }
 
 // ---------------------------------------------------------------------------

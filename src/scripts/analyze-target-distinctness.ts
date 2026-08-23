@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getCliOption } from '../lib/cli.ts';
-import { loadSpecEquivalences, loadSpecTodos, loadTargets } from '../lib/generation.ts';
+import {loadSpecEquivalences, loadSpecTodos, loadTargets} from '../lib/spec-catalog.ts';
 import { analyzeTargetDistinctness, renderTargetDistinctnessMarkdown } from '../lib/target-distinctness.ts';
 import { specPlanPaths } from '../lib/spec-plan.ts';
 

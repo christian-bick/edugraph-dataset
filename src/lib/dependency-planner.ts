@@ -1,14 +1,4 @@
-import {randomUUID} from 'node:crypto';
-import {
-    existsSync,
-    mkdirSync,
-    readFileSync,
-    renameSync,
-    rmSync,
-    writeFileSync
-} from 'node:fs';
-import {resolve} from 'node:path';
-import {digestContent, radixSortUtf8} from './content-identity.ts';
+import {radixSortUtf8} from './content-identity.ts';
 
 export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 4;
 export const DEPENDENCY_PLANNER_EPOCH = 5;
@@ -87,14 +77,6 @@ export interface DependencyDeltaPlan {
         closure_edge_visits: number;
         schedule_edge_visits: number;
     };
-}
-
-interface SnapshotEnvelope {
-    schema_version: number;
-    planner_epoch: number;
-    snapshot_sha256: string;
-    snapshot_bytes: number;
-    complete: true;
 }
 
 const kindSet = new Set<string>(DEPENDENCY_NODE_KINDS);
@@ -345,68 +327,4 @@ export function explainAffectedNode(plan: DependencyDeltaPlan, nodeId: string): 
         current = plan.causes[current]?.via;
     }
     return reversed.reverse().join(' -> ');
-}
-
-/**
- * Publishes a snapshot and integrity envelope as the last writes in a private
- * staging directory. The caller atomically promotes that directory only after
- * all affected artifacts have succeeded.
- */
-export function writeDependencySnapshot(
-    directory: string,
-    snapshot: DependencyGraphSnapshot
-): void {
-    if (!snapshotIsSupported(snapshot)) {
-        throw new Error('Cannot publish an unsupported or incomplete dependency graph.');
-    }
-    mkdirSync(directory, {recursive: true});
-    const snapshotPath = resolve(directory, 'dependency-graph.json');
-    const envelopePath = resolve(directory, 'dependency-graph.manifest.json');
-    const snapshotContent = `${JSON.stringify(snapshot, null, 2)}\n`;
-    const digest = digestContent(snapshotContent);
-    const envelope: SnapshotEnvelope = {
-        schema_version: DEPENDENCY_GRAPH_SCHEMA_VERSION,
-        planner_epoch: DEPENDENCY_PLANNER_EPOCH,
-        snapshot_sha256: digest.sha256,
-        snapshot_bytes: digest.bytes,
-        complete: true
-    };
-    const stage = resolve(directory, `.dependency-graph-${process.pid}-${randomUUID()}`);
-    mkdirSync(stage);
-    try {
-        writeFileSync(resolve(stage, 'dependency-graph.json'), snapshotContent, 'utf-8');
-        writeFileSync(
-            resolve(stage, 'dependency-graph.manifest.json'),
-            `${JSON.stringify(envelope, null, 2)}\n`,
-            'utf-8'
-        );
-        renameSync(resolve(stage, 'dependency-graph.json'), snapshotPath);
-        renameSync(resolve(stage, 'dependency-graph.manifest.json'), envelopePath);
-    } finally {
-        rmSync(stage, {recursive: true, force: true});
-    }
-}
-
-export function readDependencySnapshot(directory: string): DependencyGraphSnapshot | null {
-    const snapshotPath = resolve(directory, 'dependency-graph.json');
-    const envelopePath = resolve(directory, 'dependency-graph.manifest.json');
-    if (!existsSync(snapshotPath) && !existsSync(envelopePath)) return null;
-    if (!existsSync(snapshotPath) || !existsSync(envelopePath)) {
-        throw new Error(`Dependency graph at ${directory} is incomplete.`);
-    }
-    const snapshotContent = readFileSync(snapshotPath);
-    const envelope = JSON.parse(readFileSync(envelopePath, 'utf-8')) as SnapshotEnvelope;
-    const digest = digestContent(snapshotContent);
-    if (envelope.schema_version !== DEPENDENCY_GRAPH_SCHEMA_VERSION
-        || envelope.planner_epoch !== DEPENDENCY_PLANNER_EPOCH
-        || envelope.complete !== true
-        || envelope.snapshot_sha256 !== digest.sha256
-        || envelope.snapshot_bytes !== digest.bytes) {
-        throw new Error(`Dependency graph at ${directory} failed integrity verification.`);
-    }
-    const snapshot = JSON.parse(snapshotContent.toString('utf-8')) as DependencyGraphSnapshot;
-    if (!snapshotIsSupported(snapshot)) {
-        throw new Error(`Dependency graph at ${directory} is unsupported or incomplete.`);
-    }
-    return snapshot;
 }

@@ -171,9 +171,9 @@ are validation machinery and use explicit graph rebuild plus forced reevaluation
 behavior changes.
 Cache lookup, active-key
 selection, pruning, and strict audit consume this identity. JSONL records remain the persisted
-evaluation results, but no longer decide staleness independently. When every direct dependency is
-unchanged, graph construction reuses the previous VQA key without resolving checklist or ontology
-definition text. Unit tests compare clean and
+evaluation results, but no longer decide staleness independently. Every graph build derives the
+key from those inputs, with operation-local memoization for repeated checklist and ontology contexts;
+a proven-clean development observation skips graph construction altogether. Unit tests compare clean and
 delta matching, cover new and removed pairs, bound changed-pair work linearly, require the graph
 key to reproduce the prompt-policy context key, and prove that checklist- or policy-only changes
 reach VQA without reaching image generation.
@@ -336,7 +336,7 @@ actually render. Coverage-source identity is restricted to target specs, generat
 specs plus their reachable local model imports, and extracted generator/view problem-type declarations;
 renderer and generator implementation bodies are excluded, and coverage does not execute a sample
 generator merely to establish a semantic match. Coverage machinery is intentionally excluded and
-uses explicit `--rebuild-graph`. Its match-only catalogs do not import generator
+uses explicit `--rebuild-graph`. Its shared model catalogs do not import generator
 classes or view renderers.
 
 #### Phase 3: compute and publish core coverage once
@@ -427,8 +427,9 @@ The graph constructs VQA cache keys from immutable shard identities, exact valid
 the validation-policy node;
 cache lookup, pruning, and audit read those keys rather than applying an independent staleness
 algorithm. PNG bytes open only for cache misses, forced evaluations, or the separate full audit
-integrity pass. Unchanged VQA dependencies reuse prior graph keys without rebuilding prompt
-contexts. Persisted target-label, target-to-match, and file-to-model-node postings bound existing
+integrity pass. A graph rebuild derives keys from immutable inputs with repeated validation contexts
+memoized within that operation; a proven-clean development observation reuses the complete persisted
+graph. Persisted target-label, target-to-match, and file-to-model-node postings bound existing
 generator/view source edits to relevant pairs. The selected model modules are loaded and their
 pair subgraphs are merged into the persisted complete graph; a capability or structure change
 falls back to a complete linear build. A conservative Git-assisted observation proves exact clean
@@ -495,7 +496,7 @@ high risk when they make ordinary scoped development behave like a clean rebuild
 | --- | --- | --- | --- | --- |
 | Partial or concurrent publication | High | A process crash or competing writer exposes a manifest that references missing, truncated, or mixed-generation blobs. Developers see intermittent failures; a release may become irreproducible. | Write immutable blobs under content hashes, verify them before admission, publish the complete manifest last through atomic replacement, coordinate writers per namespace, and let readers use only completed immutable generations. | Phases 4 and 5 |
 | Corrupted or missing cache blob | High | One damaged entry causes repeated failures or encourages an engineer to delete the complete cache, creating a miss storm. | Verify stored digests on admission and before release use; quarantine and rebuild only the affected entry or shard; retain enough manifest provenance to identify all dependents; provide targeted eviction rather than requiring directory deletion. | Phases 4 and 5 |
-| Machinery behavior changed without an explicit rebuild | High | Automatic keys intentionally exclude build, matching, validation, cache, workflow, and unrelated toolchain code. Reusing a graph after one of those changes can conceal a changed algorithm. | Development diagnostics list changed machinery files and direct the engineer to `--rebuild-graph`. The flag is full-only. Release generation, coverage, and audit always rebuild. Validation-semantics changes additionally require `--force` when existing images need fresh judgments. Skills document this boundary. | Phases 4 and 5 |
+| Machinery behavior changed without an explicit rebuild | High | Automatic keys intentionally exclude build, matching, validation, cache, workflow, and unrelated toolchain code. Reusing a graph after one of those changes can conceal a changed algorithm. | The graph neither detects nor manages machinery changes. The engineer or agent decides from the change scope whether to run the full-only `--rebuild-graph`. Release generation, coverage, and audit always rebuild. Validation-semantics changes additionally require `--force` when existing images need fresh judgments. Skills document this manual boundary. | Phases 4 and 5 |
 | Over-broad dependency or key | High for development | An unrelated edit invalidates a complete dataset, ontology, VQA module, or explorer snapshot. Correctness is preserved, but scoped work becomes slow and unpredictable. | Expose the affected closure before execution; explain which changed node and dependency edge caused every miss; reject silent escalation from scoped to global development work unless explicitly forced; use entity-, record-, pair-, and shard-level keys. | Phases 4 through 6 |
 | Unbounded obsolete artifacts | Medium | Immutable generations accumulate, obscure which output is active, and consume disk until engineers manually clean broad directories. | Determine reachability from published and intentionally retained manifests, preview garbage collection before deletion, and collect only unreachable content after a retention window. Garbage collection never determines cache validity. | Phase 5 |
 
@@ -554,9 +555,10 @@ Cache behavior must be observable without becoming another investigation task fo
    incomplete generations.
 6. Cache status and cleanup operations use manifests and reachability rather than directory age or
    filename conventions.
-7. Changed machinery paths are warnings rather than automatic input hashes. If behavior changed,
-   establish a new complete baseline with `--rebuild-graph`; for evaluator behavior, combine it
-   with `--force` when unchanged samples require new Gemini results.
+7. Machinery paths are outside automatic observation. The engineer or agent determines whether a
+   machinery edit can change behavior and, if so, establishes a new complete baseline with
+   `--rebuild-graph`; for evaluator behavior, combine it with `--force` when unchanged samples
+   require new Gemini results.
 
 Phase 1 counters expose current false misses and amplification. Phase 2 removes the most dangerous
 provenance and environment false hits before artifacts are shared across workflows in Phase 3.
@@ -593,8 +595,9 @@ The work is complete when the following properties hold:
     incomplete publication state, or mismatching content digests.
 14. Incremental and clean dependency plans select equivalent outputs for representative authored
     graph-input changes.
-15. A change to cache-key, matching, dependency-planner, validation, or workflow machinery is
-    reported during development and requires an explicit complete graph rebuild before reuse.
+15. Cache-key, matching, dependency-planner, validation, and workflow machinery is absent from
+    automatic change detection; project documentation and skills require an explicit complete graph
+    rebuild before reuse whenever an engineer or agent determines that behavior may have changed.
 16. Development diagnostics identify the causal dependency path for a cache miss or invalidation,
     and a corrupt entry can be repaired without clearing an unrelated cache domain.
 17. Concurrent or interrupted writers cannot expose an incomplete generation to readers.

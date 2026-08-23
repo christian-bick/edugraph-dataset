@@ -1,13 +1,12 @@
 import {createHash} from 'node:crypto';
-import {existsSync, readFileSync, writeFileSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import {basename, relative, resolve} from 'node:path';
 import {
-    GeneratorCatalogEntry,
     MatchTuple,
     SampleSplit,
-    SPLIT_DIRS,
-    ViewCatalogEntry
+    SPLIT_DIRS
 } from './generation.ts';
+import type {GeneratorModelDescriptor, ViewModelDescriptor} from './model-catalog.ts';
 import {
     buildCompatibleModulePairIndex,
     buildDependencyMatchingIndex,
@@ -169,10 +168,6 @@ function includeRenderSource(path: string): boolean {
 
 function hash(value: string): string {
     return createHash('sha256').update(value).digest('hex').slice(0, 16);
-}
-
-function pairKey(generator: string, view: string): string {
-    return `${generator}#${view}`;
 }
 
 function nodeId(kind: string, identity: string): string {
@@ -444,15 +439,14 @@ export function buildDatasetManifest(options: {
     datasetDir: string;
     specName: string;
     targets: CompetencyTarget[];
-    generators: GeneratorCatalogEntry[];
-    views: ViewCatalogEntry[];
+    generators: GeneratorModelDescriptor[];
+    views: ViewModelDescriptor[];
     generatedSplits: SampleSplit[];
     rendererEnvironment?: string;
     tuples?: readonly MatchTuple[];
     pairIndex?: CompatibleModulePairIndex;
     sourceIndex?: SourceContentIndex;
     reuseImageIdentityFrom?: DependencyGraphSnapshot;
-    reuseValidationIdentityFrom?: DependencyGraphSnapshot;
     counters?: WorkCounters;
     datasetSnapshot?: DatasetSnapshot;
     semanticSnapshots?: {
@@ -472,7 +466,6 @@ export function buildDatasetManifest(options: {
         pairIndex: preparedPairIndex,
         sourceIndex = new SourceContentIndex(projectRoot),
         reuseImageIdentityFrom,
-        reuseValidationIdentityFrom,
         counters,
         datasetSnapshot = readDatasetSnapshot(datasetDir),
         semanticSnapshots
@@ -495,7 +488,7 @@ export function buildDatasetManifest(options: {
     const rows = readDatasetRows(datasetSnapshot);
     const rowsByPair = new Map<string, DatasetManifestRow[]>();
     for (const row of rows) {
-        const key = pairKey(row.generator, row.view);
+        const key = modulePairKey(row.generator, row.view);
         const group = rowsByPair.get(key);
         if (group) group.push(row);
         else rowsByPair.set(key, [row]);
@@ -506,7 +499,7 @@ export function buildDatasetManifest(options: {
     const targetsByPair = new Map<string, CompetencyTarget[]>();
     const pairsByTarget = new Map<string, string[]>();
     for (const tuple of tuples) {
-        const key = pairKey(tuple.generatorId, tuple.viewId);
+        const key = modulePairKey(tuple.generatorId, tuple.viewId);
         const pairTargets = targetsByPair.get(key);
         if (pairTargets) pairTargets.push(tuple.target);
         else targetsByPair.set(key, [tuple.target]);
@@ -834,7 +827,7 @@ export function buildDatasetManifest(options: {
 
     const rowsByShard = new Map<string, DatasetManifestRow[]>();
     for (const row of rows) {
-        const key = pairKey(row.generator, row.view);
+        const key = modulePairKey(row.generator, row.view);
         const pairNodeId = nodeId('pair', key);
         const executionNodes = executionNodesByPair.get(key);
         if (!nodes.has(pairNodeId) || !executionNodes) continue;
@@ -871,30 +864,12 @@ export function buildDatasetManifest(options: {
             ...checklist.ids,
             ...labelDependencies
         ]);
-        const reusableVqa = reuseValidationIdentityFrom?.nodes[vqaId];
-        const reusableDependencies = reusableVqa?.dependencies ?? [];
-        const canReuseVqaKey = reusableVqa?.kind === 'vqa-record'
-            && reusableDependencies.length === vqaDependencies.length
-            && reusableDependencies.every((dependency, index) => dependency === vqaDependencies[index])
-            && vqaDependencies.every(dependency => {
-                const current = nodes.get(dependency);
-                const previous = reuseValidationIdentityFrom?.nodes[dependency];
-                return current !== undefined
-                    && previous !== undefined
-                    && current.kind === previous.kind
-                    && current.input_hash === previous.input_hash
-                    && JSON.stringify(radixSortUtf8([...current.dependencies]))
-                        === JSON.stringify(previous.dependencies)
-                    && current.output?.content_hash === previous.output?.content_hash;
-            });
-        const validationCacheKey = canReuseVqaKey
-            ? reusableVqa.input_hash
-            : vqaContextResolver.resolve(
-                imageDigest.sha256,
-                checklist.paths,
-                row.tags ?? []
-            ).validationCacheKey;
-        counters?.add(canReuseVqaKey ? 'vqa.graph_key_reuses' : 'vqa.graph_key_recomputes');
+        const validationCacheKey = vqaContextResolver.resolve(
+            imageDigest.sha256,
+            checklist.paths,
+            row.tags ?? []
+        ).validationCacheKey;
+        counters?.add('vqa.graph_key_recomputes');
         addNode(nodes, {
             id: vqaId,
             kind: 'vqa-record',
@@ -919,7 +894,7 @@ export function buildDatasetManifest(options: {
     for (const shardKey of radixSortUtf8([...rowsByShard.keys()])) {
         const rowsInShard = rowsByShard.get(shardKey)!;
         const first = rowsInShard[0];
-        const key = pairKey(first.generator, first.view);
+        const key = modulePairKey(first.generator, first.view);
         const shardId = nodeId('shard', shardKey);
         const imageIds = radixSortUtf8(rowsInShard.map(row => nodeId('image', row.sample_key)));
         const shardHash = digestIdentity(rowsInShard.map(row => ({
@@ -1021,20 +996,6 @@ function selectedPair(
 function executionPlan(plan: DependencyDeltaPlan): DatasetExecutionPlan {
     const {reusable_outputs: _outputs, ...stored} = plan;
     return stored;
-}
-
-export function updateDatasetManifest(options: {
-    projectRoot: string;
-    datasetDir: string;
-    specName: string;
-    build: DatasetManifestBuild;
-    scope: ManifestUpdateScope;
-}): DatasetManifest {
-    const {projectRoot, datasetDir, specName, build, scope} = options;
-    const previous = readDatasetManifest(datasetDir);
-    const manifest = createDatasetManifest({projectRoot, specName, build, scope, previous});
-    writeFileSync(resolve(datasetDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8');
-    return manifest;
 }
 
 export function createDatasetManifest(options: {

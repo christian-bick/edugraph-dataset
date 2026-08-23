@@ -1,7 +1,7 @@
 import {copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync} from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { listUnionSpecs } from '../lib/generation.ts';
+import {listUnionSpecs} from '../lib/spec-catalog.ts';
 import {
     UNION_DATASET_DIR,
     datasetDirForSpec,

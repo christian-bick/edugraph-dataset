@@ -107,9 +107,9 @@ Automatic identity covers authored targets, generator/view specs and schemas, th
 assets actually reached from generator/view implementations, accepted ontology semantics, view
 checklists, the VQA system prompt, and canonical environment identities. Build, matching,
 validation, cache, and workflow machinery is deliberately outside automatic identity. Such changes
-are reported during affected development; use a full `--rebuild-graph` run when they can change
-behavior. Releases always rebuild the graph. Git commits are discovery baselines, never artifact
-keys. Standard datasets expose a tiny
+are not detected or managed by the graph. The engineer or agent must use a full
+`--rebuild-graph` run when a machinery edit can change behavior. Releases always rebuild the graph.
+Git commits are discovery baselines, never artifact keys. Standard datasets expose a tiny
 `out/dataset-<spec>/current.json` pointer to immutable shards under `out/.dataset-store/`; all
 repository readers consume that logical snapshot.
 

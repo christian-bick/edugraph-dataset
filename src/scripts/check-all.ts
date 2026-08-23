@@ -4,11 +4,11 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import {
-    listSpecModules,
     loadGeneratorCatalog,
     loadViewCatalog,
     findGeneratorsWithoutTestPath
 } from '../lib/generation.ts';
+import {listSpecModules} from '../lib/spec-catalog.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
 import {readDatasetSnapshot} from '../lib/dataset-store.ts';

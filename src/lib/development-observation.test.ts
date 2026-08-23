@@ -113,12 +113,12 @@ describe('development input observation', () => {
         });
     });
 
-    it('reports machinery changes without treating them as automatic graph inputs', () => {
+    it('ignores machinery changes outside authored graph inputs', () => {
         const {projectRoot, inspect} = fixture();
         writeFileSync(resolve(projectRoot, 'src', 'lib', 'matching.ts'), 'export const matching = 2;\n');
         expect(inspect()).toMatchObject({
             clean: true,
-            manual_rebuild_files: ['src/lib/matching.ts']
+            relevant_files_checked: 0
         });
     });
 

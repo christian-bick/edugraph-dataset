@@ -5,9 +5,9 @@ import {
     type MatchTuple
 } from './matching.ts';
 import {
-    loadGeneratorMatchCatalog,
-    loadViewMatchCatalog
-} from './matching-catalog.ts';
+    loadGeneratorModelCatalog,
+    loadViewModelCatalog
+} from './model-catalog.ts';
 import {loadSpecTodos, loadTargets} from './spec-catalog.ts';
 import type {WorkCounters} from './work-counters.ts';
 import {
@@ -470,8 +470,8 @@ export async function buildCurrentStandardsCoverage(
     const [targets, todos, generators, views] = await Promise.all([
         loadTargets('ccss'),
         loadSpecTodos('ccss'),
-        loadGeneratorMatchCatalog(undefined, options.counters),
-        loadViewMatchCatalog(undefined, options.counters)
+        loadGeneratorModelCatalog(undefined, options.counters),
+        loadViewModelCatalog(undefined, options.counters)
     ]);
     const knownSamples = options.knownAssets
         ? assetIndexSampleMap(options.knownAssets)

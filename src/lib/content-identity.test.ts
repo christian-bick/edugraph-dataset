@@ -5,7 +5,6 @@ import {describe, expect, it} from 'vitest';
 import {
     SourceContentIndex,
     digestContent,
-    hashSourceFiles,
     radixSortUtf8
 } from './content-identity.ts';
 
@@ -31,17 +30,17 @@ describe('content identity', () => {
 
         try {
             const include = (path: string): boolean => !path.endsWith('.test.ts');
-            const directoryHash = hashSourceFiles(root, [root], {include});
-            const reversedHash = hashSourceFiles(root, [
+            const directoryHash = new SourceContentIndex(root).hash([root], {include});
+            const reversedHash = new SourceContentIndex(root).hash([
                 resolve(root, 'nested', 'b.ts'),
                 resolve(root, 'a.ts')
             ], {include});
             expect(directoryHash).toBe(reversedHash);
 
             writeFileSync(resolve(root, 'nested', 'ignored.test.ts'), 'changed');
-            expect(hashSourceFiles(root, [root], {include})).toBe(directoryHash);
+            expect(new SourceContentIndex(root).hash([root], {include})).toBe(directoryHash);
             writeFileSync(resolve(root, 'nested', 'b.ts'), 'changed');
-            expect(hashSourceFiles(root, [root], {include})).not.toBe(directoryHash);
+            expect(new SourceContentIndex(root).hash([root], {include})).not.toBe(directoryHash);
         } finally {
             rmSync(root, {recursive: true, force: true});
         }

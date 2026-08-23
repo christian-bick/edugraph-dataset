@@ -1,4 +1,4 @@
-import { loadSpecTodos } from '../lib/generation.ts';
+import {loadSpecTodos} from '../lib/spec-catalog.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { shortenLabel } from '../lib/utils.ts';
 import { getTargetPrefix } from '../lib/spec-validator.ts';

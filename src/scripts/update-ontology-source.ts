@@ -9,7 +9,8 @@ import {
     withOntologySemanticUsage
 } from '../lib/external-semantics.ts';
 import {resolveOntologyProvenance} from '../lib/coverage-identity.ts';
-import {loadGeneratorCatalog, loadTargets, loadViewCatalog} from '../lib/generation.ts';
+import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../lib/model-catalog.ts';
+import {loadTargets} from '../lib/spec-catalog.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const apply = process.argv.slice(2).includes('--apply');
@@ -35,8 +36,8 @@ async function main(): Promise<void> {
     const provenance = resolveOntologyProvenance(projectRoot);
     const base = buildOntologySemanticSnapshot({provenance});
     const [generators, views, targets] = await Promise.all([
-        loadGeneratorCatalog(),
-        loadViewCatalog(),
+        loadGeneratorModelCatalog(),
+        loadViewModelCatalog(),
         loadTargets('ccss')
     ]);
     const usedLabels = [

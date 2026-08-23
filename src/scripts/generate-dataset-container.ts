@@ -12,10 +12,7 @@ import {
     readDatasetManifest
 } from '../lib/dataset-manifest.ts';
 import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
-import {
-    inspectDevelopmentInputObservation,
-    summarizeManualRebuildFiles
-} from '../lib/development-observation.ts';
+import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {CANONICAL_RENDERER_ID} from '../lib/render-environment.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -64,13 +61,6 @@ async function main(): Promise<void> {
                 rendererEnvironment: CANONICAL_RENDERER_ID
             });
             if (observation.clean) {
-                if (observation.manual_rebuild_files.length > 0) {
-                    console.warn(
-                        '[Graph cache] Build/matching/validation machinery changed outside automatic identity: '
-                        + `${summarizeManualRebuildFiles(observation.manual_rebuild_files)}. `
-                        + 'Use --rebuild-graph if behavior changed.'
-                    );
-                }
                 console.log(
                     `Development delta: clean (${observation.reason}); canonical container startup skipped.`
                 );
