@@ -3,6 +3,7 @@ import {dirname, extname, isAbsolute, relative, resolve} from 'node:path';
 import * as ts from 'typescript';
 import {AssetLibraryIndex} from './asset-library.ts';
 import {radixSortUtf8} from './content-identity.ts';
+import type {WorkCounters} from './work-counters.ts';
 
 const MODULE_EXTENSIONS = [
     '', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json', '.css', '.scss'
@@ -82,13 +83,18 @@ export class ModelSourceIndex {
     private readonly projectRoot: string;
     private readonly assetLibrary: AssetLibraryIndex;
     private readonly includeAssets: boolean;
+    private readonly counters?: WorkCounters;
     private readonly direct = new Map<string, readonly string[]>();
     private readonly closure = new Map<string, readonly string[]>();
 
-    constructor(projectRoot: string, options: {includeAssets?: boolean} = {}) {
+    constructor(projectRoot: string, options: {
+        includeAssets?: boolean;
+        counters?: WorkCounters;
+    } = {}) {
         this.projectRoot = resolve(projectRoot);
         this.assetLibrary = new AssetLibraryIndex(this.projectRoot);
         this.includeAssets = options.includeAssets ?? true;
+        this.counters = options.counters;
     }
 
     private dependenciesOf(rawPath: string): readonly string[] {
@@ -100,6 +106,8 @@ export class ModelSourceIndex {
             return [];
         }
         const content = readFileSync(path, 'utf-8');
+        this.counters?.add('model_source.files_read');
+        this.counters?.add('model_source.bytes_read', Buffer.byteLength(content));
         const extension = extname(path);
         const specifiers = CODE_EXTENSIONS.has(extension)
             ? codeSpecifiers(path, content)

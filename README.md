@@ -146,6 +146,18 @@ invalidate affected records automatically. Response-schema, pass/fail implementa
 model, and validation-pipeline changes are machinery: rebuild the graph when their behavior changed,
 and add `--force` when unchanged images must actually be re-evaluated by Gemini.
 
+**2d. Audit Label Architecture**
+Inspect label-dimension cardinality, exact generator/view capability provenance, schema ownership,
+source-code warning signals, and the production tuples affected by every finding:
+```bash
+npm run audit:label-architecture -- --spec=ccss
+```
+The Phase 0 command writes deterministic Markdown and JSON under
+`temp/label-architecture/<spec>/`. It reports current migration findings without failing; add
+`--strict` only when using migrated violation categories as a gate. When the generated dataset's
+dependency graph exactly matches current capabilities, the audit reuses its successful tuples
+instead of repeating target matching.
+
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
 ```bash

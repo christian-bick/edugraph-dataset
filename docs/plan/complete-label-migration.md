@@ -274,6 +274,21 @@ The initial command may report known migration findings without failing. No perm
 should encode the old architecture as acceptable. Each check becomes a hard gate when its
 corresponding migration phase reaches zero findings.
 
+**Status: complete.** `npm run audit:label-architecture -- --spec=<module>` writes deterministic
+Markdown and JSON reports under `temp/label-architecture/<spec>/`; `--strict` is available for
+categories promoted to gates, while the default remains migration-report mode. The audit reuses
+successful match tuples from the persisted dataset dependency graph only when all current
+capability hashes, target postings, matching policy, and compatible-pair topology agree. The graph
+does not encode `generalLabels` versus schema provenance, so the current catalogs supply that exact
+declaration metadata. Source scans supply the implementation-only findings. This separation avoids
+a graph-schema migration while keeping matching work delta-aware and all audit passes linear.
+
+The first CCSS run reproduced the inventory above from 653 targets and 806 matched production
+tuples. It reported two Area-less targets and raw-label access in two sorting views as violations;
+24 generator payload candidates, 30 rejection declarations, seven applicability declarations, and
+20 view-owned Areas as review items; and 11 Ability-parameterized views as task-identity signals.
+There were no positive cross-role capability overlaps and no target without an Ability or match.
+
 ### Phase 1: validate and formalize the language-neutral generator boundary
 
 This is the highest-priority research and design phase.

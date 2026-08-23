@@ -20,6 +20,7 @@ const camelCase = (value: string): string =>
 export interface GeneratorModelDescriptor extends GeneratorMatchInfo {
     module: LeafModule;
     spec: any;
+    schema?: ConfigSchema;
 }
 
 export interface ViewModelDescriptor extends ViewMatchInfo {
@@ -75,6 +76,7 @@ export async function loadGeneratorModelCatalog(
             generatorId: module.id,
             module,
             spec: specModule.spec,
+            schema,
             labels: [...new Set([
                 ...(specModule.spec?.generalLabels || []),
                 ...extractSchemaLabels(schema)

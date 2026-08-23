@@ -455,6 +455,11 @@ Target-file ownership postings are a future refinement if spec growth makes the 
 fallback material; they are not required to keep ordinary generator/view implementation work
 steady. Release-wide graph construction remains the mandatory linear verification path.
 
+The label-architecture audit also consumes this foundation. It reuses persisted successful tuples
+when current capability nodes and pair topology match, then joins current catalog declaration
+metadata and one-pass source signals without expanding the graph schema. Stale or absent graph
+state falls back to one fresh indexed match rather than an exhaustive rejection matrix.
+
 #### Phase 6: isolate standards conversion and process ontology updates as semantic deltas
 
 1. Add an explicit standards-update command that compares a named immutable source revision with
