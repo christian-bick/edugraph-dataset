@@ -447,7 +447,7 @@ admit each PNG once to a content-addressed pool and hard-link unchanged assets i
 snapshots. TypeScript uses ignored incremental state; `check:affected` selects related tests and
 validators with explicit reasons. Module discovery and catalogs join the existing type-graph and
 ontology-ancestry caches. Store, planner, snapshot, catalog, and changed-file tests cover exact-pair
-replacement, legacy migration refusal, immutable reuse, corruption detection, and bounded
+replacement, obsolete-layout replacement requirements, immutable reuse, corruption detection, and bounded
 classification work.
 
 Target/spec structure changes and capability changes remain conservative full-plan boundaries.

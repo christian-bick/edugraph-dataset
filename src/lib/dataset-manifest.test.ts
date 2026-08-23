@@ -25,6 +25,7 @@ import {
 } from './dependency-planner.ts';
 import {buildVqaValidationContext} from './vqa-cache.ts';
 import {createWorkCounters} from './work-counters.ts';
+import {beginDatasetStoreTransaction} from './dataset-store.ts';
 
 const dependencyGraph = createDependencyGraphSnapshot([]);
 const cleanPlan = planDependencyDelta(null, dependencyGraph);
@@ -426,7 +427,6 @@ describe('buildDatasetManifest', () => {
         const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');
         const generatorDir = resolve(projectRoot, 'src', 'generators', 'demo');
         const viewDir = resolve(projectRoot, 'src', 'visuals', 'views', 'demo-view');
-        mkdirSync(resolve(datasetDir, 'train', 'demo'), {recursive: true});
         mkdirSync(generatorDir, {recursive: true});
         mkdirSync(viewDir, {recursive: true});
         mkdirSync(resolve(projectRoot, 'src', 'validation', 'vqa'), {recursive: true});
@@ -455,8 +455,13 @@ describe('buildDatasetManifest', () => {
         mkdirSync(resolve(projectRoot, 'src', 'visuals', 'views'), {recursive: true});
         writeFileSync(resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'), 'root-checklist');
         const imageName = 'demo/sample.png';
-        writeFileSync(resolve(datasetDir, 'train', imageName), 'png-bytes');
-        writeFileSync(resolve(datasetDir, 'train', 'metadata.jsonl'), `${JSON.stringify({
+        const dataset = beginDatasetStoreTransaction(datasetDir, {
+            fullDataset: true,
+            generatorIds: ['demo']
+        }, 'manifest-fixture');
+        mkdirSync(resolve(dataset.stagingDir, 'train', 'demo'), {recursive: true});
+        writeFileSync(resolve(dataset.stagingDir, 'train', imageName), 'png-bytes');
+        writeFileSync(resolve(dataset.stagingDir, 'train', 'metadata.jsonl'), `${JSON.stringify({
             file_name: imageName,
             sample_key: 'target#demo#demo-view#train#question#inst:0',
             generator: 'demo',
@@ -470,6 +475,7 @@ describe('buildDatasetManifest', () => {
             ],
             target_associations: [{spec: 'ccss', target_id: 'target'}]
         })}\n`);
+        dataset.commit(null);
 
         const generator = {
             generatorId: 'demo',

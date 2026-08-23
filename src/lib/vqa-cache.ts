@@ -6,13 +6,6 @@ import type {WorkCounters} from './work-counters.ts';
 import {currentValidationPolicyInputHash} from './vqa-policy.ts';
 
 const EDUGRAPH_NAMESPACE = 'http://edugraph.io/edu/';
-/**
- * The pre-policy-node cache was produced with this exact prompt/schema/pass
- * policy. Preserve its keys once; any future semantic policy edit gets a new
- * policy hash and therefore a new cache namespace automatically.
- */
-const LEGACY_VALIDATION_POLICY_HASH =
-    '83c84b074ae53279b199105ab8a8608b40a27c312a318dba8004f5350782b8e3';
 
 export type VqaLabelVerdict = 'defendable' | 'uncertain' | 'not_defendable';
 
@@ -54,7 +47,7 @@ export interface VqaCacheEntry {
     checklist_hash: string;
     label_context_hash: string;
     validation_context_hash: string;
-    validation_policy_hash?: string;
+    validation_policy_hash: string;
     validated_at: string;
     evaluation: {
         pass: boolean;
@@ -142,10 +135,9 @@ export function computeValidationCacheKey(
     validationContextHash: string,
     validationPolicyHash = currentValidationPolicyInputHash()
 ): string {
-    const rawKey = validationPolicyHash === LEGACY_VALIDATION_POLICY_HASH
-        ? `${imageSha256}:${validationContextHash}`
-        : `${imageSha256}:${validationContextHash}:${validationPolicyHash}`;
-    return createHash('sha256').update(rawKey).digest('hex');
+    return createHash('sha256')
+        .update(`${imageSha256}:${validationContextHash}:${validationPolicyHash}`)
+        .digest('hex');
 }
 
 export function buildVqaValidationContext(

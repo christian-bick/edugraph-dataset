@@ -89,7 +89,7 @@ export interface DatasetManifest {
     complete: true;
     spec: string;
     ontology_dependency: string;
-    ontology_provenance_hash?: string;
+    ontology_provenance_hash: string;
     generated_at: string;
     /** Non-authoritative Git-assisted shortcut for exact development no-ops. */
     development_observation?: DevelopmentInputObservation;
@@ -140,8 +140,8 @@ interface DatasetManifestRow {
     generator: string;
     view: string;
     target_id?: string;
-    content_fingerprint?: string;
-    task_fingerprint?: string;
+    content_fingerprint: string;
+    task_fingerprint: string;
     tags?: string[];
     target_associations?: Array<{spec: string; target_id: string}>;
     _split: SampleSplit;
@@ -799,8 +799,8 @@ export function buildDatasetManifest(options: {
             kind: 'image',
             input_hash: reusableImage?.input_hash ?? digestIdentity({
                 sample_key: row.sample_key,
-                content_fingerprint: row.content_fingerprint ?? null,
-                task_fingerprint: row.task_fingerprint ?? null,
+                content_fingerprint: row.content_fingerprint,
+                task_fingerprint: row.task_fingerprint,
                 image_sha256: imageDigest.sha256
             }),
             dependencies: [pairNodeId, ...rowMatchNodes],
@@ -989,7 +989,7 @@ export function affectedDatasetPairKeys(
         ...Object.entries(previous?.entries ?? {}),
         ...Object.entries(build.entries)
     ])) {
-        if ((entry.render_nodes ?? entry.execution_nodes).some(node => affected.has(node))) keys.add(key);
+        if (entry.render_nodes.some(node => affected.has(node))) keys.add(key);
     }
     for (const node of plan.removed_nodes) {
         if (node.startsWith('pair:')) keys.add(node.slice('pair:'.length));
@@ -1015,11 +1015,11 @@ export function assertDatasetGenerationScope(
     ]);
     const outsideScope = [...entries].filter(([key, entry]) =>
         !selectedPair(key, entry, scope, generators, views, pairs)
-        && (entry.render_nodes ?? entry.execution_nodes).some(id => affected.has(id))
+        && entry.render_nodes.some(id => affected.has(id))
     );
     if (outsideScope.length > 0) {
         const first = outsideScope[0];
-        const causeNode = (first[1].render_nodes ?? first[1].execution_nodes)
+        const causeNode = first[1].render_nodes
             .find(id => affected.has(id))!;
         const cause = explainAffectedNode(plan, causeNode) ?? causeNode;
         throw new Error(
@@ -1071,7 +1071,7 @@ export function datasetFreshnessIssues(
     if (manifest.dependency_graph) {
         const plan = planDependencyDelta(manifest.dependency_graph, currentBuild.dependency_graph);
         const selectedNodes = new Set(Object.values(currentBuild.entries)
-            .flatMap(entry => entry.render_nodes ?? entry.execution_nodes));
+            .flatMap(entry => entry.render_nodes));
         const affected = plan.affected_nodes.filter(id => selectedNodes.has(id));
         if (affected.length > 0) {
             const first = affected[0];

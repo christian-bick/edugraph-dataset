@@ -23,6 +23,7 @@ function row(overrides: Partial<MetadataRow> = {}): MetadataRow {
         mode: 'question',
         instance: 0,
         content_fingerprint: 'fp-1',
+        task_fingerprint: overrides.task_fingerprint ?? overrides.content_fingerprint ?? 'fp-1',
         ...overrides,
     };
 }

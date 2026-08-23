@@ -16,7 +16,7 @@ import type {AssetIndex} from './asset-index.ts';
 import {localAssetRequestKey} from './local-assets.ts';
 import {digestFile, radixSortUtf8} from './content-identity.ts';
 
-export const LOCAL_EXPLORER_SNAPSHOT_SCHEMA_VERSION = 1;
+export const LOCAL_EXPLORER_SNAPSHOT_SCHEMA_VERSION = 2;
 
 export interface LocalExplorerSnapshotInfo {
     schema_version: number;
@@ -153,16 +153,20 @@ function listLocalExplorerSnapshots(snapshotRoot: string): LocalExplorerSnapshot
                 if (value.schema_version !== LOCAL_EXPLORER_SNAPSHOT_SCHEMA_VERSION
                     || value.snapshot_id !== entry.name
                     || typeof value.generated_at !== 'string'
-                    || typeof value.asset_count !== 'number') return [];
+                    || typeof value.asset_count !== 'number'
+                    || typeof value.asset_blobs_written !== 'number'
+                    || typeof value.asset_blobs_reused !== 'number'
+                    || typeof value.asset_links_created !== 'number'
+                    || typeof value.asset_bytes_written !== 'number') return [];
                 return [{
                     schema_version: value.schema_version,
                     snapshot_id: value.snapshot_id,
                     generated_at: value.generated_at,
                     asset_count: value.asset_count,
-                    asset_blobs_written: value.asset_blobs_written ?? 0,
-                    asset_blobs_reused: value.asset_blobs_reused ?? 0,
-                    asset_links_created: value.asset_links_created ?? 0,
-                    asset_bytes_written: value.asset_bytes_written ?? 0,
+                    asset_blobs_written: value.asset_blobs_written,
+                    asset_blobs_reused: value.asset_blobs_reused,
+                    asset_links_created: value.asset_links_created,
+                    asset_bytes_written: value.asset_bytes_written,
                     directory,
                 }];
             } catch {

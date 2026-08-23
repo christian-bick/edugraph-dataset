@@ -35,6 +35,7 @@ function makeEntry(overrides: Partial<VqaCacheEntry>): VqaCacheEntry {
         checklist_hash: 'check',
         label_context_hash: 'labels',
         validation_context_hash: 'context',
+        validation_policy_hash: contextPolicyHash(),
         validated_at: '2026-07-22T00:00:00Z',
         evaluation: { pass: true, reasoning: '', label_checks: [] },
         ...overrides

@@ -6,7 +6,6 @@ import {
     openSync,
     closeSync,
     readFileSync,
-    readdirSync,
     renameSync,
     rmSync,
     writeFileSync
@@ -126,19 +125,6 @@ function readJsonLines(path: string): StoredDatasetRow[] {
         .map(line => JSON.parse(line) as StoredDatasetRow);
 }
 
-function readLegacySplit(datasetDir: string, split: SampleSplit): StoredDatasetRow[] {
-    const splitDir = resolve(datasetDir, SPLIT_DIRS[split]);
-    const rootMetadata = resolve(splitDir, 'metadata.jsonl');
-    if (existsSync(rootMetadata)) return readJsonLines(rootMetadata);
-    if (!existsSync(splitDir)) return [];
-    const modules = readdirSync(splitDir, {withFileTypes: true})
-        .filter(entry => entry.isDirectory())
-        .map(entry => entry.name);
-    return radixSortUtf8(modules)
-        .flatMap(moduleName => readJsonLines(resolve(splitDir, moduleName, '.metadata.jsonl'))
-            .map(row => ({...row, file_name: `${moduleName}/${row.file_name}`})));
-}
-
 function readShard(datasetDir: string, reference: DatasetShardReference): DatasetShardManifest {
     const directory = shardDir(datasetDir, reference.key);
     const path = resolve(directory, 'manifest.json');
@@ -248,41 +234,18 @@ function snapshotFrom(
     };
 }
 
-function legacySnapshot(datasetDir: string): DatasetSnapshot {
-    const rowsBySplit = new Map<SampleSplit, StoredDatasetRow[]>();
-    const pathsBySample = new Map<string, string>();
-    for (const split of Object.keys(SPLIT_DIRS) as SampleSplit[]) {
-        const rows = readLegacySplit(datasetDir, split);
-        rowsBySplit.set(split, rows);
-        for (const row of rows) {
-            pathsBySample.set(`${split}\0${row.sample_key}`, resolve(datasetDir, SPLIT_DIRS[split], row.file_name));
-        }
-    }
-    const buildManifestPath = resolve(datasetDir, 'manifest.json');
-    return {
-        datasetDir,
-        generationId: null,
-        buildManifest: existsSync(buildManifestPath)
-            ? JSON.parse(readFileSync(buildManifestPath, 'utf-8'))
-            : null,
-        shardReferences: {},
-        rows: split => rowsBySplit.get(split) ?? [],
-        imagePath: (split, sampleKey) => {
-            const path = pathsBySample.get(`${split}\0${sampleKey}`);
-            if (!path) throw new Error(`Legacy dataset image is not indexed for ${sampleKey}.`);
-            return path;
-        },
-        imageIdentity: (split, sampleKey) => {
-            const path = pathsBySample.get(`${split}\0${sampleKey}`);
-            if (!path) throw new Error(`Legacy dataset image identity is not indexed for ${sampleKey}.`);
-            return digestFile(path);
-        }
-    };
+function emptySnapshot(datasetDir: string): DatasetSnapshot {
+    return snapshotFrom(datasetDir, null, null, {});
 }
 
 export function readDatasetSnapshot(datasetDir: string): DatasetSnapshot {
     const pointerPath = resolve(datasetDir, 'current.json');
-    if (!existsSync(pointerPath)) return legacySnapshot(datasetDir);
+    if (!existsSync(pointerPath)) {
+        if (!existsSync(datasetDir)) return emptySnapshot(datasetDir);
+        throw new Error(
+            `Dataset at ${datasetDir} has no current.json pointer; run one full generation to replace it.`
+        );
+    }
     const pointer = JSON.parse(readFileSync(pointerPath, 'utf-8')) as DatasetPointer;
     if (pointer.schema_version !== DATASET_STORE_SCHEMA_VERSION || pointer.complete !== true) {
         throw new Error(`Dataset pointer at ${datasetDir} is unsupported or incomplete.`);
@@ -424,12 +387,9 @@ export function beginDatasetStoreTransaction(
     let previous: DatasetSnapshot;
     try {
         mkdirSync(stagingDir, {recursive: true});
-        previous = readDatasetSnapshot(datasetDir);
-        if (!scope.fullDataset
-            && previous.generationId === null
-            && (previous.rows('train').length > 0 || previous.rows('val').length > 0)) {
-            throw new Error('A legacy dataset must be migrated with one full generation before scoped shard replacement.');
-        }
+        previous = scope.fullDataset && !existsSync(resolve(datasetDir, 'current.json'))
+            ? emptySnapshot(datasetDir)
+            : readDatasetSnapshot(datasetDir);
     } catch (error) {
         rmSync(stagingDir, {recursive: true, force: true});
         closeSync(lock);
@@ -550,7 +510,7 @@ export function beginDatasetStoreTransaction(
                 try {
                     rmSync(backup, {recursive: true, force: true});
                 } catch {
-                    // The new pointer is committed; a locked legacy backup is harmless.
+                    // The new pointer is committed; a locked previous backup is harmless.
                 }
             } catch (error) {
                 if (movedExisting && !existsSync(datasetDir) && existsSync(backup)) {

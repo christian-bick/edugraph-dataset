@@ -666,6 +666,7 @@ async function main() {
                         checklist_hash: record.checklist_hash,
                         label_context_hash: record.label_context_hash,
                         validation_context_hash: record.validation_context_hash,
+                        validation_policy_hash: record.validation_policy_hash,
                         validated_at: record.validated_at,
                         evaluation: record.evaluation
                     });

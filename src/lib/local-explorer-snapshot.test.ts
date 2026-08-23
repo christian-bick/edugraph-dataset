@@ -93,4 +93,19 @@ describe('local explorer snapshots', () => {
         })).toThrow('Invalid local explorer asset key');
         expect(readLatestLocalExplorerSnapshot(snapshotRoot)).toBeNull();
     });
+
+    it('ignores snapshots that do not satisfy the current statistics schema', () => {
+        const root = fixtureRoot();
+        const snapshotRoot = resolve(root, 'snapshots');
+        const incomplete = resolve(snapshotRoot, 'incomplete');
+        mkdirSync(incomplete, {recursive: true});
+        writeFileSync(resolve(incomplete, 'snapshot.json'), JSON.stringify({
+            schema_version: 2,
+            snapshot_id: 'incomplete',
+            generated_at: '2026-08-16T12:00:00.000Z',
+            asset_count: 1,
+        }));
+
+        expect(readLatestLocalExplorerSnapshot(snapshotRoot)).toBeNull();
+    });
 });

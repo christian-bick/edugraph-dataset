@@ -191,24 +191,31 @@ describe('dataset store', () => {
         }
     });
 
-    it('retains a legacy dataset as a readable migration source', () => {
-        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-store-legacy-'));
+    it('requires a full generation to replace an obsolete physical layout', () => {
+        const root = mkdtempSync(resolve(tmpdir(), 'edugraph-store-obsolete-'));
         const datasetDir = resolve(root, 'out', 'dataset-test');
         mkdirSync(resolve(datasetDir, 'train', 'one'), {recursive: true});
-        const row = {file_name: 'one/sample.png', sample_key: 'legacy', generator: 'one', view: 'view'};
+        const row = {file_name: 'one/sample.png', sample_key: 'obsolete', generator: 'one', view: 'view'};
         writeFileSync(resolve(datasetDir, 'train', 'metadata.jsonl'), `${JSON.stringify(row)}\n`);
-        writeFileSync(resolve(datasetDir, 'train', 'one', 'sample.png'), 'legacy-image');
+        writeFileSync(resolve(datasetDir, 'train', 'one', 'sample.png'), 'obsolete-image');
         writeFileSync(resolve(datasetDir, 'manifest.json'), JSON.stringify({schema_version: 2}));
         try {
-            const snapshot = readDatasetSnapshot(datasetDir);
-            expect(snapshot.generationId).toBeNull();
-            expect(snapshot.rows('train')).toEqual([row]);
-            expect(readFileSync(snapshot.imagePath('train', 'legacy'), 'utf-8')).toBe('legacy-image');
-            expect(snapshot.buildManifest).toEqual({schema_version: 2});
+            expect(() => readDatasetSnapshot(datasetDir)).toThrow('has no current.json pointer');
             expect(() => beginDatasetStoreTransaction(datasetDir, {
                 fullDataset: false,
                 generatorIds: ['one']
-            }, 'unsafe-scope')).toThrow('must be migrated with one full generation');
+            }, 'unsafe-scope')).toThrow('has no current.json pointer');
+
+            const replacement = beginDatasetStoreTransaction(datasetDir, {
+                fullDataset: true,
+                generatorIds: ['one']
+            }, 'replacement');
+            writeSelected(replacement.stagingDir, 'one', 'view', 'current', 'current-image');
+            replacement.commit({schema_version: 8});
+
+            const snapshot = readDatasetSnapshot(datasetDir);
+            expect(snapshot.rows('train').map(current => current.sample_key)).toEqual(['current']);
+            expect(snapshot.buildManifest).toEqual({schema_version: 8});
         } finally {
             rmSync(root, {recursive: true, force: true});
         }

@@ -24,6 +24,7 @@ function cacheEntry(overrides: Partial<VqaCacheEntry> = {}): VqaCacheEntry {
         checklist_hash: 'checklist',
         label_context_hash: 'labels',
         validation_context_hash: 'context',
+        validation_policy_hash: 'policy',
         validated_at: '2026-08-08T00:00:00Z',
         evaluation: { pass: true, reasoning: 'ok', label_checks: [] },
         ...overrides
