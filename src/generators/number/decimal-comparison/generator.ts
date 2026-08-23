@@ -53,36 +53,18 @@ const PAIRS_BY_RELATION = {
 
 const randomItem = <T>(items: readonly T[]): T => items[Math.floor(random() * items.length)]!;
 
-const normalizedNotation = (hundredths: number): string =>
-    `0.${String(hundredths).padStart(2, '0')}`;
-
-const makeOperand = <Role extends DecimalComparisonOperand['role']>(
-    role: Role,
-    seed: OperandSeed
-): DecimalComparisonOperand & {role: Role} => {
+const makeOperand = (seed: OperandSeed): DecimalComparisonOperand => {
     const tenthsDigit = Math.floor(seed.normalizedHundredths / 10);
     const normalizedHundredthsDigit = seed.normalizedHundredths % 10;
     const hundredthsDigit = seed.precision === 'hundredths'
         ? normalizedHundredthsDigit
         : null;
-    const decimalNotation = seed.precision === 'tenths'
-        ? `0.${tenthsDigit}`
-        : normalizedNotation(seed.normalizedHundredths);
-
     return {
-        role,
-        decimalNotation,
-        normalizedHundredthsNotation: normalizedNotation(seed.normalizedHundredths),
         precision: seed.precision,
         wholeDigit: 0,
         tenthsDigit,
         hundredthsDigit,
         normalizedHundredths: seed.normalizedHundredths,
-        placeValueRow: {
-            ones: '0',
-            tenths: String(tenthsDigit),
-            hundredths: String(normalizedHundredthsDigit)
-        },
         model: toTenthsHundredthsGrid(seed.normalizedHundredths, 100)
     };
 };
@@ -142,9 +124,8 @@ export class DecimalComparisonGenerator implements ProblemGenerator<
         const pair = relation === 'equal'
             ? equalityPair()
             : randomItem(PAIRS_BY_RELATION[relation]);
-        const left = makeOperand('left', pair.left);
-        const right = makeOperand('right', pair.right);
-        const symbol = relation === 'greater' ? '>' as const : relation === 'less' ? '<' as const : '=' as const;
+        const left = makeOperand(pair.left);
+        const right = makeOperand(pair.right);
         const firstDecidingPlace = relation === 'equal'
             ? 'equal' as const
             : left.tenthsDigit === right.tenthsDigit
@@ -155,7 +136,6 @@ export class DecimalComparisonGenerator implements ProblemGenerator<
                 task: 'compare-decimals',
                 sharedWhole: 1,
                 relation,
-                symbol,
                 left,
                 right,
                 firstDecidingPlace

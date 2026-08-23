@@ -1513,19 +1513,11 @@ export type DecimalNotationProblem = {
 };
 
 export type DecimalComparisonOperand = {
-    role: 'left' | 'right';
-    decimalNotation: string;
-    normalizedHundredthsNotation: string;
     precision: 'tenths' | 'hundredths';
     wholeDigit: 0;
     tenthsDigit: number;
     hundredthsDigit: number | null;
     normalizedHundredths: number;
-    placeValueRow: {
-        ones: '0';
-        tenths: string;
-        hundredths: string;
-    };
     model: TenthsHundredthsGridModel;
 };
 
@@ -1533,9 +1525,8 @@ export type DecimalComparisonProblem = {
     task: 'compare-decimals';
     sharedWhole: 1;
     relation: 'greater' | 'equal' | 'less';
-    symbol: '>' | '=' | '<';
-    left: DecimalComparisonOperand & {role: 'left'};
-    right: DecimalComparisonOperand & {role: 'right'};
+    left: DecimalComparisonOperand;
+    right: DecimalComparisonOperand;
     firstDecidingPlace: 'tenths' | 'hundredths' | 'equal';
 };
 

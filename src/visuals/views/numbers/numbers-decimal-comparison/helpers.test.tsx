@@ -6,8 +6,10 @@ import {setSeed} from '../../../../lib/random.ts';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {DecimalComparisonProblem} from '../../../../types/problems.ts';
 import {
+    decimalComparisonNotation,
     decimalComparisonPresentation,
-    isValidDecimalComparisonProblem
+    isValidDecimalComparisonProblem,
+    normalizedDecimalNotation
 } from './helpers.ts';
 import {NumbersDecimalComparisonCore} from './view.tsx';
 
@@ -31,7 +33,8 @@ const findPair = (
 ): DecimalComparisonProblem => {
     for (let index = 0; index < 20000; index++) {
         const data = generate(`decimal-comparison-${left}-${right}-${index}`, relation);
-        if (data.left.decimalNotation === left && data.right.decimalNotation === right) return data;
+        if (decimalComparisonNotation(data.left) === left
+            && decimalComparisonNotation(data.right) === right) return data;
     }
     throw new Error(`Could not generate ${left} ${relation} ${right}.`);
 };
@@ -70,14 +73,15 @@ describe('decimal comparison view contract', () => {
         }
     });
 
-    it('rejects contradictory relation, place, normalized value, and model evidence', () => {
+    it('rejects contradictory relation, place, numeric digit, precision, and model evidence', () => {
         const source = findPair('0.9', '0.91', 'less');
         const mutations: Array<(data: DecimalComparisonProblem) => void> = [
-            data => { data.symbol = '>'; },
             data => { data.relation = 'greater'; },
             data => { data.firstDecidingPlace = 'tenths'; },
-            data => { data.left.placeValueRow.hundredths = '9'; },
-            data => { data.right.normalizedHundredthsNotation = '0.19'; },
+            data => { data.left.tenthsDigit = 8; },
+            data => { data.right.hundredthsDigit = 9; },
+            data => { data.left.precision = 'hundredths'; },
+            data => { data.right.normalizedHundredths = 19; },
             data => { data.left.model.cells[0]!.shaded = false; },
             data => { data.right.model.cells[0]!.source = 'first-addend'; }
         ];
@@ -90,7 +94,6 @@ describe('decimal comparison view contract', () => {
         const source = findPair('0.5', '0.50', 'equal');
         const samePrecision = changed(source, data => {
             data.right = structuredClone(data.left) as unknown as typeof data.right;
-            data.right.role = 'right';
         });
         expect(isValidDecimalComparisonProblem(samePrecision)).toBe(false);
 
@@ -104,10 +107,10 @@ describe('decimal comparison view contract', () => {
                 malformed as unknown as DecimalComparisonProblem
             )).toBe(false);
         }
-        const missingRow = structuredClone(source);
-        missingRow.left.placeValueRow = null as never;
-        expect(() => isValidDecimalComparisonProblem(missingRow)).not.toThrow();
-        expect(isValidDecimalComparisonProblem(missingRow)).toBe(false);
+        const missingModel = structuredClone(source);
+        missingModel.left.model = null as never;
+        expect(() => isValidDecimalComparisonProblem(missingModel)).not.toThrow();
+        expect(isValidDecimalComparisonProblem(missingModel)).toBe(false);
 
         const missingCells = structuredClone(source);
         missingCells.right.model.cells = null as never;
@@ -150,10 +153,12 @@ describe('decimal comparison view contract', () => {
             config={{}}
             payload={payload(data, true)}
         />).replaceAll('&lt;', '<').replaceAll('&gt;', '>');
+        const leftNormalizedNotation = normalizedDecimalNotation(data.left.normalizedHundredths);
+        const rightNormalizedNotation = normalizedDecimalNotation(data.right.normalizedHundredths);
 
-        expect(question).not.toContain(`${data.left.normalizedHundredthsNotation} = ${data.right.normalizedHundredthsNotation}`);
+        expect(question).not.toContain(`${leftNormalizedNotation} = ${rightNormalizedNotation}`);
         expect(question).not.toContain(presentation.explanation);
-        expect(solution).toContain(`${data.left.normalizedHundredthsNotation} = ${data.right.normalizedHundredthsNotation}`);
+        expect(solution).toContain(`${leftNormalizedNotation} = ${rightNormalizedNotation}`);
         expect(solution).toContain(presentation.explanation);
     });
 });

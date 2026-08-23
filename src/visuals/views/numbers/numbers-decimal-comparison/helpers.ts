@@ -13,39 +13,37 @@ const relationPhrase = (
         ? 'less than'
         : 'equal to';
 
-const normalizedNotation = (hundredths: number): string =>
+export const normalizedDecimalNotation = (hundredths: number): string =>
     `0.${String(hundredths).padStart(2, '0')}`;
+
+export const decimalComparisonNotation = (operand: DecimalComparisonOperand): string =>
+    operand.precision === 'tenths'
+        ? `0.${operand.tenthsDigit}`
+        : normalizedDecimalNotation(operand.normalizedHundredths);
+
+export const decimalPlaceValueRow = (operand: DecimalComparisonOperand) => ({
+    ones: String(operand.wholeDigit),
+    tenths: String(operand.tenthsDigit),
+    hundredths: String(operand.normalizedHundredths % 10)
+});
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null;
 
-const validOperand = (
-    operand: DecimalComparisonOperand,
-    role: DecimalComparisonOperand['role']
-): boolean => {
+const validOperand = (operand: DecimalComparisonOperand): boolean => {
     if (!isRecord(operand)
-        || operand.role !== role
         || (operand.precision !== 'tenths' && operand.precision !== 'hundredths')
         || operand.wholeDigit !== 0
         || !Number.isInteger(operand.normalizedHundredths)
         || operand.normalizedHundredths < 1
         || operand.normalizedHundredths > 99
         || !Number.isInteger(operand.tenthsDigit)
-        || operand.tenthsDigit !== Math.floor(operand.normalizedHundredths / 10)
-        || operand.normalizedHundredthsNotation !== normalizedNotation(operand.normalizedHundredths)
-        || !isRecord(operand.placeValueRow)
-        || operand.placeValueRow.ones !== '0'
-        || operand.placeValueRow.tenths !== String(operand.tenthsDigit)
-        || operand.placeValueRow.hundredths !== String(operand.normalizedHundredths % 10)) return false;
+        || operand.tenthsDigit !== Math.floor(operand.normalizedHundredths / 10)) return false;
 
     const isTenths = operand.precision === 'tenths';
-    const expectedDecimal = isTenths
-        ? `0.${operand.tenthsDigit}`
-        : operand.normalizedHundredthsNotation;
-    if (operand.decimalNotation !== expectedDecimal
-        || (isTenths
-            ? operand.hundredthsDigit !== null || operand.normalizedHundredths % 10 !== 0
-            : operand.hundredthsDigit !== operand.normalizedHundredths % 10)) return false;
+    if (isTenths
+        ? operand.hundredthsDigit !== null || operand.normalizedHundredths % 10 !== 0
+        : operand.hundredthsDigit !== operand.normalizedHundredths % 10) return false;
 
     const modelValue: DecimalFractionValue = {
         numerator: operand.normalizedHundredths,
@@ -70,13 +68,16 @@ const expectedExplanation = (
 
 export const decimalComparisonPresentation = (data: DecimalComparisonProblem) => {
     const phrase = relationPhrase(data.relation);
-    const questionEquation = `${data.left.decimalNotation} ? ${data.right.decimalNotation}`;
-    const solutionEquation = `${data.left.decimalNotation} ${data.symbol} ${data.right.decimalNotation}`;
+    const leftNotation = decimalComparisonNotation(data.left);
+    const rightNotation = decimalComparisonNotation(data.right);
+    const symbol = data.relation === 'greater' ? '>' : data.relation === 'less' ? '<' : '=';
+    const questionEquation = `${leftNotation} ? ${rightNotation}`;
+    const solutionEquation = `${leftNotation} ${symbol} ${rightNotation}`;
     return {
         prompt: 'Compare the decimals. Use >, =, or <.',
         questionEquation,
         solutionEquation,
-        answerStatement: `${data.left.decimalNotation} is ${phrase} ${data.right.decimalNotation}, so ${solutionEquation}.`,
+        answerStatement: `${leftNotation} is ${phrase} ${rightNotation}, so ${solutionEquation}.`,
         explanation: expectedExplanation(data, phrase, solutionEquation)
     };
 };
@@ -88,8 +89,8 @@ export const isValidDecimalComparisonProblem = (
         || data.task !== 'compare-decimals'
         || data.sharedWhole !== 1
         || !['greater', 'equal', 'less'].includes(data.relation)
-        || !validOperand(data.left, 'left')
-        || !validOperand(data.right, 'right')
+        || !validOperand(data.left)
+        || !validOperand(data.right)
         || data.left.precision === data.right.precision) return false;
 
     const relation = data.left.normalizedHundredths > data.right.normalizedHundredths
@@ -97,7 +98,6 @@ export const isValidDecimalComparisonProblem = (
         : data.left.normalizedHundredths < data.right.normalizedHundredths
             ? 'less'
             : 'equal';
-    const symbol = relation === 'greater' ? '>' : relation === 'less' ? '<' : '=';
     const decidingPlace = relation === 'equal'
         ? 'equal'
         : data.left.tenthsDigit === data.right.tenthsDigit
@@ -107,6 +107,5 @@ export const isValidDecimalComparisonProblem = (
 
     return (relation === 'equal' || hundredthsOperand.normalizedHundredths % 10 !== 0)
         && data.relation === relation
-        && data.symbol === symbol
         && data.firstDecidingPlace === decidingPlace;
 };

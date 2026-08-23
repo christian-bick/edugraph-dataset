@@ -52,28 +52,24 @@ const expectGrid = (model: TenthsHundredthsGridModel, shadedCount: number): void
     });
 };
 
+const decimalNotation = (operand: DecimalComparisonOperand): string =>
+    operand.precision === 'tenths'
+        ? `0.${operand.tenthsDigit}`
+        : `0.${String(operand.normalizedHundredths).padStart(2, '0')}`;
+
 const expectOperand = (operand: DecimalComparisonOperand): void => {
     const normalized = operand.normalizedHundredths;
     const tenthsDigit = Math.floor(normalized / 10);
     const hundredthsDigit = normalized % 10;
     expect(normalized).toBeGreaterThan(0);
     expect(normalized).toBeLessThan(100);
-    expect(operand.normalizedHundredthsNotation)
-        .toBe(`0.${String(normalized).padStart(2, '0')}`);
     expect(operand.wholeDigit).toBe(0);
     expect(operand.tenthsDigit).toBe(tenthsDigit);
-    expect(operand.placeValueRow).toEqual({
-        ones: '0',
-        tenths: String(tenthsDigit),
-        hundredths: String(hundredthsDigit)
-    });
     if (operand.precision === 'tenths') {
         expect(normalized % 10).toBe(0);
         expect(operand.hundredthsDigit).toBeNull();
-        expect(operand.decimalNotation).toBe(`0.${tenthsDigit}`);
     } else {
         expect(operand.hundredthsDigit).toBe(hundredthsDigit);
-        expect(operand.decimalNotation).toBe(operand.normalizedHundredthsNotation);
     }
     expectGrid(operand.model, normalized);
 };
@@ -81,8 +77,15 @@ const expectOperand = (operand: DecimalComparisonOperand): void => {
 const expectExactProblem = (problem: DecimalComparisonProblem): void => {
     expect(problem.task).toBe('compare-decimals');
     expect(problem.sharedWhole).toBe(1);
-    expect(problem.left.role).toBe('left');
-    expect(problem.right.role).toBe('right');
+    expect(problem).not.toHaveProperty('symbol');
+    expect(problem.left).not.toHaveProperty('role');
+    expect(problem.left).not.toHaveProperty('decimalNotation');
+    expect(problem.left).not.toHaveProperty('normalizedHundredthsNotation');
+    expect(problem.left).not.toHaveProperty('placeValueRow');
+    expect(problem.right).not.toHaveProperty('role');
+    expect(problem.right).not.toHaveProperty('decimalNotation');
+    expect(problem.right).not.toHaveProperty('normalizedHundredthsNotation');
+    expect(problem.right).not.toHaveProperty('placeValueRow');
     expectOperand(problem.left);
     expectOperand(problem.right);
     expect(new Set([problem.left.precision, problem.right.precision]))
@@ -91,18 +94,16 @@ const expectExactProblem = (problem: DecimalComparisonProblem): void => {
     const difference = problem.left.normalizedHundredths
         - problem.right.normalizedHundredths;
     const expectedRelation = difference > 0 ? 'greater' : difference < 0 ? 'less' : 'equal';
-    const expectedSymbol = difference > 0 ? '>' : difference < 0 ? '<' : '=';
     const expectedPlace = difference === 0
         ? 'equal'
         : problem.left.tenthsDigit === problem.right.tenthsDigit
             ? 'hundredths'
             : 'tenths';
     expect(problem.relation).toBe(expectedRelation);
-    expect(problem.symbol).toBe(expectedSymbol);
     expect(problem.firstDecidingPlace).toBe(expectedPlace);
 
     if (expectedPlace === 'equal') {
-        expect(problem.left.decimalNotation).not.toBe(problem.right.decimalNotation);
+        expect(decimalNotation(problem.left)).not.toBe(decimalNotation(problem.right));
         expect(problem.left.normalizedHundredths).toBe(problem.right.normalizedHundredths);
         expect(problem.left.model).toEqual(problem.right.model);
     }
@@ -158,7 +159,7 @@ describe('DecimalComparisonGenerator', () => {
             for (let seed = 0; seed < 5_000; seed++) {
                 setSeed(`decimal-comparison-stress-${relation}-${seed}`);
                 const problem = generator.generate(configs[relation]).data;
-                observed.add(`${problem.left.decimalNotation}|${problem.right.decimalNotation}`);
+                observed.add(`${decimalNotation(problem.left)}|${decimalNotation(problem.right)}`);
             }
         }
         expect(observed).toContain('0.1|0.09');

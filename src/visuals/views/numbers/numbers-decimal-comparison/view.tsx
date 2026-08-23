@@ -8,7 +8,10 @@ import {
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
+    decimalComparisonNotation,
     decimalComparisonPresentation,
+    decimalPlaceValueRow,
+    normalizedDecimalNotation,
     isValidDecimalComparisonProblem
 } from './helpers.ts';
 import {
@@ -32,18 +35,20 @@ const DecimalGrid = ({
     model: TenthsHundredthsGridModel;
     operand: DecimalComparisonOperand;
     side: 'Left' | 'Right';
-}) => (
+}) => {
+    const notation = decimalComparisonNotation(operand);
+    return (
     <div
         className="rounded-xl border-2 border-slate-200 bg-white p-3"
         role="img"
-        aria-label={`${side} decimal ${operand.decimalNotation} on an identical hundred-part model of the shared whole.`}
+        aria-label={`${side} decimal ${notation} on an identical hundred-part model of the shared whole.`}
     >
         <div className="mb-2 flex items-center justify-between gap-3">
             <span className="text-sm font-extrabold uppercase tracking-[0.1em] text-slate-600">
                 {side}
             </span>
             <span className="rounded-full bg-slate-100 px-3 py-1 font-mono text-lg font-black text-slate-800">
-                {operand.decimalNotation}
+                {notation}
             </span>
         </div>
         <div
@@ -72,7 +77,8 @@ const DecimalGrid = ({
             One whole · 100 equal parts
         </div>
     </div>
-);
+    );
+};
 
 const PlaceValueRow = ({
     operand,
@@ -83,16 +89,18 @@ const PlaceValueRow = ({
     highlight: DecimalComparisonProblem['firstDecidingPlace'] | null;
     side: 'Left' | 'Right';
 }) => {
+    const notation = decimalComparisonNotation(operand);
+    const row = decimalPlaceValueRow(operand);
     const columns = [
-        {key: 'ones', label: 'Ones', value: operand.placeValueRow.ones},
-        {key: 'tenths', label: 'Tenths', value: operand.placeValueRow.tenths},
-        {key: 'hundredths', label: 'Hundredths', value: operand.placeValueRow.hundredths}
+        {key: 'ones', label: 'Ones', value: row.ones},
+        {key: 'tenths', label: 'Tenths', value: row.tenths},
+        {key: 'hundredths', label: 'Hundredths', value: row.hundredths}
     ] as const;
     return (
         <div
             className="overflow-hidden rounded-lg border-2 border-slate-200"
             role="img"
-            aria-label={`${side} decimal ${operand.decimalNotation} aligned in ones, tenths, and hundredths columns.`}
+            aria-label={`${side} decimal ${notation} aligned in ones, tenths, and hundredths columns.`}
         >
             <div className="grid grid-cols-3 bg-slate-100 text-center text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-slate-600">
                 {columns.map(column => (
@@ -143,7 +151,6 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
         'task',
         'sharedWhole',
         'relation',
-        'symbol',
         'left',
         'right',
         'firstDecidingPlace'
@@ -156,6 +163,9 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
     }
 
     const presentation = decimalComparisonPresentation(data);
+    const leftNotation = decimalComparisonNotation(data.left);
+    const rightNotation = decimalComparisonNotation(data.right);
+    const symbol = data.relation === 'greater' ? '>' : data.relation === 'less' ? '<' : '=';
     const decidingPlace = isSolutionView ? data.firstDecidingPlace : null;
     return (
         <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -163,15 +173,15 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
                 {presentation.prompt}
             </div>
             <div className="mt-3 flex items-center justify-center gap-4 font-mono text-3xl font-black text-slate-900">
-                <span>{data.left.decimalNotation}</span>
+                <span>{leftNotation}</span>
                 <span className={`flex h-12 w-14 items-center justify-center rounded-lg border-2 ${
                     isSolutionView
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
                         : 'border-dashed border-slate-400 bg-slate-50 text-slate-400'
                 }`}>
-                    {isSolutionView ? data.symbol : '?'}
+                    {isSolutionView ? symbol : '?'}
                 </span>
-                <span>{data.right.decimalNotation}</span>
+                <span>{rightNotation}</span>
             </div>
 
             <div
@@ -179,7 +189,7 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
                 role="group"
                 aria-label={isSolutionView
                     ? `The left and right decimals use identical hundred-part models of one shared whole. The supplied comparison is ${presentation.solutionEquation}.`
-                    : `The given decimals ${data.left.decimalNotation} and ${data.right.decimalNotation} use identical hundred-part models of one shared whole. The comparison symbol and deciding place are withheld.`}
+                    : `The given decimals ${leftNotation} and ${rightNotation} use identical hundred-part models of one shared whole. The comparison symbol and deciding place are withheld.`}
             >
                 <div className="mb-3 text-center text-sm font-bold text-slate-600">
                     Identical models represent the same whole
@@ -199,7 +209,7 @@ export const NumbersDecimalComparisonCore = ({config: _config, payload}: CorePro
                     <>
                         <div className="text-sm font-extrabold uppercase tracking-[0.1em] text-emerald-800">
                             {data.firstDecidingPlace === 'equal'
-                                ? `Equal after writing hundredths: ${data.left.normalizedHundredthsNotation} = ${data.right.normalizedHundredthsNotation}`
+                                ? `Equal after writing hundredths: ${normalizedDecimalNotation(data.left.normalizedHundredths)} = ${normalizedDecimalNotation(data.right.normalizedHundredths)}`
                                 : `First deciding place: ${data.firstDecidingPlace}`}
                         </div>
                         <div className="mt-2 text-lg font-extrabold">{presentation.answerStatement}</div>
