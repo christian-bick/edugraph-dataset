@@ -1,0 +1,3 @@
+- **Identity:** Uses a complete rectangular array as the observable source from which the learner formalizes an operation equation.
+- **Question:** Shows the complete array and names the requested equation form without revealing any part of the equation.
+- **Solution:** Reveals the complete operation equation; repeated-addition targets contain one identical addend per row and at least three addends when required.

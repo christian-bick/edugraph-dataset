@@ -1,4 +1,0 @@
-- **Identity:** A rectangular array visibly groups the exact total into equal rows, with the requested operation or repeated-addition task stated above it.
-- **Question mode:** The requested total, group size, or group count remains unanswered while the complete array stays visible.
-- **Solution mode:** The same array remains visible and the answer explicitly names the requested total or equal-group role.
-- **Iterated-operation evidence:** Repeated-addition targets show at least three identical addends joined by addition signs.

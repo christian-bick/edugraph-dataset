@@ -192,7 +192,7 @@ known defects:
 | `numbers-decimal-notation` | 2 | **Migrated:** distinct fraction-to-decimal formalization and decimal-to-fraction interpretation actions now use `numbers-fraction-to-decimal` and `numbers-decimal-to-fraction`, backed by one shared renderer. |
 | `operations-add-subtract-strategy` | 2 | **Migrated:** general procedure understanding now uses `operations-add-subtract-strategy-understanding`; counting-on and counting-back concept derivation use separate required-label leaves over the same renderer. |
 | `operations-equal-groups` | 1 | **Migrated:** `Interpretation` is invariant for this view, so it is now a fixed capability and the schema is empty. |
-| `operations-number-array` | 3 | Do execution, formalization, and interpretation require different checklists? |
+| `operations-number-array` | 3 | **Migrated:** execution, equation formalization, and interpretation now use three invariant leaves over one total renderer; formalization withholds the complete equation rather than merely its result. |
 | `operations-number-line` | 2 | Is visual articulation additive support or a different task? |
 | `place-value-arithmetic-model` | 2 | Does the written-method variant change the requested response? |
 | `area-perimeter-comparison` | 2 | Are classification and construction/explanation separate tasks? |

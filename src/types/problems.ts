@@ -2380,7 +2380,9 @@ export interface ViewTypeMap {
     'numbers-fraction-line-classification': FractionLineProblem;
     'numbers-fraction-line-formalization': FractionLineProblem;
     'numbers-fraction-line-explanation': FractionLineProblem;
-    'operations-number-array': NumberArrayProblem;
+    'operations-number-array-total': NumberArrayProblem;
+    'operations-number-array-equation-formalization': NumberArrayProblem;
+    'operations-number-array-interpretation': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
     'operations-number-line': NumberLineProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;

@@ -1,0 +1,3 @@
+- **Identity:** Interprets the rows, objects per row, and total of a complete rectangular array as an addition, multiplication, or division relationship.
+- **Question:** Keeps the complete array visible while asking for the meaning or requested equal-group role without supplying the interpretation.
+- **Solution:** Preserves the same array and explicitly connects its dimensions and total through the relevant operation equation.
