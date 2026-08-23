@@ -1,5 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
+import {ShapeDefinition} from '../../../../types/problems.ts';
 import {ShapeNamingViewConfig, ShapeNamingViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
@@ -10,6 +11,26 @@ interface CoreProps {
     config: ShapeNamingViewConfig;
     payload: ViewRenderPayload<'shape-naming'>;
 }
+
+const isShapeDefinition = (value: unknown): value is ShapeDefinition => {
+    if (typeof value !== 'object' || value === null) return false;
+    const definition = value as Partial<ShapeDefinition>;
+    return [0, 3, 4, 5, 6].includes(definition.sideCount as number)
+        && definition.vertexCount === definition.sideCount
+        && definition.closed === true
+        && (definition.boundary === 'curved' || definition.boundary === 'straight')
+        && (definition.equalSides === undefined || definition.equalSides === true)
+        && (definition.rightAngleCount === undefined || definition.rightAngleCount === 4);
+};
+
+const describeShapeDefinition = (definition: ShapeDefinition): string[] => {
+    const attributes = definition.boundary === 'curved'
+        ? ['one curved boundary', '0 vertices']
+        : [`${definition.sideCount} straight sides`, `${definition.vertexCount} vertices`];
+    if (definition.equalSides) attributes.push('4 equal sides');
+    if (definition.rightAngleCount) attributes.push('4 right angles');
+    return attributes;
+};
 
 function ShapeSVG({ shape, size }: { shape: string; size: number }) {
     const commonProps = {
@@ -124,10 +145,10 @@ export const ShapeNamingCore = ({ config, payload }: CoreProps) => {
     if (!supportedShapes.includes(shape)) {
         throw new ViewValidationError('shape-naming', 'The shape must be a supported geometric kind.');
     }
-    if (data.attributes !== undefined
-        && (!Array.isArray(data.attributes) || data.attributes.some(attribute => typeof attribute !== 'string' || attribute.length === 0))) {
-        throw new ViewValidationError('shape-naming', 'Shape attributes must be non-empty text statements.');
+    if (data.definition !== undefined && !isShapeDefinition(data.definition)) {
+        throw new ViewValidationError('shape-naming', 'Shape definition must contain coherent typed geometric facts.');
     }
+    const attributes = data.definition ? describeShapeDefinition(data.definition) : undefined;
 
     const is3D = ['cube', 'cone', 'cylinder', 'sphere'].includes(shape);
     const options = is3D
@@ -187,9 +208,9 @@ export const ShapeNamingCore = ({ config, payload }: CoreProps) => {
                     </div>
                 </div>
 
-                {data.attributes && (
+                {attributes && (
                     <div className="mb-5 flex flex-wrap justify-center gap-2 text-sm font-bold text-blue-700">
-                        {data.attributes.map(attribute => (
+                        {attributes.map(attribute => (
                             <span key={attribute} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1">
                                 {attribute}
                             </span>

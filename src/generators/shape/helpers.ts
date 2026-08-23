@@ -4,6 +4,7 @@ import {
     QuadrilateralSubtypeName,
     ShapeDefiningAttribute,
     ShapeDefinition,
+    ShapeNamingName,
     ShapeSubsumptionProblem
 } from '../../types/problems.ts';
 
@@ -24,6 +25,14 @@ const SHAPES_BY_LABEL: Readonly<Record<string, PlaneShapeName>> = {
     [Area.Quadrilateral]: 'quadrilateral',
     [Area.Pentagon]: 'pentagon',
     [Area.Hexagon]: 'hexagon'
+};
+
+const IDENTITY_SHAPES_BY_LABEL: Readonly<Record<string, ShapeNamingName>> = {
+    ...SHAPES_BY_LABEL,
+    [Area.Cube]: 'cube',
+    [Area.Sphere]: 'sphere',
+    [Area.Cone]: 'cone',
+    [Area.Cylinder]: 'cylinder'
 };
 
 const DEFINITIONS: Readonly<Record<PlaneShapeName, ShapeDefinition>> = {
@@ -60,6 +69,10 @@ export function shapeNameFromLabel(label: string): PlaneShapeName | null {
     return SHAPES_BY_LABEL[label] ?? null;
 }
 
+export function shapeIdentityNameFromLabel(label: string): ShapeNamingName | null {
+    return IDENTITY_SHAPES_BY_LABEL[label] ?? null;
+}
+
 export function getShapeDefinition(shape: PlaneShapeName): ShapeDefinition {
     return {...DEFINITIONS[shape]};
 }
@@ -85,17 +98,6 @@ export const QUADRILATERAL_SUBTYPE_LABELS = [
     Area.Rectangle,
     Area.Square
 ] as const;
-
-export function getVisibleShapeAttributes(shape: PlaneShapeName): string[] {
-    const definition = DEFINITIONS[shape];
-    const attributes = definition.boundary === 'curved'
-        ? ['one curved boundary', '0 vertices']
-        : [`${definition.sideCount} straight sides`, `${definition.vertexCount} vertices`];
-
-    if (definition.equalSides) attributes.push('4 equal sides');
-    if (definition.rightAngleCount) attributes.push('4 right angles');
-    return attributes;
-}
 
 export function createQuadrilateralSubsumptionProblem(
     shape: QuadrilateralSubtypeName

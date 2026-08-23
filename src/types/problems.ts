@@ -930,8 +930,8 @@ export type StatisticalGraphProblem = {
 // --- Shape Split Problem Types ---
 
 export type ShapeNamingProblem = {
-    shape: string;
-    attributes?: string[];
+    shape: ShapeNamingName;
+    definition?: ShapeDefinition;
 };
 
 export type ShapePositionProblem = {
@@ -988,6 +988,8 @@ export type PlaneShapeName =
     | 'quadrilateral'
     | 'pentagon'
     | 'hexagon';
+
+export type ShapeNamingName = PlaneShapeName | 'cube' | 'sphere' | 'cone' | 'cylinder';
 
 export type ShapeDefinition = {
     sideCount: 0 | 3 | 4 | 5 | 6;

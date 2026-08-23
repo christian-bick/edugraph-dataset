@@ -47,7 +47,12 @@ describe('ShapeIdentityGenerator Spec Integration', () => {
         const count = shape === 'quadrilateral' ? 4 : 5;
         expect(stub!.data).toEqual({
             shape,
-            attributes: [`${count} straight sides`, `${count} vertices`]
+            definition: {
+                sideCount: count,
+                vertexCount: count,
+                closed: true,
+                boundary: 'straight'
+            }
         });
     });
 });

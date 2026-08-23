@@ -38,6 +38,25 @@ describe('shape-naming view', () => {
         expect(solution.match(/border-green-600/g)).toHaveLength(1);
     });
 
+    it('derives visible attribute text from a typed definition', () => {
+        const data: ShapeNamingProblem = {
+            shape: 'rhombus',
+            definition: {
+                sideCount: 4,
+                vertexCount: 4,
+                closed: true,
+                boundary: 'straight',
+                equalSides: true
+            }
+        };
+        const markup = renderToStaticMarkup(<ShapeNamingCore
+            config={{varyOrientation: false, varySize: false}}
+            payload={payload(data, 7, false)}
+        />);
+        expect(markup).toContain('4 straight sides');
+        expect(markup).toContain('4 equal sides');
+    });
+
     it.each([
         {shape: 'star'},
         {shape: ''}
