@@ -1,9 +1,8 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {MeasurementWordProblemGrade4} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidMeasurementWordProblemGrade4} from './helpers.ts';
+import {buildMeasurementWordProblemPresentation} from './helpers.ts';
 import {
     MeasurementWordProblemGrade4ViewConfig,
     MeasurementWordProblemGrade4ViewSchema
@@ -20,31 +19,19 @@ const titleCase = (value: string): string => value
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
 
-const operandText = (
-    operand: MeasurementWordProblemGrade4['operands'][number]
-): string => operand.role === 'measured'
-    ? operand.value.quantityText
-    : operand.display;
-
 const MeasurementWordProblemGrade4Core = ({payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('measurement-word-problem-grade4', data, [
-        'task',
         'measurementKind',
         'numberKind',
-        'unit',
+        'unitId',
         'operation',
         'operands',
-        'story',
-        'question',
-        'questionEquation',
-        'solutionEquation',
-        'answer',
-        'answerStatement',
-        'explanation'
+        'answer'
     ]);
-    if (!isValidMeasurementWordProblemGrade4(data)) {
+    const presentation = buildMeasurementWordProblemPresentation(data);
+    if (!presentation) {
         throw new ViewValidationError(
             'measurement-word-problem-grade4',
             'Expected a coherent same-unit Grade 4 measurement word problem.'
@@ -71,20 +58,20 @@ const MeasurementWordProblemGrade4Core = ({payload}: CoreProps) => {
             </div>
 
             <div className="mt-4 rounded-xl border-l-4 border-indigo-500 bg-slate-50 px-6 py-5 text-xl font-semibold leading-relaxed text-slate-800">
-                {data.story}
+                {presentation.story}
             </div>
             <div className="mt-4 text-center text-xl font-extrabold leading-relaxed text-slate-900">
-                {data.question}
+                {presentation.question}
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-4">
-                {data.operands.map((operand, index) => (
+                {presentation.operands.map((operand, index) => (
                     <div key={`${operand.label}-${index}`} className="min-w-0 rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-center">
                         <div className="text-xs font-bold uppercase tracking-[0.13em] text-slate-500">
                             {operand.label}
                         </div>
                         <div className="mt-2 break-words text-[1.65rem] font-extrabold leading-tight text-slate-900">
-                            {operandText(operand)}
+                            {operand.text}
                         </div>
                         <div className="mt-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
                             {operand.role === 'measured' ? 'Measured quantity' : 'Whole-number group count'}
@@ -98,7 +85,7 @@ const MeasurementWordProblemGrade4Core = ({payload}: CoreProps) => {
                     One-step equation
                 </div>
                 <div className="mt-2 break-words font-mono text-[1.85rem] font-extrabold leading-snug text-amber-300">
-                    {data.questionEquation}
+                    {presentation.questionEquation}
                 </div>
                 {isSolutionView && (
                     <div className="mt-4 border-t border-slate-600 pt-4">
@@ -106,7 +93,7 @@ const MeasurementWordProblemGrade4Core = ({payload}: CoreProps) => {
                             Solved equation
                         </div>
                         <div className="mt-2 break-words font-mono text-[1.85rem] font-extrabold leading-snug text-emerald-300">
-                            {data.solutionEquation}
+                            {presentation.solutionEquation}
                         </div>
                     </div>
                 )}
@@ -116,11 +103,11 @@ const MeasurementWordProblemGrade4Core = ({payload}: CoreProps) => {
                 <>
                     <div className="mt-5 rounded-xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-center">
                         <div className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">Answer</div>
-                        <div className="mt-1 text-[1.7rem] font-extrabold text-emerald-950">{data.answer.quantityText}</div>
-                        <div className="mt-1 text-base font-semibold leading-relaxed text-emerald-900">{data.answerStatement}</div>
+                        <div className="mt-1 text-[1.7rem] font-extrabold text-emerald-950">{presentation.answer.quantityText}</div>
+                        <div className="mt-1 text-base font-semibold leading-relaxed text-emerald-900">{presentation.answerStatement}</div>
                     </div>
                     <div className="mt-4 rounded-xl bg-indigo-50 px-5 py-4 text-base font-semibold leading-relaxed text-indigo-950">
-                        {data.explanation}
+                        {presentation.explanation}
                     </div>
                 </>
             ) : (

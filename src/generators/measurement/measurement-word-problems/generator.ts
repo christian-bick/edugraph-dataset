@@ -6,10 +6,9 @@ import {
     ArithmeticOperation,
     MeasurementWordProblemGrade4,
     MeasurementWordProblemKind,
-    MeasurementWordProblemMeasuredOperand,
     MeasurementWordProblemNumberKind,
-    MeasurementWordProblemUnit,
-    MeasurementWordProblemValue
+    MeasurementWordProblemValue,
+    MeasurementWordProblemUnitId
 } from '../../../types/problems.ts';
 import {operationNames} from '../../arithmetic/helpers.ts';
 import {
@@ -47,12 +46,12 @@ type DivisionSample = {
 
 type MathSample = AdditiveSample | MultiplicationSample | DivisionSample;
 
-const units: Record<MeasurementWordProblemKind, MeasurementWordProblemUnit> = {
-    length: {id: 'meter', singular: 'meter', plural: 'meters', symbol: 'm', symbolPlacement: 'suffix'},
-    time: {id: 'hour', singular: 'hour', plural: 'hours', symbol: 'h', symbolPlacement: 'suffix'},
-    'liquid-volume': {id: 'liter', singular: 'liter', plural: 'liters', symbol: 'L', symbolPlacement: 'suffix'},
-    weight: {id: 'kilogram', singular: 'kilogram', plural: 'kilograms', symbol: 'kg', symbolPlacement: 'suffix'},
-    money: {id: 'dollar', singular: 'dollar', plural: 'dollars', symbol: '$', symbolPlacement: 'prefix'}
+const unitIds: Record<MeasurementWordProblemKind, MeasurementWordProblemUnitId> = {
+    length: 'meter',
+    time: 'hour',
+    'liquid-volume': 'liter',
+    weight: 'kilogram',
+    money: 'dollar'
 };
 
 const unitTags: Record<MeasurementWordProblemKind, Scope | undefined> = {
@@ -197,226 +196,51 @@ const sampleMath = (
     return sampleDecimal(operation, measurementKind);
 };
 
-const formatDecimal = (numerator: number, denominator: 10 | 100): string => {
-    const digits = denominator === 10 ? 1 : 2;
-    const whole = Math.floor(numerator / denominator);
-    const remainder = String(numerator % denominator).padStart(digits, '0');
-    return `${whole}.${remainder}`;
-};
-
-const formatDisplay = (
-    exact: ExactValue,
-    numberKind: MeasurementWordProblemNumberKind
-): string => {
-    if (numberKind === 'integer') return String(exact.numerator);
-    if (numberKind === 'fraction') return `${exact.numerator}/${exact.denominator}`;
-    return formatDecimal(exact.numerator, exact.denominator as 10 | 100);
-};
-
-const makeValue = (
-    exact: ExactValue,
-    numberKind: MeasurementWordProblemNumberKind,
-    measurementKind: MeasurementWordProblemKind
-): MeasurementWordProblemValue => {
-    const display = formatDisplay(exact, numberKind);
-    const unit = units[measurementKind];
-    if (measurementKind === 'money') {
-        const quantityText = numberKind === 'fraction'
-            ? `${display} of a dollar`
-            : `$${display}`;
-        return {
-            ...exact,
-            display,
-            quantityText,
-            equationTerm: numberKind === 'fraction' ? `${display} dollar` : quantityText
-        };
-    }
-    const unitName = exact.numerator === exact.denominator ? unit.singular : unit.plural;
-    const quantityText = `${display} ${unitName}`;
-    return {...exact, display, quantityText, equationTerm: quantityText};
-};
-
-const measuredOperand = (
-    label: string,
-    exact: ExactValue,
-    numberKind: MeasurementWordProblemNumberKind,
-    measurementKind: MeasurementWordProblemKind
-): MeasurementWordProblemMeasuredOperand => ({
-    role: 'measured',
-    label,
-    value: makeValue(exact, numberKind, measurementKind)
+const makeValue = ({numerator, denominator}: ExactValue): MeasurementWordProblemValue => ({
+    numerator,
+    denominator
 });
 
-const context = (
-    measurementKind: MeasurementWordProblemKind,
-    operation: ArithmeticOperation,
-    first: string,
-    second: string,
-    groupCount?: number
-): readonly [string, string] => {
-    if (measurementKind === 'length') {
-        if (operation === 'addition') return [`A walking route has one section that is ${first} long and another section that is ${second} long.`, 'How long is the route altogether?'];
-        if (operation === 'subtraction') return [`A ribbon is ${first} long. A piece that is ${second} long is cut off.`, 'How much ribbon remains?'];
-        if (operation === 'multiplication') return [`There are ${groupCount} equal ribbon pieces. Each piece is ${first} long.`, 'How long are the ribbon pieces altogether?'];
-        return [`A ribbon that is ${first} long is cut into ${groupCount} equal pieces.`, 'How long is each piece?'];
-    }
-    if (measurementKind === 'time') {
-        if (operation === 'addition') return [`One activity lasts ${first}, and a second activity lasts ${second}.`, 'How much time do the activities take altogether?'];
-        if (operation === 'subtraction') return [`A block of time lasts ${first}. After ${second} has passed, the activity continues.`, 'How much time remains?'];
-        if (operation === 'multiplication') return [`A practice session lasts ${first}. A class completes ${groupCount} equal sessions.`, 'How much time do the sessions take altogether?'];
-        return [`A total time of ${first} is shared equally among ${groupCount} activities.`, 'How much time does each activity receive?'];
-    }
-    if (measurementKind === 'liquid-volume') {
-        if (operation === 'addition') return [`A pitcher contains ${first}. Another ${second} is poured in.`, 'How much liquid is in the pitcher now?'];
-        if (operation === 'subtraction') return [`A tank contains ${first}. Then ${second} is poured out.`, 'How much liquid remains?'];
-        if (operation === 'multiplication') return [`There are ${groupCount} identical bottles. Each bottle holds ${first}.`, 'How much liquid do the bottles hold altogether?'];
-        return [`A total of ${first} is poured equally into ${groupCount} containers.`, 'How much liquid is in each container?'];
-    }
-    if (measurementKind === 'weight') {
-        if (operation === 'addition') return [`One package has a mass of ${first}, and another has a mass of ${second}.`, 'What is the combined mass of the packages?'];
-        if (operation === 'subtraction') return [`A supply bag has a mass of ${first}. Material with a mass of ${second} is removed.`, 'What mass remains in the bag?'];
-        if (operation === 'multiplication') return [`There are ${groupCount} identical packages. Each package has a mass of ${first}.`, 'What is the total mass of the packages?'];
-        return [`Material with a total mass of ${first} is divided equally among ${groupCount} packages.`, 'What is the mass of each package?'];
-    }
-    if (operation === 'addition') return [`A student saves ${first} and then saves another ${second}.`, 'How much money has the student saved altogether?'];
-    if (operation === 'subtraction') return [`A student has ${first} and spends ${second}.`, 'How much money remains?'];
-    if (operation === 'multiplication') return [`There are ${groupCount} identical notebooks. Each notebook costs ${first}.`, 'How much do the notebooks cost altogether?'];
-    return [`A total of ${first} is shared equally among ${groupCount} students.`, 'How much money does each student receive?'];
-};
-
-const equation = (
-    left: string,
-    symbol: '+' | '−' | '×' | '÷',
-    right: string,
-    answer: MeasurementWordProblemValue,
-    unit: MeasurementWordProblemUnit
-): readonly [string, string] => {
-    const unknown = unit.symbolPlacement === 'prefix' ? '?' : `? ${unit.symbol}`;
-    const leftSide = `${left} ${symbol} ${right}`;
-    return [`${leftSide} = ${unknown}`, `${leftSide} = ${answer.equationTerm}`];
-};
-
-const explanation = (operation: ArithmeticOperation, solutionEquation: string): string => {
-    if (operation === 'addition') return `Add the two measured amounts: ${solutionEquation}.`;
-    if (operation === 'subtraction') return `Subtract the amount used from the starting amount: ${solutionEquation}.`;
-    if (operation === 'multiplication') return `Multiply the number of equal groups by the amount in each group: ${solutionEquation}.`;
-    return `Divide the total measured amount by the number of equal groups: ${solutionEquation}.`;
-};
+const measuredOperand = (exact: ExactValue) => ({
+    role: 'measured' as const,
+    value: makeValue(exact)
+});
 
 const buildProblem = (
     sample: MathSample,
     measurementKind: MeasurementWordProblemKind,
     numberKind: MeasurementWordProblemNumberKind
 ): MeasurementWordProblemGrade4 => {
-    const unit = units[measurementKind];
+    const common = {
+        measurementKind,
+        numberKind,
+        unitId: unitIds[measurementKind],
+        answer: makeValue(sample.answer)
+    };
     if (sample.operation === 'addition' || sample.operation === 'subtraction') {
-        const first = measuredOperand(
-            sample.operation === 'addition' ? 'First amount' : 'Starting amount',
-            sample.first,
-            numberKind,
-            measurementKind
-        );
-        const second = measuredOperand(
-            sample.operation === 'addition' ? 'Amount added' : 'Amount used',
-            sample.second,
-            numberKind,
-            measurementKind
-        );
-        const answer = makeValue(sample.answer, numberKind, measurementKind);
-        const [story, question] = context(
-            measurementKind,
-            sample.operation,
-            first.value.quantityText,
-            second.value.quantityText
-        );
-        const [questionEquation, solutionEquation] = equation(
-            first.value.equationTerm,
-            sample.operation === 'addition' ? '+' : '−',
-            second.value.equationTerm,
-            answer,
-            unit
-        );
         return {
-            task: 'grade4-measurement-word-problem',
-            measurementKind,
-            numberKind,
+            ...common,
             operation: sample.operation,
-            unit,
-            operands: [first, second],
-            story,
-            question,
-            questionEquation,
-            solutionEquation,
-            answer,
-            answerStatement: `The answer is ${answer.quantityText}.`,
-            explanation: explanation(sample.operation, solutionEquation)
+            operands: [measuredOperand(sample.first), measuredOperand(sample.second)]
         };
     }
     if (sample.operation === 'multiplication') {
-        const measured = measuredOperand('Amount in each group', sample.measured, numberKind, measurementKind);
-        const group = {role: 'group-count' as const, label: 'Equal groups', count: sample.groupCount, display: `${sample.groupCount} equal groups`};
-        const answer = makeValue(sample.answer, numberKind, measurementKind);
-        const [story, question] = context(
-            measurementKind,
-            sample.operation,
-            measured.value.quantityText,
-            group.display,
-            group.count
-        );
-        const [questionEquation, solutionEquation] = equation(
-            String(group.count),
-            '×',
-            measured.value.equationTerm,
-            answer,
-            unit
-        );
         return {
-            task: 'grade4-measurement-word-problem',
-            measurementKind,
-            numberKind,
+            ...common,
             operation: sample.operation,
-            unit,
-            operands: [group, measured],
-            story,
-            question,
-            questionEquation,
-            solutionEquation,
-            answer,
-            answerStatement: `The answer is ${answer.quantityText}.`,
-            explanation: explanation(sample.operation, solutionEquation)
+            operands: [
+                {role: 'group-count', count: sample.groupCount},
+                measuredOperand(sample.measured)
+            ]
         };
     }
-    const total = measuredOperand('Total amount', sample.total, numberKind, measurementKind);
-    const group = {role: 'group-count' as const, label: 'Equal groups', count: sample.groupCount, display: `${sample.groupCount} equal groups`};
-    const answer = makeValue(sample.answer, numberKind, measurementKind);
-    const [story, question] = context(
-        measurementKind,
-        sample.operation,
-        total.value.quantityText,
-        group.display,
-        group.count
-    );
-    const [questionEquation, solutionEquation] = equation(
-        total.value.equationTerm,
-        '÷',
-        String(group.count),
-        answer,
-        unit
-    );
     return {
-        task: 'grade4-measurement-word-problem',
-        measurementKind,
-        numberKind,
+        ...common,
         operation: sample.operation,
-        unit,
-        operands: [total, group],
-        story,
-        question,
-        questionEquation,
-        solutionEquation,
-        answer,
-        answerStatement: `The answer is ${answer.quantityText}.`,
-        explanation: explanation(sample.operation, solutionEquation)
+        operands: [
+            measuredOperand(sample.total),
+            {role: 'group-count', count: sample.groupCount}
+        ]
     };
 };
 

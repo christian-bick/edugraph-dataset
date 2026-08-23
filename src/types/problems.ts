@@ -651,40 +651,27 @@ export type MeasurementWordProblemUnit = {
     symbolPlacement: 'prefix' | 'suffix';
 };
 
-/** Exact measured value. Its numeric value is numerator / denominator; display text is generator-authored. */
+/** Exact measured value. Its numeric value is numerator / denominator. */
 export type MeasurementWordProblemValue = {
     numerator: number;
     denominator: number;
-    display: string;
-    quantityText: string;
-    equationTerm: string;
 };
 
 export type MeasurementWordProblemMeasuredOperand = {
     role: 'measured';
-    label: string;
     value: MeasurementWordProblemValue;
 };
 
 export type MeasurementWordProblemGroupOperand = {
     role: 'group-count';
-    label: string;
     count: number;
-    display: string;
 };
 
 type MeasurementWordProblemBase = {
-    task: 'grade4-measurement-word-problem';
     measurementKind: MeasurementWordProblemKind;
     numberKind: MeasurementWordProblemNumberKind;
-    unit: MeasurementWordProblemUnit;
-    story: string;
-    question: string;
-    questionEquation: string;
-    solutionEquation: string;
+    unitId: MeasurementWordProblemUnitId;
     answer: MeasurementWordProblemValue;
-    answerStatement: string;
-    explanation: string;
 };
 
 export type MeasurementWordProblemAdditive = MeasurementWordProblemBase & {
