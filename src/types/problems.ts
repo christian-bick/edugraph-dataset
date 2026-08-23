@@ -814,11 +814,9 @@ export type MultiDigitComparisonEvidence =
         rightDigit: number;
         leftPlaceValue: number;
         rightPlaceValue: number;
-        explanation: string;
     }
     | {
         kind: 'all-equal';
-        explanation: string;
     };
 
 export type MultiDigitComparisonProblem = {
@@ -826,12 +824,6 @@ export type MultiDigitComparisonProblem = {
     num1: number;
     num2: number;
     relation: 'less' | 'greater' | 'equal';
-    leftNumeral: string;
-    rightNumeral: string;
-    symbol: '<' | '>' | '=';
-    prompt: string;
-    comparisonEquation: string;
-    conclusion: string;
     evidence: MultiDigitComparisonEvidence;
 };
 

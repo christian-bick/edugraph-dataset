@@ -75,7 +75,7 @@ describe('ComparisonGenerator Spec Integration', () => {
         [Scope.Less, 'less', '<'],
         [Scope.Equal, 'equal', '='],
         [Scope.Greater, 'greater', '>']
-    ] as const)('resolves Grade 4 NumericComparison %s', (relation, resolved, symbol) => {
+    ] as const)('resolves Grade 4 NumericComparison %s', (relation, resolved, _symbol) => {
         const stub = generateWithLabels(generator, [
             Area.NumericComparison,
             relation,
@@ -91,8 +91,7 @@ describe('ComparisonGenerator Spec Integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data).toMatchObject({
             task: 'multi-digit-place-value-comparison',
-            relation: resolved,
-            symbol
+            relation: resolved
         });
         expect(stub!.tags).toEqual(expect.arrayContaining([
             Area.NumericComparison,

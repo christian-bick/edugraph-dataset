@@ -4,7 +4,8 @@ import {
     displayPlaceHeading,
     getComparisonSymbol,
     isValidLegacyComparisonProblem,
-    isValidMultiDigitComparisonProblem
+    isValidMultiDigitComparisonProblem,
+    multiDigitComparisonPresentation
 } from './helpers.ts';
 
 describe('numbers-compare helpers', () => {
@@ -38,12 +39,6 @@ const firstDifferenceProblem: MultiDigitComparisonProblem = {
     num1: 705284,
     num2: 704999,
     relation: 'greater',
-    leftNumeral: '705,284',
-    rightNumeral: '704,999',
-    symbol: '>',
-    prompt: 'Compare the two multi-digit whole numbers using <, >, or =.',
-    comparisonEquation: '705,284 > 704,999',
-    conclusion: '705,284 is greater than 704,999.',
     evidence: {
         kind: 'first-difference',
         placeName: 'thousands',
@@ -51,8 +46,7 @@ const firstDifferenceProblem: MultiDigitComparisonProblem = {
         leftDigit: 5,
         rightDigit: 4,
         leftPlaceValue: 5000,
-        rightPlaceValue: 4000,
-        explanation: 'The first differing place is the thousands place: 5 is greater than 4.'
+        rightPlaceValue: 4000
     }
 };
 
@@ -64,6 +58,15 @@ describe('comparison validation', () => {
 
     it('accepts supplied first-difference evidence', () => {
         expect(isValidMultiDigitComparisonProblem(firstDifferenceProblem)).toBe(true);
+        expect(multiDigitComparisonPresentation(firstDifferenceProblem)).toEqual({
+            leftNumeral: '705,284',
+            rightNumeral: '704,999',
+            symbol: '>',
+            prompt: 'Compare the two multi-digit whole numbers using <, >, or =.',
+            comparisonEquation: '705,284 > 704,999',
+            conclusion: '705,284 is greater than 704,999.',
+            evidenceExplanation: 'The first differing place is the thousands place: 5 is greater than 4.'
+        });
     });
 
     it('accepts supplied all-equal evidence', () => {
@@ -71,14 +74,7 @@ describe('comparison validation', () => {
             ...firstDifferenceProblem,
             num2: 705284,
             relation: 'equal',
-            rightNumeral: '705,284',
-            symbol: '=',
-            comparisonEquation: '705,284 = 705,284',
-            conclusion: '705,284 is equal to 705,284.',
-            evidence: {
-                kind: 'all-equal',
-                explanation: 'Every corresponding place has the same digit, so the numbers are equal.'
-            }
+            evidence: {kind: 'all-equal'}
         })).toBe(true);
     });
 
@@ -92,13 +88,12 @@ describe('comparison validation', () => {
                 leftDigit: 5,
                 rightDigit: 4,
                 leftPlaceValue: 500,
-                rightPlaceValue: 400,
-                explanation: 'The first differing place is the hundreds place: 5 is greater than 4.'
+                rightPlaceValue: 400
             }
         })).toBe(false);
         expect(isValidMultiDigitComparisonProblem({
             ...firstDifferenceProblem,
-            comparisonEquation: '705,284 < 704,999'
+            relation: 'less'
         })).toBe(false);
     });
 });

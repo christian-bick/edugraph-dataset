@@ -11,7 +11,9 @@ import {
     displayPlaceHeading,
     getComparisonSymbol,
     isValidLegacyComparisonProblem,
-    isValidMultiDigitComparisonProblem
+    isValidMultiDigitComparisonProblem,
+    MultiDigitComparisonPresentation,
+    multiDigitComparisonPresentation
 } from './helpers.ts';
 import {NumbersCompareViewConfig, NumbersCompareViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
@@ -47,7 +49,13 @@ function LegacyComparison({data, isSolutionView}: {
     );
 }
 
-function FirstDifferenceEvidence({data}: {data: MultiDigitComparisonProblem}) {
+function FirstDifferenceEvidence({
+    data,
+    presentation
+}: {
+    data: MultiDigitComparisonProblem;
+    presentation: MultiDigitComparisonPresentation;
+}) {
     if (data.evidence.kind !== 'first-difference') return null;
     return (
         <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-5">
@@ -57,13 +65,13 @@ function FirstDifferenceEvidence({data}: {data: MultiDigitComparisonProblem}) {
                     <div className="font-mono text-3xl font-extrabold text-indigo-950">{data.evidence.leftDigit}</div>
                     <div className="mt-1 text-sm font-semibold text-slate-600">value {numberFormatter.format(data.evidence.leftPlaceValue)}</div>
                 </div>
-                <div className="text-center font-mono text-3xl font-extrabold text-amber-900">{data.symbol}</div>
+                <div className="text-center font-mono text-3xl font-extrabold text-amber-900">{presentation.symbol}</div>
                 <div className="rounded-lg border border-violet-200 bg-white px-4 py-3 text-center">
                     <div className="font-mono text-3xl font-extrabold text-violet-950">{data.evidence.rightDigit}</div>
                     <div className="mt-1 text-sm font-semibold text-slate-600">value {numberFormatter.format(data.evidence.rightPlaceValue)}</div>
                 </div>
             </div>
-            <div className="mt-3 text-center font-semibold text-amber-950">{data.evidence.explanation}</div>
+            <div className="mt-3 text-center font-semibold text-amber-950">{presentation.evidenceExplanation}</div>
         </div>
     );
 }
@@ -72,31 +80,34 @@ function Grade4Comparison({data, isSolutionView}: {
     data: MultiDigitComparisonProblem;
     isSolutionView: boolean;
 }) {
+    const presentation = multiDigitComparisonPresentation(data);
     return (
         <div className="w-[760px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-center text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Multi-digit comparison</div>
-            <div className="mt-2 text-center text-xl font-bold text-slate-800">{data.prompt}</div>
+            <div className="mt-2 text-center text-xl font-bold text-slate-800">{presentation.prompt}</div>
             <div className="mt-6 flex items-center justify-center gap-5 rounded-xl border border-slate-200 bg-slate-50 px-6 py-6 font-mono text-4xl font-extrabold text-slate-900">
                 {isSolutionView ? (
-                    <span>{data.comparisonEquation}</span>
+                    <span>{presentation.comparisonEquation}</span>
                 ) : (
                     <>
-                        <span>{data.leftNumeral}</span>
+                        <span>{presentation.leftNumeral}</span>
                         <span className="h-14 w-16 rounded-lg border-2 border-dashed border-slate-400 bg-white" />
-                        <span>{data.rightNumeral}</span>
+                        <span>{presentation.rightNumeral}</span>
                     </>
                 )}
             </div>
 
-            {isSolutionView && data.evidence.kind === 'first-difference' && <FirstDifferenceEvidence data={data} />}
+            {isSolutionView && data.evidence.kind === 'first-difference' && (
+                <FirstDifferenceEvidence data={data} presentation={presentation} />
+            )}
             {isSolutionView && data.evidence.kind === 'all-equal' && (
                 <div className="mt-5 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-5 text-center">
                     <div className="text-xs font-bold uppercase tracking-wide text-indigo-700">All corresponding places match</div>
-                    <div className="mt-2 font-semibold text-indigo-950">{data.evidence.explanation}</div>
+                    <div className="mt-2 font-semibold text-indigo-950">{presentation.evidenceExplanation}</div>
                 </div>
             )}
             {isSolutionView && (
-                <div className="mt-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-center text-lg font-bold text-emerald-950">{data.conclusion}</div>
+                <div className="mt-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-center text-lg font-bold text-emerald-950">{presentation.conclusion}</div>
             )}
         </div>
     );
@@ -110,12 +121,6 @@ const NumbersCompareCore = ({config: _config, payload}: CoreProps) => {
     if (isGrade4(data)) {
         validateProblemData(VIEW_ID, data, [
             'task',
-            'leftNumeral',
-            'rightNumeral',
-            'symbol',
-            'prompt',
-            'comparisonEquation',
-            'conclusion',
             'evidence'
         ]);
         if (!isValidMultiDigitComparisonProblem(data)) {

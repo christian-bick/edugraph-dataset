@@ -6,39 +6,18 @@ import {
 } from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {
-    createWholeNumberPlaceValues,
-    displayWholeNumberPlaceName,
-    formatStandardNumeral
+    createWholeNumberPlaceValues
 } from '../../lib/whole-number-notation.ts';
 import {ComparisonGeneratorConfig, ComparisonGeneratorSchema} from "./spec.ts";
 import {Scope} from 'edugraph-ts';
 import {validateConfigFields} from "../../lib/errors.ts";
-
-const symbolForRelation = (relation: 'less' | 'greater' | 'equal'): '<' | '>' | '=' => {
-    if (relation === 'less') return '<';
-    if (relation === 'greater') return '>';
-    return '=';
-};
-
-const conclusionForRelation = (
-    leftNumeral: string,
-    rightNumeral: string,
-    relation: 'less' | 'greater' | 'equal'
-): string => {
-    if (relation === 'less') return `${leftNumeral} is less than ${rightNumeral}.`;
-    if (relation === 'greater') return `${leftNumeral} is greater than ${rightNumeral}.`;
-    return `${leftNumeral} is equal to ${rightNumeral}.`;
-};
 
 const createComparisonEvidence = (
     num1: number,
     num2: number
 ): MultiDigitComparisonEvidence => {
     if (num1 === num2) {
-        return {
-            kind: 'all-equal',
-            explanation: 'Every corresponding place has the same digit, so the numbers are equal.'
-        };
+        return {kind: 'all-equal'};
     }
 
     const highestExponent = Math.max(
@@ -58,7 +37,6 @@ const createComparisonEvidence = (
     }
 
     const placeName = createWholeNumberPlaceValues(magnitude)[0]!.name;
-    const relationWord = leftDigit < rightDigit ? 'less than' : 'greater than';
     return {
         kind: 'first-difference',
         placeName,
@@ -66,8 +44,7 @@ const createComparisonEvidence = (
         leftDigit,
         rightDigit,
         leftPlaceValue: leftDigit * magnitude,
-        rightPlaceValue: rightDigit * magnitude,
-        explanation: `The first differing place is the ${displayWholeNumberPlaceName(placeName)} place: ${leftDigit} is ${relationWord} ${rightDigit}.`
+        rightPlaceValue: rightDigit * magnitude
     };
 };
 
@@ -106,22 +83,12 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, 
                 : config.relation === Scope.Greater
                     ? 'greater'
                     : 'equal';
-            const leftNumeral = formatStandardNumeral(num1);
-            const rightNumeral = formatStandardNumeral(num2);
-            const symbol = symbolForRelation(relation);
-
             return {
                 data: {
                     task: 'multi-digit-place-value-comparison',
                     num1,
                     num2,
                     relation,
-                    leftNumeral,
-                    rightNumeral,
-                    symbol,
-                    prompt: 'Compare the two multi-digit whole numbers using <, >, or =.',
-                    comparisonEquation: `${leftNumeral} ${symbol} ${rightNumeral}`,
-                    conclusion: conclusionForRelation(leftNumeral, rightNumeral, relation),
                     evidence: createComparisonEvidence(num1, num2)
                 }
             };

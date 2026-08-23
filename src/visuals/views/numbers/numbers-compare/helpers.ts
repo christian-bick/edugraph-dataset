@@ -39,6 +39,38 @@ export function displayPlaceHeading(name: WholeNumberPlaceName): string {
         .join(' ');
 }
 
+export type MultiDigitComparisonPresentation = {
+    leftNumeral: string;
+    rightNumeral: string;
+    symbol: '<' | '>' | '=';
+    prompt: string;
+    comparisonEquation: string;
+    conclusion: string;
+    evidenceExplanation: string;
+};
+
+export function multiDigitComparisonPresentation(
+    data: MultiDigitComparisonProblem
+): MultiDigitComparisonPresentation {
+    const leftNumeral = numberFormatter.format(data.num1);
+    const rightNumeral = numberFormatter.format(data.num2);
+    const symbol = getComparisonSymbol(data.relation) as '<' | '>' | '=';
+    const comparisonEquation = `${leftNumeral} ${symbol} ${rightNumeral}`;
+    const conclusion = `${leftNumeral} is ${data.relation === 'equal' ? 'equal to' : `${data.relation} than`} ${rightNumeral}.`;
+    const evidenceExplanation = data.evidence.kind === 'all-equal'
+        ? 'Every corresponding place has the same digit, so the numbers are equal.'
+        : `The first differing place is the ${displayPlaceName(data.evidence.placeName)} place: ${data.evidence.leftDigit} is ${data.evidence.leftDigit < data.evidence.rightDigit ? 'less than' : 'greater than'} ${data.evidence.rightDigit}.`;
+    return {
+        leftNumeral,
+        rightNumeral,
+        symbol,
+        prompt: 'Compare the two multi-digit whole numbers using <, >, or =.',
+        comparisonEquation,
+        conclusion,
+        evidenceExplanation
+    };
+}
+
 export function isValidLegacyComparisonProblem(data: LegacyComparisonProblem): boolean {
     return Number.isSafeInteger(data.num1)
         && Number.isSafeInteger(data.num2)
@@ -54,12 +86,6 @@ export function isValidMultiDigitComparisonProblem(data: MultiDigitComparisonPro
         || data.num2 <= 1000
         || data.num2 >= 1000000
         || data.relation !== resolvedRelation(data.num1, data.num2)
-        || data.leftNumeral !== numberFormatter.format(data.num1)
-        || data.rightNumeral !== numberFormatter.format(data.num2)
-        || data.symbol !== getComparisonSymbol(data.relation)
-        || data.prompt !== 'Compare the two multi-digit whole numbers using <, >, or =.'
-        || data.comparisonEquation !== `${data.leftNumeral} ${data.symbol} ${data.rightNumeral}`
-        || data.conclusion !== `${data.leftNumeral} is ${data.relation === 'equal' ? 'equal to' : `${data.relation} than`} ${data.rightNumeral}.`
         || typeof data.evidence !== 'object'
         || data.evidence === null) {
         return false;
@@ -67,8 +93,7 @@ export function isValidMultiDigitComparisonProblem(data: MultiDigitComparisonPro
 
     if (data.evidence.kind === 'all-equal') {
         return data.relation === 'equal'
-            && data.num1 === data.num2
-            && data.evidence.explanation === 'Every corresponding place has the same digit, so the numbers are equal.';
+            && data.num1 === data.num2;
     }
     if (data.evidence.kind !== 'first-difference' || data.relation === 'equal') return false;
 
@@ -88,13 +113,11 @@ export function isValidMultiDigitComparisonProblem(data: MultiDigitComparisonPro
     }
     if (firstExponent < 0) return false;
 
-    const relationWord = leftDigit < rightDigit ? 'less than' : 'greater than';
     const placeName = PLACE_NAMES[firstExponent];
     return data.evidence.exponent === firstExponent
         && data.evidence.placeName === placeName
         && data.evidence.leftDigit === leftDigit
         && data.evidence.rightDigit === rightDigit
         && data.evidence.leftPlaceValue === leftDigit * (10 ** firstExponent)
-        && data.evidence.rightPlaceValue === rightDigit * (10 ** firstExponent)
-        && data.evidence.explanation === `The first differing place is the ${displayPlaceName(placeName)} place: ${leftDigit} is ${relationWord} ${rightDigit}.`;
+        && data.evidence.rightPlaceValue === rightDigit * (10 ** firstExponent);
 }

@@ -94,13 +94,9 @@ describe('ComparisonGenerator', () => {
             expect(data.num2).toBeGreaterThanOrEqual(1000);
             expect(data.num1).toBeLessThanOrEqual(1_000_000);
             expect(data.num2).toBeLessThanOrEqual(1_000_000);
-            expect(data.comparisonEquation).toBe(
-                `${data.leftNumeral} ${data.symbol} ${data.rightNumeral}`
-            );
             if (relation === Scope.Equal) {
                 expect(data.evidence.kind).toBe('all-equal');
                 expect(data.num1).toBe(data.num2);
-                expect(data.symbol).toBe('=');
             } else {
                 expect(data.evidence.kind).toBe('first-difference');
                 if (data.evidence.kind === 'first-difference') {
@@ -135,9 +131,8 @@ describe('ComparisonGenerator', () => {
             task: 'multi-digit-place-value-comparison',
             num1: 1_000_000,
             num2: 1_000_000,
-            leftNumeral: '1,000,000',
-            rightNumeral: '1,000,000',
-            symbol: '='
+            relation: 'equal',
+            evidence: {kind: 'all-equal'}
         });
     });
 });
