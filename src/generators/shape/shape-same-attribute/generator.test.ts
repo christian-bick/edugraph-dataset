@@ -2,7 +2,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 import {ShapeSameAttributeGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 
 describe('ShapeSameAttributeGenerator', () => {
     let generator: ShapeSameAttributeGenerator;
@@ -23,7 +23,7 @@ describe('ShapeSameAttributeGenerator', () => {
 
     it('should validate same-attribute rolls/stacks/folds properties', () => {
         const stubRoll = generator.generate({
-            shapes: ['sphere'],
+            shapes: [Area.Sphere],
             property: [Scope.Rollable]
         });
         expect(stubRoll).not.toBeNull();
@@ -31,7 +31,7 @@ describe('ShapeSameAttributeGenerator', () => {
         expect(stubRoll!.data.attribute).toBe('rollable');
 
         const stubStack = generator.generate({
-            shapes: ['cube'],
+            shapes: [Area.Cube],
             property: [Scope.Stackable]
         });
         expect(stubStack).not.toBeNull();
@@ -39,7 +39,7 @@ describe('ShapeSameAttributeGenerator', () => {
         expect(stubStack!.data.attribute).toBe('stackable');
 
         const stubFold = generator.generate({
-            shapes: ['rectangle'],
+            shapes: [Area.Rectangle],
             property: [Scope.Foldable]
         });
         expect(stubFold).not.toBeNull();
@@ -49,7 +49,7 @@ describe('ShapeSameAttributeGenerator', () => {
 
     it('rejects a property that does not belong to the selected shape', () => {
         expect(generator.generate({
-            shapes: ['sphere'],
+            shapes: [Area.Sphere],
             property: [Scope.Stackable]
         })).toBeNull();
     });

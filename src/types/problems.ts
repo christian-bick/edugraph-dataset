@@ -976,7 +976,7 @@ export type ShapeCompareAttributesProblem = {
 
 export type ShapeSameAttributeProblem = {
     attribute: 'rollable' | 'stackable' | 'foldable';
-    answer: string;
+    answer: 'sphere' | 'cube' | 'rectangle';
 };
 
 export type PlaneShapeName =

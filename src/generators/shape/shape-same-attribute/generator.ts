@@ -3,47 +3,41 @@ import {ShapeSameAttributeProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
 import {ShapeSameAttributeGeneratorConfig, ShapeSameAttributeGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
+
+const SHAPE_RELATIONS: Readonly<Record<string, {
+    answer: ShapeSameAttributeProblem['answer'];
+    attribute: ShapeSameAttributeProblem['attribute'];
+    property: string;
+}>> = {
+    [Area.Sphere]: {answer: 'sphere', attribute: 'rollable', property: Scope.Rollable},
+    [Area.Cube]: {answer: 'cube', attribute: 'stackable', property: Scope.Stackable},
+    [Area.Rectangle]: {answer: 'rectangle', attribute: 'foldable', property: Scope.Foldable}
+};
 
 export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAttributeProblem, ShapeSameAttributeGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeSameAttributeGeneratorSchema;
 
-    generate(config: ShapeSameAttributeGeneratorConfig): ProblemStub | null {
+    generate(config: ShapeSameAttributeGeneratorConfig): ProblemStub<ShapeSameAttributeProblem> | null {
         validateConfigFields('shape-same-attribute', config, ['shapes', 'property']);
         const shapes = config.shapes!;
         const properties = config.property!;
 
         const selectedShape = shapes[Math.floor(random() * shapes.length)];
-        const shape = selectedShape.split('/').pop()!.toLowerCase();
+        const relation = SHAPE_RELATIONS[selectedShape];
+        if (!relation) return null;
 
-        let attribute: 'rollable' | 'stackable' | 'foldable' = 'rollable';
-        if (shape === 'sphere') {
-            attribute = 'rollable';
-        } else if (shape === 'cube') {
-            attribute = 'stackable';
-        } else if (shape === 'rectangle' || shape === 'rectangularprism') {
-            attribute = 'foldable';
-        }
-
-        const expectedProperty = {
-            rollable: Scope.Rollable,
-            stackable: Scope.Stackable,
-            foldable: Scope.Foldable
-        }[attribute];
-
-        if (!properties.includes(expectedProperty)) {
+        if (!properties.includes(relation.property)) {
             return null;
         }
 
-        const answer = shape;
-
         return {
             data: {
-                attribute,
-                answer
+                attribute: relation.attribute,
+                answer: relation.answer
             },
-            tags: [selectedShape, expectedProperty]
+            tags: [selectedShape, relation.property]
         };
     }
 }
