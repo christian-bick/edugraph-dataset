@@ -7,7 +7,6 @@ import { shortenLabel } from '../lib/utils.ts';
 import {
     loadGeneratorCatalog,
     loadViewCatalog,
-    matchTargets,
     computeSampleKey,
     computeSampleFilename,
     computeSampleSeed,
@@ -27,6 +26,11 @@ import {
     SampleSplit,
     SPLIT_DIRS
 } from '../lib/generation.ts';
+import {
+    buildCompatibleModulePairIndex,
+    matchingPolicyInputHash,
+    matchTargetsDelta
+} from '../lib/matching.ts';
 import {createWorkCounters} from '../lib/work-counters.ts';
 import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { getCliOption } from '../lib/cli.ts';
@@ -677,12 +681,28 @@ async function main() {
         throw new Error(`No views matched --view=${targetView}.`);
     }
 
-    const requestedMatchedTuples = matchTargets(
-        allTargets,
-        requestedModules,
-        requestedViews,
-        {counters}
-    ).tuples;
+    const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
+    const previousManifest = readDatasetManifest(outDir);
+    const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, fullViewCatalog, counters);
+    const matchDelta = matchTargetsDelta({
+        targets: allTargets,
+        generatorCatalog,
+        viewCatalog: fullViewCatalog,
+        specName,
+        policyHash: matchingPolicyInputHash(PROJECT_ROOT, sourceIndex),
+        previousGraph: previousManifest?.dependency_graph ?? null,
+        pairIndex,
+        counters
+    });
+    const allMatchedTuples = matchDelta.tuples;
+    console.log(
+        `Matching plan: ${matchDelta.reusedTuples} tuple(s) reused; `
+        + `${matchDelta.evaluatedTargets} target scan(s), ${matchDelta.evaluatedPairs} changed pair(s).`
+    );
+    const requestedGeneratorIds = new Set(requestedModules.map(module => module.generatorId));
+    const requestedViewIds = new Set(requestedViews.map(view => view.viewId));
+    const requestedMatchedTuples = allMatchedTuples.filter(tuple =>
+        requestedGeneratorIds.has(tuple.generatorId) && requestedViewIds.has(tuple.viewId));
     if (requestedMatchedTuples.length === 0) {
         throw new Error('The selected generation scope contains no matched generator-view tuples.');
     }
@@ -692,11 +712,6 @@ async function main() {
         generatorIds: requestedModules.map(module => module.generatorId),
         viewIds: targetView ? requestedViews.map(view => view.viewId) : undefined
     };
-    const allMatchedTuples = requestedScope.fullDataset
-        ? requestedMatchedTuples
-        : matchTargets(allTargets, generatorCatalog, fullViewCatalog, {counters}).tuples;
-    const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
-    const previousManifest = readDatasetManifest(outDir);
     let generationScope = requestedScope;
     let matchedTuples = requestedMatchedTuples;
     if (affectedOnly || !requestedScope.fullDataset) {
@@ -708,6 +723,7 @@ async function main() {
             generators: generatorCatalog,
             views: fullViewCatalog,
             tuples: allMatchedTuples,
+            pairIndex,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
             reuseImageIdentityFrom: previousManifest?.dependency_graph
@@ -811,6 +827,7 @@ async function main() {
             generators: generatorCatalog,
             views: fullViewCatalog,
             tuples: allMatchedTuples,
+            pairIndex,
             generatedSplits: trainingOnly ? ['train'] : ['train', 'val'],
             sourceIndex,
             datasetSnapshot: candidate

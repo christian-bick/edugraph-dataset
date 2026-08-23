@@ -2,13 +2,10 @@ import { createHash } from 'crypto';
 import { existsSync, lstatSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import {getConceptAncestors, isSubConceptOf} from './ontology.ts';
 import { findLeafModules, LeafModule } from './module-resolver.ts';
 import {
-    getAcceptedGeneratorProblemTypes,
     getGeneratorProblemTypeFromPath,
-    getViewToProblemTypeMap,
-    isProblemTypeCompatible
+    getViewToProblemTypeMap
 } from './type-parser.ts';
 import { extractConfig, extractSchemaLabels, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
@@ -19,12 +16,17 @@ import { defineImplementationPackage } from './dataset-permutation-builder.ts';
 import { defineOntologyPackage, toOntologyTodo } from './ontology-todo.ts';
 import type {WorkCounters} from './work-counters.ts';
 import {radixSortUtf8} from './content-identity.ts';
+import {
+    matchTargets,
+    type GeneratorMatchInfo,
+    type MatchTuple,
+    type ViewMatchInfo
+} from './matching.ts';
+export * from './matching.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
-
-const EDU_PREFIX = 'http://edugraph.io/edu/';
 
 // ---------------------------------------------------------------------------
 // Sample identity
@@ -116,323 +118,6 @@ export function computeSampleFilename(identity: SampleIdentity): string {
     const { targetId, generatorId, viewId, mode, instanceIdx } = identity;
     return `${sanitizeFilePart(targetId)}_${sanitizeFilePart(generatorId)}_${sanitizeFilePart(viewId)}`
         + `_inst-${instanceIdx}_mode-${MODE_TAGS[mode]}.png`;
-}
-
-// ---------------------------------------------------------------------------
-// Matching
-// ---------------------------------------------------------------------------
-
-export interface GeneratorMatchInfo {
-    generatorId: string;
-    /** Union of spec generalLabels and schema-extracted labels */
-    labels: string[];
-    problemType?: string | null;
-}
-
-export interface ViewMatchInfo {
-    viewId: string;
-    /** Union of spec generalLabels and view-schema-extracted labels */
-    supportedLabels: string[];
-    requiredLabels?: readonly string[];
-    rejectedLabels?: readonly string[];
-    problemType?: string | null;
-}
-
-export type MatchFailureReason =
-    | 'incompatible-type'
-    | 'unsupported-label'
-    | 'missing-required-label'
-    | 'rejected-label';
-
-export type MatchVerdict =
-    | { matched: true }
-    | { matched: false; reason: MatchFailureReason; label?: string };
-
-function hasCompatibleProblemTypes(
-    generatorInfo: GeneratorMatchInfo,
-    viewInfo: ViewMatchInfo
-): boolean {
-    return generatorInfo.problemType == null
-        || viewInfo.problemType == null
-        || isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType);
-}
-
-function matchesTargetCapabilities(
-    targetLabels: string[],
-    generatorInfo: GeneratorMatchInfo,
-    viewInfo: ViewMatchInfo
-): Exclude<MatchVerdict, {matched: false; reason: 'incompatible-type'}> {
-    const missingRequired = viewInfo.requiredLabels?.find(requiredLabel =>
-        !targetLabels.some(targetLabel => isSubConceptOf(targetLabel, requiredLabel))
-    );
-    if (missingRequired) {
-        return {
-            matched: false,
-            reason: 'missing-required-label',
-            label: missingRequired
-        };
-    }
-
-    // A target (competency/standard) is legitimately broad. It is satisfied by a
-    // generator/view capability that is EQUAL TO or MORE SPECIFIC THAN the target
-    // label — i.e. the capability specializes the broad competency:
-    // `isSubConceptOf(capabilityLabel, targetLabel)`. The reverse (a specific
-    // target met only by a more general capability) must NOT match, because the
-    // general capability may specialize some other way. This is the same
-    // directionality for Area, Scope and Ability. Each capability is owned by
-    // whichever module parameterizes or renders it; the other must not redeclare it.
-    for (const compLabel of targetLabels) {
-        if (!compLabel.startsWith(EDU_PREFIX)) continue;
-        const supportedByGen = generatorInfo.labels.some(genLabel => isSubConceptOf(genLabel, compLabel));
-        const supportedByView = viewInfo.supportedLabels.some(viewLabel => isSubConceptOf(viewLabel, compLabel));
-        if (!supportedByGen && !supportedByView) {
-            return { matched: false, reason: 'unsupported-label', label: compLabel };
-        }
-    }
-
-    const rejected = viewInfo.rejectedLabels?.find(label => targetLabels.includes(label));
-    if (rejected) {
-        return { matched: false, reason: 'rejected-label', label: rejected };
-    }
-
-    return { matched: true };
-}
-
-/**
- * The single matching predicate for (target, generator, view) triples.
- * Covers problem-type compatibility, label support and view rejection in one
- * place so no caller can apply a partial rule set.
- */
-export function matchesTarget(
-    targetLabels: string[],
-    generatorInfo: GeneratorMatchInfo,
-    viewInfo: ViewMatchInfo
-): MatchVerdict {
-    if (!hasCompatibleProblemTypes(generatorInfo, viewInfo)) {
-        return { matched: false, reason: 'incompatible-type' };
-    }
-
-    return matchesTargetCapabilities(targetLabels, generatorInfo, viewInfo);
-}
-
-export interface MatchTuple {
-    target: CompetencyTarget;
-    generatorId: string;
-    viewId: string;
-}
-
-export interface MatchRejection {
-    targetId: string;
-    generatorId: string;
-    viewId: string;
-    verdict: Exclude<MatchVerdict, { matched: true }>;
-}
-
-export interface MatchResult {
-    tuples: MatchTuple[];
-}
-
-export interface MatchDiagnosticResult extends MatchResult {
-    /** Label-level failures for type-compatible pairs (type mismatches are omitted as noise) */
-    rejections: MatchRejection[];
-}
-
-export interface CompatibleModulePair {
-    generator: GeneratorMatchInfo;
-    view: ViewMatchInfo;
-    /** Capability labels and their ancestors, used as target-label index keys. */
-    supportedTargetLabels: ReadonlySet<string>;
-}
-
-export interface CompatibleModulePairIndex {
-    /** Compatible pairs in the generator-then-view order used by dataset generation. */
-    orderedPairs: CompatibleModulePair[];
-    /** The same pairs grouped by generator payload type for scoped consumers and diagnostics. */
-    byProblemType: Map<string, CompatibleModulePair[]>;
-    /** Compatible pairs grouped by every broad target label their capabilities can satisfy. */
-    bySupportedTargetLabel: Map<string, CompatibleModulePair[]>;
-}
-
-const UNKNOWN_PROBLEM_TYPE = '(unknown)';
-
-/**
- * Computes the payload-compatible generator/view search space once. Target
- * matching can then avoid reconsidering every impossible cross-type pair.
- */
-export function buildCompatibleModulePairIndex(
-    generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[],
-    counters?: WorkCounters
-): CompatibleModulePairIndex {
-    counters?.add('match.pair_index_builds');
-    const orderedPairs: CompatibleModulePair[] = [];
-    const byProblemType = new Map<string, CompatibleModulePair[]>();
-    const bySupportedTargetLabel = new Map<string, CompatibleModulePair[]>();
-    const knownGeneratorTypes = new Set(generatorCatalog
-        .map(generator => generator.problemType)
-        .filter((problemType): problemType is string => problemType !== null && problemType !== undefined));
-    const viewsByGeneratorType = new Map(
-        [...knownGeneratorTypes].map(problemType => [problemType, [] as ViewMatchInfo[]])
-    );
-
-    for (const view of viewCatalog) {
-        if (view.problemType == null) {
-            for (const views of viewsByGeneratorType.values()) views.push(view);
-            continue;
-        }
-        for (const acceptedType of getAcceptedGeneratorProblemTypes(view.problemType, counters)) {
-            viewsByGeneratorType.get(acceptedType)?.push(view);
-        }
-    }
-
-    for (const generator of generatorCatalog) {
-        const compatibleViews = generator.problemType == null
-            ? viewCatalog
-            : viewsByGeneratorType.get(generator.problemType) ?? [];
-        for (const view of compatibleViews) {
-            const supportedTargetLabels = new Set<string>();
-            for (const label of [...generator.labels, ...view.supportedLabels]) {
-                for (const ancestor of getConceptAncestors(label)) supportedTargetLabels.add(ancestor);
-            }
-
-            const pair = {generator, view, supportedTargetLabels};
-            orderedPairs.push(pair);
-            counters?.add('match.compatible_pairs');
-
-            const problemType = generator.problemType ?? UNKNOWN_PROBLEM_TYPE;
-            const group = byProblemType.get(problemType);
-            if (group) group.push(pair);
-            else byProblemType.set(problemType, [pair]);
-
-            for (const label of supportedTargetLabels) {
-                const labelPairs = bySupportedTargetLabel.get(label);
-                if (labelPairs) labelPairs.push(pair);
-                else bySupportedTargetLabel.set(label, [pair]);
-            }
-        }
-    }
-
-    return {orderedPairs, byProblemType, bySupportedTargetLabel};
-}
-
-const candidatePairsForTarget = (
-    targetLabels: readonly string[],
-    index: CompatibleModulePairIndex,
-    counters?: WorkCounters
-): CompatibleModulePair[] => {
-    const capabilityLabels = [...new Set(targetLabels.filter(label => label.startsWith(EDU_PREFIX)))];
-    if (capabilityLabels.length === 0) return index.orderedPairs;
-
-    const postings: CompatibleModulePair[][] = [];
-    for (const label of capabilityLabels) {
-        counters?.add('match.target_label_lookups');
-        const pairs = index.bySupportedTargetLabel.get(label);
-        if (!pairs) return [];
-        counters?.add('match.posting_entries', pairs.length);
-        postings.push(pairs);
-    }
-
-    const counts = new Map<CompatibleModulePair, number>();
-    let shortest = postings[0];
-    for (const pairs of postings) {
-        if (pairs.length < shortest.length) shortest = pairs;
-        for (const pair of pairs) counts.set(pair, (counts.get(pair) ?? 0) + 1);
-    }
-
-    const candidates = shortest.filter(pair => counts.get(pair) === postings.length);
-    counters?.add('match.candidate_pairs', candidates.length);
-    return candidates;
-};
-
-export interface MatchOptions {
-    pairIndex?: CompatibleModulePairIndex;
-    counters?: WorkCounters;
-}
-
-/**
- * Produces the full deterministic list of (target, generator, view) tuples
- * the pipeline generates samples for, in stable iteration order
- * (targets in given order, then generators, then views, each in catalog order).
- */
-export function matchTargets(
-    targets: CompetencyTarget[],
-    generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[],
-    options: MatchOptions = {}
-): MatchResult {
-    const tuples: MatchTuple[] = [];
-    const index = options.pairIndex
-        ?? buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, options.counters);
-
-    for (const target of targets) {
-        options.counters?.add('match.targets');
-        for (const {generator, view} of candidatePairsForTarget(target.labels, index, options.counters)) {
-            options.counters?.add('match.capability_checks');
-            const verdict = matchesTargetCapabilities(target.labels, generator, view);
-            if (verdict.matched) {
-                tuples.push({ target, generatorId: generator.generatorId, viewId: view.viewId });
-            }
-        }
-    }
-
-    return {tuples};
-}
-
-/**
- * Explicit exhaustive diagnostic mode. Its output can be target/pair sized,
- * so production coverage and generation must use matchTargets instead.
- */
-export function diagnoseTargetMatches(
-    targets: CompetencyTarget[],
-    generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[],
-    options: MatchOptions = {}
-): MatchDiagnosticResult {
-    const tuples: MatchTuple[] = [];
-    const rejections: MatchRejection[] = [];
-    const {orderedPairs} = options.pairIndex
-        ?? buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, options.counters);
-
-    for (const target of targets) {
-        options.counters?.add('match.diagnostic_targets');
-        for (const {generator, view} of orderedPairs) {
-            options.counters?.add('match.diagnostic_pair_checks');
-            const verdict = matchesTargetCapabilities(target.labels, generator, view);
-            if (verdict.matched) {
-                tuples.push({target, generatorId: generator.generatorId, viewId: view.viewId});
-            } else {
-                rejections.push({
-                    targetId: target.id,
-                    generatorId: generator.generatorId,
-                    viewId: view.viewId,
-                    verdict
-                });
-                options.counters?.add('match.rejections');
-            }
-        }
-    }
-
-    return {tuples, rejections};
-}
-
-/**
- * Returns active targets that have no semantically compatible generator/view
- * pair. This is the inverse coverage check for target specs: every target in
- * `spec` must have at least one realizable module path before generation.
- */
-export function findTargetsWithoutMatch(
-    targets: CompetencyTarget[],
-    generatorCatalog: GeneratorMatchInfo[],
-    viewCatalog: ViewMatchInfo[],
-    options: MatchOptions = {}
-): CompetencyTarget[] {
-    const index = options.pairIndex
-        ?? buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, options.counters);
-
-    return targets.filter(target => !candidatePairsForTarget(target.labels, index, options.counters)
-        .some(({generator, view}) =>
-        matchesTargetCapabilities(target.labels, generator, view).matched
-    ));
 }
 
 // ---------------------------------------------------------------------------

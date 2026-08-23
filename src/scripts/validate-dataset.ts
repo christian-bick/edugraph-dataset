@@ -23,6 +23,7 @@ import {
 import { validationFailed, validationReportPath } from '../lib/validation-report.ts';
 import {
     buildDatasetManifest,
+    dependencyGraphVqaCacheKey,
     datasetRendererIssues,
     datasetFreshnessIssues,
     readDatasetManifest
@@ -31,6 +32,12 @@ import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
 import { auditVqaCache, type ExpectedVqaCacheRecord } from '../lib/vqa-cache-audit.ts';
 import { CANONICAL_RENDERER_ID } from '../lib/render-environment.ts';
 import {createWorkCounters} from '../lib/work-counters.ts';
+import {SourceContentIndex} from '../lib/content-identity.ts';
+import {
+    buildCompatibleModulePairIndex,
+    matchingPolicyInputHash,
+    matchTargetsDelta
+} from '../lib/matching.ts';
 import {
     readDatasetSnapshot,
     verifyDatasetSnapshotIntegrity,
@@ -75,6 +82,7 @@ interface PreparedVqaSample {
     imagePath: string;
     imageBuffer?: Buffer;
     imageSha256?: string;
+    validationCacheKey?: string;
     checklistPaths?: string[];
     checklistContents?: {global: string; view: string};
     validationContext?: VqaValidationContext;
@@ -298,6 +306,19 @@ async function main() {
             || entry.module.relativePath === targetView
             || entry.module.category === targetView)
         : viewCatalog;
+    const existingManifest = readDatasetManifest(DATASET_DIR);
+    const sourceIndex = new SourceContentIndex(PROJECT_ROOT);
+    const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, counters);
+    const matchDelta = matchTargetsDelta({
+        targets: specValidation.targets,
+        generatorCatalog,
+        viewCatalog,
+        specName,
+        policyHash: matchingPolicyInputHash(PROJECT_ROOT, sourceIndex),
+        previousGraph: existingManifest?.dependency_graph ?? null,
+        pairIndex,
+        counters
+    });
     const currentManifestBuild = buildDatasetManifest({
         projectRoot: PROJECT_ROOT,
         datasetDir: DATASET_DIR,
@@ -305,6 +326,9 @@ async function main() {
         targets: specValidation.targets,
         generators: generatorCatalog,
         views: viewCatalog,
+        tuples: matchDelta.tuples,
+        pairIndex,
+        sourceIndex,
         generatedSplits: presentSplits,
         rendererEnvironment: CANONICAL_RENDERER_ID
     });
@@ -316,7 +340,6 @@ async function main() {
     const scopedEntries = Object.fromEntries(Object.entries(currentManifestBuild.entries)
         .filter(([, entry]) => generatorIds.has(entry.generator) && viewIds.has(entry.view)));
     const scopedBuild = {...currentManifestBuild, entries: scopedEntries};
-    const existingManifest = readDatasetManifest(DATASET_DIR);
     const scopedManifest = existingManifest ? {
         ...existingManifest,
         entries: Object.fromEntries(Object.entries(existingManifest.entries)
@@ -374,42 +397,57 @@ async function main() {
         const imagePath = imagePathFor(entry);
         if (!existsSync(imagePath)) return {entry, imagePath};
 
-        const split = parseSampleKey(entry.sample_key).split;
-        const imageSha256 = DATASET_SNAPSHOT.imageIdentity(split, entry.sample_key).sha256;
-        const checklist = checklistFor(entry.view);
-        const validationContext = validationContextResolver.resolve(
-            imageSha256,
-            checklist.paths,
-            entry.tags,
-            [checklist.contents.global, checklist.contents.view]
+        const imageNode = currentManifestBuild.dependency_graph.nodes[`image:${entry.sample_key}`];
+        const validationCacheKey = dependencyGraphVqaCacheKey(
+            currentManifestBuild.dependency_graph,
+            entry.sample_key
         );
+        if (!imageNode?.output?.content_hash || !validationCacheKey) {
+            throw new Error(`Dependency graph is missing VQA identity for ${entry.sample_key}.`);
+        }
         return {
             entry,
             imagePath,
-            imageSha256,
-            checklistPaths: checklist.paths,
-            checklistContents: checklist.contents,
-            validationContext
+            imageSha256: imageNode.output.content_hash,
+            validationCacheKey
         };
     });
+
+    const prepareValidationContext = (sample: PreparedVqaSample): void => {
+        if (sample.validationContext || !sample.imageSha256) return;
+        const checklist = checklistFor(sample.entry.view);
+        const validationContext = validationContextResolver.resolve(
+            sample.imageSha256,
+            checklist.paths,
+            sample.entry.tags,
+            [checklist.contents.global, checklist.contents.view]
+        );
+        if (validationContext.validationCacheKey !== sample.validationCacheKey) {
+            throw new Error(
+                `VQA dependency graph key does not match the resolved prompt context for ${sample.entry.sample_key}.`
+            );
+        }
+        sample.checklistPaths = checklist.paths;
+        sample.checklistContents = checklist.contents;
+        sample.validationContext = validationContext;
+    };
 
     // Collect active cache keys per module for auto-pruning.
     const activeKeysPerModule = new Map<string, Set<string>>();
     const expectedCacheRecords: ExpectedVqaCacheRecord[] = [];
 
     for (const sample of preparedSamples) {
-        const {entry, validationContext} = sample;
+        const {entry, validationCacheKey} = sample;
         const moduleName = entry.generator;
-        if (!validationContext) continue;
-        const valCacheKey = validationContext.validationCacheKey;
+        if (!validationCacheKey) continue;
 
         if (!activeKeysPerModule.has(moduleName)) {
             activeKeysPerModule.set(moduleName, new Set());
         }
-        activeKeysPerModule.get(moduleName)!.add(valCacheKey);
+        activeKeysPerModule.get(moduleName)!.add(validationCacheKey);
         expectedCacheRecords.push({
             moduleName,
-            validationCacheKey: valCacheKey,
+            validationCacheKey,
             sampleKey: entry.sample_key
         });
     }
@@ -508,11 +546,11 @@ async function main() {
     let cachedFailed = 0;
 
     for (const sample of preparedSamples) {
-        const {entry, validationContext} = sample;
-        if (!validationContext) continue;
+        const {entry, validationCacheKey} = sample;
+        if (!validationCacheKey) continue;
 
         const existingCache = cacheManagerFor(entry.generator)
-            .get(validationContext.validationCacheKey);
+            .get(validationCacheKey);
 
         if (existingCache && !force) {
             cachedCount++;
@@ -531,6 +569,7 @@ async function main() {
         if (!apiKey) {
             console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
         } else {
+            for (const sample of toEvaluate) prepareValidationContext(sample);
             evaluationConcurrency = logPrompts ? 1 : evaluationConcurrency;
             console.log(`Evaluating ${toEvaluate.length} samples concurrently (up to ${evaluationConcurrency} parallel request${evaluationConcurrency === 1 ? '' : 's'})...`);
             let processed = 0;
@@ -632,18 +671,18 @@ function generateValidationReport(
     };
 
     for (const sample of preparedSamples) {
-        const {entry, validationContext} = sample;
+        const {entry, validationCacheKey} = sample;
         const moduleName = entry.generator;
         const tally = tallyFor(entry);
         tally.total++;
 
-        if (!validationContext) {
+        if (!validationCacheKey) {
             uncachedCount++;
             tally.uncached++;
             continue;
         }
 
-        const cache = cacheManagerFor(moduleName).get(validationContext.validationCacheKey);
+        const cache = cacheManagerFor(moduleName).get(validationCacheKey);
 
         if (!cache) {
             uncachedCount++;

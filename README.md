@@ -83,10 +83,13 @@ npm run merge:dataset
 *   `--concurrency=N`: Set the bounded Playwright worker count (default: 8).)*
 
 Scoped generation is transactional and dependency-checked. Before rendering, the persisted graph
-computes the affected generator/view closure; a scope that would leave stale sibling pairs stops
-with a causal-path diagnostic. A successful run replaces only the selected affected pairs, while
-any planning, preflight, generation, or render failure discards staged output and leaves the
-previous dataset intact.
+reuses unchanged target matches, computes the affected generator/view closure, and defines the
+expected VQA cache identity of every sample. Changed targets are matched through the complete
+capability index; changed compatible generator/view pairs are tested against indexed targets so
+new matches cannot be missed. A scope that would leave stale sibling pairs stops with a causal-path
+diagnostic. A successful run replaces only the selected affected pairs, while any planning,
+preflight, generation, or render failure discards staged output and leaves the previous dataset
+intact.
 
 After the first full shard baseline, let the dependency graph select exact changed pairs:
 ```bash

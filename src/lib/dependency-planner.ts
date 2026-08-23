@@ -10,14 +10,20 @@ import {
 import {resolve} from 'node:path';
 import {digestContent, radixSortUtf8} from './content-identity.ts';
 
-export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 1;
-export const DEPENDENCY_PLANNER_EPOCH = 2;
+export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 2;
+export const DEPENDENCY_PLANNER_EPOCH = 3;
 
 export const DEPENDENCY_NODE_KINDS = [
     'source-file',
+    'matching-policy',
+    'target-capability',
+    'generator-capability',
+    'view-capability',
     'generator-module',
     'view-module',
-    'generator-view-pair',
+    'module-pair',
+    'match-tuple',
+    'generation-pair',
     'competency-target',
     'ontology-entity',
     'ontology-relation',

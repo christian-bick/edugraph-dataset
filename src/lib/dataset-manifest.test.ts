@@ -8,6 +8,7 @@ import {
     DatasetManifestEntry,
     affectedDatasetPairKeys,
     buildDatasetManifest,
+    dependencyGraphVqaCacheKey,
     datasetGlobalSourceHash,
     datasetFreshnessIssues,
     datasetOntologySemanticIssues,
@@ -23,6 +24,7 @@ import {
 } from './dependency-planner.ts';
 import {buildOntologySemanticSnapshot} from './external-semantics.ts';
 import type {OntologyProvenance} from './coverage-identity.ts';
+import {buildVqaValidationContext} from './vqa-cache.ts';
 
 const dependencyGraph = createDependencyGraphSnapshot([]);
 const cleanPlan = planDependencyDelta(null, dependencyGraph);
@@ -207,7 +209,7 @@ describe('updateDatasetManifest', () => {
                 input_hash: definitionHash,
                 dependencies: ['ontology:Addition']
             },
-            {id: 'pair:demo#view', kind: 'generator-view-pair', input_hash: 'pair', dependencies: []},
+            {id: 'pair:demo#view', kind: 'generation-pair', input_hash: 'pair', dependencies: []},
             {
                 id: 'vqa:sample',
                 kind: 'vqa-record',
@@ -238,7 +240,7 @@ describe('updateDatasetManifest', () => {
     it('selects exact current and removed pairs from a delta', () => {
         const graph = (sourceHash: string, pair: string) => createDependencyGraphSnapshot([
             {id: 'source:module', kind: 'source-file', input_hash: sourceHash, dependencies: []},
-            {id: `pair:${pair}`, kind: 'generator-view-pair', input_hash: pair, dependencies: ['source:module']}
+            {id: `pair:${pair}`, kind: 'generation-pair', input_hash: pair, dependencies: ['source:module']}
         ]);
         const previousGraph = graph('before', 'writing#old-view');
         const currentGraph = graph('after', 'writing#new-view');
@@ -325,13 +327,13 @@ describe('updateDatasetManifest', () => {
             },
             {
                 id: 'pair:writing#numbers-write-standard',
-                kind: 'generator-view-pair',
+                kind: 'generation-pair',
                 input_hash: 'pair-a',
                 dependencies: ['source:shared']
             },
             {
                 id: 'pair:comparison#numbers-compare',
-                kind: 'generator-view-pair',
+                kind: 'generation-pair',
                 input_hash: 'pair-b',
                 dependencies: ['source:shared']
             }
@@ -408,13 +410,16 @@ describe('buildDatasetManifest', () => {
             target_id: 'target',
             content_fingerprint: 'content',
             task_fingerprint: 'task',
-            tags: ['Area.Demo'],
+            tags: [
+                'http://edugraph.io/edu/Addition',
+                'http://edugraph.io/edu/ProcedureExecution'
+            ],
             target_associations: [{spec: 'ccss', target_id: 'target'}]
         })}\n`);
 
         const generator = {
             generatorId: 'demo',
-            labels: ['Area.Demo'],
+            labels: ['http://edugraph.io/edu/Addition'],
             problemType: 'arithmetic',
             module: {
                 id: 'demo',
@@ -427,7 +432,7 @@ describe('buildDatasetManifest', () => {
         } as any;
         const view = {
             viewId: 'demo-view',
-            supportedLabels: ['Ability.Demo'],
+            supportedLabels: ['http://edugraph.io/edu/ProcedureExecution'],
             problemType: 'arithmetic',
             module: {
                 id: 'demo-view',
@@ -471,6 +476,57 @@ describe('buildDatasetManifest', () => {
             expect(result.source_stats.files_read).toBeLessThanOrEqual(
                 Object.values(result.dependency_graph.nodes).filter(node => node.kind === 'source-file').length
             );
+
+            const sampleKey = 'target#demo#demo-view#train#question#inst:0';
+            const imageNode = result.dependency_graph.nodes[`image:${sampleKey}`];
+            const vqaNode = result.dependency_graph.nodes[`vqa:${sampleKey}`];
+            const matchNodeId = 'match:ccss:target#demo#demo-view';
+            expect(result.dependency_graph.nodes[matchNodeId].dependencies).toEqual([
+                'module-pair:demo#demo-view',
+                'target-capability:ccss:target'
+            ]);
+            expect(result.dependency_graph.nodes['pair:demo#demo-view'].dependencies)
+                .toContain(matchNodeId);
+            expect(imageNode.dependencies).toEqual(expect.arrayContaining([
+                'pair:demo#demo-view',
+                matchNodeId
+            ]));
+            const expectedVqaKey = buildVqaValidationContext(
+                imageNode.output!.content_hash,
+                [
+                    resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'),
+                    resolve(viewDir, 'checklist.md')
+                ],
+                target.labels
+            ).validationCacheKey;
+            expect(dependencyGraphVqaCacheKey(result.dependency_graph, sampleKey))
+                .toBe(expectedVqaKey);
+            expect(vqaNode.dependencies).toEqual(expect.arrayContaining([
+                `image:${sampleKey}`,
+                'ontology-definition:Addition',
+                'ontology-definition:ProcedureExecution'
+            ]));
+
+            writeFileSync(resolve(viewDir, 'checklist.md'), 'changed-leaf-checklist');
+            const changed = buildDatasetManifest({
+                projectRoot,
+                datasetDir,
+                specName: 'ccss',
+                targets: [target],
+                generators: [generator],
+                views: [view],
+                generatedSplits: ['train'],
+                rendererEnvironment: 'canonical',
+                tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}]
+            });
+            const checklistPlan = planDependencyDelta(
+                result.dependency_graph,
+                changed.dependency_graph
+            );
+            expect(checklistPlan.affected_nodes).toContain(`vqa:${sampleKey}`);
+            expect(checklistPlan.affected_nodes).not.toContain(`image:${sampleKey}`);
+            expect(dependencyGraphVqaCacheKey(changed.dependency_graph, sampleKey))
+                .not.toBe(expectedVqaKey);
         } finally {
             rmSync(projectRoot, {recursive: true, force: true});
         }

@@ -69,11 +69,11 @@ describe('dependency delta planning', () => {
         const previous = createDependencyGraphSnapshot([
             node('source', 'source-file'),
             node('generator', 'generator-module', ['source']),
-            node('pair', 'generator-view-pair', ['generator'])
+            node('pair', 'generation-pair', ['generator'])
         ]);
         const current = createDependencyGraphSnapshot([
             node('generator', 'generator-module'),
-            node('pair', 'generator-view-pair', ['generator'])
+            node('pair', 'generation-pair', ['generator'])
         ]);
 
         const plan = planDependencyDelta(previous, current);

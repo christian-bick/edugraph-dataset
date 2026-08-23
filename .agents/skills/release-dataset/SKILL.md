@@ -145,7 +145,7 @@ meaningful checkpoints without flooding the user:
 
 1. quality gates;
 2. canonical generation;
-3. committed VQA cache audit;
+3. committed VQA cache audit against the exact VQA keys in the release dependency graph;
 4. merge, asset-index, and coverage validation;
 5. Hugging Face publication;
 6. GitHub Release publication;

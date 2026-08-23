@@ -4,11 +4,26 @@ import {basename, resolve} from 'node:path';
 import {
     GeneratorCatalogEntry,
     MatchTuple,
-    matchTargets,
     SampleSplit,
     SPLIT_DIRS,
     ViewCatalogEntry
 } from './generation.ts';
+import {
+    buildCompatibleModulePairIndex,
+    generatorCapabilityInputHash,
+    generatorCapabilityNodeId,
+    matchTargets,
+    matchingPolicyNodeId,
+    matchingPolicySourcePaths,
+    matchTupleNodeId,
+    modulePairKey,
+    modulePairNodeId,
+    targetCapabilityInputHash,
+    targetCapabilityNodeId,
+    viewCapabilityInputHash,
+    viewCapabilityNodeId,
+    type CompatibleModulePairIndex
+} from './matching.ts';
 import {CompetencyTarget} from '../types/ml-engine.ts';
 import {partOf, type CompetencyDescriptor} from 'edugraph-ts';
 import {currentRendererEnvironment} from './render-environment.ts';
@@ -38,9 +53,10 @@ import {
     type OntologySemanticSnapshot
 } from './external-semantics.ts';
 import {resolveOntologyProvenance} from './coverage-identity.ts';
+import {createVqaValidationContextResolver} from './vqa-cache.ts';
 
-export const DATASET_MANIFEST_SCHEMA_VERSION = 5;
-const GENERATION_PIPELINE_VERSION = 'ontology-semantic-delta-v1';
+export const DATASET_MANIFEST_SCHEMA_VERSION = 6;
+const GENERATION_PIPELINE_VERSION = 'unified-dependency-graph-v1';
 
 export interface DatasetManifestEntry {
     generator: string;
@@ -82,6 +98,15 @@ export interface DatasetManifestBuild {
         ontology_entities: number;
         ontology_relations: number;
     };
+}
+
+/** Returns the graph-owned VQA cache identity for one structural sample. */
+export function dependencyGraphVqaCacheKey(
+    graph: DependencyGraphSnapshot,
+    sampleKey: string
+): string | null {
+    const node = graph.nodes[nodeId('vqa', sampleKey)];
+    return node?.kind === 'vqa-record' ? node.input_hash : null;
 }
 
 export interface ManifestUpdateScope {
@@ -243,9 +268,7 @@ function pairSharedPaths(projectRoot: string): string[] {
         resolve(projectRoot, 'src', 'lib', 'dependency-planner.ts'),
         resolve(projectRoot, 'src', 'lib', 'dataset-output.ts'),
         resolve(projectRoot, 'src', 'lib', 'generation.ts'),
-        resolve(projectRoot, 'src', 'lib', 'module-resolver.ts'),
-        resolve(projectRoot, 'src', 'lib', 'spec-validator.ts'),
-        resolve(projectRoot, 'src', 'lib', 'type-parser.ts')
+        resolve(projectRoot, 'src', 'lib', 'module-resolver.ts')
     ];
 }
 
@@ -333,6 +356,7 @@ export function buildDatasetManifest(options: {
     generatedSplits: SampleSplit[];
     rendererEnvironment?: string;
     tuples?: readonly MatchTuple[];
+    pairIndex?: CompatibleModulePairIndex;
     sourceIndex?: SourceContentIndex;
     reuseImageIdentityFrom?: DependencyGraphSnapshot;
     datasetSnapshot?: DatasetSnapshot;
@@ -350,12 +374,14 @@ export function buildDatasetManifest(options: {
         generatedSplits,
         rendererEnvironment = currentRendererEnvironment(),
         tuples: preparedTuples,
+        pairIndex: preparedPairIndex,
         sourceIndex = new SourceContentIndex(projectRoot),
         reuseImageIdentityFrom,
         datasetSnapshot = readDatasetSnapshot(datasetDir),
         semanticSnapshots
     } = options;
-    const tuples = preparedTuples ?? matchTargets(targets, generators, views).tuples;
+    const pairIndex = preparedPairIndex ?? buildCompatibleModulePairIndex(generators, views);
+    const tuples = preparedTuples ?? matchTargets(targets, generators, views, {pairIndex}).tuples;
     const ontology = ontologyDependency(projectRoot);
     const ontologySemantics = semanticSnapshots
         ? {
@@ -392,6 +418,7 @@ export function buildDatasetManifest(options: {
     }
 
     const targetNodeByTarget = new Map<string, string>();
+    const targetCapabilityNodeByTarget = new Map<string, string>();
     const ontologyNodeByName = new Map<string, string>();
     const ontologyDefinitionNodeByName = new Map<string, string>();
     const ontologyNode = (rawLabel: string): string => {
@@ -482,19 +509,35 @@ export function buildDatasetManifest(options: {
         return radixSortUtf8([...new Set(dependencies)]);
     };
     for (const target of targets) {
+        const capabilityId = targetCapabilityNodeId(specName, target.id);
         const targetId = nodeId('target', `${specName}:${target.id}`);
+        targetCapabilityNodeByTarget.set(target.id, capabilityId);
         targetNodeByTarget.set(target.id, targetId);
+        addNode(nodes, {
+            id: capabilityId,
+            kind: 'target-capability',
+            input_hash: targetCapabilityInputHash(target),
+            dependencies: ontologyDependencies(target.labels)
+        });
         addNode(nodes, {
             id: targetId,
             kind: 'competency-target',
-            input_hash: digestIdentity({
-                id: target.id,
-                labels: radixSortUtf8([...target.labels]),
-                explanation: target.explanation ?? null
-            }),
-            dependencies: ontologyDependencies(target.labels)
+            input_hash: digestIdentity({id: target.id, explanation: target.explanation ?? null}),
+            dependencies: [capabilityId]
         });
     }
+
+    const matchingSources = sourceDependencies(
+        nodes,
+        sourceIndex,
+        matchingPolicySourcePaths(projectRoot)
+    );
+    addNode(nodes, {
+        id: matchingPolicyNodeId(),
+        kind: 'matching-policy',
+        input_hash: matchingSources.hash,
+        dependencies: matchingSources.ids
+    });
 
     const pairPipeline = sourceDependencies(nodes, sourceIndex, pairSharedPaths(projectRoot));
     const runtimeDependenciesHash = hashPackageStateWithoutDependency(projectRoot, 'edugraph-ts');
@@ -508,47 +551,47 @@ export function buildDatasetManifest(options: {
     });
     const generatorHashes = new Map<string, string>();
     const generatorNodeIds = new Map<string, string>();
+    const generatorCapabilityNodeIds = new Map<string, string>();
     for (const generator of generators) {
         const sources = sourceDependencies(nodes, sourceIndex, generatorSourcePaths(projectRoot, generator));
         const id = nodeId('generator', generator.generatorId);
+        const capabilityId = generatorCapabilityNodeId(generator.generatorId);
         generatorHashes.set(generator.generatorId, sources.hash);
         generatorNodeIds.set(generator.generatorId, id);
+        generatorCapabilityNodeIds.set(generator.generatorId, capabilityId);
+        addNode(nodes, {
+            id: capabilityId,
+            kind: 'generator-capability',
+            input_hash: generatorCapabilityInputHash(generator),
+            dependencies: ontologyDependencies(generator.labels)
+        });
         addNode(nodes, {
             id,
             kind: 'generator-module',
-            input_hash: digestIdentity({
-                id: generator.generatorId,
-                labels: radixSortUtf8([...generator.labels]),
-                problem_type: generator.problemType ?? null
-            }),
+            input_hash: digestIdentity({id: generator.generatorId}),
             dependencies: [
+                capabilityId,
                 runtimeDependenciesId,
-                ...sources.ids,
-                ...ontologyDependencies(generator.labels)
+                ...sources.ids
             ]
         });
     }
     const viewHashes = new Map<string, string>();
     const viewNodeIds = new Map<string, string>();
-    const checklistDependencies = new Map<string, string[]>();
+    const viewCapabilityNodeIds = new Map<string, string>();
+    const checklistDependencies = new Map<string, {ids: string[]; paths: string[]}>();
     for (const view of views) {
         const sources = sourceDependencies(nodes, sourceIndex, viewSourcePaths(projectRoot, view));
         const id = nodeId('view', view.viewId);
+        const capabilityId = viewCapabilityNodeId(view.viewId);
         viewHashes.set(view.viewId, sources.hash);
         viewNodeIds.set(view.viewId, id);
+        viewCapabilityNodeIds.set(view.viewId, capabilityId);
         addNode(nodes, {
-            id,
-            kind: 'view-module',
-            input_hash: digestIdentity({
-                id: view.viewId,
-                labels: radixSortUtf8([...view.supportedLabels]),
-                required: radixSortUtf8([...(view.requiredLabels ?? [])]),
-                rejected: radixSortUtf8([...(view.rejectedLabels ?? [])]),
-                problem_type: view.problemType ?? null
-            }),
+            id: capabilityId,
+            kind: 'view-capability',
+            input_hash: viewCapabilityInputHash(view),
             dependencies: [
-                runtimeDependenciesId,
-                ...sources.ids,
                 ...ontologyDependencies([
                     ...view.supportedLabels,
                     ...(view.requiredLabels ?? []),
@@ -556,10 +599,65 @@ export function buildDatasetManifest(options: {
                 ])
             ]
         });
-        checklistDependencies.set(view.viewId, sourceDependencies(nodes, sourceIndex, [
+        addNode(nodes, {
+            id,
+            kind: 'view-module',
+            input_hash: digestIdentity({id: view.viewId}),
+            dependencies: [capabilityId, runtimeDependenciesId, ...sources.ids]
+        });
+        const checklistPaths = [
             resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'),
             resolve(view.module.absolutePath, 'checklist.md')
-        ], path => basename(path) === 'checklist.md').ids);
+        ];
+        checklistDependencies.set(view.viewId, {
+            ids: sourceDependencies(
+                nodes,
+                sourceIndex,
+                checklistPaths,
+                path => basename(path) === 'checklist.md'
+            ).ids,
+            paths: checklistPaths
+        });
+    }
+
+    const modulePairNodeIds = new Map<string, string>();
+    for (const pair of pairIndex.orderedPairs) {
+        const generatorId = pair.generator.generatorId;
+        const viewId = pair.view.viewId;
+        const key = modulePairKey(generatorId, viewId);
+        const id = modulePairNodeId(generatorId, viewId);
+        modulePairNodeIds.set(key, id);
+        addNode(nodes, {
+            id,
+            kind: 'module-pair',
+            input_hash: digestIdentity({pair: key}),
+            dependencies: [
+                matchingPolicyNodeId(),
+                generatorCapabilityNodeIds.get(generatorId)!,
+                viewCapabilityNodeIds.get(viewId)!
+            ]
+        });
+    }
+
+    const matchNodeByTargetAndPair = new Map<string, string>();
+    for (const tuple of tuples) {
+        const key = modulePairKey(tuple.generatorId, tuple.viewId);
+        const modulePairId = modulePairNodeIds.get(key);
+        const targetCapabilityId = targetCapabilityNodeByTarget.get(tuple.target.id);
+        if (!modulePairId || !targetCapabilityId) continue;
+        const id = matchTupleNodeId(
+            specName,
+            tuple.target.id,
+            tuple.generatorId,
+            tuple.viewId
+        );
+        matchNodeByTargetAndPair.set(`${tuple.target.id}\u0000${key}`, id);
+        addNode(nodes, {
+            id,
+            kind: 'match-tuple',
+            input_hash: digestIdentity({matched: true}),
+            dependencies: [targetCapabilityId, modulePairId]
+        });
     }
 
     const entries: Record<string, DatasetManifestEntry> = {};
@@ -567,6 +665,7 @@ export function buildDatasetManifest(options: {
     const renderNodesByPair = new Map<string, Set<string>>();
     const validationNodesByPair = new Map<string, Set<string>>();
     const imageNodesByTarget = new Map<string, string[]>();
+    const vqaContextResolver = createVqaValidationContextResolver();
     for (const key of radixSortUtf8([...targetsByPair.keys()])) {
         const [generatorId, viewId] = key.split('#');
         const generator = generatorById.get(generatorId);
@@ -574,10 +673,12 @@ export function buildDatasetManifest(options: {
         if (!generator || !view) continue;
         const pairTargets = targetsByPair.get(key)!;
         const pairNodeId = nodeId('pair', key);
-        const pairTargetNodeIds = radixSortUtf8(pairTargets.map(target => targetNodeByTarget.get(target.id)!));
+        const pairMatchNodeIds = radixSortUtf8(pairTargets
+            .map(target => matchNodeByTargetAndPair.get(`${target.id}\u0000${key}`))
+            .filter((id): id is string => Boolean(id)));
         addNode(nodes, {
             id: pairNodeId,
-            kind: 'generator-view-pair',
+            kind: 'generation-pair',
             input_hash: digestIdentity({
                 pipeline: GENERATION_PIPELINE_VERSION,
                 renderer: rendererEnvironment,
@@ -587,7 +688,7 @@ export function buildDatasetManifest(options: {
                 generatorNodeIds.get(generatorId)!,
                 viewNodeIds.get(viewId)!,
                 ...pairPipeline.ids,
-                ...pairTargetNodeIds
+                ...pairMatchNodeIds
             ]
         });
         const executionNodes = new Set([pairNodeId]);
@@ -643,8 +744,8 @@ export function buildDatasetManifest(options: {
                 bytes: reusableImage.output.bytes ?? 0
             }
             : datasetSnapshot.imageIdentity(row._split, row.sample_key);
-        const rowTargetNodes = targetIdsOf(row)
-            .map(targetId => targetNodeByTarget.get(targetId))
+        const rowMatchNodes = targetIdsOf(row)
+            .map(targetId => matchNodeByTargetAndPair.get(`${targetId}\u0000${key}`))
             .filter((id): id is string => Boolean(id));
         addNode(nodes, {
             id: imageId,
@@ -655,19 +756,25 @@ export function buildDatasetManifest(options: {
                 task_fingerprint: row.task_fingerprint ?? null,
                 image_sha256: imageDigest.sha256
             }),
-            dependencies: [pairNodeId, ...rowTargetNodes],
+            dependencies: [pairNodeId, ...rowMatchNodes],
             output: {content_hash: imageDigest.sha256, bytes: imageDigest.bytes}
         });
         const labelDependencies = ontologyDependencies(row.tags ?? [], true);
+        const checklist = checklistDependencies.get(row.view);
+        if (!checklist) throw new Error(`VQA checklist dependencies are missing for view ${row.view}.`);
+        const validationContext = vqaContextResolver.resolve(
+            imageDigest.sha256,
+            checklist.paths,
+            row.tags ?? []
+        );
         const vqaId = nodeId('vqa', row.sample_key);
         addNode(nodes, {
             id: vqaId,
             kind: 'vqa-record',
-            input_hash: digestIdentity({sample_key: row.sample_key, tags: radixSortUtf8([...(row.tags ?? [])])}),
+            input_hash: validationContext.validationCacheKey,
             dependencies: [
                 imageId,
-                viewNodeIds.get(row.view)!,
-                ...(checklistDependencies.get(row.view) ?? []),
+                ...checklist.ids,
                 ...labelDependencies
             ]
         });
@@ -711,9 +818,9 @@ export function buildDatasetManifest(options: {
         const assetId = nodeId('asset-index', `${specName}:${target.id}`);
         const coverageId = nodeId('coverage', `${specName}:${target.id}`);
         const targetId = targetNodeByTarget.get(target.id)!;
-        const pairIds = radixSortUtf8([...(pairsByTarget.get(target.id) ?? [])]
-            .map(key => nodeId('pair', key))
-            .filter(id => nodes.has(id)));
+        const matchIds = radixSortUtf8([...(pairsByTarget.get(target.id) ?? [])]
+            .map(key => matchNodeByTargetAndPair.get(`${target.id}\u0000${key}`))
+            .filter((id): id is string => id !== undefined && nodes.has(id)));
         const imageIds = radixSortUtf8([...new Set(imageNodesByTarget.get(target.id) ?? [])]);
         addNode(nodes, {
             id: assetId,
@@ -725,7 +832,7 @@ export function buildDatasetManifest(options: {
             id: coverageId,
             kind: 'coverage-record',
             input_hash: digestIdentity({producer: 'coverage-v1', target: target.id}),
-            dependencies: [targetId, assetId, ...pairIds]
+            dependencies: [targetId, assetId, ...matchIds]
         });
     }
 
