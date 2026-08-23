@@ -482,8 +482,6 @@ export type MultiDigitPlaceValueExpandedProblem = {
     number: number;
     terms: number[];
     placeValues: WholeNumberPlaceValue[];
-    prompt: string;
-    expandedEquation: string;
 };
 
 export type PlaceValueExpandedProblem =

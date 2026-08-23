@@ -22,6 +22,10 @@ export function displayPlaceName(name: WholeNumberPlaceName): string {
         .join(' ');
 }
 
+export function formatExpandedEquation(number: number, terms: readonly number[]): string {
+    return `${numberFormatter.format(number)} = ${terms.map(term => numberFormatter.format(term)).join(' + ')}`;
+}
+
 export function isValidLegacyExpandedProblem(data: LegacyPlaceValueExpandedProblem): boolean {
     return Number.isInteger(data.number)
         && data.number >= 100
@@ -35,19 +39,15 @@ export function isValidLegacyExpandedProblem(data: LegacyPlaceValueExpandedProbl
 export function isValidMultiDigitExpandedProblem(data: MultiDigitPlaceValueExpandedProblem): boolean {
     if (data.task !== 'multi-digit-expanded-form'
         || !Number.isInteger(data.number)
-        || data.number <= 1000
-        || data.number >= 1000000
+        || data.number < 1000
+        || data.number > 1000000
         || !Array.isArray(data.terms)
-        || data.terms.length < 2
-        || data.terms.length > 6
+        || data.terms.length < 1
+        || data.terms.length > 7
         || data.terms.some(term => !Number.isInteger(term) || term <= 0)
         || !Array.isArray(data.placeValues)
         || data.placeValues.length < 4
-        || data.placeValues.length > 6
-        || typeof data.prompt !== 'string'
-        || data.prompt !== 'Write the numeral as a sum of its nonzero place values.'
-        || typeof data.expandedEquation !== 'string'
-        || data.expandedEquation !== `${numberFormatter.format(data.number)} = ${data.terms.map(term => numberFormatter.format(term)).join(' + ')}`) {
+        || data.placeValues.length > 7) {
         return false;
     }
 

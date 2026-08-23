@@ -2,8 +2,7 @@ import {Scope} from 'edugraph-ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {
-    createWholeNumberPlaceValues,
-    formatStandardNumeral
+    createWholeNumberPlaceValues
 } from '../../../lib/whole-number-notation.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {PlaceValueExpandedProblem} from '../../../types/problems.ts';
@@ -46,9 +45,7 @@ export class PlaceValueExpandedGenerator implements ProblemGenerator<PlaceValueE
                         task: 'multi-digit-expanded-form',
                         number,
                         terms,
-                        placeValues,
-                        prompt: 'Write the numeral as a sum of its nonzero place values.',
-                        expandedEquation: `${formatStandardNumeral(number)} = ${terms.map(formatStandardNumeral).join(' + ')}`
+                        placeValues
                     }
                 };
             }

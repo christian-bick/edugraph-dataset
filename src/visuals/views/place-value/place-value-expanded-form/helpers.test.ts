@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {MultiDigitPlaceValueExpandedProblem} from '../../../../types/problems.ts';
 import {
     displayPlaceName,
+    formatExpandedEquation,
     isValidLegacyExpandedProblem,
     isValidMultiDigitExpandedProblem
 } from './helpers.ts';
@@ -17,9 +18,7 @@ const grade4Problem: MultiDigitPlaceValueExpandedProblem = {
         {name: 'hundreds', exponent: 2, digit: 0, value: 0},
         {name: 'tens', exponent: 1, digit: 3, value: 30},
         {name: 'ones', exponent: 0, digit: 2, value: 2}
-    ],
-    prompt: 'Write the numeral as a sum of its nonzero place values.',
-    expandedEquation: '405,032 = 400,000 + 5,000 + 30 + 2'
+    ]
 };
 
 describe('expanded-form validation', () => {
@@ -30,6 +29,25 @@ describe('expanded-form validation', () => {
 
     it('accepts a complete Grade 4 place-value decomposition', () => {
         expect(isValidMultiDigitExpandedProblem(grade4Problem)).toBe(true);
+        expect(formatExpandedEquation(grade4Problem.number, grade4Problem.terms))
+            .toBe('405,032 = 400,000 + 5,000 + 30 + 2');
+    });
+
+    it('accepts the inclusive one-million boundary with all zero places preserved', () => {
+        expect(isValidMultiDigitExpandedProblem({
+            task: 'multi-digit-expanded-form',
+            number: 1_000_000,
+            terms: [1_000_000],
+            placeValues: [
+                {name: 'millions', exponent: 6, digit: 1, value: 1_000_000},
+                {name: 'hundred-thousands', exponent: 5, digit: 0, value: 0},
+                {name: 'ten-thousands', exponent: 4, digit: 0, value: 0},
+                {name: 'thousands', exponent: 3, digit: 0, value: 0},
+                {name: 'hundreds', exponent: 2, digit: 0, value: 0},
+                {name: 'tens', exponent: 1, digit: 0, value: 0},
+                {name: 'ones', exponent: 0, digit: 0, value: 0}
+            ]
+        })).toBe(true);
     });
 
     it('rejects missing zero places, reordered terms, and inconsistent values', () => {

@@ -45,8 +45,6 @@ describe('PlaceValueExpandedGenerator', () => {
                 data.placeValues.map(place => place.value).filter(value => value !== 0)
             );
             expect(data.terms.reduce((sum, term) => sum + term, 0)).toBe(data.number);
-            expect(data.expandedEquation).toContain(' = ');
-            expect(data.prompt).toBe('Write the numeral as a sum of its nonzero place values.');
         }
     });
 
@@ -59,8 +57,7 @@ describe('PlaceValueExpandedGenerator', () => {
         expect(data).toMatchObject({
             task: 'multi-digit-expanded-form',
             number: 1_000_000,
-            terms: [1_000_000],
-            expandedEquation: '1,000,000 = 1,000,000'
+            terms: [1_000_000]
         });
         expect(generator.generate({
             range: {min: 1_000_000, max: 1_000_000},
