@@ -175,9 +175,11 @@ persistent Firebase token is stored in GitHub.
 
 GitHub Actions keeps validation and publication separate. Pushes to `main` run the
 build, complete test suite, and repository checks through the local `quality-gates`
-composite action. Main validation also resolves, computes when absent, and validates the immutable
-coverage core. The exact-key `actions/cache` entry is then available to the dependent deployment
-workflow and to later release-tag runs from the default branch. A version tag repeats those gates, generates CCSS in the pinned
+composite action. Main validation also reconstructs and validates an immutable coverage core in
+job-local temporary storage. Coverage cores and development observations are not shared between
+jobs or workflows through `actions/cache`; validation, deployment, and release each perform their
+own authoritative reconstruction from the checked-out sources. The `setup-node` npm cache only
+accelerates dependency installation. A version tag repeats those gates, generates CCSS in the pinned
 canonical container, runs the strict read-only cache audit, merges the release dataset,
 generates and validates the released asset index and release coverage snapshot, publishes the dataset to Hugging
 Face, creates or updates the matching GitHub Release with that snapshot, explicitly marks

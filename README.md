@@ -206,9 +206,10 @@ complete graph. Entity, definition, and `partOf` relation records are then compa
 graph, so only targets, pairs, or VQA records reached from changed used semantics become stale.
 Unrelated ontology changes do not churn images or validation results; unversioned mutations are not
 development inputs and are eliminated by the exact locked install used for canonical work.
-The timestamp-free coverage computation is stored immutably under its complete input key. Local,
-CI, release, and deployment runs reuse that core and generate channel-specific metadata as a cheap
-projection when the effective coverage inputs are identical.
+The timestamp-free coverage computation is stored immutably under its complete input key. Local
+runs reuse that core and generate channel-specific metadata as a cheap projection when the effective
+coverage inputs are identical. CI, release, and deployment reconstruct a job-local core
+authoritatively; they do not share coverage caches between workflows.
 Local development keeps an untracked observation under `temp/coverage-core/.observations/` so
 Git candidate paths and per-file semantic records can prove an unchanged core key before loading
 model catalogs. Use `--rebuild-graph` after relevant coverage machinery changes; CI, release, and
