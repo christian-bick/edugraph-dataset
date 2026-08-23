@@ -6,13 +6,12 @@ export const spec: ViewSpec = {
     viewId: 'operations-equal-groups',
     generalLabels: [
         Scope.PhysicalNumbers,
-        Scope.ArabicNumerals
+        Scope.ArabicNumerals,
+        Ability.Interpretation
     ]
 };
 
-export const OperationsEqualGroupsViewSchema = {
-    responseMode: [Ability.Interpretation]
-} as const;
+export const OperationsEqualGroupsViewSchema = {} as const;
 
 export type OperationsEqualGroupsViewConfig = ConfigFromSchema<
     typeof OperationsEqualGroupsViewSchema

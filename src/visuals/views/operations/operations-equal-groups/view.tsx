@@ -13,7 +13,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-equal-groups'>;
 }
 
-const OperationsEqualGroupsCore = ({config, payload}: CoreProps) => {
+const OperationsEqualGroupsCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-equal-groups', data, [
@@ -38,8 +38,8 @@ const OperationsEqualGroupsCore = ({config, payload}: CoreProps) => {
         : data.operation === 'quotative-division'
             ? data.groupCount
             : data.total;
-    if (data.answer !== expectedAnswer || config.responseMode === undefined) {
-        throw new ViewValidationError('operations-equal-groups', 'The operation, answer, and response mode must agree.');
+    if (data.answer !== expectedAnswer) {
+        throw new ViewValidationError('operations-equal-groups', 'The operation and answer must agree.');
     }
 
     const prompt = data.operation === 'multiplication'
