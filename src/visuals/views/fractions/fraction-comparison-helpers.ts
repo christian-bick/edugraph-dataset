@@ -1,12 +1,10 @@
 import {
-    FractionComparisonBarModel,
     FractionValue,
     LegacyFractionComparisonProblem,
     UnlikeFractionComparisonProblem
 } from '../../../types/problems.ts';
 import {formatFraction} from '../../helpers/fraction.ts';
 
-const EPSILON = 0.001;
 const DENOMINATORS = [2, 3, 4, 6, 8] as const;
 
 const validFraction = (fraction: FractionValue): boolean => typeof fraction === 'object'
@@ -19,17 +17,6 @@ const validFraction = (fraction: FractionValue): boolean => typeof fraction === 
 
 const compare = (first: number, second: number): 'greater' | 'equal' | 'less' =>
     first > second ? 'greater' : first < second ? 'less' : 'equal';
-
-const validModel = (
-    model: FractionComparisonBarModel,
-    fraction: FractionValue
-): boolean => typeof model === 'object'
-    && model !== null
-    && model.partCount === fraction.denominator
-    && model.shadedCount === fraction.numerator
-    && Number.isFinite(model.filledPercent)
-    && Math.abs(model.filledPercent - fraction.numerator / fraction.denominator * 100) < EPSILON
-    && model.benchmarkXPercent === 50;
 
 const relationSymbol = (relation: 'greater' | 'equal' | 'less'): '>' | '=' | '<' =>
     relation === 'greater' ? '>' : relation === 'less' ? '<' : '=';
@@ -91,10 +78,13 @@ export const legacyFractionComparisonPresentation = (
     const symbol = relationSymbol(data.relation) as '>' | '<';
     const firstNotation = formatFraction(data.first);
     const secondNotation = formatFraction(data.second);
+    const sharedComponent = data.family === 'common-denominator'
+        ? data.first.denominator
+        : data.first.numerator;
     const answer = `${firstNotation} ${symbol} ${secondNotation}`;
     const rationale = data.family === 'common-denominator'
-        ? `Both ${firstNotation} and ${secondNotation} refer to the same whole and share denominator ${data.sharedComponent}; comparing numerators ${data.first.numerator} and ${data.second.numerator} shows ${firstNotation} is ${data.relation} than ${secondNotation}.`
-        : `Both ${firstNotation} and ${secondNotation} refer to the same whole and share numerator ${data.sharedComponent}; denominator ${data.first.denominator} makes ${data.relation === 'greater' ? 'larger' : 'smaller'} parts than denominator ${data.second.denominator}, so ${firstNotation} is ${data.relation} than ${secondNotation}.`;
+        ? `Both ${firstNotation} and ${secondNotation} refer to the same whole and share denominator ${sharedComponent}; comparing numerators ${data.first.numerator} and ${data.second.numerator} shows ${firstNotation} is ${data.relation} than ${secondNotation}.`
+        : `Both ${firstNotation} and ${secondNotation} refer to the same whole and share numerator ${sharedComponent}; denominator ${data.first.denominator} makes ${data.relation === 'greater' ? 'larger' : 'smaller'} parts than denominator ${data.second.denominator}, so ${firstNotation} is ${data.relation} than ${secondNotation}.`;
     return {symbol, answer, rationale};
 };
 
@@ -111,11 +101,7 @@ export const isValidUnlikeFractionComparison = (
         || typeof data.benchmark !== 'object'
         || data.benchmark === null
         || data.benchmark.numerator !== 1
-        || data.benchmark.denominator !== 2
-        || data.benchmark.notation !== '1/2'
-        || data.benchmark.xPercent !== 50
-        || !validModel(data.firstModel, data.first)
-        || !validModel(data.secondModel, data.second)) return false;
+        || data.benchmark.denominator !== 2) return false;
 
     const relation = compare(
         data.first.numerator * data.second.denominator,
@@ -137,7 +123,6 @@ export const isValidUnlikeFractionComparison = (
 
     return benchmarkProvesRelation
         && data.relation === relation
-        && data.comparisonKind === (relation === 'equal' ? 'equality' : 'inequality')
         && data.firstBenchmarkRelation === firstBenchmarkRelation
         && data.secondBenchmarkRelation === secondBenchmarkRelation;
 };

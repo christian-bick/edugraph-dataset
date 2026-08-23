@@ -1396,34 +1396,21 @@ export type LegacyFractionComparisonProblem = {
     first: FractionValue;
     second: FractionValue;
     family: 'common-denominator' | 'common-numerator';
-    sharedComponent: number;
     relation: 'greater' | 'less';
     sharedWhole: 1;
-};
-
-export type FractionComparisonBarModel = {
-    partCount: FractionParts;
-    shadedCount: number;
-    filledPercent: number;
-    benchmarkXPercent: 50;
 };
 
 export type UnlikeFractionComparisonProblem = {
     task: 'compare-unlike-fractions';
     first: FractionValue;
     second: FractionValue;
-    comparisonKind: 'inequality' | 'equality';
     relation: 'greater' | 'equal' | 'less';
     strategy: 'benchmark-half';
     sharedWhole: 1;
     benchmark: {
         numerator: 1;
         denominator: 2;
-        notation: '1/2';
-        xPercent: 50;
     };
-    firstModel: FractionComparisonBarModel;
-    secondModel: FractionComparisonBarModel;
     firstBenchmarkRelation: 'greater' | 'equal' | 'less';
     secondBenchmarkRelation: 'greater' | 'equal' | 'less';
 };

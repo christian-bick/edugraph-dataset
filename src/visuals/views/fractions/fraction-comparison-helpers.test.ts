@@ -10,18 +10,10 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
         task: 'compare-unlike-fractions',
         first: {numerator: 3, denominator: 4},
         second: {numerator: 1, denominator: 3},
-        comparisonKind: 'inequality',
         relation: 'greater',
         strategy: 'benchmark-half',
         sharedWhole: 1,
-        benchmark: {numerator: 1, denominator: 2, notation: '1/2', xPercent: 50},
-        firstModel: {partCount: 4, shadedCount: 3, filledPercent: 75, benchmarkXPercent: 50},
-        secondModel: {
-            partCount: 3,
-            shadedCount: 1,
-            filledPercent: 100 / 3,
-            benchmarkXPercent: 50
-        },
+        benchmark: {numerator: 1, denominator: 2},
         firstBenchmarkRelation: 'greater',
         secondBenchmarkRelation: 'less'
     },
@@ -29,13 +21,10 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
         task: 'compare-unlike-fractions',
         first: {numerator: 2, denominator: 4},
         second: {numerator: 3, denominator: 6},
-        comparisonKind: 'equality',
         relation: 'equal',
         strategy: 'benchmark-half',
         sharedWhole: 1,
-        benchmark: {numerator: 1, denominator: 2, notation: '1/2', xPercent: 50},
-        firstModel: {partCount: 4, shadedCount: 2, filledPercent: 50, benchmarkXPercent: 50},
-        secondModel: {partCount: 6, shadedCount: 3, filledPercent: 50, benchmarkXPercent: 50},
+        benchmark: {numerator: 1, denominator: 2},
         firstBenchmarkRelation: 'equal',
         secondBenchmarkRelation: 'equal'
     },
@@ -43,18 +32,10 @@ const fixtures: UnlikeFractionComparisonProblem[] = [
         task: 'compare-unlike-fractions',
         first: {numerator: 1, denominator: 3},
         second: {numerator: 3, denominator: 4},
-        comparisonKind: 'inequality',
         relation: 'less',
         strategy: 'benchmark-half',
         sharedWhole: 1,
-        benchmark: {numerator: 1, denominator: 2, notation: '1/2', xPercent: 50},
-        firstModel: {
-            partCount: 3,
-            shadedCount: 1,
-            filledPercent: 100 / 3,
-            benchmarkXPercent: 50
-        },
-        secondModel: {partCount: 4, shadedCount: 3, filledPercent: 75, benchmarkXPercent: 50},
+        benchmark: {numerator: 1, denominator: 2},
         firstBenchmarkRelation: 'less',
         secondBenchmarkRelation: 'greater'
     }
@@ -84,36 +65,24 @@ describe('isValidUnlikeFractionComparison', () => {
     });
 
     it.each([
-        ['filled extent', (data: UnlikeFractionComparisonProblem) => {
-            data.firstModel.filledPercent = 50;
+        ['comparison relation', (data: UnlikeFractionComparisonProblem) => {
+            data.relation = 'less';
         }],
-        ['benchmark location', (data: UnlikeFractionComparisonProblem) => {
-            data.secondModel.benchmarkXPercent = 49 as 50;
+        ['benchmark value', (data: UnlikeFractionComparisonProblem) => {
+            data.benchmark.denominator = 3 as 2;
         }],
         ['benchmark relation', (data: UnlikeFractionComparisonProblem) => {
             data.firstBenchmarkRelation = 'less';
         }],
         ['same numerator', (data: UnlikeFractionComparisonProblem) => {
             data.second = {numerator: 3, denominator: 8};
-            data.secondModel = {
-                partCount: 8,
-                shadedCount: 3,
-                filledPercent: 37.5,
-                benchmarkXPercent: 50
-            };
         }],
         ['same-side benchmark', (data: UnlikeFractionComparisonProblem) => {
             data.second = {numerator: 2, denominator: 3};
-            data.secondModel = {
-                partCount: 3,
-                shadedCount: 2,
-                filledPercent: 200 / 3,
-                benchmarkXPercent: 50
-            };
             data.secondBenchmarkRelation = 'greater';
         }],
-        ['comparison kind', (data: UnlikeFractionComparisonProblem) => {
-            data.comparisonKind = 'equality';
+        ['shared whole', (data: UnlikeFractionComparisonProblem) => {
+            data.sharedWhole = 2 as 1;
         }]
     ])('rejects contradictory %s evidence', (_name, update) => {
         expect(isValidUnlikeFractionComparison(changed(update))).toBe(false);

@@ -69,9 +69,7 @@ const expectCoherentUnlikeProblem = (problem: UnlikeFractionComparisonProblem) =
     expect(problem.strategy).toBe('benchmark-half');
     expect(problem.benchmark).toEqual({
         numerator: 1,
-        denominator: 2,
-        notation: '1/2',
-        xPercent: 50
+        denominator: 2
     });
 
     const crossProductDifference = problem.first.numerator * problem.second.denominator
@@ -82,7 +80,6 @@ const expectCoherentUnlikeProblem = (problem: UnlikeFractionComparisonProblem) =
             ? 'less'
             : 'equal';
     expect(problem.relation).toBe(expectedRelation);
-    expect(problem.comparisonKind).toBe(problem.relation === 'equal' ? 'equality' : 'inequality');
     expect(problem.firstBenchmarkRelation).toBe(benchmarkSign(
         problem.first.numerator,
         problem.first.denominator
@@ -101,17 +98,6 @@ const expectCoherentUnlikeProblem = (problem: UnlikeFractionComparisonProblem) =
         expect(problem.firstBenchmarkRelation).toBe('equal');
         expect(problem.secondBenchmarkRelation).toBe('equal');
     }
-
-    for (const [fraction, model] of [
-        [problem.first, problem.firstModel],
-        [problem.second, problem.secondModel]
-    ] as const) {
-        expect(model.partCount).toBe(fraction.denominator);
-        expect(model.shadedCount).toBe(fraction.numerator);
-        expect(model.filledPercent).toBe(100 * fraction.numerator / fraction.denominator);
-        expect(model.benchmarkXPercent).toBe(50);
-    }
-
 };
 
 describe('FractionComparisonGenerator', () => {
@@ -177,28 +163,24 @@ describe('FractionComparisonGenerator', () => {
             first: {numerator: 2, denominator: 3},
             second: {numerator: 1, denominator: 3},
             family: 'common-denominator',
-            sharedComponent: 3,
             relation: 'greater'
         }],
         [102, Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Less, {
             first: {numerator: 3, denominator: 6},
             second: {numerator: 5, denominator: 6},
             family: 'common-denominator',
-            sharedComponent: 6,
             relation: 'less'
         }],
         [103, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Greater, {
             first: {numerator: 1, denominator: 3},
             second: {numerator: 1, denominator: 8},
             family: 'common-numerator',
-            sharedComponent: 1,
             relation: 'greater'
         }],
         [104, Area.FractionCommonNumeratorComparison, Scope.CommonNumerator, Scope.Less, {
             first: {numerator: 4, denominator: 8},
             second: {numerator: 4, denominator: 6},
             family: 'common-numerator',
-            sharedComponent: 4,
             relation: 'less'
         }]
     ] as const)('preserves the legacy seed %s payload and random path', (
@@ -238,11 +220,9 @@ describe('FractionComparisonGenerator', () => {
             if (comparisonFamily === Scope.CommonDenominator) {
                 expect(problem.family).toBe('common-denominator');
                 expect(problem.first.denominator).toBe(problem.second.denominator);
-                expect(problem.sharedComponent).toBe(problem.first.denominator);
             } else {
                 expect(problem.family).toBe('common-numerator');
                 expect(problem.first.numerator).toBe(problem.second.numerator);
-                expect(problem.sharedComponent).toBe(problem.first.numerator);
             }
         }
         expect(observed.size).toBeGreaterThan(3);

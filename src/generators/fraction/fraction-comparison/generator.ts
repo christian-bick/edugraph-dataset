@@ -4,7 +4,6 @@ import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     FractionComparisonProblem,
-    FractionComparisonBarModel,
     FractionParts,
     FractionValue,
     LegacyFractionComparisonProblem,
@@ -19,9 +18,7 @@ const DENOMINATORS = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[]
 const COMMON_DENOMINATORS = [3, 4, 6, 8] as const satisfies readonly FractionParts[];
 const BENCHMARK = {
     numerator: 1,
-    denominator: 2,
-    notation: '1/2',
-    xPercent: 50
+    denominator: 2
 } as const;
 
 type FractionSeed = {
@@ -83,13 +80,6 @@ const compareToHalf = (fraction: FractionValue): 'greater' | 'equal' | 'less' =>
     return difference > 0 ? 'greater' : difference < 0 ? 'less' : 'equal';
 };
 
-const toBarModel = (fraction: FractionValue): FractionComparisonBarModel => ({
-    partCount: fraction.denominator,
-    shadedCount: fraction.numerator,
-    filledPercent: 100 * fraction.numerator / fraction.denominator,
-    benchmarkXPercent: 50
-});
-
 const generateUnlikeComparison = (
     relation: UnlikeFractionComparisonProblem['relation']
 ): UnlikeFractionComparisonProblem => {
@@ -103,13 +93,10 @@ const generateUnlikeComparison = (
         task: 'compare-unlike-fractions',
         first,
         second,
-        comparisonKind: relation === 'equal' ? 'equality' : 'inequality',
         relation,
         strategy: 'benchmark-half',
         sharedWhole: 1,
         benchmark: BENCHMARK,
-        firstModel: toBarModel(first),
-        secondModel: toBarModel(second),
         firstBenchmarkRelation,
         secondBenchmarkRelation
     };
@@ -186,7 +173,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
         let first: FractionValue;
         let second: FractionValue;
         let family: LegacyFractionComparisonProblem['family'];
-        let sharedComponent: number;
 
         if (usesCommonDenominator) {
             const denominator = randomItem(COMMON_DENOMINATORS);
@@ -200,7 +186,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             first = toFractionValue(firstNumerator, denominator);
             second = toFractionValue(secondNumerator, denominator);
             family = 'common-denominator';
-            sharedComponent = denominator;
         } else {
             const [one, two] = randomDistinctPair(DENOMINATORS);
             const lower = Math.min(one, two) as FractionParts;
@@ -211,7 +196,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             first = toFractionValue(numerator, firstDenominator);
             second = toFractionValue(numerator, secondDenominator);
             family = 'common-numerator';
-            sharedComponent = numerator;
         }
 
         return {
@@ -220,7 +204,6 @@ export class FractionComparisonGenerator implements ProblemGenerator<
                 first,
                 second,
                 family,
-                sharedComponent,
                 relation,
                 sharedWhole: 1
             }

@@ -1,6 +1,5 @@
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {
-    FractionComparisonBarModel,
     FractionComparisonProblem,
     FractionValue,
     UnlikeFractionComparisonProblem
@@ -77,11 +76,9 @@ const FractionBar = ({fraction, label}: {fraction: FractionValue; label: string}
 
 const BenchmarkBar = ({
     fraction,
-    model,
     benchmarkRelation
 }: {
     fraction: FractionValue;
-    model: FractionComparisonBarModel;
     benchmarkRelation: 'greater' | 'equal' | 'less';
 }) => (
     <div className="grid grid-cols-[4rem_600px_5rem] items-center gap-4">
@@ -91,13 +88,13 @@ const BenchmarkBar = ({
         <div className="relative h-[72px] w-[600px] overflow-visible rounded-lg border-[3px] border-slate-700 bg-white">
             <div
                 className="absolute inset-0 grid overflow-hidden rounded-[5px]"
-                style={{gridTemplateColumns: `repeat(${model.partCount}, minmax(0, 1fr))`}}
+                style={{gridTemplateColumns: `repeat(${fraction.denominator}, minmax(0, 1fr))`}}
                 aria-hidden="true"
             >
-                {Array.from({length: model.partCount}, (_, index) => (
+                {Array.from({length: fraction.denominator}, (_, index) => (
                     <div
                         key={index}
-                        className={`${index < model.shadedCount ? 'bg-sky-500' : 'bg-white'} ${
+                        className={`${index < fraction.numerator ? 'bg-sky-500' : 'bg-white'} ${
                             index > 0 ? 'border-l-2 border-slate-600' : ''
                         }`}
                     />
@@ -105,19 +102,19 @@ const BenchmarkBar = ({
             </div>
             <div
                 className="absolute -top-3 bottom-[-12px] border-l-[3px] border-dashed border-amber-600"
-                style={{left: `${model.benchmarkXPercent}%`}}
+                style={{left: '50%'}}
                 aria-hidden="true"
             />
             <div
                 className="absolute -top-[29px] -translate-x-1/2 rounded bg-amber-100 px-2 py-0.5 text-xs font-extrabold text-amber-900"
-                style={{left: `${model.benchmarkXPercent}%`}}
+                style={{left: '50%'}}
                 aria-hidden="true"
             >
                 1/2
             </div>
             <div
                 className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white bg-sky-700 shadow"
-                style={{left: `${model.filledPercent}%`}}
+                style={{left: `${100 * fraction.numerator / fraction.denominator}%`}}
                 aria-hidden="true"
             />
         </div>
@@ -164,17 +161,15 @@ const UnlikeFractionComparison = ({
         >
             <div className="mb-7 flex items-center justify-center gap-3 text-sm font-semibold text-slate-600">
                 <span className="rounded-full bg-white px-4 py-1.5 shadow-sm">Both bars represent the same whole</span>
-                <span className="rounded-full bg-amber-100 px-4 py-1.5 text-amber-900">Benchmark: {data.benchmark.notation}</span>
+                <span className="rounded-full bg-amber-100 px-4 py-1.5 text-amber-900">Benchmark: {formatFraction(data.benchmark)}</span>
             </div>
             <div className="space-y-14">
                 <BenchmarkBar
                     fraction={data.first}
-                    model={data.firstModel}
                     benchmarkRelation={data.firstBenchmarkRelation}
                 />
                 <BenchmarkBar
                     fraction={data.second}
-                    model={data.secondModel}
                     benchmarkRelation={data.secondBenchmarkRelation}
                 />
             </div>
@@ -225,14 +220,12 @@ const validateComparison = (viewId: string, data: FractionComparisonProblem) => 
     }
     if (isCommonDenominator
         && (data.first.denominator !== data.second.denominator
-            || data.first.numerator === data.second.numerator
-            || data.sharedComponent !== data.first.denominator)) {
+            || data.first.numerator === data.second.numerator)) {
         throw new ViewValidationError(viewId, 'The common-denominator family must share only its denominator.');
     }
     if (isCommonNumerator
         && (data.first.numerator !== data.second.numerator
-            || data.first.denominator === data.second.denominator
-            || data.sharedComponent !== data.first.numerator)) {
+            || data.first.denominator === data.second.denominator)) {
         throw new ViewValidationError(viewId, 'The common-numerator family must share only its numerator.');
     }
 
@@ -260,13 +253,10 @@ export const FractionComparisonView = ({
             'task',
             'first',
             'second',
-            'comparisonKind',
             'relation',
             'strategy',
             'sharedWhole',
             'benchmark',
-            'firstModel',
-            'secondModel',
             'firstBenchmarkRelation',
             'secondBenchmarkRelation'
         ]);
@@ -283,7 +273,6 @@ export const FractionComparisonView = ({
         'first',
         'second',
         'family',
-        'sharedComponent',
         'relation',
         'sharedWhole'
     ]);
@@ -292,9 +281,12 @@ export const FractionComparisonView = ({
     const emphasizedTerm: FractionTerm = data.family === 'common-denominator'
         ? 'denominator'
         : 'numerator';
+    const sharedComponent = data.family === 'common-denominator'
+        ? data.first.denominator
+        : data.first.numerator;
     const sharedDescription = data.family === 'common-denominator'
-        ? `Same denominator: ${data.sharedComponent} equal parts in each whole`
-        : `Same numerator: ${data.sharedComponent} ${data.sharedComponent === 1 ? 'part' : 'parts'} shaded in each whole`;
+        ? `Same denominator: ${sharedComponent} equal parts in each whole`
+        : `Same numerator: ${sharedComponent} ${sharedComponent === 1 ? 'part' : 'parts'} shaded in each whole`;
     const presentation = legacyFractionComparisonPresentation(data);
 
     return (
