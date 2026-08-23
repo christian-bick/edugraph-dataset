@@ -1,5 +1,8 @@
-import {DecimalPlaceValueColumn, DecimalScaleTick} from '../../../types/problems.ts';
-import {pointLabelTransform} from './decimal-notation-helpers.ts';
+import {
+    DecimalPlaceValueColumn,
+    DecimalScaleTick,
+    pointLabelTransform
+} from './decimal-notation-helpers.ts';
 
 export const PlaceValueTable = ({
     columns,

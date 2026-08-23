@@ -1,31 +1,35 @@
-import {createRoot} from 'react-dom/client';
-import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {TenthsHundredthsGrid} from '../../../components/TenthsHundredthsGrid.tsx';
-import {withConfig} from '../../withConfig.tsx';
-import {PlaceValueTable} from '../decimal-notation-components.tsx';
-import {validateDecimalNotationData} from '../decimal-notation-helpers.ts';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {TenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
+import {PlaceValueTable} from './decimal-notation-components.tsx';
 import {
-    NumbersDecimalNotationViewConfig,
-    NumbersDecimalNotationViewSchema
-} from './spec.ts';
-import '../../../../tailwind.css';
+    getDecimalNotationPresentation,
+    validateDecimalNotationData
+} from './decimal-notation-helpers.ts';
 
-const VIEW_ID = 'numbers-decimal-notation';
+export type DecimalNotationDirection = 'fraction-to-decimal' | 'decimal-to-fraction';
+export type DecimalNotationViewId =
+    | 'numbers-fraction-to-decimal'
+    | 'numbers-decimal-to-fraction';
 
-interface CoreProps {
-    config: NumbersDecimalNotationViewConfig;
-    payload: ViewRenderPayload<'numbers-decimal-notation'>;
+interface NumbersDecimalNotationViewProps {
+    direction: DecimalNotationDirection;
+    payload: ViewRenderPayload<DecimalNotationViewId>;
+    viewId: DecimalNotationViewId;
 }
 
-export const NumbersDecimalNotationCore = ({config, payload}: CoreProps) => {
+export const NumbersDecimalNotationView = ({
+    direction,
+    payload,
+    viewId
+}: NumbersDecimalNotationViewProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
-    validateDecimalNotationData(VIEW_ID, data);
-
-    const fractionToDecimal = config.conversionDirection === 'fraction-to-decimal';
+    validateDecimalNotationData(viewId, data);
+    const presentation = getDecimalNotationPresentation(data);
+    const fractionToDecimal = direction === 'fraction-to-decimal';
     const task = fractionToDecimal
-        ? data.notationTasks.fractionToDecimal
-        : data.notationTasks.decimalToFraction;
+        ? presentation.notationTasks.fractionToDecimal
+        : presentation.notationTasks.decimalToFraction;
     const revealDigits = isSolutionView || !fractionToDecimal;
 
     return (
@@ -39,13 +43,13 @@ export const NumbersDecimalNotationCore = ({config, payload}: CoreProps) => {
 
             <div className="mt-6 grid grid-cols-2 items-stretch gap-5">
                 <TenthsHundredthsGrid
-                    model={data.models.fractionGrid}
+                    model={presentation.models.fractionGrid}
                     title="One shared whole"
                     ariaLabel={fractionToDecimal
-                        ? `${data.value.fractionNotation} is shown as shaded equal parts of one shared whole; its decimal notation is withheld.`
+                        ? `${presentation.fractionNotation} is shown as shaded equal parts of one shared whole; its decimal notation is withheld.`
                         : isSolutionView
-                            ? `${data.value.fractionNotation} is shown as equal shaded parts of the same whole.`
-                            : `A shared whole is partitioned to match the given decimal ${data.value.decimalNotation}; the requested fraction numerator is not stated.`}
+                            ? `${presentation.fractionNotation} is shown as equal shaded parts of the same whole.`
+                            : `A shared whole is partitioned to match the given decimal ${presentation.decimalNotation}; the requested fraction numerator is not stated.`}
                     showDisplay={isSolutionView || fractionToDecimal}
                 />
                 <div className="flex flex-col justify-center rounded-xl border-2 border-slate-200 bg-slate-50 p-4">
@@ -53,7 +57,7 @@ export const NumbersDecimalNotationCore = ({config, payload}: CoreProps) => {
                         Decimal place value
                     </div>
                     <PlaceValueTable
-                        columns={data.placeValue.columns}
+                        columns={presentation.placeValue.columns}
                         revealDigits={revealDigits}
                         showUnitFractions={isSolutionView || fractionToDecimal}
                         ariaLabel={revealDigits
@@ -62,7 +66,7 @@ export const NumbersDecimalNotationCore = ({config, payload}: CoreProps) => {
                     />
                     {isSolutionView && (
                         <div className="mt-3 text-center font-mono text-sm font-bold text-slate-700">
-                            {data.placeValue.placeValueEquation}
+                            {presentation.placeValue.equation}
                         </div>
                     )}
                 </div>
@@ -87,20 +91,3 @@ export const NumbersDecimalNotationCore = ({config, payload}: CoreProps) => {
         </div>
     );
 };
-
-export const NumbersDecimalNotation = withConfig(
-    NumbersDecimalNotationViewSchema,
-    NumbersDecimalNotationCore
-);
-
-let root: ReturnType<typeof createRoot> | null = null;
-
-if (typeof window !== 'undefined') {
-    window.renderView = (payload: ViewRenderPayload<'numbers-decimal-notation'>) => {
-        const container = document.getElementById('view');
-        if (container) {
-            if (!root) root = createRoot(container);
-            root.render(<NumbersDecimalNotation payload={payload} />);
-        }
-    };
-}

@@ -1,0 +1,3 @@
+- **Identity:** Formalizes a supplied tenths or hundredths fraction as decimal notation while aligning the fraction model and decimal place-value columns to one shared whole.
+- **Question:** Shows the fraction and its equal-parts model; the requested decimal notation and decimal digits are not revealed.
+- **Solution:** Reveals the fraction-decimal equality, completed place-value digits, and an explanation grounded in the counted tenths or hundredths.

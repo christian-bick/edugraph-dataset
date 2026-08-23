@@ -2,7 +2,10 @@ import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {DecimalScale} from '../decimal-notation-components.tsx';
-import {validateDecimalNotationData} from '../decimal-notation-helpers.ts';
+import {
+    getDecimalNotationPresentation,
+    validateDecimalNotationData
+} from '../decimal-notation-helpers.ts';
 import {
     NumbersDecimalLineViewConfig,
     NumbersDecimalLineViewSchema
@@ -20,7 +23,7 @@ export const NumbersDecimalLineCore = ({config: _config, payload}: CoreProps) =>
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateDecimalNotationData(VIEW_ID, data);
-    const line = data.numberLine;
+    const line = getDecimalNotationPresentation(data).numberLine;
 
     return (
         <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">

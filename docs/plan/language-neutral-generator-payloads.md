@@ -65,7 +65,7 @@ payload type changes.
 | `angle-measurement` | 2/2 | **Projection:** prompt and answer/explanation prose. **Witness:** one typed angle-measure relation replaces question/solution strings. The measure-versus-sketch task discriminant is view-owned and must not select parallel payloads. |
 | `comparison` | 18/4 | **Projection:** `prompt` and `evidence.explanation`. **Canonical:** numbers, relation, and first-differing-place evidence. Numeral, conclusion, and equation strings are derivable formatting. |
 | `decimal-comparison` | 3/1 | **Projection:** every detected field (`prompt`, question/solution equations, answer statement, explanation) is losslessly derivable from the existing typed operands, relation, symbol, and deciding place. |
-| `decimal-notation` | 4/3 | **Projection:** prompts, selected `unknown`, question/solution equations, answer prose, ticks, and the `notationTasks`/`numberLine`/`measurement` task subpayloads. **Canonical:** the rational value and equivalent decimal/fraction facts. Shared renderers derive notation, scale, and measurement presentations. |
+| `decimal-notation` | 4/3 | **Migrated:** the payload now contains only the coherent rational/decimal value facts. Shared view code derives notation strings, grids, place-value columns, scales, measurement presentation, requested unknowns, and all language. |
 | `fraction-arithmetic` | 14/4 | **Projection:** prompts, questions, answer prose, and `unknownRole`. **Witness:** consolidate question/solution model pairs and equation strings into canonical fraction values, operations, decompositions, conversions, and complete models. **Decision:** replace English story context with a typed situation contract before removing it. |
 | `fraction-comparison` | 7/2 | **Projection:** prompt, question equation, answer statement, rationale, and benchmark prose. **Canonical:** fractions, shared whole, relation, benchmark relation, and bar models already carry the proof. |
 | `geometry-primitives` | 18/2 | **Projection:** drawing/identification prompts, answers, prose, candidate shuffle, guide/completed scenes, and the two task subpayloads. **Canonical:** primitive kind and its mathematical properties. Geometry renderers and definitions belong in reusable parent-level view code. |
@@ -94,7 +94,7 @@ payload type changes.
 | `angle-measurement` | `geometry-angle-drawing`, `geometry-protractor` |
 | `comparison` | `numbers-compare`, `numbers-compare-counting`, `numbers-compare-matching`, `numbers-place-value-comparison` |
 | `decimal-comparison` | `numbers-decimal-comparison` |
-| `decimal-notation` | `numbers-decimal-line`, `numbers-decimal-measurement`, `numbers-decimal-notation` |
+| `decimal-notation` | `numbers-decimal-line`, `numbers-decimal-measurement`, `numbers-fraction-to-decimal`, `numbers-decimal-to-fraction` |
 | `fraction-arithmetic` | `fractions-interpretation-model`, `fractions-operation-model`, `fractions-understanding-model`, `fractions-word-problem` |
 | `fraction-comparison` | `fractions-compare-benchmark-models`, `fractions-compare-models` |
 | `geometry-primitives` | `geometry-primitives-drawing`, `geometry-primitives-identification` |

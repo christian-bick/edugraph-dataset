@@ -1,0 +1,3 @@
+- **Identity:** Interprets a supplied decimal as a tenths or hundredths fraction while aligning decimal place value and an equal-parts model to one shared whole.
+- **Question:** Shows the decimal digits and a matching but unlabeled equal-parts model; the requested fraction notation and numerator are not revealed.
+- **Solution:** Reveals the decimal-fraction equality, labels the fraction model, and explains the fraction through the counted tenths or hundredths.
