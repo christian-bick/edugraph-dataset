@@ -41,8 +41,6 @@ export class MeasurementMediatedComparisonGenerator implements ProblemGenerator<
 
         return {
             data: {
-                objects: [{id: 'A'}, {id: 'B'}, {id: 'C'}],
-                intermediary: 'B',
                 premises: [
                     {subject: 'A', relation: premiseRelation, reference: 'B'},
                     {subject: 'B', relation: premiseRelation, reference: 'C'}

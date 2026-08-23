@@ -157,7 +157,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `measurement-length-estimation` | 4 | `measure-length-estimate` | **Keep:** object/reference size relation is canonical semantic evidence. |
 | `measurement-mass-volume` | 3 | `measure-liquid-volume`, `measure-mass` | **Keep:** object, instrument, measurement kind, and quantity are semantic facts; use typed identifiers where final words are currently stored. |
 | `measurement-mass-volume-estimation` | 3 | `measure-liquid-volume-estimate`, `measure-mass-estimate` | **Keep:** container/reference/quantity relations are canonical; identifiers remain non-display semantic values. |
-| `measurement-mediated-comparison` | 1 | `measure-mediated-comparison` | **Keep/Derive:** object identities, premises, intermediary, and asked relation are canonical; derive the redundant answer. |
+| `measurement-mediated-comparison` | 1 | `measure-mediated-comparison` | **Migrated:** the premise graph carries its node identities and intermediary once; the computed transitive answer remains an explicit mathematical result. |
 | `measurement-number-line` | 10 | `measurement-number-line` | **Derive/Project:** retain exact values, unit, interval, scale, ticks, and target; move prompt/answer/explanation prose and view label selection, and derive formatted quantities. |
 | `measurement-order` | 2 | `measure-order` | **Project:** retain magnitudes and requested direction; seed presented order and IDs in the view, then derive the correct order. |
 | `measurement-tool-selection` | 3 | `measure-select-tool` | **Project:** retain a typed object/tool suitability relation; candidate tools, placement, and `correctTool` response framing belong to the view. |

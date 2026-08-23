@@ -87,8 +87,6 @@ const MeasureMediatedComparisonCore = ({config: _config, payload}: CoreProps) =>
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('measure-mediated-comparison', data, [
-        'objects',
-        'intermediary',
         'premises',
         'askedRelation',
         'answer'

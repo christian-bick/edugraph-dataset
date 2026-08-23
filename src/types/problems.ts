@@ -750,8 +750,6 @@ export type MeasurementOrderProblem = {
 export type LengthComparisonRelation = 'longer' | 'shorter';
 
 export type MediatedLengthComparisonProblem = {
-    objects: [{id: 'A'}, {id: 'B'}, {id: 'C'}];
-    intermediary: 'B';
     premises: [
         {subject: 'A'; relation: LengthComparisonRelation; reference: 'B'},
         {subject: 'B'; relation: LengthComparisonRelation; reference: 'C'}

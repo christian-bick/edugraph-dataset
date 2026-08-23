@@ -11,8 +11,6 @@ function problem(
     askedRelation: 'longer' | 'shorter'
 ): MediatedLengthComparisonProblem {
     return {
-        objects: [{id: 'A'}, {id: 'B'}, {id: 'C'}],
-        intermediary: 'B',
         premises: [
             {subject: 'A', relation: chainRelation, reference: 'B'},
             {subject: 'B', relation: chainRelation, reference: 'C'}
@@ -45,8 +43,6 @@ describe('measure-mediated-comparison helpers', () => {
     });
 
     it.each([
-        {...problem('longer', 'longer'), intermediary: 'A'},
-        {...problem('longer', 'longer'), objects: [{id: 'A'}, {id: 'C'}, {id: 'B'}]},
         {
             ...problem('longer', 'longer'),
             premises: [

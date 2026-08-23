@@ -29,17 +29,12 @@ export function deriveMediatedAnswer(
 export function validateMediatedComparisonProblem(
     data: MediatedLengthComparisonProblem
 ): void {
-    const objectIds = Array.isArray(data.objects)
-        ? data.objects.map(object => object?.id)
-        : [];
     const [first, second] = Array.isArray(data.premises) ? data.premises : [];
     const validRelation = (relation: unknown): relation is LengthComparisonRelation => (
         relation === 'longer' || relation === 'shorter'
     );
 
-    if (objectIds.length !== 3 || objectIds.join(',') !== 'A,B,C'
-        || data.intermediary !== 'B'
-        || data.premises.length !== 2 || !first || !second
+    if (data.premises.length !== 2 || !first || !second
         || first.subject !== 'A' || first.reference !== 'B'
         || second.subject !== 'B' || second.reference !== 'C'
         || !validRelation(first.relation) || second.relation !== first.relation

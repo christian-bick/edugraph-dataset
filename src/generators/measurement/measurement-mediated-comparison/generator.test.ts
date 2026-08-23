@@ -26,8 +26,6 @@ describe('MeasurementMediatedComparisonGenerator', () => {
                 expect(stub).not.toBeNull();
                 const data = stub!.data as MediatedLengthComparisonProblem;
 
-                expect(data.objects).toEqual([{id: 'A'}, {id: 'B'}, {id: 'C'}]);
-                expect(data.intermediary).toBe('B');
                 expect(data.premises).toEqual([
                     {subject: 'A', relation: data.premises[0].relation, reference: 'B'},
                     {subject: 'B', relation: data.premises[0].relation, reference: 'C'}
