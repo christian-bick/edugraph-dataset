@@ -11,6 +11,17 @@ export type SequenceLayout = {
     tileClass: string;
 };
 
+export function resolveMissingIndex(seed: number, sequenceLength: number): number {
+    if (!Number.isInteger(sequenceLength) || sequenceLength < 2) {
+        throw new ViewValidationError(
+            'counting-number-sequence',
+            'A missing position requires at least two sequence values.'
+        );
+    }
+
+    return 1 + Math.abs(Math.trunc(seed)) % (sequenceLength - 1);
+}
+
 export function resolveSequenceLayout(representation: string | undefined, sequence: number[]): SequenceLayout {
     if (representation === Scope.PhysicalNumbers) {
         if (sequence.length > MAX_PHYSICAL_SEQUENCE_LENGTH) {

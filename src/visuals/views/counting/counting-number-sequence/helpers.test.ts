@@ -2,8 +2,21 @@ import {describe, expect, it} from 'vitest';
 import {Scope} from 'edugraph-ts';
 import {
     MAX_PHYSICAL_SEQUENCE_LENGTH,
+    resolveMissingIndex,
     resolveSequenceLayout
 } from './helpers.ts';
+
+describe('resolveMissingIndex', () => {
+    it('selects a deterministic non-initial sequence position', () => {
+        expect(resolveMissingIndex(42, 6)).toBe(3);
+        expect(resolveMissingIndex(42, 6)).toBe(3);
+        expect(resolveMissingIndex(0, 2)).toBe(1);
+    });
+
+    it('rejects sequences without a valid hidden position', () => {
+        expect(() => resolveMissingIndex(42, 1)).toThrow('at least two');
+    });
+});
 
 describe('resolveSequenceLayout', () => {
     it('admits a full row of Arabic numerals through 1000', () => {

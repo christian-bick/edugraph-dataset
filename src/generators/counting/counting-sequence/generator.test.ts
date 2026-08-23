@@ -25,8 +25,6 @@ describe('CountingSequenceGenerator', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.sequence).toHaveLength(6);
         expect(stub!.data.sequence[0]).toBeGreaterThan(1);
-        expect(stub!.data.missingIndex).toBeGreaterThan(0);
-        expect(stub!.data.answer).toBe(stub!.data.sequence[stub!.data.missingIndex]);
         stub!.data.sequence.slice(1).forEach((value, index) => {
             expect(value - stub!.data.sequence[index]).toBe(1);
         });

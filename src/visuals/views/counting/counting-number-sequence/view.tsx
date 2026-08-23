@@ -3,7 +3,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ViewValidationError, validateProblemData} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {CountingNumberSequenceViewConfig, CountingNumberSequenceViewSchema} from './spec.ts';
-import {resolveSequenceLayout} from './helpers.ts';
+import {resolveMissingIndex, resolveSequenceLayout} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -17,8 +17,6 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
 
     validateProblemData('counting-number-sequence', data, [
         'sequence',
-        'missingIndex',
-        'answer',
         'stepSize'
     ]);
 
@@ -27,12 +25,6 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
     }
     if (data.sequence.some(value => !Number.isInteger(value) || value < 1)) {
         throw new ViewValidationError('counting-number-sequence', 'Sequence values must be positive integers.');
-    }
-    if (!Number.isInteger(data.missingIndex) || data.missingIndex <= 0 || data.missingIndex >= data.sequence.length) {
-        throw new ViewValidationError('counting-number-sequence', 'Missing position must follow the visible starting value.');
-    }
-    if (!Number.isInteger(data.answer) || data.sequence[data.missingIndex] !== data.answer) {
-        throw new ViewValidationError('counting-number-sequence', 'Answer does not match the missing sequence value.');
     }
     if (![1, 5, 10, 100].includes(data.stepSize)) {
         throw new ViewValidationError('counting-number-sequence', 'Step size must be 1, 5, 10, or 100.');
@@ -44,6 +36,7 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
     }
 
     const {usesTiles, tileSizeClass, tileClass} = resolveSequenceLayout(config.representation, data.sequence);
+    const missingIndex = resolveMissingIndex(payload.seed, data.sequence.length);
     const numeralSizeClass = Math.max(...data.sequence) >= 1000 ? 'text-lg' : 'text-xl';
 
     return (
@@ -56,7 +49,7 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
                 )}
                 <div className="flex flex-nowrap justify-center items-center gap-2.5 p-5 bg-slate-100 border-2 border-slate-200 rounded-xl">
                     {data.sequence.map((value, index) => {
-                        const isMissing = index === data.missingIndex;
+                        const isMissing = index === missingIndex;
                         const solutionClass = isMissing && isSolutionView
                             ? 'border-emerald-600 bg-emerald-50 text-emerald-700 font-extrabold'
                             : tileClass;

@@ -510,8 +510,6 @@ export type CountingIncDecProblem = {
 
 export type CountingSequenceProblem = {
     sequence: number[];
-    missingIndex: number;
-    answer: number;
     stepSize: 1 | 5 | 10 | 100;
 };
 

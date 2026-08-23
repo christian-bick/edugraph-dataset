@@ -38,13 +38,9 @@ export class CountingSequenceGenerator implements ProblemGenerator<CountingSeque
         const length = Math.min(preferredLength, availableFromStart);
 
         const sequence = Array.from({length}, (_, index) => start + index * stepSize);
-        const missingIndex = 1 + Math.floor(random() * (sequence.length - 1));
-
         return {
             data: {
                 sequence,
-                missingIndex,
-                answer: sequence[missingIndex],
                 stepSize
             }
         };
