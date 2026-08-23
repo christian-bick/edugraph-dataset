@@ -1,23 +1,21 @@
 import {Scope} from 'edugraph-ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
-import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {IntegerRoundingProblem} from '../../../types/problems.ts';
 import {IntegerRoundingGeneratorConfig, IntegerRoundingGeneratorSchema} from './spec.ts';
 
 type RoundingPlace = 10 | 100 | 1000 | 10000 | 100000;
-type RoundingPlaceName = 'ten' | 'hundred' | 'thousand' | 'ten-thousand' | 'hundred-thousand';
 
 const GRADE_FOUR_MIDPOINT_CLEARANCE_RATIO = 0.05;
 const GRADE_FOUR_MIDPOINT_TIE_RATE = 0.2;
 
-const places = new Map<string, {value: RoundingPlace; name: RoundingPlaceName}>([
-    [Scope.StepsOf10, {value: 10, name: 'ten'}],
-    [Scope.StepsOf100, {value: 100, name: 'hundred'}],
-    [Scope.StepsOf1000, {value: 1000, name: 'thousand'}],
-    [Scope.StepsOf10000, {value: 10000, name: 'ten-thousand'}],
-    [Scope.StepsOf100000, {value: 100000, name: 'hundred-thousand'}]
+const places = new Map<string, RoundingPlace>([
+    [Scope.StepsOf10, 10],
+    [Scope.StepsOf100, 100],
+    [Scope.StepsOf1000, 1000],
+    [Scope.StepsOf10000, 10000],
+    [Scope.StepsOf100000, 100000]
 ]);
 
 const randomInteger = (minimum: number, maximum: number): number =>
@@ -62,7 +60,7 @@ export class IntegerRoundingGenerator implements ProblemGenerator<
 
         const place = places.get(config.roundingMagnitude!);
         if (!place) return null;
-        const {value: roundingPlace, name: roundingPlaceName} = place;
+        const roundingPlace = place;
 
         if (config.range!.max > 1000 || roundingPlace > 100) {
             const minimum = Math.max(1000, Math.ceil(config.range!.min));
@@ -90,23 +88,11 @@ export class IntegerRoundingGenerator implements ProblemGenerator<
             const direction = number < midpoint ? 'down' : 'up';
             const roundedValue = direction === 'down' ? lowerMultiple : upperMultiple;
             const isMidpointTie = number === midpoint;
-            const displayPlaceName = roundingPlaceName.replaceAll('-', ' ');
-            const numberText = formatStandardNumeral(number);
-            const roundedText = formatStandardNumeral(roundedValue);
-            const lowerText = formatStandardNumeral(lowerMultiple);
-            const upperText = formatStandardNumeral(upperMultiple);
-            const distanceLowerText = formatStandardNumeral(distanceLower);
-            const distanceUpperText = formatStandardNumeral(distanceUpper);
-            const decisionExplanation = isMidpointTie
-                ? `${numberText} is exactly halfway between ${lowerText} and ${upperText}, so it rounds up to ${upperText}.`
-                : `${numberText} is ${distanceLowerText} from ${lowerText} and ${distanceUpperText} from ${upperText}, so it rounds ${direction} to ${roundedText}.`;
-
             return {
                 data: {
                     task: 'multi-digit-integer-rounding',
                     number,
                     roundingPlace,
-                    roundingPlaceName,
                     lowerMultiple,
                     midpoint,
                     upperMultiple,
@@ -114,12 +100,7 @@ export class IntegerRoundingGenerator implements ProblemGenerator<
                     direction,
                     distanceLower,
                     distanceUpper,
-                    isMidpointTie,
-                    prompt: `Round ${numberText} to the nearest ${displayPlaceName}.`,
-                    questionEquation: `${numberText} → ?`,
-                    solutionEquation: `${numberText} → ${roundedText}`,
-                    roundingStatement: `${numberText} rounded to the nearest ${displayPlaceName} is ${roundedText}.`,
-                    decisionExplanation
+                    isMidpointTie
                 }
             };
         }

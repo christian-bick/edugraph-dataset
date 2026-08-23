@@ -396,7 +396,6 @@ export type MultiDigitIntegerRoundingProblem = {
     task: 'multi-digit-integer-rounding';
     number: number;
     roundingPlace: 10 | 100 | 1000 | 10000 | 100000;
-    roundingPlaceName: 'ten' | 'hundred' | 'thousand' | 'ten-thousand' | 'hundred-thousand';
     lowerMultiple: number;
     midpoint: number;
     upperMultiple: number;
@@ -405,11 +404,6 @@ export type MultiDigitIntegerRoundingProblem = {
     distanceLower: number;
     distanceUpper: number;
     isMidpointTie: boolean;
-    prompt: string;
-    questionEquation: string;
-    solutionEquation: string;
-    roundingStatement: string;
-    decisionExplanation: string;
 };
 
 export type IntegerRoundingProblem =

@@ -34,15 +34,14 @@ describe('IntegerRoundingGenerator', () => {
     });
 
     it.each([
-        [Scope.StepsOf10, 10, 'ten'],
-        [Scope.StepsOf100, 100, 'hundred'],
-        [Scope.StepsOf1000, 1000, 'thousand'],
-        [Scope.StepsOf10000, 10000, 'ten-thousand'],
-        [Scope.StepsOf100000, 100000, 'hundred-thousand']
+        [Scope.StepsOf10, 10],
+        [Scope.StepsOf100, 100],
+        [Scope.StepsOf1000, 1000],
+        [Scope.StepsOf10000, 10000],
+        [Scope.StepsOf100000, 100000]
     ] as const)('supplies Grade 4 rounding evidence using %s', (
         roundingMagnitude,
-        roundingPlace,
-        roundingPlaceName
+        roundingPlace
     ) => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
@@ -54,7 +53,6 @@ describe('IntegerRoundingGenerator', () => {
             expect('task' in data && data.task).toBe('multi-digit-integer-rounding');
             if (!('task' in data) || data.task !== 'multi-digit-integer-rounding') continue;
             expect(data.roundingPlace).toBe(roundingPlace);
-            expect(data.roundingPlaceName).toBe(roundingPlaceName);
             expect(data.number).toBeGreaterThanOrEqual(1000);
             expect(data.number).toBeLessThanOrEqual(1_000_000);
             expect(data.upperMultiple - data.lowerMultiple).toBe(roundingPlace);
@@ -65,8 +63,6 @@ describe('IntegerRoundingGenerator', () => {
             expect(data.distanceUpper).toBe(data.upperMultiple - data.number);
             expect(data.roundedValue)
                 .toBe(Math.round(data.number / roundingPlace) * roundingPlace);
-            expect(data.questionEquation).toMatch(/ → \?$/);
-            expect(data.solutionEquation).toContain(' → ');
         }
     });
 
@@ -140,8 +136,7 @@ describe('IntegerRoundingGenerator', () => {
             upperMultiple: 2000,
             roundedValue: 2000,
             direction: 'up',
-            isMidpointTie: true,
-            decisionExplanation: '1,500 is exactly halfway between 1,000 and 2,000, so it rounds up to 2,000.'
+            isMidpointTie: true
         });
 
         const nonTie = generator.generate({
@@ -151,12 +146,7 @@ describe('IntegerRoundingGenerator', () => {
         expect(nonTie).toMatchObject({
             task: 'multi-digit-integer-rounding',
             distanceLower: 23456,
-            distanceUpper: 76544,
-            prompt: 'Round 123,456 to the nearest hundred thousand.',
-            questionEquation: '123,456 → ?',
-            solutionEquation: '123,456 → 100,000',
-            roundingStatement: '123,456 rounded to the nearest hundred thousand is 100,000.',
-            decisionExplanation: '123,456 is 23,456 from 100,000 and 76,544 from 200,000, so it rounds down to 100,000.'
+            distanceUpper: 76544
         });
 
         const lowerBand = generator.generate({

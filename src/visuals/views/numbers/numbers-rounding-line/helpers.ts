@@ -7,7 +7,7 @@ import {
 
 const ROUNDING_PLACE_NAMES = new Map<
     MultiDigitIntegerRoundingProblem['roundingPlace'],
-    MultiDigitIntegerRoundingProblem['roundingPlaceName']
+    'ten' | 'hundred' | 'thousand' | 'ten-thousand' | 'hundred-thousand'
 >([
     [10, 'ten'],
     [100, 'hundred'],
@@ -50,8 +50,8 @@ const hasCoherentRoundingValues = (data: IntegerRoundingProblem): boolean => {
 };
 
 export const displayRoundingPlace = (
-    name: MultiDigitIntegerRoundingProblem['roundingPlaceName']
-): string => name.replaceAll('-', ' ');
+    roundingPlace: MultiDigitIntegerRoundingProblem['roundingPlace']
+): string => (ROUNDING_PLACE_NAMES.get(roundingPlace) ?? '').replaceAll('-', ' ');
 
 export const getPointLabelX = (pointX: number, midpointX: number): number => {
     const minimumX = 94;
@@ -101,10 +101,11 @@ export const isValidMultiDigitRoundingProblem = (
     if (data.number < 1000 || data.number >= 1_000_000) return false;
     if (data.upperMultiple > 1_000_000) return false;
 
-    const expectedPlaceName = ROUNDING_PLACE_NAMES.get(data.roundingPlace);
-    if (!expectedPlaceName || data.roundingPlaceName !== expectedPlaceName) return false;
+    return ROUNDING_PLACE_NAMES.has(data.roundingPlace);
+};
 
-    const placeName = displayRoundingPlace(data.roundingPlaceName);
+export const multiDigitRoundingPresentation = (data: MultiDigitIntegerRoundingProblem) => {
+    const placeName = displayRoundingPlace(data.roundingPlace);
     const numberText = formatStandardNumeral(data.number);
     const lowerText = formatStandardNumeral(data.lowerMultiple);
     const upperText = formatStandardNumeral(data.upperMultiple);
@@ -115,10 +116,11 @@ export const isValidMultiDigitRoundingProblem = (
         ? `${numberText} is exactly halfway between ${lowerText} and ${upperText}, so it rounds up to ${upperText}.`
         : `${numberText} is ${distanceLowerText} from ${lowerText} and ${distanceUpperText} from ${upperText}, so it rounds ${data.direction} to ${roundedText}.`;
 
-    return data.prompt === `Round ${numberText} to the nearest ${placeName}.`
-        && data.questionEquation === `${numberText} → ?`
-        && data.solutionEquation === `${numberText} → ${roundedText}`
-        && data.roundingStatement
-            === `${numberText} rounded to the nearest ${placeName} is ${roundedText}.`
-        && data.decisionExplanation === expectedExplanation;
+    return {
+        prompt: `Round ${numberText} to the nearest ${placeName}.`,
+        questionEquation: `${numberText} → ?`,
+        solutionEquation: `${numberText} → ${roundedText}`,
+        roundingStatement: `${numberText} rounded to the nearest ${placeName} is ${roundedText}.`,
+        decisionExplanation: expectedExplanation
+    };
 };

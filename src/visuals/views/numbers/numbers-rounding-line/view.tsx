@@ -12,7 +12,8 @@ import {
     getPointLabelX,
     getSourceScaleCue,
     isValidLegacyRoundingProblem,
-    isValidMultiDigitRoundingProblem
+    isValidMultiDigitRoundingProblem,
+    multiDigitRoundingPresentation
 } from './helpers.ts';
 import {NumbersRoundingLineViewConfig, NumbersRoundingLineViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
@@ -110,7 +111,8 @@ const MultiDigitRoundingLine = ({
         value: data.lowerMultiple + index * data.roundingPlace / 10,
         x: LEFT + index * (RIGHT - LEFT) / 10
     }));
-    const placeName = displayRoundingPlace(data.roundingPlaceName);
+    const placeName = displayRoundingPlace(data.roundingPlace);
+    const presentation = multiDigitRoundingPresentation(data);
 
     return (
         <div className="w-[780px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
@@ -118,7 +120,7 @@ const MultiDigitRoundingLine = ({
                 Rounding on a number line
             </div>
             <div className="mt-1 text-[1.35rem] font-bold text-slate-800">
-                {data.prompt}
+                {presentation.prompt}
             </div>
             <div className="mt-2 text-sm font-semibold text-slate-500">
                 Nearest {placeName}
@@ -195,13 +197,13 @@ const MultiDigitRoundingLine = ({
 
             <div className={`rounded-xl border-2 px-5 py-3 text-center font-bold ${isSolutionView ? 'border-emerald-500 bg-emerald-50 text-emerald-950' : 'border-dashed border-slate-300 text-xl text-slate-500'}`}>
                 <div className={isSolutionView ? 'text-xl' : ''}>
-                    {isSolutionView ? data.solutionEquation : data.questionEquation}
+                    {isSolutionView ? presentation.solutionEquation : presentation.questionEquation}
                 </div>
                 {isSolutionView && (
                     <>
-                        <div className="mt-2 text-base">{data.roundingStatement}</div>
+                        <div className="mt-2 text-base">{presentation.roundingStatement}</div>
                         <div className="mt-1 text-sm font-semibold text-emerald-800">
-                            {data.decisionExplanation}
+                            {presentation.decisionExplanation}
                         </div>
                     </>
                 )}
@@ -228,13 +230,7 @@ const NumbersRoundingLineCore = ({config: _config, payload}: CoreProps) => {
 
     if ('task' in data) {
         validateProblemData('numbers-rounding-line', data, [
-            'task',
-            'roundingPlaceName',
-            'prompt',
-            'questionEquation',
-            'solutionEquation',
-            'roundingStatement',
-            'decisionExplanation'
+            'task'
         ]);
         if (!isValidMultiDigitRoundingProblem(data)) {
             throw new ViewValidationError(

@@ -5,14 +5,14 @@ import {
     getPointLabelX,
     getSourceScaleCue,
     isValidLegacyRoundingProblem,
-    isValidMultiDigitRoundingProblem
+    isValidMultiDigitRoundingProblem,
+    multiDigitRoundingPresentation
 } from './helpers.ts';
 
 const gradeFourProblem: MultiDigitIntegerRoundingProblem = {
     task: 'multi-digit-integer-rounding',
     number: 347650,
     roundingPlace: 10000,
-    roundingPlaceName: 'ten-thousand',
     lowerMultiple: 340000,
     midpoint: 345000,
     upperMultiple: 350000,
@@ -20,12 +20,7 @@ const gradeFourProblem: MultiDigitIntegerRoundingProblem = {
     direction: 'up',
     distanceLower: 7650,
     distanceUpper: 2350,
-    isMidpointTie: false,
-    prompt: 'Round 347,650 to the nearest ten thousand.',
-    questionEquation: '347,650 → ?',
-    solutionEquation: '347,650 → 350,000',
-    roundingStatement: '347,650 rounded to the nearest ten thousand is 350,000.',
-    decisionExplanation: '347,650 is 7,650 from 340,000 and 2,350 from 350,000, so it rounds up to 350,000.'
+    isMidpointTie: false
 };
 
 describe('numbers-rounding-line helpers', () => {
@@ -47,9 +42,16 @@ describe('numbers-rounding-line helpers', () => {
         expect(isValidMultiDigitRoundingProblem(legacy)).toBe(false);
     });
 
-    it('validates the complete Grade 4 payload and authored text', () => {
+    it('validates the complete Grade 4 payload and derives its presentation', () => {
         expect(isValidMultiDigitRoundingProblem(gradeFourProblem)).toBe(true);
         expect(isValidLegacyRoundingProblem(gradeFourProblem)).toBe(false);
+        expect(multiDigitRoundingPresentation(gradeFourProblem)).toEqual({
+            prompt: 'Round 347,650 to the nearest ten thousand.',
+            questionEquation: '347,650 → ?',
+            solutionEquation: '347,650 → 350,000',
+            roundingStatement: '347,650 rounded to the nearest ten thousand is 350,000.',
+            decisionExplanation: '347,650 is 7,650 from 340,000 and 2,350 from 350,000, so it rounds up to 350,000.'
+        });
     });
 
     it('validates midpoint ties at the hundred-thousand boundary', () => {
@@ -57,7 +59,6 @@ describe('numbers-rounding-line helpers', () => {
             task: 'multi-digit-integer-rounding',
             number: 850000,
             roundingPlace: 100000,
-            roundingPlaceName: 'hundred-thousand',
             lowerMultiple: 800000,
             midpoint: 850000,
             upperMultiple: 900000,
@@ -65,32 +66,21 @@ describe('numbers-rounding-line helpers', () => {
             direction: 'up',
             distanceLower: 50000,
             distanceUpper: 50000,
-            isMidpointTie: true,
-            prompt: 'Round 850,000 to the nearest hundred thousand.',
-            questionEquation: '850,000 → ?',
-            solutionEquation: '850,000 → 900,000',
-            roundingStatement: '850,000 rounded to the nearest hundred thousand is 900,000.',
-            decisionExplanation: '850,000 is exactly halfway between 800,000 and 900,000, so it rounds up to 900,000.'
+            isMidpointTie: true
         };
 
         expect(isValidMultiDigitRoundingProblem(tie)).toBe(true);
     });
 
     it.each([
-        ['wrong place name', {...gradeFourProblem, roundingPlaceName: 'thousand'}],
         ['wrong midpoint', {...gradeFourProblem, midpoint: 346000}],
-        ['wrong rounded value', {...gradeFourProblem, roundedValue: 340000}],
-        ['ungrouped distance prose', {
-            ...gradeFourProblem,
-            decisionExplanation: '347,650 is 7650 from 340,000 and 2350 from 350,000, so it rounds up to 350,000.'
-        }],
-        ['leaking question equation', {...gradeFourProblem, questionEquation: '347,650 → 350,000'}]
+        ['wrong rounded value', {...gradeFourProblem, roundedValue: 340000}]
     ])('rejects %s', (_description, invalid) => {
         expect(isValidMultiDigitRoundingProblem(invalid as MultiDigitIntegerRoundingProblem)).toBe(false);
     });
 
     it('renders stable place-name slugs as readable text', () => {
-        expect(displayRoundingPlace('hundred-thousand')).toBe('hundred thousand');
+        expect(displayRoundingPlace(100000)).toBe('hundred thousand');
     });
 
     it('offsets near-midpoint point labels toward their dot and clamps line ends', () => {
