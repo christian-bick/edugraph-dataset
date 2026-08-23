@@ -151,7 +151,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `fraction-number-line` | 3 | `numbers-fraction-line`, `numbers-fraction-line-classification`, `numbers-fraction-line-explanation`, `numbers-fraction-line-formalization` | **Migrated:** retains numerator, denominator, unit-step witnesses, and whole count; the view derives all notation and the displayed endpoint answer. |
 | `angle-arithmetic` | 3 | `geometry-angle-arithmetic`, `geometry-angle-arithmetic-execution`, `geometry-angle-arithmetic-inversion` | **Migrated:** retains one adjacent-angle measure tuple, its calculated whole, and the requested operation; views derive orientation, labels, notation, and unknown placement. |
 | `measurement-attribute` | 2 | `measure-attributes` | **Keep:** measured attribute is canonical semantic context. |
-| `measurement-compare` | 4 | `measure-compare` | **Project:** retain attribute, relation, and two magnitudes; seed A/B placement in the view and derive the answer from it. |
+| `measurement-compare` | 4 | `measure-compare` | **Migrated:** retains the measurable attribute, requested relation, and canonically ordered magnitudes. The view deterministically seeds A/B placement and derives the letter answer. |
 | `measurement-length` | 6 | `measure-length-decimal`, `measure-length-integer` | **Keep:** exact length and scale data are canonical. |
 | `measurement-length-difference` | 1 | `measure-length-difference` | **Keep/Derive:** length relation is canonical; represent the unit as a typed unit identifier rather than display text. |
 | `measurement-length-estimation` | 4 | `measure-length-estimate` | **Keep:** object/reference size relation is canonical semantic evidence. |

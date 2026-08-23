@@ -2,10 +2,10 @@
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {getWeightLayout} from './helpers.ts';
+import {getMeasurementRelationWord, getWeightLayout, resolveMeasurementComparison} from './helpers.ts';
 import {MeasureCompareViewConfig, MeasureCompareViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {validateProblemData} from '../../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -13,7 +13,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'measure-compare'>;
 }
 
-function Illustration({ attribute, val1, val2, maxVal }: { attribute: string; val1: number; val2: number; maxVal?: number }) {
+function Illustration({attribute, val1, val2}: {attribute: string; val1: number; val2: number}) {
     const layout = useMemo(() => {
         return getWeightLayout(val1, val2);
     }, [val1, val2]);
@@ -53,7 +53,7 @@ function Illustration({ attribute, val1, val2, maxVal }: { attribute: string; va
         );
     } else {
         // length
-        const resolvedMax = maxVal || Math.max(val1, val2, 10);
+        const resolvedMax = Math.max(val1, val2, 10);
         const scale = 250 / resolvedMax;
         const widthA = val1 * scale;
         const widthB = val2 * scale;
@@ -83,13 +83,20 @@ const MeasureCompareCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
-    validateProblemData('measure-compare', data, ['attribute', 'relation', 'val1', 'val2', 'answer']);
+    validateProblemData('measure-compare', data, ['attribute', 'relation', 'magnitudes']);
+    const validAttribute = data.attribute === 'length' || data.attribute === 'weight';
+    const validRelation = data.relation === 'greater' || data.relation === 'less';
+    const validMagnitudes = Number.isInteger(data.magnitudes?.smaller)
+        && Number.isInteger(data.magnitudes?.larger)
+        && data.magnitudes.smaller > 0
+        && data.magnitudes.smaller < data.magnitudes.larger;
+    if (!validAttribute || !validRelation || !validMagnitudes) {
+        throw new ViewValidationError('measure-compare', 'Unsupported measurement comparison payload.');
+    }
 
     const attribute = data.attribute;
-    const relation = data.relation;
-    const val1 = data.val1;
-    const val2 = data.val2;
-    const answer = data.answer;
+    const relation = getMeasurementRelationWord(data);
+    const {val1, val2, answer} = resolveMeasurementComparison(data, payload.seed);
 
     const promptText = attribute === 'length' 
         ? `Which ribbon is ${relation}?` 
@@ -118,7 +125,7 @@ const MeasureCompareCore = ({ config: _config, payload }: CoreProps) => {
                 )}
                 
                 <div className="flex justify-center items-center w-[400px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px]">
-                    <Illustration attribute={attribute} val1={val1} val2={val2} maxVal={data.maxVal} />
+                    <Illustration attribute={attribute} val1={val1} val2={val2} />
                 </div>
 
                 <div className="flex gap-3 w-full animate-fade-in">
@@ -134,12 +141,14 @@ export const MeasureCompare = withConfig(MeasureCompareViewSchema, MeasureCompar
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: ViewRenderPayload<'measure-compare'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'measure-compare'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) {
+                root = createRoot(container);
+            }
+            root.render(<MeasureCompare payload={payload} />);
         }
-        root.render(<MeasureCompare payload={payload} />);
-    }
-};
+    };
+}

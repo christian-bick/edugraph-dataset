@@ -26,10 +26,9 @@ describe('MeasurementCompareGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.attribute).toBe('length');
-        expect(stub!.data.relation).toBe('longer');
-        expect(stub!.data.val1).toBeLessThanOrEqual(10);
-        expect(stub!.data.val2).toBeLessThanOrEqual(10);
-        expect(stub!.data.val1).not.toBe(stub!.data.val2);
+        expect(stub!.data.relation).toBe('greater');
+        expect(stub!.data.magnitudes.larger).toBeLessThanOrEqual(10);
+        expect(stub!.data.magnitudes.smaller).toBeLessThan(stub!.data.magnitudes.larger);
     });
 
     it('should generate correct weight/lighter comparison problems', () => {
@@ -40,9 +39,8 @@ describe('MeasurementCompareGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.attribute).toBe('weight');
-        expect(stub!.data.relation).toBe('lighter');
-        expect(stub!.data.val1).toBeLessThanOrEqual(10);
-        expect(stub!.data.val2).toBeLessThanOrEqual(10);
-        expect(stub!.data.val1).not.toBe(stub!.data.val2);
+        expect(stub!.data.relation).toBe('less');
+        expect(stub!.data.magnitudes.larger).toBeLessThanOrEqual(10);
+        expect(stub!.data.magnitudes.smaller).toBeLessThan(stub!.data.magnitudes.larger);
     });
 });

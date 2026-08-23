@@ -14,14 +14,13 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
         const attributeLabel = config.attribute;
         const relationLabel = config.relation;
 
-        const attribute = attributeLabel === Scope.LengthMeasurement ? 'length' : 'weight';
-        
-        let relation: string;
-        if (attribute === 'length') {
-            relation = relationLabel === Scope.Greater ? 'longer' : 'shorter';
-        } else {
-            relation = relationLabel === Scope.Greater ? 'heavier' : 'lighter';
-        }
+        if (attributeLabel !== Scope.LengthMeasurement && attributeLabel !== Scope.WeightMeasurement) return null;
+        if (relationLabel !== Scope.Greater && relationLabel !== Scope.Less) return null;
+
+        const attribute: MeasurementCompareProblem['attribute'] =
+            attributeLabel === Scope.LengthMeasurement ? 'length' : 'weight';
+        const relation: MeasurementCompareProblem['relation'] =
+            relationLabel === Scope.Greater ? 'greater' : 'less';
 
         const min = 1;
         const max = 10;
@@ -29,37 +28,14 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
         const vMax = Math.floor(random() * (max - (min + 1) + 1)) + (min + 1);
         const vMin = Math.floor(random() * ((vMax - 1) - min + 1)) + min;
 
-        const answer = random() > 0.5 ? 'A' : 'B';
-
-        let val1 = 0;
-        let val2 = 0;
-
-        const isGreater = relation === 'longer' || relation === 'heavier';
-        if (isGreater) {
-            if (answer === 'A') {
-                val1 = vMax;
-                val2 = vMin;
-            } else {
-                val1 = vMin;
-                val2 = vMax;
-            }
-        } else {
-            if (answer === 'A') {
-                val1 = vMin;
-                val2 = vMax;
-            } else {
-                val1 = vMax;
-                val2 = vMin;
-            }
-        }
-
         return {
             data: {
-                attribute: attribute as 'length' | 'weight',
+                attribute,
                 relation,
-                val1,
-                val2,
-                answer
+                magnitudes: {
+                    smaller: vMin,
+                    larger: vMax
+                }
             }
         };
     }

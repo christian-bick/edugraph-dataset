@@ -729,11 +729,11 @@ export type MeasurementAttributeProblem = {
 
 export type MeasurementCompareProblem = {
     attribute: 'length' | 'weight';
-    relation: string;
-    val1: number;
-    val2: number;
-    answer: 'A' | 'B';
-    maxVal?: number;
+    relation: 'greater' | 'less';
+    magnitudes: {
+        smaller: number;
+        larger: number;
+    };
 };
 
 export type MeasurementOrderProblem = {

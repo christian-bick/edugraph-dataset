@@ -24,16 +24,13 @@ describe('MeasurementCompareGenerator', () => {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.attribute).toBe('length');
-            expect(stub!.data.relation).toBe('longer');
+            expect(stub!.data.relation).toBe('greater');
             
-            const { val1, val2, answer } = stub!.data;
-            expect(val1).toBeLessThanOrEqual(10);
-            expect(val2).toBeLessThanOrEqual(10);
-            if (answer === 'A') {
-                expect(val1).toBeGreaterThan(val2);
-            } else {
-                expect(val1).toBeLessThan(val2);
-            }
+            const {smaller, larger} = stub!.data.magnitudes;
+            expect(larger).toBeLessThanOrEqual(10);
+            expect(smaller).toBeGreaterThanOrEqual(1);
+            expect(smaller).toBeLessThan(larger);
+            expect(stub!.data).not.toHaveProperty('answer');
         }
     });
 
@@ -46,16 +43,11 @@ describe('MeasurementCompareGenerator', () => {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.attribute).toBe('length');
-            expect(stub!.data.relation).toBe('shorter');
+            expect(stub!.data.relation).toBe('less');
             
-            const { val1, val2, answer } = stub!.data;
-            expect(val1).toBeLessThanOrEqual(10);
-            expect(val2).toBeLessThanOrEqual(10);
-            if (answer === 'A') {
-                expect(val1).toBeLessThan(val2);
-            } else {
-                expect(val1).toBeGreaterThan(val2);
-            }
+            const {smaller, larger} = stub!.data.magnitudes;
+            expect(larger).toBeLessThanOrEqual(10);
+            expect(smaller).toBeLessThan(larger);
         }
     });
 
@@ -68,20 +60,26 @@ describe('MeasurementCompareGenerator', () => {
             const stub = generator.generate(config);
             expect(stub).not.toBeNull();
             expect(stub!.data.attribute).toBe('weight');
-            expect(stub!.data.relation).toBe('heavier');
+            expect(stub!.data.relation).toBe('greater');
             
-            const { val1, val2, answer } = stub!.data;
-            expect(val1).toBeLessThanOrEqual(10);
-            expect(val2).toBeLessThanOrEqual(10);
-            if (answer === 'A') {
-                expect(val1).toBeGreaterThan(val2);
-            } else {
-                expect(val1).toBeLessThan(val2);
-            }
+            const {smaller, larger} = stub!.data.magnitudes;
+            expect(larger).toBeLessThanOrEqual(10);
+            expect(smaller).toBeLessThan(larger);
         }
     });
 
     it('should throw an error if parameters are missing', () => {
         expect(() => generator.generate({} as any)).toThrow();
+    });
+
+    it('rejects unsupported resolved labels instead of defaulting them', () => {
+        expect(generator.generate({
+            attribute: Scope.VolumeMeasurement,
+            relation: Scope.Greater
+        } as any)).toBeNull();
+        expect(generator.generate({
+            attribute: Scope.LengthMeasurement,
+            relation: Scope.Equal
+        } as any)).toBeNull();
     });
 });
