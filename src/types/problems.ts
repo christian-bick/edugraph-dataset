@@ -717,7 +717,12 @@ export type MeasurementNumberLineProblem = {
     explanation: string;
 };
 
-export type MeasurementLengthDifferenceProblem = {lengthA: number; lengthB: number; difference: number; unit: 'cm'};
+export type MeasurementLengthDifferenceProblem = {
+    longerLength: number;
+    shorterLength: number;
+    difference: number;
+    unitId: 'centimeter';
+};
 
 export type MeasurementAttributeProblem = {
     attribute: 'length' | 'height' | 'weight';

@@ -153,7 +153,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `measurement-attribute` | 2 | `measure-attributes` | **Keep:** measured attribute is canonical semantic context. |
 | `measurement-compare` | 4 | `measure-compare` | **Migrated:** retains the measurable attribute, requested relation, and canonically ordered magnitudes. The view deterministically seeds A/B placement and derives the letter answer. |
 | `measurement-length` | 6 | `measure-length-decimal`, `measure-length-integer` | **Keep:** exact length and scale data are canonical. |
-| `measurement-length-difference` | 1 | `measure-length-difference` | **Keep/Derive:** length relation is canonical; represent the unit as a typed unit identifier rather than display text. |
+| `measurement-length-difference` | 1 | `measure-length-difference` | **Migrated:** retains semantic longer/shorter magnitudes, the calculated difference, and a typed unit identifier. The view assigns A/B identities and renders unit notation. |
 | `measurement-length-estimation` | 4 | `measure-length-estimate` | **Keep:** object/reference size relation is canonical semantic evidence. |
 | `measurement-mass-volume` | 3 | `measure-liquid-volume`, `measure-mass` | **Keep:** object, instrument, measurement kind, and quantity are semantic facts; use typed identifiers where final words are currently stored. |
 | `measurement-mass-volume-estimation` | 3 | `measure-liquid-volume-estimate`, `measure-mass-estimate` | **Keep:** container/reference/quantity relations are canonical; identifiers remain non-display semantic values. |
