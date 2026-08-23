@@ -4,7 +4,7 @@ import {GeometryPrimitiveCandidate} from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {PrimitiveScene} from '../primitive-scene.tsx';
-import {isValidGeometryPrimitivesIdentificationProblem} from './helpers.ts';
+import {buildGeometryPrimitivesIdentificationPresentation} from './helpers.ts';
 import {
     GeometryPrimitivesIdentificationViewConfig,
     GeometryPrimitivesIdentificationViewSchema
@@ -54,46 +54,34 @@ function CandidateCard({candidate, selected}: {
 
 const GeometryPrimitivesIdentificationCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
-    validateProblemData('geometry-primitives-identification', problem.data, [
-        'primitiveKind',
-        'displayName',
-        'definition',
-        'identification'
-    ]);
+    validateProblemData('geometry-primitives-identification', problem.data, ['primitiveKind']);
     const data = problem.data;
-    validateProblemData('geometry-primitives-identification', data.identification, [
-        'prompt',
-        'candidates',
-        'correctCandidateId',
-        'answer',
-        'answerStatement',
-        'explanation'
-    ]);
-    if (!isValidGeometryPrimitivesIdentificationProblem(data)) {
+    const presentation = buildGeometryPrimitivesIdentificationPresentation(data, payload.seed);
+    if (!presentation) {
         throw new ViewValidationError(
             'geometry-primitives-identification',
-            'The requested primitive, four distinct diagrams, selected answer, and supplied prose must agree exactly.'
+            'The requested primitive and render seed must produce a valid identification task.'
         );
     }
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[58px] items-center justify-center px-5 text-center text-[1.22rem] font-extrabold leading-snug text-slate-700">
-                {data.identification.prompt}
+                {presentation.identificationPrompt}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3">
-                {data.identification.candidates.map(candidate => (
+                {presentation.candidates.map(candidate => (
                     <CandidateCard
                         key={candidate.id}
                         candidate={candidate}
-                        selected={isSolutionView && candidate.id === data.identification.correctCandidateId}
+                        selected={isSolutionView && candidate.id === presentation.correctCandidateId}
                     />
                 ))}
             </div>
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="text-[1.05rem] font-extrabold">{data.identification.answer}</div>
-                    <div className="mt-1 text-[0.9rem] font-semibold leading-snug text-slate-700">{data.identification.explanation}</div>
+                    <div className="text-[1.05rem] font-extrabold">{presentation.answer}</div>
+                    <div className="mt-1 text-[0.9rem] font-semibold leading-snug text-slate-700">{presentation.explanation}</div>
                 </div>
             )}
         </div>

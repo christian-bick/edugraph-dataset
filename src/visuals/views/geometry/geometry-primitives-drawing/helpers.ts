@@ -1,20 +1,25 @@
-import {GeometryPrimitivesProblem} from '../../../../types/problems.ts';
-import {PRIMITIVE_VIEW_DESCRIPTORS} from '../primitive-contract.ts';
-import {isCompletedPrimitiveScene, isValidPrimitiveGuide} from '../primitive-validation.ts';
+import {GeometryPrimitiveScene, GeometryPrimitivesProblem} from '../../../../types/problems.ts';
+import {
+    primitiveGuideScene,
+    completedPrimitiveScene,
+    PrimitiveViewDescriptor,
+    PRIMITIVE_VIEW_DESCRIPTORS
+} from '../primitive-contract.ts';
 
-export const isValidGeometryPrimitivesDrawingProblem = (
+export type GeometryPrimitivesDrawingPresentation = PrimitiveViewDescriptor & {
+    guideScene: GeometryPrimitiveScene;
+    solutionScene: GeometryPrimitiveScene;
+};
+
+export const buildGeometryPrimitivesDrawingPresentation = (
     data: GeometryPrimitivesProblem,
     usesLinearDrawing: boolean | undefined
-): boolean => {
+): GeometryPrimitivesDrawingPresentation | null => {
     const descriptor = PRIMITIVE_VIEW_DESCRIPTORS[data.primitiveKind];
-    return descriptor !== undefined
-        && usesLinearDrawing === (data.primitiveKind !== 'point')
-        && data.displayName === descriptor.displayName
-        && data.definition === descriptor.definition
-        && data.drawing.prompt === descriptor.drawingPrompt
-        && data.drawing.answer === descriptor.drawingAnswer
-        && data.drawing.answerStatement === descriptor.drawingAnswerStatement
-        && data.drawing.explanation === descriptor.drawingExplanation
-        && isValidPrimitiveGuide(data.primitiveKind, data.drawing.guideScene)
-        && isCompletedPrimitiveScene(data.primitiveKind, data.drawing.solutionScene);
+    if (!descriptor || usesLinearDrawing !== (data.primitiveKind !== 'point')) return null;
+    return {
+        ...descriptor,
+        guideScene: primitiveGuideScene(data.primitiveKind),
+        solutionScene: completedPrimitiveScene(data.primitiveKind)
+    };
 };

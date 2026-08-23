@@ -1,4 +1,9 @@
-import {GeometryPrimitiveKind} from '../../../types/problems.ts';
+import {
+    GeometryPrimitiveCandidate,
+    GeometryPrimitiveCandidateId,
+    GeometryPrimitiveKind,
+    GeometryPrimitiveScene
+} from '../../../types/problems.ts';
 
 export type PrimitiveViewDescriptor = {
     displayName: string;
@@ -115,3 +120,197 @@ export const PRIMITIVE_DISTRACTORS: Record<GeometryPrimitiveKind, readonly Geome
     'perpendicular-lines': ['parallel-lines', 'line', 'right-angle'],
     'parallel-lines': ['perpendicular-lines', 'line', 'line-segment']
 };
+
+const point = (id: string, label: string, x: number, y: number, labelX: number, labelY: number) => ({
+    id,
+    label,
+    x,
+    y,
+    labelPosition: {x: labelX, y: labelY}
+});
+
+const stroke = (
+    id: string,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    arrowStart = false,
+    arrowEnd = false
+) => ({
+    id,
+    start: {x: startX, y: startY},
+    end: {x: endX, y: endY},
+    arrowStart,
+    arrowEnd
+});
+
+const emptyScene = (): GeometryPrimitiveScene => ({points: [], strokes: [], markers: []});
+
+export function primitiveGuideScene(kind: GeometryPrimitiveKind): GeometryPrimitiveScene {
+    if (kind === 'point') return emptyScene();
+    if (kind === 'line' || kind === 'line-segment' || kind === 'ray') {
+        return {
+            points: [point('A', 'A', 25, 50, 19, 43), point('B', 'B', 75, 50, 79, 43)],
+            strokes: [],
+            markers: []
+        };
+    }
+    if (kind === 'right-angle' || kind === 'acute-angle' || kind === 'obtuse-angle') {
+        return {
+            points: [point('O', 'O', 20, 75, 12, 84), point('A', 'A', 85, 75, 89, 83)],
+            strokes: [stroke('OA', 20, 75, 90, 75, false, true)],
+            markers: []
+        };
+    }
+    if (kind === 'perpendicular-lines') {
+        return {
+            points: [point('O', 'O', 50, 50, 44, 44)],
+            strokes: [stroke('given-line', 8, 50, 92, 50, true, true)],
+            markers: []
+        };
+    }
+    return {
+        points: [point('P', 'P', 50, 28, 55, 23)],
+        strokes: [stroke('given-line', 10, 70, 90, 60, true, true)],
+        markers: []
+    };
+}
+
+export function completedPrimitiveScene(kind: GeometryPrimitiveKind): GeometryPrimitiveScene {
+    if (kind === 'point') {
+        return {
+            points: [point('P', 'P', 50, 50, 56, 44)],
+            strokes: [],
+            markers: []
+        };
+    }
+    if (kind === 'line') {
+        return {
+            points: [point('A', 'A', 25, 50, 19, 43), point('B', 'B', 75, 50, 79, 43)],
+            strokes: [stroke('AB', 8, 50, 92, 50, true, true)],
+            markers: []
+        };
+    }
+    if (kind === 'line-segment') {
+        return {
+            points: [point('A', 'A', 20, 50, 14, 43), point('B', 'B', 80, 50, 84, 43)],
+            strokes: [stroke('AB', 20, 50, 80, 50)],
+            markers: []
+        };
+    }
+    if (kind === 'ray') {
+        return {
+            points: [point('A', 'A', 20, 50, 14, 43), point('B', 'B', 65, 50, 69, 43)],
+            strokes: [stroke('AB', 20, 50, 92, 50, false, true)],
+            markers: []
+        };
+    }
+    if (kind === 'right-angle') {
+        return {
+            points: [
+                point('O', 'O', 20, 75, 12, 84),
+                point('A', 'A', 85, 75, 89, 83),
+                point('B', 'B', 20, 15, 10, 13)
+            ],
+            strokes: [
+                stroke('OA', 20, 75, 90, 75, false, true),
+                stroke('OB', 20, 75, 20, 10, false, true)
+            ],
+            markers: [{kind: 'right-angle', points: [{x: 34, y: 75}, {x: 34, y: 61}, {x: 20, y: 61}]}]
+        };
+    }
+    if (kind === 'acute-angle') {
+        return {
+            points: [
+                point('O', 'O', 20, 75, 12, 84),
+                point('A', 'A', 85, 75, 89, 83),
+                point('B', 'B', 65, 30, 69, 24)
+            ],
+            strokes: [
+                stroke('OA', 20, 75, 90, 75, false, true),
+                stroke('OB', 20, 75, 75, 20, false, true)
+            ],
+            markers: [{kind: 'angle-arc', center: {x: 20, y: 75}, radius: 20, startDegrees: 0, endDegrees: -45}]
+        };
+    }
+    if (kind === 'obtuse-angle') {
+        return {
+            points: [
+                point('O', 'O', 50, 75, 46, 85),
+                point('A', 'A', 90, 75, 92, 83),
+                point('B', 'B', 20, 45, 11, 41)
+            ],
+            strokes: [
+                stroke('OA', 50, 75, 94, 75, false, true),
+                stroke('OB', 50, 75, 10, 35, false, true)
+            ],
+            markers: [{kind: 'angle-arc', center: {x: 50, y: 75}, radius: 20, startDegrees: 0, endDegrees: -135}]
+        };
+    }
+    if (kind === 'perpendicular-lines') {
+        return {
+            points: [point('O', 'O', 50, 50, 44, 44)],
+            strokes: [
+                stroke('horizontal', 8, 50, 92, 50, true, true),
+                stroke('vertical', 50, 8, 50, 92, true, true)
+            ],
+            markers: [{kind: 'right-angle', points: [{x: 62, y: 50}, {x: 62, y: 38}, {x: 50, y: 38}]}]
+        };
+    }
+    return {
+        points: [point('P', 'P', 50, 28, 55, 23)],
+        strokes: [
+            stroke('lower', 10, 70, 90, 60, true, true),
+            stroke('upper', 10, 33, 90, 23, true, true)
+        ],
+        markers: [{
+            kind: 'parallel',
+            strokes: [
+                [{x: 47, y: 67}, {x: 51, y: 61}],
+                [{x: 47, y: 31}, {x: 51, y: 25}]
+            ]
+        }]
+    };
+}
+
+function shuffled<T>(values: readonly T[], seed: number): T[] {
+    const result = [...values];
+    let state = (seed ^ 0x9E3779B9) >>> 0;
+    for (let index = result.length - 1; index > 0; index--) {
+        state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+        const swapIndex = state % (index + 1);
+        [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+    }
+    return result;
+}
+
+export function primitiveIdentificationCandidates(
+    targetKind: GeometryPrimitiveKind,
+    seed: number
+): {
+    candidates: [
+        GeometryPrimitiveCandidate,
+        GeometryPrimitiveCandidate,
+        GeometryPrimitiveCandidate,
+        GeometryPrimitiveCandidate
+    ];
+    correctCandidateId: GeometryPrimitiveCandidateId;
+} {
+    const kinds = shuffled([targetKind, ...PRIMITIVE_DISTRACTORS[targetKind]], seed);
+    const ids: readonly GeometryPrimitiveCandidateId[] = ['A', 'B', 'C', 'D'];
+    const candidates = kinds.map((kind, index): GeometryPrimitiveCandidate => ({
+        id: ids[index],
+        kind,
+        scene: completedPrimitiveScene(kind)
+    })) as [
+        GeometryPrimitiveCandidate,
+        GeometryPrimitiveCandidate,
+        GeometryPrimitiveCandidate,
+        GeometryPrimitiveCandidate
+    ];
+    return {
+        candidates,
+        correctCandidateId: candidates.find(candidate => candidate.kind === targetKind)!.id
+    };
+}

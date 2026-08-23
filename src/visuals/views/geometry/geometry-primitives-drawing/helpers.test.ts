@@ -1,65 +1,41 @@
 import {describe, expect, it} from 'vitest';
-import {GeometryPrimitivesGenerator} from '../../../../generators/geometry/geometry-primitives/generator.ts';
-import {setSeed} from '../../../../lib/random.ts';
 import {GeometryPrimitiveKind, GeometryPrimitivesProblem} from '../../../../types/problems.ts';
-import {GEOMETRY_PRIMITIVE_LABELS} from '../../../../generators/geometry/geometry-primitives/spec.ts';
-import {isValidGeometryPrimitivesDrawingProblem} from './helpers.ts';
+import {isCompletedPrimitiveScene, isValidPrimitiveGuide} from '../primitive-validation.ts';
+import {buildGeometryPrimitivesDrawingPresentation} from './helpers.ts';
 
-const generateAll = (): GeometryPrimitivesProblem[] => {
-    const generator = new GeometryPrimitivesGenerator();
-    return GEOMETRY_PRIMITIVE_LABELS.map((primitive, index) => {
-        setSeed(8100 + index);
-        return generator.generate({primitive})!.data;
-    });
-};
+const KINDS: readonly GeometryPrimitiveKind[] = [
+    'point',
+    'line',
+    'line-segment',
+    'ray',
+    'right-angle',
+    'acute-angle',
+    'obtuse-angle',
+    'perpendicular-lines',
+    'parallel-lines'
+];
 
-const byKind = (
-    problems: GeometryPrimitivesProblem[],
-    kind: GeometryPrimitiveKind
-): GeometryPrimitivesProblem => problems.find(problem => problem.primitiveKind === kind)!;
-
-describe('geometry primitives drawing validation', () => {
-    it('accepts every generator-supplied primitive with the matching line-drawing configuration', () => {
-        for (const problem of generateAll()) {
-            expect(isValidGeometryPrimitivesDrawingProblem(
-                problem,
-                problem.primitiveKind !== 'point'
-            )).toBe(true);
-        }
-    });
-
-    it('rejects mismatched configuration, answer prose, and completed geometry leaked into a guide', () => {
-        const problems = generateAll();
-        const point = byKind(problems, 'point');
-        const line = byKind(problems, 'line');
-        expect(isValidGeometryPrimitivesDrawingProblem(point, true)).toBe(false);
-        expect(isValidGeometryPrimitivesDrawingProblem({
-            ...line,
-            drawing: {...line.drawing, answerStatement: 'The completed construction shows a ray.'}
-        }, true)).toBe(false);
-        expect(isValidGeometryPrimitivesDrawingProblem({
-            ...line,
-            drawing: {...line.drawing, guideScene: line.drawing.solutionScene}
-        }, true)).toBe(false);
+describe('geometry primitives drawing presentation', () => {
+    it.each(KINDS)('derives valid guide, solution, and prose for %s', primitiveKind => {
+        const presentation = buildGeometryPrimitivesDrawingPresentation(
+            {primitiveKind},
+            primitiveKind !== 'point'
+        );
+        expect(presentation).not.toBeNull();
+        expect(presentation!.drawingPrompt).not.toBe('');
+        expect(presentation!.drawingAnswer).not.toBe('');
+        expect(presentation!.drawingAnswerStatement).not.toBe('');
+        expect(presentation!.drawingExplanation).not.toBe('');
+        expect(isValidPrimitiveGuide(primitiveKind, presentation!.guideScene)).toBe(true);
+        expect(isCompletedPrimitiveScene(primitiveKind, presentation!.solutionScene)).toBe(true);
     });
 
-    it('rejects a parallel solution whose added line misses P', () => {
-        const parallel = byKind(generateAll(), 'parallel-lines');
-        const [lower, upper] = parallel.drawing.solutionScene.strokes;
-        const invalid: GeometryPrimitivesProblem = {
-            ...parallel,
-            drawing: {
-                ...parallel.drawing,
-                solutionScene: {
-                    ...parallel.drawing.solutionScene,
-                    strokes: [lower, {
-                        ...upper,
-                        start: {x: 10, y: 38},
-                        end: {x: 90, y: 28}
-                    }]
-                }
-            }
-        };
-        expect(isValidGeometryPrimitivesDrawingProblem(invalid, true)).toBe(false);
+    it('rejects mismatched drawing capabilities and unsupported primitive kinds', () => {
+        expect(buildGeometryPrimitivesDrawingPresentation({primitiveKind: 'point'}, true)).toBeNull();
+        expect(buildGeometryPrimitivesDrawingPresentation({primitiveKind: 'line'}, false)).toBeNull();
+        expect(buildGeometryPrimitivesDrawingPresentation(
+            {primitiveKind: 'circle'} as unknown as GeometryPrimitivesProblem,
+            true
+        )).toBeNull();
     });
 });

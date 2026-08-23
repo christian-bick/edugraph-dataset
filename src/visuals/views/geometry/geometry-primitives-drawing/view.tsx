@@ -3,7 +3,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {PrimitiveScene} from '../primitive-scene.tsx';
-import {isValidGeometryPrimitivesDrawingProblem} from './helpers.ts';
+import {buildGeometryPrimitivesDrawingPresentation} from './helpers.ts';
 import {
     GeometryPrimitivesDrawingViewConfig,
     GeometryPrimitivesDrawingViewSchema
@@ -17,37 +17,25 @@ interface CoreProps {
 
 const GeometryPrimitivesDrawingCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
-    validateProblemData('geometry-primitives-drawing', problem.data, [
-        'primitiveKind',
-        'displayName',
-        'definition',
-        'drawing'
-    ]);
+    validateProblemData('geometry-primitives-drawing', problem.data, ['primitiveKind']);
     const data = problem.data;
-    validateProblemData('geometry-primitives-drawing', data.drawing, [
-        'prompt',
-        'guideScene',
-        'solutionScene',
-        'answer',
-        'answerStatement',
-        'explanation'
-    ]);
-    if (!isValidGeometryPrimitivesDrawingProblem(data, config.usesLinearDrawing)) {
+    const presentation = buildGeometryPrimitivesDrawingPresentation(data, config.usesLinearDrawing);
+    if (!presentation) {
         throw new ViewValidationError(
             'geometry-primitives-drawing',
-            'The requested primitive, construction guide, completed geometry, and supplied prose must agree exactly.'
+            'The requested primitive must be supported and agree with the drawing capability.'
         );
     }
 
-    const scene = isSolutionView ? data.drawing.solutionScene : data.drawing.guideScene;
+    const scene = isSolutionView ? presentation.solutionScene : presentation.guideScene;
     const diagramLabel = isSolutionView
-        ? `Completed ${data.displayName} construction: ${data.drawing.answer}`
+        ? `Completed ${presentation.displayName} construction: ${presentation.drawingAnswer}`
         : 'Construction guide with the requested starting points or given line only';
 
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[58px] items-center justify-center px-5 text-center text-[1.22rem] font-extrabold leading-snug text-slate-700">
-                {data.drawing.prompt}
+                {presentation.drawingPrompt}
             </div>
             <div className="mt-2 flex items-center justify-center gap-2 text-[0.78rem] font-bold uppercase tracking-wide text-slate-500">
                 <span className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1">
@@ -83,9 +71,9 @@ const GeometryPrimitivesDrawingCore = ({config, payload}: CoreProps) => {
             </div>
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    <div className="text-[1.05rem] font-extrabold">{data.drawing.answer}</div>
-                    <div className="mt-1 text-[0.96rem] font-bold">{data.drawing.answerStatement}</div>
-                    <div className="mt-1 text-[0.86rem] font-semibold leading-snug text-slate-700">{data.drawing.explanation}</div>
+                    <div className="text-[1.05rem] font-extrabold">{presentation.drawingAnswer}</div>
+                    <div className="mt-1 text-[0.96rem] font-bold">{presentation.drawingAnswerStatement}</div>
+                    <div className="mt-1 text-[0.86rem] font-semibold leading-snug text-slate-700">{presentation.drawingExplanation}</div>
                 </div>
             )}
         </div>

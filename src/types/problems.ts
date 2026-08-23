@@ -2109,29 +2109,6 @@ export type GeometryPrimitiveCandidate = {
 
 export type GeometryPrimitivesProblem = {
     primitiveKind: GeometryPrimitiveKind;
-    displayName: string;
-    definition: string;
-    drawing: {
-        prompt: string;
-        guideScene: GeometryPrimitiveScene;
-        solutionScene: GeometryPrimitiveScene;
-        answer: string;
-        answerStatement: string;
-        explanation: string;
-    };
-    identification: {
-        prompt: string;
-        candidates: [
-            GeometryPrimitiveCandidate,
-            GeometryPrimitiveCandidate,
-            GeometryPrimitiveCandidate,
-            GeometryPrimitiveCandidate
-        ];
-        correctCandidateId: GeometryPrimitiveCandidateId;
-        answer: string;
-        answerStatement: string;
-        explanation: string;
-    };
 };
 
 
