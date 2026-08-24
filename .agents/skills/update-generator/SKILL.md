@@ -12,10 +12,12 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
 2. **Tests & Specifications**:
    - Add/update `generator.test.ts` and `spec.test.ts` per `IMPL-G5` in `docs/implementation-generator.md`.
 
-3. **Ability Neutrality**:
-   - Apply `SPEC-G3` and `IMPL-G8` to both declarations and data contracts. The generator exposes no preselected blank, unknown, prompt, hint, requested reasoning, or Ability-specific answer prose.
-   - Preserve structured mathematical witnesses needed by consuming views. A canonical model retains every law, relation, object, scale, and intermediate step that proves generator-owned labels.
-   - Apply `SPEC-11`: keep the invariant mathematical Area on the generator and express presentation-driven refinements through view-owned Scopes, never child Areas split across the boundary.
+3. **Label and Payload Architecture**:
+   - Apply the claim-ownership and payload/projection review order in
+     `docs/label-architecture.md`, then implement the generator rules from the loaded Audit
+     sections (`SPEC-G3`, `SPEC-11`, `IMPL-G8`).
+   - Record only the module-specific capability and payload-field decisions; reference the rule
+     IDs instead of reproducing their general wording.
 
 4. **Consuming View Alignment**:
    - If the returned problem payload contract needed modification, follow `IMPL-G6` in `docs/implementation-generator.md`: run `npm run show:matching -- --spec=<real-standard>` to find actual consuming views and inspect rejection reasons, then adopt each matched view to render the updated payload fields. Use `--spec=test` only for the isolated smoke path and `--raw` only for source-definition diagnosis.

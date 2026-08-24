@@ -16,10 +16,9 @@ Update the visual view module under `src/visuals/views/[<category>/]{viewName}` 
      `SPEC-V6`). Record whether it is a small same-task presentation parameter or a task identity.
      When it is a task identity, plan the leaf ids, invariant capabilities, narrow payload types,
      and parent-level renderer/helper reuse before editing (`IMPL-V9`).
-   - When an Ability changes the observable learner action, apply `SPEC-V6`: create or use a separate leaf view with that Ability invariant in `generalLabels`. Keep reusable rendering code and tests in the parent category (`IMPL-V9`); the shared renderer receives a fixed task mode and never parses ontology labels.
-   - Use dimension-neutral `requiredLabels` only when the target must explicitly request a label before the leaf participates (`SPEC-V7`). The compatible pair must still provide the capability; a view-supplied requirement remains invariant and never drives rendering (`SPEC-V8`). Prefer a narrower payload type when it expresses the same boundary.
-   - Apply `IMPL-V11` to the complete matched claim. Preserve payload evidence for generator-owned labels while making the leaf Ability observable; do not reduce physical objects, mathematical laws, scales, or premises to unsupported names or assertions.
-   - Apply `SPEC-11`: do not specialize a compatible generator Area. Use Scope for presentation, representation, evidence-source, or other contextual refinement within the same knowledge domain; claim an Area only when the task contributes an independent domain.
+   - Use `docs/label-architecture.md` for claim ownership, applicability, and the complete-evidence
+     review order. Apply the exact contracts from `SPEC-V2` through `SPEC-V8`, `SPEC-11`,
+     `IMPL-V9`, and `IMPL-V11`; record only view-specific decisions and cite those rule IDs.
 
 3. **Producing Generator Alignment**:
    - If the view needs payload data it does not have, follow `IMPL-V8` in `docs/implementation-view.md`: run `npm run show:matching -- --spec=<real-standard>` to find actual producing generators and inspect rejection reasons, then adopt each matched generator to supply the required fields. Use `--spec=test` only for the isolated smoke path and `--raw` only for source-definition diagnosis. Never derive the missing mathematics inside the view.

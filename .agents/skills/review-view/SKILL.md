@@ -32,16 +32,17 @@ load `docs/label-architecture.md` as the conceptual map.
 
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.
 
-Check these explicitly on every view:
-- `CHK-V6`: the central checklist is loaded once, every leaf has exactly one heading-free checklist with concise **Identity** and **Modes** criteria, and every extra sentence is observable and passes the removal question. There are no category or generator checklists.
-- `SPEC-V5`: every Ability capability is elicited by the rendered task and remains absent from `rejectedLabels`; an Ability in `requiredLabels` is also an invariant view capability rather than conditional behavior.
-- `SPEC-V6` / `IMPL-V9`: an Ability that changes learner action or task identity is an invariant leaf view; related leaves share parent-level rendering code rather than branching on labels inside one view.
-- `SPEC-V7` / `SPEC-V8`: every `requiredLabel` is a necessary dimension-neutral target precondition supported by the compatible pair; it is not rejected, does not parameterize rendering, and yields to a narrower payload type when possible.
-- `SPEC-V3`: every `rejectedLabels` declaration is a stable, complete invalid domain; exact exclusions admit every other compatible case and never serve as incomplete blacklists or failure suppression.
-- `SPEC-11`: a view never specializes a compatible generator Area; contextual refinement within that Area is a Scope, while a view-owned Area must be an independent knowledge domain.
-- `IMPL-V11`: the projection preserves visible evidence for every generator-owned target label; names or assertions do not replace claimed objects, relations, laws, scales, or premises.
-- Central label support: ontology-label evidence and verdict policy stay in the central checklist, not the leaf checklist or evaluator prompt.
-- `IMPL-V6`: visual randomness is derived exclusively from `payload.seed`.
+For a cross-role review, use the review order and terminology from
+`docs/label-architecture.md`. The view-specific report must include:
+
+- a task-identity assessment for every schema branch that changes learner-visible behavior;
+- a semantic disposition for `requiredLabels`, `rejectedLabels`, and every view-owned Area;
+- an evidence trace showing that the complete matched conjunction survives the projection;
+- checklist and determinism findings from their dedicated Audit sections.
+
+Judge those outputs through the loaded Audit sections, especially `SPEC-V3`, `SPEC-V5` through
+`SPEC-V8`, `SPEC-11`, `CHK-V6`, `IMPL-V6`, `IMPL-V9`, and `IMPL-V11`; do not restate or
+reinterpret the rules inside the report.
 
 ---
 

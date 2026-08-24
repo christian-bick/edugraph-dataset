@@ -72,17 +72,11 @@ Decide *where* the defect lives before touching code. Assigning a failure to the
 | View error card in the rendered image (`ViewValidationError`) | payload mismatch | `IMPL-G6`, `IMPL-V8` |
 | Target matches no generator/view at all | out of scope | hand off to `/implement-spec` |
 
-**A VQA failure is not proof of a classification defect.** Inspect the rendered image,
-ontology definition, generator payload, view spec, and production target together. Judge only
-evidence available in the image. Resolve violations in ownership priority: (1) generator
-mathematical truth and Ability-neutral canonical evidence (`IMPL-G4`, `IMPL-G8`); (2) view task
-truth and preservation of the complete matched claim (`SPEC-V5`, `IMPL-V11`); (3) view
-applicability and complete exclusion boundaries (`SPEC-V3`, `SPEC-V7`); (4) declarations,
-targets, ontology, or checklist only when the preceding contracts are sound. Before changing a
-checklist, apply the `CHK-V6` removal question and confirm that the criterion protects an
-essential observable view contract rather than duplicating the central checklist or a unit test.
-Any proposed declaration change must state the current and proposed capability owner for every
-affected target claim (`SPEC-1`).
+**A VQA failure is not proof of a classification defect.** Inspect the rendered image, ontology
+definition, generator payload, view spec, and production target together, then follow the review
+order in `docs/label-architecture.md`. Apply `CHK-V6` before changing a checklist. Any proposed
+declaration change must state the current and proposed capability owner and observable evidence
+for every affected target claim (`SPEC-1`, `TSPEC-13`).
 
 Group the triaged failures by `(generator, view)` so one fix and one regeneration cycle covers every sample it affects.
 

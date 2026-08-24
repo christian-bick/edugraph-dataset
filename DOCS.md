@@ -11,7 +11,7 @@ The core philosophy of this system is **Label-Driven Generation**. Pedagogical l
 
 ### The Three Pillars
 The architecture is divided into three distinct layers:
-1.  **The Brain (`src/generators/`)**: Handles the abstract mathematical logic, permutation definition, and label constraint satisfaction. It has no knowledge of how a problem is visualized.
+1.  **The Brain (`src/generators/`)**: Instantiates canonical mathematical problems from resolved typed configuration. It has no knowledge of how a problem is visualized or what learner action a view will request.
 2.  **The Body (`src/visuals/`)**: HTML/CSS/TS renderers that run in the browser. It is organized into `views/` (individual exercise layouts), `components/` (shared UI elements), and `helpers/` (shared layout/math algorithms).
 3.  **The Heart (`src/scripts/`)**: Node.js scripts orchestrating Playwright (headless browser). These scripts unite the Brain and the Body, generating problems, injecting them into the renderers, taking screenshots, and compiling the metadata.
 
@@ -19,8 +19,8 @@ The architecture is divided into three distinct layers:
 
 ### `AbstractProblem` & `ProblemStub`
 Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of a math problem.
-*   **`ProblemStub`**: The raw output of a Generator (`{ id, data }`).
-*   **`AbstractProblem`**: The fully realized object injected into the dataset, containing the `ProblemStub`, the `type`, and the resolved array of `tags` (labels).
+*   **`ProblemStub`**: The raw output of a Generator (`{ data, tags? }`).
+*   **`AbstractProblem`**: The fully realized object injected into the dataset (`{ type, data, tags? }`).
 
 ### `RenderPayload` & `ViewTypeMap`
 The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
@@ -28,7 +28,7 @@ The data contract passed from the Playwright orchestrator into the browser's `wi
 *   `viewId`: The string identifier of the view.
 *   `labels`: Raw pedagogical tags (used by the HOC wrapper, not the pure view).
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
-*   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy from it — see `IMPL-V6` in [docs/implementation-view.md](docs/implementation-view.md). `problem.id` is present on the payload but is dead: no view reads it (see *Sample Identity & Determinism* below).
+*   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy from it — see `IMPL-V6` in [docs/implementation-view.md](docs/implementation-view.md).
 
 To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
 1. **`ViewTypeMap`** (defined in [problems.ts](src/types/problems.ts)): A central contract mapping visual view identifiers to their expected mathematical data structure. A shared view may accept a small structurally distinguishable union: `operations-vertical` and `operations-boxes` use `ArithmeticPairProblem | ArithmeticTripleProblem`, then narrow through the presence of `num3` and validate the corresponding fields.
@@ -39,38 +39,15 @@ Because the Node orchestrator and generator configurations do not statically imp
 
 ### Capability Ownership and Task Projection
 
-Matching composes a target from generator and view capabilities, but the screenshot must make
-their conjunction true. Generators own canonical mathematical objects, relations, and evidence;
-they never choose a blank, unknown, prompt direction, hint, requested explanation, or other
-Ability-specific learner action (`IMPL-G8`). Views exclusively own Abilities and turn that
-canonical payload into an observable task (`SPEC-V5`).
+The clean conceptual model for target claims, dimension-neutral label declarations, capability
+ownership, applicability, canonical payloads, projections, and dataset identities lives in
+[docs/label-architecture.md](docs/label-architecture.md). The authoring references indexed by
+[docs/README.md](docs/README.md) are normative and carry the stable rule IDs.
 
-When an Ability changes task identity, it is represented by a separate leaf view rather than a
-schema branch (`SPEC-V6`). Related leaves reuse a renderer and helpers from their parent category,
-with each thin wrapper fixing its task mode (`IMPL-V9`). Ontology-irrelevant visual variation may
-still be seeded from `payload.seed`; it does not need an ontology parameter.
-
-A view declaration has three distinct roles:
-
-- `generalLabels` and schema labels are capabilities the view positively contributes;
-- `requiredLabels` are Area/Scope applicability preconditions that every type-compatible
-  generator must establish, not capabilities supplied by the view;
-- `rejectedLabels` are stable, complete exclusion boundaries, never Ability filters or
-  incomplete capability blacklists.
-
-The view must preserve observable evidence for generator-owned Area and Scope labels while making
-its Ability observable (`IMPL-V11`). A law-bearing relation cannot be flattened into an unrelated
-equation, and a physical object cannot be replaced by a text badge naming that object. If the
-payload contains the evidence, the view renders it; if the evidence is absent, the payload contract
-must be corrected instead of being reconstructed from labels in the view.
-
-Area ownership also remains non-polymorphic across that boundary. Under `SPEC-11`, an Area changes
-the nature of the mathematical task or independently required knowledge, while a Scope changes its
-context, constraints, representation, range, or challenge. A view therefore does not narrow a
-generator Area with a descendant Area, but it may contribute an unrelated Area when its projection
-adds an independent mathematical task. This keeps competencies factorized as
-`Area × Scope × Ability` without treating every lossless parent-Area/Scope decomposition as evidence
-that two knowledge domains are actually the same task.
+Operationally, matching resolves a target against a compatible generator/view pair, the generator
+creates the canonical mathematical payload, and the view projects it into an observable task. Use
+the architecture document's review order whenever a match, payload, or rendered artifact appears
+wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
 ### Ontology Scale Resolution
 Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in
@@ -112,7 +89,7 @@ Within one spec dataset, every sample has a **structural identity**: the tuple `
 *   **Task fingerprint**: `computeTaskFingerprint(problem.data, resolvedViewConfig)` — an order-independent identity for what the selected view actually asks. It governs same-split reuse and target associations, so equal generator data with different view parameters remains distinct. The pipeline resolves the config with the sample's render seed and the same labels before rendering; `withConfig` repeats that deterministic resolution in the browser.
 *   **Val split membership**: `isValTuple(target.id, generatorId, viewId, ratio)` — a pure function of the matched tuple, so val membership survives unrelated reorderings. Allocation is per tuple, not per target: targets differ by an order of magnitude in how many tuples they match, so target-level allocation produced a split far below the requested ratio and left most views with no validation samples at all.
 
-The consequence: a code change only invalidates the samples whose identity inputs it actually touches. `problem.id` carries the sample key for reference but has **no functional role** — do not derive anything from it.
+The consequence: a code change only invalidates the samples whose identity inputs it actually touches. Sample identity remains pipeline metadata and is not part of the generator payload.
 
 ## 3. Script Reference
 
@@ -392,11 +369,11 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/validate-generator-view-specs.ts`
 *   **Execution**: `npm run check:generator-view-specs`
-*   **Function**: Enforces generator/view capability ownership. It rejects redundant declarations, every generator-owned Ability, cross-pair parameter duplication, and view Ability filters in `requiredLabels` or `rejectedLabels`. It also verifies that each `requiredLabel` is an Area/Scope applicability condition supplied by every type-compatible generator, is not supplied by the view, and is not simultaneously rejected. Output goes to the console; redirect it to `temp/` if you need to keep it.
+*   **Function**: Enforces the static generator/view contracts from [docs/spec-general.md](docs/spec-general.md), [docs/spec-generator.md](docs/spec-generator.md), and [docs/spec-view.md](docs/spec-view.md). It rejects redundant or overlapping positive declarations, generator-owned Abilities, cross-pair schema parameter duplication, Abilities in `rejectedLabels`, unsupported pair-level `requiredLabels`, and contradictory required/rejected declarations. Label-bearing mechanisms are dimension-neutral; semantic ownership rules determine which declarations are valid. Output goes to the console; redirect it to `temp/` if you need to keep it.
 
 ### `src/scripts/audit-label-architecture.ts`
 *   **Execution**: `npm run audit:label-architecture -- --spec=<module> [--output-dir=<path>] [--strict]`
-*   **Function**: Writes deterministic `audit.md` and `audit.json` reports containing target dimension cardinalities, every matched target-label provider down to `generalLabels` versus schema parameter, schema dimensions, Ability-parameterization signals, positive cross-role overlaps, raw-label implementation access, learner-action payload-field candidates, applicability/boundary declarations, view-owned Areas, and the exact production tuples affected by each finding. Default output is `temp/label-architecture/<spec>/`. Phase 0 report mode exits successfully despite findings; `--strict` exits non-zero for findings classified as violations.
+*   **Function**: Writes deterministic `audit.md` and `audit.json` reports containing target dimension cardinalities, every matched target-label provider down to `generalLabels` versus schema parameter, schema dimensions, Ability-parameterization signals, positive cross-role overlaps, raw-label implementation access, learner-action payload-field candidates, applicability/boundary declarations, view-owned Areas, and the exact production tuples affected by each finding. Default output is `temp/label-architecture/<spec>/`. The default is a review report; `--strict` makes every finding classified as a violation fail the command.
 *   **Graph reuse**: The audit loads current model catalogs because the dependency graph deliberately stores capability hashes rather than raw declaration metadata. If every current target, generator, view, matching-policy hash, target-label posting, and compatible pair agrees with the generated dataset graph, it reuses the graph's successful match tuples. Otherwise it performs one fresh indexed match. The shared model-source index discovers imported implementation closures, and source heuristics scan each unique reachable generator/view implementation file once; ontology resolution in `withConfig` remains infrastructure rather than an implementation finding. Structured work counters and synthetic growth tests cover the linear tuple-index, capability-closure, provenance, overlap, import-graph, and source-read paths. No graph-schema change or dataset invalidation is required.
 
 ### `src/scripts/validate-standards-spec.ts`
@@ -442,25 +419,27 @@ Run `npm run show:matching -- --spec=ccss` to inspect the complete matched-pair 
 
 ### Step 3: Decide Next Steps
 - **Case A: Both Match (100% Match):** If the intended generator-view path matches and every additional match is genuine, the dataset pipeline can generate the target without a new module.
-- **Case B: No Matching Generator:** If the target matches no generator, you must create a new generator module under `src/generators/` (see Scaffolding & Implementation below).
-- **Case C: No Matching View:** If the target matches no view, you must create a new view layout under `src/visuals/views/` (see Scaffolding & Implementation below).
-- **Case D: Matches Exist but Lacks Capabilities:** If matching modules exist but do not support the target's specific labels, you must extend their `spec.ts` (supportedLabels/constraints) and logic to support them.
+- **Case B: No Matching Generator:** Add a generator capability by extending a coherent existing module or creating a new module according to `IMPL-7`.
+- **Case C: No Matching View:** Add a view capability by extending a coherent existing task or creating a new leaf according to `SPEC-V6` and `IMPL-7`.
+- **Case D: Matches Exist but Lack Capabilities:** Extend `generalLabels` or a schema only when the module can truthfully support the capability with a surgical change. Otherwise, add the missing role rather than broadening an unrelated contract.
 
 ### Step 4: Scaffolding (If Needed)
-Follow `IMPL-6` and `IMPL-7` in [docs/implementation-general.md](docs/implementation-general.md) — including the rule that a new leaf module is created only when it extends the supported ontological space, rather than to avoid touching an existing one.
+Follow `IMPL-6` and `IMPL-7` in [docs/implementation-general.md](docs/implementation-general.md). Reuse or extend a module only while its task family, payload boundary, and implementation remain coherent; scaffold a separate role when those boundaries are crossed.
 
 ### Step 5: Declaring Capabilities (`spec.ts`)
 Create or update the `spec.ts` files for both your generator and visual view, per [docs/spec-generator.md](docs/spec-generator.md) and [docs/spec-view.md](docs/spec-view.md), with the shared rules in [docs/spec-general.md](docs/spec-general.md).
 
-The decisions that most often go wrong are declaring the most specific label that is actually true (`SPEC-2`, `SPEC-3`), keeping every Ability view-owned and invariant when it changes task identity (`SPEC-V5`, `SPEC-V6`), using `requiredLabels` only for generator-established applicability (`SPEC-V7`), and expressing rejected cases as complete boundaries rather than incomplete capability filters (`SPEC-V3`, `SPEC-V4`).
+Use [docs/label-architecture.md](docs/label-architecture.md) to assign each target claim and
+applicability condition to the correct construct before editing declarations. Then apply the
+normative Audit sections of the three spec references; do not infer ownership from a label's
+dimension or from an existing match.
 
 ### Step 6: Implementation
 Implement `generator.ts` per [docs/implementation-generator.md](docs/implementation-generator.md) and `view.tsx` per [docs/implementation-view.md](docs/implementation-view.md).
 
-A generator payload contains canonical mathematical evidence and no learner-action decisions
-(`IMPL-G8`). When several Ability leaves need the same content, they share a renderer at the
-parent level (`IMPL-V9`), and every projection preserves each generator-supplied label witness
-(`IMPL-V11`).
+Use [docs/label-architecture.md](docs/label-architecture.md) for the payload/projection boundary,
+then follow the implementation references' Audit sections. If the shared problem contract changes,
+adopt both roles under `IMPL-G6` and `IMPL-V8` before treating the change as complete.
 
 The determinism rule that breaks things silently is `IMPL-V6`: every randomized visual decision must derive from `payload.seed`. Any other entropy source invalidates the VQA cache without failing a check.
 
@@ -484,13 +463,11 @@ Use the isolated `test` spec for fast visual prototyping, debugging, smoke gener
 
 ### Step 8: Final Verification
 
-Validation follows the ownership chain. Earlier gates establish the contracts consumed by
-later ones, so a downstream failure is corrected at the highest-priority owning layer that
-violates its contract:
+Follow the review order in [docs/label-architecture.md](docs/label-architecture.md) when assigning
+a failure. The operational gates then run from static contracts to the released artifact:
 
 1. **Source and static truth:** run `npm run check` (or its focused type, generator/view-spec,
-   label, and standards-spec checks). Generators must prove their Area/Scope claims with
-   Ability-neutral canonical models; views must own their Ability and valid applicability.
+   label, and standards-spec checks).
 2. **Composition truth:** run `npm run show:matching -- --spec=ccss` and confirm every matched
    generator/view pair is semantically valid. Use `--spec=test` for an isolated smoke path and
    `--raw` only for source-definition diagnosis.
@@ -550,51 +527,24 @@ Churn tells you whether the *images* moved; this tells you whether the *split* i
 
 ## 7. Autonomous Agentic Loops & Orchestration Workflows
 
-To support automated end-to-end dataset development, the repository provides eight **skills** in `.agents/skills/`: four orchestrator loops, two module update skills, and two module review skills. All of them defer to the reference library in [`docs/`](docs/README.md) for authoring rules, citing rule IDs rather than restating them.
+The repository provides nine project skills under `.agents/skills/`. Each skill's `SKILL.md` is
+the authoritative workflow; the reference library in [docs/](docs/README.md) remains authoritative
+for authoring rules. Skills load those references and cite stable rule IDs instead of copying their
+normative text.
 
-Note that a skill's directory name is not always its command name (e.g. `spec-from-standard/` provides `/create-spec-from-standard`); the command is the `name:` field in its `SKILL.md` frontmatter.
+| Command | Workflow |
+| --- | --- |
+| `/create-spec-from-standard {standardId\|gradeFile}` | Create a reviewed two-pass target plan, then implement the approved standard spec. |
+| `/implement-spec [{specModule}]` | Resolve reviewed `implementationTodos` through contract-first module work and production verification. |
+| `/update-ontology [{specModule}]` | Turn authored `ontologyTodos` into formal ontology-repository issues. |
+| `/fix-spec [{specModule}] [--generator=X] [--view=Y]` | Triage and repair matching, generation, rendering, VQA, and determinism failures for existing matches. |
+| `/release-dataset [releaseTag]` | Prepare, validate, publish, monitor, and verify a dataset release. |
+| `/update-gen {moduleName}` | Update one generator and adopt every affected consuming view. |
+| `/update-view {viewName}` | Update one view and adopt producing generators when its mathematical contract changes. |
+| `/review-gen [{moduleName}] [--file=spec\|code]` | Audit generator specs or implementations against the relevant reference Audit sections. |
+| `/review-view [{viewName}] [--file=spec\|checklist\|code]` | Audit view specs, checklists, or implementations against the relevant reference Audit sections. |
 
-### Loop 1: Standard Spec Generation (`/create-spec-from-standard`)
-- **Skill**: `.agents/skills/spec-from-standard/SKILL.md`
-- **Command**: `/create-spec-from-standard {standardId|gradeFile}`
-- **Pass 1 — review plan**: Reads and quotes the relevant standard leaves, captures `matching-before.json`, and writes a disposition, ownership, and design proposal to `temp/spec-plans/<module>/<gradeFile>/plan.md` using [`docs/target-spec-plan-template.md`](docs/target-spec-plan-template.md). It does not edit `src/spec/` and stops for explicit user approval.
-- **Pass 2 — approved implementation**: Authors the target file, runs target validation, writes `matching-after.json`, `matching-diff.md`, and `target-distinctness.md`, then runs `npm run check -- --spec=<module>`. Implementation gaps reference stable authored definitions that state generator/view ownership and `reuse`/`expand`/`new` strategy.
-- **Boundary**: The skill finishes by presenting the review artifacts and never triggers ontology or implementation follow-up loops automatically.
-
-### Loop 2: Spec Implementation & Error-Free Generation (`/implement-spec`)
-- **Skill**: `.agents/skills/implement-spec/SKILL.md`
-- **Command**: `/implement-spec [{specModule}]`
-- **Function**: Resolves `implementationTodos` step-by-step to achieve 100% error-free problem generation and rendering.
-- **Stop boundary**: Proceeds autonomously through reversible implementation work and pauses only for ontology changes, genuine semantic ambiguity, invalidated authored strategies, production declaration changes, or work outside the current todo.
-- **Contract-first phase**: Establishes and typechecks a new or materially changed shared problem type and `ViewTypeMap` entry before generator and view work diverge (`IMPL-8`).
-- **Delegation & Module Reviews**: Delegates module-level implementation to `/update-gen {moduleName}` and `/update-view {viewName}`, and targeted audits to `/review-gen {moduleName}` and `/review-view {viewName}`.
-- **Target Debugging**: Uses `npm run test:target -- --target=<id> --spec=<real-standard> --render` for the target being implemented. The isolated `test` spec remains available for deliberately authored prototypes and retained regressions; `--raw` exposes source definitions before production deduplication.
-- **Canonical Scoped Regeneration**: Uses the isolated `test` spec for a small canonical smoke slice when it contains the relevant example, then verifies the promoted target against its real standard. Every dataset render runs through Docker.
-- **Commit and continuation**: After each smooth todo, writes an implementation commit without VQA cache files, then a separate cache-only commit when validation changed records. It records both hashes, compacts context, and moves to the next reviewed todo without another prompt.
-- **Completion Gate**: Promotes verified targets to `spec`, then runs a final full canonical regeneration, full live VQA validation, strict cache audit, churn and split reports, repository checks, and the union merge for non-isolated specs.
-
-### Loop 3: Ontological Todo Resolution (`/update-ontology`)
-- **Skill**: `.agents/skills/update-ontology/SKILL.md`
-- **Command**: `/update-ontology [{specModule}]`
-- **Function**: Groups `ontologyTodos` and creates formal GitHub issues in `christian-bick/edugraph-ontology`.
-- **Upfront Prerequisite Checks**:
-  1. **Sibling Repository**: Checks presence of `../edugraph-ontology`. If missing, prints clone instructions and aborts.
-  2. **GitHub CLI Auth**: Checks `gh auth status`. If missing/unauthenticated, prints `gh auth login` instructions and aborts.
-- **Issue Creation**: Formulates structured issue titles, standard contexts, and suggestions for new entities, definitions, and family placement, then submits them via `gh issue create`. It deliberately leaves all other relation design to ontology implementation analysis.
-
-### Loop 4: Failure Resolution (`/fix-spec`)
-- **Skill**: `.agents/skills/fix-spec/SKILL.md`
-- **Command**: `/fix-spec [{specModule}] [--generator=X] [--view=Y]`
-- **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in the latest timestamped validation report), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
-- **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a declaration or target. An evidence-backed classification correction is different: when the rendered task contradicts the current ability claim, use `SPEC-2`, `SPEC-V5`, `TSPEC-6`, and `TSPEC-13`, explain the evidence, and obtain user confirmation before changing a view spec or production target.
-- **Triage priority**: A VQA failure is not proof of a classification defect. Inspect the image, ontology definition, generated payload, view spec, and target together. Resolve violations by ownership: (1) generator mathematical truth and Ability-neutral canonical evidence (`IMPL-G4`, `IMPL-G8`); (2) view task truth and preservation of the complete matched claim (`SPEC-V5`, `IMPL-V11`); (3) view applicability and complete exclusion boundaries (`SPEC-V3`, `SPEC-V7`); (4) declaration, target, ontology, or checklist correction only when the preceding contracts are sound. Production declaration and target changes require user confirmation. A nonessential leaf criterion belongs to the checklist (`CHK-V6`).
-
-### Module Update Skills
-- **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews its Ability-neutral canonical model (`IMPL-G8`), updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.
-- **`/update-view {viewName}`** (`.agents/skills/update-view/SKILL.md`): The same for one view module, splitting Ability-driven task identities into reusable leaf projections (`SPEC-V6`, `IMPL-V9`), preserving the whole target claim (`IMPL-V11`), and adopting producing generators when genuinely missing mathematics requires a payload change (`IMPL-V8`).
-
-### Module Review Skills
-- **`/review-gen {moduleName}`** (`.agents/skills/review-generator/SKILL.md`): Audits the generator's `spec.ts`, `generator.ts`, and tests against the Audit sections of the generator references.
-- **`/review-view {viewName}`** (`.agents/skills/review-view/SKILL.md`): Audits all three view module files (`spec.ts`, `checklist.md`, `view.tsx`) against the Audit sections of the view references.
-
-`/review-gen` accepts `--file=spec|code`; `/review-view` accepts `--file=spec|checklist|code`. Both resolve `{moduleName}` as a leaf module, a category (all leaves beneath it), or — when omitted — every module.
+A skill directory name may differ from its command name; the `name:` field in `SKILL.md`
+determines the command. Read the selected skill completely before acting. For cross-role label or
+payload decisions, load [docs/label-architecture.md](docs/label-architecture.md); for exact rules,
+load the references routed by [docs/README.md](docs/README.md).

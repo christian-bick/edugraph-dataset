@@ -18,10 +18,9 @@ Explore its standards coverage and generated tasks:
 
 The pipeline is built on a **Label-Driven Generation** paradigm. Instead of generating a math problem and attempting to label it, the system receives a set of constraints (e.g., "Must include zero", "Uses addition") and generates training artifacts that satisfy those labels and expose the visual or necessary textual clues a classifier needs to defend them.
 
-Generators own canonical, Ability-neutral mathematics; views own the learner-facing task and
-therefore every Ability claim. The final screenshot must defend the complete matched label
-conjunction: a view may change what the learner is asked to do, but it may not erase the
-objects, relations, laws, or other evidence supplied by the generator.
+The relationship between target claims, dimension-neutral label declarations, generator/view
+capabilities, canonical payloads, and rendered tasks is defined in
+[Label Architecture](docs/label-architecture.md).
 
 The architecture is split into three main parts:
 *   **The Brain (Generators):** Abstract mathematical constraint satisfiers.
@@ -152,9 +151,9 @@ source-code warning signals, and the production tuples affected by every finding
 ```bash
 npm run audit:label-architecture -- --spec=ccss
 ```
-The Phase 0 command writes deterministic Markdown and JSON under
-`temp/label-architecture/<spec>/`. It reports current migration findings without failing; add
-`--strict` only when using migrated violation categories as a gate. When the generated dataset's
+The command writes deterministic Markdown and JSON under
+`temp/label-architecture/<spec>/`. Its default output is a review report; add `--strict` to make
+classified architecture violations fail the command. When the generated dataset's
 dependency graph exactly matches current capabilities, the audit reuses its successful tuples
 instead of repeating target matching.
 

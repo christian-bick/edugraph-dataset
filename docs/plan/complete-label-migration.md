@@ -1,5 +1,7 @@
 # Complete the label-ownership migration
 
+**Status:** Structural migration complete; the final canonical proof remains tracked in Phase 7.
+
 ## Purpose
 
 Complete the repository-wide migration to a strict relationship between competency targets,
@@ -20,150 +22,13 @@ in a separate `docs/label-architecture.md`. Normative rules remain in the existi
 references under `docs/`, with stable rule IDs; neither this plan nor the architecture overview
 should duplicate their full wording.
 
-## Accepted decisions
+## Accepted architecture
 
-The following decisions are settled and are not open migration questions.
-
-### Targets are conjunctive competency descriptions
-
-A target describes the competency required by a standard, independently of any generator or
-view. Its labels are conjunctive:
-
-```text
-Target = Area(s) AND Scope(s) AND Ability(s)
-```
-
-This expression describes factorization, not a cardinality of exactly one label per dimension.
-A target may require several independent Areas, Scopes, or Abilities when every claim is true and
-observable in the resulting artifact.
-
-Every production target must contain at least one Area and at least one Ability. Scope is
-zero-or-more: a Scope is required when the competency has a meaningful contextual,
-representational, range, constraint, or challenge discriminator that preserves the nature of the
-mathematical task. The full dimensional test is normative in `SPEC-11`.
-
-### Generators own canonical mathematics
-
-A generator owns the mathematical objects, relations, invariants, semantic context, and
-structured witnesses needed to prove its Area and Scope claims. It must not choose how the
-learner is asked to engage with them.
-
-A canonical payload may contain:
-
-- mathematical operands, quantities, objects, relations, results, and constraints;
-- structured semantic context such as entities, events, units, and their relationships;
-- structured derivations, equivalent relations, law applications, intermediate values, graph
-  scales, or other witnesses required by consuming views;
-- deterministic mathematical variants selected from resolved generator configuration.
-
-It must not contain:
-
-- imperative prompts or instructions;
-- a preselected blank, unknown position, or response direction chosen for an Ability;
-- display-ready question or solution sentences;
-- requested explanations, hints, or answer prose;
-- presentation modes, layout decisions, or text whose only purpose is a particular learner
-  action.
-
-Validating and sharpening this language-neutral canonical-payload boundary is the highest
-priority of the migration.
-
-### Views own every Ability and one coherent task projection
-
-Every Ability capability is contributed by the view, through either invariant `generalLabels` or
-resolved view-schema configuration. Abilities remain forbidden from:
-
-- every generator declaration and schema;
-- `rejectedLabels`.
-
-An invariant view Ability may also appear in `requiredLabels` when the view should participate
-only for targets that explicitly request it. The requirement does not contribute the capability
-or make it conditional.
-
-An Ability schema parameter is valid when it changes observable support or another presentational
-property while preserving the same learner action, remains valid for every compatible payload,
-resolves deterministically from the target, and can be validated by one coherent checklist. Its
-presence is nevertheless an architectural review signal because it may conceal parallel task
-implementations inside one view.
-
-When an Ability or Ability combination changes instructions, the requested response, unknown
-placement, requested reasoning, question/solution behavior, or another part of task identity, it
-uses a separate leaf view. A view must not dispatch between those behaviors through large,
-mutually exclusive code branches. Related leaves reuse parent-level renderers, helpers, and tests;
-each thin wrapper fixes its task mode without parsing ontology labels.
-
-Several invariant Abilities may be declared in `generalLabels` only when every applicable render
-makes all of them true. A schema may conditionally contribute an Ability only under the
-same-task criteria above; conditional truth is not itself a reason to split the view.
-
-### Area and Scope ownership follows the determining behavior
-
-The generator owns invariant mathematical Areas and mathematical Scopes. A view owns Scopes
-created by presentation, representation, evidence source, or other learner-visible context.
-
-A view may contribute an Area only when the task adds an independent mathematical task or body of
-knowledge. It may not redeclare or specialize a generator-owned Area. A contextual refinement that
-preserves the nature of the mathematical task is a Scope, not polymorphic Area ownership. A
-lossless decomposition through a common Area ancestor does not by itself prove that two Areas are
-merely Scopes; separately acquired knowledge remains Area-level.
-
-Equal or ancestor/descendant positive capabilities may not be split across a compatible
-generator/view pair. `requiredLabels` are the explicit exception in role, not in ownership: they
-reference target applicability but do not contribute a capability.
-
-### Applicability and boundaries are not capabilities
-
-`requiredLabels` express dimension-neutral target preconditions. They:
-
-- may contain Area, Scope, or Ability labels;
-- must be supportable by every type-compatible generator/view pair;
-- must not also be rejected by the view;
-- never configure rendering or make a capability conditionally true;
-- should be replaced by a narrower payload type when static typing can express the boundary.
-
-`rejectedLabels` express truthful, stable, and complete exclusion boundaries. They must never
-filter an Ability, compensate for generator-side presentation logic, suppress an inconvenient
-match, or blacklist only the alternatives currently known to the ontology.
-
-An invariant stronger sibling task uses the same `requiredLabels` mechanism as any other target
-precondition. Its Ability remains declared in `generalLabels`; no dimension-specific requirement
-property is needed.
-
-### Implementations consume resolved contracts, not raw labels
-
-Ontology labels are inspected by target construction, schema resolution, matching, and
-validation. Generator and view implementations consume their resolved contracts:
-
-- a generator consumes typed mathematical configuration;
-- a view consumes typed presentation configuration and the canonical problem payload;
-- shared view renderers receive a fixed local task mode from their leaf wrapper.
-
-Implementations must not inspect `payload.labels`, `problem.tags`, raw ontology IRIs, or other
-unresolved label collections. Comparing a typed resolved configuration value with its enum value
-is not raw-label parsing.
-
-### The final artifact proves the complete conjunction
-
-The generator supplies canonical evidence and the view preserves it while making its Ability
-observable. A view may not flatten a law-bearing relation, omit a premise or scale, replace a
-claimed object with a badge naming it, or otherwise erase evidence for generator-owned labels.
-
-Canonical VQA remains the pragmatic artifact-level capability gate. It validates the complete
-label set of every generated production artifact. A separate synthetic capability-totality gate
-over all possible declared module configurations is optional and is not required to complete
-this migration. It should be reconsidered only if unused capabilities or future composition
-produce a concrete validation gap that active-target VQA cannot cover.
-
-### Identity layers remain separate
-
-- Target identity is the hash of the normalized requested label set.
-- Sample identity is the structural target/generator/view/split/mode/instance tuple.
-- Content identity is the canonical mathematical payload fingerprint.
-- Task identity is the payload plus deterministically resolved view configuration.
-
-Equal mathematical data with different task projections must remain distinct. View splitting
-therefore changes sample identity intentionally even when shared rendering code and mathematical
-payloads remain unchanged.
+The clean-state model is [docs/label-architecture.md](../label-architecture.md). Normative rules
+remain in the authoring references indexed by [docs/README.md](../README.md). This plan records
+migration evidence, sequencing, and completion status only; it does not redefine target
+conjunctions, dimension ownership, applicability, payload/projection boundaries, or dataset
+identities.
 
 ## Current inventory
 
@@ -412,57 +277,11 @@ or boundary rules, and the normalized production match set remains 795 tuples.
 
 ### Phase 6: update documentation and skills
 
-Create `docs/label-architecture.md` as the concise conceptual entry point covering:
-
-- requested target claims versus module capabilities;
-- matching direction and conjunction;
-- dimension ownership;
-- invariant capabilities, configurable capabilities, applicability, and boundaries;
-- canonical payloads and task projections;
-- observable evidence;
-- target, sample, content, and task identity.
-
-Update `docs/README.md` to route cross-role architecture work through that document. Keep
-`DOCS.md` focused on architecture, scripts, and workflows, and keep normative rules in the
-existing reference files.
-
-Append missing normative rules to:
-
-- `docs/spec-general.md`: capability provenance and complete cross-role positive overlap;
-- `docs/spec-view.md`: view-owned Abilities, the same-task criteria for Ability schemas, and leaf
-  views for task-changing Abilities;
-- `docs/implementation-generator.md`: canonical semantic data versus forbidden learner-action
-  data;
-- `docs/implementation-view.md`: no raw-label access, no parallel task dispatcher, and fixed local
-  task modes for shared leaf renderers;
-- `docs/target-spec.md`: at least one Area and Ability, Scope zero-or-more, and conjunctive
-  cardinality;
-- `docs/checklist-view.md`: the artifact must defend the complete target conjunction without
-  privileging one Ability.
-
-Update skills by referencing those rule IDs rather than restating their prose:
-
-- `/create-spec-from-standard`: require a label-ownership table and expected view capability for
-  every Ability;
-- `/review-gen`: classify payload fields and flag learner-action or display-ready data;
-- `/review-view`: inspect Ability schemas for parallel task behavior; reject raw-label access,
-  task-changing configuration branches, and unjustified Area ownership;
-- `/update-gen`: require a consuming-view adoption matrix for payload neutralization;
-- `/update-view`: require an Ability-schema task-identity assessment and, when splitting is needed,
-  a leaf plan with parent-level renderer reuse;
-- `/implement-spec`: preserve the reviewed ownership trace through matching and VQA;
-- `/fix-spec`: include capability provenance before considering a declaration correction;
-- `/release-dataset`: run the strict label-architecture audit before canonical generation and
-  release publication.
-
-Add a cross-role `/review-label-architecture [--spec=<module>]` skill only if the audit needs an
-agentic interpretation layer. The underlying deterministic inventory must remain a script so CI
-and non-agent workflows receive the same facts.
-
 **Status: complete.** [label-architecture.md](../label-architecture.md) is the concise cross-role
-entry point; the reference index routes architecture work through it, target dimension cardinality
-is normative under `TSPEC-14`, and the authoring, review, implementation, repair, and release skills
-all preserve the same ownership and evidence trace through their existing rule IDs.
+entry point, [docs/README.md](../README.md) routes exact authoring work to the normative references,
+and the project skills retain only workflow-specific decisions while citing those rule IDs. The
+deterministic architecture audit remains the common inventory for CI and agentic review; no
+separate interpretation skill was needed.
 
 ### Phase 7: canonical validation and release proof
 

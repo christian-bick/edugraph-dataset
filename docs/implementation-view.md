@@ -67,9 +67,7 @@ seeds the global PRNG from `payload.seed` before config resolution.
 
 Never derive anything from:
 
-- `Math.random()` or an unseeded `random()` call;
-- `problem.id` — it is present on the payload but **dead**: no view reads it, and nothing
-  may be derived from it.
+- `Math.random()` or an unseeded `random()` call.
 
 **Why:** any other entropy source breaks render determinism and invalidates the VQA cache.
 Under the concurrent worker pool, unseeded randomness makes renders order-dependent and
@@ -165,7 +163,7 @@ truthful, stable, and complete exclusion boundary.
 - [ ] **IMPL-V3** — every validation and range-check failure throws `ViewValidationError` rather than rendering degraded output.
 - [ ] **IMPL-V4** — no `||` fallback, default parameter, or optional-chaining default stands in for a resolved `config` or `problem.data` value.
 - [ ] **IMPL-V5** — Question Mode withholds the answer, Solution Mode reveals it with identifiable context, and each mode includes only instructions necessary for standalone understanding.
-- [ ] **IMPL-V6** — grep the view for `Math.random`, unseeded `random(`, and `problem.id`: all three must be absent. Every visual random decision traces back to `payload.seed`.
+- [ ] **IMPL-V6** — grep the view for `Math.random` and unseeded `random(`: both must be absent. Every visual random decision traces back to `payload.seed`.
 - [ ] **IMPL-V7** — no reliance on animation state; every async resource the view loads resolves.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.
 - [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code; no view hides parallel task implementations behind large config-controlled branches, and shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.

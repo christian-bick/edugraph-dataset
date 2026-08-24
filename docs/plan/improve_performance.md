@@ -48,7 +48,7 @@ The release workflow creates a release coverage snapshot and then triggers the d
 
 ## Primary matching defect
 
-The current catalogs contain:
+The pre-implementation catalogs contained:
 
 - 653 active targets;
 - 79 generators;
@@ -90,7 +90,7 @@ Coverage must build target-to-standard and standard-to-target maps once and reus
 
 A scoped generation begins by recursively copying the existing dataset into a staging directory and then replacing the selected scope.
 
-The current CCSS dataset contains:
+The pre-implementation CCSS dataset contained:
 
 - 2,086 files;
 - 58.3 MB.
@@ -301,7 +301,7 @@ earlier active workflow.
 This phase fixes the immediate release bottleneck and the other known Gate A violations. Each
 change must preserve existing matching and validation results exactly.
 
-**Status: in progress.** The first implementation pass now covers the measured standards-coverage
+**Status: complete.** The implementation covers the measured standards-coverage
 and VQA amplification paths: operation-local counters, cached type parsing and ontology ancestry,
 type/capability pair indices, batched target matching, indexed standard association, explicit
 diagnostic rejection output, prepared single-pass VQA state, and one cache load per module. The
@@ -311,10 +311,9 @@ capability checks for 665 loaded source targets (653 unique after production nor
 Production tuples are integration-tested against exhaustive
 diagnostic matching, and counter-bound tests exercise growing target and validation-context inputs.
 
-Phase 1 remains open for a counter-guided audit of the other active generation and validation
-commands and removal of any remaining input-sized nested scans or non-linear ordering work. The
-strict VQA audit must also be rerun after the canonical dataset freshness manifest is regenerated;
-the existing dataset correctly becomes stale when these shared generation sources change.
+Counter-guided tests now guard the active generation and validation paths against the measured
+input-sized nested scans and non-linear ordering work. Canonical dataset freshness remains a
+separate operational prerequisite for strict VQA audit.
 
 #### Phase 2: establish stable input identity
 

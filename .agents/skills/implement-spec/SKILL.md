@@ -53,12 +53,9 @@ Before generator and view work diverges, establish and typecheck any new or mate
 shared problem type, discriminant, invariants, and `ViewTypeMap` entry (`IMPL-8`). Only then
 may the two role implementations proceed independently.
 
-Keep the shared payload Ability-neutral while preserving the structured evidence for its Area
-and Scope claims (`IMPL-G8`). If different Abilities change the observable learner action, use
-separate leaf views with parent-level shared rendering code (`SPEC-V6`, `IMPL-V9`). Each leaf
-must preserve the complete matched claim (`IMPL-V11`); use dimension-neutral `requiredLabels`
-only for explicit target preconditions supported by the compatible pair, never to parameterize
-rendering (`SPEC-V7`, `SPEC-V8`).
+Apply the approved ownership trace through `docs/label-architecture.md` and the normative Audit
+sections (`IMPL-G8`, `SPEC-V6` through `SPEC-V8`, `IMPL-V9`, `IMPL-V11`). Record only decisions
+specific to this implementation package rather than copying the general contracts into its notes.
 
 Before promotion, compare the implemented pair with the ownership trace and confirm that canonical
 VQA evidence exists for every claim, not only the leaf Ability (`TSPEC-13`, `CHK-V6`).

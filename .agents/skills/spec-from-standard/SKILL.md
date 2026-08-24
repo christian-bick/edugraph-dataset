@@ -64,9 +64,6 @@ Complete the template with these constraints:
   view capability expected to satisfy it; for every Ability, name the expected view capability and
   observable task evidence, using a leaf when the Ability changes task identity (`SPEC-1`,
   `SPEC-V5`, `SPEC-V6`, `TSPEC-13`).
-- For every Ability, identify the expected leaf-view task that makes it observable. Do not assign
-  an Ability to a generator role or rely on a generator-authored blank, prompt, hint, or requested
-  reasoning (`SPEC-V5`, `IMPL-G8`).
 - Give every ontology TODO a stable ontology package id. Reuse that id across leaf entries
   when one coherent ontology change serves them; identify each proposed entity's dimension.
 - Record expected active generator/view matches and suspicious boundaries. For every

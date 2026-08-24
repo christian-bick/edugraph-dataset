@@ -113,8 +113,9 @@ cannot preserve evidence it never receives.
 Ability neutrality applies to both declarations and the data contract: fields such as
 `blankPart`, `question`, or `explanation` must not encode a learner-action decision. If
 multiple views need the same mathematical relation, expose that relation canonically and
-let each view derive its observable task. Ontology-irrelevant variation belongs to the
-view and is derived from `payload.seed`.
+let each view derive its observable task. Incidental deterministic variation follows the
+same ownership boundary: the generator may seed exact canonical instance values, while the
+view may seed presentation choices through `payload.seed`.
 
 ---
 

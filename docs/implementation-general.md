@@ -84,8 +84,10 @@ Given a gap to close, prefer in this order:
    ([IMPL-G6](implementation-generator.md#impl-g6--a-payload-contract-change-is-a-two-module-change)).
 2. **Extend an existing view** when its existing visual layout can adopt the capability
    through modest, configurable layout changes. Add the layout properties to its `spec.ts`
-   schema and `view.tsx`, and declare complete exclusion boundaries in `rejectedLabels`
-   ([SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting)).
+   schema and `view.tsx`. Preserve any existing complete exclusion boundary; add or expand
+   `rejectedLabels` only when the view has a truthful stable boundary under
+   [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries) and
+   [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting).
 3. **Always create a new generator or view** when the capability genuinely expands the
    supported ontological space into new and unrelated families, crosses the stable payload
    boundary described by

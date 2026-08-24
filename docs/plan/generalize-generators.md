@@ -1,5 +1,8 @@
 # Generalize generator modules conservatively
 
+**Status:** Complete. The exact `measurement-unit-scale` duplication was consolidated; the other
+reviewed families remain separate.
+
 ## Purpose
 
 Identify generator modules that can be consolidated with minimal changes to their canonical
@@ -40,11 +43,11 @@ A consolidation is accepted only when all of the following are true.
 Structural similarity, a shared target, a shared view, or a common schema parameter is only a
 candidate signal. None is sufficient evidence by itself.
 
-## Baseline
+## Historical baseline
 
 The first CCSS audit after the label and payload migration found:
 
-| Measure | Current value |
+| Measure | Pre-consolidation value |
 | --- | ---: |
 | Production targets | 653 |
 | Generator modules | 81 |
@@ -152,32 +155,20 @@ estimation and two-step word problems, scalar arithmetic and number arrays, envi
 abstract shape naming, geometric primitives and attribute classification, and measurable
 attributes and tool selection represent genuinely different evidence for the same competency.
 
-## Migration sequence
+## Completed outcome and future reviews
 
-### Batch 1: remove exact unit-scale generator duplication
+`measurement-conversion` now owns the generic unit-scale relation, the duplicate
+`measurement-unit-scale` generator is gone, and both visual treatments remain available. Counting
+classification and every other reviewed family retain separate canonical generators for the
+reasons recorded above.
 
-1. Retain the generic unit-scale branch in `measurement-conversion` unchanged.
-2. Remove `measurement-unit-scale` and its duplicate spec/tests.
-3. Retype `measure-unit-scale-relation` to the generic union member and require the generator-owned
-   unit-scale and length-measurement context. Reject concrete `MeasuringWithUnits` targets that the
-   abstract partition renderer cannot evidence.
-4. Remove the standalone payload alias and point the existing type-map entry at the generic member.
-5. Verify that both existing visual tuples remain and regenerate only the affected dependency
-   closure.
-6. Commit the batch independently.
+The post-migration CCSS architecture audit reports 80 generators, 180 views, 197 compatible
+pairs, and the preserved 795 matched target/generator/view tuples.
 
-### Batch 2: helper standardization without forced mergers
-
-Extract pure helpers only where repeated implementations encode the same invariant. Keep separate
-generators when their payload contracts remain mathematically distinct. Candidate helpers include
-category distribution, bounded integer selection, whole-number place-value construction, and
-measurement taxonomy validation; each extraction needs an actual repeated use before it is made.
-
-### Batch 3: rerun the semantic audit
-
-Recompute candidates after the consolidation. Contract cleanup can expose exact inclusions that
-the current type surface hides. New candidates still pass the full decision test; there is no
-target generator count and no pressure to merge the deferred counterexamples.
+Future helper extraction is independent of consolidation and requires an actual repeated
+invariant. Future consolidation candidates must be discovered from the current catalogs and pass
+the decision test in this document; historical similarity rankings are not a standing migration
+queue, and there is no target generator count.
 
 ## Validation gates per batch
 
@@ -218,7 +209,7 @@ that two mathematical contracts mean the same thing remains a reviewed design de
 
 ## Completion criteria
 
-This phase is complete when:
+This phase is complete because:
 
 - the proven unit-scale duplicate has one canonical generator path;
 - counting classification remains separated as two mathematical problem families;

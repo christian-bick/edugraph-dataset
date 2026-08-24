@@ -31,15 +31,16 @@ When the review traces capability ownership or consuming views across roles, als
 
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.
 
-Check these explicitly on every generator:
-- `SPEC-G3`: neither `generalLabels` nor schema parameters contain an Ability.
-- `IMPL-G8`: Ability neutrality covers both declarations and the data contract. The payload preserves the mathematical witnesses required by Area/Scope labels but contains no learner-action decision such as a blank, unknown position, prompt, hint, requested explanation, or Ability-specific answer prose.
-- For `IMPL-G8`, classify every payload field as canonical mathematical data,
-  calculated/structured evidence, semantic context, or view projection. Flag the last category and
-  any display-ready duplication; do not flag calculated mathematical values merely because a view
-  could recompute them.
-- `SPEC-11`: the generator owns the invariant mathematical Area; it does not encode presentation-driven child-Area distinctions that belong to view Scopes.
-- `IMPL-G6`: when neutralization changes the payload contract, identify every real-standard consuming view and verify each projection.
+For a cross-role review, use the review order and terminology from
+`docs/label-architecture.md`. The generator-specific report must include:
+
+- a four-way disposition of relevant payload fields as canonical mathematical data,
+  calculated/structured evidence, semantic context, or view projection;
+- the capability and structured-evidence trace for every affected target claim;
+- the real-standard consumer list and adoption impact when the payload contract changes.
+
+Judge those outputs through the loaded Audit sections, especially `SPEC-G3`, `SPEC-11`,
+`IMPL-G6`, and `IMPL-G8`; do not restate or reinterpret the rules inside the report.
 
 ---
 
