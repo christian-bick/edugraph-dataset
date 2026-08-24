@@ -1,0 +1,3 @@
+- **Identity:** A rotated circular reference or curved-boundary defining-attribute card beside a drawing canvas makes the circle-construction task identifiable.
+- **Rotation conservation:** The rotated reference remains visibly congruent to the requested drawing, directly showing that orientation does not change the circle.
+- **Modes:** Question Mode keeps the response canvas blank; Solution Mode reveals the completed circle without removing the reference or defining evidence.

@@ -1,4 +1,4 @@
-- **Identity:** A rotated reference or defining-attribute card beside a drawing canvas makes the requested shape-construction task identifiable.
+- **Identity:** A rotated straight-sided reference or defining-attribute card beside a drawing canvas makes the polygon-construction task identifiable.
 - **Rotation conservation:** The rotated reference remains visibly congruent to the requested drawing, directly showing that orientation does not change the shape.
 - **Quadrilateral exclusions:** The other-quadrilateral mode shows four straight sides and explicit unequal-side/no-right-angle evidence, then checks those properties against rhombus, rectangle, and square definitions.
-- **Modes:** Question Mode keeps the response canvas blank; Solution Mode reveals the completed drawing without removing the reference or defining evidence.
+- **Modes:** Question Mode keeps the response canvas blank; Solution Mode reveals the completed polygon without removing the reference or defining evidence.

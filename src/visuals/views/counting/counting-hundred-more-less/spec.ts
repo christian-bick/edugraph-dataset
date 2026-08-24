@@ -3,8 +3,8 @@ import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
-    viewId: 'counting-ten-more-less',
-    requiredLabels: [Scope.StepsOf10],
+    viewId: 'counting-hundred-more-less',
+    requiredLabels: [Scope.StepsOf100],
     generalLabels: [
         Area.PlaceValue,
         Scope.ArabicNumerals,
@@ -13,6 +13,6 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const CountingTenMoreLessViewSchema = {} as const;
+export const CountingHundredMoreLessViewSchema = {} as const;
 
-export type CountingTenMoreLessViewConfig = ConfigFromSchema<typeof CountingTenMoreLessViewSchema>;
+export type CountingHundredMoreLessViewConfig = ConfigFromSchema<typeof CountingHundredMoreLessViewSchema>;

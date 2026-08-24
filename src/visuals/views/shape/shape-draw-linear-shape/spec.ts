@@ -1,17 +1,18 @@
-import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
-import { ConfigFromSchema } from '../../../../types/schema.ts';
+import {ConfigFromSchema} from '../../../../types/schema.ts';
+import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
-    viewId: 'shape-draw-shape',
+    viewId: 'shape-draw-linear-shape',
+    requiredLabels: [Area.Polygon],
     generalLabels: [
         Area.LinearShapeDrawing,
-        Area.CircularShapeDrawing,
         Ability.ConceptSpecification,
         Ability.VisualArticulation
     ],
     rejectedLabels: [
         Area.Hexagon,
+        Area.Pentagon,
         Scope.ShapeProperties,
         Scope.VertexCount,
         Scope.AngleCount,
@@ -19,7 +20,6 @@ export const spec: ViewSpec = {
     ]
 };
 
+export const ShapeDrawLinearShapeViewSchema = {} as const;
 
-export const ShapeDrawShapeViewSchema = {} as const;
-
-export type ShapeDrawShapeViewConfig = ConfigFromSchema<typeof ShapeDrawShapeViewSchema>;
+export type ShapeDrawLinearShapeViewConfig = ConfigFromSchema<typeof ShapeDrawLinearShapeViewSchema>;

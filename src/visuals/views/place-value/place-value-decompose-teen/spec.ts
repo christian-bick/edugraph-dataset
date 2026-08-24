@@ -5,7 +5,6 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'place-value-decompose-teen',
     generalLabels: [
-        Area.Sum,
         Area.PartitionOfCollections,
         Scope.PhysicalNumbers,
         Ability.ProcedureExecution,

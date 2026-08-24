@@ -1915,6 +1915,7 @@ export interface ViewTypeMap {
     'counting-objects-parity': CountingProblem;
     'counting-inc-dec': CountingIncDecProblem;
     'counting-ten-more-less': CountingIncDecProblem;
+    'counting-hundred-more-less': CountingIncDecProblem;
     'counting-number-sequence': CountingSequenceProblem;
     'counting-conservation': CountingProblem;
     'sorting-classify-count': CountingClassifyCountProblem;
@@ -2033,5 +2034,6 @@ export interface ViewTypeMap {
     'numbers-decimal-line': DecimalNotationProblem;
     'numbers-decimal-measurement': DecimalNotationProblem;
     'numbers-decimal-comparison': DecimalComparisonProblem;
-    'shape-draw-shape': ShapeBuildShapeProblem;
+    'shape-draw-circular-shape': ShapeBuildShapeProblem;
+    'shape-draw-linear-shape': ShapeBuildShapeProblem;
 }

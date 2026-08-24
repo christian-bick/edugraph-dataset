@@ -1,3 +1,21 @@
+export type ShapeDrawingFamily = 'circular' | 'linear';
+
+export type ShapeDrawingViewId =
+    | 'shape-draw-circular-shape'
+    | 'shape-draw-linear-shape';
+
+const FAMILY_BY_TARGET: Readonly<Record<string, ShapeDrawingFamily>> = {
+    circle: 'circular',
+    triangle: 'linear',
+    square: 'linear',
+    rectangle: 'linear',
+    quadrilateral: 'linear'
+};
+
+export function getShapeDrawingFamily(target: string): ShapeDrawingFamily | undefined {
+    return FAMILY_BY_TARGET[target];
+}
+
 export function getTracePath(target: string): string {
     if (target === 'circle') return 'M 50 18 A 32 32 0 1 0 50 17.9 Z';
     if (target === 'triangle') return 'M 50 15 L 85 85 L 15 85 Z';

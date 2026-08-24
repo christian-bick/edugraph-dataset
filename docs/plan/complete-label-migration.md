@@ -244,10 +244,10 @@ linting must prevent recurrence.
 
 ### Applicability, boundaries, and view-owned Areas
 
-- Seven views use `requiredLabels`; their current static contracts pass.
-- 33 views use `rejectedLabels`; each needs a semantic review proving a stable and complete
+- 27 views use `requiredLabels`; their current static contracts pass.
+- 34 views use `rejectedLabels`; each needs a semantic review proving a stable and complete
   exclusion boundary.
-- 18 views declare general Areas and two view schemas declare Areas. Current validation finds no
+- 23 views declare general Areas and one view schema declares Areas. Current validation finds no
   taxonomic overlap with compatible generator Areas, but the independent-domain rationale remains
   a semantic review responsibility.
 - The current catalog contains no unresolved generator-general/view-schema Scope overlap. This

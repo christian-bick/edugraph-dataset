@@ -1,5 +1,11 @@
-import {ViewValidationError} from '../../../helpers/validation.ts';
-import {CountingIncDecProblem} from '../../../../types/problems.ts';
+import {CountingIncDecProblem} from '../../../types/problems.ts';
+import {ViewValidationError} from '../../helpers/validation.ts';
+
+export type PlaceValueOffsetViewId =
+    | 'counting-ten-more-less'
+    | 'counting-hundred-more-less';
+
+export type PlaceValueOffsetStep = 10 | 100;
 
 export interface PlaceValueParts {
     hundreds?: number;
@@ -11,12 +17,10 @@ export interface PlaceValueStepAnalysis {
     direction: 'inc' | 'dec';
     start: number;
     result: number;
-    stepSize: 10 | 100;
+    stepSize: PlaceValueOffsetStep;
     startParts: PlaceValueParts;
     resultParts: PlaceValueParts;
 }
-
-export type TenStepProblem = CountingIncDecProblem;
 
 function isValidPlaceValue(number: number, parts: PlaceValueParts): boolean {
     const usesHundreds = parts.hundreds !== undefined;
@@ -38,7 +42,11 @@ function isValidPlaceValue(number: number, parts: PlaceValueParts): boolean {
         && reconstructed === number;
 }
 
-export function analyzeTenStepProblem(data: TenStepProblem): PlaceValueStepAnalysis {
+export function analyzePlaceValueOffsetProblem(
+    data: CountingIncDecProblem,
+    expectedStepSize: PlaceValueOffsetStep,
+    viewId: PlaceValueOffsetViewId
+): PlaceValueStepAnalysis {
     const {
         numObjects: start,
         incDecAnswer: result,
@@ -49,16 +57,16 @@ export function analyzeTenStepProblem(data: TenStepProblem): PlaceValueStepAnaly
         resultPlaceValue: resultParts
     } = data;
 
-    if (simpleAnswer !== start || (stepSize !== 10 && stepSize !== 100)) {
+    if (simpleAnswer !== start || stepSize !== expectedStepSize) {
         throw new ViewValidationError(
-            'counting-ten-more-less',
-            'Expected simpleAnswer to equal the start and stepSize to equal 10 or 100.'
+            viewId,
+            `Expected simpleAnswer to equal the start and stepSize to equal ${expectedStepSize}.`
         );
     }
 
     if (!isValidPlaceValue(start, startParts) || !isValidPlaceValue(result, resultParts)) {
         throw new ViewValidationError(
-            'counting-ten-more-less',
+            viewId,
             'Expected consistent place-value decompositions for values from 0 through 1000.'
         );
     }
@@ -74,7 +82,7 @@ export function analyzeTenStepProblem(data: TenStepProblem): PlaceValueStepAnaly
 
     if (expectedResult === null || result !== expectedResult || !unchangedLowerPlaces) {
         throw new ViewValidationError(
-            'counting-ten-more-less',
+            viewId,
             `Expected a ${stepSize}-more or ${stepSize}-less transition with unchanged lower places.`
         );
     }

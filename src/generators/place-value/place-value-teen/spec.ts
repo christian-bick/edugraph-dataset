@@ -7,6 +7,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'place-value-teen',
     generalLabels: [
         Area.PlaceValue,
+        Area.Sum,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutZero,

@@ -1,25 +1,34 @@
-import {createRoot} from 'react-dom/client';
-import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {ShapeDefinition, ShapeExcludedQuadrilateralProblem} from '../../../../types/problems.ts';
-import {getTracePath, rotationDrawingPresentation} from './helpers.ts';
-import {ShapeDrawShapeViewConfig, ShapeDrawShapeViewSchema} from './spec.ts';
-import {withConfig} from '../../withConfig.tsx';
-import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
-import {shapeConstructionCountsMatch} from '../helpers.ts';
-import '../../../../tailwind.css';
+import {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import {ShapeDefinition, ShapeExcludedQuadrilateralProblem} from '../../../types/problems.ts';
+import {
+    getShapeDrawingFamily,
+    getTracePath,
+    rotationDrawingPresentation,
+    ShapeDrawingFamily,
+    ShapeDrawingViewId
+} from './shape-drawing-helpers.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
+import {shapeConstructionCountsMatch} from './helpers.ts';
 
-interface CoreProps {
-    config: ShapeDrawShapeViewConfig;
-    payload: ViewRenderPayload<'shape-draw-shape'>;
+interface ShapeDrawingViewProps {
+    expectedFamily: ShapeDrawingFamily;
+    payload: ViewRenderPayload<ShapeDrawingViewId>;
+    viewId: ShapeDrawingViewId;
 }
 
-const SUPPORTED_SHAPES = ['circle', 'triangle', 'square', 'rectangle', 'quadrilateral'] as const;
-
-const ensureSupportedShape = (shape: string) => {
-    if (!(SUPPORTED_SHAPES as readonly string[]).includes(shape)) {
-        throw new ViewValidationError('shape-draw-shape', `Unsupported shape: ${shape}`);
+function ensureSupportedShape(
+    shape: string,
+    expectedFamily: ShapeDrawingFamily,
+    viewId: ShapeDrawingViewId
+) {
+    const actualFamily = getShapeDrawingFamily(shape);
+    if (actualFamily !== expectedFamily) {
+        throw new ViewValidationError(
+            viewId,
+            `Expected a supported ${expectedFamily} shape, received: ${shape}`
+        );
     }
-};
+}
 
 function definitionLines(definition: ShapeDefinition): string[] {
     const lines = [
@@ -35,7 +44,7 @@ function definitionLines(definition: ShapeDefinition): string[] {
     return lines;
 }
 
-function validateDefinition(definition: ShapeDefinition) {
+function validateDefinition(definition: ShapeDefinition, viewId: ShapeDrawingViewId) {
     const validBoundary = definition.boundary === 'curved' || definition.boundary === 'straight';
     if (
         definition.closed !== true
@@ -43,22 +52,24 @@ function validateDefinition(definition: ShapeDefinition) {
         || !Number.isInteger(definition.sideCount)
         || !Number.isInteger(definition.vertexCount)
     ) {
-        throw new ViewValidationError('shape-draw-shape', 'The defining-attribute payload is invalid.');
+        throw new ViewValidationError(viewId, 'The defining-attribute payload is invalid.');
     }
 }
 
 function SpecificationDrawingLayout({
     shape,
     definition,
-    isSolutionView
+    isSolutionView,
+    viewId
 }: {
     shape: string;
     definition: ShapeDefinition;
     isSolutionView: boolean;
+    viewId: ShapeDrawingViewId;
 }) {
     const pathD = getTracePath(shape);
     if (pathD.length === 0) {
-        throw new ViewValidationError('shape-draw-shape', `No drawing path for shape: ${shape}`);
+        throw new ViewValidationError(viewId, `No drawing path for shape: ${shape}`);
     }
 
     return (
@@ -122,7 +133,7 @@ function LegacyDrawingLayout({
                         {showCompletedDrawing
                             ? (
                                 <svg width="150" height="150" viewBox="0 0 100 100" aria-label={`Completed ${shape} drawing`}>
-                                <path d={pathD} fill="none" stroke="forestgreen" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d={pathD} fill="none" stroke="forestgreen" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             )
                             : <div className="flex h-[150px] items-center text-lg font-bold text-slate-400">Draw here</div>}
@@ -133,7 +144,10 @@ function LegacyDrawingLayout({
     );
 }
 
-function validateExcludedQuadrilateral(data: ShapeExcludedQuadrilateralProblem) {
+function validateExcludedQuadrilateral(
+    data: ShapeExcludedQuadrilateralProblem,
+    viewId: ShapeDrawingViewId
+) {
     const definition = data.definition;
     const exclusions = ['rhombus', 'rectangle', 'square'];
     if (
@@ -149,7 +163,7 @@ function validateExcludedQuadrilateral(data: ShapeExcludedQuadrilateralProblem) 
         || !exclusions.every((category, index) => data.excludedCategories[index] === category)
     ) {
         throw new ViewValidationError(
-            'shape-draw-shape',
+            viewId,
             'The excluded-subcategory quadrilateral payload is invalid.'
         );
     }
@@ -212,59 +226,43 @@ function ExcludedQuadrilateralLayout({
     );
 }
 
-const ShapeDrawShapeCore = ({ config: _config, payload }: CoreProps) => {
-    const { problem, isSolutionView } = payload;
+export function ShapeDrawingView({
+    expectedFamily,
+    payload,
+    viewId
+}: ShapeDrawingViewProps) {
+    const {problem, isSolutionView} = payload;
     const data = problem.data;
-    validateProblemData('shape-draw-shape', data, []);
-
-    validateProblemData('shape-draw-shape', data, ['target', 'sides', 'corners']);
-    ensureSupportedShape(data.target);
+    validateProblemData(viewId, data, ['target', 'sides', 'corners']);
+    ensureSupportedShape(data.target, expectedFamily, viewId);
     if (!shapeConstructionCountsMatch(data.target, data.sides, data.corners)) {
-        throw new ViewValidationError('shape-draw-shape', 'The construction counts do not match the named shape.');
+        throw new ViewValidationError(viewId, 'The construction counts do not match the named shape.');
     }
 
     if (data.task === 'exclude-quadrilateral-subcategories') {
-        validateProblemData('shape-draw-shape', data, ['task', 'definition', 'excludedCategories']);
-        validateExcludedQuadrilateral(data);
+        validateProblemData(viewId, data, ['task', 'definition', 'excludedCategories']);
+        validateExcludedQuadrilateral(data, viewId);
         return <ExcludedQuadrilateralLayout data={data} isSolutionView={isSolutionView} />;
     }
 
     if (data.task === 'rotation-conservation') {
-        return (
-            <LegacyDrawingLayout
-                shape={data.target}
-                isSolutionView={isSolutionView}
-            />
-        );
+        return <LegacyDrawingLayout shape={data.target} isSolutionView={isSolutionView}/>;
     }
 
     if (data.task !== 'specify-attributes') {
         throw new ViewValidationError(
-            'shape-draw-shape',
+            viewId,
             'Attribute drawing requires a defining-attribute payload.'
         );
     }
-    validateProblemData('shape-draw-shape', data, ['task', 'definition']);
-    validateDefinition(data.definition);
+    validateProblemData(viewId, data, ['task', 'definition']);
+    validateDefinition(data.definition, viewId);
     return (
         <SpecificationDrawingLayout
             shape={data.target}
             definition={data.definition}
             isSolutionView={isSolutionView}
+            viewId={viewId}
         />
     );
-};
-
-export const ShapeDrawShape = withConfig(ShapeDrawShapeViewSchema, ShapeDrawShapeCore);
-
-let root: ReturnType<typeof createRoot> | null = null;
-
-window.renderView = (payload: ViewRenderPayload<'shape-draw-shape'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
-        }
-        root.render(<ShapeDrawShape payload={payload} />);
-    }
-};
+}

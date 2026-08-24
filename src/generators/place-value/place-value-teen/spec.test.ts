@@ -26,9 +26,9 @@ describe('PlaceValueTeenGenerator Spec Integration', () => {
         }
     });
 
-    it('leaves composition direction to the consuming view', () => {
+    it('owns the invariant sum while leaving collection direction to the consuming view', () => {
         expect(spec.generalLabels).toContain(Area.PlaceValue);
-        expect(spec.generalLabels).not.toContain(Area.Sum);
+        expect(spec.generalLabels).toContain(Area.Sum);
         expect(spec.generalLabels).not.toContain(Area.UnionOfCollections);
         expect(spec.generalLabels).not.toContain(Area.PartitionOfCollections);
     });

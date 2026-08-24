@@ -5,7 +5,6 @@ import { ConfigFromSchema } from '../../../../types/schema.ts';
 export const spec: ViewSpec = {
     viewId: 'place-value-compose-teen',
     generalLabels: [
-        Area.Sum,
         Area.UnionOfCollections,
         Scope.PhysicalNumbers,
         Scope.ArabicNumerals,

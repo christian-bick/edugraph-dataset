@@ -1,2 +1,2 @@
-- **Identity:** Start and result place-value panels are connected by an explicit increase or decrease of one ten; the ones place remains visibly unchanged.
+- **Identity:** Start and result place-value panels are connected by an explicit increase or decrease of one hundred; the tens and ones places remain visibly unchanged.
 - **Modes:** Question Mode withholds the changed result and its place-value model; Solution Mode reveals both while preserving the visible operation and unchanged lower places.
