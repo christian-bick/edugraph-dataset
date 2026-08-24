@@ -31,7 +31,7 @@ describe('ShapeClassifyDimGenerator Spec Integration', () => {
         expect(stub!.data.shapeType).toBe('2d');
         expect(stub!.data.shape).toBe('circle');
         expect(stub!.data.shapeType).toBe('2d');
-        expect(stub!.tags).toEqual(expect.arrayContaining([Area.Circle, Scope.TwoDimensional]));
+        expect(stub!.labels).toEqual(expect.arrayContaining([Area.Circle, Scope.TwoDimensional]));
     });
 
     it('should generate sphere problem from Area.Sphere label', () => {
@@ -44,7 +44,7 @@ describe('ShapeClassifyDimGenerator Spec Integration', () => {
         expect(stub!.data.shapeType).toBe('3d');
         expect(stub!.data.shape).toBe('sphere');
         expect(stub!.data.shapeType).toBe('3d');
-        expect(stub!.tags).toEqual(expect.arrayContaining([Area.Sphere, Scope.ThreeDimensional]));
+        expect(stub!.labels).toEqual(expect.arrayContaining([Area.Sphere, Scope.ThreeDimensional]));
     });
 
 });

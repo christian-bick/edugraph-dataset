@@ -4,7 +4,7 @@ import {readDatasetSnapshot} from './dataset-store.ts';
 
 export interface CoverageEntry {
     file_name: string;
-    tags: string[];
+    labels: string[];
     generator?: string;
     [key: string]: unknown;
 }

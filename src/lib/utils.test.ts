@@ -22,28 +22,28 @@ describe('extractConfig & generateWithLabels', () => {
 
     it('should successfully match config when matching labels are provided', () => {
         const competencyLabels = [Area.Triangle, Scope.ShapeProperties];
-        const { config, consumedLabels } = extractConfig(testSchema, competencyLabels);
+        const { config, resolvedLabels } = extractConfig(testSchema, competencyLabels);
 
         expect(config.classify).toBe(Area.Triangle);
         // Since simpleList has no matching label in competencyLabels, it falls back
         expect([Area.Circle, Area.Square]).toContain(config.simpleList);
-        expect(consumedLabels).toContain(Area.Triangle);
+        expect(resolvedLabels).toContain(Area.Triangle);
     });
 
     it('should trigger fallback when no matching labels are provided', () => {
         const competencyLabels = [Scope.ThreeDimensional];
-        const { config, consumedLabels } = extractConfig(testSchema, competencyLabels);
+        const { config, resolvedLabels } = extractConfig(testSchema, competencyLabels);
 
         // Fallback should pick a valid shape for both fields
         expect([Area.Circle, Area.Square, Area.Triangle]).toContain(config.classify);
         expect([Area.Circle, Area.Square]).toContain(config.simpleList);
 
-        // Fallback shapes should be in consumedLabels
-        expect(consumedLabels).toContain(config.classify);
-        expect(consumedLabels).toContain(config.simpleList);
+        // Fallback shapes should be in resolvedLabels
+        expect(resolvedLabels).toContain(config.classify);
+        expect(resolvedLabels).toContain(config.simpleList);
     });
 
-    it('should correctly tag the generated ProblemStub via generateWithLabels', () => {
+    it('should attach the schema-resolved labels via generateWithLabels', () => {
         const mockGenerator: ProblemGenerator = {
             type: 'shape',
             schema: testSchema,
@@ -54,7 +54,7 @@ describe('extractConfig & generateWithLabels', () => {
 
         const result = generateWithLabels(mockGenerator, [Scope.ThreeDimensional]);
         expect(result).not.toBeNull();
-        expect(result!.tags).toContain(result!.data.shape);
+        expect(result!.labels).toContain(result!.data.shape);
     });
 
     it('should strip http://edugraph.io/edu/ prefix via shortenLabel and formatLabelsKey', () => {

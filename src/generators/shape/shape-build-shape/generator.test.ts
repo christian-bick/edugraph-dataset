@@ -32,10 +32,7 @@ describe('ShapeBuildShapeGenerator', () => {
             shapeArea: Area.ShapeIdentity
         });
 
-        expect(stub).toEqual({
-            data: {target: name, sides, corners},
-            tags: []
-        });
+        expect(stub).toEqual({data: {target: name, sides, corners}});
     });
 
     it('generates a construction payload for rotation-conservation drawing', () => {
@@ -51,8 +48,7 @@ describe('ShapeBuildShapeGenerator', () => {
                 sides: 3,
                 corners: 3,
                 task: 'rotation-conservation'
-            },
-            tags: []
+            }
         });
     });
 
@@ -74,8 +70,7 @@ describe('ShapeBuildShapeGenerator', () => {
                 sides: count,
                 corners: count,
                 task: 'assemble-from-parts'
-            },
-            tags: []
+            }
         });
     });
 
@@ -109,8 +104,7 @@ describe('ShapeBuildShapeGenerator', () => {
                     rightAngleCount: 0
                 },
                 excludedCategories: ['rhombus', 'rectangle', 'square']
-            },
-            tags: []
+            }
         });
     });
 
@@ -155,8 +149,7 @@ describe('ShapeBuildShapeGenerator', () => {
                 corners: definition.vertexCount,
                 task: 'specify-attributes',
                 definition
-            },
-            tags: []
+            }
         });
     });
 
@@ -188,7 +181,6 @@ describe('ShapeBuildShapeGenerator', () => {
         if (stub.data.task !== 'specify-count') return;
         expect(stub.data.attribute).toBe('vertices');
         expect(stub.data.corners).toBe(stub.data.requiredCount);
-        expect(stub.tags).toHaveLength(1);
     });
 
     it('specifies a polygon from its required angle count', () => {
@@ -204,7 +196,6 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(stub.data.attribute).toBe('angles');
         expect(stub.data.sides).toBe(stub.data.requiredCount);
         expect(stub.data.corners).toBe(stub.data.requiredCount);
-        expect(stub.tags).toHaveLength(1);
     });
 
     it('rejects mixed angle and vertex count requirements', () => {
@@ -232,8 +223,7 @@ describe('ShapeBuildShapeGenerator', () => {
                 task: 'specify-count',
                 attribute: 'equal-faces',
                 requiredCount: 6
-            },
-            tags: [Area.Cube]
+            }
         });
     });
 

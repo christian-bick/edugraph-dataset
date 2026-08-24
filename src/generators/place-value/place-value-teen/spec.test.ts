@@ -45,7 +45,7 @@ describe('PlaceValueTeenGenerator Spec Integration', () => {
             Scope.NumbersSmaller20
         ]);
         expect(stub).not.toBeNull();
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Scope.NumbersLarger10,
             Scope.NumbersSmaller20
         ]));

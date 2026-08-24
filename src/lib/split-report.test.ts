@@ -196,25 +196,25 @@ describe('analyzeViewCoverage', () => {
 describe('analyzeLabelCoverage', () => {
     it('ranks labels with no validation mass first', () => {
         const train = [
-            row({ tags: ['Addition', 'Counting'] }),
-            row({ tags: ['Addition'] }),
+            row({ labels: ['Addition', 'Counting'] }),
+            row({ labels: ['Addition'] }),
         ];
-        const val = [row({ tags: ['Addition'] })];
+        const val = [row({ labels: ['Addition'] })];
 
         const coverage = analyzeLabelCoverage(train, val);
         expect(coverage[0]).toEqual({ label: 'Counting', trainRows: 1, valRows: 0 });
         expect(coverage[1]).toEqual({ label: 'Addition', trainRows: 2, valRows: 1 });
     });
 
-    it('tolerates rows without tags', () => {
+    it('tolerates rows without labels', () => {
         expect(analyzeLabelCoverage([row()], [])).toEqual([]);
     });
 });
 
 describe('buildSplitIntegrityReport', () => {
     it('reports a clean split without errors', () => {
-        const train = [row({ content_fingerprint: 'fp-1', tags: ['Addition'] })];
-        const val = [row({ content_fingerprint: 'fp-2', target_id: 't2', tags: ['Addition'] })];
+        const train = [row({ content_fingerprint: 'fp-1', labels: ['Addition'] })];
+        const val = [row({ content_fingerprint: 'fp-2', target_id: 't2', labels: ['Addition'] })];
 
         const report = buildSplitIntegrityReport(train, val, DEFAULT_VAL_RATIO);
         expect(report.hasErrors).toBe(false);

@@ -29,7 +29,6 @@ describe('ShapeIdentityGenerator', () => {
         const stub = generator.generate({shapes: [label]});
         expect(stub).not.toBeNull();
         expect(stub!.data.shape).toBe(shape);
-        expect(stub!.tags).toBeUndefined();
     });
 
     it('supplies generated attributes for an attributed rhombus naming task', () => {

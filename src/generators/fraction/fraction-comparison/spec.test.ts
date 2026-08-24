@@ -51,12 +51,12 @@ describe('FractionComparisonGenerator spec integration', () => {
         expect(stub!.data.task).toBe('compare-fractions');
         if (stub!.data.task !== 'compare-fractions') throw new Error('Expected common-component comparison.');
         expect(stub!.data.family).toBe(expectedFamily);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             strategy,
             comparisonFamily,
             relation
         ]));
-        expect(stub!.tags).not.toContain(Ability.LogicalInference);
+        expect(stub!.labels).not.toContain(Ability.LogicalInference);
     });
 
     it.each([
@@ -83,12 +83,12 @@ describe('FractionComparisonGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('compare-unlike-fractions');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             comparisonKind,
             relation
         ]));
-        expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
-        expect(stub!.tags).not.toContain(Scope.VisualNumbers);
-        expect(stub!.tags).not.toContain(Scope.SingleFrameOfReference);
+        expect(stub!.labels).not.toContain(Ability.ProcedureUnderstanding);
+        expect(stub!.labels).not.toContain(Scope.VisualNumbers);
+        expect(stub!.labels).not.toContain(Scope.SingleFrameOfReference);
     });
 });

@@ -16,7 +16,7 @@ const payload = (
     problemData: KnownFactDerivationProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<'operations-known-fact-derivation'> => ({
-    problem: {type: 'arithmetic', data: problemData},
+    problem: {type: 'arithmetic', data: problemData, labels: []},
     viewId: 'operations-known-fact-derivation',
     labels: [],
     isSolutionView,

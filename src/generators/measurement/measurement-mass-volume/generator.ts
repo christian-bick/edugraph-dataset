@@ -30,7 +30,7 @@ export class MeasurementMassVolumeGenerator implements ProblemGenerator<
                 {object: 'toy-car' as const, value: 320}
             ];
             const profile = profiles[Math.floor(random() * profiles.length)];
-            return {tags: [config.measurement, config.scale], data: {
+            return {data: {
                 measurementKind: 'mass',
                 ...profile,
                 unit: 'g',
@@ -47,7 +47,7 @@ export class MeasurementMassVolumeGenerator implements ProblemGenerator<
                 {object: 'suitcase' as const, value: 12}
             ];
             const profile = profiles[Math.floor(random() * profiles.length)];
-            return {tags: [config.measurement, config.scale], data: {
+            return {data: {
                 measurementKind: 'mass',
                 ...profile,
                 unit: 'kg',
@@ -63,7 +63,6 @@ export class MeasurementMassVolumeGenerator implements ProblemGenerator<
         const capacity = randomInteger(4, 7);
         const value = randomInteger(1, capacity - 1);
         return {
-            tags: [config.measurement, config.scale],
             data: {
                 measurementKind: 'liquid-volume',
                 object: 'measuring-jug',

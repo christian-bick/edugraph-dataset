@@ -29,7 +29,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
                 const values = [stub!.data.num1, stub!.data.num2, stub!.data.answer];
                 expect(values.includes(0)).toBe(false);
                 expect(values.some(value => value < 0)).toBe(false);
-                expect(stub!.tags).toEqual(expect.arrayContaining([
+                expect(stub!.labels).toEqual(expect.arrayContaining([
                     operation,
                     Scope.NumbersWithoutNegatives,
                     Scope.NumbersWithoutZero
@@ -75,7 +75,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
                 expect([stub!.data.num1, stub!.data.num2, stub!.data.answer]
                     .every(value => value % 10 === 0)).toBe(true);
             }
-            expect(stub!.tags).toContain(Scope.MultiplesOf10);
+            expect(stub!.labels).toContain(Scope.MultiplesOf10);
         }
     });
 
@@ -89,7 +89,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data).not.toHaveProperty('blankPart');
-        expect(stub!.tags).not.toContain(Ability.ProcedureInversion);
+        expect(stub!.labels).not.toContain(Ability.ProcedureInversion);
         expect(extractSchemaLabels(ArithmeticOpsPairsGeneratorSchema))
             .not.toContain(Ability.ProcedureInversion);
     });

@@ -9,8 +9,8 @@ export interface AbstractProblem<TData = any> {
     type: 'arithmetic' | 'counting' | 'measurement' | 'statistics' | 'time' | 'ordering' | 'comparison' | 'writing' | 'shape' | 'fraction';
     /** The core mathematical data. e.g. { num1: 15, num2: 7, operator: 'subtract', answer: 8 } */
     data: TData;
-    /** Pedagogical tags for dataset balancing (e.g., ['has_zero', 'requires_carry', 'negative_result']) */
-    tags?: string[];
+    /** Ontology labels resolved by orchestration, never authored by the generator implementation. */
+    labels: string[];
 }
 
 /**
@@ -62,8 +62,11 @@ declare global {
  */
 export interface ProblemStub<TData = any> {
     data: TData;
-    /** Pedagogical tags for dataset balancing (e.g., ['has_zero', 'requires_carry', 'negative_result']) */
-    tags?: string[];
+}
+
+/** A generated problem plus the generator-schema labels resolved by orchestration. */
+export interface ResolvedProblemStub<TData = any> extends ProblemStub<TData> {
+    labels: string[];
 }
 
 

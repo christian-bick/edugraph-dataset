@@ -56,7 +56,7 @@ describe('CountingBasicGenerator Spec Integration', () => {
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.parity).toBe(parity);
-            expect(stub!.tags).toEqual(expect.arrayContaining([area, scope]));
+            expect(stub!.labels).toEqual(expect.arrayContaining([area, scope]));
         }
     });
 

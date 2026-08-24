@@ -5,13 +5,13 @@ import {describe, expect, it} from 'vitest';
 import {readCoverageEntries} from './coverage-report.ts';
 import {beginDatasetStoreTransaction} from './dataset-store.ts';
 
-function row(sampleKey: string, generator: string, tag: string) {
+function row(sampleKey: string, generator: string, label: string) {
     return {
         file_name: `${generator}/${sampleKey}.png`,
         sample_key: sampleKey,
         generator,
         view: 'view',
-        tags: [tag]
+        labels: [label]
     };
 }
 
@@ -58,7 +58,7 @@ describe('readCoverageEntries', () => {
             transaction.commit({schema_version: 8});
 
             expect(readCoverageEntries(root, false)).toEqual([
-                expect.objectContaining({sample_key: 'sample', tags: ['Area.Standard']})
+                expect.objectContaining({sample_key: 'sample', labels: ['Area.Standard']})
             ]);
         } finally {
             rmSync(root, {recursive: true, force: true});

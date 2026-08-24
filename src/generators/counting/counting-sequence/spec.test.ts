@@ -28,7 +28,7 @@ describe('CountingSequenceGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.stepSize).toBe(1);
         expect(stub!.data.sequence.at(-1)).toBeLessThanOrEqual(120);
-        expect(stub!.tags).toContain(Scope.StepsOf1);
+        expect(stub!.labels).toContain(Scope.StepsOf1);
     });
 
     it('resolves steps-of-ten labels independently from direction', () => {
@@ -43,8 +43,8 @@ describe('CountingSequenceGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.stepSize).toBe(10);
         expect(stub!.data.sequence.every(value => value % 10 === 0)).toBe(true);
-        expect(stub!.tags).toContain(Scope.StepsOf10);
-        expect(stub!.tags).toContain(Scope.MultiplesOf10);
+        expect(stub!.labels).toContain(Scope.StepsOf10);
+        expect(stub!.labels).toContain(Scope.MultiplesOf10);
     });
 
     it.each([
@@ -61,6 +61,6 @@ describe('CountingSequenceGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.stepSize).toBe(expectedStep);
         expect(stub!.data.sequence.at(-1)).toBeLessThanOrEqual(1000);
-        expect(stub!.tags).toContain(stepLabel);
+        expect(stub!.labels).toContain(stepLabel);
     });
 });

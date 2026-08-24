@@ -176,7 +176,7 @@ export function analyzeLabelCoverage(train: MetadataRow[], val: MetadataRow[]): 
     const labels = new Map<string, LabelCoverage>();
     const tally = (rows: MetadataRow[], field: 'trainRows' | 'valRows') => {
         for (const row of rows) {
-            for (const label of row.tags ?? []) {
+            for (const label of row.labels ?? []) {
                 if (!labels.has(label)) labels.set(label, { label, trainRows: 0, valRows: 0 });
                 labels.get(label)![field]++;
             }

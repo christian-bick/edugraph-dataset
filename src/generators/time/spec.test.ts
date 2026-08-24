@@ -84,7 +84,7 @@ describe('TimeGenerator Spec Integration', () => {
             const components = Object.values(timeParts(stub!.data.secondsSinceMidnight));
 
             expect(stub).not.toBeNull();
-            expect(stub!.tags).toContain(Scope.NumbersWithZero);
+            expect(stub!.labels).toContain(Scope.NumbersWithZero);
             expect(components.some((component: number) => component === 0)).toBe(true);
         }
     });
@@ -104,7 +104,7 @@ describe('TimeGenerator Spec Integration', () => {
             const {hour, minute, second} = timeParts(stub!.data.secondsSinceMidnight);
 
             expect(stub).not.toBeNull();
-            expect(stub!.tags).toEqual(expect.arrayContaining([Scope.StepsOf5, periodLabel]));
+            expect(stub!.labels).toEqual(expect.arrayContaining([Scope.StepsOf5, periodLabel]));
             expect(minute % 5).toBe(0);
             expect(second).toBe(0);
             expect(hour).toBeGreaterThanOrEqual(minHour);

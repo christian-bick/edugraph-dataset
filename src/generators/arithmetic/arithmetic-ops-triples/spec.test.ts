@@ -23,7 +23,7 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.num1 + stub!.data.num2 + stub!.data.num3).toBe(stub!.data.answer);
         expect(stub!.data.answer).toBeLessThanOrEqual(20);
-        expect(stub!.tags).toContain(Area.Addition);
+        expect(stub!.labels).toContain(Area.Addition);
     });
 
     it.each([
@@ -38,7 +38,7 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.propertyLaw).toBe(propertyLaw);
-        expect(stub!.tags).toContain(law);
+        expect(stub!.labels).toContain(law);
     });
 
     it('does not expose negative or procedure-inversion configuration', () => {
@@ -60,7 +60,7 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
         expect(stub!.data.operation).toBe('multiplication');
         expect(stub!.data.propertyLaw).toBe('distributive');
         expect(stub!.data.partialProducts).toHaveLength(2);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.Addition,
             Area.Multiplication,
             Area.DistributiveLaw

@@ -162,7 +162,7 @@ function generateModuleSamples(
         const fingerprintStub = (stub: ProblemStub, seed: number) => {
             const problem = buildProblem({ stub, type: genEntry.generator.type, labels });
             const contentFingerprint = computeContentFingerprint(problem.data);
-            const viewConfig = resolveViewConfig(viewEntry.schema, problem.tags ?? [], seed);
+            const viewConfig = resolveViewConfig(viewEntry.schema, problem.labels, seed);
             return {
                 problem,
                 contentFingerprint,
@@ -441,7 +441,7 @@ async function renderSamples(
                     const payload = buildRenderPayload({
                         problem: sample.problem,
                         viewId: identity.viewId,
-                        labels: sample.problem.tags || [],
+                        labels: sample.problem.labels,
                         mode: identity.mode,
                         seed: sample.seed
                     });
@@ -479,7 +479,7 @@ async function renderSamples(
                         seed: sample.seed,
                         content_fingerprint: sample.contentFingerprint,
                         task_fingerprint: sample.taskFingerprint,
-                        tags: radixSortUtf8((sample.problem.tags || []).map(shortenLabel)),
+                        labels: radixSortUtf8(sample.problem.labels.map(shortenLabel)),
                         target_associations: radixSortUtf8([...sample.associatedTargetIds])
                             .map(targetId => ({spec: specName, target_id: targetId}))
                     });

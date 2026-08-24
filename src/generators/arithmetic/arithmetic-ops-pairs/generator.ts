@@ -166,7 +166,6 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
 
         const normalizeZero = (value: number) => value === 0 ? 0 : value;
         return {
-            tags: [operation],
             data: {
                 num1: normalizeZero(num1),
                 num2: normalizeZero(num2),

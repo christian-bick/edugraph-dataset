@@ -594,7 +594,7 @@ describe('buildDatasetManifest', () => {
             target_id: 'target',
             content_fingerprint: 'content',
             task_fingerprint: 'task',
-            tags: [
+            labels: [
                 'http://edugraph.io/edu/Addition',
                 'http://edugraph.io/edu/ProcedureExecution'
             ],

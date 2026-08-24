@@ -16,7 +16,7 @@ describe('ArithmeticEquationJudgmentGenerator spec integration', () => {
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.operation).toBe(operation === Area.Addition ? 'addition' : 'subtraction');
-            expect(stub!.tags).toEqual(expect.arrayContaining([operation, Scope.NumbersSmaller20]));
+            expect(stub!.labels).toEqual(expect.arrayContaining([operation, Scope.NumbersSmaller20]));
         }
     });
 });

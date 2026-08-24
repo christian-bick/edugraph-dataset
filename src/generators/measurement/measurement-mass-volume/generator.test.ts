@@ -34,7 +34,6 @@ describe('MeasurementMassVolumeGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generator.generate({measurement: Scope.WeightMeasurement, scale});
-            expect(stub.tags).toEqual([Scope.WeightMeasurement, scale]);
             expect(stub.data.measurementKind).toBe('mass');
             if (stub.data.measurementKind !== 'mass') throw new Error('Expected mass.');
             expect(stub.data.unit).toBe(unit);

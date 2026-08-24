@@ -253,20 +253,20 @@ describe('FractionArithmeticGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe(expectedTask);
-        const tags = stub!.tags ?? [];
-        const labelStrings: readonly string[] = labels;
-        expect(tags.includes(Scope.CommonDenominator)).toBe(
+        const resolvedLabels = stub!.labels ?? [];
+        const labelStrings: readonly string[] = resolvedLabels;
+        expect(resolvedLabels.includes(Scope.CommonDenominator)).toBe(
             labelStrings.includes(Scope.CommonDenominator)
         );
-        expect(new Set(tags)).toEqual(new Set(labelStrings.filter(label =>
+        expect(new Set(resolvedLabels)).toEqual(new Set(labelStrings.filter(label =>
             schemaLabels.includes(label)
         )));
-        expect(tags).not.toContain(Scope.VisualNumbers);
-        expect(tags).not.toContain(Ability.TextualReception);
-        expect(tags).not.toContain(Ability.Interpretation);
-        expect(tags).not.toContain(Ability.ProcedureUnderstanding);
-        expect(tags).not.toContain(Ability.Formalization);
-        expect(tags).not.toContain(Ability.ProcedureExecution);
+        expect(resolvedLabels).not.toContain(Scope.VisualNumbers);
+        expect(resolvedLabels).not.toContain(Ability.TextualReception);
+        expect(resolvedLabels).not.toContain(Ability.Interpretation);
+        expect(resolvedLabels).not.toContain(Ability.ProcedureUnderstanding);
+        expect(resolvedLabels).not.toContain(Ability.Formalization);
+        expect(resolvedLabels).not.toContain(Ability.ProcedureExecution);
     });
 
     it('keeps deterministic label extraction on the direct generator RNG path', () => {

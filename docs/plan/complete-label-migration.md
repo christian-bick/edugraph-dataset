@@ -1,6 +1,7 @@
 # Complete the label-ownership migration
 
-**Status:** Structural migration complete; the final canonical proof remains tracked in Phase 7.
+**Status:** Structural migration complete; Scope completeness is active in Phase 7 and the final
+canonical proof remains tracked in Phase 8.
 
 ## Purpose
 
@@ -228,7 +229,7 @@ Add static linting for rules that are mechanically decidable.
 
 At minimum, reject:
 
-- `payload.labels` and `problem.tags` access outside schema/orchestration infrastructure;
+- `payload.labels` and `problem.labels` access outside schema/orchestration infrastructure;
 - raw ontology IRI string matching in generator and view implementations;
 - `Ability` imports or references in `generator.ts`;
 - label resolver imports in generator and view implementation files;
@@ -283,7 +284,39 @@ and the project skills retain only workflow-specific decisions while citing thos
 deterministic architecture audit remains the common inventory for CI and agentic review; no
 separate interpretation skill was needed.
 
-### Phase 7: canonical validation and release proof
+### Phase 7: scope completeness
+
+The matched target proves that an artifact satisfies a requested competency. The released sample
+must describe the complete observable result, including capabilities that were not needed to make
+that match. Derive its labels from the resolved generator/view pair:
+
+```text
+generator generalLabels
+union resolved generator schema labels
+union view generalLabels
+union resolved view schema labels
+```
+
+`requiredLabels` and `rejectedLabels` are applicability constraints and never contribute output
+labels. A rejection is a gate, not a subtraction operation. Target labels remain provenance for
+the standard association; they are not a substitute for deriving the artifact's labels from the
+pair that produced it.
+
+1. Remove all generator-authored ontology annotations and keep `ProblemStub` data-only.
+2. Resolve both generator and view schemas into explicit capability-label sets.
+3. Persist the complete pair-derived label set on `AbstractProblem` and in dataset metadata.
+4. Audit every schema fallback and seeded parameter choice: competency-changing specializations
+   must resolve through the schema; incidental instance variation remains unlabeled.
+5. Compare pair-derived labels with every matched target and fail if a target claim is missing or
+   a rejected boundary is present.
+6. Inventory observable Scope leaves absent from the pair-derived set, prioritizing cases where a
+   broad target did not need the more-specific Scope for matching.
+7. Regenerate affected artifacts and verify matching, label churn, coverage, and VQA.
+
+**Status: in progress.** The data-only `ProblemStub` boundary and metadata terminology are the
+prerequisites. Complete view-schema resolution and the observable Scope audit remain.
+
+### Phase 8: canonical validation and release proof
 
 After all strict violations and source signals reach zero and semantic declarations are reviewed:
 
@@ -319,7 +352,7 @@ Research should distinguish:
 - a target explicitly requiring a concrete capability;
 - a broad target intentionally realized through one valid specialization;
 - a target silent about a choice that is incidental to its competency;
-- a resolved specialization that should be added to runtime tags because it materially changes
+- a specialization that must become an explicit schema capability because it materially changes
   the artifact's ontological description.
 
 Do not assume that every schema fallback is either ontology-relevant or irrelevant globally. No

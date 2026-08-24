@@ -17,7 +17,7 @@ const data: ShapeComposeShapesProblem = {
 };
 
 const payload = (isSolutionView: boolean, seed = 42): ViewRenderPayload<'shape-compose-shapes'> => ({
-    problem: {type: 'shape', data},
+    problem: {type: 'shape', data, labels: []},
     viewId: 'shape-compose-shapes',
     labels: [],
     isSolutionView,

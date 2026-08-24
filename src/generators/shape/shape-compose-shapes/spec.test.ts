@@ -30,11 +30,11 @@ describe('ShapeComposeShapesGenerator spec integration', () => {
 
         expect(stub.data.compositionTree.shape).toBe('rectangle');
         expect(stub.data.compositionDepth).toBe(1);
-        expect(stub.tags).toEqual(expect.arrayContaining([
+        expect(stub.labels).toEqual(expect.arrayContaining([
             Area.Rectangle,
-            Area.Triangle,
             Scope.SingleLevelComposition
         ]));
+        expect(stub.labels).not.toContain(Area.Triangle);
     });
 
     it('resolves multi-level labels into a depth-two tree', () => {
@@ -48,11 +48,11 @@ describe('ShapeComposeShapesGenerator spec integration', () => {
         expect(stub.data.compositionTree.inputs.map(input => input.shape))
             .toEqual(['trapezoid', 'trapezoid']);
         expect(stub.data.compositionDepth).toBe(2);
-        expect(stub.tags).toEqual(expect.arrayContaining([
+        expect(stub.labels).toEqual(expect.arrayContaining([
             Area.Hexagon,
-            Area.Trapezoid,
-            Area.Triangle,
             Scope.MultiLevelComposition
         ]));
+        expect(stub.labels).not.toContain(Area.Trapezoid);
+        expect(stub.labels).not.toContain(Area.Triangle);
     });
 });

@@ -40,7 +40,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.operandProfile).toBe('two-digit-single-digit');
         expect(stub!.data.regrouping.kind).toBe(regroupingKind);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.AdditionPlaceValuePartitioning,
             Scope.SingleDigitSmallestOperand,
             Scope.TwoDigitLargestOperand
@@ -73,7 +73,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.operandProfile).toBe('multiples-of-ten');
         expect(stub!.data.answer === 0).toBe(requireZero);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.SubtractionPlaceValuePartitioning,
             Scope.MultiplesOf10,
             zeroLabel
@@ -96,6 +96,6 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         expect(stub!.data.operation).toBe(operation);
         expect(stub!.data.operandProfile).toBe('general');
         expect(stub!.data.regrouping.kind).toBe(kind);
-        expect(stub!.tags).toEqual(expect.arrayContaining([strategy, Area.IntegerRegrouping]));
+        expect(stub!.labels).toEqual(expect.arrayContaining([strategy, Area.IntegerRegrouping]));
     });
 });

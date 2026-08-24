@@ -38,7 +38,7 @@ describe('MeasurementMassVolumeGenerator spec integration', () => {
             Ability.ProcedureExecution
         ]);
         expect(stub).not.toBeNull();
-        expect(stub!.tags).toContain(scale);
+        expect(stub!.labels).toContain(scale);
         expect(stub!.data.measurementKind).toBe('mass');
     });
 });

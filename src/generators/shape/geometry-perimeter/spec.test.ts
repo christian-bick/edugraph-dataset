@@ -42,8 +42,8 @@ describe('GeometryPerimeterGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data).toMatchObject({shape: 'quadrilateral'});
-        expect(stub!.tags).toContain(Area.Quadrilateral);
-        expect(stub!.tags).not.toContain(Ability.ProcedureExecution);
+        expect(stub!.labels).toContain(Area.Quadrilateral);
+        expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
     });
 
     it.each([Area.Triangle, Area.Quadrilateral, Area.Pentagon, Area.Hexagon])(
@@ -58,7 +58,7 @@ describe('GeometryPerimeterGenerator spec integration', () => {
 
             expect(stub).not.toBeNull();
             expect(stub!.data.perimeter).toBeGreaterThan(0);
-            expect(stub!.tags).not.toContain(Ability.ProcedureInversion);
+            expect(stub!.labels).not.toContain(Ability.ProcedureInversion);
         }
     );
 
@@ -74,7 +74,7 @@ describe('GeometryPerimeterGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data).toMatchObject({shape: 'rectangle'});
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.Equation,
             Area.Addition,
             Area.Rectangle
@@ -95,6 +95,6 @@ describe('GeometryPerimeterGenerator spec integration', () => {
         expect(stub!.data.shape).toBe('rectangle');
         if (stub!.data.shape !== 'rectangle') throw new Error('Expected rectangle data.');
         expect(stub!.data.perimeter).toBe(2 * (stub!.data.length + stub!.data.width));
-        expect(stub!.tags).not.toContain(Ability.ProcedureInversion);
+        expect(stub!.labels).not.toContain(Ability.ProcedureInversion);
     });
 });

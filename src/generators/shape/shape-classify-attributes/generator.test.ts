@@ -45,8 +45,7 @@ describe('ShapeClassifyAttributesGenerator', () => {
                     rightAngleCount: 4
                 },
                 definingAttribute: {kind: 'side-count', value: 4}
-            },
-            tags: [Area.Rectangle]
+            }
         });
     });
 
@@ -126,7 +125,6 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(stub.data.task).toBe('classify-count');
         if (stub.data.task !== 'classify-count') return;
         expect(stub.data.requiredCount).toBe(5);
-        expect(stub.tags).toEqual([Area.Pentagon]);
     });
 
     it('classifies simple polygons by a visibly countable angle total', () => {
@@ -179,7 +177,6 @@ describe('ShapeClassifyAttributesGenerator', () => {
         expect(stub.data.shape).toBe(shape);
         expect(stub.data.definition).toMatchObject({sideCount: 4, vertexCount: 4, boundary: 'straight'});
         expect(stub.data.category).toBe('quadrilateral');
-        expect(stub.tags).toEqual([label]);
     });
 
     it('rejects missing and unsupported quadrilateral subsumption subjects', () => {

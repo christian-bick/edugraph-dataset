@@ -45,8 +45,8 @@ describe('AngleMeasurementGenerator spec integration', () => {
         const stub = generateWithLabels(new AngleMeasurementGenerator(), [...labels]);
         expect(stub).not.toBeNull();
         expect(stub!.data).toEqual({angleMeasure: stub!.data.angleMeasure});
-        expect(stub!.tags).toEqual(expect.arrayContaining([...generatorLabels]));
-        expect(stub!.tags).not.toContain(Ability.ConceptSpecification);
-        expect([...new Set(stub!.tags)]).toHaveLength(stub!.tags!.length);
+        expect(stub!.labels).toEqual(expect.arrayContaining([...generatorLabels]));
+        expect(stub!.labels).not.toContain(Ability.ConceptSpecification);
+        expect([...new Set(stub!.labels)]).toHaveLength(stub!.labels!.length);
     });
 });

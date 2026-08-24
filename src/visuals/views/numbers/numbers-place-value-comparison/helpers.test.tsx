@@ -14,7 +14,7 @@ const payload = (
     data: LegacyComparisonProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<'numbers-place-value-comparison'> => ({
-    problem: {type: 'comparison', data},
+    problem: {type: 'comparison', data, labels: []},
     viewId: 'numbers-place-value-comparison',
     labels: [],
     isSolutionView,

@@ -142,26 +142,4 @@ describe('ShapeComposeShapesGenerator', () => {
         })).toBeNull();
     });
 
-    it('tags all nested ontology-backed components without duplicating the target', () => {
-        expect(generator.generate({
-            classify: Area.Rectangle,
-            compositionStructure: Scope.SingleLevelComposition
-        })!.tags).toEqual([Area.Triangle]);
-        expect(generator.generate({
-            classify: Area.Hexagon,
-            compositionStructure: Scope.MultiLevelComposition
-        })!.tags).toEqual([Area.Trapezoid, Area.Triangle]);
-        expect(generator.generate({
-            classify: Area.Cube,
-            compositionStructure: Scope.SingleLevelComposition
-        })!.tags).toEqual([Area.RectangularPrism]);
-        expect(generator.generate({
-            classify: Area.Rectangle,
-            compositionStructure: Scope.MultiLevelComposition
-        })!.tags).toEqual([Area.Square, Area.Triangle]);
-        expect(generator.generate({
-            classify: Area.Triangle,
-            compositionStructure: Scope.MultiLevelComposition
-        })!.tags).toBeUndefined();
-    });
 });

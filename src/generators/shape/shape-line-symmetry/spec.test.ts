@@ -22,8 +22,8 @@ describe('ShapeLineSymmetryGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.figures.filter(figure => figure.validAxes.length === 0)).toHaveLength(2);
-        expect(stub!.tags).not.toContain(Ability.ConceptClassification);
-        expect(stub!.tags).not.toContain(Ability.VisualRecognition);
+        expect(stub!.labels).not.toContain(Ability.ConceptClassification);
+        expect(stub!.labels).not.toContain(Ability.VisualRecognition);
     });
 
     it('resolves the corrected Grade 4 drawing target', () => {
@@ -36,6 +36,6 @@ describe('ShapeLineSymmetryGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.figures.filter(figure => figure.validAxes.length > 0)).toHaveLength(3);
-        expect(stub!.tags).not.toContain(Ability.VisualArticulation);
+        expect(stub!.labels).not.toContain(Ability.VisualArticulation);
     });
 });

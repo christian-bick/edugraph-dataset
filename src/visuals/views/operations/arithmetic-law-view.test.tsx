@@ -37,7 +37,7 @@ const associative: ArithmeticTripleProblem = {
 };
 
 const payload = (data: ArithmeticTripleProblem, isSolutionView = false) => ({
-    problem: {type: 'arithmetic', data},
+    problem: {type: 'arithmetic', data, labels: []},
     viewId: 'operations-boxes-inversion',
     labels: [],
     isSolutionView,

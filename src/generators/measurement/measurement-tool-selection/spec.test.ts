@@ -12,6 +12,6 @@ describe('measurement-tool-selection spec', () => {
             Ability.ConceptClassification
         ]);
         expect(stub?.data.correctTool).toBe('ruler');
-        expect(stub?.tags).toContain(Scope.PhysicalRuler);
+        expect(stub?.labels).toContain(Scope.PhysicalRuler);
     });
 });

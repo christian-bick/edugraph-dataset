@@ -12,7 +12,7 @@ describe('IntegerRoundingGenerator spec integration', () => {
             roundingMagnitude
         ]);
         expect(stub).not.toBeNull();
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Scope.NumbersSmaller1000,
             roundingMagnitude
         ]));
@@ -37,7 +37,7 @@ describe('IntegerRoundingGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect('task' in stub!.data && stub!.data.task).toBe('multi-digit-integer-rounding');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Scope.NumbersSmaller1000000,
             roundingMagnitude
         ]));

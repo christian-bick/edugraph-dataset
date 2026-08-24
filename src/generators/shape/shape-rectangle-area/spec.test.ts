@@ -31,7 +31,7 @@ describe('ShapeRectangleAreaGenerator spec integration', () => {
 
         expect(equation.data).toEqual(plain.data);
         expect(inverse.data).toEqual(plain.data);
-        expect(equation.tags).toContain(Area.Equation);
-        expect(inverse.tags).not.toContain(Ability.ProcedureInversion);
+        expect(equation.labels).toContain(Area.Equation);
+        expect(inverse.labels).not.toContain(Ability.ProcedureInversion);
     });
 });

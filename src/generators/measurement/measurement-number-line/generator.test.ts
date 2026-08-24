@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
@@ -139,21 +138,14 @@ describe('MeasurementNumberLineGenerator', () => {
         expect(counts).toEqual(new Set([4, 8]));
     });
 
-    it('propagates fixed physical unit scales and no redundant money tag', () => {
-        const expectedTags = {
-            length: Scope.MeterScale,
-            time: Scope.HourIntervals,
-            'liquid-volume': Scope.LiterScale,
-            weight: Scope.KilogramScale
-        } as const;
+    it('keeps ontology labels out of the generated payload', () => {
         for (const measurementKind of measurementKinds) {
             setSeed(measurementKind);
             const stub = generator.generate({
                 measurementKind,
                 numberKind: 'decimal'
             });
-            if (measurementKind === 'money') expect(stub.tags).toBeUndefined();
-            else expect(stub.tags).toEqual([expectedTags[measurementKind]]);
+            expect(Object.keys(stub)).toEqual(['data']);
         }
     });
 

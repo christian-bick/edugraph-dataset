@@ -25,7 +25,7 @@ describe('MeasurementMediatedComparisonGenerator spec integration', () => {
             const data = stub!.data as MediatedLengthComparisonProblem;
             expect(data.askedRelation).toBe(relation === Scope.Greater ? 'longer' : 'shorter');
             expect(data.answer).toBe(data.premises[0].relation === data.askedRelation ? 'A' : 'C');
-            expect(stub!.tags).toContain(relation);
+            expect(stub!.labels).toContain(relation);
         }
     });
 });

@@ -20,6 +20,6 @@ describe('EqualGroupsCollectionGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.operation).toBe(operation);
-        expect(stub!.tags).toContain(area);
+        expect(stub!.labels).toContain(area);
     });
 });

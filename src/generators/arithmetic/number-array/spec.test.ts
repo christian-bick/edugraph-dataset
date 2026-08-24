@@ -26,7 +26,7 @@ describe('NumberArrayGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.addends.length).toBeGreaterThanOrEqual(3);
         expect(new Set(stub!.data.addends).size).toBe(1);
-        expect(stub!.tags).toContain(Area.IteratedOperation);
+        expect(stub!.labels).toContain(Area.IteratedOperation);
     });
 
     it.each([
@@ -43,6 +43,6 @@ describe('NumberArrayGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.operation).toBe(operation);
-        expect(stub!.tags).toContain(area);
+        expect(stub!.labels).toContain(area);
     });
 });

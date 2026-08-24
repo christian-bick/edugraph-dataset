@@ -1,4 +1,3 @@
-import {Area} from 'edugraph-ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -29,7 +28,6 @@ export class ArithmeticOpsFourGenerator implements ProblemGenerator<ArithmeticFo
 
         const [num1, num2, num3, num4] = operands as [number, number, number, number];
         return {
-            tags: [Area.Addition],
             data: {
                 num1,
                 num2,

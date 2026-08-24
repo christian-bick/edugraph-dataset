@@ -26,7 +26,7 @@ describe('ShapePartitionEquivalenceGenerator spec integration', () => {
         ])!;
 
         expect(stub.data.shape).toBe(expectedShape);
-        expect(stub.tags).toContain(shape);
-        expect(stub.tags).not.toContain(Ability.ConceptDerivation);
+        expect(stub.labels).toContain(shape);
+        expect(stub.labels).not.toContain(Ability.ConceptDerivation);
     });
 });

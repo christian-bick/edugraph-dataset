@@ -36,8 +36,7 @@ export class ShapeSameAttributeGenerator implements ProblemGenerator<ShapeSameAt
             data: {
                 attribute: relation.attribute,
                 answer: relation.answer
-            },
-            tags: [selectedShape, relation.property]
+            }
         };
     }
 }

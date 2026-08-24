@@ -33,7 +33,7 @@ describe('FractionEquivalenceGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('relate-equivalent-fractions');
-        expect(stub!.tags).not.toEqual(expect.arrayContaining([...taskAbilities]));
+        expect(stub!.labels).not.toEqual(expect.arrayContaining([...taskAbilities]));
     });
 
     it('resolves whole-number mathematics without consuming Formalization', () => {
@@ -48,12 +48,12 @@ describe('FractionEquivalenceGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('represent-whole-as-fraction');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Scope.ImproperFractions,
             Scope.IntegerNumbers
         ]));
-        expect(stub!.tags).not.toContain(Ability.Formalization);
-        expect(stub!.tags).not.toContain(Scope.EqualShares);
+        expect(stub!.labels).not.toContain(Ability.Formalization);
+        expect(stub!.labels).not.toContain(Scope.EqualShares);
     });
 
     it.each([
@@ -83,12 +83,12 @@ describe('FractionEquivalenceGenerator spec integration', () => {
             throw new Error('Expected the exact 10-to-100 denominator relation.');
         }
         expect(stub!.data.scaleFactor).toBe(10);
-        expect(stub!.tags).toContain(Area.Multiplication);
-        expect(stub!.tags).toContain(Scope.TenthFractions);
-        expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
-        expect(stub!.tags).not.toContain(Ability.Formalization);
-        expect(stub!.tags).not.toContain(Scope.SingleFrameOfReference);
-        expect(stub!.tags).not.toContain(representation);
+        expect(stub!.labels).toContain(Area.Multiplication);
+        expect(stub!.labels).toContain(Scope.TenthFractions);
+        expect(stub!.labels).not.toContain(Ability.ProcedureUnderstanding);
+        expect(stub!.labels).not.toContain(Ability.Formalization);
+        expect(stub!.labels).not.toContain(Scope.SingleFrameOfReference);
+        expect(stub!.labels).not.toContain(representation);
     });
 
     it('keeps the seeded multiplication model independent of the requested Ability', () => {
@@ -113,6 +113,6 @@ describe('FractionEquivalenceGenerator spec integration', () => {
 
         expect(formalization).not.toBeNull();
         expect(procedure!.data).toEqual(formalization!.data);
-        expect(formalization!.tags).not.toContain(Ability.Formalization);
+        expect(formalization!.labels).not.toContain(Ability.Formalization);
     });
 });

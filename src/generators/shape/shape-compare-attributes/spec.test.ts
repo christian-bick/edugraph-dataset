@@ -29,6 +29,6 @@ describe('shape-compare-attributes generator spec', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.shapes[0].shape).toBe(shape);
         expect(stub!.data.dimension).toBe(dimension);
-        expect(stub!.tags).toContain(label);
+        expect(stub!.labels).toContain(label);
     });
 });

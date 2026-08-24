@@ -35,7 +35,7 @@ export interface MetadataRow {
     /** Additional target permutations represented by the same physical sample. */
     target_associations?: TargetAssociation[];
     /** Shortened ontology labels, as written by the pipeline. */
-    tags?: string[];
+    labels?: string[];
     [key: string]: unknown;
 }
 
@@ -73,21 +73,21 @@ export function addRowTargetAssociations(
 /** Stable, training-facing metadata written into the released union dataset. */
 export interface PublishedMetadataRow {
     file_name: string;
-    tags: string[];
+    labels: string[];
     solution: boolean;
 }
 
 /** Projects an operational standard row onto the compact public schema. */
 export function toPublishedMetadataRow(row: MetadataRow): PublishedMetadataRow {
-    if (!Array.isArray(row.tags) || !row.tags.every(tag => typeof tag === 'string')) {
-        throw new Error(`Cannot publish metadata without string tags: ${row.sample_key}.`);
+    if (!Array.isArray(row.labels) || !row.labels.every(label => typeof label === 'string')) {
+        throw new Error(`Cannot publish metadata without string labels: ${row.sample_key}.`);
     }
     if (row.mode !== 'question' && row.mode !== 'solution') {
         throw new Error(`Cannot publish metadata with unknown mode "${row.mode}": ${row.sample_key}.`);
     }
     return {
         file_name: row.file_name,
-        tags: [...row.tags],
+        labels: [...row.labels],
         solution: row.mode === 'solution',
     };
 }

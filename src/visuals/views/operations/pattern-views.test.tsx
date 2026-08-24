@@ -36,7 +36,7 @@ function recurrenceProblem(withLaw: boolean): ArithmeticRecurrencePatternProblem
 
 function payload<T>(data: T, isSolutionView: boolean): RenderPayload<AbstractProblem<T>> {
     return {
-        problem: {type: 'arithmetic', data},
+        problem: {type: 'arithmetic', data, labels: []},
         viewId: 'test-pattern-view',
         labels: [],
         isSolutionView,

@@ -457,8 +457,7 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
                     attribute: useAngleCount ? 'angles' : 'vertices',
                     requiredCount: selected.count,
                     options
-                },
-                tags: [selected.label]
+                }
             };
         }
 
@@ -469,8 +468,7 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
                     attribute: 'equal-faces',
                     requiredCount: 6,
                     options: [...FACE_SHAPES]
-                },
-                tags: [Area.Cube]
+                }
             };
         }
 
@@ -513,10 +511,7 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
             if (!subsumptionLabel) return null;
             const shape = shapeNameFromLabel(subsumptionLabel);
             if (shape !== 'rhombus' && shape !== 'rectangle' && shape !== 'square') return null;
-            return {
-                data: createQuadrilateralSubsumptionProblem(shape),
-                tags: [subsumptionLabel]
-            };
+            return {data: createQuadrilateralSubsumptionProblem(shape)};
         }
 
         const shapeLabel = pickRandom(PLANE_SHAPE_LABELS);
@@ -528,8 +523,7 @@ export class ShapeClassifyAttributesGenerator implements ProblemGenerator<
                 shape,
                 definition: getShapeDefinition(shape),
                 definingAttribute: pickRandom(getDefiningAttributes(shape))
-            },
-            tags: [shapeLabel]
+            }
         };
     }
 }

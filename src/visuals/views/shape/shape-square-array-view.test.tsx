@@ -11,7 +11,7 @@ import {RectangleAreaView} from './shape-rectangle-area-view.tsx';
 import {UnitSquareGridView} from './shape-unit-square-grid-view.tsx';
 
 const payload = <T,>(data: T, viewId: string): RenderPayload<AbstractProblem<T>> => ({
-    problem: {type: 'shape', data},
+    problem: {type: 'shape', data, labels: []},
     viewId,
     labels: [],
     isSolutionView: false,

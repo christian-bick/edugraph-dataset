@@ -51,7 +51,7 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         expect(stub!.data.leftOperand).toBeLessThan(1000);
         expect(stub!.data.rightOperand).toBeLessThan(1000);
         expect(stub!.data.answer).toBeLessThan(1000);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             strategyLabel,
             Scope.NumbersSmaller1000
         ]));
@@ -82,6 +82,6 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         expect(stub!.data.leftOperand).toBeLessThan(upperBound);
         expect(stub!.data.rightOperand).toBeLessThan(upperBound);
         expect(stub!.data.answer).toBeLessThan(upperBound);
-        expect(stub!.tags).toEqual(expect.arrayContaining([strategyLabel, rangeLabel]));
+        expect(stub!.labels).toEqual(expect.arrayContaining([strategyLabel, rangeLabel]));
     });
 });

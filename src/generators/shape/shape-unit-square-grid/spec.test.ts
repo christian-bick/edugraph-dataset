@@ -60,7 +60,7 @@ describe('ShapeUnitSquareGridGenerator spec integration', () => {
         expect(stub.data.kind).toBe('unit-square-grid');
         expect(stub.data.unitId).toBe(unitId);
         expect(stub.data.tileCount).toBe(tileCount ?? stub.data.rows * stub.data.columns);
-        expect(stub.tags).not.toContain(labels.at(-1));
+        expect(stub.labels).not.toContain(labels.at(-1));
     });
 
     it('does not vary the mathematical grid by Ability projection', () => {

@@ -15,7 +15,7 @@ const payload = (
     data: FractionLineProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<'numbers-fraction-line-explanation'> => ({
-    problem: {type: 'fraction', data},
+    problem: {type: 'fraction', data, labels: []},
     viewId: 'numbers-fraction-line-explanation',
     labels: [],
     isSolutionView,

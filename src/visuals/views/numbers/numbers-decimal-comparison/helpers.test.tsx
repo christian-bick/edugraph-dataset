@@ -51,7 +51,7 @@ const payload = (
     data: DecimalComparisonProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<'numbers-decimal-comparison'> => ({
-    problem: {type: 'comparison', data},
+    problem: {type: 'comparison', data, labels: []},
     viewId: 'numbers-decimal-comparison',
     labels: [],
     isSolutionView,

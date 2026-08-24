@@ -24,7 +24,7 @@ describe('ComparisonGenerator Spec Integration', () => {
                 ]);
                 expect(stub).not.toBeNull();
                 expect([stub!.data.num1, stub!.data.num2]).not.toContain(0);
-                expect(stub!.tags).toEqual(expect.arrayContaining([
+                expect(stub!.labels).toEqual(expect.arrayContaining([
                     comparisonKind,
                     relation,
                     Scope.NumbersWithoutNegatives,
@@ -63,7 +63,7 @@ describe('ComparisonGenerator Spec Integration', () => {
                 const values = [stub!.data.num1, stub!.data.num2];
                 expect(values).toContain(0);
                 expect(values.some(value => value < 0)).toBe(true);
-                expect(stub!.tags).toEqual(expect.arrayContaining([
+                expect(stub!.labels).toEqual(expect.arrayContaining([
                     Scope.NumbersWithZero,
                     Scope.NumbersWithNegatives
                 ]));
@@ -93,7 +93,7 @@ describe('ComparisonGenerator Spec Integration', () => {
             task: 'multi-digit-place-value-comparison',
             relation: resolved
         });
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.NumericComparison,
             relation,
             Scope.NumbersLarger1000,

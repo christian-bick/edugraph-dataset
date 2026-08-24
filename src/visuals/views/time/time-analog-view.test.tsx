@@ -14,7 +14,7 @@ const payload = (
     viewId: TimeAnalogViewId,
     isSolutionView: boolean
 ): ViewRenderPayload<TimeAnalogViewId> => ({
-    problem: {type: 'time', data},
+    problem: {type: 'time', data, labels: []},
     viewId,
     labels: [],
     isSolutionView,

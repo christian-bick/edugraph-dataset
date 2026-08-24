@@ -179,7 +179,7 @@ async function evaluateSingleSample(
         attempt: entry.attempt,
         seed: entry.seed,
         fileName: entry.file_name,
-        labels: entry.tags,
+        labels: entry.labels,
         apiKey,
         logPrompt,
         imageBuffer: sample.imageBuffer,
@@ -487,7 +487,7 @@ async function main() {
         const validationContext = validationContextResolver.resolve(
             sample.imageSha256,
             checklist.paths,
-            sample.entry.tags,
+            sample.entry.labels,
             [checklist.contents.global, checklist.contents.view]
         );
         if (validationContext.validationCacheKey !== sample.validationCacheKey) {

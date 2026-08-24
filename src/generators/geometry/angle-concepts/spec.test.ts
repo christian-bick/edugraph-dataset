@@ -55,15 +55,15 @@ describe('AngleConceptsGenerator spec integration', () => {
         const stub = generateWithLabels(new AngleConceptsGenerator(), [...labels]);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe(task);
-        expect(stub!.tags).toEqual(expect.arrayContaining(
+        expect(stub!.labels).toEqual(expect.arrayContaining(
             labels.filter(label =>
                 !spec.generalLabels.includes(label)
                 && label !== Ability.Interpretation
                 && label !== Ability.ConceptDerivation
             )
         ));
-        expect(stub!.tags).not.toContain(Ability.Interpretation);
-        expect(stub!.tags).not.toContain(Ability.ConceptDerivation);
-        expect([...new Set(stub!.tags)]).toHaveLength(stub!.tags!.length);
+        expect(stub!.labels).not.toContain(Ability.Interpretation);
+        expect(stub!.labels).not.toContain(Ability.ConceptDerivation);
+        expect([...new Set(stub!.labels)]).toHaveLength(stub!.labels!.length);
     });
 });

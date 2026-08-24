@@ -17,7 +17,7 @@ describe('measurement-data spec', () => {
 
         expect(result?.data.observations).toHaveLength(6);
         expect(result?.data.unit).toBe('cm');
-        expect(result?.tags).not.toContain(Scope.ObservedMeasurement);
+        expect(result?.labels).not.toContain(Scope.ObservedMeasurement);
     });
 
     it('resolves provided eighth-inch data without selecting a line-plot task', () => {
@@ -35,13 +35,13 @@ describe('measurement-data spec', () => {
 
         expect(result?.data).toEqual(expect.objectContaining({unit: 'in', subdivisions: 8}));
         expect(result?.data.extremaRelation).toBeUndefined();
-        expect(result?.tags).toEqual(expect.arrayContaining([
+        expect(result?.labels).toEqual(expect.arrayContaining([
             Scope.SingleFrameOfReference,
             Scope.FractionNumbers,
             Scope.InchScale
         ]));
-        expect(result?.tags).not.toContain(Ability.VisualArticulation);
-        expect(result?.tags).not.toContain(Scope.LinePlot);
+        expect(result?.labels).not.toContain(Ability.VisualArticulation);
+        expect(result?.labels).not.toContain(Scope.LinePlot);
     });
 
     it.each([
@@ -62,7 +62,7 @@ describe('measurement-data spec', () => {
         ]);
 
         expect(result?.data.extremaRelation).toEqual(expect.objectContaining({operation: taskOperation}));
-        expect(result?.tags).toEqual(expect.arrayContaining([
+        expect(result?.labels).toEqual(expect.arrayContaining([
             Area.FractionArithmetic,
             operation,
             Scope.SingleFrameOfReference

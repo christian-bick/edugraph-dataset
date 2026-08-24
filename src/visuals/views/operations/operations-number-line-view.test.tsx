@@ -13,7 +13,7 @@ const payload = (
     data: WritingProblem | ArithmeticPairProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<OperationsNumberLineViewId> => ({
-    problem: {type: 'arithmetic', data},
+    problem: {type: 'arithmetic', data, labels: []},
     viewId,
     labels: [],
     isSolutionView,

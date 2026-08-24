@@ -2,7 +2,6 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
-import {PLANE_SHAPE_LABELS, shapeNameFromLabel} from '../helpers.ts';
 import {ShapeClassifyAttributesGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
@@ -39,7 +38,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         expect(stub?.data.task).toBe('classify-quadrilateral-subcategory');
     });
 
-    it('tags each problem with exactly its runtime-selected shape', () => {
+    it('does not turn incidental runtime shape selection into a schema capability', () => {
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
             const stub = generateWithLabels(generator, [
@@ -47,12 +46,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
                 Scope.ShapeAttributes
             ])!;
             if (!('shape' in stub.data)) throw new Error('Expected a legacy classification problem.');
-            const shape = stub.data.shape;
-            const expectedLabel = PLANE_SHAPE_LABELS.find(
-                label => shapeNameFromLabel(label) === shape
-            );
-
-            expect(stub.tags).toEqual([expectedLabel, Scope.ShapeAttributes]);
+            expect(stub.labels).toEqual([Scope.ShapeAttributes]);
         }
     });
 
@@ -66,7 +60,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         expect(stub.data.task).toBe('classify-count');
         if (stub.data.task !== 'classify-count') return;
         expect(stub.data.attribute).toBe('vertices');
-        expect(stub.tags).toContain(Scope.VertexCount);
+        expect(stub.labels).toContain(Scope.VertexCount);
     });
 
     it('resolves the angle-count classification path', () => {
@@ -80,7 +74,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         expect(stub.data.task).toBe('classify-count');
         if (stub.data.task !== 'classify-count') return;
         expect(stub.data.attribute).toBe('angles');
-        expect(stub.tags).toContain(Scope.AngleCount);
+        expect(stub.labels).toContain(Scope.AngleCount);
         expect(stub.data.options.filter(option => option.satisfies)).toHaveLength(1);
     });
 
@@ -95,7 +89,8 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         expect(stub.data.task).toBe('classify-count');
         if (stub.data.task !== 'classify-count') return;
         expect(stub.data).toMatchObject({attribute: 'equal-faces', requiredCount: 6});
-        expect(stub.tags).toEqual(expect.arrayContaining([Scope.FaceCount, Scope.Equal, Area.Cube]));
+        expect(stub.labels).toEqual(expect.arrayContaining([Scope.FaceCount, Scope.Equal]));
+        expect(stub.labels).not.toContain(Area.Cube);
     });
 
     it.each([
@@ -119,7 +114,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe(task);
-        expect(stub!.tags).toContain(criterion);
+        expect(stub!.labels).toContain(criterion);
     });
 
     it('resolves the corrected Grade 4 right-triangle category target', () => {
@@ -135,7 +130,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('classify-right-triangle-category');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.ShapeSubsumption,
             Area.RightTriangle,
             Area.RightAngle

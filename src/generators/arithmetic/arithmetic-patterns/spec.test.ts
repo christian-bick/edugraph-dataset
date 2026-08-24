@@ -33,9 +33,9 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         ])!;
 
         expect(stub.data.kind).toBe(model);
-        expect(stub.tags).toEqual(expect.arrayContaining([Area.Addition, ...patternAreas]));
-        expect(stub.tags).not.toContain(Ability.ProcedureExecution);
-        expect(stub.tags).not.toContain(Ability.ConceptClassification);
+        expect(stub.labels).toEqual(expect.arrayContaining([Area.Addition, ...patternAreas]));
+        expect(stub.labels).not.toContain(Ability.ProcedureExecution);
+        expect(stub.labels).not.toContain(Ability.ConceptClassification);
     });
 
     it.each([
@@ -58,12 +58,12 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         if (stub.data.kind !== 'recurrence') throw new Error('Expected a recurrence.');
         expect(stub.data.lawWitness?.law).toBe(propertyLaw);
         expect(stub.data.lawWitness?.result).toBeTypeOf('number');
-        expect(stub.tags).toEqual(expect.arrayContaining([
+        expect(stub.labels).toEqual(expect.arrayContaining([
             operation,
             law,
             Area.EmergentFeatureRecognition
         ]));
-        expect(stub.tags).not.toContain(Ability.ProcedureUnderstanding);
-        expect(stub.tags).not.toContain(Ability.TextualArticulation);
+        expect(stub.labels).not.toContain(Ability.ProcedureUnderstanding);
+        expect(stub.labels).not.toContain(Ability.TextualArticulation);
     });
 });

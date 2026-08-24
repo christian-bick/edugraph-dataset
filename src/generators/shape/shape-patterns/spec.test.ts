@@ -31,14 +31,14 @@ describe('ShapePatternsGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub.data.sequence).toHaveLength(6);
         expect(['growth-parity', 'rotation-axis']).toContain(stub.data.patternKind);
-        expect(stub.tags).toEqual(expect.arrayContaining(
+        expect(stub.labels).toEqual(expect.arrayContaining(
             labels.filter(label => label === Area.PatternGeneration
                 || label === Area.EmergentFeatureRecognition)
         ));
-        expect(stub.tags).not.toContain(Ability.VisualArticulation);
-        expect(stub.tags).not.toContain(Ability.ConceptClassification);
-        expect(stub.tags).not.toContain(Ability.ProcedureUnderstanding);
-        expect(stub.tags).not.toContain(Ability.TextualArticulation);
+        expect(stub.labels).not.toContain(Ability.VisualArticulation);
+        expect(stub.labels).not.toContain(Ability.ConceptClassification);
+        expect(stub.labels).not.toContain(Ability.ProcedureUnderstanding);
+        expect(stub.labels).not.toContain(Ability.TextualArticulation);
     });
 
     it('requires an Area-defined task even when an ability is supplied', () => {

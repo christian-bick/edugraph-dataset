@@ -13,7 +13,7 @@ describe('PlaceValueMakeTenGenerator Spec Integration', () => {
             const stub = generateWithLabels(generator, [Area.Difference, Scope.NumbersWithZero]);
             expect(stub).not.toBeNull();
             expect([stub!.data.givenNumber, stub!.data.missingNumber]).toContain(0);
-            expect(stub!.tags).toContain(Scope.NumbersWithZero);
+            expect(stub!.labels).toContain(Scope.NumbersWithZero);
         }
     });
 
@@ -24,7 +24,7 @@ describe('PlaceValueMakeTenGenerator Spec Integration', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.givenNumber).toBeGreaterThanOrEqual(1);
             expect(stub!.data.missingNumber).toBeGreaterThanOrEqual(1);
-            expect(stub!.tags).toContain(Scope.NumbersWithoutZero);
+            expect(stub!.labels).toContain(Scope.NumbersWithoutZero);
         }
     });
 });

@@ -170,7 +170,6 @@ export class ArithmeticOpsTriplesGenerator implements ProblemGenerator<Arithmeti
             : {};
 
         return {
-            tags: [operation],
             data: {
                 num1,
                 num2,

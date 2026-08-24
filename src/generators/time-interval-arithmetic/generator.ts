@@ -39,7 +39,6 @@ export class TimeIntervalArithmeticGenerator implements ProblemGenerator<
         const operation = config.operation === Area.Addition ? 'addition' : 'subtraction';
 
         return {
-            tags: [config.operation],
             data: {
                 operation,
                 startTime,

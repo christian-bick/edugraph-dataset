@@ -38,14 +38,14 @@ describe('MeasurementConversionGenerator spec integration', () => {
             expect(stub!.data.task).not.toBe('generic-unit-scale');
             if (stub!.data.task === 'generic-unit-scale') throw new Error('Unexpected generic task.');
             expect(stub!.data.pair.id).toBe(pairId);
-            expect(stub!.tags).toEqual(expect.arrayContaining([...pairLabels]));
+            expect(stub!.labels).toEqual(expect.arrayContaining([...pairLabels]));
             if (task === 'relative-unit-size') {
-                expect(stub!.tags).toContain(Area.UnitScaleRelation);
+                expect(stub!.labels).toContain(Area.UnitScaleRelation);
             } else if (task === 'conversion-table') {
-                expect(stub!.tags).toContain(Scope.ConversionTable);
+                expect(stub!.labels).toContain(Scope.ConversionTable);
             }
             for (const ability of [Ability.ConceptDerivation, Ability.ProcedureExecution]) {
-                expect(stub!.tags).not.toContain(ability);
+                expect(stub!.labels).not.toContain(ability);
             }
         }
     });
@@ -59,7 +59,7 @@ describe('MeasurementConversionGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('generic-unit-scale');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.UnitScaleRelation,
             Scope.LengthMeasurement
         ]));

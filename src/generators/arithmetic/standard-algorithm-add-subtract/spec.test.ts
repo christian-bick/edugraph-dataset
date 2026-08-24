@@ -39,7 +39,7 @@ describe('StandardAlgorithmAddSubtractGenerator spec integration', () => {
         expect(stub!.data.operation).toBe(operation);
         expect(stub!.data.topValue).toBeGreaterThanOrEqual(1000);
         expect(stub!.data.topValue).toBeLessThanOrEqual(999999);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             operationLabel,
             Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000

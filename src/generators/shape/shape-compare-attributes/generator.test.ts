@@ -29,18 +29,6 @@ const COUNTS: Readonly<Record<ShapeComparisonName, Partial<Record<ShapeCompariso
     sphere: {faces: 0, vertices: 0, edges: 0}
 };
 
-const SHAPE_LABELS: Readonly<Record<ShapeComparisonName, string>> = {
-    triangle: Area.Triangle,
-    square: Area.Square,
-    rectangle: Area.Rectangle,
-    hexagon: Area.Hexagon,
-    circle: Area.Circle,
-    cube: Area.Cube,
-    cone: Area.Cone,
-    cylinder: Area.Cylinder,
-    sphere: Area.Sphere
-};
-
 describe('ShapeCompareAttributesGenerator', () => {
     const generator = new ShapeCompareAttributesGenerator();
 
@@ -71,7 +59,6 @@ describe('ShapeCompareAttributesGenerator', () => {
             expect(first.count).not.toBe(second.count);
             expect(data.answer).toBe(first.count > second.count ? first.shape : second.shape);
             expect(data.relation).toBe('more');
-            expect(stub.tags).toEqual([SHAPE_LABELS[second.shape]]);
         }
 
         expect(seenAttributes).toEqual(new Set(

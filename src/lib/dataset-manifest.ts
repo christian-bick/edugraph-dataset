@@ -146,7 +146,7 @@ interface DatasetManifestRow {
     target_id?: string;
     content_fingerprint: string;
     task_fingerprint: string;
-    tags?: string[];
+    labels?: string[];
     target_associations?: Array<{spec: string; target_id: string}>;
     _split: SampleSplit;
 }
@@ -814,7 +814,7 @@ export function buildDatasetManifest(options: {
             dependencies: [pairNodeId, ...rowMatchNodes],
             output: {content_hash: imageDigest.sha256, bytes: imageDigest.bytes}
         });
-        const labelDependencies = ontologyDependencies(row.tags ?? [], true);
+        const labelDependencies = ontologyDependencies(row.labels ?? [], true);
         const checklist = checklistDependencies.get(row.view);
         if (!checklist) throw new Error(`VQA checklist dependencies are missing for view ${row.view}.`);
         const vqaId = nodeId('vqa', row.sample_key);
@@ -827,7 +827,7 @@ export function buildDatasetManifest(options: {
         const validationCacheKey = vqaContextResolver.resolve(
             imageDigest.sha256,
             checklist.paths,
-            row.tags ?? []
+            row.labels ?? []
         ).validationCacheKey;
         counters?.add('vqa.graph_key_recomputes');
         addNode(nodes, {

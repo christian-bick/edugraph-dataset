@@ -22,7 +22,7 @@ const row = (overrides: Partial<MetadataRow> = {}): MetadataRow => ({
     instance: 0,
     content_fingerprint: 'fp',
     task_fingerprint: 'task',
-    tags: ['Addition', 'Counting'],
+    labels: ['Addition', 'Counting'],
     ...overrides,
 });
 

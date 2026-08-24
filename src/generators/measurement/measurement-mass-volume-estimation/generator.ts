@@ -32,7 +32,7 @@ export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerato
                 {object: 'book' as const, estimate: 500}
             ];
             const profile = profiles[Math.floor(random() * profiles.length)];
-            return {tags: [config.measurement, config.scale], data: {
+            return {data: {
                 measurementKind: 'mass', ...profile, referenceCount: profile.estimate, unit: 'g',
                 referenceObject: 'paperclip', referenceValue: 1
             }};
@@ -45,7 +45,7 @@ export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerato
                 {object: 'bicycle' as const, estimate: 12}
             ];
             const profile = profiles[Math.floor(random() * profiles.length)];
-            return {tags: [config.measurement, config.scale], data: {
+            return {data: {
                 measurementKind: 'mass', ...profile, referenceCount: profile.estimate, unit: 'kg',
                 referenceObject: 'one-kilogram-bag', referenceValue: 1
             }};
@@ -53,7 +53,7 @@ export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerato
         if (config.scale !== Scope.LiterScale) throw new Error('Unsupported scale.');
         if (config.measurement !== Scope.LiquidVolumes) throw new Error('Liter scale requires liquid volume.');
         const estimate = liquidEstimates[Math.floor(random() * liquidEstimates.length)];
-        return {tags: [config.measurement, config.scale], data: {
+        return {data: {
             measurementKind: 'liquid-volume',
             ...estimate,
             unit: 'L',

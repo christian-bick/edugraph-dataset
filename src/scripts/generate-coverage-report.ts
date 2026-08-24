@@ -57,12 +57,12 @@ function generateReport() {
         totalEntries++;
 
         // Independent Label Counts
-        for (const label of entry.tags) {
+        for (const label of entry.labels) {
             labelCounts[label] = (labelCounts[label] || 0) + 1;
         }
 
         // Combination Counts (sorted to ensure uniqueness)
-        const combo = radixSortUtf8(entry.tags).join(' | ');
+        const combo = radixSortUtf8(entry.labels).join(' | ');
         combinationCounts[combo] = (combinationCounts[combo] || 0) + 1;
     }
 

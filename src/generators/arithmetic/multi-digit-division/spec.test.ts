@@ -50,7 +50,7 @@ describe('MultiDigitDivisionGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.dividendDigits).toBe(dividendDigits);
         expect(stub!.data.divisorDigits).toBe(1);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Scope.SingleDigitDivisor,
             dividendLabel
         ]));

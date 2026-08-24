@@ -29,7 +29,7 @@ describe('FractionNumberLineGenerator spec integration', () => {
         ]);
 
         expect(stub).not.toBeNull();
-        expect(stub!.tags).toContain(fractionType);
+        expect(stub!.labels).toContain(fractionType);
         if (fractionType === Scope.UnitFractions) {
             expect(stub!.data.numerator).toBe(1);
         } else if (fractionType === Scope.NonUnitFractions) {

@@ -53,13 +53,13 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
                     const stub = generateWithLabels(generator, labels);
                     expect(stub).not.toBeNull();
                     expect(stub!.data).toMatchObject({measurementKind, numberKind, operation});
-                    expect(stub!.tags).toEqual(expect.arrayContaining([
+                    expect(stub!.labels).toEqual(expect.arrayContaining([
                         ...measurementLabels.filter(label => label !== Area.MeasuringWithUnits),
                         numberLabel,
                         operationLabel
                     ]));
-                    expect(stub!.tags).not.toContain(Area.MeasuringWithUnits);
-                    expect(stub!.tags).not.toContain(Ability.TextualReception);
+                    expect(stub!.labels).not.toContain(Area.MeasuringWithUnits);
+                    expect(stub!.labels).not.toContain(Ability.TextualReception);
                 }
             }
         }
@@ -78,7 +78,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.measurementKind).toBe('money');
-        expect(stub!.tags).toContain(Scope.Dollar);
-        expect(stub!.tags).not.toContain(Area.MeasuringWithUnits);
+        expect(stub!.labels).toContain(Scope.Dollar);
+        expect(stub!.labels).not.toContain(Area.MeasuringWithUnits);
     });
 });

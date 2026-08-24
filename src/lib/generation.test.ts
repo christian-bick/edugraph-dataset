@@ -238,7 +238,7 @@ describe('matchesTarget', () => {
     });
 
     it('ignores non-ontology labels', () => {
-        const verdict = matchesTarget(['some-plain-tag'], gen([]), view([]));
+        const verdict = matchesTarget(['some-plain-label'], gen([]), view([]));
         expect(verdict).toEqual({ matched: true });
     });
 
@@ -673,7 +673,7 @@ describe('isValTuple', () => {
 
 describe('buildRenderPayload', () => {
     it('maps mode to isSolutionView and carries the seed', () => {
-        const problem = { type: 'writing' as const, data: {} };
+        const problem = { type: 'writing' as const, data: {}, labels: [] };
         const q = buildRenderPayload({ problem, viewId: 'v', labels: ['l'], mode: 'question', seed: 7 });
         expect(q.isSolutionView).toBe(false);
         expect(q.seed).toBe(7);

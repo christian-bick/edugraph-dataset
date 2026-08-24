@@ -8,7 +8,7 @@ const payload = (
     data: MeasurementToolSelectionProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<'measure-select-tool'> => ({
-    problem: {type: 'measurement', data},
+    problem: {type: 'measurement', data, labels: []},
     viewId: 'measure-select-tool',
     labels: [],
     isSolutionView,

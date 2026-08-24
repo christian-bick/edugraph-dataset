@@ -47,7 +47,7 @@ describe('statistical-graphs spec', () => {
             operationLabel
         ])!;
         expect(result.data.operation).toBe(operation);
-        expect(result.tags).toEqual(expect.arrayContaining([Scope.SingleStep, operationLabel]));
+        expect(result.labels).toEqual(expect.arrayContaining([Scope.SingleStep, operationLabel]));
     });
 
     it.each([
@@ -91,7 +91,7 @@ describe('statistical-graphs spec', () => {
 
         expect(result.data.intermediate).toBe(first - second);
         expect(result.data.answer).toBe(result.data.intermediate! - third);
-        expect(result.tags).toEqual(expect.arrayContaining([Area.Subtraction, Scope.MultiStep]));
+        expect(result.labels).toEqual(expect.arrayContaining([Area.Subtraction, Scope.MultiStep]));
     });
 
     it('resolves object sorting as canonical observation evidence without consuming Ability', () => {
@@ -106,10 +106,10 @@ describe('statistical-graphs spec', () => {
         ])!;
         expect(result.data.categories.map(({id}) => id)).toEqual(['apple', 'book', 'kite']);
         expect(Object.keys(result.data).sort()).toEqual(['categories', 'scale']);
-        expect(result.tags).toEqual(expect.arrayContaining([
+        expect(result.labels).toEqual(expect.arrayContaining([
             Area.ObjectSorting
         ]));
-        expect(result.tags).not.toContain(Ability.ConceptClassification);
+        expect(result.labels).not.toContain(Ability.ConceptClassification);
     });
 
     it('leaves interpretation and category selection to the view', () => {
@@ -122,7 +122,7 @@ describe('statistical-graphs spec', () => {
         ])!;
         expect(result.data.operation).toBeUndefined();
         expect(result.data.answer).toBeUndefined();
-        expect(result.tags).not.toContain(Ability.Interpretation);
+        expect(result.labels).not.toContain(Ability.Interpretation);
     });
 
     it('resolves three-operand addition as find-total', () => {
@@ -136,6 +136,6 @@ describe('statistical-graphs spec', () => {
             Ability.ProcedureExecution
         ])!;
         expect(result.data.operandCategoryIds).toEqual(['apple', 'book', 'kite']);
-        expect(result.tags).toEqual(expect.arrayContaining([Area.Addition, Scope.ThreeOperands]));
+        expect(result.labels).toEqual(expect.arrayContaining([Area.Addition, Scope.ThreeOperands]));
     });
 });

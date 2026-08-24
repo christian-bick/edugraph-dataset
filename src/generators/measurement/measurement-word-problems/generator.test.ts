@@ -1,4 +1,4 @@
-import {Area, Scope} from 'edugraph-ts';
+import {Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
@@ -154,13 +154,7 @@ describe('MeasurementWordProblemsGenerator', () => {
         }
     });
 
-    it('propagates the fixed physical unit scale without adding a redundant money tag', () => {
-        const expectedTags = {
-            length: Scope.MeterScale,
-            time: Scope.HourIntervals,
-            'liquid-volume': Scope.LiterScale,
-            weight: Scope.KilogramScale
-        } as const;
+    it('keeps ontology labels out of the generated payload', () => {
         for (const measurementKind of measurementKinds) {
             setSeed(measurementKind);
             const stub = generator.generate({
@@ -168,8 +162,7 @@ describe('MeasurementWordProblemsGenerator', () => {
                 numberKind: 'integer',
                 operation: Area.Addition
             });
-            if (measurementKind === 'money') expect(stub.tags).toBeUndefined();
-            else expect(stub.tags).toEqual([expectedTags[measurementKind]]);
+            expect(Object.keys(stub)).toEqual(['data']);
         }
     });
 });

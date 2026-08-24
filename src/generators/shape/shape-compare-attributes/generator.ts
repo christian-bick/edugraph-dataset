@@ -26,10 +26,6 @@ const SHAPES_BY_LABEL: Readonly<Record<string, ShapeComparisonName>> = {
     [Area.Sphere]: 'sphere'
 };
 
-const LABELS_BY_SHAPE = Object.fromEntries(
-    Object.entries(SHAPES_BY_LABEL).map(([label, shape]) => [shape, label])
-) as Readonly<Record<ShapeComparisonName, string>>;
-
 const DEFINITIONS: Readonly<Record<ShapeComparisonName, ShapeDefinition>> = {
     triangle: {dimension: '2d', counts: {sides: 3, vertices: 3}},
     square: {dimension: '2d', counts: {sides: 4, vertices: 4}},
@@ -88,8 +84,7 @@ export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCo
                 ],
                 relation: 'more',
                 answer
-            },
-            tags: [LABELS_BY_SHAPE[shape2]]
+            }
         };
     }
 }

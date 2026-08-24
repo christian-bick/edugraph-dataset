@@ -17,7 +17,7 @@ describe('WritingGenerator Spec Integration', () => {
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBe(0);
-            expect(stub!.tags).toContain(Scope.NumbersWithZero);
+            expect(stub!.labels).toContain(Scope.NumbersWithZero);
         }
     });
 
@@ -32,7 +32,7 @@ describe('WritingGenerator Spec Integration', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBeGreaterThanOrEqual(1);
             expect(stub!.data.number).toBeLessThanOrEqual(20);
-            expect(stub!.tags).toContain(Scope.NumbersWithoutZero);
+            expect(stub!.labels).toContain(Scope.NumbersWithoutZero);
         }
     });
 
@@ -47,7 +47,7 @@ describe('WritingGenerator Spec Integration', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBeGreaterThanOrEqual(1);
             expect(stub!.data.number).toBeLessThanOrEqual(120);
-            expect(stub!.tags).toContain(Scope.NumbersSmaller120);
+            expect(stub!.labels).toContain(Scope.NumbersSmaller120);
         }
     });
 
@@ -62,7 +62,7 @@ describe('WritingGenerator Spec Integration', () => {
             expect(stub).not.toBeNull();
             expect(stub!.data.number).toBeGreaterThanOrEqual(1);
             expect(stub!.data.number).toBeLessThanOrEqual(1000);
-            expect(stub!.tags).toContain(Scope.NumbersSmaller1000);
+            expect(stub!.labels).toContain(Scope.NumbersSmaller1000);
         }
     });
 
@@ -82,7 +82,7 @@ describe('WritingGenerator Spec Integration', () => {
         expect('placeValues' in stub!.data && stub!.data.placeValues.length).toBeGreaterThanOrEqual(4);
         expect(stub!.data.number).toBeGreaterThanOrEqual(1000);
         expect(stub!.data.number).toBeLessThanOrEqual(1_000_000);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             notationFamily,
             Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000

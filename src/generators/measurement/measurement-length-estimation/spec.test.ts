@@ -30,6 +30,6 @@ describe('measurement-length-estimation spec', () => {
             estimateVariant: 0,
             referenceVariant: 2
         });
-        expect(result?.tags).toEqual([]);
+        expect(result?.labels).toEqual([]);
     });
 });

@@ -42,7 +42,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             expect(stub!.data.kind).toBe('two-step');
             if (stub!.data.kind !== 'two-step') throw new Error('Expected legacy payload.');
             expect(stub!.data.operations).toEqual(entry.operations);
-            expect(stub!.tags).toEqual(expect.arrayContaining([...entry.labels]));
+            expect(stub!.labels).toEqual(expect.arrayContaining([...entry.labels]));
         }
     });
 
@@ -56,12 +56,12 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.kind).toBe('interpreted-remainder');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Area.Division,
             Area.ImperfectDivisibility,
             Area.Modulo
         ]));
-        expect(stub!.tags).not.toContain(Ability.ResultInterpretation);
+        expect(stub!.labels).not.toContain(Ability.ResultInterpretation);
     });
 
     it('resolves equation-labelled targets across all ten operation groups', () => {
@@ -76,8 +76,8 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             expect(stub!.data.kind).toBe('letter-equation');
             if (stub!.data.kind !== 'letter-equation') throw new Error('Expected equation payload.');
             expect(stub!.data.operations).toEqual(entry.operations);
-            expect(stub!.tags).toEqual(expect.arrayContaining([...entry.labels, Area.Equation]));
-            expect(stub!.tags).not.toContain(Ability.Formalization);
+            expect(stub!.labels).toEqual(expect.arrayContaining([...entry.labels, Area.Equation]));
+            expect(stub!.labels).not.toContain(Ability.Formalization);
         }
     });
 
@@ -92,12 +92,12 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.kind).toBe('rounding');
-            expect(stub!.tags).toEqual(expect.arrayContaining([
+            expect(stub!.labels).toEqual(expect.arrayContaining([
                 operation,
                 Area.IntegerRounding
             ]));
-            expect(stub!.tags).not.toContain(Ability.PlausibilityEvaluation);
-            expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
+            expect(stub!.labels).not.toContain(Ability.PlausibilityEvaluation);
+            expect(stub!.labels).not.toContain(Ability.ProcedureUnderstanding);
         }
     });
 });

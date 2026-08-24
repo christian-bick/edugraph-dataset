@@ -37,7 +37,7 @@ describe('GeometryPrimitivesGenerator spec integration', () => {
         const stub = generateWithLabels(new GeometryPrimitivesGenerator(), labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.primitiveKind).toBe(kind);
-        expect(stub!.tags).toEqual([subject]);
+        expect(stub!.labels).toEqual([subject]);
     });
 
     it.each(CASES)('resolves corrected identification target for %s', (
@@ -51,6 +51,6 @@ describe('GeometryPrimitivesGenerator spec integration', () => {
         const stub = generateWithLabels(new GeometryPrimitivesGenerator(), labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.primitiveKind).toBe(kind);
-        expect(stub!.tags).toEqual([subject]);
+        expect(stub!.labels).toEqual([subject]);
     });
 });

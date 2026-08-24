@@ -74,7 +74,7 @@ describe('DecimalNotationGenerator spec integration', () => {
         const stub = generateWithLabels(generator, [...labels]);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('decimal-notation');
-        expect(stub!.tags).toEqual([]);
+        expect(stub!.labels).toEqual([]);
     });
 
     it('keeps label-driven and direct generation on the identical RNG path', () => {

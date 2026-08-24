@@ -29,13 +29,17 @@ depth matching the sub-directory structure — and call it at the **beginning** 
 It must throw a `GeneratorValidationError` when executed with missing or empty
 configuration. **Do not use silent internal fallbacks.**
 
-### IMPL-G3 — Propagate runtime ontology choices as tags
+### IMPL-G3 — Ontology labels are resolved outside the generator
 
-Any runtime choices representing competencies (e.g. the specific shape chosen, the relation
-chosen) must be returned in the `tags` array of `ProblemStub`, so they are not lost.
+`generator.ts` returns only canonical mathematical `data`. It never annotates a `ProblemStub`
+with ontology labels. The schema resolver records the labels that selected the typed config, and
+orchestration combines those resolved capabilities with the matched module capabilities.
 
-Do **not** duplicate any tags or parameters already provided as configuration parameters —
-those are automatically captured in `consumedLabels` by the ontology mapping layer.
+If a runtime choice materially changes the competency expressed by the artifact, make that choice
+an explicit schema capability so it is resolved before `generate(config)` runs. If the choice only
+changes the concrete instance without changing its competency — for example, choosing `23 + 18`
+instead of `31 + 7` for the same configured addition range — it remains ordinary generator
+variation and does not need an ontology label.
 
 ### IMPL-G4 — The math must prove the labels
 
@@ -50,7 +54,7 @@ satisfier, not a labeller of arbitrary output.
 - **`generator.test.ts`** — deeply tests edge cases by passing explicit `config` mocks. It
   must cover mathematical boundaries and edge cases: division by zero, invalid target
   ranges, subtraction yielding negative/zero values under non-negative constraints.
-- **`spec.test.ts`** — verifies tag resolution using `generateWithLabels` from
+- **`spec.test.ts`** — verifies schema-label resolution using `generateWithLabels` from
   `../../../lib/utils.ts`.
 - **Both or either** must include a test asserting that calling `generate` with an empty
   config throws — e.g. `expect(() => generator.generate({})).toThrow()`
@@ -123,9 +127,9 @@ view may seed presentation choices through `payload.seed`.
 
 - [ ] **IMPL-G1** — `generate` is a pure function of `config`; no ontology label is read, parsed, or string-matched inside it.
 - [ ] **IMPL-G2** — `validateConfigFields` is imported at the correct relative depth and called first in `generate`; no silent fallback substitutes for a missing config value.
-- [ ] **IMPL-G3** — every runtime competency choice appears in `ProblemStub.tags`, and no configured label is duplicated there.
+- [ ] **IMPL-G3** — `ProblemStub` contains only `data`; every competency-changing choice is resolved through the schema before generation.
 - [ ] **IMPL-G4** — the generated math provably satisfies every label the config encodes.
-- [ ] **IMPL-G5** — `generator.test.ts` covers the mathematical boundaries; `spec.test.ts` covers tag resolution; an empty-config throw is asserted.
+- [ ] **IMPL-G5** — `generator.test.ts` covers the mathematical boundaries; `spec.test.ts` covers schema-label resolution; an empty-config throw is asserted.
 - [ ] **IMPL-G6** — if the payload contract changed, every consuming view found against the real standard via `npm run show:matching` renders the new fields; the test spec also retains a smoke path.
 - [ ] **IMPL-G7** — capability extensions preserve the payload contract; structurally different problem shapes use a separate generator and share a typed-union view where rendering remains simple.
 - [ ] **IMPL-G8** — the payload preserves the structured witnesses for its mathematical labels and semantic context, but contains no Ability-specific prompt, blank, hint, requested reasoning, or answer prose.

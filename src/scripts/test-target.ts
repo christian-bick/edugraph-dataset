@@ -168,7 +168,7 @@ async function main() {
                 payload: buildRenderPayload({
                     problem,
                     viewId: sample.identity.viewId,
-                    labels: problem.tags || [],
+                    labels: problem.labels,
                     mode: sample.identity.mode,
                     seed: sample.seed
                 })
@@ -206,7 +206,7 @@ async function main() {
                         fileName: sample.fileName,
                         labels: Array.from(new Set([
                             ...target.labels,
-                            ...(sample.stub?.tags || [])
+                            ...(sample.stub?.labels ?? [])
                         ])),
                         apiKey,
                         cacheManager: cacheMgr

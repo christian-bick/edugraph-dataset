@@ -59,8 +59,8 @@ describe('ShapePartitionGenerator spec integration', () => {
 
         expect(first.data).toEqual(second.data);
         expect(first.data.kind).toBe('partition');
-        expect(first.tags).not.toContain(firstAbility);
-        expect(second.tags).not.toContain(secondAbility);
+        expect(first.labels).not.toContain(firstAbility);
+        expect(second.labels).not.toContain(secondAbility);
     });
 
     it('ignores the combined articulation/formalization projection during generation', () => {
@@ -79,8 +79,8 @@ describe('ShapePartitionGenerator spec integration', () => {
 
         expect(combined.data).toEqual(withoutAbilities.data);
         expect(combined.data.kind).toBe('partition');
-        expect(combined.tags).not.toContain(Ability.VisualArticulation);
-        expect(combined.tags).not.toContain(Ability.Formalization);
+        expect(combined.labels).not.toContain(Ability.VisualArticulation);
+        expect(combined.labels).not.toContain(Ability.Formalization);
     });
 
     it('resolves comparison and fraction-region models from non-Ability labels', () => {
@@ -103,7 +103,7 @@ describe('ShapePartitionGenerator spec integration', () => {
 
         expect(comparison.data.kind).toBe('share-comparison');
         expect(interpretation.data.kind).toBe('selected-region');
-        expect(comparison.tags).not.toContain(Ability.ConceptDerivation);
-        expect(interpretation.tags).not.toContain(Ability.Interpretation);
+        expect(comparison.labels).not.toContain(Ability.ConceptDerivation);
+        expect(interpretation.labels).not.toContain(Ability.Interpretation);
     });
 });

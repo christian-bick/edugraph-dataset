@@ -43,7 +43,7 @@ describe('buildAssetIndexBundle', () => {
             instance: 0,
             content_fingerprint: 'fingerprint',
             task_fingerprint: 'task',
-            tags: ['Counting'],
+            labels: ['Counting'],
         });
     });
 
@@ -77,7 +77,7 @@ describe('buildAssetIndexBundle', () => {
             instance: 0,
             content_fingerprint: 'fingerprint',
             task_fingerprint: 'task',
-            tags: ['Addition', 'Counting'],
+            labels: ['Addition', 'Counting'],
         });
 
         const bundle = await buildAssetIndexBundle({
@@ -108,7 +108,7 @@ describe('buildAssetIndexBundle', () => {
             instance: 0,
             content_fingerprint: 'fingerprint',
             task_fingerprint: 'composition-task',
-            tags: ['Composition'],
+            labels: ['Composition'],
         });
 
         const bundle = await buildAssetIndexBundle({

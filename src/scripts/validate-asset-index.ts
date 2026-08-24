@@ -19,7 +19,7 @@ const specName = readOption('spec');
 
 interface PublicRow {
     file_name: string;
-    tags: string[];
+    labels: string[];
     solution: boolean;
 }
 
@@ -91,10 +91,10 @@ async function validate(index: AssetIndex): Promise<string[]> {
     for (const [sampleKey, labelSets] of requestedLabelsBySample) {
         const publicRow = publicRows.get(sampleKey);
         if (!publicRow) continue;
-        const publicTags = new Set(publicRow.tags);
-        if (!labelSets.some(labels => labels.every(label => publicTags.has(label)))) {
+        const publicLabels = new Set(publicRow.labels);
+        if (!labelSets.some(labels => labels.every(label => publicLabels.has(label)))) {
             const [split, fileName] = sampleKey.split('\0');
-            errors.push(`No requested label set matches the published tags for ${split}/${fileName}.`);
+            errors.push(`No requested label set matches the published labels for ${split}/${fileName}.`);
         }
     }
 

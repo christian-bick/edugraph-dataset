@@ -18,25 +18,6 @@ type CompositionStructure =
     | typeof Scope.SingleLevelComposition
     | typeof Scope.MultiLevelComposition;
 
-const ONTOLOGY_LABEL_BY_SHAPE: Readonly<Partial<Record<ShapeCompositionShapeId, string>>> = {
-    triangle: Area.Triangle,
-    'small-triangle': Area.Triangle,
-    'tiny-triangle': Area.Triangle,
-    square: Area.Square,
-    rectangle: Area.Rectangle,
-    hexagon: Area.Hexagon,
-    trapezoid: Area.Trapezoid,
-    'half-circle': Area.HalfCircle,
-    'quarter-circle': Area.QuarterCircle,
-    cube: Area.Cube,
-    'small-cube': Area.Cube,
-    'rectangular-prism': Area.RectangularPrism,
-    cone: Area.Cone,
-    cylinder: Area.Cylinder,
-    'short-cylinder': Area.Cylinder,
-    'cylinder-segment': Area.Cylinder
-};
-
 function primitive(shape: ShapeCompositionShapeId): ShapeCompositionNode {
     return {kind: 'primitive', shape};
 }
@@ -87,22 +68,6 @@ function isValidTreeForStructure(
     }
 
     return depth === 2 && tree.inputs.some(input => input.kind === 'composite');
-}
-
-function collectComponentTags(
-    tree: ShapeCompositionRoot,
-    configuredTarget: string
-): string[] {
-    const tags = new Set<string>();
-
-    const visit = (node: ShapeCompositionNode): void => {
-        const label = ONTOLOGY_LABEL_BY_SHAPE[node.shape];
-        if (label && label !== configuredTarget) tags.add(label);
-        if (node.kind === 'composite') node.inputs.forEach(visit);
-    };
-
-    tree.inputs.forEach(visit);
-    return [...tags];
 }
 
 function singleLevelComposition(label: string): ShapeCompositionRoot | null {
@@ -232,14 +197,11 @@ export class ShapeComposeShapesGenerator implements ProblemGenerator<
         const compositionDepth = getCompositionDepth(compositionTree);
         if (compositionDepth !== 1 && compositionDepth !== 2) return null;
 
-        const componentTags = collectComponentTags(compositionTree, config.classify!);
-
         return {
             data: {
                 compositionTree,
                 compositionDepth
-            },
-            tags: componentTags.length > 0 ? componentTags : undefined
+            }
         };
     }
 }

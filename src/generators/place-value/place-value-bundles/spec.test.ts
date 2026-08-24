@@ -39,7 +39,7 @@ describe('PlaceValueBundlesGenerator spec integration', () => {
             ones: 0,
             target: 10
         });
-        expect(stub!.tags).toContain(Scope.NumbersSmaller10);
+        expect(stub!.labels).toContain(Scope.NumbersSmaller10);
     });
 
     it('resolves multiples of one hundred into hundred bundles', () => {
@@ -53,6 +53,6 @@ describe('PlaceValueBundlesGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.hundreds).toBeGreaterThanOrEqual(1);
         expect(stub!.data.target % 100).toBe(0);
-        expect(stub!.tags).toContain(Scope.MultiplesOf100);
+        expect(stub!.labels).toContain(Scope.MultiplesOf100);
     });
 });

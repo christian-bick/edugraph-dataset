@@ -5,7 +5,7 @@ import {ShapeNamingProblem} from '../../../../types/problems.ts';
 import {ShapeNamingCore} from './view.tsx';
 
 const payload = (data: ShapeNamingProblem, seed: number, isSolutionView: boolean): ViewRenderPayload<'shape-naming'> => ({
-    problem: {type: 'shape', data},
+    problem: {type: 'shape', data, labels: []},
     viewId: 'shape-naming',
     labels: [],
     isSolutionView,

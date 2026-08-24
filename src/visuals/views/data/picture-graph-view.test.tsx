@@ -12,7 +12,7 @@ const categories = [
 ] as const;
 
 const payload = (data: StatisticalGraphProblem, isSolutionView: boolean): ViewRenderPayload<'data-picture-graph'> => ({
-    problem: {type: 'statistics', data}, viewId: 'data-picture-graph', labels: [], isSolutionView, seed: 11
+    problem: {type: 'statistics', data, labels: []}, viewId: 'data-picture-graph', labels: [], isSolutionView, seed: 11
 });
 
 const markerCount = (markup: string) => (markup.match(/data-picture-marker="true"/g) ?? []).length;

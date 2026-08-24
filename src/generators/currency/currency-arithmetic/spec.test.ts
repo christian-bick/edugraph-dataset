@@ -22,7 +22,7 @@ describe('CurrencyArithmeticGenerator spec', () => {
         ])!;
 
         expect(problem.data.amounts.flatMap(amount => amount.items).every(item => item.denominationCents === cents)).toBe(true);
-        expect(problem.tags).toEqual(expect.arrayContaining([Scope.Coins, denomination, Area.Addition]));
+        expect(problem.labels).toEqual(expect.arrayContaining([Scope.Coins, denomination, Area.Addition]));
     });
 
     it('resolves a banknote-only subtraction without inventing a coin denomination', () => {
@@ -44,7 +44,7 @@ describe('CurrencyArithmeticGenerator spec', () => {
             Scope.TwentiethDenomination,
             Scope.HundredthDenomination
         ]) {
-            expect(problem.tags).not.toContain(denomination);
+            expect(problem.labels).not.toContain(denomination);
         }
     });
 });

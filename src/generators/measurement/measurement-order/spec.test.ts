@@ -21,7 +21,7 @@ describe('MeasurementOrderGenerator spec integration', () => {
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.direction).toBe(direction === Scope.AscendingOrder ? 'ascending' : 'descending');
-            expect(stub!.tags).toContain(direction);
+            expect(stub!.labels).toContain(direction);
         }
     });
 });

@@ -20,7 +20,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
 
         expect(stub).toEqual({
             data: {target: 'hexagon', sides: 6, corners: 6},
-            tags: [Area.Hexagon, Scope.ShapeProperties, Area.ShapeIdentity]
+            labels: [Area.Hexagon, Scope.ShapeProperties, Area.ShapeIdentity]
         });
     });
 
@@ -40,12 +40,12 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
             corners: 6,
             task: 'assemble-from-parts'
         });
-        expect(stub?.tags).toEqual(expect.arrayContaining([
+        expect(stub?.labels).toEqual(expect.arrayContaining([
             Area.Hexagon,
             Area.ShapeIdentity,
             Scope.ShapeAttributes
         ]));
-        expect(stub?.tags).toHaveLength(3);
+        expect(stub?.labels).toHaveLength(3);
     });
 
     it('resolves the Grade 1 attribute-specification path and records each configured label once', () => {
@@ -69,13 +69,13 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
                 boundary: 'curved'
             }
         });
-        expect(stub?.tags).toEqual(expect.arrayContaining([
+        expect(stub?.labels).toEqual(expect.arrayContaining([
             Area.Circle,
             Area.ShapeClassification,
             Scope.ShapeAttributes
         ]));
-        expect(stub?.tags).not.toContain(Ability.ConceptSpecification);
-        expect(new Set(stub!.tags).size).toBe(stub!.tags!.length);
+        expect(stub?.labels).not.toContain(Ability.ConceptSpecification);
+        expect(new Set(stub!.labels).size).toBe(stub!.labels!.length);
     });
 
     it('resolves shape identity only for the identity construction mode', () => {
@@ -84,7 +84,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
 
         expect(stub).toEqual({
             data: {target: 'circle', sides: 0, corners: 0},
-            tags: labels
+            labels: labels
         });
     });
 
@@ -121,7 +121,7 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
             task: 'exclude-quadrilateral-subcategories',
             excludedCategories: ['rhombus', 'rectangle', 'square']
         });
-        expect(stub?.tags).toEqual(expect.arrayContaining([
+        expect(stub?.labels).toEqual(expect.arrayContaining([
             Area.Quadrilateral,
             Area.ShapeSubsumption,
             Scope.ShapeAttributes
@@ -141,12 +141,12 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub.data.task).toBe('specify-count');
         if (stub.data.task !== 'specify-count') return;
         expect(stub.data.attribute).toBe('vertices');
-        expect(stub.tags).toEqual(expect.arrayContaining([
+        expect(stub.labels).toEqual(expect.arrayContaining([
             Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.VertexCount
         ]));
-        expect(stub.tags).not.toContain(Ability.ConceptSpecification);
+        expect(stub.labels).not.toContain(Ability.ConceptSpecification);
     });
 
     it('resolves an angle-count construction without substituting the vertex scope', () => {
@@ -162,13 +162,13 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
         expect(stub.data.task).toBe('specify-count');
         if (stub.data.task !== 'specify-count') return;
         expect(stub.data.attribute).toBe('angles');
-        expect(stub.tags).toEqual(expect.arrayContaining([
+        expect(stub.labels).toEqual(expect.arrayContaining([
             Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.AngleCount
         ]));
-        expect(stub.tags).not.toContain(Ability.ConceptSpecification);
-        expect(stub.tags).not.toContain(Scope.VertexCount);
+        expect(stub.labels).not.toContain(Ability.ConceptSpecification);
+        expect(stub.labels).not.toContain(Scope.VertexCount);
     });
 
     it('resolves the equal-face construction path without a named target label', () => {
@@ -188,13 +188,13 @@ describe('ShapeBuildShapeGenerator Spec Integration', () => {
             attribute: 'equal-faces',
             requiredCount: 6
         });
-        expect(stub.tags).toEqual(expect.arrayContaining([
+        expect(stub.labels).toEqual(expect.arrayContaining([
             Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.FaceCount,
-            Scope.Equal,
-            Area.Cube
+            Scope.Equal
         ]));
-        expect(stub.tags).not.toContain(Ability.ConceptSpecification);
+        expect(stub.labels).not.toContain(Area.Cube);
+        expect(stub.labels).not.toContain(Ability.ConceptSpecification);
     });
 });

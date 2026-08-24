@@ -25,7 +25,6 @@ describe('TimeIntervalArithmeticGenerator', () => {
             expect(data.startOffsetMinutes).toBe(toMinutes(data.startTime) % 60);
             expect(data.endOffsetMinutes).toBe(60 + toMinutes(data.endTime) % 60);
             expect(data.endOffsetMinutes - data.startOffsetMinutes).toBe(data.elapsedMinutes);
-            expect(stub.tags).toContain(operationLabel);
         }
     });
 

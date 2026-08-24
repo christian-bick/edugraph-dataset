@@ -3,7 +3,14 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { extractConfig, generateWithLabels } from './utils.ts';
 import { setSeed } from './random.ts';
-import { CompetencyTarget, ProblemGenerator, ProblemStub, AbstractProblem, RenderPayload } from '../types/ml-engine.ts';
+import {
+    CompetencyTarget,
+    ProblemGenerator,
+    ProblemStub,
+    ResolvedProblemStub,
+    AbstractProblem,
+    RenderPayload
+} from '../types/ml-engine.ts';
 import { ConfigSchema } from '../types/schema.ts';
 import type {WorkCounters} from './work-counters.ts';
 import {radixSortUtf8} from './content-identity.ts';
@@ -55,7 +62,7 @@ export interface SampleIdentity {
 }
 
 const KEY_SEPARATOR = '#';
-const MODE_TAGS: Record<SampleMode, string> = { question: 'Q', solution: 'S' };
+const MODE_CODES: Record<SampleMode, string> = { question: 'Q', solution: 'S' };
 
 export function computeSampleKey(identity: SampleIdentity): string {
     const { targetId, generatorId, viewId, split, mode, instanceIdx } = identity;
@@ -114,7 +121,7 @@ export function sanitizeFilePart(part: string): string {
 export function computeSampleFilename(identity: SampleIdentity): string {
     const { targetId, generatorId, viewId, mode, instanceIdx } = identity;
     return `${sanitizeFilePart(targetId)}_${sanitizeFilePart(generatorId)}_${sanitizeFilePart(viewId)}`
-        + `_inst-${instanceIdx}_mode-${MODE_TAGS[mode]}.png`;
+        + `_inst-${instanceIdx}_mode-${MODE_CODES[mode]}.png`;
 }
 
 // ---------------------------------------------------------------------------
@@ -244,7 +251,7 @@ export interface GenerateSampleInput {
  * generation consumes — the view participates solely through the seed
  * (derived from a sample key that contains the viewId).
  */
-export function generateSample({ generator, labels, seed }: GenerateSampleInput): ProblemStub | null {
+export function generateSample({ generator, labels, seed }: GenerateSampleInput): ResolvedProblemStub | null {
     setSeed(seed);
     return generateWithLabels(generator, labels);
 }
@@ -255,11 +262,11 @@ export interface GenerateSampleWithRetryInput {
     sampleKey: string;
     maxAttempts?: number;
     /** Caller-defined dedup scope; return true to reject a draw and retry */
-    isDuplicate?: (stub: ProblemStub, attempt: { attempt: number; seed: number }) => boolean;
+    isDuplicate?: (stub: ResolvedProblemStub, attempt: { attempt: number; seed: number }) => boolean;
 }
 
 export interface RetryResult {
-    stub: ProblemStub | null;
+    stub: ResolvedProblemStub | null;
     /** The winning attempt (or maxAttempts when stub is null) — record it: it is a seed input */
     attempt: number;
     /** The seed of the winning attempt */
@@ -299,7 +306,7 @@ export interface GenerateSampleByKeyResult {
     target: CompetencyTarget;
     labels: string[];
     seed: number;
-    stub: ProblemStub | null;
+    stub: ResolvedProblemStub | null;
 }
 
 /**
@@ -340,7 +347,7 @@ export interface TargetSample {
     fileName: string;
     seed: number;
     attempt: number;
-    stub: ProblemStub | null;
+    stub: ResolvedProblemStub | null;
     fingerprint: string | null;
     /** Set when the generator threw for this tuple (e.g. a config validation error) — a matching problem worth surfacing, not a crash */
     error: string | null;
@@ -389,7 +396,7 @@ export function generateTargetSamples(
                         instanceIdx
                     };
                     const sampleKey = computeSampleKey(identity);
-                    let stub: ProblemStub | null = null;
+                    let stub: ResolvedProblemStub | null = null;
                     let attempt = 0;
                     let seed = computeSampleSeed(sampleKey, 1);
                     let error: string | null = null;
@@ -490,15 +497,17 @@ export interface BuildProblemInput {
 }
 
 /**
- * Wraps a generated stub into the AbstractProblem sent to the renderer.
- * The stub's own `id` is intentionally dropped here — it is informational
- * only (see `ProblemStub.id`) and has no place on the render payload.
+ * Wraps generated canonical data and orchestration-resolved labels into the
+ * AbstractProblem sent to the renderer.
  */
 export function buildProblem({ stub, type, labels }: BuildProblemInput): AbstractProblem {
     return {
         type,
         data: stub.data,
-        tags: Array.from(new Set([...labels, ...(stub.tags || [])]))
+        labels: Array.from(new Set([
+            ...labels,
+            ...('labels' in stub && Array.isArray(stub.labels) ? stub.labels : [])
+        ]))
     };
 }
 

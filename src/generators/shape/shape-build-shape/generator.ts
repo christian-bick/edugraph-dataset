@@ -57,8 +57,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
                     task: 'specify-count',
                     attribute: useAngleCount ? 'angles' : 'vertices',
                     requiredCount: selected.count
-                },
-                tags: [selected.label]
+                }
             };
         }
 
@@ -71,8 +70,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
                     task: 'specify-count',
                     attribute: 'equal-faces',
                     requiredCount: 6
-                },
-                tags: [Area.Cube]
+                }
             };
         }
 
@@ -111,16 +109,12 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
                         rightAngleCount: 0
                     },
                     excludedCategories: ['rhombus', 'rectangle', 'square']
-                },
-                tags: []
+                }
             };
         }
 
         if (config.shapeArea === Area.ShapeRotationConservation) {
-            return {
-                data: {...construction, task: 'rotation-conservation'},
-                tags: []
-            };
+            return {data: {...construction, task: 'rotation-conservation'}};
         }
 
         if (
@@ -136,13 +130,12 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
                     sides: count,
                     corners: count,
                     task: 'assemble-from-parts'
-                },
-                tags: []
+                }
             };
         }
 
         if (config.shapeArea === Area.ShapeIdentity) {
-            return {data: construction, tags: []};
+            return {data: construction};
         }
 
         if (isAttributeSpecification) {
@@ -151,8 +144,7 @@ export class ShapeBuildShapeGenerator implements ProblemGenerator<ShapeBuildShap
                     ...construction,
                     task: 'specify-attributes',
                     definition
-                },
-                tags: []
+                }
             };
         }
 

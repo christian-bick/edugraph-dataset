@@ -17,7 +17,7 @@ const data: ShapeCompareAttributesProblem = {
 
 function payload(problemData: ShapeCompareAttributesProblem, isSolutionView: boolean): ViewRenderPayload<'shape-compare-attributes'> {
     return {
-        problem: {type: 'shape', data: problemData},
+        problem: {type: 'shape', data: problemData, labels: []},
         viewId: 'shape-compare-attributes',
         labels: [],
         isSolutionView,

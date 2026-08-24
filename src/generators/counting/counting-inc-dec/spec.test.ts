@@ -23,8 +23,8 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
-        expect(stub!.tags).toContain(Scope.AdditiveCount);
-        expect(stub!.tags).toContain(Scope.StepsOf1);
+        expect(stub!.labels).toContain(Scope.AdditiveCount);
+        expect(stub!.labels).toContain(Scope.StepsOf1);
     });
 
     it('resolves a decrement-by-one problem', () => {
@@ -38,7 +38,7 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
-        expect(stub!.tags).toContain(Scope.SubtractiveCount);
+        expect(stub!.labels).toContain(Scope.SubtractiveCount);
     });
 
     it('resolves a subsequent position as an increment', () => {
@@ -52,7 +52,7 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
-        expect(stub!.tags).toContain(Scope.After);
+        expect(stub!.labels).toContain(Scope.After);
     });
 
     it('resolves a preceding position as a decrement', () => {
@@ -66,7 +66,7 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
-        expect(stub!.tags).toContain(Scope.Before);
+        expect(stub!.labels).toContain(Scope.Before);
     });
 
     it('resolves direction and steps of ten independently through 100', () => {
@@ -83,8 +83,8 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub!.data.stepSize).toBe(10);
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 10);
         expect(stub!.data.startPlaceValue.ones).toBe(stub!.data.resultPlaceValue.ones);
-        expect(stub!.tags).toContain(Area.Increment);
-        expect(stub!.tags).toContain(Scope.StepsOf10);
+        expect(stub!.labels).toContain(Area.Increment);
+        expect(stub!.labels).toContain(Scope.StepsOf10);
     });
 
     it('resolves a one-hundred step through 1000', () => {
@@ -101,6 +101,6 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 100);
         expect(stub!.data.resultPlaceValue.tens).toBe(stub!.data.startPlaceValue.tens);
         expect(stub!.data.resultPlaceValue.ones).toBe(stub!.data.startPlaceValue.ones);
-        expect(stub!.tags).toContain(Scope.StepsOf100);
+        expect(stub!.labels).toContain(Scope.StepsOf100);
     });
 });

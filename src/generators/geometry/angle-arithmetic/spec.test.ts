@@ -73,10 +73,10 @@ describe('AngleArithmeticGenerator spec integration', () => {
         const stub = generateWithLabels(new AngleArithmeticGenerator(), [...labels]);
         expect(stub).not.toBeNull();
         expect(stub!.data.operation).toBe(operation);
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             operation === 'addition' ? Area.Addition : Area.Subtraction
         ]));
-        expect(stub!.tags).not.toEqual(expect.arrayContaining([
+        expect(stub!.labels).not.toEqual(expect.arrayContaining([
             Ability.ProcedureUnderstanding,
             Ability.ProcedureExecution,
             Ability.ProcedureInversion

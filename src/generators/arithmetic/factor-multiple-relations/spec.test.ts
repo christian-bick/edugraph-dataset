@@ -45,9 +45,9 @@ describe('FactorMultipleRelationsGenerator spec integration', () => {
         for (const label of labels.filter(label =>
             label !== Ability.ProcedureExecution && label !== Ability.ConceptClassification
         )) {
-            expect(stub!.tags).toContain(label);
+            expect(stub!.labels).toContain(label);
         }
-        expect(stub!.tags).not.toContain(Ability.ProcedureExecution);
-        expect(stub!.tags).not.toContain(Ability.ConceptClassification);
+        expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
+        expect(stub!.labels).not.toContain(Ability.ConceptClassification);
     });
 });

@@ -51,7 +51,7 @@ describe('MultiDigitMultiplicationGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.smallestOperandDigits).toBe(smallestOperandDigits);
         expect(stub!.data.largestOperandDigits).toBe(largestOperandDigits);
-        expect(stub!.tags).toEqual(expect.arrayContaining([smallestLabel, largestLabel]));
+        expect(stub!.labels).toEqual(expect.arrayContaining([smallestLabel, largestLabel]));
     });
 
     it('rejects an unauthored operand profile combination', () => {

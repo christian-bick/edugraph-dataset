@@ -103,7 +103,6 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
         }
 
         return {
-            tags: [],
             data: {
                 kind: 'two-step',
                 ...values,

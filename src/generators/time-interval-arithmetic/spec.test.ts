@@ -15,6 +15,6 @@ describe('TimeIntervalArithmeticGenerator spec integration', () => {
         ]);
 
         expect(stub).not.toBeNull();
-        expect(stub!.tags).toContain(operation);
+        expect(stub!.labels).toContain(operation);
     });
 });

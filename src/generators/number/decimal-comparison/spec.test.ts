@@ -44,10 +44,10 @@ describe('DecimalComparisonGenerator spec integration', () => {
         const stub = generateWithLabels(generator, [...labels]);
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe(relation);
-        expect(stub!.tags).toEqual(relation === 'equal'
+        expect(stub!.labels).toEqual(relation === 'equal'
             ? [Area.NumericEquality, Scope.Equal]
             : [Area.NumericInequality, relation === 'greater' ? Scope.Greater : Scope.Less]);
-        expect(stub!.tags).not.toContain(Ability.ConceptDerivation);
+        expect(stub!.labels).not.toContain(Ability.ConceptDerivation);
     });
 
     it('keeps direct and label-driven generation on the same RNG path', () => {

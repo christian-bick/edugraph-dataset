@@ -73,7 +73,7 @@ async function main() {
     }
 
     console.log(`\nGenerated stub:`);
-    console.log(JSON.stringify({ data: stub.data, tags: stub.tags }, null, 2));
+    console.log(JSON.stringify({ data: stub.data, resolved_labels: stub.labels }, null, 2));
     console.log(`Content fingerprint: ${computeContentFingerprint(stub.data)}`);
 
     if (skipRender) return;
@@ -98,7 +98,7 @@ async function main() {
             payload: buildRenderPayload({
                 problem,
                 viewId: identity.viewId,
-                labels: problem.tags || [],
+                labels: problem.labels,
                 mode: identity.mode,
                 seed
             })
@@ -155,7 +155,7 @@ async function main() {
             attempt,
             seed,
             fileName,
-            labels: problem.tags || [],
+            labels: problem.labels,
             apiKey,
             cacheManager
         });

@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -21,14 +20,6 @@ const unitIds: Record<MeasurementNumberLineKind, MeasurementNumberLineUnitId> = 
     'liquid-volume': 'liter',
     weight: 'kilogram',
     money: 'dollar'
-};
-
-const unitTags: Record<MeasurementNumberLineKind, Scope | undefined> = {
-    length: Scope.MeterScale,
-    time: Scope.HourIntervals,
-    'liquid-volume': Scope.LiterScale,
-    weight: Scope.KilogramScale,
-    money: undefined
 };
 
 const gcd = (a: number, b: number): number => {
@@ -102,7 +93,6 @@ export class MeasurementNumberLineGenerator implements ProblemGenerator<
             tickValues,
             targetIndex
         };
-        const unitTag = unitTags[measurementKind];
-        return unitTag ? {data, tags: [unitTag]} : {data};
+        return {data};
     }
 }

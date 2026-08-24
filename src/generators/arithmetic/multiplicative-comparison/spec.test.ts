@@ -34,6 +34,6 @@ describe('MultiplicativeComparisonGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.operation).toBe(operation);
-        expect(stub!.tags).toContain(label);
+        expect(stub!.labels).toContain(label);
     });
 });

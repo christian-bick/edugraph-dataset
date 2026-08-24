@@ -189,7 +189,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 
 This pass found two raw resolved-label parsing cases missed by the Phase 0 rule, in
 `shape-identity` and `shape-same-attribute`. The future lint must cover ontology-IRI parsing in
-generator/view implementations in addition to direct `payload.labels` and `problem.tags` access.
+generator/view implementations in addition to direct `payload.labels` and `problem.labels` access.
 
 ## Reusable contracts indicated by the review
 

@@ -20,7 +20,7 @@ describe('ArithmeticEstimationGenerator spec integration', () => {
         for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division]) {
             const stub = generateWithLabels(generator, [operation, Scope.NumbersSmaller1000]);
             expect(stub).not.toBeNull();
-            expect(stub!.tags).toEqual(expect.arrayContaining([operation, Scope.NumbersSmaller1000]));
+            expect(stub!.labels).toEqual(expect.arrayContaining([operation, Scope.NumbersSmaller1000]));
         }
     });
 });

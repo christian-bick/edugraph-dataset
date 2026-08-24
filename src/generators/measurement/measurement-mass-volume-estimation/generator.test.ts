@@ -43,7 +43,6 @@ describe('MeasurementMassVolumeEstimationGenerator', () => {
             setSeed(seed);
             const stub = generator.generate({measurement: Scope.WeightMeasurement, scale});
             if (stub.data.measurementKind !== 'mass') throw new Error('Expected mass.');
-            expect(stub.tags).toEqual([Scope.WeightMeasurement, scale]);
             expect(stub.data.unit).toBe(unit);
             expect(stub.data.referenceObject).toBe(referenceObject);
             expect(stub.data.referenceValue).toBe(1);

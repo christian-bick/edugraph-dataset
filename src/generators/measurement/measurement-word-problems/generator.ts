@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -52,14 +51,6 @@ const unitIds: Record<MeasurementWordProblemKind, MeasurementWordProblemUnitId> 
     'liquid-volume': 'liter',
     weight: 'kilogram',
     money: 'dollar'
-};
-
-const unitTags: Record<MeasurementWordProblemKind, Scope | undefined> = {
-    length: Scope.MeterScale,
-    time: Scope.HourIntervals,
-    'liquid-volume': Scope.LiterScale,
-    weight: Scope.KilogramScale,
-    money: undefined
 };
 
 const integer = (value: number): ExactValue => ({numerator: value, denominator: 1});
@@ -278,7 +269,6 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
             measurementKind,
             numberKind
         );
-        const unitTag = unitTags[measurementKind];
-        return unitTag ? {data, tags: [unitTag]} : {data};
+        return {data};
     }
 }

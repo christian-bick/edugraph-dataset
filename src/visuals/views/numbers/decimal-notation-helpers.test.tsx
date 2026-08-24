@@ -40,7 +40,7 @@ const payload = <ViewId extends DecimalViewId>(
     data: DecimalNotationProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<ViewId> => ({
-    problem: {type: 'fraction', data},
+    problem: {type: 'fraction', data, labels: []},
     viewId,
     labels: [],
     isSolutionView,

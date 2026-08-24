@@ -374,7 +374,7 @@ function matchesWithLines(content: string, pattern: RegExp): Array<{match: RegEx
 
 const RAW_LABEL_PATTERNS = [
     /\bpayload\s*(?:\?\.)?\.\s*labels\b/g,
-    /\bproblem\s*(?:\?\.)?\.\s*tags\b/g
+    /\bproblem\s*(?:\?\.)?\.\s*labels\b/g
 ] as const;
 
 const PAYLOAD_FIELD_PATTERN = /\b(prompt|instruction|instructions|hint|explanation|rationale|question(?:[A-Z][A-Za-z0-9_]*)?|answer(?:Statement|Text|Sentence|Explanation|Prompt)[A-Za-z0-9_]*|solution(?:[A-Z][A-Za-z0-9_]*)|unknown(?:[A-Z][A-Za-z0-9_]*)?|blank(?:[A-Z][A-Za-z0-9_]*)?|responseDirection)\s*:/g;

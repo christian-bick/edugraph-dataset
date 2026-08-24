@@ -22,7 +22,7 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.terms).toHaveLength(expectedLength);
-        expect(stub!.tags).toContain(operandCardinality);
+        expect(stub!.labels).toContain(operandCardinality);
     });
 
     it('resolves the Grade 4 all-nonzero-place expansion without an operand count', () => {
@@ -38,7 +38,7 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect('task' in stub!.data && stub!.data.task).toBe('multi-digit-expanded-form');
-        expect(stub!.tags).toEqual(expect.arrayContaining([
+        expect(stub!.labels).toEqual(expect.arrayContaining([
             Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000
         ]));

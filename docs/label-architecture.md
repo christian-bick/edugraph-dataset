@@ -140,6 +140,14 @@ one Ability or accepting a label name as a substitute for its witness. See
 [TSPEC-13](target-spec.md#tspec-13--labels-require-observable-classification-evidence) and
 [CHK-V6](checklist-view.md#chk-v6--keep-one-minimal-observable-contract-per-view).
 
+Generators do not annotate their output with ontology labels. Orchestration derives the sample's
+observable label set from the matched pair's invariant capabilities and resolved generator/view
+schema capabilities. Applicability-only `requiredLabels` and `rejectedLabels` never become sample
+labels; target labels record what the standard requested, not the complete description of what the
+pair produced. The Scope-completeness phase in
+[complete-label-migration.md](plan/complete-label-migration.md#phase-7-scope-completeness) closes
+the remaining gap between target-driven metadata and this pair-derived end state.
+
 ## Four different identities
 
 | Identity | Defined by | Purpose |

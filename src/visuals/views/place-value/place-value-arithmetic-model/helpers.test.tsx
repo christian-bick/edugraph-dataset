@@ -133,7 +133,7 @@ const payload = (
     data: PlaceValueArithmeticProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<'place-value-arithmetic-model'> => ({
-    problem: {type: 'arithmetic', data},
+    problem: {type: 'arithmetic', data, labels: []},
     viewId: 'place-value-arithmetic-model',
     labels: [],
     isSolutionView,

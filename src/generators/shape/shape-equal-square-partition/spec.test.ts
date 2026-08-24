@@ -32,7 +32,7 @@ describe('ShapeEqualSquarePartitionGenerator spec integration', () => {
         ])!;
 
         expect(execution.data).toEqual(articulation.data);
-        expect(articulation.tags).not.toContain(Ability.VisualArticulation);
-        expect(execution.tags).not.toContain(Ability.ProcedureExecution);
+        expect(articulation.labels).not.toContain(Ability.VisualArticulation);
+        expect(execution.labels).not.toContain(Ability.ProcedureExecution);
     });
 });
