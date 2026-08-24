@@ -6,6 +6,9 @@ import {
     MeasurementNumberLineProblem
 } from '../../../../types/problems.ts';
 import {
+    formatMeasurementNumberLineValue,
+    formatMeasurementQuantity,
+    getMeasurementNumberLinePresentation,
     getMeasurementPointLabelX,
     isValidMeasurementNumberLineProblem
 } from './helpers.ts';
@@ -37,7 +40,7 @@ const variants = measurementKinds.flatMap(measurementKind =>
     numberKinds.map(numberKind => [measurementKind, numberKind] as const)
 );
 
-describe('measurement-number-line validation', () => {
+describe('measurement-number-line validation and presentation', () => {
     it.each(variants)('accepts generated %s / %s scales', (measurementKind, numberKind) => {
         for (let seed = 0; seed < 30; seed++) {
             expect(isValidMeasurementNumberLineProblem(
@@ -46,14 +49,66 @@ describe('measurement-number-line validation', () => {
         }
     });
 
-    it('accepts both bounded fraction capacities and the 11-tick decimal capacity', () => {
+    it('accepts both bounded fraction capacities and the 11-value decimal capacity', () => {
         const fractionCounts = new Set<number>();
         for (let seed = 0; seed < 100; seed++) {
-            fractionCounts.add(problemFor('length', 'fraction', `fraction-count-${seed}`).tickCount);
+            fractionCounts.add(
+                problemFor('length', 'fraction', `fraction-count-${seed}`).tickValues.length - 1
+            );
         }
         expect(fractionCounts).toEqual(new Set([4, 8]));
-        expect(problemFor('money', 'decimal').tickCount).toBe(10);
-        expect(problemFor('money', 'decimal').ticks).toHaveLength(11);
+        expect(problemFor('money', 'decimal').tickValues).toHaveLength(11);
+    });
+
+    it('derives fraction, decimal, unit, and task wording from canonical values', () => {
+        for (const measurementKind of measurementKinds.filter(kind => kind !== 'money')) {
+            const fraction = problemFor(measurementKind, 'fraction', `${measurementKind}-fraction`);
+            const target = fraction.tickValues[fraction.targetIndex]!;
+            const display = formatMeasurementNumberLineValue(target, 'fraction');
+            const quantity = `${display} of ${measurementKind === 'time' ? 'an' : 'a'} ${fraction.unitId}`;
+            const presentation = getMeasurementNumberLinePresentation(fraction);
+            const intervalQuantity = formatMeasurementQuantity(
+                fraction.tickValues[1]!,
+                'fraction',
+                fraction.unitId
+            );
+            expect(formatMeasurementQuantity(target, 'fraction', fraction.unitId)).toBe(quantity);
+            expect(presentation.prompt).toBe(`Plot ${quantity} on the number line.`);
+            expect(presentation.scaleStatement)
+                .toBe(`Each equal interval represents ${intervalQuantity}.`);
+            expect(presentation.answerStatement)
+                .toBe(`${quantity} belongs at tick ${fraction.targetIndex} after zero.`);
+            expect(presentation.explanation)
+                .toBe(`Starting at zero, count ${fraction.targetIndex} equal intervals of ${intervalQuantity}. The point lands at ${quantity}.`);
+
+            const decimal = problemFor(measurementKind, 'decimal', `${measurementKind}-decimal`);
+            const end = decimal.tickValues.at(-1)!;
+            expect(formatMeasurementNumberLineValue(end, 'decimal')).toBe('1.0');
+            expect(formatMeasurementQuantity(end, 'decimal', decimal.unitId))
+                .toBe(`1.0 ${getMeasurementNumberLinePresentation(decimal).unit.singular}`);
+        }
+
+        const moneyDecimal = problemFor('money', 'decimal');
+        const moneyTarget = moneyDecimal.tickValues[moneyDecimal.targetIndex]!;
+        expect(formatMeasurementQuantity(moneyTarget, 'decimal', 'dollar')).toMatch(/^\$0\.\d0$/);
+
+        const moneyFraction = problemFor('money', 'fraction');
+        const fractionTarget = moneyFraction.tickValues[moneyFraction.targetIndex]!;
+        expect(formatMeasurementQuantity(fractionTarget, 'fraction', 'dollar'))
+            .toBe(`${formatMeasurementNumberLineValue(fractionTarget, 'fraction')} of a dollar`);
+    });
+
+    it('formats zero and whole endpoints without payload display aliases', () => {
+        expect(formatMeasurementNumberLineValue({numerator: 0, denominator: 1}, 'fraction')).toBe('0');
+        expect(formatMeasurementNumberLineValue({numerator: 1, denominator: 1}, 'fraction')).toBe('1');
+        expect(formatMeasurementQuantity({numerator: 0, denominator: 1}, 'fraction', 'meter'))
+            .toBe('0 meters');
+        expect(formatMeasurementQuantity({numerator: 1, denominator: 1}, 'fraction', 'hour'))
+            .toBe('1 hour');
+        expect(formatMeasurementQuantity({numerator: 0, denominator: 1}, 'fraction', 'dollar'))
+            .toBe('0 dollars');
+        expect(formatMeasurementQuantity({numerator: 1, denominator: 1}, 'fraction', 'dollar'))
+            .toBe('1 dollar');
     });
 
     it('clamps wide target labels inside the scale without moving central labels', () => {
@@ -63,53 +118,53 @@ describe('measurement-number-line validation', () => {
     });
 
     it.each([
-        ['wrong task', () => ({...problemFor('length', 'fraction'), task: 'other'})],
-        ['wrong unit identity', () => {
-            const problem = problemFor('weight', 'decimal');
-            return {...problem, unit: {...problem.unit, symbol: 'g'}};
-        }],
-        ['wrong tick count for decimal', () => ({...problemFor('time', 'decimal'), tickCount: 8})],
-        ['incomplete ticks', () => {
-            const problem = problemFor('money', 'decimal');
-            return {...problem, ticks: problem.ticks.slice(0, -1)};
-        }],
-        ['misindexed tick', () => {
+        ['wrong unit identity', () => ({...problemFor('weight', 'decimal'), unitId: 'gram'})],
+        ['wrong fraction value count', () => {
             const problem = problemFor('length', 'fraction');
-            return {...problem, ticks: problem.ticks.map((tick, index) => index === 2 ? {...tick, index: 3} : tick)};
+            return {...problem, tickValues: problem.tickValues.slice(0, -1)};
+        }],
+        ['wrong decimal value count', () => {
+            const problem = problemFor('time', 'decimal');
+            return {...problem, tickValues: problem.tickValues.slice(0, -1)};
         }],
         ['unequal interval', () => {
             const problem = problemFor('liquid-volume', 'fraction');
-            const tick = problem.ticks[2]!;
             return {
                 ...problem,
-                ticks: problem.ticks.map((item, index) => index === 2
-                    ? {...tick, value: {...tick.value, numerator: tick.value.numerator + 1}}
-                    : item)
+                tickValues: problem.tickValues.map((value, index) => index === 2
+                    ? {...value, numerator: value.numerator + 1}
+                    : value)
             };
         }],
-        ['wrong reference labels', () => ({...problemFor('money', 'fraction'), labeledTickIndices: [0, 2, 4]})],
-        ['labeled target', () => {
-            const problem = problemFor('time', 'fraction');
-            return {...problem, labeledTickIndices: [0, problem.target.index, problem.tickCount]};
-        }],
-        ['wrong decimal trailing precision', () => {
-            const problem = problemFor('money', 'decimal');
-            const target = {...problem.target, value: {...problem.target.value, display: '0.5'}};
-            return {...problem, target};
-        }],
-        ['wrong physical singular endpoint', () => {
-            const problem = problemFor('length', 'decimal');
-            return {...problem, end: {...problem.end, quantityText: '1.0 meters'}};
-        }],
-        ['wrong fraction-dollar wording', () => {
+        ['unreduced fraction', () => {
             const problem = problemFor('money', 'fraction');
-            return {...problem, target: {...problem.target, value: {...problem.target.value, quantityText: '$1/2'}}};
+            return {
+                ...problem,
+                tickValues: problem.tickValues.map((value, index) => index === 2
+                    ? {numerator: value.numerator * 2, denominator: value.denominator * 2}
+                    : value)
+            };
         }],
-        ['wrong prompt', () => ({...problemFor('weight', 'fraction'), prompt: 'Plot the value.'})],
-        ['wrong scale statement', () => ({...problemFor('time', 'decimal'), scaleStatement: 'Use equal intervals.'})],
-        ['wrong answer statement', () => ({...problemFor('money', 'decimal'), answerStatement: 'The point is shown.'})],
-        ['wrong explanation', () => ({...problemFor('liquid-volume', 'fraction'), explanation: 'Count intervals.'})],
-        ['missing target', () => ({...problemFor('length', 'decimal'), target: undefined})]
+        ['wrong decimal denominator', () => {
+            const problem = problemFor('money', 'decimal');
+            return {
+                ...problem,
+                tickValues: problem.tickValues.map((value, index) => index === 2
+                    ? {...value, denominator: 10}
+                    : value)
+            };
+        }],
+        ['negative value', () => {
+            const problem = problemFor('length', 'fraction');
+            return {...problem, tickValues: [{numerator: -1, denominator: 1}, ...problem.tickValues.slice(1)]};
+        }],
+        ['target on first reference tick', () => ({...problemFor('time', 'fraction'), targetIndex: 1})],
+        ['target on endpoint', () => {
+            const problem = problemFor('time', 'decimal');
+            return {...problem, targetIndex: problem.tickValues.length - 1};
+        }],
+        ['missing target index', () => ({...problemFor('length', 'decimal'), targetIndex: undefined})],
+        ['missing tick values', () => ({...problemFor('length', 'decimal'), tickValues: undefined})]
     ])('rejects %s', (_description, build) => {
         expect(isValidMeasurementNumberLineProblem(
             build() as MeasurementNumberLineProblem

@@ -5,7 +5,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-
 import {
     MeasurementNumberLineKind,
     MeasurementNumberLineProblem,
-    MeasurementNumberLineUnit,
+    MeasurementNumberLineUnitId,
     MeasurementNumberLineValue
 } from '../../../types/problems.ts';
 import {
@@ -15,12 +15,12 @@ import {
 
 type NumberKind = MeasurementNumberLineProblem['numberKind'];
 
-const units: Record<MeasurementNumberLineKind, MeasurementNumberLineUnit> = {
-    length: {id: 'meter', singular: 'meter', plural: 'meters', symbol: 'm', symbolPlacement: 'suffix'},
-    time: {id: 'hour', singular: 'hour', plural: 'hours', symbol: 'h', symbolPlacement: 'suffix'},
-    'liquid-volume': {id: 'liter', singular: 'liter', plural: 'liters', symbol: 'L', symbolPlacement: 'suffix'},
-    weight: {id: 'kilogram', singular: 'kilogram', plural: 'kilograms', symbol: 'kg', symbolPlacement: 'suffix'},
-    money: {id: 'dollar', singular: 'dollar', plural: 'dollars', symbol: '$', symbolPlacement: 'prefix'}
+const unitIds: Record<MeasurementNumberLineKind, MeasurementNumberLineUnitId> = {
+    length: 'meter',
+    time: 'hour',
+    'liquid-volume': 'liter',
+    weight: 'kilogram',
+    money: 'dollar'
 };
 
 const unitTags: Record<MeasurementNumberLineKind, Scope | undefined> = {
@@ -40,52 +40,19 @@ const gcd = (a: number, b: number): number => {
     return first;
 };
 
-const formatFraction = (numerator: number, denominator: number): string => {
-    if (numerator === 0) return '0';
-    if (numerator === denominator) return '1';
-    const divisor = gcd(numerator, denominator);
-    return `${numerator / divisor}/${denominator / divisor}`;
-};
-
-const formatDecimal = (numerator: number, denominator: 10 | 100): string => {
-    const digits = denominator === 10 ? 1 : 2;
-    const whole = Math.floor(numerator / denominator);
-    return `${whole}.${String(numerator % denominator).padStart(digits, '0')}`;
-};
-
 const makeValue = (
     numerator: number,
     denominator: number,
-    numberKind: NumberKind,
-    measurementKind: MeasurementNumberLineKind
+    numberKind: NumberKind
 ): MeasurementNumberLineValue => {
-    const unit = units[measurementKind];
     if (numberKind === 'fraction') {
         const divisor = gcd(numerator, denominator);
-        const exact = numerator === 0
+        return numerator === 0
             ? {numerator: 0, denominator: 1}
             : {numerator: numerator / divisor, denominator: denominator / divisor};
-        const display = formatFraction(numerator, denominator);
-        if (measurementKind === 'money') {
-            const quantityText = exact.numerator === 0
-                ? '0 dollars'
-                : exact.numerator === exact.denominator ? '1 dollar' : `${display} of a dollar`;
-            return {...exact, display, quantityText};
-        }
-        const quantityText = exact.numerator === 0
-            ? `0 ${unit.plural}`
-            : exact.numerator === exact.denominator
-                ? `1 ${unit.singular}`
-                : `${display} of ${measurementKind === 'time' ? 'an' : 'a'} ${unit.singular}`;
-        return {...exact, display, quantityText};
     }
 
-    const decimalDenominator = denominator as 10 | 100;
-    const display = formatDecimal(numerator, decimalDenominator);
-    const exact = {numerator, denominator: decimalDenominator};
-    if (measurementKind === 'money') return {...exact, display, quantityText: `$${display}`};
-    const unitName = numerator === decimalDenominator ? unit.singular : unit.plural;
-    return {...exact, display, quantityText: `${display} ${unitName}`};
+    return {numerator, denominator};
 };
 
 const randomInteger = (min: number, max: number): number =>
@@ -131,35 +98,17 @@ export class MeasurementNumberLineGenerator implements ProblemGenerator<
         const increment = numberKind === 'fraction'
             ? 1
             : measurementKind === 'money' ? 10 : 1;
-        const ticks = Array.from({length: tickCount + 1}, (_, index) => ({
-            index,
-            value: makeValue(index * increment, denominator, numberKind, measurementKind)
-        }));
+        const tickValues = Array.from(
+            {length: tickCount + 1},
+            (_, index) => makeValue(index * increment, denominator, numberKind)
+        );
         const targetIndex = randomInteger(2, tickCount - 1);
-        const start = ticks[0]!.value;
-        const end = ticks[tickCount]!.value;
-        const interval = ticks[1]!.value;
-        const target = ticks[targetIndex]!;
-        const prompt = `Plot ${target.value.quantityText} on the number line.`;
-        const scaleStatement = `Each equal interval represents ${interval.quantityText}.`;
-        const answerStatement = `${target.value.quantityText} belongs at tick ${target.index} after zero.`;
-        const explanation = `Starting at zero, count ${target.index} equal intervals of ${interval.quantityText}. The point lands at ${target.value.quantityText}.`;
         const data: MeasurementNumberLineProblem = {
-            task: 'grade4-measurement-number-line',
             measurementKind,
             numberKind,
-            unit: units[measurementKind],
-            tickCount,
-            ticks,
-            labeledTickIndices: [0, 1, tickCount],
-            start,
-            end,
-            interval,
-            target,
-            prompt,
-            scaleStatement,
-            answerStatement,
-            explanation
+            unitId: unitIds[measurementKind],
+            tickValues,
+            targetIndex
         };
         const unitTag = unitTags[measurementKind];
         return unitTag ? {data, tags: [unitTag]} : {data};

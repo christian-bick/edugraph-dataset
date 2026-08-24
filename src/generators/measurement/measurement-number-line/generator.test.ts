@@ -3,8 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
     MeasurementNumberLineKind,
-    MeasurementNumberLineProblem,
-    MeasurementNumberLineValue
+    MeasurementNumberLineProblem
 } from '../../../types/problems.ts';
 import {MeasurementNumberLineGenerator} from './generator.ts';
 import {MeasurementNumberLineGeneratorConfig} from './spec.ts';
@@ -29,72 +28,63 @@ const unitIds = {
     money: 'dollar'
 } as const;
 
-const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
-
-const expectSameValue = (
-    first: MeasurementNumberLineValue,
-    second: MeasurementNumberLineValue
-): void => {
-    expect(first.numerator * second.denominator).toBe(second.numerator * first.denominator);
-};
+const gcd = (a: number, b: number): number => b === 0 ? Math.abs(a) : gcd(b, a % b);
 
 const expectCoherent = (problem: MeasurementNumberLineProblem): void => {
-    expect(problem.task).toBe('grade4-measurement-number-line');
-    expect(problem.unit.id).toBe(unitIds[problem.measurementKind]);
-    expect(problem.ticks).toHaveLength(problem.tickCount + 1);
-    expect(problem.labeledTickIndices).toEqual([0, 1, problem.tickCount]);
-    expect(problem.target.index).toBeGreaterThan(1);
-    expect(problem.target.index).toBeLessThan(problem.tickCount);
-    expect(problem.labeledTickIndices).not.toContain(problem.target.index);
-    expect(problem.target).toEqual(problem.ticks[problem.target.index]);
-    expect(problem.start).toEqual(problem.ticks[0]!.value);
-    expect(problem.end).toEqual(problem.ticks[problem.tickCount]!.value);
-    expect(problem.interval).toEqual(problem.ticks[1]!.value);
+    expect(Object.keys(problem).sort()).toEqual([
+        'measurementKind',
+        'numberKind',
+        'targetIndex',
+        'tickValues',
+        'unitId'
+    ]);
+    expect(problem.unitId).toBe(unitIds[problem.measurementKind]);
 
-    for (const [index, tick] of problem.ticks.entries()) {
-        expect(tick.index).toBe(index);
-        expect(tick.value.numerator * problem.tickCount).toBe(index * tick.value.denominator);
+    const tickCount = problem.tickValues.length - 1;
+    const interval = problem.tickValues[1]!;
+    expect(problem.targetIndex).toBeGreaterThan(1);
+    expect(problem.targetIndex).toBeLessThan(tickCount);
+    expect(problem.tickValues[problem.targetIndex]).toBeDefined();
+
+    for (const [index, value] of problem.tickValues.entries()) {
+        expect(value.numerator * tickCount).toBe(index * value.denominator);
         if (index > 0) {
-            const previous = problem.ticks[index - 1]!.value;
-            const differenceNumerator = tick.value.numerator * previous.denominator
-                - previous.numerator * tick.value.denominator;
-            const differenceDenominator = tick.value.denominator * previous.denominator;
-            expect(differenceNumerator * problem.interval.denominator)
-                .toBe(problem.interval.numerator * differenceDenominator);
+            const previous = problem.tickValues[index - 1]!;
+            const differenceNumerator = value.numerator * previous.denominator
+                - previous.numerator * value.denominator;
+            const differenceDenominator = value.denominator * previous.denominator;
+            expect(differenceNumerator * interval.denominator)
+                .toBe(interval.numerator * differenceDenominator);
         }
     }
 
-    expect(problem.start.numerator).toBe(0);
-    expect(problem.end.numerator).toBe(problem.end.denominator);
-    expect(problem.prompt).toBe(`Plot ${problem.target.value.quantityText} on the number line.`);
-    expect(problem.scaleStatement).toBe(`Each equal interval represents ${problem.interval.quantityText}.`);
-    expect(problem.answerStatement).toBe(`${problem.target.value.quantityText} belongs at tick ${problem.target.index} after zero.`);
-    expect(problem.explanation).toBe(`Starting at zero, count ${problem.target.index} equal intervals of ${problem.interval.quantityText}. The point lands at ${problem.target.value.quantityText}.`);
-    expect(problem.prompt).not.toContain(`tick ${problem.target.index}`);
-    expect(problem.scaleStatement).not.toContain(`tick ${problem.target.index}`);
+    const start = problem.tickValues[0]!;
+    const end = problem.tickValues[tickCount]!;
+    expect(start.numerator).toBe(0);
+    expect(end.numerator).toBe(end.denominator);
 
+    const target = problem.tickValues[problem.targetIndex]!;
     if (problem.numberKind === 'fraction') {
-        expect([4, 8]).toContain(problem.tickCount);
-        expect(problem.target.value.numerator).toBeLessThan(problem.target.value.denominator);
-        expect(problem.target.value.denominator).toBeGreaterThan(1);
-        expect(gcd(problem.target.value.numerator, problem.target.value.denominator)).toBe(1);
-        expect(problem.target.value.display).toBe(`${problem.target.value.numerator}/${problem.target.value.denominator}`);
-        expect(problem.target.value.display).not.toContain('.');
-        if (problem.measurementKind === 'money') {
-            expect(problem.target.value.quantityText).toBe(`${problem.target.value.display} of a dollar`);
+        expect([4, 8]).toContain(tickCount);
+        expect(target.numerator).toBeLessThan(target.denominator);
+        expect(target.denominator).toBeGreaterThan(1);
+        expect(gcd(target.numerator, target.denominator)).toBe(1);
+        expect(start).toEqual({numerator: 0, denominator: 1});
+        expect(end).toEqual({numerator: 1, denominator: 1});
+        for (const value of problem.tickValues) {
+            expect(gcd(value.numerator, value.denominator)).toBe(1);
         }
     } else {
-        expect(problem.tickCount).toBe(10);
+        expect(tickCount).toBe(10);
         const denominator = problem.measurementKind === 'money' ? 100 : 10;
-        expect(problem.interval.denominator).toBe(denominator);
-        expect(problem.interval.numerator).toBe(problem.measurementKind === 'money' ? 10 : 1);
-        for (const {value} of problem.ticks) {
+        expect(interval).toEqual({
+            numerator: problem.measurementKind === 'money' ? 10 : 1,
+            denominator
+        });
+        for (const value of problem.tickValues) {
             expect(value.denominator).toBe(denominator);
-            expect(value.display).toMatch(problem.measurementKind === 'money' ? /^\d+\.\d{2}$/ : /^\d+\.\d$/);
         }
     }
-
-    expectSameValue(problem.target.value, problem.ticks[problem.target.index]!.value);
 };
 
 describe('MeasurementNumberLineGenerator', () => {
@@ -117,7 +107,7 @@ describe('MeasurementNumberLineGenerator', () => {
         })).toThrow('Physical measurement semantics are required');
     });
 
-    it('is deterministic for the complete task identity', () => {
+    it('is deterministic for the complete mathematical identity', () => {
         const config: MeasurementNumberLineGeneratorConfig = {
             measurementKind: 'liquid-volume',
             physicalMeasurement: true,
@@ -149,11 +139,12 @@ describe('MeasurementNumberLineGenerator', () => {
         const counts = new Set<number>();
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            counts.add(generator.generate({
+            const data = generator.generate({
                 measurementKind: 'length',
                 physicalMeasurement: true,
                 numberKind: 'fraction'
-            }).data.tickCount);
+            }).data;
+            counts.add(data.tickValues.length - 1);
         }
         expect(counts).toEqual(new Set([4, 8]));
     });
@@ -177,27 +168,30 @@ describe('MeasurementNumberLineGenerator', () => {
         }
     });
 
-    it('authors grammatical proper-fraction and decimal endpoint quantities', () => {
-        for (const measurementKind of measurementKinds.filter(kind => kind !== 'money')) {
-            setSeed(`${measurementKind}-fraction-grammar`);
-            const fraction = generator.generate({
-                measurementKind,
-                physicalMeasurement: true,
-                numberKind: 'fraction'
-            }).data;
-            expect(fraction.target.value.quantityText)
-                .toBe(`${fraction.target.value.display} of ${measurementKind === 'time' ? 'an' : 'a'} ${fraction.unit.singular}`);
-            expect(fraction.prompt).toContain(fraction.target.value.quantityText);
-            expect(fraction.scaleStatement).toContain(fraction.interval.quantityText);
-            expect(fraction.answerStatement).toContain(fraction.target.value.quantityText);
-
-            setSeed(`${measurementKind}-decimal-grammar`);
-            const decimal = generator.generate({
-                measurementKind,
-                physicalMeasurement: true,
-                numberKind: 'decimal'
-            }).data;
-            expect(decimal.end.quantityText).toBe(`1.0 ${decimal.unit.singular}`);
+    it('keeps presentation fields out of the canonical payload', () => {
+        setSeed('canonical-contract');
+        const data = generator.generate({
+            measurementKind: 'time',
+            physicalMeasurement: true,
+            numberKind: 'fraction'
+        }).data;
+        for (const field of [
+            'task',
+            'unit',
+            'tickCount',
+            'ticks',
+            'labeledTickIndices',
+            'start',
+            'end',
+            'interval',
+            'target',
+            'prompt',
+            'scaleStatement',
+            'answerStatement',
+            'explanation'
+        ]) {
+            expect(data).not.toHaveProperty(field);
         }
+        expect(data.tickValues.every(value => Object.keys(value).length === 2)).toBe(true);
     });
 });

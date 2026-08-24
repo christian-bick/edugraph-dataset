@@ -684,37 +684,20 @@ export type MeasurementWordProblemGrade4 =
     | MeasurementWordProblemDivision;
 
 export type MeasurementNumberLineKind = MeasurementWordProblemKind;
-export type MeasurementNumberLineUnit = MeasurementWordProblemUnit;
+export type MeasurementNumberLineUnitId = MeasurementWordProblemUnitId;
 
 /** Exact number-line value. Its numeric value is numerator / denominator. */
 export type MeasurementNumberLineValue = {
     numerator: number;
     denominator: number;
-    display: string;
-    quantityText: string;
-};
-
-export type MeasurementNumberLineTick = {
-    index: number;
-    value: MeasurementNumberLineValue;
 };
 
 export type MeasurementNumberLineProblem = {
-    task: 'grade4-measurement-number-line';
     measurementKind: MeasurementNumberLineKind;
     numberKind: 'fraction' | 'decimal';
-    unit: MeasurementNumberLineUnit;
-    tickCount: 4 | 8 | 10;
-    ticks: readonly MeasurementNumberLineTick[];
-    labeledTickIndices: readonly [number, number, number];
-    start: MeasurementNumberLineValue;
-    end: MeasurementNumberLineValue;
-    interval: MeasurementNumberLineValue;
-    target: MeasurementNumberLineTick;
-    prompt: string;
-    scaleStatement: string;
-    answerStatement: string;
-    explanation: string;
+    unitId: MeasurementNumberLineUnitId;
+    tickValues: readonly MeasurementNumberLineValue[];
+    targetIndex: number;
 };
 
 export type MeasurementLengthDifferenceProblem = {

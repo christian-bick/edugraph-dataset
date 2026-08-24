@@ -3,6 +3,8 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
+    formatMeasurementNumberLineValue,
+    getMeasurementNumberLinePresentation,
     getMeasurementPointLabelX,
     isValidMeasurementNumberLineProblem
 } from './helpers.ts';
@@ -31,21 +33,11 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData(VIEW_ID, data, [
-        'task',
         'measurementKind',
         'numberKind',
-        'unit',
-        'tickCount',
-        'ticks',
-        'labeledTickIndices',
-        'start',
-        'end',
-        'interval',
-        'target',
-        'prompt',
-        'scaleStatement',
-        'answerStatement',
-        'explanation'
+        'unitId',
+        'tickValues',
+        'targetIndex'
     ]);
     if (!isValidMeasurementNumberLineProblem(data)) {
         throw new ViewValidationError(
@@ -54,9 +46,10 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
         );
     }
 
+    const presentation = getMeasurementNumberLinePresentation(data);
     const toX = (index: number): number => LEFT
-        + index / data.tickCount * (RIGHT - LEFT);
-    const targetX = toX(data.target.index);
+        + index / presentation.tickCount * (RIGHT - LEFT);
+    const targetX = toX(data.targetIndex);
     const targetLabelX = getMeasurementPointLabelX(targetX, LEFT, RIGHT);
 
     return (
@@ -76,17 +69,17 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
             </div>
 
             <div className="mt-4 text-center text-[1.5rem] font-extrabold leading-relaxed text-slate-900">
-                {data.prompt}
+                {presentation.prompt}
             </div>
             <div className="mt-2 rounded-lg bg-blue-50 px-4 py-3 text-center text-base font-semibold text-blue-950">
-                {data.scaleStatement}
+                {presentation.scaleStatement}
             </div>
 
             <svg
                 viewBox="0 0 840 300"
                 className="mt-1 h-[300px] w-full"
                 role="img"
-                aria-label={`Equal-interval number line in ${data.unit.plural}`}
+                aria-label={`Equal-interval number line in ${presentation.unit.plural}`}
             >
                 <line
                     x1={LEFT}
@@ -98,12 +91,12 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
                     strokeLinecap="round"
                 />
 
-                {data.ticks.map(tick => {
-                    const x = toX(tick.index);
-                    const labeled = data.labeledTickIndices.includes(tick.index);
-                    const endpoint = tick.index === 0 || tick.index === data.tickCount;
+                {data.tickValues.map((value, index) => {
+                    const x = toX(index);
+                    const labeled = index === 0 || index === 1 || index === presentation.tickCount;
+                    const endpoint = index === 0 || index === presentation.tickCount;
                     return (
-                        <g key={tick.index}>
+                        <g key={index}>
                             <line
                                 x1={x}
                                 y1={AXIS_Y - (labeled ? 16 : 10)}
@@ -116,10 +109,10 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
                                 <text
                                     x={x}
                                     y={AXIS_Y + 44}
-                                    textAnchor={endpoint ? tick.index === 0 ? 'start' : 'end' : 'middle'}
+                                    textAnchor={endpoint ? index === 0 ? 'start' : 'end' : 'middle'}
                                     className="fill-slate-800 text-[18px] font-bold"
                                 >
-                                    {tick.value.display}
+                                    {formatMeasurementNumberLineValue(value, data.numberKind)}
                                 </text>
                             )}
                         </g>
@@ -132,7 +125,7 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
                     textAnchor="middle"
                     className="fill-slate-600 text-[16px] font-semibold"
                 >
-                    Scale in {data.unit.plural} ({data.unit.symbol})
+                    Scale in {presentation.unit.plural} ({presentation.unit.symbol})
                 </text>
 
                 {isSolutionView && (
@@ -161,7 +154,7 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
                             textAnchor="middle"
                             className="fill-blue-800 text-[18px] font-extrabold"
                         >
-                            {data.target.value.quantityText}
+                            {presentation.targetQuantity}
                         </text>
                         <circle cx={targetX} cy={AXIS_Y} r="12" fill="#2563eb" stroke="white" strokeWidth="4" />
                     </>
@@ -170,9 +163,9 @@ const MeasurementNumberLineCore = ({config: _config, payload}: CoreProps) => {
 
             {isSolutionView ? (
                 <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-center text-emerald-950">
-                    <div className="text-xl font-extrabold">{data.answerStatement}</div>
+                    <div className="text-xl font-extrabold">{presentation.answerStatement}</div>
                     <div className="mt-2 text-base font-semibold leading-relaxed text-emerald-900">
-                        {data.explanation}
+                        {presentation.explanation}
                     </div>
                 </div>
             ) : (
