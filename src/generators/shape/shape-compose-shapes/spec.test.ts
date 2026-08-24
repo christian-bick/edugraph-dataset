@@ -28,7 +28,7 @@ describe('ShapeComposeShapesGenerator spec integration', () => {
             Scope.SingleLevelComposition
         ])!;
 
-        expect(stub.data.target).toBe('rectangle');
+        expect(stub.data.compositionTree.shape).toBe('rectangle');
         expect(stub.data.compositionDepth).toBe(1);
         expect(stub.tags).toEqual(expect.arrayContaining([
             Area.Rectangle,
@@ -44,8 +44,9 @@ describe('ShapeComposeShapesGenerator spec integration', () => {
             Scope.MultiLevelComposition
         ])!;
 
-        expect(stub.data.target).toBe('hexagon');
-        expect(stub.data.components).toEqual(['trapezoid', 'trapezoid']);
+        expect(stub.data.compositionTree.shape).toBe('hexagon');
+        expect(stub.data.compositionTree.inputs.map(input => input.shape))
+            .toEqual(['trapezoid', 'trapezoid']);
         expect(stub.data.compositionDepth).toBe(2);
         expect(stub.tags).toEqual(expect.arrayContaining([
             Area.Hexagon,

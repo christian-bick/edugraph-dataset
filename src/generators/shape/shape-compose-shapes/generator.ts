@@ -4,6 +4,9 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-
 import {
     ShapeCompositionComposite,
     ShapeCompositionNode,
+    ShapeCompositionRoot,
+    ShapeCompositionShapeId,
+    ShapeCompositionTargetId,
     ShapeComposeShapesProblem
 } from '../../../types/problems.ts';
 import {
@@ -15,52 +18,45 @@ type CompositionStructure =
     | typeof Scope.SingleLevelComposition
     | typeof Scope.MultiLevelComposition;
 
-interface CompositionRecipe {
-    tree: ShapeCompositionComposite;
-    distractor: string;
-}
-
-const NUMBER_WORDS: Readonly<Record<number, string>> = {
-    2: 'Two',
-    3: 'Three',
-    6: 'Six'
-};
-
-const ONTOLOGY_LABEL_BY_SHAPE: Readonly<Record<string, string>> = {
+const ONTOLOGY_LABEL_BY_SHAPE: Readonly<Partial<Record<ShapeCompositionShapeId, string>>> = {
     triangle: Area.Triangle,
-    'smaller triangle': Area.Triangle,
-    'tiny triangle': Area.Triangle,
+    'small-triangle': Area.Triangle,
+    'tiny-triangle': Area.Triangle,
     square: Area.Square,
     rectangle: Area.Rectangle,
     hexagon: Area.Hexagon,
     trapezoid: Area.Trapezoid,
-    'half circle': Area.HalfCircle,
-    'quarter circle': Area.QuarterCircle,
+    'half-circle': Area.HalfCircle,
+    'quarter-circle': Area.QuarterCircle,
     cube: Area.Cube,
-    'smaller cube': Area.Cube,
-    'rectangular prism': Area.RectangularPrism,
+    'small-cube': Area.Cube,
+    'rectangular-prism': Area.RectangularPrism,
     cone: Area.Cone,
     cylinder: Area.Cylinder,
-    'shorter cylinder': Area.Cylinder,
-    'cylinder segment': Area.Cylinder
+    'short-cylinder': Area.Cylinder,
+    'cylinder-segment': Area.Cylinder
 };
 
-function primitive(shape: string): ShapeCompositionNode {
+function primitive(shape: ShapeCompositionShapeId): ShapeCompositionNode {
     return {kind: 'primitive', shape};
 }
 
-function composite(shape: string, inputs: ShapeCompositionNode[]): ShapeCompositionComposite {
+function composite(shape: ShapeCompositionShapeId, inputs: ShapeCompositionNode[]): ShapeCompositionComposite {
     return {kind: 'composite', shape, inputs};
 }
 
-function repeatedPrimitive(shape: string, count: number): ShapeCompositionNode[] {
+function root(shape: ShapeCompositionTargetId, inputs: ShapeCompositionNode[]): ShapeCompositionRoot {
+    return {kind: 'composite', shape, inputs};
+}
+
+function repeatedPrimitive(shape: ShapeCompositionShapeId, count: number): ShapeCompositionNode[] {
     return Array.from({length: count}, () => primitive(shape));
 }
 
 function repeatedComposite(
-    shape: string,
+    shape: ShapeCompositionShapeId,
     count: number,
-    primitiveShape: string,
+    primitiveShape: ShapeCompositionShapeId,
     primitiveCount: number
 ): ShapeCompositionNode[] {
     return Array.from({length: count}, () =>
@@ -80,7 +76,7 @@ function isValidNode(node: ShapeCompositionNode): boolean {
 }
 
 function isValidTreeForStructure(
-    tree: ShapeCompositionComposite,
+    tree: ShapeCompositionRoot,
     structure: CompositionStructure
 ): boolean {
     if (!isValidNode(tree)) return false;
@@ -93,17 +89,8 @@ function isValidTreeForStructure(
     return depth === 2 && tree.inputs.some(input => input.kind === 'composite');
 }
 
-function describeInputs(inputs: ShapeCompositionNode[]): string | null {
-    const shapes = new Set(inputs.map(input => input.shape));
-    if (shapes.size !== 1) return null;
-
-    const countWord = NUMBER_WORDS[inputs.length];
-    if (!countWord) return null;
-    return `${countWord} ${inputs[0].shape}s`;
-}
-
 function collectComponentTags(
-    tree: ShapeCompositionComposite,
+    tree: ShapeCompositionRoot,
     configuredTarget: string
 ): string[] {
     const tags = new Set<string>();
@@ -118,151 +105,102 @@ function collectComponentTags(
     return [...tags];
 }
 
-function singleLevelRecipe(label: string): CompositionRecipe | null {
+function singleLevelComposition(label: string): ShapeCompositionRoot | null {
     if (label === Area.Rectangle) {
-        return recipe(composite('rectangle', repeatedPrimitive('triangle', 2)), 'Two circles');
+        return root('rectangle', repeatedPrimitive('triangle', 2));
     }
     if (label === Area.Square) {
-        return recipe(composite('square', repeatedPrimitive('triangle', 2)), 'Two circles');
+        return root('square', repeatedPrimitive('triangle', 2));
     }
     if (label === Area.Triangle) {
-        return recipe(composite('triangle', repeatedPrimitive('smaller triangle', 2)), 'Two squares');
+        return root('triangle', repeatedPrimitive('small-triangle', 2));
     }
     if (label === Area.Hexagon) {
-        return recipe(composite('hexagon', repeatedPrimitive('triangle', 6)), 'Six circles');
+        return root('hexagon', repeatedPrimitive('triangle', 6));
     }
     if (label === Area.Trapezoid) {
-        return recipe(composite('trapezoid', repeatedPrimitive('triangle', 3)), 'Three squares');
+        return root('trapezoid', repeatedPrimitive('triangle', 3));
     }
     if (label === Area.HalfCircle) {
-        return recipe(
-            composite('half circle', repeatedPrimitive('quarter circle', 2)),
-            'Two triangles'
-        );
+        return root('half-circle', repeatedPrimitive('quarter-circle', 2));
     }
     if (label === Area.QuarterCircle) {
-        return recipe(
-            composite('quarter circle', repeatedPrimitive('eighth-circle piece', 2)),
-            'Two squares'
-        );
+        return root('quarter-circle', repeatedPrimitive('eighth-circle-piece', 2));
     }
     if (label === Area.Cube) {
-        return recipe(
-            composite('cube', repeatedPrimitive('rectangular prism', 2)),
-            'Two cones'
-        );
+        return root('cube', repeatedPrimitive('rectangular-prism', 2));
     }
     if (label === Area.RectangularPrism) {
-        return recipe(
-            composite('rectangular prism', repeatedPrimitive('cube', 2)),
-            'Two spheres'
-        );
+        return root('rectangular-prism', repeatedPrimitive('cube', 2));
     }
     if (label === Area.Cone) {
-        return recipe(composite('cone', repeatedPrimitive('half-cone', 2)), 'Two cylinders');
+        return root('cone', repeatedPrimitive('half-cone', 2));
     }
     if (label === Area.Cylinder) {
-        return recipe(
-            composite('cylinder', repeatedPrimitive('shorter cylinder', 2)),
-            'Two cones'
-        );
+        return root('cylinder', repeatedPrimitive('short-cylinder', 2));
     }
     return null;
 }
 
-function multiLevelRecipe(label: string): CompositionRecipe | null {
+function multiLevelComposition(label: string): ShapeCompositionRoot | null {
     if (label === Area.Rectangle) {
-        return recipe(
-            composite('rectangle', repeatedComposite('square', 2, 'triangle', 2)),
-            'Two circles'
-        );
+        return root('rectangle', repeatedComposite('square', 2, 'triangle', 2));
     }
     if (label === Area.Square) {
-        return recipe(
-            composite('square', repeatedComposite('rectangle', 2, 'triangle', 2)),
-            'Two circles'
-        );
+        return root('square', repeatedComposite('rectangle', 2, 'triangle', 2));
     }
     if (label === Area.Triangle) {
-        return recipe(
-            composite(
-                'triangle',
-                repeatedComposite('smaller triangle', 2, 'tiny triangle', 2)
-            ),
-            'Two squares'
+        return root(
+            'triangle',
+            repeatedComposite('small-triangle', 2, 'tiny-triangle', 2)
         );
     }
     if (label === Area.Hexagon) {
-        return recipe(
-            composite('hexagon', repeatedComposite('trapezoid', 2, 'triangle', 3)),
-            'Two circles'
-        );
+        return root('hexagon', repeatedComposite('trapezoid', 2, 'triangle', 3));
     }
     if (label === Area.Trapezoid) {
-        return recipe(
-            composite(
-                'trapezoid',
-                repeatedComposite('triangle', 3, 'smaller triangle', 2)
-            ),
-            'Three squares'
+        return root(
+            'trapezoid',
+            repeatedComposite('triangle', 3, 'small-triangle', 2)
         );
     }
     if (label === Area.HalfCircle) {
-        return recipe(
-            composite(
-                'half circle',
-                repeatedComposite('quarter circle', 2, 'eighth-circle piece', 2)
-            ),
-            'Two triangles'
+        return root(
+            'half-circle',
+            repeatedComposite('quarter-circle', 2, 'eighth-circle-piece', 2)
         );
     }
     if (label === Area.QuarterCircle) {
-        return recipe(
-            composite(
-                'quarter circle',
-                repeatedComposite('eighth-circle piece', 2, 'sixteenth-circle piece', 2)
-            ),
-            'Two squares'
+        return root(
+            'quarter-circle',
+            repeatedComposite('eighth-circle-piece', 2, 'sixteenth-circle-piece', 2)
         );
     }
     if (label === Area.Cube) {
-        return recipe(
-            composite(
-                'cube',
-                repeatedComposite('rectangular prism', 2, 'smaller cube', 4)
-            ),
-            'Two cones'
+        return root(
+            'cube',
+            repeatedComposite('rectangular-prism', 2, 'small-cube', 4)
         );
     }
     if (label === Area.RectangularPrism) {
-        return recipe(
-            composite(
-                'rectangular prism',
-                repeatedComposite('cube', 2, 'smaller cube', 8)
-            ),
-            'Two spheres'
+        return root(
+            'rectangular-prism',
+            repeatedComposite('cube', 2, 'small-cube', 8)
         );
     }
     if (label === Area.Cone) {
-        return recipe(
-            composite('cone', repeatedComposite('half-cone', 2, 'quarter-cone piece', 2)),
-            'Two cylinders'
+        return root(
+            'cone',
+            repeatedComposite('half-cone', 2, 'quarter-cone-piece', 2)
         );
     }
     if (label === Area.Cylinder) {
-        return recipe(
-            composite(
-                'cylinder',
-                repeatedComposite('shorter cylinder', 2, 'cylinder segment', 2)
-            ),
-            'Two cones'
+        return root(
+            'cylinder',
+            repeatedComposite('short-cylinder', 2, 'cylinder-segment', 2)
         );
     }
     return null;
-}
-
-function recipe(tree: ShapeCompositionComposite, distractor: string): CompositionRecipe {
-    return {tree, distractor};
 }
 
 export class ShapeComposeShapesGenerator implements ProblemGenerator<
@@ -286,26 +224,19 @@ export class ShapeComposeShapesGenerator implements ProblemGenerator<
             structure !== Scope.MultiLevelComposition
         ) return null;
 
-        const recipe = structure === Scope.SingleLevelComposition
-            ? singleLevelRecipe(config.classify!)
-            : multiLevelRecipe(config.classify!);
-        if (!recipe || !isValidTreeForStructure(recipe.tree, structure)) return null;
+        const compositionTree = structure === Scope.SingleLevelComposition
+            ? singleLevelComposition(config.classify!)
+            : multiLevelComposition(config.classify!);
+        if (!compositionTree || !isValidTreeForStructure(compositionTree, structure)) return null;
 
-        const answer = describeInputs(recipe.tree.inputs);
-        if (!answer) return null;
-
-        const compositionDepth = getCompositionDepth(recipe.tree);
+        const compositionDepth = getCompositionDepth(compositionTree);
         if (compositionDepth !== 1 && compositionDepth !== 2) return null;
 
-        const componentTags = collectComponentTags(recipe.tree, config.classify!);
+        const componentTags = collectComponentTags(compositionTree, config.classify!);
 
         return {
             data: {
-                target: recipe.tree.shape,
-                components: recipe.tree.inputs.map(input => input.shape),
-                options: [answer, recipe.distractor],
-                answer,
-                compositionTree: recipe.tree,
+                compositionTree,
                 compositionDepth
             },
             tags: componentTags.length > 0 ? componentTags : undefined

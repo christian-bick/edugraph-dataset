@@ -11,10 +11,10 @@ const SHAPE_CASES = [
     [Area.Triangle, 'triangle'],
     [Area.Hexagon, 'hexagon'],
     [Area.Trapezoid, 'trapezoid'],
-    [Area.HalfCircle, 'half circle'],
-    [Area.QuarterCircle, 'quarter circle'],
+    [Area.HalfCircle, 'half-circle'],
+    [Area.QuarterCircle, 'quarter-circle'],
     [Area.Cube, 'cube'],
-    [Area.RectangularPrism, 'rectangular prism'],
+    [Area.RectangularPrism, 'rectangular-prism'],
     [Area.Cone, 'cone'],
     [Area.Cylinder, 'cylinder']
 ] as const;
@@ -54,16 +54,23 @@ describe('ShapeComposeShapesGenerator', () => {
         })).toThrow(GeneratorValidationError);
     });
 
-    it('preserves the legacy single-level rectangle projection', () => {
+    it('returns only the canonical composition tree and its calculated depth', () => {
         const stub = generator.generate({
             classify: Area.Rectangle,
             compositionStructure: Scope.SingleLevelComposition
         })!;
 
-        expect(stub.data.target).toBe('rectangle');
-        expect(stub.data.components).toEqual(['triangle', 'triangle']);
-        expect(stub.data.options).toEqual(['Two triangles', 'Two circles']);
-        expect(stub.data.answer).toBe('Two triangles');
+        expect(stub.data).toEqual({
+            compositionTree: {
+                kind: 'composite',
+                shape: 'rectangle',
+                inputs: [
+                    {kind: 'primitive', shape: 'triangle'},
+                    {kind: 'primitive', shape: 'triangle'}
+                ]
+            },
+            compositionDepth: 1
+        });
     });
 
     it.each(SHAPE_CASES)(
@@ -74,18 +81,13 @@ describe('ShapeComposeShapesGenerator', () => {
                 compositionStructure: Scope.SingleLevelComposition
             })!;
 
-            expect(stub.data.target).toBe(target);
             expect(stub.data.compositionTree.shape).toBe(target);
             expect(stub.data.compositionDepth).toBe(1);
             expect(depth(stub.data.compositionTree)).toBe(1);
             expect(stub.data.compositionTree.inputs.every(
                 input => input.kind === 'primitive'
             )).toBe(true);
-            expect(stub.data.components).toEqual(
-                stub.data.compositionTree.inputs.map(input => input.shape)
-            );
-            expect(stub.data.options).toHaveLength(2);
-            expect(stub.data.options).toContain(stub.data.answer);
+            expect(Object.keys(stub.data).sort()).toEqual(['compositionDepth', 'compositionTree']);
             expectValidRecursiveTree(stub.data.compositionTree);
         }
     );
@@ -98,18 +100,13 @@ describe('ShapeComposeShapesGenerator', () => {
                 compositionStructure: Scope.MultiLevelComposition
             })!;
 
-            expect(stub.data.target).toBe(target);
             expect(stub.data.compositionTree.shape).toBe(target);
             expect(stub.data.compositionDepth).toBe(2);
             expect(depth(stub.data.compositionTree)).toBe(2);
             expect(stub.data.compositionTree.inputs.some(
                 input => input.kind === 'composite'
             )).toBe(true);
-            expect(stub.data.components).toEqual(
-                stub.data.compositionTree.inputs.map(input => input.shape)
-            );
-            expect(stub.data.options).toHaveLength(2);
-            expect(stub.data.options).toContain(stub.data.answer);
+            expect(Object.keys(stub.data).sort()).toEqual(['compositionDepth', 'compositionTree']);
             expectValidRecursiveTree(stub.data.compositionTree);
         }
     );

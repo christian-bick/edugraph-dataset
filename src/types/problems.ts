@@ -1253,26 +1253,51 @@ export type ShapeBuildShapeProblem =
     | ShapeAttributeSpecificationProblem
     | ShapeAttributeCountSpecificationProblem;
 
+export type ShapeCompositionTargetId =
+    | 'rectangle'
+    | 'square'
+    | 'triangle'
+    | 'hexagon'
+    | 'trapezoid'
+    | 'half-circle'
+    | 'quarter-circle'
+    | 'cube'
+    | 'rectangular-prism'
+    | 'cone'
+    | 'cylinder';
+
+export type ShapeCompositionComponentId =
+    | 'small-triangle'
+    | 'tiny-triangle'
+    | 'eighth-circle-piece'
+    | 'sixteenth-circle-piece'
+    | 'small-cube'
+    | 'half-cone'
+    | 'quarter-cone-piece'
+    | 'short-cylinder'
+    | 'cylinder-segment';
+
+export type ShapeCompositionShapeId = ShapeCompositionTargetId | ShapeCompositionComponentId;
+
 export type ShapeCompositionLeaf = {
     kind: 'primitive';
-    shape: string;
+    shape: ShapeCompositionShapeId;
 };
 
 export type ShapeCompositionComposite = {
     kind: 'composite';
-    shape: string;
+    shape: ShapeCompositionShapeId;
     inputs: ShapeCompositionNode[];
 };
 
 export type ShapeCompositionNode = ShapeCompositionLeaf | ShapeCompositionComposite;
 
+export type ShapeCompositionRoot = ShapeCompositionComposite & {
+    shape: ShapeCompositionTargetId;
+};
+
 export type ShapeComposeShapesProblem = {
-    target: string;
-    /** Compatibility projection of the authoritative tree's direct inputs. */
-    components: string[];
-    options: string[];
-    answer: string;
-    compositionTree: ShapeCompositionComposite;
+    compositionTree: ShapeCompositionRoot;
     /** Primitive leaves have depth 0; a composite adds one to its deepest input. */
     compositionDepth: 1 | 2;
 };
