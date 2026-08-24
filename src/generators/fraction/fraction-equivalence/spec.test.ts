@@ -59,8 +59,8 @@ describe('FractionEquivalenceGenerator spec integration', () => {
     });
 
     it.each([
-        [Scope.VisualNumbers, 'd2b490fc'],
-        [Scope.Numberline, '9db6415f']
+        [Scope.VisualNumbers, '88c0220c'],
+        [Scope.Numberline, 'abb860af']
     ] as const)('uses a deterministic seeded scaling model for the Grade 4 %s target', (representation, hash) => {
         const labels = [
             Area.FractionEquivalence,
@@ -68,6 +68,7 @@ describe('FractionEquivalenceGenerator spec integration', () => {
             Area.Multiplication,
             Scope.EqualShares,
             Scope.Equal,
+            Scope.TenthFractions,
             Scope.SingleFrameOfReference,
             Ability.ProcedureUnderstanding,
             Ability.Formalization,
@@ -81,15 +82,12 @@ describe('FractionEquivalenceGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(repeated!.data).toEqual(stub!.data);
-        expect([
-            'relate-equivalent-fractions',
-            'tenths-to-hundredths'
-        ]).toContain(stub!.data.task);
-        if (stub!.data.task === 'represent-whole-as-fraction') {
-            throw new Error('Expected a proper-fraction multiplication model.');
+        if (stub!.data.task !== 'tenths-to-hundredths') {
+            throw new Error('Expected the exact 10-to-100 denominator relation.');
         }
-        expect([2, 3, 4, 10]).toContain(stub!.data.scaleFactor);
+        expect(stub!.data.scaleFactor).toBe(10);
         expect(stub!.tags).toContain(Area.Multiplication);
+        expect(stub!.tags).toContain(Scope.TenthFractions);
         expect(stub!.tags).not.toContain(Ability.ProcedureUnderstanding);
         expect(stub!.tags).not.toContain(Ability.Formalization);
         expect(stub!.tags).not.toContain(Scope.SingleFrameOfReference);
@@ -103,11 +101,12 @@ describe('FractionEquivalenceGenerator spec integration', () => {
             Area.Multiplication,
             Scope.EqualShares,
             Scope.Equal,
+            Scope.TenthFractions,
             Scope.SingleFrameOfReference,
             Scope.VisualNumbers,
             Ability.Formalization
         ];
-        expect(labelSetHash(labels)).toBe('4b26e9d5');
+        expect(labelSetHash(labels)).toBe('121d8895');
         setSeed('shared-base-ten-model');
         const formalization = generateWithLabels(generator, labels);
         setSeed('shared-base-ten-model');

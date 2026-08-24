@@ -638,6 +638,7 @@ const tenthsToHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Multiplication,
     Scope.EqualShares,
     Scope.Equal,
+    Scope.TenthFractions,
     Scope.SingleFrameOfReference,
     Scope.VisualNumbers,
     Ability.Formalization

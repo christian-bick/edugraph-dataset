@@ -36,17 +36,18 @@ const generateAddition = (
 };
 
 const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view'): TenthsToHundredthsProblem => {
-    for (let attempt = 0; attempt < 50; attempt++) {
-        setSeed(`${seed}-${attempt}`);
-        const data = new FractionEquivalenceGenerator().generate({
-            usesMultiplication: true,
-            usesEqualShares: true,
-            usesImproperFractions: false,
-            usesIntegerNumbers: false
-        }).data;
-        if (data.task === 'tenths-to-hundredths') return data;
+    setSeed(seed);
+    const data = new FractionEquivalenceGenerator().generate({
+        usesMultiplication: true,
+        usesEqualShares: true,
+        usesImproperFractions: false,
+        usesIntegerNumbers: false,
+        usesTenthFractions: true
+    }).data;
+    if (data.task !== 'tenths-to-hundredths') {
+        throw new Error('Expected a tenths-to-hundredths payload.');
     }
-    throw new Error('Expected seeded generation to produce a tenths-to-hundredths payload.');
+    return data;
 };
 
 describe('tenths/hundredths view contract', () => {
@@ -54,7 +55,7 @@ describe('tenths/hundredths view contract', () => {
         expect(CompatibilityTenthsHundredthsGrid).toBe(SharedTenthsHundredthsGrid);
     });
 
-    it('accepts generator-supplied 1×10 and 10×10 shared-whole models', () => {
+    it('accepts canonical numeric relations from which views derive both grids', () => {
         let sawWholeEquivalence = false;
         let sawOneHundredth = false;
         let sawBoundaryCrossing = false;
@@ -77,12 +78,11 @@ describe('tenths/hundredths view contract', () => {
         });
     });
 
-    it('rejects contradictory scaling and grid evidence', () => {
+    it('rejects contradictory canonical scaling evidence', () => {
         const mutations: Array<(data: TenthsToHundredthsProblem) => void> = [
             data => { data.hundredths.numerator += 1; },
-            data => { data.models.hundredths.cells[10]!.column += 1; },
-            data => { data.models.hundredths.cells[0]!.shaded = false; },
-            data => { data.models.hundredths.cells[0]!.tenthGroupIndex = 2; }
+            data => { data.scaleFactor = 2 as never; },
+            data => { data.relation = 'less' as never; }
         ];
         for (const mutate of mutations) {
             const data = structuredClone(generateEquivalence());

@@ -12,7 +12,7 @@ import {
     FractionEquivalenceGeneratorConfig,
     FractionEquivalenceGeneratorSchema
 } from './spec.ts';
-import {toDecimalFraction, toTenthsHundredthsGrid} from '../tenths-hundredths.ts';
+import {toDecimalFraction} from '../tenths-hundredths.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
 const SCALE_FACTORS = [2, 3, 4] as const;
@@ -56,10 +56,6 @@ const generateTenthsToHundredths = (): TenthsToHundredthsProblem => {
         hundredths,
         scaleFactor: 10,
         sharedWhole: 1,
-        models: {
-            tenths: toTenthsHundredthsGrid(numerator, 10),
-            hundredths: toTenthsHundredthsGrid(scaledNumerator, 100)
-        },
         relation: 'equal'
     };
 };
@@ -92,10 +88,12 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
             'usesMultiplication',
             'usesEqualShares',
             'usesImproperFractions',
-            'usesIntegerNumbers'
+            'usesIntegerNumbers',
+            'usesTenthFractions'
         ]);
 
         const usesMultiplication = config.usesMultiplication === true;
+        const usesTenthFractions = config.usesTenthFractions === true;
         const usesProperFractionMode = config.usesEqualShares === true
             && config.usesImproperFractions === false
             && config.usesIntegerNumbers === false;
@@ -104,13 +102,19 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
             && config.usesIntegerNumbers === true;
 
         if (usesProperFractionMode) {
-            const data = usesMultiplication && random() < 0.5
+            if (usesTenthFractions && !usesMultiplication) {
+                throw new GeneratorValidationError(
+                    'fraction-equivalence',
+                    'TenthFractions requires Multiplication to express the 10-to-100 denominator relation.'
+                );
+            }
+            const data = usesTenthFractions
                 ? generateTenthsToHundredths()
                 : generateProperEquivalence();
             return {data};
         }
 
-        if (usesWholeNumberMode && !usesMultiplication) {
+        if (usesWholeNumberMode && !usesMultiplication && !usesTenthFractions) {
             const wholeNumber = randomItem(WHOLE_NUMBERS);
             const denominator = randomItem(DENOMINATORS);
             const fraction = toFractionValue(wholeNumber * denominator, denominator);
@@ -127,7 +131,7 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
 
         throw new GeneratorValidationError(
             'fraction-equivalence',
-            'Select EqualShares for proper-fraction equivalence, or select ImproperFractions and IntegerNumbers for whole-number equivalence.'
+            'Select EqualShares for proper-fraction equivalence, or select ImproperFractions and IntegerNumbers for whole-number equivalence. TenthFractions is only supported with Multiplication and EqualShares.'
         );
     }
 }

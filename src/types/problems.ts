@@ -1391,10 +1391,6 @@ export type TenthsToHundredthsProblem = {
     hundredths: DecimalFractionValue & {denominator: 100};
     scaleFactor: 10;
     sharedWhole: 1;
-    models: {
-        tenths: TenthsHundredthsGridModel;
-        hundredths: TenthsHundredthsGridModel;
-    };
     relation: 'equal';
 };
 

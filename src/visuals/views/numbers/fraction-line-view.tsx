@@ -468,7 +468,6 @@ export const FractionLineView = ({mode, payload}: FractionLineViewProps) => {
             'hundredths',
             'scaleFactor',
             'sharedWhole',
-            'models',
             'relation'
         ]);
         const formalizationOnly = mode === 'formalization';

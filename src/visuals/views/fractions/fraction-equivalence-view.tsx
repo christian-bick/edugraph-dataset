@@ -76,7 +76,6 @@ export const FractionEquivalenceView = ({mode, payload, viewId}: FractionEquival
             'hundredths',
             'scaleFactor',
             'sharedWhole',
-            'models',
             'relation'
         ]);
         if (!isValidTenthsToHundredthsProblem(data)) {

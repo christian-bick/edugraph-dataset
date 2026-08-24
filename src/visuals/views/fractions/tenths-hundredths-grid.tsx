@@ -6,7 +6,8 @@ import {TenthsHundredthsAdditionPresentation} from './fraction-arithmetic-presen
 import {TenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
 import {
     isValidDecimalFraction,
-    isValidTenthsHundredthsGrid
+    isValidTenthsHundredthsGrid,
+    toTenthsHundredthsGrid
 } from '../../helpers/tenths-hundredths-grid.ts';
 import {formatFraction} from '../../helpers/fraction.ts';
 
@@ -24,9 +25,7 @@ export const isValidTenthsToHundredthsProblem = (
         || typeof data.tenths !== 'object'
         || data.tenths === null
         || typeof data.hundredths !== 'object'
-        || data.hundredths === null
-        || typeof data.models !== 'object'
-        || data.models === null) return false;
+        || data.hundredths === null) return false;
     const {tenths, hundredths} = data;
     const scaledNumerator = tenths.numerator * 10;
     return data.task === 'tenths-to-hundredths'
@@ -35,9 +34,7 @@ export const isValidTenthsToHundredthsProblem = (
         && hundredths.numerator === scaledNumerator
         && data.scaleFactor === 10
         && data.sharedWhole === 1
-        && data.relation === 'equal'
-        && isValidTenthsHundredthsGrid(data.models.tenths, tenths)
-        && isValidTenthsHundredthsGrid(data.models.hundredths, hundredths);
+        && data.relation === 'equal';
 };
 
 export const isValidTenthsHundredthsAdditionProblem = (
@@ -160,6 +157,8 @@ export const TenthsToHundredthsModel = ({
     const questionEquation = `${tenthsNotation} = ?/100`;
     const scalingEquation = `${tenthsNotation} = (${data.tenths.numerator} × 10)/(10 × 10) = ${hundredthsNotation}`;
     const explanation = `Multiplying the numerator and denominator of ${tenthsNotation} by 10 makes 10 times as many equal parts. Each tenth becomes 10 hundredths, so ${hundredthsNotation} shades the same amount.`;
+    const tenthsModel = toTenthsHundredthsGrid(data.tenths);
+    const hundredthsModel = toTenthsHundredthsGrid(data.hundredths);
 
     return (
         <div className="w-[930px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_34px_rgba(15,23,42,0.08)]">
@@ -174,12 +173,12 @@ export const TenthsToHundredthsModel = ({
 
             <div className="mt-5 grid grid-cols-2 gap-5">
                 <TenthsHundredthsGrid
-                    model={data.models.tenths}
+                    model={tenthsModel}
                     title="Tenths"
                     ariaLabel={`${tenthsNotation} shades ${data.tenths.numerator} of 10 equal vertical parts in the shared whole.`}
                 />
                 <TenthsHundredthsGrid
-                    model={data.models.hundredths}
+                    model={hundredthsModel}
                     title="The same whole in hundredths"
                     ariaLabel={isSolutionView
                         ? `${hundredthsNotation} shades the same region using 100 equal parts grouped into 10 tenths.`

@@ -3,7 +3,6 @@ import {setSeed} from '../../../lib/random.ts';
 import {
     FractionParts,
     ProperFractionEquivalenceProblem,
-    TenthsHundredthsGridModel,
     TenthsToHundredthsProblem
 } from '../../../types/problems.ts';
 import {FractionEquivalenceGenerator} from './generator.ts';
@@ -15,19 +14,26 @@ const properConfig: FractionEquivalenceGeneratorConfig = {
     usesMultiplication: false,
     usesEqualShares: true,
     usesImproperFractions: false,
-    usesIntegerNumbers: false
+    usesIntegerNumbers: false,
+    usesTenthFractions: false
 };
 
 const wholeConfig: FractionEquivalenceGeneratorConfig = {
     usesMultiplication: false,
     usesEqualShares: false,
     usesImproperFractions: true,
-    usesIntegerNumbers: true
+    usesIntegerNumbers: true,
+    usesTenthFractions: false
 };
 
 const multiplicationConfig: FractionEquivalenceGeneratorConfig = {
     ...properConfig,
     usesMultiplication: true
+};
+
+const tenthFractionsConfig: FractionEquivalenceGeneratorConfig = {
+    ...multiplicationConfig,
+    usesTenthFractions: true
 };
 
 const expectCoherentPair = (problem: ProperFractionEquivalenceProblem) => {
@@ -46,31 +52,6 @@ const expectCoherentPair = (problem: ProperFractionEquivalenceProblem) => {
     expect(problem.relation).toBe('equal');
 };
 
-const expectGrid = (model: TenthsHundredthsGridModel): void => {
-    expect(model.cells).toHaveLength(model.partCount);
-    expect(model.cells.filter(cell => cell.shaded)).toHaveLength(model.shadedCount);
-    expect(model.groups).toEqual([]);
-    model.cells.forEach((cell, index) => {
-        expect(cell.index).toBe(index);
-        expect(cell.widthPercent).toBe(10);
-        expect(cell.shaded).toBe(index < model.shadedCount);
-        expect(cell.source).toBeNull();
-        if (model.partCount === 10) {
-            expect(cell).toMatchObject({row: 0, column: index, tenthGroupIndex: index});
-            expect(cell.xPercent).toBe(index * 10);
-            expect(cell.yPercent).toBe(0);
-            expect(cell.heightPercent).toBe(100);
-        } else {
-            expect(cell.column).toBe(Math.floor(index / 10));
-            expect(cell.row).toBe(index % 10);
-            expect(cell.tenthGroupIndex).toBe(cell.column);
-            expect(cell.xPercent).toBe(cell.column * 10);
-            expect(cell.yPercent).toBe(cell.row * 10);
-            expect(cell.heightPercent).toBe(10);
-        }
-    });
-};
-
 const expectTenthsProblem = (problem: TenthsToHundredthsProblem): void => {
     const n = problem.tenths.numerator;
     expect(problem.task).toBe('tenths-to-hundredths');
@@ -85,8 +66,7 @@ const expectTenthsProblem = (problem: TenthsToHundredthsProblem): void => {
     expect(problem.scaleFactor).toBe(10);
     expect(problem.sharedWhole).toBe(1);
     expect(problem.relation).toBe('equal');
-    expectGrid(problem.models.tenths);
-    expectGrid(problem.models.hundredths);
+    expect(problem).not.toHaveProperty('models');
 };
 
 describe('FractionEquivalenceGenerator', () => {
@@ -106,6 +86,10 @@ describe('FractionEquivalenceGenerator', () => {
             ...wholeConfig,
             usesMultiplication: true
         })).toThrow('Select EqualShares');
+        expect(() => generator.generate({
+            ...properConfig,
+            usesTenthFractions: true
+        })).toThrow('TenthFractions requires Multiplication');
     });
 
     it('generates an Ability-neutral proper-fraction equivalence relation', () => {
@@ -144,29 +128,31 @@ describe('FractionEquivalenceGenerator', () => {
         expect(denominatorsSeen).toEqual(new Set(denominators));
     });
 
-    it('uses seeded variation across generic and base-ten multiplication models', () => {
-        const tasks = new Set<string>();
+    it('keeps generic multiplication on the generic proper-fraction relation', () => {
         const scaleFactors = new Set<number>();
-        const tenthsNumerators = new Set<number>();
         for (let seed = 0; seed < 200; seed++) {
             setSeed(`multiplication-${seed}`);
             const problem = generator.generate(multiplicationConfig).data;
-            tasks.add(problem.task);
-            if (problem.task === 'tenths-to-hundredths') {
-                expectTenthsProblem(problem);
-                tenthsNumerators.add(problem.tenths.numerator);
-            } else if (problem.task === 'relate-equivalent-fractions') {
-                expectCoherentPair(problem);
-                scaleFactors.add(problem.scaleFactor);
-            } else {
-                throw new Error('Expected a proper-fraction scaling model.');
+            if (problem.task !== 'relate-equivalent-fractions') {
+                throw new Error('Expected a generic proper-fraction scaling relation.');
             }
+            expectCoherentPair(problem);
+            scaleFactors.add(problem.scaleFactor);
         }
-        expect(tasks).toEqual(new Set([
-            'relate-equivalent-fractions',
-            'tenths-to-hundredths'
-        ]));
         expect(scaleFactors).toEqual(new Set([2, 3, 4]));
+    });
+
+    it('uses TenthFractions to select the exact 10-to-100 denominator relation', () => {
+        const tenthsNumerators = new Set<number>();
+        for (let seed = 0; seed < 200; seed++) {
+            setSeed(`tenths-${seed}`);
+            const problem = generator.generate(tenthFractionsConfig).data;
+            if (problem.task !== 'tenths-to-hundredths') {
+                throw new Error('Expected a tenths-to-hundredths relation.');
+            }
+            expectTenthsProblem(problem);
+            tenthsNumerators.add(problem.tenths.numerator);
+        }
         expect(tenthsNumerators).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     });
 

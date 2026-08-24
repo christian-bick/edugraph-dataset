@@ -16,7 +16,8 @@ export const FractionEquivalenceGeneratorSchema = {
     usesMultiplication: [[Area.Multiplication], hasLabel(Area.Multiplication)],
     usesEqualShares: [[Scope.EqualShares], hasLabel(Scope.EqualShares)],
     usesImproperFractions: [[Scope.ImproperFractions], hasLabel(Scope.ImproperFractions)],
-    usesIntegerNumbers: [[Scope.IntegerNumbers], hasLabel(Scope.IntegerNumbers)]
+    usesIntegerNumbers: [[Scope.IntegerNumbers], hasLabel(Scope.IntegerNumbers)],
+    usesTenthFractions: [[Scope.TenthFractions], hasLabel(Scope.TenthFractions)]
 } as const;
 
 export type FractionEquivalenceGeneratorConfig = ConfigFromSchema<

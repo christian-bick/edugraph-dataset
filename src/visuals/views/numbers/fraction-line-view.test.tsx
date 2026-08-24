@@ -50,7 +50,8 @@ function wholeTenthsData(): TenthsToHundredthsProblem {
             usesMultiplication: true,
             usesEqualShares: true,
             usesImproperFractions: false,
-            usesIntegerNumbers: false
+            usesIntegerNumbers: false,
+            usesTenthFractions: true
         }).data;
         if (data.task === 'tenths-to-hundredths' && data.tenths.numerator === 10) return data;
     }
