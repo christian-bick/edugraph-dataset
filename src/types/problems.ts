@@ -297,29 +297,67 @@ export type ArithmeticEstimationProblem = {
     estimatedAnswer: number;
 };
 
-export type ArithmeticPatternProperty = 'commutative' | 'associative' | 'distributive';
+export type ArithmeticPatternOperation = 'addition' | 'multiplication';
 
-export type ArithmeticPatternProblem = {
-    operation: 'addition' | 'multiplication';
-    headers: number[];
-    table: number[][];
-    focusRow: number;
-    sequence: number[];
-    patternStep: number;
-    startValue: number;
-    ruleOperation: 'add' | 'multiply' | 'multiply-position';
-    ruleValue: number;
-    ruleText: string;
-    terms: readonly number[];
-    inferredFeature: string;
-    featureEvidence: string;
-    explanation: string;
-    propertyLaw?: ArithmeticPatternProperty;
-    leftExpression?: string;
-    rightExpression?: string;
-    propertyResult?: number;
-    highlightedCells?: Array<[number, number]>;
+export type ArithmeticOperationTablePatternProblem = {
+    kind: 'operation-table';
+    operation: ArithmeticPatternOperation;
+    operands: readonly number[];
+    values: readonly (readonly number[])[];
 };
+
+export type ArithmeticPatternRecurrence =
+    | {
+        kind: 'add-constant';
+        start: number;
+        operand: number;
+    }
+    | {
+        kind: 'multiply-constant';
+        start: number;
+        operand: number;
+    }
+    | {
+        kind: 'position-multiple';
+        factor: number;
+    };
+
+export type ArithmeticPatternEmergentFeature =
+    | {kind: 'alternating-parity'}
+    | {kind: 'even-after-start'}
+    | {kind: 'operand-order-invariance'}
+    | {kind: 'two-step-recurrence'; combinedOperand: number}
+    | {kind: 'constant-difference'; difference: number};
+
+export type ArithmeticPatternLawWitness =
+    | {
+        law: 'commutative';
+        operands: readonly [number, number];
+        result: number;
+    }
+    | {
+        law: 'associative';
+        operands: readonly [number, number, number];
+        result: number;
+    }
+    | {
+        law: 'distributive';
+        multiplier: number;
+        addends: readonly [number, number];
+        result: number;
+    };
+
+export type ArithmeticRecurrencePatternProblem = {
+    kind: 'recurrence';
+    recurrence: ArithmeticPatternRecurrence;
+    terms: readonly number[];
+    emergentFeature: ArithmeticPatternEmergentFeature;
+    lawWitness?: ArithmeticPatternLawWitness;
+};
+
+export type ArithmeticPatternProblem =
+    | ArithmeticOperationTablePatternProblem
+    | ArithmeticRecurrencePatternProblem;
 
 export type LegacyIntegerRoundingProblem = {
     number: number;
@@ -1865,12 +1903,12 @@ export interface ViewTypeMap {
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
     'operations-answer-reasonableness': ArithmeticEstimationProblem;
-    'operations-pattern-table': ArithmeticPatternProblem;
-    'operations-pattern-explanation': ArithmeticPatternProblem;
-    'operations-pattern-feature-explanation': ArithmeticPatternProblem;
-    'operations-pattern-feature-table': ArithmeticPatternProblem;
-    'operations-pattern-generation-practice': ArithmeticPatternProblem;
-    'operations-pattern-generation-table': ArithmeticPatternProblem;
+    'operations-pattern-table': ArithmeticOperationTablePatternProblem;
+    'operations-pattern-explanation': ArithmeticRecurrencePatternProblem;
+    'operations-pattern-feature-explanation': ArithmeticRecurrencePatternProblem;
+    'operations-pattern-feature-table': ArithmeticRecurrencePatternProblem;
+    'operations-pattern-generation-practice': ArithmeticRecurrencePatternProblem;
+    'operations-pattern-generation-table': ArithmeticRecurrencePatternProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
     'numbers-fraction-line': FractionLineProblem;
     'numbers-fraction-line-classification': FractionLineProblem;

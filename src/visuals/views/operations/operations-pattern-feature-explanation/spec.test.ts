@@ -1,4 +1,4 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
 
@@ -10,6 +10,8 @@ describe('operations-pattern-feature-explanation view spec', () => {
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation
         ]);
+        expect(spec.requiredLabels).toEqual([Area.EmergentFeatureRecognition]);
+        expect(spec.requiredTargetAbilities).toEqual([Ability.ProcedureExecution]);
         expect(spec.rejectedLabels).toBeUndefined();
     });
 });

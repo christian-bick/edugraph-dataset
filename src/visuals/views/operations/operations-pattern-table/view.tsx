@@ -12,8 +12,13 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-pattern-table'>;
 }
 
-const OperationsPatternTableCore = ({payload}: CoreProps) => (
-    <PatternTableView mode="legacy-classification" payload={payload} viewId={VIEW_ID} />
+const OperationsPatternTableCore = ({config, payload}: CoreProps) => (
+    <PatternTableView
+        mode="legacy-classification"
+        payload={payload}
+        viewId={VIEW_ID}
+        focusOperand={config.focusOperand}
+    />
 );
 
 export const OperationsPatternTable = withConfig(

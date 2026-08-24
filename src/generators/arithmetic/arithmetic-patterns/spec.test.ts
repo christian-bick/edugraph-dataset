@@ -8,37 +8,34 @@ import {spec} from './spec.ts';
 describe('ArithmeticPatternsGenerator spec integration', () => {
     const generator = new ArithmeticPatternsGenerator();
 
-    it('declares one canonical model capable of supporting each pattern focus', () => {
-        expect(spec.generalLabels).toEqual(expect.arrayContaining([
-            Area.PatternGeneration,
-            Area.GenerativeRuleRecognition,
-            Area.EmergentFeatureRecognition,
+    it('keeps only invariant numeric scopes in general capabilities', () => {
+        expect(spec.generalLabels).toEqual([
             Scope.IntegerNumbers,
             Scope.Base10,
             Scope.NumbersWithoutNegatives
-        ]));
+        ]);
+        expect(generator.schema).toHaveProperty('model');
         expect(generator.schema).not.toHaveProperty('task');
     });
 
     it.each([
-        Area.PatternGeneration,
-        Area.GenerativeRuleRecognition,
-        Area.EmergentFeatureRecognition
-    ] as const)('keeps %s in the target labels without selecting a learner task', patternArea => {
+        [[Area.GenerativeRuleRecognition], 'operation-table'],
+        [[Area.PatternGeneration], 'recurrence'],
+        [[Area.EmergentFeatureRecognition], 'recurrence'],
+        [[Area.PatternGeneration, Area.EmergentFeatureRecognition], 'recurrence']
+    ] as const)('resolves %j to the %s canonical model', (patternAreas, model) => {
         setSeed(17);
         const stub = generateWithLabels(generator, [
             Area.Addition,
-            patternArea,
-            Ability.ProcedureExecution
+            ...patternAreas,
+            Ability.ProcedureExecution,
+            Ability.ConceptClassification
         ])!;
 
-        expect(stub.data).not.toHaveProperty('task');
-        expect(stub.data.ruleText).toBeTruthy();
-        expect(stub.data.terms.length).toBeGreaterThanOrEqual(4);
-        expect(stub.data.inferredFeature).toBeTruthy();
-        expect(stub.tags).toContain(Area.Addition);
-        expect(stub.tags).not.toContain(patternArea);
+        expect(stub.data.kind).toBe(model);
+        expect(stub.tags).toEqual(expect.arrayContaining([Area.Addition, ...patternAreas]));
         expect(stub.tags).not.toContain(Ability.ProcedureExecution);
+        expect(stub.tags).not.toContain(Ability.ConceptClassification);
     });
 
     it.each([
@@ -57,10 +54,15 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
             Ability.TextualArticulation
         ])!;
 
-        expect(stub.data.propertyLaw).toBe(propertyLaw);
-        expect(stub.data.leftExpression).toBeTruthy();
-        expect(stub.data.rightExpression).toBeTruthy();
-        expect(stub.tags).toEqual(expect.arrayContaining([operation, law]));
+        expect(stub.data.kind).toBe('recurrence');
+        if (stub.data.kind !== 'recurrence') throw new Error('Expected a recurrence.');
+        expect(stub.data.lawWitness?.law).toBe(propertyLaw);
+        expect(stub.data.lawWitness?.result).toBeTypeOf('number');
+        expect(stub.tags).toEqual(expect.arrayContaining([
+            operation,
+            law,
+            Area.EmergentFeatureRecognition
+        ]));
         expect(stub.tags).not.toContain(Ability.ProcedureUnderstanding);
         expect(stub.tags).not.toContain(Ability.TextualArticulation);
     });

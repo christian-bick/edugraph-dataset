@@ -1,2 +1,2 @@
-- **Identity:** A stated number-pattern rule and generated terms require classifying an emergent feature into one of the supplied categories.
-- **Modes:** Question Mode keeps all feature options neutral; Solution Mode selects the supplied feature and reveals its evidence.
+- **Identity:** A stated number-pattern rule with one missing term requires executing the recurrence and classifying its emergent feature into one of the supplied categories.
+- **Modes:** Question Mode withholds one term and keeps all feature options neutral; Solution Mode reveals the term, selects the canonical feature, and reveals its evidence.

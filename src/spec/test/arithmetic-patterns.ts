@@ -11,6 +11,15 @@ const generate = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Area.Addition], [Area.Multiplication]]);
 
+const recognizeTableRule = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.GenerativeRuleRecognition,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Ability.ConceptClassification
+    ])
+    .applyLabelVariants([[Area.Addition], [Area.Multiplication]]);
+
 const identify = new DatasetPermutationBuilder()
     .addLabels([
         Area.EmergentFeatureRecognition,
@@ -39,8 +48,26 @@ const explain = new DatasetPermutationBuilder()
         [Area.Multiplication, Area.DistributiveLaw]
     ]);
 
+const explainWithoutExecution = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.EmergentFeatureRecognition,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Ability.ProcedureUnderstanding,
+        Ability.TextualArticulation
+    ])
+    .applyLabelVariants([
+        [Area.Addition, Area.CommutativeLaw],
+        [Area.Addition, Area.AssociativeLaw],
+        [Area.Multiplication, Area.CommutativeLaw],
+        [Area.Multiplication, Area.AssociativeLaw],
+        [Area.Multiplication, Area.DistributiveLaw]
+    ]);
+
 export const spec: CompetencyTarget[] = [
+    ...toTargets('test-arithmetic-pattern-recognize-table-rule', recognizeTableRule),
     ...toTargets('test-arithmetic-pattern-generate', generate),
     ...toTargets('test-arithmetic-pattern-identify', identify),
+    ...toTargets('test-arithmetic-pattern-explain-without-execution', explainWithoutExecution),
     ...toTargets('test-arithmetic-pattern-explain', explain)
 ];

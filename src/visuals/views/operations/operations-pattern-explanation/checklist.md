@@ -1,2 +1,2 @@
-- **Identity:** Selected operation-table cells, a named property law, and equivalent expressions require a written explanation of the relationship.
-- **Modes:** Question Mode withholds the explanation; Solution Mode reveals it while preserving the same table and equation evidence.
+- **Identity:** A displayed numeric property-law relation, generated terms, and equivalent equations require a written explanation of the relationship.
+- **Modes:** Question Mode withholds the explanation; Solution Mode reveals it while preserving the same recurrence and equation evidence.

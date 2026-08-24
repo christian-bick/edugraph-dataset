@@ -15,8 +15,13 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-pattern-generation-table'>;
 }
 
-const OperationsPatternGenerationTableCore = ({payload}: CoreProps) => (
-    <PatternTableView mode="generation" payload={payload} viewId={VIEW_ID} />
+const OperationsPatternGenerationTableCore = ({config, payload}: CoreProps) => (
+    <PatternTableView
+        mode="generation"
+        payload={payload}
+        viewId={VIEW_ID}
+        missingTermIndex={config.missingTermIndex}
+    />
 );
 
 export const OperationsPatternGenerationTable = withConfig(

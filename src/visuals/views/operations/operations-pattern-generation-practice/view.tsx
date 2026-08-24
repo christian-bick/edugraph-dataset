@@ -15,8 +15,13 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-pattern-generation-practice'>;
 }
 
-const OperationsPatternGenerationPracticeCore = ({payload}: CoreProps) => (
-    <PatternExplanationView mode="generation-practice" payload={payload} viewId={VIEW_ID} />
+const OperationsPatternGenerationPracticeCore = ({config, payload}: CoreProps) => (
+    <PatternExplanationView
+        mode="generation-practice"
+        payload={payload}
+        viewId={VIEW_ID}
+        missingTermIndex={config.missingTermIndex}
+    />
 );
 
 export const OperationsPatternGenerationPractice = withConfig(

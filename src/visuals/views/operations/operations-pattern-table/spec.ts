@@ -1,14 +1,18 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
+import {selectTableFocusOperand} from '../pattern-table-helpers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-pattern-table',
     generalLabels: [
         Scope.ArabicNumerals,
         Ability.ConceptClassification
-    ]
+    ],
+    requiredLabels: [Area.GenerativeRuleRecognition]
 };
 
-export const OperationsPatternTableViewSchema = {} as const;
+export const OperationsPatternTableViewSchema = {
+    focusOperand: selectTableFocusOperand
+} as const;
 export type OperationsPatternTableViewConfig = ConfigFromSchema<typeof OperationsPatternTableViewSchema>;

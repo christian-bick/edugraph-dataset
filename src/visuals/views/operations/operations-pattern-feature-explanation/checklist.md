@@ -1,2 +1,2 @@
-- **Identity:** A stated number-pattern rule, generated terms, and a named emergent feature require a causal written explanation supported by property-law equations.
-- **Modes:** Question Mode withholds the explanation; Solution Mode reveals it while preserving the supplied terms, feature, and equation evidence.
+- **Identity:** A stated number-pattern rule, one missing recurrence term, and a named emergent feature require executing the rule and giving a causal written explanation supported by property-law equations.
+- **Modes:** Question Mode withholds one term and the explanation; Solution Mode reveals both while preserving the recurrence, feature, and equation evidence.
