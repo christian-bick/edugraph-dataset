@@ -43,10 +43,10 @@ export class OrderingGenerator implements ProblemGenerator<OrderingProblem, Orde
         }
 
         const remaining = shuffleArray(pool.filter(value => !required.has(value)));
-        const selectedNumbers = shuffleArray([
+        const selectedNumbers = [
             ...required,
             ...remaining.slice(0, 5 - required.size)
-        ]);
+        ].sort((left, right) => left - right);
 
         return {
             data: {

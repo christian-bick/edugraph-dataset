@@ -1,10 +1,10 @@
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {sortNumbers} from './helpers.ts';
+import {presentNumbers, sortNumbers} from './helpers.ts';
 import { NumbersOrderViewConfig, NumbersOrderViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import { validateProblemData } from '../../../helpers/validation.ts';
+import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -16,11 +16,22 @@ const NumbersOrderCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('numbers-order', data, ['numbers']);
+    if (data.numbers.length !== 5
+        || data.numbers.some(number => !Number.isSafeInteger(number))
+        || data.numbers.some((number, index) => index > 0 && data.numbers[index - 1]! >= number)) {
+        throw new ViewValidationError(
+            'numbers-order',
+            'Expected five unique numbers in canonical ascending order.'
+        );
+    }
     const isDesc = config.isDesc;
 
     const sortedNumbers = useMemo(() => {
         return sortNumbers(data.numbers, isDesc);
     }, [data.numbers, isDesc]);
+    const presentedNumbers = useMemo(() => {
+        return presentNumbers(data.numbers, payload.seed);
+    }, [data.numbers, payload.seed]);
 
     const arrowSymbol = isDesc ? '↘' : '↗';
 
@@ -33,7 +44,7 @@ const NumbersOrderCore = ({ config, payload }: CoreProps) => {
             )}
             <div className="flex flex-row items-center gap-[15px]">
                 <div className="flex gap-2.5 p-2.5 border-2 border-slate-200 rounded-xl bg-slate-50">
-                    {data.numbers.map((n, i) => (
+                    {presentedNumbers.map((n, i) => (
                         <div key={i} className="w-[50px] h-[50px] flex justify-center items-center text-[1.5rem] font-bold text-slate-800">
                             {n}
                         </div>
@@ -66,12 +77,14 @@ export const NumbersOrder = withConfig(NumbersOrderViewSchema, NumbersOrderCore)
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: ViewRenderPayload<'numbers-order'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'numbers-order'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) {
+                root = createRoot(container);
+            }
+            root.render(<NumbersOrder payload={payload} />);
         }
-        root.render(<NumbersOrder payload={payload} />);
-    }
-};
+    };
+}

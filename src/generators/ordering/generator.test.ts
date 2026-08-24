@@ -35,6 +35,7 @@ describe('OrderingGenerator', () => {
                     expect(numbers.includes(0)).toBe(requireZero);
                     expect(numbers.some((number: number) => number < 0)).toBe(requireNegative);
                     expect(numbers.every((number: number) => Math.abs(number) <= 10)).toBe(true);
+                    expect(numbers).toEqual([...numbers].sort((left, right) => left - right));
                 }
             }
         }

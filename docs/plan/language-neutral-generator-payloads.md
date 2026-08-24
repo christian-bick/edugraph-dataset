@@ -162,7 +162,7 @@ nested task payloads. It covers the other 397 production targets. The dispositio
 | `measurement-order` | 2 | `measure-order` | **Migrated:** retains a canonical sorted magnitude triple and the requested direction. The view deterministically seeds presentation order, assigns A/B/C identities, and derives the correct letter order. |
 | `measurement-tool-selection` | 3 | `measure-select-tool` | **Migrated:** retains the typed object and its mathematically suitable tool answer; the view owns the fixed candidate set, placement, labels, and response framing. |
 | `measurement-unit-scale` | 1 | `measure-unit-scale-relation` | **Keep:** counts and unit-size relation are canonical. |
-| `ordering` | 0 | `numbers-order` | **Project:** retain the selected numeric set; the payload array must not encode presentation order. This compatible generator currently has no CCSS production tuple. |
+| `ordering` | 0 | `numbers-order` | **Migrated:** retains the selected numeric set in canonical ascending order. The view deterministically seeds question presentation and derives the requested ascending or descending solution; this pair currently has no CCSS production tuple. |
 | `place-value-bundles` | 4 | `place-value-hundreds-bundles`, `place-value-tens-bundles` | **Keep:** quantity and bundle decomposition are canonical. |
 | `place-value-make-ten` | 1 | `place-value-make-ten` | **Keep:** addends and composed-ten relation are canonical. |
 | `place-value-teen` | 3 | `place-value-compose-teen`, `place-value-decompose-teen` | **Keep:** teen quantity and ten/ones decomposition are canonical; leaf views own direction. |

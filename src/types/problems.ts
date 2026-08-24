@@ -764,7 +764,7 @@ export type MultiDigitComparisonProblem = {
 export type ComparisonProblem = LegacyComparisonProblem | MultiDigitComparisonProblem;
 
 export type OrderingProblem = {
-    numbers: number[];
+    numbers: readonly number[];
 };
 
 export type LegacyWritingProblem = {
