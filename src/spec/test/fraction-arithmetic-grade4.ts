@@ -11,7 +11,6 @@ import {
 const interpretationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Scope.FractionNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
@@ -22,7 +21,6 @@ const interpretationBuilder = new DatasetPermutationBuilder()
 const decompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Addition,
         Area.Equation,
         Scope.CommonDenominator,
@@ -38,7 +36,6 @@ const decompositionBuilder = new DatasetPermutationBuilder()
 const mixedOperationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Scope.MixedNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
@@ -49,7 +46,6 @@ const mixedOperationBuilder = new DatasetPermutationBuilder()
 const wordProblemBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Equation,
         Scope.FractionNumbers,
         Scope.CommonDenominator,
@@ -61,7 +57,6 @@ const wordProblemBuilder = new DatasetPermutationBuilder()
 
 const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionArithmetic,
-    Area.FractionNotation,
     Area.Multiplication,
     Area.IteratedOperation,
     Area.Equation,
@@ -74,7 +69,6 @@ const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
 const wholeNumberFractionProductBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Multiplication,
         Area.IteratedOperation,
         Area.Equation,
@@ -87,7 +81,6 @@ const wholeNumberFractionProductBuilder = new DatasetPermutationBuilder()
 const fractionMultiplicationProblemBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Multiplication,
         Area.IteratedOperation,
         Area.Equation,
@@ -100,11 +93,11 @@ const fractionMultiplicationProblemBuilder = new DatasetPermutationBuilder()
 
 const tenthsHundredthsAdditionBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionArithmetic,
-    Area.FractionNotation,
     Area.Addition,
     Area.Multiplication,
     Area.Equation,
     Scope.CommonDenominator,
+    Scope.TenthFractions,
     Scope.SingleFrameOfReference,
     Ability.ProcedureExecution
 ]);

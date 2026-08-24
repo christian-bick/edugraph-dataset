@@ -11,7 +11,6 @@ import {
 const commonDenominatorBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionCommonDenominatorComparison,
-        Area.FractionNotation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,
@@ -23,7 +22,6 @@ const commonDenominatorBuilder = new DatasetPermutationBuilder()
 const commonNumeratorBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionCommonNumeratorComparison,
-        Area.FractionNotation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,
@@ -35,7 +33,6 @@ const commonNumeratorBuilder = new DatasetPermutationBuilder()
 const grade4UnlikeFractionComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionReferenceComparison,
-        Area.FractionNotation,
         Scope.FractionNumbers,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,

@@ -14,7 +14,6 @@ describe('FractionComparisonGenerator spec integration', () => {
         relation: Scope.Greater | Scope.Less
     ) => [
         strategy,
-        Area.FractionNotation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         family,
@@ -26,7 +25,6 @@ describe('FractionComparisonGenerator spec integration', () => {
         expect(spec).toEqual({
             generatorId: 'fraction-comparison',
             generalLabels: [
-                Area.FractionNotation,
                 Scope.ProperFractions,
                 Scope.SingleFrameOfReference
             ]
@@ -62,9 +60,9 @@ describe('FractionComparisonGenerator spec integration', () => {
     });
 
     it.each([
-        [Area.NumericInequality, Scope.Greater, 'f401dab7'],
-        [Area.NumericEquality, Scope.Equal, '386d3640'],
-        [Area.NumericInequality, Scope.Less, '8481a534']
+        [Area.NumericInequality, Scope.Greater, '928f1181'],
+        [Area.NumericEquality, Scope.Equal, 'b66df27a'],
+        [Area.NumericInequality, Scope.Less, '007bf5e6']
     ] as const)('resolves the corrected Grade 4 %s / %s target', (
         comparisonKind,
         relation,
@@ -73,7 +71,6 @@ describe('FractionComparisonGenerator spec integration', () => {
         const labels = [
             comparisonKind,
             Area.FractionReferenceComparison,
-            Area.FractionNotation,
             Scope.FractionNumbers,
             Scope.SingleFrameOfReference,
             Scope.VisualNumbers,

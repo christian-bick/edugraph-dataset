@@ -7,7 +7,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'decimal-comparison',
     generalLabels: [
         Area.NumerationWithDecimals,
-        Area.DecimalNotation,
         Area.DecimalPrecission,
         Scope.DecimalNumbers
     ]

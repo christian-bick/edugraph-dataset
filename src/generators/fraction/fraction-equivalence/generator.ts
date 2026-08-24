@@ -87,21 +87,24 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
         validateConfigFields('fraction-equivalence', config, [
             'usesMultiplication',
             'usesEqualShares',
+            'usesProperFractions',
             'usesImproperFractions',
             'usesIntegerNumbers',
             'usesTenthFractions'
         ]);
 
         const usesMultiplication = config.usesMultiplication === true;
+        const usesProperFractions = config.usesProperFractions === true;
         const usesTenthFractions = config.usesTenthFractions === true;
-        const usesProperFractionMode = config.usesEqualShares === true
+        const usesEqualShareMode = config.usesEqualShares === true
+            && (usesProperFractions !== usesTenthFractions)
             && config.usesImproperFractions === false
             && config.usesIntegerNumbers === false;
         const usesWholeNumberMode = config.usesEqualShares === false
             && config.usesImproperFractions === true
             && config.usesIntegerNumbers === true;
 
-        if (usesProperFractionMode) {
+        if (usesEqualShareMode) {
             if (usesTenthFractions && !usesMultiplication) {
                 throw new GeneratorValidationError(
                     'fraction-equivalence',
@@ -114,7 +117,10 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
             return {data};
         }
 
-        if (usesWholeNumberMode && !usesMultiplication && !usesTenthFractions) {
+        if (usesWholeNumberMode
+            && !usesMultiplication
+            && !usesProperFractions
+            && !usesTenthFractions) {
             const wholeNumber = randomItem(WHOLE_NUMBERS);
             const denominator = randomItem(DENOMINATORS);
             const fraction = toFractionValue(wholeNumber * denominator, denominator);
@@ -131,7 +137,7 @@ export class FractionEquivalenceGenerator implements ProblemGenerator<
 
         throw new GeneratorValidationError(
             'fraction-equivalence',
-            'Select EqualShares for proper-fraction equivalence, or select ImproperFractions and IntegerNumbers for whole-number equivalence. TenthFractions is only supported with Multiplication and EqualShares.'
+            'Select EqualShares with exactly one of ProperFractions or TenthFractions, or select ImproperFractions and IntegerNumbers for whole-number equivalence. TenthFractions is only supported with Multiplication.'
         );
     }
 }

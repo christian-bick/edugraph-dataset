@@ -49,6 +49,7 @@ function wholeTenthsData(): TenthsToHundredthsProblem {
         const data = new FractionEquivalenceGenerator().generate({
             usesMultiplication: true,
             usesEqualShares: true,
+            usesProperFractions: false,
             usesImproperFractions: false,
             usesIntegerNumbers: false,
             usesTenthFractions: true

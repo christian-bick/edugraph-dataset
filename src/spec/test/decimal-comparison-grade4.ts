@@ -11,7 +11,6 @@ import {
 const comparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithDecimals,
-        Area.DecimalNotation,
         Area.DecimalPrecission,
         Scope.DecimalNumbers,
         Scope.SingleFrameOfReference,

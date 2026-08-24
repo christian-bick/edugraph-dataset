@@ -6,7 +6,6 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-comparison',
     generalLabels: [
-        Area.FractionNotation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference
     ]

@@ -11,8 +11,8 @@ import {
 const builder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionEquivalence,
-        Area.FractionNotation,
         Scope.EqualShares,
+        Scope.ProperFractions,
         Scope.Equal,
         Scope.VisualNumbers,
         Ability.ConceptClassification
@@ -21,7 +21,6 @@ const builder = new DatasetPermutationBuilder()
 const wholeNumberBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionEquivalence,
-        Area.FractionNotation,
         Scope.ImproperFractions,
         Scope.IntegerNumbers,
         Scope.Equal,
@@ -32,9 +31,9 @@ const wholeNumberBuilder = new DatasetPermutationBuilder()
 const grade4ScalingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionEquivalence,
-        Area.FractionNotation,
         Area.Multiplication,
         Scope.EqualShares,
+        Scope.ProperFractions,
         Scope.Equal,
         Scope.SingleFrameOfReference,
         Ability.ProcedureUnderstanding,
@@ -44,7 +43,6 @@ const grade4ScalingBuilder = new DatasetPermutationBuilder()
 
 const tenthsToHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionEquivalence,
-    Area.FractionNotation,
     Area.Multiplication,
     Scope.EqualShares,
     Scope.Equal,

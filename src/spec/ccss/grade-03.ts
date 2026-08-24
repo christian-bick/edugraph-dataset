@@ -625,7 +625,6 @@ const interpretFractionsOfWholeBuilder = new DatasetPermutationBuilder()
 const locateUnitFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithFractions,
-        Area.FractionNotation,
         Scope.Numberline,
         Scope.UnitFractions,
         Ability.VisualArticulation
@@ -634,7 +633,6 @@ const locateUnitFractionsBuilder = new DatasetPermutationBuilder()
 const locateIteratedFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithFractions,
-        Area.FractionNotation,
         Scope.Numberline,
         Ability.VisualArticulation
     ])
@@ -643,8 +641,8 @@ const locateIteratedFractionsBuilder = new DatasetPermutationBuilder()
 const recognizeEquivalentFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionEquivalence,
-        Area.FractionNotation,
         Scope.EqualShares,
+        Scope.ProperFractions,
         Scope.Equal,
         Ability.ConceptClassification
     ])
@@ -653,8 +651,8 @@ const recognizeEquivalentFractionsBuilder = new DatasetPermutationBuilder()
 const generateExplainEquivalentFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionEquivalence,
-        Area.FractionNotation,
         Scope.EqualShares,
+        Scope.ProperFractions,
         Scope.Equal,
         Ability.Formalization,
         Ability.ProcedureUnderstanding
@@ -663,7 +661,6 @@ const generateExplainEquivalentFractionsBuilder = new DatasetPermutationBuilder(
 
 const wholeNumbersAsFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionNotation,
         Area.FractionEquivalence,
         Scope.ImproperFractions,
         Scope.IntegerNumbers,
@@ -674,7 +671,6 @@ const wholeNumbersAsFractionsBuilder = new DatasetPermutationBuilder()
 
 const compareFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionNotation,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,

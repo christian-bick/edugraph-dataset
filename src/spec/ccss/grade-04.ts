@@ -520,9 +520,9 @@ const drawLineSymmetryBuilder = new DatasetPermutationBuilder().addLabels([
 const equivalentFractionScalingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionEquivalence,
-        Area.FractionNotation,
         Area.Multiplication,
         Scope.EqualShares,
+        Scope.ProperFractions,
         Scope.Equal,
         Scope.SingleFrameOfReference,
         Ability.ProcedureUnderstanding,
@@ -533,7 +533,6 @@ const equivalentFractionScalingBuilder = new DatasetPermutationBuilder()
 const unlikeFractionComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionReferenceComparison,
-        Area.FractionNotation,
         Scope.FractionNumbers,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,
@@ -548,7 +547,6 @@ const unlikeFractionComparisonBuilder = new DatasetPermutationBuilder()
 const interpretFractionAdditionSubtractionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Scope.FractionNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
@@ -559,7 +557,6 @@ const interpretFractionAdditionSubtractionBuilder = new DatasetPermutationBuilde
 const decomposeFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Addition,
         Area.Equation,
         Scope.CommonDenominator,
@@ -572,7 +569,6 @@ const decomposeFractionsBuilder = new DatasetPermutationBuilder()
 const mixedNumberArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Scope.MixedNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
@@ -583,7 +579,6 @@ const mixedNumberArithmeticBuilder = new DatasetPermutationBuilder()
 const fractionArithmeticWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Equation,
         Scope.FractionNumbers,
         Scope.CommonDenominator,
@@ -595,7 +590,6 @@ const fractionArithmeticWordProblemsBuilder = new DatasetPermutationBuilder()
 
 const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionArithmetic,
-    Area.FractionNotation,
     Area.Multiplication,
     Area.IteratedOperation,
     Area.Equation,
@@ -608,7 +602,6 @@ const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
 const wholeNumberFractionMultiplicationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Multiplication,
         Area.IteratedOperation,
         Area.Equation,
@@ -621,7 +614,6 @@ const wholeNumberFractionMultiplicationBuilder = new DatasetPermutationBuilder()
 const fractionMultiplicationWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Multiplication,
         Area.IteratedOperation,
         Area.Equation,
@@ -634,7 +626,6 @@ const fractionMultiplicationWordProblemsBuilder = new DatasetPermutationBuilder(
 
 const tenthsToHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionEquivalence,
-    Area.FractionNotation,
     Area.Multiplication,
     Scope.EqualShares,
     Scope.Equal,
@@ -648,9 +639,9 @@ const addTenthsHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FractionArithmetic,
     Area.Addition,
     Area.Multiplication,
-    Area.FractionNotation,
     Area.Equation,
     Scope.CommonDenominator,
+    Scope.TenthFractions,
     Scope.SingleFrameOfReference,
     Ability.ProcedureExecution
 ]);
@@ -696,7 +687,6 @@ const decimalMeasurementNotationBuilder = new DatasetPermutationBuilder().addLab
 const compareDecimalsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithDecimals,
-        Area.DecimalNotation,
         Area.DecimalPrecission,
         Scope.DecimalNumbers,
         Scope.SingleFrameOfReference,

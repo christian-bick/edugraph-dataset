@@ -40,6 +40,7 @@ const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view'): Tenth
     const data = new FractionEquivalenceGenerator().generate({
         usesMultiplication: true,
         usesEqualShares: true,
+        usesProperFractions: false,
         usesImproperFractions: false,
         usesIntegerNumbers: false,
         usesTenthFractions: true

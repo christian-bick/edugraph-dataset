@@ -13,7 +13,6 @@ describe('FractionEquivalenceGenerator spec integration', () => {
             generatorId: 'fraction-equivalence',
             generalLabels: [
                 Area.FractionEquivalence,
-                Area.FractionNotation,
                 Scope.Equal
             ]
         });
@@ -26,8 +25,8 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         setSeed('proper-equivalence');
         const stub = generateWithLabels(generator, [
             Area.FractionEquivalence,
-            Area.FractionNotation,
             Scope.EqualShares,
+            Scope.ProperFractions,
             Scope.Equal,
             ...taskAbilities
         ]);
@@ -41,7 +40,6 @@ describe('FractionEquivalenceGenerator spec integration', () => {
         setSeed('whole-number-fraction');
         const stub = generateWithLabels(generator, [
             Area.FractionEquivalence,
-            Area.FractionNotation,
             Scope.ImproperFractions,
             Scope.IntegerNumbers,
             Scope.Equal,
@@ -59,12 +57,11 @@ describe('FractionEquivalenceGenerator spec integration', () => {
     });
 
     it.each([
-        [Scope.VisualNumbers, '88c0220c'],
-        [Scope.Numberline, 'abb860af']
+        [Scope.VisualNumbers, '0ea3b2ba'],
+        [Scope.Numberline, 'e2c38541']
     ] as const)('uses a deterministic seeded scaling model for the Grade 4 %s target', (representation, hash) => {
         const labels = [
             Area.FractionEquivalence,
-            Area.FractionNotation,
             Area.Multiplication,
             Scope.EqualShares,
             Scope.Equal,
@@ -97,7 +94,6 @@ describe('FractionEquivalenceGenerator spec integration', () => {
     it('keeps the seeded multiplication model independent of the requested Ability', () => {
         const labels = [
             Area.FractionEquivalence,
-            Area.FractionNotation,
             Area.Multiplication,
             Scope.EqualShares,
             Scope.Equal,
@@ -106,7 +102,7 @@ describe('FractionEquivalenceGenerator spec integration', () => {
             Scope.VisualNumbers,
             Ability.Formalization
         ];
-        expect(labelSetHash(labels)).toBe('121d8895');
+        expect(labelSetHash(labels)).toBe('8d4de1af');
         setSeed('shared-base-ten-model');
         const formalization = generateWithLabels(generator, labels);
         setSeed('shared-base-ten-model');

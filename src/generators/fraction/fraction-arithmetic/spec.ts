@@ -10,7 +10,8 @@ const fractionArithmeticTaskLabels = [
     Scope.ProperFractions,
     Scope.ImproperFractions,
     Scope.MixedNumbers,
-    Scope.UnitFractions
+    Scope.UnitFractions,
+    Scope.TenthFractions
 ] as const;
 
 export type FractionArithmeticTaskConfig =
@@ -30,7 +31,7 @@ const resolveTask: ResolverFn<FractionArithmeticTaskConfig | null> = labels => {
     const taskLabels = fractionArithmeticTaskLabels.filter(label => labels.includes(label));
     const operationLabels = [Area.Addition, Area.Subtraction, Area.Multiplication]
         .filter(label => labels.includes(label));
-    if (taskLabels.length === 0
+    if (sameLabels(taskLabels, [Scope.TenthFractions])
         && sameLabels(operationLabels, [Area.Addition, Area.Multiplication])) {
         return 'tenths-hundredths-addition';
     }
@@ -77,7 +78,6 @@ export const spec: GeneratorSpec = {
     generatorId: 'fraction-arithmetic',
     generalLabels: [
         Area.FractionArithmetic,
-        Area.FractionNotation,
         Area.Equation,
         Scope.SingleFrameOfReference
     ]

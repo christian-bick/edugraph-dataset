@@ -12,8 +12,7 @@ describe('FractionNumberLineGenerator spec integration', () => {
         expect(spec).toEqual({
             generatorId: 'fraction-number-line',
             generalLabels: [
-                Area.NumerationWithFractions,
-                Area.FractionNotation
+                Area.NumerationWithFractions
             ]
         });
     });
@@ -26,7 +25,6 @@ describe('FractionNumberLineGenerator spec integration', () => {
         setSeed(fractionType);
         const stub = generateWithLabels(generator, [
             Area.NumerationWithFractions,
-            Area.FractionNotation,
             fractionType
         ]);
 

@@ -13,6 +13,7 @@ const denominators = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[]
 const properConfig: FractionEquivalenceGeneratorConfig = {
     usesMultiplication: false,
     usesEqualShares: true,
+    usesProperFractions: true,
     usesImproperFractions: false,
     usesIntegerNumbers: false,
     usesTenthFractions: false
@@ -21,6 +22,7 @@ const properConfig: FractionEquivalenceGeneratorConfig = {
 const wholeConfig: FractionEquivalenceGeneratorConfig = {
     usesMultiplication: false,
     usesEqualShares: false,
+    usesProperFractions: false,
     usesImproperFractions: true,
     usesIntegerNumbers: true,
     usesTenthFractions: false
@@ -33,6 +35,7 @@ const multiplicationConfig: FractionEquivalenceGeneratorConfig = {
 
 const tenthFractionsConfig: FractionEquivalenceGeneratorConfig = {
     ...multiplicationConfig,
+    usesProperFractions: false,
     usesTenthFractions: true
 };
 
@@ -88,8 +91,17 @@ describe('FractionEquivalenceGenerator', () => {
         })).toThrow('Select EqualShares');
         expect(() => generator.generate({
             ...properConfig,
+            usesProperFractions: false,
             usesTenthFractions: true
         })).toThrow('TenthFractions requires Multiplication');
+        expect(() => generator.generate({
+            ...multiplicationConfig,
+            usesTenthFractions: true
+        })).toThrow('exactly one of ProperFractions or TenthFractions');
+        expect(() => generator.generate({
+            ...properConfig,
+            usesProperFractions: false
+        })).toThrow('exactly one of ProperFractions or TenthFractions');
     });
 
     it('generates an Ability-neutral proper-fraction equivalence relation', () => {
