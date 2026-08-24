@@ -58,7 +58,7 @@ describe('ShapePartitionGenerator spec integration', () => {
         const second = generate([...mathematicalLabels, secondAbility], 31);
 
         expect(first.data).toEqual(second.data);
-        expect(first.data.model).toBe('equal-share-partition');
+        expect(first.data.kind).toBe('partition');
         expect(first.tags).not.toContain(firstAbility);
         expect(second.tags).not.toContain(secondAbility);
     });
@@ -78,7 +78,7 @@ describe('ShapePartitionGenerator spec integration', () => {
         const withoutAbilities = generate(mathematicalLabels, 19);
 
         expect(combined.data).toEqual(withoutAbilities.data);
-        expect(combined.data.model).toBe('equal-share-partition');
+        expect(combined.data.kind).toBe('partition');
         expect(combined.tags).not.toContain(Ability.VisualArticulation);
         expect(combined.tags).not.toContain(Ability.Formalization);
     });
@@ -101,8 +101,8 @@ describe('ShapePartitionGenerator spec integration', () => {
             Area.Rectangle
         ], 7);
 
-        expect(comparison.data.model).toBe('unit-share-comparison');
-        expect(interpretation.data.model).toBe('fraction-region');
+        expect(comparison.data.kind).toBe('share-comparison');
+        expect(interpretation.data.kind).toBe('selected-region');
         expect(comparison.tags).not.toContain(Ability.ConceptDerivation);
         expect(interpretation.tags).not.toContain(Ability.Interpretation);
     });

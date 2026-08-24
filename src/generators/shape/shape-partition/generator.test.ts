@@ -53,35 +53,35 @@ describe('ShapePartitionGenerator', () => {
         }))).toBeNull();
     });
 
-    it('generates two- and four-share decomposition models for both shapes', () => {
+    it('generates canonical two- and four-share partitions for both shapes', () => {
         for (const shape of [Area.Circle, Area.Rectangle] as const) {
             const seenParts = new Set<number>();
             for (let seed = 0; seed < 50; seed++) {
                 setSeed(seed);
                 const data = generator.generate(config({shape}))!.data;
 
-                expect(data.model).toBe('equal-share-partition');
-                if (data.model !== 'equal-share-partition') continue;
+                expect(data.kind).toBe('partition');
+                if (data.kind !== 'partition') continue;
                 expect(data.shape).toBe(shape === Area.Circle ? 'circle' : 'rectangle');
                 expect([2, 4]).toContain(data.parts);
-                expect(data.wholeCount).toBe(1);
-                expect(data.unitFraction).toBeNull();
+                expect(Object.keys(data).sort()).toEqual(['kind', 'parts', 'shape']);
                 seenParts.add(data.parts);
             }
             expect(seenParts).toEqual(new Set([2, 4]));
         }
     });
 
-    it('carries a requested unit fraction into the equal-share model', () => {
+    it('does not duplicate a partition as a unit-fraction display model', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
-            const data = generator.generate(config({
+            const withoutFractionType = generator.generate(config())!.data;
+            setSeed(seed);
+            const withUnitFraction = generator.generate(config({
                 fractionTypes: [Scope.UnitFractions]
             }))!.data;
 
-            expect(data.model).toBe('equal-share-partition');
-            if (data.model !== 'equal-share-partition') continue;
-            expect(data.unitFraction).toBe(`1/${data.parts}`);
+            expect(withUnitFraction).toEqual(withoutFractionType);
+            expect(withUnitFraction.kind).toBe('partition');
         }
     });
 
@@ -94,9 +94,8 @@ describe('ShapePartitionGenerator', () => {
                 fractionTypes: [Scope.UnitFractions]
             }))!.data;
 
-            expect(data.model).toBe('equal-share-partition');
-            if (data.model !== 'equal-share-partition') continue;
-            expect(data.unitFraction).toBe(`1/${data.parts}`);
+            expect(data.kind).toBe('partition');
+            if (data.kind !== 'partition') continue;
             seen.add(data.parts);
         }
         expect(seen).toEqual(new Set([2, 3, 4, 6, 8]));
@@ -108,21 +107,18 @@ describe('ShapePartitionGenerator', () => {
             fractionTypes: [Scope.UnitFractions],
             isLessComparison: true
         }))!.data).toEqual({
-            model: 'unit-share-comparison',
+            kind: 'share-comparison',
             shape: 'circle',
-            unitFractions: [
-                {numerator: 1, denominator: 2, display: '1/2'},
-                {numerator: 1, denominator: 4, display: '1/4'}
-            ],
+            leftParts: 4,
             relation: 'less',
-            lesserFraction: '1/4'
+            rightParts: 2
         });
     });
 
     it.each([
         [Scope.UnitFractions, true],
         [Scope.NonUnitFractions, false]
-    ] as const)('generates a consistent %s fraction-region model', (fractionType, isUnit) => {
+    ] as const)('generates a consistent %s selected region', (fractionType, isUnit) => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const data = generator.generate(config({
@@ -131,11 +127,15 @@ describe('ShapePartitionGenerator', () => {
                 fractionNotation: true
             }))!.data;
 
-            expect(data.model).toBe('fraction-region');
-            if (data.model !== 'fraction-region') continue;
+            expect(data.kind).toBe('selected-region');
+            if (data.kind !== 'selected-region') continue;
             expect(data.numerator === 1).toBe(isUnit);
-            expect(data.unitFraction).toBe(`1/${data.parts}`);
-            expect(data.fraction).toBe(`${data.numerator}/${data.parts}`);
+            expect(Object.keys(data).sort()).toEqual([
+                'kind',
+                'numerator',
+                'parts',
+                'shape'
+            ]);
         }
     });
 

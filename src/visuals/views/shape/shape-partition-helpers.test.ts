@@ -8,31 +8,24 @@ import {
 } from './shape-partition-helpers.ts';
 
 const equalShare: ShapePartitionProblem = {
-    model: 'equal-share-partition',
+    kind: 'partition',
     shape: 'circle',
-    parts: 4,
-    wholeCount: 1,
-    unitFraction: '1/4'
+    parts: 4
 };
 
 const comparison: ShapePartitionProblem = {
-    model: 'unit-share-comparison',
+    kind: 'share-comparison',
     shape: 'rectangle',
-    unitFractions: [
-        {numerator: 1, denominator: 2, display: '1/2'},
-        {numerator: 1, denominator: 4, display: '1/4'}
-    ],
+    leftParts: 4,
     relation: 'less',
-    lesserFraction: '1/4'
+    rightParts: 2
 };
 
 const fractionRegion: ShapePartitionProblem = {
-    model: 'fraction-region',
+    kind: 'selected-region',
     shape: 'circle',
     parts: 6,
-    numerator: 5,
-    unitFraction: '1/6',
-    fraction: '5/6'
+    numerator: 5
 };
 
 describe('shape-partition Ability projection', () => {
@@ -53,8 +46,7 @@ describe('shape-partition Ability projection', () => {
         expect(resolveShapePartitionTask(fractionRegion, 'name-share')).toBeNull();
         expect(resolveShapePartitionTask({
             ...equalShare,
-            parts: 6,
-            unitFraction: '1/6'
+            parts: 6
         }, 'name-share')).toBeNull();
     });
 });
@@ -66,18 +58,18 @@ describe('shape-partition model validation', () => {
         expect(isValidShapePartitionProblem(fractionRegion)).toBe(true);
     });
 
-    it('rejects inconsistent partitions, fractions, comparisons, and shapes', () => {
+    it('rejects inconsistent partitions, regions, comparisons, and shapes', () => {
         expect(isValidShapePartitionProblem({
             ...equalShare,
-            unitFraction: '1/3'
-        })).toBe(false);
+            parts: 5
+        } as unknown as ShapePartitionProblem)).toBe(false);
         expect(isValidShapePartitionProblem({
             ...fractionRegion,
-            fraction: '4/6'
+            numerator: 6
         })).toBe(false);
         expect(isValidShapePartitionProblem({
             ...comparison,
-            lesserFraction: '1/2'
+            leftParts: 2
         } as unknown as ShapePartitionProblem)).toBe(false);
         expect(isValidShapePartitionProblem({
             ...equalShare,

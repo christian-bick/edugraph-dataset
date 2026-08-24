@@ -252,11 +252,11 @@ function ViewFrame({children}: {children: ReactNode}) {
 export const ShapePartitionView = ({payload, task: requestedTask, viewId}: ShapePartitionViewProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
-    validateProblemData(viewId, data, ['model', 'shape']);
+    validateProblemData(viewId, data, ['kind', 'shape']);
     if (!isValidShapePartitionProblem(data)) {
         throw new ViewValidationError(
             viewId,
-            'Expected a consistent equal-share, fraction-region, or unit-share comparison model.'
+            'Expected a consistent partition, selected region, or share comparison.'
         );
     }
     const task = resolveShapePartitionTask(data, requestedTask);
@@ -269,30 +269,27 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
 
     switch (task) {
         case 'partition': {
-            if (data.model !== 'equal-share-partition') {
-                throw new ViewValidationError(viewId, 'Partitioning requires an equal-share model.');
+            if (data.kind !== 'partition') {
+                throw new ViewValidationError(viewId, 'Partitioning requires a partition relation.');
             }
-            validateProblemData(viewId, data, ['parts', 'unitFraction']);
-            const prompt = data.unitFraction === null
-                ? `Partition the shape into ${PART_WORDS[data.parts]} equal parts.`
-                : `Partition the shape into ${PART_WORDS[data.parts]} equal parts so each part is ${data.unitFraction} of the whole.`;
+            validateProblemData(viewId, data, ['parts']);
             return (
                 <ViewFrame>
-                    <PromptSlot isSolutionView={isSolutionView}>{prompt}</PromptSlot>
+                    <PromptSlot isSolutionView={isSolutionView}>
+                        {`Partition the shape into ${PART_WORDS[data.parts]} equal parts.`}
+                    </PromptSlot>
                     <div className="w-[420px] h-[260px] bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-center box-border">
                         <PartitionedShape shape={data.shape} parts={data.parts} showDivisions={isSolutionView} solvedHighlight={isSolutionView} />
                     </div>
                     <div className="h-[52px] px-6 rounded-xl bg-slate-100 text-[1.15rem] font-bold text-slate-600 flex items-center">
-                        {data.unitFraction === null
-                            ? `${PART_WORDS[data.parts]} equal parts`
-                            : `Each part is ${data.unitFraction} of the whole`}
+                        {`${PART_WORDS[data.parts]} equal parts`}
                     </div>
                 </ViewFrame>
             );
         }
         case 'name-share': {
             if (
-                data.model !== 'equal-share-partition'
+                data.kind !== 'partition'
                 || (data.parts !== 2 && data.parts !== 4)
             ) {
                 throw new ViewValidationError(viewId, 'Naming a share requires two or four equal parts.');
@@ -338,12 +335,12 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
         }
         case 'compose-whole': {
             if (
-                data.model !== 'equal-share-partition'
+                data.kind !== 'partition'
                 || (data.parts !== 2 && data.parts !== 4)
             ) {
                 throw new ViewValidationError(viewId, 'Composing a whole requires two or four equal parts.');
             }
-            validateProblemData(viewId, data, ['parts', 'wholeCount']);
+            validateProblemData(viewId, data, ['parts']);
             const pluralShareName = data.parts === 2 ? 'halves' : 'fourths';
             return (
                 <ViewFrame>
@@ -366,15 +363,15 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
             );
         }
         case 'compare-share-size': {
-            if (data.model !== 'unit-share-comparison') {
-                throw new ViewValidationError(viewId, 'Comparing share sizes requires a unit-share comparison model.');
+            if (data.kind !== 'share-comparison') {
+                throw new ViewValidationError(viewId, 'Comparing share sizes requires a share comparison.');
             }
-            validateProblemData(viewId, data, ['unitFractions', 'relation', 'lesserFraction']);
-            const shares = data.unitFractions.map(unitFraction => ({
-                parts: unitFraction.denominator,
-                shareName: unitFraction.display === '1/2' ? 'half' : 'fourth'
+            validateProblemData(viewId, data, ['leftParts', 'relation', 'rightParts']);
+            const shares = [data.leftParts, data.rightParts].map(parts => ({
+                parts,
+                shareName: parts === 2 ? 'half' : 'fourth'
             } as const));
-            const answer = data.lesserFraction === '1/4' ? 'fourth' : 'half';
+            const answer = shares[0].shareName;
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>Which share is smaller?</PromptSlot>
@@ -410,16 +407,17 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
             );
         }
         case 'partition-and-label-unit-fraction': {
-            if (data.model !== 'equal-share-partition' || data.unitFraction === null) {
-                throw new ViewValidationError(viewId, 'Labeling a unit fraction requires a partition with a unit fraction.');
+            if (data.kind !== 'partition') {
+                throw new ViewValidationError(viewId, 'Labeling a unit fraction requires a partition.');
             }
-            validateProblemData(viewId, data, ['parts', 'unitFraction']);
+            validateProblemData(viewId, data, ['parts']);
             const selectedShare = selectShareIndex(data.parts, payload.seed);
-            const answer = `${data.unitFraction} of the whole`;
+            const unitFraction = `1/${data.parts}`;
+            const answer = `${unitFraction} of the whole`;
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>
-                        {`Partition the shape into ${PART_WORDS[data.parts]} equal parts and label one part ${data.unitFraction}.`}
+                        {`Partition the shape into ${PART_WORDS[data.parts]} equal parts and label one part ${unitFraction}.`}
                     </PromptSlot>
                     <div className="w-[420px] h-[260px] bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-center box-border">
                         <PartitionedShape
@@ -427,7 +425,7 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
                             parts={data.parts}
                             showDivisions={isSolutionView}
                             highlightedShare={isSolutionView ? selectedShare : undefined}
-                            shareLabel={isSolutionView ? {index: selectedShare, text: data.unitFraction} : undefined}
+                            shareLabel={isSolutionView ? {index: selectedShare, text: unitFraction} : undefined}
                             solvedHighlight={isSolutionView}
                         />
                     </div>
@@ -436,15 +434,15 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
             );
         }
         case 'interpret-fraction': {
-            if (data.model !== 'fraction-region') {
-                throw new ViewValidationError(viewId, 'Interpreting a fraction requires a fraction-region model.');
+            if (data.kind !== 'selected-region') {
+                throw new ViewValidationError(viewId, 'Interpreting a fraction requires a selected region.');
             }
             validateProblemData(viewId, data, [
                 'parts',
-                'numerator',
-                'unitFraction',
-                'fraction'
+                'numerator'
             ]);
+            const unitFraction = `1/${data.parts}`;
+            const fraction = `${data.numerator}/${data.parts}`;
             const highlightedShares = Array.from(
                 {length: data.numerator},
                 (_, index) => index
@@ -462,9 +460,9 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
                         />
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                        <AnswerSlot isSolutionView={isSolutionView} answer={data.fraction} />
+                        <AnswerSlot isSolutionView={isSolutionView} answer={fraction} />
                         <div className={`h-[20px] text-sm font-semibold ${isSolutionView ? 'text-slate-600' : 'text-transparent'}`}>
-                            {`${data.numerator} equal ${data.numerator === 1 ? 'part' : 'parts'} of size ${data.unitFraction}`}
+                            {`${data.numerator} equal ${data.numerator === 1 ? 'part' : 'parts'} of size ${unitFraction}`}
                         </div>
                     </div>
                 </ViewFrame>

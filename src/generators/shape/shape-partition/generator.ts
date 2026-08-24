@@ -70,14 +70,11 @@ export class ShapePartitionGenerator implements ProblemGenerator<
         ) {
             return {
                 data: {
-                    model: 'unit-share-comparison',
+                    kind: 'share-comparison',
                     shape,
-                    unitFractions: [
-                        {numerator: 1, denominator: 2, display: '1/2'},
-                        {numerator: 1, denominator: 4, display: '1/4'}
-                    ],
                     relation: 'less',
-                    lesserFraction: '1/4'
+                    leftParts: 4,
+                    rightParts: 2
                 }
             };
         }
@@ -95,15 +92,12 @@ export class ShapePartitionGenerator implements ProblemGenerator<
             const numerator = isUnitFraction
                 ? 1
                 : 2 + Math.floor(random() * (parts - 2));
-            const fraction = `${numerator}/${parts}`;
             return {
                 data: {
-                    model: 'fraction-region',
+                    kind: 'selected-region',
                     shape,
                     parts,
-                    numerator,
-                    unitFraction: `1/${parts}`,
-                    fraction
+                    numerator
                 }
             };
         }
@@ -123,13 +117,9 @@ export class ShapePartitionGenerator implements ProblemGenerator<
         const parts = usesBroadPartitionModel ? pickGrade3Parts() : pickLegacyParts();
         return {
             data: {
-                model: 'equal-share-partition',
+                kind: 'partition',
                 shape,
-                parts,
-                wholeCount: 1,
-                unitFraction: fractionTypes[0] === Scope.UnitFractions
-                    ? `1/${parts}`
-                    : null
+                parts
             }
         };
     }

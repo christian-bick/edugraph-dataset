@@ -1517,32 +1517,23 @@ export type FractionArithmeticProblem =
     | WholeNumberFractionProductProblem
     | TenthsHundredthsAdditionProblem;
 
-export type ShapePartitionProblem =
+export type ShapePartitionProblem = {shape: FractionShape} & (
     | {
-        model: 'equal-share-partition';
-        shape: FractionShape;
+        kind: 'partition';
         parts: FractionParts;
-        wholeCount: 1;
-        unitFraction: string | null;
     }
     | {
-        model: 'unit-share-comparison';
-        shape: FractionShape;
-        unitFractions: [
-            {numerator: 1; denominator: 2; display: '1/2'},
-            {numerator: 1; denominator: 4; display: '1/4'}
-        ];
+        kind: 'share-comparison';
+        leftParts: 4;
         relation: 'less';
-        lesserFraction: '1/4';
+        rightParts: 2;
     }
     | {
-        model: 'fraction-region';
-        shape: FractionShape;
+        kind: 'selected-region';
         parts: FractionParts;
         numerator: number;
-        unitFraction: string;
-        fraction: string;
-    };
+    }
+);
 
 export type ShapePatternToken = {
     shape: 'square' | 'triangle';
