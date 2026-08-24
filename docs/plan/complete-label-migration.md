@@ -307,8 +307,10 @@ pair that produced it.
 3. Persist the complete pair-derived label set on `AbstractProblem` and in dataset metadata.
 4. Audit every schema fallback and seeded parameter choice: competency-changing specializations
    must resolve through the schema; incidental instance variation remains unlabeled.
-5. Compare pair-derived labels with every matched target and fail if a target claim is missing or
-   a rejected boundary is present.
+5. After resolving each matched tuple, verify that every target claim is covered by an equal or
+   more-specific pair-derived label and that no resolved capability falls inside a rejected
+   boundary. This is an end-to-end resolution and persistence invariant, not a second matching
+   policy.
 6. Inventory observable Scope leaves absent from the pair-derived set, prioritizing cases where a
    broad target did not need the more-specific Scope for matching.
 7. Regenerate affected artifacts and verify matching, label churn, coverage, and VQA.
@@ -352,6 +354,17 @@ after documentation consolidation.
 ## Low-priority investigations
 
 These questions do not block the migration.
+
+### Ontology-neutral schema choices
+
+The current `ontologyNeutral` marker makes unlabeled function-only schema choices explicit and
+prevents them from being mistaken for capability resolution. Its final architectural role is
+deferred. Before extending this pattern, determine whether it should be replaced by a narrower
+view-only task-identity construct, which objective test distinguishes a task-identifying choice
+from seeded presentation variation, and whether generator schemas should prohibit it entirely.
+Audit the five current uses under that decision, especially the line-symmetry figure choices,
+which may select observable ontology capabilities. Treat the marker as a provisional safeguard,
+not as proof that a choice is genuinely ontology-neutral.
 
 ### Ontology-relevant fallback variation
 
