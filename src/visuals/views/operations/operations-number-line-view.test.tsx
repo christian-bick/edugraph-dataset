@@ -15,7 +15,7 @@ const payload = (
 ): ViewRenderPayload<OperationsNumberLineViewId> => ({
     problem: {type: 'arithmetic', data, labels: []},
     viewId,
-    labels: [],
+    targetLabels: [],
     isSolutionView,
     seed: 1
 });

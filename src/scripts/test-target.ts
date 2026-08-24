@@ -6,6 +6,7 @@ import {
     loadViewCatalog,
     diagnoseTargetMatches,
     generateTargetSamples,
+    resolvePairCapabilities,
     buildProblem,
     buildRenderPayload,
     sanitizeFilePart
@@ -149,14 +150,24 @@ async function main() {
         const validableSamples: Array<{
             sample: typeof samples[number];
             renderFileName: string;
+            labels: string[];
         }> = [];
         for (const sample of samples) {
             if (!sample.stub) continue;
-            const generatorType = generatorCatalog.find(g => g.generatorId === sample.identity.generatorId)!.generator.type;
+            const generatorEntry = generatorCatalog.find(g => g.generatorId === sample.identity.generatorId)!;
+            const viewEntry = viewCatalog.find(v => v.viewId === sample.identity.viewId)!;
+            const pair = resolvePairCapabilities({
+                targetLabels: target.labels,
+                generatorGeneralLabels: generatorEntry.generalLabels,
+                generatorResolvedLabels: sample.stub.labels,
+                viewGeneralLabels: viewEntry.generalLabels,
+                viewSchema: viewEntry.schema,
+                seed: sample.seed
+            });
             const problem = buildProblem({
                 stub: sample.stub,
-                type: generatorType,
-                labels: [...target.labels]
+                type: generatorEntry.generator.type,
+                labels: pair.labels
             });
             // Train and validation samples intentionally share their canonical
             // dataset filename. Qualify debug renders by split so they cannot
@@ -168,12 +179,12 @@ async function main() {
                 payload: buildRenderPayload({
                     problem,
                     viewId: sample.identity.viewId,
-                    labels: problem.labels,
+                    targetLabels: [...target.labels],
                     mode: sample.identity.mode,
                     seed: sample.seed
                 })
             });
-            validableSamples.push({sample, renderFileName});
+            validableSamples.push({sample, renderFileName, labels: problem.labels});
         }
         const outDir = resolve(PROJECT_ROOT, 'out', 'target-test', sanitizeFilePart(target.id));
         const written = await renderTasks(tasks, outDir, viewPathMap);
@@ -190,7 +201,7 @@ async function main() {
                 );
             } else {
                 console.log(`\n🤖 Running live VQA validation for rendered target samples...`);
-                for (const {sample, renderFileName} of validableSamples) {
+                for (const {sample, renderFileName, labels} of validableSamples) {
                     const imagePath = resolve(outDir, renderFileName);
                     const cacheMgr = getCache(sample.identity.generatorId);
                     const vqaResult = await evaluateSampleVqa({
@@ -204,10 +215,7 @@ async function main() {
                         attempt: sample.attempt,
                         seed: sample.seed,
                         fileName: sample.fileName,
-                        labels: Array.from(new Set([
-                            ...target.labels,
-                            ...(sample.stub?.labels ?? [])
-                        ])),
+                        labels,
                         apiKey,
                         cacheManager: cacheMgr
                     });

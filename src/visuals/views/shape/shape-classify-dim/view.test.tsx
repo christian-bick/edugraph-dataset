@@ -7,7 +7,7 @@ import {ShapeClassifyDimCore} from './view.tsx';
 const payload = (data: ShapeClassifyDimProblem, isSolutionView: boolean): ViewRenderPayload<'shape-classify-dim'> => ({
     problem: {type: 'shape', data, labels: []},
     viewId: 'shape-classify-dim',
-    labels: [],
+    targetLabels: [],
     isSolutionView,
     seed: 17
 });

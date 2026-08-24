@@ -18,7 +18,7 @@ const payload = (
 ): ViewRenderPayload<'operations-known-fact-derivation'> => ({
     problem: {type: 'arithmetic', data: problemData, labels: []},
     viewId: 'operations-known-fact-derivation',
-    labels: [],
+    targetLabels: [],
     isSolutionView,
     seed: 17
 });

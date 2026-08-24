@@ -34,6 +34,7 @@ const target: CompetencyTarget = {
 
 const generator: GeneratorModelDescriptor = {
     generatorId: 'generator-one',
+    generalLabels: [Area.Addition],
     labels: [Area.Addition],
     problemType: null,
     module: {
@@ -48,6 +49,7 @@ const generator: GeneratorModelDescriptor = {
 
 const view: ViewModelDescriptor = {
     viewId: 'view-one',
+    generalLabels: [Ability.ProcedureExecution],
     supportedLabels: [Ability.ProcedureExecution],
     requiredLabels: [],
     rejectedLabels: [],

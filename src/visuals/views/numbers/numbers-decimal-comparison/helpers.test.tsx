@@ -53,7 +53,7 @@ const payload = (
 ): ViewRenderPayload<'numbers-decimal-comparison'> => ({
     problem: {type: 'comparison', data, labels: []},
     viewId: 'numbers-decimal-comparison',
-    labels: [],
+    targetLabels: [],
     isSolutionView,
     seed: 29
 });

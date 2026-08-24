@@ -2,7 +2,7 @@ import { Browser, Page, chromium } from 'playwright';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import {mkdirSync} from 'fs';
-import { AbstractProblem, ProblemStub } from '../types/ml-engine.ts';
+import { AbstractProblem, ResolvedProblemStub } from '../types/ml-engine.ts';
 import { shortenLabel } from '../lib/utils.ts';
 import {
     loadGeneratorCatalog,
@@ -12,7 +12,7 @@ import {
     computeSampleSeed,
     computeContentFingerprint,
     computeTaskFingerprint,
-    resolveViewConfig,
+    resolvePairCapabilities,
     generateSampleWithRetry,
     isValTuple,
     DEFAULT_VAL_RATIO,
@@ -87,6 +87,8 @@ const MAX_ATTEMPTS = 50;
  */
 interface RenderSample {
     identity: SampleIdentity;
+    /** Target claims that selected the resolved view configuration. */
+    targetLabels: string[];
     sampleKey: string;
     fileName: string;
     seed: number;
@@ -145,7 +147,7 @@ function generateModuleSamples(
         const target = tuple.target;
         if (split === 'val' && !isValTuple(target.id, moduleName, tuple.viewId, DEFAULT_VAL_RATIO)) continue;
 
-        const labels = [...target.labels];
+        const targetLabels = [...target.labels];
         const instanceIdx = 0;
         const viewEntry = viewsById.get(tuple.viewId);
         if (!viewEntry) throw new Error(`View catalog entry not found: ${tuple.viewId}`);
@@ -159,14 +161,25 @@ function generateModuleSamples(
             instanceIdx
         });
 
-        const fingerprintStub = (stub: ProblemStub, seed: number) => {
-            const problem = buildProblem({ stub, type: genEntry.generator.type, labels });
+        const fingerprintStub = (stub: ResolvedProblemStub, seed: number) => {
+            const pair = resolvePairCapabilities({
+                targetLabels,
+                generatorGeneralLabels: genEntry.generalLabels,
+                generatorResolvedLabels: stub.labels,
+                viewGeneralLabels: viewEntry.generalLabels,
+                viewSchema: viewEntry.schema,
+                seed
+            });
+            const problem = buildProblem({
+                stub,
+                type: genEntry.generator.type,
+                labels: pair.labels
+            });
             const contentFingerprint = computeContentFingerprint(problem.data);
-            const viewConfig = resolveViewConfig(viewEntry.schema, problem.labels, seed);
             return {
                 problem,
                 contentFingerprint,
-                taskFingerprint: computeTaskFingerprint(problem.data, viewConfig)
+                taskFingerprint: computeTaskFingerprint(problem.data, pair.viewConfig)
             };
         };
 
@@ -174,13 +187,17 @@ function generateModuleSamples(
         // with only the same mathematical payload cannot: it merely excludes
         // that payload from validation to protect the split boundary.
         const representingSamples: RenderSample[] = [];
-        const isDuplicate = (stub: ProblemStub, { seed }: { seed: number }) => {
-            const { contentFingerprint, taskFingerprint } = fingerprintStub(stub, seed);
+        const isDuplicate = (stub: ResolvedProblemStub, { seed }: { seed: number }) => {
+            const { problem, contentFingerprint, taskFingerprint } = fingerprintStub(stub, seed);
             const taskMatches = [
                 ...samplesForFingerprint(taskFingerprintsByView, tuple.viewId, taskFingerprint),
                 ...samplesForFingerprint(trainTaskFingerprintsByView, tuple.viewId, taskFingerprint)
             ];
             for (const sample of taskMatches) {
+                sample.problem.labels = radixSortUtf8([...new Set([
+                    ...sample.problem.labels,
+                    ...problem.labels
+                ])]);
                 if (!representingSamples.includes(sample)) representingSamples.push(sample);
             }
             const trainContentMatches = samplesForFingerprint(
@@ -194,11 +211,11 @@ function generateModuleSamples(
         const questionIdentity = makeIdentity('question');
         const questionKey = computeSampleKey(questionIdentity);
 
-        let question: { stub: ProblemStub | null; attempt: number; seed: number };
+        let question: { stub: ResolvedProblemStub | null; attempt: number; seed: number };
         try {
             question = generateSampleWithRetry({
                 generator: genEntry.generator,
-                labels,
+                labels: targetLabels,
                 sampleKey: questionKey,
                 maxAttempts: MAX_ATTEMPTS,
                 isDuplicate
@@ -221,6 +238,7 @@ function generateModuleSamples(
         const questionResult = fingerprintStub(question.stub, question.seed);
         const questionSample: RenderSample = {
             identity: questionIdentity,
+            targetLabels,
             sampleKey: questionKey,
             fileName: computeSampleFilename(questionIdentity),
             seed: question.seed,
@@ -236,11 +254,11 @@ function generateModuleSamples(
 
         const solutionIdentity = makeIdentity('solution');
         const solutionKey = computeSampleKey(solutionIdentity);
-        let solution: { stub: ProblemStub | null; attempt: number; seed: number };
+        let solution: { stub: ResolvedProblemStub | null; attempt: number; seed: number };
         try {
             solution = generateSampleWithRetry({
                 generator: genEntry.generator,
-                labels,
+                labels: targetLabels,
                 sampleKey: solutionKey,
                 maxAttempts: MAX_ATTEMPTS,
                 isDuplicate
@@ -256,6 +274,7 @@ function generateModuleSamples(
         const solutionResult = fingerprintStub(solutionStub, solutionSeed);
         const solutionSample: RenderSample = {
             identity: solutionIdentity,
+            targetLabels,
             sampleKey: solutionKey,
             fileName: computeSampleFilename(solutionIdentity),
             seed: solutionSeed,
@@ -441,7 +460,7 @@ async function renderSamples(
                     const payload = buildRenderPayload({
                         problem: sample.problem,
                         viewId: identity.viewId,
-                        labels: sample.problem.labels,
+                        targetLabels: sample.targetLabels,
                         mode: identity.mode,
                         seed: sample.seed
                     });

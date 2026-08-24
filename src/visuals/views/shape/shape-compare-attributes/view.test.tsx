@@ -19,7 +19,7 @@ function payload(problemData: ShapeCompareAttributesProblem, isSolutionView: boo
     return {
         problem: {type: 'shape', data: problemData, labels: []},
         viewId: 'shape-compare-attributes',
-        labels: [],
+        targetLabels: [],
         isSolutionView,
         seed: 31
     };

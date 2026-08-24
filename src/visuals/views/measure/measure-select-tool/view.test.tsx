@@ -10,7 +10,7 @@ const payload = (
 ): ViewRenderPayload<'measure-select-tool'> => ({
     problem: {type: 'measurement', data, labels: []},
     viewId: 'measure-select-tool',
-    labels: [],
+    targetLabels: [],
     isSolutionView,
     seed: 17
 });

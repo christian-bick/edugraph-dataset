@@ -32,23 +32,27 @@ describe('model catalogs', () => {
             loadViewCatalog(),
             loadViewModelCatalog()
         ]);
-        expect(modelGenerators.map(({generatorId, labels, problemType}) => ({
+        expect(modelGenerators.map(({generatorId, generalLabels, labels, problemType}) => ({
             generatorId,
+            generalLabels,
             labels,
             problemType
-        }))).toEqual(fullGenerators.map(({generatorId, labels, problemType}) => ({
+        }))).toEqual(fullGenerators.map(({generatorId, generalLabels, labels, problemType}) => ({
             generatorId,
+            generalLabels,
             labels,
             problemType
         })));
-        expect(modelViews.map(({viewId, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
+        expect(modelViews.map(({viewId, generalLabels, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
             viewId,
+            generalLabels,
             supportedLabels,
             requiredLabels,
             rejectedLabels,
             problemType
-        }))).toEqual(fullViews.map(({viewId, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
+        }))).toEqual(fullViews.map(({viewId, generalLabels, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
             viewId,
+            generalLabels,
             supportedLabels,
             requiredLabels,
             rejectedLabels,
@@ -73,6 +77,7 @@ describe('model catalogs', () => {
         const [descriptor] = await loadGeneratorModelCatalog(root);
         expect(descriptor).toMatchObject({
             generatorId: 'demo',
+            generalLabels: ['Capability'],
             labels: ['Capability'],
             problemType: 'DemoProblem'
         });

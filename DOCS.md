@@ -24,9 +24,9 @@ Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of
 
 ### `RenderPayload` & `ViewTypeMap`
 The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
-*   `problem`: The `AbstractProblem`.
+*   `problem`: The `AbstractProblem`; `problem.labels` is the complete observable capability set resolved from the matched generator/view pair.
 *   `viewId`: The string identifier of the view.
-*   `labels`: Resolved ontology labels used by the HOC wrapper, not inspected by the pure view.
+*   `targetLabels`: Standard target claims used only by the HOC wrapper to resolve view configuration, not emitted as artifact labels and not inspected by the pure view.
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
 *   `seed`: The deterministic render seed derived from the sample identity. Views must draw **all** of their entropy from it — see `IMPL-V6` in [docs/implementation-view.md](docs/implementation-view.md).
 

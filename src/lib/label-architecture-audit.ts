@@ -374,6 +374,7 @@ function matchesWithLines(content: string, pattern: RegExp): Array<{match: RegEx
 
 const RAW_LABEL_PATTERNS = [
     /\bpayload\s*(?:\?\.)?\.\s*labels\b/g,
+    /\bpayload\s*(?:\?\.)?\.\s*targetLabels\b/g,
     /\bproblem\s*(?:\?\.)?\.\s*labels\b/g
 ] as const;
 

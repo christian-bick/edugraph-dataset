@@ -16,7 +16,7 @@ const payload = (
 ): ViewRenderPayload<'numbers-place-value-comparison'> => ({
     problem: {type: 'comparison', data, labels: []},
     viewId: 'numbers-place-value-comparison',
-    labels: [],
+    targetLabels: [],
     isSolutionView,
     seed: 17
 });

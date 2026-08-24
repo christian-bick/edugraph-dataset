@@ -304,7 +304,7 @@ export interface GenerateSampleByKeyInput {
 export interface GenerateSampleByKeyResult {
     identity: SampleIdentity;
     target: CompetencyTarget;
-    labels: string[];
+    targetLabels: string[];
     seed: number;
     stub: ResolvedProblemStub | null;
 }
@@ -335,10 +335,10 @@ export async function generateSampleByKey({
         throw new Error(`Generator "${identity.generatorId}" from sample key not found in catalog`);
     }
 
-    const labels = [...target.labels];
+    const targetLabels = [...target.labels];
     const seed = computeSampleSeed(sampleKey, attempt);
-    const stub = generateSample({ generator: entry.generator, labels, seed });
-    return { identity, target, labels, seed, stub };
+    const stub = generateSample({ generator: entry.generator, labels: targetLabels, seed });
+    return { identity, target, targetLabels, seed, stub };
 }
 
 export interface TargetSample {
@@ -469,6 +469,47 @@ export function resolveViewConfig<T extends ConfigSchema>(
     return resolveViewConfigWithLabels(schema, labels, seed).config;
 }
 
+export interface ResolvePairCapabilitiesInput<T extends ConfigSchema> {
+    targetLabels: readonly string[];
+    generatorGeneralLabels: readonly string[];
+    generatorResolvedLabels: readonly string[];
+    viewGeneralLabels: readonly string[];
+    viewSchema: T;
+    seed: number;
+}
+
+export interface ResolvedPairCapabilities<T extends ConfigSchema> {
+    labels: string[];
+    viewConfig: ConfigFromSchema<T>;
+    viewResolvedLabels: string[];
+}
+
+/**
+ * Resolves the exact positive capabilities realized by one generated pair.
+ * Target labels select schema behavior but never enter the emitted set by themselves.
+ * Applicability-only required/rejected labels are deliberately absent from this contract.
+ */
+export function resolvePairCapabilities<T extends ConfigSchema>({
+    targetLabels,
+    generatorGeneralLabels,
+    generatorResolvedLabels,
+    viewGeneralLabels,
+    viewSchema,
+    seed
+}: ResolvePairCapabilitiesInput<T>): ResolvedPairCapabilities<T> {
+    const viewResolution = resolveViewConfigWithLabels(viewSchema, [...targetLabels], seed);
+    return {
+        labels: radixSortUtf8([...new Set([
+            ...generatorGeneralLabels,
+            ...generatorResolvedLabels,
+            ...viewGeneralLabels,
+            ...viewResolution.resolvedLabels
+        ])]),
+        viewConfig: viewResolution.config,
+        viewResolvedLabels: viewResolution.resolvedLabels
+    };
+}
+
 /**
  * Identity of a rendered task within one view. The mathematical payload alone
  * is insufficient: one view can turn it into distinct tasks through its
@@ -517,27 +558,24 @@ export function buildProblem({ stub, type, labels }: BuildProblemInput): Abstrac
     return {
         type,
         data: stub.data,
-        labels: Array.from(new Set([
-            ...labels,
-            ...('labels' in stub && Array.isArray(stub.labels) ? stub.labels : [])
-        ]))
+        labels: radixSortUtf8([...new Set(labels)])
     };
 }
 
 export interface BuildRenderPayloadInput {
     problem: AbstractProblem;
     viewId: string;
-    labels: string[];
+    targetLabels: string[];
     mode: SampleMode;
     seed: number;
 }
 
 /** Single constructor for the payload contract, including the render seed. */
-export function buildRenderPayload({ problem, viewId, labels, mode, seed }: BuildRenderPayloadInput): RenderPayload {
+export function buildRenderPayload({ problem, viewId, targetLabels, mode, seed }: BuildRenderPayloadInput): RenderPayload {
     return {
         problem,
         viewId,
-        labels,
+        targetLabels,
         isSolutionView: mode === 'solution',
         seed
     };

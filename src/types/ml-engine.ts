@@ -19,7 +19,8 @@ export interface AbstractProblem<TData = any> {
 export interface RenderPayload<TProblem extends AbstractProblem = AbstractProblem> {
     problem: TProblem;
     viewId: string;
-    labels: string[];
+    /** Target claims used only to resolve the view schema for this matched task. */
+    targetLabels: string[];
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
     isSolutionView: boolean;
     /** Deterministic render seed derived from the sample identity; views must draw all entropy from it */

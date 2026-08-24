@@ -19,6 +19,7 @@ import {
     computeTaskFingerprint,
     resolveViewConfig,
     resolveViewConfigWithLabels,
+    resolvePairCapabilities,
     isValTuple,
     DEFAULT_VAL_RATIO,
     buildRenderPayload,
@@ -486,6 +487,7 @@ describe('findGeneratorsWithoutTestPath', () => {
     };
     const viewCatalog = [{
         viewId: 'fixture-view',
+        generalLabels: [],
         supportedLabels: [],
         problemType: 'WritingProblem',
         module,
@@ -497,6 +499,7 @@ describe('findGeneratorsWithoutTestPath', () => {
         const generatorCatalog = [
             {
                 generatorId: 'covered',
+                generalLabels: [],
                 labels: [],
                 problemType: 'WritingProblem',
                 module,
@@ -505,6 +508,7 @@ describe('findGeneratorsWithoutTestPath', () => {
             },
             {
                 generatorId: 'null-only',
+                generalLabels: [],
                 labels: [],
                 problemType: 'WritingProblem',
                 module,
@@ -513,6 +517,7 @@ describe('findGeneratorsWithoutTestPath', () => {
             },
             {
                 generatorId: 'type-mismatch',
+                generalLabels: [],
                 labels: [],
                 problemType: 'CountingProblem',
                 module,
@@ -630,6 +635,40 @@ describe('configured task identity', () => {
     });
 });
 
+describe('resolved pair capabilities', () => {
+    it('emits only invariant and resolved positive capabilities from both roles', () => {
+        const result = resolvePairCapabilities({
+            targetLabels: ['TargetOnly', 'ViewChoice'],
+            generatorGeneralLabels: ['GeneratorGeneral'],
+            generatorResolvedLabels: ['GeneratorChoice'],
+            viewGeneralLabels: ['ViewGeneral'],
+            viewSchema: {choice: ['ViewChoice', 'ViewFallback'] as const},
+            seed: 11
+        });
+
+        expect(result).toEqual({
+            labels: ['GeneratorChoice', 'GeneratorGeneral', 'ViewChoice', 'ViewGeneral'],
+            viewConfig: {choice: 'ViewChoice'},
+            viewResolvedLabels: ['ViewChoice']
+        });
+        expect(result.labels).not.toContain('TargetOnly');
+    });
+
+    it('includes a seeded view fallback as a realized capability', () => {
+        const result = resolvePairCapabilities({
+            targetLabels: ['TargetOnly'],
+            generatorGeneralLabels: [],
+            generatorResolvedLabels: [],
+            viewGeneralLabels: [],
+            viewSchema: {choice: ['ViewChoice', 'ViewFallback'] as const},
+            seed: 11
+        });
+
+        expect(result.labels).toEqual([result.viewConfig.choice]);
+        expect(result.viewResolvedLabels).toEqual([result.viewConfig.choice]);
+    });
+});
+
 describe('isValTuple', () => {
     it('handles ratio edge cases', () => {
         expect(isValTuple('t', 'g', 'v', 0)).toBe(false);
@@ -685,10 +724,10 @@ describe('isValTuple', () => {
 describe('buildRenderPayload', () => {
     it('maps mode to isSolutionView and carries the seed', () => {
         const problem = { type: 'writing' as const, data: {}, labels: [] };
-        const q = buildRenderPayload({ problem, viewId: 'v', labels: ['l'], mode: 'question', seed: 7 });
+        const q = buildRenderPayload({ problem, viewId: 'v', targetLabels: ['l'], mode: 'question', seed: 7 });
         expect(q.isSolutionView).toBe(false);
         expect(q.seed).toBe(7);
-        const s = buildRenderPayload({ problem, viewId: 'v', labels: ['l'], mode: 'solution', seed: 7 });
+        const s = buildRenderPayload({ problem, viewId: 'v', targetLabels: ['l'], mode: 'solution', seed: 7 });
         expect(s.isSolutionView).toBe(true);
     });
 });

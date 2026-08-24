@@ -313,8 +313,12 @@ pair that produced it.
    broad target did not need the more-specific Scope for matching.
 7. Regenerate affected artifacts and verify matching, label churn, coverage, and VQA.
 
-**Status: in progress.** The data-only `ProblemStub` boundary and metadata terminology are the
-prerequisites. Complete view-schema resolution and the observable Scope audit remain.
+**Status: in progress.** Steps 1 and 2 are complete: `ProblemStub` is data-only, and both schema
+roles expose the exact labels selected by target matching or deterministic fallback. Step 3 is
+complete in orchestration: `AbstractProblem.labels` and dataset rows contain only the union of
+pair-general and pair-resolved capabilities, while `RenderPayload.targetLabels` remains a separate
+configuration-selection input. The schema fallback/seeded-choice audit and observable Scope
+inventory remain.
 
 ### Phase 8: canonical validation and release proof
 

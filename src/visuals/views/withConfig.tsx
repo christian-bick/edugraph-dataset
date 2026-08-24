@@ -14,7 +14,7 @@ export function withConfig<T extends ConfigSchema>(
         // Reset the global PRNG from the sample's render seed so config
         // resolution (and any downstream draws) never depend on render order
         setSeed(props.payload.seed);
-        const { config } = extractConfig(Schema, props.payload.labels || []);
+        const { config } = extractConfig(Schema, props.payload.targetLabels || []);
         const viewId = props.payload.viewId || 'unknown-view';
 
         // Enforce parameter validation as a safeguard against coding errors or misusage

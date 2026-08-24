@@ -38,7 +38,7 @@ function payload<T>(data: T, isSolutionView: boolean): RenderPayload<AbstractPro
     return {
         problem: {type: 'arithmetic', data, labels: []},
         viewId: 'test-pattern-view',
-        labels: [],
+        targetLabels: [],
         isSolutionView,
         seed: 23
     };

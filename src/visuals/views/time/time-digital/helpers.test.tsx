@@ -10,7 +10,7 @@ const payload = (
     data: TimeProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<TimeDigitalViewId> => ({
-    problem: {type: 'time', data, labels: []}, viewId, labels: [], isSolutionView, seed: 9
+    problem: {type: 'time', data, labels: []}, viewId, targetLabels: [], isSolutionView, seed: 9
 });
 
 describe('time-digital payload validation', () => {

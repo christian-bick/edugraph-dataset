@@ -42,7 +42,7 @@ const payload = <ViewId extends DecimalViewId>(
 ): ViewRenderPayload<ViewId> => ({
     problem: {type: 'fraction', data, labels: []},
     viewId,
-    labels: [],
+    targetLabels: [],
     isSolutionView,
     seed: 17
 });

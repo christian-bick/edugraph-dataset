@@ -13,7 +13,7 @@ import {UnitSquareGridView} from './shape-unit-square-grid-view.tsx';
 const payload = <T,>(data: T, viewId: string): RenderPayload<AbstractProblem<T>> => ({
     problem: {type: 'shape', data, labels: []},
     viewId,
-    labels: [],
+    targetLabels: [],
     isSolutionView: false,
     seed: 1806151483
 });

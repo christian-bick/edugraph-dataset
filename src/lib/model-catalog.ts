@@ -21,12 +21,16 @@ export interface GeneratorModelDescriptor extends GeneratorMatchInfo {
     module: LeafModule;
     spec: any;
     schema?: ConfigSchema;
+    /** Invariant positive capabilities, kept separate from schema-supported alternatives. */
+    generalLabels: string[];
 }
 
 export interface ViewModelDescriptor extends ViewMatchInfo {
     module: LeafModule;
     spec: ViewSpec;
     schema: ConfigSchema;
+    /** Invariant positive capabilities, kept separate from schema-supported alternatives. */
+    generalLabels: string[];
 }
 
 const generatorCache = new Map<string, readonly GeneratorModelDescriptor[]>();
@@ -72,13 +76,17 @@ export async function loadGeneratorModelCatalog(
         const specModule = await import(pathToFileURL(resolve(module.absolutePath, 'spec.ts')).href);
         const schemaName = camelCase(module.id[0].toUpperCase() + module.id.slice(1)) + 'GeneratorSchema';
         const schema: ConfigSchema = specModule[schemaName] ?? {};
+        const generalLabels = [...new Set<string>(
+            (specModule.spec?.generalLabels ?? []) as readonly string[]
+        )];
         entries.push({
             generatorId: module.id,
             module,
             spec: specModule.spec,
             schema,
+            generalLabels,
             labels: [...new Set([
-                ...(specModule.spec?.generalLabels || []),
+                ...generalLabels,
                 ...extractSchemaLabels(schema)
             ])],
             problemType: getGeneratorProblemTypeFromPath(
@@ -115,13 +123,15 @@ export async function loadViewModelCatalog(
         const spec: ViewSpec = specModule.spec;
         const schemaName = camelCase(module.id[0].toUpperCase() + module.id.slice(1)) + 'ViewSchema';
         const schema: ConfigSchema = specModule[schemaName] ?? {};
+        const generalLabels = [...new Set(spec.generalLabels || [])];
         entries.push({
             viewId: spec.viewId,
             module,
             spec,
             schema,
+            generalLabels,
             supportedLabels: [...new Set([
-                ...(spec.generalLabels || []),
+                ...generalLabels,
                 ...extractSchemaLabels(schema)
             ])],
             requiredLabels: spec.requiredLabels || [],

@@ -7,6 +7,7 @@ import {
     loadGeneratorCatalog,
     computeSampleFilename,
     computeContentFingerprint,
+    resolvePairCapabilities,
     buildProblem,
     buildRenderPayload
 } from '../lib/generation.ts';
@@ -61,11 +62,11 @@ async function main() {
     console.log(`Sample key: ${sampleKey}`);
     console.log(`Attempt:    ${attempt}${attemptArg === undefined && cachedByIdentity ? ' (auto-adopted from VQA cache)' : ''}`);
 
-    const { target, labels, seed, stub } = await generateSampleByKey({ sampleKey, attempt, specName });
+    const { target, targetLabels, seed, stub } = await generateSampleByKey({ sampleKey, attempt, specName });
 
     console.log(`Seed:       ${seed}`);
     console.log(`Target:     ${target.id}`);
-    console.log(`Labels:     ${labels.map(l => l.split('/').pop()).join(', ')}`);
+    console.log(`Target labels: ${targetLabels.map(l => l.split('/').pop()).join(', ')}`);
 
     if (!stub) {
         console.log(`\n⚠️ Generator returned null for this seed — with this attempt the pipeline would have retried.`);
@@ -78,12 +79,23 @@ async function main() {
 
     if (skipRender) return;
 
+    const generatorCatalog = await loadGeneratorCatalog();
+    const viewCatalog = await loadViewCatalog();
+    const generatorEntry = generatorCatalog.find(g => g.generatorId === identity.generatorId)!;
+    const viewEntry = viewCatalog.find(v => v.viewId === identity.viewId)!;
+    const pair = resolvePairCapabilities({
+        targetLabels,
+        generatorGeneralLabels: generatorEntry.generalLabels,
+        generatorResolvedLabels: stub.labels,
+        viewGeneralLabels: viewEntry.generalLabels,
+        viewSchema: viewEntry.schema,
+        seed
+    });
     const problem = buildProblem({
         stub,
-        type: (await loadGeneratorCatalog()).find(g => g.generatorId === identity.generatorId)!.generator.type,
-        labels
+        type: generatorEntry.generator.type,
+        labels: pair.labels
     });
-    const viewCatalog = await loadViewCatalog();
     const viewPathMap: Record<string, string> = {};
     for (const view of viewCatalog) {
         viewPathMap[view.viewId] = view.module.relativePath;
@@ -98,7 +110,7 @@ async function main() {
             payload: buildRenderPayload({
                 problem,
                 viewId: identity.viewId,
-                labels: problem.labels,
+                targetLabels,
                 mode: identity.mode,
                 seed
             })
