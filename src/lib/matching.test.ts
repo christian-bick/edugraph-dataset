@@ -90,6 +90,75 @@ describe('required target Abilities', () => {
     });
 });
 
+describe('required-label-guarded discriminated generator unions', () => {
+    it('indexes member leaves and selects only the target-compatible discriminant', () => {
+        const familyGenerator: GeneratorMatchInfo = {
+            generatorId: 'discriminated-family',
+            labels: [
+                Area.GenerativeRuleRecognition,
+                Area.PatternGeneration,
+                Area.EmergentFeatureRecognition
+            ],
+            problemType: 'WritingProblem'
+        };
+        const familyViews: ViewMatchInfo[] = [
+            {
+                viewId: 'table-leaf',
+                supportedLabels: [Ability.ConceptClassification],
+                requiredLabels: [Area.GenerativeRuleRecognition],
+                problemType: 'LegacyWritingProblem'
+            },
+            {
+                viewId: 'recurrence-leaf',
+                supportedLabels: [Ability.ProcedureExecution],
+                requiredLabels: [Area.PatternGeneration],
+                problemType: 'MultiDigitWritingProblem'
+            }
+        ];
+        const pairIndex = buildCompatibleModulePairIndex([familyGenerator], familyViews);
+        expect(pairIndex.orderedPairs.map(pair => pair.view.viewId)).toEqual([
+            'table-leaf',
+            'recurrence-leaf'
+        ]);
+
+        const result = matchTargets([
+            {
+                id: 'table-target',
+                labels: [Area.GenerativeRuleRecognition, Ability.ConceptClassification]
+            },
+            {
+                id: 'recurrence-target',
+                labels: [Area.PatternGeneration, Ability.ProcedureExecution]
+            }
+        ], [familyGenerator], familyViews, {pairIndex});
+        expect(tupleIds(result.tuples)).toEqual([
+            'table-target#discriminated-family#table-leaf',
+            'recurrence-target#discriminated-family#recurrence-leaf'
+        ]);
+    });
+
+    it('does not index an unguarded member-only view for a union generator', () => {
+        const unionGenerator: GeneratorMatchInfo = {
+            generatorId: 'discriminated-family',
+            labels: [Area.PatternGeneration],
+            problemType: 'WritingProblem'
+        };
+        const unguardedView: ViewMatchInfo = {
+            viewId: 'unguarded-recurrence-leaf',
+            supportedLabels: [Ability.ProcedureExecution],
+            problemType: 'MultiDigitWritingProblem'
+        };
+        const pairIndex = buildCompatibleModulePairIndex([unionGenerator], [unguardedView]);
+
+        expect(pairIndex.orderedPairs).toEqual([]);
+        expect(matchesTarget(
+            [Area.PatternGeneration, Ability.ProcedureExecution],
+            unionGenerator,
+            unguardedView
+        )).toEqual({matched: false, reason: 'incompatible-type'});
+    });
+});
+
 function matchingGraph(options: {
     targets: CompetencyTarget[];
     generators: GeneratorMatchInfo[];

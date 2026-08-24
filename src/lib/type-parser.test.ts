@@ -33,6 +33,21 @@ describe('type-parser', () => {
         expect(isProblemTypeCompatible('ArithmeticTripleProblem', 'ArithmeticPairProblem')).toBe(false);
     });
 
+    it('accepts a required-label-guarded leaf from a discriminated generator union', () => {
+        expect(isProblemTypeCompatible(
+            'WritingProblem',
+            'LegacyWritingProblem'
+        )).toBe(true);
+        expect(isProblemTypeCompatible(
+            'WritingProblem',
+            'MultiDigitWritingProblem'
+        )).toBe(true);
+        expect(isProblemTypeCompatible(
+            'WritingProblem',
+            'ArithmeticPairProblem'
+        )).toBe(false);
+    });
+
     it('reads each type source once across repeated lookups', () => {
         clearTypeParserCaches();
         const counters = createWorkCounters();

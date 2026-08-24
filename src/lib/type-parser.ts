@@ -11,6 +11,7 @@ const PROJECT_ROOT = resolve(__dirname, '..', '..');
 interface ProblemTypeGraph {
     viewToProblemType: Record<string, string>;
     unionMembers: Map<string, readonly string[]>;
+    containingUnions: Map<string, readonly string[]>;
 }
 
 let problemTypeGraph: ProblemTypeGraph | undefined;
@@ -29,12 +30,21 @@ const parseProblemTypeGraph = (content: string): ProblemTypeGraph => {
     }
 
     const unionMembers = new Map<string, readonly string[]>();
-    const unionPattern = /export\s+type\s+(\w+)\s*=\s*((?:\w+\s*\|\s*)+\w+)\s*;/g;
+    const unionPattern = /export\s+type\s+(\w+)\s*=\s*(\|?\s*\w+(?:\s*\|\s*\w+)+)\s*;/g;
     for (const match of content.matchAll(unionPattern)) {
-        unionMembers.set(match[1], match[2].split('|').map(member => member.trim()));
+        unionMembers.set(match[1], match[2].split('|').map(member => member.trim()).filter(Boolean));
     }
 
-    return {viewToProblemType, unionMembers};
+    const containingUnions = new Map<string, string[]>();
+    for (const [unionType, members] of unionMembers) {
+        for (const member of members) {
+            const containers = containingUnions.get(member);
+            if (containers) containers.push(unionType);
+            else containingUnions.set(member, [unionType]);
+        }
+    }
+
+    return {viewToProblemType, unionMembers, containingUnions};
 };
 
 const loadProblemTypeGraph = (counters?: WorkCounters): ProblemTypeGraph => {
@@ -42,7 +52,11 @@ const loadProblemTypeGraph = (counters?: WorkCounters): ProblemTypeGraph => {
 
     const problemsPath = resolve(PROJECT_ROOT, 'src', 'types', 'problems.ts');
     if (!existsSync(problemsPath)) {
-        problemTypeGraph = {viewToProblemType: {}, unionMembers: new Map()};
+        problemTypeGraph = {
+            viewToProblemType: {},
+            unionMembers: new Map(),
+            containingUnions: new Map()
+        };
         return problemTypeGraph;
     }
 
@@ -127,6 +141,14 @@ export function getAcceptedGeneratorProblemTypes(
     return members ? [viewType, ...members] : [viewType];
 }
 
+/** Returns named generator unions that can emit the supplied concrete member. */
+export function getContainingProblemUnionTypes(
+    memberType: string,
+    counters?: WorkCounters
+): readonly string[] {
+    return loadProblemTypeGraph(counters).containingUnions.get(memberType) ?? [];
+}
+
 /**
  * Returns whether a view payload type accepts a generator payload type.
  * Parsed type information is shared for the lifetime of the operation.
@@ -137,7 +159,13 @@ export function isProblemTypeCompatible(
     counters?: WorkCounters
 ): boolean {
     counters?.add('type.compatibility_checks');
-    return getAcceptedGeneratorProblemTypes(viewType, counters).includes(generatorType);
+    if (getAcceptedGeneratorProblemTypes(viewType, counters).includes(generatorType)) return true;
+
+    // A discriminated generator family may safely feed a member-only leaf when
+    // that view guards its applicability with requiredLabels (SPEC-V6/V7).
+    // Label validation owns that runtime boundary; the type graph only needs
+    // to recognize the named union-member relationship in this direction.
+    return loadProblemTypeGraph(counters).unionMembers.get(generatorType)?.includes(viewType) ?? false;
 }
 
 /** Clears process-local parser state for watch-mode invalidation and isolated tests. */

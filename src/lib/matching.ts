@@ -1,6 +1,7 @@
 import {getConceptAncestors, isSubConceptOf} from './ontology.ts';
 import {
     getAcceptedGeneratorProblemTypes,
+    getContainingProblemUnionTypes,
     isProblemTypeCompatible
 } from './type-parser.ts';
 import {
@@ -50,9 +51,12 @@ function hasCompatibleProblemTypes(
     generatorInfo: GeneratorMatchInfo,
     viewInfo: ViewMatchInfo
 ): boolean {
-    return generatorInfo.problemType == null
-        || viewInfo.problemType == null
-        || isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType);
+    if (generatorInfo.problemType == null || viewInfo.problemType == null) return true;
+    if (!isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType)) return false;
+
+    const acceptsOnlyUnionMember = getContainingProblemUnionTypes(viewInfo.problemType)
+        .includes(generatorInfo.problemType);
+    return !acceptsOnlyUnionMember || (viewInfo.requiredLabels?.length ?? 0) > 0;
 }
 
 function matchesTargetCapabilities(
@@ -275,6 +279,11 @@ export function buildCompatibleModulePairIndex(
         }
         for (const acceptedType of getAcceptedGeneratorProblemTypes(view.problemType, counters)) {
             viewsByGeneratorType.get(acceptedType)?.push(view);
+        }
+        if ((view.requiredLabels?.length ?? 0) > 0) {
+            for (const containingUnion of getContainingProblemUnionTypes(view.problemType, counters)) {
+                viewsByGeneratorType.get(containingUnion)?.push(view);
+            }
         }
     }
 
