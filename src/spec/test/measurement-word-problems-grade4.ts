@@ -16,4 +16,17 @@ const builder = new DatasetPermutationBuilder()
     .applyLabelVariants([[Scope.IntegerNumbers], [Scope.FractionNumbers], [Scope.DecimalNumbers]])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction], [Area.Multiplication], [Area.Division]]);
 
-export const spec: CompetencyTarget[] = toTargets('test-grade4-measurement-word-problems', builder);
+const currencyArithmeticBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Addition,
+    Scope.Dollar,
+    Scope.Coins,
+    Scope.QuarterDenomination,
+    Scope.SingleStep,
+    Scope.TwoOperands,
+    Ability.TextualReception
+]);
+
+export const spec: CompetencyTarget[] = [
+    ...toTargets('test-grade4-measurement-word-problems', builder),
+    ...toTargets('test-currency-arithmetic', currencyArithmeticBuilder)
+];

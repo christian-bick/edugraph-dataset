@@ -20,7 +20,15 @@ const mediatedBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.Greater], [Scope.Less]]);
 
+const lengthDifferenceBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Difference,
+    Scope.LengthMeasurement,
+    Scope.DirectRelation,
+    Ability.ProcedureExecution
+]);
+
 export const spec: CompetencyTarget[] = [
     ...toTargets('test-measurement-order', directBuilder),
-    ...toTargets('test-measurement-mediated-comparison', mediatedBuilder)
+    ...toTargets('test-measurement-mediated-comparison', mediatedBuilder),
+    ...toTargets('test-measurement-length-difference', lengthDifferenceBuilder)
 ];
