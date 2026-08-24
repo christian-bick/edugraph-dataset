@@ -81,7 +81,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
         }
     });
 
-    it('resolves integer rounding into reasonableness checks', () => {
+    it('resolves integer rounding into canonical rounding relations', () => {
         for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division]) {
             const stub = generateWithLabels(generator, [
                 operation,
@@ -91,7 +91,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
                 Ability.ProcedureUnderstanding
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.kind).toBe('reasonableness');
+            expect(stub!.data.kind).toBe('rounding');
             expect(stub!.tags).toEqual(expect.arrayContaining([
                 operation,
                 Area.IntegerRounding

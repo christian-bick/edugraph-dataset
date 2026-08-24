@@ -4,7 +4,7 @@ import {
     ArithmeticPairProblem,
     ArithmeticWordProblemInterpretedRemainder,
     ArithmeticWordProblemLetterEquation,
-    ArithmeticWordProblemReasonableness,
+    ArithmeticWordProblemRounding,
     ArithmeticWordProblemTwoStep,
     ArithmeticWordProblemWithin100
 } from '../../../types/problems.ts';
@@ -14,11 +14,12 @@ import {
     getWordProblemStory,
     isTwoStepProblem,
     operationSymbol,
+    resolveRoundingClaim,
     WordProblemPart
 } from './arithmetic-word-problem-within-100-helpers.ts';
 
 export interface ArithmeticWordProblemWithin100Config {
-    expectedKind?: 'interpreted-remainder' | 'letter-equation' | 'reasonableness';
+    expectedKind?: 'interpreted-remainder' | 'letter-equation' | 'rounding';
     invertProcedure: boolean;
     useLengthContext: boolean;
 }
@@ -30,7 +31,7 @@ interface ArithmeticWordProblemWithin100ViewProps {
 
 const VIEW_ID = 'operations-word-problem-within-100';
 const MAX_MAGNITUDE = 1_000_000;
-const ROUNDING_PLACE_NAMES: Record<ArithmeticWordProblemReasonableness['roundingPlace'], string> = {
+const ROUNDING_PLACE_NAMES: Record<ArithmeticWordProblemRounding['roundingPlace'], string> = {
     10: 'ten',
     100: 'hundred',
     1000: 'thousand',
@@ -231,45 +232,43 @@ function validateLetterEquation(data: ArithmeticWordProblemLetterEquation) {
     }
 }
 
-function validateReasonableness(data: ArithmeticWordProblemReasonableness) {
+function validateRounding(data: ArithmeticWordProblemRounding) {
     validateProblemData(VIEW_ID, data, [
         'kind',
         'operands',
         'operations',
         'intermediate',
-        'exactAnswer',
-        'proposedAnswer',
+        'answer',
         'roundingPlace',
-        'roundedExactAnswer',
-        'roundedProposedAnswer',
-        'isReasonable'
+        'roundedAnswer'
     ]);
     if (!Array.isArray(data.operands) || data.operands.length !== 3) {
-        fail('The reasonableness task requires exactly three operands.');
+        fail('The rounding relation requires exactly three operands.');
     }
     assertOperations(data.operations);
     assertIntegers(
         [
             ...data.operands,
             data.intermediate,
-            data.exactAnswer,
-            data.proposedAnswer,
-            data.roundedExactAnswer,
-            data.roundedProposedAnswer
+            data.answer,
+            data.roundedAnswer
         ],
-        'Reasonableness values must be whole numbers with magnitudes through one million.'
+        'Rounding values must be whole numbers with magnitudes through one million.'
     );
     const intermediate = applyOperation(data.operands[0], data.operands[1], data.operations[0]);
-    const exactAnswer = applyOperation(intermediate, data.operands[2], data.operations[1]);
-    const roundedExact = Math.round(data.exactAnswer / data.roundingPlace) * data.roundingPlace;
-    const roundedProposed = Math.round(data.proposedAnswer / data.roundingPlace) * data.roundingPlace;
+    const answer = applyOperation(intermediate, data.operands[2], data.operations[1]);
+    const expectedExponent = Math.max(
+        1,
+        Math.min(5, Math.floor(Math.log10(Math.max(1, Math.abs(data.answer)))))
+    );
+    const expectedRoundingPlace = 10 ** expectedExponent;
+    const roundedAnswer = Math.round(data.answer / data.roundingPlace) * data.roundingPlace;
     if (!Object.hasOwn(ROUNDING_PLACE_NAMES, data.roundingPlace)
         || data.intermediate !== intermediate
-        || data.exactAnswer !== exactAnswer
-        || data.roundedExactAnswer !== roundedExact
-        || data.roundedProposedAnswer !== roundedProposed
-        || data.isReasonable !== (roundedExact === roundedProposed)) {
-        fail('The supplied reasonableness check is mathematically inconsistent.');
+        || data.answer !== answer
+        || data.roundingPlace !== expectedRoundingPlace
+        || data.roundedAnswer !== roundedAnswer) {
+        fail('The supplied result-rounding relation is mathematically inconsistent.');
     }
 }
 
@@ -536,26 +535,28 @@ function LetterEquationProblem({data, isSolutionView}: {
     );
 }
 
-function ReasonablenessProblem({data, isSolutionView}: {
-    data: ArithmeticWordProblemReasonableness;
+function ReasonablenessProblem({data, isSolutionView, seed}: {
+    data: ArithmeticWordProblemRounding;
     isSolutionView: boolean;
+    seed: number;
 }) {
+    const claim = resolveRoundingClaim(data, seed);
     const firstSymbol = operationSymbol(data.operations[0]);
     const secondSymbol = operationSymbol(data.operations[1]);
     const exactEquations = [
         `${data.operands[0]} ${firstSymbol} ${data.operands[1]} = ${data.intermediate}`,
-        `${data.intermediate} ${secondSymbol} ${data.operands[2]} = ${data.exactAnswer}`
+        `${data.intermediate} ${secondSymbol} ${data.operands[2]} = ${data.answer}`
     ];
-    const roundingCheck = `${data.exactAnswer} rounds to ${data.roundedExactAnswer}; ${data.proposedAnswer} rounds to ${data.roundedProposedAnswer}.`;
+    const roundingCheck = `${data.answer} rounds to ${data.roundedAnswer}; ${claim.proposedAnswer} rounds to ${claim.roundedProposedAnswer}.`;
     const roundingPlaceName = ROUNDING_PLACE_NAMES[data.roundingPlace];
-    const reasonablenessExplanation = data.isReasonable
+    const reasonablenessExplanation = claim.isReasonable
         ? `The exact and proposed answers round to the same ${roundingPlaceName}, so the proposal is reasonable.`
         : `The exact and proposed answers round to different ${roundingPlaceName}s, so the proposal is not reasonable.`;
     return (
         <>
             <StoryHeader title="Check answer reasonableness" instruction="Use the rounding check to evaluate the proposed result." />
             <StoryCard
-                story={`${buildMultiStepStory(data.operands, data.operations)} A student says the final result is ${data.proposedAnswer}.`}
+                story={`${buildMultiStepStory(data.operands, data.operations)} A student says the final result is ${claim.proposedAnswer}.`}
                 question="Is the student’s answer reasonable? Explain using rounding."
             />
             <div className="mt-5 rounded-xl border-2 border-violet-200 bg-violet-50 px-5 py-4 text-center">
@@ -578,7 +579,7 @@ function ReasonablenessProblem({data, isSolutionView}: {
                         {reasonablenessExplanation}
                     </div>
                     <AnswerCard>
-                        {data.proposedAnswer} is {data.isReasonable ? 'a reasonable' : 'not a reasonable'} answer.
+                        {claim.proposedAnswer} is {claim.isReasonable ? 'a reasonable' : 'not a reasonable'} answer.
                     </AnswerCard>
                 </>
             ) : (
@@ -610,9 +611,9 @@ function renderProblem(
         validateLetterEquation(data);
         return <LetterEquationProblem data={data} isSolutionView={isSolutionView} />;
     }
-    if (data.kind === 'reasonableness') {
-        validateReasonableness(data);
-        return <ReasonablenessProblem data={data} isSolutionView={isSolutionView} />;
+    if (data.kind === 'rounding') {
+        validateRounding(data);
+        return <ReasonablenessProblem data={data} isSolutionView={isSolutionView} seed={seed} />;
     }
     return fail('Unsupported word-problem discriminant.');
 }

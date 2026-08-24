@@ -8,7 +8,7 @@ import '../../../../tailwind.css';
 interface CoreProps {payload: ViewRenderPayload<'operations-word-problem-reasoning'>}
 const Core = ({payload}: CoreProps) => (
     <ArithmeticWordProblemWithin100View
-        config={{expectedKind: 'reasonableness', invertProcedure: false, useLengthContext: false}}
+        config={{expectedKind: 'rounding', invertProcedure: false, useLengthContext: false}}
         payload={payload}
     />
 );

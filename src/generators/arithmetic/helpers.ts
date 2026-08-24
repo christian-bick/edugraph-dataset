@@ -18,7 +18,7 @@ export type ArithmeticWordProblemTask =
     | 'two-step'
     | 'interpreted-remainder'
     | 'letter-equation'
-    | 'reasonableness';
+    | 'rounding';
 
 /** Resolves only an explicitly requested operation, never a related ontology label. */
 export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
@@ -59,7 +59,7 @@ export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabe
 /** Resolves the Grade 4 mathematical task while preserving the legacy two-step default. */
 export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWordProblemTask {
     if (labels.includes(Area.IntegerRounding)) {
-        return 'reasonableness';
+        return 'rounding';
     }
     if (labels.includes(Area.ImperfectDivisibility) || labels.includes(Area.Modulo)) {
         return 'interpreted-remainder';

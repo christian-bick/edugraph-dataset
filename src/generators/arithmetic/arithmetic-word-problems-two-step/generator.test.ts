@@ -153,8 +153,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
         );
     });
 
-    it('provides visible rounding checks for reasonable and unreasonable proposals', () => {
-        const conclusions = new Set<boolean>();
+    it('provides canonical result-rounding relations', () => {
         const roundingPlaces = new Set<number>();
 
         for (const operations of [
@@ -166,40 +165,34 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
             for (let seed = 0; seed < 30; seed++) {
                 setSeed(seed);
                 const stub = generator.generate({
-                    task: 'reasonableness',
+                    task: 'rounding',
                     operations,
                     range: {min: 0, max: 1_000_000}
                 });
                 expect(stub).not.toBeNull();
-                expect(stub!.data.kind).toBe('reasonableness');
-                if (stub!.data.kind !== 'reasonableness') throw new Error('Expected estimate payload.');
+                expect(stub!.data.kind).toBe('rounding');
+                if (stub!.data.kind !== 'rounding') throw new Error('Expected rounding payload.');
 
                 const data = stub!.data;
-                conclusions.add(data.isReasonable);
                 roundingPlaces.add(data.roundingPlace);
                 expect(data.intermediate).toBe(apply(data.operands[0], data.operands[1], data.operations[0]));
-                expect(data.exactAnswer).toBe(apply(data.intermediate, data.operands[2], data.operations[1]));
+                expect(data.answer).toBe(apply(data.intermediate, data.operands[2], data.operations[1]));
                 const expectedPlace = 10 ** Math.max(
                     1,
-                    Math.floor(Math.log10(Math.max(1, data.exactAnswer)))
+                    Math.floor(Math.log10(Math.max(1, data.answer)))
                 );
                 expect(data.roundingPlace).toBe(expectedPlace);
-                expect(data.roundedExactAnswer).toBe(
-                    Math.round(data.exactAnswer / data.roundingPlace) * data.roundingPlace
+                expect(data.roundedAnswer).toBe(
+                    Math.round(data.answer / data.roundingPlace) * data.roundingPlace
                 );
-                expect(data.roundedProposedAnswer).toBe(
-                    Math.round(data.proposedAnswer / data.roundingPlace) * data.roundingPlace
-                );
-                expect(data.isReasonable).toBe(data.roundedExactAnswer === data.roundedProposedAnswer);
             }
         }
 
-        expect(conclusions).toEqual(new Set([true, false]));
         expect([...roundingPlaces].some(place => place > 10)).toBe(true);
     });
 
     it('is deterministic for every Grade 4 task', () => {
-        for (const task of ['interpreted-remainder', 'letter-equation', 'reasonableness'] as const) {
+        for (const task of ['interpreted-remainder', 'letter-equation', 'rounding'] as const) {
             const operations = task === 'interpreted-remainder'
                 ? [Area.Division, Area.Division] as const
                 : [Area.Multiplication, Area.Addition] as const;

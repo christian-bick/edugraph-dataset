@@ -1,11 +1,59 @@
 import {
     ArithmeticOperation,
     ArithmeticPairProblem,
+    ArithmeticWordProblemRounding,
     ArithmeticWordProblemTwoStep,
     ArithmeticWordProblemWithin100
 } from '../../../types/problems.ts';
 
 export type WordProblemPart = 'num1' | 'num2' | 'num3' | 'intermediate' | 'answer';
+
+export type RoundingClaim = {
+    proposedAnswer: number;
+    roundedProposedAnswer: number;
+    isReasonable: boolean;
+};
+
+/** Derives a bounded learner-facing claim from the canonical result-rounding relation. */
+export function resolveRoundingClaim(
+    data: ArithmeticWordProblemRounding,
+    seed: number
+): RoundingClaim {
+    const normalizedSeed = Number.isFinite(seed) ? Math.abs(Math.trunc(seed)) : 0;
+    const shouldBeReasonable = normalizedSeed % 2 === 0;
+    const preferredDirection = Math.floor(normalizedSeed / 2) % 2 === 0 ? 1 : -1;
+    const fineStep = Math.max(1, data.roundingPlace / 10);
+    const baseDistances = shouldBeReasonable
+        ? [1, fineStep, 2 * fineStep]
+        : [data.roundingPlace, 2 * data.roundingPlace];
+    const distances = [...new Set(baseDistances)];
+    const rotation = Math.floor(normalizedSeed / 4) % distances.length;
+    const rotatedDistances = [...distances.slice(rotation), ...distances.slice(0, rotation)];
+    const maximumProposal = 10 * data.roundingPlace - 1;
+    const candidates = rotatedDistances.flatMap(distance => [
+        data.answer + preferredDirection * distance,
+        data.answer - preferredDirection * distance
+    ]);
+    const proposedAnswer = candidates.find(candidate => {
+        if (!Number.isInteger(candidate) || candidate < 1 || candidate > maximumProposal) {
+            return false;
+        }
+        const roundedCandidate = Math.round(candidate / data.roundingPlace) * data.roundingPlace;
+        return (roundedCandidate === data.roundedAnswer) === shouldBeReasonable;
+    });
+
+    if (proposedAnswer === undefined) {
+        throw new Error('The rounded answer has no bounded reasonableness proposal.');
+    }
+
+    const roundedProposedAnswer = Math.round(proposedAnswer / data.roundingPlace)
+        * data.roundingPlace;
+    return {
+        proposedAnswer,
+        roundedProposedAnswer,
+        isReasonable: roundedProposedAnswer === data.roundedAnswer
+    };
+}
 
 export function isTwoStepProblem(
     data: ArithmeticWordProblemWithin100

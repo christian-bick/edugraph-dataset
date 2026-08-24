@@ -252,23 +252,20 @@ export type ArithmeticWordProblemLetterEquation = {
     answer: number;
 };
 
-export type ArithmeticWordProblemReasonableness = {
-    kind: 'reasonableness';
+export type ArithmeticWordProblemRounding = {
+    kind: 'rounding';
     operands: readonly [number, number, number];
     operations: readonly [ArithmeticOperation, ArithmeticOperation];
     intermediate: number;
-    exactAnswer: number;
-    proposedAnswer: number;
+    answer: number;
     roundingPlace: 10 | 100 | 1000 | 10000 | 100000;
-    roundedExactAnswer: number;
-    roundedProposedAnswer: number;
-    isReasonable: boolean;
+    roundedAnswer: number;
 };
 
 export type ArithmeticWordProblemGrade4 =
     | ArithmeticWordProblemInterpretedRemainder
     | ArithmeticWordProblemLetterEquation
-    | ArithmeticWordProblemReasonableness;
+    | ArithmeticWordProblemRounding;
 
 /** Generator contract shared by legacy and Grade 4 multi-step word problems. */
 export type ArithmeticWordProblemMultistep = ArithmeticWordProblemTwoStep | ArithmeticWordProblemGrade4;

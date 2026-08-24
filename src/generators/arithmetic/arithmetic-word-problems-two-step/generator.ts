@@ -7,7 +7,7 @@ import {
     ArithmeticWordProblemInterpretedRemainder,
     ArithmeticWordProblemLetterEquation,
     ArithmeticWordProblemMultistep,
-    ArithmeticWordProblemReasonableness,
+    ArithmeticWordProblemRounding,
     ArithmeticWordProblemTwoStep
 } from '../../../types/problems.ts';
 import {
@@ -26,14 +26,14 @@ type NamedOperations = readonly [ArithmeticOperation, ArithmeticOperation];
 const MAX_TWO_STEP_VALUE = 100;
 const MAX_GRADE4_VALUE = 999_999;
 
-type ReasonablenessRoundingPlace = ArithmeticWordProblemReasonableness['roundingPlace'];
+type RoundingPlace = ArithmeticWordProblemRounding['roundingPlace'];
 
-const roundingPlaceFor = (value: number): ReasonablenessRoundingPlace => {
+const roundingPlaceFor = (value: number): RoundingPlace => {
     const exponent = Math.max(1, Math.min(5, Math.floor(Math.log10(Math.max(1, Math.abs(value))))));
-    return 10 ** exponent as ReasonablenessRoundingPlace;
+    return 10 ** exponent as RoundingPlace;
 };
 
-const roundTo = (value: number, place: ReasonablenessRoundingPlace): number =>
+const roundTo = (value: number, place: RoundingPlace): number =>
     Math.round(value / place) * place;
 
 const applyOperation = (left: number, right: number, operation: ArithmeticOperation): number => {
@@ -98,9 +98,8 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
         if (config.task === 'letter-equation') {
             return {data: this.buildLetterEquation(values, namedOperations)};
         }
-        if (config.task === 'reasonableness') {
-            const reasonableness = this.buildReasonableness(values, namedOperations, maximum);
-            return reasonableness ? {data: reasonableness} : null;
+        if (config.task === 'rounding') {
+            return {data: this.buildRounding(values, namedOperations)};
         }
 
         return {
@@ -263,40 +262,19 @@ export class ArithmeticWordProblemsTwoStepGenerator implements ProblemGenerator<
         };
     }
 
-    private buildReasonableness(
+    private buildRounding(
         values: Values,
-        operations: NamedOperations,
-        maximum: number
-    ): ArithmeticWordProblemReasonableness | null {
+        operations: NamedOperations
+    ): ArithmeticWordProblemRounding {
         const roundingPlace = roundingPlaceFor(values.answer);
-        const roundedExactAnswer = roundTo(values.answer, roundingPlace);
-        const shouldBeReasonable = random() < 0.5;
-        const fineStep = Math.max(1, roundingPlace / 10);
-        const offsets = shouldBeReasonable
-            ? [fineStep, -fineStep, 2 * fineStep, -2 * fineStep, 1, -1]
-            : [roundingPlace, -roundingPlace, 2 * roundingPlace, -2 * roundingPlace];
-        const candidates = offsets
-            .map(offset => values.answer + offset)
-            .filter(candidate => {
-                if (!Number.isInteger(candidate) || candidate < 1 || candidate > maximum) return false;
-                return (roundTo(candidate, roundingPlace) === roundedExactAnswer) === shouldBeReasonable;
-            });
-        if (candidates.length === 0) return null;
-
-        const proposedAnswer = candidates[Math.floor(random() * candidates.length)];
-        const roundedProposedAnswer = roundTo(proposedAnswer, roundingPlace);
-        const isReasonable = roundedExactAnswer === roundedProposedAnswer;
         return {
-            kind: 'reasonableness',
+            kind: 'rounding',
             operands: [values.num1, values.num2, values.num3],
             operations,
             intermediate: values.intermediate,
-            exactAnswer: values.answer,
-            proposedAnswer,
+            answer: values.answer,
             roundingPlace,
-            roundedExactAnswer,
-            roundedProposedAnswer,
-            isReasonable
+            roundedAnswer: roundTo(values.answer, roundingPlace)
         };
     }
 }
