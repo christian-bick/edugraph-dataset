@@ -1,9 +1,4 @@
-import {
-    DecimalComparisonOperand,
-    DecimalComparisonProblem,
-    DecimalFractionValue
-} from '../../../../types/problems.ts';
-import {isValidTenthsHundredthsGrid} from '../../../helpers/tenths-hundredths-grid.ts';
+import {DecimalComparisonOperand, DecimalComparisonProblem} from '../../../../types/problems.ts';
 
 const relationPhrase = (
     relation: DecimalComparisonProblem['relation']
@@ -45,11 +40,7 @@ const validOperand = (operand: DecimalComparisonOperand): boolean => {
         ? operand.hundredthsDigit !== null || operand.normalizedHundredths % 10 !== 0
         : operand.hundredthsDigit !== operand.normalizedHundredths % 10) return false;
 
-    const modelValue: DecimalFractionValue = {
-        numerator: operand.normalizedHundredths,
-        denominator: 100
-    };
-    return isValidTenthsHundredthsGrid(operand.model, modelValue);
+    return true;
 };
 
 const expectedExplanation = (

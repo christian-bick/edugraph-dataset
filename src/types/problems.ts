@@ -1532,7 +1532,6 @@ export type DecimalComparisonOperand = {
     tenthsDigit: number;
     hundredthsDigit: number | null;
     normalizedHundredths: number;
-    model: TenthsHundredthsGridModel;
 };
 
 export type DecimalComparisonProblem = {

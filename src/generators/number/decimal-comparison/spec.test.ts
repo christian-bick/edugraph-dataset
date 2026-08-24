@@ -58,8 +58,8 @@ describe('DecimalComparisonGenerator spec integration', () => {
         const resolved = generateWithLabels(generator, labels);
         setSeed('decimal-comparison-label-path');
         const direct = generator.generate({
-            comparisonKind: Area.NumericInequality,
-            relation: Scope.Greater
+            comparisonKind: 'inequality',
+            relation: 'greater'
         });
         expect(resolved!.data).toEqual(direct.data);
     });

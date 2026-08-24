@@ -6,6 +6,7 @@ import {
     TenthsHundredthsGridModel
 } from '../../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {toTenthsHundredthsGrid} from '../../../helpers/tenths-hundredths-grid.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {
     decimalComparisonNotation,
@@ -28,15 +29,17 @@ interface CoreProps {
 }
 
 const DecimalGrid = ({
-    model,
     operand,
     side
 }: {
-    model: TenthsHundredthsGridModel;
     operand: DecimalComparisonOperand;
     side: 'Left' | 'Right';
 }) => {
     const notation = decimalComparisonNotation(operand);
+    const model: TenthsHundredthsGridModel = toTenthsHundredthsGrid({
+        numerator: operand.normalizedHundredths,
+        denominator: 100
+    });
     return (
     <div
         className="rounded-xl border-2 border-slate-200 bg-white p-3"
@@ -139,7 +142,7 @@ const OperandPanel = ({
     decidingPlace: DecimalComparisonProblem['firstDecidingPlace'] | null;
 }) => (
     <div className="space-y-3">
-        <DecimalGrid model={operand.model} operand={operand} side={side} />
+        <DecimalGrid operand={operand} side={side} />
         <PlaceValueRow operand={operand} highlight={decidingPlace} side={side} />
     </div>
 );

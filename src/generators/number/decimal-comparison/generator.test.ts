@@ -1,11 +1,6 @@
-import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {
-    DecimalComparisonOperand,
-    DecimalComparisonProblem,
-    TenthsHundredthsGridModel
-} from '../../../types/problems.ts';
+import {DecimalComparisonOperand, DecimalComparisonProblem} from '../../../types/problems.ts';
 import {DecimalComparisonGenerator} from './generator.ts';
 import {DecimalComparisonGeneratorConfig} from './spec.ts';
 
@@ -13,44 +8,18 @@ const generator = new DecimalComparisonGenerator();
 
 const configs = {
     greater: {
-        comparisonKind: Area.NumericInequality,
-        relation: Scope.Greater
+        comparisonKind: 'inequality',
+        relation: 'greater'
     },
     equal: {
-        comparisonKind: Area.NumericEquality,
-        relation: Scope.Equal
+        comparisonKind: 'equality',
+        relation: 'equal'
     },
     less: {
-        comparisonKind: Area.NumericInequality,
-        relation: Scope.Less
+        comparisonKind: 'inequality',
+        relation: 'less'
     }
 } as const satisfies Record<DecimalComparisonProblem['relation'], DecimalComparisonGeneratorConfig>;
-
-const expectGrid = (model: TenthsHundredthsGridModel, shadedCount: number): void => {
-    expect(model).toMatchObject({
-        display: `${shadedCount}/100`,
-        rows: 10,
-        columns: 10,
-        partCount: 100,
-        shadedCount,
-        groups: []
-    });
-    expect(model.cells).toHaveLength(100);
-    model.cells.forEach((cell, index) => {
-        expect(cell).toEqual({
-            index,
-            row: index % 10,
-            column: Math.floor(index / 10),
-            tenthGroupIndex: Math.floor(index / 10),
-            xPercent: Math.floor(index / 10) * 10,
-            yPercent: (index % 10) * 10,
-            widthPercent: 10,
-            heightPercent: 10,
-            shaded: index < shadedCount,
-            source: null
-        });
-    });
-};
 
 const decimalNotation = (operand: DecimalComparisonOperand): string =>
     operand.precision === 'tenths'
@@ -71,7 +40,7 @@ const expectOperand = (operand: DecimalComparisonOperand): void => {
     } else {
         expect(operand.hundredthsDigit).toBe(hundredthsDigit);
     }
-    expectGrid(operand.model, normalized);
+    expect(operand).not.toHaveProperty('model');
 };
 
 const expectExactProblem = (problem: DecimalComparisonProblem): void => {
@@ -105,7 +74,6 @@ const expectExactProblem = (problem: DecimalComparisonProblem): void => {
     if (expectedPlace === 'equal') {
         expect(decimalNotation(problem.left)).not.toBe(decimalNotation(problem.right));
         expect(problem.left.normalizedHundredths).toBe(problem.right.normalizedHundredths);
-        expect(problem.left.model).toEqual(problem.right.model);
     }
 };
 
@@ -118,11 +86,11 @@ describe('DecimalComparisonGenerator', () => {
         } as never)).toThrow('Greater, Equal, or Less');
         expect(() => generator.generate({
             ...configs.greater,
-            comparisonKind: Area.NumericEquality
+            comparisonKind: 'equality'
         })).toThrow('Equal requires NumericEquality');
         expect(() => generator.generate({
             ...configs.equal,
-            comparisonKind: Area.NumericInequality
+            comparisonKind: 'inequality'
         })).toThrow('Equal requires NumericEquality');
         expect(() => generator.generate({
             ...configs.less,

@@ -1,4 +1,3 @@
-import {Area, Scope} from 'edugraph-ts';
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -6,13 +5,11 @@ import {
     DecimalComparisonOperand,
     DecimalComparisonProblem
 } from '../../../types/problems.ts';
-import {toTenthsHundredthsGrid} from '../../fraction/tenths-hundredths.ts';
 import {
     DecimalComparisonGeneratorConfig,
     DecimalComparisonGeneratorSchema
 } from './spec.ts';
 
-type Relation = DecimalComparisonProblem['relation'];
 type Precision = DecimalComparisonOperand['precision'];
 type OperandSeed = {
     precision: Precision;
@@ -64,8 +61,7 @@ const makeOperand = (seed: OperandSeed): DecimalComparisonOperand => {
         wholeDigit: 0,
         tenthsDigit,
         hundredthsDigit,
-        normalizedHundredths: seed.normalizedHundredths,
-        model: toTenthsHundredthsGrid(seed.normalizedHundredths, 100)
+        normalizedHundredths: seed.normalizedHundredths
     };
 };
 
@@ -79,14 +75,6 @@ const equalityPair = (): PairSeed => {
         ? {left: tenths, right: hundredths}
         : {left: hundredths, right: tenths};
 };
-
-const toRelation = (label: string): Relation | null => label === Scope.Greater
-    ? 'greater'
-    : label === Scope.Equal
-        ? 'equal'
-        : label === Scope.Less
-            ? 'less'
-            : null;
 
 export class DecimalComparisonGenerator implements ProblemGenerator<
     DecimalComparisonProblem,
@@ -104,16 +92,16 @@ export class DecimalComparisonGenerator implements ProblemGenerator<
             );
         }
 
-        const relation = toRelation(config.relation!);
-        if (!relation) {
+        const relation = config.relation;
+        if (relation !== 'greater' && relation !== 'equal' && relation !== 'less') {
             throw new GeneratorValidationError(
                 'decimal-comparison',
                 'The relation must be Greater, Equal, or Less.'
             );
         }
         const expectedKind = relation === 'equal'
-            ? Area.NumericEquality
-            : Area.NumericInequality;
+            ? 'equality'
+            : 'inequality';
         if (config.comparisonKind !== expectedKind) {
             throw new GeneratorValidationError(
                 'decimal-comparison',

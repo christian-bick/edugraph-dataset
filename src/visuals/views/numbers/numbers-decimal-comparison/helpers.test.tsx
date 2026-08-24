@@ -1,4 +1,3 @@
-import {Area, Scope} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {DecimalComparisonGenerator} from '../../../../generators/number/decimal-comparison/generator.ts';
@@ -21,8 +20,8 @@ const generate = (
 ): DecimalComparisonProblem => {
     setSeed(seed);
     return generator.generate({
-        comparisonKind: relation === 'equal' ? Area.NumericEquality : Area.NumericInequality,
-        relation: relation === 'greater' ? Scope.Greater : relation === 'less' ? Scope.Less : Scope.Equal
+        comparisonKind: relation === 'equal' ? 'equality' : 'inequality',
+        relation
     }).data;
 };
 
@@ -81,9 +80,7 @@ describe('decimal comparison view contract', () => {
             data => { data.left.tenthsDigit = 8; },
             data => { data.right.hundredthsDigit = 9; },
             data => { data.left.precision = 'hundredths'; },
-            data => { data.right.normalizedHundredths = 19; },
-            data => { data.left.model.cells[0]!.shaded = false; },
-            data => { data.right.model.cells[0]!.source = 'first-addend'; }
+            data => { data.right.normalizedHundredths = 19; }
         ];
         for (const mutate of mutations) {
             expect(isValidDecimalComparisonProblem(changed(source, mutate))).toBe(false);
@@ -107,15 +104,6 @@ describe('decimal comparison view contract', () => {
                 malformed as unknown as DecimalComparisonProblem
             )).toBe(false);
         }
-        const missingModel = structuredClone(source);
-        missingModel.left.model = null as never;
-        expect(() => isValidDecimalComparisonProblem(missingModel)).not.toThrow();
-        expect(isValidDecimalComparisonProblem(missingModel)).toBe(false);
-
-        const missingCells = structuredClone(source);
-        missingCells.right.model.cells = null as never;
-        expect(() => isValidDecimalComparisonProblem(missingCells)).not.toThrow();
-        expect(isValidDecimalComparisonProblem(missingCells)).toBe(false);
     });
 
     it('withholds the relation and deciding evidence in Question Mode', () => {
