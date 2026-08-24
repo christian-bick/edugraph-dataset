@@ -1,20 +1,45 @@
 import {
-    RectangleAreaFormulaModel,
-    ShapeSquareArrayProblem,
-    SquareAreaUnit
+    EqualSquarePartitionProblem,
+    RectangleAreaProblem,
+    SquareAreaUnitId,
+    UnitSquareGridProblem
 } from '../../../types/problems.ts';
 
-const AREA_TILE_MEASURES: Record<SquareAreaUnit, string> = {
-    'square units': '1 square unit',
-    'square centimeters': '1 square centimeter',
-    'square meters': '1 square meter',
-    'square inches': '1 square inch',
-    'square feet': '1 square foot'
+type SquareAreaUnitPresentation = {
+    singular: string;
+    plural: string;
 };
 
+const AREA_UNITS: Record<SquareAreaUnitId, SquareAreaUnitPresentation> = {
+    'square-unit': {singular: '1 square unit', plural: 'square units'},
+    'square-centimeter': {singular: '1 square centimeter', plural: 'square centimeters'},
+    'square-meter': {singular: '1 square meter', plural: 'square meters'},
+    'square-inch': {singular: '1 square inch', plural: 'square inches'},
+    'square-foot': {singular: '1 square foot', plural: 'square feet'}
+};
+
+export const getSquareAreaUnit = (
+    unitId: SquareAreaUnitId
+): SquareAreaUnitPresentation => AREA_UNITS[unitId];
+
 export const getAreaTilePrompt = (
-    areaUnit: SquareAreaUnit
-): string => `Follow the arrows and count every unit-square tile once, increasing the count by 1 at each tile. Each tile measures ${AREA_TILE_MEASURES[areaUnit]}. What is the area?`;
+    unitId: SquareAreaUnitId
+): string => `Follow the arrows and count every unit-square tile once, increasing the count by 1 at each tile. Each tile measures ${AREA_UNITS[unitId].singular}. What is the area?`;
+
+export const getEqualSquareStoryPrompt = (
+    data: EqualSquarePartitionProblem
+): string => `A classroom display has ${data.rows} rows and ${data.columns} columns of equal square spaces. How many square spaces are there?`;
+
+export const getUnitSquareStoryPrompt = (
+    data: UnitSquareGridProblem
+): string => `A floor is completely covered by ${data.rows} rows and ${data.columns} columns of unit-square tiles. Its area is measured in ${AREA_UNITS[data.unitId].plural}. What is the total area?`;
+
+export const getRectangleAreaStoryPrompt = (
+    data: RectangleAreaProblem,
+    mentionFormula: boolean
+): string => mentionFormula
+    ? `A rectangular garden is ${data.length} units long and ${data.width} units wide. Use the area formula to find its area.`
+    : `A garden is ${data.length} units long and ${data.width} units wide. What is its area?`;
 
 export const getRectangleDiagramGeometry = (
     length: number,
@@ -31,115 +56,39 @@ export const getRectangleDiagramGeometry = (
     };
 };
 
-export type ShapeSquareArrayTask =
-    | 'interpret-unit'
-    | 'interpret-coverage'
-    | 'partition'
-    | 'count'
-    | 'count-area'
-    | 'explain-product'
-    | 'calculate-area'
-    | 'rectangle-area-formula'
-    | 'find-missing-area-dimension';
+const isDimension = (value: number, allowUnit: boolean): boolean =>
+    Number.isSafeInteger(value)
+    && value >= (allowUnit ? 1 : 2)
+    && value <= 5;
 
-type ShapeSquareArrayStoryTask = Extract<
-    ShapeSquareArrayTask,
-    'count' | 'count-area' | 'calculate-area' | 'rectangle-area-formula'
->;
+export const isValidEqualSquarePartitionProblem = (
+    data: EqualSquarePartitionProblem
+): boolean => data.kind === 'equal-square-partition'
+    && isDimension(data.rows, false)
+    && isDimension(data.columns, false)
+    && data.rows !== data.columns
+    && data.partCount === data.rows * data.columns;
 
-export const getSquareArrayStoryPrompt = (
-    data: ShapeSquareArrayProblem,
-    task: ShapeSquareArrayStoryTask
-): string => {
-    if (task === 'count') {
-        return `A classroom display has ${data.rows} rows and ${data.columns} columns of equal square spaces. How many square spaces are there?`;
-    }
-    if (task === 'count-area') {
-        return `A floor is completely covered by ${data.rows} rows and ${data.columns} columns of unit-square tiles. Its area is measured in ${data.areaUnit}. What is the total area?`;
-    }
-    if (task === 'calculate-area') {
-        return `A garden is ${data.columns} units long and ${data.rows} units wide. What is its area?`;
-    }
-    return `A rectangular garden is ${data.columns} units long and ${data.rows} units wide. Use the area formula to find its area.`;
-};
+export const isValidUnitSquareGridProblem = (
+    data: UnitSquareGridProblem
+): boolean => data.kind === 'unit-square-grid'
+    && isDimension(data.rows, true)
+    && isDimension(data.columns, true)
+    && (data.rows === 1) === (data.columns === 1)
+    && data.tileCount === data.rows * data.columns
+    && data.unitId in AREA_UNITS;
 
-export type ShapeSquareArrayMode =
-    | 'interpretation'
-    | 'partition'
-    | 'execution'
-    | 'inversion'
-    | 'understanding';
-
-export const resolveShapeSquareArrayTask = (
-    data: ShapeSquareArrayProblem,
-    mode: ShapeSquareArrayMode
-): ShapeSquareArrayTask | null => {
-    if (data.model === 'unit-square' && mode === 'interpretation') {
-        return 'interpret-unit';
-    }
-    if (data.model !== 'unit-square' && mode === 'inversion') {
-        return 'find-missing-area-dimension';
-    }
-    if (data.model === 'equal-square-array') {
-        if (mode === 'partition') return 'partition';
-        if (mode === 'execution') return 'count';
-    }
-    if (data.model === 'unit-square-coverage') {
-        if (mode === 'interpretation') return 'interpret-coverage';
-        if (mode === 'execution') return 'count-area';
-    }
-    if (
-        data.model === 'tiled-area-product'
-        && mode === 'understanding'
-    ) return 'explain-product';
-    if (
-        data.model === 'rectangle-area-product'
-        && mode === 'execution'
-    ) return 'calculate-area';
-    if (data.model === 'rectangle-area-formula') {
-        if (mode === 'execution') return 'rectangle-area-formula';
-        if (mode === 'inversion') return 'find-missing-area-dimension';
-    }
-    return null;
-};
-
-export const isRectangleAreaFormulaModel = (
-    data: ShapeSquareArrayProblem
-): data is RectangleAreaFormulaModel => data.model === 'rectangle-area-formula';
-
-const isValidAreaUnit = (value: string): value is SquareAreaUnit => value in AREA_TILE_MEASURES;
-
-export const isValidShapeSquareArrayProblem = (
-    data: ShapeSquareArrayProblem
-): boolean => {
-    if (data.model === 'unit-square') {
-        return data.rows === 1
-            && data.columns === 1
-            && data.squareCount === 1
-            && data.areaUnit === 'square units';
-    }
-
-    if (!Number.isSafeInteger(data.rows)
-        || !Number.isSafeInteger(data.columns)
-        || data.rows < 2
-        || data.rows > 5
-        || data.columns < 2
-        || data.columns > 5
-        || data.rows === data.columns
-        || data.squareCount !== data.rows * data.columns
-        || !isValidAreaUnit(data.areaUnit)) return false;
-
-    if (data.model !== 'rectangle-area-formula') return true;
-
-    return data.length === data.columns
-        && data.width === data.rows
-        && data.area === data.squareCount
-        && data.areaUnit === 'square units'
-        && data.formula === 'A = length × width';
-};
+export const isValidRectangleAreaProblem = (
+    data: RectangleAreaProblem
+): boolean => data.kind === 'rectangle-area'
+    && isDimension(data.length, false)
+    && isDimension(data.width, false)
+    && data.length !== data.width
+    && data.area === data.length * data.width
+    && data.unitId in AREA_UNITS;
 
 type DirectRectangleAreaPresentation = {
-    task: 'rectangle-area-formula';
+    task: 'calculate-area';
     prompt: string;
     questionEquation: string;
     solutionEquation: string;
@@ -194,29 +143,29 @@ const buildInverseAreaPresentation = (
     };
 };
 
-export const buildSquareArrayInversionPresentation = (
-    data: ShapeSquareArrayProblem,
+export const buildUnitSquareInversionPresentation = (
+    data: UnitSquareGridProblem,
     seed: number
 ): InverseRectangleAreaPresentation => buildInverseAreaPresentation(
     data.columns,
     data.rows,
-    data.squareCount,
+    data.tileCount,
     seed
 );
 
 export const buildRectangleAreaPresentation = (
-    data: RectangleAreaFormulaModel,
-    task: 'rectangle-area-formula' | 'find-missing-area-dimension',
+    data: RectangleAreaProblem,
+    task: 'calculate-area' | 'find-missing-area-dimension',
     seed: number
 ): RectangleAreaPresentation => {
-    if (task === 'rectangle-area-formula') {
+    if (task === 'calculate-area') {
         return {
             task,
             prompt: `Find the area of a rectangle with length ${data.length} units and width ${data.width} units.`,
             questionEquation: `A = ${data.length} × ${data.width} = ?`,
             solutionEquation: `A = ${data.length} × ${data.width} = ${data.area}`,
-            answerStatement: `The area is ${data.area} square units.`,
-            explanation: `The area formula is A = length × width. Multiply ${data.length} units by ${data.width} units to get ${data.area} square units.`
+            answerStatement: `The area is ${data.area} ${AREA_UNITS[data.unitId].plural}.`,
+            explanation: `The area formula is A = length × width. Multiply ${data.length} units by ${data.width} units to get ${data.area} ${AREA_UNITS[data.unitId].plural}.`
         };
     }
 

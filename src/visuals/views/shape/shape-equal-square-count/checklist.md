@@ -1,0 +1,2 @@
+- **Identity:** A rectangle partitioned into supplied rows and columns of equal squares requires determining the total number of parts.
+- **Modes:** Question Mode withholds the total; Solution Mode reveals the row-by-column count without changing the partition.

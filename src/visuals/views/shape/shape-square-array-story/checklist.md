@@ -1,2 +1,2 @@
-- **Identity:** A textual rectangular-array context and visible rows, columns, tiles, or dimensions require determining the count or area.
-- **Modes:** Question Mode withholds the requested count or area; Solution Mode reveals it while preserving the same story and rectangle.
+- **Identity:** A textual floor-coverage context and a complete unit-square grid require determining the covered area.
+- **Modes:** Question Mode withholds the area; Solution Mode reveals the tile count and square-unit result while preserving the story and grid.

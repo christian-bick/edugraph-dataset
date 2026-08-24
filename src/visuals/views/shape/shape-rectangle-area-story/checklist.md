@@ -1,0 +1,2 @@
+- **Identity:** A textual rectangle context supplies length and width and requires applying the area formula to determine area.
+- **Modes:** Question Mode withholds the area; Solution Mode reveals the substituted formula and square-unit result while preserving the story and rectangle.

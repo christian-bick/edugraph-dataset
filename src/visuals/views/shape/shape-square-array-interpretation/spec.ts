@@ -1,2 +1,13 @@
-import {Ability} from 'edugraph-ts'; import {ConfigFromSchema} from '../../../../types/schema.ts'; import {ViewSpec} from '../../../../types/view-spec.ts';
-export const spec: ViewSpec = {viewId: 'shape-square-array-interpretation', generalLabels: [Ability.Interpretation]}; export const ShapeSquareArrayInterpretationViewSchema = {} as const; export type ShapeSquareArrayInterpretationViewConfig = ConfigFromSchema<typeof ShapeSquareArrayInterpretationViewSchema>;
+import {Ability, Scope} from 'edugraph-ts';
+import {ConfigFromSchema} from '../../../../types/schema.ts';
+import {ViewSpec} from '../../../../types/view-spec.ts';
+
+export const spec: ViewSpec = {
+    viewId: 'shape-square-array-interpretation',
+    generalLabels: [Ability.Interpretation],
+    requiredLabels: [Scope.TileScale]
+};
+export const ShapeSquareArrayInterpretationViewSchema = {} as const;
+export type ShapeSquareArrayInterpretationViewConfig = ConfigFromSchema<
+    typeof ShapeSquareArrayInterpretationViewSchema
+>;

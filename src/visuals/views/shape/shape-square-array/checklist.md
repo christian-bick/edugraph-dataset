@@ -1,2 +1,2 @@
-- **Identity:** A square-cell array or dimensioned rectangle requires counting unit squares or multiplying dimensions to determine its area; iterative counting tasks visibly traverse every tile exactly once.
-- **Modes:** Question Mode withholds the requested count or area; Solution Mode reveals the square-unit result while preserving the same array or rectangle.
+- **Identity:** A complete unit-square grid requires counting every tile exactly once to determine area; the direct task visibly traverses the full grid.
+- **Modes:** Question Mode withholds the area; Solution Mode reveals the tile count and square-unit result while preserving the same grid.

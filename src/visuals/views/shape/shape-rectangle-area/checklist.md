@@ -1,0 +1,2 @@
+- **Identity:** A rectangle's length and width require applying the area relation; the formula is projected from the typed multiplication relation.
+- **Modes:** Question Mode withholds the area; Solution Mode reveals the substituted formula, product, and square-unit result without changing the rectangle.

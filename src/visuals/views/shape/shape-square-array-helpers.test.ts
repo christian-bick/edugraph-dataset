@@ -1,194 +1,124 @@
 import {describe, expect, it} from 'vitest';
 import {
-    RectangleAreaFormulaModel,
-    ShapeSquareArrayProblem
+    EqualSquarePartitionProblem,
+    RectangleAreaProblem,
+    UnitSquareGridProblem
 } from '../../../types/problems.ts';
 import {
     buildRectangleAreaPresentation,
-    buildSquareArrayInversionPresentation,
+    buildUnitSquareInversionPresentation,
     getAreaTilePrompt,
+    getEqualSquareStoryPrompt,
+    getRectangleAreaStoryPrompt,
     getRectangleDiagramGeometry,
-    getSquareArrayStoryPrompt,
-    isValidShapeSquareArrayProblem,
-    resolveShapeSquareArrayTask
+    getSquareAreaUnit,
+    getUnitSquareStoryPrompt,
+    isValidEqualSquarePartitionProblem,
+    isValidRectangleAreaProblem,
+    isValidUnitSquareGridProblem
 } from './shape-square-array-helpers.ts';
 
-const models: Record<ShapeSquareArrayProblem['model'], ShapeSquareArrayProblem> = {
-    'unit-square': {
-        model: 'unit-square',
-        rows: 1,
-        columns: 1,
-        squareCount: 1,
-        areaUnit: 'square units'
-    },
-    'equal-square-array': {
-        model: 'equal-square-array',
-        rows: 4,
-        columns: 5,
-        squareCount: 20,
-        areaUnit: 'square units'
-    },
-    'unit-square-coverage': {
-        model: 'unit-square-coverage',
-        rows: 4,
-        columns: 5,
-        squareCount: 20,
-        areaUnit: 'square centimeters'
-    },
-    'tiled-area-product': {
-        model: 'tiled-area-product',
-        rows: 4,
-        columns: 5,
-        squareCount: 20,
-        areaUnit: 'square units'
-    },
-    'rectangle-area-product': {
-        model: 'rectangle-area-product',
-        rows: 4,
-        columns: 5,
-        squareCount: 20,
-        areaUnit: 'square units'
-    },
-    'rectangle-area-formula': {
-        model: 'rectangle-area-formula',
-        rows: 4,
-        columns: 5,
-        squareCount: 20,
-        length: 5,
-        width: 4,
-        area: 20,
-        areaUnit: 'square units',
-        formula: 'A = length × width'
-    }
+const equalSquares: EqualSquarePartitionProblem = {
+    kind: 'equal-square-partition',
+    rows: 4,
+    columns: 5,
+    partCount: 20
+};
+const unitGrid: UnitSquareGridProblem = {
+    kind: 'unit-square-grid',
+    rows: 4,
+    columns: 5,
+    tileCount: 20,
+    unitId: 'square-centimeter'
+};
+const rectangle: RectangleAreaProblem = {
+    kind: 'rectangle-area',
+    length: 5,
+    width: 4,
+    area: 20,
+    unitId: 'square-unit'
 };
 
-describe('shape-square-array Ability projection', () => {
-    it.each([
-        ['unit-square', 'interpretation', 'interpret-unit'],
-        ['equal-square-array', 'partition', 'partition'],
-        ['equal-square-array', 'execution', 'count'],
-        ['equal-square-array', 'inversion', 'find-missing-area-dimension'],
-        ['unit-square-coverage', 'interpretation', 'interpret-coverage'],
-        ['unit-square-coverage', 'execution', 'count-area'],
-        ['unit-square-coverage', 'inversion', 'find-missing-area-dimension'],
-        ['tiled-area-product', 'understanding', 'explain-product'],
-        ['tiled-area-product', 'inversion', 'find-missing-area-dimension'],
-        ['rectangle-area-product', 'execution', 'calculate-area'],
-        ['rectangle-area-product', 'inversion', 'find-missing-area-dimension'],
-        ['rectangle-area-formula', 'execution', 'rectangle-area-formula'],
-        ['rectangle-area-formula', 'inversion', 'find-missing-area-dimension']
-    ] as const)('projects %s + %s to %s', (model, mode, task) => {
-        expect(resolveShapeSquareArrayTask(models[model], mode)).toBe(task);
+describe('shape-square-array problem validation', () => {
+    it('accepts each canonical mathematical family', () => {
+        expect(isValidEqualSquarePartitionProblem(equalSquares)).toBe(true);
+        expect(isValidUnitSquareGridProblem(unitGrid)).toBe(true);
+        expect(isValidUnitSquareGridProblem({
+            kind: 'unit-square-grid',
+            rows: 1,
+            columns: 1,
+            tileCount: 1,
+            unitId: 'square-unit'
+        })).toBe(true);
+        expect(isValidRectangleAreaProblem(rectangle)).toBe(true);
     });
 
-    it('rejects an Ability that the mathematical model cannot expose', () => {
-        expect(resolveShapeSquareArrayTask(
-            models['unit-square'],
-            'inversion'
-        )).toBeNull();
+    it('rejects inconsistent products, partial unit grids, and square rectangles', () => {
+        expect(isValidEqualSquarePartitionProblem({...equalSquares, partCount: 19})).toBe(false);
+        expect(isValidUnitSquareGridProblem({...unitGrid, rows: 1})).toBe(false);
+        expect(isValidUnitSquareGridProblem({...unitGrid, tileCount: 19})).toBe(false);
+        expect(isValidRectangleAreaProblem({...rectangle, area: 19})).toBe(false);
+        expect(isValidRectangleAreaProblem({
+            ...rectangle,
+            length: 5,
+            width: 5,
+            area: 25
+        })).toBe(false);
     });
+});
 
-    it('creates direct and inverse presentations from the same rectangle model', () => {
-        const data = models['rectangle-area-formula'] as RectangleAreaFormulaModel;
-        const direct = buildRectangleAreaPresentation(data, 'rectangle-area-formula', 2);
-        const inverse = buildRectangleAreaPresentation(data, 'find-missing-area-dimension', 2);
+describe('shape-square-array projections', () => {
+    it('derives direct and inverse rectangle equations from one relation', () => {
+        const direct = buildRectangleAreaPresentation(rectangle, 'calculate-area', 2);
+        const inverse = buildRectangleAreaPresentation(
+            rectangle,
+            'find-missing-area-dimension',
+            2
+        );
 
         expect(direct.questionEquation).toBe('A = 5 × 4 = ?');
         expect(direct.solutionEquation).toBe('A = 5 × 4 = 20');
         expect(inverse.task).toBe('find-missing-area-dimension');
         if (inverse.task !== 'find-missing-area-dimension') {
-            throw new Error('Expected an inverse presentation.');
+            throw new Error('Expected inverse presentation.');
         }
         expect(inverse.unknownDimension).toBe('length');
-        expect(inverse.questionEquation).toBe('20 = ? × 4');
         expect(inverse.inverseEquation).toBe('20 ÷ 4 = ?');
         expect(inverse.solutionEquation).toBe('20 ÷ 4 = 5');
     });
 
-    it('uses the render seed to vary which dimension is unknown', () => {
-        const data = models['rectangle-area-formula'] as RectangleAreaFormulaModel;
-        const even = buildRectangleAreaPresentation(data, 'find-missing-area-dimension', 2);
-        const odd = buildRectangleAreaPresentation(data, 'find-missing-area-dimension', 3);
-
-        expect(even.task === 'find-missing-area-dimension' && even.unknownDimension).toBe('length');
-        expect(odd.task === 'find-missing-area-dimension' && odd.unknownDimension).toBe('width');
+    it('uses the render seed to vary the unknown dimension', () => {
+        const even = buildUnitSquareInversionPresentation(unitGrid, 2);
+        const odd = buildUnitSquareInversionPresentation(unitGrid, 3);
+        expect(even.unknownDimension).toBe('length');
+        expect(odd.unknownDimension).toBe('width');
     });
 
-    it('derives the same inverse relation from a tiled square array', () => {
-        const data = models['tiled-area-product'];
-        const presentation = buildSquareArrayInversionPresentation(data, 2);
-
-        expect(presentation.unknownDimension).toBe('length');
-        expect(presentation.questionEquation).toBe('20 = ? × 4');
-        expect(presentation.inverseEquation).toBe('20 ÷ 4 = ?');
-        expect(presentation.solutionEquation).toBe('20 ÷ 4 = 5');
-    });
-});
-
-describe('shape-square-array problem validation', () => {
-    it('accepts every complete mathematical model', () => {
-        for (const model of Object.values(models)) {
-            expect(isValidShapeSquareArrayProblem(model)).toBe(true);
-        }
-    });
-
-    it('rejects inconsistent products, formula dimensions, and square arrays', () => {
-        expect(isValidShapeSquareArrayProblem({
-            ...models['unit-square-coverage'],
-            squareCount: 19
-        } as ShapeSquareArrayProblem)).toBe(false);
-        expect(isValidShapeSquareArrayProblem({
-            ...models['rectangle-area-formula'],
-            area: 19
-        } as RectangleAreaFormulaModel)).toBe(false);
-        expect(isValidShapeSquareArrayProblem({
-            ...models['equal-square-array'],
-            rows: 5,
-            columns: 5,
-            squareCount: 25
-        } as ShapeSquareArrayProblem)).toBe(false);
-    });
-});
-
-describe('area-tile wording', () => {
     it.each([
-        ['square units', '1 square unit'],
-        ['square centimeters', '1 square centimeter'],
-        ['square meters', '1 square meter'],
-        ['square inches', '1 square inch'],
-        ['square feet', '1 square foot']
-    ] as const)('identifies each %s tile as a unit square measuring %s', (areaUnit, measure) => {
-        expect(getAreaTilePrompt(areaUnit)).toBe(
-            `Follow the arrows and count every unit-square tile once, increasing the count by 1 at each tile. Each tile measures ${measure}. What is the area?`
-        );
+        ['square-unit', '1 square unit', 'square units'],
+        ['square-centimeter', '1 square centimeter', 'square centimeters'],
+        ['square-meter', '1 square meter', 'square meters'],
+        ['square-inch', '1 square inch', 'square inches'],
+        ['square-foot', '1 square foot', 'square feet']
+    ] as const)('projects semantic unit %s into language', (unitId, singular, plural) => {
+        expect(getSquareAreaUnit(unitId)).toEqual({singular, plural});
+        expect(getAreaTilePrompt(unitId)).toContain(singular);
+    });
+
+    it('derives each family story from its mathematical roles', () => {
+        expect(getEqualSquareStoryPrompt(equalSquares)).toContain('classroom display');
+        expect(getUnitSquareStoryPrompt(unitGrid)).toContain('floor');
+        expect(getRectangleAreaStoryPrompt(rectangle, false)).toContain('garden');
+        expect(getRectangleAreaStoryPrompt(rectangle, true)).toContain('area formula');
     });
 });
 
 describe('rectangle diagram geometry', () => {
-    it('uses the same visual scale for both dimensions', () => {
-        const geometry = getRectangleDiagramGeometry(2, 3);
-
-        expect(geometry.pixelLength / 2).toBeCloseTo(geometry.pixelWidth / 3);
-        expect(geometry.pixelLength).toBeLessThan(geometry.pixelWidth);
-    });
-
-    it('keeps wide rectangles inside the available diagram area', () => {
-        const geometry = getRectangleDiagramGeometry(9, 2);
-
-        expect(geometry.pixelLength).toBeLessThanOrEqual(292);
-        expect(geometry.pixelWidth).toBeLessThanOrEqual(170);
-    });
-});
-
-describe('shape-square-array story wording', () => {
-    it('provides a textual context for every execution payload family', () => {
-        expect(getSquareArrayStoryPrompt(models['equal-square-array'], 'count'))
-            .toContain('classroom display');
-        expect(getSquareArrayStoryPrompt(models['unit-square-coverage'], 'count-area'))
-            .toContain('floor');
-        expect(getSquareArrayStoryPrompt(models['rectangle-area-product'], 'calculate-area'))
-            .toContain('garden');
-        expect(getSquareArrayStoryPrompt(models['rectangle-area-formula'], 'rectangle-area-formula'))
-            .toContain('area formula');
+    it('uses the same visual scale for both dimensions and stays within bounds', () => {
+        const normal = getRectangleDiagramGeometry(2, 3);
+        const wide = getRectangleDiagramGeometry(9, 2);
+        expect(normal.pixelLength / 2).toBeCloseTo(normal.pixelWidth / 3);
+        expect(wide.pixelLength).toBeLessThanOrEqual(292);
+        expect(wide.pixelWidth).toBeLessThanOrEqual(170);
     });
 });

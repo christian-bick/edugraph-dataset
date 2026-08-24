@@ -1,0 +1,2 @@
+- **Identity:** A textual rectangular-array context and an equal-square partition require determining the number of square spaces.
+- **Modes:** Question Mode withholds the total; Solution Mode reveals it while preserving the story and partition.

@@ -1608,49 +1608,37 @@ export type ShapePatternProblem = ShapePatternProblemBase & (
     }
 );
 
-export type SquareAreaUnit =
-    | 'square units'
-    | 'square centimeters'
-    | 'square meters'
-    | 'square inches'
-    | 'square feet';
+export type SquareArrayDimension = 1 | 2 | 3 | 4 | 5;
 
-export type UnitSquareModel = {
-    model: 'unit-square';
-    rows: 1;
-    columns: 1;
-    squareCount: 1;
-    areaUnit: 'square units';
+export type SquareAreaUnitId =
+    | 'square-unit'
+    | 'square-centimeter'
+    | 'square-meter'
+    | 'square-inch'
+    | 'square-foot';
+
+export type EqualSquarePartitionProblem = {
+    kind: 'equal-square-partition';
+    rows: Exclude<SquareArrayDimension, 1>;
+    columns: Exclude<SquareArrayDimension, 1>;
+    partCount: number;
 };
 
-export type SquareArrayModel = {
-    model:
-        | 'equal-square-array'
-        | 'unit-square-coverage'
-        | 'tiled-area-product'
-        | 'rectangle-area-product';
-    rows: 2 | 3 | 4 | 5;
-    columns: 2 | 3 | 4 | 5;
-    squareCount: number;
-    areaUnit: SquareAreaUnit;
+export type UnitSquareGridProblem = {
+    kind: 'unit-square-grid';
+    rows: SquareArrayDimension;
+    columns: SquareArrayDimension;
+    tileCount: number;
+    unitId: SquareAreaUnitId;
 };
 
-export type RectangleAreaFormulaModel = {
-    model: 'rectangle-area-formula';
-    rows: 2 | 3 | 4 | 5;
-    columns: 2 | 3 | 4 | 5;
-    squareCount: number;
+export type RectangleAreaProblem = {
+    kind: 'rectangle-area';
     length: number;
     width: number;
     area: number;
-    areaUnit: 'square units';
-    formula: 'A = length × width';
+    unitId: SquareAreaUnitId;
 };
-
-export type ShapeSquareArrayProblem =
-    | UnitSquareModel
-    | SquareArrayModel
-    | RectangleAreaFormulaModel;
 
 export type DistributiveAreaDecompositionProblem = {
     kind: 'distributive';
@@ -2013,12 +2001,17 @@ export interface ViewTypeMap {
     'shape-patterns': ShapePatternProblem;
     'shape-patterns-explanation': ShapePatternProblem;
     'shape-patterns-identification': ShapePatternProblem;
-    'shape-square-array': ShapeSquareArrayProblem;
-    'shape-square-array-interpretation': ShapeSquareArrayProblem;
-    'shape-square-array-inversion': ShapeSquareArrayProblem;
-    'shape-square-array-partition': ShapeSquareArrayProblem;
-    'shape-square-array-story': ShapeSquareArrayProblem;
-    'shape-square-array-understanding': ShapeSquareArrayProblem;
+    'shape-equal-square-count': EqualSquarePartitionProblem;
+    'shape-equal-square-count-story': EqualSquarePartitionProblem;
+    'shape-square-array-partition': EqualSquarePartitionProblem;
+    'shape-square-array': UnitSquareGridProblem;
+    'shape-square-array-interpretation': UnitSquareGridProblem;
+    'shape-square-array-inversion': UnitSquareGridProblem;
+    'shape-square-array-story': UnitSquareGridProblem;
+    'shape-square-array-understanding': UnitSquareGridProblem;
+    'shape-rectangle-area': RectangleAreaProblem;
+    'shape-rectangle-area-story': RectangleAreaProblem;
+    'shape-rectangle-area-inversion': RectangleAreaProblem;
     'area-distributive-model': AreaDecompositionProblem;
     'area-rectilinear-decomposition': AreaDecompositionProblem;
     'geometry-perimeter': GeometryPerimeterProblem;
