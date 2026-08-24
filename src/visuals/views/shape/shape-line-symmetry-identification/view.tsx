@@ -15,9 +15,10 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-line-symmetry-identification'>;
 }
 
-const ShapeLineSymmetryIdentificationCore = ({payload}: CoreProps) => (
+const ShapeLineSymmetryIdentificationCore = ({config, payload}: CoreProps) => (
     <ShapeLineSymmetryView
         mode="identify"
+        multiAxisKind={config.multiAxisKind!}
         payload={payload}
         viewId={VIEW_ID}
     />

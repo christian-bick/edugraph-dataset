@@ -1146,16 +1146,11 @@ export type LineSymmetryCoordinate = {
 };
 
 export type LineSymmetryCorrespondence = {
-    first: LineSymmetryCoordinate;
-    second: LineSymmetryCoordinate;
-    foldPoint: LineSymmetryCoordinate;
-    distanceToAxis: number;
+    firstVertex: number;
+    secondVertex: number;
 };
 
 export type LineSymmetryAxis = {
-    id: 'vertical' | 'horizontal' | 'diagonal-rise' | 'diagonal-fall';
-    start: LineSymmetryCoordinate;
-    end: LineSymmetryCoordinate;
     equation: {
         a: number;
         b: number;
@@ -1165,36 +1160,13 @@ export type LineSymmetryAxis = {
 };
 
 export type LineSymmetryFigure = {
-    figureKind: 'isosceles-triangle' | 'rectangle' | 'square' | 'scalene-triangle' | 'parallelogram';
+    kind: 'isosceles-triangle' | 'rectangle' | 'square' | 'scalene-triangle' | 'parallelogram';
     vertices: LineSymmetryCoordinate[];
     validAxes: LineSymmetryAxis[];
-    axisCount: 0 | 1 | 2 | 4;
-};
-
-export type LineSymmetryIdentificationOption = {
-    id: ShapeAttributeOption['id'];
-    figure: LineSymmetryFigure;
-    hasLineSymmetry: boolean;
-};
-
-export type IdentifyLineSymmetryProblem = {
-    options: [
-        LineSymmetryIdentificationOption,
-        LineSymmetryIdentificationOption,
-        LineSymmetryIdentificationOption,
-        LineSymmetryIdentificationOption
-    ];
-    answerIds: [ShapeAttributeOption['id'], ShapeAttributeOption['id']];
-};
-
-export type DrawLineSymmetryProblem = {
-    figure: LineSymmetryFigure;
-    completedAxes: LineSymmetryAxis[];
 };
 
 export type ShapeLineSymmetryProblem = {
-    identification: IdentifyLineSymmetryProblem;
-    drawing: DrawLineSymmetryProblem;
+    figures: LineSymmetryFigure[];
 };
 
 export type ShapePartsConstructionProblem = {

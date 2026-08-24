@@ -15,9 +15,10 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-line-symmetry-drawing'>;
 }
 
-const ShapeLineSymmetryDrawingCore = ({payload}: CoreProps) => (
+const ShapeLineSymmetryDrawingCore = ({config, payload}: CoreProps) => (
     <ShapeLineSymmetryView
         mode="draw"
+        figureKind={config.figureKind!}
         payload={payload}
         viewId={VIEW_ID}
     />

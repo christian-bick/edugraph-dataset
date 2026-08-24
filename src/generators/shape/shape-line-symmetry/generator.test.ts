@@ -24,10 +24,7 @@ function reflect(point: LineSymmetryCoordinate, axis: LineSymmetryAxis): LineSym
     };
 }
 
-function expectCoordinateClose(
-    actual: LineSymmetryCoordinate,
-    expected: LineSymmetryCoordinate
-): void {
+function expectCoordinateClose(actual: LineSymmetryCoordinate, expected: LineSymmetryCoordinate): void {
     expect(actual.x).toBeCloseTo(expected.x, 8);
     expect(actual.y).toBeCloseTo(expected.y, 8);
 }
@@ -37,7 +34,7 @@ type Equation = LineSymmetryAxis['equation'];
 function canonicalEquation(a: number, b: number, c: number): Equation {
     const length = Math.hypot(a, b);
     let normalized = {a: a / length, b: b / length, c: c / length};
-    if (normalized.a < -EPSILON || (Math.abs(normalized.a) < EPSILON && normalized.b < 0)) {
+    if (normalized.a < -EPSILON || Math.abs(normalized.a) < EPSILON && normalized.b < 0) {
         normalized = {a: -normalized.a, b: -normalized.b, c: -normalized.c};
     }
     return normalized;
@@ -50,17 +47,8 @@ function equationKey(equation: Equation): string {
         .join('|');
 }
 
-function matchesVertexSet(
-    equation: Equation,
-    vertices: readonly LineSymmetryCoordinate[]
-): boolean {
-    const axis: LineSymmetryAxis = {
-        id: 'vertical',
-        start: {x: 0, y: 0},
-        end: {x: 0, y: 0},
-        equation,
-        correspondences: []
-    };
+function matchesVertexSet(equation: Equation, vertices: readonly LineSymmetryCoordinate[]): boolean {
+    const axis: LineSymmetryAxis = {equation, correspondences: []};
     return vertices.every(vertex => {
         const reflected = reflect(vertex, axis);
         return vertices.some(candidate =>
@@ -99,24 +87,17 @@ function discoverSymmetryAxes(vertices: readonly LineSymmetryCoordinate[]): Set<
 
 function expectValidAxis(axis: LineSymmetryAxis, figure: LineSymmetryFigure): void {
     expect(Math.hypot(axis.equation.a, axis.equation.b)).toBeCloseTo(1, 10);
-    expect(Math.abs(onAxis(axis.start, axis))).toBeLessThan(EPSILON);
-    expect(Math.abs(onAxis(axis.end, axis))).toBeLessThan(EPSILON);
-    for (const endpoint of [axis.start, axis.end]) {
-        expect(endpoint.x).toBeGreaterThanOrEqual(0);
-        expect(endpoint.x).toBeLessThanOrEqual(100);
-        expect(endpoint.y).toBeGreaterThanOrEqual(0);
-        expect(endpoint.y).toBeLessThanOrEqual(100);
-    }
-    expect(axis.correspondences.length).toBeGreaterThanOrEqual(2);
-    for (const pair of axis.correspondences) {
-        expectCoordinateClose(reflect(pair.first, axis), pair.second);
-        expectCoordinateClose(pair.foldPoint, {
-            x: (pair.first.x + pair.second.x) / 2,
-            y: (pair.first.y + pair.second.y) / 2
-        });
-        expect(Math.abs(onAxis(pair.foldPoint, axis))).toBeLessThan(EPSILON);
-        expect(Math.abs(onAxis(pair.first, axis))).toBeCloseTo(pair.distanceToAxis, 8);
-        expect(Math.abs(onAxis(pair.second, axis))).toBeCloseTo(pair.distanceToAxis, 8);
+    const representedVertices = axis.correspondences.flatMap(({firstVertex, secondVertex}) =>
+        firstVertex === secondVertex ? [firstVertex] : [firstVertex, secondVertex]
+    );
+    expect([...representedVertices].sort((first, second) => first - second))
+        .toEqual(figure.vertices.map((_, index) => index));
+    for (const {firstVertex, secondVertex} of axis.correspondences) {
+        expect(firstVertex).toBeLessThanOrEqual(secondVertex);
+        expectCoordinateClose(
+            reflect(figure.vertices[firstVertex], axis),
+            figure.vertices[secondVertex]
+        );
     }
     expect(figure.vertices.every(vertex => {
         const reflected = reflect(vertex, axis);
@@ -128,8 +109,6 @@ function expectValidAxis(axis: LineSymmetryAxis, figure: LineSymmetryFigure): vo
 }
 
 function expectCompleteSymmetryGeometry(figure: LineSymmetryFigure): void {
-    expect(figure.axisCount).toBe(figure.validAxes.length);
-    expect(new Set(figure.validAxes.map(axis => axis.id)).size).toBe(figure.validAxes.length);
     for (const vertex of figure.vertices) {
         expect(vertex.x).toBeGreaterThanOrEqual(0);
         expect(vertex.x).toBeLessThanOrEqual(100);
@@ -137,19 +116,18 @@ function expectCompleteSymmetryGeometry(figure: LineSymmetryFigure): void {
         expect(vertex.y).toBeLessThanOrEqual(100);
     }
     for (const axis of figure.validAxes) expectValidAxis(axis, figure);
+    expect(new Set(figure.validAxes.map(axis => equationKey(axis.equation))).size)
+        .toBe(figure.validAxes.length);
     expect(new Set(figure.validAxes.map(axis => equationKey(axis.equation))))
         .toEqual(discoverSymmetryAxes(figure.vertices));
 }
 
-function distance(
-    first: LineSymmetryCoordinate,
-    second: LineSymmetryCoordinate
-): number {
+function distance(first: LineSymmetryCoordinate, second: LineSymmetryCoordinate): number {
     return Math.hypot(second.x - first.x, second.y - first.y);
 }
 
 function expectVisibleAsymmetry(figure: LineSymmetryFigure): void {
-    if (figure.figureKind === 'scalene-triangle') {
+    if (figure.kind === 'scalene-triangle') {
         const [first, second, third] = figure.vertices;
         const sideLengths = [
             distance(first, second),
@@ -159,8 +137,7 @@ function expectVisibleAsymmetry(figure: LineSymmetryFigure): void {
         expect(sideLengths[1] - sideLengths[0]).toBeGreaterThanOrEqual(10);
         expect(sideLengths[2] - sideLengths[1]).toBeGreaterThanOrEqual(20);
     }
-
-    if (figure.figureKind === 'parallelogram') {
+    if (figure.kind === 'parallelogram') {
         const [first, second, third] = figure.vertices;
         const base = distance(first, second);
         const side = distance(second, third);
@@ -178,40 +155,26 @@ describe('ShapeLineSymmetryGenerator', () => {
         expect(generator.generate({})).not.toBeNull();
     });
 
-    it('classifies balanced no-, one-, and multiple-axis figures by fold validity', () => {
-        setSeed('identify-line-symmetry');
-        const data = generator.generate({})!.data.identification;
-        expect(data.options.map(option => option.id)).toEqual(['A', 'B', 'C', 'D']);
-        expect(data.options.filter(option => option.hasLineSymmetry)).toHaveLength(2);
-        expect(data.options.filter(option => !option.hasLineSymmetry)).toHaveLength(2);
-        expect(data.options.map(option => option.figure.axisCount).sort()).toEqual([0, 0, 1, 2]);
-        expect(data.answerIds).toEqual(
-            data.options.filter(option => option.hasLineSymmetry).map(option => option.id)
-        );
-        for (const option of data.options) {
-            expect(option.hasLineSymmetry).toBe(option.figure.axisCount > 0);
-            expectCompleteSymmetryGeometry(option.figure);
-            if (!option.hasLineSymmetry) expectVisibleAsymmetry(option.figure);
-        }
+    it('provides one canonical catalogue with every valid reflection axis', () => {
+        const figures = generator.generate({})!.data.figures;
+        expect(figures.map(figure => figure.kind)).toEqual([
+            'isosceles-triangle',
+            'rectangle',
+            'square',
+            'scalene-triangle',
+            'parallelogram'
+        ]);
+        expect(figures.map(figure => figure.validAxes.length)).toEqual([1, 2, 4, 0, 0]);
+        figures.forEach(figure => {
+            expectCompleteSymmetryGeometry(figure);
+            if (figure.validAxes.length === 0) expectVisibleAsymmetry(figure);
+        });
     });
 
-    it('supplies every completed fold axis and correspondence for drawing', () => {
-        const counts = new Set<number>();
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(`draw-line-symmetry-${seed}`);
-            const data = generator.generate({})!.data.drawing;
-            expect(data.figure.axisCount).toBeGreaterThan(0);
-            expect(data.completedAxes).toEqual(data.figure.validAxes);
-            expectCompleteSymmetryGeometry(data.figure);
-            counts.add(data.figure.axisCount);
-        }
-        expect(counts).toEqual(new Set([1, 2, 4]));
-    });
-
-    it('is deterministic for the neutral model', () => {
-        setSeed('line-symmetry-neutral');
+    it('is independent of presentation seeds', () => {
+        setSeed('line-symmetry-first');
         const first = generator.generate({});
-        setSeed('line-symmetry-neutral');
+        setSeed('line-symmetry-second');
         expect(generator.generate({})).toEqual(first);
     });
 });

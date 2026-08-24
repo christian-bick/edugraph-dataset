@@ -1,14 +1,40 @@
 import {
-    DrawLineSymmetryProblem,
-    IdentifyLineSymmetryProblem,
     LineSymmetryAxis,
     LineSymmetryCoordinate,
     LineSymmetryFigure,
+    ShapeAttributeOption,
     ShapeLineSymmetryProblem
 } from '../../../types/problems.ts';
 
 const EPSILON = 0.01;
-const OPTION_IDS = ['A', 'B', 'C', 'D'] as const;
+const OPTION_IDS: readonly ShapeAttributeOption['id'][] = ['A', 'B', 'C', 'D'];
+const FIGURE_KINDS: readonly LineSymmetryFigure['kind'][] = [
+    'isosceles-triangle',
+    'rectangle',
+    'square',
+    'scalene-triangle',
+    'parallelogram'
+];
+const EXPECTED_AXIS_COUNTS: Readonly<Record<LineSymmetryFigure['kind'], number>> = {
+    'isosceles-triangle': 1,
+    rectangle: 2,
+    square: 4,
+    'scalene-triangle': 0,
+    parallelogram: 0
+};
+
+export type IdentificationMultiAxisKind = 'rectangle' | 'square';
+export type DrawingFigureKind = 'isosceles-triangle' | IdentificationMultiAxisKind;
+
+export type LineSymmetryIdentificationOption = {
+    id: ShapeAttributeOption['id'];
+    figure: LineSymmetryFigure;
+};
+
+export type LineSymmetryIdentificationPresentation = {
+    options: LineSymmetryIdentificationOption[];
+    answerIds: ShapeAttributeOption['id'][];
+};
 
 const isCoordinate = (point: LineSymmetryCoordinate): boolean => typeof point === 'object'
     && point !== null
@@ -145,14 +171,6 @@ const reflectedPoint = (
     };
 };
 
-const pointOnBoundary = (point: LineSymmetryCoordinate, vertices: readonly LineSymmetryCoordinate[]): boolean => (
-    vertices.some((vertex, index) => pointOnSegment(
-        point,
-        vertex,
-        vertices[(index + 1) % vertices.length]
-    ))
-);
-
 const candidateEquation = (
     center: LineSymmetryCoordinate,
     point: LineSymmetryCoordinate
@@ -202,122 +220,164 @@ const discoverReflectionAxes = (vertices: readonly LineSymmetryCoordinate[]): No
     return discovered;
 };
 
-const correspondenceIsValid = (
+const correspondencesAreValid = (
     axis: LineSymmetryAxis,
     vertices: readonly LineSymmetryCoordinate[]
 ): boolean => {
     const equation = normalizeEquation(axis.equation);
-    if (equation === null
-        || !Array.isArray(axis.correspondences)
-        || axis.correspondences.length < 1
-        || axis.correspondences.length > 3) return false;
-    return axis.correspondences.every(pair => {
-        if (typeof pair !== 'object'
-            || pair === null
-            || !isCoordinate(pair.first)
-            || !isCoordinate(pair.second)
-            || !isCoordinate(pair.foldPoint)
-            || !Number.isFinite(pair.distanceToAxis)
-            || pair.distanceToAxis <= 0
-            || !pointOnBoundary(pair.first, vertices)
-            || !pointOnBoundary(pair.second, vertices)) return false;
-        const expectedFold = {
-            x: (pair.first.x + pair.second.x) / 2,
-            y: (pair.first.y + pair.second.y) / 2
-        };
-        const firstDistance = Math.abs(signedDistance(pair.first, equation));
-        const secondDistance = Math.abs(signedDistance(pair.second, equation));
-        return samePoint(pair.foldPoint, expectedFold)
-            && Math.abs(signedDistance(pair.foldPoint, equation)) < EPSILON
-            && Math.abs(firstDistance - secondDistance) < EPSILON
-            && Math.abs(pair.distanceToAxis - firstDistance) < EPSILON
-            && samePoint(reflectedPoint(pair.first, equation), pair.second);
-    });
+    if (equation === null || !Array.isArray(axis.correspondences)) return false;
+    const representedVertices: number[] = [];
+    for (const correspondence of axis.correspondences) {
+        if (typeof correspondence !== 'object'
+            || correspondence === null
+            || !Number.isInteger(correspondence.firstVertex)
+            || !Number.isInteger(correspondence.secondVertex)
+            || correspondence.firstVertex < 0
+            || correspondence.firstVertex >= vertices.length
+            || correspondence.secondVertex < correspondence.firstVertex
+            || correspondence.secondVertex >= vertices.length) return false;
+        const first = vertices[correspondence.firstVertex];
+        const second = vertices[correspondence.secondVertex];
+        if (!samePoint(reflectedPoint(first, equation), second)) return false;
+        representedVertices.push(correspondence.firstVertex);
+        if (correspondence.secondVertex !== correspondence.firstVertex) {
+            representedVertices.push(correspondence.secondVertex);
+        }
+    }
+    return representedVertices.length === vertices.length
+        && representedVertices.sort((first, second) => first - second)
+            .every((vertex, index) => vertex === index);
 };
 
 const axisIsValid = (axis: LineSymmetryAxis, figure: LineSymmetryFigure): boolean => {
-    if (typeof axis !== 'object'
-        || axis === null
-        || !['vertical', 'horizontal', 'diagonal-rise', 'diagonal-fall'].includes(axis.id)
-        || !isCoordinate(axis.start)
-        || !isCoordinate(axis.end)
-        || samePoint(axis.start, axis.end)) return false;
+    if (typeof axis !== 'object' || axis === null) return false;
     const equation = normalizeEquation(axis.equation);
     return equation !== null
         && Math.abs(Math.hypot(axis.equation.a, axis.equation.b) - 1) < EPSILON
-        && Math.abs(signedDistance(axis.start, equation)) < EPSILON
-        && Math.abs(signedDistance(axis.end, equation)) < EPSILON
         && isReflectionAxis(equation, figure.vertices)
-        && correspondenceIsValid(axis, figure.vertices);
+        && correspondencesAreValid(axis, figure.vertices);
 };
 
 const figureIsValid = (figure: LineSymmetryFigure): boolean => {
     if (typeof figure !== 'object'
         || figure === null
-        || !['isosceles-triangle', 'rectangle', 'square', 'scalene-triangle', 'parallelogram']
-            .includes(figure.figureKind)
+        || !FIGURE_KINDS.includes(figure.kind)
         || !isSimpleConvexPolygon(figure.vertices)
-        || ![0, 1, 2, 4].includes(figure.axisCount)
         || !Array.isArray(figure.validAxes)
-        || figure.validAxes.length !== figure.axisCount
-        || new Set(figure.validAxes.map(axis => axis.id)).size !== figure.validAxes.length
+        || figure.validAxes.length !== EXPECTED_AXIS_COUNTS[figure.kind]
         || !figure.validAxes.every(axis => axisIsValid(axis, figure))) return false;
     const discovered = discoverReflectionAxes(figure.vertices);
     return discovered.length === figure.validAxes.length
         && discovered.every(equation => figure.validAxes.some(axis => equationMatches(axis.equation, equation)));
 };
 
-const axesMatch = (first: readonly LineSymmetryAxis[], second: readonly LineSymmetryAxis[]): boolean => (
-    first.length === second.length
-    && first.every(axis => second.some(candidate => candidate.id === axis.id
-        && equationMatches(candidate.equation, axis.equation)
-        && candidate.correspondences.length === axis.correspondences.length
-        && axis.correspondences.every((pair, index) => {
-            const other = candidate.correspondences[index];
-            return samePoint(pair.first, other.first)
-                && samePoint(pair.second, other.second)
-                && samePoint(pair.foldPoint, other.foldPoint)
-                && Math.abs(pair.distanceToAxis - other.distanceToAxis) < EPSILON;
-        })))
-);
+export const isValidShapeLineSymmetryProblem = (data: ShapeLineSymmetryProblem): boolean => {
+    if (!data || !Array.isArray(data.figures) || data.figures.length !== FIGURE_KINDS.length) return false;
+    const kinds = data.figures.map(figure => figure.kind);
+    return new Set(kinds).size === FIGURE_KINDS.length
+        && FIGURE_KINDS.every(kind => kinds.includes(kind))
+        && data.figures.every(figureIsValid);
+};
 
-const identifyProblemIsValid = (data: IdentifyLineSymmetryProblem): boolean => {
-    if (!data
-        || !Array.isArray(data.options)
-        || data.options.length !== 4
-        || !Array.isArray(data.answerIds)
-        || data.answerIds.length !== 2) {
-        return false;
+const figureOfKind = <TKind extends LineSymmetryFigure['kind']>(
+    data: ShapeLineSymmetryProblem,
+    kind: TKind
+): LineSymmetryFigure => data.figures.find(figure => figure.kind === kind)!;
+
+function shuffled<T>(values: readonly T[], seed: number): T[] {
+    const result = [...values];
+    let state = (seed ^ 0x9E3779B9) >>> 0;
+    for (let index = result.length - 1; index > 0; index--) {
+        state = Math.imul(state ^ state >>> 16, 0x21F0AAAD) >>> 0;
+        state = Math.imul(state ^ state >>> 15, 0x735A2D97) >>> 0;
+        const swapIndex = ((state ^ state >>> 15) >>> 0) % (index + 1);
+        [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
     }
-    const ids = data.options.map(option => option.id);
-    const positiveIds = data.options.filter(option => option.hasLineSymmetry).map(option => option.id);
-    return ids.every((id, index) => id === OPTION_IDS[index])
-        && new Set(ids).size === 4
-        && data.options.every(option => figureIsValid(option.figure)
-            && option.hasLineSymmetry === (option.figure.axisCount > 0))
-        && positiveIds.length === 2
-        && new Set(data.answerIds).size === 2
-        && data.answerIds.every((id, index) => id === positiveIds[index])
-        && data.options.some(option => option.hasLineSymmetry && option.figure.axisCount === 1)
-        && data.options.some(option => option.hasLineSymmetry && option.figure.axisCount > 1)
-        && data.options.filter(option => !option.hasLineSymmetry).every(option => option.figure.axisCount === 0);
+    return result;
+}
+
+export const identificationPresentation = (
+    data: ShapeLineSymmetryProblem,
+    multiAxisKind: IdentificationMultiAxisKind,
+    seed: number
+): LineSymmetryIdentificationPresentation => {
+    const figures = shuffled([
+        figureOfKind(data, 'isosceles-triangle'),
+        figureOfKind(data, multiAxisKind),
+        figureOfKind(data, 'scalene-triangle'),
+        figureOfKind(data, 'parallelogram')
+    ], seed);
+    const options = figures.map((figure, index) => ({id: OPTION_IDS[index], figure}));
+    return {
+        options,
+        answerIds: options.filter(option => option.figure.validAxes.length > 0).map(option => option.id)
+    };
 };
 
-const drawProblemIsValid = (data: DrawLineSymmetryProblem): boolean => {
-    if (!data
-        || !figureIsValid(data.figure)
-        || data.figure.axisCount === 0
-        || !Array.isArray(data.completedAxes)
-        || !data.completedAxes.every(axis => axisIsValid(axis, data.figure))
-        || !axesMatch(data.completedAxes, data.figure.validAxes)) return false;
-    return true;
-};
+export const drawingFigure = (
+    data: ShapeLineSymmetryProblem,
+    kind: DrawingFigureKind
+): LineSymmetryFigure => figureOfKind(data, kind);
 
-export const isValidShapeLineSymmetryProblem = (data: ShapeLineSymmetryProblem): boolean => (
-    Boolean(data)
-    && identifyProblemIsValid(data.identification)
-    && drawProblemIsValid(data.drawing)
-);
+export const axisEndpoints = (
+    axis: LineSymmetryAxis,
+    figure: LineSymmetryFigure
+): readonly [LineSymmetryCoordinate, LineSymmetryCoordinate] | null => {
+    const equation = normalizeEquation(axis.equation);
+    if (equation === null || figure.vertices.length === 0) return null;
+    const xs = figure.vertices.map(vertex => vertex.x);
+    const ys = figure.vertices.map(vertex => vertex.y);
+    const figureBounds = {
+        minX: Math.min(...xs),
+        maxX: Math.max(...xs),
+        minY: Math.min(...ys),
+        maxY: Math.max(...ys)
+    };
+    const bounds = {
+        minX: Math.min(Math.max(8, figureBounds.minX - 13), figureBounds.minX),
+        maxX: Math.max(Math.min(92, figureBounds.maxX + 13), figureBounds.maxX),
+        minY: Math.min(Math.max(8, figureBounds.minY - 13), figureBounds.minY),
+        maxY: Math.max(Math.min(92, figureBounds.maxY + 13), figureBounds.maxY)
+    };
+    const candidates: LineSymmetryCoordinate[] = [];
+    const add = (point: LineSymmetryCoordinate): void => {
+        const snapped = {
+            x: Math.abs(point.x - Math.round(point.x)) < EPSILON ? Math.round(point.x) : point.x,
+            y: Math.abs(point.y - Math.round(point.y)) < EPSILON ? Math.round(point.y) : point.y
+        };
+        if (snapped.x < bounds.minX - EPSILON || snapped.x > bounds.maxX + EPSILON
+            || snapped.y < bounds.minY - EPSILON || snapped.y > bounds.maxY + EPSILON
+            || candidates.some(candidate => samePoint(candidate, snapped))) return;
+        candidates.push(snapped);
+    };
+    if (Math.abs(equation.b) >= EPSILON) {
+        add({x: bounds.minX, y: (-equation.a * bounds.minX - equation.c) / equation.b});
+        add({x: bounds.maxX, y: (-equation.a * bounds.maxX - equation.c) / equation.b});
+    }
+    if (Math.abs(equation.a) >= EPSILON) {
+        add({x: (-equation.b * bounds.minY - equation.c) / equation.a, y: bounds.minY});
+        add({x: (-equation.b * bounds.maxY - equation.c) / equation.a, y: bounds.maxY});
+    }
+    if (candidates.length < 2) return null;
+    let endpoints: readonly [LineSymmetryCoordinate, LineSymmetryCoordinate] = [
+        candidates[0],
+        candidates[1]
+    ];
+    let greatestDistance = 0;
+    for (let first = 0; first < candidates.length; first++) {
+        for (let second = first + 1; second < candidates.length; second++) {
+            const distance = Math.hypot(
+                candidates[first].x - candidates[second].x,
+                candidates[first].y - candidates[second].y
+            );
+            if (distance > greatestDistance) {
+                greatestDistance = distance;
+                endpoints = [candidates[first], candidates[second]];
+            }
+        }
+    }
+    return endpoints;
+};
 
 export const rotationFor = (seed: number, index: number): number => {
     const rotations = [-12, -6, 0, 7, 13] as const;

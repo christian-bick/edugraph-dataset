@@ -1,4 +1,5 @@
 import {Ability} from 'edugraph-ts';
+import {random} from '../../../../lib/random.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -10,7 +11,14 @@ export const spec: ViewSpec = {
     ]
 };
 
-export const ShapeLineSymmetryIdentificationViewSchema = {} as const;
+export type IdentificationMultiAxisKind = 'rectangle' | 'square';
+
+export const selectIdentificationMultiAxisKind = (): IdentificationMultiAxisKind =>
+    random() < 0.5 ? 'rectangle' : 'square';
+
+export const ShapeLineSymmetryIdentificationViewSchema = {
+    multiAxisKind: selectIdentificationMultiAxisKind
+} as const;
 
 export type ShapeLineSymmetryIdentificationViewConfig = ConfigFromSchema<
     typeof ShapeLineSymmetryIdentificationViewSchema

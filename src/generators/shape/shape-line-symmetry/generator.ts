@@ -1,12 +1,9 @@
 import {validateConfigFields} from '../../../lib/errors.ts';
-import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     LineSymmetryAxis,
     LineSymmetryCoordinate,
     LineSymmetryFigure,
-    LineSymmetryIdentificationOption,
-    ShapeAttributeOption,
     ShapeLineSymmetryProblem
 } from '../../../types/problems.ts';
 import {
@@ -14,39 +11,22 @@ import {
     ShapeLineSymmetryGeneratorSchema
 } from './spec.ts';
 
-const OPTION_IDS: readonly ShapeAttributeOption['id'][] = ['A', 'B', 'C', 'D'];
 const ROOT_TWO = Math.sqrt(2);
 
 function coordinate(x: number, y: number): LineSymmetryCoordinate {
     return {x, y};
 }
 
-function correspondence(
-    first: LineSymmetryCoordinate,
-    second: LineSymmetryCoordinate,
-    equation: LineSymmetryAxis['equation']
-) {
-    return {
-        first,
-        second,
-        foldPoint: coordinate((first.x + second.x) / 2, (first.y + second.y) / 2),
-        distanceToAxis: Math.abs(equation.a * first.x + equation.b * first.y + equation.c)
-    };
-}
-
 function axis(
-    id: LineSymmetryAxis['id'],
-    start: LineSymmetryCoordinate,
-    end: LineSymmetryCoordinate,
     equation: LineSymmetryAxis['equation'],
-    pairs: ReadonlyArray<readonly [LineSymmetryCoordinate, LineSymmetryCoordinate]>
+    correspondences: ReadonlyArray<readonly [number, number]>
 ): LineSymmetryAxis {
     return {
-        id,
-        start,
-        end,
         equation,
-        correspondences: pairs.map(([first, second]) => correspondence(first, second, equation))
+        correspondences: correspondences.map(([firstVertex, secondVertex]) => ({
+            firstVertex,
+            secondVertex
+        }))
     };
 }
 
@@ -60,134 +40,94 @@ const DIAGONAL_RISE_EQUATION = {
 };
 
 const ISOSCELES_TRIANGLE: LineSymmetryFigure = {
-    figureKind: 'isosceles-triangle',
+    kind: 'isosceles-triangle',
     vertices: [coordinate(50, 15), coordinate(85, 80), coordinate(15, 80)],
     validAxes: [axis(
-        'vertical',
-        coordinate(50, 8),
-        coordinate(50, 92),
         VERTICAL_EQUATION,
         [
-            [coordinate(15, 80), coordinate(85, 80)],
-            [coordinate(32.5, 47.5), coordinate(67.5, 47.5)]
+            [0, 0],
+            [1, 2]
         ]
-    )],
-    axisCount: 1
+    )]
 };
 
 const RECTANGLE: LineSymmetryFigure = {
-    figureKind: 'rectangle',
+    kind: 'rectangle',
     vertices: [coordinate(20, 25), coordinate(80, 25), coordinate(80, 75), coordinate(20, 75)],
     validAxes: [
         axis(
-            'vertical',
-            coordinate(50, 12),
-            coordinate(50, 88),
             VERTICAL_EQUATION,
             [
-                [coordinate(20, 25), coordinate(80, 25)],
-                [coordinate(20, 75), coordinate(80, 75)]
+                [0, 1],
+                [2, 3]
             ]
         ),
         axis(
-            'horizontal',
-            coordinate(8, 50),
-            coordinate(92, 50),
             HORIZONTAL_EQUATION,
             [
-                [coordinate(20, 25), coordinate(20, 75)],
-                [coordinate(80, 25), coordinate(80, 75)]
+                [0, 3],
+                [1, 2]
             ]
         )
-    ],
-    axisCount: 2
+    ]
 };
 
 const SQUARE: LineSymmetryFigure = {
-    figureKind: 'square',
+    kind: 'square',
     vertices: [coordinate(25, 25), coordinate(75, 25), coordinate(75, 75), coordinate(25, 75)],
     validAxes: [
         axis(
-            'vertical',
-            coordinate(50, 12),
-            coordinate(50, 88),
             VERTICAL_EQUATION,
             [
-                [coordinate(25, 25), coordinate(75, 25)],
-                [coordinate(25, 75), coordinate(75, 75)]
+                [0, 1],
+                [2, 3]
             ]
         ),
         axis(
-            'horizontal',
-            coordinate(12, 50),
-            coordinate(88, 50),
             HORIZONTAL_EQUATION,
             [
-                [coordinate(25, 25), coordinate(25, 75)],
-                [coordinate(75, 25), coordinate(75, 75)]
+                [0, 3],
+                [1, 2]
             ]
         ),
         axis(
-            'diagonal-fall',
-            coordinate(12, 12),
-            coordinate(88, 88),
             DIAGONAL_FALL_EQUATION,
             [
-                [coordinate(75, 25), coordinate(25, 75)],
-                [coordinate(50, 25), coordinate(25, 50)]
+                [0, 0],
+                [1, 3],
+                [2, 2]
             ]
         ),
         axis(
-            'diagonal-rise',
-            coordinate(12, 88),
-            coordinate(88, 12),
             DIAGONAL_RISE_EQUATION,
             [
-                [coordinate(25, 25), coordinate(75, 75)],
-                [coordinate(50, 25), coordinate(75, 50)]
+                [0, 2],
+                [1, 1],
+                [3, 3]
             ]
         )
-    ],
-    axisCount: 4
+    ]
 };
 
 const SCALENE_TRIANGLE: LineSymmetryFigure = {
-    figureKind: 'scalene-triangle',
+    kind: 'scalene-triangle',
     vertices: [coordinate(15, 80), coordinate(15, 20), coordinate(85, 80)],
-    validAxes: [],
-    axisCount: 0
+    validAxes: []
 };
 
 const PARALLELOGRAM: LineSymmetryFigure = {
-    figureKind: 'parallelogram',
+    kind: 'parallelogram',
     vertices: [coordinate(10, 25), coordinate(80, 25), coordinate(95, 63), coordinate(25, 63)],
-    validAxes: [],
-    axisCount: 0
+    validAxes: []
 };
 
-const IDENTIFICATION_FIGURES = [
+const FIGURES: readonly LineSymmetryFigure[] = [
     ISOSCELES_TRIANGLE,
     RECTANGLE,
+    SQUARE,
     SCALENE_TRIANGLE,
     PARALLELOGRAM
-] as const;
-
-const DRAWING_FIGURES = [ISOSCELES_TRIANGLE, RECTANGLE, SQUARE] as const;
-
-function shuffleOptions(
-    figures: readonly LineSymmetryFigure[]
-): ShapeLineSymmetryProblem['identification']['options'] {
-    const shuffled = [...figures];
-    for (let index = shuffled.length - 1; index > 0; index--) {
-        const swapIndex = Math.floor(random() * (index + 1));
-        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-    }
-    return shuffled.map((figure, index): LineSymmetryIdentificationOption => ({
-        id: OPTION_IDS[index],
-        figure,
-        hasLineSymmetry: figure.axisCount > 0
-    })) as ShapeLineSymmetryProblem['identification']['options'];
-}
+];
 
 export class ShapeLineSymmetryGenerator implements ProblemGenerator<
     ShapeLineSymmetryProblem,
@@ -198,19 +138,8 @@ export class ShapeLineSymmetryGenerator implements ProblemGenerator<
 
     generate(config: ShapeLineSymmetryGeneratorConfig): ProblemStub<ShapeLineSymmetryProblem> | null {
         validateConfigFields('shape-line-symmetry', config, []);
-        const options = shuffleOptions(IDENTIFICATION_FIGURES);
-        const answerIds = options
-            .filter(option => option.hasLineSymmetry)
-            .map(option => option.id) as ShapeLineSymmetryProblem['identification']['answerIds'];
-        const drawingFigure = DRAWING_FIGURES[Math.floor(random() * DRAWING_FIGURES.length)];
         return {
-            data: {
-                identification: {options, answerIds},
-                drawing: {
-                    figure: drawingFigure,
-                    completedAxes: drawingFigure.validAxes
-                }
-            }
+            data: {figures: [...FIGURES]}
         };
     }
 }

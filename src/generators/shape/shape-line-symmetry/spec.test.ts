@@ -21,7 +21,7 @@ describe('ShapeLineSymmetryGenerator spec integration', () => {
         expect(labelSetHash(labels)).toBe('245bc791');
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
-        expect(stub!.data.identification.answerIds).toHaveLength(2);
+        expect(stub!.data.figures.filter(figure => figure.validAxes.length === 0)).toHaveLength(2);
         expect(stub!.tags).not.toContain(Ability.ConceptClassification);
         expect(stub!.tags).not.toContain(Ability.VisualRecognition);
     });
@@ -35,7 +35,7 @@ describe('ShapeLineSymmetryGenerator spec integration', () => {
         expect(labelSetHash(labels)).toBe('4b67d8c7');
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
-        expect(stub!.data.drawing.completedAxes).toEqual(stub!.data.drawing.figure.validAxes);
+        expect(stub!.data.figures.filter(figure => figure.validAxes.length > 0)).toHaveLength(3);
         expect(stub!.tags).not.toContain(Ability.VisualArticulation);
     });
 });
