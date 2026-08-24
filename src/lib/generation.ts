@@ -11,7 +11,7 @@ import {
     AbstractProblem,
     RenderPayload
 } from '../types/ml-engine.ts';
-import { ConfigSchema } from '../types/schema.ts';
+import { ConfigFromSchema, ConfigSchema, ResolvedConfig } from '../types/schema.ts';
 import type {WorkCounters} from './work-counters.ts';
 import {radixSortUtf8} from './content-identity.ts';
 import {loadTargets} from './spec-catalog.ts';
@@ -450,10 +450,23 @@ export function computeContentFingerprint(data: any): string {
     return createHash('sha256').update(canonicalJson(data)).digest('hex').slice(0, 16);
 }
 
-/** Resolves the same seeded view configuration that `withConfig` will render. */
-export function resolveViewConfig(schema: ConfigSchema, labels: string[], seed: number): Record<string, unknown> {
+/** Resolves the same seeded view configuration and capability labels that `withConfig` will render. */
+export function resolveViewConfigWithLabels<T extends ConfigSchema>(
+    schema: T,
+    labels: string[],
+    seed: number
+): ResolvedConfig<ConfigFromSchema<T>> {
     setSeed(seed);
-    return extractConfig(schema, labels).config;
+    return extractConfig(schema, labels);
+}
+
+/** Convenience projection for callers concerned only with configured task identity. */
+export function resolveViewConfig<T extends ConfigSchema>(
+    schema: T,
+    labels: string[],
+    seed: number
+): ConfigFromSchema<T> {
+    return resolveViewConfigWithLabels(schema, labels, seed).config;
 }
 
 /**

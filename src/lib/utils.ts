@@ -1,4 +1,4 @@
-import { ConfigSchema, ConfigFromSchema } from '../types/schema.ts';
+import { ConfigSchema, ConfigFromSchema, ResolvedConfig } from '../types/schema.ts';
 import { isSubConceptOf } from './ontology.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ResolvedProblemStub } from '../types/ml-engine.ts';
@@ -7,7 +7,7 @@ import { ProblemGenerator, ResolvedProblemStub } from '../types/ml-engine.ts';
 export function extractConfig<T extends ConfigSchema>(
     schema: T,
     competencyLabels: string[]
-): { config: ConfigFromSchema<T>; resolvedLabels: string[] } {
+): ResolvedConfig<ConfigFromSchema<T>> {
     const config: any = {};
     const resolvedLabels = new Set<string>();
 

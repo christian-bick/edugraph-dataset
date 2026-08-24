@@ -18,6 +18,7 @@ import {
     computeContentFingerprint,
     computeTaskFingerprint,
     resolveViewConfig,
+    resolveViewConfigWithLabels,
     isValTuple,
     DEFAULT_VAL_RATIO,
     buildRenderPayload,
@@ -613,9 +614,19 @@ describe('configured task identity', () => {
 
     it('resolves view configuration deterministically from labels and render seed', () => {
         const schema = { layout: ['grid', 'row'] as const };
-        const first = resolveViewConfig(schema, [], 17);
-        const second = resolveViewConfig(schema, [], 17);
+        const first = resolveViewConfigWithLabels(schema, [], 17);
+        const second = resolveViewConfigWithLabels(schema, [], 17);
         expect(first).toEqual(second);
+        expect(first.resolvedLabels).toEqual([first.config.layout]);
+        expect(resolveViewConfig(schema, [], 17)).toEqual(first.config);
+    });
+
+    it('reports target-selected view capabilities separately from the resolved config', () => {
+        const schema = { layout: ['grid', 'row'] as const };
+        expect(resolveViewConfigWithLabels(schema, ['row'], 17)).toEqual({
+            config: {layout: 'row'},
+            resolvedLabels: ['row']
+        });
     });
 });
 

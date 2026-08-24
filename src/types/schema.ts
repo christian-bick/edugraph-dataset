@@ -16,3 +16,9 @@ export type ConfigFromSchema<T extends ConfigSchema> = {
     ? R2
     : never;
 };
+
+/** One deterministic schema resolution and the ontology capabilities selected by it. */
+export interface ResolvedConfig<TConfig> {
+  config: TConfig;
+  resolvedLabels: string[];
+}
