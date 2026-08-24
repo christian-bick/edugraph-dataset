@@ -10,9 +10,9 @@ describe('resolveComparisonRelation', () => {
         expect(resolveComparisonRelation([Area.NumericComparison, Scope.Greater])).toBe(Scope.Greater);
     });
 
-    it('derives a canonical relation when only the conceptual area is supplied', () => {
-        expect(resolveComparisonRelation([Area.NumericEquality])).toBe(Scope.Equal);
-        expect(resolveComparisonRelation([Area.NumericInequality])).toBe(Scope.Less);
+    it('does not hide a relation specialization behind a conceptual area', () => {
+        expect(resolveComparisonRelation([Area.NumericEquality])).toBeUndefined();
+        expect(resolveComparisonRelation([Area.NumericInequality])).toBeUndefined();
         expect(resolveComparisonRelation([])).toBeUndefined();
     });
 

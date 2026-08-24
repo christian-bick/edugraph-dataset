@@ -19,6 +19,9 @@ The core component itself (`<Name>Core`) is a **pure stateless function** taking
 `{ config, payload }`. It does not parse labels — the ontology has already been resolved
 into `config` by the schema ([SPEC-V1](spec-view.md#spec-v1--export-contract)).
 
+Function-only seeded schema choices must be explicitly `ontologyNeutral`; label-dependent
+choices require a non-empty supported capability set ([SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)).
+
 ### IMPL-V2 — Validate the payload strictly
 
 Import `validateProblemData` from `../../../helpers/validation.ts` — with the correct

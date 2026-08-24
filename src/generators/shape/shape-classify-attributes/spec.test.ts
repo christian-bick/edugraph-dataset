@@ -46,7 +46,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
                 Scope.ShapeAttributes
             ])!;
             if (!('shape' in stub.data)) throw new Error('Expected a legacy classification problem.');
-            expect(stub.labels).toEqual([Scope.ShapeAttributes]);
+            expect(stub.labels).toEqual([]);
         }
     });
 

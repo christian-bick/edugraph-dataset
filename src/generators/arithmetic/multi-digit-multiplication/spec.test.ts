@@ -62,4 +62,14 @@ describe('MultiDigitMultiplicationGenerator spec integration', () => {
             Scope.FourDigitLargestOperand
         ])).toThrow();
     });
+
+    it('resolves a complete valid operand profile when the target is broad', () => {
+        setSeed('operand-profile-fallback');
+        const stub = generateWithLabels(generator, [Area.MultiplicationPartialProducts]);
+
+        expect(stub).not.toBeNull();
+        expect(profiles.some(([smallest, largest]) =>
+            stub!.labels.includes(smallest) && stub!.labels.includes(largest)
+        )).toBe(true);
+    });
 });

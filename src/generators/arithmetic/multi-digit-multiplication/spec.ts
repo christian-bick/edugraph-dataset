@@ -24,6 +24,14 @@ const resolveOperandDigitProfile: ResolverFn<OperandDigitProfile | undefined> = 
     return undefined;
 };
 
+const operandDigitProfileFallbacks = [
+    [Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand],
+    [Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
+    [Scope.SingleDigitSmallestOperand, Scope.ThreeDigitLargestOperand],
+    [Scope.SingleDigitSmallestOperand, Scope.FourDigitLargestOperand],
+    [Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]
+] as const;
+
 export const spec: GeneratorSpec = {
     generatorId: 'multi-digit-multiplication',
     generalLabels: [
@@ -46,7 +54,8 @@ export const MultiDigitMultiplicationGeneratorSchema = {
             Scope.ThreeDigitLargestOperand,
             Scope.FourDigitLargestOperand
         ],
-        resolveOperandDigitProfile
+        resolveOperandDigitProfile,
+        operandDigitProfileFallbacks
     ]
 } as const;
 

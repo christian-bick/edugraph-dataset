@@ -24,7 +24,15 @@ export const ComparisonGeneratorSchema = {
             Scope.Equal,
             Scope.Greater
         ],
-        resolveComparisonRelation
+        resolveComparisonRelation,
+        [
+            [Area.NumericEquality, Scope.Equal],
+            [Area.NumericInequality, Scope.Less],
+            [Area.NumericInequality, Scope.Greater],
+            [Area.NumericComparison, Scope.Less],
+            [Area.NumericComparison, Scope.Equal],
+            [Area.NumericComparison, Scope.Greater]
+        ]
     ],
     requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],

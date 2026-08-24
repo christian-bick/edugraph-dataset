@@ -2,7 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { isSubConceptOf } from '../lib/ontology.ts';
-import { extractSchemaLabels } from '../lib/utils.ts';
+import {
+    extractSchemaLabels,
+    findSchemaFallbackContractIssues,
+    findSchemaResolutionContractIssues
+} from '../lib/utils.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from '../lib/type-parser.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
 import {
@@ -83,6 +87,17 @@ async function validateSpecs() {
                 const schema = specModule[schemaName];
                 
                 if (schema) {
+                    for (const issue of findSchemaResolutionContractIssues(schema)) {
+                        const detail = issue.kind === 'empty-supported-labels'
+                            ? 'has no supported capability labels'
+                            : 'uses an unmarked function-only resolver; wrap ontology-neutral seeded choices with ontologyNeutral()';
+                        console.error(`❌ [generator:${item}] Schema parameter '${issue.field}' ${detail}`);
+                        hasError = true;
+                    }
+                    for (const issue of findSchemaFallbackContractIssues(schema)) {
+                        console.error(`❌ [generator:${item}] Schema parameter '${issue.field}' cannot resolve supported fallback '${issue.label}' (${issue.reason})`);
+                        hasError = true;
+                    }
                     const paramLabels = extractSchemaLabels(schema);
                     generatorSchemas[item] = { schema, paramLabels };
 
@@ -151,6 +166,17 @@ async function validateSpecs() {
                     : [];
                 
                 if (schema) {
+                    for (const issue of findSchemaResolutionContractIssues(schema)) {
+                        const detail = issue.kind === 'empty-supported-labels'
+                            ? 'has no supported capability labels'
+                            : 'uses an unmarked function-only resolver; wrap ontology-neutral seeded choices with ontologyNeutral()';
+                        console.error(`❌ [view:${item}] Schema parameter '${issue.field}' ${detail}`);
+                        hasError = true;
+                    }
+                    for (const issue of findSchemaFallbackContractIssues(schema)) {
+                        console.error(`❌ [view:${item}] Schema parameter '${issue.field}' cannot resolve supported fallback '${issue.label}' (${issue.reason})`);
+                        hasError = true;
+                    }
                     viewSchemas[item] = { schema, paramLabels };
 
                     // Self overlap check

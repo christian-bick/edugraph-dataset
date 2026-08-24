@@ -73,6 +73,29 @@ describe('MeasurementConversionGenerator spec integration', () => {
             Scope.KilometerScale,
             Scope.CentimeterScale,
             Ability.ProcedureExecution
-        ])).toThrow('Required field "unitPair" is missing.');
+        ])).toThrow('Schema field "unitPair" cannot complete the requested label combination.');
+    });
+
+    it('resolves a broad request through a complete valid unit-pair fallback', () => {
+        setSeed('unit-pair-fallback');
+        const stub = generateWithLabels(generator, [Ability.ProcedureExecution]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.task).toBe('convert-larger-to-smaller');
+        const resolvedConcreteScales = stub!.labels.filter(label => [
+            Scope.KilometerScale,
+            Scope.MeterScale,
+            Scope.CentimeterScale,
+            Scope.KilogramScale,
+            Scope.GramScale,
+            Scope.PoundScale,
+            Scope.OunceScale,
+            Scope.LiterScale,
+            Scope.MilliliterScale,
+            Scope.HourIntervals,
+            Scope.MinuteIntervals,
+            Scope.SecondIntervals
+        ].includes(label as Scope));
+        expect(resolvedConcreteScales.length).toBeGreaterThanOrEqual(2);
     });
 });

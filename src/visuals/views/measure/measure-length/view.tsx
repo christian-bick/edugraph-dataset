@@ -1,16 +1,14 @@
 import React, {useMemo} from 'react';
 import {formatMeasureAnswer, getRulerTicks} from './helpers.ts';
-import {MeasureLengthViewConfig, MeasureLengthViewSchema} from './_spec.ts';
-import {withConfig} from '../../withConfig.tsx';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
-    config: MeasureLengthViewConfig;
+    isReverse: boolean;
     payload: any;
 }
 
-export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
+export const MeasureLengthCore = ({isReverse, payload}: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
 
@@ -24,8 +22,6 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
 
     const color = '#4682B4'; // SteelBlue
 
-    const isReverse = config.isReverse;
-    
     const bandLength = data.bandLength;
     const problemLength = data.problemLength;
 
@@ -125,5 +121,3 @@ export const MeasureLengthCore = ({ config, payload }: CoreProps) => {
         </div>
     );
 };
-
-export const MeasureLength = withConfig(MeasureLengthViewSchema, MeasureLengthCore);

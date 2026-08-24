@@ -2,6 +2,7 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {selectMissingTermIndex} from '../pattern-table-helpers.ts';
+import {ontologyNeutral} from '../../../../lib/resolvers.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-pattern-generation-practice',
@@ -13,7 +14,7 @@ export const spec: ViewSpec = {
 };
 
 export const OperationsPatternGenerationPracticeViewSchema = {
-    missingTermIndex: selectMissingTermIndex
+    missingTermIndex: ontologyNeutral(selectMissingTermIndex)
 } as const;
 
 export type OperationsPatternGenerationPracticeViewConfig = ConfigFromSchema<

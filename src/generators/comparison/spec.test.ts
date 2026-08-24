@@ -100,4 +100,18 @@ describe('ComparisonGenerator Spec Integration', () => {
             Scope.NumbersSmaller1000000
         ]));
     });
+
+    it('resolves an explicit relation capability for a broad comparison target', () => {
+        setSeed('comparison-relation-fallback');
+        const stub = generateWithLabels(generator, [
+            Area.NumericComparison,
+            Scope.NumbersSmaller20,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.labels).toContain(Area.NumericComparison);
+        expect(stub!.labels.some(label => [Scope.Less, Scope.Equal, Scope.Greater].includes(label as Scope))).toBe(true);
+    });
 });

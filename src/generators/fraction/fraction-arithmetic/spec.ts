@@ -84,7 +84,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const FractionArithmeticGeneratorSchema = {
-    task: [fractionArithmeticTaskLabels, resolveTask],
+    task: [fractionArithmeticTaskLabels, resolveTask, [[Scope.FractionNumbers]]],
     usesCommonDenominator: [
         [Scope.CommonDenominator],
         hasLabel(Scope.CommonDenominator)

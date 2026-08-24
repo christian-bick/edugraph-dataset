@@ -25,8 +25,5 @@ export function resolveComparisonRelation(labels: string[]): ComparisonRelation 
         throw new Error('Numeric inequality requires a non-equal relation.');
     }
 
-    if (relation) return relation;
-    if (requiresEquality) return Scope.Equal;
-    if (requiresInequality) return Scope.Less;
-    return undefined;
+    return relation;
 }

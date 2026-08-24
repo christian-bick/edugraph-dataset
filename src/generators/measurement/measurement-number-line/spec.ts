@@ -48,7 +48,11 @@ export const MeasurementNumberLineGeneratorSchema = {
         selectCanonicalLabel([
             [[Scope.ProperFractions, Scope.FractionNumbers], 'fraction'],
             [[Scope.DecimalNumbers], 'decimal']
-        ])
+        ]),
+        [
+            [Scope.ProperFractions],
+            [Scope.DecimalNumbers]
+        ]
     ]
 } as const;
 

@@ -44,8 +44,9 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
                 expect(stub!.data).toMatchObject({measurementKind, numberKind});
                 expect(stub!.labels).toEqual(expect.arrayContaining([
                     ...measurementLabels.filter(label => label !== Area.MeasuringWithUnits),
-                    numberLabel
+                    numberKind === 'fraction' ? Scope.ProperFractions : numberLabel
                 ]));
+                if (numberKind === 'fraction') expect(stub!.labels).not.toContain(Scope.FractionNumbers);
                 expect(stub!.labels).not.toContain(Area.MeasuringWithUnits);
                 expect(stub!.labels).not.toContain(Scope.Numberline);
                 expect(stub!.labels).not.toContain(Ability.VisualArticulation);

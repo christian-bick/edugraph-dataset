@@ -317,8 +317,15 @@ pair that produced it.
 roles expose the exact labels selected by target matching or deterministic fallback. Step 3 is
 complete in orchestration: `AbstractProblem.labels` and dataset rows contain only the union of
 pair-general and pair-resolved capabilities, while `RenderPayload.targetLabels` remains a separate
-configuration-selection input. The schema fallback/seeded-choice audit and observable Scope
-inventory remain.
+configuration-selection input. Step 4 is complete: label-backed fields require a non-empty
+supported-capability set, and function-only fields must be explicitly `ontologyNeutral`. The five
+current function-only choices select a missing pattern term, a pattern-table operand, or a line-
+symmetry figure and remain fingerprint-visible but unlabeled. The two hidden target-dependent
+length-task switches were not valid fallbacks; measuring and drawing now use separate invariant
+views over one renderer. Resolvers that need label conjunctions now declare and validate complete
+fallback label sets; operand profiles, comparison relations, fraction-arithmetic tasks, and
+measurement unit pairs no longer rely on invalid singleton fallback inputs. The target-coverage
+gate and observable Scope inventory remain.
 
 ### Phase 8: canonical validation and release proof
 

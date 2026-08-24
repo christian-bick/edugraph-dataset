@@ -1922,7 +1922,9 @@ export interface ViewTypeMap {
     'sorting-classify-sort': CountingClassifySortProblem;
 
     'measure-length-integer': MeasurementStandardProblem;
+    'measure-length-integer-drawing': MeasurementStandardProblem;
     'measure-length-decimal': MeasurementStandardProblem;
+    'measure-length-decimal-drawing': MeasurementStandardProblem;
     'measure-select-tool': MeasurementToolSelectionProblem;
     'measure-unit-scale-relation': GenericUnitScaleRelationProblem;
     'measure-conversion-derivation': MeasurementConversionProblem;

@@ -1,0 +1,2 @@
+- **Identity:** A stated decimal length and ruler make constructing an object of that length identifiable.
+- **Modes:** Question Mode withholds the object; Solution Mode draws it to the stated decimal length.

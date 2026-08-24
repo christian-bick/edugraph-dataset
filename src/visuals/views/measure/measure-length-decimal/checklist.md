@@ -1,2 +1,2 @@
-- **Identity:** A ruler and object or target length make either measuring a decimal length or drawing that length identifiable.
-- **Modes:** Question Mode withholds the measured value or drawn object; Solution Mode reveals the corresponding decimal measurement representation.
+- **Identity:** A ruler and visible object make measuring a decimal length identifiable.
+- **Modes:** Question Mode withholds the measured value; Solution Mode reveals the corresponding decimal measurement.

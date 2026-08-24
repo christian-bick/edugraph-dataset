@@ -42,11 +42,8 @@ describe('FactorMultipleRelationsGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.kind).toBe(kind);
-        for (const label of labels.filter(label =>
-            label !== Ability.ProcedureExecution && label !== Ability.ConceptClassification
-        )) {
-            expect(stub!.labels).toContain(label);
-        }
+        expect(stub!.labels).toContain(labels[0]);
+        expect(stub!.labels).not.toContain(Area.Factorization);
         expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
         expect(stub!.labels).not.toContain(Ability.ConceptClassification);
     });

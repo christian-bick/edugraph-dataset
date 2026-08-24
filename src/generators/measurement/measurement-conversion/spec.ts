@@ -56,6 +56,16 @@ const resolveUnitPair: ResolverFn<MeasurementConversionUnitPairConfig | undefine
     return undefined;
 };
 
+const unitPairFallbacks = [
+    [Area.UnitMagnitudeScaling, Scope.LengthMeasurement, Scope.KilometerScale, Scope.MeterScale],
+    [Area.UnitMagnitudeScaling, Scope.LengthMeasurement, Scope.MeterScale, Scope.CentimeterScale],
+    [Area.UnitMagnitudeScaling, Scope.WeightMeasurement, Scope.KilogramScale, Scope.GramScale],
+    [Area.UnitFactorScaling, Scope.WeightMeasurement, Scope.PoundScale, Scope.OunceScale],
+    [Area.UnitMagnitudeScaling, Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale, Scope.MilliliterScale],
+    [Area.UnitFactorScaling, Scope.TimeMeasurement, Scope.HourIntervals, Scope.MinuteIntervals],
+    [Area.UnitFactorScaling, Scope.TimeMeasurement, Scope.MinuteIntervals, Scope.SecondIntervals]
+] as const;
+
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-conversion',
     generalLabels: []
@@ -64,7 +74,8 @@ export const spec: GeneratorSpec = {
 export const MeasurementConversionGeneratorSchema = {
     task: [
         [Area.UnitScaleRelation, Scope.ConversionTable],
-        resolveTask
+        resolveTask,
+        [[]]
     ],
     unitPair: [
         [
@@ -88,7 +99,8 @@ export const MeasurementConversionGeneratorSchema = {
             Scope.SecondIntervals,
             Scope.LiquidVolumes
         ],
-        resolveUnitPair
+        resolveUnitPair,
+        unitPairFallbacks
     ]
 } as const;
 

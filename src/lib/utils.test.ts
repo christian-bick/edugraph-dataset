@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { extractConfig, generateWithLabels, shortenLabel, formatLabelsKey } from './utils.ts';
+import {
+    extractConfig,
+    findSchemaFallbackContractIssues,
+    findSchemaResolutionContractIssues,
+    generateWithLabels,
+    shortenLabel,
+    formatLabelsKey
+} from './utils.ts';
 import { Area, Scope } from 'edugraph-ts';
-import { selectExactMatch } from './resolvers.ts';
+import { ontologyNeutral, selectExactMatch } from './resolvers.ts';
 import { ProblemGenerator } from '../types/ml-engine.ts';
 
 describe('extractConfig & generateWithLabels', () => {
@@ -55,6 +62,71 @@ describe('extractConfig & generateWithLabels', () => {
         const result = generateWithLabels(mockGenerator, [Scope.ThreeDimensional]);
         expect(result).not.toBeNull();
         expect(result!.labels).toContain(result!.data.shape);
+    });
+
+    it('keeps explicitly ontology-neutral seeded choices unlabeled', () => {
+        const schema = {
+            selectedIndex: ontologyNeutral(() => 2)
+        } as const;
+
+        expect(extractConfig(schema, [Area.Circle])).toEqual({
+            config: {selectedIndex: 2},
+            resolvedLabels: []
+        });
+        expect(findSchemaResolutionContractIssues(schema)).toEqual([]);
+    });
+
+    it('rejects label-aware fields without declared capability labels', () => {
+        const schema = {
+            hiddenChoice: [[], selectExactMatch]
+        } as const;
+
+        expect(findSchemaResolutionContractIssues(schema as any)).toEqual([
+            {field: 'hiddenChoice', kind: 'empty-supported-labels'}
+        ]);
+        expect(() => extractConfig(schema as any, [Area.Circle])).toThrow(
+            'Schema field "hiddenChoice" has no supported capability labels.'
+        );
+    });
+
+    it('rejects unmarked function-only resolvers', () => {
+        const schema = {
+            hiddenChoice: () => 2
+        };
+
+        expect(findSchemaResolutionContractIssues(schema as any)).toEqual([
+            {field: 'hiddenChoice', kind: 'unmarked-function-only-resolver'}
+        ]);
+        expect(() => extractConfig(schema as any, [])).toThrow('not marked ontologyNeutral()');
+    });
+
+    it('probes every label that may be selected as a tuple fallback', () => {
+        const schema = {
+            choice: [[Area.Circle, Area.Square], (labels: string[]) =>
+                labels.includes(Area.Circle) ? 'circle' : undefined]
+        } as const;
+
+        expect(findSchemaFallbackContractIssues(schema)).toEqual([
+            {field: 'choice', label: Area.Square, reason: 'unresolved'}
+        ]);
+    });
+
+    it('resolves and records an explicit conjunction fallback', () => {
+        const schema = {
+            choice: [
+                [Area.Circle, Area.Square],
+                (labels: string[]) => labels.includes(Area.Circle) && labels.includes(Area.Square)
+                    ? 'both'
+                    : undefined,
+                [[Area.Circle, Area.Square]]
+            ]
+        } as const;
+
+        expect(extractConfig(schema, [])).toEqual({
+            config: {choice: 'both'},
+            resolvedLabels: [Area.Circle, Area.Square]
+        });
+        expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
     });
 
     it('should strip http://edugraph.io/edu/ prefix via shortenLabel and formatLabelsKey', () => {

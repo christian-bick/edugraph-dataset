@@ -1,5 +1,12 @@
-import { ResolverFn } from '../types/schema.ts';
+import { OntologyNeutralResolverFn, ResolverFn } from '../types/schema.ts';
 import { isSubConceptOf } from './ontology.ts';
+
+/**
+ * Marks a function-only schema choice as independent of ontology labels.
+ * Use this only for deterministic seeded configuration that contributes no capability label.
+ */
+export const ontologyNeutral = <T>(resolver: () => T): OntologyNeutralResolverFn<T> =>
+    Object.assign(resolver, {ontologyNeutral: true as const});
 
 export const hasLabel = (targetLabel: string): ResolverFn<boolean> => {
     return (labels: string[]) => labels.includes(targetLabel);
@@ -27,4 +34,3 @@ export const selectCanonicalLabel = <T extends string>(
 ): ResolverFn<T | undefined> => {
     return (labels: string[]) => groups.find(([group]) => group.some(label => labels.includes(label)))?.[1];
 };
-

@@ -3,7 +3,10 @@ import {MeasureLengthCore} from '../measure-length/view.tsx';
 import {MeasureLengthDecimalViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
 
-export const MeasureLengthDecimal = withConfig(MeasureLengthDecimalViewSchema, MeasureLengthCore);
+const MeasureLengthDecimalCore = ({payload}: {payload: any}) =>
+    <MeasureLengthCore isReverse={false} payload={payload} />;
+
+export const MeasureLengthDecimal = withConfig(MeasureLengthDecimalViewSchema, MeasureLengthDecimalCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
 

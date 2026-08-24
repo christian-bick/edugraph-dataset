@@ -102,12 +102,29 @@ examples include:
 
 | Module                | Exports                                                                        |
 |-----------------------|--------------------------------------------------------------------------------|
-| `src/lib/resolvers.ts` | `hasLabel`, `hasSubConcept`, `matchAllLabels`, `selectExactMatch`, `matchAllExactLabels`, `selectCanonicalLabel` |
+| `src/lib/resolvers.ts` | `hasLabel`, `hasSubConcept`, `matchAllLabels`, `selectExactMatch`, `matchAllExactLabels`, `selectCanonicalLabel`, `ontologyNeutral` |
 | `src/lib/ontology.ts`  | label-derived value helpers such as `resolveRangeFromLabels`, `isSubConceptOf`  |
 
 Resolver functions must be passed as **references** — or as the output of curried factory
 functions, e.g. `hasLabel(Scope.TenFrame)` — to the schema arrays, and **not executed
 prematurely** inside the array.
+
+Every label-aware schema field declares a non-empty supported-label set. Never use an empty
+label tuple to inspect target labels without contributing a resolved capability. A function-only
+schema field is valid only for a choice that is independent of ontology labels; wrap that resolver
+with `ontologyNeutral(() => value)`. Such a resolver cannot consume target labels, contributes no
+output label, and its resolved value remains visible in generator data or the view task
+fingerprint. For example, selecting which term of an otherwise fixed pattern is blank is a seeded
+task-instance choice and may use `ontologyNeutral(selectMissingTermIndex)`; selecting addition
+versus multiplication changes the mathematical capability and must use a labeled schema field.
+
+When a resolver needs a conjunction rather than one supported label, add a third tuple element
+containing its valid fallback label sets. The resolver must succeed for every listed set, and every
+fallback label must belong to that field's supported-label declaration. An explicit empty set may
+represent a default that contributes no capability from that field, but only when the resulting
+configuration is ontologically accounted for elsewhere in the pair.
+
+**Verified by:** `npm run check:generator-view-specs`.
 
 ### SPEC-7 — Zero overlap between schema parameter labels and `generalLabels`
 
