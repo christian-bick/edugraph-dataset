@@ -173,7 +173,7 @@ The inventory below reflects the current CCSS K-4 state.
 - All 653 contain at least one Area.
 - All 653 contain at least one Ability.
 - 557 contain one Ability, 80 contain two, and 16 contain three.
-- 257 contain one Area and 396 contain multiple Areas; multiple Areas are not inherently a defect.
+- 270 contain one Area and 383 contain multiple Areas; multiple Areas are not inherently a defect.
 - 25 contain no Scope; this is not inherently a defect.
 
 ### Generator declarations
@@ -212,47 +212,25 @@ The current generator/view validator correctly rejects Abilities in generator sc
 them in view schemas. The migration audit should report the latter for semantic review rather than
 turning them into validation failures.
 
-### Generator payload candidates
+### Generator payloads and implementation isolation
 
-A source scan found at least 24 generator modules with fields that may cross the canonical
-mathematics/task-projection boundary:
+The completed payload inventory records 81 historical module rows: 58 migrated, 22 explicitly
+kept as canonical, and one redundant generator consolidated. The current catalog contains 80
+generators. Every current payload has a compatible-view trace and no unresolved **Decision**
+field remains.
 
-- 20 modules contain a `prompt` field;
-- 17 contain `explanation` or `rationale` fields;
-- 10 contain preformatted question artifacts such as `questionEquation`;
-- three contain `unknown` or `unknownRole` fields.
-
-Field names are an audit signal, not final proof. Each payload field must be classified as one
-of:
-
-1. canonical mathematical or semantic data;
-2. a structured mathematical witness that should remain but may need a typed representation;
-3. learner-action or display prose that must move to the view;
-4. an ambiguous case requiring an explicit architectural decision.
-
-Imperative prompts, blank markers, selected unknowns, and answer/explanation prose are presumed
-presentation defects unless the review establishes a different mathematical invariant. Narrative
-context such as a word-problem situation must be reviewed separately: its semantics may be
-canonical even when its final wording should be view-owned.
-
-### Raw-label access
-
-Two view implementations currently inspect `payload.labels` directly:
-
-- `sorting-classify-sort`;
-- `sorting-classify-count`.
-
-These decisions must move into resolved view configuration or canonical payload fields. Static
-linting must prevent recurrence.
+The strict source audit reports no raw-label access, raw ontology-IRI parsing, or learner-action
+payload-field signal. Static checks prevent Abilities in generator declarations and schemas and
+reject unresolved ontology access in generator/view implementations.
 
 ### Applicability, boundaries, and view-owned Areas
 
-- 27 views use `requiredLabels`; their current static contracts pass.
-- 34 views use `rejectedLabels`; each needs a semantic review proving a stable and complete
-  exclusion boundary.
-- 23 views declare general Areas and one view schema declares Areas. Current validation finds no
-  taxonomic overlap with compatible generator Areas, but the independent-domain rationale remains
-  a semantic review responsibility.
+- 35 views use `requiredLabels`; their static and semantic contracts pass.
+- 26 views use `rejectedLabels`; each has a reviewed stable and complete exclusion boundary.
+- 23 views declare general Areas. Current validation finds no
+  taxonomic overlap with compatible generator Areas, and each independent-domain rationale is
+  recorded in [label-declaration-review.md](label-declaration-review.md).
+- Two views use `requiredTargetAbilities`; both stronger-sibling contracts are reviewed.
 - The current catalog contains no unresolved generator-general/view-schema Scope overlap. This
   permits the complete positive-capability overlap rule to become strict without a known migration
   exception.
@@ -288,10 +266,10 @@ declaration metadata. Source scans supply the implementation-only findings. This
 a graph-schema migration while keeping matching work delta-aware and all audit passes linear.
 
 The current strict CCSS audit covers 653 targets and 795 matched production tuples. It reports zero
-violations and no Ability-parameterized views. Its remaining semantic review queue contains 33
-rejection declarations, 23 applicability declarations, two target-Ability applicability
-declarations, and 21 view-owned Areas. There are no positive cross-role capability overlaps and no
-target without an Area, Ability, or match.
+violations, zero source signals, and no Ability-parameterized views. Its 86 semantic review signals
+cover 26 rejection declarations, 35 applicability declarations, two target-Ability applicability
+declarations, and 23 view-owned Areas; Phase 5 records a durable disposition for all of them. There
+are no positive cross-role capability overlaps and no target without an Area, Ability, or match.
 
 ### Phase 1: validate and formalize the language-neutral generator boundary
 
@@ -318,6 +296,10 @@ This phase validates the rule; it does not require one universal problem AST or 
 support. Domain-specific typed structures are acceptable when they preserve evidence and keep
 learner action out of the payload.
 
+**Status: complete.** The companion inventory records every current generator and compatible view,
+with no unresolved **Decision** field. All accepted migrations and typed replacements are
+implemented; the lone exact duplicate was subsequently consolidated.
+
 ### Phase 2: audit Ability-parameterized views and split parallel task behavior
 
 For each remaining view in the inventory:
@@ -343,6 +325,10 @@ represent distinct observable task projections. Multiple target Ability sets may
 the same leaf, and an Ability parameter may remain when all configurations satisfy the strict
 same-task criteria.
 
+**Status: complete.** The catalog contains no Ability-parameterized view. Every reviewed
+task-changing mode now uses an invariant leaf over reusable parent-level rendering code; invariant
+same-task capabilities remain declarative.
+
 ### Phase 3: neutralize generator payloads in pair-aligned batches
 
 Use the Phase 1 inventory to migrate related generator/view families together. Prioritize:
@@ -366,6 +352,9 @@ For every batch:
 
 Where Phase 2 and Phase 3 affect the same generator/view family, perform them in one pair-aligned
 batch so the shared renderer and payload contract are rewritten once.
+
+**Status: complete.** All accepted payload migrations are implemented across every compatible
+production consumer. Canonical generation and VQA verified the resulting projections.
 
 ### Phase 4: enforce implementation label isolation
 
@@ -393,6 +382,10 @@ Payload-language lint begins as a diagnostic because field names alone cannot pr
 It may become a hard gate for explicitly forbidden shapes and imports after Phase 1 defines the
 contract and affected payload types are migrated.
 
+**Status: complete for mechanically decidable rules.** The strict CCSS audit currently reports
+zero violations and zero source signals. Semantic questions remain review items rather than being
+misclassified as syntax failures.
+
 ### Phase 5: review target, applicability, and boundary declarations
 
 1. **Resolved:** every Grade 4 measurement kind, including `Scope.Dollar`, now belongs to
@@ -408,6 +401,13 @@ contract and affected payload types are migrated.
    primary Ability.
 
 Zero-Scope targets and multiple-Area or multiple-Ability targets are not findings by themselves.
+
+**Status: complete.** [label-declaration-review.md](label-declaration-review.md) records the durable
+disposition of all 86 semantic review signals: 26 `rejectedLabels`, 35 `requiredLabels`, two
+`requiredTargetAbilities`, and 23 view-owned Area declarations. Positive mass/volume, notation,
+and hundreds-bundle applicability is stated through `requiredLabels`; the redundant
+length-estimation rejection is absent. All retained declarations satisfy the accepted ownership
+or boundary rules, and the normalized production match set remains 795 tuples.
 
 ### Phase 6: update documentation and skills
 
@@ -458,9 +458,13 @@ Add a cross-role `/review-label-architecture [--spec=<module>]` skill only if th
 agentic interpretation layer. The underlying deterministic inventory must remain a script so CI
 and non-agent workflows receive the same facts.
 
+**Status: pending final consolidation.** Normative rules and existing skills already encode most
+accepted decisions, but the concise cross-role `docs/label-architecture.md` entry point and final
+plan/skill reconciliation remain outstanding.
+
 ### Phase 7: canonical validation and release proof
 
-After all strict findings reach zero:
+After all strict violations and source signals reach zero and semantic declarations are reviewed:
 
 1. run generator/view spec validation;
 2. run the label-architecture lint and ownership report;
@@ -475,6 +479,10 @@ After all strict findings reach zero:
 Canonical VQA is the required empirical proof that active target conjunctions survive generator
 and view composition. The optional synthetic capability-totality investigation is not a release
 gate.
+
+**Status: pending final proof after Phase 6.** Canonical CCSS generation and the current VQA cache
+have already demonstrated complete 1,898/1,898 coverage, but the final release-wide proof is rerun
+after documentation consolidation.
 
 ## Low-priority investigations
 

@@ -1,12 +1,11 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability} from 'edugraph-ts';
 import {DISTANCE_SCALE_LABELS, resolveDistanceScale} from '../../../../lib/ontology.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-length-estimate',
-    generalLabels: [Ability.ProcedureExecution],
-    rejectedLabels: [Area.MeasuringObjects]
+    generalLabels: [Ability.ProcedureExecution]
 };
 export const MeasureLengthEstimateViewSchema = {
     scale: [DISTANCE_SCALE_LABELS, resolveDistanceScale]

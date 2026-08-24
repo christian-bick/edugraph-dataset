@@ -1,6 +1,6 @@
 # Language-neutral generator payload migration
 
-**Status:** Phase 1 active  
+**Status:** Complete
 **Baseline:** label-architecture audit committed in `0da1621`  
 **Parent plan:** [Complete label migration](complete-label-migration.md)
 
@@ -9,14 +9,14 @@
 Make every generator payload a canonical mathematical or semantic model that can support all
 compatible views without preselecting a learner action or final wording.
 
-This phase is an inventory and contract-design phase. It precedes bulk generator changes. A
-module is ready for migration only after its mathematical source of truth, structured witnesses,
-view-owned projections, consuming views, and production targets are explicit.
+This file records the completed inventory, contract decisions, and migrations. A module was
+migrated only after its mathematical source of truth, structured witnesses, view-owned
+projections, consuming views, and production targets were explicit.
 
 ## Evidence base
 
 The Phase 0 audit reuses the persisted matching graph when its target postings, capability hashes,
-compatible-pair topology, and tuple nodes are current. For CCSS it establishes:
+compatible-pair topology, and tuple nodes are current. The original review baseline established:
 
 - 79 generator modules and 162 view modules;
 - 180 type-compatible generator/view pairs;
@@ -210,18 +210,18 @@ typed patterns:
 Domain-specific types should implement these patterns when a shared type would erase useful
 constraints.
 
-## Remaining Phase 1 work
+## Completion
 
-All 79 generators now have a first explicit structural disposition and a complete compatible-view
-trace. Phase 1 is complete only when:
+The inventory records 81 reviewed module rows: 58 migrated payloads, 22 payloads explicitly kept
+as canonical, and the redundant `measurement-unit-scale` generator consolidated into
+`measurement-conversion`. The repository now contains 80 generators. No **Decision** disposition
+or unresolved non-lossless field remains.
 
-1. the typed replacements for every **Decision** and non-losslessly derivable field are accepted;
-2. every display string is either losslessly derivable or preceded by a typed replacement;
-3. representative arithmetic, measurement, geometry, fraction, and word-problem contracts are
-   accepted as migration templates;
-4. the generator implementation rules and the generator review/update skills cite the accepted
-   boundary and require a consuming-view adoption matrix.
+Representative arithmetic, measurement, geometry, fraction, word-problem, and structured-law
+contracts established the domain-specific migration patterns. Generator implementation rules and
+the generator review/update skills enforce the accepted boundary and require adoption of every
+compatible consuming view.
 
-The next audit extension should index payload property origins and view property reads in one
-source pass. It must reuse the compatible-pair and production-tuple graph, emit deterministic
-field-to-view provenance, and stay linear in source size plus graph edges.
+A future field-origin/read index may improve audit explanations, but it is not required to prove
+the completed migration. If added, it must reuse the compatible-pair and production-tuple graph,
+emit deterministic field-to-view provenance, and remain linear in source size plus graph edges.

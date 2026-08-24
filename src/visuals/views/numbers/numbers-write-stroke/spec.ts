@@ -8,7 +8,8 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.VisualArticulation
     ],
-    rejectedLabels: [Area.NumerationWithIntegers, ...deductAdmitting([Scope.NumbersLarger120])],
+    requiredLabels: [Area.DigitNotation],
+    rejectedLabels: [...deductAdmitting([Scope.NumbersLarger120])]
 };
 
 

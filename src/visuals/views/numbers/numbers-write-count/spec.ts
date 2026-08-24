@@ -9,7 +9,7 @@ export const spec: ViewSpec = {
         Ability.Formalization,
         Scope.ArabicNumerals
     ],
-    rejectedLabels: [Area.DigitNotation],
+    requiredLabels: [Area.NumerationWithIntegers]
 };
 
 
