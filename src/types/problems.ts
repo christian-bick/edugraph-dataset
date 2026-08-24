@@ -574,12 +574,6 @@ export type MeasurementToolSelectionProblem = {
     correctTool: 'ruler' | 'tape';
 };
 
-export type MeasurementUnitScaleProblem = {
-    largeUnitCount: number;
-    smallUnitCount: number;
-    unitsPerLarge: number;
-};
-
 export type MeasurementConversionPairId =
     | 'kilometer-meter'
     | 'meter-centimeter'
@@ -1929,7 +1923,7 @@ export interface ViewTypeMap {
     'measure-length-integer': MeasurementStandardProblem;
     'measure-length-decimal': MeasurementStandardProblem;
     'measure-select-tool': MeasurementToolSelectionProblem;
-    'measure-unit-scale-relation': MeasurementUnitScaleProblem;
+    'measure-unit-scale-relation': GenericUnitScaleRelationProblem;
     'measure-conversion-derivation': MeasurementConversionProblem;
     'measure-conversion-execution': MeasurementConversionProblem;
     'measure-conversion-table': MeasurementConversionProblem;

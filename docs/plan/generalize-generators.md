@@ -91,21 +91,23 @@ measurement-conversion × measure-conversion-derivation
 measurement-unit-scale × measure-unit-scale-relation
 ```
 
-The preferred migration is to retain the first tuple and remove the redundant generator and view
-modules. This reduces implementation and artifact duplication without changing target coverage or
-the canonical mathematical model. If the second visual treatment is intentionally retained later,
-it should consume the existing generic union member with an exact applicability contract; that is
-visual diversity, not a reason to retain a second generator.
+The accepted migration retains both visual treatments but gives them one generator. The narrow
+`measure-unit-scale-relation` view consumes the existing generic union member with an exact
+applicability contract. It rejects `Area.MeasuringWithUnits` because its abstract equal-length
+partitions cannot display concrete unit identities; concrete conversion targets remain with
+`measure-conversion-derivation`. The second view is visual diversity; it is not a reason to retain
+a second generator.
 
-**Risk:** low. The expected matching delta is exactly one removed tuple and zero removed targets.
+**Risk:** low. The expected matching delta replaces the standalone generator id in one tuple,
+without changing the tuple count, visual treatments, or target coverage.
 
-### Review after the exact consolidation: counting classification
+### Keep separate: counting classification
 
 `counting-classify-count` and `counting-classify-sort` build the same categorized collection. The
 sort module adds a selected `least` or `most` relation and its calculated category answer. Their
 generation code duplicates category initialization and random distribution.
 
-A clean shared canonical model is plausible:
+A shared canonical model would be mechanically plausible:
 
 ```ts
 {
@@ -114,19 +116,12 @@ A clean shared canonical model is plausible:
 }
 ```
 
-with a uniqueness invariant for the least and most categories. The count view can project the
-category totals. The sort view can resolve which extremum the target asks for and derive its answer
-losslessly. Before implementing this version, the review must decide and document whether
-`Scope.Least` and `Scope.Most` describe the view-selected task direction or a generator-selected
-mathematical relation. The merge is accepted only if capability ownership remains explicit; it
-must not be achieved by silently broadening `generalLabels`.
-
-The fallback is one small discriminated generator contract for count versus extremum tasks. That
-is still mechanically feasible, but is less desirable because it preserves two task projections
-inside the generator instead of establishing one canonical categorized collection.
-
-**Risk:** medium-low after the Scope ownership decision. It affects two generators, two views, one
-count target, and two sort targets.
+with a uniqueness invariant for the least and most categories. That abstraction does not justify a
+merge by itself. Counting category members and selecting an extremum are distinct mathematical
+problems; the latter owns `Area.NumericOrder` and a `Scope.Least` or `Scope.Most` relation. Merging
+them would either move that mathematical relation into the view or introduce parallel generator
+tasks. The accepted disposition is therefore to keep both generators and share only a category
+distribution helper if repeated implementation work later warrants one.
 
 ### Defer: related models that require contract redesign
 
@@ -159,33 +154,28 @@ attributes and tool selection represent genuinely different evidence for the sam
 
 ## Migration sequence
 
-### Batch 1: remove exact unit-scale duplication
+### Batch 1: remove exact unit-scale generator duplication
 
 1. Retain the generic unit-scale branch in `measurement-conversion` unchanged.
 2. Remove `measurement-unit-scale` and its duplicate spec/tests.
-3. Remove `measure-unit-scale-relation` unless a distinct visual treatment is explicitly retained.
-4. Remove obsolete type-map entries and the standalone payload alias.
-5. Verify the one-tuple matching reduction and regenerate only the affected dependency closure.
+3. Retype `measure-unit-scale-relation` to the generic union member and require the generator-owned
+   unit-scale and length-measurement context. Reject concrete `MeasuringWithUnits` targets that the
+   abstract partition renderer cannot evidence.
+4. Remove the standalone payload alias and point the existing type-map entry at the generic member.
+5. Verify that both existing visual tuples remain and regenerate only the affected dependency
+   closure.
 6. Commit the batch independently.
 
-### Batch 2: decide and, if clean, merge counting classification
-
-1. Review the `Least`/`Most` Scope ownership against the two rendered task identities.
-2. Choose one canonical category contract without independent generator behaviors.
-3. Adopt the count and sort views and preserve all three CCSS targets.
-4. Verify seed determinism, unique extrema, range constraints, and target fingerprints.
-5. Commit the module family independently.
-
-### Batch 3: helper standardization without forced mergers
+### Batch 2: helper standardization without forced mergers
 
 Extract pure helpers only where repeated implementations encode the same invariant. Keep separate
 generators when their payload contracts remain mathematically distinct. Candidate helpers include
 category distribution, bounded integer selection, whole-number place-value construction, and
 measurement taxonomy validation; each extraction needs an actual repeated use before it is made.
 
-### Batch 4: rerun the semantic audit
+### Batch 3: rerun the semantic audit
 
-Recompute candidates after the first two batches. Contract cleanup can expose exact inclusions that
+Recompute candidates after the consolidation. Contract cleanup can expose exact inclusions that
 the current type surface hides. New candidates still pass the full decision test; there is no
 target generator count and no pressure to merge the deferred counterexamples.
 
@@ -231,8 +221,7 @@ that two mathematical contracts mean the same thing remains a reviewed design de
 This phase is complete when:
 
 - the proven unit-scale duplicate has one canonical generator path;
-- counting classification has either one justified canonical generator or a recorded reason to
-  remain separate;
+- counting classification remains separated as two mathematical problem families;
 - every surfaced high-similarity pair has a documented consolidate, defer, helper-only, or keep
   disposition;
 - CCSS target coverage remains complete;

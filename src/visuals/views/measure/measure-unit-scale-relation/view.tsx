@@ -19,8 +19,17 @@ function UnitRow({count, small}: {count: number; small: boolean}) {
 
 const MeasureUnitScaleRelationCore = ({config: _config, payload}: CoreProps) => {
     const data = payload.problem.data;
-    validateProblemData('measure-unit-scale-relation', data, ['largeUnitCount', 'smallUnitCount', 'unitsPerLarge']);
-    if (data.smallUnitCount !== data.largeUnitCount * data.unitsPerLarge || data.unitsPerLarge <= 1) {
+    validateProblemData('measure-unit-scale-relation', data, [
+        'task',
+        'largeUnitCount',
+        'smallUnitCount',
+        'unitsPerLarge'
+    ]);
+    if (
+        data.task !== 'generic-unit-scale'
+        || data.smallUnitCount !== data.largeUnitCount * data.unitsPerLarge
+        || data.unitsPerLarge <= 1
+    ) {
         throw new ViewValidationError('measure-unit-scale-relation', 'Expected equivalent unit partitions of one length.');
     }
     return (
