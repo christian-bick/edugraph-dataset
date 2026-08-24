@@ -18,6 +18,11 @@ const payload = <T,>(data: T, viewId: string): RenderPayload<AbstractProblem<T>>
     seed: 1806151483
 });
 
+const solutionPayload = <T,>(data: T, viewId: string): RenderPayload<AbstractProblem<T>> => ({
+    ...payload(data, viewId),
+    isSolutionView: true
+});
+
 describe('shape square-array family views', () => {
     it('renders equal-square counting without area semantics', () => {
         const data: EqualSquarePartitionProblem = {
@@ -78,6 +83,37 @@ describe('shape square-array family views', () => {
         expect(markup).toContain('Follow the arrows');
         expect(markup).toContain('start');
         expect(markup).toMatch(/[→↓←]/);
+    });
+
+    it('uses a genuine blank area response instead of instruction text for interpretation', () => {
+        const data: UnitSquareGridProblem = {
+            kind: 'unit-square-grid',
+            rows: 3,
+            columns: 2,
+            tileCount: 6,
+            unitId: 'square-unit'
+        };
+        const question = renderToStaticMarkup(
+            <UnitSquareGridView
+                payload={payload(data, 'shape-square-array-interpretation')}
+                task="interpretation"
+                useStory={false}
+                viewId="shape-square-array-interpretation"
+            />
+        );
+        const solution = renderToStaticMarkup(
+            <UnitSquareGridView
+                payload={solutionPayload(data, 'shape-square-array-interpretation')}
+                task="interpretation"
+                useStory={false}
+                viewId="shape-square-array-interpretation"
+            />
+        );
+
+        expect(question).toContain('Area:');
+        expect(question).toContain('Blank area answer in square units');
+        expect(question).not.toContain('Interpret the square-tile evidence as area.');
+        expect(solution).toContain('6 unit squares cover the figure');
     });
 
     it('derives the literal formula from the typed rectangle relation', () => {

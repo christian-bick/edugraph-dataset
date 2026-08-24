@@ -5,6 +5,7 @@ import {ShapeClassifyAttributesGenerator} from '../../../../generators/shape/sha
 import {
     definingOptions,
     grade4Presentation,
+    RECTANGULAR_PRISM_NET_FACES,
     subsumptionOptions,
     withOptionIds
 } from './presentation.ts';
@@ -12,6 +13,11 @@ import {
 const generator = new ShapeClassifyAttributesGenerator();
 
 describe('shape classification presentation', () => {
+    it('renders a rectangular-prism net with six visibly non-square faces', () => {
+        expect(RECTANGULAR_PRISM_NET_FACES).toHaveLength(6);
+        expect(RECTANGULAR_PRISM_NET_FACES.every(face => face.width !== face.height)).toBe(true);
+    });
+
     it('assigns deterministic view-owned option order and IDs', () => {
         const values = [{value: 1}, {value: 2}, {value: 3}, {value: 4}];
         expect(withOptionIds(values, 17)).toEqual(withOptionIds(values, 17));

@@ -27,6 +27,9 @@ const equationFor = (data: NumberArrayProblem): string => {
     return `${data.total} ÷ ${data.groupSize} = ${data.groupCount}`;
 };
 
+const incompleteEquationFor = (data: NumberArrayProblem): string =>
+    equationFor(data).replace(/= [^=]+$/, '= ?');
+
 const interpretationFor = (data: NumberArrayProblem): string => {
     if (data.operation === 'addition') {
         return `${data.groupCount} equal rows of ${data.groupSize} can be added as ${data.addends.join(' + ')} to make ${data.total}.`;
@@ -172,14 +175,14 @@ export const OperationsNumberArrayView = ({
                         </span>
                     )
                 ) : (
-                    <>
-                        <span className="mr-4 font-sans text-lg font-semibold text-slate-600">
+                    <div className="flex flex-col items-center gap-1 text-center">
+                        <span className="font-sans text-sm font-semibold text-slate-600">
                             {executionLabel(data)}
                         </span>
-                        <span className="inline-flex min-w-20 justify-center rounded-md border-2 border-slate-700 px-3 py-1 text-emerald-700">
-                            {isSolutionView ? data.answer : ''}
+                        <span className={`font-mono text-2xl font-bold ${isSolutionView ? 'text-emerald-700' : 'text-slate-700'}`}>
+                            {isSolutionView ? equationFor(data) : incompleteEquationFor(data)}
                         </span>
-                    </>
+                    </div>
                 )}
             </div>
         </div>

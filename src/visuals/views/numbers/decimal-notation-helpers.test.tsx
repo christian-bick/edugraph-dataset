@@ -163,6 +163,8 @@ describe('decimal notation view contract', () => {
             viewId="numbers-decimal-to-fraction"
         />);
         expect(interpretQuestion).not.toContain(presentation.fractionNotation);
+        expect(interpretQuestion).toContain('Blank numerator over denominator 100');
+        expect(interpretQuestion).toContain('>100</span>');
         expect(interpretSolution).toContain(presentation.notationTasks.decimalToFraction.solutionEquation);
     });
 

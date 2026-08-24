@@ -33,6 +33,7 @@ import {
     definingOptions,
     grade4Presentation,
     PresentedOption,
+    RECTANGULAR_PRISM_NET_FACES,
     subsumptionOptions,
     visibleAttributes
 } from './presentation.ts';
@@ -479,12 +480,9 @@ function FaceNet({shape}: {shape: ShapeCountOption['shape']}) {
             )}
             {shape === 'rectangular-prism' && (
                 <>
-                    <rect x="39" y="3" width="25" height="14" {...common} />
-                    <rect x="39" y="17" width="25" height="19" {...common} />
-                    <rect x="20" y="36" width="19" height="25" {...common} />
-                    <rect x="39" y="36" width="25" height="25" {...common} />
-                    <rect x="64" y="36" width="19" height="25" {...common} />
-                    <rect x="39" y="61" width="25" height="14" {...common} />
+                    {RECTANGULAR_PRISM_NET_FACES.map(face => (
+                        <rect key={`${face.x}-${face.y}`} {...face} {...common} />
+                    ))}
                 </>
             )}
             {shape === 'triangular-prism' && (

@@ -19,10 +19,16 @@ describe('answer reasonableness projection', () => {
         const unreasonable = resolveEstimationClaim(problem, 3);
 
         expect(resolveEstimationClaim(problem, 2)).toEqual(reasonable);
-        expect(reasonable).toMatchObject({tolerance: 38, isReasonable: true});
-        expect(reasonable.estimateDifference).toBeLessThanOrEqual(reasonable.tolerance);
-        expect(unreasonable).toMatchObject({tolerance: 38, isReasonable: false});
-        expect(unreasonable.estimateDifference).toBeGreaterThan(unreasonable.tolerance);
+        expect(reasonable).toMatchObject({
+            roundedEstimatedAnswer: 380,
+            roundedProposedAnswer: 380,
+            isReasonable: true
+        });
+        expect(unreasonable.roundedProposedAnswer).not.toBe(380);
+        expect(unreasonable).toMatchObject({
+            roundedEstimatedAnswer: 380,
+            isReasonable: false
+        });
     });
 
     it.each([0, 1000])('keeps both claim classes bounded at estimate %i', estimatedAnswer => {
@@ -43,5 +49,29 @@ describe('answer reasonableness projection', () => {
         expect(resolveEstimationClaim(problem, -3)).toEqual(
             resolveEstimationClaim(problem, 3)
         );
+    });
+
+    it('uses the displayed nearest-ten strategy for small division estimates', () => {
+        const division: ArithmeticEstimationProblem = {
+            num1: 270,
+            num2: 27,
+            operation: 'division',
+            roundedNum1: 270,
+            roundedNum2: 30,
+            roundingPlace: 10,
+            exactAnswer: 10,
+            estimatedAnswer: 9
+        };
+
+        for (const seed of [0, 2, 4, 6]) {
+            const claim = resolveEstimationClaim(division, seed);
+            expect(claim.roundedProposedAnswer).toBe(10);
+            expect(claim.isReasonable).toBe(true);
+        }
+        for (const seed of [1, 3, 5, 7]) {
+            const claim = resolveEstimationClaim(division, seed);
+            expect(claim.roundedProposedAnswer).not.toBe(10);
+            expect(claim.isReasonable).toBe(false);
+        }
     });
 });

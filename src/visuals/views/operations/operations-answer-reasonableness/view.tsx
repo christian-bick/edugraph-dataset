@@ -134,7 +134,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
 
             {isSolutionView && (
                 <div className="mt-5 rounded-xl border-l-4 border-emerald-500 bg-emerald-50 px-5 py-4 text-center text-lg font-semibold text-emerald-900">
-                    {claim.proposedAnswer} is {claim.isReasonable ? 'close to' : 'too far from'} the estimate of {data.estimatedAnswer}.
+                    {claim.proposedAnswer} rounds to {claim.roundedProposedAnswer}, which {claim.isReasonable ? 'matches' : 'does not match'} {data.estimatedAnswer} rounded to {claim.roundedEstimatedAnswer}.
                 </div>
             )}
         </div>

@@ -66,9 +66,39 @@ describe('operations number array view family', () => {
             false
         );
         expect(execution).toContain('Determine the total number of objects');
-        expect(execution).not.toContain('4 + 4 + 4');
+        expect(execution).toContain('4 + 4 + 4 = ?');
+        expect(execution).not.toContain('4 + 4 + 4 = 12');
         expect(interpretation).toContain('Explain how the equal rows represent repeated addition');
         expect(interpretation).toContain('Use the rows and objects in each row to explain.');
+    });
+
+    it('makes the operation and operands visible in execution Question and Solution modes', () => {
+        const additionQuestion = render(
+            'execution',
+            'operations-number-array-total',
+            addition,
+            false
+        );
+        const additionSolution = render(
+            'execution',
+            'operations-number-array-total',
+            addition,
+            true
+        );
+        const multiplication: NumberArrayProblem = {
+            ...addition,
+            operation: 'multiplication'
+        };
+        const multiplicationQuestion = render(
+            'execution',
+            'operations-number-array-total',
+            multiplication,
+            false
+        );
+
+        expect(additionQuestion).toContain('4 + 4 + 4 = ?');
+        expect(additionSolution).toContain('4 + 4 + 4 = 12');
+        expect(multiplicationQuestion).toContain('3 × 4 = ?');
     });
 
     it.each([

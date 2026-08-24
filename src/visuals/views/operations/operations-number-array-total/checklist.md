@@ -1,3 +1,3 @@
-- **Identity:** Uses a complete rectangular array to determine the requested total, objects per row, or row count.
-- **Question:** Keeps the complete array visible while withholding only the requested numeric result.
-- **Solution:** Preserves the same array and reveals the requested quantity in its named equal-group role.
+- **Identity:** Uses a complete rectangular array and its corresponding operation to determine the requested total, objects per row, or row count.
+- **Question:** Keeps the complete array and incomplete operation visible while withholding only the requested numeric result.
+- **Solution:** Preserves the same array and reveals the completed operation in its named equal-group role.

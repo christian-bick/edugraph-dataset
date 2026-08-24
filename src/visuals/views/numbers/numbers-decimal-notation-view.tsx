@@ -17,6 +17,17 @@ interface NumbersDecimalNotationViewProps {
     viewId: DecimalNotationViewId;
 }
 
+const IncompleteFraction = ({denominator}: {denominator: 10 | 100}) => (
+    <span
+        className="inline-grid min-w-[2.8rem] grid-rows-2 text-center align-middle text-[1.35rem] font-black leading-none text-slate-800"
+        role="img"
+        aria-label={`Blank numerator over denominator ${denominator}`}
+    >
+        <span className="border-b-2 border-slate-700 px-2 pb-1">?</span>
+        <span className="px-2 pt-1">{denominator}</span>
+    </span>
+);
+
 export const NumbersDecimalNotationView = ({
     direction,
     payload,
@@ -37,9 +48,11 @@ export const NumbersDecimalNotationView = ({
             <div className="text-center text-[1.45rem] font-extrabold text-slate-800">
                 {task.prompt}
             </div>
-            <div className="mt-2 text-center font-mono text-xl font-black text-blue-800">
-                {isSolutionView ? task.solutionEquation : task.questionEquation}
-            </div>
+            {isSolutionView && (
+                <div className="mt-2 text-center font-mono text-xl font-black text-blue-800">
+                    {task.solutionEquation}
+                </div>
+            )}
 
             <div className="mt-6 grid grid-cols-2 items-stretch gap-5">
                 <TenthsHundredthsGrid
@@ -84,7 +97,12 @@ export const NumbersDecimalNotationView = ({
                     </>
                 ) : (
                     <div className="flex min-h-[78px] items-center justify-center font-mono text-lg font-bold">
-                        {task.questionEquation}
+                        {fractionToDecimal ? task.questionEquation : (
+                            <div className="flex items-center justify-center gap-3 text-xl">
+                                <span>{presentation.decimalNotation} =</span>
+                                <IncompleteFraction denominator={data.value.denominator} />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -110,11 +110,17 @@ export const UnitSquareGridView = ({
                     className={`box-border flex h-[52px] min-w-[270px] items-center justify-center rounded-xl border-2 px-6 text-[1.18rem] font-bold ${isSolutionView
                         ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
                         : isInterpretation
-                            ? 'border-slate-200 bg-slate-100 text-slate-600'
+                            ? 'border-dashed border-slate-400 bg-white text-slate-700'
                             : 'border-slate-300 bg-white text-transparent'}`}
-                    aria-label={isSolutionView ? solution : isInterpretation ? 'Interpret the unit-square evidence as area' : 'Blank area answer'}
+                    aria-label={isSolutionView ? solution : isInterpretation ? `Blank area answer in ${units.plural}` : 'Blank area answer'}
                 >
-                    {isSolutionView ? solution : isInterpretation ? 'Interpret the square-tile evidence as area.' : '\u00a0'}
+                    {isSolutionView ? solution : isInterpretation ? (
+                        <div className="flex items-center justify-center gap-3">
+                            <span>Area:</span>
+                            <span className="inline-block min-w-20 border-b-2 border-slate-500" aria-hidden="true" />
+                            <span>{units.plural}</span>
+                        </div>
+                    ) : '\u00a0'}
                 </div>
             </div>
         </div>

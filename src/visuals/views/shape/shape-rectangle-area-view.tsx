@@ -22,6 +22,7 @@ const RectangleAreaDiagram = ({
     const {x, y, pixelLength, pixelWidth} = getRectangleDiagramGeometry(data.length, data.width);
     const horizontalMeasureY = y + pixelWidth + 18;
     const verticalMeasureX = x - 26;
+    const areaLabelY = Math.max(20, y - 8);
     const lengthLabel = isInverse && presentation.unknownDimension === 'length' && !isSolutionView
         ? '? units'
         : `${data.length} units`;
@@ -43,7 +44,7 @@ const RectangleAreaDiagram = ({
             <line x1={verticalMeasureX - 7} y1={y} x2={verticalMeasureX + 7} y2={y} stroke="#475569" strokeWidth="2" />
             <line x1={verticalMeasureX - 7} y1={y + pixelWidth} x2={verticalMeasureX + 7} y2={y + pixelWidth} stroke="#475569" strokeWidth="2" />
             <text x={verticalMeasureX - 25} y={y + pixelWidth / 2} textAnchor="middle" transform={`rotate(-90 ${verticalMeasureX - 25} ${y + pixelWidth / 2})`} className="fill-slate-700 text-[16px] font-extrabold">width: {widthLabel}</text>
-            <text x={x + pixelLength / 2} y={y + pixelWidth / 2 + 7} textAnchor="middle" className="fill-violet-800 text-[18px] font-extrabold">
+            <text x={x + pixelLength / 2} y={areaLabelY} textAnchor="middle" className="fill-violet-800 text-[18px] font-extrabold">
                 {isInverse ? `Area: ${data.area} square units` : 'rectangle'}
             </text>
         </svg>

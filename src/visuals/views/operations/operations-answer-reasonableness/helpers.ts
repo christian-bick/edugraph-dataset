@@ -5,10 +5,13 @@ const MAXIMUM_PROPOSAL = 1000;
 
 export type EstimationClaim = {
     proposedAnswer: number;
-    estimateDifference: number;
-    tolerance: number;
+    roundedProposedAnswer: number;
+    roundedEstimatedAnswer: number;
     isReasonable: boolean;
 };
+
+const roundToPlace = (value: number, place: number): number =>
+    Math.round(value / place) * place;
 
 /** Derives the learner-facing claim deterministically from the canonical estimate. */
 export function resolveEstimationClaim(
@@ -17,11 +20,14 @@ export function resolveEstimationClaim(
 ): EstimationClaim {
     const normalizedSeed = Number.isFinite(seed) ? Math.abs(Math.trunc(seed)) : 0;
     const shouldBeReasonable = normalizedSeed % 2 === 0;
-    const tolerance = Math.max(10, Math.ceil(Math.abs(data.estimatedAnswer) * 0.1));
-    const distanceOffset = Math.floor(normalizedSeed / 2) % tolerance;
+    const roundedEstimatedAnswer = roundToPlace(
+        data.estimatedAnswer,
+        data.roundingPlace
+    );
+    const distanceOffset = Math.floor(normalizedSeed / 2) % data.roundingPlace;
     const distance = shouldBeReasonable
-        ? 1 + distanceOffset
-        : tolerance + 1 + distanceOffset;
+        ? 1 + distanceOffset % Math.max(1, data.roundingPlace / 2 - 1)
+        : data.roundingPlace + distanceOffset;
     const preferredDirection = Math.floor(normalizedSeed / 2) % 2 === 0 ? 1 : -1;
     const proposedAnswer = [
         data.estimatedAnswer + preferredDirection * distance,
@@ -30,17 +36,19 @@ export function resolveEstimationClaim(
         Number.isInteger(value)
         && value >= MINIMUM_PROPOSAL
         && value <= MAXIMUM_PROPOSAL
+        && (roundToPlace(value, data.roundingPlace) === roundedEstimatedAnswer)
+            === shouldBeReasonable
     );
 
     if (proposedAnswer === undefined) {
         throw new Error('The estimate has no bounded reasonableness proposal.');
     }
 
-    const estimateDifference = Math.abs(proposedAnswer - data.estimatedAnswer);
+    const roundedProposedAnswer = roundToPlace(proposedAnswer, data.roundingPlace);
     return {
         proposedAnswer,
-        estimateDifference,
-        tolerance,
-        isReasonable: estimateDifference <= tolerance
+        roundedProposedAnswer,
+        roundedEstimatedAnswer,
+        isReasonable: roundedProposedAnswer === roundedEstimatedAnswer
     };
 }

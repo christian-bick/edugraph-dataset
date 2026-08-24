@@ -15,6 +15,15 @@ export type PresentedOption<T> = T & {id: ShapeOptionId};
 
 const OPTION_IDS: readonly ShapeOptionId[] = ['A', 'B', 'C', 'D'];
 
+export const RECTANGULAR_PRISM_NET_FACES = [
+    {x: 39, y: 0, width: 30, height: 20},
+    {x: 39, y: 20, width: 30, height: 12},
+    {x: 27, y: 32, width: 12, height: 20},
+    {x: 39, y: 32, width: 30, height: 20},
+    {x: 69, y: 32, width: 12, height: 20},
+    {x: 39, y: 52, width: 30, height: 12}
+] as const;
+
 export function withOptionIds<T>(values: readonly T[], seed: number): PresentedOption<T>[] {
     const result = [...values];
     let state = (seed ^ 0x9E3779B9) >>> 0;
