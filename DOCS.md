@@ -98,10 +98,11 @@ The consequence: a code change only invalidates the samples whose identity input
 `src/standards-explorer.html` is a compatible direct URL, and `src/modules.html` hosts the
 renderer/view directory. The React application
 lives under `src/standards-explorer/`, uses Zustand for
-its navigation and selection state, and reads the `preview` coverage routes at runtime.
-In a production build, those routes contain the deployed-main snapshot under
-`public/coverage/preview/`. The internal `preview` channel denotes coverage for the exact
-deployed `main` revision; it is not a user-selectable preview mode. The snapshot contains
+its navigation and selection state. Production defaults to the `latest` coverage routes,
+which contain the snapshot published with the latest dataset release, and exposes a
+Release / Preview selector. Preview reads the deployed-main snapshot under
+`public/coverage/preview/` and is addressable with `?view=preview`; Release omits the query
+parameter and reads `public/coverage/latest/`. Each snapshot contains
 `ccss-tree.json`, `ccss-coverage.json`, and `coverage-manifest.json`; the manifest records
 the schema version, channel, source ref and SHA, generation time, and ontology version.
 Run `npm run dev` and open `/` for local working-tree development; open `/modules.html`
@@ -129,8 +130,11 @@ same immutable snapshot. Its image route serves the copied snapshot PNGs, so ord
 browsing never reads generated standard datasets and local preview does not require a
 merged union. Refresh again after target, generator, view, ontology, or dataset changes;
 the explorer shows an explicit loading state while coverage, the index, and images are
-materialized. Production hosts do not
-render the switch and always resolve images through the release-pinned Hugging Face URL.
+materialized. Production hosts do not render the image-source switch and always resolve
+images through the release-pinned Hugging Face URL. Their separate Release / Preview
+selector changes the complete coverage snapshot while retaining that published asset index.
+Release therefore reports the internally consistent published state; Preview compares the
+deployed `main` competencies with the same released evidence to expose next-release readiness.
 
 The released index remains loaded in both modes, but status evidence follows the selected
 asset source. A dataset-covered leaf is `Released` only when every implemented competency
@@ -144,8 +148,9 @@ in the `edugraph-438718` project. `.firebaserc` maps the local hosting target,
 `firebase.json` serves the root `dist/index.html` directly and requires revalidation for
 the mutable coverage JSON and released asset index routes, and
 `.github/workflows/deploy.yaml` is a reusable workflow that regenerates and validates
-Preview from an exact main SHA, downloads Latest from the repository's explicitly marked
-latest GitHub Release, builds the Vite application, and deploys it. The release stores the
+Preview from an exact main SHA, resolves the repository's explicitly marked latest GitHub
+Release once, and downloads both Latest coverage and its matching asset index from that tag
+before building and deploying the Vite application. The release stores the
 three immutable coverage files plus `asset-index.json` as individual assets, so deployment needs no historical
 checkout and the browser makes no cross-origin request. The workflow can also be started
 independently with `workflow_dispatch`. It uses the same Workload Identity Federation

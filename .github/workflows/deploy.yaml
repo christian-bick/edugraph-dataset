@@ -52,11 +52,21 @@ jobs:
       - name: Validate Preview coverage data
         run: npm run validate:coverage -- --coverage-dir=public/coverage/preview --rebuild-graph
 
+      - id: latest_release
+        name: Resolve Latest release
+        shell: bash
+        run: |
+          release_tag="$(gh release view --repo "${{ github.repository }}" --json tagName --jq .tagName)"
+          test -n "$release_tag"
+          echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Download Latest release coverage data
         shell: bash
         run: |
           mkdir -p public/coverage/latest
-          gh release download \
+          gh release download "${{ steps.latest_release.outputs.tag }}" \
             --repo "${{ github.repository }}" \
             --pattern ccss-tree.json \
             --pattern ccss-coverage.json \
@@ -72,17 +82,23 @@ jobs:
           test -f public/coverage/latest/ccss-tree.json
           test -f public/coverage/latest/ccss-coverage.json
           test -f public/coverage/latest/coverage-manifest.json
+          jq -e --arg tag "${{ steps.latest_release.outputs.tag }}" \
+            '.channel == "latest" and .source_ref == $tag' \
+            public/coverage/latest/coverage-manifest.json >/dev/null
 
       - name: Download released dataset asset index
         shell: bash
         run: |
           mkdir -p public/dataset
-          gh release download \
+          gh release download "${{ steps.latest_release.outputs.tag }}" \
             --repo "${{ github.repository }}" \
             --pattern asset-index.json \
             --dir public/dataset \
             --clobber
           test -f public/dataset/asset-index.json
+          jq -e --arg tag "${{ steps.latest_release.outputs.tag }}" \
+            '.dataset.revision == $tag' \
+            public/dataset/asset-index.json >/dev/null
         env:
           GH_TOKEN: ${{ github.token }}
 

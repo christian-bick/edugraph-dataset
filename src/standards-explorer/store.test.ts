@@ -73,6 +73,15 @@ const previewManifest = {
     },
 };
 
+const releaseManifest = {
+    schema_version: 2,
+    channel: 'latest',
+    source_ref: 'v0.21.0-01',
+    source_sha: '5489ebca38b05225d03996a728f16f577d0f2912',
+    generated_at: '2026-08-10T00:00:00.000Z',
+    ontology_version: 'v0.11.1',
+};
+
 describe('standards explorer data and sample sources', () => {
     beforeEach(() => {
         useExplorerStore.setState({
@@ -84,6 +93,7 @@ describe('standards explorer data and sample sources', () => {
             releasedAssetIndex: null,
             assetIndexLoading: false,
             assetIndexError: null,
+            dataView: 'latest',
             assetSource: 'released',
             assetIndexSource: null,
             localSnapshotAvailable: false,
@@ -118,24 +128,107 @@ describe('standards explorer data and sample sources', () => {
         expect(selectCoverageAssetIndex(useExplorerStore.getState())).toBe(assetIndex);
     });
 
-    it('always loads the deployed main coverage snapshot', async () => {
+    it('loads the released coverage snapshot by default in production', async () => {
+        const remoteWindow = {
+            location: new URL('https://coverage.edugraph.io/'),
+            history: {replaceState: vi.fn()},
+        };
+        vi.stubGlobal('window', remoteWindow);
         const fetchMock = vi.fn(async (input: string | URL | Request, _init?: RequestInit) => {
             const url = String(input);
             if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
             if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
-            return jsonResponse(previewManifest);
+            return jsonResponse(releaseManifest);
         });
         vi.stubGlobal('fetch', fetchMock);
 
         await useExplorerStore.getState().loadData();
 
         expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+            '/coverage/latest/ccss-tree.json',
+            '/coverage/latest/ccss-coverage.json',
+            '/coverage/latest/coverage-manifest.json',
+        ]);
+        expect(fetchMock.mock.calls.every(([, init]) => init?.cache === 'no-store')).toBe(true);
+        expect(useExplorerStore.getState()).toMatchObject({
+            dataView: 'latest',
+            coverageManifest: releaseManifest,
+        });
+    });
+
+    it('switches production coverage to the deployed main preview', async () => {
+        const remoteWindow = {
+            location: new URL('https://coverage.edugraph.io/'),
+            history: {
+                replaceState: (_state: unknown, _unused: string, url: URL) => {
+                    remoteWindow.location = new URL(url);
+                },
+            },
+        };
+        vi.stubGlobal('window', remoteWindow);
+        useExplorerStore.setState({coverageData});
+        const fetchMock = vi.fn(async (input: string | URL | Request) => {
+            const url = String(input);
+            if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
+            if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
+            return jsonResponse(url.includes('/latest/') ? releaseManifest : previewManifest);
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        await useExplorerStore.getState().setDataView('preview');
+
+        expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
             '/coverage/preview/ccss-tree.json',
             '/coverage/preview/ccss-coverage.json',
             '/coverage/preview/coverage-manifest.json',
         ]);
-        expect(fetchMock.mock.calls.every(([, init]) => init?.cache === 'no-store')).toBe(true);
-        expect(useExplorerStore.getState().coverageManifest?.source_ref).toBe('main');
+        expect(useExplorerStore.getState()).toMatchObject({
+            dataView: 'preview',
+            coverageManifest: previewManifest,
+        });
+        expect(new URLSearchParams(window.location.search).get('view')).toBe('preview');
+
+        await useExplorerStore.getState().setDataView('latest');
+
+        expect(fetchMock.mock.calls.slice(3).map(([url]) => String(url))).toEqual([
+            '/coverage/latest/ccss-tree.json',
+            '/coverage/latest/ccss-coverage.json',
+            '/coverage/latest/coverage-manifest.json',
+        ]);
+        expect(useExplorerStore.getState()).toMatchObject({
+            dataView: 'latest',
+            coverageManifest: releaseManifest,
+        });
+        expect(new URLSearchParams(window.location.search).has('view')).toBe(false);
+    });
+
+    it('accepts the current manifest schema for the next release', async () => {
+        const nextReleaseManifest = {
+            ...previewManifest,
+            channel: 'latest',
+            source_ref: 'v0.22.1-01',
+            inputs: {
+                ...previewManifest.inputs,
+                repository: {
+                    ...previewManifest.inputs.repository,
+                    ref: 'v0.22.1-01',
+                },
+            },
+        };
+        const fetchMock = vi.fn(async (input: string | URL | Request) => {
+            const url = String(input);
+            if (url.endsWith('ccss-tree.json')) return jsonResponse(treeData);
+            if (url.endsWith('ccss-coverage.json')) return jsonResponse(coverageData);
+            return jsonResponse(nextReleaseManifest);
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        await useExplorerStore.getState().loadData('latest');
+
+        expect(useExplorerStore.getState()).toMatchObject({
+            error: null,
+            coverageManifest: nextReleaseManifest,
+        });
     });
 
     it('loads and retains the released index as the readiness baseline', async () => {
@@ -181,6 +274,7 @@ describe('standards explorer data and sample sources', () => {
         };
         vi.stubGlobal('window', localWindow);
         useExplorerStore.setState({
+            dataView: 'preview',
             releasedAssetIndex: assetIndex,
             assetIndex,
             assetIndexSource: 'released',
@@ -228,6 +322,7 @@ describe('standards explorer data and sample sources', () => {
         };
         vi.stubGlobal('window', remoteWindow);
         useExplorerStore.setState({
+            dataView: 'preview',
             releasedAssetIndex: assetIndex,
             assetIndex,
             assetIndexSource: 'released',
@@ -237,7 +332,7 @@ describe('standards explorer data and sample sources', () => {
 
         expect(useExplorerStore.getState().assetSource).toBe('released');
         expect(new URLSearchParams(window.location.search).has('assets')).toBe(false);
-        expect(new URLSearchParams(window.location.search).has('view')).toBe(false);
+        expect(new URLSearchParams(window.location.search).get('view')).toBe('preview');
     });
 
     it('refreshes an immutable local snapshot before reloading local data', async () => {
@@ -246,7 +341,7 @@ describe('standards explorer data and sample sources', () => {
             history: {replaceState: vi.fn()},
         };
         vi.stubGlobal('window', localWindow);
-        useExplorerStore.setState({assetSource: 'local'});
+        useExplorerStore.setState({assetSource: 'local', dataView: 'preview'});
         const refreshedIndex = {...assetIndex, generated_at: '2026-08-16T12:00:00.000Z'};
         const fetchMock = vi.fn(async (input: string | URL | Request) => {
             const url = String(input);

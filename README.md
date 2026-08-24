@@ -233,7 +233,10 @@ the latest explicit development snapshot and can be opened at
 The renderer module directory at [`/modules.html`](http://localhost:5173/modules.html)
 links to this mode as well. Coverage and navigation state
 do not change when the image source changes. Deployed explorers always use release-pinned
-images and do not render the switch. The `generate:asset-index` and
+images and do not render the image-source switch. Instead, production exposes a
+**Release / Preview** coverage switch: Release loads the coverage snapshot published with
+the latest dataset release, while Preview loads the exact deployed `main` snapshot. The
+`generate:asset-index` and
 `validate:asset-index` commands remain release/CI operations.
 
 A dataset-covered leaf is labeled **Released** only when the selected asset index has an
@@ -245,8 +248,12 @@ blocks publication if any production permutation lacks exact asset evidence.
 
 ### Coverage Explorer Deployment
 
-The production explorer shows the coverage snapshot regenerated from the exact validated
-`main` commit being deployed and combines it with the latest released asset index. Every
+The production explorer defaults to **Release**, combining the latest GitHub Release's
+coverage snapshot and asset index so the UI reflects the actual published dataset state.
+Its **Preview** mode combines the coverage snapshot regenerated from the exact validated
+`main` commit with that released asset index, showing which current competencies already
+have published evidence and which remain Ready for the next release. Preview can be linked
+directly with `/?view=preview`. Every
 successful push validation on `main` calls the reusable deployment workflow, while a
 successful tagged dataset release publishes its immutable coverage snapshot after the
 Hugging Face upload and dispatches the same workflow to promote its assets. The files are

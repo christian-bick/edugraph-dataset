@@ -262,6 +262,8 @@ function Header() {
     const coverageData = useExplorerStore(state => state.coverageData);
     const releasedAssetIndex = useExplorerStore(state => state.releasedAssetIndex);
     const assetSource = useExplorerStore(state => state.assetSource);
+    const dataView = useExplorerStore(state => state.dataView);
+    const loading = useExplorerStore(state => state.loading);
     const assetIndexLoading = useExplorerStore(state => state.assetIndexLoading);
     const localSnapshotAvailable = useExplorerStore(state => state.localSnapshotAvailable);
     const localSnapshotRefreshing = useExplorerStore(state => state.localSnapshotRefreshing);
@@ -269,6 +271,7 @@ function Header() {
     const localSnapshotAssetCount = useExplorerStore(state => state.localSnapshotAssetCount);
     const refreshLocalSnapshot = useExplorerStore(state => state.refreshLocalSnapshot);
     const setAssetSource = useExplorerStore(state => state.setAssetSource);
+    const setDataView = useExplorerStore(state => state.setDataView);
     const standardsMap = useExplorerStore(state => state.standardsMap);
     const stats = calculateStats(coverageData);
     if (!coverageData) {
@@ -333,6 +336,22 @@ function Header() {
                             ))}
                         </div>
                     </>
+                )}
+                {!isLocalExplorerHost() && (
+                    <div className="explorer-data-view" aria-label="Coverage snapshot">
+                        {(['latest', 'preview'] as const).map(view => (
+                            <button
+                                key={view}
+                                type="button"
+                                aria-pressed={dataView === view}
+                                disabled={loading}
+                                onClick={() => void setDataView(view)}
+                                className={dataView === view ? 'is-active' : ''}
+                            >
+                                {view === 'latest' ? 'Release' : 'Preview'}
+                            </button>
+                        ))}
+                    </div>
                 )}
                 <div className="explorer-metrics">
                     <div className="explorer-metric">

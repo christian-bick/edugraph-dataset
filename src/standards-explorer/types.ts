@@ -44,6 +44,17 @@ export interface CoverageManifest {
     inputs: CoverageInputIdentity;
 }
 
+export interface LegacyCoverageManifest {
+    schema_version: 2;
+    channel: DataView;
+    source_ref: string;
+    source_sha: string;
+    generated_at: string;
+    ontology_version: string;
+}
+
+export type ExplorerCoverageManifest = CoverageManifest | LegacyCoverageManifest;
+
 export interface StandardNode {
     id: string;
     description: string;
@@ -188,5 +199,5 @@ export interface ExplorerData {
     gradesTree: GradesTree;
     standardsMap: Record<string, StandardNode>;
     coverageData: CoverageData | null;
-    coverageManifest: CoverageManifest | null;
+    coverageManifest: ExplorerCoverageManifest | null;
 }
