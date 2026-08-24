@@ -55,7 +55,8 @@ A view declaration has three distinct roles:
 - `generalLabels` and schema labels are capabilities the view positively contributes;
 - `requiredLabels` are Area/Scope applicability preconditions that every type-compatible
   generator must establish, not capabilities supplied by the view;
-- `rejectedLabels` are physical rendering boundaries, never competency or Ability filters.
+- `rejectedLabels` are stable, complete exclusion boundaries, never Ability filters or
+  incomplete capability blacklists.
 
 The view must preserve observable evidence for generator-owned Area and Scope labels while making
 its Ability observable (`IMPL-V11`). A law-bearing relation cannot be flattened into an unrelated
@@ -450,7 +451,7 @@ Follow `IMPL-6` and `IMPL-7` in [docs/implementation-general.md](docs/implementa
 ### Step 5: Declaring Capabilities (`spec.ts`)
 Create or update the `spec.ts` files for both your generator and visual view, per [docs/spec-generator.md](docs/spec-generator.md) and [docs/spec-view.md](docs/spec-view.md), with the shared rules in [docs/spec-general.md](docs/spec-general.md).
 
-The decisions that most often go wrong are declaring the most specific label that is actually true (`SPEC-2`, `SPEC-3`), keeping every Ability view-owned and invariant when it changes task identity (`SPEC-V5`, `SPEC-V6`), using `requiredLabels` only for generator-established applicability (`SPEC-V7`), and expressing physical limits as rejection boundaries rather than competency filters (`SPEC-V3`, `SPEC-V4`).
+The decisions that most often go wrong are declaring the most specific label that is actually true (`SPEC-2`, `SPEC-3`), keeping every Ability view-owned and invariant when it changes task identity (`SPEC-V5`, `SPEC-V6`), using `requiredLabels` only for generator-established applicability (`SPEC-V7`), and expressing rejected cases as complete boundaries rather than incomplete capability filters (`SPEC-V3`, `SPEC-V4`).
 
 ### Step 6: Implementation
 Implement `generator.ts` per [docs/implementation-generator.md](docs/implementation-generator.md) and `view.tsx` per [docs/implementation-view.md](docs/implementation-view.md).
@@ -585,7 +586,7 @@ Note that a skill's directory name is not always its command name (e.g. `spec-fr
 - **Command**: `/fix-spec [{specModule}] [--generator=X] [--view=Y]`
 - **Function**: The debugging half of Loop 2, run standalone against a spec whose targets already match. Collects failures from all three sources — matching/generation (`show:matching`), Visual QA (the `Failure TODO List` in the latest timestamped validation report), and determinism (`report:churn`) — triages each to its owning file, and fixes via `/update-gen` and `/update-view`.
 - **Boundary**: Creates no modules and resolves no `implementationTodos` — those hand off to `/implement-spec`. It must never silence a failure by weakening a declaration or target. An evidence-backed classification correction is different: when the rendered task contradicts the current ability claim, use `SPEC-2`, `SPEC-V5`, `TSPEC-6`, and `TSPEC-13`, explain the evidence, and obtain user confirmation before changing a view spec or production target.
-- **Triage priority**: A VQA failure is not proof of a classification defect. Inspect the image, ontology definition, generated payload, view spec, and target together. Resolve violations by ownership: (1) generator mathematical truth and Ability-neutral canonical evidence (`IMPL-G4`, `IMPL-G8`); (2) view task truth and preservation of the complete matched claim (`SPEC-V5`, `IMPL-V11`); (3) view applicability and irreducible physical boundaries (`SPEC-V3`, `SPEC-V7`); (4) declaration, target, ontology, or checklist correction only when the preceding contracts are sound. Production declaration and target changes require user confirmation. A nonessential leaf criterion belongs to the checklist (`CHK-V6`).
+- **Triage priority**: A VQA failure is not proof of a classification defect. Inspect the image, ontology definition, generated payload, view spec, and target together. Resolve violations by ownership: (1) generator mathematical truth and Ability-neutral canonical evidence (`IMPL-G4`, `IMPL-G8`); (2) view task truth and preservation of the complete matched claim (`SPEC-V5`, `IMPL-V11`); (3) view applicability and complete exclusion boundaries (`SPEC-V3`, `SPEC-V7`); (4) declaration, target, ontology, or checklist correction only when the preceding contracts are sound. Production declaration and target changes require user confirmation. A nonessential leaf criterion belongs to the checklist (`CHK-V6`).
 
 ### Module Update Skills
 - **`/update-gen {moduleName}`** (`.agents/skills/update-generator/SKILL.md`): Updates one generator module to match its spec — reviews its Ability-neutral canonical model (`IMPL-G8`), updates its tests, adopts consuming views on a payload contract change (`IMPL-G6`), and runs the targeted validation workflow of §6.

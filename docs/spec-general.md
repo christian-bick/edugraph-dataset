@@ -41,7 +41,7 @@ the module that owns the corresponding behavior:
 
 A view's `requiredLabels` applicability constraints and `rejectedLabels` boundaries are then
 applied on top. They can respectively require a mathematical target context or veto an otherwise matching tuple
-([SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-physical-boundaries-not-competency-filters)).
+([SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries)).
 
 **Why:** declaring only an ancestor of what a target needs silently fails to match it — the
 target simply produces no samples, with no error.
@@ -141,7 +141,7 @@ The two deduction operators are duals and are not interchangeable:
 - **Capabilities** are declared with `deductCompatible`, in generator/view schemas.
 - **Boundaries** are declared with `deductAdmitting`, in view rejection lists.
 
-See [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-physical-boundaries-not-competency-filters)
+See [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries)
 and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting).
 
 ### SPEC-11 — Contextual refinement of an Area is a Scope

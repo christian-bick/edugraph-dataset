@@ -1,7 +1,7 @@
 # Spec Rules — View
 
 Rules specific to a view's `spec.ts`: matching capabilities, visual configuration, and
-physical rejection boundaries.
+rejection boundaries.
 
 **Applies to:** `src/visuals/views/[<category>/]<view>/spec.ts`
 **Read with:** [spec-general.md](spec-general.md) — all `SPEC-n` rules apply here too.
@@ -81,28 +81,36 @@ export const clockDrawingSpec: ViewSpec = {
 };
 ```
 
-### SPEC-V3 — `rejectedLabels` declares physical boundaries, not competency filters
+### SPEC-V3 — `rejectedLabels` declares complete exclusion boundaries
 
-Instead of declaring what a view *can* handle, view specs use `rejectedLabels` to
-explicitly list the labels (or label arrays) they *cannot* handle.
+View specs use `rejectedLabels` to veto otherwise matching target contexts that the view's
+contract cannot accept. Every entry must describe a real, stable, and complete exclusion
+boundary. **Stable** means that the reason follows from the view contract rather than today's
+target or generator catalog. **Complete** means that the declaration covers the whole invalid
+region instead of enumerating only failures currently known to occur.
 
-Its purpose is to narrow a view to a **subset of the problems its matched generator can
-produce** — the cases the view's layout physically cannot render (e.g. rejecting
-`Scope.NumbersWithZero`, or using `...deductAdmitting([Scope.NumbersLarger20])` to reject
-every target that allows numbers beyond the view's physical rendering capacity).
+Use it when the invalid side can be stated completely: for example, when a target range exceeds
+the view's rendering capacity, when a representation is not defined for zero, negative, or
+decimal values, or when the view accepts every compatible family except an explicitly rejected
+one. `...deductAdmitting([Scope.NumbersLarger20])`, for example, rejects the complete boundary of
+every target range that admits values beyond 20.
 
-It is **not** a general competency filter. Never put an Ability in `rejectedLabels`, and
-do not use the list to work around the matching direction. Area/Scope limits may be
-forward-compatible with generator capabilities that do not exist yet; the contract is
-their physical truth, not whether each entry currently changes a match. What a view
-*supports* belongs in the positive `generalLabels`/schema declarations
-([SPEC-1](spec-general.md#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific)).
+An exact rejection is truthful only when the view accepts every other compatible case. When the
+view accepts only a positively enumerable subset — for example, exactly step sizes 10 and 100 —
+use `requiredLabels`, a narrower payload type, or separate leaf views. Do not blacklist only the
+alternatives known today, because a later ontology member would pass the incomplete boundary.
+
+Never put an Ability in `rejectedLabels`, use the list to work around matching direction, or add
+an exclusion merely to suppress an inconvenient failure. Positive capabilities remain in
+`generalLabels` or the schema ([SPEC-1](spec-general.md#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific));
+positive mathematical applicability belongs in `requiredLabels` when it can be stated directly
+([SPEC-V7](#spec-v7--requiredlabels-scopes-payload-applicability)).
 
 ### SPEC-V4 — Expand rejection boundaries with `deductAdmitting`
 
 Use `...deductAdmitting([<boundary>])` in the rejected list to logically expand a rejection
 boundary — e.g. `...deductAdmitting([Scope.NumbersLarger10])` rejects every scope admitting
-numbers beyond the view's physical capacity of 10.
+numbers beyond the view's supported capacity of 10.
 
 **Never** use `deductCompatible` for rejection lists: it is the dual operator, for
 declaring capabilities in schemas ([SPEC-10](spec-general.md#spec-10--capabilities-use-deductcompatible-boundaries-use-deductadmitting)).
@@ -168,7 +176,8 @@ and `rejectedLabels`. `npm run check:generator-view-specs` verifies this contrac
 Only Area and Scope terms belong here. Never put an Ability in `requiredLabels`; the view must
 positively own each Ability through `generalLabels` or its schema. Prefer a narrower `ViewTypeMap`
 payload whenever static typing alone can express the same boundary. Use `rejectedLabels` for
-physical rendering limits, not for this positive mathematical context.
+complete exclusion boundaries, not as an incomplete substitute for this positive mathematical
+context.
 
 ### SPEC-V8 — `requiredTargetAbilities` selects an invariant task claim
 
@@ -191,7 +200,7 @@ inside one implementation. `npm run check:generator-view-specs` verifies the con
 
 - [ ] **SPEC-V1** — `spec`, `ViewSchema` and `ViewConfig` are all exported, with `ViewConfig` extracted from the schema.
 - [ ] **SPEC-V2** — every schema parameter is presentational and preserves learner action; no mathematical parameter or Ability-driven task selector appears, and each Ability parameter has been reviewed as a possible parallel-task branch.
-- [ ] **SPEC-V3** — every entry in `rejectedLabels` names a case the layout physically cannot render, never an Ability or a competency the view merely does not want.
+- [ ] **SPEC-V3** — every `rejectedLabels` declaration is a real, stable, and complete exclusion boundary; exact exclusions admit every other compatible case, and no entry is an Ability, an incomplete blacklist, a matching workaround, or failure suppression.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — every Ability is declared by a view, directly evidenced by its rendered task, absent from all generators, and not parameterized when it changes task identity.
 - [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than implemented through parallel configuration branches; only its most specific required Ability is declared.

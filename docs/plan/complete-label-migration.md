@@ -114,9 +114,9 @@ reference generator-established Area/Scope applicability but do not contribute a
 - must not also be supplied or rejected by the view;
 - should be replaced by a narrower payload type when static typing can express the boundary.
 
-`rejectedLabels` express irreducible physical rendering boundaries only. They must never filter
-an Ability, compensate for generator-side presentation logic, suppress an inconvenient match,
-or express that a view merely prefers not to handle a competency.
+`rejectedLabels` express truthful, stable, and complete exclusion boundaries. They must never
+filter an Ability, compensate for generator-side presentation logic, suppress an inconvenient
+match, or blacklist only the alternatives currently known to the ontology.
 
 `requiredTargetAbilities` select an invariant stronger task only when sibling leaf views share the
 same generator-established Area/Scope capability set and payload type. Every entry is an Ability
@@ -245,8 +245,8 @@ linting must prevent recurrence.
 ### Applicability, boundaries, and view-owned Areas
 
 - Seven views use `requiredLabels`; their current static contracts pass.
-- 30 views use `rejectedLabels`; each needs a semantic review proving a physical rendering
-  boundary.
+- 33 views use `rejectedLabels`; each needs a semantic review proving a stable and complete
+  exclusion boundary.
 - 18 views declare general Areas and two view schemas declare Areas. Current validation finds no
   taxonomic overlap with compatible generator Areas, but the independent-domain rationale remains
   a semantic review responsibility.
@@ -396,7 +396,8 @@ contract and affected payload types are migrated.
    `Area.MeasuringWithUnits`. The Scope authoritatively selects the unit system; dataset generation
    does not model currency-specific denomination availability.
 2. Keep the production target dimension gate strict.
-3. Review every `rejectedLabels` declaration and retain only physical rendering boundaries.
+3. Review every `rejectedLabels` declaration and retain only stable, complete exclusion
+   boundaries.
 4. Review every view-owned Area and record why it is an independent knowledge domain.
 5. Confirm every `requiredLabels` declaration is necessary, generator-established, and not better
    expressed by a narrower payload type.
@@ -549,7 +550,7 @@ The migration is complete when:
 8. every task-changing Ability is a leaf view with reusable parent-level rendering code, and no
    view hides parallel task implementations behind large config-controlled branches;
 9. every `requiredLabels` declaration is a valid generator-established applicability condition;
-10. every `rejectedLabels` declaration is an irreducible physical rendering boundary;
+10. every `rejectedLabels` declaration is a stable, complete exclusion boundary;
 11. every view-owned Area is demonstrably independent of compatible generator Areas;
 12. matching provenance identifies the capability owner of every target claim;
 13. all affected canonical artifacts pass live VQA and the complete cache passes strict audit;

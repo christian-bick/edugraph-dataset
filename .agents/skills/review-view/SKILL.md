@@ -3,7 +3,7 @@ name: review-view
 description: "/review-view [{viewName}] [--file=spec|checklist|code] - Unified review of visual view module(s) under src/visuals/views/ against the EduGraph reference library."
 ---
 
-Perform a review of visual view module(s) under `src/visuals/views/` (identified by `spec.ts`, `checklist.md`, and `view.tsx`). The goal is to enforce visual rendering quality, layout spec separation of concerns, physical capacity rejection boundaries, and 100% seed-derived determinism.
+Perform a review of visual view module(s) under `src/visuals/views/` (identified by `spec.ts`, `checklist.md`, and `view.tsx`). The goal is to enforce visual rendering quality, layout spec separation of concerns, complete exclusion boundaries, and 100% seed-derived determinism.
 
 ## Scope Resolution
 - **Specific Leaf Module**: If `{viewName}` matches a specific leaf view module (e.g., `/review-view operations-vertical`), restrict review to that module.
@@ -34,6 +34,7 @@ Check these explicitly on every view:
 - `SPEC-V5`: every Ability in `generalLabels` is elicited by the rendered task, and every Ability remains absent from `requiredLabels` and `rejectedLabels`.
 - `SPEC-V6` / `IMPL-V9`: an Ability that changes learner action or task identity is an invariant leaf view; related leaves share parent-level rendering code rather than branching on labels inside one view.
 - `SPEC-V7`: every `requiredLabel` is a generator-established Area/Scope applicability condition, not a capability supplied or rejected by the view.
+- `SPEC-V3`: every `rejectedLabels` declaration is a stable, complete invalid domain; exact exclusions admit every other compatible case and never serve as incomplete blacklists or failure suppression.
 - `SPEC-11`: a view never specializes a compatible generator Area; contextual refinement within that Area is a Scope, while a view-owned Area must be an independent knowledge domain.
 - `IMPL-V11`: the projection preserves visible evidence for every generator-owned target label; names or assertions do not replace claimed objects, relations, laws, scales, or premises.
 - Central label support: ontology-label evidence and verdict policy stay in the central checklist, not the leaf checklist or evaluator prompt.

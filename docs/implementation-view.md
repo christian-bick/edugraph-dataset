@@ -153,8 +153,8 @@ Evidence follows ownership. The generator contract supplies every canonical math
 witness; the view preserves those witnesses while making its Ability observable. When a
 witness is absent from the payload, follow
 [IMPL-V8](#impl-v8--needing-a-new-payload-field-is-a-two-module-change). When the payload
-contains it but the screenshot does not, correct the view. Use `rejectedLabels` only for an
-irreducible physical rendering boundary.
+contains it but the screenshot does not, correct the view. Use `rejectedLabels` only for a
+truthful, stable, and complete exclusion boundary.
 
 ---
 

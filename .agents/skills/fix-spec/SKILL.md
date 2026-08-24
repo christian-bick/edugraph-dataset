@@ -13,7 +13,7 @@ Hand off to `/implement-spec` instead of proceeding when a failure turns out to 
 - a **new** generator or view module, or an extension of the supported ontological space (`IMPL-7` in `docs/implementation-general.md`);
 - resolution of an entry in `implementationTodos`, or promotion of targets into `spec`.
 
-**Never make a failure disappear by suppressing the match.** Do not weaken a declaration, add a convenient `rejectedLabels` entry, or edit a target merely so the sample stops being generated (`TSPEC-6`, `SPEC-V3`). An evidence-backed classification correction is legitimate when the ontology definition and rendered task show that the current claim is false and the replacement is the most specific directly observable claim (`SPEC-2`, `SPEC-V5`, `TSPEC-13`). Explain that evidence and obtain user confirmation before changing any view `spec.ts` or production target; update the aligned `test` target when one exists. A rejection boundary remains legitimate only when the view physically cannot render the case.
+**Never make a failure disappear by suppressing the match.** Do not weaken a declaration, add a convenient `rejectedLabels` entry, or edit a target merely so the sample stops being generated (`TSPEC-6`, `SPEC-V3`). An evidence-backed classification correction is legitimate when the ontology definition and rendered task show that the current claim is false and the replacement is the most specific directly observable claim (`SPEC-2`, `SPEC-V5`, `TSPEC-13`). Explain that evidence and obtain user confirmation before changing any view `spec.ts` or production target; update the aligned `test` target when one exists. A rejection remains legitimate only when it describes a truthful, stable, and complete invalid domain for the view; an exact exclusion requires the view to accept every other compatible case.
 
 ## Scope: One Standard at a Time
 
@@ -67,7 +67,7 @@ ontology definition, generator payload, view spec, and production target togethe
 evidence available in the image. Resolve violations in ownership priority: (1) generator
 mathematical truth and Ability-neutral canonical evidence (`IMPL-G4`, `IMPL-G8`); (2) view task
 truth and preservation of the complete matched claim (`SPEC-V5`, `IMPL-V11`); (3) view
-applicability and irreducible physical boundaries (`SPEC-V3`, `SPEC-V7`); (4) declarations,
+applicability and complete exclusion boundaries (`SPEC-V3`, `SPEC-V7`); (4) declarations,
 targets, ontology, or checklist only when the preceding contracts are sound. Before changing a
 checklist, apply the `CHK-V6` removal question and confirm that the criterion protects an
 essential observable view contract rather than duplicating the central checklist or a unit test.
