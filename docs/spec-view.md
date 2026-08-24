@@ -128,7 +128,7 @@ redeclare a label owned by its paired module
 ([SPEC-8](spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair)).
 When a presentation distinction refines the same generator-owned Area, it is a Scope rather
 than a descendant Area; a view-owned Area must contribute an independent knowledge domain
-([SPEC-11](spec-general.md#spec-11--contextual-refinement-of-an-area-is-a-scope)).
+([SPEC-11](spec-general.md#spec-11--area-changes-task-nature-scope-changes-task-context)).
 View ownership of the Ability does not narrow the artifact's truth requirement: the final
 projection must preserve observable evidence for every generator-owned label in the matched
 target ([IMPL-V11](implementation-view.md#impl-v11--preserve-the-whole-matched-claim)).

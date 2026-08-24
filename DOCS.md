@@ -64,12 +64,13 @@ equation, and a physical object cannot be replaced by a text badge naming that o
 payload contains the evidence, the view renders it; if the evidence is absent, the payload contract
 must be corrected instead of being reconstructed from labels in the view.
 
-Area ownership also remains non-polymorphic across that boundary. A view does not narrow a
-generator Area with a descendant Area: observable presentation, representation, and evidence-source
-distinctions within the same knowledge domain are Scopes. Views may still contribute an unrelated
-Area when the task adds an independent mathematical domain. This keeps competencies losslessly
-factorized as `Area × Scope × Ability` without making generator/view composition depend on Area
-specialization.
+Area ownership also remains non-polymorphic across that boundary. Under `SPEC-11`, an Area changes
+the nature of the mathematical task or independently required knowledge, while a Scope changes its
+context, constraints, representation, range, or challenge. A view therefore does not narrow a
+generator Area with a descendant Area, but it may contribute an unrelated Area when its projection
+adds an independent mathematical task. This keeps competencies factorized as
+`Area × Scope × Ability` without treating every lossless parent-Area/Scope decomposition as evidence
+that two knowledge domains are actually the same task.
 
 ### Ontology Scale Resolution
 Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in

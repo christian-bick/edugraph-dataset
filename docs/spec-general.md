@@ -144,24 +144,40 @@ The two deduction operators are duals and are not interchangeable:
 See [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries)
 and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting).
 
-### SPEC-11 — Contextual refinement of an Area is a Scope
+### SPEC-11 — Area changes task nature; Scope changes task context
 
-A compatible generator and view must not divide ownership by declaring equal or
-taxonomically overlapping Areas. In particular, a view must not specialize a
-generator-owned Area with a descendant Area. The generator declares the invariant area of
-knowledge and understanding; any observable presentation, representation, evidence source,
-or other contextual distinction within that Area is a view-owned Scope.
+An Area identifies the mathematical task, relation, concept, procedure, or body of knowledge
+involved in a competency. A Scope changes the context, constraints, representation, range, or
+challenge within essentially the same mathematical task. An Ability identifies the observable
+cognitive performance demanded from the learner. Here *mathematical task* means competency
+content, not the final prompt or learner action constructed by a view.
 
-An unrelated Area may still belong to the view when the learner-facing task genuinely adds
-an independent knowledge domain. For example, an equation view can add `Area.Equation` to
-an arithmetic generator. Independence is the test: replacing the view-owned label with a
-Scope must be rejected when it would erase a different mathematical question, not merely
-because the ontology currently models a contextual distinction as an Area.
+Use knowledge transfer as the semantic test. When changing a label can require separately
+acquired mathematical knowledge, it changes the nature of the task and remains an Area. When
+the underlying knowledge and success criterion stay the same while only the inputs, boundaries,
+representation, evidence source, or difficulty context change, use a Scope. A common ancestor
+and a lossless `parent Area × proposed Scope` encoding do not by themselves prove that an Area
+is really a Scope: related domains such as measuring time and measuring weight, or reasoning
+about circles and rectangles, may still require independently acquired knowledge.
 
-If a contextual distinction has no suitable Scope, create an ontology gap instead of using
-Area specialization as polymorphism. If the distinction changes the central mathematical
-question, audit whether the generator owns the wrong Area or whether a separate canonical
-mathematical model is required.
+Do not use an Area merely to report that content happens to appear in a particular notation or
+representation. For example, `Area.FractionNotation` is true when understanding or using fraction
+notation is itself part of the competency. A comparison task whose values are merely displayed as
+fractions instead uses the relevant fraction and representation Scopes; the visible fraction bar
+alone does not establish a fraction-notation learning claim. Apply the same distinction to decimal,
+digit, number-name, and other notation Areas.
+
+Across a compatible generator/view pair, ownership remains non-polymorphic. The pair must not
+divide ownership by declaring equal or taxonomically overlapping Areas, and a view must not
+specialize a generator-owned Area with a descendant Area. Presentation, representation, evidence
+source, or another contextual change within the same mathematical task is a Scope. A view may
+contribute an unrelated Area when its projection adds an independent mathematical task or body of
+knowledge—for example, an equation view can add `Area.Equation` to an arithmetic generator.
+
+If a contextual distinction has no suitable Scope, create an ontology gap instead of using Area
+specialization as polymorphism. If the distinction changes the nature of the mathematical task,
+retain or add the appropriate Area and audit whether a separate canonical mathematical model is
+required.
 
 **Verified by:** `npm run check:generator-view-specs`.
 
@@ -179,5 +195,5 @@ mathematical model is required.
 - [ ] **SPEC-8** — no label parameterized by the generator is re-queried by the matching view.
 - [ ] **SPEC-9** — discrete label sets are expressed as plain arrays unless a resolver is genuinely required.
 - [ ] **SPEC-10** — `deductCompatible` appears only in schemas; `deductAdmitting` only in rejection lists.
-- [ ] **SPEC-11** — no compatible generator/view pair shares equal or ancestor/descendant Areas; contextual refinement of one generator-owned Area is expressed with a view-owned Scope, while any view-owned Area is an independent knowledge domain.
+- [ ] **SPEC-11** — each Area changes the mathematical task or independently required body of knowledge; each Scope changes only the context, constraints, representation, range, or challenge within that task; notation Areas are not passive representation indicators; and no compatible generator/view pair shares equal or ancestor/descendant Areas.
 - [ ] `npm run check:generator-view-specs` passes.

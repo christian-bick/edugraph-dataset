@@ -39,7 +39,8 @@ observable in the resulting artifact.
 
 Every production target must contain at least one Area and at least one Ability. Scope is
 zero-or-more: a Scope is required when the competency has a meaningful contextual,
-representational, range, object, relation, or other discriminator.
+representational, range, constraint, or challenge discriminator that preserves the nature of the
+mathematical task. The full dimensional test is normative in `SPEC-11`.
 
 ### Generators own canonical mathematics
 
@@ -97,9 +98,11 @@ same-task criteria above; conditional truth is not itself a reason to split the 
 The generator owns invariant mathematical Areas and mathematical Scopes. A view owns Scopes
 created by presentation, representation, evidence source, or other learner-visible context.
 
-A view may contribute an Area only when the task adds an independent knowledge domain. It may
-not redeclare or specialize a generator-owned Area. A contextual refinement within the same
-knowledge domain is a Scope, not polymorphic Area ownership.
+A view may contribute an Area only when the task adds an independent mathematical task or body of
+knowledge. It may not redeclare or specialize a generator-owned Area. A contextual refinement that
+preserves the nature of the mathematical task is a Scope, not polymorphic Area ownership. A
+lossless decomposition through a common Area ancestor does not by itself prove that two Areas are
+merely Scopes; separately acquired knowledge remains Area-level.
 
 Equal or ancestor/descendant positive capabilities may not be split across a compatible
 generator/view pair. `requiredLabels` are the explicit exception in role, not in ownership: they
