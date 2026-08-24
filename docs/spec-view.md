@@ -164,8 +164,8 @@ from matching a target that did not request it.
 
 Use `requiredLabels` when a leaf view may participate only if the target explicitly requests a
 label. Every listed label must be present in the target, or be an ancestor of a more specific
-target label, before the tuple can match. The property is dimension-neutral: the same mechanism
-applies to Area, Scope, and Ability labels.
+target label, before the tuple can match. Like all label-bearing spec constructs, the property is
+dimension-neutral: the same mechanism applies to Area, Scope, and Ability labels.
 
 A requirement is not a capability. The compatible generator/view pair must still provide a label
 equal to or more specific than every required label. The provider may be the generator, the view,

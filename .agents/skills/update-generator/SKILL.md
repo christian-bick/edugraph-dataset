@@ -19,6 +19,10 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
 
 4. **Consuming View Alignment**:
    - If the returned problem payload contract needed modification, follow `IMPL-G6` in `docs/implementation-generator.md`: run `npm run show:matching -- --spec=<real-standard>` to find actual consuming views and inspect rejection reasons, then adopt each matched view to render the updated payload fields. Use `--spec=test` only for the isolated smoke path and `--raw` only for source-definition diagnosis.
+   - Before editing consumers, record a compact adoption matrix with every production consumer,
+     its matched target families, fields affected, required projection change, and verification
+     test. A payload migration is incomplete until every matrix row is adopted or explicitly shown
+     to be unaffected (`IMPL-G6`).
 
 5. **Validation Workflow**:
    - Follow the targeted debugging & fast-iteration workflows documented in `DOCS.md § 6` (Efficient Development & Debugging Iteration):

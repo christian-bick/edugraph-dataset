@@ -25,6 +25,9 @@ The reference library under `docs/` is authoritative. Load the references for th
 
 Without `--file`, review all three aspects.
 
+When the review traces capability ownership or a matched target conjunction across roles, also
+load `docs/label-architecture.md` as the conceptual map.
+
 **Reporting**: every finding must cite the rule ID it violates (e.g. `SPEC-V3`, `CHK-V6`, `IMPL-V6`). If something looks wrong but violates no rule, report it as an observation and say so — do not invent a rule ID.
 
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.

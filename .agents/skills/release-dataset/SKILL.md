@@ -46,7 +46,17 @@ All inspection and local validation before tag publication must remain reversibl
 
 Prevent a release tag from becoming the first full canonical test:
 
-1. Generate the complete canonical dataset. The explorer serves immutable snapshots from
+1. Run the strict label-architecture gate before canonical generation:
+
+   ```bash
+   npm run audit:label-architecture -- --spec=ccss --strict
+   ```
+
+   This verifies target dimensions, capability provenance and ownership, applicability contracts,
+   cross-role overlap, and implementation label isolation. It complements rather than replaces
+   canonical VQA of the final artifacts.
+
+2. Generate the complete canonical dataset. The explorer serves immutable snapshots from
    `temp/` and host development servers are not generation prerequisites. If the transactional
    swap still reports a filesystem lock, inspect the exact external handle before stopping a
    user-owned process.
@@ -55,13 +65,13 @@ Prevent a release tag from becoming the first full canonical test:
    npm run generate:dataset -- --spec=ccss --rebuild-graph
    ```
 
-2. Run the strict, offline cache audit:
+3. Run the strict, offline cache audit:
 
    ```bash
    npm run audit:dataset -- --spec=ccss
    ```
 
-3. Run the release-relevant dataset checks and build the merged release artifact:
+4. Run the release-relevant dataset checks and build the merged release artifact:
 
    ```bash
    npm run report:churn -- --spec=ccss
@@ -69,7 +79,7 @@ Prevent a release tag from becoming the first full canonical test:
    npm run merge:dataset
    ```
 
-4. Generate and validate the release asset index against the merged dataset. Use the
+5. Generate and validate the release asset index against the merged dataset. Use the
    proposed release tag as the revision even though the tag does not exist yet:
 
    ```bash
@@ -81,11 +91,12 @@ Prevent a release tag from becoming the first full canonical test:
    least one associated released sample. Successful matching and generation alone are not
    substitutes for it.
 
-5. Confirm that the worktree remains clean. Generated files in `out/` and `temp/` are build
+6. Confirm that the worktree remains clean. Generated files in `out/` and `temp/` are build
    output and must not be committed.
 
-Do not create or push the release tag unless canonical generation, strict VQA audit, split
-audit, merged asset-index validation, and the exact-HEAD `Validate Main` workflow all pass.
+Do not create or push the release tag unless the strict label-architecture gate, canonical
+generation, strict VQA audit, split audit, merged asset-index validation, and the exact-HEAD
+`Validate Main` workflow all pass.
 
 ### Repairing VQA Cache Findings
 

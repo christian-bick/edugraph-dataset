@@ -66,6 +66,15 @@ Legend: a bare module id has strategy `reuse`; `△` has strategy `expand`; `＋
 
 ### Implementation Design Decisions
 
+#### Label Ownership
+
+| Target family | Claim / dimension | Expected capability owner | Required artifact evidence |
+|---|---|---|---|
+| `<target family>` | `<Area.X>`, `<Scope.Y>`, or `<Ability.Z>` | `<generator>` or `<view>` | <How the final artifact makes the claim observable> |
+
+Give every target claim an expected owner. For every Ability, identify the expected view capability
+and task evidence; a task-changing Ability must use a leaf view (`SPEC-V5`, `SPEC-V6`, `TSPEC-13`).
+
 #### Expected Active Matches
 
 - `<target family>` → `<generator>#<view>`.
@@ -95,6 +104,7 @@ Use this checklist when authoring a plan; do not copy it into the generated `pla
 - [ ] Active and implementation targets state labels, permutation dimensions, and observable evidence.
 - [ ] Every ontology TODO names a stable package; related leaf entries share the same package id where one ontology change serves them.
 - [ ] Every implementation TODO has a stable id and explicit `reuse`/`expand`/`new` ownership for every generator and view.
+- [ ] The label-ownership table assigns every target claim to an expected capability owner and identifies the view evidence for every Ability.
 - [ ] Every equivalence is a 100% mutual semantic implication between complete source leaf competencies; partial overlap, containment, and identical current-support slices remain distinct. Declaration and disposition counts agree with their tables.
 - [ ] Detailed Design Decisions contains accepted rationale, matching risks, and distinctness expectations.
 - [ ] Open Questions contains only directly answerable questions ending in `?`.

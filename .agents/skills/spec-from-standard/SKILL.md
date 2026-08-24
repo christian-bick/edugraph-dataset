@@ -5,7 +5,7 @@ description: "/create-spec-from-standard {grade} - Two-pass workflow that first 
 
 Create or extend a competency target spec under `src/spec/[<module>/]{grade}.ts` from educational-standard leaf nodes. This is deliberately a **two-pass workflow with a user review boundary**: Pass 1 produces analysis artifacts only; Pass 2 edits the target spec only after the user explicitly approves that plan.
 
-Use `public/coverage/ccss-tree.json` (or the relevant standard tree) as the starting hypothesis for the hierarchy. Study existing target specs in the same module. Read and follow `docs/target-spec.md` and `docs/target-spec-plan-template.md` throughout.
+Use `public/coverage/ccss-tree.json` (or the relevant standard tree) as the starting hypothesis for the hierarchy. Study existing target specs in the same module. Read and follow `docs/label-architecture.md`, `docs/target-spec.md`, and `docs/target-spec-plan-template.md` throughout.
 
 ## Stable plan workspace
 
@@ -59,7 +59,11 @@ Complete the template with these constraints:
   an unsupported TODO remainder.
 - Give active and implementation targets their programmatic builder dimensions,
   most-specific truthful ontology labels, and visible or necessary textual evidence
-  (`TSPEC-4`, `TSPEC-6`, `TSPEC-13`).
+  (`TSPEC-4`, `TSPEC-6`, `TSPEC-13`, `TSPEC-14`).
+- Complete the template's label-ownership table. Assign every target claim to the generator or
+  view capability expected to satisfy it; for every Ability, name the expected view capability and
+  observable task evidence, using a leaf when the Ability changes task identity (`SPEC-1`,
+  `SPEC-V5`, `SPEC-V6`, `TSPEC-13`).
 - For every Ability, identify the expected leaf-view task that makes it observable. Do not assign
   an Ability to a generator role or rely on a generator-authored blank, prompt, hint, or requested
   reasoning (`SPEC-V5`, `IMPL-G8`).
@@ -135,6 +139,7 @@ npm run check -- --spec=<specModule>
 Report:
 
 - active target and permutation counts;
+- reviewed capability ownership and the expected view evidence for every Ability;
 - implementation definitions, module strategies, and permutation counts;
 - ontology gaps and beyond-scope competencies;
 - intentional equivalences;

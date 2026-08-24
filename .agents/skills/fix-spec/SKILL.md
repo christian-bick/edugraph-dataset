@@ -27,7 +27,17 @@ Rebuild the union only after the standard is clean (Step 6).
 
 #### Step 1: Collect the Failure Set
 
-Gather all three failure sources before fixing anything, so related defects are batched:
+Establish capability provenance, then gather all three failure sources before fixing anything so
+related defects are batched:
+
+0. **Capability provenance** — establish which generator/view capability satisfies every target
+   claim before considering any declaration correction:
+   ```bash
+   npm run audit:label-architecture -- --spec=<specModule> --strict
+   ```
+   Use `docs/label-architecture.md` to distinguish positive capability, applicability, boundary,
+   payload evidence, and final projection. A failed render does not by itself invalidate the
+   declaration.
 
 1. **Matching & generation failures** — targets that match nothing, and generators that fail or hit `rejectedLabels` boundaries:
    ```bash
@@ -71,6 +81,8 @@ applicability and complete exclusion boundaries (`SPEC-V3`, `SPEC-V7`); (4) decl
 targets, ontology, or checklist only when the preceding contracts are sound. Before changing a
 checklist, apply the `CHK-V6` removal question and confirm that the criterion protects an
 essential observable view contract rather than duplicating the central checklist or a unit test.
+Any proposed declaration change must state the current and proposed capability owner for every
+affected target claim (`SPEC-1`).
 
 Group the triaged failures by `(generator, view)` so one fix and one regeneration cycle covers every sample it affects.
 

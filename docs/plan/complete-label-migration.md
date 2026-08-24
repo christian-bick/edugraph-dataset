@@ -459,9 +459,10 @@ Add a cross-role `/review-label-architecture [--spec=<module>]` skill only if th
 agentic interpretation layer. The underlying deterministic inventory must remain a script so CI
 and non-agent workflows receive the same facts.
 
-**Status: pending final consolidation.** Normative rules and existing skills already encode most
-accepted decisions, but the concise cross-role `docs/label-architecture.md` entry point and final
-plan/skill reconciliation remain outstanding.
+**Status: complete.** [label-architecture.md](../label-architecture.md) is the concise cross-role
+entry point; the reference index routes architecture work through it, target dimension cardinality
+is normative under `TSPEC-14`, and the authoring, review, implementation, repair, and release skills
+all preserve the same ownership and evidence trace through their existing rule IDs.
 
 ### Phase 7: canonical validation and release proof
 
@@ -481,7 +482,7 @@ Canonical VQA is the required empirical proof that active target conjunctions su
 and view composition. The optional synthetic capability-totality investigation is not a release
 gate.
 
-**Status: pending final proof after Phase 6.** Canonical CCSS generation and the current VQA cache
+**Status: pending final proof.** Canonical CCSS generation and the current VQA cache
 have already demonstrated complete 1,898/1,898 coverage, but the final release-wide proof is rerun
 after documentation consolidation.
 

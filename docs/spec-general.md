@@ -39,6 +39,17 @@ the module that owns the corresponding behavior:
 | Area, Scope | the generator or view that owns the corresponding mathematical or presentational behavior |
 | Ability | the view whose final observable task makes the ability claim true |
 
+All label-bearing spec constructs are dimension-neutral mechanisms. Target labels,
+`generalLabels`, schema-supported labels, `requiredLabels`, and `rejectedLabels` use the same
+ontology-label type; each construct applies its semantics without a separate Area, Scope, or
+Ability channel. Schema parameterization is dimension-neutral in the same sense. The resolved
+configuration value and the role's ownership rules determine what a label controls; the schema API
+does not.
+
+Dimension-neutral machinery does not remove semantic ownership constraints. Generators still
+cannot own Abilities, views cannot reject them, and Area/Scope ownership follows
+[SPEC-11](#spec-11--area-changes-task-nature-scope-changes-task-context).
+
 A view's `requiredLabels` applicability constraints and `rejectedLabels` boundaries are then
 applied on top. They can respectively require an explicit target claim or veto an otherwise matching tuple
 ([SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries)).
@@ -185,7 +196,7 @@ required.
 
 ## Audit
 
-- [ ] **SPEC-1** — every target label is satisfied by the combined generator/view capabilities in the correct ontology direction, with every Ability owned by a view.
+- [ ] **SPEC-1** — every target label is satisfied by the combined generator/view capabilities in the correct ontology direction, with every label-bearing construct interpreted dimension-neutrally and every Ability owned by a view.
 - [ ] **SPEC-2** — no declared label is an ancestor of another declared label.
 - [ ] **SPEC-3** — no leaf label is claimed where the leaf is an instrument/subtype the module does not actually produce.
 - [ ] **SPEC-4** — no declared capability is broader than the module's real output; distinguishable members are enumerated individually.

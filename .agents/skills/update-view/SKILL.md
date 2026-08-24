@@ -11,6 +11,11 @@ Update the visual view module under `src/visuals/views/[<category>/]{viewName}` 
    - VQA loads the central checklist plus exactly this leaf checklist. Keep the leaf heading-free and concise, with **Identity** and **Modes** criteria; do not create generator/category checklists or move central label policy into the leaf (`CHK-V6`).
 
 2. **Task Identity and Evidence**:
+   - Assess every Ability schema/config branch against one learner action, requested response,
+     unknown placement, reasoning request, mode behavior, and coherent checklist (`SPEC-V2`,
+     `SPEC-V6`). Record whether it is a small same-task presentation parameter or a task identity.
+     When it is a task identity, plan the leaf ids, invariant capabilities, narrow payload types,
+     and parent-level renderer/helper reuse before editing (`IMPL-V9`).
    - When an Ability changes the observable learner action, apply `SPEC-V6`: create or use a separate leaf view with that Ability invariant in `generalLabels`. Keep reusable rendering code and tests in the parent category (`IMPL-V9`); the shared renderer receives a fixed task mode and never parses ontology labels.
    - Use dimension-neutral `requiredLabels` only when the target must explicitly request a label before the leaf participates (`SPEC-V7`). The compatible pair must still provide the capability; a view-supplied requirement remains invariant and never drives rendering (`SPEC-V8`). Prefer a narrower payload type when it expresses the same boundary.
    - Apply `IMPL-V11` to the complete matched claim. Preserve payload evidence for generator-owned labels while making the leaf Ability observable; do not reduce physical objects, mathematical laws, scales, or premises to unsupported names or assertions.

@@ -120,7 +120,19 @@ or necessary textual clues for a combination of labels to be reasonably identifi
 When the intended label is not actually elicited by the rendered task, select the most
 specific label that is. If the required evidence cannot exist in any image medium (would require a video), 
 suggest to use `beyondScope`; if the concept is missing from the ontology or implementation, 
-se the corresponding todo export.
+use the corresponding todo export.
+
+### TSPEC-14 — Dimension cardinality and conjunction
+
+Every active production target contains at least one Area and at least one Ability. Scope is
+zero-or-more: add one only when the competency has a meaningful contextual, representational,
+range, constraint, or challenge discriminator that preserves the nature of the mathematical task
+under [SPEC-11](spec-general.md#spec-11--area-changes-task-nature-scope-changes-task-context).
+
+Do not impose an upper bound or designate a primary label in any dimension. Multiple Areas,
+Scopes, or Abilities on one target are conjunctive claims: the final matched artifact must make
+every one true and observable. Alternative variants belong in separate builder permutations under
+[TSPEC-4](#tspec-4--build-permutations-programmatically).
 
 ### TSPEC-7 — Categorize each competency into exactly one export
 
@@ -318,3 +330,4 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
 - [ ] **TSPEC-12** — `test` remains a focused prototyping/regression spec and provides at least one generatable target-view path per generator.
 - [ ] **TSPEC-13** — every active label is reasonably identifiable and defendable from visual or textual evidence in the expected matched artifact; no target relies on hidden context.
+- [ ] **TSPEC-14** — every active target contains at least one Area and Ability; Scope is used only when a meaningful same-task discriminator exists; multiple labels in any dimension are treated as a conjunction without a primary label.

@@ -20,6 +20,8 @@ checklist.
 
 Standing outside the matrix, because it describes standards rather than modules:
 
+- [label-architecture.md](label-architecture.md) — conceptual map for cross-role ownership,
+  matching, payload/projection boundaries, observable evidence, and dataset identities.
 - [target-spec.md](target-spec.md) — authoring competency targets under `src/spec/`.
 - [target-spec-plan-template.md](target-spec-plan-template.md) — required Pass 1 structure for
   reviewable standard-to-target plans.
@@ -28,6 +30,7 @@ Standing outside the matrix, because it describes standards rather than modules:
 
 | Task                                          | Load                                                              |
 |-----------------------------------------------|-------------------------------------------------------------------|
+| Reasoning across targets, generators and views | `label-architecture.md`, then the affected role references       |
 | Planning competency targets from a standard  | `target-spec.md` + `target-spec-plan-template.md`                 |
 | Authoring competency targets in `src/spec/`   | `target-spec.md`                                                  |
 | Auditing or writing a generator `spec.ts`     | `spec-general.md` + `spec-generator.md`                           |

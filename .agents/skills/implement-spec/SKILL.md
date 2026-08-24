@@ -37,6 +37,10 @@ compact the working context, and continue directly to the next definition.
 - Treat each referenced implementation definition as the stable package. Work through
   definitions in review order and preserve their authored module strategies. Do not regroup
   targets or replace ownership decisions without evidence and user approval.
+- Load the approved plan's label-ownership table and preserve that trace through implementation.
+  For every target claim, retain the reviewed generator/view capability owner and expected
+  observable artifact evidence (`SPEC-1`, `TSPEC-13`). If implementation requires moving a claim
+  to another role, stop under the repository-drift contract rather than silently rewriting it.
 
 #### Step 2: Execute the Reviewed Module Strategies
 For each implementation definition, use its generator and view roles directly: `reuse` needs
@@ -55,6 +59,9 @@ separate leaf views with parent-level shared rendering code (`SPEC-V6`, `IMPL-V9
 must preserve the complete matched claim (`IMPL-V11`); use dimension-neutral `requiredLabels`
 only for explicit target preconditions supported by the compatible pair, never to parameterize
 rendering (`SPEC-V7`, `SPEC-V8`).
+
+Before promotion, compare the implemented pair with the ownership trace and confirm that canonical
+VQA evidence exists for every claim, not only the leaf Ability (`TSPEC-13`, `CHK-V6`).
 
 #### Step 3: Delegate Module-Level Tasks & Reviews
 Delegate component updates and audits to specialized skills:

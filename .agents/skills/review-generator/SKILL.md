@@ -24,6 +24,9 @@ The reference library under `docs/` is authoritative. Load the references for th
 
 Without `--file`, review both aspects.
 
+When the review traces capability ownership or consuming views across roles, also load
+`docs/label-architecture.md` as the conceptual map.
+
 **Reporting**: every finding must cite the rule ID it violates (e.g. `SPEC-G2`, `IMPL-G3`). If something looks wrong but violates no rule, report it as an observation and say so — do not invent a rule ID.
 
 **Keep edits minimal**: do not rewrite, restructure, or remove anything that already complies. Only touch what actually violates a rule.
@@ -31,6 +34,10 @@ Without `--file`, review both aspects.
 Check these explicitly on every generator:
 - `SPEC-G3`: neither `generalLabels` nor schema parameters contain an Ability.
 - `IMPL-G8`: Ability neutrality covers both declarations and the data contract. The payload preserves the mathematical witnesses required by Area/Scope labels but contains no learner-action decision such as a blank, unknown position, prompt, hint, requested explanation, or Ability-specific answer prose.
+- For `IMPL-G8`, classify every payload field as canonical mathematical data,
+  calculated/structured evidence, semantic context, or view projection. Flag the last category and
+  any display-ready duplication; do not flag calculated mathematical values merely because a view
+  could recompute them.
 - `SPEC-11`: the generator owns the invariant mathematical Area; it does not encode presentation-driven child-Area distinctions that belong to view Scopes.
 - `IMPL-G6`: when neutralization changes the payload contract, identify every real-standard consuming view and verify each projection.
 
