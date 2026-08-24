@@ -16,6 +16,12 @@ export type SchemaFallbackContractIssue = {
     reason: 'unresolved' | 'resolver-error' | 'undeclared-label';
 };
 
+export type SchemaCoResolutionGroup = {
+    field: string;
+    labels: string[];
+    resolvedValue: unknown;
+};
+
 const isResolverTuple = (schemaValue: unknown): schemaValue is readonly [
     readonly string[],
     (labels: string[], supported?: readonly string[]) => unknown,
@@ -28,6 +34,65 @@ const fallbackLabelSets = (schemaValue: readonly unknown[], supportedLabels: rea
     schemaValue.length >= 3
         ? schemaValue[2] as readonly (readonly string[])[]
         : supportedLabels.map(label => [label] as const);
+
+export const schemaResolutionKey = (value: unknown): string => {
+    if (value === null || typeof value !== 'object') return JSON.stringify(value);
+    if (Array.isArray(value)) return `[${value.map(schemaResolutionKey).join(',')}]`;
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).sort().map(key =>
+        `${JSON.stringify(key)}:${schemaResolutionKey(record[key])}`
+    ).join(',')}}`;
+};
+
+/**
+ * Finds unresolved conjunction candidates: multiple non-ancestor labels which
+ * independently select the same configuration value without an explicit
+ * fallback-label contract declaring whether they are co-capabilities.
+ */
+export function findSchemaCoResolutionGroups(schema: ConfigSchema): SchemaCoResolutionGroup[] {
+    const groups: SchemaCoResolutionGroup[] = [];
+    for (const [field, schemaValue] of Object.entries(schema)) {
+        if (!isResolverTuple(schemaValue) || schemaValue.length >= 3) continue;
+        const supportedLabels = schemaValue[0] as readonly string[];
+        const resolver = schemaValue[1];
+        let defaultValue: unknown;
+        try {
+            defaultValue = resolver([], supportedLabels);
+        } catch {
+            defaultValue = undefined;
+        }
+        const defaultKey = defaultValue === undefined || defaultValue === null
+            ? null
+            : schemaResolutionKey(defaultValue);
+        const byValue = new Map<string, {labels: string[]; resolvedValue: unknown}>();
+        for (const label of supportedLabels) {
+            let resolvedValue: unknown;
+            try {
+                resolvedValue = resolver([label], supportedLabels);
+            } catch {
+                continue;
+            }
+            if (resolvedValue === undefined || resolvedValue === null) continue;
+            const key = schemaResolutionKey(resolvedValue);
+            const group = byValue.get(key);
+            if (group) group.labels.push(label);
+            else byValue.set(key, {labels: [label], resolvedValue});
+        }
+        for (const [key, group] of byValue) {
+            if (key === defaultKey) continue;
+            const mostSpecificLabels = group.labels.filter(label => !group.labels.some(other =>
+                other !== label && isSubConceptOf(other, label)
+            ));
+            if (mostSpecificLabels.length < 2) continue;
+            groups.push({
+                field,
+                labels: mostSpecificLabels,
+                resolvedValue: group.resolvedValue
+            });
+        }
+    }
+    return groups;
+}
 
 /**
  * Finds schema choices whose ontological meaning cannot be reconstructed.
@@ -120,32 +185,53 @@ export function extractConfig<T extends ConfigSchema>(
                 competencyLabels.includes(label)
             );
             let resolved = resolver(competencyLabels, supportedLabels);
-            
             const hasExplicitFallback = schemaValue.length >= 3;
-            if (resolved === undefined || resolved === null
-                || (hasExplicitFallback && matchingSupportedLabels.length === 0)) {
+            if (hasExplicitFallback) {
                 const relevantLabels = competencyLabels.filter(label =>
                     supportedLabels.includes(label)
                 );
                 const compatibleCandidates = fallbackLabelSets(schemaValue, supportedLabels).filter(labelSet =>
                     relevantLabels.every(targetLabel => labelSet.some(label =>
-                        isSubConceptOf(label, targetLabel) || isSubConceptOf(targetLabel, label)
+                        isSubConceptOf(label, targetLabel)
                     ))
                 );
-                if (compatibleCandidates.length === 0) {
-                    throw new Error(`Schema field "${key}" cannot complete the requested label combination.`);
-                }
+                const resolvedCandidates = compatibleCandidates.flatMap(labelSet => {
+                    const candidateValue = resolver(
+                        [...new Set([...competencyLabels, ...labelSet])],
+                        supportedLabels
+                    );
+                    if (candidateValue === undefined || candidateValue === null) return [];
+                    if (resolved !== undefined && resolved !== null
+                        && schemaResolutionKey(candidateValue) !== schemaResolutionKey(resolved)) return [];
+                    return [{labelSet, candidateValue}];
+                });
                 const compatibilityScore = (labelSet: readonly string[]) => labelSet.reduce(
-                    (score, label) => score + competencyLabels.filter(targetLabel =>
-                        isSubConceptOf(label, targetLabel) || isSubConceptOf(targetLabel, label)
-                    ).length,
+                    (score, label) => score + competencyLabels.reduce((labelScore, targetLabel) => {
+                        if (label === targetLabel) return labelScore + 1;
+                        return isSubConceptOf(label, targetLabel) ? labelScore + 2 : labelScore;
+                    }, 0),
                     0
                 );
-                const bestScore = Math.max(...compatibleCandidates.map(compatibilityScore));
-                const candidates = compatibleCandidates.filter(labelSet =>
-                    compatibilityScore(labelSet) === bestScore
-                );
-                const selectedLabels = candidates[Math.floor(random() * candidates.length)];
+                if (resolvedCandidates.length > 0) {
+                    const bestScore = Math.max(...resolvedCandidates.map(candidate =>
+                        compatibilityScore(candidate.labelSet)));
+                    const candidates = resolvedCandidates.filter(candidate =>
+                        compatibilityScore(candidate.labelSet) === bestScore
+                    );
+                    const selected = candidates.length === 1
+                        ? candidates[0]
+                        : candidates[Math.floor(random() * candidates.length)];
+                    resolved = selected.candidateValue;
+                    for (const label of selected.labelSet) resolvedLabels.add(label);
+                } else if (resolved === undefined || resolved === null) {
+                    throw new Error(`Schema field "${key}" cannot complete the requested label combination.`);
+                } else {
+                    for (const label of matchingSupportedLabels) resolvedLabels.add(label);
+                }
+            } else if (resolved === undefined || resolved === null) {
+                const selectedLabels = fallbackLabelSets(schemaValue, supportedLabels)[
+                    Math.floor(random() * supportedLabels.length)
+                ];
                 resolved = resolver([...new Set([...competencyLabels, ...selectedLabels])], supportedLabels);
                 if (resolved === undefined || resolved === null) {
                     throw new Error(`Schema field "${key}" fallback did not resolve a configuration value.`);

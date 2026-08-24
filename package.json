@@ -22,6 +22,7 @@
     "check:docs": "vite-node src/scripts/validate-docs.ts",
     "check:types": "tsc --noEmit",
     "audit:label-architecture": "vite-node src/scripts/audit-label-architecture.ts",
+    "audit:scope-completeness": "vite-node src/scripts/audit-scope-completeness.ts",
     "update:standards-source": "vite-node src/scripts/update-standards-source.ts",
     "generate:dataset": "vite-node src/scripts/generate-dataset-container.ts",
     "generate:dataset:internal": "vite-node src/scripts/generate-dataset.ts",

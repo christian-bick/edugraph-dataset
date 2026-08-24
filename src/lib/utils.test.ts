@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     extractConfig,
+    findSchemaCoResolutionGroups,
     findSchemaFallbackContractIssues,
     findSchemaResolutionContractIssues,
     generateWithLabels,
@@ -127,6 +128,74 @@ describe('extractConfig & generateWithLabels', () => {
             resolvedLabels: [Area.Circle, Area.Square]
         });
         expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
+    });
+
+    it('records a complete explicit conjunction when a partial target already resolves', () => {
+        const schema = {
+            measurement: [
+                [Scope.LengthMeasurement, Scope.MeterScale, Scope.TimeMeasurement, Scope.HourIntervals],
+                (labels: string[]) => labels.includes(Scope.LengthMeasurement)
+                    || labels.includes(Scope.MeterScale)
+                    ? 'length'
+                    : labels.includes(Scope.TimeMeasurement) || labels.includes(Scope.HourIntervals)
+                        ? 'time'
+                        : undefined,
+                [
+                    [Scope.LengthMeasurement, Scope.MeterScale],
+                    [Scope.TimeMeasurement, Scope.HourIntervals]
+                ]
+            ]
+        } as const;
+
+        expect(extractConfig(schema, [Scope.LengthMeasurement])).toEqual({
+            config: {measurement: 'length'},
+            resolvedLabels: [Scope.LengthMeasurement, Scope.MeterScale]
+        });
+    });
+
+    it('inventories co-resolving labels until an explicit conjunction contract exists', () => {
+        const resolver = (labels: string[]) => labels.includes(Scope.LengthMeasurement)
+            || labels.includes(Scope.MeterScale)
+            ? 'length'
+            : labels.includes(Scope.TimeMeasurement) || labels.includes(Scope.HourIntervals)
+                ? 'time'
+                : undefined;
+        const unresolved = {
+            measurement: [[
+                Scope.LengthMeasurement,
+                Scope.MeterScale,
+                Scope.TimeMeasurement,
+                Scope.HourIntervals
+            ], resolver]
+        } as const;
+        expect(findSchemaCoResolutionGroups(unresolved)).toEqual([
+            {
+                field: 'measurement',
+                labels: [Scope.LengthMeasurement, Scope.MeterScale],
+                resolvedValue: 'length'
+            },
+            {
+                field: 'measurement',
+                labels: [Scope.TimeMeasurement, Scope.HourIntervals],
+                resolvedValue: 'time'
+            }
+        ]);
+
+        const explicit = {
+            measurement: [unresolved.measurement[0], resolver, [[
+                Scope.LengthMeasurement,
+                Scope.MeterScale
+            ]]]
+        } as const;
+        expect(findSchemaCoResolutionGroups(explicit)).toEqual([]);
+    });
+
+    it('does not treat labels which merely fall through to a resolver default as co-capabilities', () => {
+        const schema = {
+            choice: [[Area.Circle, Area.Square], () => 'default-choice']
+        } as const;
+
+        expect(findSchemaCoResolutionGroups(schema)).toEqual([]);
     });
 
     it('should strip http://edugraph.io/edu/ prefix via shortenLabel and formatLabelsKey', () => {

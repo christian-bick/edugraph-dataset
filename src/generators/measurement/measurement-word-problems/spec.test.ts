@@ -6,11 +6,11 @@ import {MeasurementWordProblemsGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
 const measurementCases = [
-    [[Area.MeasuringWithUnits, Scope.LengthMeasurement], 'length'],
-    [[Area.MeasuringWithUnits, Scope.TimeMeasurement], 'time'],
-    [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], 'liquid-volume'],
-    [[Area.MeasuringWithUnits, Scope.WeightMeasurement], 'weight'],
-    [[Area.MeasuringWithUnits, Scope.Dollar], 'money']
+    [[Area.MeasuringWithUnits, Scope.LengthMeasurement], [Scope.LengthMeasurement, Scope.MeterScale], 'length'],
+    [[Area.MeasuringWithUnits, Scope.TimeMeasurement], [Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
+    [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], 'liquid-volume'],
+    [[Area.MeasuringWithUnits, Scope.WeightMeasurement], [Scope.WeightMeasurement, Scope.KilogramScale], 'weight'],
+    [[Area.MeasuringWithUnits, Scope.Dollar], [Scope.Dollar], 'money']
 ] as const;
 
 const numberCases = [
@@ -38,7 +38,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
     });
 
     it('resolves all 60 corrected Grade 4 label permutations', () => {
-        for (const [measurementLabels, measurementKind] of measurementCases) {
+        for (const [measurementLabels, resolvedMeasurementLabels, measurementKind] of measurementCases) {
             for (const [numberLabel, numberKind] of numberCases) {
                 for (const [operationLabel, operation] of operationCases) {
                     const labels = [
@@ -54,7 +54,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
                     expect(stub).not.toBeNull();
                     expect(stub!.data).toMatchObject({measurementKind, numberKind, operation});
                     expect(stub!.labels).toEqual(expect.arrayContaining([
-                        ...measurementLabels.filter(label => label !== Area.MeasuringWithUnits),
+                        ...resolvedMeasurementLabels,
                         numberLabel,
                         operationLabel
                     ]));

@@ -41,7 +41,14 @@ export const MeasurementNumberLineGeneratorSchema = {
             [[Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale], 'liquid-volume'],
             [[Scope.WeightMeasurement, Scope.KilogramScale], 'weight'],
             [[Scope.Dollar], 'money']
-        ])
+        ]),
+        [
+            [Scope.LengthMeasurement, Scope.MeterScale],
+            [Scope.TimeMeasurement, Scope.HourIntervals],
+            [Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale],
+            [Scope.WeightMeasurement, Scope.KilogramScale],
+            [Scope.Dollar]
+        ]
     ],
     numberKind: [
         measurementNumberLineNumberKinds,

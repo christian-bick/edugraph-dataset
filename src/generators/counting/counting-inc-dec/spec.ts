@@ -34,7 +34,14 @@ export const CountingIncDecGeneratorSchema = {
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
         resolveRangeFromLabels
     ],
-    direction: [countingDirections, resolveDirection],
+    direction: [
+        countingDirections,
+        resolveDirection,
+        [
+            [Scope.SubtractiveCount, Area.Decrement, Scope.Before],
+            [Scope.AdditiveCount, Area.Increment, Scope.After]
+        ]
+    ],
     stepMagnitude: [Scope.StepsOf1, Scope.StepsOf10, Scope.StepsOf100]
 } as const;
 

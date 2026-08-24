@@ -326,8 +326,16 @@ symmetry figure and remain fingerprint-visible but unlabeled. The two hidden tar
 length-task switches were not valid fallbacks; measuring and drawing now use separate invariant
 views over one renderer. Resolvers that need label conjunctions now declare and validate complete
 fallback label sets; operand profiles, comparison relations, fraction-arithmetic tasks, and
-measurement unit pairs no longer rely on invalid singleton fallback inputs. The target-coverage
-gate and observable Scope inventory remain.
+measurement unit pairs no longer rely on invalid singleton fallback inputs. Step 6 is complete:
+`npm run audit:scope-completeness -- --spec=ccss` reuses the active matching topology, resolves one
+deterministic configuration per matched tuple, and inventories co-resolving schema labels whose
+Scope conjunction is not present in the pair-derived set. The review recovered fixed meter, hour,
+liter, and kilogram scales from measurement number lines and word problems, plus complete
+increment/decrement direction Scopes from `counting-inc-dec`. All 795 CCSS tuples now have zero
+unresolved co-resolving Scope candidates; the report separately records 37 additional Scope labels
+and eight more-specific target-Scope realizations already supplied by pair resolution. This is a
+deterministic candidate audit rather than an observability oracle, so canonical VQA remains the
+empirical proof. The Step 5 target-coverage gate and Step 7 regeneration remain.
 
 ### Phase 8: canonical validation and release proof
 

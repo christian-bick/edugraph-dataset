@@ -23,7 +23,11 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
-        expect(stub!.labels).toContain(Scope.AdditiveCount);
+        expect(stub!.labels).toEqual(expect.arrayContaining([
+            Scope.AdditiveCount,
+            Area.Increment,
+            Scope.After
+        ]));
         expect(stub!.labels).toContain(Scope.StepsOf1);
     });
 
@@ -38,7 +42,11 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
-        expect(stub!.labels).toContain(Scope.SubtractiveCount);
+        expect(stub!.labels).toEqual(expect.arrayContaining([
+            Scope.SubtractiveCount,
+            Area.Decrement,
+            Scope.Before
+        ]));
     });
 
     it('resolves a subsequent position as an increment', () => {

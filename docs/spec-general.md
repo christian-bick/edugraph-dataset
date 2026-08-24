@@ -122,7 +122,11 @@ When a resolver needs a conjunction rather than one supported label, add a third
 containing its valid fallback label sets. The resolver must succeed for every listed set, and every
 fallback label must belong to that field's supported-label declaration. An explicit empty set may
 represent a default that contributes no capability from that field, but only when the resulting
-configuration is ontologically accounted for elsewhere in the pair.
+configuration is ontologically accounted for elsewhere in the pair. Resolution records the whole
+compatible set, even when one requested label was already sufficient to select the configuration;
+when several sets remain valid, it prefers the most-specific truthful realization before using the
+seed to choose among equivalent sets. This prevents a broad target from hiding additional
+observable capabilities such as `LengthMeasurement + MeterScale`.
 
 **Verified by:** `npm run check:generator-view-specs`.
 
@@ -218,7 +222,7 @@ required.
 - [ ] **SPEC-3** — no leaf label is claimed where the leaf is an instrument/subtype the module does not actually produce.
 - [ ] **SPEC-4** — no declared capability is broader than the module's real output; distinguishable members are enumerated individually.
 - [ ] **SPEC-5** — the schema contains only parameters of this module's own concern (math for generators, visual for views).
-- [ ] **SPEC-6** — all resolvers are imported from `src/lib/resolvers.ts` (or `src/lib/ontology.ts` for label-derived value helpers); none is defined inline; none is executed prematurely inside a schema array.
+- [ ] **SPEC-6** — all resolvers are imported from `src/lib/resolvers.ts` (or `src/lib/ontology.ts` for label-derived value helpers); none is defined inline or executed prematurely; conjunction resolvers declare complete fallback sets whose labels are all emitted when selected.
 - [ ] **SPEC-7** — every invariant capability is general, every configurable capability is in the schema, and no schema parameter label or ancestor appears in `generalLabels`.
 - [ ] **SPEC-8** — no label parameterized by the generator is re-queried by the matching view.
 - [ ] **SPEC-9** — discrete label sets are expressed as plain arrays unless a resolver is genuinely required.

@@ -6,11 +6,11 @@ import {MeasurementNumberLineGenerator} from './generator.ts';
 import {measurementNumberLineNumberKinds, spec} from './spec.ts';
 
 const measurementCases = [
-    [[Area.MeasuringWithUnits, Scope.LengthMeasurement], 'length'],
-    [[Area.MeasuringWithUnits, Scope.TimeMeasurement], 'time'],
-    [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], 'liquid-volume'],
-    [[Area.MeasuringWithUnits, Scope.WeightMeasurement], 'weight'],
-    [[Area.MeasuringWithUnits, Scope.Dollar], 'money']
+    [[Area.MeasuringWithUnits, Scope.LengthMeasurement], [Scope.LengthMeasurement, Scope.MeterScale], 'length'],
+    [[Area.MeasuringWithUnits, Scope.TimeMeasurement], [Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
+    [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], 'liquid-volume'],
+    [[Area.MeasuringWithUnits, Scope.WeightMeasurement], [Scope.WeightMeasurement, Scope.KilogramScale], 'weight'],
+    [[Area.MeasuringWithUnits, Scope.Dollar], [Scope.Dollar], 'money']
 ] as const;
 
 const numberCases = [
@@ -30,7 +30,7 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
     });
 
     it('resolves the complete corrected 10-target matrix', () => {
-        for (const [measurementLabels, measurementKind] of measurementCases) {
+        for (const [measurementLabels, resolvedMeasurementLabels, measurementKind] of measurementCases) {
             for (const [numberLabel, numberKind] of numberCases) {
                 const labels = [
                     Scope.Numberline,
@@ -43,7 +43,7 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
                 expect(stub).not.toBeNull();
                 expect(stub!.data).toMatchObject({measurementKind, numberKind});
                 expect(stub!.labels).toEqual(expect.arrayContaining([
-                    ...measurementLabels.filter(label => label !== Area.MeasuringWithUnits),
+                    ...resolvedMeasurementLabels,
                     numberKind === 'fraction' ? Scope.ProperFractions : numberLabel
                 ]));
                 if (numberKind === 'fraction') expect(stub!.labels).not.toContain(Scope.FractionNumbers);
