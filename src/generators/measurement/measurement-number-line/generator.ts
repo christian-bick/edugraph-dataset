@@ -68,7 +68,6 @@ export class MeasurementNumberLineGenerator implements ProblemGenerator<
     generate(config: MeasurementNumberLineGeneratorConfig): ProblemStub<MeasurementNumberLineProblem> {
         validateConfigFields('measurement-number-line', config, [
             'measurementKind',
-            'physicalMeasurement',
             'numberKind'
         ]);
 
@@ -81,13 +80,6 @@ export class MeasurementNumberLineGenerator implements ProblemGenerator<
         }
 
         const measurementKind = config.measurementKind as MeasurementNumberLineKind;
-        if (config.physicalMeasurement !== (measurementKind !== 'money')) {
-            throw new GeneratorValidationError(
-                'measurement-number-line',
-                'Physical measurement semantics are required for length, time, liquid-volume, and weight, and forbidden for money.'
-            );
-        }
-
         const numberKind = config.numberKind as NumberKind;
         const tickCount: 4 | 8 | 10 = numberKind === 'fraction'
             ? random() >= 0.5 ? 8 : 4

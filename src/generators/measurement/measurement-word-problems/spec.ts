@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {arithmeticOperations, resolveExplicitOperation} from '../../arithmetic/helpers.ts';
@@ -20,7 +20,7 @@ export const measurementWordProblemNumberKinds = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-word-problems',
-    generalLabels: [Scope.SingleStep, Scope.TwoOperands]
+    generalLabels: [Area.MeasuringWithUnits, Scope.SingleStep, Scope.TwoOperands]
 };
 
 export const MeasurementWordProblemsGeneratorSchema = {
@@ -45,7 +45,6 @@ export const MeasurementWordProblemsGeneratorSchema = {
             [[Scope.Dollar], 'money']
         ])
     ],
-    physicalMeasurement: [[Area.MeasuringWithUnits], hasLabel(Area.MeasuringWithUnits)],
     numberKind: [
         measurementWordProblemNumberKinds,
         selectCanonicalLabel([

@@ -10,7 +10,7 @@ const measurementCases = [
     [[Area.MeasuringWithUnits, Scope.TimeMeasurement], 'time'],
     [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], 'liquid-volume'],
     [[Area.MeasuringWithUnits, Scope.WeightMeasurement], 'weight'],
-    [[Scope.Dollar], 'money']
+    [[Area.MeasuringWithUnits, Scope.Dollar], 'money']
 ] as const;
 
 const numberCases = [
@@ -21,8 +21,8 @@ const numberCases = [
 describe('MeasurementNumberLineGenerator spec integration', () => {
     const generator = new MeasurementNumberLineGenerator();
 
-    it('has no invariant generator labels because kind and number form both vary', () => {
-        expect(spec.generalLabels).toEqual([]);
+    it('declares unit measurement invariant while Scope selects the unit kind', () => {
+        expect(spec.generalLabels).toEqual([Area.MeasuringWithUnits]);
         expect(measurementNumberLineNumberKinds).toEqual([
             Scope.ProperFractions,
             Scope.DecimalNumbers
@@ -43,18 +43,20 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
                 expect(stub).not.toBeNull();
                 expect(stub!.data).toMatchObject({measurementKind, numberKind});
                 expect(stub!.tags).toEqual(expect.arrayContaining([
-                    ...measurementLabels,
+                    ...measurementLabels.filter(label => label !== Area.MeasuringWithUnits),
                     numberLabel
                 ]));
+                expect(stub!.tags).not.toContain(Area.MeasuringWithUnits);
                 expect(stub!.tags).not.toContain(Scope.Numberline);
                 expect(stub!.tags).not.toContain(Ability.VisualArticulation);
             }
         }
     });
 
-    it('resolves Dollar without false physical measurement semantics', () => {
+    it('resolves Dollar as a unit-measurement Scope', () => {
         setSeed('money-decimal-line');
         const stub = generateWithLabels(generator, [
+            Area.MeasuringWithUnits,
             Scope.Dollar,
             Scope.DecimalNumbers,
             Scope.Numberline,
@@ -62,6 +64,7 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.measurementKind).toBe('money');
+        expect(stub!.tags).toContain(Scope.Dollar);
         expect(stub!.tags).not.toContain(Area.MeasuringWithUnits);
     });
 });

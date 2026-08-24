@@ -38,7 +38,6 @@ const generate = (
     setSeed(`${measurementKind}-${numberKind}-${operation}`);
     return generator.generate({
         measurementKind,
-        physicalMeasurement: measurementKind !== 'money',
         numberKind,
         operation: operationArea
     }).data;

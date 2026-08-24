@@ -88,29 +88,21 @@ const expectCoherent = (problem: MeasurementNumberLineProblem): void => {
 };
 
 describe('MeasurementNumberLineGenerator', () => {
-    it('strictly validates configuration and physical/currency semantics', () => {
+    it('strictly validates configuration', () => {
         expect(() => generator.generate({} as never)).toThrow('Required field "measurementKind" is missing.');
         expect(() => generator.generate({
             measurementKind: 'distance',
-            physicalMeasurement: true,
             numberKind: 'fraction'
         } as never)).toThrow('Unsupported measurement kind "distance".');
         expect(() => generator.generate({
             measurementKind: 'length',
-            physicalMeasurement: true,
             numberKind: 'integer'
         } as never)).toThrow('Unsupported number kind "integer".');
-        expect(() => generator.generate({
-            measurementKind: 'money',
-            physicalMeasurement: true,
-            numberKind: 'decimal'
-        })).toThrow('Physical measurement semantics are required');
     });
 
     it('is deterministic for the complete mathematical identity', () => {
         const config: MeasurementNumberLineGeneratorConfig = {
             measurementKind: 'liquid-volume',
-            physicalMeasurement: true,
             numberKind: 'fraction'
         };
         setSeed('measurement-number-line-determinism');
@@ -126,7 +118,6 @@ describe('MeasurementNumberLineGenerator', () => {
                     setSeed(`${measurementKind}-${numberKind}-${seed}`);
                     const stub = generator.generate({
                         measurementKind,
-                        physicalMeasurement: measurementKind !== 'money',
                         numberKind
                     });
                     expectCoherent(stub.data);
@@ -141,7 +132,6 @@ describe('MeasurementNumberLineGenerator', () => {
             setSeed(seed);
             const data = generator.generate({
                 measurementKind: 'length',
-                physicalMeasurement: true,
                 numberKind: 'fraction'
             }).data;
             counts.add(data.tickValues.length - 1);
@@ -160,7 +150,6 @@ describe('MeasurementNumberLineGenerator', () => {
             setSeed(measurementKind);
             const stub = generator.generate({
                 measurementKind,
-                physicalMeasurement: measurementKind !== 'money',
                 numberKind: 'decimal'
             });
             if (measurementKind === 'money') expect(stub.tags).toBeUndefined();
@@ -172,7 +161,6 @@ describe('MeasurementNumberLineGenerator', () => {
         setSeed('canonical-contract');
         const data = generator.generate({
             measurementKind: 'time',
-            physicalMeasurement: true,
             numberKind: 'fraction'
         }).data;
         for (const field of [

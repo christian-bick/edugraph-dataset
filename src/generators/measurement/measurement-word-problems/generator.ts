@@ -254,7 +254,6 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
     generate(config: MeasurementWordProblemsGeneratorConfig): ProblemStub<MeasurementWordProblemGrade4> {
         validateConfigFields('measurement-word-problems', config, [
             'measurementKind',
-            'physicalMeasurement',
             'numberKind',
             'operation'
         ]);
@@ -273,12 +272,6 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
         }
 
         const measurementKind = config.measurementKind as MeasurementWordProblemKind;
-        if (config.physicalMeasurement !== (measurementKind !== 'money')) {
-            throw new GeneratorValidationError(
-                'measurement-word-problems',
-                'Physical measurement semantics are required for length, time, liquid-volume, and weight, and forbidden for money.'
-            );
-        }
         const numberKind = config.numberKind as MeasurementWordProblemNumberKind;
         const data = buildProblem(
             sampleMath(numberKind, operation, measurementKind),

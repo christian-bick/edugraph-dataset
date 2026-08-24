@@ -31,7 +31,6 @@ const problemFor = (
     setSeed(seed);
     return generator.generate({
         measurementKind,
-        physicalMeasurement: measurementKind !== 'money',
         numberKind
     }).data;
 };

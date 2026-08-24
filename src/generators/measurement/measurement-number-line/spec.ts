@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -18,7 +18,7 @@ export const measurementNumberLineNumberKinds = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-number-line',
-    generalLabels: []
+    generalLabels: [Area.MeasuringWithUnits]
 };
 
 export const MeasurementNumberLineGeneratorSchema = {
@@ -43,7 +43,6 @@ export const MeasurementNumberLineGeneratorSchema = {
             [[Scope.Dollar], 'money']
         ])
     ],
-    physicalMeasurement: [[Area.MeasuringWithUnits], hasLabel(Area.MeasuringWithUnits)],
     numberKind: [
         measurementNumberLineNumberKinds,
         selectCanonicalLabel([

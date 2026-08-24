@@ -162,25 +162,20 @@ payloads remain unchanged.
 
 ## Current inventory
 
-The inventory below reflects the CCSS K-4 release state at commit
-`5489ebca38b05225d03996a728f16f577d0f2912`.
+The inventory below reflects the current CCSS K-4 state.
 
 ### Targets
 
 - 653 normalized active targets.
+- All 653 contain at least one Area.
 - All 653 contain at least one Ability.
 - 557 contain one Ability, 80 contain two, and 16 contain three.
-- 384 contain multiple Areas; this is not inherently a defect.
+- 257 contain one Area and 396 contain multiple Areas; multiple Areas are not inherently a defect.
 - 25 contain no Scope; this is not inherently a defect.
-- Two Grade 4 measurement-number-line permutations contain no Area because the `Scope.Dollar`
-  member of `measurementKinds` is not paired with an Area.
-
-The two Area-less targets must be classified correctly after reviewing the ontology and source
-standard. The migration must not guess an Area merely to satisfy the new gate.
 
 ### Generator declarations
 
-- 79 generator modules.
+- 80 generator modules.
 - Zero generator `generalLabels` contain an Ability.
 - Zero generator schemas contain an Ability.
 
@@ -289,11 +284,11 @@ does not encode `generalLabels` versus schema provenance, so the current catalog
 declaration metadata. Source scans supply the implementation-only findings. This separation avoids
 a graph-schema migration while keeping matching work delta-aware and all audit passes linear.
 
-The first CCSS run reproduced the inventory above from 653 targets and 806 matched production
-tuples. It reported two Area-less targets and raw-label access in two sorting views as violations;
-24 generator payload candidates, 30 rejection declarations, seven applicability declarations, and
-20 view-owned Areas as review items; and 11 Ability-parameterized views as task-identity signals.
-There were no positive cross-role capability overlaps and no target without an Ability or match.
+The current strict CCSS audit covers 653 targets and 795 matched production tuples. It reports zero
+violations and no Ability-parameterized views. Its remaining semantic review queue contains 33
+rejection declarations, 23 applicability declarations, two target-Ability applicability
+declarations, and 21 view-owned Areas. There are no positive cross-role capability overlaps and no
+target without an Area, Ability, or match.
 
 ### Phase 1: validate and formalize the language-neutral generator boundary
 
@@ -397,9 +392,10 @@ contract and affected payload types are migrated.
 
 ### Phase 5: review target, applicability, and boundary declarations
 
-1. Correct the two Area-less Grade 4 measurement-number-line permutations after an ontology and
-   standards review.
-2. Add the production target dimension gate.
+1. **Resolved:** every Grade 4 measurement kind, including `Scope.Dollar`, now belongs to
+   `Area.MeasuringWithUnits`. The Scope authoritatively selects the unit system; dataset generation
+   does not model currency-specific denomination availability.
+2. Keep the production target dimension gate strict.
 3. Review every `rejectedLabels` declaration and retain only physical rendering boundaries.
 4. Review every view-owned Area and record why it is an independent knowledge domain.
 5. Confirm every `requiredLabels` declaration is necessary, generator-established, and not better

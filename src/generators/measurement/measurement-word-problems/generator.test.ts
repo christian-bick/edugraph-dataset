@@ -109,23 +109,19 @@ describe('MeasurementWordProblemsGenerator', () => {
     it('strictly validates every configuration field and supported value', () => {
         expect(() => generator.generate({} as never)).toThrow('Required field "measurementKind" is missing.');
         expect(() => generator.generate({
-            measurementKind: 'distance', physicalMeasurement: true, numberKind: 'integer', operation: Area.Addition
+            measurementKind: 'distance', numberKind: 'integer', operation: Area.Addition
         } as never)).toThrow('Unsupported measurement kind "distance".');
         expect(() => generator.generate({
-            measurementKind: 'length', physicalMeasurement: true, numberKind: 'ratio', operation: Area.Addition
+            measurementKind: 'length', numberKind: 'ratio', operation: Area.Addition
         } as never)).toThrow('Unsupported number kind "ratio".');
         expect(() => generator.generate({
-            measurementKind: 'length', physicalMeasurement: true, numberKind: 'integer', operation: 'unsupported'
+            measurementKind: 'length', numberKind: 'integer', operation: 'unsupported'
         } as never)).toThrow('Unsupported operation "unsupported".');
-        expect(() => generator.generate({
-            measurementKind: 'money', physicalMeasurement: true, numberKind: 'integer', operation: Area.Addition
-        })).toThrow('Physical measurement semantics are required');
     });
 
     it('is deterministic for the complete task identity', () => {
         const config: MeasurementWordProblemsGeneratorConfig = {
             measurementKind: 'liquid-volume',
-            physicalMeasurement: true,
             numberKind: 'decimal',
             operation: Area.Division
         };
@@ -143,7 +139,6 @@ describe('MeasurementWordProblemsGenerator', () => {
                         setSeed(`${measurementKind}-${numberKind}-${operationLabel}-${seed}`);
                         const stub = generator.generate({
                             measurementKind,
-                            physicalMeasurement: measurementKind !== 'money',
                             numberKind,
                             operation: operationLabel
                         });
@@ -170,7 +165,6 @@ describe('MeasurementWordProblemsGenerator', () => {
             setSeed(measurementKind);
             const stub = generator.generate({
                 measurementKind,
-                physicalMeasurement: measurementKind !== 'money',
                 numberKind: 'integer',
                 operation: Area.Addition
             });

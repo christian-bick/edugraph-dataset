@@ -10,7 +10,7 @@ const measurementCases = [
     [[Area.MeasuringWithUnits, Scope.TimeMeasurement], 'time'],
     [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], 'liquid-volume'],
     [[Area.MeasuringWithUnits, Scope.WeightMeasurement], 'weight'],
-    [[Scope.Dollar], 'money']
+    [[Area.MeasuringWithUnits, Scope.Dollar], 'money']
 ] as const;
 
 const numberCases = [
@@ -29,8 +29,12 @@ const operationCases = [
 describe('MeasurementWordProblemsGenerator spec integration', () => {
     const generator = new MeasurementWordProblemsGenerator();
 
-    it('declares only the invariant one-step, two-operand contract generally', () => {
-        expect(spec.generalLabels).toEqual([Scope.SingleStep, Scope.TwoOperands]);
+    it('declares unit measurement, one-step, and two-operand invariants generally', () => {
+        expect(spec.generalLabels).toEqual([
+            Area.MeasuringWithUnits,
+            Scope.SingleStep,
+            Scope.TwoOperands
+        ]);
     });
 
     it('resolves all 60 corrected Grade 4 label permutations', () => {
@@ -50,19 +54,21 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
                     expect(stub).not.toBeNull();
                     expect(stub!.data).toMatchObject({measurementKind, numberKind, operation});
                     expect(stub!.tags).toEqual(expect.arrayContaining([
-                        ...measurementLabels,
+                        ...measurementLabels.filter(label => label !== Area.MeasuringWithUnits),
                         numberLabel,
                         operationLabel
                     ]));
+                    expect(stub!.tags).not.toContain(Area.MeasuringWithUnits);
                     expect(stub!.tags).not.toContain(Ability.TextualReception);
                 }
             }
         }
     });
 
-    it('does not require physical measurement semantics for money', () => {
+    it('resolves Dollar as a unit-measurement Scope', () => {
         setSeed('money-only');
         const stub = generateWithLabels(generator, [
+            Area.MeasuringWithUnits,
             Scope.SingleStep,
             Scope.TwoOperands,
             Scope.Dollar,
@@ -72,10 +78,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.measurementKind).toBe('money');
+        expect(stub!.tags).toContain(Scope.Dollar);
         expect(stub!.tags).not.toContain(Area.MeasuringWithUnits);
-    });
-
-    it('keeps the physical-measurement guard separate from the mathematical kind resolver', () => {
-        expect(generator.schema).toHaveProperty('physicalMeasurement');
     });
 });

@@ -7,7 +7,7 @@ const measurementKinds = [
     [Area.MeasuringWithUnits, Scope.TimeMeasurement],
     [Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes],
     [Area.MeasuringWithUnits, Scope.WeightMeasurement],
-    [Scope.Dollar]
+    [Area.MeasuringWithUnits, Scope.Dollar]
 ];
 
 const builder = new DatasetPermutationBuilder()
