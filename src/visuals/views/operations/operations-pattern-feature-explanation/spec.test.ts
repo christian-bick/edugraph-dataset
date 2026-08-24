@@ -10,8 +10,10 @@ describe('operations-pattern-feature-explanation view spec', () => {
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation
         ]);
-        expect(spec.requiredLabels).toEqual([Area.EmergentFeatureRecognition]);
-        expect(spec.requiredTargetAbilities).toEqual([Ability.ProcedureExecution]);
+        expect(spec.requiredLabels).toEqual([
+            Area.EmergentFeatureRecognition,
+            Ability.ProcedureExecution
+        ]);
         expect(spec.rejectedLabels).toBeUndefined();
     });
 });

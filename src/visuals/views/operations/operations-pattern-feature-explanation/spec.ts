@@ -10,8 +10,7 @@ export const spec: ViewSpec = {
         Ability.ProcedureUnderstanding,
         Ability.TextualArticulation
     ],
-    requiredLabels: [Area.EmergentFeatureRecognition],
-    requiredTargetAbilities: [Ability.ProcedureExecution]
+    requiredLabels: [Area.EmergentFeatureRecognition, Ability.ProcedureExecution]
 };
 
 export const OperationsPatternFeatureExplanationViewSchema = {} as const;

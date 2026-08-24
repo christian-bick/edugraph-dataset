@@ -120,7 +120,7 @@ views and share their common rendering code.
 
 The leaf wrapper fixes the task mode passed to the shared renderer. The shared renderer
 must not inspect ontology labels or import one leaf's spec to recover that decision.
-When [SPEC-V7](spec-view.md#spec-v7--requiredlabels-scopes-payload-applicability) scopes a
+When [SPEC-V7](spec-view.md#spec-v7--requiredlabels-declares-target-preconditions) scopes a
 leaf to one member of a canonical discriminated family, the wrapper also fixes the expected
 discriminant and the shared renderer fails strictly if the payload does not match it.
 

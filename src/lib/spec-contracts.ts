@@ -1,11 +1,7 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Area} from 'edugraph-ts';
 import {isSubConceptOf} from './ontology.ts';
 
 const abilityLabels = new Set<string>(Object.values(Ability));
-const applicabilityLabels = new Set<string>([
-    ...Object.values(Area),
-    ...Object.values(Scope)
-]);
 const areaLabels = new Set<string>(Object.values(Area));
 
 export function findAbilityLabels(labels: readonly string[]): string[] {
@@ -35,45 +31,15 @@ export interface CompatibleGeneratorLabels {
 }
 
 export type RequiredLabelContractIssue =
-    | {kind: 'invalid-required-label-kind'; label: string}
-    | {kind: 'view-provides-required-label'; label: string; viewLabel: string}
     | {kind: 'required-and-rejected-label'; label: string}
     | {kind: 'no-compatible-generator'}
-    | {kind: 'generator-missing-required-label'; generatorId: string; label: string};
+    | {kind: 'pair-missing-required-label'; generatorId: string; label: string};
 
 export type RejectedLabelContractIssue =
     {kind: 'ability-rejection'; label: string};
 
-export type RequiredTargetAbilityContractIssue =
-    | {kind: 'invalid-required-target-ability'; label: string}
-    | {kind: 'required-target-ability-not-invariant'; label: string};
-
 /**
- * Target-Ability requirements select among invariant view projections. They
- * must be Abilities that the same view unconditionally contributes.
- */
-export function findRequiredTargetAbilityContractIssues({
-    requiredTargetAbilities,
-    viewGeneralLabels
-}: {
-    requiredTargetAbilities: readonly string[];
-    viewGeneralLabels: readonly string[];
-}): RequiredTargetAbilityContractIssue[] {
-    const issues: RequiredTargetAbilityContractIssue[] = [];
-    for (const label of requiredTargetAbilities) {
-        if (!abilityLabels.has(label)) {
-            issues.push({kind: 'invalid-required-target-ability', label});
-            continue;
-        }
-        if (!viewGeneralLabels.some(viewLabel => isSubConceptOf(viewLabel, label))) {
-            issues.push({kind: 'required-target-ability-not-invariant', label});
-        }
-    }
-    return issues;
-}
-
-/**
- * Rejections express physical rendering boundaries. They never filter Abilities.
+ * Rejections express stable, complete exclusion boundaries. They never filter Abilities.
  * Area/Scope limits may intentionally be forward-compatible with generators that
  * do not currently establish them, so their present matching effect is not part
  * of this static contract.
@@ -88,8 +54,8 @@ export function findRejectedLabelContractIssues({
 }
 
 /**
- * Required labels are applicability preconditions supplied by every compatible
- * generator, never capabilities supplied by the view itself.
+ * Required labels are dimension-neutral target preconditions. Every compatible
+ * generator/view pair must be capable of satisfying each requirement.
  */
 export function findRequiredLabelContractIssues({
     requiredLabels,
@@ -106,21 +72,6 @@ export function findRequiredLabelContractIssues({
 
     const issues: RequiredLabelContractIssue[] = [];
     for (const requiredLabel of requiredLabels) {
-        if (!applicabilityLabels.has(requiredLabel)) {
-            issues.push({kind: 'invalid-required-label-kind', label: requiredLabel});
-        }
-
-        const providingViewLabel = viewSupportedLabels.find(viewLabel =>
-            isSubConceptOf(viewLabel, requiredLabel)
-        );
-        if (providingViewLabel) {
-            issues.push({
-                kind: 'view-provides-required-label',
-                label: requiredLabel,
-                viewLabel: providingViewLabel
-            });
-        }
-
         if (rejectedLabels.includes(requiredLabel)) {
             issues.push({kind: 'required-and-rejected-label', label: requiredLabel});
         }
@@ -133,12 +84,15 @@ export function findRequiredLabelContractIssues({
 
     for (const generator of compatibleGenerators) {
         for (const requiredLabel of requiredLabels) {
-            const suppliedByGenerator = generator.supportedLabels.some(generatorLabel =>
-                isSubConceptOf(generatorLabel, requiredLabel)
+            const suppliedByPair = [
+                ...generator.supportedLabels,
+                ...viewSupportedLabels
+            ].some(supportedLabel =>
+                isSubConceptOf(supportedLabel, requiredLabel)
             );
-            if (!suppliedByGenerator) {
+            if (!suppliedByPair) {
                 issues.push({
-                    kind: 'generator-missing-required-label',
+                    kind: 'pair-missing-required-label',
                     generatorId: generator.generatorId,
                     label: requiredLabel
                 });

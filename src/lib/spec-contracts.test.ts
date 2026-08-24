@@ -4,8 +4,7 @@ import {
     findAbilityLabels,
     findCrossRoleAreaOverlaps,
     findRejectedLabelContractIssues,
-    findRequiredLabelContractIssues,
-    findRequiredTargetAbilityContractIssues
+    findRequiredLabelContractIssues
 } from './spec-contracts.ts';
 
 describe('findAbilityLabels', () => {
@@ -50,7 +49,7 @@ describe('findRequiredLabelContractIssues', () => {
         })).toEqual([]);
     });
 
-    it('reports every compatible generator that cannot establish a requirement', () => {
+    it('reports every compatible pair that cannot establish a requirement', () => {
         expect(findRequiredLabelContractIssues({
             requiredLabels: [Area.PrimeNumbers],
             viewSupportedLabels: [],
@@ -60,41 +59,33 @@ describe('findRequiredLabelContractIssues', () => {
                 {generatorId: 'missing', supportedLabels: [Area.CompositeNumbers]}
             ]
         })).toContainEqual({
-            kind: 'generator-missing-required-label',
+            kind: 'pair-missing-required-label',
             generatorId: 'missing',
             label: Area.PrimeNumbers
         });
     });
 
-    it('rejects view-provided, rejected, and generator-less requirements', () => {
+    it('accepts a requirement supplied by the view in any label dimension', () => {
+        expect(findRequiredLabelContractIssues({
+            requiredLabels: [Ability.Formalization],
+            viewSupportedLabels: [Ability.Formalization],
+            rejectedLabels: [],
+            compatibleGenerators: [
+                {generatorId: 'writing', supportedLabels: [Area.NumerationWithIntegers]}
+            ]
+        })).toEqual([]);
+    });
+
+    it('rejects contradictory and generator-less requirements', () => {
         expect(findRequiredLabelContractIssues({
             requiredLabels: [Area.PrimeNumbers],
             viewSupportedLabels: [Area.PrimeNumbers],
             rejectedLabels: [Area.PrimeNumbers],
             compatibleGenerators: []
         })).toEqual([
-            {
-                kind: 'view-provides-required-label',
-                label: Area.PrimeNumbers,
-                viewLabel: Area.PrimeNumbers
-            },
             {kind: 'required-and-rejected-label', label: Area.PrimeNumbers},
             {kind: 'no-compatible-generator'}
         ]);
-    });
-
-    it('restricts applicability requirements to Area and Scope labels', () => {
-        expect(findRequiredLabelContractIssues({
-            requiredLabels: [Ability.Formalization],
-            viewSupportedLabels: [],
-            rejectedLabels: [],
-            compatibleGenerators: [
-                {generatorId: 'writing', supportedLabels: [Ability.Formalization]}
-            ]
-        })).toContainEqual({
-            kind: 'invalid-required-label-kind',
-            label: Ability.Formalization
-        });
     });
 });
 
@@ -117,27 +108,5 @@ describe('findRejectedLabelContractIssues', () => {
         expect(findRejectedLabelContractIssues({
             rejectedLabels: [Scope.NumbersLarger20, Scope.NumbersLarger100]
         })).toEqual([]);
-    });
-});
-
-describe('findRequiredTargetAbilityContractIssues', () => {
-    it('accepts an invariant Ability used to select an explicit target claim', () => {
-        expect(findRequiredTargetAbilityContractIssues({
-            requiredTargetAbilities: [Ability.Formalization],
-            viewGeneralLabels: [Ability.ProcedureUnderstanding, Ability.Formalization]
-        })).toEqual([]);
-    });
-
-    it('rejects non-Ability and non-invariant requirements', () => {
-        expect(findRequiredTargetAbilityContractIssues({
-            requiredTargetAbilities: [Area.Equation, Ability.Formalization],
-            viewGeneralLabels: [Ability.ProcedureUnderstanding]
-        })).toEqual([
-            {kind: 'invalid-required-target-ability', label: Area.Equation},
-            {
-                kind: 'required-target-ability-not-invariant',
-                label: Ability.Formalization
-            }
-        ]);
     });
 });

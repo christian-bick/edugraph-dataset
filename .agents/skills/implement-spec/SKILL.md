@@ -52,8 +52,9 @@ may the two role implementations proceed independently.
 Keep the shared payload Ability-neutral while preserving the structured evidence for its Area
 and Scope claims (`IMPL-G8`). If different Abilities change the observable learner action, use
 separate leaf views with parent-level shared rendering code (`SPEC-V6`, `IMPL-V9`). Each leaf
-must preserve the complete matched claim (`IMPL-V11`); use `requiredLabels` only for
-generator-established Area/Scope applicability (`SPEC-V7`).
+must preserve the complete matched claim (`IMPL-V11`); use dimension-neutral `requiredLabels`
+only for explicit target preconditions supported by the compatible pair, never to parameterize
+rendering (`SPEC-V7`, `SPEC-V8`).
 
 #### Step 3: Delegate Module-Level Tasks & Reviews
 Delegate component updates and audits to specialized skills:

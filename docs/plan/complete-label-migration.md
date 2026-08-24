@@ -74,8 +74,11 @@ Every Ability capability is contributed by the view, through either invariant `g
 resolved view-schema configuration. Abilities remain forbidden from:
 
 - every generator declaration and schema;
-- `requiredLabels`;
 - `rejectedLabels`.
+
+An invariant view Ability may also appear in `requiredLabels` when the view should participate
+only for targets that explicitly request it. The requirement does not contribute the capability
+or make it conditional.
 
 An Ability schema parameter is valid when it changes observable support or another presentational
 property while preserving the same learner action, remains valid for every compatible payload,
@@ -106,26 +109,25 @@ merely Scopes; separately acquired knowledge remains Area-level.
 
 Equal or ancestor/descendant positive capabilities may not be split across a compatible
 generator/view pair. `requiredLabels` are the explicit exception in role, not in ownership: they
-reference generator-established Area/Scope applicability but do not contribute a capability.
+reference target applicability but do not contribute a capability.
 
 ### Applicability and boundaries are not capabilities
 
-`requiredLabels` express positive mathematical applicability. They:
+`requiredLabels` express dimension-neutral target preconditions. They:
 
-- contain Area or Scope labels only;
-- must be supportable by every type-compatible generator;
-- must not also be supplied or rejected by the view;
+- may contain Area, Scope, or Ability labels;
+- must be supportable by every type-compatible generator/view pair;
+- must not also be rejected by the view;
+- never configure rendering or make a capability conditionally true;
 - should be replaced by a narrower payload type when static typing can express the boundary.
 
 `rejectedLabels` express truthful, stable, and complete exclusion boundaries. They must never
 filter an Ability, compensate for generator-side presentation logic, suppress an inconvenient
 match, or blacklist only the alternatives currently known to the ontology.
 
-`requiredTargetAbilities` select an invariant stronger task only when sibling leaf views share the
-same generator-established Area/Scope capability set and payload type. Every entry is an Ability
-already declared in that leaf's `generalLabels`; the property never branches rendering or supplies
-a capability. Prefer a narrower payload type or generator-owned `requiredLabels` whenever either
-can express the distinction.
+An invariant stronger sibling task uses the same `requiredLabels` mechanism as any other target
+precondition. Its Ability remains declared in `generalLabels`; no dimension-specific requirement
+property is needed.
 
 ### Implementations consume resolved contracts, not raw labels
 
@@ -225,12 +227,11 @@ reject unresolved ontology access in generator/view implementations.
 
 ### Applicability, boundaries, and view-owned Areas
 
-- 35 views use `requiredLabels`; their static and semantic contracts pass.
+- 36 views use `requiredLabels`; their static and semantic contracts pass.
 - 26 views use `rejectedLabels`; each has a reviewed stable and complete exclusion boundary.
 - 23 views declare general Areas. Current validation finds no
   taxonomic overlap with compatible generator Areas, and each independent-domain rationale is
   recorded in [label-declaration-review.md](label-declaration-review.md).
-- Two views use `requiredTargetAbilities`; both stronger-sibling contracts are reviewed.
 - The current catalog contains no unresolved generator-general/view-schema Scope overlap. This
   permits the complete positive-capability overlap rule to become strict without a known migration
   exception.
@@ -266,9 +267,9 @@ declaration metadata. Source scans supply the implementation-only findings. This
 a graph-schema migration while keeping matching work delta-aware and all audit passes linear.
 
 The current strict CCSS audit covers 653 targets and 795 matched production tuples. It reports zero
-violations, zero source signals, and no Ability-parameterized views. Its 86 semantic review signals
-cover 26 rejection declarations, 35 applicability declarations, two target-Ability applicability
-declarations, and 23 view-owned Areas; Phase 5 records a durable disposition for all of them. There
+violations, zero source signals, and no Ability-parameterized views. Its 85 semantic review signals
+cover 26 rejection declarations, 36 applicability declarations, and 23 view-owned Areas; Phase 5
+records a durable disposition for all of them. There
 are no positive cross-role capability overlaps and no target without an Area, Ability, or match.
 
 ### Phase 1: validate and formalize the language-neutral generator boundary
@@ -366,7 +367,7 @@ At minimum, reject:
 - raw ontology IRI string matching in generator and view implementations;
 - `Ability` imports or references in `generator.ts`;
 - label resolver imports in generator and view implementation files;
-- Abilities in generator schemas, `requiredLabels`, or `rejectedLabels`;
+- Abilities in generator schemas or `rejectedLabels`;
 - equal or ancestor/descendant positive capability overlap across compatible roles;
 - active targets without an Area or Ability.
 
@@ -395,17 +396,17 @@ misclassified as syntax failures.
 3. Review every `rejectedLabels` declaration and retain only stable, complete exclusion
    boundaries.
 4. Review every view-owned Area and record why it is an independent knowledge domain.
-5. Confirm every `requiredLabels` declaration is necessary, generator-established, and not better
-   expressed by a narrower payload type.
+5. Confirm every `requiredLabels` declaration is necessary, supported by every compatible pair,
+   does not parameterize rendering, and is not better expressed by a narrower payload type.
 6. Audit multiple-Ability view declarations for unconditional conjunction without introducing a
    primary Ability.
 
 Zero-Scope targets and multiple-Area or multiple-Ability targets are not findings by themselves.
 
 **Status: complete.** [label-declaration-review.md](label-declaration-review.md) records the durable
-disposition of all 86 semantic review signals: 26 `rejectedLabels`, 35 `requiredLabels`, two
-`requiredTargetAbilities`, and 23 view-owned Area declarations. Positive mass/volume, notation,
-and hundreds-bundle applicability is stated through `requiredLabels`; the redundant
+disposition of all 85 semantic review signals: 26 `rejectedLabels`, 36 `requiredLabels`, and 23
+view-owned Area declarations. Positive mass/volume, notation, hundreds-bundle, and stronger-sibling
+applicability is stated through dimension-neutral `requiredLabels`; the redundant
 length-estimation rejection is absent. All retained declarations satisfy the accepted ownership
 or boundary rules, and the normalized production match set remains 795 tuples.
 
@@ -511,11 +512,9 @@ The current preferred tools are:
 
 1. a narrower payload type;
 2. a separate leaf view with shared rendering code;
-3. `requiredLabels` for generator-established Area/Scope applicability.
-4. `requiredTargetAbilities` for a stronger invariant sibling task that otherwise has the same
-   mathematical applicability and payload type.
+3. dimension-neutral `requiredLabels` for an explicit target precondition.
 
-The place-value model-to-written-method task is the concrete fourth case: the stronger leaf adds
+The place-value model-to-written-method task is the concrete third case: the stronger leaf adds
 an invariant `Formalization` claim, but no mathematical discriminator separates it from the
 concrete-model task. Parameter defaults do not by themselves justify conditional capability
 semantics.
@@ -551,8 +550,9 @@ The migration is complete when:
 2. every generator declaration and schema is Ability-free;
 3. every target Ability is positively contributed by its matched view through `generalLabels` or
    resolved schema configuration;
-4. no `requiredLabels` or `rejectedLabels` declaration contains an Ability, and every view Ability
-   schema has passed the same-task, totality, determinism, and checklist review;
+4. no `rejectedLabels` declaration contains an Ability; every Ability in `requiredLabels` is an
+   invariant view capability; and every view Ability schema has passed the same-task, totality,
+   determinism, and checklist review;
 5. no generator or view implementation parses raw labels;
 6. no compatible generator/view pair has equal or ancestor/descendant positive capability
    ownership overlap;
@@ -560,7 +560,8 @@ The migration is complete when:
    prompt, selected blank, requested explanation, or answer prose;
 8. every task-changing Ability is a leaf view with reusable parent-level rendering code, and no
    view hides parallel task implementations behind large config-controlled branches;
-9. every `requiredLabels` declaration is a valid generator-established applicability condition;
+9. every `requiredLabels` declaration is a necessary dimension-neutral target precondition,
+   supported by every compatible pair and independent of rendering behavior;
 10. every `rejectedLabels` declaration is a stable, complete exclusion boundary;
 11. every view-owned Area is demonstrably independent of compatible generator Areas;
 12. matching provenance identifies the capability owner of every target claim;

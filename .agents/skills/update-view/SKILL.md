@@ -12,7 +12,7 @@ Update the visual view module under `src/visuals/views/[<category>/]{viewName}` 
 
 2. **Task Identity and Evidence**:
    - When an Ability changes the observable learner action, apply `SPEC-V6`: create or use a separate leaf view with that Ability invariant in `generalLabels`. Keep reusable rendering code and tests in the parent category (`IMPL-V9`); the shared renderer receives a fixed task mode and never parses ontology labels.
-   - Use `requiredLabels` only to scope a leaf to generator-established Area/Scope context (`SPEC-V7`). It does not provide those labels and is not a substitute for a narrower payload type.
+   - Use dimension-neutral `requiredLabels` only when the target must explicitly request a label before the leaf participates (`SPEC-V7`). The compatible pair must still provide the capability; a view-supplied requirement remains invariant and never drives rendering (`SPEC-V8`). Prefer a narrower payload type when it expresses the same boundary.
    - Apply `IMPL-V11` to the complete matched claim. Preserve payload evidence for generator-owned labels while making the leaf Ability observable; do not reduce physical objects, mathematical laws, scales, or premises to unsupported names or assertions.
    - Apply `SPEC-11`: do not specialize a compatible generator Area. Use Scope for presentation, representation, evidence-source, or other contextual refinement within the same knowledge domain; claim an Area only when the task contributes an independent domain.
 

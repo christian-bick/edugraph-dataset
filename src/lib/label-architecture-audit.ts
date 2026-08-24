@@ -36,7 +36,7 @@ import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {createWorkCounters, type WorkCounters} from './work-counters.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
 
-export const LABEL_ARCHITECTURE_AUDIT_SCHEMA_VERSION = 1;
+export const LABEL_ARCHITECTURE_AUDIT_SCHEMA_VERSION = 2;
 
 const areaLabels = new Set<string>(Object.values(Area));
 const scopeLabels = new Set<string>(Object.values(Scope));
@@ -125,7 +125,6 @@ export interface LabelArchitectureAuditReport {
         view_schema_parameters: number;
         ability_parameterized_views: string[];
         views_with_required_labels: string[];
-        views_with_required_target_abilities: string[];
         views_with_rejected_labels: string[];
         views_with_positive_areas: string[];
     };
@@ -772,36 +771,23 @@ export function buildLabelArchitectureAudit(options: {
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
         }
-        for (const [kind, labels] of [
-            ['requiredLabels', view.requiredLabels ?? []],
-            ['rejectedLabels', view.rejectedLabels ?? []]
-        ] as const) {
-            const abilities = labels.filter(label => labelDimension(label) === 'Ability');
-            if (abilities.length > 0) {
-                findings.push(finding({
-                    category: `view-ability-${kind}`,
-                    disposition: 'violation',
-                    summary: `View ${view.viewId} contains Ability labels in ${kind}.`,
-                    modules: [view.viewId], labels: abilities, files: [],
-                    affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
-                }));
-            }
+        const rejectedAbilities = (view.rejectedLabels ?? [])
+            .filter(label => labelDimension(label) === 'Ability');
+        if (rejectedAbilities.length > 0) {
+            findings.push(finding({
+                category: 'view-ability-rejectedLabels',
+                disposition: 'violation',
+                summary: `View ${view.viewId} contains Ability labels in rejectedLabels.`,
+                modules: [view.viewId], labels: rejectedAbilities, files: [],
+                affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
+            }));
         }
         if ((view.requiredLabels ?? []).length > 0) {
             findings.push(finding({
                 category: 'required-label-review',
                 disposition: 'review',
-                summary: `Review whether ${view.viewId} requires irreducible generator-established applicability.`,
+                summary: `Review whether ${view.viewId} requires an explicit target precondition.`,
                 modules: [view.viewId], labels: [...(view.requiredLabels ?? [])], files: [],
-                affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
-            }));
-        }
-        if ((view.requiredTargetAbilities ?? []).length > 0) {
-            findings.push(finding({
-                category: 'required-target-ability-review',
-                disposition: 'review',
-                summary: `Review whether ${view.viewId} requires an explicit target Ability to select a distinct task leaf.`,
-                modules: [view.viewId], labels: [...(view.requiredTargetAbilities ?? [])], files: [],
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
         }
@@ -809,7 +795,7 @@ export function buildLabelArchitectureAudit(options: {
             findings.push(finding({
                 category: 'rejected-label-review',
                 disposition: 'review',
-                summary: `Review whether ${view.viewId} rejections are irreducible physical boundaries.`,
+                summary: `Review whether ${view.viewId} rejections are stable, complete exclusion boundaries.`,
                 modules: [view.viewId], labels: [...(view.rejectedLabels ?? [])], files: [],
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
@@ -922,9 +908,6 @@ export function buildLabelArchitectureAudit(options: {
             ability_parameterized_views: abilityParameterizedViews,
             views_with_required_labels: radixSortUtf8(options.views
                 .filter(view => (view.requiredLabels ?? []).length > 0).map(view => view.viewId)),
-            views_with_required_target_abilities: radixSortUtf8(options.views
-                .filter(view => (view.requiredTargetAbilities ?? []).length > 0)
-                .map(view => view.viewId)),
             views_with_rejected_labels: radixSortUtf8(options.views
                 .filter(view => (view.rejectedLabels ?? []).length > 0).map(view => view.viewId)),
             views_with_positive_areas: radixSortUtf8(options.views
@@ -978,7 +961,6 @@ export function formatLabelArchitectureAudit(report: LabelArchitectureAuditRepor
         `- View schema parameters: ${report.module_inventory.view_schema_parameters}`,
         `- Ability-parameterized views: ${report.module_inventory.ability_parameterized_views.length}`,
         `- Views with required labels: ${report.module_inventory.views_with_required_labels.length}`,
-        `- Views with required target Abilities: ${report.module_inventory.views_with_required_target_abilities.length}`,
         `- Views with rejected labels: ${report.module_inventory.views_with_rejected_labels.length}`,
         `- Views with positive Areas: ${report.module_inventory.views_with_positive_areas.length}`,
         '',

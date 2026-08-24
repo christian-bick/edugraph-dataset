@@ -15,10 +15,9 @@ and zero source signals.
 
 ## Review criteria
 
-- `requiredLabels` is retained only when it states positive Area/Scope applicability established
-  by every type-compatible generator and cannot be expressed more precisely by the payload type.
-- `requiredTargetAbilities` is retained only when it selects an invariant stronger sibling task
-  without supplying a capability or controlling rendering.
+- `requiredLabels` is retained only when it states a necessary target precondition supported by
+  every type-compatible generator/view pair, does not control rendering, and cannot be expressed
+  more precisely by the payload type.
 - `rejectedLabels` is retained only for a stable, complete invalid region of an otherwise
   compatible view contract.
 - A view-owned Area is retained only when the projection adds a distinct mathematical task or
@@ -28,8 +27,8 @@ These criteria are normative in `SPEC-V3`, `SPEC-V7`, `SPEC-V8`, and `SPEC-11`.
 
 ## Positive applicability
 
-All 35 current `requiredLabels` declarations are accepted. Each discriminant is generator-owned,
-while the view merely requires that mathematical member before participating.
+All 36 current `requiredLabels` declarations are accepted. Each precondition is pair-supported;
+the requirement itself supplies no capability.
 
 | Family | Views and accepted applicability |
 | --- | --- |
@@ -43,13 +42,11 @@ while the view merely requires that mathematical member before participating.
 | Place value | The hundreds-bundle leaf requires `MultiplesOf100`. |
 | Shape drawing | Circular and linear drawing require `Circle` or `Polygon`. |
 | Square arrays | Tile projections require `TileScale`; arrangement projections require `BoxArrangement`. |
+| Stronger sibling tasks | `operations-pattern-feature-explanation` requires its invariant `ProcedureExecution` claim; `place-value-arithmetic-written-method` requires its invariant `Formalization` claim. |
 
-The two `requiredTargetAbilities` declarations are also accepted:
-
-- `operations-pattern-feature-explanation` requires the target to request its invariant
-  `ProcedureExecution` claim so it does not replace the weaker sibling explanation task.
-- `place-value-arithmetic-written-method` requires the target to request its invariant
-  `Formalization` claim so it does not replace the block-model sibling task.
+The stronger sibling requirements use the same dimension-neutral mechanism as every other target
+precondition. Their Abilities remain invariant `generalLabels` capabilities and do not configure
+the views.
 
 ## Exclusion boundaries
 
@@ -97,7 +94,8 @@ The declaration review is complete:
 - redundant rejections that cannot affect matching are absent;
 - all retained exclusions state contract-level boundaries;
 - every view-owned Area has an independent-task rationale;
-- both stronger-sibling Ability requirements satisfy `SPEC-V8`;
+- both stronger-sibling Ability preconditions satisfy `SPEC-V8` without a dimension-specific
+  property;
 - the corrected declarations preserve all 795 matched production tuples.
 
 The audit should continue to report these declarations for review whenever their modules or

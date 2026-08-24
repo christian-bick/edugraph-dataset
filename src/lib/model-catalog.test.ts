@@ -41,18 +41,16 @@ describe('model catalogs', () => {
             labels,
             problemType
         })));
-        expect(modelViews.map(({viewId, supportedLabels, requiredLabels, requiredTargetAbilities, rejectedLabels, problemType}) => ({
+        expect(modelViews.map(({viewId, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
             viewId,
             supportedLabels,
             requiredLabels,
-            requiredTargetAbilities,
             rejectedLabels,
             problemType
-        }))).toEqual(fullViews.map(({viewId, supportedLabels, requiredLabels, requiredTargetAbilities, rejectedLabels, problemType}) => ({
+        }))).toEqual(fullViews.map(({viewId, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
             viewId,
             supportedLabels,
             requiredLabels,
-            requiredTargetAbilities,
             rejectedLabels,
             problemType
         })));

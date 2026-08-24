@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 export const spec: ViewSpec = {
     viewId: 'place-value-arithmetic-written-method',
     rejectedLabels: [Scope.NumbersSmaller10],
-    requiredTargetAbilities: [Ability.Formalization],
+    requiredLabels: [Ability.Formalization],
     generalLabels: [
         Scope.PhysicalNumbers,
         Ability.ProcedureUnderstanding,

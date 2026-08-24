@@ -66,12 +66,12 @@ const tupleIds = (tuples: readonly MatchTuple[]): string[] => tuples.map(tuple =
     `${tuple.target.id}#${tuple.generatorId}#${tuple.viewId}`
 );
 
-describe('required target Abilities', () => {
-    it('selects an invariant view only when the target requests its Ability', () => {
+describe('required target labels', () => {
+    it('selects a view only when the target requests its required Ability', () => {
         const view: ViewMatchInfo = {
             viewId: 'written-method',
             supportedLabels: [Ability.ProcedureUnderstanding, Ability.Formalization],
-            requiredTargetAbilities: [Ability.Formalization]
+            requiredLabels: [Ability.Formalization]
         };
         expect(matchesTarget(
             [Area.Addition, Ability.ProcedureUnderstanding],
@@ -79,7 +79,7 @@ describe('required target Abilities', () => {
             view
         )).toEqual({
             matched: false,
-            reason: 'missing-required-ability',
+            reason: 'missing-required-label',
             label: Ability.Formalization
         });
         expect(matchesTarget(

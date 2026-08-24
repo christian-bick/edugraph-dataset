@@ -40,7 +40,7 @@ the module that owns the corresponding behavior:
 | Ability | the view whose final observable task makes the ability claim true |
 
 A view's `requiredLabels` applicability constraints and `rejectedLabels` boundaries are then
-applied on top. They can respectively require a mathematical target context or veto an otherwise matching tuple
+applied on top. They can respectively require an explicit target claim or veto an otherwise matching tuple
 ([SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries)).
 
 **Why:** declaring only an ancestor of what a target needs silently fails to match it — the

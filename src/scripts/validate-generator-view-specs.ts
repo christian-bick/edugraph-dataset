@@ -9,8 +9,7 @@ import {
     findAbilityLabels,
     findCrossRoleAreaOverlaps,
     findRejectedLabelContractIssues,
-    findRequiredLabelContractIssues,
-    findRequiredTargetAbilityContractIssues
+    findRequiredLabelContractIssues
 } from '../lib/spec-contracts.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -136,7 +135,6 @@ async function validateSpecs() {
 
                 const generalLabels = spec.generalLabels || [];
                 const requiredLabels = spec.requiredLabels || [];
-                const requiredTargetAbilities = spec.requiredTargetAbilities || [];
                 const rejectedLabels = spec.rejectedLabels || [];
                 if (checkRedundantGeneralLabels('view', item, generalLabels)) {
                     hasError = true;
@@ -204,29 +202,12 @@ async function validateSpecs() {
                     }))
                 });
                 for (const issue of requiredLabelIssues) {
-                    if (issue.kind === 'invalid-required-label-kind') {
-                        console.error(`❌ [view:${item}] Required label '${issue.label}' is not an Area or Scope; requiredLabels may only scope mathematical applicability`);
-                    } else if (issue.kind === 'view-provides-required-label') {
-                        console.error(`❌ [view:${item}] Required label '${issue.label}' is provided by the view capability '${issue.viewLabel}'; requiredLabels must be generator-owned applicability only`);
-                    } else if (issue.kind === 'required-and-rejected-label') {
+                    if (issue.kind === 'required-and-rejected-label') {
                         console.error(`❌ [view:${item}] Required label '${issue.label}' is also rejected, making the view contract impossible`);
                     } else if (issue.kind === 'no-compatible-generator') {
-                        console.error(`❌ [view:${item}] requiredLabels cannot be established because the view has no compatible generator`);
+                        console.error(`❌ [view:${item}] requiredLabels cannot be evaluated because the view has no compatible generator`);
                     } else {
-                        console.error(`❌ [view:${item}] Required label '${issue.label}' is not supported by compatible generator '${issue.generatorId}'`);
-                    }
-                    hasError = true;
-                }
-
-                const requiredTargetAbilityIssues = findRequiredTargetAbilityContractIssues({
-                    requiredTargetAbilities,
-                    viewGeneralLabels: generalLabels
-                });
-                for (const issue of requiredTargetAbilityIssues) {
-                    if (issue.kind === 'invalid-required-target-ability') {
-                        console.error(`❌ [view:${item}] Required target Ability '${issue.label}' is not an Ability`);
-                    } else {
-                        console.error(`❌ [view:${item}] Required target Ability '${issue.label}' is not an invariant capability in generalLabels`);
+                        console.error(`❌ [view:${item}] Required label '${issue.label}' is not supported by compatible pair '${issue.generatorId}#${item}'`);
                     }
                     hasError = true;
                 }
@@ -235,7 +216,7 @@ async function validateSpecs() {
                     rejectedLabels
                 });
                 for (const issue of rejectedLabelIssues) {
-                    console.error(`❌ [view:${item}] Rejected label '${issue.label}' is an Ability; rejectedLabels may only express physical rendering boundaries`);
+                    console.error(`❌ [view:${item}] Rejected label '${issue.label}' is an Ability; rejectedLabels may only express stable, complete exclusion boundaries`);
                     hasError = true;
                 }
 

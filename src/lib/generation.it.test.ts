@@ -104,7 +104,6 @@ describe('catalogs and end-to-end matching', () => {
             expect([
                 'unsupported-label',
                 'missing-required-label',
-                'missing-required-ability',
                 'rejected-label'
             ])
                 .toContain(rejection.verdict.reason);
