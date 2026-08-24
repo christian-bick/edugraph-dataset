@@ -1,5 +1,5 @@
-import {StatisticalCategory, StatisticalGraphProblem} from '../../../types/problems.ts';
-import {graphQuestion} from './helpers.ts';
+import {StatisticalCategory, StatisticalCategoryId, StatisticalGraphProblem} from '../../../types/problems.ts';
+import {categoryLabel, graphQuestion} from './helpers.ts';
 
 export type StatisticalGraphPresentationTask =
     | 'construct'
@@ -34,7 +34,7 @@ export const resolveStatisticalGraphTask = (
         return null;
     }
     if (mode !== 'arithmetic') return null;
-    if (data.operandIndices?.length === 2) return 'single-step-arithmetic';
+    if (data.operandCategoryIds?.length === 2) return 'single-step-arithmetic';
     return data.operation === 'addition' ? 'find-total' : 'multi-step-arithmetic';
 };
 
@@ -53,15 +53,19 @@ function shuffled<T>(values: readonly T[], seed: number): T[] {
     return result;
 }
 
+export const graphCategories = (
+    data: StatisticalGraphProblem,
+    seed: number
+): StatisticalCategory[] => shuffled(data.categories, seed ^ 0x4A3B2C1D);
+
 export const graphObservations = (
     data: StatisticalGraphProblem,
     seed: number
-): StatisticalCategory['label'][] => {
-    if (data.rawObservations) return [...data.rawObservations];
+): StatisticalCategoryId[] => {
     const observations = data.categories.flatMap(category =>
-        Array.from({length: category.count / data.scale}, () => category.label)
+        Array.from({length: category.count / data.scale}, () => category.id)
     );
-    return shuffled(observations, seed);
+    return shuffled(observations, seed ^ 0x1D2C3B4A);
 };
 
 export const taskHeading = (
@@ -79,7 +83,8 @@ export const taskHeading = (
             : 'Sort the observations into the three categories, then complete the graph.';
     }
     if (task === 'read-category-count') {
-        return `How many ${data.categories[selectCategoryIndex(seed)].label.toLowerCase()} are shown?`;
+        const category = graphCategories(data, seed)[selectCategoryIndex(seed)];
+        return `How many ${categoryLabel(category.id).toLowerCase()} are shown?`;
     }
     if (task === 'find-total') {
         return 'How many items are shown across all three categories?';

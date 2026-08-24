@@ -3,11 +3,12 @@ import {describe, expect, it} from 'vitest';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {StatisticalGraphProblem} from '../../../types/problems.ts';
 import {PictureGraphView} from './picture-graph-view.tsx';
+import {graphCategories, selectCategoryIndex} from './statistical-graph-presentation.ts';
 
 const categories = [
-    {label: 'Apples', count: 2},
-    {label: 'Books', count: 3},
-    {label: 'Kites', count: 4}
+    {id: 'apple', count: 2},
+    {id: 'book', count: 3},
+    {id: 'kite', count: 4}
 ] as const;
 
 const payload = (data: StatisticalGraphProblem, isSolutionView: boolean): ViewRenderPayload<'data-picture-graph'> => ({
@@ -34,14 +35,15 @@ describe('data-picture-graph modes', () => {
         };
         const question = renderToStaticMarkup(<PictureGraphView mode="interpretation" payload={payload(data, false)} viewId="data-picture-graph-interpretation" />);
         const solution = renderToStaticMarkup(<PictureGraphView mode="interpretation" payload={payload(data, true)} viewId="data-picture-graph-interpretation" />);
+        const expected = graphCategories(data, 11)[selectCategoryIndex(11)].count;
         expect(markerCount(question)).toBe(9);
         expect(question).toMatch(/data-response="category-count"[^>]*>____<\/span>/);
-        expect(solution).toMatch(/data-response="category-count"[^>]*>4<\/span>/);
+        expect(solution).toMatch(new RegExp(`data-response="category-count"[^>]*>${expected}<\\/span>`));
     });
 
     it('shows all three addends and withholds only the total', () => {
         const data: StatisticalGraphProblem = {
-            categories, scale: 1, operation: 'addition', operandIndices: [0, 1, 2], answer: 9
+            categories, scale: 1, operation: 'addition', operandCategoryIds: ['apple', 'book', 'kite'], answer: 9
         };
         const question = renderToStaticMarkup(<PictureGraphView mode="arithmetic" payload={payload(data, false)} viewId="data-picture-graph-arithmetic" />);
         const solution = renderToStaticMarkup(<PictureGraphView mode="arithmetic" payload={payload(data, true)} viewId="data-picture-graph-arithmetic" />);
@@ -55,7 +57,7 @@ describe('data-picture-graph modes', () => {
 
     it('preserves scaled legacy construction', () => {
         const data: StatisticalGraphProblem = {
-            categories: [{label: 'Apples', count: 4}, {label: 'Books', count: 6}, {label: 'Kites', count: 8}],
+            categories: [{id: 'apple', count: 4}, {id: 'book', count: 6}, {id: 'kite', count: 8}],
             scale: 2
         };
         const question = renderToStaticMarkup(<PictureGraphView mode="construction" payload={payload(data, false)} viewId="data-picture-graph" />);

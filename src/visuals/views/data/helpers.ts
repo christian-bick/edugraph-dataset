@@ -1,13 +1,32 @@
-import {MeasurementDataProblem, StatisticalGraphProblem} from '../../../types/problems.ts';
+import {
+    MeasurementDataProblem,
+    StatisticalCategory,
+    StatisticalCategoryId,
+    StatisticalGraphProblem
+} from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 
-export const categoryStyles = [
-    {bar: 'bg-rose-400', marker: 'rounded-full bg-rose-400', text: 'text-rose-600'},
-    {bar: 'bg-sky-400', marker: 'rounded-sm bg-sky-400', text: 'text-sky-600'},
-    {bar: 'bg-amber-400', marker: 'rotate-45 rounded-sm bg-amber-400', text: 'text-amber-600'}
-] as const;
+export const statisticalCategoryIds = ['apple', 'book', 'kite'] as const satisfies readonly StatisticalCategoryId[];
 
-const expectedLabels = ['Apples', 'Books', 'Kites'];
+const categoryLabels: Record<StatisticalCategoryId, string> = {
+    apple: 'Apples',
+    book: 'Books',
+    kite: 'Kites'
+};
+
+export const categoryStyles = {
+    apple: {bar: 'bg-rose-400', marker: 'rounded-full bg-rose-400', text: 'text-rose-600'},
+    book: {bar: 'bg-sky-400', marker: 'rounded-sm bg-sky-400', text: 'text-sky-600'},
+    kite: {bar: 'bg-amber-400', marker: 'rotate-45 rounded-sm bg-amber-400', text: 'text-amber-600'}
+} as const satisfies Record<StatisticalCategoryId, {bar: string; marker: string; text: string}>;
+
+export const categoryLabel = (id: StatisticalCategoryId): string => categoryLabels[id];
+
+export const statisticalCategory = (
+    data: StatisticalGraphProblem,
+    id: StatisticalCategoryId
+): StatisticalCategory => data.categories.find(category => category.id === id)!;
+
 const expectedObjects = ['pencil', 'crayon', 'ribbon', 'key', 'brush', 'block'];
 
 export function validateMeasurementData(data: MeasurementDataProblem, viewId: string) {
@@ -66,8 +85,8 @@ export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: 
     if (!Array.isArray(data.categories) || data.categories.length !== 3) {
         throw new ViewValidationError(viewId, 'Expected exactly three statistical categories.');
     }
-    if (data.categories.some(({label}, index) => label !== expectedLabels[index])) {
-        throw new ViewValidationError(viewId, 'Statistical category labels or their order are invalid.');
+    if (data.categories.some(({id}, index) => id !== statisticalCategoryIds[index])) {
+        throw new ViewValidationError(viewId, 'Statistical category IDs or their canonical order are invalid.');
     }
     if (data.categories.some(({count}) => !Number.isInteger(count) || count < 0 || count > 8 * data.scale || count % data.scale !== 0)) {
         throw new ViewValidationError(viewId, 'Category totals must be whole-number multiples of the graph scale through eight steps.');
@@ -79,42 +98,25 @@ export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: 
             throw new ViewValidationError(viewId, `Statistical graph data cannot include field ${present}.`);
         }
     };
-    const validateOperands = (indices: readonly number[]) => {
-        if (indices.some(index => !Number.isInteger(index) || index < 0 || index > 2)
-            || new Set(indices).size !== indices.length) {
+    const validateOperands = (ids: readonly StatisticalCategoryId[]) => {
+        if (ids.some(id => !statisticalCategoryIds.includes(id))
+            || new Set(ids).size !== ids.length) {
             throw new ViewValidationError(viewId, 'Arithmetic operands must reference distinct graph categories.');
         }
-        return indices.map(index => data.categories[index].count);
+        return ids.map(id => statisticalCategory(data, id).count);
     };
 
-    if (data.rawObservations !== undefined) {
-        if (data.scale !== 1
-            || !Array.isArray(data.rawObservations)
-            || data.rawObservations.some(label => !expectedLabels.includes(label))) {
-            throw new ViewValidationError(viewId, 'Raw observations require a unit scale and known category labels.');
-        }
-        for (const category of data.categories) {
-            const frequency = data.rawObservations.filter(label => label === category.label).length;
-            if (frequency !== category.count) {
-                throw new ViewValidationError(viewId, 'Raw observation frequencies must equal the category totals.');
-            }
-        }
-    }
-
     if (data.operation === undefined) {
-        rejectFields(['operandIndices', 'intermediate', 'answer']);
+        rejectFields(['operandCategoryIds', 'intermediate', 'answer']);
         return;
     }
     if (!['addition', 'subtraction'].includes(data.operation)
-        || !Array.isArray(data.operandIndices)
+        || !Array.isArray(data.operandCategoryIds)
         || !Number.isInteger(data.answer)) {
         throw new ViewValidationError(viewId, 'Graph arithmetic requires an operation, operands, and answer.');
     }
-    if (data.rawObservations !== undefined) {
-        throw new ViewValidationError(viewId, 'Arithmetic graph data cannot include raw sorting observations.');
-    }
 
-    const operands = validateOperands(data.operandIndices);
+    const operands = validateOperands(data.operandCategoryIds);
     if (operands.length === 2) {
         rejectFields(['intermediate']);
         const [first, second] = operands;
@@ -130,7 +132,7 @@ export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: 
     const [first, second, third] = operands;
     if (data.operation === 'addition') {
         if (data.scale !== 1
-            || data.operandIndices.some((index, position) => index !== position)
+            || data.operandCategoryIds.some((id, position) => id !== statisticalCategoryIds[position])
             || data.intermediate !== undefined
             || data.answer !== first + second + third) {
             throw new ViewValidationError(viewId, 'Three-operand graph addition is inconsistent.');
@@ -145,14 +147,14 @@ export function validateStatisticalGraph(data: StatisticalGraphProblem, viewId: 
 }
 
 export function graphQuestion(data: StatisticalGraphProblem): string {
-    if (!data.operation || !data.operandIndices || data.operandIndices.length < 2) {
+    if (!data.operation || !data.operandCategoryIds || data.operandCategoryIds.length < 2) {
         throw new Error('graphQuestion requires an arithmetic graph problem.');
     }
-    const [firstIndex, secondIndex, thirdIndex] = data.operandIndices;
-    const first = data.categories[firstIndex].label.toLowerCase();
-    const second = data.categories[secondIndex].label.toLowerCase();
-    if (data.operandIndices.length === 3) {
-        const third = data.categories[thirdIndex!].label.toLowerCase();
+    const [firstId, secondId, thirdId] = data.operandCategoryIds;
+    const first = categoryLabel(firstId).toLowerCase();
+    const second = categoryLabel(secondId).toLowerCase();
+    if (data.operandCategoryIds.length === 3) {
+        const third = categoryLabel(thirdId!).toLowerCase();
         return `How many more ${first} are there than ${second} and ${third} together?`;
     }
     return data.operation === 'addition'

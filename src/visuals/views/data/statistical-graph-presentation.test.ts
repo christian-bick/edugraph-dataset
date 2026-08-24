@@ -3,6 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {StatisticalGraphsGenerator} from '../../../generators/statistics/statistical-graphs/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {
+    graphCategories,
     graphObservations,
     isArithmeticTask,
     isConstructionTask,
@@ -11,6 +12,7 @@ import {
     resolveStatisticalGraphTask,
     taskHeading
 } from './statistical-graph-presentation.ts';
+import {categoryLabel} from './helpers.ts';
 
 const generator = new StatisticalGraphsGenerator();
 const baseConfig = {
@@ -33,10 +35,12 @@ describe('statistical graph presentation', () => {
         expect(resolveStatisticalGraphTask(data, 'interpretation')).toBe('read-category-count');
         expect(resolveStatisticalGraphTask(data, 'arithmetic')).toBeNull();
         expect(taskHeading(data, false, 'organize', 4)).toMatch(/sort/i);
-        expect(taskHeading(data, false, 'read-category-count', 4)).toContain('books');
+        const selected = graphCategories(data, 4)[1];
+        expect(taskHeading(data, false, 'read-category-count', 4))
+            .toContain(categoryLabel(selected.id).toLowerCase());
     });
 
-    it('derives deterministic scaled observations when the generator has no raw observations', () => {
+    it('derives deterministic scaled observation presentation from counts', () => {
         setSeed('scaled-observations');
         const data = generator.generate({...baseConfig, scale: Scope.StepsOf5}).data;
         const first = graphObservations(data, 31);
@@ -45,8 +49,20 @@ describe('statistical graph presentation', () => {
         expect(first).toEqual(second);
         expect(first).toHaveLength(data.categories.reduce((sum, category) => sum + category.count / data.scale, 0));
         for (const category of data.categories) {
-            expect(first.filter(label => label === category.label)).toHaveLength(category.count / data.scale);
+            expect(first.filter(id => id === category.id)).toHaveLength(category.count / data.scale);
         }
+    });
+
+    it('seeds category order in the view without changing canonical generator order', () => {
+        setSeed('category-order');
+        const data = generator.generate(baseConfig).data;
+        const orders = new Set(Array.from({length: 12}, (_, seed) =>
+            graphCategories(data, seed).map(category => category.id).join(',')
+        ));
+
+        expect(orders.size).toBeGreaterThan(1);
+        expect(data.categories.map(category => category.id)).toEqual(['apple', 'book', 'kite']);
+        expect(graphCategories(data, 7)).toEqual(graphCategories(data, 7));
     });
 
     it('keeps construction artifacts unresolved only in Question Mode', () => {

@@ -1,8 +1,9 @@
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {StatisticalGraphProblem} from '../../../types/problems.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
-import {categoryStyles, validateStatisticalGraph} from './helpers.ts';
+import {categoryLabel, categoryStyles, statisticalCategory, validateStatisticalGraph} from './helpers.ts';
 import {
+    graphCategories,
     graphObservations,
     resolveStatisticalGraphTask,
     selectCategoryIndex,
@@ -32,14 +33,15 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
     }
 
     const showMarkers = mode !== 'construction' && mode !== 'classification' || isSolutionView;
-    const selectedCategory = data.categories[selectCategoryIndex(seed)];
+    const categories = graphCategories(data, seed);
+    const selectedCategory = categories[selectCategoryIndex(seed)];
     const observations = graphObservations(data, seed);
     const heading = displayTask === 'construct'
         ? (isSolutionView ? 'Completed picture graph' : 'Draw a picture graph for the data.')
         : displayTask === 'organize'
             ? (isSolutionView ? 'Grouped picture graph' : 'Sort the observations into categories, then complete the picture graph.')
             : displayTask === 'read-category-count'
-                ? `How many ${selectedCategory.label.toLowerCase()} are shown?`
+                ? `How many ${categoryLabel(selectedCategory.id).toLowerCase()} are shown?`
                 : 'How many items are shown across all three categories?';
 
     return (
@@ -49,9 +51,9 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
 
             {displayTask === 'construct' && (
                 <div className="mt-5 grid grid-cols-3 gap-3">
-                    {data.categories.map(({label, count}, index) => (
-                        <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-center">
-                            <div className={`text-sm font-bold ${categoryStyles[index].text}`}>{label}</div>
+                    {categories.map(({id, count}) => (
+                        <div key={id} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-center">
+                            <div className={`text-sm font-bold ${categoryStyles[id].text}`}>{categoryLabel(id)}</div>
                             <div className="mt-1 font-mono text-xl font-extrabold text-slate-800">{count}</div>
                         </div>
                     ))}
@@ -65,26 +67,23 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
                         Each observation card represents {data.scale} {data.scale === 1 ? 'item' : 'items'}.
                     </div>
                     <div className="flex flex-wrap justify-center gap-2">
-                        {observations.map((label, observationIndex) => {
-                            const categoryIndex = data.categories.findIndex(category => category.label === label);
-                            return (
-                                <div key={`${label}-${observationIndex}`} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-700">
-                                    <span className={`size-3 ${categoryStyles[categoryIndex].marker}`} />
-                                    {label}
-                                </div>
-                            );
-                        })}
+                        {observations.map((id, observationIndex) => (
+                            <div key={`${id}-${observationIndex}`} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-slate-700">
+                                <span className={`size-3 ${categoryStyles[id].marker}`} />
+                                {categoryLabel(id)}
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
 
             <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-5">
-                {data.categories.map(({label, count}, index) => (
-                    <div key={label} className="grid min-h-16 grid-cols-[90px_1fr] items-center border-t border-slate-200 first:border-t-0">
-                        <div className="font-bold text-slate-700">{label}</div>
-                        <div aria-label={`${label} picture row`} className="flex min-h-11 items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 bg-white px-4">
+                {categories.map(({id, count}) => (
+                    <div key={id} className="grid min-h-16 grid-cols-[90px_1fr] items-center border-t border-slate-200 first:border-t-0">
+                        <div className="font-bold text-slate-700">{categoryLabel(id)}</div>
+                        <div aria-label={`${categoryLabel(id)} picture row`} className="flex min-h-11 items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 bg-white px-4">
                             {showMarkers && Array.from({length: count / data.scale}, (_, marker) => (
-                                <span key={marker} data-picture-marker="true" className={`size-6 ${categoryStyles[index].marker}`} />
+                                <span key={marker} data-picture-marker="true" className={`size-6 ${categoryStyles[id].marker}`} />
                             ))}
                         </div>
                     </div>
@@ -97,17 +96,17 @@ export const PictureGraphView = ({mode, payload, viewId}: PictureGraphViewProps)
 
             {displayTask === 'read-category-count' && (
                 <div className={`mx-auto mt-5 flex min-h-16 w-[280px] items-center justify-center rounded-xl border-2 px-4 text-center ${isSolutionView ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-dashed border-slate-300 bg-white text-slate-500'}`}>
-                    <span className="mr-3 text-sm font-bold">{selectedCategory.label} count:</span>
+                    <span className="mr-3 text-sm font-bold">{categoryLabel(selectedCategory.id)} count:</span>
                     <span aria-label="Category count response" data-response="category-count" className="min-w-16 font-mono text-2xl font-black">{isSolutionView ? selectedCategory.count : '____'}</span>
                 </div>
             )}
 
-            {displayTask === 'find-total' && data.operandIndices?.length === 3 && (
+            {displayTask === 'find-total' && data.operandCategoryIds?.length === 3 && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
-                    {data.operandIndices.map((categoryIndex, index) => (
-                        <span key={categoryIndex} className="contents">
+                    {data.operandCategoryIds.map((categoryId, index) => (
+                        <span key={categoryId} className="contents">
                             {index > 0 && <span>+</span>}
-                            <span>{data.categories[categoryIndex].count}</span>
+                            <span>{statisticalCategory(data, categoryId).count}</span>
                         </span>
                     ))}
                     <span>=</span>

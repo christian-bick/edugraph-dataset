@@ -1,8 +1,9 @@
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {StatisticalGraphProblem} from '../../../types/problems.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
-import {categoryStyles, validateStatisticalGraph} from './helpers.ts';
+import {categoryLabel, categoryStyles, statisticalCategory, validateStatisticalGraph} from './helpers.ts';
 import {
+    graphCategories,
     graphObservations,
     revealsBarCounts,
     revealsBars,
@@ -17,12 +18,6 @@ interface BarGraphViewProps {
     payload: RenderPayload<AbstractProblem<StatisticalGraphProblem>>;
     viewId: string;
 }
-
-const observationStyle = {
-    Apples: categoryStyles[0],
-    Books: categoryStyles[1],
-    Kites: categoryStyles[2]
-} as const;
 
 const AnswerBox = ({answer}: {answer?: number}) => (
     <span className="inline-flex min-h-11 min-w-16 items-center justify-center rounded-md border-2 border-slate-500 bg-white px-3 py-1 text-emerald-700">
@@ -46,7 +41,8 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
     const revealBars = revealsBars(isSolutionView, displayTask);
     const revealCounts = revealsBarCounts(isSolutionView, displayTask);
     const axisValues = Array.from({length: 9}, (_, value) => (8 - value) * data.scale);
-    const selectedCategory = data.categories[selectCategoryIndex(seed)];
+    const categories = graphCategories(data, seed);
+    const selectedCategory = categories[selectCategoryIndex(seed)];
     const observations = graphObservations(data, seed);
 
     return (
@@ -56,9 +52,9 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
 
             {displayTask === 'construct' && (
                 <div className="mt-4 flex justify-center gap-3">
-                    {data.categories.map(({label, count}, index) => (
-                        <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700">
-                            <span className={categoryStyles[index].text}>{label}</span>: {count}
+                    {categories.map(({id, count}) => (
+                        <div key={id} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700">
+                            <span className={categoryStyles[id].text}>{categoryLabel(id)}</span>: {count}
                         </div>
                     ))}
                 </div>
@@ -71,12 +67,12 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
                         Each observation card represents {data.scale} {data.scale === 1 ? 'item' : 'items'}.
                     </div>
                     <div className="flex flex-wrap justify-center gap-2">
-                        {observations.map((label, index) => (
+                        {observations.map((id, index) => (
                             <span
-                                key={`${label}-${index}`}
-                                className={`rounded-full bg-white px-3 py-1 text-sm font-bold shadow-sm ${observationStyle[label].text}`}
+                                key={`${id}-${index}`}
+                                className={`rounded-full bg-white px-3 py-1 text-sm font-bold shadow-sm ${categoryStyles[id].text}`}
                             >
-                                {label}
+                                {categoryLabel(id)}
                             </span>
                         ))}
                     </div>
@@ -98,12 +94,12 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
                                 <div key={line} className="border-t border-dashed border-slate-300 first:border-t-0" />
                             ))}
                         </div>
-                        {data.categories.map(({label, count}, index) => (
-                            <div key={label} className="relative z-10 flex h-full w-24 items-end justify-center">
+                        {categories.map(({id, count}) => (
+                            <div key={id} className="relative z-10 flex h-full w-24 items-end justify-center">
                                 <div
                                     className={`w-16 rounded-t-md border-x-2 border-t-2 ${
                                         revealBars
-                                            ? `${categoryStyles[index].bar} border-slate-600`
+                                            ? `${categoryStyles[id].bar} border-slate-600`
                                             : 'h-full border-dashed border-slate-400 bg-white'
                                     }`}
                                     style={revealBars ? {height: `${(count / data.scale) * 12.5}%`} : undefined}
@@ -116,8 +112,8 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
                         ))}
                     </div>
                     <div className="flex justify-around px-8 pt-2">
-                        {data.categories.map(({label}) => (
-                            <div key={label} className="w-24 text-center text-sm font-bold text-slate-700">{label}</div>
+                        {categories.map(({id}) => (
+                            <div key={id} className="w-24 text-center text-sm font-bold text-slate-700">{categoryLabel(id)}</div>
                         ))}
                     </div>
                     <div className="mt-2 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -128,41 +124,41 @@ export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
 
             {displayTask === 'read-category-count' && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
-                    <span>{selectedCategory.label}</span><span>=</span>
+                    <span>{categoryLabel(selectedCategory.id)}</span><span>=</span>
                     <AnswerBox answer={isSolutionView ? selectedCategory.count : undefined} />
                 </div>
             )}
 
-            {displayTask === 'find-total' && (
+            {displayTask === 'find-total' && data.operandCategoryIds?.length === 3 && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
-                    <span>{data.categories[0].count}</span><span>+</span>
-                    <span>{data.categories[1].count}</span><span>+</span>
-                    <span>{data.categories[2].count}</span><span>=</span>
+                    <span>{statisticalCategory(data, data.operandCategoryIds[0]).count}</span><span>+</span>
+                    <span>{statisticalCategory(data, data.operandCategoryIds[1]).count}</span><span>+</span>
+                    <span>{statisticalCategory(data, data.operandCategoryIds[2]).count}</span><span>=</span>
                     <AnswerBox answer={isSolutionView ? data.answer : undefined} />
                 </div>
             )}
 
-            {displayTask === 'single-step-arithmetic' && data.operandIndices?.length === 2 && (
+            {displayTask === 'single-step-arithmetic' && data.operandCategoryIds?.length === 2 && (
                 <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-2xl font-bold text-slate-700">
-                    <span>{data.categories[data.operandIndices[0]].count}</span>
+                    <span>{statisticalCategory(data, data.operandCategoryIds[0]).count}</span>
                     <span>{data.operation === 'addition' ? '+' : '−'}</span>
-                    <span>{data.categories[data.operandIndices[1]].count}</span><span>=</span>
+                    <span>{statisticalCategory(data, data.operandCategoryIds[1]).count}</span><span>=</span>
                     <AnswerBox answer={isSolutionView ? data.answer : undefined} />
                 </div>
             )}
 
-            {displayTask === 'multi-step-arithmetic' && data.operandIndices?.length === 3 && (
+            {displayTask === 'multi-step-arithmetic' && data.operandCategoryIds?.length === 3 && (
                 <div className="mt-5 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xl font-bold text-slate-700">
                     <div className="flex items-center justify-center gap-2">
                         <span className="font-sans text-xs font-bold uppercase tracking-wide text-slate-500">Step 1</span>
-                        <span>{data.categories[data.operandIndices[0]].count}</span><span>−</span>
-                        <span>{data.categories[data.operandIndices[1]].count}</span><span>=</span>
+                        <span>{statisticalCategory(data, data.operandCategoryIds[0]).count}</span><span>−</span>
+                        <span>{statisticalCategory(data, data.operandCategoryIds[1]).count}</span><span>=</span>
                         <AnswerBox answer={isSolutionView ? data.intermediate : undefined} />
                     </div>
                     <div className="flex items-center justify-center gap-2">
                         <span className="font-sans text-xs font-bold uppercase tracking-wide text-slate-500">Step 2</span>
                         <span>{isSolutionView ? data.intermediate : 'Step 1'}</span><span>−</span>
-                        <span>{data.categories[data.operandIndices[2]].count}</span><span>=</span>
+                        <span>{statisticalCategory(data, data.operandCategoryIds[2]).count}</span><span>=</span>
                         <AnswerBox answer={isSolutionView ? data.answer : undefined} />
                     </div>
                 </div>

@@ -887,8 +887,10 @@ export type MeasurementDataProblem = {
     extremaRelation?: MeasurementExtremaRelation;
 };
 
+export type StatisticalCategoryId = 'apple' | 'book' | 'kite';
+
 export type StatisticalCategory = {
-    label: 'Apples' | 'Books' | 'Kites';
+    id: StatisticalCategoryId;
     count: number;
 };
 
@@ -896,10 +898,10 @@ export type StatisticalGraphProblem = {
     categories: readonly [StatisticalCategory, StatisticalCategory, StatisticalCategory];
     scale: 1 | 2 | 5 | 10;
     operation?: 'addition' | 'subtraction';
-    operandIndices?: [number, number] | [number, number, number];
+    operandCategoryIds?: [StatisticalCategoryId, StatisticalCategoryId]
+        | [StatisticalCategoryId, StatisticalCategoryId, StatisticalCategoryId];
     intermediate?: number;
     answer?: number;
-    rawObservations?: readonly StatisticalCategory['label'][];
 };
 
 // --- Shape Split Problem Types ---

@@ -64,9 +64,9 @@ describe('statistical-graphs spec', () => {
             Scope.SingleStep,
             Ability.ProcedureExecution
         ])!.data;
-        const [firstIndex, secondIndex] = data.operandIndices!;
-        const first = data.categories[firstIndex].count;
-        const second = data.categories[secondIndex].count;
+        const [firstId, secondId] = data.operandCategoryIds!;
+        const first = data.categories.find(category => category.id === firstId)!.count;
+        const second = data.categories.find(category => category.id === secondId)!.count;
 
         expect(data.scale).toBe(scale);
         expect(data.operation).toBe('subtraction');
@@ -84,10 +84,10 @@ describe('statistical-graphs spec', () => {
             Scope.MultiStep,
             Ability.ProcedureExecution
         ])!;
-        if (result.data.operandIndices?.length !== 3) throw new Error('Expected three operand indices.');
-        const [firstIndex, secondIndex, thirdIndex] = result.data.operandIndices;
-        const [first, second, third] = [firstIndex, secondIndex, thirdIndex]
-            .map(index => result.data.categories[index].count);
+        if (result.data.operandCategoryIds?.length !== 3) throw new Error('Expected three operand category IDs.');
+        const [firstId, secondId, thirdId] = result.data.operandCategoryIds;
+        const [first, second, third] = [firstId, secondId, thirdId]
+            .map(id => result.data.categories.find(category => category.id === id)!.count);
 
         expect(result.data.intermediate).toBe(first - second);
         expect(result.data.answer).toBe(result.data.intermediate! - third);
@@ -104,7 +104,8 @@ describe('statistical-graphs spec', () => {
             Ability.ConceptClassification,
             Ability.VisualArticulation
         ])!;
-        expect(result.data.rawObservations).toBeDefined();
+        expect(result.data.categories.map(({id}) => id)).toEqual(['apple', 'book', 'kite']);
+        expect(Object.keys(result.data).sort()).toEqual(['categories', 'scale']);
         expect(result.tags).toEqual(expect.arrayContaining([
             Area.ObjectSorting
         ]));
@@ -134,7 +135,7 @@ describe('statistical-graphs spec', () => {
             Scope.StepsOf1,
             Ability.ProcedureExecution
         ])!;
-        expect(result.data.operandIndices).toEqual([0, 1, 2]);
+        expect(result.data.operandCategoryIds).toEqual(['apple', 'book', 'kite']);
         expect(result.tags).toEqual(expect.arrayContaining([Area.Addition, Scope.ThreeOperands]));
     });
 });

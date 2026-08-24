@@ -20,6 +20,7 @@ describe('StatisticalGraphsGenerator', () => {
     it('generates three distinct positive whole-number category counts', () => {
         const problem = generator.generate(baseConfig);
         expect(problem.data.categories).toHaveLength(3);
+        expect(problem.data.categories.map(({id}) => id)).toEqual(['apple', 'book', 'kite']);
         expect(new Set(problem.data.categories.map(({count}) => count)).size).toBe(3);
         for (const {count} of problem.data.categories) {
             expect(Number.isInteger(count)).toBe(true);
@@ -47,9 +48,9 @@ describe('StatisticalGraphsGenerator', () => {
         [false, true, 'subtraction']
     ] as const)('generates a coherent %s graph question', (useAddition, useSubtraction, operation) => {
         const data = generator.generate({...baseConfig, useAddition, useSubtraction, isSingleStep: true}).data;
-        const [firstIndex, secondIndex] = data.operandIndices!;
-        const first = data.categories[firstIndex].count;
-        const second = data.categories[secondIndex].count;
+        const [firstId, secondId] = data.operandCategoryIds!;
+        const first = data.categories.find(category => category.id === firstId)!.count;
+        const second = data.categories.find(category => category.id === secondId)!.count;
 
         expect(data.operation).toBe(operation);
         expect(data.answer).toBe(operation === 'addition' ? first + second : first - second);
@@ -63,11 +64,10 @@ describe('StatisticalGraphsGenerator', () => {
             useSubtraction: true,
             isMultiStep: true
         }).data;
-        if (data.operandIndices?.length !== 3) throw new Error('Expected three operand indices.');
-        const [firstIndex, secondIndex, thirdIndex] = data.operandIndices;
-        const first = data.categories[firstIndex].count;
-        const second = data.categories[secondIndex].count;
-        const third = data.categories[thirdIndex].count;
+        if (data.operandCategoryIds?.length !== 3) throw new Error('Expected three operand category IDs.');
+        const [firstId, secondId, thirdId] = data.operandCategoryIds;
+        const [first, second, third] = [firstId, secondId, thirdId]
+            .map(id => data.categories.find(category => category.id === id)!.count);
 
         expect(data.operation).toBe('subtraction');
         expect(data.intermediate).toBe(first - second);
@@ -75,26 +75,18 @@ describe('StatisticalGraphsGenerator', () => {
         expect(data.answer).toBeGreaterThan(0);
     });
 
-    it('authors shuffled raw observations with exact three-category frequencies', () => {
+    it('keeps object-sorting presentation out of the canonical mathematical payload', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const data = generator.generate({
+            const canonical = generator.generate(baseConfig).data;
+            setSeed(seed);
+            const sorting = generator.generate({
                 ...baseConfig,
                 useObjectSorting: true
             }).data;
-            expect(data.scale).toBe(1);
-            expect(data.categories).toHaveLength(3);
-            expect(data.rawObservations).toBeDefined();
-            expect(data.rawObservations).toHaveLength(
-                data.categories.reduce((total, category) => total + category.count, 0)
-            );
-            for (const category of data.categories) {
-                expect(data.rawObservations!.filter(label => label === category.label)).toHaveLength(category.count);
-            }
-            const grouped = data.categories.flatMap(category =>
-                Array.from({length: category.count}, () => category.label)
-            );
-            expect(data.rawObservations).not.toEqual(grouped);
+            expect(sorting).toEqual(canonical);
+            expect(sorting.categories.map(({id}) => id)).toEqual(['apple', 'book', 'kite']);
+            expect(Object.keys(sorting).sort()).toEqual(['categories', 'scale']);
         }
     });
 
@@ -104,9 +96,8 @@ describe('StatisticalGraphsGenerator', () => {
             const data = generator.generate(baseConfig).data;
             expect(data.scale).toBe(1);
             expect(data.operation).toBeUndefined();
-            expect(data.operandIndices).toBeUndefined();
+            expect(data.operandCategoryIds).toBeUndefined();
             expect(data.answer).toBeUndefined();
-            expect(data.rawObservations).toBeUndefined();
         }
     });
 
@@ -120,7 +111,7 @@ describe('StatisticalGraphsGenerator', () => {
             }).data;
             expect(data.scale).toBe(1);
             expect(data.operation).toBe('addition');
-            expect(data.operandIndices).toEqual([0, 1, 2]);
+            expect(data.operandCategoryIds).toEqual(['apple', 'book', 'kite']);
             expect(data.answer).toBe(data.categories.reduce((total, category) => total + category.count, 0));
         }
     });
