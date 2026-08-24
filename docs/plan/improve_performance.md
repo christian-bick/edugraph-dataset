@@ -191,7 +191,9 @@ before canonical container startup or catalog/graph construction, and live VQA r
 graph while still auditing or updating the physical VQA cache. For an existing generator/view
 source change, the persisted graph is patched at the changed source nodes, reverse closure selects
 exact pairs, only those model modules load, and unchanged capability hashes admit the persisted
-matching postings. Their rebuilt pair subgraphs are merged back into the complete baseline.
+matching postings. Every affected execution subgraph is rebuilt and merged onto the already patched
+observed graph, while only render-affected pairs regenerate pixels. This publishes mixed rendering
+and validation-only deltas atomically instead of requiring a later full-graph reconciliation.
 
 Git identity never participates in an artifact key. The observation is only a safe acceleration
 index over the content-addressed graph. New discovery files, capability changes, relevant ignored
@@ -439,8 +441,9 @@ algorithm. PNG bytes open only for cache misses, forced evaluations, or the sepa
 integrity pass. A graph rebuild derives keys from immutable inputs with repeated validation contexts
 memoized within that operation; a proven-clean development observation reuses the complete persisted
 graph. Persisted target-label, target-to-match, and file-to-model-node postings bound existing
-generator/view source edits to relevant pairs. The selected model modules are loaded and their
-pair subgraphs are merged into the persisted complete graph; a capability or structure change
+generator/view source edits to relevant pairs. The selected model modules are loaded and every
+affected execution subgraph is merged into the observed complete graph, while only render-affected
+pairs regenerate pixels; a capability or structure change
 falls back to a complete linear build. A conservative Git-assisted observation proves exact clean
 development no-ops without making Git identity authoritative. Local explorer snapshots
 admit each PNG once to a content-addressed pool and hard-link unchanged assets into later

@@ -320,6 +320,7 @@ export function mergeObservedDatasetBuild(options: {
     projectRoot: string;
     specName: string;
     previous: DatasetManifest;
+    observedGraph: DependencyGraphSnapshot;
     partial: DatasetManifestBuild;
     pairKeys: readonly string[];
     sourceIndex?: SourceContentIndex;
@@ -334,7 +335,10 @@ export function mergeObservedDatasetBuild(options: {
             if (id.startsWith('image:')) oldImages.add(id);
         }
     }
-    const nodes = new Map(Object.entries(options.previous.dependency_graph.nodes));
+    // The observed graph already contains every changed authored-source hash,
+    // including validation-only roots outside the rendered pair set. Starting
+    // from the persisted graph would silently discard those observed changes.
+    const nodes = new Map(Object.entries(options.observedGraph.nodes));
     for (const id of oldOwned) nodes.delete(id);
 
     const partialSpecial: DependencyNode[] = [];
@@ -346,7 +350,7 @@ export function mergeObservedDatasetBuild(options: {
         nodes.set(node.id, node);
     }
     for (const node of partialSpecial) {
-        const previous = options.previous.dependency_graph.nodes[node.id];
+        const previous = options.observedGraph.nodes[node.id];
         const retainedDependencies = previous?.dependencies.filter(dependency =>
             node.kind === 'coverage-record' || !oldImages.has(dependency)) ?? [];
         nodes.set(node.id, {
@@ -366,7 +370,7 @@ export function mergeObservedDatasetBuild(options: {
     const graph = createDependencyGraphSnapshot(
         [...nodes.values()],
         DEPENDENCY_PLANNER_EPOCH,
-        options.previous.dependency_graph.matching_index
+        options.observedGraph.matching_index
     );
     const entries = {...options.previous.entries};
     for (const key of selected) {
@@ -1019,6 +1023,21 @@ export function affectedDatasetPairKeys(
     ])) {
         if (entry.render_nodes.some(node => affected.has(node))) keys.add(key);
     }
+    for (const node of plan.removed_nodes) {
+        if (node.startsWith('pair:')) keys.add(node.slice('pair:'.length));
+    }
+    return radixSortUtf8([...keys]);
+}
+
+/** Resolves pairs whose persisted execution subgraphs must be rebuilt, even without new pixels. */
+export function affectedDatasetExecutionPairKeys(
+    plan: DependencyDeltaPlan,
+    previous: DatasetManifest
+): string[] {
+    const affected = new Set(plan.affected_nodes);
+    const keys = new Set(Object.entries(previous.entries)
+        .filter(([, entry]) => entry.execution_nodes.some(node => affected.has(node)))
+        .map(([key]) => key));
     for (const node of plan.removed_nodes) {
         if (node.startsWith('pair:')) keys.add(node.slice('pair:'.length));
     }

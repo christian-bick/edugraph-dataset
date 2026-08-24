@@ -7,6 +7,7 @@ import {
     DatasetManifest,
     DatasetManifestBuild,
     DatasetManifestEntry,
+    affectedDatasetExecutionPairKeys,
     affectedDatasetPairKeys,
     buildDatasetManifest,
     createDatasetManifest,
@@ -278,6 +279,7 @@ describe('updateDatasetManifest', () => {
                     dependency_graph: previousGraph,
                     entries: {'demo#view': demoEntry, 'other#view': otherEntry}
                 }),
+                observedGraph: previousGraph,
                 partial: build({
                     'demo#view': {...demoEntry, input_hash: 'new'}
                 }, partialGraph),
@@ -292,6 +294,104 @@ describe('updateDatasetManifest', () => {
                 .toEqual(['image:demo-sample', 'image:other-sample']);
             expect(result.dependency_graph.matching_index)
                 .toEqual(previousGraph.matching_index);
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
+    });
+
+    it('publishes rendered and validation-only observed deltas in one graph', () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-observed-mixed-'));
+        const previousGraph = createDependencyGraphSnapshot([
+            {id: 'source:render.tsx', kind: 'source-file', input_hash: 'render-old', dependencies: []},
+            {id: 'source:checklist.md', kind: 'source-file', input_hash: 'checklist-old', dependencies: []},
+            {id: 'view:rendered', kind: 'view-module', input_hash: 'view', dependencies: ['source:render.tsx']},
+            {id: 'pair:demo#rendered', kind: 'generation-pair', input_hash: 'pair', dependencies: ['view:rendered']},
+            {id: 'image:demo', kind: 'image', input_hash: 'image-old', dependencies: ['pair:demo#rendered']},
+            {id: 'pair:other#validated', kind: 'generation-pair', input_hash: 'other-pair', dependencies: []},
+            {id: 'image:other', kind: 'image', input_hash: 'other-image', dependencies: ['pair:other#validated']},
+            {
+                id: 'vqa:other',
+                kind: 'vqa-record',
+                input_hash: 'vqa-old',
+                dependencies: ['image:other', 'source:checklist.md']
+            }
+        ]);
+        const observedGraph = createDependencyGraphSnapshot([
+            {id: 'source:render.tsx', kind: 'source-file', input_hash: 'render-new', dependencies: []},
+            {id: 'source:checklist.md', kind: 'source-file', input_hash: 'checklist-new', dependencies: []},
+            {id: 'view:rendered', kind: 'view-module', input_hash: 'view', dependencies: ['source:render.tsx']},
+            {id: 'pair:demo#rendered', kind: 'generation-pair', input_hash: 'pair', dependencies: ['view:rendered']},
+            {id: 'image:demo', kind: 'image', input_hash: 'image-old', dependencies: ['pair:demo#rendered']},
+            {id: 'pair:other#validated', kind: 'generation-pair', input_hash: 'other-pair', dependencies: []},
+            {id: 'image:other', kind: 'image', input_hash: 'other-image', dependencies: ['pair:other#validated']},
+            {
+                id: 'vqa:other',
+                kind: 'vqa-record',
+                input_hash: 'vqa-old',
+                dependencies: ['image:other', 'source:checklist.md']
+            }
+        ]);
+        const currentGraph = createDependencyGraphSnapshot([
+            {id: 'source:render.tsx', kind: 'source-file', input_hash: 'render-new', dependencies: []},
+            {id: 'source:checklist.md', kind: 'source-file', input_hash: 'checklist-new', dependencies: []},
+            {id: 'view:rendered', kind: 'view-module', input_hash: 'view', dependencies: ['source:render.tsx']},
+            {id: 'pair:demo#rendered', kind: 'generation-pair', input_hash: 'pair', dependencies: ['view:rendered']},
+            {id: 'image:demo', kind: 'image', input_hash: 'image-new', dependencies: ['pair:demo#rendered']},
+            {id: 'pair:other#validated', kind: 'generation-pair', input_hash: 'other-pair', dependencies: []},
+            {id: 'image:other', kind: 'image', input_hash: 'other-image', dependencies: ['pair:other#validated']},
+            {
+                id: 'vqa:other',
+                kind: 'vqa-record',
+                input_hash: 'vqa-new',
+                dependencies: ['image:other', 'source:checklist.md']
+            }
+        ]);
+        const renderedEntry: DatasetManifestEntry = {
+            ...entry,
+            generator: 'demo',
+            view: 'rendered',
+            execution_nodes: ['pair:demo#rendered', 'image:demo'],
+            render_nodes: ['pair:demo#rendered', 'image:demo']
+        };
+        const validatedEntry: DatasetManifestEntry = {
+            ...entry,
+            generator: 'other',
+            view: 'validated',
+            execution_nodes: ['pair:other#validated', 'image:other', 'vqa:other'],
+            render_nodes: ['pair:other#validated', 'image:other'],
+            validation_nodes: ['vqa:other']
+        };
+        const previous = manifest({
+            dependency_graph: previousGraph,
+            entries: {
+                'demo#rendered': renderedEntry,
+                'other#validated': validatedEntry
+            }
+        });
+        const plan = planDependencyDelta(previousGraph, observedGraph);
+        const partial = build({
+            'demo#rendered': {...renderedEntry, input_hash: 'render-new'},
+            'other#validated': validatedEntry
+        }, currentGraph);
+
+        try {
+            expect(affectedDatasetPairKeys(plan, partial, previous)).toEqual(['demo#rendered']);
+            const graphPairs = affectedDatasetExecutionPairKeys(plan, previous);
+            expect(graphPairs).toEqual(['demo#rendered', 'other#validated']);
+
+            const result = mergeObservedDatasetBuild({
+                projectRoot,
+                specName: 'ccss',
+                previous,
+                observedGraph,
+                partial,
+                pairKeys: graphPairs
+            });
+
+            expect(result.dependency_graph.nodes['source:checklist.md'].input_hash)
+                .toBe('checklist-new');
+            expect(result.dependency_graph.nodes['vqa:other'].input_hash).toBe('vqa-new');
+            expect(planDependencyDelta(result.dependency_graph, currentGraph).changed_roots).toEqual([]);
         } finally {
             rmSync(projectRoot, {recursive: true, force: true});
         }
@@ -327,6 +427,10 @@ describe('updateDatasetManifest', () => {
         const plan = planDependencyDelta(previousGraph, currentGraph);
 
         expect(plan.affected_nodes).toContain('vqa:sample');
+        expect(affectedDatasetExecutionPairKeys(
+            plan,
+            manifest({dependency_graph: previousGraph, entries: {'demo#view': pairEntry}})
+        )).toEqual(['demo#view']);
         expect(affectedDatasetPairKeys(
             plan,
             build({'demo#view': pairEntry}, currentGraph),

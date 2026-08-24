@@ -48,6 +48,7 @@ import {
 } from '../lib/dataset-output.ts';
 import {
     assertDatasetGenerationScope,
+    affectedDatasetExecutionPairKeys,
     affectedDatasetPairKeys,
     buildDatasetManifest,
     createDatasetManifest,
@@ -750,13 +751,18 @@ async function main() {
     let pairIndex: ReturnType<typeof buildCompatibleModulePairIndex> | null = null;
     let allMatchedTuples: MatchTuple[] = [];
     let incrementalSourcePairs: string[] | null = null;
+    let incrementalGraphPairs: string[] | null = null;
+    const observedGraphPairs = observedSourcePlan && trustedPreviousManifest
+        ? affectedDatasetExecutionPairKeys(observedSourcePlan.plan, trustedPreviousManifest)
+        : [];
 
-    if (observedSourcePlan?.pairKeys.length
+    if (observedSourcePlan
+        && observedGraphPairs.length > 0
         && trustedPreviousManifest?.dependency_graph.matching_index
         && trustedPreviousManifest.development_observation?.entry_files_by_node) {
-        const selectedPairs = new Set(observedSourcePlan.pairKeys);
-        const generatorIds = new Set(observedSourcePlan.pairKeys.map(key => key.split('#')[0]));
-        const viewIds = new Set(observedSourcePlan.pairKeys.map(key => key.split('#')[1]));
+        const selectedPairs = new Set(observedGraphPairs);
+        const generatorIds = new Set(observedGraphPairs.map(key => key.split('#')[0]));
+        const viewIds = new Set(observedGraphPairs.map(key => key.split('#')[1]));
         const allCandidateModulesSelected = observedSourcePlan.candidateNodes.every(nodeId => {
             if (nodeId.startsWith('generator:')) {
                 return generatorIds.has(nodeId.slice('generator:'.length));
@@ -812,9 +818,12 @@ async function main() {
             fullViewCatalog = selectedViews;
             allMatchedTuples = tuples;
             incrementalSourcePairs = observedSourcePlan.pairKeys;
+            incrementalGraphPairs = observedGraphPairs;
             console.log(
                 `Incremental source plan: reused persisted matching and loaded `
-                + `${generatorCatalog.length} generator(s), ${fullViewCatalog.length} view(s).`
+                + `${generatorCatalog.length} generator(s), ${fullViewCatalog.length} view(s); `
+                + `${incrementalSourcePairs.length} render pair(s), `
+                + `${incrementalGraphPairs.length} graph pair(s).`
             );
         } else {
             console.log('Incremental source plan reached a capability change; rebuilding the authored model graph.');
@@ -876,6 +885,7 @@ async function main() {
     let generationScope = requestedScope;
     let matchedTuples = requestedMatchedTuples;
     if (incrementalSourcePairs) {
+        const renderPairs = new Set(incrementalSourcePairs);
         generationScope = {
             fullDataset: false,
             pairKeys: incrementalSourcePairs,
@@ -883,8 +893,11 @@ async function main() {
                 ...new Set(incrementalSourcePairs.map(key => key.split('#')[0]))
             ])
         };
-        matchedTuples = allMatchedTuples;
-        console.log(`Affected execution: ${incrementalSourcePairs.length} exact generator/view pair(s).`);
+        matchedTuples = allMatchedTuples.filter(tuple =>
+            renderPairs.has(modulePairKey(tuple.generatorId, tuple.viewId)));
+        if (incrementalSourcePairs.length > 0) {
+            console.log(`Affected execution: ${incrementalSourcePairs.length} exact generator/view pair(s).`);
+        }
     }
     let graphOnlyBuild: ReturnType<typeof buildDatasetManifest> | null = null;
     // The observed-source fast path intentionally holds only the selected
@@ -987,6 +1000,71 @@ async function main() {
         }
     }
 
+    if (incrementalSourcePairs
+        && incrementalSourcePairs.length === 0
+        && incrementalGraphPairs
+        && trustedPreviousManifest
+        && observedSourcePlan) {
+        const manifestTargets = radixSortUtf8([...new Set(allMatchedTuples.map(tuple => tuple.target.id))])
+            .map(targetId => allTargetsById.get(targetId)!);
+        const partialManifestBuild = buildDatasetManifest({
+            projectRoot: PROJECT_ROOT,
+            datasetDir: outDir,
+            specName,
+            targets: manifestTargets,
+            generators: generatorCatalog,
+            views: fullViewCatalog,
+            tuples: allMatchedTuples,
+            pairIndex,
+            generatedSplits: ['train', 'val'],
+            sourceIndex,
+            datasetSnapshot,
+            reuseImageIdentityFrom: trustedPreviousManifest.dependency_graph,
+            counters
+        });
+        const manifestBuild = mergeObservedDatasetBuild({
+            projectRoot: PROJECT_ROOT,
+            specName,
+            previous: trustedPreviousManifest,
+            observedGraph: observedSourcePlan.graph,
+            partial: partialManifestBuild,
+            pairKeys: incrementalGraphPairs,
+            sourceIndex
+        });
+        counters.add('dataset.source_directories_read', manifestBuild.source_stats.directories_read);
+        counters.add('dataset.source_files_read', manifestBuild.source_stats.files_read);
+        counters.add('dataset.source_bytes_read', manifestBuild.source_stats.bytes_read);
+        const graphOnlyScope: ManifestUpdateScope = {
+            fullDataset: false,
+            pairKeys: [],
+            generatorIds: []
+        };
+        const graphTransaction = beginDatasetStoreTransaction(outDir, graphOnlyScope);
+        try {
+            const manifest = createDatasetManifest({
+                projectRoot: PROJECT_ROOT,
+                specName,
+                build: manifestBuild,
+                scope: graphOnlyScope,
+                previous: comparisonManifest
+            });
+            graphTransaction.commit(manifest);
+            const storeStats = graphTransaction.stats();
+            counters.add('dataset.shards_written', storeStats.shards_written);
+            counters.add('dataset.shards_reused', storeStats.shards_reused);
+            counters.add('dataset.image_bytes_written', storeStats.image_bytes_written);
+            console.log(
+                `Published ${incrementalGraphPairs.length} affected validation-only pair subgraph(s) `
+                + 'without image rendering.'
+            );
+            console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
+            return;
+        } catch (error) {
+            graphTransaction.rollback();
+            throw error;
+        }
+    }
+
     const selectedGeneratorIds = new Set(generationScope.fullDataset
         ? requestedModules.map(module => module.generatorId)
         : generationScope.generatorIds);
@@ -1062,13 +1140,17 @@ async function main() {
             datasetSnapshot: candidate,
             counters
         });
-        const manifestBuild = incrementalSourcePairs && trustedPreviousManifest
+        const manifestBuild = incrementalSourcePairs
+            && incrementalGraphPairs
+            && trustedPreviousManifest
+            && observedSourcePlan
             ? mergeObservedDatasetBuild({
                 projectRoot: PROJECT_ROOT,
                 specName,
                 previous: trustedPreviousManifest,
+                observedGraph: observedSourcePlan.graph,
                 partial: partialManifestBuild,
-                pairKeys: incrementalSourcePairs,
+                pairKeys: incrementalGraphPairs,
                 sourceIndex
             })
             : partialManifestBuild;
