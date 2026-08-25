@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import {
     isAssetIndex,
     missingTargetAssetEvidence,
+    publishedLabelsCoverRequested,
     requestedLabelKey,
     type AssetIndex,
 } from '../lib/asset-index.ts';
@@ -91,8 +92,7 @@ async function validate(index: AssetIndex): Promise<string[]> {
     for (const [sampleKey, labelSets] of requestedLabelsBySample) {
         const publicRow = publicRows.get(sampleKey);
         if (!publicRow) continue;
-        const publicLabels = new Set(publicRow.labels);
-        if (!labelSets.some(labels => labels.every(label => publicLabels.has(label)))) {
+        if (!labelSets.some(labels => publishedLabelsCoverRequested(publicRow.labels, labels))) {
             const [split, fileName] = sampleKey.split('\0');
             errors.push(`No requested label set matches the published labels for ${split}/${fileName}.`);
         }

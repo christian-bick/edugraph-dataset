@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import {Ability, Area} from 'edugraph-ts';
 import {
     assetIndexSampleMap,
     buildAssetIndex,
@@ -6,6 +7,7 @@ import {
     buildLocalAssetUrl,
     isAssetIndex,
     missingTargetAssetEvidence,
+    publishedLabelsCoverRequested,
     requestedLabelKey,
     targetLookupKey,
 } from './asset-index.ts';
@@ -108,6 +110,21 @@ describe('buildAssetIndex', () => {
 describe('asset-index helpers', () => {
     it('matches label sets independent of label order and duplication', () => {
         expect(requestedLabelKey(['b', 'a', 'a'])).toBe(requestedLabelKey(['a', 'b']));
+    });
+
+    it('accepts equal or more-specific published capabilities for requested claims', () => {
+        expect(publishedLabelsCoverRequested(
+            ['ProcedureInversion', 'Addition'],
+            [Ability.ProcedureUnderstanding, Area.Addition],
+        )).toBe(true);
+        expect(publishedLabelsCoverRequested(
+            ['ProcedureUnderstanding', 'Addition'],
+            [Ability.ProcedureInversion, Area.Addition],
+        )).toBe(false);
+        expect(publishedLabelsCoverRequested(
+            ['ProcedureInversion', 'Subtraction'],
+            [Ability.ProcedureUnderstanding, Area.Addition],
+        )).toBe(false);
     });
 
     it('maps label sets and builds encoded, tag-pinned Hugging Face URLs', () => {

@@ -9,6 +9,11 @@ export const spec: GeneratorSpec = {
 };
 
 export const ShapeClassifyAttributesGeneratorSchema = {
+    shapeAttributes: [
+        [Scope.ShapeAttributes],
+        hasLabel(Scope.ShapeAttributes),
+        [[Scope.ShapeAttributes]]
+    ],
     subsumption: [
         [Area.ShapeSubsumption],
         hasLabel(Area.ShapeSubsumption)

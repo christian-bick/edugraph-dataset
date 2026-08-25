@@ -339,7 +339,10 @@ increment/decrement direction Scopes from `counting-inc-dec`. All 795 CCSS tuple
 unresolved co-resolving Scope candidates; the report separately records 37 additional Scope labels
 and eight more-specific target-Scope realizations already supplied by pair resolution. This is a
 deterministic candidate audit rather than an observability oracle, so canonical VQA remains the
-empirical proof. The Step 5 target-coverage gate and Step 7 regeneration remain.
+empirical proof. Step 5 is complete: release-index validation now applies the same one-directional,
+equal-or-more-specific ontology coverage rule as matching. The gate exposed and corrected one
+generator that matched the broad `ShapeAttributes` context without persisting a covering resolved
+capability. Step 7 regeneration is complete, while its live VQA proof remains part of Phase 8.
 
 ### Phase 8: canonical validation and release proof
 
@@ -359,9 +362,9 @@ Canonical VQA is the required empirical proof that active target conjunctions su
 and view composition. The optional synthetic capability-totality investigation is not a release
 gate.
 
-**Status: pending final proof.** Canonical CCSS generation and the current VQA cache
-have already demonstrated complete 1,898/1,898 coverage, but the final release-wide proof is rerun
-after documentation consolidation.
+**Status: pending live VQA.** Full canonical CCSS regeneration, repository checks, matching,
+split integrity, and the union asset-index gate pass. The release-wide strict VQA audit still
+requires live validation of the uncovered canonical artifacts before publication.
 
 ## Low-priority investigations
 

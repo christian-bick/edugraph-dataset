@@ -271,7 +271,8 @@ Playwright image, so changing the host runtime does not change the renderer iden
 * **Execution**: `npm run validate:asset-index -- [--index=<path>] [--dataset-dir=<path>] [--spec=<spec_module>]`
 * **Function**: Validates the asset-index schema and release revision, canonical label-set
   grouping, independent sample modes, exact correspondence with the merged public metadata,
-  requested-label containment, and on-disk image presence. With `--spec`, it additionally
+  ontology-aware requested-label coverage (each published capability may be equal to or more
+  specific than the requested claim), and on-disk image presence. With `--spec`, it additionally
   requires exact asset evidence for every normalized production target permutation. Defaults
   to the local public index and `out/dataset`; release passes its temporary index with
   `--spec=ccss` so a target cannot remain `Ready` after publication.

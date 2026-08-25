@@ -1,4 +1,5 @@
 import { labelSetKey } from './utils.ts';
+import { isSubConceptOf } from './ontology.ts';
 import { rowTargetAssociations, type MetadataRow } from './dataset-merge.ts';
 import type { CompetencyTarget } from '../types/ml-engine.ts';
 
@@ -46,6 +47,19 @@ export const canonicalLabels = (labels: readonly string[]): string[] =>
 
 export const requestedLabelKey = (labels: readonly string[]): string =>
     labelSetKey(canonicalLabels(labels));
+
+const EDU_PREFIX = 'http://edugraph.io/edu/';
+const ontologyLabel = (label: string): string =>
+    label.startsWith(EDU_PREFIX) ? label : `${EDU_PREFIX}${label}`;
+
+/** True when every requested claim is supplied by an equal or more-specific published capability. */
+export function publishedLabelsCoverRequested(
+    publishedLabels: readonly string[],
+    requestedLabels: readonly string[],
+): boolean {
+    return requestedLabels.every(requestedLabel => publishedLabels.some(publishedLabel =>
+        isSubConceptOf(ontologyLabel(publishedLabel), ontologyLabel(requestedLabel))));
+}
 
 const splitOrder: Record<AssetSplit, number> = { train: 0, validation: 1 };
 const modeOrder: Record<AssetMode, number> = { question: 0, solution: 1 };

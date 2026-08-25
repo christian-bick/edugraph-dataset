@@ -17,13 +17,14 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         expect(spec.generalLabels).toEqual([Area.ShapeClassification]);
     });
 
-    it('generates from general target labels with an empty schema', () => {
+    it('resolves the broad shape-attributes context', () => {
         const stub = generateWithLabels(generator, [
             Area.ShapeClassification,
             Scope.ShapeAttributes
         ]);
 
         expect(stub).not.toBeNull();
+        expect(stub!.labels).toContain(Scope.ShapeAttributes);
     });
 
     it('generates the quadrilateral subsumption target', () => {
@@ -46,7 +47,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
                 Scope.ShapeAttributes
             ])!;
             if (!('shape' in stub.data)) throw new Error('Expected a legacy classification problem.');
-            expect(stub.labels).toEqual([]);
+            expect(stub.labels).toEqual([Scope.ShapeAttributes]);
         }
     });
 
