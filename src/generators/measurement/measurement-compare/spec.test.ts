@@ -3,7 +3,7 @@ import {MeasurementCompareGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
-import {spec} from './spec.ts';
+import {MeasurementCompareGeneratorSchema, spec} from './spec.ts';
 
 describe('MeasurementCompareGenerator Spec Integration', () => {
     let generator: MeasurementCompareGenerator;
@@ -13,15 +13,18 @@ describe('MeasurementCompareGenerator Spec Integration', () => {
         setSeed(42);
     });
 
-    it('declares direct measurement comparison without object sorting', () => {
-        expect(spec.generalLabels).toContain(Area.Measurement);
+    it('resolves the measured attribute as the mathematical Area', () => {
+        expect(spec.generalLabels).toEqual([]);
+        expect(MeasurementCompareGeneratorSchema.attribute).toEqual([
+            Area.MeasuringLength,
+            Area.MeasuringWeight
+        ]);
         expect(spec.generalLabels).not.toContain(Area.ObjectSorting);
     });
 
     it('should generate correct length/longer comparison problems', () => {
         const stub = generateWithLabels(generator, [
-            Area.Measurement,
-            Scope.LengthMeasurement,
+            Area.MeasuringLength,
             Scope.Greater
         ]);
         expect(stub).not.toBeNull();
@@ -33,8 +36,7 @@ describe('MeasurementCompareGenerator Spec Integration', () => {
 
     it('should generate correct weight/lighter comparison problems', () => {
         const stub = generateWithLabels(generator, [
-            Area.Measurement,
-            Scope.WeightMeasurement,
+            Area.MeasuringWeight,
             Scope.Less
         ]);
         expect(stub).not.toBeNull();

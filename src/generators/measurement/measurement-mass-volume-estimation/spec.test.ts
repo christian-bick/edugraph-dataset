@@ -7,20 +7,27 @@ import {MeasurementMassVolumeEstimationGeneratorSchema, spec} from './spec.ts';
 describe('measurement-mass-volume-estimation spec', () => {
     it('declares liquid-volume estimation with a liter reference', () => {
         expect(spec.generalLabels).toEqual([Area.Estimation]);
-        expect(MeasurementMassVolumeEstimationGeneratorSchema.measurement).toEqual([
-            Scope.LiquidVolumes, Scope.WeightMeasurement
+        expect(MeasurementMassVolumeEstimationGeneratorSchema.measurement[2]).toEqual([
+            [Area.MeasuringVolumes, Scope.LiquidVolumes, Scope.LiterScale],
+            [Area.MeasuringWeight, Scope.GramScale],
+            [Area.MeasuringWeight, Scope.KilogramScale]
         ]);
     });
 
     it('supports the Grade 3 liquid-volume estimation target', () => {
         const stub = generateWithLabels(new MeasurementMassVolumeEstimationGenerator(), [
             Area.Estimation,
-            Scope.VolumeMeasurement,
+            Area.MeasuringVolumes,
             Scope.LiquidVolumes,
             Scope.LiterScale,
             Ability.ProcedureExecution
         ]);
         expect(stub).not.toBeNull();
+        expect(stub!.labels).toEqual(expect.arrayContaining([
+            Area.MeasuringVolumes,
+            Scope.LiquidVolumes,
+            Scope.LiterScale
+        ]));
         expect(stub!.data.measurementKind).toBe('liquid-volume');
         if (stub!.data.measurementKind !== 'liquid-volume') throw new Error('Expected liquid volume.');
         expect(stub!.data.referenceLiters).toBe(1);
@@ -28,9 +35,10 @@ describe('measurement-mass-volume-estimation spec', () => {
 
     it.each([Scope.GramScale, Scope.KilogramScale])('supports mass estimation with %s', scale => {
         const stub = generateWithLabels(new MeasurementMassVolumeEstimationGenerator(), [
-            Area.Estimation, Scope.WeightMeasurement, scale, Ability.ProcedureExecution
+            Area.Estimation, Area.MeasuringWeight, scale, Ability.ProcedureExecution
         ]);
         expect(stub).not.toBeNull();
+        expect(stub!.labels).toEqual(expect.arrayContaining([Area.MeasuringWeight, scale]));
         expect(stub!.data.measurementKind).toBe('mass');
     });
 });

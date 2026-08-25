@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {random} from '../../../lib/random.ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -23,9 +22,8 @@ export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerato
     schema = MeasurementMassVolumeEstimationGeneratorSchema;
 
     generate(config: MeasurementMassVolumeEstimationGeneratorConfig): ProblemStub<MassVolumeEstimateProblem> {
-        validateConfigFields('measurement-mass-volume-estimation', config, ['measurement', 'scale']);
-        if (config.scale === Scope.GramScale) {
-            if (config.measurement !== Scope.WeightMeasurement) throw new Error('Gram scale requires weight measurement.');
+        validateConfigFields('measurement-mass-volume-estimation', config, ['measurement']);
+        if (config.measurement === 'gram-weight') {
             const profiles = [
                 {object: 'crayon' as const, estimate: 10},
                 {object: 'apple' as const, estimate: 200},
@@ -37,8 +35,7 @@ export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerato
                 referenceObject: 'paperclip', referenceValue: 1
             }};
         }
-        if (config.scale === Scope.KilogramScale) {
-            if (config.measurement !== Scope.WeightMeasurement) throw new Error('Kilogram scale requires weight measurement.');
+        if (config.measurement === 'kilogram-weight') {
             const profiles = [
                 {object: 'backpack' as const, estimate: 3},
                 {object: 'chair' as const, estimate: 5},
@@ -50,8 +47,7 @@ export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerato
                 referenceObject: 'one-kilogram-bag', referenceValue: 1
             }};
         }
-        if (config.scale !== Scope.LiterScale) throw new Error('Unsupported scale.');
-        if (config.measurement !== Scope.LiquidVolumes) throw new Error('Liter scale requires liquid volume.');
+        if (config.measurement !== 'liter-volume') throw new Error('Unsupported measurement configuration.');
         const estimate = liquidEstimates[Math.floor(random() * liquidEstimates.length)];
         return {data: {
             measurementKind: 'liquid-volume',

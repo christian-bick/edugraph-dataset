@@ -3,11 +3,11 @@ import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutatio
 import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const select = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringObjects, Scope.LengthMeasurement, Ability.ConceptClassification])
+    .addLabels([Area.MeasuringLength, Ability.ConceptClassification])
     .applyLabelVariants([[Scope.PhysicalRuler], [Scope.Tapemeter]]);
 
 const use = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringObjects, Scope.LengthMeasurement, Scope.IntegerNumbers, Ability.ProcedureExecution])
+    .addLabels([Area.MeasuringLength, Scope.IntegerNumbers, Ability.ProcedureExecution])
     .applyLabelVariants([[Scope.PhysicalRuler], [Scope.Tapemeter]]);
 
 export const spec: CompetencyTarget[] = [

@@ -4,16 +4,14 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-compare',
-    generalLabels: [
-        Area.Measurement,
-    ]
+    generalLabels: []
 };
 
 
 // TODO: Ontological relations could be beneficial in the future for non-range properties,
 // such as inferring 'heavier' vs 'lighter' from related physics concepts.
 export const MeasurementCompareGeneratorSchema = {
-    attribute: [Scope.LengthMeasurement, Scope.WeightMeasurement],
+    attribute: [Area.MeasuringLength, Area.MeasuringWeight],
     relation: [Scope.Greater, Scope.Less],
 } as const;
 

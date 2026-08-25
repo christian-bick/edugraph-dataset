@@ -1,7 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {MeasurementMassVolumeEstimationGenerator} from './generator.ts';
-import {Scope} from 'edugraph-ts';
 
 const expectedEstimates = {
     'water-bottle': 1,
@@ -17,7 +16,7 @@ describe('MeasurementMassVolumeEstimationGenerator', () => {
         const containers = new Set<string>();
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const data = generator.generate({measurement: Scope.LiquidVolumes, scale: Scope.LiterScale}).data;
+            const data = generator.generate({measurement: 'liter-volume'}).data;
             if (data.measurementKind !== 'liquid-volume') throw new Error('Expected liquid volume.');
             containers.add(data.container);
             expect(data.measurementKind).toBe('liquid-volume');
@@ -30,18 +29,18 @@ describe('MeasurementMassVolumeEstimationGenerator', () => {
 
     it('is deterministic for the same seed', () => {
         setSeed('liquid-volume-estimate');
-        const first = generator.generate({measurement: Scope.LiquidVolumes, scale: Scope.LiterScale});
+        const first = generator.generate({measurement: 'liter-volume'});
         setSeed('liquid-volume-estimate');
-        expect(generator.generate({measurement: Scope.LiquidVolumes, scale: Scope.LiterScale})).toEqual(first);
+        expect(generator.generate({measurement: 'liter-volume'})).toEqual(first);
     });
 
     it.each([
-        [Scope.GramScale, 'g', 'paperclip', [10, 200, 500]],
-        [Scope.KilogramScale, 'kg', 'one-kilogram-bag', [3, 5, 12]]
-    ] as const)('generates plausible mass estimates for %s', (scale, unit, referenceObject, values) => {
+        ['gram-weight', 'g', 'paperclip', [10, 200, 500]],
+        ['kilogram-weight', 'kg', 'one-kilogram-bag', [3, 5, 12]]
+    ] as const)('generates plausible mass estimates for %s', (measurement, unit, referenceObject, values) => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
-            const stub = generator.generate({measurement: Scope.WeightMeasurement, scale});
+            const stub = generator.generate({measurement});
             if (stub.data.measurementKind !== 'mass') throw new Error('Expected mass.');
             expect(stub.data.unit).toBe(unit);
             expect(stub.data.referenceObject).toBe(referenceObject);
@@ -57,12 +56,9 @@ describe('MeasurementMassVolumeEstimationGenerator', () => {
         );
     });
 
-    it.each([
-        [{measurement: Scope.LiquidVolumes, scale: Scope.GramScale}, 'Gram scale requires'],
-        [{measurement: Scope.LiquidVolumes, scale: Scope.KilogramScale}, 'Kilogram scale requires'],
-        [{measurement: Scope.WeightMeasurement, scale: Scope.LiterScale}, 'Liter scale requires'],
-        [{measurement: Scope.WeightMeasurement, scale: 'unsupported' as never}, 'Unsupported scale']
-    ] as const)('rejects incompatible estimation scales', (config, message) => {
-        expect(() => generator.generate(config)).toThrow(message);
+    it('rejects an unsupported resolved measurement configuration', () => {
+        expect(() => generator.generate({measurement: 'unsupported' as never})).toThrow(
+            'Unsupported measurement configuration'
+        );
     });
 });

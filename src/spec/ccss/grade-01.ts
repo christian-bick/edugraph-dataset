@@ -380,8 +380,7 @@ const explainPlaceValueSubtractionBuilder = createPlaceValueSubtractionBuilder([
 // --- 1.MD.A.1: Directly order three objects by length ---
 const directLengthComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringObjects,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.DirectRelation,
         Ability.ProcedureExecution
     ])
@@ -393,8 +392,7 @@ const directLengthComparisonBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.A.1: Compare two lengths through a third object ---
 const mediatedLengthComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringObjects,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.MediatedRelation,
         Ability.ConceptDerivation
     ]);
@@ -402,8 +400,7 @@ const mediatedLengthComparisonBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.A.2: Express length as a whole number of iterated units ---
 const measureLengthBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringObjects,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.IntegerNumbers
     ])
     .applyLabelVariants([

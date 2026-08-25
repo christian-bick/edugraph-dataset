@@ -1,7 +1,7 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
 import {MeasurementAttributeProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
-import {Scope} from "edugraph-ts";
+import {Area} from "edugraph-ts";
 import {MeasurementAttributeGeneratorConfig, MeasurementAttributeGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
@@ -14,10 +14,12 @@ export class MeasurementAttributeGenerator implements ProblemGenerator<Measureme
         const attributeLabel = config.attribute;
 
         let attribute: 'length' | 'height' | 'weight';
-        if (attributeLabel === Scope.LengthMeasurement) {
+        if (attributeLabel === Area.MeasuringLength) {
             attribute = random() > 0.5 ? 'length' : 'height';
-        } else {
+        } else if (attributeLabel === Area.MeasuringWeight) {
             attribute = 'weight';
+        } else {
+            return null;
         }
 
         return {

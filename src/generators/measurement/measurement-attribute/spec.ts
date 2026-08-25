@@ -1,19 +1,17 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, Scope} from 'edugraph-ts';
+import {Area} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {selectExactMatch} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-attribute',
-    generalLabels: [
-        Area.MeasuringObjects,
-    ]
+    generalLabels: []
 };
 
 
 export const MeasurementAttributeGeneratorSchema = {
     attribute: [
-        [Scope.LengthMeasurement, Scope.WeightMeasurement],
+        [Area.MeasuringLength, Area.MeasuringWeight],
         selectExactMatch
     ]
 } as const;

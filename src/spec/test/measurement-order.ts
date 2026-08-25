@@ -4,8 +4,7 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const directBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.DirectRelation,
         Ability.ProcedureExecution
     ])
@@ -13,8 +12,7 @@ const directBuilder = new DatasetPermutationBuilder()
 
 const mediatedBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.MediatedRelation,
         Ability.ConceptDerivation
     ])

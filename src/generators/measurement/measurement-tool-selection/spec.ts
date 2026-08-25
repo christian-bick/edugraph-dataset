@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-tool-selection',
-    generalLabels: [Area.MeasuringObjects]
+    generalLabels: [Area.MeasuringLength]
 };
 
 export const MeasurementToolSelectionGeneratorSchema = {

@@ -9,15 +9,14 @@ describe('MeasurementMediatedComparisonGenerator spec integration', () => {
     const generator = new MeasurementMediatedComparisonGenerator();
 
     it('declares mediated length comparison as an invariant capability', () => {
-        expect(spec.generalLabels).toContain(Scope.LengthMeasurement);
+        expect(spec.generalLabels).toContain(Area.MeasuringLength);
         expect(spec.generalLabels).toContain(Scope.MediatedRelation);
     });
 
     it('resolves greater and less comparison targets', () => {
         for (const relation of [Scope.Greater, Scope.Less] as const) {
             const stub = generateWithLabels(generator, [
-                Area.MeasuringObjects,
-                Scope.LengthMeasurement,
+                Area.MeasuringLength,
                 Scope.MediatedRelation,
                 relation
             ]);

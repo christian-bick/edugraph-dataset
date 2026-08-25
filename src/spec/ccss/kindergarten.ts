@@ -293,23 +293,21 @@ const decomposeTeenNumbersBuilder = createTeenNumbersBuilder(Area.PartitionOfCol
 // --- K.MD.A.1: Describe measurable attributes of objects ---
 const measurableAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringObjects,
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Scope.LengthMeasurement],
-        [Scope.WeightMeasurement]
+        [Area.MeasuringLength],
+        [Area.MeasuringWeight]
     ]);
 
 // --- K.MD.A.2: Directly compare two objects with a common measurable attribute ---
 const compareAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Measurement,
         Ability.VisualReception
     ])
     .applyLabelVariants([
-        [Scope.LengthMeasurement],
-        [Scope.WeightMeasurement]
+        [Area.MeasuringLength],
+        [Area.MeasuringWeight]
     ])
     .applyLabelVariants([
         [Scope.Greater],

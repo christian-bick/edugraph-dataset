@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {MeasurementCompareGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 
 describe('MeasurementCompareGenerator', () => {
     let generator: MeasurementCompareGenerator;
@@ -17,7 +17,7 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length longer relation', () => {
         const config = {
-            attribute: Scope.LengthMeasurement,
+            attribute: Area.MeasuringLength,
             relation: Scope.Greater
         } as const;
         for (let i = 0; i < 50; i++) {
@@ -36,7 +36,7 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare length shorter relation', () => {
         const config = {
-            attribute: Scope.LengthMeasurement,
+            attribute: Area.MeasuringLength,
             relation: Scope.Less
         } as const;
         for (let i = 0; i < 50; i++) {
@@ -53,7 +53,7 @@ describe('MeasurementCompareGenerator', () => {
 
     it('should validate direct-compare weight heavier relation', () => {
         const config = {
-            attribute: Scope.WeightMeasurement,
+            attribute: Area.MeasuringWeight,
             relation: Scope.Greater
         } as const;
         for (let i = 0; i < 50; i++) {
@@ -74,11 +74,11 @@ describe('MeasurementCompareGenerator', () => {
 
     it('rejects unsupported resolved labels instead of defaulting them', () => {
         expect(generator.generate({
-            attribute: Scope.VolumeMeasurement,
+            attribute: Area.MeasuringVolumes,
             relation: Scope.Greater
         } as any)).toBeNull();
         expect(generator.generate({
-            attribute: Scope.LengthMeasurement,
+            attribute: Area.MeasuringLength,
             relation: Scope.Equal
         } as any)).toBeNull();
     });

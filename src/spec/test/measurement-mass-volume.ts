@@ -3,15 +3,14 @@ import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutatio
 import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const liquidBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.MeasuringObjects,
-    Scope.VolumeMeasurement,
+    Area.MeasuringVolumes,
     Scope.LiquidVolumes,
     Scope.LiterScale,
     Ability.ProcedureExecution
 ]);
 
 const massBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.MeasuringObjects, Scope.WeightMeasurement, Ability.ProcedureExecution])
+    .addLabels([Area.MeasuringWeight, Ability.ProcedureExecution])
     .applyLabelVariants([[Scope.GramScale], [Scope.KilogramScale]]);
 
 export const spec: CompetencyTarget[] = [

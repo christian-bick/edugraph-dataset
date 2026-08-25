@@ -1,15 +1,14 @@
 import DatasetPermutationBuilder, { toTargets } from '../../lib/dataset-permutation-builder.ts';
-import { Area, Scope, Ability } from 'edugraph-ts';
+import {Area, Ability} from 'edugraph-ts';
 import { CompetencyTarget } from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringObjects,
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Scope.LengthMeasurement],
-        [Scope.WeightMeasurement]
+        [Area.MeasuringLength],
+        [Area.MeasuringWeight]
     ]);
 
 export const spec: CompetencyTarget[] = toTargets('test-measurement-attribute', builder);

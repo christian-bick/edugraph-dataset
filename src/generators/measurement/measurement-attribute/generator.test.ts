@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {MeasurementAttributeGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {Scope} from 'edugraph-ts';
+import {Area} from 'edugraph-ts';
 
 describe('MeasurementAttributeGenerator', () => {
     let generator: MeasurementAttributeGenerator;
@@ -17,7 +17,7 @@ describe('MeasurementAttributeGenerator', () => {
 
     it('should validate weight attribute type mode', () => {
         const config = {
-            attribute: Scope.WeightMeasurement
+            attribute: Area.MeasuringWeight
         };
         const stub = generator.generate(config);
         expect(stub).not.toBeNull();
@@ -26,7 +26,7 @@ describe('MeasurementAttributeGenerator', () => {
 
     it('should validate length attribute type mode', () => {
         const config = {
-            attribute: Scope.LengthMeasurement
+            attribute: Area.MeasuringLength
         };
         let hasLength = false;
         let hasHeight = false;

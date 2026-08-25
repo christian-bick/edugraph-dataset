@@ -6,8 +6,7 @@ import {MeasurementToolSelectionGenerator} from './generator.ts';
 describe('measurement-tool-selection spec', () => {
     it('consumes the selected physical tool label', () => {
         const stub = generateWithLabels(new MeasurementToolSelectionGenerator(), [
-            Area.MeasuringObjects,
-            Scope.LengthMeasurement,
+            Area.MeasuringLength,
             Scope.PhysicalRuler,
             Ability.ConceptClassification
         ]);

@@ -347,8 +347,7 @@ const explainStrategiesBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.A.1: Select a length-measurement tool ---
 const selectLengthToolBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringObjects,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
@@ -359,8 +358,7 @@ const selectLengthToolBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.A.1: Use a length-measurement tool ---
 const useLengthToolBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringObjects,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.IntegerNumbers,
         Ability.ProcedureExecution
     ])
@@ -381,7 +379,7 @@ const unitScaleRelationBuilder = new DatasetPermutationBuilder()
 const estimateMetricLengthBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Estimation,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
@@ -393,7 +391,7 @@ const estimateMetricLengthBuilder = new DatasetPermutationBuilder()
 const estimateImperialLengthBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Estimation,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([

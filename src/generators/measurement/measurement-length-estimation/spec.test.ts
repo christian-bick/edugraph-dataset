@@ -7,7 +7,7 @@ import {MeasurementLengthEstimationGeneratorSchema, spec} from './spec.ts';
 
 describe('measurement-length-estimation spec', () => {
     it('declares the invariant estimation mathematics with an empty schema', () => {
-        expect(spec.generalLabels).toEqual([Area.Estimation, Scope.LengthMeasurement]);
+        expect(spec.generalLabels).toEqual([Area.Estimation, Area.MeasuringLength]);
         expect(MeasurementLengthEstimationGeneratorSchema).toEqual({});
     });
 
@@ -20,7 +20,7 @@ describe('measurement-length-estimation spec', () => {
         setSeed(17);
         const result = generateWithLabels(new MeasurementLengthEstimationGenerator(), [
             Area.Estimation,
-            Scope.LengthMeasurement,
+            Area.MeasuringLength,
             scale,
             Ability.ProcedureExecution
         ]);

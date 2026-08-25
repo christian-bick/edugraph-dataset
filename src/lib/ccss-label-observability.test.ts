@@ -85,8 +85,13 @@ describe('CCSS observable-label contracts', () => {
     it('keeps pairwise measurement comparison distinct from object sorting', () => {
         const comparisons = targets(kindergarten, 'K.MD.A.2-compare-attributes');
 
-        expectAll(comparisons, [Area.Measurement, Ability.VisualReception]);
+        expectAll(comparisons, [Ability.VisualReception]);
         expectNone(comparisons, [Area.ObjectSorting]);
+        for (const target of comparisons) {
+            const measurementAreas = [Area.MeasuringLength, Area.MeasuringWeight]
+                .filter(area => target.labels.includes(area));
+            expect(measurementAreas).toHaveLength(1);
+        }
     });
 
     it('uses drawing labels rather than coordinate-plane plotting for shape tracing', () => {

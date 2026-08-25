@@ -7,37 +7,45 @@ import {MeasurementMassVolumeGeneratorSchema, spec} from './spec.ts';
 describe('MeasurementMassVolumeGenerator spec integration', () => {
     it('supports calibrated liter measurements', () => {
         const stub = generateWithLabels(new MeasurementMassVolumeGenerator(), [
-            Area.MeasuringObjects,
-            Scope.VolumeMeasurement,
+            Area.MeasuringVolumes,
             Scope.LiquidVolumes,
             Scope.LiterScale,
             Ability.ProcedureExecution
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.unit).toBe('L');
+        expect(stub!.labels).toEqual(expect.arrayContaining([
+            Area.MeasuringVolumes,
+            Scope.LiquidVolumes,
+            Scope.LiterScale
+        ]));
     });
 
     it('declares object measurement with an explicit metric scale', () => {
-        expect(spec.generalLabels).toEqual([Area.MeasuringObjects]);
-        expect(MeasurementMassVolumeGeneratorSchema.measurement).toEqual([
+        expect(spec.generalLabels).toEqual([]);
+        expect(MeasurementMassVolumeGeneratorSchema.measurement[0]).toEqual([
+            Area.MeasuringVolumes,
             Scope.LiquidVolumes,
-            Scope.WeightMeasurement
-        ]);
-        expect(MeasurementMassVolumeGeneratorSchema.scale).toEqual([
             Scope.LiterScale,
+            Area.MeasuringWeight,
             Scope.GramScale,
             Scope.KilogramScale
+        ]);
+        expect(MeasurementMassVolumeGeneratorSchema.measurement[2]).toEqual([
+            [Area.MeasuringVolumes, Scope.LiquidVolumes, Scope.LiterScale],
+            [Area.MeasuringWeight, Scope.GramScale],
+            [Area.MeasuringWeight, Scope.KilogramScale]
         ]);
     });
 
     it.each([Scope.GramScale, Scope.KilogramScale])('supports mass measurement with %s', scale => {
         const stub = generateWithLabels(new MeasurementMassVolumeGenerator(), [
-            Area.MeasuringObjects,
-            Scope.WeightMeasurement,
+            Area.MeasuringWeight,
             scale,
             Ability.ProcedureExecution
         ]);
         expect(stub).not.toBeNull();
+        expect(stub!.labels).toContain(Area.MeasuringWeight);
         expect(stub!.labels).toContain(scale);
         expect(stub!.data.measurementKind).toBe('mass');
     });

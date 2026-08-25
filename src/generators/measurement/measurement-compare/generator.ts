@@ -1,7 +1,7 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
 import {MeasurementCompareProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
-import {Scope} from "edugraph-ts";
+import {Area, Scope} from "edugraph-ts";
 import {MeasurementCompareGeneratorConfig, MeasurementCompareGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
@@ -14,11 +14,11 @@ export class MeasurementCompareGenerator implements ProblemGenerator<Measurement
         const attributeLabel = config.attribute;
         const relationLabel = config.relation;
 
-        if (attributeLabel !== Scope.LengthMeasurement && attributeLabel !== Scope.WeightMeasurement) return null;
+        if (attributeLabel !== Area.MeasuringLength && attributeLabel !== Area.MeasuringWeight) return null;
         if (relationLabel !== Scope.Greater && relationLabel !== Scope.Less) return null;
 
         const attribute: MeasurementCompareProblem['attribute'] =
-            attributeLabel === Scope.LengthMeasurement ? 'length' : 'weight';
+            attributeLabel === Area.MeasuringLength ? 'length' : 'weight';
         const relation: MeasurementCompareProblem['relation'] =
             relationLabel === Scope.Greater ? 'greater' : 'less';
 

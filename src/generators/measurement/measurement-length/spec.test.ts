@@ -15,8 +15,7 @@ describe('MeasurementLengthGenerator Spec Integration', () => {
     it('should generate integer measurement problems when Scope.IntegerNumbers is requested', () => {
         for (let i = 0; i < 20; i++) {
             const stub = generateWithLabels(generator, [
-                Area.MeasuringObjects,
-                Scope.LengthMeasurement,
+                Area.MeasuringLength,
                 Scope.IntegerNumbers,
                 Scope.NumbersSmaller10
             ]);
@@ -32,8 +31,7 @@ describe('MeasurementLengthGenerator Spec Integration', () => {
     it('should generate decimal measurement problems when Scope.DecimalNumbers is requested', () => {
         for (let i = 0; i < 20; i++) {
             const stub = generateWithLabels(generator, [
-                Area.MeasuringObjects,
-                Scope.LengthMeasurement,
+                Area.MeasuringLength,
                 Scope.DecimalNumbers,
                 Scope.NumbersSmaller10
             ]);

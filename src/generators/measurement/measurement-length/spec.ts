@@ -14,7 +14,7 @@ const exactTool = (labels: readonly string[]) => {
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-length',
     generalLabels: [
-        Area.MeasuringObjects,
+        Area.MeasuringLength,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero

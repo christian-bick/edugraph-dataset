@@ -5,8 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-order',
     generalLabels: [
-        Area.MeasuringObjects,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.DirectRelation
     ]
 };
