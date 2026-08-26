@@ -1,4 +1,4 @@
-import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
+import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -6,7 +6,12 @@ export const spec: ViewSpec = {
     viewId: 'operations-word-problem-inversion',
     rejectedLabels: [
         ...deductAdmitting([Scope.NumbersLarger20]),
-        ...deductAdmitting([Scope.NumbersWithNegatives])
+        ...deductAdmitting([Scope.NumbersWithNegatives]),
+        ...deductAdmitting([
+            Area.CommutativeLaw,
+            Area.AssociativeLaw,
+            Area.DistributiveLaw
+        ])
     ],
     generalLabels: [
         Ability.TextualReception,
