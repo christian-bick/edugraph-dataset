@@ -6,8 +6,6 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'number-array',
     generalLabels: [
-        Area.GroupRecognition,
-        Scope.EqualShares,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
