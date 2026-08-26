@@ -5,6 +5,8 @@ import {Scope} from "edugraph-ts";
 import {CountingIncDecGeneratorConfig, CountingIncDecGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
 
+const hasNoZeroDigit = (value: number): boolean => !String(value).includes('0');
+
 export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecProblem, CountingIncDecGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
     schema = CountingIncDecGeneratorSchema;
@@ -44,7 +46,15 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingIncDecP
             return null;
         }
 
-        const numObjects = Math.floor(random() * (maxCount - minCount + 1)) + minCount;
+        const validStarts = Array.from(
+            {length: maxCount - minCount + 1},
+            (_, index) => minCount + index
+        ).filter(value => hasNoZeroDigit(value) && hasNoZeroDigit(
+            incDecType === 'inc' ? value + stepSize : value - stepSize
+        ));
+        if (validStarts.length === 0) return null;
+
+        const numObjects = validStarts[Math.floor(random() * validStarts.length)];
         const incDecAnswer = incDecType === 'inc'
             ? numObjects + stepSize
             : numObjects - stepSize;

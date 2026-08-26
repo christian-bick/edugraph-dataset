@@ -119,6 +119,26 @@ describe('CountingIncDecGenerator', () => {
         expect(stub!.data.incDecAnswer).toBe(result.hundreds! * 100 + result.tens * 10 + result.ones);
     });
 
+    it.each([
+        [Scope.AdditiveCount, Scope.StepsOf10],
+        [Scope.SubtractiveCount, Scope.StepsOf10],
+        [Scope.AdditiveCount, Scope.StepsOf100],
+        [Scope.SubtractiveCount, Scope.StepsOf100]
+    ] as const)('keeps every displayed numeral zero-free for %s with %s', (direction, stepMagnitude) => {
+        for (let seed = 0; seed < 25; seed++) {
+            setSeed(seed);
+            const stub = generator.generate({
+                range: {min: 101, max: 999},
+                direction,
+                stepMagnitude
+            });
+
+            expect(stub).not.toBeNull();
+            expect(String(stub!.data.numObjects)).not.toContain('0');
+            expect(String(stub!.data.incDecAnswer)).not.toContain('0');
+        }
+    });
+
     it('returns null when the range cannot fit the requested change', () => {
         expect(generator.generate({
             range: {min: 1, max: 1},
@@ -129,6 +149,14 @@ describe('CountingIncDecGenerator', () => {
             range: {min: 1, max: 9},
             direction: Scope.AdditiveCount,
             stepMagnitude: Scope.StepsOf10
+        })).toBeNull();
+    });
+
+    it('returns null when the only transition would introduce a zero digit', () => {
+        expect(generator.generate({
+            range: {min: 9, max: 10},
+            direction: Scope.AdditiveCount,
+            stepMagnitude: Scope.StepsOf1
         })).toBeNull();
     });
 
