@@ -5,23 +5,28 @@ import { setSeed } from '../../../../lib/random.ts';
 import { CountingObjectsSimpleViewSchema } from './spec.ts';
 
 describe('CountingObjectsSimpleViewSchema', () => {
-    it('resolves box arrangement without changing the legacy arrangement fallback set', () => {
+    it('resolves exactly one box arrangement capability', () => {
         setSeed(42);
-        const { config } = extractConfig(CountingObjectsSimpleViewSchema, [Scope.BoxArrangement]);
+        const {config, resolvedLabels} = extractConfig(
+            CountingObjectsSimpleViewSchema,
+            [Scope.BoxArrangement]
+        );
 
-        expect(config.isBoxArrangement).toBe(true);
-        expect([
-            Scope.LinearArrangement,
-            Scope.CircularArrangement,
-            Scope.ScatteredArrangement
-        ]).toContain(config.arrangement);
+        expect(config.arrangement).toBe(Scope.BoxArrangement);
+        expect(resolvedLabels).toEqual([Scope.BoxArrangement]);
     });
 
-    it('keeps unlabeled arrangements out of box mode', () => {
-        setSeed(42);
-        const { config } = extractConfig(CountingObjectsSimpleViewSchema, []);
+    it.each([
+        Scope.LinearArrangement,
+        Scope.CircularArrangement,
+        Scope.ScatteredArrangement
+    ])('resolves %s without an additional arrangement label', arrangement => {
+        const {config, resolvedLabels} = extractConfig(
+            CountingObjectsSimpleViewSchema,
+            [arrangement]
+        );
 
-        expect(config.isBoxArrangement).toBe(false);
-        expect(config.arrangement).not.toBe(Scope.BoxArrangement);
+        expect(config.arrangement).toBe(arrangement);
+        expect(resolvedLabels).toEqual([arrangement]);
     });
 });

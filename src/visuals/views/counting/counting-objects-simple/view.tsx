@@ -25,7 +25,7 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
     const { numObjects } = data;
     
     let arrangement: 'line' | 'circle' | 'scattered' | 'array';
-    if (config.isBoxArrangement) arrangement = 'array';
+    if (config.arrangement === Scope.BoxArrangement) arrangement = 'array';
     else if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';
     else if (config.arrangement === Scope.CircularArrangement) arrangement = 'circle';
     else if (config.arrangement === Scope.ScatteredArrangement) arrangement = 'scattered';
