@@ -27,3 +27,7 @@ export function hasCompletePositiveFactorEvidence(data: PositiveFactorEvidence):
             && pair.upperFactor === expectedPairs[index].upperFactor
         ));
 }
+
+export function formatDivisionRemainder(remainder: number): string {
+    return remainder === 0 ? 'Divides evenly' : `Remainder: ${remainder}`;
+}

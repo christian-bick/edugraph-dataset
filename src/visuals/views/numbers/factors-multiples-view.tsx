@@ -7,7 +7,10 @@ import {
     PositiveFactorEvidence
 } from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
-import {hasCompletePositiveFactorEvidence} from './factors-multiples-helpers.ts';
+import {
+    formatDivisionRemainder,
+    hasCompletePositiveFactorEvidence
+} from './factors-multiples-helpers.ts';
 
 interface NumbersFactorsMultiplesViewProps {
     expectedKinds: readonly FactorMultipleRelationsProblem['kind'][];
@@ -197,7 +200,7 @@ function MultipleTestTask({data, isSolutionView}: {data: OneDigitMultipleTestPro
                             Quotient: <span className="font-mono text-lg">{data.quotient}</span>
                         </div>
                         <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-center font-bold text-slate-800">
-                            Remainder: <span className="font-mono text-lg">{data.remainder}</span>
+                            {formatDivisionRemainder(data.remainder)}
                         </div>
                     </div>
                     <Conclusion>Yes. {data.candidate} is a multiple of {data.divisor}.</Conclusion>
