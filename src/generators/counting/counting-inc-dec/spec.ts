@@ -38,8 +38,10 @@ export const CountingIncDecGeneratorSchema = {
         countingDirections,
         resolveDirection,
         [
-            [Scope.SubtractiveCount, Area.Decrement, Scope.Before],
-            [Scope.AdditiveCount, Area.Increment, Scope.After]
+            [Scope.SubtractiveCount],
+            [Area.Decrement, Scope.Before],
+            [Scope.AdditiveCount],
+            [Area.Increment, Scope.After]
         ]
     ],
     stepMagnitude: [Scope.StepsOf1, Scope.StepsOf10, Scope.StepsOf100]
