@@ -375,7 +375,7 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/validate-generator-view-specs.ts`
 *   **Execution**: `npm run check:generator-view-specs`
-*   **Function**: Enforces the static generator/view contracts from [docs/spec-general.md](docs/spec-general.md), [docs/spec-generator.md](docs/spec-generator.md), and [docs/spec-view.md](docs/spec-view.md). It rejects redundant or overlapping positive declarations, generator-owned Abilities, cross-pair schema parameter duplication, Abilities in `rejectedLabels`, unsupported pair-level `requiredLabels`, and contradictory required/rejected declarations. Label-bearing mechanisms are dimension-neutral; semantic ownership rules determine which declarations are valid. Output goes to the console; redirect it to `temp/` if you need to keep it.
+*   **Function**: Enforces the static generator/view contracts from [docs/spec-general.md](docs/spec-general.md), [docs/spec-generator.md](docs/spec-generator.md), and [docs/spec-view.md](docs/spec-view.md). It rejects redundant or overlapping positive declarations, `deductCompatible(...)` in invariant `generalLabels`, generator-owned Abilities, cross-pair schema parameter duplication, Abilities in `rejectedLabels`, unsupported pair-level `requiredLabels`, and contradictory required/rejected declarations. Label-bearing mechanisms are dimension-neutral; semantic ownership rules determine which declarations are valid. Output goes to the console; redirect it to `temp/` if you need to keep it.
 
 ### `src/scripts/audit-label-architecture.ts`
 *   **Execution**: `npm run audit:label-architecture -- --spec=<module> [--output-dir=<path>] [--strict]`

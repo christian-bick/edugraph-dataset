@@ -15,12 +15,24 @@ import {
     findRejectedLabelContractIssues,
     findRequiredLabelContractIssues
 } from '../lib/spec-contracts.ts';
+import {findGeneralLabelDeductionIssues} from '../lib/spec-source-contracts.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
 const camelCase = (str: string) => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
+
+function checkGeneralLabelDeductions(kind: string, item: string, specPath: string): boolean {
+    const issues = findGeneralLabelDeductionIssues(fs.readFileSync(specPath, 'utf8'), specPath);
+    for (const issue of issues) {
+        console.error(
+            `❌ [${kind}:${item}] SPEC-10 violation at spec.ts:${issue.line}:${issue.column}: `
+            + 'deductCompatible may declare supported capabilities in a schema, but not invariant generalLabels'
+        );
+    }
+    return issues.length > 0;
+}
 
 /**
  * A generalLabels list must not contain a label together with one of its
@@ -63,6 +75,9 @@ async function validateSpecs() {
         const specPath = path.join(gMod.absolutePath, 'spec.ts');
         if (fs.existsSync(specPath)) {
             try {
+                if (checkGeneralLabelDeductions('generator', item, specPath)) {
+                    hasError = true;
+                }
                 const fileUrl = pathToFileURL(specPath).href;
                 const specModule = await import(fileUrl);
                 const spec = specModule.spec;
@@ -139,6 +154,9 @@ async function validateSpecs() {
         const specPath = path.join(vMod.absolutePath, 'spec.ts');
         if (fs.existsSync(specPath)) {
             try {
+                if (checkGeneralLabelDeductions('view', item, specPath)) {
+                    hasError = true;
+                }
                 const fileUrl = pathToFileURL(specPath).href;
                 const specModule = await import(fileUrl);
                 const spec = specModule.spec;
