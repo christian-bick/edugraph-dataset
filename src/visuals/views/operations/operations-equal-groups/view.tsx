@@ -6,6 +6,7 @@ import {
     OperationsEqualGroupsViewConfig,
     OperationsEqualGroupsViewSchema
 } from './spec.ts';
+import {equalGroupTitle} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -71,7 +72,7 @@ const OperationsEqualGroupsCore = ({config: _config, payload}: CoreProps) => {
                 {Array.from({length: data.groupCount}, (_, groupIndex) => (
                     <div key={groupIndex} className="rounded-xl border-2 border-teal-300 bg-white p-3">
                         <div className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-teal-700">
-                            Group {groupIndex + 1}
+                            {equalGroupTitle(data.operation, groupIndex, isSolutionView)}
                         </div>
                         <div className="flex min-h-16 flex-wrap items-center justify-center gap-2">
                             {Array.from({length: data.groupSize}, (_, itemIndex) => (
