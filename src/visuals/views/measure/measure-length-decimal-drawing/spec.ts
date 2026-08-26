@@ -6,6 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'measure-length-decimal-drawing',
     generalLabels: [
         Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.VisualReception,
         Ability.VisualArticulation,
         Ability.ProcedureExecution

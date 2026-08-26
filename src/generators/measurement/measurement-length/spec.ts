@@ -15,9 +15,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement-length',
     generalLabels: [
         Area.MeasuringLength,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersWithoutZero
+        Scope.NumbersWithoutNegatives
     ]
 };
 

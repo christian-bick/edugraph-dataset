@@ -6,6 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'measure-length-integer',
     generalLabels: [
         Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.VisualReception,
         Ability.ProcedureExecution
     ],

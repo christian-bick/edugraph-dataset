@@ -3,6 +3,7 @@ import {MeasurementLengthGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {spec} from './spec.ts';
 
 describe('MeasurementLengthGenerator Spec Integration', () => {
     let generator: MeasurementLengthGenerator;
@@ -10,6 +11,13 @@ describe('MeasurementLengthGenerator Spec Integration', () => {
     beforeEach(() => {
         generator = new MeasurementLengthGenerator();
         setSeed(42);
+    });
+
+    it('declares only canonical measurement invariants', () => {
+        expect(spec.generalLabels).toEqual([
+            Area.MeasuringLength,
+            Scope.NumbersWithoutNegatives
+        ]);
     });
 
     it('should generate integer measurement problems when Scope.IntegerNumbers is requested', () => {
