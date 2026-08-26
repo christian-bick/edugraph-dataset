@@ -1,6 +1,7 @@
 # Separate structural and specialization ontology relations
 
-**Status:** Planned after the next dataset release.
+**Status:** Ontology edge classification implemented on `add/specializes`; the two explicit
+redesign cases and the downstream library/content migration remain open.
 
 ## Purpose
 
@@ -156,6 +157,123 @@ six use grouped semantics and require the relation and bundle audit first.
 
 The output must be reviewable as an edge-level diff. Classification by naming convention, depth,
 or dimension is insufficient.
+
+#### Execution checklist
+
+For every item below, the review followed the same sequence:
+
+1. read the child and parent definitions in context;
+2. ask whether the child is a narrower form of the same observable capability;
+3. change only such edges to `specializes`;
+4. retain constituent, stage, instrument, aspect, and field-membership edges as `partOf`;
+5. validate both relation-specific acyclicity and the global `partOf* -> specializes*` path order.
+
+The completed batches migrate 364 of 716 descriptor hierarchy edges. The remaining 352 edges were
+reviewed and retained as structural `partOf`; retention means that a direct specialization was not
+established, not that every name and definition is necessarily beyond future improvement.
+
+##### Area — 63 migrated, 206 structural
+
+- [x] Iterated arithmetic evaluation (1 edge).
+- [x] Angle kinds (5 edges).
+- [x] Decimal-padding equivalence (1 edge).
+- [x] Division-of-collections variants (6 edges).
+- [x] Geometric transformation kinds (4 edges).
+- [x] Mathematical statement kinds (2 edges).
+- [x] Measuring-object dimensions (3 edges).
+- [x] Number-notation kinds (8 edges).
+- [x] Numeration kinds and infinite intervals (5 edges).
+- [x] Numeric approximation kinds (2 edges; `Subitizing` remains structural).
+- [x] Pattern-recognition kinds (2 edges).
+- [x] Circumference as perimeter calculation (1 edge).
+- [x] Polygon, quadrilateral, rectangle, and triangle taxonomy (16 edges).
+- [x] Polyhedron, prism, rectangular-prism, and cube taxonomy (4 edges).
+- [x] Shape-conservation kinds (3 edges).
+- [x] Review the complete Area remainder and retain constituent families such as Cartesian-plane
+  components, circle parts, fraction/ratio roles, measuring-with-units topics, and shape
+  part-whole operations as `partOf`.
+
+Ontology commit: `59c776a refactor: classify Area specializations`.
+
+##### Scope — 243 migrated, 84 structural
+
+- [x] Complexity and cardinality values: composition depth, operand cardinality, frame
+  complexity, relation mediation, statement complexity, and step complexity (14 edges).
+- [x] Dividend, divisor, largest-operand, and smallest-operand digit-count chains (18 edges).
+- [x] Numeric bases (4 edges).
+- [x] Numeric divisibility families (5 edges).
+- [x] Numeric range boundaries (19 edges).
+- [x] Numeric sign and zero families (4 edges).
+- [x] Step magnitudes (8 edges).
+- [x] Numeric-space, real, rational, decimal, and fraction hierarchy (6 edges).
+- [x] Proper, improper, mixed, related, numerator/denominator, and fixed-denominator fraction
+  families (13 edges).
+- [x] Metric and imperial area-scale families (8 edges).
+- [x] Metric and imperial distance-scale families (11 edges).
+- [x] Metric and imperial volume-scale families (9 edges).
+- [x] Metric and imperial weight-scale families (7 edges).
+- [x] Temperature and rotation scales (5 edges).
+- [x] Conversion, currency, and data representation families (8 edges).
+- [x] Physical and visual geometry representation families (7 edges).
+- [x] Numeral, physical, spatial, and visual number representation families (15 edges).
+- [x] Object arrangement and object-type families (6 edges).
+- [x] Currency denomination and currency-system families (11 edges).
+- [x] Dimensional abstraction values (5 edges).
+- [x] Compass, cardinal, intercardinal, spatial, and temporal direction families (19 edges).
+- [x] Meridiem and time-interval families (13 edges).
+- [x] Measurement mode, quantity-measurement, and liquid-volume families (6 edges).
+- [x] Order and partition families (10 edges).
+- [x] Shape attribute, property, and variation families (9 edges).
+- [x] State-property values (3 edges).
+- [x] Review the complete Scope remainder and retain structural category and instrument edges,
+  including protractors, rulers, tape meters, thermometers, clocks, calendars, and weighing scales,
+  as `partOf`.
+
+Ontology commit: `e345a7b refactor: classify Scope specializations`.
+
+##### Ability — 58 migrated, 62 structural
+
+- [x] Non-deductive reasoning kinds and logical inference (5 edges).
+- [x] Conceptual-thinking operations (5 edges).
+- [x] Creativity kinds (5 edges).
+- [x] Facilitation kinds (2 edges).
+- [x] Evaluation kinds with clear entailment (4 edges).
+- [x] Extraction kinds (4 edges).
+- [x] Interpretation kinds with clear entailment (4 edges).
+- [x] Direct, subtext, and supertext understanding (3 edges).
+- [x] Expression kinds with clear entailment (6 edges).
+- [x] Non-fringe articulation modalities and lexical/grammatical specializations (6 edges).
+- [x] Non-fringe reception modalities and visual-reception specializations (6 edges).
+- [x] Procedure-understanding specializations, including `ProcedureInversion` (4 edges).
+- [x] Spatial-thinking specializations (4 edges).
+- [x] Review the complete Ability remainder and retain structural faculties and stages, including
+  procedure application, scientific thinking, empathy, introspection, and social scaling, as
+  `partOf`.
+
+Ontology commit: `60a4720 refactor: classify Ability specializations`.
+
+#### Fringe-case resolution queue
+
+- [ ] **Deductive reasoning and axiom definition.** `DeductiveReasoning` is a genuine
+  specialization of `LogicalReasoning`, but `AxiomDefinition` is currently modeled as one of its
+  parts. Converting the former while retaining the latter would create the forbidden
+  `specializes -> partOf` order. Recommended redesign: split the current compound definition into
+  premise/axiom identification and premise formalization where the observable actions differ;
+  model those as specializations of appropriate conceptual or formalization abilities, and express
+  their use by deductive reasoning through a compositional progression relation rather than the
+  descriptor hierarchy. Then migrate `DeductiveReasoning specializes LogicalReasoning`.
+- [ ] **Linguistic modalities and performance facets.** `TextualReception`, `VocalReception`,
+  `TextualArticulation`, and `VocalArticulation` are plausible modality specializations, while
+  reading, writing, speaking, and listening fluency/precision/speed/capacity/flexibility are
+  performance facets rather than parts below an already specialized modality. Recommended
+  redesign: represent modality and transferable performance quality as atomic Ability labels—for
+  example `TextualReception + Fluency` rather than the compound `ReadingFluency`—and move
+  linguistic knowledge such as syntax or pronunciation into the appropriate Area when it is the
+  learned subject matter. The modal Ability chains can then use `specializes` without placing a
+  new structural decomposition beneath them.
+
+Neither fringe case is an exception to the ordering rule. Both remain explicit ontology-design
+tasks and were intentionally excluded from the Ability edge commit.
 
 ### Phase 2: add explicit ontology semantics
 
