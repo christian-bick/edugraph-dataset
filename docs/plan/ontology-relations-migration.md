@@ -168,7 +168,7 @@ For every item below, the review followed the same sequence:
 4. retain constituent, stage, instrument, aspect, and field-membership edges as `partOf`;
 5. validate both relation-specific acyclicity and the global `partOf* -> specializes*` path order.
 
-The completed batches migrate 364 of 716 descriptor hierarchy edges. The remaining 352 edges were
+The completed batches migrate 364 of 718 descriptor hierarchy edges. The remaining 354 edges were
 reviewed and retained as structural `partOf`; retention means that a direct specialization was not
 established, not that every name and definition is necessarily beyond future improvement.
 
@@ -231,7 +231,7 @@ Ontology commit: `59c776a refactor: classify Area specializations`.
 
 Ontology commit: `e345a7b refactor: classify Scope specializations`.
 
-##### Ability — 58 migrated, 62 structural
+##### Ability — 58 migrated, 64 structural
 
 - [x] Non-deductive reasoning kinds and logical inference (5 edges).
 - [x] Conceptual-thinking operations (5 edges).
