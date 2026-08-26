@@ -7,6 +7,7 @@ describe('time-digital view spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.DigitalClock,
             Scope.ArabicNumerals,
+            Scope.Base10,
             Ability.Formalization,
             Ability.VisualReception,
             Ability.Interpretation

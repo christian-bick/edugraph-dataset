@@ -6,7 +6,6 @@ export const spec: ViewSpec = {
     viewId: 'time-analog',
     generalLabels: [
         Scope.AnalogClock,
-        Scope.ArabicNumerals,
         Ability.VisualReception,
         Ability.ProcedureExecution,
         Ability.Interpretation,

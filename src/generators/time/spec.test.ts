@@ -1,5 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {TimeGenerator} from './generator.ts';
+import {spec} from './spec.ts';
 import {setSeed} from '../../lib/random.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../lib/utils.ts';
@@ -16,6 +17,10 @@ describe('TimeGenerator Spec Integration', () => {
     beforeEach(() => {
         generator = new TimeGenerator();
         setSeed(42);
+    });
+
+    it('declares only the invariant time-measurement capability', () => {
+        expect(spec.generalLabels).toEqual([Area.MeasuringTime]);
     });
 
     it('should generate hour intervals when HourIntervals is targeted', () => {

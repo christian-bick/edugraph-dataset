@@ -6,7 +6,6 @@ describe('time-analog view spec', () => {
     it('owns the invariant analog-to-numeral reading task', () => {
         expect(spec.generalLabels).toEqual([
             Scope.AnalogClock,
-            Scope.ArabicNumerals,
             Ability.VisualReception,
             Ability.ProcedureExecution,
             Ability.Interpretation,

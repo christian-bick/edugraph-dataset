@@ -7,6 +7,7 @@ export const spec: ViewSpec = {
     generalLabels: [
         Scope.DigitalClock,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.Formalization,
         Ability.VisualReception,
         Ability.Interpretation
