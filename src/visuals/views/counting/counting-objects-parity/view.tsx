@@ -3,6 +3,7 @@ import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {CountingObjectsParityViewConfig, CountingObjectsParityViewSchema} from './spec.ts';
+import {formatParityGrouping} from './helpers.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {
@@ -78,7 +79,7 @@ const CountingObjectsParityCore = ({config: _config, payload}: CoreProps) => {
             <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-200 px-5 py-4">
                 <div className="text-base font-semibold text-slate-600">
                     {isSolutionView
-                        ? `2 groups of ${groupSize}, ${remainder} left over`
+                        ? formatParityGrouping(groupSize, remainder)
                         : 'Classify the collection'}
                 </div>
                 <div className={`flex h-12 w-28 items-center justify-center rounded-lg border-2 text-lg font-extrabold uppercase tracking-wide ${
