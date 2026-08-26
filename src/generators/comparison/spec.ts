@@ -8,8 +8,7 @@ import {resolveComparisonRelation} from './helpers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'comparison',
     generalLabels: [
-        Scope.IntegerNumbers,
-        Scope.Base10,
+        Scope.IntegerNumbers
     ]
 };
 

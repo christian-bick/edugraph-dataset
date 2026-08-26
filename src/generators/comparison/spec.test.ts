@@ -3,9 +3,14 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {setSeed} from '../../lib/random.ts';
 import {generateWithLabels} from '../../lib/utils.ts';
 import {ComparisonGenerator} from './generator.ts';
+import {spec} from './spec.ts';
 
 describe('ComparisonGenerator Spec Integration', () => {
     const generator = new ComparisonGenerator();
+
+    it('keeps representation capabilities out of the canonical relation', () => {
+        expect(spec.generalLabels).toEqual([Scope.IntegerNumbers]);
+    });
 
     it('should resolve relation and nonzero labels into valid samples', () => {
         for (const [comparisonKind, relation] of [

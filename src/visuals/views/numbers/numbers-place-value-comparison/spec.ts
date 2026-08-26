@@ -13,6 +13,7 @@ export const spec: ViewSpec = {
     generalLabels: [
         Area.PlaceValue,
         Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.ProcedureUnderstanding
     ]
 };

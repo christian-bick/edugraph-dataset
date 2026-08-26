@@ -6,6 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'numbers-compare',
     generalLabels: [
         Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.ProcedureExecution
     ]
 };
