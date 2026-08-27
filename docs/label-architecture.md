@@ -126,9 +126,11 @@ evidence, semantic context, or view projection; only the last category must move
 The view projects that model into one task. It owns wording, unknown placement, requested response,
 and presentation. Incidental seeded variation may live in either role: a generator may choose the
 exact fraction, operands, or starting value of its canonical instance, while a view may choose
-layout or other presentation details. The owner follows whether the choice changes mathematical
-content or only its projection. A view must not compensate for missing mathematics, inspect raw
-labels, or erase evidence for another matched claim. See
+layout or other presentation details. An ontology-neutral view choice that changes task identity
+belongs in resolved view configuration; presentation-only randomness remains in the renderer. The
+owner follows whether the choice changes mathematical content, task identity, or only presentation.
+A view must not compensate for missing mathematics, inspect raw labels, or erase evidence for
+another matched claim. See
 [IMPL-V8](implementation-view.md#impl-v8--needing-a-new-payload-field-is-a-two-module-change),
 [IMPL-V9](implementation-view.md#impl-v9--related-task-identities-share-parent-level-rendering-code),
 and [IMPL-V11](implementation-view.md#impl-v11--preserve-the-whole-matched-claim).
@@ -144,9 +146,9 @@ Generators do not annotate their output with ontology labels. Orchestration deri
 observable label set from the matched pair's invariant capabilities and resolved generator/view
 schema capabilities. Applicability-only `requiredLabels` and `rejectedLabels` never become sample
 labels; target labels record what the standard requested, not the complete description of what the
-pair produced. The Scope-completeness phase in
-[complete-label-migration.md](plan/complete-label-migration.md#phase-7-scope-completeness) closes
-the remaining gap between target-driven metadata and this pair-derived end state.
+pair produced. The completed Scope-completeness phase in
+[complete-label-migration.md](plan/complete-label-migration.md#phase-7-scope-completeness) proves
+this pair-derived end state for the current production catalog.
 
 ## Four different identities
 

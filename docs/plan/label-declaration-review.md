@@ -9,8 +9,8 @@ report these declarations as review signals because their correctness depends on
 this file records their durable disposition without turning the current module catalog into a
 validator allowlist.
 
-The reviewed CCSS K-4 catalog contains 653 targets, 80 generators, 180 views, 197 compatible
-generator/view pairs, and 795 matched production tuples. The strict audit reports zero violations
+The reviewed CCSS K-4 catalog contains 653 targets, 80 generators, 182 views, 199 compatible
+generator/view pairs, and 790 matched production tuples. The strict audit reports zero violations
 and zero source signals.
 
 ## Review criteria
@@ -27,13 +27,13 @@ These criteria are normative in `SPEC-V3`, `SPEC-V7`, `SPEC-V8`, and `SPEC-11`.
 
 ## Positive applicability
 
-All 36 current `requiredLabels` declarations are accepted. Each precondition is pair-supported;
+All 38 current `requiredLabels` declarations are accepted. Each precondition is pair-supported;
 the requirement itself supplies no capability.
 
 | Family | Views and accepted applicability |
 | --- | --- |
 | Counting steps | `counting-ten-more-less` requires `StepsOf10`; `counting-hundred-more-less` requires `StepsOf100`. |
-| Measurement | Conversion derivation/execution require `UnitScaleRelation` or `MeasuringWithUnits`; the generic unit-scale relation requires `UnitScaleRelation + LengthMeasurement`; mass leaves require `WeightMeasurement`; liquid-volume leaves require `LiquidVolumes`; line-plot arithmetic requires `FractionArithmetic`. |
+| Measurement | Conversion derivation/execution require `UnitScaleRelation` or `MeasuringWithUnits`; the generic unit-scale relation requires `UnitScaleRelation + LengthMeasurement`; mass leaves require `WeightMeasurement`; liquid-volume leaves require `LiquidVolumes`; line-plot arithmetic requires `FractionArithmetic`; length-drawing leaves require their invariant `VisualArticulation` task. |
 | Number classification | Prime, composite, and factor/multiple leaves require their corresponding generator-established Areas. |
 | Number writing | `numbers-write-count` requires `NumerationWithIntegers`; standard and stroke numeral-writing leaves require `DigitNotation`. |
 | Operation strategies | Counting-on and counting-back derivation leaves require their corresponding strategy Areas. |
@@ -50,15 +50,16 @@ the views.
 
 ## Exclusion boundaries
 
-All 26 current `rejectedLabels` declarations are accepted after replacing negatively stated
+All 30 current `rejectedLabels` declarations are accepted after replacing negatively stated
 positive applicability. Expanded range reports name every ontology range admitted by the boundary;
 the source declarations use `deductAdmitting` rather than enumerating those derived labels.
 
 | Boundary class | Views | Rationale |
 | --- | --- | --- |
 | Finite visual or task capacity | `counting-conservation`, `counting-inc-dec`, `numbers-compare-counting`, `numbers-compare-matching`, `numbers-write-stroke`, `operations-answer-reasonableness`, `operations-representation`, `operations-word-problem`, `operations-word-problem-inversion`, `place-value-make-ten` | Each view accepts the complete domain up to a declared magnitude and rejects the full admitting range above it. |
-| Number form or signed-domain boundary | `measure-length-decimal`, `measure-length-integer`, `numbers-place-value-comparison`, `numbers-rounding-line`, `operations-number-line-arithmetic`, `operations-number-line-representation` | Decimal/integer, zero, negative, and bounded-line restrictions follow from the concrete representation contract. |
+| Number form or signed-domain boundary | `measure-length-decimal`, `measure-length-decimal-drawing`, `measure-length-integer`, `measure-length-integer-drawing`, `numbers-place-value-comparison`, `numbers-rounding-line`, `operations-number-line-arithmetic`, `operations-number-line-representation` | Decimal/integer, zero, negative, and bounded-line restrictions follow from the concrete representation contract. |
 | Operation or operand-family boundary | `operations-number-line-arithmetic`, `place-value-arithmetic-model`, `place-value-arithmetic-written-method` | The renderer supports the complete declared operation/operand family and excludes the incompatible family. |
+| Law-witness boundary | `operations-boxes-inversion`, `operations-vertical-inversion` | A single withheld operand preserves the operation relation but cannot expose the structured witness required for associative, commutative, or distributive-law claims. |
 | Statistical task-family boundary | `data-picture-graph`, `data-picture-graph-arithmetic`, `data-picture-graph-classification`, `data-picture-graph-interpretation` | These picture-graph projections accept the non-step categorical-data and three-category-total families, while the explicit one- and multi-step comparison families use the corresponding bar-graph projections. |
 | Independent-task conjunction | `measure-unit-scale-relation` | The generic unit-scale partition demonstrates relative unit size but does not claim the independent `MeasuringWithUnits` task. Concrete conversions use the conversion-derivation view. |
 | Hierarchical family without a positive complement | `place-value-tens-bundles` | The tens leaf accepts the general multiples-of-ten family except the `MultiplesOf100` specialization. The hundreds sibling states its positive applicability directly. |
@@ -69,7 +70,7 @@ exact exclusion remains valid only while the view accepts every other type-compa
 
 ## View-owned Areas
 
-All 23 current declarations are accepted. They fall into independent knowledge/task families:
+All 24 current declarations are accepted. They fall into independent knowledge/task families:
 
 | Independent task added by the view | Views |
 | --- | --- |
@@ -78,6 +79,7 @@ All 23 current declarations are accepted. They fall into independent knowledge/t
 | Numeration or set comparison | `numbers-compare-counting`, `numbers-compare-matching`, `numbers-order` |
 | Decimal/fraction notation and equivalence | `numbers-decimal-line`, `numbers-decimal-measurement`, `numbers-decimal-to-fraction`, `numbers-fraction-to-decimal` |
 | Equation construction or judgment | `operations-boxes`, `operations-boxes-inversion`, `operations-equation-judgment`, `operations-multiplicative-comparison`, `operations-number-array-equation-formalization` |
+| Equal-group interpretation | `operations-number-array-interpretation` |
 | Collection composition/decomposition | `place-value-compose-teen`, `place-value-decompose-teen` |
 | Geometric drawing or naming | `geometry-primitives-drawing`, `shape-draw-circular-shape`, `shape-draw-linear-shape`, `shape-naming` |
 
@@ -96,7 +98,7 @@ The declaration review is complete:
 - every view-owned Area has an independent-task rationale;
 - both stronger-sibling Ability preconditions satisfy `SPEC-V8` without a dimension-specific
   property;
-- the corrected declarations preserve all 795 matched production tuples.
+- the corrected declarations preserve all 790 matched production tuples.
 
 The audit should continue to report these declarations for review whenever their modules or
 ontology neighborhoods change. A review signal is not a migration defect and should not be hidden

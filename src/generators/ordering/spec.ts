@@ -17,7 +17,8 @@ export const spec: GeneratorSpec = {
 export const OrderingGeneratorSchema = {
     requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
-        hasLabel(Scope.NumbersWithNegatives)
+        hasLabel(Scope.NumbersWithNegatives),
+        [[Scope.NumbersWithNegatives], [Scope.NumbersWithoutNegatives]]
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],

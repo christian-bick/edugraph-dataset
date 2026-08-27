@@ -109,7 +109,7 @@ examples include:
 |------------------------|--------------------------------------------------------------------------------|
 | `src/lib/resolvers.ts` | `hasLabel`, `hasCapability`, `matchAllCapabilities`, `selectExactMatch`, `selectExactLabelMap`, `selectExactLabelSetMap`, `matchAllExactLabels`, `ontologyNeutral` |
 | `src/lib/ontology.ts`  | label-derived helpers such as `resolveRangeFromLabels`, `capabilitySatisfies`, `getCapabilityAncestors`, `getStructuralAncestors` |
-| `src/types/schema.ts`  | `exactResolver` for a custom ambiguity-rejecting exact resolver; `compositionalResolver` for a resolver that deliberately combines independent label constraints |
+| `src/types/schema.ts`  | `exactResolver`, `predicateResolver`, `aggregateResolver`, and `compositionalResolver` for explicit custom resolver semantics |
 
 Resolver functions must be passed as **references** — or as the output of curried factory
 functions, e.g. `hasLabel(Scope.TenFrame)` — to the schema arrays, and **not executed
@@ -124,19 +124,31 @@ classification and enforces the same rejection contract.
 Ontology specialization is handled by schema fallback completion and must not be recreated as a
 list of parent/child aliases inside an exact mapping.
 
+Every multi-label resolver declares one dimension-neutral contract. `exact` selects one declared
+alternative or exact bundle; `predicate` answers one fixed capability question; `aggregate`
+preserves every matching member; and `compositional` combines independent constraints into a new
+value. These markers document and validate resolver behavior; they do not change positive matching,
+which continues to use the field's supported capability labels.
+
 Only wrap a resolver with `compositionalResolver` when several independent labels jointly constrain
 one result rather than select alternatives. Numeric range resolution is the canonical example: a
 lower-bound Scope and an upper-bound Scope combine into `{min, max}`. The wrapper must not be used
 to conceal first-match precedence between competing operations, units, shapes, or task kinds.
 
-Every label-aware schema field declares a non-empty supported-label set. Never use an empty
-label tuple to inspect target labels without contributing a resolved capability. A function-only
-schema field is valid only for a choice that is independent of ontology labels; wrap that resolver
-with `ontologyNeutral(() => value)`. Such a resolver cannot consume target labels, contributes no
-output label, and its resolved value remains visible in generator data or the view task
-fingerprint. For example, selecting which term of an otherwise fixed pattern is blank is a seeded
-task-instance choice and may use `ontologyNeutral(selectMissingTermIndex)`; selecting addition
-versus multiplication changes the mathematical capability and must use a labeled schema field.
+Every label-aware schema field declares a non-empty supported-label set. Never use an empty label
+tuple to inspect target labels without contributing a resolved capability. A function-only schema
+field is valid only for a choice that is independent of ontology labels but must remain visible in
+configuration or task identity; wrap that resolver with `ontologyNeutral(() => value)`. Such a
+resolver cannot consume target labels and contributes no output label. For example, selecting which
+term of an otherwise fixed pattern is blank may use `ontologyNeutral(selectMissingTermIndex)`;
+selecting addition versus multiplication changes the mathematical capability and must use a labeled
+schema field.
+
+`ontologyNeutral` is not a container for all seeded randomness. A generator chooses concrete
+operands, fractions, or starting values in its implementation, and `problem.data` records that
+instance in the content fingerprint. A view task choice with no ontological meaning uses
+`ontologyNeutral` when it must enter the task fingerprint. Presentation-only shuffles, positions,
+or rotations remain seeded view logic and do not become schema fields.
 
 When a resolver needs a conjunction rather than one supported label, add a third tuple element
 containing its valid fallback label sets. The resolver must succeed for every listed set, and every
@@ -147,6 +159,13 @@ compatible set, even when one requested label was already sufficient to select t
 when several sets remain valid, it prefers the most-specific truthful realization before using the
 seed to choose among equivalent sets. This prevents a broad target from hiding additional
 observable capabilities such as `LengthMeasurement + MeterScale`.
+
+An explicit absence default is narrower than general fallback completion. Use it only when the
+false configuration has a truthful meaning. If the generator guarantees the complementary
+capability, declare both singleton fallback sets so the default label is emitted—for example,
+`NumbersWithNegatives` may default to `NumbersWithoutNegatives`. A false one-sided predicate such
+as `requireEvenResult` means only that evenness is not required; it must not manufacture
+`OddNumbers`.
 
 Do not add fallback label sets merely because several exact labels map to the same implementation
 value. Shared code does not make those labels a conjunction. When each label independently selects
@@ -247,7 +266,7 @@ required.
 - [ ] **SPEC-3** — no leaf label is claimed where the leaf is an instrument/subtype the module does not actually produce.
 - [ ] **SPEC-4** — no declared capability is broader than the module's real output; distinguishable members are enumerated individually.
 - [ ] **SPEC-5** — the schema contains only parameters of this module's own concern (math for generators, visual for views).
-- [ ] **SPEC-6** — all resolvers are imported from `src/lib/resolvers.ts` (or `src/lib/ontology.ts` for label-derived value helpers); none is defined inline or executed prematurely; conjunction resolvers declare complete fallback sets whose labels are all emitted when selected.
+- [ ] **SPEC-6** — all resolvers are imported from `src/lib/resolvers.ts` (or `src/lib/ontology.ts` for label-derived value helpers); none is defined inline or executed prematurely; every multi-label resolver declares exact, predicate, aggregate, or compositional semantics; conjunctions and truthful complementary defaults declare complete fallback sets; `ontologyNeutral` is used only for unlabeled choices that must enter configuration or task identity.
 - [ ] **SPEC-7** — every invariant capability is general, every configurable capability is in the schema, and no schema parameter label or ancestor appears in `generalLabels`.
 - [ ] **SPEC-8** — no label parameterized by the generator is re-queried by the matching view.
 - [ ] **SPEC-9** — discrete label sets are expressed as plain arrays unless a resolver is genuinely required.

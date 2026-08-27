@@ -16,6 +16,9 @@ Update the visual view module under `src/visuals/views/[<category>/]{viewName}` 
      `SPEC-V6`). Record whether it is a small same-task presentation parameter or a task identity.
      When it is a task identity, plan the leaf ids, invariant capabilities, narrow payload types,
      and parent-level renderer/helper reuse before editing (`IMPL-V9`).
+   - For ontology-neutral variation, apply the identity boundary in `SPEC-6` and `IMPL-V6`: a
+     choice that changes what is asked belongs in resolved `ontologyNeutral` config; a choice that
+     changes only presentation remains seeded view logic.
    - Use `docs/label-architecture.md` for claim ownership, applicability, and the complete-evidence
      review order. Apply the exact contracts from `SPEC-V2` through `SPEC-V8`, `SPEC-11`,
      `IMPL-V9`, and `IMPL-V11`; record only view-specific decisions and cite those rule IDs.

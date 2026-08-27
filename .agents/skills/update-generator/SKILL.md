@@ -16,6 +16,9 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
    - Apply the claim-ownership and payload/projection review order in
      `docs/label-architecture.md`, then implement the generator rules from the loaded Audit
      sections (`SPEC-G3`, `SPEC-11`, `IMPL-G8`).
+   - Apply `SPEC-6` when configuration or randomness changes: ontology-backed choices resolve
+     labeled schema capabilities, while ontology-neutral concrete-instance variation remains in
+     generator code and is captured by `problem.data` rather than an `ontologyNeutral` schema field.
    - Record only the module-specific capability and payload-field decisions; reference the rule
      IDs instead of reproducing their general wording.
 

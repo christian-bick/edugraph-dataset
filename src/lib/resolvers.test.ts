@@ -84,7 +84,8 @@ describe('Resolvers & Utilities', () => {
         const MockSchema = {
             requireNegative: [
                 [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
-                hasLabel(Scope.NumbersWithNegatives)
+                hasLabel(Scope.NumbersWithNegatives),
+                [[Scope.NumbersWithNegatives], [Scope.NumbersWithoutNegatives]]
             ],
             operation: [
                 Area.Addition,
@@ -98,9 +99,10 @@ describe('Resolvers & Utilities', () => {
             expect(config.operation).toBe(Area.Subtraction);
         });
 
-        it('uses random fallback if no matches provided', () => {
-            const { config } = extractConfig(MockSchema, []);
-            expect(config.requireNegative).toBeTypeOf('boolean');
+        it('uses the declared negative-free default when no sign label is requested', () => {
+            const { config, resolvedLabels } = extractConfig(MockSchema, []);
+            expect(config.requireNegative).toBe(false);
+            expect(resolvedLabels).toContain(Scope.NumbersWithoutNegatives);
             expect([Area.Addition, Area.Subtraction]).toContain(config.operation);
         });
 

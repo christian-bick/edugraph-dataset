@@ -19,8 +19,10 @@ The core component itself (`<Name>Core`) is a **pure stateless function** taking
 `{ config, payload }`. It does not parse labels — the ontology has already been resolved
 into `config` by the schema ([SPEC-V1](spec-view.md#spec-v1--export-contract)).
 
-Function-only seeded schema choices must be explicitly `ontologyNeutral`; label-dependent
-choices require a non-empty supported capability set ([SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)).
+Function-only seeded schema choices that change task identity must be explicitly
+`ontologyNeutral`; label-dependent choices require a non-empty supported capability set. Purely
+presentational seeded variation remains in view code rather than the schema
+([SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)).
 
 ### IMPL-V2 — Validate the payload strictly
 
@@ -67,6 +69,10 @@ Derive **all** randomized visual decisions from `payload.seed` — icon choices,
 positions, shuffles, rotations. Either use the seed directly (`payload.seed % ICONS.length`)
 or pass it into a helper that calls `setSeed(seed)` before drawing. The `withConfig` wrapper
 seeds the global PRNG from `payload.seed` before config resolution.
+
+Placement follows identity: an ontology-neutral choice that changes what is asked belongs in the
+resolved view schema so the task fingerprint includes it; a shuffle, rotation, or layout choice
+that changes only presentation stays in the renderer. Determinism is required in both places.
 
 Never derive anything from:
 
@@ -161,12 +167,12 @@ truthful, stable, and complete exclusion boundary.
 
 ## Audit
 
-- [ ] **IMPL-V1** — the exported component is wrapped in `withConfig`; the core is stateless and parses no labels.
+- [ ] **IMPL-V1** — the exported component is wrapped in `withConfig`; the core is stateless and parses no labels; ontology-neutral task choices use resolved config while presentation-only choices do not enlarge the schema.
 - [ ] **IMPL-V2** — `validateProblemData` is imported at the correct relative depth and called first, listing every required `problem.data` field.
 - [ ] **IMPL-V3** — every validation and range-check failure throws `ViewValidationError` rather than rendering degraded output.
 - [ ] **IMPL-V4** — no `||` fallback, default parameter, or optional-chaining default stands in for a resolved `config` or `problem.data` value.
 - [ ] **IMPL-V5** — Question Mode withholds the answer, Solution Mode reveals it with identifiable context, and each mode includes only instructions necessary for standalone understanding.
-- [ ] **IMPL-V6** — grep the view for `Math.random` and unseeded `random(`: both must be absent. Every visual random decision traces back to `payload.seed`.
+- [ ] **IMPL-V6** — grep the view for `Math.random` and unseeded `random(`: both must be absent. Every visual random decision traces back to `payload.seed`, and only task-identifying choices enter resolved config.
 - [ ] **IMPL-V7** — no reliance on animation state; every async resource the view loads resolves.
 - [ ] **IMPL-V8** — no mathematics is derived inside the view to compensate for a missing payload field; the producing generator supplies it.
 - [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code; no view hides parallel task implementations behind large config-controlled branches, and shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.

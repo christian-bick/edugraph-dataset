@@ -39,7 +39,8 @@ If a runtime choice materially changes the competency expressed by the artifact,
 an explicit schema capability so it is resolved before `generate(config)` runs. If the choice only
 changes the concrete instance without changing its competency — for example, choosing `23 + 18`
 instead of `31 + 7` for the same configured addition range — it remains ordinary generator
-variation and does not need an ontology label.
+variation and does not need an ontology label or an `ontologyNeutral` schema field. The resulting
+`problem.data` already makes the choice visible to content and task fingerprinting.
 
 ### IMPL-G4 — The math must prove the labels
 
@@ -127,7 +128,7 @@ view may seed presentation choices through `payload.seed`.
 
 - [ ] **IMPL-G1** — `generate` is a pure function of `config`; no ontology label is read, parsed, or string-matched inside it.
 - [ ] **IMPL-G2** — `validateConfigFields` is imported at the correct relative depth and called first in `generate`; no silent fallback substitutes for a missing config value.
-- [ ] **IMPL-G3** — `ProblemStub` contains only `data`; every competency-changing choice is resolved through the schema before generation.
+- [ ] **IMPL-G3** — `ProblemStub` contains only `data`; every competency-changing choice is resolved through the schema before generation, while ontology-neutral instance randomness remains in generator code and is captured by `problem.data`.
 - [ ] **IMPL-G4** — the generated math provably satisfies every label the config encodes.
 - [ ] **IMPL-G5** — `generator.test.ts` covers the mathematical boundaries; `spec.test.ts` covers schema-label resolution; an empty-config throw is asserted.
 - [ ] **IMPL-G6** — if the payload contract changed, every consuming view found against the real standard via `npm run show:matching` renders the new fields; the test spec also retains a smoke path.

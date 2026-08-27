@@ -1,11 +1,12 @@
 # Complete the label-ownership migration
 
-**Status:** Structural migration complete; Scope completeness is active in Phase 7 and the final
-canonical proof remains tracked in Phase 8.
+**Status:** Complete. Structural ownership, Scope completeness, schema-resolution semantics, and
+the final canonical proof all satisfy the completion gates below.
 
 The separation of structural `part_of` and inheriting `specializes` relations is implemented and
-tracked independently in [ontology-relations-migration.md](ontology-relations-migration.md). Its
-remaining schema cleanup and canonical proof are not part of this label-ownership inventory.
+tracked independently in [ontology-relations-migration.md](ontology-relations-migration.md). The
+ordinary release using that ontology version remains a release operation, not unfinished work in
+this label-ownership migration.
 
 ## Purpose
 
@@ -45,8 +46,8 @@ The inventory below reflects the current CCSS K-4 state.
 - All 653 contain at least one Area.
 - All 653 contain at least one Ability.
 - 557 contain one Ability, 80 contain two, and 16 contain three.
-- 270 contain one Area and 383 contain multiple Areas; multiple Areas are not inherently a defect.
-- 25 contain no Scope; this is not inherently a defect.
+- 263 contain one Area and 390 contain multiple Areas; multiple Areas are not inherently a defect.
+- 27 contain no Scope; this is not inherently a defect.
 
 ### Generator declarations
 
@@ -58,9 +59,8 @@ This declaration-level part of Ability ownership is complete and already enforce
 
 ### Ability-parameterized views
 
-The Phase 2 queue began with eleven views that resolved an Ability through their schema. Completed
-rows below name their invariant replacement leaves; unresolved rows remain review candidates, not
-known defects:
+The Phase 2 queue began with eleven views that resolved an Ability through their schema. The
+completed rows below name their invariant replacement leaves:
 
 | Existing view | Current resolved modes | Initial review question |
 | --- | ---: | --- |
@@ -97,9 +97,9 @@ reject unresolved ontology access in generator/view implementations.
 
 ### Applicability, boundaries, and view-owned Areas
 
-- 36 views use `requiredLabels`; their static and semantic contracts pass.
-- 26 views use `rejectedLabels`; each has a reviewed stable and complete exclusion boundary.
-- 23 views declare general Areas. Current validation finds no
+- 38 views use `requiredLabels`; their static and semantic contracts pass.
+- 30 views use `rejectedLabels`; each has a reviewed stable and complete exclusion boundary.
+- 24 views declare general Areas. Current validation finds no
   taxonomic overlap with compatible generator Areas, and each independent-domain rationale is
   recorded in [label-declaration-review.md](label-declaration-review.md).
 - The current catalog contains no unresolved generator-general/view-schema Scope overlap. This
@@ -136,9 +136,9 @@ does not encode `generalLabels` versus schema provenance, so the current catalog
 declaration metadata. Source scans supply the implementation-only findings. This separation avoids
 a graph-schema migration while keeping matching work delta-aware and all audit passes linear.
 
-The current strict CCSS audit covers 653 targets and 795 matched production tuples. It reports zero
-violations, zero source signals, and no Ability-parameterized views. Its 85 semantic review signals
-cover 26 rejection declarations, 36 applicability declarations, and 23 view-owned Areas; Phase 5
+The current strict CCSS audit covers 653 targets and 790 matched production tuples. It reports zero
+violations, zero source signals, and no Ability-parameterized views. Its 92 semantic review signals
+cover 30 rejection declarations, 38 applicability declarations, and 24 view-owned Areas; Phase 5
 records a durable disposition for all of them. There
 are no positive cross-role capability overlaps and no target without an Area, Ability, or match.
 
@@ -274,11 +274,11 @@ misclassified as syntax failures.
 Zero-Scope targets and multiple-Area or multiple-Ability targets are not findings by themselves.
 
 **Status: complete.** [label-declaration-review.md](label-declaration-review.md) records the durable
-disposition of all 85 semantic review signals: 26 `rejectedLabels`, 36 `requiredLabels`, and 23
+disposition of all 92 semantic review signals: 30 `rejectedLabels`, 38 `requiredLabels`, and 24
 view-owned Area declarations. Positive mass/volume, notation, hundreds-bundle, and stronger-sibling
 applicability is stated through dimension-neutral `requiredLabels`; the redundant
 length-estimation rejection is absent. All retained declarations satisfy the accepted ownership
-or boundary rules, and the normalized production match set remains 795 tuples.
+or boundary rules, and the normalized production match set contains 790 tuples.
 
 ### Phase 6: update documentation and skills
 
@@ -319,7 +319,7 @@ pair that produced it.
    broad target did not need the more-specific Scope for matching.
 7. Regenerate affected artifacts and verify matching, label churn, coverage, and VQA.
 
-**Status: in progress.** Steps 1 and 2 are complete: `ProblemStub` is data-only, and both schema
+**Status: complete.** Steps 1 and 2 are complete: `ProblemStub` is data-only, and both schema
 roles expose the exact labels selected by target matching or deterministic fallback. Step 3 is
 complete in orchestration: `AbstractProblem.labels` and dataset rows contain only the union of
 pair-general and pair-resolved capabilities, while `RenderPayload.targetLabels` remains a separate
@@ -335,9 +335,12 @@ measurement unit pairs no longer rely on invalid singleton fallback inputs. Step
 deterministic configuration per matched tuple, and inventories co-resolving schema labels whose
 Scope conjunction is not present in the pair-derived set. The review recovered fixed meter, hour,
 liter, and kilogram scales from measurement number lines and word problems, plus complete
-increment/decrement direction Scopes from `counting-inc-dec`. All 795 CCSS tuples now have zero
-unresolved co-resolving Scope candidates; the report separately records 37 additional Scope labels
-and eight more-specific target-Scope realizations already supplied by pair resolution. This is a
+increment/decrement direction Scopes from `counting-inc-dec`. All 790 CCSS tuples now have zero
+unresolved co-resolving Scope candidates; the report separately records 30 additional Scope labels
+and six more-specific target-Scope realizations already supplied by pair resolution. Complementary
+presence predicates explicitly resolve a truthful absence default only when the negative branch
+guarantees it. A non-negative domain therefore emits `NumbersWithoutNegatives`; `requireZero: false`
+does not emit `NumbersWithoutZero`, because zero may still appear in derived values or a view. This is a
 deterministic candidate audit rather than an observability oracle, so canonical VQA remains the
 empirical proof. Step 5 is complete: release-index validation now applies the same one-directional,
 equal-or-more-specific ontology coverage rule as matching. The gate exposed and corrected one
@@ -362,64 +365,77 @@ Canonical VQA is the required empirical proof that active target conjunctions su
 and view composition. The optional synthetic capability-totality investigation is not a release
 gate.
 
-**Status: pending live VQA.** Full canonical CCSS regeneration, repository checks, matching,
-split integrity, and the union asset-index gate pass. The release-wide strict VQA audit still
-requires live validation of the uncovered canonical artifacts before publication.
+**Status: complete.** Full canonical CCSS affected regeneration, repository checks, matching,
+split integrity, and strict VQA coverage pass. The final fallback audit preserves all 1,878 sample
+identities and image bytes with zero churn. Live validation rejected the proposed
+`NumbersWithoutZero` default because derived values and views may still expose zero; removing that
+overclaim restored the existing validated contexts. The 46 artifacts that truthfully gained
+`NumbersWithoutNegatives` all passed focused live revalidation, and the strict audit covers all
+1,878 artifacts. Future publication runs the same gates as ordinary release policy rather than
+reopening this migration.
 
-## Low-priority investigations
+## Post-migration decisions and regression research
 
-These questions do not block the migration.
+These items are not completion gates for the closed migration.
 
 ### Ontology-neutral schema choices
 
-The current `ontologyNeutral` marker makes unlabeled function-only schema choices explicit and
-prevents them from being mistaken for capability resolution. Its final architectural role is
-deferred. Before extending this pattern, determine whether it should be replaced by a narrower
-view-only task-identity construct, which objective test distinguishes a task-identifying choice
-from seeded presentation variation, and whether generator schemas should prohibit it entirely.
-Audit the five current uses under that decision, especially the line-symmetry figure choices,
-which may select observable ontology capabilities. Treat the marker as a provisional safeguard,
-not as proof that a choice is genuinely ontology-neutral.
+The `ontologyNeutral` marker is the explicit opt-in for a configuration choice that changes task
+identity or configuration while contributing no ontology capability. It intentionally allows
+ontology-independent dataset variation, and its resolved value participates in the relevant
+fingerprint. It is not the universal home for seeded randomness:
 
-### Ontology-relevant fallback variation
+- generator randomness that selects a concrete canonical instance remains in the generator and is
+  captured by `problem.data` and the content fingerprint;
+- a view choice that changes what the task asks, while remaining ontology-neutral, belongs in an
+  `ontologyNeutral` schema field so it enters the task fingerprint;
+- a view choice that changes only presentation remains seeded view logic and does not enlarge the
+  schema.
 
-Whether a choice is ontologically relevant depends on the target. The same visual or mathematical
-choice may instantiate a required distinction for one target and be incidental for another.
+All entropy still comes from the established sample or render seed. The five current uses are
+view-owned task choices: missing pattern positions, a table focus operand, and line-symmetry figure
+selection. A future generator use requires a concrete task-identity reason; ordinary mathematical
+instance variation does not.
 
-Research should distinguish:
+### Schema completion versus absence defaults
 
-- a target explicitly requiring a concrete capability;
-- a broad target intentionally realized through one valid specialization;
-- a target silent about a choice that is incidental to its competency;
-- a specialization that must become an explicit schema capability because it materially changes
-  the artifact's ontological description.
+An absence default and a broad-target realization are different contracts even though both use
+schema completion machinery.
 
-Do not assume that every schema fallback is either ontology-relevant or irrelevant globally. No
-fallback redesign is required for the current migration unless a concrete mislabeled artifact is
-found.
+- A predicate default is monotone: when the positive feature is absent, the generator uses the
+  configuration without it. If that absence itself is a guaranteed observable capability, the
+  complementary label must be an explicit fallback set. `NumbersWithNegatives` therefore defaults
+  to the declared `NumbersWithoutNegatives` configuration; a false `requireEvenResult` does not
+  imply `OddNumbers` and emits no opposite label.
+- A broad target may require a concrete observable realization. Choosing `PhysicalRuler` versus
+  `Tapemeter`, `Greater` versus `Less`, `ProperFractions` under `FractionNumbers`, or two versus
+  three operands is not an absence default. It is a labeled specialization selection, and the
+  selected label belongs in the pair-derived dataset description.
+- Incidental instance variation that changes neither contract is not schema completion and remains
+  unlabeled seeded implementation variation.
 
-### Pair-conditional view capabilities
+Keeping these meanings separate avoids treating every false predicate as an opposite claim while
+still preserving the complete observable label set of a concrete realization.
 
-The current preferred tools are:
+### Synthetic capability-totality regression
 
-1. a narrower payload type;
-2. a separate leaf view with shared rendering code;
-3. dimension-neutral `requiredLabels` for an explicit target precondition.
+VQA validates every generated active-target artifact and its full label conjunction, while the
+hand-authored `test` spec provides curated smoke paths and regression fixtures. A synthetic matrix
+could instead derive regression cases directly from generator/view declarations:
 
-The place-value model-to-written-method task is the concrete third case: the stronger leaf adds
-an invariant `Formalization` claim, but no mathematical discriminator separates it from the
-concrete-model task. Parameter defaults do not by themselves justify conditional capability
-semantics.
+1. enumerate every valid schema resolution and explicit fallback set;
+2. pair it only with type-compatible views whose requirements and boundaries admit it;
+3. assert resolution totality, deterministic generation, view validation, question/solution task
+   identity, and stable fingerprints;
+4. render representative cases without claiming standards coverage; and
+5. keep the work linear in declared choices plus compatible-pair edges by avoiding a blind label
+   power set.
 
-### Synthetic capability-totality probing
-
-VQA already validates every generated active-target artifact and its full label conjunction. A
-synthetic matrix that probes every declared module capability across every type-compatible partner
-could detect unused or future-facing declaration defects, but it creates substantial combination
-and fixture complexity.
-
-Keep this as an optional diagnostic. Promote it only when evidence shows that active-target VQA,
-static ownership validation, and test-spec coverage leave a recurring blind spot.
+This could replace the `test` spec's generic reachability role, but not its deliberately authored
+edge cases, bug reproductions, or human-readable fixtures. The useful experiment is to compare the
+synthetic matrix with the existing test targets, retain unique curated cases, and measure whether
+the remaining hand-authored smoke targets add coverage before removing any of them. Live VQA of
+real standard targets remains the semantic release proof.
 
 ## Explicit non-goals
 
@@ -430,7 +446,6 @@ static ownership validation, and test-spec coverage leave a recurring blind spot
 - Do not move all Areas to generators or all Scopes to views.
 - Do not weaken matching, remove labels, or add rejection boundaries to avoid migration work.
 - Do not introduce ontology entities merely to encode implementation ownership.
-- Do not build pair-conditional capability infrastructure without a concrete counterexample.
 - Do not require one universal canonical problem AST as a prerequisite.
 - Do not replace canonical VQA with static declaration checks.
 
@@ -463,3 +478,8 @@ The migration is complete when:
     enforce the same clean architecture;
 16. the full CCSS generation, union merge, and asset-index validation pass without migration
     exceptions or permanent allowlists.
+
+All sixteen gates are satisfied by the closing evidence: 653 active targets, 199 compatible pairs,
+790 matched tuples, zero strict architecture violations, zero unresolved Scope candidates, 443
+passing test files with 2,431 tests, stable identities and image bytes for all 1,878 canonical
+artifacts, and strict live VQA coverage of 1,878/1,878.

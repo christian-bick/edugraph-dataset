@@ -162,8 +162,9 @@ attributes and tool selection represent genuinely different evidence for the sam
 classification and every other reviewed family retain separate canonical generators for the
 reasons recorded above.
 
-The post-migration CCSS architecture audit reports 80 generators, 180 views, 197 compatible
-pairs, and the preserved 795 matched target/generator/view tuples.
+The current CCSS architecture audit reports 80 generators, 182 views, 199 compatible pairs, and
+790 matched target/generator/view tuples. The historical consolidation itself preserved the 795
+tuples recorded at its cutoff; later ontology-relation adoption changed that catalog independently.
 
 Future helper extraction is independent of consolidation and requires an actual repeated
 invariant. Future consolidation candidates must be discovered from the current catalogs and pass

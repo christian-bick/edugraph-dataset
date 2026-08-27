@@ -19,7 +19,8 @@ export const ArithmeticOpsPairsGeneratorSchema = {
     operation: [arithmeticOperations, resolveDeclaredOperation],
     requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
-        hasLabel(Scope.NumbersWithNegatives)
+        hasLabel(Scope.NumbersWithNegatives),
+        [[Scope.NumbersWithNegatives], [Scope.NumbersWithoutNegatives]]
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
