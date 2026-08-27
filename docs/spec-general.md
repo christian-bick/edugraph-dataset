@@ -13,19 +13,24 @@ Rules that apply to **every** `spec.ts` file, in both generators and views.
 ### SPEC-1 — Matching is one-directional: capability must be equal or more specific
 
 Standards/targets (`src/spec/`) are deliberately broad; generators and views are
-**specific**. The matching predicate (`matchesTarget` in `src/lib/generation.ts`) satisfies
+**specific**. The matching predicate (`matchesTarget` in `src/lib/matching.ts`) satisfies
 a target label `T` with a generator/view capability label `L` **only when `L` is equal to
-or more specific than `T`** — `isSubConceptOf(L, T)`, i.e. `L partOf* T`. The reverse never
+or more specific than `T`** — `capabilitySatisfies(L, T)`, i.e. `L specializes* T`. The reverse never
 matches: a specific target is *not* satisfied by a merely more-general capability.
 
 Matching is conjunctive across the target and collective across the pair. For every
 ontology label `T` in the target, at least one capability label `L` in the union of the
-generator and view declarations must satisfy `L = T` or `L partOf* T`:
+generator and view declarations must satisfy `L = T` or `L specializes* T`:
 
 ```text
 for every T in targetLabels:
-    some L in (generatorLabels union viewLabels) satisfies isSubConceptOf(L, T)
+    some L in (generatorLabels union viewLabels) satisfies capabilitySatisfies(L, T)
 ```
+
+`partOf` is structural and never provides capability substitution. If a target requires both a
+field and one of its parts, both claims must be declared explicitly by the target and supplied by
+the matched pair. For example, `Scope.PhysicalRuler partOf Scope.LengthMeasurement` does not let a
+module that declares only `PhysicalRuler` satisfy a `LengthMeasurement` target.
 
 Consequently, two labels on one target mean **A AND B**, not two independently selectable
 representations. The generator and view do not match the target separately; their combined
@@ -102,8 +107,8 @@ examples include:
 
 | Module                | Exports                                                                        |
 |-----------------------|--------------------------------------------------------------------------------|
-| `src/lib/resolvers.ts` | `hasLabel`, `hasSubConcept`, `matchAllLabels`, `selectExactMatch`, `matchAllExactLabels`, `selectCanonicalLabel`, `ontologyNeutral` |
-| `src/lib/ontology.ts`  | label-derived value helpers such as `resolveRangeFromLabels`, `isSubConceptOf`  |
+| `src/lib/resolvers.ts` | `hasLabel`, `hasCapability`, `matchAllCapabilities`, `selectExactMatch`, `matchAllExactLabels`, `selectCanonicalLabel`, `ontologyNeutral` |
+| `src/lib/ontology.ts`  | label-derived helpers such as `resolveRangeFromLabels`, `capabilitySatisfies`, `getCapabilityAncestors`, `getStructuralAncestors` |
 
 Resolver functions must be passed as **references** — or as the output of curried factory
 functions, e.g. `hasLabel(Scope.TenFrame)` — to the schema arrays, and **not executed
@@ -132,7 +137,7 @@ observable capabilities such as `LengthMeasurement + MeterScale`.
 
 ### SPEC-7 — Zero overlap between schema parameter labels and `generalLabels`
 
-There must be zero overlap — **including taxonomic ancestors via `partOf`** — between the
+There must be zero overlap — **including capability ancestors via `specializes`** — between the
 labels checked inside schema parameters and the spec's `generalLabels`. When a label is
 declared as part of a schema parameter, neither it nor any of its ancestors may appear in
 `generalLabels`.
@@ -200,7 +205,7 @@ alone does not establish a fraction-notation learning claim. Apply the same dist
 digit, number-name, and other notation Areas.
 
 Across a compatible generator/view pair, ownership remains non-polymorphic. The pair must not
-divide ownership by declaring equal or taxonomically overlapping Areas, and a view must not
+divide ownership by declaring equal or specialization-overlapping Areas, and a view must not
 specialize a generator-owned Area with a descendant Area. Presentation, representation, evidence
 source, or another contextual change within the same mathematical task is a Scope. A view may
 contribute an unrelated Area when its projection adds an independent mathematical task or body of

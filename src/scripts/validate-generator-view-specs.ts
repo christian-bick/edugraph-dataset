@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { isSubConceptOf } from '../lib/ontology.ts';
+import { capabilitySatisfies } from '../lib/ontology.ts';
 import {
     extractSchemaLabels,
     findSchemaFallbackContractIssues,
@@ -36,7 +36,7 @@ function checkGeneralLabelDeductions(kind: string, item: string, specPath: strin
 
 /**
  * A generalLabels list must not contain a label together with one of its
- * taxonomic ancestors: the ancestor already covers every target label the
+ * specialization ancestors: the ancestor already covers every target label the
  * specialization covers, so the pair is either redundant or (worse) an
  * over-claim smuggled in via the broad label.
  */
@@ -44,7 +44,7 @@ function checkRedundantGeneralLabels(kind: string, item: string, generalLabels: 
     let hasError = false;
     for (const a of generalLabels) {
         for (const b of generalLabels) {
-            if (a !== b && isSubConceptOf(a, b)) {
+            if (a !== b && capabilitySatisfies(a, b)) {
                 console.error(`❌ [${kind}:${item}] Redundant declaration: general label '${a}' is a specialization of general label '${b}' — declare only one of them`);
                 hasError = true;
             }
@@ -125,8 +125,8 @@ async function validateSpecs() {
                     // Self overlap check
                     for (const p of paramLabels) {
                         for (const g of generalLabels) {
-                            if (isSubConceptOf(p, g) || isSubConceptOf(g, p)) {
-                                console.error(`❌ [generator:${item}] Overlap detected: Schema parameter label '${p}' overlaps with general label '${g}' (taxonomic ancestor relationship exists)`);
+                            if (capabilitySatisfies(p, g) || capabilitySatisfies(g, p)) {
+                                console.error(`❌ [generator:${item}] Overlap detected: Schema parameter label '${p}' overlaps with general label '${g}' (specialization relationship exists)`);
                                 hasError = true;
                             }
                         }
@@ -200,8 +200,8 @@ async function validateSpecs() {
                     // Self overlap check
                     for (const p of paramLabels) {
                         for (const g of generalLabels) {
-                            if (isSubConceptOf(p, g) || isSubConceptOf(g, p)) {
-                                console.error(`❌ [view:${item}] Overlap detected: Schema parameter label '${p}' overlaps with general label '${g}' (taxonomic ancestor relationship exists)`);
+                            if (capabilitySatisfies(p, g) || capabilitySatisfies(g, p)) {
+                                console.error(`❌ [view:${item}] Overlap detected: Schema parameter label '${p}' overlaps with general label '${g}' (specialization relationship exists)`);
                                 hasError = true;
                             }
                         }
@@ -214,8 +214,9 @@ async function validateSpecs() {
                             if (genSchemaData) {
                                 for (const v of paramLabels) {
                                     for (const g of genSchemaData.paramLabels) {
-                                        if (isSubConceptOf(v, g) || isSubConceptOf(g, v)) {
-                                            console.error(`❌ [view:${item}] Duplicate parameterization: View parameter label '${v}' overlaps with Generator '${genId}' parameter label '${g}' (ancestor relationship exists)`);
+                                        if (capabilitySatisfies(v, g)
+                                            || capabilitySatisfies(g, v)) {
+                                            console.error(`❌ [view:${item}] Duplicate parameterization: View parameter label '${v}' overlaps with Generator '${genId}' parameter label '${g}' (specialization relationship exists)`);
                                             hasError = true;
                                         }
                                     }
@@ -277,8 +278,8 @@ async function validateSpecs() {
                         ];
                         for (const v of generalLabels) {
                             for (const g of genLabels) {
-                                if (isSubConceptOf(v, g) || isSubConceptOf(g, v)) {
-                                    console.error(`❌ [view:${item}] Double declaration: View general label '${v}' overlaps label '${g}' of matching generator '${genId}' (ancestor relationship exists)`);
+                                if (capabilitySatisfies(v, g) || capabilitySatisfies(g, v)) {
+                                    console.error(`❌ [view:${item}] Double declaration: View general label '${v}' overlaps label '${g}' of matching generator '${genId}' (specialization relationship exists)`);
                                     hasError = true;
                                 }
                             }

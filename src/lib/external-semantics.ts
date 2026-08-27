@@ -6,7 +6,8 @@ import {resolveOntologyProvenance, type OntologyProvenance} from './coverage-ide
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
 import {loadTargets} from './spec-catalog.ts';
 
-export const EXTERNAL_SEMANTICS_SCHEMA_VERSION = 1;
+export const EXTERNAL_SEMANTICS_SCHEMA_VERSION = 2;
+export const ONTOLOGY_DEPENDENCY_RELATIONS = ['partOf', 'specializes'] as const;
 
 export type OntologyDimension = 'Area' | 'Scope' | 'Ability' | 'unknown';
 
@@ -196,7 +197,10 @@ export class OntologySemanticIndex {
         }
     }
 
-    closure(labels: readonly string[], relationTypes: readonly string[] = ['partOf']): OntologyUsageClosure {
+    closure(
+        labels: readonly string[],
+        relationTypes: readonly string[] = ONTOLOGY_DEPENDENCY_RELATIONS
+    ): OntologyUsageClosure {
         const accepted = new Set(relationTypes);
         const entities = new Set<string>();
         const relations = new Set<string>();

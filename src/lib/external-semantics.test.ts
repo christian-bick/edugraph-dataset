@@ -19,6 +19,7 @@ describe('external semantic deltas', () => {
         const a = 'http://edugraph.io/edu/A';
         const b = 'http://edugraph.io/edu/B';
         const c = 'http://edugraph.io/edu/C';
+        const d = 'http://edugraph.io/edu/D';
         const prior = buildOntologySemanticSnapshot({
             provenance: ontologyProvenance('v1'),
             entityRelations: {
@@ -31,7 +32,8 @@ describe('external semantic deltas', () => {
             entityRelations: {
                 [a]: {definition: 'A changed', partOf: [c] as never[]},
                 [b]: {definition: 'B'},
-                [c]: {definition: 'C'}
+                [c]: {definition: 'C', specializes: [d] as never[]},
+                [d]: {definition: 'D'}
             }
         });
 
@@ -39,14 +41,20 @@ describe('external semantic deltas', () => {
         expect(prior.relations[`partOf|${a}|${b}`]).toBeDefined();
         expect(current.relations[`partOf|${a}|${c}`]).toBeDefined();
         const closure = new OntologySemanticIndex(current).closure([a]);
-        expect(closure.entities).toEqual([a, c]);
-        expect(closure.relations).toEqual([`partOf|${a}|${c}`]);
-        expect(closure.work.entities_visited).toBe(2);
+        expect(closure.entities).toEqual([a, c, d]);
+        expect(closure.relations).toEqual([
+            `partOf|${a}|${c}`,
+            `specializes|${c}|${d}`
+        ]);
+        expect(closure.work.entities_visited).toBe(3);
 
         const used = withOntologySemanticUsage(current, 'ccss', [a]);
         expect(used.usages.ccss.roots).toEqual([a]);
-        expect(used.usages.ccss.entities).toEqual([a, c]);
-        expect(used.usages.ccss.relations).toEqual([`partOf|${a}|${c}`]);
+        expect(used.usages.ccss.entities).toEqual([a, c, d]);
+        expect(used.usages.ccss.relations).toEqual([
+            `partOf|${a}|${c}`,
+            `specializes|${c}|${d}`
+        ]);
         expect(used.usages.ccss.input_sha256).toMatch(/^[a-f\d]{64}$/);
         expect(current.usages.ccss).toBeUndefined();
     });

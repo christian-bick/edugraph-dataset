@@ -7,7 +7,6 @@ export const spec: ViewSpec = {
     viewId: 'measurement-line-plot',
     generalLabels: [
         Scope.LinePlot,
-        Scope.LengthMeasurement,
         Scope.ProvidedMeasurement,
         Ability.VisualArticulation
     ]

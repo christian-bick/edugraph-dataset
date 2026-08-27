@@ -1,5 +1,5 @@
 import {Ability, Area} from 'edugraph-ts';
-import {isSubConceptOf} from './ontology.ts';
+import {capabilitySatisfies} from './ontology.ts';
 
 const abilityLabels = new Set<string>(Object.values(Ability));
 const areaLabels = new Set<string>(Object.values(Area));
@@ -20,8 +20,8 @@ export function findCrossRoleAreaOverlaps({
     const generatorAreas = generatorLabels.filter(label => areaLabels.has(label));
     const viewAreas = viewLabels.filter(label => areaLabels.has(label));
     return viewAreas.flatMap(viewLabel => generatorAreas
-        .filter(generatorLabel => isSubConceptOf(viewLabel, generatorLabel)
-            || isSubConceptOf(generatorLabel, viewLabel))
+        .filter(generatorLabel => capabilitySatisfies(viewLabel, generatorLabel)
+            || capabilitySatisfies(generatorLabel, viewLabel))
         .map(generatorLabel => ({generatorLabel, viewLabel})));
 }
 
@@ -88,7 +88,7 @@ export function findRequiredLabelContractIssues({
                 ...generator.supportedLabels,
                 ...viewSupportedLabels
             ].some(supportedLabel =>
-                isSubConceptOf(supportedLabel, requiredLabel)
+                capabilitySatisfies(supportedLabel, requiredLabel)
             );
             if (!suppliedByPair) {
                 issues.push({

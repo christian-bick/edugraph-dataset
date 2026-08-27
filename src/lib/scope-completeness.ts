@@ -7,7 +7,7 @@ import {
     computeSampleSeed
 } from './generation.ts';
 import type {MatchTuple} from './matching.ts';
-import {isSubConceptOf} from './ontology.ts';
+import {capabilitySatisfies} from './ontology.ts';
 import {setSeed} from './random.ts';
 import {
     extractConfig,
@@ -141,7 +141,8 @@ export function buildScopeCompletenessInventory(options: {
         const resolvedScopes = scopeOnly(pairLabels);
         const requestedScopes = targetScopes(tuple.target);
         for (const label of resolvedScopes) {
-            const satisfiedTargets = requestedScopes.filter(target => isSubConceptOf(label, target));
+            const satisfiedTargets = requestedScopes.filter(target =>
+                capabilitySatisfies(label, target));
             if (satisfiedTargets.length === 0) increment(additionalScopes, label);
             if (satisfiedTargets.some(target => target !== label)) {
                 increment(specializedTargetScopes, label);
@@ -159,7 +160,7 @@ export function buildScopeCompletenessInventory(options: {
                     !== schemaResolutionKey(candidate.resolvedValue)) continue;
                 const candidateScopes = scopeOnly(candidate.labels);
                 const missing = candidateScopes.filter(candidateLabel => !pairLabels.some(label =>
-                    isSubConceptOf(label, candidateLabel)
+                    capabilitySatisfies(label, candidateLabel)
                 ));
                 if (missing.length === 0) continue;
                 const key = [

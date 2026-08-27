@@ -2,8 +2,17 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {MeasurementDataGenerator} from './generator.ts';
+import {spec} from './spec.ts';
 
 describe('measurement-data spec', () => {
+    it('owns the invariant length-measurement context of its canonical observations', () => {
+        expect(spec.generalLabels).toEqual([
+            Area.Statistics,
+            Area.Measurement,
+            Scope.LengthMeasurement
+        ]);
+    });
+
     it('generates observed whole-unit measurement data without owning the evidence source', () => {
         const result = generateWithLabels(new MeasurementDataGenerator(), [
             Area.Statistics,

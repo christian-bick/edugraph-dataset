@@ -1,5 +1,5 @@
 import { labelSetKey } from './utils.ts';
-import { isSubConceptOf } from './ontology.ts';
+import { capabilitySatisfies } from './ontology.ts';
 import { rowTargetAssociations, type MetadataRow } from './dataset-merge.ts';
 import type { CompetencyTarget } from '../types/ml-engine.ts';
 
@@ -58,7 +58,7 @@ export function publishedLabelsCoverRequested(
     requestedLabels: readonly string[],
 ): boolean {
     return requestedLabels.every(requestedLabel => publishedLabels.some(publishedLabel =>
-        isSubConceptOf(ontologyLabel(publishedLabel), ontologyLabel(requestedLabel))));
+        capabilitySatisfies(ontologyLabel(publishedLabel), ontologyLabel(requestedLabel))));
 }
 
 const splitOrder: Record<AssetSplit, number> = { train: 0, validation: 1 };

@@ -3,9 +3,9 @@
 **Status:** Structural migration complete; Scope completeness is active in Phase 7 and the final
 canonical proof remains tracked in Phase 8.
 
-The post-release separation of structural `part_of` and inheriting `specializes` relations is
-tracked independently in [ontology-relations-migration.md](ontology-relations-migration.md). It is
-not part of this release-bound label-ownership migration.
+The separation of structural `part_of` and inheriting `specializes` relations is implemented and
+tracked independently in [ontology-relations-migration.md](ontology-relations-migration.md). Its
+remaining schema cleanup and canonical proof are not part of this label-ownership inventory.
 
 ## Purpose
 

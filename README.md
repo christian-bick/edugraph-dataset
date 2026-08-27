@@ -213,7 +213,7 @@ The standards updater fetches only the explicitly named revision, reports the ID
 replaces the tracked canonical tree only with `--apply`. It does not alter dataset generation:
 authored targets under `src/spec/` are the sole standards-side dataset input. Updating the exact
 `edugraph-ts` package and lock changes ontology provenance, which authoritatively reconstructs the
-complete graph. Entity, definition, and `partOf` relation records are then compared with the prior
+complete graph. Entity, definition, `partOf`, and `specializes` relation records are then compared with the prior
 graph, so only targets, pairs, or VQA records reached from changed used semantics become stale.
 Unrelated ontology changes do not churn images or validation results; unversioned mutations are not
 development inputs and are eliminated by the exact locked install used for canonical work.

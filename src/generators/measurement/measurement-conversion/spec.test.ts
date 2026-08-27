@@ -24,8 +24,8 @@ const taskCases = [
 describe('MeasurementConversionGenerator spec integration', () => {
     const generator = new MeasurementConversionGenerator();
 
-    it('keeps invariant capabilities empty because every mathematical area varies by task or pair', () => {
-        expect(spec.generalLabels).toEqual([]);
+    it('declares the structural field that every conversion task observably instantiates', () => {
+        expect(spec.generalLabels).toEqual([Area.MeasuringWithUnits]);
     });
 
     it.each(unitPairCases)('resolves all tasks for %s', (pairLabels, pairId) => {

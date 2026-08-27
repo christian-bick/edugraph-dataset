@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     buildCompatibleModulePairIndex,
     buildDependencyMatchingIndex,
@@ -87,6 +87,60 @@ describe('required target labels', () => {
             generators()[0]!,
             view
         )).toEqual({matched: true});
+    });
+
+    it('accepts a target specialization of a required capability', () => {
+        const view: ViewMatchInfo = {
+            viewId: 'bounded-view',
+            supportedLabels: [Ability.ProcedureExecution, Scope.NumbersSmaller10],
+            requiredLabels: [Scope.NumericRange]
+        };
+        expect(matchesTarget(
+            [Area.Addition, Ability.ProcedureExecution, Scope.NumbersSmaller10],
+            generators()[0]!,
+            view
+        )).toEqual({matched: true});
+    });
+});
+
+describe('capability inheritance', () => {
+    it('accepts a specialization for a broader target capability', () => {
+        expect(matchesTarget(
+            [Area.Addition, Ability.ProcedureUnderstanding],
+            generators()[0]!,
+            {viewId: 'inversion', supportedLabels: [Ability.ProcedureInversion]}
+        )).toEqual({matched: true});
+    });
+
+    it('does not use structural partOf ancestry as capability inheritance', () => {
+        expect(matchesTarget(
+            [Area.Addition, Ability.ProcedureExecution, Scope.LengthMeasurement],
+            generators()[0]!,
+            {
+                viewId: 'tapemeter',
+                supportedLabels: [Ability.ProcedureExecution, Scope.Tapemeter]
+            }
+        )).toEqual({
+            matched: false,
+            reason: 'unsupported-label',
+            label: Scope.LengthMeasurement
+        });
+    });
+
+    it('applies rejected boundaries to target specializations', () => {
+        expect(matchesTarget(
+            [Area.Addition, Ability.ProcedureExecution, Scope.NumbersSmaller10],
+            generators()[0]!,
+            {
+                viewId: 'unbounded-only',
+                supportedLabels: [Ability.ProcedureExecution, Scope.NumbersSmaller10],
+                rejectedLabels: [Scope.NumericRange]
+            }
+        )).toEqual({
+            matched: false,
+            reason: 'rejected-label',
+            label: Scope.NumericRange
+        });
     });
 });
 

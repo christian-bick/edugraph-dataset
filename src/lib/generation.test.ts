@@ -185,7 +185,7 @@ describe('matchesTarget', () => {
 
     it('matches a broad target label with a more specific view/generator capability', () => {
         // A broad standard (ProcedureUnderstanding) is satisfied by a view that
-        // exercises a specialization of it (ProcedureInversion partOf ProcedureUnderstanding).
+        // exercises a specialization of it (ProcedureInversion specializes ProcedureUnderstanding).
         const abilityVerdict = matchesTarget(
             [Ability.ProcedureUnderstanding],
             gen([]),
@@ -193,10 +193,10 @@ describe('matchesTarget', () => {
         );
         expect(abilityVerdict).toEqual({ matched: true });
 
-        // Same directionality for Area (ObjectSorting partOf CollectionSense).
+        // Same directionality for Area (MeasuringLength specializes MeasuringObjects).
         const areaVerdict = matchesTarget(
-            [Area.CollectionSense],
-            gen([Area.ObjectSorting]),
+            [Area.MeasuringObjects],
+            gen([Area.MeasuringLength]),
             view([])
         );
         expect(areaVerdict).toEqual({ matched: true });
@@ -275,9 +275,9 @@ describe('matchesTarget', () => {
 
     it('accepts a target specialization of a required view label', () => {
         const verdict = matchesTarget(
-            [Area.ObjectSorting],
-            gen([Area.ObjectSorting]),
-            view([], [], 'WritingProblem', [Area.CollectionSense])
+            [Area.MeasuringLength],
+            gen([Area.MeasuringLength]),
+            view([], [], 'WritingProblem', [Area.MeasuringObjects])
         );
         expect(verdict).toEqual({matched: true});
     });

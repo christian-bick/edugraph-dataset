@@ -1,4 +1,4 @@
-import { partOf, Scope } from 'edugraph-ts';
+import { Scope, specializesTransitive, structuresTransitive } from 'edugraph-ts';
 import type { CompetencyDescriptor } from 'edugraph-ts';
 
 export const DISTANCE_SCALE_LABELS = [
@@ -17,44 +17,53 @@ export interface DistanceScaleResolution {
     family: DistanceScaleFamily;
 }
 
-const ancestorCache = new Map<string, ReadonlySet<string>>();
+const capabilityAncestorCache = new Map<string, ReadonlySet<string>>();
+const structuralAncestorCache = new Map<string, ReadonlySet<string>>();
 
-/** Returns a concept and its transitive taxonomic ancestors. */
-export function getConceptAncestors(concept: string): ReadonlySet<string> {
-    const cached = ancestorCache.get(concept);
+/** Returns a capability and every capability it transitively specializes, including itself. */
+export function getCapabilityAncestors(concept: string): ReadonlySet<string> {
+    const cached = capabilityAncestorCache.get(concept);
     if (cached) return cached;
 
-    const ancestors = new Set<string>();
-    const queue: string[] = [concept];
-    let cursor = 0;
-
-    while (cursor < queue.length) {
-        const current = queue[cursor++];
-        if (ancestors.has(current)) continue;
-        ancestors.add(current);
-
-        try {
-            for (const parent of partOf(current as CompetencyDescriptor) || []) {
-                if (!ancestors.has(parent)) queue.push(parent);
-            }
-        } catch {
-            // Unknown concepts have no known ancestors, but still include themselves.
+    const ancestors = new Set<string>([concept]);
+    try {
+        for (const parent of specializesTransitive(concept as CompetencyDescriptor) || []) {
+            ancestors.add(parent);
         }
+    } catch {
+        // Unknown capabilities have no known ancestors, but still include themselves.
     }
 
-    ancestorCache.set(concept, ancestors);
+    capabilityAncestorCache.set(concept, ancestors);
     return ancestors;
 }
 
 /**
- * Returns true if child is equal to parent, or if parent is a transitive
- * ancestor of child via the taxonomic partOf relation.
+ * Returns true when `provided` is equal to `requested`, or specializes it.
+ * This is capability substitution; structural `partOf` ancestry is deliberately excluded.
  */
-export function isSubConceptOf(child: string, parent: string): boolean {
-    return getConceptAncestors(child).has(parent);
+export function capabilitySatisfies(provided: string, requested: string): boolean {
+    return getCapabilityAncestors(provided).has(requested);
 }
 
-/** Resolves an exact distance-scale label and classifies it through its ontology parent. */
+/** Returns a descriptor and its complete `structures` ancestry, including itself. */
+export function getStructuralAncestors(concept: string): ReadonlySet<string> {
+    const cached = structuralAncestorCache.get(concept);
+    if (cached) return cached;
+
+    const ancestors = new Set<string>([concept]);
+    try {
+        for (const parent of structuresTransitive(concept as CompetencyDescriptor) || []) {
+            ancestors.add(parent);
+        }
+    } catch {
+        // Unknown descriptors have no known ancestors, but still include themselves.
+    }
+    structuralAncestorCache.set(concept, ancestors);
+    return ancestors;
+}
+
+/** Resolves an exact distance-scale label and classifies it through structural ancestry. */
 export function resolveDistanceScale(
     labels: string[],
     supportedLabels: readonly string[] = DISTANCE_SCALE_LABELS
@@ -63,9 +72,10 @@ export function resolveDistanceScale(
         supportedLabels.includes(candidate) && labels.includes(candidate));
     if (!label) return undefined;
 
-    if (isSubConceptOf(label, Scope.MetricDistanceScale)) return {label, family: 'metric'};
-    if (isSubConceptOf(label, Scope.ImperialDistanceScale)) return {label, family: 'imperial'};
-    if (isSubConceptOf(label, Scope.DistanceAbstraction)) return {label, family: 'abstract'};
+    const ancestors = getStructuralAncestors(label);
+    if (ancestors.has(Scope.MetricDistanceScale)) return {label, family: 'metric'};
+    if (ancestors.has(Scope.ImperialDistanceScale)) return {label, family: 'imperial'};
+    if (ancestors.has(Scope.DistanceAbstraction)) return {label, family: 'abstract'};
     return undefined;
 }
 

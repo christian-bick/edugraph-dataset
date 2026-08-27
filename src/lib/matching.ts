@@ -1,4 +1,4 @@
-import {getConceptAncestors, isSubConceptOf} from './ontology.ts';
+import {capabilitySatisfies, getCapabilityAncestors} from './ontology.ts';
 import {
     getAcceptedGeneratorProblemTypes,
     getContainingProblemUnionTypes,
@@ -62,7 +62,7 @@ function matchesTargetCapabilities(
     viewInfo: ViewMatchInfo
 ): Exclude<MatchVerdict, {matched: false; reason: 'incompatible-type'}> {
     const missingRequired = viewInfo.requiredLabels?.find(requiredLabel =>
-        !targetLabels.some(targetLabel => isSubConceptOf(targetLabel, requiredLabel))
+        !targetLabels.some(targetLabel => capabilitySatisfies(targetLabel, requiredLabel))
     );
     if (missingRequired) {
         return {matched: false, reason: 'missing-required-label', label: missingRequired};
@@ -71,15 +71,16 @@ function matchesTargetCapabilities(
     for (const compLabel of targetLabels) {
         if (!compLabel.startsWith(EDU_PREFIX)) continue;
         const supportedByGen = generatorInfo.labels.some(genLabel =>
-            isSubConceptOf(genLabel, compLabel));
+            capabilitySatisfies(genLabel, compLabel));
         const supportedByView = viewInfo.supportedLabels.some(viewLabel =>
-            isSubConceptOf(viewLabel, compLabel));
+            capabilitySatisfies(viewLabel, compLabel));
         if (!supportedByGen && !supportedByView) {
             return {matched: false, reason: 'unsupported-label', label: compLabel};
         }
     }
 
-    const rejected = viewInfo.rejectedLabels?.find(label => targetLabels.includes(label));
+    const rejected = viewInfo.rejectedLabels?.find(label =>
+        targetLabels.some(targetLabel => capabilitySatisfies(targetLabel, label)));
     if (rejected) return {matched: false, reason: 'rejected-label', label: rejected};
     return {matched: true};
 }
@@ -280,7 +281,9 @@ export function buildCompatibleModulePairIndex(
         for (const view of compatibleViews) {
             const supportedTargetLabels = new Set<string>();
             for (const label of [...generator.labels, ...view.supportedLabels]) {
-                for (const ancestor of getConceptAncestors(label)) supportedTargetLabels.add(ancestor);
+                for (const ancestor of getCapabilityAncestors(label)) {
+                    supportedTargetLabels.add(ancestor);
+                }
             }
             orderedPairs.push({generator, view, supportedTargetLabels});
             counters?.add('match.compatible_pairs');
@@ -402,7 +405,7 @@ export function findTargetsWithoutMatch(
 const matchingClosure = (labels: readonly string[]): Array<{label: string; ancestors: string[]}> =>
     radixSortUtf8([...new Set(labels)]).map(label => ({
         label,
-        ancestors: radixSortUtf8([...new Set(getConceptAncestors(label))])
+        ancestors: radixSortUtf8([...new Set(getCapabilityAncestors(label))])
     }));
 
 export const matchingPolicyNodeId = (): string => 'matching-policy:target-capabilities';
@@ -443,7 +446,7 @@ export function viewCapabilityInputHash(view: ViewMatchInfo): string {
     });
 }
 
-export const MATCHING_POLICY_EPOCH = 3;
+export const MATCHING_POLICY_EPOCH = 4;
 
 /**
  * Matching implementation code is deliberately outside automatic cache

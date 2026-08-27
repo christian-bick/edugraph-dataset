@@ -18,6 +18,7 @@ export const FactorMultipleRelationsGeneratorSchema = {
     task: [
         [
             Area.FactorsAndMultiples,
+            Area.Factorization,
             Area.PerfectDivisibility,
             Area.PrimeNumbers,
             Area.CompositeNumbers
@@ -26,7 +27,7 @@ export const FactorMultipleRelationsGeneratorSchema = {
             [[Area.PerfectDivisibility], 'one-digit-multiple-test'],
             [[Area.PrimeNumbers], 'prime-classification'],
             [[Area.CompositeNumbers], 'composite-classification'],
-            [[Area.FactorsAndMultiples], 'factor-pairs']
+            [[Area.FactorsAndMultiples, Area.Factorization], 'factor-pairs']
         ])
     ]
 } as const;

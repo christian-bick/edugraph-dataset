@@ -20,12 +20,19 @@ describe('findAbilityLabels', () => {
 describe('findCrossRoleAreaOverlaps', () => {
     it('rejects equal and specializing Areas across a generator/view boundary', () => {
         expect(findCrossRoleAreaOverlaps({
+            generatorLabels: [Area.MeasuringObjects, Area.Rectangle],
+            viewLabels: [Area.MeasuringLength, Area.Square]
+        })).toEqual([
+            {generatorLabel: Area.MeasuringObjects, viewLabel: Area.MeasuringLength},
+            {generatorLabel: Area.Rectangle, viewLabel: Area.Square}
+        ]);
+    });
+
+    it('does not treat structural Area ancestry as positive overlap', () => {
+        expect(findCrossRoleAreaOverlaps({
             generatorLabels: [Area.Measurement, Area.ShapeIdentity],
             viewLabels: [Area.MeasuringObjects, Area.ShapeNaming]
-        })).toEqual([
-            {generatorLabel: Area.Measurement, viewLabel: Area.MeasuringObjects},
-            {generatorLabel: Area.ShapeIdentity, viewLabel: Area.ShapeNaming}
-        ]);
+        })).toEqual([]);
     });
 
     it('allows independent Areas and ignores Scope taxonomy', () => {

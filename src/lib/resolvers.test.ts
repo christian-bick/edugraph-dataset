@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
     hasLabel,
-    hasSubConcept,
+    hasCapability,
     matchAllExactLabels,
-    matchAllLabels,
+    matchAllCapabilities,
     selectCanonicalLabel
 } from './resolvers.ts';
 import { extractConfig } from './utils.ts';
@@ -22,22 +22,27 @@ describe('Resolvers & Utilities', () => {
         });
     });
 
-    describe('hasSubConcept', () => {
+    describe('hasCapability', () => {
         it('returns true if the exact label is present', () => {
-            const resolver = hasSubConcept(Scope.NumbersSmaller10);
+            const resolver = hasCapability(Scope.NumbersSmaller10);
             expect(resolver([Scope.NumbersSmaller10])).toBe(true);
         });
 
-        it('returns true if a descendant label is present', () => {
-            const resolver = hasSubConcept(Scope.NumericRange);
+        it('returns true if a specialization is present', () => {
+            const resolver = hasCapability(Scope.NumericRange);
             expect(resolver([Scope.NumbersSmaller10])).toBe(true);
+        });
+
+        it('does not treat partOf children as substitutable capabilities', () => {
+            const resolver = hasCapability(Scope.LengthMeasurement);
+            expect(resolver([Scope.Tapemeter])).toBe(false);
         });
     });
 
-    describe('matchAllLabels', () => {
+    describe('matchAllCapabilities', () => {
         it('returns all intersecting labels from the provided target set', () => {
             const targetSet = [Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersLarger10];
-            const resolver = matchAllLabels(targetSet);
+            const resolver = matchAllCapabilities(targetSet);
             const result = resolver([Scope.NumbersSmaller10, Scope.NumbersLarger100]); // Larger100 is not in targetSet
             expect(result).toContain(Scope.NumbersSmaller10);
             expect(result).not.toContain(Scope.NumbersSmaller20);

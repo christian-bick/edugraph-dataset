@@ -1,41 +1,54 @@
 import { describe, it, expect } from 'vitest';
 import {
     DISTANCE_SCALE_LABELS,
-    getConceptAncestors,
-    isSubConceptOf,
+    capabilitySatisfies,
+    getCapabilityAncestors,
+    getStructuralAncestors,
     resolveDistanceScale,
     resolveRangeFromLabels
 } from './ontology.ts';
 import { Scope, Area } from 'edugraph-ts';
 
 describe('Ontology Helper', () => {
-    describe('isSubConceptOf', () => {
+    describe('capabilitySatisfies', () => {
         it('should return true for identity', () => {
-            expect(isSubConceptOf(Scope.NumbersSmaller10, Scope.NumbersSmaller10)).toBe(true);
+            expect(capabilitySatisfies(Scope.NumbersSmaller10, Scope.NumbersSmaller10)).toBe(true);
         });
 
-        it('should return true for taxonomic child-to-parent relation (10 is partOf NumericRange)', () => {
-            expect(isSubConceptOf(Scope.NumbersSmaller10, Scope.NumericRange)).toBe(true);
+        it('accepts a specialization for a broader requested capability', () => {
+            expect(capabilitySatisfies(Scope.NumbersSmaller10, Scope.NumericRange)).toBe(true);
         });
 
-        it('should return false for parent-to-child relation (NumericRange is not partOf 10)', () => {
-            expect(isSubConceptOf(Scope.NumericRange, Scope.NumbersSmaller10)).toBe(false);
+        it('does not accept a broader capability for its specialization', () => {
+            expect(capabilitySatisfies(Scope.NumericRange, Scope.NumbersSmaller10)).toBe(false);
+        });
+
+        it('does not treat structural partOf ancestry as capability inheritance', () => {
+            expect(capabilitySatisfies(Scope.Tapemeter, Scope.LengthMeasurement)).toBe(false);
         });
 
         it('should return false for unrelated concepts', () => {
-            expect(isSubConceptOf(Scope.NumbersSmaller10, Area.Addition)).toBe(false);
+            expect(capabilitySatisfies(Scope.NumbersSmaller10, Area.Addition)).toBe(false);
         });
     });
 
-    describe('getConceptAncestors', () => {
-        it('includes the concept and its transitive parents', () => {
-            const ancestors = getConceptAncestors(Scope.NumbersSmaller10);
+    describe('getCapabilityAncestors', () => {
+        it('includes the concept and its transitive specializations', () => {
+            const ancestors = getCapabilityAncestors(Scope.NumbersSmaller10);
             expect(ancestors.has(Scope.NumbersSmaller10)).toBe(true);
             expect(ancestors.has(Scope.NumericRange)).toBe(true);
         });
 
         it('returns unknown concepts as self-only closures', () => {
-            expect([...getConceptAncestors('urn:unknown')]).toEqual(['urn:unknown']);
+            expect([...getCapabilityAncestors('urn:unknown')]).toEqual(['urn:unknown']);
+        });
+    });
+
+    describe('getStructuralAncestors', () => {
+        it('includes both partOf and specializes structure', () => {
+            expect(getStructuralAncestors(Scope.Tapemeter).has(Scope.LengthMeasurement)).toBe(true);
+            expect(getStructuralAncestors(Scope.CentimeterScale)
+                .has(Scope.MetricDistanceScale)).toBe(true);
         });
     });
 

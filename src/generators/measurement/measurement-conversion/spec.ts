@@ -68,7 +68,7 @@ const unitPairFallbacks = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-conversion',
-    generalLabels: []
+    generalLabels: [Area.MeasuringWithUnits]
 };
 
 export const MeasurementConversionGeneratorSchema = {

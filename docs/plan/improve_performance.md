@@ -157,7 +157,8 @@ image + checklist + ontology definitions + validation policy
 ```
 
 Capability nodes contain only matching-relevant labels, constraints, problem types, and ontology
-ancestor closure. Target prose and implementation source live in separate downstream nodes, so
+specialization closure. Structural `partOf` and capability `specializes` records are tracked as
+separate ontology provenance. Target prose and implementation source live in separate downstream nodes, so
 they cannot cause matching churn. The graph persists successful matches, not every rejected
 target/pair combination. It also persists target-label and target-to-successful-pair postings as
 derivable acceleration metadata. Label/type postings provide the discovery mechanism:

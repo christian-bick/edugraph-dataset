@@ -1,5 +1,5 @@
 import { ConfigSchema, ConfigFromSchema, ResolvedConfig } from '../types/schema.ts';
-import { isSubConceptOf } from './ontology.ts';
+import { capabilitySatisfies } from './ontology.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ResolvedProblemStub } from '../types/ml-engine.ts';
 
@@ -81,7 +81,7 @@ export function findSchemaCoResolutionGroups(schema: ConfigSchema): SchemaCoReso
         for (const [key, group] of byValue) {
             if (key === defaultKey) continue;
             const mostSpecificLabels = group.labels.filter(label => !group.labels.some(other =>
-                other !== label && isSubConceptOf(other, label)
+                other !== label && capabilitySatisfies(other, label)
             ));
             if (mostSpecificLabels.length < 2) continue;
             groups.push({
@@ -192,7 +192,7 @@ export function extractConfig<T extends ConfigSchema>(
                 );
                 const compatibleCandidates = fallbackLabelSets(schemaValue, supportedLabels).filter(labelSet =>
                     relevantLabels.every(targetLabel => labelSet.some(label =>
-                        isSubConceptOf(label, targetLabel)
+                        capabilitySatisfies(label, targetLabel)
                     ))
                 );
                 const resolvedCandidates = compatibleCandidates.flatMap(labelSet => {
@@ -208,7 +208,9 @@ export function extractConfig<T extends ConfigSchema>(
                 const compatibilityScore = (labelSet: readonly string[]) => labelSet.reduce(
                     (score, label) => score + competencyLabels.reduce((labelScore, targetLabel) => {
                         if (label === targetLabel) return labelScore + 1;
-                        return isSubConceptOf(label, targetLabel) ? labelScore + 2 : labelScore;
+                        return capabilitySatisfies(label, targetLabel)
+                            ? labelScore + 2
+                            : labelScore;
                     }, 0),
                     0
                 );
@@ -243,7 +245,8 @@ export function extractConfig<T extends ConfigSchema>(
             config[key] = resolved;
         } else {
             const matchingSupportedLabels = supportedLabels.filter(s => 
-                competencyLabels.some(l => isSubConceptOf(s, l) || isSubConceptOf(l, s))
+                competencyLabels.some(label => capabilitySatisfies(s, label)
+                    || capabilitySatisfies(label, s))
             );
             
             if (matchingSupportedLabels.length === 0) {

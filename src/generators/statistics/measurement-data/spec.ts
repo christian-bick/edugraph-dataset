@@ -18,7 +18,8 @@ export const spec: GeneratorSpec = {
     generatorId: 'measurement-data',
     generalLabels: [
         Area.Statistics,
-        Area.Measurement
+        Area.Measurement,
+        Scope.LengthMeasurement
     ]
 };
 

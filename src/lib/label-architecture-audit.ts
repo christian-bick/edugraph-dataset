@@ -30,7 +30,7 @@ import {
     type CompatibleModulePairIndex,
     type MatchTuple
 } from './matching.ts';
-import {getConceptAncestors} from './ontology.ts';
+import {getCapabilityAncestors} from './ontology.ts';
 import {extractSchemaLabels, shortenLabel} from './utils.ts';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {createWorkCounters, type WorkCounters} from './work-counters.ts';
@@ -606,7 +606,7 @@ function provenanceForTuples(options: {
         ];
         for (const capability of capabilities) {
             const {dimension: _dimension, ...provider} = capability;
-            for (const satisfiedLabel of getConceptAncestors(capability.capability)) {
+            for (const satisfiedLabel of getCapabilityAncestors(capability.capability)) {
                 const providers = bySatisfiedLabel.get(satisfiedLabel);
                 if (providers) providers.push(provider);
                 else bySatisfiedLabel.set(satisfiedLabel, [provider]);
@@ -653,7 +653,7 @@ function crossRolePositiveOverlaps(
         const direct = directGenerators.get(capability.capability);
         if (direct) direct.push(capability);
         else directGenerators.set(capability.capability, [capability]);
-        for (const ancestor of getConceptAncestors(capability.capability)) {
+        for (const ancestor of getCapabilityAncestors(capability.capability)) {
             const providers = generatorsBySatisfiedLabel.get(ancestor);
             if (providers) providers.push(capability);
             else generatorsBySatisfiedLabel.set(ancestor, [capability]);
@@ -666,7 +666,7 @@ function crossRolePositiveOverlaps(
             generatorsBySatisfiedLabel.get(view.capability) ?? []
         );
         counters.add('label_audit.overlap_label_lookups');
-        for (const ancestor of getConceptAncestors(view.capability)) {
+        for (const ancestor of getCapabilityAncestors(view.capability)) {
             counters.add('label_audit.overlap_label_lookups');
             for (const generator of directGenerators.get(ancestor) ?? []) candidates.add(generator);
         }

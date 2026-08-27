@@ -6,7 +6,6 @@ export const spec: ViewSpec = {
     viewId: 'measurement-line-plot-arithmetic',
     generalLabels: [
         Scope.LinePlot,
-        Scope.LengthMeasurement,
         Scope.ProvidedMeasurement,
         Ability.ProcedureExecution
     ],

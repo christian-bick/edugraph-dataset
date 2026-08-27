@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { Area, Scope, Ability } from 'edugraph-ts';
-import { isSubConceptOf } from '../lib/ontology.ts';
+import { capabilitySatisfies } from '../lib/ontology.ts';
 import { extractSchemaLabels } from '../lib/utils.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
 
@@ -59,7 +59,7 @@ async function checkLabels() {
                                 if (!used) continue;
 
                                 const isSupported = generalLabels.some((supported: string) =>
-                                    isSubConceptOf(supported, used)
+                                    capabilitySatisfies(supported, used)
                                 );
 
                                 if (!isSupported) {

@@ -25,7 +25,7 @@ import {
     type CompatibleModulePairIndex
 } from './matching.ts';
 import {CompetencyTarget} from '../types/ml-engine.ts';
-import {partOf, type CompetencyDescriptor} from 'edugraph-ts';
+import {partOf, specializes, type CompetencyDescriptor} from 'edugraph-ts';
 import {currentRendererEnvironment} from './render-environment.ts';
 import {
     SourceContentIndex,
@@ -516,20 +516,32 @@ export function buildDatasetManifest(options: {
                 const entityId = ontologyNode(label);
                 dependencies.push(entityId);
                 try {
-                    for (const parent of partOf(ontologyIri(label) as CompetencyDescriptor) ?? []) {
-                        const parentId = ontologyNode(parent);
-                        const relationId = nodeId(
-                            'ontology-relation',
-                            `partOf:${ontologyName(label)}->${ontologyName(parent)}`
-                        );
-                        addNode(nodes, {
-                            id: relationId,
-                            kind: 'ontology-relation',
-                            input_hash: digestIdentity({ontology, relation: 'partOf', source: label, target: parent}),
-                            dependencies: [entityId, parentId]
-                        });
-                        dependencies.push(relationId);
-                        if (!visited.has(parent)) queue.push(parent);
+                    const descriptor = ontologyIri(label) as CompetencyDescriptor;
+                    const relations = [
+                        ['partOf', partOf(descriptor) ?? []],
+                        ['specializes', specializes(descriptor) ?? []]
+                    ] as const;
+                    for (const [relation, parents] of relations) {
+                        for (const parent of parents) {
+                            const parentId = ontologyNode(parent);
+                            const relationId = nodeId(
+                                'ontology-relation',
+                                `${relation}:${ontologyName(label)}->${ontologyName(parent)}`
+                            );
+                            addNode(nodes, {
+                                id: relationId,
+                                kind: 'ontology-relation',
+                                input_hash: digestIdentity({
+                                    ontology,
+                                    relation,
+                                    source: label,
+                                    target: parent
+                                }),
+                                dependencies: [entityId, parentId]
+                            });
+                            dependencies.push(relationId);
+                            if (!visited.has(parent)) queue.push(parent);
+                        }
                     }
                 } catch {
                     // Authored unknown labels remain explicit entity dependencies.

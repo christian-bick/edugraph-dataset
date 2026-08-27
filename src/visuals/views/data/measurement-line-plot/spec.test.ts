@@ -6,7 +6,6 @@ describe('measurement-line-plot view spec', () => {
     it('owns provided-data line-plot construction as one invariant task', () => {
         expect(spec.generalLabels).toEqual([
             Scope.LinePlot,
-            Scope.LengthMeasurement,
             Scope.ProvidedMeasurement,
             Ability.VisualArticulation
         ]);

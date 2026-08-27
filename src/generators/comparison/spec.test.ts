@@ -102,12 +102,12 @@ describe('ComparisonGenerator Spec Integration', () => {
             ? Area.NumericEquality
             : Area.NumericInequality;
         expect(stub!.labels).toEqual(expect.arrayContaining([
+            Area.NumericComparison,
             resolvedArea,
             relation,
             Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000
         ]));
-        expect(stub!.labels).not.toContain(Area.NumericComparison);
     });
 
     it('resolves an explicit relation capability for a broad comparison target', () => {
@@ -124,7 +124,7 @@ describe('ComparisonGenerator Spec Integration', () => {
             Area.NumericEquality,
             Area.NumericInequality
         ].includes(label as Area))).toBe(true);
-        expect(stub!.labels).not.toContain(Area.NumericComparison);
+        expect(stub!.labels).toContain(Area.NumericComparison);
         expect(stub!.labels.some(label => [Scope.Less, Scope.Equal, Scope.Greater].includes(label as Scope))).toBe(true);
     });
 });

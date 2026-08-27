@@ -6,7 +6,6 @@ describe('measurement-line-plot-arithmetic view spec', () => {
     it('owns invariant arithmetic from provided line-plot data', () => {
         expect(spec.generalLabels).toEqual([
             Scope.LinePlot,
-            Scope.LengthMeasurement,
             Scope.ProvidedMeasurement,
             Ability.ProcedureExecution
         ]);

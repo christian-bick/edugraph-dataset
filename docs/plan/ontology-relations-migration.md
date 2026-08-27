@@ -1,21 +1,22 @@
 # Separate structural and specialization ontology relations
 
-**Status:** Ontology edge classification implemented on `add/specializes`; the two explicit
-redesign cases and the downstream library/content migration remain open.
+**Status:** Ontology classification and the content-semantics adoption are implemented. Ontology
+release `v0.23.0` is pinned in this repository. The canonical dataset has been rebuilt with exact
+matching preservation; VQA revalidation and ambiguous schema canonicalization remain open.
 
 ## Purpose
 
-The ontology currently represents both structural membership and capability inheritance through
-`partOf`. Content matching consequently interprets the complete `partOf*` closure as
-specialization: a module capability on a descendant satisfies a target claim on any ancestor.
+Before ontology `v0.23.0`, structural membership and capability inheritance were both represented
+through `partOf`. Content matching consequently interpreted the complete `partOf*` closure as
+specialization: a module capability on a descendant satisfied a target claim on any ancestor.
 
 That behavior is correct for some edges and false for others. The migration separates the two
 meanings so that matching, target authoring, schema resolution, dataset labels, and ontology
 definitions all use the same explicit semantics.
 
-This is intentionally a post-release migration. The current release candidate preserves the
-existing relation model; the next ontology phase may change matching topology and must receive its
-own complete canonical proof.
+Ontology `v0.23.0` and the content adoption implement the separated relation model. The remaining
+schema cleanup and canonical proof are tracked below rather than being hidden behind compatibility
+behavior.
 
 ## Accepted theory
 
@@ -73,9 +74,9 @@ capacities into constituent faculties without implying that any one constituent 
 for the complete parent.
 
 The cross-dimension audit found only two apparent pressures against the proposed relation ordering.
-`AxiomDefinition` was judged an ontology-design defect rather than a valid exception. The remaining
-pressure case must be remodeled or clarified during the edge inventory; it must not be grandfathered
-as an ordering exception merely because the old ontology had only one relation.
+Both were ontology-design defects rather than valid exceptions and were resolved before release:
+axiom work now specializes an orthogonal `AxiomaticReasoning` capability, while the linguistic
+modality and performance families have explicit specialization structure.
 
 ### Areas
 
@@ -103,8 +104,9 @@ After the ontology exposes both relations:
 5. Dataset labels remain the resolved observable generator/view capabilities. Structural ancestry
    is not silently emitted as additional artifact labels.
 
-This removes the current ambiguity in `isSubConceptOf`, which presently means `partOf*` while being
-used as capability inheritance throughout matching and validation.
+The content implementation expresses this directly through `capabilitySatisfies`, which uses only
+the `specializes*` closure. Structural inspection uses `getStructuralAncestors` and therefore cannot
+silently enter capability matching.
 
 ## Consequences for schema resolution
 
@@ -252,49 +254,41 @@ Ontology commit: `e345a7b refactor: classify Scope specializations`.
 
 Ontology commit: `60a4720 refactor: classify Ability specializations`.
 
-#### Fringe-case resolution queue
+#### Fringe-case resolutions
 
-- [ ] **Deductive reasoning and axiom definition.** `DeductiveReasoning` is a genuine
-  specialization of `LogicalReasoning`, but `AxiomDefinition` is currently modeled as one of its
-  parts. Converting the former while retaining the latter would create the forbidden
-  `specializes -> partOf` order. Recommended redesign: split the current compound definition into
-  premise/axiom identification and premise formalization where the observable actions differ;
-  model those as specializations of appropriate conceptual or formalization abilities, and express
-  their use by deductive reasoning through a compositional progression relation rather than the
-  descriptor hierarchy. Then migrate `DeductiveReasoning specializes LogicalReasoning`.
-- [ ] **Linguistic modalities and performance facets.** `TextualReception`, `VocalReception`,
-  `TextualArticulation`, and `VocalArticulation` are plausible modality specializations, while
-  reading, writing, speaking, and listening fluency/precision/speed/capacity/flexibility are
-  performance facets rather than parts below an already specialized modality. Recommended
-  redesign: represent modality and transferable performance quality as atomic Ability labels—for
-  example `TextualReception + Fluency` rather than the compound `ReadingFluency`—and move
-  linguistic knowledge such as syntax or pronunciation into the appropriate Area when it is the
-  learned subject matter. The modal Ability chains can then use `specializes` without placing a
-  new structural decomposition beneath them.
+- [x] **Deductive reasoning and axiom definition.** `DeductiveReasoning` specializes
+  `LogicalReasoning`. The former compound axiom node was replaced by `AxiomaticReasoning`, an
+  orthogonal specialization of `LogicalReasoning`, with the observable specializations
+  `AxiomIdentification` and `AxiomFormalization`.
+- [x] **Linguistic modalities and performance facets.** Reception and articulation modalities now
+  use explicit specialization chains. Cross-modal capabilities such as `ActiveVocabulary` and
+  `GrammaticalPrecision` specialize both textual and vocal articulation instead of being modeled
+  as incomplete parts of only one modality.
 
-Neither fringe case is an exception to the ordering rule. Both remain explicit ontology-design
-tasks and were intentionally excluded from the Ability edge commit.
+Neither fringe case required an exception to the ordering rule.
 
 ### Phase 2: add explicit ontology semantics
 
-1. Add the `specializes` relation alongside non-inheriting `part_of`.
-2. Expose direct and transitive relation access in generated TypeScript and Python packages.
-3. Validate acyclicity and the `part_of* -> specializes*` ordering on every path.
-4. Add relation-specific tests and document targetability independently of leaf status.
-5. Publish one immutable ontology version containing the complete classified migration.
+1. [x] Add the `specializes` relation alongside non-inheriting `part_of`.
+2. [x] Expose direct and transitive relation access in generated TypeScript and Python packages.
+3. [x] Validate acyclicity and the `part_of* -> specializes*` ordering on every path.
+4. [x] Add relation-specific tests and document targetability independently of leaf status.
+5. [x] Publish immutable ontology version `v0.23.0` containing the classified migration.
 
 Whether the structural hierarchy must be a strict single-parent tree or may remain an ordered
 acyclic graph is a separate modeling decision. It must not delay separating inheritance semantics.
 
 ### Phase 3: migrate content semantics
 
-1. Replace `isSubConceptOf` with relation-specific APIs whose names state their semantics.
-2. Make positive matching, requirements, rejections, overlap validation, target coverage, and
+1. [x] Replace `isSubConceptOf` with relation-specific APIs whose names state their semantics.
+2. [x] Make positive matching, requirements, rejections, overlap validation, target coverage, and
    scope completeness follow `specializes` only where inheritance is intended.
-3. Record both relation types in dependency-graph semantic provenance so ontology deltas remain
+3. [x] Record both relation types in dependency-graph semantic provenance so ontology deltas remain
    exact.
-4. Audit every target and generator/view declaration whose successful match changes.
-5. Reject declarations that depended on a `part_of` edge as an implicit capability substitute.
+4. [x] Audit every target and generator/view declaration whose successful match changes. The
+   v0.22.2 graph and v0.23.0 matcher both contain the same 790 CCSS tuples for all 653 targets.
+5. [x] Replace implicit `part_of` substitution with explicit claims in
+   `measurement-conversion`, `measurement-data`, and `factor-multiple-relations`.
 
 ### Phase 4: remove ambiguous schema canonicalization
 
@@ -307,12 +301,16 @@ acyclic graph is a separate modeling decision. It must not delay separating inhe
 
 ### Phase 5: canonical proof
 
-1. Run the complete repository and ontology test suites.
-2. Produce before/after matching and label-resolution reports for every production target.
-3. Rebuild the complete dependency graph because matching semantics changed.
-4. Canonically generate every affected CCSS tuple and inspect additions and removals.
-5. Revalidate every changed label/image context through VQA.
-6. Require strict VQA audit, split integrity, union merge, and exact asset-index coverage before the
+1. [x] Run the complete repository and ontology test suites. The ontology release workflow and the
+   content repository's 2,421-test coverage suite pass.
+2. [x] Produce before/after matching and label-resolution reports for every production target. The
+   exact 790-tuple match set is unchanged across all 653 CCSS targets.
+3. [x] Rebuild the complete dependency graph because matching semantics changed.
+4. [x] Canonically generate every affected CCSS tuple and inspect additions and removals. The
+   affected rebuild produced 1,878 artifacts without generation or renderer failures.
+5. [ ] Revalidate every changed label/image context through VQA. The strict audit identifies 117
+   revised prompt contexts across four modules; the external validation upload remains pending.
+6. [ ] Require strict VQA audit, split integrity, union merge, and exact asset-index coverage before the
    first release using the new relations.
 
 ## Completion gates
