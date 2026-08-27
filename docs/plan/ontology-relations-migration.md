@@ -2,7 +2,7 @@
 
 **Status:** Ontology classification and the content-semantics adoption are implemented. Ontology
 release `v0.23.0` is pinned in this repository. The canonical dataset has been rebuilt with exact
-matching preservation; VQA revalidation and ambiguous schema canonicalization remain open.
+matching preservation and complete VQA coverage. Ambiguous schema canonicalization remains open.
 
 ## Purpose
 
@@ -308,8 +308,8 @@ acyclic graph is a separate modeling decision. It must not delay separating inhe
 3. [x] Rebuild the complete dependency graph because matching semantics changed.
 4. [x] Canonically generate every affected CCSS tuple and inspect additions and removals. The
    affected rebuild produced 1,878 artifacts without generation or renderer failures.
-5. [ ] Revalidate every changed label/image context through VQA. The strict audit identifies 117
-   revised prompt contexts across four modules; the external validation upload remains pending.
+5. [x] Revalidate every changed label/image context through VQA. All 117 revised contexts pass,
+   and the strict audit proves exact passing cache coverage for all 1,878 artifacts.
 6. [ ] Require strict VQA audit, split integrity, union merge, and exact asset-index coverage before the
    first release using the new relations.
 
