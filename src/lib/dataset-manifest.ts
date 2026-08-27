@@ -456,6 +456,7 @@ export function buildDatasetManifest(options: {
 
     const generatorById = new Map(generators.map(entry => [entry.generatorId, entry]));
     const viewById = new Map(views.map(entry => [entry.viewId, entry]));
+    const targetById = new Map(targets.map(target => [target.id, target]));
     const targetsByPair = new Map<string, CompetencyTarget[]>();
     const pairsByTarget = new Map<string, string[]>();
     for (const tuple of tuples) {
@@ -772,10 +773,13 @@ export function buildDatasetManifest(options: {
             content_fingerprint: row.content_fingerprint,
             task_fingerprint: row.task_fingerprint
         }));
-        const targetSignature = pairTargets.map(target => ({
-            id: target.id,
-            labels: radixSortUtf8([...target.labels])
-        }));
+        const targetSignature = radixSortUtf8(pairTargets.map(target => target.id)).map(targetId => {
+            const target = targetById.get(targetId)!;
+            return {
+                id: target.id,
+                labels: radixSortUtf8([...target.labels])
+            };
+        });
         const pairSplits = radixSortUtf8([...new Set(pairRows.map(row => row._split))]) as SampleSplit[];
         entries[key] = {
             generator: generatorId,

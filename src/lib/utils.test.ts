@@ -3,14 +3,21 @@ import {
     extractConfig,
     findSchemaCoResolutionGroups,
     findSchemaFallbackContractIssues,
+    findSchemaLabelResolutionIssues,
     findSchemaResolutionContractIssues,
     generateWithLabels,
     shortenLabel,
     formatLabelsKey
 } from './utils.ts';
 import { Area, Scope } from 'edugraph-ts';
-import { ontologyNeutral, selectExactMatch } from './resolvers.ts';
+import {
+    ontologyNeutral,
+    selectExactLabelMap,
+    selectExactLabelSetMap,
+    selectExactMatch
+} from './resolvers.ts';
 import { ProblemGenerator } from '../types/ml-engine.ts';
+import {compositionalResolver} from '../types/schema.ts';
 
 describe('extractConfig & generateWithLabels', () => {
     const testSchema = {
@@ -196,6 +203,63 @@ describe('extractConfig & generateWithLabels', () => {
         } as const;
 
         expect(findSchemaCoResolutionGroups(schema)).toEqual([]);
+    });
+
+    it('rejects an unclassified custom resolver with several supported labels', () => {
+        const schema = {
+            operation: [[Area.Addition, Area.Subtraction], (labels: string[]) =>
+                labels.includes(Area.Addition)
+                    ? 'addition'
+                    : labels.includes(Area.Subtraction) ? 'subtraction' : undefined]
+        } as const;
+
+        expect(findSchemaLabelResolutionIssues(schema)).toEqual([{
+            field: 'operation',
+            supportedLabels: [Area.Addition, Area.Subtraction]
+        }]);
+    });
+
+    it('accepts exact mappings which reject undeclared combinations', () => {
+        const exact = {
+            operation: [[
+                Area.Addition,
+                Area.Subtraction
+            ], selectExactLabelMap([
+                [Area.Addition, 'addition'],
+                [Area.Subtraction, 'subtraction']
+            ])]
+        } as const;
+        const bundles = {
+            measurement: [[
+                Scope.LengthMeasurement,
+                Scope.MeterScale,
+                Scope.TimeMeasurement,
+                Scope.HourIntervals
+            ], selectExactLabelSetMap([
+                [[Scope.LengthMeasurement, Scope.MeterScale], 'length'],
+                [[Scope.TimeMeasurement, Scope.HourIntervals], 'time']
+            ]), [
+                [Scope.LengthMeasurement, Scope.MeterScale],
+                [Scope.TimeMeasurement, Scope.HourIntervals]
+            ]]
+        } as const;
+
+        expect(findSchemaLabelResolutionIssues(exact)).toEqual([]);
+        expect(findSchemaLabelResolutionIssues(bundles)).toEqual([]);
+    });
+
+    it('accepts an explicitly compositional resolver which combines independent constraints', () => {
+        const schema = {
+            range: [[
+                Scope.NumbersLarger5,
+                Scope.NumbersSmaller100
+            ], compositionalResolver((labels: string[]) => ({
+                min: labels.includes(Scope.NumbersLarger5) ? 5 : 0,
+                max: labels.includes(Scope.NumbersSmaller100) ? 100 : Number.MAX_SAFE_INTEGER
+            }))]
+        } as const;
+
+        expect(findSchemaLabelResolutionIssues(schema)).toEqual([]);
     });
 
     it('should strip http://edugraph.io/edu/ prefix via shortenLabel and formatLabelsKey', () => {

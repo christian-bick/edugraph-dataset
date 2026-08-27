@@ -5,6 +5,7 @@ import { capabilitySatisfies } from '../lib/ontology.ts';
 import {
     extractSchemaLabels,
     findSchemaFallbackContractIssues,
+    findSchemaLabelResolutionIssues,
     findSchemaResolutionContractIssues
 } from '../lib/utils.ts';
 import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from '../lib/type-parser.ts';
@@ -113,6 +114,10 @@ async function validateSpecs() {
                         console.error(`❌ [generator:${item}] Schema parameter '${issue.field}' cannot resolve supported fallback '${issue.label}' (${issue.reason})`);
                         hasError = true;
                     }
+                    for (const issue of findSchemaLabelResolutionIssues(schema)) {
+                        console.error(`❌ [generator:${item}] Schema parameter '${issue.field}' has multiple supported labels but no declared exact, predicate, aggregate, or compositional resolution contract`);
+                        hasError = true;
+                    }
                     const paramLabels = extractSchemaLabels(schema);
                     generatorSchemas[item] = { schema, paramLabels };
 
@@ -193,6 +198,10 @@ async function validateSpecs() {
                     }
                     for (const issue of findSchemaFallbackContractIssues(schema)) {
                         console.error(`❌ [view:${item}] Schema parameter '${issue.field}' cannot resolve supported fallback '${issue.label}' (${issue.reason})`);
+                        hasError = true;
+                    }
+                    for (const issue of findSchemaLabelResolutionIssues(schema)) {
+                        console.error(`❌ [view:${item}] Schema parameter '${issue.field}' has multiple supported labels but no declared exact, predicate, aggregate, or compositional resolution contract`);
                         hasError = true;
                     }
                     viewSchemas[item] = { schema, paramLabels };

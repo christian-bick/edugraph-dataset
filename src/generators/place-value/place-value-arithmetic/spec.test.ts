@@ -45,6 +45,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
             Scope.SingleDigitSmallestOperand,
             Scope.TwoDigitLargestOperand
         ]));
+        expect(stub!.labels).not.toContain(Area.Addition);
     });
 
     it('resolves two-digit plus a multiple of 10', () => {
@@ -78,6 +79,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
             Scope.MultiplesOf10,
             zeroLabel
         ]));
+        expect(stub!.labels).not.toContain(Area.Subtraction);
     });
 
     it.each([

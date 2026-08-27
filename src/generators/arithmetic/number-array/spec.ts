@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -16,11 +16,11 @@ export const spec: GeneratorSpec = {
 export const NumberArrayGeneratorSchema = {
     operation: [
         [Area.Addition, Area.Multiplication, Area.PartitiveDivision, Area.QuotativeDivision],
-        selectCanonicalLabel([
-            [[Area.Addition], 'addition'],
-            [[Area.Multiplication], 'multiplication'],
-            [[Area.PartitiveDivision], 'partitive-division'],
-            [[Area.QuotativeDivision], 'quotative-division']
+        selectExactLabelMap([
+            [Area.Addition, 'addition'],
+            [Area.Multiplication, 'multiplication'],
+            [Area.PartitiveDivision, 'partitive-division'],
+            [Area.QuotativeDivision, 'quotative-division']
         ])
     ],
     requireTwoOperands: [

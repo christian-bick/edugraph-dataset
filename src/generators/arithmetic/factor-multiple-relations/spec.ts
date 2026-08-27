@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -14,6 +14,13 @@ export const spec: GeneratorSpec = {
     ]
 };
 
+const taskLabelSets = [
+    [Area.FactorsAndMultiples, Area.PerfectDivisibility],
+    [Area.PrimeNumbers, Area.Factorization],
+    [Area.CompositeNumbers, Area.Factorization],
+    [Area.FactorsAndMultiples, Area.Factorization]
+] as const;
+
 export const FactorMultipleRelationsGeneratorSchema = {
     task: [
         [
@@ -23,12 +30,13 @@ export const FactorMultipleRelationsGeneratorSchema = {
             Area.PrimeNumbers,
             Area.CompositeNumbers
         ],
-        selectCanonicalLabel([
-            [[Area.PerfectDivisibility], 'one-digit-multiple-test'],
-            [[Area.PrimeNumbers], 'prime-classification'],
-            [[Area.CompositeNumbers], 'composite-classification'],
-            [[Area.FactorsAndMultiples, Area.Factorization], 'factor-pairs']
-        ])
+        selectExactLabelSetMap([
+            [taskLabelSets[0], 'one-digit-multiple-test'],
+            [taskLabelSets[1], 'prime-classification'],
+            [taskLabelSets[2], 'composite-classification'],
+            [taskLabelSets[3], 'factor-pairs']
+        ]),
+        taskLabelSets
     ]
 } as const;
 

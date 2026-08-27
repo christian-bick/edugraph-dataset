@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectExactMatch} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelSetMap, selectExactMatch} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -11,8 +11,10 @@ export const coinDenominations = [
     Scope.HundredthDenomination
 ] as const;
 
-const resolveCoinDenomination = (labels: string[]) =>
-    coinDenominations.find(denomination => labels.includes(denomination)) ?? 'none';
+const resolveCoinDenomination = selectExactLabelSetMap([
+    [[], 'none'],
+    ...coinDenominations.map(denomination => [[denomination], denomination] as const)
+]);
 
 export const spec: GeneratorSpec = {
     generatorId: 'currency-arithmetic',

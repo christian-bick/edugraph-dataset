@@ -1,18 +1,18 @@
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
-const resolveStrategy = selectCanonicalLabel([
-    [[Area.AdditionCountingOn], 'addition-counting-on'],
-    [[Area.SubtractionCountingBack], 'subtraction-counting-back'],
-    [[Area.AdditionMakeTen], 'addition-make-ten'],
-    [[Area.AdditionNearDoubles], 'addition-near-doubles'],
-    [[Area.AdditionCompensation], 'addition-compensation'],
-    [[Area.SubtractionCompensation], 'subtraction-compensation'],
-    [[Area.SubtractionMakeTen], 'subtraction-make-ten'],
-    [[Area.SubtractionThinkAddition], 'subtraction-think-addition']
+const resolveStrategy = selectExactLabelMap([
+    [Area.AdditionCountingOn, 'addition-counting-on'],
+    [Area.SubtractionCountingBack, 'subtraction-counting-back'],
+    [Area.AdditionMakeTen, 'addition-make-ten'],
+    [Area.AdditionNearDoubles, 'addition-near-doubles'],
+    [Area.AdditionCompensation, 'addition-compensation'],
+    [Area.SubtractionCompensation, 'subtraction-compensation'],
+    [Area.SubtractionMakeTen, 'subtraction-make-ten'],
+    [Area.SubtractionThinkAddition, 'subtraction-think-addition']
 ] as const);
 
 export const spec: GeneratorSpec = {

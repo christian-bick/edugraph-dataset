@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
 
 const fractionArithmeticTaskLabels = [
     Area.IteratedOperation,
@@ -27,7 +27,7 @@ export type FractionArithmeticTaskConfig =
 const sameLabels = (actual: readonly string[], expected: readonly string[]): boolean =>
     actual.length === expected.length && expected.every(label => actual.includes(label));
 
-const resolveTask: ResolverFn<FractionArithmeticTaskConfig | null> = labels => {
+const resolveTask = exactResolver((labels: string[]): FractionArithmeticTaskConfig | null => {
     const taskLabels = fractionArithmeticTaskLabels.filter(label => labels.includes(label));
     const operationLabels = [Area.Addition, Area.Subtraction, Area.Multiplication]
         .filter(label => labels.includes(label));
@@ -72,7 +72,7 @@ const resolveTask: ResolverFn<FractionArithmeticTaskConfig | null> = labels => {
         return 'whole-number-fraction-product-improper';
     }
     return null;
-};
+});
 
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-arithmetic',
@@ -91,11 +91,17 @@ export const FractionArithmeticGeneratorSchema = {
     ],
     operation: [
         [Area.Addition, Area.Subtraction, Area.Multiplication],
-        selectCanonicalLabel([
+        selectExactLabelSetMap([
             [[Area.Addition], 'addition'],
+            [[Area.Addition, Area.Multiplication], 'addition'],
             [[Area.Subtraction], 'subtraction'],
             [[Area.Multiplication], 'multiplication']
-        ])
+        ]),
+        [
+            [Area.Addition],
+            [Area.Subtraction],
+            [Area.Multiplication]
+        ]
     ]
 } as const;
 

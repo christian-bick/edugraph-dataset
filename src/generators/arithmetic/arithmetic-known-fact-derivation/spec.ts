@@ -2,15 +2,15 @@ import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {
     hasLabel,
-    selectCanonicalLabel,
+    selectExactLabelMap,
     selectExactMatch
 } from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
-const resolveOperation = selectCanonicalLabel([
-    [[Area.MultiplicationKnownFactDerivation], 'multiplication'],
-    [[Area.DivisionKnownFactDerivation], 'division']
+const resolveOperation = selectExactLabelMap([
+    [Area.MultiplicationKnownFactDerivation, 'multiplication'],
+    [Area.DivisionKnownFactDerivation, 'division']
 ] as const);
 
 export const spec: GeneratorSpec = {

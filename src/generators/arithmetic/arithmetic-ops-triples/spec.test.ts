@@ -26,6 +26,18 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
         expect(stub!.labels).toContain(Area.Addition);
     });
 
+    it('does not add Sum to a generic three-addend addition target', () => {
+        const stub = generateWithLabels(generator, [
+            Area.Addition,
+            Scope.ThreeOperands,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersSmaller20
+        ]);
+        expect(stub).not.toBeNull();
+        expect(stub!.labels).toContain(Area.Addition);
+        expect(stub!.labels).not.toContain(Area.Sum);
+    });
+
     it.each([
         [Area.CommutativeLaw, 'commutative'],
         [Area.AssociativeLaw, 'associative']

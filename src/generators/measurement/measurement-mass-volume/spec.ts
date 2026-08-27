@@ -1,15 +1,19 @@
 import {Area, Scope} from 'edugraph-ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
+import {ConfigFromSchema} from '../../../types/schema.ts';
 
-type MeasurementMassVolumeKind = 'liter-volume' | 'gram-weight' | 'kilogram-weight';
+const measurementLabelSets = [
+    [Area.MeasuringVolumes, Scope.LiquidVolumes, Scope.LiterScale],
+    [Area.MeasuringWeight, Scope.GramScale],
+    [Area.MeasuringWeight, Scope.KilogramScale]
+] as const;
 
-const resolveMeasurement: ResolverFn<MeasurementMassVolumeKind | undefined> = labels => {
-    if (labels.includes(Scope.LiterScale)) return 'liter-volume';
-    if (labels.includes(Scope.GramScale)) return 'gram-weight';
-    if (labels.includes(Scope.KilogramScale)) return 'kilogram-weight';
-    return undefined;
-};
+const resolveMeasurement = selectExactLabelSetMap([
+    [measurementLabelSets[0], 'liter-volume'],
+    [measurementLabelSets[1], 'gram-weight'],
+    [measurementLabelSets[2], 'kilogram-weight']
+] as const);
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-mass-volume',
@@ -27,11 +31,7 @@ export const MeasurementMassVolumeGeneratorSchema = {
             Scope.KilogramScale
         ],
         resolveMeasurement,
-        [
-            [Area.MeasuringVolumes, Scope.LiquidVolumes, Scope.LiterScale],
-            [Area.MeasuringWeight, Scope.GramScale],
-            [Area.MeasuringWeight, Scope.KilogramScale]
-        ]
+        measurementLabelSets
     ]
 } as const;
 

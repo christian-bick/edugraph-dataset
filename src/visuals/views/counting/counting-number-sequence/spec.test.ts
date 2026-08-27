@@ -4,7 +4,7 @@ import {extractConfig} from '../../../../lib/utils.ts';
 import {CountingNumberSequenceViewSchema} from './spec.ts';
 
 describe('CountingNumberSequenceViewSchema', () => {
-    it('prefers physical number tiles when both representations are requested', () => {
+    it('resolves the explicit physical-plus-numeral bundle to physical tiles', () => {
         const {config} = extractConfig(CountingNumberSequenceViewSchema, [
             Scope.ArabicNumerals,
             Scope.PhysicalNumbers

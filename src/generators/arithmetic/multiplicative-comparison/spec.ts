@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -19,9 +19,9 @@ export const spec: GeneratorSpec = {
 export const MultiplicativeComparisonGeneratorSchema = {
     operation: [
         [Area.Multiplication, Area.Division],
-        selectCanonicalLabel([
-            [[Area.Multiplication], 'multiplication'],
-            [[Area.Division], 'division']
+        selectExactLabelMap([
+            [Area.Multiplication, 'multiplication'],
+            [Area.Division, 'division']
         ])
     ]
 } as const;

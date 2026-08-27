@@ -59,6 +59,25 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub!.labels).toContain(Scope.After);
     });
 
+    it('preserves the complete successor-principle direction bundle', () => {
+        const stub = generateWithLabels(generator, [
+            Area.NumerationWithIntegers,
+            Scope.NumbersSmaller20,
+            Scope.AdditiveCount,
+            Area.Increment,
+            Scope.After,
+            Scope.StepsOf1
+        ]);
+
+        expect(stub).not.toBeNull();
+        expect(stub!.data.incDecType).toBe('inc');
+        expect(stub!.labels).toEqual(expect.arrayContaining([
+            Scope.AdditiveCount,
+            Area.Increment,
+            Scope.After
+        ]));
+    });
+
     it('resolves a preceding position as a decrement', () => {
         const stub = generateWithLabels(generator, [
             Area.NumerationWithIntegers,

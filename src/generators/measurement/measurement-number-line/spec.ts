@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -35,7 +35,7 @@ export const MeasurementNumberLineGeneratorSchema = {
             Scope.LiterScale,
             Scope.KilogramScale
         ],
-        selectCanonicalLabel([
+        selectExactLabelSetMap([
             [[Scope.LengthMeasurement, Scope.MeterScale], 'length'],
             [[Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
             [[Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale], 'liquid-volume'],
@@ -52,9 +52,9 @@ export const MeasurementNumberLineGeneratorSchema = {
     ],
     numberKind: [
         measurementNumberLineNumberKinds,
-        selectCanonicalLabel([
-            [[Scope.ProperFractions, Scope.FractionNumbers], 'fraction'],
-            [[Scope.DecimalNumbers], 'decimal']
+        selectExactLabelMap([
+            [Scope.ProperFractions, 'fraction'],
+            [Scope.DecimalNumbers, 'decimal']
         ]),
         [
             [Scope.ProperFractions],

@@ -34,6 +34,13 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
 
         expect(stub.data.kind).toBe(model);
         expect(stub.labels).toEqual(expect.arrayContaining([Area.Addition, ...patternAreas]));
+        const requestedPatternAreas: readonly string[] = patternAreas;
+        if (!requestedPatternAreas.includes(Area.PatternGeneration)) {
+            expect(stub.labels).not.toContain(Area.PatternGeneration);
+        }
+        if (!requestedPatternAreas.includes(Area.EmergentFeatureRecognition)) {
+            expect(stub.labels).not.toContain(Area.EmergentFeatureRecognition);
+        }
         expect(stub.labels).not.toContain(Ability.ProcedureExecution);
         expect(stub.labels).not.toContain(Ability.ConceptClassification);
     });

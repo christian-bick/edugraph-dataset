@@ -4,7 +4,9 @@ import {
     hasCapability,
     matchAllExactLabels,
     matchAllCapabilities,
-    selectCanonicalLabel
+    selectExactLabelMap,
+    selectExactLabelSetMap,
+    selectExactMatch
 } from './resolvers.ts';
 import { extractConfig } from './utils.ts';
 import { Scope, Area } from 'edugraph-ts';
@@ -63,6 +65,21 @@ describe('Resolvers & Utilities', () => {
         });
     });
 
+    describe('selectExactMatch', () => {
+        const supportedShapes = [Area.Square, Area.Rectangle] as const;
+
+        it('returns one exact supported label', () => {
+            expect(selectExactMatch([Area.Square], supportedShapes)).toBe(Area.Square);
+        });
+
+        it('rejects multiple exact supported labels', () => {
+            expect(() => selectExactMatch(
+                [Area.Square, Area.Rectangle],
+                supportedShapes
+            )).toThrow('Ambiguous exact label selection');
+        });
+    });
+
     describe('extractConfig Fallback Logic', () => {
         const MockSchema = {
             requireNegative: [
@@ -95,18 +112,38 @@ describe('Resolvers & Utilities', () => {
     });
 });
 
-describe('selectCanonicalLabel', () => {
-    const resolveDirection = selectCanonicalLabel([
-        [[Scope.SubtractiveCount, Area.Decrement, Scope.Before], Scope.SubtractiveCount],
-        [[Scope.AdditiveCount, Area.Increment, Scope.After], Scope.AdditiveCount]
+describe('exact label mappings', () => {
+    const resolveOperation = selectExactLabelMap([
+        [Area.Addition, 'addition'],
+        [Area.Subtraction, 'subtraction']
     ] as const);
 
-    it('maps equivalent exact labels to their canonical label', () => {
-        expect(resolveDirection([Scope.Before])).toBe(Scope.SubtractiveCount);
+    it('maps exactly one label to its configured value', () => {
+        expect(resolveOperation([Area.Addition])).toBe('addition');
+    });
+
+    it('rejects multiple mapped labels instead of using declaration order', () => {
+        expect(() => resolveOperation([Area.Addition, Area.Subtraction]))
+            .toThrow('Ambiguous exact label mapping');
+    });
+
+    const resolveDirection = selectExactLabelSetMap([
+        [[Scope.SubtractiveCount], Scope.SubtractiveCount],
+        [[Area.Decrement, Scope.Before], Scope.SubtractiveCount],
+        [[Scope.AdditiveCount], Scope.AdditiveCount],
+        [[Area.Increment, Scope.After], Scope.AdditiveCount]
+    ] as const);
+
+    it('maps an explicitly allowed correlated label set', () => {
         expect(resolveDirection([Area.Increment, Scope.After])).toBe(Scope.AdditiveCount);
     });
 
-    it('returns undefined when none of the grouped labels is present', () => {
-        expect(resolveDirection([Scope.ArabicNumerals])).toBeUndefined();
+    it('leaves a partial label set unresolved for fallback completion', () => {
+        expect(resolveDirection([Area.Increment])).toBeUndefined();
+    });
+
+    it('rejects a combination spanning different allowed bundles', () => {
+        expect(() => resolveDirection([Area.Increment, Scope.Before]))
+            .toThrow('Unsupported exact label combination');
     });
 });

@@ -1,4 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
+import {exactResolver} from '../../types/schema.ts';
 
 export type ParityConstraint = 'even' | 'odd' | 'any';
 
@@ -15,3 +16,5 @@ export function resolveParityConstraint(labels: string[]): ParityConstraint {
     if (requiresOdd) return 'odd';
     return 'any';
 }
+
+exactResolver(resolveParityConstraint);

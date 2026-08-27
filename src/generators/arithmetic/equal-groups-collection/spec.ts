@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -19,10 +19,10 @@ export const spec: GeneratorSpec = {
 export const EqualGroupsCollectionGeneratorSchema = {
     operation: [
         [Area.Multiplication, Area.PartitiveDivision, Area.QuotativeDivision],
-        selectCanonicalLabel([
-            [[Area.Multiplication], 'multiplication'],
-            [[Area.PartitiveDivision], 'partitive-division'],
-            [[Area.QuotativeDivision], 'quotative-division']
+        selectExactLabelMap([
+            [Area.Multiplication, 'multiplication'],
+            [Area.PartitiveDivision, 'partitive-division'],
+            [Area.QuotativeDivision, 'quotative-division']
         ])
     ]
 } as const;

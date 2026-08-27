@@ -25,7 +25,15 @@ export const CountingBasicGeneratorSchema = {
             Scope.EvenNumbers,
             Scope.OddNumbers
         ],
-        resolveParityConstraint
+        resolveParityConstraint,
+        [
+            [Area.EvenDivisibility],
+            [Scope.EvenNumbers],
+            [Area.EvenDivisibility, Scope.EvenNumbers],
+            [Area.UnevenDivisibility],
+            [Scope.OddNumbers],
+            [Area.UnevenDivisibility, Scope.OddNumbers]
+        ]
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),

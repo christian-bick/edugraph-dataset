@@ -73,7 +73,7 @@ describe('MeasurementConversionGenerator spec integration', () => {
             Scope.KilometerScale,
             Scope.CentimeterScale,
             Ability.ProcedureExecution
-        ])).toThrow('Schema field "unitPair" cannot complete the requested label combination.');
+        ])).toThrow('Unsupported exact label combination');
     });
 
     it('resolves a broad request through a complete valid unit-pair fallback', () => {

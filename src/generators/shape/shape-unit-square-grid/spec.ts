@@ -1,27 +1,29 @@
 import {Area, Scope} from 'edugraph-ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
-import {SquareAreaUnitId} from '../../../types/problems.ts';
+import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export type UnitSquareGridKind = 'single-unit' | 'coverage' | 'product';
 
-const resolveGridKind: ResolverFn<UnitSquareGridKind> = labels => {
-    if (labels.includes(Area.Multiplication) || labels.includes(Scope.BoxArrangement)) {
-        return 'product';
-    }
-    if (labels.includes(Area.Iteration) || labels.includes(Area.AreaCalculation)) {
-        return 'coverage';
-    }
-    return 'single-unit';
-};
+const gridKindLabelSets = [
+    [Scope.TileScale],
+    [Area.AreaCalculation, Area.Iteration, Scope.IntegerNumbers, Scope.TileScale],
+    [Area.AreaCalculation, Area.Multiplication, Scope.BoxArrangement, Scope.TwoOperands]
+] as const;
 
-const resolveUnitId: ResolverFn<SquareAreaUnitId> = labels => {
-    if (labels.includes(Scope.SquareCentimeterScale)) return 'square-centimeter';
-    if (labels.includes(Scope.SquareMeterScale)) return 'square-meter';
-    if (labels.includes(Scope.SquareInchScale)) return 'square-inch';
-    if (labels.includes(Scope.SquareFootScale)) return 'square-foot';
-    return 'square-unit';
-};
+const resolveGridKind = selectExactLabelSetMap([
+    [gridKindLabelSets[0], 'single-unit'],
+    [gridKindLabelSets[1], 'coverage'],
+    [gridKindLabelSets[2], 'product']
+] as const);
+
+const resolveUnitId = selectExactLabelSetMap([
+    [[], 'square-unit'],
+    [[Scope.SquareCentimeterScale], 'square-centimeter'],
+    [[Scope.SquareMeterScale], 'square-meter'],
+    [[Scope.SquareInchScale], 'square-inch'],
+    [[Scope.SquareFootScale], 'square-foot']
+] as const);
 
 export const spec: GeneratorSpec = {
     generatorId: 'shape-unit-square-grid',
@@ -37,7 +39,7 @@ export const ShapeUnitSquareGridGeneratorSchema = {
         Scope.IntegerNumbers,
         Scope.TileScale,
         Scope.TwoOperands
-    ], resolveGridKind],
+    ], resolveGridKind, gridKindLabelSets],
     unitId: [[
         Scope.SquareCentimeterScale,
         Scope.SquareMeterScale,

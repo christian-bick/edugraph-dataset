@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {matchAllExactLabels, selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {matchAllExactLabels, selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -20,10 +20,10 @@ export const spec: GeneratorSpec = {
 export const AngleConceptsGeneratorSchema = {
     task: [
         [Area.ArchConcept, Scope.UnitFractions, Area.Iteration],
-        selectCanonicalLabel([
-            [[Area.ArchConcept], 'recognize-angle-from-arc'],
-            [[Scope.UnitFractions], 'derive-one-degree'],
-            [[Area.Iteration], 'interpret-degree-iteration']
+        selectExactLabelMap([
+            [Area.ArchConcept, 'recognize-angle-from-arc'],
+            [Scope.UnitFractions, 'derive-one-degree'],
+            [Area.Iteration, 'interpret-degree-iteration']
         ])
     ],
     taskFeatures: [taskFeatureLabels, matchAllExactLabels]

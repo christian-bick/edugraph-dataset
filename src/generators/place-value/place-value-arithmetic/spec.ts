@@ -1,12 +1,14 @@
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {hasLabel, selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
-const resolveOperation = selectCanonicalLabel([
-    [[Area.AdditionPlaceValuePartitioning, Area.Addition], Area.Addition],
-    [[Area.SubtractionPlaceValuePartitioning, Area.Subtraction], Area.Subtraction]
+const resolveOperation = selectExactLabelMap([
+    [Area.AdditionPlaceValuePartitioning, Area.Addition],
+    [Area.SubtractionPlaceValuePartitioning, Area.Subtraction],
+    [Area.Addition, Area.Addition],
+    [Area.Subtraction, Area.Subtraction]
 ] as const);
 
 export const spec: GeneratorSpec = {

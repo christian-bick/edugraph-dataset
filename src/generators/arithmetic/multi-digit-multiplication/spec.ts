@@ -1,6 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export type OperandDigitProfile =
     | 'one-by-one'
@@ -9,21 +10,6 @@ export type OperandDigitProfile =
     | 'one-by-four'
     | 'two-by-two';
 
-const resolveOperandDigitProfile: ResolverFn<OperandDigitProfile | undefined> = labels => {
-    const hasSingleDigitSmallest = labels.includes(Scope.SingleDigitSmallestOperand);
-    const hasTwoDigitSmallest = labels.includes(Scope.TwoDigitSmallestOperand);
-
-    if (hasTwoDigitSmallest && labels.includes(Scope.TwoDigitLargestOperand)) {
-        return 'two-by-two';
-    }
-    if (!hasSingleDigitSmallest) return undefined;
-    if (labels.includes(Scope.FourDigitLargestOperand)) return 'one-by-four';
-    if (labels.includes(Scope.ThreeDigitLargestOperand)) return 'one-by-three';
-    if (labels.includes(Scope.TwoDigitLargestOperand)) return 'one-by-two';
-    if (labels.includes(Scope.SingleDigitLargestOperand)) return 'one-by-one';
-    return undefined;
-};
-
 const operandDigitProfileFallbacks = [
     [Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand],
     [Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
@@ -31,6 +17,14 @@ const operandDigitProfileFallbacks = [
     [Scope.SingleDigitSmallestOperand, Scope.FourDigitLargestOperand],
     [Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]
 ] as const;
+
+const resolveOperandDigitProfile = selectExactLabelSetMap([
+    [operandDigitProfileFallbacks[0], 'one-by-one'],
+    [operandDigitProfileFallbacks[1], 'one-by-two'],
+    [operandDigitProfileFallbacks[2], 'one-by-three'],
+    [operandDigitProfileFallbacks[3], 'one-by-four'],
+    [operandDigitProfileFallbacks[4], 'two-by-two']
+] as const);
 
 export const spec: GeneratorSpec = {
     generatorId: 'multi-digit-multiplication',

@@ -1,18 +1,22 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
 
-const resolveOperation: ResolverFn<Area.Addition | Area.Subtraction | 'none'> = labels =>
-    labels.includes(Area.Addition)
-        ? Area.Addition
-        : labels.includes(Area.Subtraction) ? Area.Subtraction : 'none';
+const resolveOperation = selectExactLabelSetMap([
+    [[], 'none'],
+    [[Area.Addition], Area.Addition],
+    [[Area.Subtraction], Area.Subtraction]
+] as const);
 
-const resolveUnitScale: ResolverFn<Scope.CentimeterScale | Scope.InchScale> = labels => {
-    if (labels.includes(Scope.InchScale)) return Scope.InchScale;
-    if (labels.includes(Scope.CentimeterScale)) return Scope.CentimeterScale;
+const resolveUnitScale = exactResolver((labels: string[]): Scope.CentimeterScale | Scope.InchScale => {
+    const exactScale = selectExactLabelMap([
+        [Scope.CentimeterScale, Scope.CentimeterScale],
+        [Scope.InchScale, Scope.InchScale]
+    ] as const)(labels);
+    if (exactScale) return exactScale;
     return labels.includes(Scope.FractionNumbers) ? Scope.InchScale : Scope.CentimeterScale;
-};
+});
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-data',

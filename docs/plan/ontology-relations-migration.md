@@ -1,8 +1,9 @@
 # Separate structural and specialization ontology relations
 
-**Status:** Ontology classification and the content-semantics adoption are implemented. Ontology
-release `v0.23.0` is pinned in this repository. The canonical dataset has been rebuilt with exact
-matching preservation and complete VQA coverage. Ambiguous schema canonicalization remains open.
+**Status:** Ontology classification, content-semantics adoption, and strict schema canonicalization
+are implemented. Ontology release `v0.23.0` is pinned in this repository. The canonical dataset has
+been rebuilt with exact matching preservation and complete VQA coverage. The remaining release
+gate is tracked in Phase 5.
 
 ## Purpose
 
@@ -110,14 +111,13 @@ silently enter capability matching.
 
 ## Consequences for schema resolution
 
-`selectCanonicalLabel` is transitional infrastructure, not part of the desired end state. Its
-first-group-containing-any-label behavior currently combines three cases that must be separated:
+Schema resolution separates three contracts that must not be conflated:
 
 - an exact ontology label selecting a typed configuration value;
 - a specialization inheriting the implementation semantics of its ancestor;
 - several correlated labels describing one valid capability bundle.
 
-The replacement design should provide:
+The implementation provides:
 
 - exact, type-safe label-to-value mapping for the authoritative discriminator;
 - specialization-aware inheritance through ontology semantics rather than alias lists;
@@ -126,19 +126,22 @@ The replacement design should provide:
 - shared implementation helpers when different exact capabilities use identical code, without
   collapsing their ontology identities.
 
-For example, this grouped alias must disappear:
+For example, a declaration-order alias such as:
 
 ```ts
 [[Scope.LengthMeasurement, Scope.MeterScale], 'length']
 ```
 
-The concrete observable discriminator selects the configuration, while any broader or correlated
-context is represented through the correct relation or an explicit capability bundle. `part_of`
-members are never interchangeable aliases.
+is represented as an explicit bundle only when both labels jointly describe one supported
+configuration. Otherwise the concrete observable discriminator selects the configuration and the
+broader context is handled through specialization. `part_of` members are never interchangeable
+aliases.
 
-The current inventory contains 20 production `selectCanonicalLabel` calls across 16 generator
-specs. Fourteen are simple exact mappings that can move to the stricter replacement mechanically;
-six use grouped semantics and require the relation and bundle audit first.
+The completed inventory migrated 20 production calls across 16 generator specs: fourteen simple
+exact mappings and six grouped mappings. The permanent validator also identified and removed
+equivalent first-match behavior in custom operation, measurement, digit-profile, unit-scale, and
+grid resolvers. Exact choices now reject ambiguity; the numeric range resolver explicitly declares
+its independent-bound composition semantics.
 
 ## Migration phases
 
@@ -292,24 +295,26 @@ acyclic graph is a separate modeling decision. It must not delay separating inhe
 
 ### Phase 4: remove ambiguous schema canonicalization
 
-1. Introduce the exact, ambiguity-rejecting schema mapping primitive.
-2. Migrate the fourteen simple `selectCanonicalLabel` calls.
-3. Resolve the six grouped calls using authoritative discriminators, specialization, and allowed
+1. [x] Introduce the exact, ambiguity-rejecting schema mapping primitives.
+2. [x] Migrate the fourteen simple exact mappings.
+3. [x] Resolve the six grouped calls using authoritative discriminators, specialization, and allowed
    bundles.
-4. Delete `selectCanonicalLabel` and its tests once production usage reaches zero.
-5. Add validation preventing first-match label precedence from reappearing in custom resolvers.
+4. [x] Remove the declaration-order helper and its tests once production usage reaches zero.
+5. [x] Add validation preventing first-match label precedence from reappearing in custom resolvers,
+   while requiring genuine multi-label constraint composition to be declared explicitly.
 
 ### Phase 5: canonical proof
 
 1. [x] Run the complete repository and ontology test suites. The ontology release workflow and the
-   content repository's 2,421-test coverage suite pass.
+   content repository's 2,431-test coverage suite pass.
 2. [x] Produce before/after matching and label-resolution reports for every production target. The
    exact 790-tuple match set is unchanged across all 653 CCSS targets.
 3. [x] Rebuild the complete dependency graph because matching semantics changed.
 4. [x] Canonically generate every affected CCSS tuple and inspect additions and removals. The
    affected rebuild produced 1,878 artifacts without generation or renderer failures.
-5. [x] Revalidate every changed label/image context through VQA. All 117 revised contexts pass,
-   and the strict audit proves exact passing cache coverage for all 1,878 artifacts.
+5. [x] Revalidate every changed label/image context through VQA. The strict audit proves exact
+   passing cache coverage for all 1,878 artifacts. The schema canonicalization itself preserves all
+   1,878 sample identities and image bytes and requires no additional live VQA.
 6. [ ] Require strict VQA audit, split integrity, union merge, and exact asset-index coverage before the
    first release using the new relations.
 
@@ -323,7 +328,8 @@ The migration is complete only when:
 4. all intended specialization matches remain covered;
 5. all targets and module declarations use defensible observable concepts, independent of leaf
    status;
-6. `selectCanonicalLabel` has no production or test usage and is removed;
+6. declaration-order label selection has no production or test usage and exact choices reject
+   ambiguous or undeclared combinations;
 7. the dependency graph tracks both relation types and preserves delta behavior;
 8. no permanent compatibility allowlist conceals an unclassified edge;
 9. the complete canonical dataset and VQA cache prove the resulting observable labels;

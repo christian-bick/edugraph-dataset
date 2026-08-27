@@ -946,13 +946,16 @@ async function main() {
         );
         if (affectedOnly || authoritativeRebuild) {
             if (plan.clean) {
-                if (!requestedScope.fullDataset) {
+                if (comparisonManifest) {
+                    graphOnlyBuild = planningBuild;
+                } else if (!requestedScope.fullDataset) {
                     throw new Error(
                         'Affected-only generation has no trusted prior dependency state. '
                         + 'Run one unfiltered full generation to establish the shard baseline.'
                     );
+                } else {
+                    console.log('Dependency baseline unavailable; performing the required full generation.');
                 }
-                console.log('Dependency baseline unavailable; performing the required full generation.');
             } else {
                 const pairKeys = affectedDatasetPairKeys(plan, planningBuild, comparisonManifest);
                 if (pairKeys.length === 0) {

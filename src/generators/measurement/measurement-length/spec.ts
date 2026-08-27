@@ -1,15 +1,13 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {Area, Scope, deductCompatible} from 'edugraph-ts';
-import {ConfigFromSchema} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {hasLabel} from "../../../lib/resolvers.ts";
+import {hasLabel, selectExactMatch} from "../../../lib/resolvers.ts";
 
-const exactTool = (labels: readonly string[]) => {
+const exactTool = exactResolver((labels: string[]) => {
     if (labels.includes(Scope.CentimeterScale) || labels.includes(Scope.MeterScale)) return undefined;
-    if (labels.includes(Scope.PhysicalRuler)) return Scope.PhysicalRuler;
-    if (labels.includes(Scope.Tapemeter)) return Scope.Tapemeter;
-    return undefined;
-};
+    return selectExactMatch(labels, [Scope.PhysicalRuler, Scope.Tapemeter]);
+});
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-length',

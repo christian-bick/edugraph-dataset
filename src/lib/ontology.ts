@@ -1,5 +1,6 @@
 import { Scope, specializesTransitive, structuresTransitive } from 'edugraph-ts';
 import type { CompetencyDescriptor } from 'edugraph-ts';
+import {compositionalResolver, exactResolver} from '../types/schema.ts';
 
 export const DISTANCE_SCALE_LABELS = [
     Scope.CentimeterScale,
@@ -68,8 +69,12 @@ export function resolveDistanceScale(
     labels: string[],
     supportedLabels: readonly string[] = DISTANCE_SCALE_LABELS
 ): DistanceScaleResolution | undefined {
-    const label = DISTANCE_SCALE_LABELS.find(candidate =>
+    const matches = DISTANCE_SCALE_LABELS.filter(candidate =>
         supportedLabels.includes(candidate) && labels.includes(candidate));
+    if (matches.length > 1) {
+        throw new Error(`Ambiguous exact distance scale: ${matches.join(' + ')}`);
+    }
+    const label = matches[0];
     if (!label) return undefined;
 
     const ancestors = getStructuralAncestors(label);
@@ -79,11 +84,13 @@ export function resolveDistanceScale(
     return undefined;
 }
 
+exactResolver(resolveDistanceScale);
+
 
 /**
  * Resolves the numeric range boundary from a list of ontological labels.
  */
-export function resolveRangeFromLabels(labels: string[]): { min: number; max: number } {
+export const resolveRangeFromLabels = compositionalResolver((labels: string[]): { min: number; max: number } => {
     let min = 0;
     let max = Number.MAX_SAFE_INTEGER;
 
@@ -131,4 +138,4 @@ export function resolveRangeFromLabels(labels: string[]): { min: number; max: nu
     }
 
     return { min, max };
-}
+});

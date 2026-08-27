@@ -2,7 +2,11 @@ import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveArithmeticWordProblemTask, resolveTwoStepOperations} from '../helpers.ts';
+import {
+    arithmeticWordProblemTaskLabelSets,
+    resolveArithmeticWordProblemTask,
+    resolveTwoStepOperations
+} from '../helpers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-word-problems-two-step',
@@ -24,7 +28,8 @@ export const ArithmeticWordProblemsTwoStepGeneratorSchema = {
             Area.Equation,
             Area.IntegerRounding
         ],
-        resolveArithmeticWordProblemTask
+        resolveArithmeticWordProblemTask,
+        arithmeticWordProblemTaskLabelSets
     ],
     operations: [
         [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division],

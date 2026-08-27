@@ -105,14 +105,29 @@ The role-specific parameter lists and worked cases live in
 Do not define custom resolvers inline. Import them from the module that owns them. Common
 examples include:
 
-| Module                | Exports                                                                        |
-|-----------------------|--------------------------------------------------------------------------------|
-| `src/lib/resolvers.ts` | `hasLabel`, `hasCapability`, `matchAllCapabilities`, `selectExactMatch`, `matchAllExactLabels`, `selectCanonicalLabel`, `ontologyNeutral` |
+| Module                 | Exports                                                                        |
+|------------------------|--------------------------------------------------------------------------------|
+| `src/lib/resolvers.ts` | `hasLabel`, `hasCapability`, `matchAllCapabilities`, `selectExactMatch`, `selectExactLabelMap`, `selectExactLabelSetMap`, `matchAllExactLabels`, `ontologyNeutral` |
 | `src/lib/ontology.ts`  | label-derived helpers such as `resolveRangeFromLabels`, `capabilitySatisfies`, `getCapabilityAncestors`, `getStructuralAncestors` |
+| `src/types/schema.ts`  | `exactResolver` for a custom ambiguity-rejecting exact resolver; `compositionalResolver` for a resolver that deliberately combines independent label constraints |
 
 Resolver functions must be passed as **references** — or as the output of curried factory
 functions, e.g. `hasLabel(Scope.TenFrame)` — to the schema arrays, and **not executed
 prematurely** inside the array.
+
+An exact-choice field must not depend on declaration order. Use `selectExactMatch` when the exact
+label is the configuration value, `selectExactLabelMap` when one exact label maps to another typed
+value, and `selectExactLabelSetMap` when one of several explicitly allowed correlated label bundles
+selects the value. These resolvers reject multiple competing matches and undeclared combinations.
+Wrap a custom exact resolver with `exactResolver` only when it performs additional validation or
+classification and enforces the same rejection contract.
+Ontology specialization is handled by schema fallback completion and must not be recreated as a
+list of parent/child aliases inside an exact mapping.
+
+Only wrap a resolver with `compositionalResolver` when several independent labels jointly constrain
+one result rather than select alternatives. Numeric range resolution is the canonical example: a
+lower-bound Scope and an upper-bound Scope combine into `{min, max}`. The wrapper must not be used
+to conceal first-match precedence between competing operations, units, shapes, or task kinds.
 
 Every label-aware schema field declares a non-empty supported-label set. Never use an empty
 label tuple to inspect target labels without contributing a resolved capability. A function-only
@@ -132,6 +147,11 @@ compatible set, even when one requested label was already sufficient to select t
 when several sets remain valid, it prefers the most-specific truthful realization before using the
 seed to choose among equivalent sets. This prevents a broad target from hiding additional
 observable capabilities such as `LengthMeasurement + MeterScale`.
+
+Do not add fallback label sets merely because several exact labels map to the same implementation
+value. Shared code does not make those labels a conjunction. When each label independently selects
+the value, let the exact resolver complete directly so the resolved dataset labels contain only the
+capability actually requested or deliberately selected.
 
 **Verified by:** `npm run check:generator-view-specs`.
 

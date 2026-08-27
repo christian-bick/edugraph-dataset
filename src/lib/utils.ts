@@ -22,6 +22,11 @@ export type SchemaCoResolutionGroup = {
     resolvedValue: unknown;
 };
 
+export type SchemaLabelResolutionIssue = {
+    field: string;
+    supportedLabels: string[];
+};
+
 const isResolverTuple = (schemaValue: unknown): schemaValue is readonly [
     readonly string[],
     (labels: string[], supported?: readonly string[]) => unknown,
@@ -92,6 +97,26 @@ export function findSchemaCoResolutionGroups(schema: ConfigSchema): SchemaCoReso
         }
     }
     return groups;
+}
+
+/**
+ * Finds multi-label fields whose selection semantics are not explicit. Requiring
+ * an exact, predicate, aggregate, or compositional resolver prevents custom
+ * declaration-order selection without pairwise probing.
+ */
+export function findSchemaLabelResolutionIssues(
+    schema: ConfigSchema
+): SchemaLabelResolutionIssue[] {
+    const issues: SchemaLabelResolutionIssue[] = [];
+    for (const [field, schemaValue] of Object.entries(schema)) {
+        if (!isResolverTuple(schemaValue)) continue;
+        const supportedLabels = schemaValue[0] as readonly string[];
+        const resolver = schemaValue[1];
+        if (supportedLabels.length > 1 && resolver.labelResolution === undefined) {
+            issues.push({field, supportedLabels: [...supportedLabels]});
+        }
+    }
+    return issues;
 }
 
 /**

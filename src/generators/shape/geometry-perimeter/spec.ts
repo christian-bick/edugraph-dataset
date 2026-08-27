@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {matchAllExactLabels, selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {matchAllExactLabels, selectExactMatch} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -11,13 +11,7 @@ export const spec: GeneratorSpec = {
 export const GeometryPerimeterGeneratorSchema = {
     polygonShape: [
         [Area.Triangle, Area.Rectangle, Area.Quadrilateral, Area.Pentagon, Area.Hexagon],
-        selectCanonicalLabel([
-            [[Area.Triangle], Area.Triangle],
-            [[Area.Rectangle], Area.Rectangle],
-            [[Area.Quadrilateral], Area.Quadrilateral],
-            [[Area.Pentagon], Area.Pentagon],
-            [[Area.Hexagon], Area.Hexagon]
-        ])
+        selectExactMatch
     ],
     operationFeatures: [[Area.Addition, Area.Equation], matchAllExactLabels]
 } as const;

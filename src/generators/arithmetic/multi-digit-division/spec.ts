@@ -1,17 +1,17 @@
 import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
 
 const resolveDivisorDigits: ResolverFn<1 | undefined> = labels =>
     labels.includes(Scope.SingleDigitDivisor) ? 1 : undefined;
 
-const resolveDividendDigits: ResolverFn<1 | 2 | 3 | 4 | undefined> = labels => {
-    if (labels.includes(Scope.SingleDigitDividend)) return 1;
-    if (labels.includes(Scope.TwoDigitDividend)) return 2;
-    if (labels.includes(Scope.ThreeDigitDividend)) return 3;
-    if (labels.includes(Scope.FourDigitDividend)) return 4;
-    return undefined;
-};
+const resolveDividendDigits = selectExactLabelMap([
+    [Scope.SingleDigitDividend, 1],
+    [Scope.TwoDigitDividend, 2],
+    [Scope.ThreeDigitDividend, 3],
+    [Scope.FourDigitDividend, 4]
+] as const);
 
 export const spec: GeneratorSpec = {
     generatorId: 'multi-digit-division',

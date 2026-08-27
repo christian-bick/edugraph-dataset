@@ -1,5 +1,7 @@
 import {Area} from 'edugraph-ts';
 import {random} from '../../lib/random.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../lib/resolvers.ts';
+import {compositionalResolver, exactResolver} from '../../types/schema.ts';
 
 export const arithmeticOperations = [
     Area.Addition,
@@ -20,20 +22,40 @@ export type ArithmeticWordProblemTask =
     | 'letter-equation'
     | 'rounding';
 
+const resolveExplicitOperationLabel = selectExactLabelMap(
+    arithmeticOperations.map(operation => [operation, operation] as const)
+);
+
 /** Resolves only an explicitly requested operation, never a related ontology label. */
 export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
     // Preserve the schema-array resolver's single RNG draw for stable pair samples.
     random();
-    return arithmeticOperations.find(operation => labels.includes(operation)) ?? 'unsupported';
+    return resolveExplicitOperationLabel(labels) ?? 'unsupported';
 }
 
 /** Resolves multiplication for a distributive-law target that also names addition. */
 export function resolvePropertyAwareOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
     if (labels.includes(Area.DistributiveLaw)) {
         random();
+        const operations = arithmeticOperations.filter(operation => labels.includes(operation));
+        const isMultiplicationTarget = operations.length === 1
+            && operations[0] === Area.Multiplication;
+        const isExpandedDistributiveTarget = operations.length === 2
+            && operations.includes(Area.Addition)
+            && operations.includes(Area.Multiplication);
+        if (!isMultiplicationTarget && !isExpandedDistributiveTarget) {
+            throw new Error(`Unsupported distributive operation combination: ${operations.join(' + ')}`);
+        }
         return Area.Multiplication;
     }
-    return resolveExplicitOperation(labels);
+    random();
+    return selectExactLabelSetMap([
+        [[Area.Addition], Area.Addition],
+        [[Area.Addition, Area.Sum], Area.Addition],
+        [[Area.Subtraction], Area.Subtraction],
+        [[Area.Multiplication], Area.Multiplication],
+        [[Area.Division], Area.Division]
+    ] as const)(labels) ?? 'unsupported';
 }
 
 /** Resolves the operation sequence required by a connected two-step word problem. */
@@ -57,16 +79,32 @@ export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabe
 }
 
 /** Resolves the Grade 4 mathematical task while preserving the legacy two-step default. */
+export const arithmeticWordProblemTaskLabelSets = [
+    [],
+    [Area.IntegerRounding],
+    [Area.ImperfectDivisibility],
+    [Area.Modulo],
+    [Area.ImperfectDivisibility, Area.Modulo],
+    [Area.Equation]
+] as const;
+
+const resolveArithmeticWordProblemTaskLabels = selectExactLabelSetMap([
+    [arithmeticWordProblemTaskLabelSets[0], 'two-step'],
+    [arithmeticWordProblemTaskLabelSets[1], 'rounding'],
+    [arithmeticWordProblemTaskLabelSets[2], 'interpreted-remainder'],
+    [arithmeticWordProblemTaskLabelSets[3], 'interpreted-remainder'],
+    [arithmeticWordProblemTaskLabelSets[4], 'interpreted-remainder'],
+    [arithmeticWordProblemTaskLabelSets[5], 'letter-equation']
+] as const);
+
 export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWordProblemTask {
-    if (labels.includes(Area.IntegerRounding)) {
-        return 'rounding';
-    }
-    if (labels.includes(Area.ImperfectDivisibility) || labels.includes(Area.Modulo)) {
-        return 'interpreted-remainder';
-    }
-    if (labels.includes(Area.Equation)) return 'letter-equation';
-    return 'two-step';
+    return resolveArithmeticWordProblemTaskLabels(labels) ?? 'two-step';
 }
+
+exactResolver(resolveExplicitOperation);
+exactResolver(resolvePropertyAwareOperation);
+compositionalResolver(resolveTwoStepOperations);
+exactResolver(resolveArithmeticWordProblemTask);
 
 export const operationNames: Record<ArithmeticOperationLabel, 'addition' | 'subtraction' | 'multiplication' | 'division'> = {
     [Area.Addition]: 'addition',

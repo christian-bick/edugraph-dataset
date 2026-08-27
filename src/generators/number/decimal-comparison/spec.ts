@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -12,15 +12,15 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-const resolveComparisonKind = selectCanonicalLabel([
-    [[Area.NumericEquality], 'equality'],
-    [[Area.NumericInequality], 'inequality']
+const resolveComparisonKind = selectExactLabelMap([
+    [Area.NumericEquality, 'equality'],
+    [Area.NumericInequality, 'inequality']
 ] as const);
 
-const resolveRelation = selectCanonicalLabel([
-    [[Scope.Greater], 'greater'],
-    [[Scope.Equal], 'equal'],
-    [[Scope.Less], 'less']
+const resolveRelation = selectExactLabelMap([
+    [Scope.Greater, 'greater'],
+    [Scope.Equal, 'equal'],
+    [Scope.Less, 'less']
 ] as const);
 
 export const DecimalComparisonGeneratorSchema = {

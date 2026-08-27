@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectCanonicalLabel} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {arithmeticOperations, resolveExplicitOperation} from '../../arithmetic/helpers.ts';
@@ -37,7 +37,7 @@ export const MeasurementWordProblemsGeneratorSchema = {
             Scope.LiterScale,
             Scope.KilogramScale
         ],
-        selectCanonicalLabel([
+        selectExactLabelSetMap([
             [[Scope.LengthMeasurement, Scope.MeterScale], 'length'],
             [[Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
             [[Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale], 'liquid-volume'],
@@ -54,10 +54,10 @@ export const MeasurementWordProblemsGeneratorSchema = {
     ],
     numberKind: [
         measurementWordProblemNumberKinds,
-        selectCanonicalLabel([
-            [[Scope.IntegerNumbers], 'integer'],
-            [[Scope.FractionNumbers], 'fraction'],
-            [[Scope.DecimalNumbers], 'decimal']
+        selectExactLabelMap([
+            [Scope.IntegerNumbers, 'integer'],
+            [Scope.FractionNumbers, 'fraction'],
+            [Scope.DecimalNumbers, 'decimal']
         ])
     ],
     operation: [arithmeticOperations, resolveExplicitOperation]

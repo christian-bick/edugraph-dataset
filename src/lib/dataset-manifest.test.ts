@@ -712,6 +712,38 @@ describe('buildDatasetManifest', () => {
             expect(rebuiltCounters.get('vqa.graph_key_recomputes')).toBe(1);
             expect(rebuiltCounters.get('vqa.validation_contexts')).toBe(1);
 
+            const secondTarget = {...target, id: 'target-2'};
+            const orderedTargets = buildDatasetManifest({
+                projectRoot,
+                datasetDir,
+                specName: 'ccss',
+                targets: [target, secondTarget],
+                generators: [generator],
+                views: [view],
+                generatedSplits: ['train'],
+                rendererEnvironment: 'canonical',
+                tuples: [
+                    {target, generatorId: 'demo', viewId: 'demo-view'},
+                    {target: secondTarget, generatorId: 'demo', viewId: 'demo-view'}
+                ]
+            });
+            const reversedTargets = buildDatasetManifest({
+                projectRoot,
+                datasetDir,
+                specName: 'ccss',
+                targets: [target, secondTarget],
+                generators: [generator],
+                views: [view],
+                generatedSplits: ['train'],
+                rendererEnvironment: 'canonical',
+                tuples: [
+                    {target: secondTarget, generatorId: 'demo', viewId: 'demo-view'},
+                    {target, generatorId: 'demo', viewId: 'demo-view'}
+                ]
+            });
+            expect(orderedTargets.entries['demo#demo-view'].input_hash)
+                .toBe(reversedTargets.entries['demo#demo-view'].input_hash);
+
             writeFileSync(resolve(viewDir, 'checklist.md'), 'changed-leaf-checklist');
             const changed = buildDatasetManifest({
                 projectRoot,

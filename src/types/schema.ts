@@ -1,4 +1,33 @@
-export type ResolverFn<T> = (labels: string[], supportedLabels?: readonly string[]) => T;
+export type LabelResolution = 'exact' | 'predicate' | 'aggregate' | 'compositional';
+
+export type ResolverFn<T> = ((labels: string[], supportedLabels?: readonly string[]) => T) & {
+  readonly labelResolution?: LabelResolution;
+};
+
+const markLabelResolution = <T, TResolution extends LabelResolution>(
+  resolver: ResolverFn<T>,
+  labelResolution: TResolution
+): ResolverFn<T> & {readonly labelResolution: TResolution} =>
+  Object.assign(resolver, {labelResolution});
+
+/** Marks a custom resolver that rejects all undeclared alternative combinations. */
+export const exactResolver = <T>(resolver: ResolverFn<T>): ResolverFn<T> =>
+  markLabelResolution(resolver, 'exact');
+
+/** Marks a resolver that answers one fixed boolean label predicate. */
+export const predicateResolver = <T>(resolver: ResolverFn<T>): ResolverFn<T> =>
+  markLabelResolution(resolver, 'predicate');
+
+/** Marks a resolver that returns every matching member rather than selecting one. */
+export const aggregateResolver = <T>(resolver: ResolverFn<T>): ResolverFn<T> =>
+  markLabelResolution(resolver, 'aggregate');
+
+/**
+ * Marks a resolver whose result deliberately combines several independent label constraints.
+ * Unlike an exact choice, a compositional resolver may accept multiple supported labels at once.
+ */
+export const compositionalResolver = <T>(resolver: ResolverFn<T>): ResolverFn<T> =>
+  markLabelResolution(resolver, 'compositional');
 
 /**
  * A function-only schema choice that is explicitly independent of ontology labels.
