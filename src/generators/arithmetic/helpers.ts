@@ -22,15 +22,15 @@ export type ArithmeticWordProblemTask =
     | 'letter-equation'
     | 'rounding';
 
-const resolveExplicitOperationLabel = selectExactLabelMap(
+const resolveDeclaredOperationLabel = selectExactLabelMap(
     arithmeticOperations.map(operation => [operation, operation] as const)
 );
 
 /** Resolves only an explicitly requested operation, never a related ontology label. */
-export function resolveExplicitOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
+export function resolveDeclaredOperation(labels: string[]): ArithmeticOperationLabel | 'unsupported' {
     // Preserve the schema-array resolver's single RNG draw for stable pair samples.
     random();
-    return resolveExplicitOperationLabel(labels) ?? 'unsupported';
+    return resolveDeclaredOperationLabel(labels) ?? 'unsupported';
 }
 
 /** Resolves multiplication for a distributive-law target that also names addition. */
@@ -101,7 +101,7 @@ export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWo
     return resolveArithmeticWordProblemTaskLabels(labels) ?? 'two-step';
 }
 
-exactResolver(resolveExplicitOperation);
+exactResolver(resolveDeclaredOperation);
 exactResolver(resolvePropertyAwareOperation);
 compositionalResolver(resolveTwoStepOperations);
 exactResolver(resolveArithmeticWordProblemTask);

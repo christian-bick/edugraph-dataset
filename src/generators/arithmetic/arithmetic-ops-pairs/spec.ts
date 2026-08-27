@@ -3,7 +3,7 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {arithmeticOperations, resolveExplicitOperation} from '../helpers.ts';
+import {arithmeticOperations, resolveDeclaredOperation} from '../helpers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-pairs',
@@ -16,7 +16,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const ArithmeticOpsPairsGeneratorSchema = {
-    operation: [arithmeticOperations, resolveExplicitOperation],
+    operation: [arithmeticOperations, resolveDeclaredOperation],
     requireNegative: [
         [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
         hasLabel(Scope.NumbersWithNegatives)
