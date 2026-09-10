@@ -372,6 +372,7 @@ The only public dataset-generation entry point.
 ### `src/scripts/validate-docs.ts`
 *   **Execution**: `npm run check:docs`
 *   **Function**: Validates the wiring of the reference library in [`docs/`](docs/README.md) using `src/lib/docs-validator.ts`. Errors on: a cited rule ID that no reference defines, a rule ID defined twice, a link or anchor that does not resolve, a reference to a missing `docs/` file, a `DOCS.md § n` citation for a section that no longer exists, and a reference file without an `## Audit` section (the review skills navigate to it by heading). Warns on: a rule missing from its own file's Audit section, a reference file not linked from the index, and machine-specific `file://` links. Scans `docs/`, `DOCS.md`, `AGENTS.md`, `README.md` and every `.agents/skills/*/SKILL.md`.
+*   **External documents**: HTTP(S) links to Markdown files are fetched once per document per run, with a five-second timeout. GitHub `blob` links use the raw document at the linked revision. Fetch failures and missing headings produce warnings, not validation errors. Remote content is not traversed recursively or imported into the local rule catalog; other external URL formats are left unchecked. URL paths are never interpreted as local `docs/` references, and no sibling checkout is needed.
 
 ### `src/scripts/validate-generator-view-specs.ts`
 *   **Execution**: `npm run check:generator-view-specs`

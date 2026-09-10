@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     collectRuleDefinitions,
     extractAuditSection,
@@ -7,6 +7,7 @@ import {
     resolveRelative,
     slugifyHeading,
     validateDocs,
+    validateExternalDocuments,
     type DocsValidationInput,
 } from './docs-validator.ts';
 
@@ -285,9 +286,136 @@ describe('validateDocs', () => {
         expect(result.warnings).toEqual([]);
     });
 
+    const externalUrl = 'https://github.com/christian-bick/edugraph-ontology/blob/main/docs/content-evidence.md';
+
+    it.each([
+        `[evidence](${externalUrl}#SPEC-999)`,
+        `[evidence][ontology]\n[ontology]: ${externalUrl}#SPEC-999`,
+        `<${externalUrl}#SPEC-999>`,
+        externalUrl,
+        `[evidence](${externalUrl.replace('https:', '')})`,
+    ])('does not interpret an external URL as a local file or rule: %s', reference => {
+        const exists = vi.fn(() => false);
+        const result = validateDocs({
+            ...buildInput({ 'DOCS.md': `${CLEAN_DOCS}\n${reference}\n` }),
+            exists,
+        });
+        expect(result.errors).toEqual([]);
+        expect(result.warnings).toEqual([]);
+        expect(exists).not.toHaveBeenCalled();
+    });
+
+    it('still checks local paths and rule citations beside an external URL', () => {
+        const result = validateDocs(buildInput({
+            'DOCS.md': `${CLEAN_DOCS}\n[evidence](${externalUrl}) and docs/missing.md and SPEC-999.\n`,
+        }));
+        expect(result.errors).toHaveLength(2);
+        expect(result.errors).toContainEqual(expect.stringContaining('docs/missing.md'));
+        expect(result.errors).toContainEqual(expect.stringContaining('cites rule SPEC-999'));
+    });
+
     it('tolerates a documentation set with no index', () => {
         const result = validateDocs(buildInput({ 'docs/README.md': null }));
         expect(result.errors).toEqual([]);
         expect(result.warnings).toEqual([]);
+    });
+});
+
+describe('validateExternalDocuments', () => {
+    const url = 'https://github.com/christian-bick/edugraph-ontology/blob/v0.25.0/docs/content-evidence.md';
+    const rawUrl = 'https://raw.githubusercontent.com/christian-bick/edugraph-ontology/v0.25.0/docs/content-evidence.md';
+    const files = (text: string) => new Map([['DOCS.md', text]]);
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it('fetches the linked GitHub revision as raw Markdown and checks its heading', async () => {
+        const fetchDocument = vi.fn<typeof fetch>().mockResolvedValue(new Response('## Evidence\n'));
+        vi.stubGlobal('fetch', fetchDocument);
+        expect(await validateExternalDocuments(files(`[evidence](${url}#evidence)`))).toEqual([]);
+        expect(fetchDocument).toHaveBeenCalledExactlyOnceWith(rawUrl, { signal: expect.any(AbortSignal) });
+    });
+
+    it('fetches each document only once across files, URL forms, and anchors without following its links', async () => {
+        const fetchDocument = vi.fn<typeof fetch>().mockResolvedValue(new Response(
+            '# Evidence\n## Detail\n### SPEC-999 — Foreign rule\n[unvisited](https://example.com/docs/other.md)\n'
+        ));
+        const input = files(`[evidence](${url}#%65vidence) [detail](${rawUrl}#detail)`);
+        input.set('README.md', `<${url}> [rule](${url}#spec-999--foreign-rule)`);
+        expect(await validateExternalDocuments(input, fetchDocument)).toEqual([]);
+        expect(fetchDocument).toHaveBeenCalledOnce();
+    });
+
+    it.each([404, 403, 503])('warns instead of rejecting when the server returns HTTP %s', async status => {
+        const fetchDocument = vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status }));
+        expect(await validateExternalDocuments(files(`[evidence](${url})`), fetchDocument))
+            .toEqual([expect.stringContaining(`HTTP ${status}`)]);
+    });
+
+    it.each([new Error('network unavailable'), new DOMException('timed out', 'TimeoutError'), 'fetch rejected'])(
+        'warns instead of rejecting on a fetch failure: %s', async error => {
+            const fetchDocument = vi.fn<typeof fetch>().mockRejectedValue(error);
+            const warnings = await validateExternalDocuments(files(`[evidence](${url})`), fetchDocument);
+            expect(warnings).toEqual([expect.stringContaining('Could not check external document')]);
+        }
+    );
+
+    it('bounds the request with a five-second timeout', async () => {
+        const timeout = vi.spyOn(AbortSignal, 'timeout');
+        try {
+            const fetchDocument = vi.fn<typeof fetch>().mockResolvedValue(new Response('# Evidence\n'));
+            await validateExternalDocuments(files(url), fetchDocument);
+            expect(timeout).toHaveBeenCalledWith(5_000);
+        } finally {
+            timeout.mockRestore();
+        }
+    });
+
+    it('warns for a missing remote heading but keeps a local broken link as an error', async () => {
+        const input = buildInput({ 'DOCS.md': `${CLEAN_DOCS}\n[evidence](${url}#missing) [local](missing.md)\n` });
+        const fetchDocument = vi.fn<typeof fetch>().mockResolvedValue(new Response('# Evidence\n'));
+        expect(await validateExternalDocuments(input.files, fetchDocument))
+            .toEqual([expect.stringContaining('unknown anchor "#missing"')]);
+        expect(validateDocs(input).errors).toEqual([expect.stringContaining('link target "missing.md" does not exist')]);
+    });
+
+    it('does not mistake an HTML login or error page for the document', async () => {
+        const fetchDocument = vi.fn<typeof fetch>().mockResolvedValue(new Response('<html>Login</html>', {
+            headers: { 'content-type': 'text/html' },
+        }));
+        expect(await validateExternalDocuments(files(url), fetchDocument))
+            .toEqual([expect.stringContaining('received HTML instead of Markdown')]);
+    });
+
+    it('warns on a body-read failure and continues checking other documents', async () => {
+        const failedResponse = new Response('');
+        vi.spyOn(failedResponse, 'text').mockRejectedValue(new Error('body interrupted'));
+        const fetchDocument = vi.fn<typeof fetch>()
+            .mockResolvedValueOnce(failedResponse)
+            .mockResolvedValueOnce(new Response('# Other\n'));
+        expect(await validateExternalDocuments(files(`${url}\nhttps://example.com/docs/other.md#other`), fetchDocument))
+            .toEqual([expect.stringContaining('body interrupted')]);
+        expect(fetchDocument).toHaveBeenCalledTimes(2);
+    });
+
+    it('recognizes reference links and protocol-relative Markdown URLs', async () => {
+        const fetchDocument = vi.fn<typeof fetch>().mockResolvedValue(new Response('# Evidence\n'));
+        expect(await validateExternalDocuments(files(
+            '[evidence][ref]\n[ref]: //example.com/docs/evidence.md#evidence'
+        ), fetchDocument)).toEqual([]);
+        expect(fetchDocument).toHaveBeenCalledExactlyOnceWith('https://example.com/docs/evidence.md', expect.anything());
+    });
+
+    it('ignores local paths, non-HTTP schemes, and non-Markdown URLs', async () => {
+        const fetchDocument = vi.fn<typeof fetch>();
+        const content = '[local](docs/local.md) [file](file:///docs/local.md) [web](https://example.com/docs)';
+        expect(await validateExternalDocuments(files(content), fetchDocument)).toEqual([]);
+        expect(fetchDocument).not.toHaveBeenCalled();
+    });
+
+    it.each(['https://example.com:invalid/docs/file.md', `${url}#%ZZ`])('warns on a malformed reference: %s', async target => {
+        const fetchDocument = vi.fn<typeof fetch>();
+        expect(await validateExternalDocuments(files(target), fetchDocument))
+            .toEqual([expect.stringContaining('Invalid external document URL')]);
+        expect(fetchDocument).not.toHaveBeenCalled();
     });
 });

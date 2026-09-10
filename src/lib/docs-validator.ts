@@ -4,7 +4,7 @@
  * The library is the single source of truth for module authoring rules, and
  * everything else (DOCS.md, AGENTS.md, the skills) points into it by stable
  * rule ID. None of that is enforced by the type system, so this validator
- * checks the wiring: that every cited rule exists, every link resolves, and
+ * checks the wiring: that every local cited rule exists, checked links resolve, and
  * every reference file keeps the structure the review skills navigate by.
  */
 
@@ -18,6 +18,7 @@ const MARKDOWN_LINK = /\[[^\]]*\]\(([^)\s]+)\)/g;
 const DOCS_SECTION_REF = /DOCS\.md\s*§\s*([0-9]+[a-z]?)/g;
 const DOCS_PATH_REF = /docs\/([a-z0-9-]+\.md)/g;
 const PROTOCOL = /^[a-z][a-z0-9+.-]*:/i;
+const EXTERNAL_URL = /(?:\b[a-z][a-z0-9+.-]*:\/\/|(?<![\w:/])\/\/)[^\s<>()[\]`"']+/gi;
 
 export const REFERENCE_DIR = 'docs/';
 export const REFERENCE_INDEX = 'docs/README.md';
@@ -114,7 +115,7 @@ function validateLinks(
             }
             continue;
         }
-        if (PROTOCOL.test(target)) {
+        if (PROTOCOL.test(target) || target.startsWith('//')) {
             if (target.startsWith('file:')) {
                 warnings.push(`${path}: machine-specific absolute link "${target}" — use a repo-relative path.`);
             }
@@ -131,6 +132,51 @@ function validateLinks(
             errors.push(`${path}: link to unknown anchor "#${anchor}" in ${resolved}.`);
         }
     }
+}
+
+/** Advisory remote Markdown checks: one bounded fetch per document, without recursive validation. */
+export async function validateExternalDocuments(
+    files: Map<string, string>,
+    fetchDocument: typeof fetch = fetch
+): Promise<string[]> {
+    const documents = new Map<string, Set<string>>();
+    const warnings: string[] = [];
+    for (const content of files.values()) {
+        for (const match of matchAll(content, EXTERNAL_URL)) {
+            try {
+                const url = new URL(match[0].startsWith('//') ? `https:${match[0]}` : match[0]);
+                if (!['http:', 'https:'].includes(url.protocol) || !/\.md$/i.test(url.pathname)) continue;
+                const anchor = decodeURIComponent(url.hash.slice(1));
+                url.hash = '';
+                if (url.hostname === 'github.com' && /^\/[^/]+\/[^/]+\/blob\//.test(url.pathname)) {
+                    url.hostname = 'raw.githubusercontent.com';
+                    url.pathname = url.pathname.replace('/blob/', '/');
+                }
+                if (!documents.has(url.href)) documents.set(url.href, new Set());
+                if (anchor) documents.get(url.href)!.add(anchor);
+            } catch {
+                warnings.push(`Invalid external document URL: ${match[0]}`);
+            }
+        }
+    }
+
+    for (const [url, requestedAnchors] of documents) {
+        try {
+            const response = await fetchDocument(url, { signal: AbortSignal.timeout(5_000) });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (response.headers.get('content-type')?.includes('text/html')) {
+                throw new Error('received HTML instead of Markdown');
+            }
+            const content = await response.text();
+            const anchors = new Set(matchAll(content, HEADING).map(match => slugifyHeading(match[1])));
+            for (const anchor of requestedAnchors) {
+                if (!anchors.has(anchor)) warnings.push(`External document ${url}: unknown anchor "#${anchor}".`);
+            }
+        } catch (error) {
+            warnings.push(`Could not check external document ${url}: ${error instanceof Error ? error.message : String(error)}.`);
+        }
+    }
+    return warnings;
 }
 
 /**
@@ -157,7 +203,9 @@ export function validateDocs(input: DocsValidationInput): DocsValidationResult {
     }
 
     for (const [path, content] of input.files) {
-        for (const match of matchAll(content, RULE_ID)) {
+        // Paths and rule-like fragments inside URLs belong to that document, not this repository.
+        const localReferences = content.replace(EXTERNAL_URL, ' ');
+        for (const match of matchAll(localReferences, RULE_ID)) {
             const id = match[0];
             cited.add(id);
             if (!definitions.has(id)) {
@@ -165,14 +213,14 @@ export function validateDocs(input: DocsValidationInput): DocsValidationResult {
             }
         }
 
-        for (const match of matchAll(content, DOCS_PATH_REF)) {
+        for (const match of matchAll(localReferences, DOCS_PATH_REF)) {
             const referenced = `${REFERENCE_DIR}${match[1]}`;
             if (!input.files.has(referenced)) {
                 errors.push(`${path}: references "${referenced}", which does not exist.`);
             }
         }
 
-        for (const match of matchAll(content, DOCS_SECTION_REF)) {
+        for (const match of matchAll(localReferences, DOCS_SECTION_REF)) {
             if (!input.docsSections.has(match[1])) {
                 errors.push(`${path}: references DOCS.md § ${match[1]}, which is not a section of DOCS.md.`);
             }

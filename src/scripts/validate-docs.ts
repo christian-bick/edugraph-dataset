@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { parseDocsSections, validateDocs, type DocsValidationResult } from '../lib/docs-validator.ts';
+import { parseDocsSections, validateDocs, validateExternalDocuments, type DocsValidationResult } from '../lib/docs-validator.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,19 +38,21 @@ function collectFiles(): Map<string, string> {
     return files;
 }
 
-export function runDocsValidation(): DocsValidationResult {
+export async function runDocsValidation(): Promise<DocsValidationResult> {
     const files = collectFiles();
-    return validateDocs({
+    const result = validateDocs({
         files,
         docsSections: parseDocsSections(files.get('DOCS.md') ?? ''),
         exists: (relativePath: string) => existsSync(join(PROJECT_ROOT, relativePath)),
     });
+    result.warnings.push(...await validateExternalDocuments(files));
+    return result;
 }
 
-function main(): void {
+async function main(): Promise<void> {
     console.log(`\n=== Validating Documentation References ===`);
 
-    const result = runDocsValidation();
+    const result = await runDocsValidation();
 
     console.log(`\n--- Statistics ---`);
     console.log(`Reference Files:   ${result.stats.referenceFiles}`);
@@ -77,4 +79,4 @@ function main(): void {
     console.log(`\n✅ Documentation references valid! No errors detected.`);
 }
 
-main();
+await main();
