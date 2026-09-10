@@ -6,7 +6,7 @@ import {spec} from './spec.ts';
 
 const cases = [
     {
-        expectedHash: '186a2e31',
+        expectedHash: 'c9f2ee74',
         task: 'recognize-angle-from-arc',
         labels: [
             Area.AngleConcept,
@@ -14,31 +14,28 @@ const cases = [
             Area.ArchConcept,
             Area.Circle,
             Area.FractionInterpretation,
-            Scope.AngleMeasurement,
             Ability.Interpretation
         ]
     },
     {
-        expectedHash: '1286efa9',
+        expectedHash: 'f0d8fba4',
         task: 'derive-one-degree',
         labels: [
             Area.AngleConcept,
             Area.Circle,
             Area.FractionInterpretation,
-            Scope.AngleMeasurement,
             Scope.DegreeScale,
             Scope.UnitFractions,
             Ability.ConceptDerivation
         ]
     },
     {
-        expectedHash: 'ea4ab73a',
+        expectedHash: '28165605',
         task: 'interpret-degree-iteration',
         labels: [
             Area.AngleConcept,
             Area.AngleCalculation,
             Area.Iteration,
-            Scope.AngleMeasurement,
             Scope.DegreeScale,
             Ability.Interpretation
         ]
@@ -47,7 +44,7 @@ const cases = [
 
 describe('AngleConceptsGenerator spec integration', () => {
     it('declares only the invariant abstract angle claims as general labels', () => {
-        expect(spec.generalLabels).toEqual([Area.AngleConcept, Scope.AngleMeasurement]);
+        expect(spec.generalLabels).toEqual([Area.AngleConcept]);
     });
 
     it.each(cases)('resolves the corrected Grade 4 $task target', ({expectedHash, labels, task}) => {

@@ -85,8 +85,7 @@ const drawFromAttributesBuilder = new DatasetPermutationBuilder()
 const compareAttrBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ShapeAttributes,
-        Area.ShapeIdentity,
-        Area.NumericComparison,
+        Area.NumericInequality,
         Ability.VisualReception
     ])
     .applyLabelVariants([

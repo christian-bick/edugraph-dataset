@@ -17,7 +17,6 @@ const measureAnglesBuilder = new DatasetPermutationBuilder().addLabels([
 
 const sketchAnglesBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.ConceptSpecification,
     Ability.VisualArticulation

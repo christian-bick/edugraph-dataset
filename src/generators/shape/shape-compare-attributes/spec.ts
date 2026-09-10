@@ -6,8 +6,7 @@ import {selectExactMatch} from '../../../lib/resolvers.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'shape-compare-attributes',
     generalLabels: [
-        Area.ShapeIdentity,
-        Area.NumericComparison,
+        Area.NumericInequality,
         Scope.ShapeAttributes,
         Scope.IntegerNumbers,
         Scope.Base10,

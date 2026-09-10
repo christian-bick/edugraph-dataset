@@ -385,7 +385,6 @@ const recognizeAngleArcBuilder = new DatasetPermutationBuilder().addLabels([
     Area.ArchConcept,
     Area.Circle,
     Area.FractionInterpretation,
-    Scope.AngleMeasurement,
     Ability.Interpretation
 ]);
 
@@ -393,7 +392,6 @@ const deriveOneDegreeBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
     Area.Circle,
     Area.FractionInterpretation,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Scope.UnitFractions,
     Ability.ConceptDerivation
@@ -403,7 +401,6 @@ const interpretDegreeIterationBuilder = new DatasetPermutationBuilder().addLabel
     Area.AngleConcept,
     Area.AngleCalculation,
     Area.Iteration,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.Interpretation
 ]);
@@ -417,7 +414,6 @@ const measureAnglesBuilder = new DatasetPermutationBuilder().addLabels([
 
 const sketchAnglesBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.ConceptSpecification,
     Ability.VisualArticulation
@@ -427,7 +423,6 @@ const additiveAngleMeasureBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AdjacentAngles,
     Area.AngleCalculation,
     Area.Addition,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.ProcedureUnderstanding
 ]);
@@ -436,7 +431,6 @@ const unknownAnglesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.AdjacentAngles,
         Area.AngleCalculation,
-        Scope.AngleMeasurement,
         Scope.DegreeScale,
     ])
     .applyLabelVariants([

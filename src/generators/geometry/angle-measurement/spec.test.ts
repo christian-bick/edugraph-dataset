@@ -16,10 +16,9 @@ const cases = [
         generatorLabels: [Area.AngleCalculation]
     },
     {
-        expectedHash: 'f158f327',
+        expectedHash: 'e4c3895a',
         labels: [
             Area.AngleConcept,
-            Scope.AngleMeasurement,
             Scope.DegreeScale,
             Ability.ConceptSpecification,
             Ability.VisualArticulation

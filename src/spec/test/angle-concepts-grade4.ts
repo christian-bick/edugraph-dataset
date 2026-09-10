@@ -16,7 +16,6 @@ const recognizeAngleArcBuilder = new DatasetPermutationBuilder().addLabels([
     Area.ArchConcept,
     Area.Circle,
     Area.FractionInterpretation,
-    Scope.AngleMeasurement,
     Ability.Interpretation
 ]);
 
@@ -24,7 +23,6 @@ const deriveOneDegreeBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
     Area.Circle,
     Area.FractionInterpretation,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Scope.UnitFractions,
     Ability.ConceptDerivation
@@ -34,7 +32,6 @@ const interpretDegreeIterationBuilder = new DatasetPermutationBuilder().addLabel
     Area.AngleConcept,
     Area.AngleCalculation,
     Area.Iteration,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.Interpretation
 ]);

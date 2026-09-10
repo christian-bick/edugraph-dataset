@@ -12,7 +12,6 @@ const additiveAngleMeasureBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AdjacentAngles,
     Area.AngleCalculation,
     Area.Addition,
-    Scope.AngleMeasurement,
     Scope.DegreeScale,
     Ability.ProcedureUnderstanding
 ]);
@@ -21,7 +20,6 @@ const unknownAnglesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.AdjacentAngles,
         Area.AngleCalculation,
-        Scope.AngleMeasurement,
         Scope.DegreeScale
     ])
     .applyLabelVariants([

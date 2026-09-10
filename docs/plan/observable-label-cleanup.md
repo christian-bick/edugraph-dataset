@@ -82,6 +82,24 @@ configuration as before; no payload adoption is required (`IMPL-G6`, `IMPL-G8`).
 - [ ] Rerun the observable-node audit against the fresh canonical snapshot and record actual
   annotation counts and cache churn.
 
+## Batch 2: shape comparison and angle contexts
+
+The shape-attribute generator always pairs different attribute counts. Its invariant relation
+is therefore `NumericInequality`, not the `NumericComparison` grouping. Its concrete shape Area,
+`ShapeAttributes`, and comparison claim already describe the task; remove the additional
+`ShapeIdentity` grouping. Apply the same corrections to its CCSS and smoke targets.
+
+Remove `AngleMeasurement` from angle concepts, arithmetic, and drawing declarations and targets.
+Those tasks retain their angle Areas and applicable `DegreeScale`; no instrument is substituted
+where none is shown. The actual protractor-reading task still declares `Protractor`.
+
+- Existing module tests pass: 8 files, 53 tests. No migration-specific regression tests added.
+- Full CCSS matching remains 653 targets and 790 pairs after mapping 16 changed target ids.
+- Across 360 fixed-seed draws, generator configuration, view configuration, and payloads are
+  identical. Only the reviewed labels change.
+- Targets with composition-parent claims decrease from 159 to 146; image counts remain pending
+  canonical regeneration.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
@@ -94,9 +112,8 @@ all modules merely because one usage is redundant.
 - [ ] `measurement-data` uses `FractionArithmetic` as a behavioral flag, and
   `measurement-line-plot-arithmetic` requires it. Review the operation and applicability contract
   together. Deleting the label alone would disable or invalidate a real arithmetic task.
-- [ ] `shape-compare-attributes` uses `NumericComparison` and `ShapeIdentity`. Review which
-  attribute relations and shape knowledge the task actually asks for before choosing concrete
-  labels. Other `ShapeIdentity` usages also need individual review.
+- [x] Replace `NumericComparison` and remove redundant `ShapeIdentity` in
+  `shape-compare-attributes`. The `shape-build-shape` use still needs review.
 - [ ] Review `MeasuringWithUnits`, `Measurement`, and the `LengthMeasurement`,
   `WeightMeasurement`, `TimeMeasurement`, and `AngleMeasurement` Scope groupings. Concrete
   operation, unit, and instrument labels can replace grouping uses only where the artifact

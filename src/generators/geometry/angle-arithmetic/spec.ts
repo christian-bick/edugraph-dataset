@@ -8,7 +8,6 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.AdjacentAngles,
         Area.AngleCalculation,
-        Scope.AngleMeasurement,
         Scope.DegreeScale
     ]
 };

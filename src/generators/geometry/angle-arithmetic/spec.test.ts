@@ -10,37 +10,34 @@ import {AngleArithmeticGeneratorSchema, spec} from './spec.ts';
 
 const cases = [
     {
-        expectedHash: 'c66ef9e7',
+        expectedHash: '569e9916',
         operation: 'addition',
         labels: [
             Area.AdjacentAngles,
             Area.AngleCalculation,
             Area.Addition,
-            Scope.AngleMeasurement,
             Scope.DegreeScale,
             Ability.ProcedureUnderstanding
         ]
     },
     {
-        expectedHash: 'fb75a29f',
+        expectedHash: 'addd94b2',
         operation: 'addition',
         labels: [
             Area.AdjacentAngles,
             Area.AngleCalculation,
             Area.Addition,
-            Scope.AngleMeasurement,
             Scope.DegreeScale,
             Ability.ProcedureExecution
         ]
     },
     {
-        expectedHash: 'cddd5940',
+        expectedHash: 'daa9d2b3',
         operation: 'subtraction',
         labels: [
             Area.AdjacentAngles,
             Area.AngleCalculation,
             Area.Subtraction,
-            Scope.AngleMeasurement,
             Scope.DegreeScale,
             Ability.ProcedureInversion
         ]
@@ -52,7 +49,6 @@ describe('AngleArithmeticGenerator spec integration', () => {
         expect(spec.generalLabels).toEqual([
             Area.AdjacentAngles,
             Area.AngleCalculation,
-            Scope.AngleMeasurement,
             Scope.DegreeScale
         ]);
     });

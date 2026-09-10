@@ -14,7 +14,7 @@ const taskFeatureLabels = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'angle-concepts',
-    generalLabels: [Area.AngleConcept, Scope.AngleMeasurement]
+    generalLabels: [Area.AngleConcept]
 };
 
 export const AngleConceptsGeneratorSchema = {

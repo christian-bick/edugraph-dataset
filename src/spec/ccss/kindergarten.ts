@@ -440,8 +440,7 @@ const classifyDimBuilder = new DatasetPermutationBuilder()
 // --- K.G.B.4: Analyze and compare shapes ---
 const compareShapeAttributesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
-        Area.NumericComparison,
+        Area.NumericInequality,
         Scope.ShapeAttributes,
         Ability.VisualReception
     ])

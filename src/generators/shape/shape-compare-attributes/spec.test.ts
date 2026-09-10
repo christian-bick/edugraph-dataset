@@ -20,8 +20,7 @@ describe('shape-compare-attributes generator spec', () => {
     it.each(CASES)('resolves %s to its exact comparison shape', (label, shape, dimension) => {
         setSeed(27);
         const stub = generateWithLabels(new ShapeCompareAttributesGenerator(), [
-            Area.ShapeIdentity,
-            Area.NumericComparison,
+            Area.NumericInequality,
             Scope.ShapeAttributes,
             label
         ]);
