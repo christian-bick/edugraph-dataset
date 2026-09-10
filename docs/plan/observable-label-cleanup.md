@@ -2,15 +2,18 @@
 
 ## Current status — 2026-09-10
 
-All twelve grouping-label source batches are implemented. Ontology v0.25.0 is installed, and
-canonical CCSS affected generation plus a full test baseline have completed successfully.
+All twelve grouping-label batches and their CCSS artifact validation are complete. Ontology
+v0.25.0 is installed, and canonical CCSS generation plus a full test baseline have completed.
 Both source targets and fresh image annotations contain **zero composition-parent labels**.
 The detailed batch evidence below records the successive source-review checkpoints; the final
 artifact evidence at the end supersedes their earlier Docker and regeneration blockers.
 
-The remaining cleanup gate is live CCSS VQA: **1,380 of 1,944 images already have exact passing
-cache records; 564 need validation**, including the four revised equal-shares images. Upload
-permission for this exact PNG/prompt set is still required. No cache entries have been changed.
+The final strict offline audit passes with **1,944/1,944 exact passing VQA records**, including
+all four equal-shares ProofByConstruction images. The 17 revised images were authorized and
+validated: 16 passed immediately, and one verified fraction-reading error passed a single
+unchanged-image/prompt recheck. All original judgments remain in the diagnostic reports.
+There are no missing, failing, stale, duplicate, malformed, or obsolete-module cache records.
+Repository and split checks pass, and the local union has been rebuilt with all 1,944 images.
 The separate fraction payload-family and classification-caption review findings remain tracked
 below; structural eligibility does not resolve those independent implementation questions.
 
@@ -90,10 +93,10 @@ configuration as before; no payload adoption is required (`IMPL-G6`, `IMPL-G8`).
   successfully (v0.24.1 and v0.24.2, 2026-09-10), closing the earlier daemon blocker.
 - [x] Run canonical `npm run generate:dataset -- --spec=ccss --affected` and test regeneration.
   The missing test snapshot required a full baseline; both completed in the final artifact gate.
-- [ ] Inspect changed samples and run the matching VQA validation. Obtain permission before
-  uploading new PNG/prompt sets to Gemini. No new VQA result or cache update is claimed here.
+- [x] Inspect changed samples and run the matching VQA validation. The authorized full CCSS run
+  passed all Batch 1 samples; the remaining view repairs and revalidation are recorded below.
 - [x] Rerun the observable-node audit against the fresh canonical snapshots and record actual
-  annotation counts and image deltas. Cache churn remains zero until live validation changes it.
+  annotation counts and image deltas. Live validation has now updated the corresponding cache.
 
 ## Batch 2: shape comparison and angle contexts
 
@@ -580,7 +583,7 @@ all modules merely because one usage is redundant.
 - [x] Separate observed length measurement from provided-data tasks; declare the concrete
   units of the decimal-measurement, length-difference, and within-100 story contexts (Batch 4).
 - [x] Review the unit-conversion family: replace grouping claims with concrete scales, move
-  task identity to views, and separate generator output families (Batch 5; canonical validation pending).
+  task identity to views, and separate generator output families (Batch 5; artifact validation complete).
 - [x] Resolve all partition-family `ProportionSense` and `FractionInterpretation` uses (Batch 8).
 - [x] Resolve the two angle-family `FractionInterpretation` targets (Batch 9).
 - [x] Resolve the Circle modeling question through the CircularShapes sibling grouping and
@@ -599,7 +602,7 @@ applicability before modifying targets or adding ontology entities.
 1. **Unit conversion (resolved in Batch 5):** seven concrete unit pairs establish magnitude or
    factor scaling; abstract segment counts use a separate precise payload family. `UnitConversion`
    was not substituted: its definition concerns different unit systems, unlike several current
-   within-system scaling examples. Complete canonical validation before closing the artifact gate.
+   within-system scaling examples. The final canonical and VQA gate is complete.
 2. **Measurement line-plot arithmetic (resolved in Batch 6):** plain observations and extrema
    arithmetic have precise separate contracts. The arithmetic view requires its relation through
    the payload type, with Addition/Subtraction as the actual operation claims.
@@ -608,10 +611,10 @@ applicability before modifying targets or adding ontology entities.
    branches retain their current behavior and are tracked by the separate payload-family plan.
 4. **Fraction partitioning (source refactor resolved in Batch 8):** precise families, explicit
    denominator contexts, and view-owned mathematical projections replace Area-driven branching.
-   Complete canonical validation before closing the artifact gate.
+   The final canonical and VQA gate is complete.
 5. **Angle fraction interpretation (source refactor resolved in Batch 9):** three precise
    mathematical families and three fixed projections replace task dispatch and raw feature-label
-   parsing. Both fraction-facing views own denominator interpretation. Canonical validation is pending.
+   parsing. Both fraction-facing views own denominator interpretation. The artifact gate is complete.
 
 ### Ontology review outcome
 
@@ -739,8 +742,8 @@ that directory, `temp/ontology-v0242-adoption/{before,after,delta}.json`, and
 
 ## Batch 12: equal shares through a constructed witness
 
-Source refactor and canonical generation completed on 2026-09-10 with ontology v0.25.0.
-VQA remains pending; source and rendering success alone do not close the dataset gate.
+Source refactor, canonical generation, and all four CCSS VQA judgments completed successfully
+on 2026-09-10 with ontology v0.25.0. The broader cleanup's three view repairs also pass revalidation.
 
 ### Approved semantics
 
@@ -808,12 +811,13 @@ extension or split view is indicated (`SPEC-V6`, `IMPL-G6`, `CHK-V6`).
 - [x] Adopt target claims and review the full matching delta.
 - [x] Finish full tests, canonical generation, visual review of the four equal-shares images,
   and the fresh annotation audit.
-- [ ] Obtain approval for the exact changed PNG/prompt set and complete Gemini VQA.
+- [x] Obtain approval for the exact changed PNG/prompt set and complete Gemini VQA for this batch.
+  Both shapes in both modes pass with their complete ProofByConstruction claim.
 
 Temporary evidence: `temp/spec-plans/ccss/equal-shares-construction/`,
 `temp/equal-shares-consumers.log`, and the validation records added below.
 
-### Final canonical artifact evidence
+### Canonical artifact evidence before live validation
 
 - Full suite: **461 files / 2,522 tests**, all passing. Overall statement/branch coverage is
   **96.31% / 92.83%**; the changed generator has **100% / 100%**. Every generator passes its
@@ -849,3 +853,73 @@ Temporary evidence: `temp/observable-cleanup-final/{before,after}-summary.json`,
 records, `temp/equal-shares-{coverage,check,architecture,generation,test-generation,vqa-audit,churn}.log`.
 The first container snapshot attempt overlapped temporary coverage writes and failed before
 generation; retrying after the test process finished completed successfully without source changes.
+
+### Live validation and focused view repairs
+
+The user approved uploading the 564 uncached canonical CCSS PNGs and their complete prompts.
+The full run reused 1,380 exact passing records and obtained 560 passes and four failures.
+It also pruned the 492 obsolete records and removed the obsolete `angle-concepts` cache file;
+the committed versions remain recoverable through Git. The timestamped report preserves the
+original judgments, including failures.
+
+| Finding | Resolution | Changed CCSS images |
+| --- | --- | ---: |
+| Component-angle inversion solution omitted its generator-owned Addition witness. | Show the existing numeric addition relation alongside the inverse subtraction (`IMPL-V11`). | 2 |
+| Circle drawing used a near-closed arc with the wrong center and no observable turn. | Draw two exact semicircles; show a moving boundary mark and turn arrow for rotation conservation. Leave the question response blank. | 3 |
+| Fraction ticks on dense line plots used 9px text; Gemini misread several correct labels. | Use 14px labels, checked on both the 17-tick eighth and 25-tick quarter axes. | 12 |
+| Gemini reported a missing digit in a correct large-integer division. | Manual inspection confirmed `5271685800394752 ÷ 2635842900197376 = 2`; one recheck of the exact unchanged image and complete prompt passed. Both judgments are retained in diagnostic evidence. | 0 |
+
+No generator, payload contract, target, spec, checklist, or ontology definition changed in these
+repairs. Full tests pass: **463 files / 2,536 tests**. Focused view tests cover both angle operations,
+both unknown components, question/solution behavior, bounded closed-circle geometry, visible
+rotation evidence, deterministic rendering, and the complete fraction tick sequence. Repository
+checks pass. All 17 revised CCSS PNGs were inspected directly, including both modes and the
+densest fraction labels; the subsequent Gemini gate is recorded below.
+
+Affected canonical regeneration completed without generation or render failures:
+
+- CCSS: 40 images scheduled, **17 changed**, 274 shards reused and five written; all other
+  image hashes are unchanged. Current generation:
+  `7ca35901a5f2f1c28399d3af5558edba4fb5d554cf0fbf8c7bc04e6e38af0684`.
+- Test: 30 images scheduled, **11 changed**, 269 shards reused and four written. Current generation:
+  `efc25e82e5983a5516b47012ebdb00591312ab93bfc19259a5a5d5bcd1f7ead7`.
+- Both snapshots preserve their sample identities, seeds, attempts, and exact annotation sets.
+  Composition-parent annotations remain zero. The isolated test snapshot has not received live VQA.
+- Before revalidation, the CCSS offline audit confirmed graph freshness and zero dataset-structure
+  or renderer-identity issues, but coverage was **1,927 passing and 17 missing**. Its 17 stale
+  predecessor keys were pruned by the authorized live run, not by the read-only audit.
+
+- [x] Obtain approval for the 17 revised CCSS PNGs and their complete VQA prompts.
+- [x] Validate the revised set, require the full offline audit to pass, and record final cache
+  churn and split integrity before rebuilding the union.
+
+Temporary evidence: `temp/validation-reports/dataset-ccss/2026-09-10T19-42-17-982Z__full.md`,
+`temp/observable-cleanup-final/division-single-recheck.json`, the `*-view-fixes.json` records in
+that directory, and `temp/observable-cleanup-fixes-{tests,check,generation,test-generation,audit}.log`.
+
+### Completed artifact gate
+
+- The authorized 17-image run reused 1,927 passing records, obtained 16 new passes, and flagged
+  one validation-split line plot. All repaired angle and circle images passed.
+- The remaining judgment read the pencil's `3¼ in` as `3¾ in`. Exact seed replay, the unchanged
+  content fingerprint, formatted measurement, tick counts, and inspected PNG all agree on 3¼.
+  One recheck of the same PNG and complete prompt passed, explicitly identifying 3¼. Neither
+  evaluator instructions nor content was changed to obtain this judgment. Both results remain
+  in the timestamped report and `line-plot-single-recheck.json` diagnostic evidence.
+- Final strict offline audit: **1,944/1,944 passing**, zero uncovered images, structure or renderer
+  issues, and zero failing, missing, stale, duplicate, malformed, or obsolete-module records.
+  It reconstructed current graph expectations and verified all 1,944 canonical image digests.
+- Final `check` and CCSS split audit pass. The complete unchanged test suite remains at
+  **463 files / 2,536 passing tests**. The isolated test dataset remains outside live CCSS VQA.
+- Final cache churn against HEAD: 1,419 stable identities, 17 changed images, 508 additions,
+  and 442 removals. The 17 comprise the previously explained 13 comparison changes, one
+  arithmetic validation draw, and three repaired circle images; two are attempt shifts and
+  none is a seed-scheme change. This older cache baseline differs from the immediate pre-repair
+  snapshot, against which exactly the 17 images in the repair table changed.
+- The derived local union was replaced from the validated CCSS snapshot: **1,630 training +
+  314 validation images**, with no exercise lost in merge. It is reproducible from the source
+  snapshot. No dataset release, tag, or remote publication is part of this validation completion.
+
+Final evidence: `temp/validation-reports/dataset-ccss/2026-09-10T20-00-14-587Z__full.md`,
+`temp/observable-cleanup-final/line-plot-single-recheck.json`, and
+`temp/observable-cleanup-final-{vqa,audit,check,churn,splits,merge}.log`.

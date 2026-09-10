@@ -17,7 +17,7 @@ export function getShapeDrawingFamily(target: string): ShapeDrawingFamily | unde
 }
 
 export function getTracePath(target: string): string {
-    if (target === 'circle') return 'M 50 18 A 32 32 0 1 0 50 17.9 Z';
+    if (target === 'circle') return 'M 50 18 A 32 32 0 1 1 50 82 A 32 32 0 1 1 50 18 Z';
     if (target === 'triangle') return 'M 50 15 L 85 85 L 15 85 Z';
     if (target === 'square') return 'M 15 15 L 85 15 L 85 85 L 15 85 Z';
     if (target === 'rectangle') return 'M 15 25 L 85 25 L 85 75 L 15 75 Z';
@@ -32,7 +32,9 @@ export function rotationDrawingPresentation(shape: string, isSolutionView: boole
             ? 90
             : shape === 'square'
                 ? 45
-                : 0;
+                : shape === 'circle'
+                    ? 90
+                    : 0;
     return {
         referenceRotation,
         showCompletedDrawing: isSolutionView

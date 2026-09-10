@@ -283,6 +283,9 @@ export const AngleArithmeticView = ({payload, task: requestedTask, viewId}: Angl
             )}
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
+                    {viewModel.task === 'solve-unknown-angle' && viewModel.unknownRole !== 'whole' && (
+                        <div className="font-mono text-[1.08rem] font-extrabold">{viewModel.solutionWholePartEquation}</div>
+                    )}
                     <div className="font-mono text-[1.08rem] font-extrabold">{viewModel.solutionEquation}</div>
                     <div className="mt-1 text-[0.98rem] font-extrabold">{viewModel.answerStatement}</div>
                     <div className="mt-1 text-[0.86rem] font-semibold leading-snug text-slate-700">{viewModel.explanation}</div>

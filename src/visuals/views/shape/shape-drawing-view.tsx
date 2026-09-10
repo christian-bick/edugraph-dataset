@@ -111,6 +111,7 @@ function LegacyDrawingLayout({
     const promptText = `Draw the same ${shape}. Turning it does not change the shape.`;
     const pathD = getTracePath(shape);
     const {referenceRotation, showCompletedDrawing} = rotationDrawingPresentation(shape, isSolutionView);
+    const showCircleTurn = shape === 'circle';
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit mx-auto font-sans">
@@ -121,11 +122,20 @@ function LegacyDrawingLayout({
 
                 <div className="flex w-full items-stretch justify-center gap-4">
                     <div className="flex h-[220px] w-[250px] flex-col items-center justify-center rounded-xl border-2 border-blue-200 bg-blue-50 p-3">
-                        <span className="mb-1 text-sm font-bold text-blue-700">Reference</span>
+                        <span className="mb-1 text-sm font-bold text-blue-700">{showCircleTurn ? 'Turned reference' : 'Reference'}</span>
                         <svg width="150" height="150" viewBox="0 0 100 100" aria-label={`Reference ${shape}`}>
                             <g transform={`rotate(${referenceRotation} 50 50)`}>
                                 <path d={pathD} fill="none" stroke="#1d4ed8" strokeWidth="4" />
+                                {showCircleTurn && (
+                                    <circle cx="50" cy="18" r="4.5" fill="#1d4ed8" stroke="white" strokeWidth="1.5" aria-label="Boundary mark" />
+                                )}
                             </g>
+                            {showCircleTurn && (
+                                <>
+                                    <circle cx="50" cy="18" r="4.5" fill="white" stroke="#1d4ed8" strokeWidth="1.5" aria-label="Mark before turning" />
+                                    <path d="M 50 8 A 42 42 0 0 1 92 50 M 87 44 L 92 50 L 97 44" fill="none" stroke="#1d4ed8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Clockwise turn" />
+                                </>
+                            )}
                         </svg>
                     </div>
                     <div className="flex h-[220px] w-[250px] flex-col items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50 p-3">
@@ -134,6 +144,9 @@ function LegacyDrawingLayout({
                             ? (
                                 <svg width="150" height="150" viewBox="0 0 100 100" aria-label={`Completed ${shape} drawing`}>
                                     <path d={pathD} fill="none" stroke="forestgreen" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                    {showCircleTurn && (
+                                        <circle cx="50" cy="18" r="4.5" fill="forestgreen" stroke="white" strokeWidth="1.5" aria-label="Boundary mark" />
+                                    )}
                                 </svg>
                             )
                             : <div className="flex h-[150px] items-center text-lg font-bold text-slate-400">Draw here</div>}

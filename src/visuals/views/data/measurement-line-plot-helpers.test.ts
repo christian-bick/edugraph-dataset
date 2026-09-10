@@ -28,6 +28,10 @@ describe('measurement line-plot projection', () => {
         expect(model.ticks).toHaveLength(17);
         expect(model.ticks[1]).toMatchObject({display: '1⅛', count: 1});
         expect(model.ticks[4]).toMatchObject({display: '1½', count: 2});
+        expect(model.ticks.map(tick => tick.display)).toEqual([
+            '1', '1⅛', '1¼', '1⅜', '1½', '1⅝', '1¾', '1⅞',
+            '2', '2⅛', '2¼', '2⅜', '2½', '2⅝', '2¾', '2⅞', '3'
+        ]);
     });
 
     it('validates a canonical extrema relation and rejects missing or inconsistent arithmetic', () => {

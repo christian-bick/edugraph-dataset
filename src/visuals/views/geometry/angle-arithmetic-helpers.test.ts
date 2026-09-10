@@ -83,8 +83,8 @@ describe('angle arithmetic view projection', () => {
         });
     });
 
-    it('uses the view seed to choose either hidden component for ProcedureInversion', () => {
-        const data = relation('subtraction', 65, 85);
+    it.each(['addition', 'subtraction'] as const)('preserves %s whole-part evidence for either hidden component', operation => {
+        const data = relation(operation, 65, 85);
         const left = buildAngleArithmeticPresentation(
             data,
             'solve-unknown-component',
@@ -101,7 +101,9 @@ describe('angle arithmetic view projection', () => {
             unknownRole: 'left-component',
             prompt: 'Find the measure of angle AOB.',
             wholePartEquation: '?° + 85° = 150°',
+            solutionWholePartEquation: '65° + 85° = 150°',
             questionEquation: '150° − 85° = ?°',
+            solutionEquation: '150° − 85° = 65°',
             answer: '65°'
         });
         expect(right).toMatchObject({
@@ -109,7 +111,9 @@ describe('angle arithmetic view projection', () => {
             unknownRole: 'right-component',
             prompt: 'Find the measure of angle BOC.',
             wholePartEquation: '65° + ?° = 150°',
+            solutionWholePartEquation: '65° + 85° = 150°',
             questionEquation: '150° − 65° = ?°',
+            solutionEquation: '150° − 65° = 85°',
             answer: '85°'
         });
     });

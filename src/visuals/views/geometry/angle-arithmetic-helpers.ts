@@ -39,6 +39,7 @@ type SolveUnknownComponentPresentation = AngleArithmeticPresentationBase & {
     task: 'solve-unknown-angle';
     unknownRole: 'left-component' | 'right-component';
     wholePartEquation: string;
+    solutionWholePartEquation: string;
 };
 
 export type AngleArithmeticPresentation =
@@ -123,6 +124,7 @@ export const buildAngleArithmeticPresentation = (
         unknownRole,
         prompt: `Find the measure of angle ${unknownAngleName}.`,
         wholePartEquation,
+        solutionWholePartEquation: numericAddition,
         questionEquation: `${wholeMeasure}° − ${knownMeasure}° = ?°`,
         solutionEquation: `${wholeMeasure}° − ${knownMeasure}° = ${unknownMeasure}°`,
         answer: `${unknownMeasure}°`,

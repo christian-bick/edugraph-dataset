@@ -53,7 +53,7 @@ const LinePlot = ({
         <div className="h-[2px] bg-slate-700" />
         <div className="grid" style={{gridTemplateColumns: `repeat(${model.ticks.length}, minmax(0, 1fr))`}}>
             {model.ticks.map(tick => (
-                <div key={tick.value} className={`min-w-0 pt-2 text-center font-mono font-bold text-slate-700 ${model.ticks.length > 12 ? 'text-[9px]' : 'text-sm'}`}>
+                <div key={tick.value} className="min-w-0 pt-2 text-center font-mono text-sm font-bold text-slate-700">
                     {tick.display}
                 </div>
             ))}
