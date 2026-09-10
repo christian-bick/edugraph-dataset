@@ -6,11 +6,11 @@ import {MeasurementWordProblemsGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
 const measurementCases = [
-    [[Area.MeasuringWithUnits, Scope.LengthMeasurement], [Scope.LengthMeasurement, Scope.MeterScale], 'length'],
-    [[Area.MeasuringWithUnits, Scope.TimeMeasurement], [Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
-    [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], 'liquid-volume'],
-    [[Area.MeasuringWithUnits, Scope.WeightMeasurement], [Scope.WeightMeasurement, Scope.KilogramScale], 'weight'],
-    [[Area.MeasuringWithUnits, Scope.Dollar], [Scope.Dollar], 'money']
+    [[Scope.MeterScale], [Scope.MeterScale], 'length'],
+    [[Scope.HourIntervals], [Scope.HourIntervals], 'time'],
+    [[Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], 'liquid-volume'],
+    [[Scope.KilogramScale], [Scope.KilogramScale], 'weight'],
+    [[Scope.Dollar], [Scope.Dollar], 'money']
 ] as const;
 
 const numberCases = [
@@ -29,9 +29,8 @@ const operationCases = [
 describe('MeasurementWordProblemsGenerator spec integration', () => {
     const generator = new MeasurementWordProblemsGenerator();
 
-    it('declares unit measurement, one-step, and two-operand invariants generally', () => {
+    it('declares one-step and two-operand invariants generally', () => {
         expect(spec.generalLabels).toEqual([
-            Area.MeasuringWithUnits,
             Scope.SingleStep,
             Scope.TwoOperands
         ]);
@@ -68,7 +67,6 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
     it('resolves Dollar as a unit-measurement Scope', () => {
         setSeed('money-only');
         const stub = generateWithLabels(generator, [
-            Area.MeasuringWithUnits,
             Scope.SingleStep,
             Scope.TwoOperands,
             Scope.Dollar,

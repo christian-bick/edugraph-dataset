@@ -1,13 +1,13 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const measurementNumberLineKinds = [
-    Scope.LengthMeasurement,
-    Scope.TimeMeasurement,
+    Scope.MeterScale,
+    Scope.HourIntervals,
     Scope.LiquidVolumes,
-    Scope.WeightMeasurement,
+    Scope.KilogramScale,
     Scope.Dollar
 ] as const;
 
@@ -18,17 +18,14 @@ export const measurementNumberLineNumberKinds = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-number-line',
-    generalLabels: [Area.MeasuringWithUnits]
+    generalLabels: []
 };
 
 export const MeasurementNumberLineGeneratorSchema = {
     measurementKind: [
         [
-            Scope.LengthMeasurement,
-            Scope.TimeMeasurement,
             Scope.VolumeMeasurement,
             Scope.LiquidVolumes,
-            Scope.WeightMeasurement,
             Scope.Dollar,
             Scope.MeterScale,
             Scope.HourIntervals,
@@ -36,29 +33,29 @@ export const MeasurementNumberLineGeneratorSchema = {
             Scope.KilogramScale
         ],
         selectExactLabelSetMap([
-            [[Scope.LengthMeasurement, Scope.MeterScale], 'length'],
-            [[Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
+            [[Scope.MeterScale], 'length'],
+            [[Scope.HourIntervals], 'time'],
             [[Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale], 'liquid-volume'],
-            [[Scope.WeightMeasurement, Scope.KilogramScale], 'weight'],
+            [[Scope.KilogramScale], 'weight'],
             [[Scope.Dollar], 'money']
         ]),
         [
-            [Scope.LengthMeasurement, Scope.MeterScale],
-            [Scope.TimeMeasurement, Scope.HourIntervals],
+            [Scope.MeterScale],
+            [Scope.HourIntervals],
             [Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale],
-            [Scope.WeightMeasurement, Scope.KilogramScale],
+            [Scope.KilogramScale],
             [Scope.Dollar]
         ]
     ],
     numberKind: [
-        measurementNumberLineNumberKinds,
-        selectExactLabelMap([
-            [Scope.ProperFractions, 'fraction'],
-            [Scope.DecimalNumbers, 'decimal']
+        [Area.NumerationWithFractions, Area.NumerationWithDecimals, ...measurementNumberLineNumberKinds],
+        selectExactLabelSetMap([
+            [[Area.NumerationWithFractions, Scope.ProperFractions], 'fraction'],
+            [[Area.NumerationWithDecimals, Scope.DecimalNumbers], 'decimal']
         ]),
         [
-            [Scope.ProperFractions],
-            [Scope.DecimalNumbers]
+            [Area.NumerationWithFractions, Scope.ProperFractions],
+            [Area.NumerationWithDecimals, Scope.DecimalNumbers]
         ]
     ]
 } as const;

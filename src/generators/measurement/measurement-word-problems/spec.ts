@@ -1,14 +1,14 @@
-import {Area, Scope} from 'edugraph-ts';
+import {Scope} from 'edugraph-ts';
 import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {arithmeticOperations, resolveDeclaredOperation} from '../../arithmetic/helpers.ts';
 
 export const measurementWordProblemKinds = [
-    Scope.LengthMeasurement,
-    Scope.TimeMeasurement,
+    Scope.MeterScale,
+    Scope.HourIntervals,
     Scope.LiquidVolumes,
-    Scope.WeightMeasurement,
+    Scope.KilogramScale,
     Scope.Dollar
 ] as const;
 
@@ -20,17 +20,14 @@ export const measurementWordProblemNumberKinds = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-word-problems',
-    generalLabels: [Area.MeasuringWithUnits, Scope.SingleStep, Scope.TwoOperands]
+    generalLabels: [Scope.SingleStep, Scope.TwoOperands]
 };
 
 export const MeasurementWordProblemsGeneratorSchema = {
     measurementKind: [
         [
-            Scope.LengthMeasurement,
-            Scope.TimeMeasurement,
             Scope.VolumeMeasurement,
             Scope.LiquidVolumes,
-            Scope.WeightMeasurement,
             Scope.Dollar,
             Scope.MeterScale,
             Scope.HourIntervals,
@@ -38,17 +35,17 @@ export const MeasurementWordProblemsGeneratorSchema = {
             Scope.KilogramScale
         ],
         selectExactLabelSetMap([
-            [[Scope.LengthMeasurement, Scope.MeterScale], 'length'],
-            [[Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
+            [[Scope.MeterScale], 'length'],
+            [[Scope.HourIntervals], 'time'],
             [[Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale], 'liquid-volume'],
-            [[Scope.WeightMeasurement, Scope.KilogramScale], 'weight'],
+            [[Scope.KilogramScale], 'weight'],
             [[Scope.Dollar], 'money']
         ]),
         [
-            [Scope.LengthMeasurement, Scope.MeterScale],
-            [Scope.TimeMeasurement, Scope.HourIntervals],
+            [Scope.MeterScale],
+            [Scope.HourIntervals],
             [Scope.LiquidVolumes, Scope.VolumeMeasurement, Scope.LiterScale],
-            [Scope.WeightMeasurement, Scope.KilogramScale],
+            [Scope.KilogramScale],
             [Scope.Dollar]
         ]
     ],

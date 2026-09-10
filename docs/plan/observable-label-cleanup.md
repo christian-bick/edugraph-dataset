@@ -100,13 +100,48 @@ where none is shown. The actual protractor-reading task still declares `Protract
 - Targets with composition-parent claims decrease from 159 to 146; image counts remain pending
   canonical regeneration.
 
+## Batch 3: concrete unit contexts and number-line knowledge
+
+Remove `MeasuringWithUnits` from the word-problem and number-line families. Merely using a
+quantity with a unit does not teach unit systems, relative unit sizes, or conversion. Word
+problems retain their arithmetic operation Areas; number lines explicitly claim
+`NumerationWithFractions` or `NumerationWithDecimals`, according to the numeric model.
+
+Replace the `LengthMeasurement`, `WeightMeasurement`, and `TimeMeasurement` groupings in these
+families with the actual fixed `MeterScale`, `KilogramScale`, and `HourIntervals` contexts.
+Liquid-volume and dollar contexts remain. Update the corresponding production and smoke targets.
+
+Removing the inappropriate unit-study claim exposes eight additional, valid Grade 4 matches
+through `arithmetic-ops-pairs` and `measurement-word-problem`. Keep these alternatives. Review
+also exposed an independent configuration defect in that view: measurement family and unit could
+resolve separately to incompatible choices. A single concrete unit configuration now chooses
+grams, kilograms, or liters, with the coherent capabilities declared by that choice. The view
+consumes plain configuration values rather than ontology labels. Existing Grade 3/test targets
+use their actual gram or kilogram scales without the weight-tool grouping.
+
+### Evidence
+
+- All 653 active CCSS targets remain matched. Mapping 78 renamed target identities gives 798
+  pairs: all 790 existing pairs plus the eight reviewed alternatives, with no lost pair.
+- Replay of both measurement generators covers 1,400 fixed-seed draws. Generator configurations,
+  mathematical payloads, and consuming view configurations are unchanged; annotation changes
+  are exactly the intended corrections.
+- The measurement-story view renders all 20 matched targets at 20 fixed seeds in both modes:
+  400 draws and 800 successful server-side renders, including the eight additional matches.
+  This checks rendering totality, not screenshots or visual annotation correctness.
+- `npm run check:affected` passes. Full coverage passes: 444 test files, 2,438 tests, and all
+  checked generator coverage thresholds. Unit-profile tests exercise valid resolution and
+  incompatible context rejection, not migration-specific target snapshots.
+- Targets with composition-parent claims decrease from 146 to 68. Canonical generation and
+  VQA remain pending under the validation checklist above; stored image counts are unchanged.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
 all modules merely because one usage is redundant.
 
 - [x] Remove all active `Factorization` grouping claims from the reviewed task family.
-- [x] Remove `NumericComparison` from `comparison`; its shape-attribute usage remains below.
+- [x] Remove `NumericComparison` from `comparison` and `shape-compare-attributes`.
 - [x] Remove `FractionArithmetic` from `fraction-arithmetic`; its measurement-data usage remains
   below.
 - [ ] `measurement-data` uses `FractionArithmetic` as a behavioral flag, and
@@ -114,8 +149,10 @@ all modules merely because one usage is redundant.
   together. Deleting the label alone would disable or invalidate a real arithmetic task.
 - [x] Replace `NumericComparison` and remove redundant `ShapeIdentity` in
   `shape-compare-attributes`. The `shape-build-shape` use still needs review.
-- [ ] Review `MeasuringWithUnits`, `Measurement`, and the `LengthMeasurement`,
-  `WeightMeasurement`, `TimeMeasurement`, and `AngleMeasurement` Scope groupings. Concrete
+- [x] Replace the angle-tool and measurement word-problem/number-line grouping uses with their
+  actual observable contexts and knowledge claims (Batches 2 and 3).
+- [ ] Review remaining `MeasuringWithUnits`, `Measurement`, and `LengthMeasurement`,
+  `WeightMeasurement`, and `TimeMeasurement` usages, especially measurement data and conversion. Concrete
   operation, unit, and instrument labels can replace grouping uses only where the artifact
   actually supplies their evidence; a number line must not become a ruler claim.
 - [ ] Review `ProportionSense` and `FractionInterpretation` against their concrete constituents.

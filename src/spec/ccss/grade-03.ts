@@ -404,8 +404,8 @@ const estimateMassBuilder = new DatasetPermutationBuilder()
 const massVolumeWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([Scope.SingleStep, Ability.TextualReception])
     .applyLabelVariants([
-        [Scope.WeightMeasurement, Scope.GramScale],
-        [Scope.WeightMeasurement, Scope.KilogramScale],
+        [Scope.GramScale],
+        [Scope.KilogramScale],
         [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale]
     ])
     .applyLabelVariants([

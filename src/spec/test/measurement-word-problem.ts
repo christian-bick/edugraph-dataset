@@ -5,8 +5,8 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const builder = new DatasetPermutationBuilder()
     .addLabels([Scope.SingleStep, Ability.TextualReception])
     .applyLabelVariants([
-        [Scope.WeightMeasurement, Scope.GramScale],
-        [Scope.WeightMeasurement, Scope.KilogramScale],
+        [Scope.GramScale],
+        [Scope.KilogramScale],
         [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale]
     ])
     .applyLabelVariants([

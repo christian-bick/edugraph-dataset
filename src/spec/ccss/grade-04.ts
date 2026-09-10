@@ -310,11 +310,11 @@ const twoColumnConversionTableBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants(measurementUnitPairs);
 
 const measurementKinds = [
-    [Area.MeasuringWithUnits, Scope.LengthMeasurement],
-    [Area.MeasuringWithUnits, Scope.TimeMeasurement],
-    [Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes],
-    [Area.MeasuringWithUnits, Scope.WeightMeasurement],
-    [Area.MeasuringWithUnits, Scope.Dollar]
+    [Scope.MeterScale],
+    [Scope.HourIntervals],
+    [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale],
+    [Scope.KilogramScale],
+    [Scope.Dollar]
 ];
 
 const grade4MeasurementWordProblemsBuilder = new DatasetPermutationBuilder()
@@ -326,7 +326,10 @@ const grade4MeasurementWordProblemsBuilder = new DatasetPermutationBuilder()
 const grade4MeasurementNumberLinesBuilder = new DatasetPermutationBuilder()
     .addLabels([Scope.Numberline, Ability.VisualArticulation])
     .applyLabelVariants(measurementKinds)
-    .applyLabelVariants([[Scope.FractionNumbers], [Scope.DecimalNumbers]]);
+    .applyLabelVariants([
+        [Area.NumerationWithFractions, Scope.FractionNumbers],
+        [Area.NumerationWithDecimals, Scope.DecimalNumbers]
+    ]);
 
 const rectangleAreaFormulaBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AreaCalculation,

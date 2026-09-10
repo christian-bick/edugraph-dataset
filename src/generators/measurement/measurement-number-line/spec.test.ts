@@ -6,23 +6,23 @@ import {MeasurementNumberLineGenerator} from './generator.ts';
 import {measurementNumberLineNumberKinds, spec} from './spec.ts';
 
 const measurementCases = [
-    [[Area.MeasuringWithUnits, Scope.LengthMeasurement], [Scope.LengthMeasurement, Scope.MeterScale], 'length'],
-    [[Area.MeasuringWithUnits, Scope.TimeMeasurement], [Scope.TimeMeasurement, Scope.HourIntervals], 'time'],
-    [[Area.MeasuringWithUnits, Scope.VolumeMeasurement, Scope.LiquidVolumes], [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], 'liquid-volume'],
-    [[Area.MeasuringWithUnits, Scope.WeightMeasurement], [Scope.WeightMeasurement, Scope.KilogramScale], 'weight'],
-    [[Area.MeasuringWithUnits, Scope.Dollar], [Scope.Dollar], 'money']
+    [[Scope.MeterScale], [Scope.MeterScale], 'length'],
+    [[Scope.HourIntervals], [Scope.HourIntervals], 'time'],
+    [[Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale], 'liquid-volume'],
+    [[Scope.KilogramScale], [Scope.KilogramScale], 'weight'],
+    [[Scope.Dollar], [Scope.Dollar], 'money']
 ] as const;
 
 const numberCases = [
-    [Scope.FractionNumbers, 'fraction'],
-    [Scope.DecimalNumbers, 'decimal']
+    [Scope.FractionNumbers, Area.NumerationWithFractions, 'fraction'],
+    [Scope.DecimalNumbers, Area.NumerationWithDecimals, 'decimal']
 ] as const;
 
 describe('MeasurementNumberLineGenerator spec integration', () => {
     const generator = new MeasurementNumberLineGenerator();
 
-    it('declares unit measurement invariant while Scope selects the unit kind', () => {
-        expect(spec.generalLabels).toEqual([Area.MeasuringWithUnits]);
+    it('keeps numeration in the number-kind schema and units in the measurement schema', () => {
+        expect(spec.generalLabels).toEqual([]);
         expect(measurementNumberLineNumberKinds).toEqual([
             Scope.ProperFractions,
             Scope.DecimalNumbers
@@ -31,12 +31,13 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
 
     it('resolves the complete corrected 10-target matrix', () => {
         for (const [measurementLabels, resolvedMeasurementLabels, measurementKind] of measurementCases) {
-            for (const [numberLabel, numberKind] of numberCases) {
+            for (const [numberLabel, numerationArea, numberKind] of numberCases) {
                 const labels = [
                     Scope.Numberline,
                     Ability.VisualArticulation,
                     ...measurementLabels,
-                    numberLabel
+                    numberLabel,
+                    numerationArea
                 ];
                 setSeed(`${measurementKind}-${numberKind}`);
                 const stub = generateWithLabels(generator, labels);
@@ -44,6 +45,7 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
                 expect(stub!.data).toMatchObject({measurementKind, numberKind});
                 expect(stub!.labels).toEqual(expect.arrayContaining([
                     ...resolvedMeasurementLabels,
+                    numerationArea,
                     numberKind === 'fraction' ? Scope.ProperFractions : numberLabel
                 ]));
                 if (numberKind === 'fraction') expect(stub!.labels).not.toContain(Scope.FractionNumbers);
@@ -57,9 +59,9 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
     it('resolves Dollar as a unit-measurement Scope', () => {
         setSeed('money-decimal-line');
         const stub = generateWithLabels(generator, [
-            Area.MeasuringWithUnits,
             Scope.Dollar,
             Scope.DecimalNumbers,
+            Area.NumerationWithDecimals,
             Scope.Numberline,
             Ability.VisualArticulation
         ]);

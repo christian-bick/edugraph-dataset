@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {ArithmeticOperation, ArithmeticPairProblem} from '../../../../types/problems.ts';
@@ -21,10 +20,10 @@ type UnitProfile = {
     theme: string;
 };
 
-const unitProfiles: Record<string, UnitProfile> = {
-    [Scope.GramScale]: {unit: 'g', unitName: 'grams', theme: 'rose'},
-    [Scope.KilogramScale]: {unit: 'kg', unitName: 'kilograms', theme: 'amber'},
-    [Scope.LiterScale]: {unit: 'L', unitName: 'liters', theme: 'sky'}
+const unitProfiles: Record<NonNullable<MeasurementWordProblemViewConfig['scale']>, UnitProfile> = {
+    gram: {unit: 'g', unitName: 'grams', theme: 'rose'},
+    kilogram: {unit: 'kg', unitName: 'kilograms', theme: 'amber'},
+    liter: {unit: 'L', unitName: 'liters', theme: 'sky'}
 };
 
 const symbols: Record<ArithmeticOperation, string> = {
@@ -82,16 +81,12 @@ const MeasurementWordProblemCore = ({config, payload}: CoreProps) => {
     validateProblem(data);
 
     const scale = config.scale;
-    const measurement = config.measurement;
-    if (!scale || !measurement) {
-        throw new ViewValidationError('measurement-word-problem', 'Measurement family and unit scale are required.');
+    if (!scale) {
+        throw new ViewValidationError('measurement-word-problem', 'A unit scale is required.');
     }
     const profile = unitProfiles[scale];
-    const compatible = measurement === Scope.WeightMeasurement
-        ? scale === Scope.GramScale || scale === Scope.KilogramScale
-        : measurement === Scope.LiquidVolumes && scale === Scope.LiterScale;
-    if (!profile || !compatible) {
-        throw new ViewValidationError('measurement-word-problem', 'Measurement family and unit scale are incompatible.');
+    if (!profile) {
+        throw new ViewValidationError('measurement-word-problem', 'The unit scale is unsupported.');
     }
 
     const evidence = evidenceFor(data, profile);

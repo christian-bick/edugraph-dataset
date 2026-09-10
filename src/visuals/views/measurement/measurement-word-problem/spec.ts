@@ -1,5 +1,5 @@
 import {Ability, Scope} from 'edugraph-ts';
-import {selectExactMatch} from '../../../../lib/resolvers.ts';
+import {selectExactLabelSetMap} from '../../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -9,13 +9,14 @@ export const spec: ViewSpec = {
 };
 
 export const MeasurementWordProblemViewSchema = {
-    measurement: [
-        [Scope.WeightMeasurement, Scope.LiquidVolumes],
-        selectExactMatch
-    ],
     scale: [
-        [Scope.GramScale, Scope.KilogramScale, Scope.LiterScale],
-        selectExactMatch
+        [Scope.GramScale, Scope.KilogramScale, Scope.LiterScale, Scope.LiquidVolumes],
+        selectExactLabelSetMap([
+            [[Scope.GramScale], 'gram'],
+            [[Scope.KilogramScale], 'kilogram'],
+            [[Scope.LiquidVolumes, Scope.LiterScale], 'liter']
+        ]),
+        [[Scope.GramScale], [Scope.KilogramScale], [Scope.LiquidVolumes, Scope.LiterScale]]
     ]
 } as const;
 
