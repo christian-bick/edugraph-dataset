@@ -152,9 +152,9 @@ Generators do not annotate their output with ontology labels. Orchestration deri
 observable label set from the matched pair's invariant capabilities and resolved generator/view
 schema capabilities. Applicability-only `requiredLabels` and `rejectedLabels` never become sample
 labels; target labels record what the standard requested, not the complete description of what the
-pair produced. The completed Scope-completeness phase in
-[complete-label-migration.md](plan/complete-label-migration.md#phase-7-scope-completeness) proves
-this pair-derived end state for the current production catalog.
+pair produced. See [IMPL-G3](implementation-generator.md#impl-g3--ontology-labels-are-resolved-outside-the-generator)
+for the generator boundary and [SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
+for resolved schema capabilities, including fallback choices.
 
 ## Four different identities
 

@@ -26,6 +26,16 @@ Standing outside the matrix, because it describes standards rather than modules:
 - [target-spec-plan-template.md](target-spec-plan-template.md) — required Pass 1 structure for
   reviewable standard-to-target plans.
 
+## Open follow-ups
+
+- [Payload-family matching and regression](plan/payload-family-matching.md) — unresolved input
+  contracts, positive micro-filters, classification evidence, and optional synthetic regression work.
+- [Performance safeguards and follow-ups](plan/improve_performance.md) — the performance contract
+  and deferred retention/provenance improvements.
+
+These plans track unfinished work, not exceptions to the authoring rules. Completed migration
+inventories and validation logs remain available in Git history.
+
 ## Which files to load
 
 | Task                                          | Load                                                              |

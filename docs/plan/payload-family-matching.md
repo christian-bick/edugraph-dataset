@@ -1,157 +1,81 @@
-# Payload-family matching and positive applicability
+# Payload-family matching and regression follow-ups
 
-## Direction agreed with the user
+## Agreed direction
 
-Use explicit mathematical payload families and their view mappings as the primary
-generator/view compatibility contract. Use positively formulated applicability filters for
-restrictions within an accepted family, such as numeric range. Ontology capability coverage
-remains necessary: type compatibility alone does not establish a target's claims.
+Use mathematical payload families and explicit view input types as the primary generator/view
+compatibility contract. Use positive applicability filters for restrictions within an accepted
+family, such as numeric range. Ontology capability coverage remains necessary: type compatibility
+alone does not establish a target's claims.
 
-This plan tracks adoption of that direction. It does not claim that the shared matcher or all
-existing applicability declarations already implement it. Current normative rules remain in
-[spec-view.md](../spec-view.md) and [implementation-generator.md](../implementation-generator.md).
+The unit-relation, measurement-extrema, shape-edge, fraction-partition, and angle-family splits are
+implemented and canonically validated. This plan retains the unfinished framework and consumer
+work. Current normative rules remain in [spec-view.md](../spec-view.md),
+[implementation-generator.md](../implementation-generator.md), and
+[implementation-view.md](../implementation-view.md); this plan does not silently change them.
 
-## Problem to resolve
+## Open contract findings
 
-The matcher currently permits a generator returning `A | B` to feed a view accepting only `A`
-when the view has a nonempty `requiredLabels` list. That check does not establish that the
-requirement guarantees output `A`. A negative boundary such as “everything except B” would also
-admit an unsupported new family C unless every consumer were updated.
+- [ ] **Union-member matching.** [matching.ts](../../src/lib/matching.ts) permits a generator
+  returning `A | B` to feed a view accepting only `A` when the view has any `requiredLabels`.
+  Their presence does not prove that the generated payload is `A`. Inventory these pairs and remove
+  that exception after adopting their contracts.
+- [ ] **Shape construction.** `shape-build-shape` retains attribute/count, rotation, and
+  excluded-subcategory branches with task-shaped payloads. Its construction and drawing consumers
+  are not total over the declared union. Review the mathematical responsibilities and every
+  consuming projection together; do not repair routing by changing truthful targets. Consuming
+  schema-resolved ontology enum values is not itself raw-label parsing.
+- [ ] **Fraction equivalence.** `fraction-equivalence` returns proper-fraction scaling,
+  whole-number equivalence, or tenths-to-hundredths relations. Several views declare the whole
+  union while accepting only a subset. A synthetic target with FractionEquivalence, ProperFractions,
+  EqualShares, Equal, Formalization, and ArabicNumerals matches `fractions-whole-equivalence`, which
+  rejects the proper-fraction payload. Current active CCSS/test targets avoid that combination.
+  Decide whether a uniform mathematical model is truthful or precise generator entry points are
+  needed, then align view input types. No blacklist or artificial family flag should conceal it.
+- [ ] **Positive micro-filters.** `measurement-line-plot` and its `usesUnitSteps` parameter provide
+  a concrete starting case: an explicit whole-step requirement must agree with generated
+  subdivisions. Decide whether filters inspect target constraints or resolved generator guarantees,
+  and how broad targets, fallbacks, alternatives, and bounded domains are handled. A flat
+  `requiredLabels` conjunction is not proof of the complete generated domain.
+- [ ] **Classification evidence.** Review the fraction-equivalence classification number-line
+  question's literal "same point" caption in
+  [fraction-line-view.tsx](../../src/visuals/views/numbers/fraction-line-view.tsx). It may disclose
+  the requested verdict (`IMPL-V5`). Replay representative question/solution artifacts before
+  deciding on a change; the completed structural cleanup does not settle this independent issue.
 
-Both current label filters examine requested target labels. They do not by themselves prove
-what schema completion, fallback selection, and generation can produce. The safety criterion is:
-every output reachable for an admitted target must satisfy the view's accepted input contract.
+## Adoption order and boundaries
 
-## First application: unit relations
+1. Inventory generator unions, member-only consumers, and family-selecting requirements/exclusions
+   using the parsed type graph and compatible-pair index. Record concrete failures and affected
+   targets; separate within-family limits from explicit target-participation policies.
+2. Establish precise mathematical output contracts. A view may accept a small named union only
+   when it supports every member. Share pure helpers and rendering components; do not manufacture
+   unrelated optional fields merely to preserve one generator registration.
+3. Review the positive micro-filter API with concrete examples before changing required/rejected
+   semantics globally. Preserve dimension neutrality and avoid duplicate generator parameterization
+   in views. An allowlist of every generator label on every view is not the objective.
+4. Adopt consumers, then tighten matching and validation. Reject missing/unrecognized mappings and
+   remove the presence-only union exception. Do not add pair-conditional capabilities or
+   configuration-dependent output routing to keep a combined generator.
+5. Verify direct and indexed matching agree. Test that unrelated new payload members cannot become
+   eligible for narrower views, while valid capability extensions within a family remain reusable.
+   Update the affected normative rules and skill references only when replacement behavior exists.
+6. Rebuild the graph after matching-machinery changes, compare complete match sets, and canonically
+   regenerate and validate affected artifacts. Keep indexed work and dependency-delta execution.
 
-Keep one concrete output family per generator entry point:
+Every output reachable for an admitted target must satisfy the view's accepted payload contract.
+Neither target-only label filters nor a passing sample prove that property for all configurations.
 
-| Generator | Guaranteed output | Accepting views |
-| --- | --- | --- |
-| `measurement-conversion` | `StandardUnitEquivalencesProblem` | Conversion derivation, execution, and table |
-| `measurement-unit-scale` | `GenericUnitScaleRelationProblem` | Conversion derivation and segment comparison |
+## Optional synthetic regression experiment
 
-`MeasurementConversionProblem` remains a view-side union. The derivation view explicitly accepts
-both families; it does not require a label to narrow a generator's output. The other views declare
-their precise member types. No conversion view needs family-selecting `requiredLabels` or
-`rejectedLabels`.
+Compare declaration-derived regression cases with the hand-authored `test` spec:
 
-Named-unit equivalences contain unit identities, a factor, and equivalent quantity pairs. The
-segment model contains the two partition counts and their integer ratio. Neither model selects
-an exercise mode. This follows the stable-payload and Ability-neutrality rules (`IMPL-G7`,
-`IMPL-G8`), while the shared rendering stays reusable (`IMPL-V9`). Do not add a generator mode,
-optional field, or ontology label solely to preserve one combined generator registration.
+- [ ] Derive valid schema choices and explicit fallback sets, paired only with compatible views
+  whose applicability admits them. Avoid a blind label power set or unrestricted Cartesian product.
+- [ ] Check resolution, deterministic generation, rendering in both modes, task identities, and
+  fingerprints. Keep work proportional to declared choices, compatible-pair edges, and emitted cases.
+- [ ] Compare detected failures and coverage with existing test targets. Preserve unique authored
+  edge cases, bug reproductions, and human-readable fixtures. Replace generic reachability targets
+  only if the experiment establishes an equivalent or stronger check.
 
-The separate entry points reuse the existing view components and measurement presentation
-helpers. Their small mathematical generators do not need an artificial abstraction around a
-single multiplication. The segment generator has an empty schema because its mathematical
-capabilities are invariant; only concrete instance counts vary with the seed.
-
-- [x] Split generator output contracts and remove conversion-family label guards.
-- [x] Retain the existing views, canonical fields, and shared presentation code.
-- [x] Add mathematical/schema tests and a typed-routing integration regression without pinning
-  curriculum target IDs or migration-specific label permutations.
-- [x] Finish matching, type, coverage, and server-render checks; record evidence in
-  [observable-label-cleanup.md](observable-label-cleanup.md#batch-5-unit-conversion-contract).
-- [ ] Regenerate canonical artifacts and validate their labels before claiming dataset completion.
-
-## Broader adoption, in order
-
-The second application is measurement observations versus extrema arithmetic, recorded in
-[Batch 6](observable-label-cleanup.md#batch-6-measurement-extrema-arithmetic). It replaces an optional
-relation and grouping-label guard with two precise generator outputs and shares observation
-generation and line-plot components. A view's input type must reflect which mathematical claims
-its projection preserves, not only whether it could access the payload's common fields.
-
-The plain line-plot view's `usesUnitSteps` parameter is a concrete micro-filter review candidate:
-an explicit whole-step requirement must be compatible with the generator's subdivisions. It is
-not a reason to recreate payload-family routing through a grouping label.
-
-[Batch 7](observable-label-cleanup.md#batch-7-shape-edge-composition) extracts shape edge composition
-from the construction union. A dedicated assembly view consumes that exact family and owns the
-GeometrySticks representation, sharing polygon/material components with attribute construction.
-The new family needs no label guard or generator-owned task flag.
-
-Remaining shape-construction work belongs in the inventory below: the old generator still selects
-attribute/count, rotation, and excluded-subcategory branches through raw labels and returns a
-task-shaped union. Its construction and drawing consumers are not total over that entire union.
-Review those mathematical families and their projections together, remove raw-label implementation
-access (`IMPL-G1`), and replace family-selecting guards without changing current truthful targets.
-The edge-composition extraction does not claim to complete that wider normalization.
-
-[Batch 8](observable-label-cleanup.md#batch-8-fraction-partitioning) separates equal partitions,
-selected fraction regions, and unit-share comparisons into three precise generator outputs.
-The existing six views consume their exact family; the four partition projections share the same
-neutral model. Explicit denominator Scopes replace Area-driven domain selection. Proper fraction
-kind and denominator use an exact correlated schema choice because nonunit halves are impossible.
-This is a mathematical feasibility constraint, not a view applicability filter. No shared matcher
-change or family-routing label guard was needed. Canonical artifact validation remains pending.
-
-[Batch 9](observable-label-cleanup.md#batch-9-angle-fraction-interpretation) separates fractional
-arcs, equal unit partitions, and repeated angle units. Each generator has a precise payload and
-each leaf view accepts only its corresponding family. Shared frame and diagram code replaces the
-combined interpretation view; no target-label guard is needed. The arc schema records its concrete
-denominator, while the other families have invariant capabilities and empty schemas.
-
-1. **Inventory payload-family routing.** Reuse the parsed type graph and compatible-pair index to
-   list generator unions, member-only consumers, and requirements/exclusions used to distinguish
-   output families. Record actual affected targets and whether configuration guarantees a member.
-   Separate genuine within-family restrictions and explicit target-participation policies.
-2. **Migrate family boundaries.** Prefer precise generator entry points and explicit view input
-   types. Share pure implementation where useful. A view may accept a small named union only when
-   it supports every member. First check whether an apparently split family instead has a genuinely
-   uniform mathematical model; do not merge unrelated shapes through optional fields.
-3. **Specify positive micro-filters.** Work through numeric-range and other within-family examples.
-   Decide whether filtering examines requested constraints or resolved generator guarantees, how
-   broad targets and fallbacks behave, and how bounded admissible domains are expressed. Existing
-   flat `requiredLabels` means conjunction, not alternatives or a complete output-domain proof.
-   Do not silently change its semantics or duplicate generator parameterization in views.
-4. **Migrate existing boundaries.** Replace family blacklists with payload contracts and replace
-   within-family rejections with the agreed positive filter. Preserve truthful labels and actual
-   supported contexts; do not edit targets just to suppress invalid compositions. Record unresolved
-   cases rather than inventing ontology distinctions for implementation routing.
-5. **Tighten shared validation and matching.** After consumers are adopted, remove the presence-only
-   union-member exception. Fail missing/unrecognized payload mappings rather than treating absent
-   information as proof of compatibility. Verify direct and indexed matching agree. Update
-   `SPEC-V3`, `SPEC-V4`, `SPEC-V6`, `SPEC-V7`, related implementation rules, and linked skills when
-   the replacement semantics are implemented, preserving stable rule IDs.
-6. **Verify extension safety and artifacts.** Test that a new unrelated output family does not
-   silently become eligible for a narrower view, and that legitimate capability growth within a
-   stable family still works. Test fallback and boundary behavior, compare complete matching sets,
-   then regenerate and validate affected artifacts.
-
-The new phase must retain linear indexed work and dependency-delta execution. Reuse type and
-capability indexes rather than resolving every target against every module. Shared matching changes
-require an authoritative graph rebuild before generation; do not assume source-only delta detection
-covers matching machinery.
-
-### Fraction-equivalence inventory finding
-
-The [FractionEquivalence review](observable-label-cleanup.md#fractionequivalence-review-existing-strategy-family)
-confirms another broad declared contract: the generator returns proper-fraction scaling,
-whole-number equivalence, or tenths-to-hundredths relations. The model views and whole-number
-view declare the entire union; number-line views additionally include fraction-location data.
-Several actual renderers accept only a subset.
-
-A synthetic target requesting FractionEquivalence, ProperFractions, EqualShares, Equal,
-Formalization, and ArabicNumerals matches `fractions-whole-equivalence`, but that view rejects
-the generated proper-fraction payload. This is a broad input-declaration defect, not the
-presence-only `requiredLabels` exception: no requirement is declared on that view. Current
-active CCSS/test targets avoid the invalid combination.
-
-Include these consumers in the family inventory. First decide whether the mathematical relations
-can share a genuinely uniform payload or need precise generator entry points; then make each
-view's declared input match its accepted domain. Do not silently add a blacklist or family flag.
-Keep this work separate from relocating the ontology's fraction-procedure descriptors.
-
-## Boundaries and decisions still needed
-
-- No matcher extension is needed for the first application. Existing required/rejected semantics
-  elsewhere remain unchanged until their replacements have been reviewed and adopted.
-- Do not introduce conditional view capabilities or configuration-dependent output routing merely
-  to keep one generator module. Explicit typed multi-output declarations are not part of this plan.
-- A payload type name must describe a mathematical contract, not a standard, Ability, or particular
-  view. Type compatibility does not replace preservation of observable label evidence (`IMPL-V11`).
-- The positive micro-filter API and treatment of existing explicit target-participation requirements
-  need concrete review before global changes. An allowlist of every generator label on every view
-  is not the objective.
+This could strengthen regression testing; it does not replace live VQA of real standard artifacts
+or establish standards coverage. No synthetic probing framework is implemented by this plan.
