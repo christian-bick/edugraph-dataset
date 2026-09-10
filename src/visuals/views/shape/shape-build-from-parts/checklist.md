@@ -1,0 +1,2 @@
+- **Identity:** Loose sticks and corners are provided to build a named polygon.
+- **Modes:** Question Mode shows the loose materials and leaves the assembly area blank. Solution Mode shows the assembled polygon and accounts for its sticks and corners.

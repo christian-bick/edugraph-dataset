@@ -300,6 +300,75 @@ Evidence files: `after.json` / `diff.json` record actual seeded changes; `after-
 `diff-aligned.json` isolate the removed schema draw. `coverage.log`, `check-affected.log`, and
 `matching.log` record the repository gates.
 
+## Batch 7: shape edge composition
+
+The Kindergarten construction target describes assembling a polygon from loose edges and
+vertices. Replace its grouping `ShapeIdentity` claim with the existing `ShapeSynthesis` claim:
+the task combines component shapes into a whole. Do not reuse ShapeClassification merely because
+both tasks involve sides and vertices (`SPEC-G3`, `TSPEC-6`).
+
+Extract this mathematical family into `shape-edge-composition`, returning required target, side,
+and corner counts without an assembly-task flag. The dedicated `shape-build-from-parts` view owns
+the geometry-stick presentation. Shared polygon and material rendering stays in the shape parent
+directory (`IMPL-G7`, `IMPL-G8`, `IMPL-V9`). This removes the branch that required a separately
+resolved GeometrySticks flag to agree with a generator-selected task.
+
+| Production consumer | Target family | Adoption | Verification |
+| --- | --- | --- | --- |
+| `shape-build-from-parts` (extracted from `shape-build-shape`) | K.G.B.5 loose-part construction, four polygons | Exact edge-composition payload; invariant GeometrySticks representation and existing Abilities. | Four shapes, both modes, typed routing and baseline markup. |
+| `shape-build-shape` | Grade 1 defining attributes and Grade 2 attribute counts | Remove loose-part dispatch and unused count-choice branch; retain these existing contracts. | Existing tests and baseline replay. |
+| `shape-draw-linear-shape` | Rotated polygons, defining attributes, excluded quadrilateral subcategories | No edge-composition input; preserve existing drawing payloads. | Baseline replay and drawing tests. |
+| `shape-draw-circular-shape` | Rotated circles and defining attributes | No edge-composition input; preserve existing drawing payloads. | Baseline replay and drawing tests. |
+
+The old ShapeIdentity + ShapeProperties branch only served unit fixtures, not a CCSS or test
+target. Its choice of a side/corner count did not justify the view's VisualArticulation claim.
+Remove that unused branch rather than moving it into the assembly contract. Other construction
+families retain their current behavior; their wider payload/task normalization remains in the
+separate payload-family plan.
+
+### Validation
+
+- All 653 CCSS targets retain their 799 matches after the four assembly targets change from
+  ShapeIdentity to ShapeSynthesis and adopt the new generator/view pair. No CCSS or test path is
+  otherwise added or lost. Composition-parent target usage decreases from 35 to 31.
+- All 1,360 fixed-seed payloads and 2,720 server renders reproduce the baseline, accounting only
+  for the removed assembly-task flag and corrected annotation. No PRNG alignment is needed.
+  Changed target, generator, and view identifiers still change canonical sample identities.
+- Full coverage: 450 files and 2,464 tests pass. The new generator has 100% statement/branch
+  coverage; the remaining construction generator has 94.11% / 94.87%. Tests cover exact shape
+  resolution, invalid configurations, independent typed routing, both view modes, and malformed
+  construction evidence without pinning curriculum IDs.
+- `check:types` and `check:affected` pass, including documentation, module contracts, all 653
+  CCSS targets, all 559 test targets, and a test path for all 83 generators. `git diff --check`
+  passes. Evidence is under `temp/observable-cleanup-batch7/`: `before.json`, `after.json`,
+  `diff.json`, `types.log`, `coverage.log`, and `check-affected.log`.
+- Canonical PNG generation and VQA remain pending. A fresh outside-sandbox Docker version query
+  did not respond and was cancelled. No images, external uploads, or cache files changed.
+
+### Fraction-partition review: decisions before implementation
+
+The existing payload already separates a partition, a selected region, and a share comparison.
+These are candidates for precise generator output families, with the existing six task views
+sharing their renderer. That structural refactor does not settle these semantic choices:
+
+| Current use | Observable evidence | Resolution candidate |
+| --- | --- | --- |
+| Grade 1 FractionInterpretation + ActiveVocabulary | A highlighted equal share is named half, fourth, or quarter, without written fractions. | Review NumberNameNotation + UnitFractions: its current definition covers written words for numerical values, so this may already express the naming task. Confirm that the part/whole meaning is preserved before considering a new Area or broader denominator-interpretation definition. Current numerator/denominator definitions explicitly refer to the top/bottom numbers. |
+| Grade 1 FractionInterpretation + ConceptComposition | Separate halves or fourths are assembled into one whole. | ShapeSynthesis + EqualShares describes the composition; retain the fraction context without claiming written-notation interpretation. |
+| Grade 3 ProportionSense + partition/label | Equal-area partition with an explicit 1/b label. | ShapeDecomposition plus FractionDenominatorInterpretation and the view's notation capability; check the full target conjunction. |
+| Grade 3 ProportionSense + FractionNotation + Interpretation | A highlighted a/b region is written as a fraction and related to equal parts. | The existing numerator/denominator interpretation Areas are direct candidates. No generic proportional-reasoning claim is needed. |
+
+The old Areas also select denominator ranges: Grade 1 chooses 2 or 4; Grade 3 chooses 2, 3, 4,
+6, or 8. Those are real constraints in the tracked 1.G.A.3 and 3.NF.A.1 standard descriptions,
+not arbitrary variation. Parameterize the mathematical denominator directly rather than retaining
+a grade/task-Area switch. HalfFractions, ThirdFractions, QuarterFractions, and EighthFractions
+already exist; SixthFractions does not. Request the missing denominator context before claiming
+complete explicit coverage; do not drop sixths or use an unrelated number range.
+
+Keep this review separate from the already tracked Circle / FractionEquivalence ontology structure
+questions. The two angle-concepts FractionInterpretation usages also need a later evidence review;
+they are not changed by the shape-construction extraction.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
@@ -311,7 +380,8 @@ all modules merely because one usage is redundant.
   Batch 6 replaces the latter's behavioral flag and view requirement with precise mathematical
   payload families and the existing operation claims.
 - [x] Replace `NumericComparison` and remove redundant `ShapeIdentity` in
-  `shape-compare-attributes`. The `shape-build-shape` use still needs review.
+  `shape-compare-attributes`; replace the construction use with ShapeSynthesis and a precise
+  edge-composition family (Batch 7).
 - [x] Replace the angle-tool and measurement word-problem/number-line grouping uses with their
   actual observable contexts and knowledge claims (Batches 2 and 3).
 - [x] Separate observed length measurement from provided-data tasks; declare the concrete
@@ -336,11 +406,12 @@ applicability before modifying targets or adding ontology entities.
 2. **Measurement line-plot arithmetic (resolved in Batch 6):** plain observations and extrema
    arithmetic have precise separate contracts. The arithmetic view requires its relation through
    the payload type, with Addition/Subtraction as the actual operation claims.
-3. **Shape construction and fraction partitioning:** `ShapeIdentity`, `ProportionSense`, and
-   `FractionInterpretation` still help select generator branches or denominator ranges. Review
-   these decisions before replacing broad Areas with narrower constituents. Naming halves and
-   quarters without written fractions is not automatically numerator/denominator notation
-   interpretation.
+3. **Shape construction (grouping use resolved in Batch 7):** edge composition no longer needs
+   ShapeIdentity or a generator-owned assembly task. The remaining attribute/rotation/subsumption
+   branches retain their current behavior and are tracked by the separate payload-family plan.
+4. **Fraction partitioning (reviewed, awaiting decisions):** resolve the verbal share-naming
+   meaning and missing sixth-denominator context described in Batch 7, then replace the Area-driven
+   branches with explicit partition/selected-region/comparison families and denominator choices.
 
 ### Ontology questions to review with the user
 
@@ -352,6 +423,6 @@ applicability before modifying targets or adding ontology entities.
 - **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
   congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
 
-The 35 remaining targets span these contract and modeling reviews; they are not
-35 proven false annotations. Eligibility under the proposed structural rule and truthfulness
+The 31 remaining targets span these contract and modeling reviews; they are not
+31 proven false annotations. Eligibility under the proposed structural rule and truthfulness
 of the current content claim remain separate questions.

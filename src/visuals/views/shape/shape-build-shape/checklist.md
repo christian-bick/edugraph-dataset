@@ -1,3 +1,3 @@
-- **Identity:** Loose sticks and corners, a defining-attribute card, or a required-count card make the requested construction identifiable.
-- **Modes:** Question Mode leaves the assembly area blank, every choice neutral, or the requested construction unfinished; Solution Mode assembles the target or reveals the completed choice or construction.
+- **Identity:** A defining-attribute card or a required-count card makes the requested construction identifiable.
+- **Modes:** Question Mode leaves the requested construction unfinished; Solution Mode reveals the completed construction.
 - **Attribute counts:** Angle solutions mark and total every interior angle; equal-face tasks show six congruent square pieces and a completed cube with its six-face net.

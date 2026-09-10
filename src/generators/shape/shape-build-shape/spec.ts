@@ -21,7 +21,6 @@ export const ShapeBuildShapeGeneratorSchema = {
     ],
     shapeArea: [
         [
-            Area.ShapeIdentity,
             Area.ShapeClassification,
             Area.ShapeRotationConservation,
             Area.ShapeSubsumption

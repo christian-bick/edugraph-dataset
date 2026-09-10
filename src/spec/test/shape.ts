@@ -6,7 +6,7 @@ const builder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ShapeAttributes,
         Scope.GeometrySticks,
-        Area.ShapeIdentity,
+        Area.ShapeSynthesis,
         Ability.VisualArticulation
     ])
     .applyLabelVariants([

@@ -471,7 +471,7 @@ const sameAttributeBuilder = new DatasetPermutationBuilder()
 // --- K.G.B.5: Model shapes by building them ---
 const buildShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeIdentity,
+        Area.ShapeSynthesis,
         Scope.ShapeAttributes,
         Scope.GeometrySticks,
         Ability.VisualArticulation

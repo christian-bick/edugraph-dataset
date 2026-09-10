@@ -19,22 +19,6 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.type).toBe('shape');
     });
 
-    it.each([
-        [Area.Circle, 'circle', 0, 0],
-        [Area.Triangle, 'triangle', 3, 3],
-        [Area.Square, 'square', 4, 4],
-        [Area.Rectangle, 'rectangle', 4, 4],
-        [Area.Hexagon, 'hexagon', 6, 6]
-    ] as const)('preserves the legacy construction payload for %s', (target, name, sides, corners) => {
-        const stub = generator.generate({
-            ...configFor(target),
-            constructionScopes: [Scope.ShapeProperties],
-            shapeArea: Area.ShapeIdentity
-        });
-
-        expect(stub).toEqual({data: {target: name, sides, corners}});
-    });
-
     it('generates a construction payload for rotation-conservation drawing', () => {
         const stub = generator.generate({
             ...configFor(Area.Triangle),
@@ -50,36 +34,6 @@ describe('ShapeBuildShapeGenerator', () => {
                 task: 'rotation-conservation'
             }
         });
-    });
-
-    it.each([
-        [Area.Triangle, 'triangle', 3],
-        [Area.Square, 'square', 4],
-        [Area.Rectangle, 'rectangle', 4],
-        [Area.Hexagon, 'hexagon', 6]
-    ] as const)('generates explicit loose-part assembly evidence for %s', (label, target, count) => {
-        const stub = generator.generate({
-            ...configFor(label),
-            constructionScopes: [Scope.ShapeAttributes],
-            shapeArea: Area.ShapeIdentity
-        });
-
-        expect(stub).toEqual({
-            data: {
-                target,
-                sides: count,
-                corners: count,
-                task: 'assemble-from-parts'
-            }
-        });
-    });
-
-    it('rejects a curved shape for loose-stick assembly', () => {
-        expect(generator.generate({
-            ...configFor(Area.Circle),
-            constructionScopes: [Scope.ShapeAttributes],
-            shapeArea: Area.ShapeIdentity
-        })).toBeNull();
     });
 
     it('generates a quadrilateral that excludes the named subcategories', () => {
@@ -157,7 +111,7 @@ describe('ShapeBuildShapeGenerator', () => {
         expect(generator.generate({
             ...configFor(Area.Cube),
             constructionScopes: [Scope.ShapeProperties],
-            shapeArea: Area.ShapeIdentity
+            shapeArea: Area.ShapeClassification
         })).toBeNull();
     });
 

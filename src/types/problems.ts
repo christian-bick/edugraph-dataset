@@ -1183,19 +1183,10 @@ export type ShapeLineSymmetryProblem = {
     figures: LineSymmetryFigure[];
 };
 
-export type ShapePartsConstructionProblem = {
-    target: PlaneShapeName;
-    sides: number;
-    corners: number;
-    task?: undefined;
-    definition?: undefined;
-};
-
-export type ShapeLoosePartsConstructionProblem = {
+export type ShapeEdgeCompositionProblem = {
     target: 'triangle' | 'square' | 'rectangle' | 'hexagon';
     sides: 3 | 4 | 6;
     corners: 3 | 4 | 6;
-    task: 'assemble-from-parts';
 };
 
 export type ShapeRotationConstructionProblem = {
@@ -1232,8 +1223,6 @@ export type ShapeAttributeCountSpecificationProblem = {
 };
 
 export type ShapeBuildShapeProblem =
-    | ShapePartsConstructionProblem
-    | ShapeLoosePartsConstructionProblem
     | ShapeRotationConstructionProblem
     | ShapeExcludedQuadrilateralProblem
     | ShapeAttributeSpecificationProblem
@@ -1966,6 +1955,7 @@ export interface ViewTypeMap {
     'shape-line-symmetry-identification': ShapeLineSymmetryProblem;
     'shape-same-attribute': ShapeSameAttributeProblem;
     'shape-build-shape': ShapeBuildShapeProblem;
+    'shape-build-from-parts': ShapeEdgeCompositionProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
     'shape-partition-equal': ShapePartitionProblem;
     'shape-partition-fraction-interpretation': ShapePartitionProblem;

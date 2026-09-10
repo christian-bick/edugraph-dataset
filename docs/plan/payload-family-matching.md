@@ -67,6 +67,18 @@ The plain line-plot view's `usesUnitSteps` parameter is a concrete micro-filter 
 an explicit whole-step requirement must be compatible with the generator's subdivisions. It is
 not a reason to recreate payload-family routing through a grouping label.
 
+[Batch 7](observable-label-cleanup.md#batch-7-shape-edge-composition) extracts shape edge composition
+from the construction union. A dedicated assembly view consumes that exact family and owns the
+GeometrySticks representation, sharing polygon/material components with attribute construction.
+The new family needs no label guard or generator-owned task flag.
+
+Remaining shape-construction work belongs in the inventory below: the old generator still selects
+attribute/count, rotation, and excluded-subcategory branches through raw labels and returns a
+task-shaped union. Its construction and drawing consumers are not total over that entire union.
+Review those mathematical families and their projections together, remove raw-label implementation
+access (`IMPL-G1`), and replace family-selecting guards without changing current truthful targets.
+The edge-composition extraction does not claim to complete that wider normalization.
+
 1. **Inventory payload-family routing.** Reuse the parsed type graph and compatible-pair index to
    list generator unions, member-only consumers, and requirements/exclusions used to distinguish
    output families. Record actual affected targets and whether configuration guarantees a member.
