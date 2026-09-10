@@ -512,6 +512,43 @@ parallel tasks. No ontology change was needed.
 
 Temporary evidence: `temp/angle-cleanup/{before,after,summary}.json` and `temp/angle-*.log`.
 
+## Batch 10: circular-shape ontology correction
+
+Adopted ontology [v0.24.1](https://github.com/christian-bick/edugraph-ontology/releases/tag/v0.24.1)
+on 2026-09-10 through the exact `edugraph-ts` release URL and lockfile.
+
+`CircularShapes` now groups `Circle`, `HalfCircle`, and `QuarterCircle` through `partOf`,
+under `TwoDimensionalObjects`. `Circle` retains the meaning of a complete circle and its
+enclosed region. Physical composition between the objects does not automatically establish
+composition between their concepts, and the three siblings do not inherit one another's claims.
+
+All three concrete descriptors are now structural leaves. Existing whole-circle targets and
+module declarations remain truthful without substituting the new grouping label. No target,
+generator, view, payload, checklist, or matching implementation changes are needed.
+
+### Validation
+
+- Before/after comparison preserves all **681 CCSS targets / 829 pairs** and **559 test targets /
+  691 pairs**. Three fixed-seed generator/view configuration and resolved-capability probes per
+  pair are identical: **4,560 resolutions** across both specs.
+- The package adds only CircularShapes. Existing changed records are Circle, HalfCircle,
+  QuarterCircle, and TwoDimensionalObjects; no descriptor is removed.
+- The complete test suite passes: **460 files / 2,518 tests**. `check:affected` passes type,
+  generator/view contract, label, documentation, and CCSS target validation checks.
+  Separate test-spec validation passes all 559 targets and confirms a path for all 87 generators.
+- Composition-parent candidates decrease from 40 to **11 CCSS targets**: FractionEquivalence (9)
+  and ShapeEquivalenceRelations (2). The 30 Circle occurrences no longer violate the proposed
+  structural criterion; one overlaps a remaining candidate. The isolated test spec has 8
+  remaining candidate targets across the same two labels.
+- Canonical regeneration and VQA remain pending with the earlier cleanup batches. Docker is now
+  responsive and the upstream patch passed its supplied Docker build. This dependency adoption
+  does not itself regenerate artifacts or update VQA caches. The changed Circle definition
+  requires fresh validation context for Circle annotations; unchanged matching is not proof of
+  cache reuse or artifact freshness.
+
+Temporary evidence: `temp/ontology-v0241-adoption/{before,after,delta}.json` and validation logs
+in the same directory.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
@@ -533,8 +570,10 @@ all modules merely because one usage is redundant.
   task identity to views, and separate generator output families (Batch 5; canonical validation pending).
 - [x] Resolve all partition-family `ProportionSense` and `FractionInterpretation` uses (Batch 8).
 - [x] Resolve the two angle-family `FractionInterpretation` targets (Batch 9).
-- [ ] Resolve the ontology modeling questions around `Circle` and `FractionEquivalence`:
-  both describe directly observable content despite currently having composition children.
+- [x] Resolve the Circle modeling question through the CircularShapes sibling grouping and
+  adopt ontology v0.24.1 (Batch 10).
+- [ ] Resolve the ontology modeling question around `FractionEquivalence`: it describes directly
+  observable content despite currently having composition children.
 - [ ] Review `ShapeEquivalenceRelations` for equal-area partitions. Equal area does not imply
   congruence, similarity, or symmetry; do not choose an existing child that changes the claim.
 
@@ -562,14 +601,12 @@ applicability before modifying targets or adding ontology entities.
 
 ### Ontology questions to review with the user
 
-- **Circle:** a whole circle is directly observable even though semicircles and quarter circles
-  are its composition children. Replacing a whole-circle claim with either child is false.
 - **FractionEquivalence:** an equivalence such as `1/10 = 10/100` does not necessarily demand
   simplification or least-common-denominator/numerator procedures. Review the placement of
   those procedures relative to the equivalence principle.
 - **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
   congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
 
-The 40 remaining targets span these contract and modeling reviews; they are not
-40 proven false annotations. Eligibility under the proposed structural rule and truthfulness
+The 11 remaining CCSS targets span these contract and modeling reviews; they are not
+11 proven false annotations. Eligibility under the proposed structural rule and truthfulness
 of the current content claim remain separate questions.
