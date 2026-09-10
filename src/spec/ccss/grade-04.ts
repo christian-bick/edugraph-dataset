@@ -81,7 +81,6 @@ const multistepReasonablenessBuilder = new DatasetPermutationBuilder()
 
 const factorPairsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FactorsAndMultiples,
-    Area.Factorization,
     Scope.NumbersSmaller100,
     Ability.ProcedureExecution
 ]);
@@ -95,14 +94,12 @@ const oneDigitMultipleTestBuilder = new DatasetPermutationBuilder().addLabels([
 
 const primeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PrimeNumbers,
-    Area.Factorization,
     Scope.NumbersSmaller100,
     Ability.ConceptClassification
 ]);
 
 const compositeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.CompositeNumbers,
-    Area.Factorization,
     Scope.NumbersSmaller100,
     Ability.ConceptClassification
 ]);
@@ -210,7 +207,7 @@ const compareMultiDigitNumbersBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Area.NumericComparison, Scope.Greater], [Area.NumericComparison, Scope.Equal], [Area.NumericComparison, Scope.Less]]);
+    .applyLabelVariants([[Area.NumericInequality, Scope.Greater], [Area.NumericEquality, Scope.Equal], [Area.NumericInequality, Scope.Less]]);
 
 const grade4IntegerRoundingBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -546,7 +543,6 @@ const unlikeFractionComparisonBuilder = new DatasetPermutationBuilder()
 
 const interpretFractionAdditionSubtractionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Scope.FractionNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
@@ -556,7 +552,6 @@ const interpretFractionAdditionSubtractionBuilder = new DatasetPermutationBuilde
 
 const decomposeFractionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Area.Addition,
         Area.Equation,
         Scope.CommonDenominator,
@@ -568,7 +563,6 @@ const decomposeFractionsBuilder = new DatasetPermutationBuilder()
 
 const mixedNumberArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Scope.MixedNumbers,
         Scope.CommonDenominator,
         Scope.SingleFrameOfReference,
@@ -578,7 +572,6 @@ const mixedNumberArithmeticBuilder = new DatasetPermutationBuilder()
 
 const fractionArithmeticWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Area.Equation,
         Scope.FractionNumbers,
         Scope.CommonDenominator,
@@ -589,7 +582,6 @@ const fractionArithmeticWordProblemsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
 
 const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.FractionArithmetic,
     Area.Multiplication,
     Area.IteratedOperation,
     Area.Equation,
@@ -601,7 +593,6 @@ const unitFractionMultipleBuilder = new DatasetPermutationBuilder().addLabels([
 
 const wholeNumberFractionMultiplicationBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Area.Multiplication,
         Area.IteratedOperation,
         Area.Equation,
@@ -613,7 +604,6 @@ const wholeNumberFractionMultiplicationBuilder = new DatasetPermutationBuilder()
 
 const fractionMultiplicationWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Area.Multiplication,
         Area.IteratedOperation,
         Area.Equation,
@@ -636,7 +626,6 @@ const tenthsToHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
 ]);
 
 const addTenthsHundredthsBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.FractionArithmetic,
     Area.Addition,
     Area.Multiplication,
     Area.Equation,

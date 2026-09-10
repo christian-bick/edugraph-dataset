@@ -1,7 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
+import {generateWithLabels} from '../../../lib/utils.ts';
 import {FractionArithmeticGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
@@ -26,7 +26,6 @@ describe('FractionArithmeticGenerator spec integration', () => {
         expect(spec).toEqual({
             generatorId: 'fraction-arithmetic',
             generalLabels: [
-                Area.FractionArithmetic,
                 Area.Equation,
                 Scope.SingleFrameOfReference
             ]
@@ -39,33 +38,28 @@ describe('FractionArithmeticGenerator spec integration', () => {
         [
             '3a addition',
             [
-                Area.FractionArithmetic,
                 Area.Addition,
                 Scope.FractionNumbers,
                 Scope.CommonDenominator,
                 Scope.SingleFrameOfReference,
                 Ability.Interpretation
             ],
-            '3d0f30a5',
             'fraction-operation'
         ],
         [
             '3a subtraction',
             [
-                Area.FractionArithmetic,
                 Area.Subtraction,
                 Scope.FractionNumbers,
                 Scope.CommonDenominator,
                 Scope.SingleFrameOfReference,
                 Ability.Interpretation
             ],
-            'e3924583',
             'fraction-operation'
         ],
         [
             '3b proper decomposition',
             [
-                Area.FractionArithmetic,
                 Area.Addition,
                 Area.Equation,
                 Scope.ProperFractions,
@@ -74,13 +68,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.ProcedureUnderstanding,
                 Ability.Formalization
             ],
-            'c825a9a2',
             'decompose'
         ],
         [
             '3b mixed decomposition',
             [
-                Area.FractionArithmetic,
                 Area.Addition,
                 Area.Equation,
                 Scope.ImproperFractions,
@@ -90,39 +82,33 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.ProcedureUnderstanding,
                 Ability.Formalization
             ],
-            '20231a9b',
             'decompose'
         ],
         [
             '3c mixed addition',
             [
-                Area.FractionArithmetic,
                 Area.Addition,
                 Scope.MixedNumbers,
                 Scope.CommonDenominator,
                 Scope.SingleFrameOfReference,
                 Ability.ProcedureExecution
             ],
-            '19aafbc3',
             'mixed-operation'
         ],
         [
             '3c mixed subtraction',
             [
-                Area.FractionArithmetic,
                 Area.Subtraction,
                 Scope.MixedNumbers,
                 Scope.CommonDenominator,
                 Scope.SingleFrameOfReference,
                 Ability.ProcedureExecution
             ],
-            '371cfff9',
             'mixed-operation'
         ],
         [
             '3d word addition',
             [
-                Area.FractionArithmetic,
                 Area.Addition,
                 Area.Equation,
                 Scope.FractionNumbers,
@@ -131,13 +117,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.TextualReception,
                 Ability.ProcedureExecution
             ],
-            '2f9e63cc',
             'fraction-operation'
         ],
         [
             '3d word subtraction',
             [
-                Area.FractionArithmetic,
                 Area.Subtraction,
                 Area.Equation,
                 Scope.FractionNumbers,
@@ -146,13 +130,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.TextualReception,
                 Ability.ProcedureExecution
             ],
-            '942b0e60',
             'fraction-operation'
         ],
         [
             '4a unit fraction multiple',
             [
-                Area.FractionArithmetic,
                 Area.Multiplication,
                 Area.IteratedOperation,
                 Area.Equation,
@@ -161,13 +143,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Scope.SingleFrameOfReference,
                 Ability.Interpretation
             ],
-            'bb1bb0fe',
             'unit-fraction-multiple'
         ],
         [
             '4b proper product',
             [
-                Area.FractionArithmetic,
                 Area.Multiplication,
                 Area.IteratedOperation,
                 Area.Equation,
@@ -176,13 +156,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.ProcedureUnderstanding,
                 Scope.ProperFractions
             ],
-            '8be542ad',
             'whole-number-fraction-product'
         ],
         [
             '4b improper product',
             [
-                Area.FractionArithmetic,
                 Area.Multiplication,
                 Area.IteratedOperation,
                 Area.Equation,
@@ -191,13 +169,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.ProcedureUnderstanding,
                 Scope.ImproperFractions
             ],
-            'f60dee05',
             'whole-number-fraction-product'
         ],
         [
             '4c proper word product',
             [
-                Area.FractionArithmetic,
                 Area.Multiplication,
                 Area.IteratedOperation,
                 Area.Equation,
@@ -207,13 +183,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.TextualReception,
                 Scope.ProperFractions
             ],
-            '69679bd7',
             'whole-number-fraction-product'
         ],
         [
             '4c improper word product',
             [
-                Area.FractionArithmetic,
                 Area.Multiplication,
                 Area.IteratedOperation,
                 Area.Equation,
@@ -223,13 +197,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Ability.TextualReception,
                 Scope.ImproperFractions
             ],
-            '403d2ccf',
             'whole-number-fraction-product'
         ],
         [
             '5 tenths and hundredths addition',
             [
-                Area.FractionArithmetic,
                 Area.Addition,
                 Area.Multiplication,
                 Area.Equation,
@@ -238,17 +210,14 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 Scope.SingleFrameOfReference,
                 Ability.ProcedureExecution
             ],
-            '2c45a722',
             'tenths-hundredths-addition'
         ]
     ] as const)('resolves the corrected Grade 4 %s target', (
-        _name,
+        name,
         labels,
-        expectedHash,
         expectedTask
     ) => {
-        expect(labelSetHash([...labels])).toBe(expectedHash);
-        setSeed(expectedHash);
+        setSeed(name);
         const stub = generateWithLabels(generator, [...labels]);
 
         expect(stub).not.toBeNull();
@@ -271,7 +240,6 @@ describe('FractionArithmeticGenerator spec integration', () => {
 
     it('keeps deterministic label extraction on the direct generator RNG path', () => {
         const legacyLabels = [
-            Area.FractionArithmetic,
             Area.Addition,
             Scope.FractionNumbers,
             Scope.CommonDenominator,
@@ -289,7 +257,6 @@ describe('FractionArithmeticGenerator spec integration', () => {
         expect(resolvedLegacy!.data).toEqual(directLegacy.data);
 
         const multiplicationLabels = [
-            Area.FractionArithmetic,
             Area.Multiplication,
             Area.IteratedOperation,
             Area.Equation,
@@ -309,7 +276,6 @@ describe('FractionArithmeticGenerator spec integration', () => {
         expect(resolvedMultiplication!.data).toEqual(directMultiplication.data);
 
         const tenthsHundredthsLabels = [
-            Area.FractionArithmetic,
             Area.Addition,
             Area.Multiplication,
             Area.Equation,

@@ -1,9 +1,9 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {FactorMultipleRelationsGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {FactorMultipleRelationsGeneratorSchema, spec} from './spec.ts';
 
 describe('FactorMultipleRelationsGenerator spec integration', () => {
     const generator = new FactorMultipleRelationsGenerator();
@@ -21,7 +21,7 @@ describe('FactorMultipleRelationsGenerator spec integration', () => {
 
     it.each([
         [
-            [Area.FactorsAndMultiples, Area.Factorization, Ability.ProcedureExecution],
+            [Area.FactorsAndMultiples, Ability.ProcedureExecution],
             'factor-pairs'
         ],
         [
@@ -29,11 +29,11 @@ describe('FactorMultipleRelationsGenerator spec integration', () => {
             'one-digit-multiple-test'
         ],
         [
-            [Area.PrimeNumbers, Area.Factorization, Ability.ConceptClassification],
+            [Area.PrimeNumbers, Ability.ConceptClassification],
             'prime-classification'
         ],
         [
-            [Area.CompositeNumbers, Area.Factorization, Ability.ConceptClassification],
+            [Area.CompositeNumbers, Ability.ConceptClassification],
             'composite-classification'
         ]
     ] as const)('resolves the authored labels into %s', (labels, kind) => {
@@ -43,10 +43,14 @@ describe('FactorMultipleRelationsGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.kind).toBe(kind);
         expect(stub!.labels).toContain(labels[0]);
-        if (labels.some(label => String(label) === Area.Factorization)) {
-            expect(stub!.labels).toContain(Area.Factorization);
-        }
+        expect(stub!.labels).not.toContain(Area.Factorization);
         expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
         expect(stub!.labels).not.toContain(Ability.ConceptClassification);
+    });
+
+    it('rejects contradictory classifications instead of choosing a task', () => {
+        expect(() => extractConfig(FactorMultipleRelationsGeneratorSchema, [
+            Area.PrimeNumbers, Area.CompositeNumbers
+        ])).toThrow();
     });
 });

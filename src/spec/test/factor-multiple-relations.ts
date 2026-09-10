@@ -4,7 +4,6 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const factorPairsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FactorsAndMultiples,
-    Area.Factorization,
     Scope.NumbersSmaller100,
     Ability.ProcedureExecution
 ]);
@@ -18,14 +17,12 @@ const multipleTestBuilder = new DatasetPermutationBuilder().addLabels([
 
 const primeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PrimeNumbers,
-    Area.Factorization,
     Scope.NumbersSmaller100,
     Ability.ConceptClassification
 ]);
 
 const compositeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.CompositeNumbers,
-    Area.Factorization,
     Scope.NumbersSmaller100,
     Ability.ConceptClassification
 ]);

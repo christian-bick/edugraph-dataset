@@ -16,16 +16,15 @@ export const spec: GeneratorSpec = {
 
 const taskLabelSets = [
     [Area.FactorsAndMultiples, Area.PerfectDivisibility],
-    [Area.PrimeNumbers, Area.Factorization],
-    [Area.CompositeNumbers, Area.Factorization],
-    [Area.FactorsAndMultiples, Area.Factorization]
+    [Area.PrimeNumbers],
+    [Area.CompositeNumbers],
+    [Area.FactorsAndMultiples]
 ] as const;
 
 export const FactorMultipleRelationsGeneratorSchema = {
     task: [
         [
             Area.FactorsAndMultiples,
-            Area.Factorization,
             Area.PerfectDivisibility,
             Area.PrimeNumbers,
             Area.CompositeNumbers

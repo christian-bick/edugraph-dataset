@@ -77,7 +77,6 @@ const resolveTask = exactResolver((labels: string[]): FractionArithmeticTaskConf
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-arithmetic',
     generalLabels: [
-        Area.FractionArithmetic,
         Area.Equation,
         Scope.SingleFrameOfReference
     ]

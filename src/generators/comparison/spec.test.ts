@@ -80,9 +80,12 @@ describe('ComparisonGenerator Spec Integration', () => {
         [Scope.Less, 'less', '<'],
         [Scope.Equal, 'equal', '='],
         [Scope.Greater, 'greater', '>']
-    ] as const)('resolves Grade 4 NumericComparison %s', (relation, resolved, _symbol) => {
+    ] as const)('resolves the concrete Grade 4 relation %s', (relation, resolved, _symbol) => {
+        const resolvedArea = relation === Scope.Equal
+            ? Area.NumericEquality
+            : Area.NumericInequality;
         const stub = generateWithLabels(generator, [
-            Area.NumericComparison,
+            resolvedArea,
             relation,
             Scope.ArabicNumerals,
             Scope.Base10,
@@ -98,22 +101,18 @@ describe('ComparisonGenerator Spec Integration', () => {
             task: 'multi-digit-place-value-comparison',
             relation: resolved
         });
-        const resolvedArea = relation === Scope.Equal
-            ? Area.NumericEquality
-            : Area.NumericInequality;
         expect(stub!.labels).toEqual(expect.arrayContaining([
-            Area.NumericComparison,
             resolvedArea,
             relation,
             Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000
         ]));
+        expect(stub!.labels).not.toContain(Area.NumericComparison);
     });
 
-    it('resolves an explicit relation capability for a broad comparison target', () => {
+    it('completes a concrete relation when the target leaves it unspecified', () => {
         setSeed('comparison-relation-fallback');
         const stub = generateWithLabels(generator, [
-            Area.NumericComparison,
             Scope.NumbersSmaller20,
             Scope.NumbersWithoutNegatives,
             Scope.NumbersWithoutZero
@@ -124,7 +123,7 @@ describe('ComparisonGenerator Spec Integration', () => {
             Area.NumericEquality,
             Area.NumericInequality
         ].includes(label as Area))).toBe(true);
-        expect(stub!.labels).toContain(Area.NumericComparison);
+        expect(stub!.labels).not.toContain(Area.NumericComparison);
         expect(stub!.labels.some(label => [Scope.Less, Scope.Equal, Scope.Greater].includes(label as Scope))).toBe(true);
     });
 });

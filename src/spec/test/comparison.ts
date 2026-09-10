@@ -22,7 +22,6 @@ const builder = new DatasetPermutationBuilder()
 
 const gradeFourBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.NumericComparison,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersLarger1000,
@@ -32,9 +31,9 @@ const gradeFourBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Less],
-        [Scope.Equal],
-        [Scope.Greater]
+        [Area.NumericInequality, Scope.Less],
+        [Area.NumericEquality, Scope.Equal],
+        [Area.NumericInequality, Scope.Greater]
     ]);
 
 const gradeOnePlaceValueBuilder = new DatasetPermutationBuilder()
