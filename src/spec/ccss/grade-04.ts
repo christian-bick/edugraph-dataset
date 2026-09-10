@@ -369,7 +369,6 @@ const constructFractionalLinePlotBuilder = new DatasetPermutationBuilder().addLa
 
 const fractionLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionArithmetic,
         Area.Statistics,
         Scope.InchScale,
         Scope.ProvidedMeasurement,

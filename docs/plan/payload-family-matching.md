@@ -57,6 +57,16 @@ capabilities are invariant; only concrete instance counts vary with the seed.
 
 ## Broader adoption, in order
 
+The second application is measurement observations versus extrema arithmetic, recorded in
+[Batch 6](observable-label-cleanup.md#batch-6-measurement-extrema-arithmetic). It replaces an optional
+relation and grouping-label guard with two precise generator outputs and shares observation
+generation and line-plot components. A view's input type must reflect which mathematical claims
+its projection preserves, not only whether it could access the payload's common fields.
+
+The plain line-plot view's `usesUnitSteps` parameter is a concrete micro-filter review candidate:
+an explicit whole-step requirement must be compatible with the generator's subdivisions. It is
+not a reason to recreate payload-family routing through a grouping label.
+
 1. **Inventory payload-family routing.** Reuse the parsed type graph and compatible-pair index to
    list generator unions, member-only consumers, and requirements/exclusions used to distinguish
    output families. Record actual affected targets and whether configuration guarantees a member.

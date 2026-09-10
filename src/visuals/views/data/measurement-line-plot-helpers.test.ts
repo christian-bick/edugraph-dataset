@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
-import {MeasurementDataProblem, MeasurementObservation} from '../../../types/problems.ts';
+import {MeasurementDataProblem, MeasurementExtremaProblem, MeasurementObservation} from '../../../types/problems.ts';
+import {formatMeasurement, validateMeasurementData} from './helpers.ts';
 import {buildMeasurementLinePlot, validateMeasurementExtremaRelation} from './measurement-line-plot-helpers.ts';
 
 const objects: MeasurementObservation['object'][] = ['pencil', 'crayon', 'ribbon', 'key', 'brush', 'block'];
@@ -35,16 +36,49 @@ describe('measurement line-plot projection', () => {
             operation: 'subtraction',
             shortest: 1.125,
             longest: 3,
-            leftOperand: 3,
-            rightOperand: 1.125,
             answer: 1.875
         } as const;
-        data.extremaRelation = relation;
-        expect(validateMeasurementExtremaRelation(data, 'fixture', true)).toEqual(relation);
-        expect(() => validateMeasurementExtremaRelation({...data, extremaRelation: undefined}, 'fixture', true)).toThrow();
+        const arithmetic: MeasurementExtremaProblem = {...data, extremaRelation: relation};
+        expect(validateMeasurementExtremaRelation(arithmetic, 'fixture')).toEqual(relation);
+        expect(() => validateMeasurementExtremaRelation(data as never, 'fixture')).toThrow();
         expect(() => validateMeasurementExtremaRelation({
             ...data,
             extremaRelation: {...relation, answer: 2}
-        }, 'fixture', true)).toThrow();
+        }, 'fixture')).toThrow();
+        for (const invalid of [
+            {...relation, operation: 'multiply'}, {...relation, shortest: 0},
+            {...relation, longest: 0}, {...relation, answer: NaN}
+        ]) expect(() => validateMeasurementExtremaRelation({
+            ...data, extremaRelation: invalid as never
+        }, 'fixture')).toThrow();
+        expect(validateMeasurementExtremaRelation({
+            ...data, extremaRelation: {...relation, operation: 'addition', answer: 4.125}
+        }, 'fixture').answer).toBe(4.125);
+    });
+
+    it.each(['cm', 'in'] as const)('uses subdivision precision independently of %s', unit => {
+        for (const [values, subdivisions, expectedEnd] of [
+            [[2, 3, 4, 4, 7, 10], 1, 10],
+            [[2.25, 2.5, 3, 4, 7, 8], 4, 8],
+            [[1.125, 1.25, 1.5, 1.5, 2.625, 3], 8, 3]
+        ] as const) {
+            const data = {...problem(values, subdivisions), unit};
+            expect(() => validateMeasurementData(data, 'fixture')).not.toThrow();
+            const model = buildMeasurementLinePlot(data, 'fixture');
+            expect(model.end).toBe(expectedEnd);
+            expect(model.ticks.reduce((sum, tick) => sum + tick.count, 0)).toBe(6);
+        }
+        expect(formatMeasurement(1.125, unit)).toBe(`1⅛ ${unit}`);
+        expect(formatMeasurement(2.5, unit)).toBe(`2½ ${unit}`);
+        expect(formatMeasurement(2, unit)).toBe(`2 ${unit}`);
+    });
+
+    it('rejects unsupported units and measurements outside the declared precision', () => {
+        const data = problem([2, 3, 4, 4, 7, 10], 1);
+        expect(() => validateMeasurementData({...data, unit: 'm'} as never, 'fixture')).toThrow();
+        expect(() => validateMeasurementData({...data, subdivisions: 3} as never, 'fixture')).toThrow();
+        expect(() => validateMeasurementData(problem([2, 3, 4, 4, 7, 11], 1), 'fixture')).toThrow();
+        expect(() => validateMeasurementData(problem([2, 3, 4, 4, 7, 8], 4), 'fixture')).toThrow();
+        expect(() => validateMeasurementData(problem([1, 2, 3, 3, 3, 4], 8), 'fixture')).toThrow();
     });
 });

@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
@@ -8,8 +8,7 @@ export const spec: ViewSpec = {
         Scope.LinePlot,
         Scope.ProvidedMeasurement,
         Ability.ProcedureExecution
-    ],
-    requiredLabels: [Area.FractionArithmetic]
+    ]
 };
 
 export const MeasurementLinePlotArithmeticViewSchema = {} as const;

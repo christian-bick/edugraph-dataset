@@ -1,125 +1,48 @@
-import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {MeasurementDataGenerator} from './generator.ts';
 
 describe('MeasurementDataGenerator', () => {
-    it('generates six whole-centimeter observations in a compact range', () => {
-        setSeed(42);
-        const problem = new MeasurementDataGenerator().generate({numberKind: Scope.IntegerNumbers});
+    const generator = new MeasurementDataGenerator();
 
-        expect(problem.data).toEqual(expect.objectContaining({unit: 'cm', subdivisions: 1}));
-        expect(problem.data.observations).toHaveLength(6);
-        expect(new Set(problem.data.observations.map(({object}) => object)).size).toBe(6);
-        expect(problem.data.observations.every(({value}) => Number.isInteger(value) && value >= 2 && value <= 10)).toBe(true);
-        expect(problem.data.extremaRelation).toBeUndefined();
-    });
-
-    it('generates quarter-inch observations including halves and fourths', () => {
-        setSeed(42);
-        const data = new MeasurementDataGenerator().generate({numberKind: Scope.FractionNumbers}).data;
-        const quarterUnits = data.observations.map(({value}) => value * 4);
-
-        expect(data.unit).toBe('in');
-        expect(data.subdivisions).toBe(4);
-        expect(quarterUnits.every(Number.isInteger)).toBe(true);
-        expect(quarterUnits.every(value => value >= 8 && value <= 32)).toBe(true);
-        expect(quarterUnits.some(value => value % 4 === 2)).toBe(true);
-        expect(quarterUnits.some(value => value % 2 === 1)).toBe(true);
-    });
-
-    it('uses an explicit unit scale independently of the number kind', () => {
-        setSeed(42);
-        const fractionalCentimeters = new MeasurementDataGenerator().generate({
-            numberKind: Scope.FractionNumbers,
-            unitScale: Scope.CentimeterScale
-        }).data;
-        const integerInches = new MeasurementDataGenerator().generate({
-            numberKind: Scope.IntegerNumbers,
-            unitScale: Scope.InchScale
-        }).data;
-
-        expect(fractionalCentimeters).toEqual(expect.objectContaining({unit: 'cm', subdivisions: 4}));
-        expect(integerInches).toEqual(expect.objectContaining({unit: 'in', subdivisions: 1}));
-    });
-
-    it('generates neutral eighth-inch observations for one measurement frame', () => {
-        for (let seed = 0; seed < 40; seed++) {
-            setSeed(`eighth-inch-data-${seed}`);
-            const data = new MeasurementDataGenerator().generate({
-                numberKind: Scope.FractionNumbers,
-                useSingleFrame: true
-            }).data;
-            const eighths = data.observations.map(({value}) => value * 8);
-
-            expect(data.unit).toBe('in');
-            expect(data.subdivisions).toBe(8);
-            expect(eighths.every(Number.isInteger)).toBe(true);
-            expect(new Set(eighths).size).toBeLessThan(6);
-            expect(data.extremaRelation).toBeUndefined();
-            expect(Object.keys(data).sort()).toEqual(['observations', 'subdivisions', 'unit']);
+    it.each(['cm', 'in'] as const)('generates whole-unit observations in %s', unitScale => {
+        for (let seed = 0; seed < 80; seed++) {
+            setSeed(seed);
+            const data = generator.generate({numberKind: 'integer', unitScale, useSingleFrame: false}).data;
+            expect(data.unit).toBe(unitScale);
+            expect(data.subdivisions).toBe(1);
+            expect(data.observations).toHaveLength(6);
+            expect(new Set(data.observations.map(({object}) => object)).size).toBe(6);
+            expect(data.observations.every(({value}) => Number.isInteger(value) && value >= 2 && value <= 10)).toBe(true);
         }
     });
 
-    it.each([
-        [Area.Addition, 'addition'],
-        [Area.Subtraction, 'subtraction']
-    ] as const)('derives a canonical extrema %s relation without presentation prose', (operation, expectedOperation) => {
-        setSeed(expectedOperation);
-        const data = new MeasurementDataGenerator().generate({
-            numberKind: Scope.FractionNumbers,
-            useSingleFrame: true,
-            includeFractionArithmetic: true,
-            operation
-        }).data;
-        const relation = data.extremaRelation!;
-        const lengths = data.observations.map(({value}) => value);
-
-        expect(relation.operation).toBe(expectedOperation);
-        expect(relation.shortest).toBe(Math.min(...lengths));
-        expect(relation.longest).toBe(Math.max(...lengths));
-        expect(relation.leftOperand).toBe(operation === Area.Addition ? relation.shortest : relation.longest);
-        expect(relation.rightOperand).toBe(operation === Area.Addition ? relation.longest : relation.shortest);
-        expect(relation.answer).toBe(operation === Area.Addition
-            ? relation.leftOperand + relation.rightOperand
-            : relation.leftOperand - relation.rightOperand);
-        expect(Object.keys(relation).sort()).toEqual([
-            'answer', 'leftOperand', 'longest', 'operation', 'rightOperand', 'shortest'
-        ]);
+    it.each(['cm', 'in'] as const)('preserves fractional observations and replay in %s', unitScale => {
+        for (const useSingleFrame of [false, true]) for (let seed = 0; seed < 80; seed++) {
+            const config = {numberKind: 'fraction', unitScale, useSingleFrame} as const;
+            setSeed(seed);
+            const data = generator.generate(config).data;
+            const subdivisions = useSingleFrame ? 8 : 4;
+            const ticks = data.observations.map(({value}) => value * subdivisions);
+            expect(data.subdivisions).toBe(subdivisions);
+            expect(data.unit).toBe(unitScale);
+            expect(ticks.every(Number.isInteger)).toBe(true);
+            expect(ticks.every(value => value >= 8 && value <= 32)).toBe(true);
+            expect(ticks.some(value => value % subdivisions === 1)).toBe(true);
+            expect(ticks.some(value => value % subdivisions === subdivisions / 2)).toBe(true);
+            if (useSingleFrame) expect(new Set(ticks).size).toBeLessThan(6);
+            setSeed(seed);
+            expect(generator.generate(config).data).toEqual(data);
+        }
     });
 
-    it('is deterministic for the same seed', () => {
-        const generator = new MeasurementDataGenerator();
-        setSeed(7);
-        const first = generator.generate({numberKind: Scope.IntegerNumbers});
-        setSeed(7);
-        expect(generator.generate({numberKind: Scope.IntegerNumbers})).toEqual(first);
-    });
-
-    it('strictly rejects incomplete arithmetic configurations', () => {
-        const generator = new MeasurementDataGenerator();
-        expect(() => generator.generate({
-            numberKind: Scope.IntegerNumbers,
-            useSingleFrame: true
-        })).toThrow('requires fractional measurements');
-        expect(() => generator.generate({
-            numberKind: Scope.FractionNumbers,
-            includeFractionArithmetic: true,
-            operation: Area.Addition
-        })).toThrow('requires a single measurement frame');
-        expect(() => generator.generate({
-            numberKind: Scope.FractionNumbers,
-            useSingleFrame: true,
-            includeFractionArithmetic: true
-        })).toThrow('requires addition or subtraction');
-        expect(() => generator.generate({
-            numberKind: Scope.FractionNumbers,
-            useSingleFrame: true,
-            operation: Area.Addition
-        })).toThrow('requires FractionArithmetic');
-    });
-
-    it('rejects a missing configuration object', () => {
-        expect(() => new MeasurementDataGenerator().generate(null as never)).toThrow();
+    it('rejects absent, invalid, and incompatible configuration', () => {
+        const valid = {numberKind: 'integer', unitScale: 'cm', useSingleFrame: false} as const;
+        expect(() => generator.generate({})).toThrow();
+        expect(() => generator.generate(null as never)).toThrow();
+        for (const invalid of [
+            {...valid, numberKind: 'complex'}, {...valid, unitScale: 'm'},
+            {...valid, useSingleFrame: 'yes'}, {...valid, useSingleFrame: true}
+        ]) expect(() => generator.generate(invalid as never)).toThrow();
     });
 });

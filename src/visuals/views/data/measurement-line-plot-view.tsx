@@ -1,5 +1,5 @@
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
-import {MeasurementDataProblem, MeasurementExtremaRelation} from '../../../types/problems.ts';
+import {MeasurementDataProblem, MeasurementExtremaProblem, MeasurementExtremaRelation} from '../../../types/problems.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
 import {formatMeasurement} from './helpers.ts';
 import {
@@ -10,12 +10,17 @@ import {
 
 export type MeasurementLinePlotMode = 'construction' | 'arithmetic';
 
-interface MeasurementLinePlotViewProps {
-    mode: MeasurementLinePlotMode;
+type MeasurementLinePlotViewProps = {
+    viewId: string;
+} & ({
+    mode: 'construction';
     payload: RenderPayload<AbstractProblem<MeasurementDataProblem>>;
     requireUnitSteps?: boolean;
-    viewId: string;
-}
+} | {
+    mode: 'arithmetic';
+    payload: RenderPayload<AbstractProblem<MeasurementExtremaProblem>>;
+    requireUnitSteps?: never;
+});
 
 const stepText = (subdivisions: MeasurementDataProblem['subdivisions']): string =>
     subdivisions === 1 ? '1' : subdivisions === 4 ? '¼' : '⅛';
@@ -70,8 +75,12 @@ const questionEquation = (relation: MeasurementExtremaRelation): string => relat
     ? 'shortest + longest = ?'
     : 'longest − shortest = ?';
 
-const solutionEquation = (relation: MeasurementExtremaRelation, data: MeasurementDataProblem): string =>
-    `${formatMeasurement(relation.leftOperand, data.unit)} ${relation.operation === 'addition' ? '+' : '−'} ${formatMeasurement(relation.rightOperand, data.unit)} = ${formatMeasurement(relation.answer, data.unit)}`;
+const solutionEquation = (relation: MeasurementExtremaRelation, data: MeasurementDataProblem): string => {
+    const isAddition = relation.operation === 'addition';
+    const left = isAddition ? relation.shortest : relation.longest;
+    const right = isAddition ? relation.longest : relation.shortest;
+    return `${formatMeasurement(left, data.unit)} ${isAddition ? '+' : '−'} ${formatMeasurement(right, data.unit)} = ${formatMeasurement(relation.answer, data.unit)}`;
+};
 
 const explanation = (relation: MeasurementExtremaRelation, data: MeasurementDataProblem): string => relation.operation === 'addition'
     ? `The shortest measurement is ${formatMeasurement(relation.shortest, data.unit)}, and the longest is ${formatMeasurement(relation.longest, data.unit)}. Add them to get ${formatMeasurement(relation.answer, data.unit)}.`
@@ -89,7 +98,9 @@ export const MeasurementLinePlotView = ({
     if (requireUnitSteps && data.subdivisions !== 1) {
         throw new ViewValidationError(viewId, 'Unit-step line plots require whole-unit measurements.');
     }
-    const relation = validateMeasurementExtremaRelation(data, viewId, mode === 'arithmetic');
+    const relation = mode === 'arithmetic'
+        ? validateMeasurementExtremaRelation(payload.problem.data, viewId)
+        : undefined;
     const showMarks = mode === 'arithmetic' || isSolutionView;
 
     return (

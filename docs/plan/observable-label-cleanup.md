@@ -234,6 +234,72 @@ families instead of broadening that guard; no shared matching code changed.
 Diagnostic evidence is in `temp/observable-cleanup-batch5/`: `before.json`, `after-split.json`,
 `diff-split.json`, `matching-split.log`, `coverage-split.log`, and `check-affected-split.log`.
 
+## Batch 6: measurement extrema arithmetic
+
+Separate plain measurement observations from observations with a required extrema operation.
+`measurement-data` retains plain observations; `measurement-extrema` owns the existing bounded
+eighth-unit observations plus an addition/subtraction relation. Both use shared observation
+generation. The arithmetic view accepts `MeasurementExtremaProblem` directly, not an optional
+field made mandatory through `FractionArithmetic` (`IMPL-G7`, `SPEC-G3`).
+
+| Production consumer | Target family | Payload adoption | Verification |
+| --- | --- | --- | --- |
+| `measurement-data-table` | Grade 2 observed length data | Plain observation structure remains unchanged; no arithmetic relation belongs to this contract. | Seed-aligned data/markup replay and both modes. |
+| `measurement-line-plot` | Grades 2 and 4 provided-data construction | Retain the plain observation type and shared line-plot rendering. | Fixed-seed replay and frequency/scale tests. |
+| `measurement-line-plot-arithmetic` | Grade 4 extrema addition/subtraction | Require the precise arithmetic payload; remove the grouping-label guard; order existing shortest/longest values in the view. | Typed-routing, relation validation, and both-mode replay. |
+
+Remove `FractionArithmetic` from generator capabilities and the affected CCSS/test targets.
+Addition/Subtraction and FractionNumbers already express the actual claim. Keep calculated
+shortest, longest, and answer values as mathematical evidence, but remove `leftOperand` and
+`rightOperand` aliases of the extrema (`IMPL-G8`). Resolve ontology labels to plain typed
+configuration rather than comparing labels inside generator code (`IMPL-G1`).
+
+The new arithmetic generator guarantees fractional observations in one compact frame. Addition
+and Subtraction remain schema choices; centimeter/inch unit capabilities remain configurable.
+Plain views do not consume this family: they would omit the arithmetic evidence. The arithmetic
+view cannot consume plain observations whose required relation is absent. Typed routing enforces
+both directions without a grouping-label guard.
+
+Review also found unit/precision coupling in the shared views: the generator can produce whole
+inches and fractional centimeters, but validation previously admitted only whole centimeters and
+fractional inches. Validation and formatting now follow subdivisions independently of the unit.
+Axes and rulers cover the numeric domain, and measurement instructions request whole, quarter,
+or eighth units accordingly. This fixes an unnecessarily partial projection (`IMPL-V11`) rather
+than restricting valid mathematical capabilities to the combinations in current targets.
+
+No ontology changes, new learner actions, or shared matcher changes were needed. Baseline evidence
+is in `temp/observable-cleanup-batch6/before.json`: 600 draws and 1,200 server renders across all
+matched measurement-data consumers in CCSS and test.
+
+### Validation
+
+- All 653 CCSS targets retain their 799 matches after the producer ID change for extrema
+  arithmetic. No CCSS or test target/view path is added or lost. The two CCSS and two smoke
+  arithmetic targets no longer contain `FractionArithmetic`.
+- All 600 ordinary fixed-seed draws change their concrete measurements because the old
+  plain-array `numberKind` selector consumed one random value even with an exact requested
+  number kind. The typed exact resolver does not. A diagnostic replay accounts for that one
+  removed draw and reproduces every baseline payload and all 1,200 markup outputs, after only
+  deleting the two duplicate operand aliases and the grouping annotation. No dummy random draw
+  is retained in production. Target and generator ID changes also affect canonical sample seeds.
+- Regression tests cover schema resolution, bounded observations, coherent extrema arithmetic,
+  rejection of missing relations, precise generator/view routing, and both rendered modes for
+  every supported unit/subdivision combination. Relation arithmetic and plain-data generation
+  remain independent of ontology labels in implementation code.
+- Composition-parent target usage decreases from 37 to 35. Image counts remain those of the
+  existing canonical snapshot, not a regenerated dataset.
+- Full coverage: 447 test files and 2,456 tests pass; both measurement generators have 100%
+  statement and branch coverage. The render regression adds 32 server renders across units,
+  precisions, operations, and question/solution modes. `check:affected` passes, including types,
+  module contracts, all 653 CCSS targets, all 559 test targets, and coverage of all 82 generators.
+  Documentation checks and `git diff --check` also pass.
+- Canonical generation and VQA remain pending: a fresh outside-sandbox Docker query still did
+  not respond and was cancelled. No PNGs, uploads, or cache changes were produced.
+
+Evidence files: `after.json` / `diff.json` record actual seeded changes; `after-aligned.json` /
+`diff-aligned.json` isolate the removed schema draw. `coverage.log`, `check-affected.log`, and
+`matching.log` record the repository gates.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
@@ -241,11 +307,9 @@ all modules merely because one usage is redundant.
 
 - [x] Remove all active `Factorization` grouping claims from the reviewed task family.
 - [x] Remove `NumericComparison` from `comparison` and `shape-compare-attributes`.
-- [x] Remove `FractionArithmetic` from `fraction-arithmetic`; its measurement-data usage remains
-  below.
-- [ ] `measurement-data` uses `FractionArithmetic` as a behavioral flag, and
-  `measurement-line-plot-arithmetic` requires it. Review the operation and applicability contract
-  together. Deleting the label alone would disable or invalidate a real arithmetic task.
+- [x] Remove `FractionArithmetic` from `fraction-arithmetic` and measurement-data arithmetic.
+  Batch 6 replaces the latter's behavioral flag and view requirement with precise mathematical
+  payload families and the existing operation claims.
 - [x] Replace `NumericComparison` and remove redundant `ShapeIdentity` in
   `shape-compare-attributes`. The `shape-build-shape` use still needs review.
 - [x] Replace the angle-tool and measurement word-problem/number-line grouping uses with their
@@ -269,11 +333,9 @@ applicability before modifying targets or adding ontology entities.
    factor scaling; abstract segment counts use a separate precise payload family. `UnitConversion`
    was not substituted: its definition concerns different unit systems, unlike several current
    within-system scaling examples. Complete canonical validation before closing the artifact gate.
-2. **Measurement line-plot arithmetic:** `FractionArithmetic` enables an optional extrema
-   relation in the payload and is required by the arithmetic view. Replacing it with
-   `FractionNumbers` alone would admit ordinary observations without that relation. Review
-   whether the canonical model should always carry the derived evidence or whether separate
-   mathematical contracts are warranted; use the actual addition/subtraction claims.
+2. **Measurement line-plot arithmetic (resolved in Batch 6):** plain observations and extrema
+   arithmetic have precise separate contracts. The arithmetic view requires its relation through
+   the payload type, with Addition/Subtraction as the actual operation claims.
 3. **Shape construction and fraction partitioning:** `ShapeIdentity`, `ProportionSense`, and
    `FractionInterpretation` still help select generator branches or denominator ranges. Review
    these decisions before replacing broad Areas with narrower constituents. Naming halves and
@@ -290,6 +352,6 @@ applicability before modifying targets or adding ontology entities.
 - **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
   congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
 
-The 37 remaining targets span these contract and modeling reviews; they are not
-37 proven false annotations. Eligibility under the proposed structural rule and truthfulness
+The 35 remaining targets span these contract and modeling reviews; they are not
+35 proven false annotations. Eligibility under the proposed structural rule and truthfulness
 of the current content claim remain separate questions.

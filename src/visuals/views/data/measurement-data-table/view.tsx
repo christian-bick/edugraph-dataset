@@ -41,7 +41,7 @@ function MeasurementObject({object, width}: {object: MeasurementObservation['obj
 
 function MeasurementRow({observation, data, reveal}: {observation: MeasurementObservation; data: MeasurementDataProblem; reveal: boolean}) {
     const width = observation.value * 28;
-    const maxLength = data.unit === 'cm' ? 10 : 8;
+    const maxLength = data.subdivisions === 1 ? 10 : 8;
     const tickCount = maxLength * data.subdivisions;
     return (
         <div className="grid grid-cols-[90px_1fr_92px] items-center gap-4 border-t border-slate-200 py-3 first:border-t-0">
@@ -86,13 +86,15 @@ const MeasurementDataTableCore = ({payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateMeasurementData(data, 'measurement-data-table');
+    const unitName = data.unit === 'cm' ? 'centimeter' : 'inch';
+    const precision = data.subdivisions === 1 ? '' : data.subdivisions === 4 ? 'quarter ' : 'eighth ';
     return (
         <div className="w-[690px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Collect length data</div>
             <div className="mt-1 text-xl font-bold text-slate-800">
                 {isSolutionView
                     ? 'Recorded measurements'
-                    : `Measure each object to the nearest ${data.unit === 'cm' ? 'centimeter' : 'quarter inch'}.`}
+                    : `Measure each object to the nearest ${precision}${unitName}.`}
             </div>
             <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-5">
                 {data.observations.map(observation => (

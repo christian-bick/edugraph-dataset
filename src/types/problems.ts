@@ -888,8 +888,6 @@ export type MeasurementExtremaRelation = {
     operation: 'addition' | 'subtraction';
     shortest: number;
     longest: number;
-    leftOperand: number;
-    rightOperand: number;
     answer: number;
 };
 
@@ -897,7 +895,10 @@ export type MeasurementDataProblem = {
     unit: 'cm' | 'in';
     subdivisions: 1 | 4 | 8;
     observations: MeasurementObservation[];
-    extremaRelation?: MeasurementExtremaRelation;
+};
+
+export type MeasurementExtremaProblem = MeasurementDataProblem & {
+    extremaRelation: MeasurementExtremaRelation;
 };
 
 export type StatisticalCategoryId = 'apple' | 'book' | 'kite';
@@ -1943,7 +1944,7 @@ export interface ViewTypeMap {
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
-    'measurement-line-plot-arithmetic': MeasurementDataProblem;
+    'measurement-line-plot-arithmetic': MeasurementExtremaProblem;
     'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
     'measurement-number-line': MeasurementNumberLineProblem;
     'data-picture-graph': StatisticalGraphProblem;

@@ -1,72 +1,54 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {setSeed} from '../../../lib/random.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {MeasurementDataGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {MeasurementDataGeneratorSchema} from './spec.ts';
 
-describe('measurement-data spec', () => {
-    it('owns the statistical data without claiming a measurement task', () => {
-        expect(spec.generalLabels).toEqual([Area.Statistics]);
-    });
-
-    it('generates observed whole-unit measurement data without owning the evidence source', () => {
-        const result = generateWithLabels(new MeasurementDataGenerator(), [
-            Area.Statistics,
-            Area.MeasuringLength,
-            Scope.ObservedMeasurement,
-            Scope.IntegerNumbers,
-            Scope.CentimeterScale,
-            Ability.ProcedureExecution
-        ]);
-
-        expect(result?.data.observations).toHaveLength(6);
-        expect(result?.data.unit).toBe('cm');
-        expect(result?.labels).not.toContain(Scope.ObservedMeasurement);
-    });
-
-    it('resolves provided eighth-inch data without selecting a line-plot task', () => {
-        const result = generateWithLabels(new MeasurementDataGenerator(), [
-            Area.Statistics,
-            Scope.ProvidedMeasurement,
-            Scope.FractionNumbers,
-            Scope.InchScale,
-            Scope.LinePlot,
-            Scope.SingleFrameOfReference,
-            Ability.VisualArticulation
-        ]);
-
-        expect(result?.data).toEqual(expect.objectContaining({unit: 'in', subdivisions: 8}));
-        expect(result?.data.extremaRelation).toBeUndefined();
-        expect(result?.labels).toEqual(expect.arrayContaining([
-            Scope.SingleFrameOfReference,
-            Scope.FractionNumbers,
-            Scope.InchScale
-        ]));
-        expect(result?.labels).not.toContain(Ability.VisualArticulation);
-        expect(result?.labels).not.toContain(Scope.LinePlot);
+describe('measurement-data schema integration', () => {
+    it.each([
+        [Scope.IntegerNumbers, 'integer', Scope.CentimeterScale, 'cm', 1],
+        [Scope.IntegerNumbers, 'integer', Scope.InchScale, 'in', 1],
+        [Scope.FractionNumbers, 'fraction', Scope.CentimeterScale, 'cm', 4],
+        [Scope.FractionNumbers, 'fraction', Scope.InchScale, 'in', 4]
+    ] as const)('resolves numeric and unit context independently: %s / %s / %s', (numberLabel, numberKind, unitLabel, unit, subdivisions) => {
+        const labels = [numberLabel, unitLabel];
+        const resolution = extractConfig(MeasurementDataGeneratorSchema, labels);
+        expect(resolution.config).toMatchObject({numberKind, unitScale: unit, useSingleFrame: false});
+        expect(new Set(resolution.resolvedLabels)).toEqual(new Set(labels));
+        const result = generateWithLabels(new MeasurementDataGenerator(), labels)!;
+        expect(result.data).toMatchObject({unit, subdivisions});
     });
 
     it.each([
-        [Area.Addition, 'addition'],
-        [Area.Subtraction, 'subtraction']
-    ] as const)('resolves Grade 4 FractionArithmetic %s as a neutral relation', (operation, taskOperation) => {
-        const result = generateWithLabels(new MeasurementDataGenerator(), [
-            Area.Statistics,
-            Area.FractionArithmetic,
-            operation,
-            Scope.FractionNumbers,
-            Scope.ProvidedMeasurement,
-            Scope.LinePlot,
-            Scope.SingleFrameOfReference,
-            Ability.ProcedureExecution
-        ]);
+        [Scope.IntegerNumbers, 'cm', Scope.CentimeterScale],
+        [Scope.FractionNumbers, 'in', Scope.InchScale]
+    ] as const)('labels its default unit for %s', (numberLabel, unit, unitLabel) => {
+        const result = generateWithLabels(new MeasurementDataGenerator(), [numberLabel])!;
+        expect(result.data.unit).toBe(unit);
+        expect(result.labels).toContain(unitLabel);
+    });
 
-        expect(result?.data.extremaRelation).toEqual(expect.objectContaining({operation: taskOperation}));
-        expect(result?.labels).toEqual(expect.arrayContaining([
-            Area.FractionArithmetic,
-            operation,
-            Scope.InchScale,
-            Scope.SingleFrameOfReference
-        ]));
+    it('preserves the same fractional data across presentation requests', () => {
+        const generator = new MeasurementDataGenerator();
+        const labels = [Scope.FractionNumbers, Scope.InchScale, Scope.SingleFrameOfReference];
+        setSeed('single-frame');
+        const reference = generateWithLabels(generator, labels)!;
+        expect(reference.data.subdivisions).toBe(8);
+        for (const presentation of [
+            [Scope.LinePlot, Scope.ProvidedMeasurement, Ability.VisualArticulation],
+            [Scope.DataTable, Scope.ObservedMeasurement, Ability.ProcedureExecution]
+        ]) {
+            setSeed('single-frame');
+            const result = generateWithLabels(generator, [...labels, ...presentation])!;
+            expect(result).toEqual(reference);
+        }
+    });
+
+    it('rejects competing numeric kinds and unit choices', () => {
+        for (const labels of [
+            [Scope.IntegerNumbers, Scope.FractionNumbers],
+            [Scope.CentimeterScale, Scope.InchScale]
+        ]) expect(() => extractConfig(MeasurementDataGeneratorSchema, labels)).toThrow();
     });
 });

@@ -1,21 +1,15 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
 
-const resolveOperation = selectExactLabelSetMap([
-    [[], 'none'],
-    [[Area.Addition], Area.Addition],
-    [[Area.Subtraction], Area.Subtraction]
-] as const);
-
-const resolveUnitScale = exactResolver((labels: string[]): Scope.CentimeterScale | Scope.InchScale => {
+const resolveUnitScale = exactResolver((labels: string[]): 'cm' | 'in' => {
     const exactScale = selectExactLabelMap([
-        [Scope.CentimeterScale, Scope.CentimeterScale],
-        [Scope.InchScale, Scope.InchScale]
+        [Scope.CentimeterScale, 'cm'],
+        [Scope.InchScale, 'in']
     ] as const)(labels);
     if (exactScale) return exactScale;
-    return labels.includes(Scope.FractionNumbers) ? Scope.InchScale : Scope.CentimeterScale;
+    return labels.includes(Scope.FractionNumbers) ? 'in' : 'cm';
 });
 
 export const spec: GeneratorSpec = {
@@ -24,14 +18,15 @@ export const spec: GeneratorSpec = {
 };
 
 export const MeasurementDataGeneratorSchema = {
-    numberKind: [Scope.IntegerNumbers, Scope.FractionNumbers],
+    numberKind: [[Scope.IntegerNumbers, Scope.FractionNumbers], selectExactLabelMap([
+        [Scope.IntegerNumbers, 'integer'],
+        [Scope.FractionNumbers, 'fraction']
+    ] as const)],
     unitScale: [
         [Scope.CentimeterScale, Scope.InchScale],
         resolveUnitScale,
         [[Scope.CentimeterScale], [Scope.InchScale]]
     ],
-    useSingleFrame: [[Scope.SingleFrameOfReference], hasLabel(Scope.SingleFrameOfReference)],
-    includeFractionArithmetic: [[Area.FractionArithmetic], hasLabel(Area.FractionArithmetic)],
-    operation: [[Area.Addition, Area.Subtraction], resolveOperation]
+    useSingleFrame: [[Scope.SingleFrameOfReference], hasLabel(Scope.SingleFrameOfReference)]
 } as const;
 export type MeasurementDataGeneratorConfig = ConfigFromSchema<typeof MeasurementDataGeneratorSchema>;

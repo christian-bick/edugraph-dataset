@@ -1,5 +1,5 @@
-import {MeasurementDataProblem, MeasurementExtremaRelation} from '../../../types/problems.ts';
-import {ViewValidationError} from '../../helpers/validation.ts';
+import {MeasurementDataProblem, MeasurementExtremaProblem, MeasurementExtremaRelation} from '../../../types/problems.ts';
+import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {formatMeasurementValue, validateMeasurementData} from './helpers.ts';
 
 export type MeasurementLinePlotTick = {
@@ -18,17 +18,12 @@ export type MeasurementLinePlotModel = {
 const sameNumber = (left: number, right: number): boolean => Math.abs(left - right) < Number.EPSILON * 8;
 
 export const validateMeasurementExtremaRelation = (
-    data: MeasurementDataProblem,
-    viewId: string,
-    required: boolean
-): MeasurementExtremaRelation | undefined => {
+    data: MeasurementExtremaProblem,
+    viewId: string
+): MeasurementExtremaRelation => {
+    validateProblemData(viewId, data, ['extremaRelation']);
+    validateMeasurementData(data, viewId);
     const relation = data.extremaRelation;
-    if (relation === undefined) {
-        if (required) {
-            throw new ViewValidationError(viewId, 'The arithmetic view requires a canonical extrema relation.');
-        }
-        return undefined;
-    }
 
     const lengths = data.observations.map(({value}) => value);
     const shortest = Math.min(...lengths);
@@ -37,13 +32,9 @@ export const validateMeasurementExtremaRelation = (
     if (!isAddition && relation.operation !== 'subtraction') {
         throw new ViewValidationError(viewId, 'The extrema relation operation is invalid.');
     }
-    const leftOperand = isAddition ? shortest : longest;
-    const rightOperand = isAddition ? longest : shortest;
-    const answer = isAddition ? leftOperand + rightOperand : leftOperand - rightOperand;
+    const answer = isAddition ? shortest + longest : longest - shortest;
     if (!sameNumber(relation.shortest, shortest)
         || !sameNumber(relation.longest, longest)
-        || !sameNumber(relation.leftOperand, leftOperand)
-        || !sameNumber(relation.rightOperand, rightOperand)
         || !sameNumber(relation.answer, answer)) {
         throw new ViewValidationError(viewId, 'The extrema relation must agree with the supplied measurements.');
     }
@@ -58,7 +49,7 @@ export const buildMeasurementLinePlot = (
     const values = data.observations.map(({value}) => value);
     const step = 1 / data.subdivisions;
     const start = data.subdivisions === 8 ? Math.floor(Math.min(...values)) : 2;
-    const end = data.subdivisions === 8 ? start + 2 : data.unit === 'cm' ? 10 : 8;
+    const end = data.subdivisions === 8 ? start + 2 : data.subdivisions === 1 ? 10 : 8;
     const intervalCount = Math.round((end - start) / step);
     if (values.some(value => value < start || value > end)) {
         throw new ViewValidationError(viewId, 'The supplied measurements do not fit the derived line-plot scale.');
