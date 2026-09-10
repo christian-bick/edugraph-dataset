@@ -1678,14 +1678,22 @@ export type AreaPerimeterRelationProblem = AreaPerimeterRelationBase & (
     }
 );
 
-export type ShapePartitionEquivalenceProblem = {
-    shape: FractionShape;
-    parts: 2;
-    partitionComparison: {
-        wholes: 'congruent';
-        shareMeasures: 'equal';
-        shareShapes: 'different';
+export type PartitionPoint = {x: number; y: number};
+
+export type PartitionBoundary =
+    | {kind: 'segment'; start: PartitionPoint; end: PartitionPoint}
+    | {
+        kind: 'cubic';
+        start: PartitionPoint;
+        segments: {control1: PartitionPoint; control2: PartitionPoint; end: PartitionPoint}[];
     };
+
+/** Two partitions of the same origin-centered whole, in mathematical rather than pixel coordinates. */
+export type ShapePartitionEquivalenceProblem = {
+    whole:
+        | {shape: 'rectangle'; width: number; height: number}
+        | {shape: 'circle'; radius: number};
+    boundaries: [PartitionBoundary, PartitionBoundary];
 };
 
 export type AngleArcFraction =

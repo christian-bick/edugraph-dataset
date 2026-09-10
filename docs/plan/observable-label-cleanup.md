@@ -1,5 +1,19 @@
 # Observable label cleanup
 
+## Current status — 2026-09-10
+
+All twelve grouping-label source batches are implemented. Ontology v0.25.0 is installed, and
+canonical CCSS affected generation plus a full test baseline have completed successfully.
+Both source targets and fresh image annotations contain **zero composition-parent labels**.
+The detailed batch evidence below records the successive source-review checkpoints; the final
+artifact evidence at the end supersedes their earlier Docker and regeneration blockers.
+
+The remaining cleanup gate is live CCSS VQA: **1,380 of 1,944 images already have exact passing
+cache records; 564 need validation**, including the four revised equal-shares images. Upload
+permission for this exact PNG/prompt set is still required. No cache entries have been changed.
+The separate fraction payload-family and classification-caption review findings remain tracked
+below; structural eligibility does not resolve those independent implementation questions.
+
 ## Goal and boundary
 
 Review direct target and dataset labels against the proposed distinction between structural
@@ -74,12 +88,12 @@ configuration as before; no payload adoption is required (`IMPL-G6`, `IMPL-G8`).
 
 - [x] Restore a responsive Docker daemon. The supplied ontology Docker builds now complete
   successfully (v0.24.1 and v0.24.2, 2026-09-10), closing the earlier daemon blocker.
-- [ ] Run canonical `npm run generate:dataset -- --spec=ccss --affected` and the affected `test`
-  regeneration.
+- [x] Run canonical `npm run generate:dataset -- --spec=ccss --affected` and test regeneration.
+  The missing test snapshot required a full baseline; both completed in the final artifact gate.
 - [ ] Inspect changed samples and run the matching VQA validation. Obtain permission before
   uploading new PNG/prompt sets to Gemini. No new VQA result or cache update is claimed here.
-- [ ] Rerun the observable-node audit against the fresh canonical snapshot and record actual
-  annotation counts and cache churn.
+- [x] Rerun the observable-node audit against the fresh canonical snapshots and record actual
+  annotation counts and image deltas. Cache churn remains zero until live validation changes it.
 
 ## Batch 2: shape comparison and angle contexts
 
@@ -574,8 +588,8 @@ all modules merely because one usage is redundant.
 - [x] Resolve the ontology modeling question around `FractionEquivalence`: the three procedures
   now belong to the existing FractionStrategies field in ontology v0.24.2. The equivalence
   principle, targets, and matched configurations remain unchanged (review and adoption below).
-- [ ] Review `ShapeEquivalenceRelations` for equal-area partitions. Equal area does not imply
-  congruence, similarity, or symmetry; do not choose an existing child that changes the claim.
+- [x] Resolve `ShapeEquivalenceRelations` through the approved ProofByConstruction context
+  and a neutral partition-geometry payload (Batch 12). Canonical validation remains a separate gate.
 
 ### Next contract reviews
 
@@ -599,14 +613,12 @@ applicability before modifying targets or adding ontology entities.
    mathematical families and three fixed projections replace task dispatch and raw feature-label
    parsing. Both fraction-facing views own denominator interpretation. Canonical validation is pending.
 
-### Ontology questions to review with the user
+### Ontology review outcome
 
-- **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
-  congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
-
-The two remaining CCSS targets contain ShapeEquivalenceRelations; they are not
-two proven false annotations. Eligibility under the proposed structural rule and truthfulness
-of the current content claim remain separate questions.
+The final grouping-label use, ShapeEquivalenceRelations, is resolved in Batch 12 by describing
+the partition mathematics and its constructed possibility witness. No ontology question remains
+open for this cleanup. Structural eligibility and observable truth still require independent
+checks against the newly generated dataset.
 
 ## FractionEquivalence review: existing strategy family
 
@@ -724,3 +736,116 @@ HTML in that directory, and `temp/fraction-equivalence-review{,-tests,-contracts
 Temporary evidence: `temp/ontology-v0242/semantic-review.json`, published-package checks in
 that directory, `temp/ontology-v0242-adoption/{before,after,delta}.json`, and
 `temp/ontology-v0242-adoption-{coverage,check,test-spec}.log`.
+
+## Batch 12: equal shares through a constructed witness
+
+Source refactor and canonical generation completed on 2026-09-10 with ontology v0.25.0.
+VQA remains pending; source and rendering success alone do not close the dataset gate.
+
+### Approved semantics
+
+The [2.G.A.3 standard](https://www.thecorestandards.org/Math/Content/2/G/) asks learners to
+recognize that equal shares of identical wholes need not have the same shape. This is a
+possibility claim: one valid construction establishes it. It is not a claim that every pair
+of equal shares must differ in shape, nor that equal area implies congruence or similarity.
+
+The approved ontology release adds the JustificationScope field, including ProofMethod and its
+ProofByConstruction specialization. The content now uses:
+
+- Generator: ShapeDecomposition + EqualShares, and the selected Circle or Rectangle.
+- View: ConceptDerivation + ProofByConstruction.
+- CCSS and smoke targets: the conjunction of those claims.
+
+The earlier EqualAreaRelation/DifferentlyShapedShares proposal was rejected and is not an
+outstanding ontology request. ShapeEquivalenceRelations remains an organizational field for its
+existing geometric relations; this task no longer claims it. No new theorem-specific Area is
+needed. ProofByConstruction belongs to the view because the same partitions could instead be
+shown without asking or establishing a possibility claim.
+
+The question asks, “Can equal shares of identical wholes have different shapes? Explain using
+these pictures.” The solution relates the displayed instance to that conclusion. Within each
+whole a half-turn exchanges its two pieces, establishing equal area; across the two partitions
+the pieces have different forms. It does not manufacture a false universal statement merely to
+label its refutation as DisproofByCounterexample.
+
+### Contract and consumer adoption
+
+The generator no longer emits unsubstantiated comparison strings or reads Area enum values.
+Its schema reuses the exact shape mapping, and its plain configuration selects a mathematical
+whole and two partition boundaries. Rectangles use a median and a diagonal. Circles use a
+diameter and a centrally symmetric two-segment cubic boundary.
+
+| Payload field | Disposition | Use |
+| --- | --- | --- |
+| `whole` | Canonical mathematical object | One rectangle's dimensions or one circle's radius defines both identical wholes. |
+| `boundaries` | Structured mathematical evidence | Two partitions in origin-centered mathematical coordinates prove the equal-share construction. |
+| Removed comparison strings | Replaced by evidence | Equality and contrasting form follow from the actual boundaries rather than assertions. |
+
+No pixel coordinates, SVG paths, prompt, chosen unknown, or answer prose enters the payload
+(`IMPL-G1`, `IMPL-G4`, `IMPL-G8`). The view transforms those coordinates to pixels, draws the
+two wholes, and owns the question and explanation (`IMPL-V8`, `IMPL-V11`).
+
+| Production consumer | Target families | Adoption | Verification |
+| --- | --- | --- | --- |
+| `shape-partition-equivalence` | Two 2.G.A.3 circle/rectangle permutations | Render supplied whole/boundaries; ask for and explain the possibility witness. | Generator geometry tests, view mode/geometry tests, matching diff, canonical images and VQA. |
+
+This is the only production consumer. The isolated test spec retains both shape paths.
+There is one learner action, an empty view schema, and no required/rejected labels; no matcher
+extension or split view is indicated (`SPEC-V6`, `IMPL-G6`, `CHK-V6`).
+
+### Verification
+
+- Published `edugraph-ts` v0.25.0 is pinned in package.json and package-lock.json.
+- Focused generator/view tests: **4 files / 12 tests**, passing. Tests check rectangle bisection,
+  disk containment, half-turn symmetry, the nonstraight curved divider, actual payload rendering,
+  strict malformed-geometry rejection, deterministic rendering, and question/solution separation.
+- Type checking passes.
+- Complete CCSS matching stays at **681 targets / 829 paths**. Only the two intentional
+  label-set hashes change; each retains its one original pair. No unmatched target or unrelated
+  match change appears.
+- [x] Release and adopt the approved justification context.
+- [x] Migrate the mathematical payload and its sole production consumer.
+- [x] Adopt target claims and review the full matching delta.
+- [x] Finish full tests, canonical generation, visual review of the four equal-shares images,
+  and the fresh annotation audit.
+- [ ] Obtain approval for the exact changed PNG/prompt set and complete Gemini VQA.
+
+Temporary evidence: `temp/spec-plans/ccss/equal-shares-construction/`,
+`temp/equal-shares-consumers.log`, and the validation records added below.
+
+### Final canonical artifact evidence
+
+- Full suite: **461 files / 2,522 tests**, all passing. Overall statement/branch coverage is
+  **96.31% / 92.83%**; the changed generator has **100% / 100%**. Every generator passes its
+  coverage thresholds. `npm run check` passes all six gates, including both split audits.
+- Strict architecture audit: **681 CCSS targets / 829 matched paths**, zero violations.
+  The 95 reported review items are not newly classified violations.
+- CCSS affected generation: **1,944 images**, no generation or render failures; 220 immutable
+  shards reused and 59 written. Generation id:
+  `317814423d2e978ec08eff55f91b3a6262a22a8c28b7a83abc7f8aebcb3501bd`.
+- Test full baseline: **1,686 images**, no generation or render failures. Generation id:
+  `7c0b9ee71ed7562fd2140dd861e1eefad8ec66f95954caf3d8207affb9657ee4`.
+- Direct annotation audit: **0/1,944 CCSS images** and **0/1,686 test images** use a composition
+  parent. Source audits likewise find **0/681 CCSS** and **0/559 test** target occurrences.
+  These are structural checks, not substitutes for VQA evidence.
+- Relative to the old 1,878-image CCSS snapshot, 1,436 sample identities survive, 508 are added,
+  and 442 removed by the accumulated cleanup. Of surviving identities, 1,422 keep identical
+  pixels. Thirteen changed comparison samples follow the previously documented removal of a
+  redundant random fallback draw. The other changed sample is a measurement word-problem
+  validation draw whose successful attempt changes from 1 to 2 after train-content changes.
+- Visually inspected all four revised CCSS equal-shares PNGs: both constructions, the question
+  without its conclusion, and the solution's equal-area argument and possibility conclusion.
+- Offline VQA audit verifies current graph freshness and all 1,944 image identities: **zero
+  dataset-structure or renderer-identity issues**. Exact passing coverage is **1,380/1,944**;
+  there are **564 missing keys**, **492 stale records**, and one obsolete module cache
+  (`angle-concepts`). There are no failing, malformed, or duplicate cache records. This is an
+  incomplete VQA gate, not a passed audit. A full authorized live run must validate the misses,
+  prune obsolete output, and be followed by the strict offline audit.
+- `report:churn` is unchanged because no VQA cache was mutated. The independent image-digest
+  comparison above describes actual artifact changes; a zero cache diff does not imply zero
+  image changes.
+
+Temporary evidence: `temp/observable-cleanup-final/{before,after}-summary.json`, its per-spec
+records, `temp/equal-shares-{coverage,check,architecture,generation,test-generation,vqa-audit,churn}.log`.
+The first container snapshot attempt overlapped temporary coverage writes and failed before
+generation; retrying after the test process finished completed successfully without source changes.

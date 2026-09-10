@@ -632,8 +632,9 @@ const rectangularSquareCountBuilder = new DatasetPermutationBuilder()
 // --- 2.G.A.3: Equal shares of identical wholes may differ in shape ---
 const equalShareShapeEquivalenceBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeEquivalenceRelations,
+        Area.ShapeDecomposition,
         Scope.EqualShares,
+        Scope.ProofByConstruction,
         Ability.ConceptDerivation
     ])
     .applyLabelVariants([

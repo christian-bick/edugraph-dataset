@@ -9,7 +9,7 @@ const generator = new ShapePartitionEquivalenceGenerator();
 describe('ShapePartitionEquivalenceGenerator spec integration', () => {
     it('declares only the invariant mathematics', () => {
         expect(spec.generalLabels).toEqual([
-            Area.ShapeEquivalenceRelations,
+            Area.ShapeDecomposition,
             Scope.EqualShares
         ]);
     });
@@ -19,13 +19,13 @@ describe('ShapePartitionEquivalenceGenerator spec integration', () => {
         [Area.Rectangle, 'rectangle']
     ] as const)('resolves the %s variant', (shape, expectedShape) => {
         const stub = generateWithLabels(generator, [
-            Area.ShapeEquivalenceRelations,
+            Area.ShapeDecomposition,
             Scope.EqualShares,
             Ability.ConceptDerivation,
             shape
         ])!;
 
-        expect(stub.data.shape).toBe(expectedShape);
+        expect(stub.data.whole.shape).toBe(expectedShape);
         expect(stub.labels).toContain(shape);
         expect(stub.labels).not.toContain(Ability.ConceptDerivation);
     });

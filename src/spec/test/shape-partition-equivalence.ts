@@ -4,8 +4,9 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ShapeEquivalenceRelations,
+        Area.ShapeDecomposition,
         Scope.EqualShares,
+        Scope.ProofByConstruction,
         Ability.ConceptDerivation
     ])
     .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);
