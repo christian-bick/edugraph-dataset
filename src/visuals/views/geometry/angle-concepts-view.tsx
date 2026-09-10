@@ -1,24 +1,24 @@
+import {ReactNode} from 'react';
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {
-    AngleConceptProblem,
-    AngleConceptGeometry,
-    DeriveOneDegreeProblem,
-    InterpretDegreeIterationProblem,
-    RecognizeAngleFromArcProblem
+    AngleArcFractionProblem,
+    AngleUnitPartitionProblem,
+    AngleUnitIterationProblem
 } from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
     counterclockwiseArcPath,
-    isValidAngleConceptProblem,
+    isValidAngleRelationProblem,
+    AngleRelationProblem,
+    AngleDiagramGeometry,
+    angleDiagramGeometry,
+    AngleConceptPresentation,
     presentAngleConcept,
     pointOnCircle
 } from './angle-concepts-helpers.ts';
 
-export type AngleConceptMode = 'interpretation' | 'concept-derivation';
-
-interface AngleConceptsViewProps {
-    mode: AngleConceptMode;
-    payload: RenderPayload<AbstractProblem<AngleConceptProblem>>;
+interface AngleViewProps<T extends AngleRelationProblem> {
+    payload: RenderPayload<AbstractProblem<T>>;
     viewId: string;
 }
 
@@ -26,7 +26,7 @@ const CENTER_X = 310;
 const CENTER_Y = 145;
 const RADIUS = 105;
 
-function RayAndArcDiagram({geometry}: {geometry: AngleConceptGeometry}) {
+function RayAndArcDiagram({geometry}: {geometry: AngleDiagramGeometry}) {
     const start = pointOnCircle(CENTER_X, CENTER_Y, RADIUS, geometry.startDegrees);
     const end = pointOnCircle(CENTER_X, CENTER_Y, RADIUS, geometry.endDegrees);
     const labelEnd = pointOnCircle(CENTER_X, CENTER_Y, RADIUS + 24, geometry.endDegrees);
@@ -63,20 +63,20 @@ function RayAndArcDiagram({geometry}: {geometry: AngleConceptGeometry}) {
 }
 
 function RecognitionDiagram({data, rayStatement}: {
-    data: RecognizeAngleFromArcProblem;
+    data: AngleArcFractionProblem;
     rayStatement: string;
 }) {
     return (
         <div className="flex h-[300px] flex-col items-center justify-center">
-            <RayAndArcDiagram geometry={data.geometry} />
+            <RayAndArcDiagram geometry={angleDiagramGeometry(data)} />
             <div className="-mt-6 text-[0.95rem] font-semibold text-slate-600">{rayStatement}</div>
         </div>
     );
 }
 
-function OneDegreeDiagram({data, isSolutionView}: {data: DeriveOneDegreeProblem; isSolutionView: boolean}) {
-    const mainStart = pointOnCircle(175, 140, 98, data.geometry.startDegrees);
-    const mainEnd = pointOnCircle(175, 140, 98, data.geometry.endDegrees);
+function OneDegreeDiagram({data, isSolutionView}: {data: AngleUnitPartitionProblem; isSolutionView: boolean}) {
+    const mainStart = pointOnCircle(175, 140, 98, 0);
+    const mainEnd = pointOnCircle(175, 140, 98, data.angleDegrees);
     const insetStart = pointOnCircle(455, 145, 82, -14);
     const insetEnd = pointOnCircle(455, 145, 82, 14);
 
@@ -84,10 +84,10 @@ function OneDegreeDiagram({data, isSolutionView}: {data: DeriveOneDegreeProblem;
         <svg
             viewBox="0 0 620 290"
             className="h-[290px] w-[620px]"
-            aria-label={`A full circle with ${data.selectedParts} of ${data.partitionCount} equal turns isolated in a magnified inset`}
+            aria-label={`A full circle with ${1} of ${data.parts} equal turns isolated in a magnified inset`}
         >
             <circle cx="175" cy="140" r="98" fill="#f8fafc" stroke="#64748b" strokeWidth="4" />
-            <path d={counterclockwiseArcPath(175, 140, 98, data.geometry.startDegrees, data.geometry.endDegrees)} fill="none" stroke="#0d9488" strokeWidth="12" strokeLinecap="round" />
+            <path d={counterclockwiseArcPath(175, 140, 98, 0, data.angleDegrees)} fill="none" stroke="#0d9488" strokeWidth="12" strokeLinecap="round" />
             <line x1="175" y1="140" x2={mainStart.x} y2={mainStart.y} stroke="#334155" strokeWidth="3" />
             <line x1="175" y1="140" x2={mainEnd.x} y2={mainEnd.y} stroke="#334155" strokeWidth="3" />
             <circle cx={mainStart.x} cy={mainStart.y} r="8" fill="#0d9488" />
@@ -100,18 +100,19 @@ function OneDegreeDiagram({data, isSolutionView}: {data: DeriveOneDegreeProblem;
             <line x1="455" y1="145" x2={insetEnd.x} y2={insetEnd.y} stroke="#334155" strokeWidth="4" />
             <path d={counterclockwiseArcPath(455, 145, 82, -14, 14)} fill="none" stroke="#0d9488" strokeWidth="10" strokeLinecap="round" />
             <text x="423" y="105" textAnchor="middle" className="fill-teal-900 text-[16px] font-extrabold">magnified sliver</text>
-            <text x="423" y="129" textAnchor="middle" className="fill-slate-700 text-[14px] font-bold">{data.selectedParts} of {data.partitionCount} equal turns</text>
+            <text x="423" y="129" textAnchor="middle" className="fill-slate-700 text-[14px] font-bold">{1} of {data.parts} equal turns</text>
             {isSolutionView && (
-                <text x="423" y="178" textAnchor="middle" className="fill-emerald-700 text-[22px] font-extrabold">{data.degreeMeasure}°</text>
+                <text x="423" y="178" textAnchor="middle" className="fill-emerald-700 text-[22px] font-extrabold">{data.angleDegrees}°</text>
             )}
             <text x="175" y="277" textAnchor="middle" className="fill-slate-600 text-[15px] font-bold">one full turn</text>
         </svg>
     );
 }
 
-function IterationDiagram({data}: {data: InterpretDegreeIterationProblem}) {
-    const start = pointOnCircle(155, 120, 92, data.geometry.startDegrees);
-    const end = pointOnCircle(155, 120, 92, data.geometry.endDegrees);
+function IterationDiagram({data}: {data: AngleUnitIterationProblem}) {
+    const {tickDegrees: ticks} = angleDiagramGeometry(data);
+    const start = pointOnCircle(155, 120, 92, 0);
+    const end = pointOnCircle(155, 120, 92, data.angleDegrees);
 
     return (
         <div className="flex h-[290px] w-[620px] flex-col items-center">
@@ -121,11 +122,11 @@ function IterationDiagram({data}: {data: InterpretDegreeIterationProblem}) {
                 aria-label="An accumulated counterclockwise turn with one boundary mark for every one-degree interval"
             >
                 <circle cx="155" cy="120" r="92" fill="#f8fafc" stroke="#94a3b8" strokeWidth="3" />
-                <path d={counterclockwiseArcPath(155, 120, 92, data.geometry.startDegrees, data.geometry.endDegrees)} fill="none" stroke="#0d9488" strokeWidth="12" strokeLinecap="round" />
+                <path d={counterclockwiseArcPath(155, 120, 92, 0, data.angleDegrees)} fill="none" stroke="#0d9488" strokeWidth="12" strokeLinecap="round" />
                 <line x1="155" y1="120" x2={start.x} y2={start.y} stroke="#334155" strokeWidth="4" />
                 <line x1="155" y1="120" x2={end.x} y2={end.y} stroke="#334155" strokeWidth="4" />
                 <g aria-hidden="true">
-                    {data.geometry.tickDegrees.map(degrees => {
+                    {ticks.map(degrees => {
                         const inner = pointOnCircle(155, 120, 84, degrees);
                         const outer = pointOnCircle(155, 120, 101, degrees);
                         return <line key={degrees} x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke="#0f766e" strokeWidth="2" />;
@@ -140,10 +141,10 @@ function IterationDiagram({data}: {data: InterpretDegreeIterationProblem}) {
                     </marker>
                 </defs>
             </svg>
-            <div className="-mt-2 flex h-[58px] items-stretch justify-center gap-1" aria-label={`${data.iterationCount} repeated one-degree intervals`}>
-                {data.geometry.tickDegrees.slice(1).map(degrees => (
+            <div className="-mt-2 flex h-[58px] items-stretch justify-center gap-1" aria-label={`${data.count} repeated one-degree intervals`}>
+                {ticks.slice(1).map(degrees => (
                     <div key={degrees} className="flex w-[34px] items-center justify-center rounded-md border-2 border-teal-500 bg-teal-50 text-[0.82rem] font-extrabold text-teal-800">
-                        {data.unitDegree}°
+                        {data.unitDegrees}°
                     </div>
                 ))}
             </div>
@@ -165,59 +166,18 @@ function SolutionPanel({relation, answerStatement, explanation}: {
     );
 }
 
-export const AngleConceptsView = ({mode, payload, viewId}: AngleConceptsViewProps) => {
-    const {problem, isSolutionView} = payload;
-    validateProblemData(viewId, problem.data, [
-        'task',
-        'geometry'
-    ]);
-    const data = problem.data;
-    const expectedMode = data.task === 'derive-one-degree'
-        ? 'concept-derivation'
-        : 'interpretation';
-    if (mode !== expectedMode) {
-        throw new ViewValidationError(
-            viewId,
-            'The fixed view mode must agree with the rendered angle task.'
-        );
-    }
-    if (data.task === 'recognize-angle-from-arc') {
-        validateProblemData(viewId, data, [
-            'arcFraction'
-        ]);
-    } else if (data.task === 'derive-one-degree') {
-        validateProblemData(viewId, data, [
-            'partitionCount',
-            'selectedParts',
-            'unitFraction',
-            'degreeMeasure'
-        ]);
-    } else if (data.task === 'interpret-degree-iteration') {
-        validateProblemData(viewId, data, [
-            'unitDegree',
-            'iterationCount',
-            'angleMeasure'
-        ]);
-    }
-    if (!isValidAngleConceptProblem(data)) {
-        throw new ViewValidationError(
-            viewId,
-            'The angle geometry, fraction, and unit evidence must agree exactly.'
-        );
-    }
-    const presentation = presentAngleConcept(data);
-
+function AngleTaskFrame({presentation, isSolutionView, children}: {
+    presentation: AngleConceptPresentation;
+    isSolutionView: boolean;
+    children: ReactNode;
+}) {
     return (
         <div className="w-[700px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="flex min-h-[54px] items-center justify-center px-5 text-center text-[1.22rem] font-bold leading-snug text-slate-700">
                 {presentation.prompt}
             </div>
             <div className="mt-3 flex h-[310px] items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50">
-                {data.task === 'recognize-angle-from-arc' && (
-                    <RecognitionDiagram data={data} rayStatement={presentation.rayStatement!} />
-                )}
-                {data.task === 'derive-one-degree' && <OneDegreeDiagram data={data} isSolutionView={isSolutionView} />}
-                {data.task === 'interpret-degree-iteration' && <IterationDiagram data={data} />}
+                {children}
             </div>
             {!isSolutionView && (
                 <div className="mt-3 flex min-h-[58px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-5 text-center font-mono text-[1.05rem] font-extrabold text-slate-700">
@@ -234,5 +194,47 @@ export const AngleConceptsView = ({mode, payload, viewId}: AngleConceptsViewProp
                 </div>
             )}
         </div>
+    );
+}
+
+function validateAngleRelation<T extends AngleRelationProblem>(
+    viewId: string,
+    data: T,
+    kind: T['kind']
+): void {
+    validateProblemData(viewId, data, ['kind', 'fullTurnDegrees', 'angleDegrees']);
+    if (data.kind !== kind || !isValidAngleRelationProblem(data)) {
+        throw new ViewValidationError(viewId, 'The angle, fraction, and unit evidence must agree with this payload family.');
+    }
+}
+
+export const AngleArcInterpretationView = ({payload, viewId}: AngleViewProps<AngleArcFractionProblem>) => {
+    const {problem: {data}, isSolutionView} = payload;
+    validateAngleRelation(viewId, data, 'fractional-arc');
+    const presentation = presentAngleConcept(data);
+    return (
+        <AngleTaskFrame presentation={presentation} isSolutionView={isSolutionView}>
+            <RecognitionDiagram data={data} rayStatement={presentation.rayStatement!} />
+        </AngleTaskFrame>
+    );
+};
+
+export const AngleOneDegreeDerivationView = ({payload, viewId}: AngleViewProps<AngleUnitPartitionProblem>) => {
+    const {problem: {data}, isSolutionView} = payload;
+    validateAngleRelation(viewId, data, 'equal-angle-partition');
+    return (
+        <AngleTaskFrame presentation={presentAngleConcept(data)} isSolutionView={isSolutionView}>
+            <OneDegreeDiagram data={data} isSolutionView={isSolutionView} />
+        </AngleTaskFrame>
+    );
+};
+
+export const AngleDegreeIterationView = ({payload, viewId}: AngleViewProps<AngleUnitIterationProblem>) => {
+    const {problem: {data}, isSolutionView} = payload;
+    validateAngleRelation(viewId, data, 'angle-iteration');
+    return (
+        <AngleTaskFrame presentation={presentAngleConcept(data)} isSolutionView={isSolutionView}>
+            <IterationDiagram data={data} />
+        </AngleTaskFrame>
     );
 };

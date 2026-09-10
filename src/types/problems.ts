@@ -1688,49 +1688,33 @@ export type ShapePartitionEquivalenceProblem = {
     };
 };
 
-export type AngleConceptFraction =
+export type AngleArcFraction =
     | {numerator: 1; denominator: 6}
     | {numerator: 1; denominator: 4}
     | {numerator: 1; denominator: 3}
     | {numerator: 1; denominator: 2};
 
-export type AngleConceptGeometry = {
+type AngleRelationBase = {
     fullTurnDegrees: 360;
-    startDegrees: 0;
-    endDegrees: number;
-    sweepDegrees: number;
-    direction: 'counterclockwise';
-    tickDegrees: number[];
+    angleDegrees: number;
 };
 
-type AngleConceptProblemBase = {
-    geometry: AngleConceptGeometry;
+export type AngleArcFractionProblem = AngleRelationBase & {
+    kind: 'fractional-arc';
+    arcFraction: AngleArcFraction;
 };
 
-export type RecognizeAngleFromArcProblem = AngleConceptProblemBase & {
-    task: 'recognize-angle-from-arc';
-    arcFraction: AngleConceptFraction;
+export type AngleUnitPartitionProblem = AngleRelationBase & {
+    kind: 'equal-angle-partition';
+    parts: 360;
+    angleDegrees: 1;
 };
 
-export type DeriveOneDegreeProblem = AngleConceptProblemBase & {
-    task: 'derive-one-degree';
-    partitionCount: 360;
-    selectedParts: 1;
-    unitFraction: {numerator: 1; denominator: 360};
-    degreeMeasure: 1;
+export type AngleUnitIterationProblem = AngleRelationBase & {
+    kind: 'angle-iteration';
+    unitDegrees: 1;
+    count: number;
 };
-
-export type InterpretDegreeIterationProblem = AngleConceptProblemBase & {
-    task: 'interpret-degree-iteration';
-    unitDegree: 1;
-    iterationCount: number;
-    angleMeasure: number;
-};
-
-export type AngleConceptProblem =
-    | RecognizeAngleFromArcProblem
-    | DeriveOneDegreeProblem
-    | InterpretDegreeIterationProblem;
 
 export type ProtractorAngleMeasure = 23 | 37 | 52 | 68 | 90 | 112 | 127 | 143 | 158;
 export type SketchAngleMeasure = 30 | 45 | 60 | 75 | 90 | 105 | 120 | 135 | 150;
@@ -1987,8 +1971,9 @@ export interface ViewTypeMap {
     'area-perimeter-comparison': AreaPerimeterRelationProblem;
     'area-perimeter-construction': AreaPerimeterRelationProblem;
     'shape-partition-equivalence': ShapePartitionEquivalenceProblem;
-    'geometry-angle-concepts': AngleConceptProblem;
-    'geometry-angle-one-degree-derivation': AngleConceptProblem;
+    'geometry-angle-concepts': AngleArcFractionProblem;
+    'geometry-angle-one-degree-derivation': AngleUnitPartitionProblem;
+    'geometry-angle-degree-iteration': AngleUnitIterationProblem;
     'geometry-protractor': AngleMeasurementProblem;
     'geometry-angle-drawing': AngleMeasurementProblem;
     'geometry-angle-arithmetic': AngleArithmeticProblem;

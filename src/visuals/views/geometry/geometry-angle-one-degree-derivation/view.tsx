@@ -1,7 +1,7 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {AngleConceptsView} from '../angle-concepts-view.tsx';
+import {AngleOneDegreeDerivationView} from '../angle-concepts-view.tsx';
 import {
     GeometryAngleOneDegreeDerivationViewConfig,
     GeometryAngleOneDegreeDerivationViewSchema
@@ -16,8 +16,7 @@ interface CoreProps {
 }
 
 const GeometryAngleOneDegreeDerivationCore = ({payload}: CoreProps) => (
-    <AngleConceptsView
-        mode="concept-derivation"
+    <AngleOneDegreeDerivationView
         payload={payload}
         viewId={VIEW_ID}
     />

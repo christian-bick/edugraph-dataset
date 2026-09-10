@@ -1,9 +1,20 @@
 import {
-    AngleConceptProblem,
-    DeriveOneDegreeProblem,
-    InterpretDegreeIterationProblem,
-    RecognizeAngleFromArcProblem
+    AngleArcFractionProblem,
+    AngleUnitPartitionProblem,
+    AngleUnitIterationProblem
 } from '../../../types/problems.ts';
+
+export type AngleRelationProblem = AngleArcFractionProblem | AngleUnitPartitionProblem | AngleUnitIterationProblem;
+export type AngleDiagramGeometry = {startDegrees: number; endDegrees: number; tickDegrees: number[]};
+
+/** Diagram orientation and tick placement are view choices, derived from the mathematical relation. */
+export const angleDiagramGeometry = (data: AngleRelationProblem): AngleDiagramGeometry => ({
+    startDegrees: 0,
+    endDegrees: data.angleDegrees,
+    tickDegrees: data.kind === 'angle-iteration'
+        ? Array.from({length: data.count + 1}, (_, index) => index * data.unitDegrees)
+        : [0, data.angleDegrees]
+});
 
 const ARC_SWEEPS = new Map([
     [60, {numerator: 1, denominator: 6}],
@@ -42,43 +53,19 @@ export const counterclockwiseArcPath = (
     return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${sweep > 180 ? 1 : 0} 0 ${end.x} ${end.y}`;
 };
 
-const isSequentialTicks = (ticks: number[], endDegrees: number): boolean => ticks.length === endDegrees + 1
-    && ticks.every((degree, index) => degree === index);
-
-const hasValidGeometry = (data: AngleConceptProblem): boolean => {
-    const {geometry} = data;
-    return geometry.fullTurnDegrees === 360
-        && geometry.startDegrees === 0
-        && geometry.endDegrees === geometry.sweepDegrees
-        && geometry.direction === 'counterclockwise'
-        && Array.isArray(geometry.tickDegrees);
-};
-
-const isValidRecognition = (data: RecognizeAngleFromArcProblem): boolean => {
-    const expectedFraction = ARC_SWEEPS.get(data.geometry.sweepDegrees as 60 | 90 | 120 | 180);
+const isValidRecognition = (data: AngleArcFractionProblem): boolean => {
+    const expectedFraction = ARC_SWEEPS.get(data.angleDegrees as 60 | 90 | 120 | 180);
     return expectedFraction !== undefined
-        && data.arcFraction.numerator === expectedFraction.numerator
-        && data.arcFraction.denominator === expectedFraction.denominator
-        && data.geometry.tickDegrees.length === 2
-        && data.geometry.tickDegrees[0] === 0
-        && data.geometry.tickDegrees[1] === data.geometry.sweepDegrees;
+        && data.arcFraction?.numerator === expectedFraction.numerator
+        && data.arcFraction?.denominator === expectedFraction.denominator;
 };
 
-const isValidOneDegree = (data: DeriveOneDegreeProblem): boolean => data.geometry.sweepDegrees === 1
-    && data.geometry.tickDegrees.length === 2
-    && data.geometry.tickDegrees[0] === 0
-    && data.geometry.tickDegrees[1] === 1
-    && data.partitionCount === 360
-    && data.selectedParts === 1
-    && data.unitFraction.numerator === 1
-    && data.unitFraction.denominator === 360
-    && data.degreeMeasure === 1;
+const isValidOneDegree = (data: AngleUnitPartitionProblem): boolean =>
+    data.parts === 360 && data.angleDegrees === data.fullTurnDegrees / data.parts;
 
-const isValidIteration = (data: InterpretDegreeIterationProblem): boolean => ITERATION_COUNTS.has(data.iterationCount)
-    && data.unitDegree === 1
-    && data.angleMeasure === data.iterationCount
-    && data.geometry.sweepDegrees === data.angleMeasure
-    && isSequentialTicks(data.geometry.tickDegrees, data.angleMeasure);
+const isValidIteration = (data: AngleUnitIterationProblem): boolean => ITERATION_COUNTS.has(data.count)
+    && data.unitDegrees === 1
+    && data.angleDegrees === data.count * data.unitDegrees;
 
 export type AngleConceptPresentation = {
     prompt: string;
@@ -89,19 +76,19 @@ export type AngleConceptPresentation = {
     rayStatement?: string;
 };
 
-export const presentAngleConcept = (data: AngleConceptProblem): AngleConceptPresentation => {
-    if (data.task === 'recognize-angle-from-arc') {
+export const presentAngleConcept = (data: AngleRelationProblem): AngleConceptPresentation => {
+    if (data.kind === 'fractional-arc') {
         const fraction = `${data.arcFraction.numerator}/${data.arcFraction.denominator}`;
         return {
             prompt: 'What is the degree measure of the highlighted angle?',
             questionRelation: `${fraction} of a full turn = ?°`,
-            solutionRelation: `${fraction} of a full turn = ${data.geometry.sweepDegrees}°`,
+            solutionRelation: `${fraction} of a full turn = ${data.angleDegrees}°`,
             rayStatement: 'Rays OA and OB share endpoint O.',
-            answerStatement: `The highlighted angle measures ${data.geometry.sweepDegrees}° because it sweeps ${fraction} of a full turn.`,
-            explanation: `The highlighted arc covers ${fraction} of the 360° full turn, so its angle measure is ${data.geometry.sweepDegrees}°.`
+            answerStatement: `The highlighted angle measures ${data.angleDegrees}° because it sweeps ${fraction} of a full turn.`,
+            explanation: `The highlighted arc covers ${fraction} of the 360° full turn, so its angle measure is ${data.angleDegrees}°.`
         };
     }
-    if (data.task === 'derive-one-degree') {
+    if (data.kind === 'equal-angle-partition') {
         return {
             prompt: 'A full circle is partitioned into 360 equal turns. What is the angle measure of one turn?',
             questionRelation: '1/360 of a full turn = ?',
@@ -111,17 +98,17 @@ export const presentAngleConcept = (data: AngleConceptProblem): AngleConceptPres
         };
     }
     return {
-        prompt: `How many degrees are in ${data.iterationCount} one-degree turns?`,
-        questionRelation: `${data.iterationCount} × 1° = ?`,
-        solutionRelation: `${data.iterationCount} × 1° = ${data.angleMeasure}°`,
-        answerStatement: `The angle measures ${data.angleMeasure}°.`,
-        explanation: `Each interval measures 1°. Iterating it ${data.iterationCount} times gives ${data.iterationCount} × 1° = ${data.angleMeasure}°.`
+        prompt: `How many degrees are in ${data.count} one-degree turns?`,
+        questionRelation: `${data.count} × 1° = ?`,
+        solutionRelation: `${data.count} × 1° = ${data.angleDegrees}°`,
+        answerStatement: `The angle measures ${data.angleDegrees}°.`,
+        explanation: `Each interval measures 1°. Iterating it ${data.count} times gives ${data.count} × 1° = ${data.angleDegrees}°.`
     };
 };
 
-export const isValidAngleConceptProblem = (data: AngleConceptProblem): boolean => {
-    if (!hasValidGeometry(data)) return false;
-    if (data.task === 'recognize-angle-from-arc') return isValidRecognition(data);
-    if (data.task === 'derive-one-degree') return isValidOneDegree(data);
-    return data.task === 'interpret-degree-iteration' && isValidIteration(data);
+export const isValidAngleRelationProblem = (data: AngleRelationProblem): boolean => {
+    if (!data || data.fullTurnDegrees !== 360) return false;
+    if (data.kind === 'fractional-arc') return isValidRecognition(data);
+    if (data.kind === 'equal-angle-partition') return isValidOneDegree(data);
+    return data.kind === 'angle-iteration' && isValidIteration(data);
 };

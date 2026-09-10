@@ -384,14 +384,14 @@ const recognizeAngleArcBuilder = new DatasetPermutationBuilder().addLabels([
     Area.RayConcept,
     Area.ArchConcept,
     Area.Circle,
-    Area.FractionInterpretation,
+    Area.FractionDenominatorInterpretation,
     Ability.Interpretation
 ]);
 
 const deriveOneDegreeBuilder = new DatasetPermutationBuilder().addLabels([
     Area.AngleConcept,
     Area.Circle,
-    Area.FractionInterpretation,
+    Area.FractionDenominatorInterpretation,
     Scope.DegreeScale,
     Scope.UnitFractions,
     Ability.ConceptDerivation

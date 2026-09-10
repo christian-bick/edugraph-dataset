@@ -1,7 +1,7 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {AngleConceptsView} from '../angle-concepts-view.tsx';
+import {AngleArcInterpretationView} from '../angle-concepts-view.tsx';
 import {
     GeometryAngleConceptsViewConfig,
     GeometryAngleConceptsViewSchema
@@ -16,8 +16,7 @@ interface CoreProps {
 }
 
 const GeometryAngleConceptsCore = ({payload}: CoreProps) => (
-    <AngleConceptsView
-        mode="interpretation"
+    <AngleArcInterpretationView
         payload={payload}
         viewId={VIEW_ID}
     />

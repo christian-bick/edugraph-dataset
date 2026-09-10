@@ -383,7 +383,7 @@ CompetencyDescription; this does not change the dataset's own `TSPEC-14` authori
 No canonical artifacts or VQA cache files are changed by this dependency update.
 
 Keep this review separate from the already tracked Circle / FractionEquivalence ontology structure
-questions. The two angle-concepts FractionInterpretation usages also need a later evidence review;
+questions. The two angle-family FractionInterpretation usages are resolved separately in Batch 9;
 they are not changed by the shape-construction extraction.
 
 ## Batch 8: fraction partitioning
@@ -451,6 +451,67 @@ teach fraction notation. No additional ontology entity or definition change was 
 Temporary evidence: `temp/fraction-partition/{before,after,summary}.json` and
 `temp/fraction-partition-*.log`.
 
+## Batch 9: angle fraction interpretation
+
+Source changes and automated checks completed on 2026-09-10; canonical regeneration and VQA
+remain pending.
+
+The two 4.MD.C.5a tasks use a unit fraction to relate an arc or a one-of-360 turn to angle
+measure. FractionDenominatorInterpretation expresses the partition-count meaning actually used;
+no separate numerator-interpretation task is added. The degree scale supplies its explicit
+360-degree full-turn convention, without requiring an invented denominator-360 Scope.
+
+The review also found generator-owned task dispatch and raw feature-label parsing (`IMPL-G1`,
+`IMPL-G8`), plus one view/checklist combining arc interpretation with repeated-unit interpretation
+(`SPEC-V6`, `CHK-V6`). These are resolved together through precise families and shared rendering.
+
+| Consumer | Generator / mathematical family | Adoption |
+| --- | --- | --- |
+| geometry-angle-concepts | angle-arc-fraction / fractional arc of a full turn | Accepts only arc fractions; owns denominator interpretation. |
+| geometry-angle-one-degree-derivation | angle-unit-partition / equal one-degree partition of a full turn | Accepts only unit partitions; owns denominator interpretation; preserves the magnified inset. |
+| geometry-angle-degree-iteration (new) | angle-unit-iteration / repeated one-degree units | The existing interpretation task has a thin leaf and its own checklist. |
+
+Canonical fields retain mathematical fractions, partition counts, unit sizes, and calculated
+angle measures. Task names, fixed diagram orientation, tick arrays, and duplicate endpoint
+or answer aliases are removed. Views derive diagram coordinates, ticks, and wording from the mathematical
+relation (`IMPL-G6`, `IMPL-V9`).
+
+The arc generator resolves HalfFractions, ThirdFractions, QuarterFractions, or SixthFractions.
+When no denominator is requested, its exact schema choice records the selected denominator in
+the observable labels. The standard's angle task does not prescribe that four-denominator set,
+so it is not expanded into arbitrary denominator-specific target variants. Both fraction-facing
+targets replace only FractionInterpretation; DegreeScale is now an invariant generator capability
+for all three families. The unit-partition and iteration generators have empty schemas: their
+mathematical capabilities are invariant. Iteration count remains seeded generator variation.
+
+Each `ViewTypeMap` entry accepts its precise family. There are no family-selecting
+`requiredLabels`/`rejectedLabels`, raw-label implementation branches, or shared matcher changes.
+The three fixed task projections share a frame and diagram helpers; no view chooses between
+parallel tasks. No ontology change was needed.
+
+### Validation
+
+- CCSS retains **681 targets / 829 pairs**. All three angle tasks keep exactly one matching
+  path, now through their precise families. All unrelated CCSS/test target matches are unchanged.
+- The isolated test spec retains **559 targets** and covers all **87 generators**.
+- Full tests and `npm run test:coverage`: **460 files / 2,518 tests pass**. All three new
+  generators have **100% statement and branch coverage**.
+- `check:affected` passes, including types, related tests, coverage, generator/view declarations,
+  labels, docs, and CCSS/test target validation. Renderer regression tests cover each supported
+  denominator and iteration count, both modes, answer withholding, and invalid family evidence.
+- A temporary before/after probe covers **240 generated samples / 480 server-rendered outputs**.
+  For the same mathematical values, every question/solution HTML hash matches the previous
+  rendering. This does not establish identical sample seeds, canonical PNG pixels, or VQA results.
+- FractionInterpretation is absent from active source declarations. **40 CCSS targets** still
+  contain a composition-parent candidate: Circle (30), FractionEquivalence (9), and
+  ShapeEquivalenceRelations (2). Counts overlap; the two angle targets also contain Circle,
+  so the number of candidate targets does not fall when their fraction claim is corrected.
+- Canonical PNG generation and VQA remain pending. Docker is inaccessible inside the sandbox;
+  an outside-sandbox server-version check also timed out after 15 seconds. Only that probe was
+  stopped. No daemon restart, image upload, or VQA-cache change was performed.
+
+Temporary evidence: `temp/angle-cleanup/{before,after,summary}.json` and `temp/angle-*.log`.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
@@ -471,7 +532,7 @@ all modules merely because one usage is redundant.
 - [x] Review the unit-conversion family: replace grouping claims with concrete scales, move
   task identity to views, and separate generator output families (Batch 5; canonical validation pending).
 - [x] Resolve all partition-family `ProportionSense` and `FractionInterpretation` uses (Batch 8).
-- [ ] Review the two remaining `FractionInterpretation` targets in `angle-concepts`.
+- [x] Resolve the two angle-family `FractionInterpretation` targets (Batch 9).
 - [ ] Resolve the ontology modeling questions around `Circle` and `FractionEquivalence`:
   both describe directly observable content despite currently having composition children.
 - [ ] Review `ShapeEquivalenceRelations` for equal-area partitions. Equal area does not imply
@@ -495,6 +556,9 @@ applicability before modifying targets or adding ontology entities.
 4. **Fraction partitioning (source refactor resolved in Batch 8):** precise families, explicit
    denominator contexts, and view-owned mathematical projections replace Area-driven branching.
    Complete canonical validation before closing the artifact gate.
+5. **Angle fraction interpretation (source refactor resolved in Batch 9):** three precise
+   mathematical families and three fixed projections replace task dispatch and raw feature-label
+   parsing. Both fraction-facing views own denominator interpretation. Canonical validation is pending.
 
 ### Ontology questions to review with the user
 

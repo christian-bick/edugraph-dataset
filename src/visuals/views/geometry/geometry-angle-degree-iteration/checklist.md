@@ -1,0 +1,2 @@
+- **Identity:** A circular reference and repeated one-degree intervals require interpreting the accumulated angle as a count of equal angular units.
+- **Modes:** Question Mode shows the repeated units while withholding the degree result; Solution Mode reveals the relation, answer, and explanation.

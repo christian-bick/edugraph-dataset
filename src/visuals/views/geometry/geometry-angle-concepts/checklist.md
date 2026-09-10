@@ -1,2 +1,2 @@
-- **Identity:** A centered circular reference requires interpreting the angle from a highlighted circumference arc or repeated one-degree intervals between two rays.
-- **Modes:** Question Mode preserves the arc-fraction or repeated-unit evidence while withholding the degree result; Solution Mode reveals the supplied relation, answer, and explanation.
+- **Identity:** A centered circular reference requires interpreting the angle from a highlighted circumference arc between two rays; the fraction denominator describes equal portions of the full turn.
+- **Modes:** Question Mode preserves the arc-fraction evidence while withholding the degree result; Solution Mode reveals the relation, answer, and explanation.

@@ -1,64 +1,44 @@
 import {describe, expect, it} from 'vitest';
 import {
-    DeriveOneDegreeProblem,
-    InterpretDegreeIterationProblem,
-    RecognizeAngleFromArcProblem
+    AngleUnitPartitionProblem,
+    AngleUnitIterationProblem,
+    AngleArcFractionProblem
 } from '../../../types/problems.ts';
 import {
     counterclockwiseArcPath,
-    isValidAngleConceptProblem,
+    angleDiagramGeometry,
+    isValidAngleRelationProblem,
     presentAngleConcept,
     pointOnCircle
 } from './angle-concepts-helpers.ts';
 
-const base = {
-    geometry: {
-        fullTurnDegrees: 360 as const,
-        startDegrees: 0 as const,
-        direction: 'counterclockwise' as const
-    }
-};
-
-const recognition: RecognizeAngleFromArcProblem = {
-    ...base,
-    task: 'recognize-angle-from-arc',
-    geometry: {...base.geometry, endDegrees: 90, sweepDegrees: 90, tickDegrees: [0, 90]},
+const recognition: AngleArcFractionProblem = {
+    kind: 'fractional-arc', fullTurnDegrees: 360, angleDegrees: 90,
     arcFraction: {numerator: 1, denominator: 4}
 };
 
-const oneDegree: DeriveOneDegreeProblem = {
-    ...base,
-    task: 'derive-one-degree',
-    geometry: {...base.geometry, endDegrees: 1, sweepDegrees: 1, tickDegrees: [0, 1]},
-    partitionCount: 360,
-    selectedParts: 1,
-    unitFraction: {numerator: 1, denominator: 360},
-    degreeMeasure: 1
+const oneDegree: AngleUnitPartitionProblem = {
+    kind: 'equal-angle-partition', fullTurnDegrees: 360, parts: 360, angleDegrees: 1
 };
 
-const iteration: InterpretDegreeIterationProblem = {
-    ...base,
-    task: 'interpret-degree-iteration',
-    geometry: {...base.geometry, endDegrees: 5, sweepDegrees: 5, tickDegrees: [0, 1, 2, 3, 4, 5]},
-    unitDegree: 1,
-    iterationCount: 5,
-    angleMeasure: 5
+const iteration: AngleUnitIterationProblem = {
+    kind: 'angle-iteration', fullTurnDegrees: 360, unitDegrees: 1, count: 5, angleDegrees: 5
 };
 
 describe('angle concept payload validation', () => {
     it('accepts each supported task with exact mathematical evidence', () => {
-        expect(isValidAngleConceptProblem(recognition)).toBe(true);
-        expect(isValidAngleConceptProblem(oneDegree)).toBe(true);
-        expect(isValidAngleConceptProblem(iteration)).toBe(true);
+        expect(isValidAngleRelationProblem(recognition)).toBe(true);
+        expect(isValidAngleRelationProblem(oneDegree)).toBe(true);
+        expect(isValidAngleRelationProblem(iteration)).toBe(true);
     });
 
     it('rejects inconsistent typed angle and fraction relations', () => {
-        expect(isValidAngleConceptProblem({
+        expect(isValidAngleRelationProblem({
             ...recognition,
             arcFraction: {numerator: 1, denominator: 3}
         })).toBe(false);
-        expect(isValidAngleConceptProblem({...oneDegree, degreeMeasure: 2 as 1})).toBe(false);
-        expect(isValidAngleConceptProblem({...iteration, angleMeasure: 6})).toBe(false);
+        expect(isValidAngleRelationProblem({...oneDegree, angleDegrees: 2 as 1})).toBe(false);
+        expect(isValidAngleRelationProblem({...iteration, angleDegrees: 6})).toBe(false);
     });
 
     it('derives the learner-facing relations and explanations', () => {
@@ -73,11 +53,22 @@ describe('angle concept payload validation', () => {
         expect(presentAngleConcept(iteration).solutionRelation).toBe('5 × 1° = 5°');
     });
 
-    it('rejects missing or non-sequential repeated-degree boundaries', () => {
-        expect(isValidAngleConceptProblem({
-            ...iteration,
-            geometry: {...iteration.geometry, tickDegrees: [0, 1, 3, 4, 5]}
-        })).toBe(false);
+    it('rejects missing, unsupported, or inconsistent mathematical evidence', () => {
+        for (const invalid of [
+            null, {}, {...recognition, fullTurnDegrees: 180},
+            {...recognition, arcFraction: undefined},
+            {...oneDegree, parts: 180}, {...iteration, count: 7},
+            {...iteration, unitDegrees: 2}, {...iteration, kind: 'unknown'}
+        ]) {
+            expect(isValidAngleRelationProblem(invalid as never)).toBe(false);
+        }
+    });
+
+    it('derives sequential diagram boundaries from the repeated unit', () => {
+        expect(angleDiagramGeometry(iteration)).toEqual({
+            startDegrees: 0, endDegrees: 5, tickDegrees: [0, 1, 2, 3, 4, 5]
+        });
+        expect(angleDiagramGeometry(recognition).tickDegrees).toEqual([0, 90]);
     });
 });
 

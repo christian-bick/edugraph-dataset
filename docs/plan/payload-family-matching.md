@@ -87,6 +87,12 @@ kind and denominator use an exact correlated schema choice because nonunit halve
 This is a mathematical feasibility constraint, not a view applicability filter. No shared matcher
 change or family-routing label guard was needed. Canonical artifact validation remains pending.
 
+[Batch 9](observable-label-cleanup.md#batch-9-angle-fraction-interpretation) separates fractional
+arcs, equal unit partitions, and repeated angle units. Each generator has a precise payload and
+each leaf view accepts only its corresponding family. Shared frame and diagram code replaces the
+combined interpretation view; no target-label guard is needed. The arc schema records its concrete
+denominator, while the other families have invariant capabilities and empty schemas.
+
 1. **Inventory payload-family routing.** Reuse the parsed type graph and compatible-pair index to
    list generator unions, member-only consumers, and requirements/exclusions used to distinguish
    output families. Record actual affected targets and whether configuration guarantees a member.

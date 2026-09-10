@@ -61,7 +61,7 @@ payload type changes.
 
 | Generator | T/V | Reviewed disposition |
 |---|---:|---|
-| `angle-concepts` | 3/2 | **Migrated:** each target-selected concept retains a typed fraction, turn, degree, iteration, and geometry witness. Shared view code derives prompts, point labels, fraction notation, question/solution relations, ray and unit statements, answers, and explanations. |
+| `angle-concepts` | 3/2 | **Migrated; subsequently split:** [observable-label cleanup Batch 9](observable-label-cleanup.md#batch-9-angle-fraction-interpretation) replaces task selection with arc-fraction, unit-partition, and unit-iteration generators. Mathematical values remain canonical; views derive orientation, ticks, wording, and task projections. |
 | `angle-measurement` | 2/2 | **Migrated:** both target paths produce the same neutral whole-degree angle relation. The protractor and drawing views independently derive task identity, geometry/orientation, tool configuration, point labels, prompts, question/solution relations, answers, and explanations; the target discriminator affects matching provenance, not payload behavior. |
 | `comparison` | 18/4 | **Migrated:** legacy comparisons remain the neutral number pair and relation. Grade 4 comparisons add typed first-differing-place or all-equal evidence; the view derives numeral formatting, symbol, prompt, equation, conclusion, and explanation. **Deferred:** reconcile direct range-config boundary semantics with ontology `NumbersLarger*`/`NumbersSmaller*` exclusivity. |
 | `decimal-comparison` | 3/1 | **Migrated:** retains operand precision, numeric place-value decomposition, normalized values, relation, and first-deciding-place evidence. The view derives both hundred-grid models, operand roles, decimal notation, normalized notation, place-value rows, the comparison symbol, equations, answer statement, and explanation. Schema resolvers translate ontology labels into typed comparison configuration before generation. |
@@ -90,7 +90,7 @@ payload type changes.
 
 | Generator | Production views |
 |---|---|
-| `angle-concepts` | `geometry-angle-concepts`, `geometry-angle-one-degree-derivation` |
+| `angle-concepts` (baseline; split in Batch 9) | `geometry-angle-concepts`, `geometry-angle-one-degree-derivation`; the iteration task now has `geometry-angle-degree-iteration` |
 | `angle-measurement` | `geometry-angle-drawing`, `geometry-protractor` |
 | `comparison` | `numbers-compare`, `numbers-compare-counting`, `numbers-compare-matching`, `numbers-place-value-comparison` |
 | `decimal-comparison` | `numbers-decimal-comparison` |
