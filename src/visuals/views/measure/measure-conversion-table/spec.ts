@@ -4,7 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-conversion-table',
-    generalLabels: [Scope.ArabicNumerals, Ability.Formalization]
+    generalLabels: [Scope.ArabicNumerals, Scope.ConversionTable, Ability.Formalization]
 };
 
 export const MeasureConversionTableViewSchema = {} as const;

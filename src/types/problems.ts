@@ -606,44 +606,25 @@ export type MeasurementConversionPair = {
     factor: 16 | 60 | 100 | 1000;
 };
 
-type MeasurementConversionProblemBase = {
-    pair: MeasurementConversionPair;
-};
-
 export type GenericUnitScaleRelationProblem = {
-    task: 'generic-unit-scale';
     largeUnitCount: number;
     smallUnitCount: number;
     unitsPerLarge: number;
 };
 
-export type RelativeUnitSizeProblem = MeasurementConversionProblemBase & {
-    task: 'relative-unit-size';
-    exampleLargerValue: number;
-    exampleSmallerValue: number;
-};
-
-export type LargerToSmallerConversionProblem = MeasurementConversionProblemBase & {
-    task: 'convert-larger-to-smaller';
-    sourceValue: number;
-    convertedValue: number;
-};
-
-export type MeasurementConversionTableRow = {
+export type MeasurementUnitEquivalence = {
     largerValue: number;
     smallerValue: number;
 };
 
-export type MeasurementConversionTableProblem = MeasurementConversionProblemBase & {
-    task: 'conversion-table';
-    rows: readonly MeasurementConversionTableRow[];
+export type StandardUnitEquivalencesProblem = {
+    pair: MeasurementConversionPair;
+    equivalents: readonly MeasurementUnitEquivalence[];
 };
 
 export type MeasurementConversionProblem =
     | GenericUnitScaleRelationProblem
-    | RelativeUnitSizeProblem
-    | LargerToSmallerConversionProblem
-    | MeasurementConversionTableProblem;
+    | StandardUnitEquivalencesProblem;
 
 export type MeasurementWordProblemKind =
     | 'length'
@@ -1928,8 +1909,8 @@ export interface ViewTypeMap {
     'measure-select-tool': MeasurementToolSelectionProblem;
     'measure-unit-scale-relation': GenericUnitScaleRelationProblem;
     'measure-conversion-derivation': MeasurementConversionProblem;
-    'measure-conversion-execution': MeasurementConversionProblem;
-    'measure-conversion-table': MeasurementConversionProblem;
+    'measure-conversion-execution': StandardUnitEquivalencesProblem;
+    'measure-conversion-table': StandardUnitEquivalencesProblem;
     'measure-length-estimate': MeasurementEstimateProblem;
     'measure-length-difference': MeasurementLengthDifferenceProblem;
     'measure-attributes': MeasurementAttributeProblem;

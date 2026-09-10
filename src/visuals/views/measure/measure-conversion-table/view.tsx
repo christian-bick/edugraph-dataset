@@ -1,9 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {
-    MeasurementConversionProblem,
-    MeasurementConversionTableProblem
-} from '../../../../types/problems.ts';
+import {StandardUnitEquivalencesProblem} from '../../../../types/problems.ts';
 import {
     capitalize,
     formatFactorInstruction,
@@ -22,20 +19,13 @@ import '../../../../tailwind.css';
 const VIEW_ID = 'measure-conversion-table';
 
 function assertConversionTable(
-    data: MeasurementConversionProblem
-): asserts data is MeasurementConversionTableProblem {
-    validateProblemData(VIEW_ID, data, ['task', 'pair']);
-    if (data.task !== 'conversion-table') {
-        throw new ViewValidationError(
-            VIEW_ID,
-            `Expected task "conversion-table", received "${data.task}".`
-        );
-    }
-    validateProblemData(VIEW_ID, data, ['rows']);
+    data: StandardUnitEquivalencesProblem
+): void {
+    validateProblemData(VIEW_ID, data, ['pair', 'equivalents']);
     if (!hasCoherentConversionTable(data)) {
         throw new ViewValidationError(
             VIEW_ID,
-            'Expected a coherent five-row conversion table with the final two responses withheld.'
+            'Expected five coherent equivalent measurements for the named unit pair.'
         );
     }
 }
@@ -46,7 +36,7 @@ interface CoreProps {
 }
 
 function ConversionTable({data, isSolutionView}: {
-    data: MeasurementConversionTableProblem;
+    data: StandardUnitEquivalencesProblem;
     isSolutionView: boolean;
 }) {
     const hiddenIndices = new Set([3, 4]);
@@ -68,7 +58,7 @@ function ConversionTable({data, isSolutionView}: {
                     </div>
                 ))}
             </div>
-            {data.rows.map((row, index) => {
+            {data.equivalents.map((row, index) => {
                 const withhold = !isSolutionView && hiddenIndices.has(index);
                 const revealedAnswer = isSolutionView && hiddenIndices.has(index);
                 return (
@@ -102,7 +92,7 @@ const MeasureConversionTableCore = ({config: _config, payload}: CoreProps) => {
     assertConversionTable(data);
     const largerUnit = getMeasurementUnitPresentation(data.pair.largerUnit);
     const smallerUnit = getMeasurementUnitPresentation(data.pair.smallerUnit);
-    const finalRow = data.rows.at(-1)!;
+    const finalRow = data.equivalents.at(-1)!;
     const finalEquation = formatMeasurementEquation(
         finalRow.largerValue,
         finalRow.smallerValue,

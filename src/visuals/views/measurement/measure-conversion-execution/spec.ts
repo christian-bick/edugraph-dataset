@@ -1,11 +1,10 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-conversion-execution',
-    generalLabels: [Ability.ProcedureExecution],
-    requiredLabels: [Area.MeasuringWithUnits]
+    generalLabels: [Ability.ProcedureExecution]
 };
 
 export const MeasureConversionExecutionViewSchema = {} as const;

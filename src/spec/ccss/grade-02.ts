@@ -371,7 +371,7 @@ const useLengthToolBuilder = new DatasetPermutationBuilder()
 const unitScaleRelationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.UnitScaleRelation,
-        Scope.LengthMeasurement,
+        Scope.SegmentScale,
         Ability.ConceptDerivation
     ]);
 

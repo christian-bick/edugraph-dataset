@@ -1,11 +1,10 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-conversion-derivation',
-    generalLabels: [Ability.ConceptDerivation],
-    requiredLabels: [Area.UnitScaleRelation]
+    generalLabels: [Ability.ConceptDerivation]
 };
 
 export const MeasureConversionDerivationViewSchema = {} as const;

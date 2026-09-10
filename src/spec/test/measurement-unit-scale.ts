@@ -3,6 +3,6 @@ import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutatio
 import {CompetencyTarget} from '../../types/ml-engine.ts';
 
 const builder = new DatasetPermutationBuilder().addLabels([
-    Area.UnitScaleRelation, Scope.LengthMeasurement, Ability.ConceptDerivation
+    Area.UnitScaleRelation, Scope.SegmentScale, Ability.ConceptDerivation
 ]);
 export const spec: CompetencyTarget[] = toTargets('test-measurement-unit-scale', builder);

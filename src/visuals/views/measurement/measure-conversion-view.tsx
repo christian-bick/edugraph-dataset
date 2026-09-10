@@ -2,9 +2,8 @@ import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {
     GenericUnitScaleRelationProblem,
-    LargerToSmallerConversionProblem,
     MeasurementConversionProblem,
-    RelativeUnitSizeProblem
+    StandardUnitEquivalencesProblem
 } from '../../../types/problems.ts';
 import {
     formatFactorInstruction,
@@ -18,7 +17,6 @@ import {
 } from '../../helpers/measurement-conversion.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
-    isSupportedMeasureConversionProblem,
     isValidMeasureConversionProblem
 } from './measure-conversion-helpers.ts';
 
@@ -51,7 +49,7 @@ const UnitCard = ({unit, role}: {
 );
 
 const UnitPair = ({data}: {
-    data: RelativeUnitSizeProblem | LargerToSmallerConversionProblem;
+    data: StandardUnitEquivalencesProblem;
 }) => (
     <div className="grid grid-cols-[1fr_76px_1fr] items-center gap-3">
         <UnitCard
@@ -133,15 +131,16 @@ const GenericUnitScale = ({data, isSolutionView}: {
 };
 
 const RelativeUnitSize = ({data, isSolutionView}: {
-    data: RelativeUnitSizeProblem;
+    data: StandardUnitEquivalencesProblem;
     isSolutionView: boolean;
 }) => {
     const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
     const smaller = getMeasurementUnitPresentation(data.pair.smallerUnit);
     const quantity = getQuantityName(data.pair.quantityKind);
+    const equivalent = data.equivalents[0]!;
     const exampleEquation = formatMeasurementEquation(
-        data.exampleLargerValue,
-        data.exampleSmallerValue,
+        equivalent.largerValue,
+        equivalent.smallerValue,
         data.pair
     );
     const solutionEquation = formatUnitEquivalence(data.pair);
@@ -186,7 +185,7 @@ const RelativeUnitSize = ({data, isSolutionView}: {
                         {exampleEquation} names the same {quantity} with a smaller count of {larger.plural} and a larger count of {smaller.plural}.
                     </div>
                     <div className="mt-2 text-sm font-semibold leading-relaxed text-emerald-900">
-                        {exampleEquation} represents the same {quantity}. Dividing both counts by {formatStandardNumeral(data.exampleLargerValue)} gives {solutionEquation}. {formatRelativeSizeStatement(data.pair)}
+                        {exampleEquation} represents the same {quantity}. Dividing both counts by {formatStandardNumeral(equivalent.largerValue)} gives {solutionEquation}. {formatRelativeSizeStatement(data.pair)}
                     </div>
                 </div>
             ) : null}
@@ -195,16 +194,17 @@ const RelativeUnitSize = ({data, isSolutionView}: {
 };
 
 const LargerToSmaller = ({data, isSolutionView}: {
-    data: LargerToSmallerConversionProblem;
+    data: StandardUnitEquivalencesProblem;
     isSolutionView: boolean;
 }) => {
     const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
     const smaller = getMeasurementUnitPresentation(data.pair.smallerUnit);
-    const source = formatMeasurement(data.sourceValue, data.pair.largerUnit);
-    const converted = formatMeasurement(data.convertedValue, data.pair.smallerUnit);
-    const sourceText = formatStandardNumeral(data.sourceValue);
+    const equivalent = data.equivalents[0]!;
+    const source = formatMeasurement(equivalent.largerValue, data.pair.largerUnit);
+    const converted = formatMeasurement(equivalent.smallerValue, data.pair.smallerUnit);
+    const sourceText = formatStandardNumeral(equivalent.largerValue);
     const factorText = formatStandardNumeral(data.pair.factor);
-    const convertedText = formatStandardNumeral(data.convertedValue);
+    const convertedText = formatStandardNumeral(equivalent.smallerValue);
     const solutionEquation = `${sourceText} × ${factorText} = ${convertedText}`;
     const measurementEquation = `${source} = ${converted}`;
     return (
@@ -262,45 +262,29 @@ const LargerToSmaller = ({data, isSolutionView}: {
 
 export const MeasureConversionView = ({mode, payload, viewId}: MeasureConversionViewProps) => {
     const data: MeasurementConversionProblem = payload.problem.data;
-    validateProblemData(viewId, data, ['task']);
-    if (!isSupportedMeasureConversionProblem(data)) {
-        throw new ViewValidationError(
-            viewId,
-            'Only generic unit-scale, relative unit-size, and larger-to-smaller conversion tasks are supported.'
-        );
-    }
-
-    if (data.task === 'generic-unit-scale') {
+    validateProblemData(viewId, data, []);
+    if (!('pair' in data)) {
         validateProblemData(viewId, data, [
             'largeUnitCount',
             'smallUnitCount',
             'unitsPerLarge'
         ]);
-    } else if (data.task === 'relative-unit-size') {
-        validateProblemData(viewId, data, [
-            'pair',
-            'exampleLargerValue',
-            'exampleSmallerValue'
-        ]);
     } else {
-        validateProblemData(viewId, data, ['pair', 'sourceValue', 'convertedValue']);
+        validateProblemData(viewId, data, ['pair', 'equivalents']);
     }
 
-    const expectedMode = data.task === 'convert-larger-to-smaller'
-        ? 'execution'
-        : 'derivation';
-    if (mode !== expectedMode || !isValidMeasureConversionProblem(data)) {
+    if ((!('pair' in data) && mode !== 'derivation') || !isValidMeasureConversionProblem(data)) {
         throw new ViewValidationError(
             viewId,
             'The fixed task identity, unit pair, scale factor, and quantities must agree.'
         );
     }
 
-    const prompt = data.task === 'generic-unit-scale'
+    const prompt = !('pair' in data)
         ? 'The same length is measured with large units and small units. Which unit size needs more units?'
-        : data.task === 'relative-unit-size'
+        : mode === 'derivation'
         ? `Use the equivalent ${getQuantityName(data.pair.quantityKind)} to determine how many ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural} equal 1 ${getMeasurementUnitPresentation(data.pair.largerUnit).singular}.`
-        : `Convert ${formatMeasurement(data.sourceValue, data.pair.largerUnit)} to ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural}.`;
+        : `Convert ${formatMeasurement(data.equivalents[0]!.largerValue, data.pair.largerUnit)} to ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural}.`;
 
     return (
         <div className="w-[860px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
@@ -312,12 +296,12 @@ export const MeasureConversionView = ({mode, payload, viewId}: MeasureConversion
                 </div>
                 <div className="mt-1 text-xl font-bold text-slate-800">{prompt}</div>
             </div>
-            {data.task === 'generic-unit-scale' ? (
+            {!('pair' in data) ? (
                 <GenericUnitScale data={data} isSolutionView={payload.isSolutionView} />
             ) : (
                 <>
                     <div className="mt-5"><UnitPair data={data} /></div>
-                    {data.task === 'relative-unit-size'
+                    {mode === 'derivation'
                         ? <RelativeUnitSize data={data} isSolutionView={payload.isSolutionView} />
                         : <LargerToSmaller data={data} isSolutionView={payload.isSolutionView} />}
                 </>

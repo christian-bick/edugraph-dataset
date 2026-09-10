@@ -168,6 +168,72 @@ through `MeasuringWithUnits` or using the length-tool grouping.
 - Composition-parent target usage decreases from 68 to 59. Image annotation counts and VQA
   remain pending canonical regeneration.
 
+## Batch 5: unit conversion contract
+
+Replace the generator's learner-task selector and task-specific quantity aliases with canonical
+unit equivalences (`SPEC-G2`, `IMPL-G8`). `measurement-conversion` now produces only named-unit
+equivalences; `measurement-unit-scale` produces the bounded segment-partition model. Each generator
+guarantees one concrete payload family (`IMPL-G7`). The derivation view accepts their named union;
+the other views accept only their appropriate concrete member. No matcher change is needed.
+
+The named-unit payload becomes `{pair, equivalents: [{largerValue, smallerValue}, ...]}`.
+It holds five consecutive, mathematically equivalent quantity pairs. Derivation and execution
+use the first pair, while the table view projects the collection as rows. No quantity is repeated
+under a task-specific alias. The segment variant retains its three mathematical counts without
+a task discriminant.
+
+| Production consumer | Target family | Payload adoption | Verification |
+| --- | --- | --- | --- |
+| `measure-unit-scale-relation` | Grade 2 same-length unit comparison | Retain segment counts; remove `task`; receive only `GenericUnitScaleRelationProblem`. | Typed-routing regression, fixed-seed markup comparison, and both modes. |
+| `measure-conversion-derivation` | Grade 2 unit comparison and Grade 4 relative unit sizes | Keep segment projection; use the first canonical equivalence for named units. | Fixed-seed markup equivalence and both modes. |
+| `measure-conversion-execution` | Grade 4 larger-to-smaller conversion | Use the first canonical equivalence; accept only `StandardUnitEquivalencesProblem`. | Typed-routing regression, fixed-seed markup comparison, and both modes. |
+| `measure-conversion-table` | Grade 4 conversion tables | Own `ConversionTable`; render all equivalences; accept only `StandardUnitEquivalencesProblem`. | Equivalent-value/sequence tests, typed routing, and both-mode rendering. |
+
+Remove the grouping claims `MeasuringWithUnits`, `LengthMeasurement`, `WeightMeasurement`,
+and `TimeMeasurement`. Retain the actual magnitude/factor scaling and named-unit capabilities.
+`UnitScaleRelation` is invariant mathematical evidence in both payload variants; `SegmentScale`
+identifies the generic distance measured in segment counts. No new ontology entity is required.
+
+The first named-unit quantity keeps the existing derivation/execution distribution (2 through 9).
+The table now uses the same collection, so its first quantity also comes from that range rather
+than a separate task-selected 1-through-5 distribution. Neither range is a target claim.
+
+The segment generator invariantly declares `UnitScaleRelation` and `SegmentScale`. It has no
+ontology-backed parameter to resolve; its bounded counts are seeded instance variation. All four
+conversion views drop their family-selecting label requirements/exclusions. Shared renderers and
+presentation helpers remain in place. The separate
+[payload-family matching plan](payload-family-matching.md) records the broader architectural
+direction and the still-unimplemented positive micro-filter migration.
+
+### Validation
+
+Source and automated validation completed on 2026-09-10. The initial combined-generator attempt
+exposed the required-label-only union-member guard. The approved resolution splits precise output
+families instead of broadening that guard; no shared matching code changed.
+
+- `npm run check:affected` and `npm run check:docs` pass. All 653 CCSS and 559 test targets remain
+  matched; the test spec covers all 81 generators.
+- `npm run test:coverage` passes: 444 test files and 2,440 tests. Both unit-relation generators
+  have 100% statement and branch coverage. Typed-routing integration tests replace three
+  declaration-snapshot tests that only asserted the previous label guards.
+- Full matching preserves all 799 CCSS pairs after the intended target-label corrections and
+  the segment producer's ID change from `measurement-conversion` to `measurement-unit-scale`.
+  There are no additional or lost target/view paths in CCSS or test.
+- Replay of every baseline conversion tuple covers 920 fixed-seed draws and 1,840 successful
+  server-side renders across CCSS and test. Non-table markup is unchanged. The 280 table draws
+  have the intended quantity-series change; resolved labels have no unexplained difference.
+  Reintroducing the segment entry point causes no additional fixed-seed markup change.
+- Composition-parent target usage decreases from 59 to 37. These are source results, not new
+  image-annotation counts. Canonical sample identities include target and generator IDs, so the
+  migrated identities will obtain new seeds; fixed-seed markup equivalence is not PNG identity.
+- Canonical generation and VQA remain pending. The sandbox denied Docker access; the subsequent
+  outside-sandbox daemon query did not respond and was cancelled without restarting Docker.
+  No new PNGs, VQA uploads, or cache entries were produced. Follow the shared artifact checklist
+  above once canonical rendering is available.
+
+Diagnostic evidence is in `temp/observable-cleanup-batch5/`: `before.json`, `after-split.json`,
+`diff-split.json`, `matching-split.log`, `coverage-split.log`, and `check-affected-split.log`.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
@@ -186,9 +252,8 @@ all modules merely because one usage is redundant.
   actual observable contexts and knowledge claims (Batches 2 and 3).
 - [x] Separate observed length measurement from provided-data tasks; declare the concrete
   units of the decimal-measurement, length-difference, and within-100 story contexts (Batch 4).
-- [ ] Review the remaining unit-conversion family. `MeasuringWithUnits` and the tool-family
-  Scopes still occur here; the distinction between generic unit partitions, relative standard
-  unit sizes, conversion, and conversion tables is also encoded in generator/view contracts.
+- [x] Review the unit-conversion family: replace grouping claims with concrete scales, move
+  task identity to views, and separate generator output families (Batch 5; canonical validation pending).
 - [ ] Review `ProportionSense` and `FractionInterpretation` against their concrete constituents.
 - [ ] Resolve the ontology modeling questions around `Circle` and `FractionEquivalence`:
   both describe directly observable content despite currently having composition children.
@@ -200,12 +265,10 @@ all modules merely because one usage is redundant.
 These are not safe global label substitutions. Review the mathematical payload and view
 applicability before modifying targets or adding ontology entities.
 
-1. **Unit conversion:** seven concrete unit pairs already establish magnitude or factor scaling.
-   The generic partitioned-unit case has no named standard unit. `MeasuringWithUnits` and
-   `LengthMeasurement` also act as required/rejected boundaries in consuming views. Preserve
-   valid task distinctions without retaining a grouping label merely to separate matches.
-   `UnitConversion` is not an automatic replacement: its definition concerns different unit
-   systems, unlike several current within-system scaling examples.
+1. **Unit conversion (resolved in Batch 5):** seven concrete unit pairs establish magnitude or
+   factor scaling; abstract segment counts use a separate precise payload family. `UnitConversion`
+   was not substituted: its definition concerns different unit systems, unlike several current
+   within-system scaling examples. Complete canonical validation before closing the artifact gate.
 2. **Measurement line-plot arithmetic:** `FractionArithmetic` enables an optional extrema
    relation in the payload and is required by the arithmetic view. Replacing it with
    `FractionNumbers` alone would admit ordinary observations without that relation. Review
@@ -227,6 +290,6 @@ applicability before modifying targets or adding ontology entities.
 - **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
   congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
 
-The 59 remaining targets span these contract and modeling reviews; they are not
-59 proven false annotations. Eligibility under the proposed structural rule and truthfulness
+The 37 remaining targets span these contract and modeling reviews; they are not
+37 proven false annotations. Eligibility under the proposed structural rule and truthfulness
 of the current content claim remain separate questions.

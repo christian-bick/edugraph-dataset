@@ -1,10 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {
-    MeasurementConversionPair,
-    MeasurementConversionPairId,
-    MeasurementConversionProblem
-} from '../../../types/problems.ts';
+import {StandardUnitEquivalencesProblem} from '../../../types/problems.ts';
 import {MeasurementConversionGenerator} from './generator.ts';
 
 const pairCases = [
@@ -17,65 +13,20 @@ const pairCases = [
     ['minute-second', 'time', 'factor', 'minute', 'second', 60]
 ] as const;
 
-const tasks = [
-    'relative-unit-size',
-    'convert-larger-to-smaller',
-    'conversion-table'
-] as const;
-
-const expectValidPair = (pair: MeasurementConversionPair): void => {
-    const expected = pairCases.find(([id]) => id === pair.id)!;
+const expectConsistentProblem = (problem: StandardUnitEquivalencesProblem): void => {
+    const expected = pairCases.find(([id]) => id === problem.pair.id)!;
     expect([
-        pair.id,
-        pair.quantityKind,
-        pair.scalingKind,
-        pair.largerUnit,
-        pair.smallerUnit,
-        pair.factor
+        problem.pair.id, problem.pair.quantityKind, problem.pair.scalingKind,
+        problem.pair.largerUnit, problem.pair.smallerUnit, problem.pair.factor
     ]).toEqual(expected);
-};
-
-const expectConsistentProblem = (problem: MeasurementConversionProblem): void => {
-    if (problem.task === 'generic-unit-scale') {
-        expect(problem.largeUnitCount).toBeGreaterThanOrEqual(3);
-        expect(problem.largeUnitCount).toBeLessThanOrEqual(6);
-        expect(problem.unitsPerLarge).toBeGreaterThanOrEqual(2);
-        expect(problem.unitsPerLarge).toBeLessThanOrEqual(3);
-        expect(problem.smallUnitCount).toBe(problem.largeUnitCount * problem.unitsPerLarge);
-        expect(Object.keys(problem).sort()).toEqual([
-            'largeUnitCount',
-            'smallUnitCount',
-            'task',
-            'unitsPerLarge'
-        ]);
-        return;
-    }
-
-    expectValidPair(problem.pair);
-    if (problem.task === 'relative-unit-size') {
-        expect(problem.exampleLargerValue).toBeGreaterThanOrEqual(2);
-        expect(problem.exampleLargerValue).toBeLessThanOrEqual(9);
-        expect(problem.exampleSmallerValue).toBe(
-            problem.exampleLargerValue * problem.pair.factor
-        );
-        return;
-    }
-
-    if (problem.task === 'convert-larger-to-smaller') {
-        expect(problem.sourceValue).toBeGreaterThanOrEqual(2);
-        expect(problem.sourceValue).toBeLessThanOrEqual(9);
-        expect(problem.convertedValue).toBe(problem.sourceValue * problem.pair.factor);
-        return;
-    }
-
-    expect(problem.rows).toHaveLength(5);
-    const startValue = problem.rows[0]!.largerValue;
-    expect(startValue).toBeGreaterThanOrEqual(1);
-    expect(startValue).toBeLessThanOrEqual(5);
-    problem.rows.forEach((row, index) => {
-        expect(row).toEqual({
-            largerValue: startValue + index,
-            smallerValue: (startValue + index) * problem.pair.factor
+    expect(problem.equivalents).toHaveLength(5);
+    const start = problem.equivalents[0]!.largerValue;
+    expect(start).toBeGreaterThanOrEqual(2);
+    expect(start).toBeLessThanOrEqual(9);
+    problem.equivalents.forEach((equivalent, index) => {
+        expect(equivalent).toEqual({
+            largerValue: start + index,
+            smallerValue: (start + index) * problem.pair.factor
         });
     });
 };
@@ -83,93 +34,29 @@ const expectConsistentProblem = (problem: MeasurementConversionProblem): void =>
 describe('MeasurementConversionGenerator', () => {
     const generator = new MeasurementConversionGenerator();
 
-    it('strictly validates task and unit-pair configuration', () => {
+    it('strictly validates unit-pair configuration', () => {
         expect(() => generator.generate({})).toThrow();
-        expect(() => generator.generate({
-            task: 'relative-unit-size',
-            unitPair: 'yard-foot'
-        } as never)).toThrow('Unsupported unit pair "yard-foot".');
-        expect(() => generator.generate({
-            task: 'unknown',
-            unitPair: 'kilometer-meter'
-        } as never)).toThrow('Unsupported task "unknown".');
-        expect(() => generator.generate({
-            task: 'conversion-table',
-            unitPair: 'generic-unit-scale'
-        })).toThrow('Generic unit scaling does not support task "conversion-table".');
+        expect(() => generator.generate({unitPair: 'yard-foot'} as never))
+            .toThrow('Unsupported unit pair "yard-foot".');
     });
 
-    it('generates a genuine bounded generic unit-scale relation', () => {
-        const largeCounts = new Set<number>();
-        const factors = new Set<number>();
-        for (let seed = 0; seed < 500; seed++) {
-            setSeed(`generic-${seed}`);
-            const problem = generator.generate({
-                task: 'relative-unit-size',
-                unitPair: 'generic-unit-scale'
-            }).data;
-            expect(problem.task).toBe('generic-unit-scale');
-            expectConsistentProblem(problem);
-            if (problem.task === 'generic-unit-scale') {
-                largeCounts.add(problem.largeUnitCount);
-                factors.add(problem.unitsPerLarge);
-            }
-        }
-        expect(largeCounts).toEqual(new Set([3, 4, 5, 6]));
-        expect(factors).toEqual(new Set([2, 3]));
-    });
-
-    it.each(tasks)('is deterministic for %s', task => {
-        setSeed(`deterministic-${task}`);
-        const first = generator.generate({task, unitPair: 'kilometer-meter'});
-        setSeed(`deterministic-${task}`);
-        expect(generator.generate({task, unitPair: 'kilometer-meter'})).toEqual(first);
-    });
-
-    it.each(pairCases)('generates all three canonical tasks for %s', pairId => {
-        for (const task of tasks) {
-            for (let seed = 0; seed < 50; seed++) {
-                setSeed(`${pairId}-${task}-${seed}`);
-                const problem = generator.generate({
-                    task,
-                    unitPair: pairId as MeasurementConversionPairId
-                }).data;
-                expect(problem.task).toBe(task);
-                expectConsistentProblem(problem);
-            }
+    it.each(pairCases)('generates deterministic equivalent quantities for %s', unitPair => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const first = generator.generate({unitPair});
+            expectConsistentProblem(first.data);
+            setSeed(seed);
+            expect(generator.generate({unitPair})).toEqual(first);
         }
     });
 
-    it('reaches both random-value boundaries for bounded tasks', () => {
-        const relativeValues = new Set<number>();
-        const conversionValues = new Set<number>();
-        const tableStarts = new Set<number>();
+    it('reaches the complete starting-quantity range', () => {
+        const starts = new Set<number>();
         for (let seed = 0; seed < 1000; seed++) {
             setSeed(seed);
-            const relative = generator.generate({
-                task: 'relative-unit-size',
-                unitPair: 'pound-ounce'
-            }).data;
-            setSeed(seed);
-            const conversion = generator.generate({
-                task: 'convert-larger-to-smaller',
-                unitPair: 'pound-ounce'
-            }).data;
-            setSeed(seed);
-            const table = generator.generate({
-                task: 'conversion-table',
-                unitPair: 'pound-ounce'
-            }).data;
-            if (relative.task === 'relative-unit-size') {
-                relativeValues.add(relative.exampleLargerValue);
-            }
-            if (conversion.task === 'convert-larger-to-smaller') {
-                conversionValues.add(conversion.sourceValue);
-            }
-            if (table.task === 'conversion-table') tableStarts.add(table.rows[0]!.largerValue);
+            const data = generator.generate({unitPair: 'pound-ounce'}).data;
+            starts.add(data.equivalents[0]!.largerValue);
         }
-        expect(relativeValues).toEqual(new Set([2, 3, 4, 5, 6, 7, 8, 9]));
-        expect(conversionValues).toEqual(relativeValues);
-        expect(tableStarts).toEqual(new Set([1, 2, 3, 4, 5]));
+        expect(starts).toEqual(new Set([2, 3, 4, 5, 6, 7, 8, 9]));
     });
 });

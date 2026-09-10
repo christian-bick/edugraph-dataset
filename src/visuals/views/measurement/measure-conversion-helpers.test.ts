@@ -1,82 +1,42 @@
 import {describe, expect, it} from 'vitest';
 import {MeasurementConversionGenerator} from '../../../generators/measurement/measurement-conversion/generator.ts';
+import {MeasurementUnitScaleGenerator} from '../../../generators/measurement/measurement-unit-scale/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {
-    MeasurementConversionPairId,
-    MeasurementConversionProblem
-} from '../../../types/problems.ts';
-import {
-    isSupportedMeasureConversionProblem,
-    isValidMeasureConversionProblem
-} from './measure-conversion-helpers.ts';
+import {MeasurementConversionPairId} from '../../../types/problems.ts';
+import {isValidMeasureConversionProblem} from './measure-conversion-helpers.ts';
 
 const pairIds: MeasurementConversionPairId[] = [
-    'kilometer-meter',
-    'meter-centimeter',
-    'kilogram-gram',
-    'pound-ounce',
-    'liter-milliliter',
-    'hour-minute',
-    'minute-second'
+    'kilometer-meter', 'meter-centimeter', 'kilogram-gram', 'pound-ounce',
+    'liter-milliliter', 'hour-minute', 'minute-second'
 ];
 
 describe('measure-conversion validation', () => {
     const generator = new MeasurementConversionGenerator();
 
-    it('accepts every canonical conversion task', () => {
-        for (const unitPair of pairIds) {
-            for (const task of [
-                'relative-unit-size',
-                'convert-larger-to-smaller'
-            ] as const) {
-                setSeed(`${unitPair}-${task}`);
-                const problem = generator.generate({task, unitPair}).data;
-                expect(isSupportedMeasureConversionProblem(problem)).toBe(true);
-                if (isSupportedMeasureConversionProblem(problem)) {
-                    expect(isValidMeasureConversionProblem(problem)).toBe(true);
-                }
-            }
-        }
+    it.each(pairIds)('accepts canonical equivalences for %s', unitPair => {
+        setSeed(unitPair);
+        expect(isValidMeasureConversionProblem(generator.generate({unitPair}).data)).toBe(true);
     });
 
     it('accepts the complete abstract equal-length partition range', () => {
+        const segmentGenerator = new MeasurementUnitScaleGenerator();
         const combinations = new Set<string>();
         for (let seed = 0; seed < 100; seed++) {
-            setSeed(`generic-${seed}`);
-            const problem = generator.generate({
-                task: 'relative-unit-size',
-                unitPair: 'generic-unit-scale'
-            }).data;
-            expect(isSupportedMeasureConversionProblem(problem)).toBe(true);
-            if (problem.task === 'generic-unit-scale') {
-                combinations.add(`${problem.largeUnitCount}:${problem.unitsPerLarge}`);
-                expect(isValidMeasureConversionProblem(problem)).toBe(true);
-            }
+            setSeed(seed);
+            const data = segmentGenerator.generate({}).data;
+            combinations.add(`${data.largeUnitCount}:${data.unitsPerLarge}`);
+            expect(isValidMeasureConversionProblem(data)).toBe(true);
         }
         expect(combinations.size).toBe(8);
     });
 
-    it('rejects inconsistent canonical values and unsupported table payloads', () => {
-        setSeed('invalid-relative');
-        const relative = generator.generate({
-            task: 'relative-unit-size',
-            unitPair: 'hour-minute'
-        }).data;
-        expect(relative.task).toBe('relative-unit-size');
-        if (relative.task !== 'relative-unit-size') return;
-        expect(isValidMeasureConversionProblem({
-            ...relative,
-            exampleSmallerValue: relative.exampleSmallerValue + 1
-        })).toBe(false);
-        expect(isValidMeasureConversionProblem({
-            ...relative,
-            pair: {...relative.pair, factor: 16}
-        })).toBe(false);
-
-        const table = generator.generate({
-            task: 'conversion-table',
-            unitPair: 'hour-minute'
-        }).data as MeasurementConversionProblem;
-        expect(isSupportedMeasureConversionProblem(table)).toBe(false);
+    it('rejects inconsistent or out-of-range segment counts', () => {
+        const valid = {largeUnitCount: 4, unitsPerLarge: 2, smallUnitCount: 8};
+        for (const change of [
+            {largeUnitCount: 2}, {largeUnitCount: 7}, {largeUnitCount: 3.5},
+            {unitsPerLarge: 1}, {unitsPerLarge: 4}, {unitsPerLarge: 2.5},
+            {smallUnitCount: 9}, {smallUnitCount: 8.5}
+        ]) expect(isValidMeasureConversionProblem({...valid, ...change})).toBe(false);
+        expect(isValidMeasureConversionProblem(null as never)).toBe(false);
     });
 });

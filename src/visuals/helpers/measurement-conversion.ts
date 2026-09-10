@@ -2,7 +2,8 @@ import {formatStandardNumeral} from '../../lib/whole-number-notation.ts';
 import {
     MeasurementConversionPair,
     MeasurementConversionPairId,
-    MeasurementConversionUnitId
+    MeasurementConversionUnitId,
+    StandardUnitEquivalencesProblem
 } from '../../types/problems.ts';
 
 export type MeasurementUnitPresentation = {
@@ -100,6 +101,18 @@ export const isValidMeasurementConversionPair = (
 export const getMeasurementUnitPresentation = (
     unitId: MeasurementConversionUnitId
 ): MeasurementUnitPresentation => units[unitId];
+
+export const isValidStandardUnitEquivalences = (data: StandardUnitEquivalencesProblem): boolean => {
+    if (!data || !isValidMeasurementConversionPair(data.pair)
+        || !Array.isArray(data.equivalents) || data.equivalents.length !== 5) return false;
+    return data.equivalents.every((equivalent, index) => Boolean(equivalent)
+        && Number.isSafeInteger(equivalent.largerValue) && equivalent.largerValue > 0
+        && Number.isSafeInteger(equivalent.smallerValue) && equivalent.smallerValue > 0
+        && equivalent.smallerValue === equivalent.largerValue * data.pair.factor
+        && (index === 0
+            ? equivalent.largerValue >= 2 && equivalent.largerValue <= 9
+            : equivalent.largerValue === data.equivalents[index - 1]!.largerValue + 1));
+};
 
 export const getQuantityName = (
     quantityKind: MeasurementConversionPair['quantityKind']

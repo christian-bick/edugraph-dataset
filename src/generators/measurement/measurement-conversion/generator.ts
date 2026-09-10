@@ -2,18 +2,13 @@ import {GeneratorValidationError, validateConfigFields} from '../../../lib/error
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
-    LargerToSmallerConversionProblem,
-    GenericUnitScaleRelationProblem,
     MeasurementConversionPair,
     MeasurementConversionPairId,
-    MeasurementConversionProblem,
-    MeasurementConversionTableProblem,
-    RelativeUnitSizeProblem
+    StandardUnitEquivalencesProblem
 } from '../../../types/problems.ts';
 import {
     MeasurementConversionGeneratorConfig,
-    MeasurementConversionGeneratorSchema,
-    MeasurementConversionUnitPairConfig
+    MeasurementConversionGeneratorSchema
 } from './spec.ts';
 
 const pairSeeds: Record<MeasurementConversionPairId, MeasurementConversionPair> = {
@@ -81,49 +76,11 @@ const randomInteger = (minimum: number, maximum: number): number =>
 const buildPair = (id: MeasurementConversionPairId): MeasurementConversionPair =>
     ({...pairSeeds[id]});
 
-const buildGenericUnitScaleRelation = (): GenericUnitScaleRelationProblem => {
-    const largeUnitCount = randomInteger(3, 6);
-    const unitsPerLarge = randomInteger(2, 3);
-    const smallUnitCount = largeUnitCount * unitsPerLarge;
-    return {
-        task: 'generic-unit-scale',
-        largeUnitCount,
-        smallUnitCount,
-        unitsPerLarge
-    };
-};
-
-const buildRelativeUnitSize = (
+const buildUnitEquivalences = (
     pair: MeasurementConversionPair
-): RelativeUnitSizeProblem => {
-    const exampleLargerValue = randomInteger(2, 9);
-    const exampleSmallerValue = exampleLargerValue * pair.factor;
-    return {
-        task: 'relative-unit-size',
-        pair,
-        exampleLargerValue,
-        exampleSmallerValue
-    };
-};
-
-const buildLargerToSmallerConversion = (
-    pair: MeasurementConversionPair
-): LargerToSmallerConversionProblem => {
-    const sourceValue = randomInteger(2, 9);
-    const convertedValue = sourceValue * pair.factor;
-    return {
-        task: 'convert-larger-to-smaller',
-        pair,
-        sourceValue,
-        convertedValue
-    };
-};
-
-const buildConversionTable = (
-    pair: MeasurementConversionPair
-): MeasurementConversionTableProblem => {
-    const startValue = randomInteger(1, 5);
-    const rows = Array.from({length: 5}, (_, index) => {
+): StandardUnitEquivalencesProblem => {
+    const startValue = randomInteger(2, 9);
+    const equivalents = Array.from({length: 5}, (_, index) => {
         const largerValue = startValue + index;
         const smallerValue = largerValue * pair.factor;
         return {
@@ -132,14 +89,13 @@ const buildConversionTable = (
         };
     });
     return {
-        task: 'conversion-table',
         pair,
-        rows
+        equivalents
     };
 };
 
 export class MeasurementConversionGenerator implements ProblemGenerator<
-    MeasurementConversionProblem,
+    StandardUnitEquivalencesProblem,
     MeasurementConversionGeneratorConfig
 > {
     type: AbstractProblem['type'] = 'measurement';
@@ -147,20 +103,10 @@ export class MeasurementConversionGenerator implements ProblemGenerator<
 
     generate(
         config: MeasurementConversionGeneratorConfig
-    ): ProblemStub<MeasurementConversionProblem> {
-        validateConfigFields('measurement-conversion', config, ['task', 'unitPair']);
+    ): ProblemStub<StandardUnitEquivalencesProblem> {
+        validateConfigFields('measurement-conversion', config, ['unitPair']);
 
-        if ((config.unitPair as MeasurementConversionUnitPairConfig) === 'generic-unit-scale') {
-            if (config.task !== 'relative-unit-size') {
-                throw new GeneratorValidationError(
-                    'measurement-conversion',
-                    `Generic unit scaling does not support task "${config.task}".`
-                );
-            }
-            return {data: buildGenericUnitScaleRelation()};
-        }
-
-        const pairSeed = pairSeeds[config.unitPair as MeasurementConversionPairId];
+        const pairSeed = pairSeeds[config.unitPair!];
         if (!pairSeed) {
             throw new GeneratorValidationError(
                 'measurement-conversion',
@@ -169,18 +115,6 @@ export class MeasurementConversionGenerator implements ProblemGenerator<
         }
         const pair = buildPair(pairSeed.id);
 
-        if (config.task === 'relative-unit-size') {
-            return {data: buildRelativeUnitSize(pair)};
-        }
-        if (config.task === 'convert-larger-to-smaller') {
-            return {data: buildLargerToSmallerConversion(pair)};
-        }
-        if (config.task === 'conversion-table') {
-            return {data: buildConversionTable(pair)};
-        }
-        throw new GeneratorValidationError(
-            'measurement-conversion',
-            `Unsupported task "${config.task}".`
-        );
+        return {data: buildUnitEquivalences(pair)};
     }
 }
