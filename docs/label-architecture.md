@@ -36,6 +36,12 @@ boundaries are evaluated in addition to that positive coverage. See
 [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries), and
 [SPEC-V7](spec-view.md#spec-v7--requiredlabels-declares-target-preconditions).
 
+Before matching, distinguish the ontology's organizational nodes from descriptors eligible for
+labeling. The same eligibility requirement applies to target claims, module declarations, and
+resolved dataset annotations. A specialization family can be a valid label; a field that groups
+constituents cannot. See [SPEC-3](spec-general.md#spec-3--most-specific-does-not-mean-leaf), which
+applies the ontology's content-evidence rule to this repository.
+
 ## Claims, capabilities, applicability, and boundaries
 
 | Construct | Meaning | Does it satisfy a target claim? | May it change behavior? |
@@ -171,7 +177,8 @@ resolved config used by the task fingerprint. Operational details live in
 
 When a match or artifact looks wrong, inspect it in this order:
 
-1. Is every target claim truthful, most-specific, and observable (`TSPEC-6`, `TSPEC-13`, `TSPEC-14`)?
+1. Is every target claim eligible for labeling, truthful, most-specific, and observable
+   (`SPEC-3`, `TSPEC-6`, `TSPEC-13`, `TSPEC-14`)?
 2. Which generator or view capability positively satisfies each claim (`SPEC-1`)?
 3. Does the generator payload prove its mathematical claims without selecting learner action
    (`IMPL-G4`, `IMPL-G8`)?
@@ -189,6 +196,8 @@ artifact.
 
 ## Audit
 
+- [ ] Target, module, and resolved dataset labels pass the eligibility review in SPEC-3;
+  organizational relationships are not additional annotations or matching guards.
 - [ ] Every label-bearing construct, including schema parameterization, is interpreted through its
   own semantics without a dimension-specific Area, Scope, or Ability channel.
 - [ ] Every target label is traced to the positive generator or view capability that satisfies it;

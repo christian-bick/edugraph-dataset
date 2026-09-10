@@ -27,10 +27,11 @@ for every T in targetLabels:
     some L in (generatorLabels union viewLabels) satisfies capabilitySatisfies(L, T)
 ```
 
-`partOf` is structural and never provides capability substitution. If a target requires both a
-field and one of its parts, both claims must be declared explicitly by the target and supplied by
-the matched pair. For example, `Scope.PhysicalRuler partOf Scope.LengthMeasurement` does not let a
-module that declares only `PhysicalRuler` satisfy a `LengthMeasurement` target.
+`partOf` is structural and never provides capability substitution. For example,
+`Scope.PhysicalRuler partOf Scope.LengthMeasurement` does not make the instrument a substitute
+for its organizational field. `LengthMeasurement` is not eligible as a target or module label
+under [SPEC-3](#spec-3--most-specific-does-not-mean-leaf); declaring both labels explicitly is not
+a valid repair. Declare the evidenced instrument instead.
 
 Consequently, two labels on one target mean **A AND B**, not two independently selectable
 representations. The generator and view do not match the target separately; their combined
@@ -66,19 +67,38 @@ target simply produces no samples, with no error.
 
 Declare the **most specific ontology label that is still a true statement** about what the
 module produces or renders. A specific label automatically matches every broader standard
-that subsumes it, so **never also declare an ancestor** of a label you already declare.
+that subsumes it through `specializes`, so **never also declare a specialization ancestor** of a
+label you already declare. Structural ancestors are not inherited claims.
 
 **Why:** an ancestor declaration cannot add any match, and `validate-generator-view-specs`
 flags it as a redundant declaration.
 
 ### SPEC-3 — "Most specific" does not mean "leaf"
 
-Several ontology branches bottom out in *instruments* or *subtypes* rather than in
-refinements of the same claim — e.g. the only leaf under `Area.Rectangle` is `Area.Square`.
-A generator emitting rectangles must **not** claim `Square`.
+Apply the ontology's
+[ONT-E7 labeling eligibility rule](https://github.com/christian-bick/edugraph-ontology/blob/main/docs/content-evidence.md#ont-e7--label-observable-descriptors-not-organizational-nodes)
+before choosing specificity. Labels must have no constituent children (`hasPart`) in the complete
+pinned ontology. Structural leaves and families with only specialization children are eligible;
+organizational nodes and nodes with mixed child roles are not.
 
-**Why:** a leaf label is a stronger claim, not a safer one. Claiming it makes the module
-match targets whose output it cannot actually produce.
+This applies dimension-neutrally to target labels, generator/view `generalLabels`, schema-supported
+and fallback labels, and the labels used in `requiredLabels` and `rejectedLabels`. Every resolved
+dataset annotation must satisfy it too. Structural families may organize code or discovery, but
+must not be exported as claims or used as matching guards.
+
+For example, `Area.CircularShapes` organizes `Circle`, `HalfCircle`, and `QuarterCircle`; declare
+the actual supported shape rather than the grouping. `Area.Rectangle`, however, remains eligible
+despite having `Area.Square` as a specialization. A generator emitting general rectangles must
+**not** claim `Square` merely to reach a leaf.
+
+Eligibility is only the first check: select the most specific meaning justified by the module's
+output or the target's competency. Never replace a grouping with all its children or an arbitrary
+child. If no eligible descriptor expresses the intended claim, review the ontology gap under
+[TSPEC-6](target-spec.md#tspec-6--never-stretch-labels-to-force-a-match).
+
+**Review:** inspect the complete installed ontology, not a filtered tree or only the declarations
+that happen to match. Eligibility is an authoring and review requirement; the existing automated
+spec checks do not yet enforce this structural rule.
 
 ### SPEC-4 — Never declare a capability broader than the module can deliver
 
@@ -158,7 +178,8 @@ configuration is ontologically accounted for elsewhere in the pair. Resolution r
 compatible set, even when one requested label was already sufficient to select the configuration;
 when several sets remain valid, it prefers the most-specific truthful realization before using the
 seed to choose among equivalent sets. This prevents a broad target from hiding additional
-observable capabilities such as `LengthMeasurement + MeterScale`.
+observable capabilities supplied by the resolved configuration. Every member of the resolved set
+must satisfy [SPEC-3](#spec-3--most-specific-does-not-mean-leaf).
 
 An explicit absence default is narrower than general fallback completion. Use it only when the
 false configuration has a truthful meaning. If the generator guarantees the complementary
@@ -262,8 +283,8 @@ required.
 ## Audit
 
 - [ ] **SPEC-1** — every target label is satisfied by the combined generator/view capabilities in the correct ontology direction, with every label-bearing construct interpreted dimension-neutrally and every Ability owned by a view.
-- [ ] **SPEC-2** — no declared label is an ancestor of another declared label.
-- [ ] **SPEC-3** — no leaf label is claimed where the leaf is an instrument/subtype the module does not actually produce.
+- [ ] **SPEC-2** — no declared label is a specialization ancestor of another declared label.
+- [ ] **SPEC-3** — every target, module, fallback, applicability, and resolved output label is structurally eligible in the complete pinned ontology and justified by its actual meaning; specificity does not force a leaf.
 - [ ] **SPEC-4** — no declared capability is broader than the module's real output; distinguishable members are enumerated individually.
 - [ ] **SPEC-5** — the schema contains only parameters of this module's own concern (math for generators, visual for views).
 - [ ] **SPEC-6** — all resolvers are imported from `src/lib/resolvers.ts` (or `src/lib/ontology.ts` for label-derived value helpers); none is defined inline or executed prematurely; every multi-label resolver declares exact, predicate, aggregate, or compositional semantics; conjunctions and truthful complementary defaults declare complete fallback sets; `ontologyNeutral` is used only for unlabeled choices that must enter configuration or task identity.

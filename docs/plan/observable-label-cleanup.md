@@ -19,16 +19,16 @@ below; structural eligibility does not resolve those independent implementation 
 
 ## Goal and boundary
 
-Review direct target and dataset labels against the proposed distinction between structural
-groupings and observable descriptors. Candidate direct labels are structural leaves or nodes
-with specialization children, not nodes with `partOf` children. This is not a leaf-only rule:
-`Rectangle` and `FractionNumbers`, for example, have meaningful broader claims and specialization
-children.
+Review direct target and dataset labels against the labeling eligibility rule adopted in
+[SPEC-3](../spec-general.md#spec-3--most-specific-does-not-mean-leaf), which references the ontology's
+content-evidence contract. Organizational nodes are not direct labels; specialization families
+such as `Rectangle` and `FractionNumbers` can remain eligible. This is not a leaf-only rule.
 
 Structural eligibility does not prove that a label describes an artifact. Apply `TSPEC-6`,
 `TSPEC-13`, `SPEC-4`, and `SPEC-G3` to the actual task first. Do not automatically substitute a
 child, change ontology edges, or weaken targets just to satisfy a structural check. Resolve
-genuine modeling questions before making this a universal validation gate.
+genuine modeling questions rather than granting permanent exceptions. The rule is an authoring
+and review requirement; automated structural enforcement remains separate work.
 
 This is a follow-up to the completed label and relation migrations, not a claim that the new
 structural criterion was part of their acceptance gates.

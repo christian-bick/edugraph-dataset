@@ -113,6 +113,12 @@ labels being truthful, observable claims about the training artifact.
 
 ### TSPEC-13 — Labels require observable classification evidence
 
+First check every target label's eligibility under
+[SPEC-3](spec-general.md#spec-3--most-specific-does-not-mean-leaf). Organizational descriptors
+cannot label a target even when their field is relevant to the standard. A specialization family
+can be eligible without being a leaf; choose a narrower descriptor only when the competency
+justifies it.
+
 A true statement about the source standard is not automatically a valid labeled competency. For
 every active target, the expected matched generator-view artifact must expose enough visual
 or necessary textual clues for a combination of labels to be reasonably identifiable and defendable.
@@ -314,6 +320,9 @@ generator-view path whose bounded probe can produce a sample.
 
 Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 
+The structural eligibility requirement in SPEC-3 still needs explicit authoring review; a passing
+matching or standards-spec check does not establish it.
+
 ---
 
 ## Audit
@@ -329,5 +338,5 @@ Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` confirms structural validity and at least one compatible generator/view path for every active target; `npm run check -- --spec=<module>` passes.
 - [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
 - [ ] **TSPEC-12** — `test` remains a focused prototyping/regression spec and provides at least one generatable target-view path per generator.
-- [ ] **TSPEC-13** — every active label is reasonably identifiable and defendable from visual or textual evidence in the expected matched artifact; no target relies on hidden context.
+- [ ] **TSPEC-13** — every active label is structurally eligible under SPEC-3 and reasonably identifiable and defendable from visual or textual evidence in the expected matched artifact; no target relies on hidden context.
 - [ ] **TSPEC-14** — every active target contains at least one Area and Ability; Scope is used only when a meaningful same-task discriminator exists; multiple labels in any dimension are treated as a conjunction without a primary label.
