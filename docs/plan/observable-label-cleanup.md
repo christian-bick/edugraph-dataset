@@ -361,9 +361,26 @@ sharing their renderer. That structural refactor does not settle these semantic 
 The old Areas also select denominator ranges: Grade 1 chooses 2 or 4; Grade 3 chooses 2, 3, 4,
 6, or 8. Those are real constraints in the tracked 1.G.A.3 and 3.NF.A.1 standard descriptions,
 not arbitrary variation. Parameterize the mathematical denominator directly rather than retaining
-a grade/task-Area switch. HalfFractions, ThirdFractions, QuarterFractions, and EighthFractions
-already exist; SixthFractions does not. Request the missing denominator context before claiming
-complete explicit coverage; do not drop sixths or use an unrelated number range.
+a grade/task-Area switch. HalfFractions, ThirdFractions, QuarterFractions, SixthFractions, and
+EighthFractions are now available in the pinned ontology package. Do not drop sixths or use an
+unrelated number range when implementing the explicit denominator configuration.
+
+### Ontology prerequisite: v0.24.0
+
+- [x] Upgrade the exact `edugraph-ts` release URL and lockfile to v0.24.0.
+- [x] Verify SixthFractions specializes CommonDenominator and expands ThirdFractions. The package
+  adds only that descriptor; CommonDenominator and ThirdFractions gain the corresponding inverse
+  links. No existing descriptor is removed or redefined.
+- [x] Compare all existing CCSS/test matches and three seeded configuration/capability resolutions
+  per pair: unchanged (653 CCSS targets / 799 pairs; 559 test targets / 691 pairs).
+- [x] Run the complete test suite (450 files / 2,464 passing tests) and `check:affected`.
+- [ ] Use the new Scope in the fraction-partitioning migration; the package upgrade alone does
+  not change target labels, denominator selection, or the unresolved verbal share-naming decision.
+
+Temporary evidence: `temp/ontology-v024/{before,after,delta}.json`, `tests.log`, and
+`check-affected.log`. The upstream schema also removes ontology-wide dimension requirements on
+CompetencyDescription; this does not change the dataset's own `TSPEC-14` authoring requirement.
+No canonical artifacts or VQA cache files are changed by this dependency update.
 
 Keep this review separate from the already tracked Circle / FractionEquivalence ontology structure
 questions. The two angle-concepts FractionInterpretation usages also need a later evidence review;
@@ -409,8 +426,8 @@ applicability before modifying targets or adding ontology entities.
 3. **Shape construction (grouping use resolved in Batch 7):** edge composition no longer needs
    ShapeIdentity or a generator-owned assembly task. The remaining attribute/rotation/subsumption
    branches retain their current behavior and are tracked by the separate payload-family plan.
-4. **Fraction partitioning (reviewed, awaiting decisions):** resolve the verbal share-naming
-   meaning and missing sixth-denominator context described in Batch 7, then replace the Area-driven
+4. **Fraction partitioning (reviewed, denominator prerequisite available):** resolve the verbal
+   share-naming meaning described in Batch 7, then replace the Area-driven
    branches with explicit partition/selected-region/comparison families and denominator choices.
 
 ### Ontology questions to review with the user
