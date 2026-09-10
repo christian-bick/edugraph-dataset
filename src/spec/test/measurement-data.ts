@@ -5,18 +5,19 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const tableBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.ObservedMeasurement,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Scope.IntegerNumbers], [Scope.FractionNumbers]]);
+    .applyLabelVariants([
+        [Scope.IntegerNumbers, Scope.CentimeterScale],
+        [Scope.FractionNumbers, Scope.InchScale]
+    ]);
 
 const linePlotBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Scope.CentimeterScale,
         Scope.ProvidedMeasurement,
         Scope.IntegerNumbers,
         Scope.LinePlot,
@@ -27,8 +28,7 @@ const linePlotBuilder = new DatasetPermutationBuilder()
 const fractionalLinePlotBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Scope.InchScale,
         Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
         Scope.LinePlot,
@@ -39,10 +39,9 @@ const fractionalLinePlotBuilder = new DatasetPermutationBuilder()
 const fractionalLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
         Area.FractionArithmetic,
         Area.Subtraction,
-        Scope.LengthMeasurement,
+        Scope.InchScale,
         Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
         Scope.LinePlot,

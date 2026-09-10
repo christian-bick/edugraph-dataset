@@ -1,10 +1,11 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
 
 describe('measurement-data-table view spec', () => {
     it('owns observable measurement from depicted objects', () => {
         expect(spec.generalLabels).toEqual([
+            Area.MeasuringLength,
             Scope.PhysicalRuler,
             Scope.DataTable,
             Scope.ObservedMeasurement,

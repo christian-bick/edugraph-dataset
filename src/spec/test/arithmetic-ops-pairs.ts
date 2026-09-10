@@ -84,7 +84,7 @@ const unknownAddendBuilder = new DatasetPermutationBuilder()
 
 const lengthWordProblemBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.LengthMeasurement,
+        Scope.CentimeterScale,
         Scope.SingleStep,
         Scope.NumbersSmaller100,
         Ability.TextualReception

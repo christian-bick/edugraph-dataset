@@ -135,6 +135,39 @@ use their actual gram or kilogram scales without the weight-tool grouping.
 - Targets with composition-parent claims decrease from 146 to 68. Canonical generation and
   VQA remain pending under the validation checklist above; stored image counts are unchanged.
 
+## Batch 4: observed measurements versus supplied data
+
+The `measurement-data` generator contributes statistical observations and their units. The
+`measurement-data-table` view contributes `MeasuringLength`: it actually asks the learner to
+measure depicted objects using rulers. Line-plot construction and arithmetic use supplied
+measurements and do not claim that object-measurement task. Remove the broad `Measurement`
+Area and `LengthMeasurement` grouping from these declarations and targets accordingly.
+
+Declare the concrete centimeter or inch context already selected by each target. The generator's
+unit resolver also explicitly publishes its existing default unit capability when the target
+does not name a unit. This does not introduce a new random choice or change the selected unit.
+
+Two further fixed contexts use their concrete labels: the length-difference problem and the
+within-100 length stories use `CentimeterScale`. The one-meter fraction-to-decimal task retains
+`DecimalEquivalence`, notation Areas, and `MeterScale`, without claiming study of unit systems
+through `MeasuringWithUnits` or using the length-tool grouping.
+
+### Evidence
+
+- All 653 active CCSS targets remain matched. Eleven target identities change. All 798 existing
+  pairs remain; one additional pair satisfies the existing Grade 2 ruler-use target through
+  `measurement-data` and `measurement-data-table`, for 799 pairs total.
+- Replay preserves generator configurations, view configurations, and mathematical payloads
+  across all 840 baseline fixed-seed draws. The additional ruler-use match contributes 20 more
+  draws. Only the reviewed annotation changes occur.
+- All eight matched measurement-data targets pass both server-rendered modes at 20 seeds:
+  160 draws and 320 renders. No view implementation, payload type, or checklist changed.
+- `npm run check:affected` passes. The catalog integration test now checks preservation of
+  every view's declared capabilities instead of fixing one module's historical label list.
+- Full coverage passes: 444 test files, 2,438 tests, and all checked generator coverage thresholds.
+- Composition-parent target usage decreases from 68 to 59. Image annotation counts and VQA
+  remain pending canonical regeneration.
+
 ## Remaining semantic review
 
 Prioritize usages with an existing truthful replacement; do not batch-replace a label across
@@ -151,12 +184,49 @@ all modules merely because one usage is redundant.
   `shape-compare-attributes`. The `shape-build-shape` use still needs review.
 - [x] Replace the angle-tool and measurement word-problem/number-line grouping uses with their
   actual observable contexts and knowledge claims (Batches 2 and 3).
-- [ ] Review remaining `MeasuringWithUnits`, `Measurement`, and `LengthMeasurement`,
-  `WeightMeasurement`, and `TimeMeasurement` usages, especially measurement data and conversion. Concrete
-  operation, unit, and instrument labels can replace grouping uses only where the artifact
-  actually supplies their evidence; a number line must not become a ruler claim.
+- [x] Separate observed length measurement from provided-data tasks; declare the concrete
+  units of the decimal-measurement, length-difference, and within-100 story contexts (Batch 4).
+- [ ] Review the remaining unit-conversion family. `MeasuringWithUnits` and the tool-family
+  Scopes still occur here; the distinction between generic unit partitions, relative standard
+  unit sizes, conversion, and conversion tables is also encoded in generator/view contracts.
 - [ ] Review `ProportionSense` and `FractionInterpretation` against their concrete constituents.
 - [ ] Resolve the ontology modeling questions around `Circle` and `FractionEquivalence`:
   both describe directly observable content despite currently having composition children.
 - [ ] Review `ShapeEquivalenceRelations` for equal-area partitions. Equal area does not imply
   congruence, similarity, or symmetry; do not choose an existing child that changes the claim.
+
+### Next contract reviews
+
+These are not safe global label substitutions. Review the mathematical payload and view
+applicability before modifying targets or adding ontology entities.
+
+1. **Unit conversion:** seven concrete unit pairs already establish magnitude or factor scaling.
+   The generic partitioned-unit case has no named standard unit. `MeasuringWithUnits` and
+   `LengthMeasurement` also act as required/rejected boundaries in consuming views. Preserve
+   valid task distinctions without retaining a grouping label merely to separate matches.
+   `UnitConversion` is not an automatic replacement: its definition concerns different unit
+   systems, unlike several current within-system scaling examples.
+2. **Measurement line-plot arithmetic:** `FractionArithmetic` enables an optional extrema
+   relation in the payload and is required by the arithmetic view. Replacing it with
+   `FractionNumbers` alone would admit ordinary observations without that relation. Review
+   whether the canonical model should always carry the derived evidence or whether separate
+   mathematical contracts are warranted; use the actual addition/subtraction claims.
+3. **Shape construction and fraction partitioning:** `ShapeIdentity`, `ProportionSense`, and
+   `FractionInterpretation` still help select generator branches or denominator ranges. Review
+   these decisions before replacing broad Areas with narrower constituents. Naming halves and
+   quarters without written fractions is not automatically numerator/denominator notation
+   interpretation.
+
+### Ontology questions to review with the user
+
+- **Circle:** a whole circle is directly observable even though semicircles and quarter circles
+  are its composition children. Replacing a whole-circle claim with either child is false.
+- **FractionEquivalence:** an equivalence such as `1/10 = 10/100` does not necessarily demand
+  simplification or least-common-denominator/numerator procedures. Review the placement of
+  those procedures relative to the equivalence principle.
+- **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
+  congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
+
+The 59 remaining targets span these contract and modeling reviews; they are not
+59 proven false annotations. Eligibility under the proposed structural rule and truthfulness
+of the current content claim remain separate questions.

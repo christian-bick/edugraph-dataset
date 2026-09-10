@@ -7,9 +7,7 @@ describe('numbers-decimal-measurement view spec', () => {
         expect(spec.generalLabels).toEqual([
             Area.DecimalEquivalence,
             Area.FractionNotation,
-            Area.MeasuringWithUnits,
             Scope.FractionNumbers,
-            Scope.LengthMeasurement,
             Scope.MeterScale,
             Scope.EqualShares,
             Scope.Equal,

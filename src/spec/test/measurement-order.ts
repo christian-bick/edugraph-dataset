@@ -20,7 +20,7 @@ const mediatedBuilder = new DatasetPermutationBuilder()
 
 const lengthDifferenceBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Difference,
-    Scope.LengthMeasurement,
+    Scope.CentimeterScale,
     Scope.DirectRelation,
     Ability.ProcedureExecution
 ]);

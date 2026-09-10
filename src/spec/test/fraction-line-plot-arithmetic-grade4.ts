@@ -5,10 +5,9 @@ import {CompetencyTarget} from '../../types/ml-engine.ts';
 const fractionLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
         Area.FractionArithmetic,
         Area.Addition,
-        Scope.LengthMeasurement,
+        Scope.InchScale,
         Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
         Scope.LinePlot,

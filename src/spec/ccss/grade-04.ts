@@ -359,8 +359,7 @@ const unknownRectangleDimensionBuilder = new DatasetPermutationBuilder()
 
 const constructFractionalLinePlotBuilder = new DatasetPermutationBuilder().addLabels([
     Area.Statistics,
-    Area.Measurement,
-    Scope.LengthMeasurement,
+    Scope.InchScale,
     Scope.ProvidedMeasurement,
     Scope.FractionNumbers,
     Scope.LinePlot,
@@ -372,8 +371,7 @@ const fractionLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionArithmetic,
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Scope.InchScale,
         Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
         Scope.LinePlot,
@@ -659,10 +657,8 @@ const decimalMeasurementNotationBuilder = new DatasetPermutationBuilder().addLab
     Area.DecimalNotation,
     Area.DecimalEquivalence,
     Area.FractionNotation,
-    Area.MeasuringWithUnits,
     Scope.DecimalNumbers,
     Scope.FractionNumbers,
-    Scope.LengthMeasurement,
     Scope.MeterScale,
     Scope.EqualShares,
     Scope.Equal,

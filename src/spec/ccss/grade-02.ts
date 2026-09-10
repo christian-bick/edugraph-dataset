@@ -403,7 +403,7 @@ const estimateImperialLengthBuilder = new DatasetPermutationBuilder()
 const measuredLengthDifferenceBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Difference,
-        Scope.LengthMeasurement,
+        Scope.CentimeterScale,
         Scope.DirectRelation,
         Ability.ProcedureExecution
     ]);
@@ -411,7 +411,7 @@ const measuredLengthDifferenceBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.B.5: Same-unit length word problems ---
 const lengthWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Scope.LengthMeasurement,
+        Scope.CentimeterScale,
         Scope.SingleStep,
         Scope.NumbersSmaller100,
         Ability.TextualReception
@@ -487,8 +487,8 @@ const currencyWordProblemsBuilder = new DatasetPermutationBuilder()
 const measurementDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
+        Scope.CentimeterScale,
         Scope.ObservedMeasurement,
         Scope.IntegerNumbers,
         Ability.ProcedureExecution
@@ -498,8 +498,7 @@ const measurementDataBuilder = new DatasetPermutationBuilder()
 const measurementLinePlotBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Scope.CentimeterScale,
         Scope.ProvidedMeasurement,
         Scope.IntegerNumbers,
         Scope.LinePlot,

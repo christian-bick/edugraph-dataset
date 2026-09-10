@@ -448,8 +448,7 @@ const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
 const generateFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
+        Area.MeasuringLength,
         Scope.ObservedMeasurement,
         Scope.FractionNumbers,
         Scope.InchScale,
@@ -460,8 +459,6 @@ const generateFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
 const plotFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement,
         Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
         Scope.InchScale,

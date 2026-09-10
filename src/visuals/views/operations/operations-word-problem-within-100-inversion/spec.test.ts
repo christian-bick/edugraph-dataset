@@ -7,17 +7,17 @@ import {
 } from './spec.ts';
 
 describe('operations-word-problem-within-100-inversion view spec', () => {
-    it('owns inversion while retaining the non-Ability length parameter', () => {
+    it('owns inversion and selects the declared centimeter context', () => {
         expect(spec.generalLabels).toEqual([
             Ability.TextualReception,
             Ability.ProcedureInversion,
             Scope.ArabicNumerals
         ]);
         expect(extractSchemaLabels(OperationsWordProblemWithin100InversionViewSchema))
-            .toEqual([Scope.LengthMeasurement]);
+            .toEqual([Scope.CentimeterScale]);
         expect(extractConfig(
             OperationsWordProblemWithin100InversionViewSchema,
-            [Scope.LengthMeasurement]
+            [Scope.CentimeterScale]
         ).config.useLengthContext).toBe(true);
     });
 });

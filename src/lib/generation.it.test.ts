@@ -14,7 +14,7 @@ import {
 } from './generation.ts';
 import {loadTargets} from './spec-catalog.ts';
 import { isProblemTypeCompatible } from './type-parser.ts';
-import {Scope} from 'edugraph-ts';
+import {extractSchemaLabels} from './utils.ts';
 
 describe('catalogs and end-to-end matching', () => {
     it('routes CCSS comparison targets to representation-compatible views', async () => {
@@ -79,10 +79,12 @@ describe('catalogs and end-to-end matching', () => {
         expect(viewCatalog.length).toBeGreaterThan(0);
         expect(targets.length).toBeGreaterThan(0);
 
-        expect(viewCatalog
-            .find(view => view.viewId === 'operations-word-problem-within-100')
-            ?.supportedLabels
-        ).toContain(Scope.LengthMeasurement);
+        for (const view of viewCatalog) {
+            expect(new Set(view.supportedLabels)).toEqual(new Set([
+                ...(view.spec.generalLabels ?? []),
+                ...extractSchemaLabels(view.schema)
+            ]));
+        }
 
         for (const gen of generatorCatalog) {
             expect(gen.generatorId).toBeTruthy();

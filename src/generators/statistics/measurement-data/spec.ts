@@ -20,16 +20,16 @@ const resolveUnitScale = exactResolver((labels: string[]): Scope.CentimeterScale
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-data',
-    generalLabels: [
-        Area.Statistics,
-        Area.Measurement,
-        Scope.LengthMeasurement
-    ]
+    generalLabels: [Area.Statistics]
 };
 
 export const MeasurementDataGeneratorSchema = {
     numberKind: [Scope.IntegerNumbers, Scope.FractionNumbers],
-    unitScale: [[Scope.CentimeterScale, Scope.InchScale], resolveUnitScale],
+    unitScale: [
+        [Scope.CentimeterScale, Scope.InchScale],
+        resolveUnitScale,
+        [[Scope.CentimeterScale], [Scope.InchScale]]
+    ],
     useSingleFrame: [[Scope.SingleFrameOfReference], hasLabel(Scope.SingleFrameOfReference)],
     includeFractionArithmetic: [[Area.FractionArithmetic], hasLabel(Area.FractionArithmetic)],
     operation: [[Area.Addition, Area.Subtraction], resolveOperation]

@@ -13,8 +13,8 @@ export const spec: ViewSpec = {
 
 export const OperationsWordProblemWithin100ViewSchema = {
     useLengthContext: [
-        [Scope.LengthMeasurement],
-        hasLabel(Scope.LengthMeasurement)
+        [Scope.CentimeterScale],
+        hasLabel(Scope.CentimeterScale)
     ]
 } as const;
 
