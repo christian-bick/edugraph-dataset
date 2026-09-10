@@ -1,8 +1,12 @@
 import {
     FractionParts,
     FractionShareName,
-    ShapePartitionProblem
+    ShapePartitionProblem,
+    ShapeFractionRegionProblem,
+    ShapeUnitShareComparisonProblem
 } from '../../../types/problems.ts';
+
+export type ShapePartitionModel = ShapePartitionProblem | ShapeFractionRegionProblem | ShapeUnitShareComparisonProblem;
 
 export type ShapePartitionTask =
     | 'partition'
@@ -13,7 +17,7 @@ export type ShapePartitionTask =
     | 'interpret-fraction';
 
 export const resolveShapePartitionTask = (
-    data: ShapePartitionProblem,
+    data: ShapePartitionModel,
     task: ShapePartitionTask
 ): ShapePartitionTask | null => {
     if (data.kind === 'share-comparison') {
@@ -24,12 +28,11 @@ export const resolveShapePartitionTask = (
     }
     if (task === 'partition-and-label-unit-fraction') return task;
     if (task === 'partition') return task;
-    if (data.parts !== 2 && data.parts !== 4) return null;
     if (task === 'name-share' || task === 'compose-whole') return task;
     return null;
 };
 
-export const isValidShapePartitionProblem = (data: ShapePartitionProblem): boolean => {
+export const isValidShapePartitionProblem = (data: ShapePartitionModel): boolean => {
     if (data.shape !== 'circle' && data.shape !== 'rectangle') return false;
     if (data.kind === 'share-comparison') {
         return data.leftParts === 4
@@ -38,6 +41,7 @@ export const isValidShapePartitionProblem = (data: ShapePartitionProblem): boole
     }
     if (!isFractionParts(data.parts)) return false;
     if (data.kind === 'partition') return true;
+    if (data.kind !== 'selected-region') return false;
     return Number.isSafeInteger(data.numerator)
         && data.numerator >= 1
         && data.numerator < data.parts;

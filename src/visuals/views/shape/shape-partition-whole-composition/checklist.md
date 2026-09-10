@@ -1,2 +1,2 @@
-- **Identity:** Equal half or fourth pieces require determining how many such shares compose one whole.
+- **Identity:** Separate equal-share pieces require identifying the whole they compose.
 - **Modes:** Question Mode withholds the composition count; Solution Mode reveals it while preserving the same equal-share evidence.

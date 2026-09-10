@@ -1,16 +1,17 @@
 import {ReactNode} from 'react';
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
-import {FractionParts, FractionShape, ShapePartitionProblem} from '../../../types/problems.ts';
+import {FractionParts, FractionShape} from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
     isValidShapePartitionProblem,
     resolveShapePartitionTask,
     selectShareIndex,
-    ShapePartitionTask
+    ShapePartitionTask,
+    ShapePartitionModel
 } from './shape-partition-helpers.ts';
 
 interface ShapePartitionViewProps {
-    payload: RenderPayload<AbstractProblem<ShapePartitionProblem>>;
+    payload: RenderPayload<AbstractProblem<ShapePartitionModel>>;
     task: ShapePartitionTask;
     viewId: string;
 }
@@ -21,6 +22,14 @@ const PART_WORDS: Record<FractionParts, string> = {
     4: 'four',
     6: 'six',
     8: 'eight'
+};
+
+const SHARE_WORDS: Record<FractionParts, {singular: string; plural: string}> = {
+    2: {singular: 'half', plural: 'halves'},
+    3: {singular: 'third', plural: 'thirds'},
+    4: {singular: 'fourth', plural: 'fourths'},
+    6: {singular: 'sixth', plural: 'sixths'},
+    8: {singular: 'eighth', plural: 'eighths'}
 };
 
 function circlePoint(angle: number, radius = 80): {x: number; y: number} {
@@ -194,6 +203,22 @@ function PartitionedShape({
 }
 
 function SharePiece({shape, parts}: {shape: FractionShape; parts: FractionParts}) {
+    if (parts !== 2 && parts !== 4) {
+        const columns = parts === 8 ? 4 : 3;
+        const rows = parts === 3 ? 1 : 2;
+        return (
+            <svg viewBox="0 0 100 100" className="w-[68px] h-[68px]" aria-hidden="true">
+                {shape === 'circle' ? (
+                    <g transform="translate(-25 0) scale(0.5)">
+                        <path d={circleSharePath(parts, 0)} fill="#dbeafe" stroke="#334155" strokeWidth="8" />
+                    </g>
+                ) : (
+                    <rect x="20" y="12" width={105 / columns} height={65 / rows}
+                        fill="#fef3c7" stroke="#334155" strokeWidth="4" />
+                )}
+            </svg>
+        );
+    }
     return (
         <svg viewBox="0 0 100 100" className={parts === 2 ? 'w-[100px] h-[100px]' : 'w-[78px] h-[78px]'} aria-hidden="true">
             {shape === 'circle' ? (
@@ -288,23 +313,15 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
             );
         }
         case 'name-share': {
-            if (
-                data.kind !== 'partition'
-                || (data.parts !== 2 && data.parts !== 4)
-            ) {
-                throw new ViewValidationError(viewId, 'Naming a share requires two or four equal parts.');
+            if (data.kind !== 'partition') {
+                throw new ViewValidationError(viewId, 'Naming a share requires an equal partition.');
             }
             validateProblemData(viewId, data, ['parts']);
             const selectedShare = selectShareIndex(data.parts, payload.seed);
-            const singularNames = data.parts === 2
-                ? 'one half'
-                : 'one fourth (one quarter)';
-            const pluralNames = data.parts === 2
-                ? 'two halves'
-                : 'four fourths (four quarters)';
-            const relationNames = data.parts === 2
-                ? 'one half of the whole'
-                : 'one fourth / one quarter of the whole';
+            const words = SHARE_WORDS[data.parts];
+            const singularNames = data.parts === 4 ? 'one fourth (one quarter)' : `one ${words.singular}`;
+            const pluralNames = data.parts === 4 ? 'four fourths (four quarters)' : `${PART_WORDS[data.parts]} ${words.plural}`;
+            const relationNames = data.parts === 4 ? 'one fourth / one quarter of the whole' : `one ${words.singular} of the whole`;
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>Use fraction words to name the highlighted share and describe the whole.</PromptSlot>
@@ -334,14 +351,11 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
             );
         }
         case 'compose-whole': {
-            if (
-                data.kind !== 'partition'
-                || (data.parts !== 2 && data.parts !== 4)
-            ) {
-                throw new ViewValidationError(viewId, 'Composing a whole requires two or four equal parts.');
+            if (data.kind !== 'partition') {
+                throw new ViewValidationError(viewId, 'Composing a whole requires an equal partition.');
             }
             validateProblemData(viewId, data, ['parts']);
-            const pluralShareName = data.parts === 2 ? 'halves' : 'fourths';
+            const pluralShareName = SHARE_WORDS[data.parts].plural;
             return (
                 <ViewFrame>
                     <PromptSlot isSolutionView={isSolutionView}>
@@ -351,7 +365,7 @@ export const ShapePartitionView = ({payload, task: requestedTask, viewId}: Shape
                         {isSolutionView ? (
                             <PartitionedShape shape={data.shape} parts={data.parts} showDivisions solvedHighlight />
                         ) : (
-                            <div className="flex items-center justify-center gap-2" aria-label={`${PART_WORDS[data.parts]} separate ${pluralShareName}`}>
+                            <div className={data.parts > 4 ? 'grid grid-cols-4 items-center justify-center gap-2' : 'flex items-center justify-center gap-2'} aria-label={`${PART_WORDS[data.parts]} separate ${pluralShareName}`}>
                                 {Array.from({length: data.parts}, (_, index) => (
                                     <SharePiece key={index} shape={data.shape} parts={data.parts} />
                                 ))}

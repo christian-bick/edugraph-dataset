@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {ShapePartitionProblem} from '../../../types/problems.ts';
+import {ShapePartitionModel as ShapePartitionProblem} from './shape-partition-helpers.ts';
 import {
     isValidShapePartitionProblem,
     resolveShapePartitionTask,
@@ -47,7 +47,7 @@ describe('shape-partition Ability projection', () => {
         expect(resolveShapePartitionTask({
             ...equalShare,
             parts: 6
-        }, 'name-share')).toBeNull();
+        }, 'name-share')).toBe('name-share');
     });
 });
 

@@ -79,6 +79,14 @@ Review those mathematical families and their projections together, remove raw-la
 access (`IMPL-G1`), and replace family-selecting guards without changing current truthful targets.
 The edge-composition extraction does not claim to complete that wider normalization.
 
+[Batch 8](observable-label-cleanup.md#batch-8-fraction-partitioning) separates equal partitions,
+selected fraction regions, and unit-share comparisons into three precise generator outputs.
+The existing six views consume their exact family; the four partition projections share the same
+neutral model. Explicit denominator Scopes replace Area-driven domain selection. Proper fraction
+kind and denominator use an exact correlated schema choice because nonunit halves are impossible.
+This is a mathematical feasibility constraint, not a view applicability filter. No shared matcher
+change or family-routing label guard was needed. Canonical artifact validation remains pending.
+
 1. **Inventory payload-family routing.** Reuse the parsed type graph and compatible-pair index to
    list generator unions, member-only consumers, and requirements/exclusions used to distinguish
    output families. Record actual affected targets and whether configuration guarantees a member.

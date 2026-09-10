@@ -1,38 +1,16 @@
-import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
+import {Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {partitionParts, partitionShape} from '../partition-schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'shape-partition',
-    generalLabels: [
-        Scope.EqualShares
-    ]
+    generalLabels: [Scope.EqualShares, Scope.UnitFractions]
 };
 
 export const ShapePartitionGeneratorSchema = {
-    taskAreas: [
-        [
-            Area.ProportionSense,
-            Area.ShapeDecomposition,
-            Area.FractionInterpretation,
-            Area.FractionCommonNumeratorComparison
-        ],
-        matchAllExactLabels
-    ],
-    shape: [Area.Circle, Area.Rectangle],
-    fractionTypes: [
-        [Scope.UnitFractions, Scope.NonUnitFractions],
-        matchAllExactLabels
-    ],
-    fractionNotation: [
-        [Area.FractionNotation],
-        hasLabel(Area.FractionNotation)
-    ],
-    isLessComparison: [
-        [Scope.Less],
-        hasLabel(Scope.Less)
-    ]
+    shape: partitionShape,
+    parts: partitionParts
 } as const;
 
 export type ShapePartitionGeneratorConfig = ConfigFromSchema<typeof ShapePartitionGeneratorSchema>;

@@ -345,11 +345,11 @@ separate payload-family plan.
 - Canonical PNG generation and VQA remain pending. A fresh outside-sandbox Docker version query
   did not respond and was cancelled. No images, external uploads, or cache files changed.
 
-### Fraction-partition review: decisions before implementation
+### Fraction-partition review (resolved in Batch 8)
 
 The existing payload already separates a partition, a selected region, and a share comparison.
-These are candidates for precise generator output families, with the existing six task views
-sharing their renderer. That structural refactor does not settle these semantic choices:
+The review identified precise generator output families, with the existing six task views
+sharing their renderer. Batch 8 below records the implemented resolution of these candidates:
 
 | Current use | Observable evidence | Resolution candidate |
 | --- | --- | --- |
@@ -374,8 +374,8 @@ unrelated number range when implementing the explicit denominator configuration.
 - [x] Compare all existing CCSS/test matches and three seeded configuration/capability resolutions
   per pair: unchanged (653 CCSS targets / 799 pairs; 559 test targets / 691 pairs).
 - [x] Run the complete test suite (450 files / 2,464 passing tests) and `check:affected`.
-- [ ] Use the new Scope in the fraction-partitioning migration; the package upgrade alone does
-  not change target labels, denominator selection, or the unresolved verbal share-naming decision.
+- [x] Use the new Scope in the fraction-partitioning migration (Batch 8). The package upgrade
+  itself did not change target labels or denominator selection.
 
 Temporary evidence: `temp/ontology-v024/{before,after,delta}.json`, `tests.log`, and
 `check-affected.log`. The upstream schema also removes ontology-wide dimension requirements on
@@ -385,6 +385,71 @@ No canonical artifacts or VQA cache files are changed by this dependency update.
 Keep this review separate from the already tracked Circle / FractionEquivalence ontology structure
 questions. The two angle-concepts FractionInterpretation usages also need a later evidence review;
 they are not changed by the shape-construction extraction.
+
+## Batch 8: fraction partitioning
+
+The generators now use three precise mathematical output families: equal partition, selected fraction region,
+and unit-share comparison. Shape and denominator choices belong to generator schemas; the
+mathematical activity contributed by each projection belongs to its view (`SPEC-11`, `IMPL-G8`).
+The family migration removes raw-label task dispatch (`IMPL-G1`) without changing the matcher.
+
+Consumer adoption matrix (`IMPL-G6`):
+
+| View | Target family | Payload | Projection and verification |
+| --- | --- | --- | --- |
+| shape-partition-equal | 1.G.A.3 partition | Equal partition | Own ShapeDecomposition; explicit halves/fourths; withhold/reveal boundaries. |
+| shape-partition-share-name | 1.G.A.3 vocabulary | Equal partition | Own NumberNameNotation; name fractional values in words; preserve part/whole context and fourth/quarter synonyms. |
+| shape-partition-whole-composition | 1.G.A.3 composition | Equal partition | Own ShapeSynthesis; show separate shares and the resulting whole. |
+| shape-partition-unit-fraction | 3.G.A.2 partition and label | Equal partition | Own ShapeDecomposition, FractionDenominatorInterpretation and FractionNotation; explicit denominator scopes. |
+| shape-partition-fraction-interpretation | 3.NF.A.1 region | Selected fraction region | Own numerator/denominator interpretation and FractionNotation; validate every proper unit/nonunit combination. |
+| shape-partition-share-comparison | 1.G.A.3 smaller share | Unit-share comparison | Keep fourth versus half; explicit mathematical comparison, no family-routing labels. |
+
+`shape-partition` returns only `ShapePartitionProblem`; `shape-fraction-region` returns
+`ShapeFractionRegionProblem`; `shape-unit-share-comparison` returns `ShapeUnitShareComparisonProblem`.
+All six `ViewTypeMap` entries consume exactly their accepted family. No required/rejected label
+guard or shared matcher change is needed. The pre-existing stronger partition-and-label view
+remains eligible for plain partition targets; this batch does not change stronger-Ability policy.
+
+Naming and composition now support all five denominators through shared words and piece rendering,
+while Grade 1 targets explicitly request halves or fourths. Six/eight composition pieces use two
+rows. The selected-region schema uses an exact correlated choice for denominator and proper
+fraction kind: unit fractions allow 2/3/4/6/8; nonunit fractions allow 3/4/6/8 with numerator in
+2..denominator-1. Impossible nonunit halves fail configuration resolution. Concrete numerator
+variation remains seeded generator logic, and presentation-only highlight selection remains seeded
+view logic (`SPEC-6`).
+
+The share-naming resolution uses the existing NumberNameNotation definition: written words for
+numerical values. The learner supplies "one half", "one fourth (one quarter)", and the corresponding
+whole phrases; EqualShares, UnitFractions, the denominator, and shape preserve the part/whole
+context. Numerator/denominator interpretation labels are reserved here for the views that actually
+teach fraction notation. No additional ontology entity or definition change was needed.
+
+### Validation
+
+- CCSS expands from 653 targets / 799 pairs to **681 targets / 829 pairs** because denominator
+  contexts are explicit target variants. All previous view paths survive within their competency
+  families, with comparison and selected-region paths transferred to their precise generators.
+  Every unrelated target and matching pair is unchanged.
+- The isolated test spec retains 559 targets and a generatable path for all **85 generators**.
+- Full tests and `npm run test:coverage`: **455 files / 2,494 tests pass**. All three generators
+  have **100% statement and branch coverage**. Renderer tests exercise both shapes, every supported
+  denominator, all proper region numerators, both modes, vocabulary, and invalid payloads.
+- `check:affected` passes, including types, related tests, generator coverage, generator/view
+  declarations, label checks, docs, and both CCSS/test standards validation. Target distinctness
+  reports no finding involving the migrated fraction definitions.
+- A temporary fixed-seed probe checks **1,240 draws / 2,480 server-rendered outputs** over current
+  CCSS/test tuples. Replaying all 640 pre-refactor payloads in both modes produces **1,280 unchanged
+  HTML hashes**. This is renderer-equivalence evidence, not canonical pixel or live VQA proof.
+- Composition-parent target candidates change from 31 to **40**: Circle expands from 16 to 30
+  explicit denominator targets. ProportionSense drops from 6 to 0, and FractionInterpretation from
+  6 to the two unmodified angle targets. FractionEquivalence (9) and ShapeEquivalenceRelations (2)
+  remain unchanged. These overlapping label counts are not counts of proven false annotations.
+- Canonical PNG generation and VQA are pending. Docker access is denied inside the sandbox; an
+  outside-sandbox server-version query also did not respond and was cancelled. No Docker restart,
+  image upload, or VQA-cache change was performed.
+
+Temporary evidence: `temp/fraction-partition/{before,after,summary}.json` and
+`temp/fraction-partition-*.log`.
 
 ## Remaining semantic review
 
@@ -405,7 +470,8 @@ all modules merely because one usage is redundant.
   units of the decimal-measurement, length-difference, and within-100 story contexts (Batch 4).
 - [x] Review the unit-conversion family: replace grouping claims with concrete scales, move
   task identity to views, and separate generator output families (Batch 5; canonical validation pending).
-- [ ] Review `ProportionSense` and `FractionInterpretation` against their concrete constituents.
+- [x] Resolve all partition-family `ProportionSense` and `FractionInterpretation` uses (Batch 8).
+- [ ] Review the two remaining `FractionInterpretation` targets in `angle-concepts`.
 - [ ] Resolve the ontology modeling questions around `Circle` and `FractionEquivalence`:
   both describe directly observable content despite currently having composition children.
 - [ ] Review `ShapeEquivalenceRelations` for equal-area partitions. Equal area does not imply
@@ -426,9 +492,9 @@ applicability before modifying targets or adding ontology entities.
 3. **Shape construction (grouping use resolved in Batch 7):** edge composition no longer needs
    ShapeIdentity or a generator-owned assembly task. The remaining attribute/rotation/subsumption
    branches retain their current behavior and are tracked by the separate payload-family plan.
-4. **Fraction partitioning (reviewed, denominator prerequisite available):** resolve the verbal
-   share-naming meaning described in Batch 7, then replace the Area-driven
-   branches with explicit partition/selected-region/comparison families and denominator choices.
+4. **Fraction partitioning (source refactor resolved in Batch 8):** precise families, explicit
+   denominator contexts, and view-owned mathematical projections replace Area-driven branching.
+   Complete canonical validation before closing the artifact gate.
 
 ### Ontology questions to review with the user
 
@@ -440,6 +506,6 @@ applicability before modifying targets or adding ontology entities.
 - **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
   congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
 
-The 31 remaining targets span these contract and modeling reviews; they are not
-31 proven false annotations. Eligibility under the proposed structural rule and truthfulness
+The 40 remaining targets span these contract and modeling reviews; they are not
+40 proven false annotations. Eligibility under the proposed structural rule and truthfulness
 of the current content claim remain separate questions.

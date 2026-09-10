@@ -606,36 +606,30 @@ const partitionEqualSharesBuilder = new DatasetPermutationBuilder()
         Scope.UnitFractions,
         Ability.VisualArticulation
     ])
-    .applyLabelVariants([
-        [Area.Circle],
-        [Area.Rectangle]
-    ]);
+    .applyLabelVariants([[Area.Circle], [Area.Rectangle]])
+    .applyLabelVariants([[Scope.HalfFractions], [Scope.QuarterFractions]]);
 
 // --- 1.G.A.3: Name individual shares as halves, fourths, or quarters ---
 const nameUnitSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionInterpretation,
+        Area.NumberNameNotation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ActiveVocabulary
     ])
-    .applyLabelVariants([
-        [Area.Circle],
-        [Area.Rectangle]
-    ]);
+    .applyLabelVariants([[Area.Circle], [Area.Rectangle]])
+    .applyLabelVariants([[Scope.HalfFractions], [Scope.QuarterFractions]]);
 
 // --- 1.G.A.3: Describe a whole as all of its equal shares ---
 const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionInterpretation,
+        Area.ShapeSynthesis,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ConceptComposition
     ])
-    .applyLabelVariants([
-        [Area.Circle],
-        [Area.Rectangle]
-    ]);
+    .applyLabelVariants([[Area.Circle], [Area.Rectangle]])
+    .applyLabelVariants([[Scope.HalfFractions], [Scope.QuarterFractions]]);
 
 // --- 1.G.A.3: Infer that more equal shares produce smaller shares ---
 const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
@@ -643,6 +637,8 @@ const compareUnitShareSizesBuilder = new DatasetPermutationBuilder()
         Area.FractionCommonNumeratorComparison,
         Scope.EqualShares,
         Scope.UnitFractions,
+        Scope.HalfFractions,
+        Scope.QuarterFractions,
         Scope.Less,
         Ability.ConceptDerivation
     ])

@@ -12,7 +12,7 @@ const partitionBuilder = new DatasetPermutationBuilder()
 
 const vocabularyBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionInterpretation,
+        Area.NumberNameNotation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ActiveVocabulary
@@ -21,7 +21,7 @@ const vocabularyBuilder = new DatasetPermutationBuilder()
 
 const compositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.FractionInterpretation,
+        Area.ShapeSynthesis,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.ConceptComposition
@@ -33,6 +33,8 @@ const comparisonBuilder = new DatasetPermutationBuilder()
         Area.FractionCommonNumeratorComparison,
         Scope.EqualShares,
         Scope.UnitFractions,
+        Scope.HalfFractions,
+        Scope.QuarterFractions,
         Scope.Less,
         Ability.ConceptDerivation
     ])
@@ -40,7 +42,9 @@ const comparisonBuilder = new DatasetPermutationBuilder()
 
 const partitionAndLabelBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.ShapeDecomposition,
+        Area.FractionDenominatorInterpretation,
+        Area.FractionNotation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.VisualArticulation,
@@ -51,7 +55,8 @@ const partitionAndLabelBuilder = new DatasetPermutationBuilder()
 const interpretFractionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionNotation,
-        Area.ProportionSense,
+        Area.FractionNumeratorInterpretation,
+        Area.FractionDenominatorInterpretation,
         Scope.EqualShares,
         Ability.Interpretation
     ])

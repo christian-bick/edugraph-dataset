@@ -1512,23 +1512,26 @@ export type FractionArithmeticProblem =
     | WholeNumberFractionProductProblem
     | TenthsHundredthsAdditionProblem;
 
-export type ShapePartitionProblem = {shape: FractionShape} & (
-    | {
-        kind: 'partition';
-        parts: FractionParts;
-    }
-    | {
-        kind: 'share-comparison';
-        leftParts: 4;
-        relation: 'less';
-        rightParts: 2;
-    }
-    | {
-        kind: 'selected-region';
-        parts: FractionParts;
-        numerator: number;
-    }
-);
+export type ShapePartitionProblem = {
+    kind: 'partition';
+    shape: FractionShape;
+    parts: FractionParts;
+};
+
+export type ShapeUnitShareComparisonProblem = {
+    kind: 'share-comparison';
+    shape: FractionShape;
+    leftParts: 4;
+    relation: 'less';
+    rightParts: 2;
+};
+
+export type ShapeFractionRegionProblem = {
+    kind: 'selected-region';
+    shape: FractionShape;
+    parts: FractionParts;
+    numerator: number;
+};
 
 export type ShapePatternToken = {
     shape: 'square' | 'triangle';
@@ -1958,8 +1961,8 @@ export interface ViewTypeMap {
     'shape-build-from-parts': ShapeEdgeCompositionProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
     'shape-partition-equal': ShapePartitionProblem;
-    'shape-partition-fraction-interpretation': ShapePartitionProblem;
-    'shape-partition-share-comparison': ShapePartitionProblem;
+    'shape-partition-fraction-interpretation': ShapeFractionRegionProblem;
+    'shape-partition-share-comparison': ShapeUnitShareComparisonProblem;
     'shape-partition-share-name': ShapePartitionProblem;
     'shape-partition-unit-fraction': ShapePartitionProblem;
     'shape-partition-whole-composition': ShapePartitionProblem;

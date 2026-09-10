@@ -596,13 +596,19 @@ const drawOtherQuadrilateralBuilder = new DatasetPermutationBuilder()
 
 const partitionEqualAreaPartsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.ProportionSense,
+        Area.ShapeDecomposition,
+        Area.FractionDenominatorInterpretation,
+        Area.FractionNotation,
         Scope.EqualShares,
         Scope.UnitFractions,
         Ability.VisualArticulation,
         Ability.Formalization
     ])
-    .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);
+    .applyLabelVariants([[Area.Circle], [Area.Rectangle]])
+    .applyLabelVariants([
+        [Scope.HalfFractions], [Scope.ThirdFractions], [Scope.QuarterFractions],
+        [Scope.SixthFractions], [Scope.EighthFractions]
+    ]);
 
 // ==========================================
 // 5. Number and Operations—Fractions (3.NF)
@@ -611,11 +617,19 @@ const partitionEqualAreaPartsBuilder = new DatasetPermutationBuilder()
 const interpretFractionsOfWholeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.FractionNotation,
-        Area.ProportionSense,
+        Area.FractionNumeratorInterpretation,
+        Area.FractionDenominatorInterpretation,
         Scope.EqualShares,
         Ability.Interpretation
     ])
-    .applyLabelVariants([[Scope.UnitFractions], [Scope.NonUnitFractions]])
+    .applyLabelVariants([
+        [Scope.UnitFractions, Scope.HalfFractions],
+        ...[Scope.ThirdFractions, Scope.QuarterFractions, Scope.SixthFractions, Scope.EighthFractions]
+            .flatMap(denominator => [
+                [Scope.UnitFractions, denominator],
+                [Scope.NonUnitFractions, denominator]
+            ])
+    ])
     .applyLabelVariants([[Area.Circle], [Area.Rectangle]]);
 
 const locateUnitFractionsBuilder = new DatasetPermutationBuilder()
