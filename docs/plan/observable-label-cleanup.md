@@ -72,9 +72,8 @@ configuration as before; no payload adoption is required (`IMPL-G6`, `IMPL-G8`).
 
 ### Remaining validation for Batch 1
 
-- [ ] Restore a responsive Docker daemon. The sandboxed server query was denied; an
-  outside-sandbox server query then did not respond and was cancelled. No daemon restart was
-  attempted.
+- [x] Restore a responsive Docker daemon. The supplied ontology Docker builds now complete
+  successfully (v0.24.1 and v0.24.2, 2026-09-10), closing the earlier daemon blocker.
 - [ ] Run canonical `npm run generate:dataset -- --spec=ccss --affected` and the affected `test`
   regeneration.
 - [ ] Inspect changed samples and run the matching VQA validation. Obtain permission before
@@ -572,8 +571,9 @@ all modules merely because one usage is redundant.
 - [x] Resolve the two angle-family `FractionInterpretation` targets (Batch 9).
 - [x] Resolve the Circle modeling question through the CircularShapes sibling grouping and
   adopt ontology v0.24.1 (Batch 10).
-- [ ] Resolve the ontology modeling question around `FractionEquivalence`: it describes directly
-  observable content despite currently having composition children.
+- [x] Resolve the ontology modeling question around `FractionEquivalence`: the three procedures
+  now belong to the existing FractionStrategies field in ontology v0.24.2. The equivalence
+  principle, targets, and matched configurations remain unchanged (review and adoption below).
 - [ ] Review `ShapeEquivalenceRelations` for equal-area partitions. Equal area does not imply
   congruence, similarity, or symmetry; do not choose an existing child that changes the claim.
 
@@ -601,12 +601,126 @@ applicability before modifying targets or adding ontology entities.
 
 ### Ontology questions to review with the user
 
-- **FractionEquivalence:** an equivalence such as `1/10 = 10/100` does not necessarily demand
-  simplification or least-common-denominator/numerator procedures. Review the placement of
-  those procedures relative to the equivalence principle.
 - **ShapeEquivalenceRelations:** the equal-area partition tasks need an equal-area claim, not
   congruence, similarity, or symmetry. Review whether a suitable constituent is missing.
 
-The 11 remaining CCSS targets span these contract and modeling reviews; they are not
-11 proven false annotations. Eligibility under the proposed structural rule and truthfulness
+The two remaining CCSS targets contain ShapeEquivalenceRelations; they are not
+two proven false annotations. Eligibility under the proposed structural rule and truthfulness
 of the current content claim remain separate questions.
+
+## FractionEquivalence review: existing strategy family
+
+Reviewed on 2026-09-10 against ontology v0.24.1. The approved correction is implemented in
+ontology commit `bec2374`, released as
+[v0.24.2](https://github.com/christian-bick/edugraph-ontology/releases/tag/v0.24.2), and adopted
+through the exact release dependency and lockfile. Dataset targets, module implementations,
+generated PNGs, and VQA caches are unchanged by this correction.
+
+### Target and evidence trace
+
+The nine CCSS targets have eleven matched paths through `fraction-equivalence`; the six isolated
+test targets have eight paths. Each target's FractionEquivalence claim is supplied by the
+generator's invariant declaration. The view supplies the Ability and representation, retaining
+the equality through aligned quantities, points, symbolic wholes, or scaling evidence.
+
+| Competency family | CCSS targets | Mathematical evidence and view projection |
+| --- | ---: | --- |
+| 3.NF.A.3a recognition | 2 | Two fraction values occupy equal portions of equal wholes or the same point; classify their equivalence. |
+| 3.NF.A.3b generation and explanation | 2 | Complete a numerator and explain why multiplying both terms preserves the represented amount or point. |
+| 3.NF.A.3c whole numbers as fractions | 2 | Complete an equality such as `2 = 8/4`, using complete groups or number-line subdivisions. |
+| 4.NF.A.1 scaling | 2 | Complete and explain the relation between `a/b` and `(n × a)/(n × b)`, with the shared whole preserved. |
+| 4.NF.C.5 tenths to hundredths | 1 | Complete a relation such as `3/10 = 30/100`, with aligned grids and multiplication evidence. |
+
+The distinction agrees with the official [Grade 3 fraction standards](https://www.thecorestandards.org/Math/Content/3/NF/)
+and [Grade 4 fraction standards](https://www.thecorestandards.org/Math/Content/4/NF/).
+These tasks do not universally require reducing a fraction to simplest form or finding a least
+common denominator/numerator. Replacing their Area with one of those procedures would change the
+claim rather than repair it (`TSPEC-6`, `SPEC-G3`).
+
+The payload fields have the following dispositions under `IMPL-G8`: fraction numerators and
+denominators and the whole-number value are canonical mathematics; `scaleFactor` and `relation`
+are structured mathematical evidence; the normalized `sharedWhole` supplies the unit reference.
+There is no narrative context or Ability-selected unknown, prompt, or explanation. The `task`
+field distinguishes three mathematical payload variants, albeit with task-oriented names.
+Leaf wrappers fix classification, completion, or explanation; their view schemas are empty and
+their Area ownership does not overlap the generator. None uses required/rejected label guards.
+
+### Approved ontology correction
+
+FractionEquivalence retains its current definition as the directly observable principle,
+its `partOf FractionArithmetic`, `expands RatioEquivalence`, and incoming
+`DecimalEquivalence expands FractionEquivalence` relations.
+
+The `partOf` parent of these three existing descriptors moves from FractionEquivalence to
+FractionStrategies:
+
+- FractionSimplification;
+- LowestCommonDenominator;
+- LowestCommonNumerator.
+
+FractionStrategies already describes methods for coordinating fraction magnitude, equivalence,
+and arithmetic. It can contain these procedures alongside the existing comparison strategies;
+no new grouping descriptor or definition is needed. FractionEquivalence is now a structural
+leaf. Its present definition names a principle, not a field composed of those procedures
+([ONT-D4](https://github.com/christian-bick/edugraph-ontology/blob/v0.24.1/docs/descriptors.md#ont-d4--define-the-educational-meaning-and-its-boundaries),
+[ONT-S1](https://github.com/christian-bick/edugraph-ontology/blob/v0.24.1/docs/structure.md#ont-s1--partof-organizes-constituents)).
+
+Do not blanket-convert the three edges to specialization. For example, finding the common
+denominator 12 for `1/4` and `1/6` need not show any equivalent fraction pair, and the two supplied
+fractions are not equal. Likewise, finding the common numerator 6 for `2/5` and `3/7` does not
+assert equality between those fractions. Simplification does produce an equivalent fraction,
+but organizing it as a strategy avoids conflating a method with the principle it uses. Any later
+progression refinement is a separate decision; keep the existing FactorsAndMultiples edges.
+
+All three children have no structural descendants. Both the old and new parent are directly
+under FractionArithmetic. The move introduces neither a mixed-child parent nor a
+specialization-to-composition transition. It changes structural ancestry, not specialization.
+Actual annotations must still be audited after canonical regeneration.
+
+### Verification and separate implementation finding
+
+- `check:generator-view-specs` passes; focused tests pass **22 files / 70 tests**.
+- A temporary probe resolves all 19 current CCSS/test paths over 20 fixed seeds: **380 mathematical
+  draws / 760 question-and-solution server renders**, with coherent equalities and no render errors.
+  This is not canonical pixel validation or live VQA.
+- The probe also confirms a separate payload-totality defect (`SPEC-V6`): a synthetic proper-fraction
+  Formalization target with ArabicNumerals matches `fractions-whole-equivalence`, whose declared
+  input is the complete union but whose runtime validator accepts only the whole-number member.
+  All current active targets avoid this combination. Track the contract correction in
+  [payload-family matching](payload-family-matching.md#broader-adoption-in-order), independently
+  of the ontology correction; do not repair it by altering the meaning of FractionEquivalence.
+- Canonical review must also check the classification number-line question's literal "same point"
+  caption: it may disclose the requested equivalence verdict (`IMPL-V5`). Successful server
+  rendering and a structural ontology correction do not settle that visual evidence question.
+
+Temporary evidence: `temp/fraction-equivalence-review/report.json`, representative question/solution
+HTML in that directory, and `temp/fraction-equivalence-review{,-tests,-contracts}.log`.
+
+### Batch 11: release and adoption evidence
+
+- The supplied ontology Docker build and GitHub release workflow passed. All eight published
+  assets were verified, including matching Turtle sources, RDF relations, archive integrity,
+  and package versions. Both published clients pass their relation suites (14 Python tests).
+- Exact source comparison with v0.24.1 confirms only three parent replacements. Five generated
+  relation records change: the three procedures plus FractionEquivalence and FractionStrategies.
+  All 744 identifiers, definitions, specialization ancestry, progression relations, and constraints
+  remain unchanged. The complete structural graph has 737 nodes / 729 edges and no ordering,
+  mixed-child, or cycle violations.
+- Before/after replay preserves all **681 CCSS targets / 829 matched paths** and
+  **559 test targets / 691 matched paths** exactly. Three fixed seeds per path give **4,560
+  resolved configurations** with identical generator configuration, view configuration, and
+  complete pair-derived labels.
+- Composition-parent candidates decrease from 11 to **2 CCSS targets**, and from 8 to
+  **2 test targets**. All four remaining occurrences use ShapeEquivalenceRelations. This is
+  a source-target result, not a refreshed count of stored image annotations.
+- `npm run test:coverage` passes **460 files / 2,518 tests**, with 96.31% statement and
+  92.84% branch coverage; all generators meet their thresholds. `check:affected` passes types,
+  generator/view contracts, labels, docs, and CCSS validation. Separate test-spec validation
+  passes all 559 targets and verifies coverage of all 87 generator modules.
+- Canonical regeneration, image review, VQA, and cache freshness remain pending for the cleanup
+  batches. Neither this ontology patch nor its adoption changes generator/view source or targets;
+  the separate fraction payload-domain and classification-caption findings remain open above.
+
+Temporary evidence: `temp/ontology-v0242/semantic-review.json`, published-package checks in
+that directory, `temp/ontology-v0242-adoption/{before,after,delta}.json`, and
+`temp/ontology-v0242-adoption-{coverage,check,test-spec}.log`.

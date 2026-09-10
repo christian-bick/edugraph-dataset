@@ -125,6 +125,25 @@ capability indexes rather than resolving every target against every module. Shar
 require an authoritative graph rebuild before generation; do not assume source-only delta detection
 covers matching machinery.
 
+### Fraction-equivalence inventory finding
+
+The [FractionEquivalence review](observable-label-cleanup.md#fractionequivalence-review-existing-strategy-family)
+confirms another broad declared contract: the generator returns proper-fraction scaling,
+whole-number equivalence, or tenths-to-hundredths relations. The model views and whole-number
+view declare the entire union; number-line views additionally include fraction-location data.
+Several actual renderers accept only a subset.
+
+A synthetic target requesting FractionEquivalence, ProperFractions, EqualShares, Equal,
+Formalization, and ArabicNumerals matches `fractions-whole-equivalence`, but that view rejects
+the generated proper-fraction payload. This is a broad input-declaration defect, not the
+presence-only `requiredLabels` exception: no requirement is declared on that view. Current
+active CCSS/test targets avoid the invalid combination.
+
+Include these consumers in the family inventory. First decide whether the mathematical relations
+can share a genuinely uniform payload or need precise generator entry points; then make each
+view's declared input match its accepted domain. Do not silently add a blacklist or family flag.
+Keep this work separate from relocating the ontology's fraction-procedure descriptors.
+
 ## Boundaries and decisions still needed
 
 - No matcher extension is needed for the first application. Existing required/rejected semantics
