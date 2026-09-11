@@ -28,6 +28,8 @@ Standing outside the matrix, because it describes standards rather than modules:
 
 ## Open follow-ups
 
+- [Automated rule checks](plan/automated-rule-checks.md) — current enforcement, missing gates,
+  shared validation entry points, and incremental implementation order.
 - [Payload-family matching and regression](plan/payload-family-matching.md) — unresolved input
   contracts, positive micro-filters, classification evidence, and optional synthetic regression work.
 - [Performance safeguards and follow-ups](plan/improve_performance.md) — the performance contract
