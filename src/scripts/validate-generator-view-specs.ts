@@ -17,6 +17,7 @@ import {
     findRequiredLabelContractIssues
 } from '../lib/spec-contracts.ts';
 import {findGeneralLabelDeductionIssues} from '../lib/spec-source-contracts.ts';
+import {validateModuleLabelContract} from '../lib/label-contracts.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -101,6 +102,10 @@ async function validateSpecs() {
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                 const schemaName = `${modulePrefix}GeneratorSchema`;
                 const schema = specModule[schemaName];
+                for (const issue of validateModuleLabelContract({...spec, schema}, specPath)) {
+                    console.error(issue);
+                    hasError = true;
+                }
                 
                 if (schema) {
                     for (const issue of findSchemaResolutionContractIssues(schema)) {
@@ -180,6 +185,10 @@ async function validateSpecs() {
                 const modulePrefix = camelCase(item[0].toUpperCase() + item.slice(1));
                 const schemaName = `${modulePrefix}ViewSchema`;
                 const schema = specModule[schemaName];
+                for (const issue of validateModuleLabelContract({...spec, schema}, specPath)) {
+                    console.error(issue);
+                    hasError = true;
+                }
                 const paramLabels = schema ? extractSchemaLabels(schema) : [];
                 const problemType = viewToProblemType[item];
                 const matchingGenIds = problemType

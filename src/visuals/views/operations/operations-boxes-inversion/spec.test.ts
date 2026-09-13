@@ -12,10 +12,10 @@ describe('operations-boxes-inversion view spec', () => {
             Area.Equation,
             Scope.ExpressionOnOneSide
         ]);
-        expect(spec.rejectedLabels).toEqual([
+        expect(spec.rejectedLabels?.toSorted()).toEqual([
             Area.CommutativeLaw,
             Area.AssociativeLaw,
             Area.DistributiveLaw
-        ]);
+        ].toSorted());
     });
 });

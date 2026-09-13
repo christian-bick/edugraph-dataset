@@ -1,16 +1,13 @@
-import {normalizeAndValidateSpec} from '../lib/spec-validator.ts';
+import {validateStandardContracts} from '../lib/standards-validation.ts';
 import {getCliOption} from '../lib/cli.ts';
 import {
     loadGeneratorCatalog,
     loadViewCatalog,
-    findGeneratorsWithoutTestPath,
-    findTargetsWithoutMatch,
     type GeneratorCatalogEntry,
     type ViewCatalogEntry
 } from '../lib/generation.ts';
-import {loadSpecTodos} from '../lib/spec-catalog.ts';
-import {shortenLabel} from '../lib/utils.ts';
 import {radixSortUtf8} from '../lib/content-identity.ts';
+import {fileURLToPath} from 'node:url';
 
 async function validateSpec(
     specName: string,
@@ -19,10 +16,9 @@ async function validateSpec(
 ): Promise<boolean> {
     console.log(`\n=== Validating Standards Spec: "${specName}" ===`);
     try {
-        const [result] = await Promise.all([
-            normalizeAndValidateSpec(specName),
-            loadSpecTodos(specName)
-        ]);
+        const result = await validateStandardContracts(specName, generatorCatalog, viewCatalog, undefined,
+            process.argv.includes('--affected') && !process.argv.includes('--rebuild-graph')
+                ? fileURLToPath(new URL('../..', import.meta.url)) : undefined);
 
         console.log(`\n--- Statistics ---`);
         console.log(`Total Targets Defined:      ${result.stats.totalTargets}`);
@@ -41,25 +37,6 @@ async function validateSpec(
             return false;
         }
 
-        const unmatchedTargets = findTargetsWithoutMatch(result.targets, generatorCatalog, viewCatalog);
-        if (unmatchedTargets.length > 0) {
-            console.error(`\n--- Unmatched Active Targets (${unmatchedTargets.length}) ---`);
-            for (const target of unmatchedTargets) {
-                console.error(`❌ ${target.id} [${target.labels.map(shortenLabel).join(', ')}]`);
-            }
-            console.error(`\n❌ Spec contains ${unmatchedTargets.length} active target(s) without a compatible generator/view path.`);
-            return false;
-        }
-        console.log(`\n✅ All ${result.targets.length} active targets have a compatible generator/view path.`);
-
-        if (specName === 'test') {
-            const uncovered = findGeneratorsWithoutTestPath(result.targets, generatorCatalog, viewCatalog);
-            if (uncovered.length > 0) {
-                console.error(`\n❌ Test spec has no generatable target/view path for: ${uncovered.join(', ')}`);
-                return false;
-            }
-            console.log(`\n✅ Test spec covers all ${generatorCatalog.length} generator modules.`);
-        }
         console.log(`\n✅ Spec validation succeeded for "${specName}"! No errors detected.`);
         return true;
     } catch (error) {

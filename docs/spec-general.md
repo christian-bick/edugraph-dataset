@@ -97,8 +97,9 @@ child. If no eligible descriptor expresses the intended claim, review the ontolo
 [TSPEC-6](target-spec.md#tspec-6--never-stretch-labels-to-force-a-match).
 
 **Review:** inspect the complete installed ontology, not a filtered tree or only the declarations
-that happen to match. Eligibility is an authoring and review requirement; the existing automated
-spec checks do not yet enforce this structural rule.
+that happen to match. Module and standards checks enforce eligibility against the complete pinned
+descriptor index, and generation checks resolved annotations. Whether an eligible label is
+justified by the actual mathematics remains an authoring and review requirement.
 
 ### SPEC-4 — Never declare a capability broader than the module can deliver
 

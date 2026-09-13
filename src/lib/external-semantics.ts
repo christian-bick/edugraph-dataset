@@ -1,12 +1,12 @@
 import {resolve} from 'node:path';
-import {Ability, Area, ENTITY_RELATIONS, Scope} from 'edugraph-ts';
-import type {DescriptorRelations} from 'edugraph-ts';
+import {bundledContext} from 'edugraph-ts/generated';
+import {RELATION_IRIS, type OntologyContext} from 'edugraph-ts/core';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {resolveOntologyProvenance, type OntologyProvenance} from './coverage-identity.ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
 import {loadTargets} from './spec-catalog.ts';
 
-export const EXTERNAL_SEMANTICS_SCHEMA_VERSION = 2;
+export const EXTERNAL_SEMANTICS_SCHEMA_VERSION = 3;
 export const ONTOLOGY_DEPENDENCY_RELATIONS = ['partOf', 'specializes'] as const;
 
 export type OntologyDimension = 'Area' | 'Scope' | 'Ability' | 'unknown';
@@ -75,36 +75,35 @@ function completedOntologySnapshot(
     return {...body, semantic_sha256: snapshotHash(body)};
 }
 
-const dimensions = new Map<string, OntologyDimension>([
-    ...Object.values(Area).map(value => [value, 'Area'] as const),
-    ...Object.values(Scope).map(value => [value, 'Scope'] as const),
-    ...Object.values(Ability).map(value => [value, 'Ability'] as const)
-]);
+const dimensions = new Map<string, OntologyDimension>(
+    (['Area', 'Scope', 'Ability'] as const).map(name => [`http://edugraph.io/edu#${name}`, name])
+);
 
 function relationKey(type: string, source: string, target: string): string {
     return `${type}|${source}|${target}`;
 }
 
 export function buildOntologySemanticSnapshot(options: {
-    entityRelations?: Readonly<Record<string, DescriptorRelations>>;
+    context?: OntologyContext;
     provenance: OntologyProvenance;
 }): OntologySemanticSnapshot {
-    const source = options.entityRelations
-        ?? ENTITY_RELATIONS as unknown as Readonly<Record<string, DescriptorRelations>>;
+    const context = options.context ?? bundledContext;
     const entities = new Map<string, OntologySemanticEntity>();
     const relations = new Map<string, OntologySemanticRelation>();
-    for (const iri of radixSortUtf8(Object.keys(source))) {
-        const record = source[iri] ?? {};
-        const dimension = dimensions.get(iri) ?? 'unknown';
+    for (const descriptor of context.descriptors()) {
+        const {iri} = descriptor;
+        const dimension = descriptor.dimensions.map(type => dimensions.get(type))
+            .find(value => value !== undefined) ?? 'unknown';
+        const eligibility = context.inspectLabel(iri);
+        if (eligibility.status !== 'known') throw new Error(`Ontology inventory contains an unknown descriptor: ${iri}`);
         entities.set(iri, {
             dimension,
-            identity_hash: snapshotHash({iri, dimension}),
-            definition_hash: snapshotHash({iri, definition: record.definition ?? ''})
+            identity_hash: snapshotHash({iri, dimension,
+                constituentChildren: radixSortUtf8([...eligibility.constituentChildren])}),
+            definition_hash: snapshotHash({iri, definition: descriptor.definitions[0] ?? ''})
         });
-        for (const type of radixSortUtf8(Object.keys(record).filter(key => key !== 'definition'))) {
-            const targets = record[type as keyof DescriptorRelations];
-            if (!Array.isArray(targets)) continue;
-            for (const target of radixSortUtf8([...new Set(targets as readonly string[])])) {
+        for (const [type, property] of Object.entries(RELATION_IRIS)) {
+            for (const target of context.related(iri, property)) {
                 const key = relationKey(type, iri, target);
                 relations.set(key, {
                     type,

@@ -320,8 +320,8 @@ generator-view path whose bounded probe can produce a sample.
 
 Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 
-The structural eligibility requirement in SPEC-3 still needs explicit authoring review; a passing
-matching or standards-spec check does not establish it.
+Standards-spec checks enforce structural eligibility under SPEC-3 through the pinned ontology
+library. Whether an eligible descriptor is justified by the target's competency remains authoring review.
 
 ---
 

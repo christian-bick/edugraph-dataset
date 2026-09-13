@@ -9,10 +9,10 @@ describe('operations-vertical-inversion view spec', () => {
             Ability.ProcedureExecution,
             Ability.ProcedureInversion
         ]);
-        expect(spec.rejectedLabels).toEqual([
+        expect(spec.rejectedLabels?.toSorted()).toEqual([
             Area.CommutativeLaw,
             Area.AssociativeLaw,
             Area.DistributiveLaw
-        ]);
+        ].toSorted());
     });
 });

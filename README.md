@@ -167,6 +167,13 @@ npm run check
 npm run check -- --spec=ccss
 ```
 
+All standards-check entry points enforce label eligibility, Area/Ability cardinality, and active
+target matching through one shared validator. Ontology eligibility and traversal use the pinned
+`edugraph-ts` library; dataset cardinality and matching policy remain here.
+`npm run check:affected` reuses the existing dataset
+graph for delta matching when its pinned ontology provenance is current; `--rebuild-graph` requests
+fresh matching. Declaration checks still scan the selected catalogs/specs completely.
+
 **4. Run Tests**
 Validate the mathematical logic, constraints, and edge cases of the generators and library modules.
 ```bash

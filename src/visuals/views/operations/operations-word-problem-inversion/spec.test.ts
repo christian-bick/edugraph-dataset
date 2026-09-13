@@ -10,12 +10,12 @@ describe('operations-word-problem-inversion view spec', () => {
             Scope.ArabicNumerals,
             Scope.PhysicalNumbers
         ]);
-        expect(spec.rejectedLabels).toEqual([
+        expect(spec.rejectedLabels?.toSorted()).toEqual([
             ...deductAdmitting([Scope.NumbersLarger20]),
             ...deductAdmitting([Scope.NumbersWithNegatives]),
             Area.CommutativeLaw,
             Area.AssociativeLaw,
             Area.DistributiveLaw
-        ]);
+        ].toSorted());
     });
 });

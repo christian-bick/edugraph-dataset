@@ -103,7 +103,8 @@ async function main(): Promise<void> {
     if (plan.specs.length > 0) {
         console.log(`\n--- Affected standard specs: ${plan.specs.join(', ')} ---`);
         if (!runNode('node_modules/vite-node/dist/cli.mjs', [
-            'src/scripts/validate-standards-spec.ts', `--spec=${plan.specs.join(',')}`
+            'src/scripts/validate-standards-spec.ts', `--spec=${plan.specs.join(',')}`, '--affected',
+            ...(args.includes('--rebuild-graph') ? ['--rebuild-graph'] : [])
         ])) passed = false;
     }
     if (!passed) process.exitCode = 1;

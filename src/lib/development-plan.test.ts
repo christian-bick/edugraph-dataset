@@ -15,7 +15,7 @@ describe('development validation plan', () => {
             'generator-view-specs',
             'labels'
         ]);
-        expect(plan.specs).toEqual(['ccss']);
+        expect(plan.specs).toEqual(['ccss', 'test']);
         expect(plan.reasons.docs).toBeUndefined();
     });
 
@@ -41,7 +41,7 @@ describe('development validation plan', () => {
         const file = 'src/generators/counting/counting-basic/generator.ts';
         const plan = planDevelopmentValidation([file], specs, ['ccss'], [file]);
         expect(plan.checks).toEqual(['types', 'related-tests', 'generator-view-specs', 'labels']);
-        expect(plan.specs).toEqual(['ccss']);
+        expect(plan.specs).toEqual(['ccss', 'test']);
     });
 
     it('classifies work with a constant number of steps per changed file', () => {
@@ -58,7 +58,7 @@ describe('development validation plan', () => {
             ['ccss']
         );
         expect(plan.checks).toEqual(['types', 'generator-view-specs', 'labels']);
-        expect(plan.specs).toEqual(['ccss']);
+        expect(plan.specs).toEqual(['ccss', 'test']);
     });
 
     it('does not treat the explorer-only canonical tree as a dataset input', () => {

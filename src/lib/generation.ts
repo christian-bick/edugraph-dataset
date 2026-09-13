@@ -143,9 +143,10 @@ export function findGeneratorsWithoutTestPath(
     targets: CompetencyTarget[],
     generatorCatalog: GeneratorCatalogEntry[],
     viewCatalog: ViewCatalogEntry[],
-    maxAttempts = 10
+    maxAttempts = 10,
+    matchedTuples?: MatchTuple[]
 ): string[] {
-    const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
+    const tuples = matchedTuples ?? matchTargets(targets, generatorCatalog, viewCatalog).tuples;
     const tuplesByGenerator = new Map<string, MatchTuple[]>();
     for (const tuple of tuples) {
         const group = tuplesByGenerator.get(tuple.generatorId);

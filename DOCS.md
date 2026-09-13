@@ -385,6 +385,24 @@ The only public dataset-generation entry point.
 
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<module>[,<module>...]`
+*   **Shared contracts**: `standards-validation.ts` is called by dedicated, full and affected checks,
+    including CI. It checks active label eligibility and Area/Ability cardinality, implementation-TODO
+    label eligibility, TODO structure, active target matching, and the isolated `test` generator path.
+    TODOs and beyond-scope exports do not enter the match-coverage set. Existing equivalences remain unchanged.
+*   **Delta matching**: `--affected` uses `matchTargetsDelta` with the persisted dataset graph only
+    when its schema, epoch, completeness and pinned ontology provenance agree. Missing baselines and
+    changed provenance use fresh matching; `--rebuild-graph` explicitly bypasses reuse after machinery
+    changes. Full and CI checks always match afresh. Checks never publish a new graph or validation cache.
+    Declaration checks remain complete within the selected catalogs/specs.
+*   **Eligibility dependency**: the existing ontology entity identity now includes its complete
+    constituent-child summary from `edugraph-ts/generated`'s shared `bundledContext.inspectLabel`.
+    `label-contracts.ts` uses that same API for known/eligible label checks; it only adds dataset
+    diagnostics and cardinality policy. Semantic snapshots read definitions, dimensions and relations
+    through the context and the exported relation IRIs, without rebuilding ontology semantics.
+    Child additions, removals and reparenting therefore invalidate parent users through the existing reverse graph,
+    including when the child itself is unused. Rebuild the generation graph once after adopting this
+    machinery change. Resolved draws are checked before rendering and duplicate-target association;
+    annotation contract failures abort generation instead of being swallowed as retry failures.
 *   **Function**: Validates one or more competency target standard specs using one shared generator/view catalog. All checks always run: target ID uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set normalization, intra-target permutation uniqueness, definition distinctness, and inverse matching coverage — every normalized active target must have at least one semantically compatible generator/view path. No two target definitions may define an identical *set* of permutations, since such definitions are indistinguishable by the ontology. Definitions that merely *overlap* in some permutations are legitimate (related standards across grades); overlapping permutations are deduplicated to one representative target and reported as warnings, not errors. For `--spec=test`, validation additionally requires a matched target/view tuple whose bounded probe can produce a sample for every generator module.
 
 ### Type Checking (`npm run check:types`)

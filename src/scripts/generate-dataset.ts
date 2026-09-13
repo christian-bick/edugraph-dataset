@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import {mkdirSync} from 'fs';
 import { AbstractProblem, ResolvedProblemStub } from '../types/ml-engine.ts';
 import { shortenLabel } from '../lib/utils.ts';
+import {assertResolvedTargetCoverage, ResolvedLabelContractError} from '../lib/label-contracts.ts';
 import {
     loadGeneratorCatalog,
     loadViewCatalog,
@@ -170,6 +171,7 @@ function generateModuleSamples(
                 viewSchema: viewEntry.schema,
                 seed
             });
+            assertResolvedTargetCoverage(pair.labels, targetLabels, `${target.id}/${moduleName}/${tuple.viewId}`);
             const problem = buildProblem({
                 stub,
                 type: genEntry.generator.type,
@@ -221,12 +223,14 @@ function generateModuleSamples(
                 isDuplicate
             });
         } catch (e) {
+            if (e instanceof ResolvedLabelContractError) throw e;
             console.warn(`[${moduleName}] Skipping ${questionKey}: generator error: ${e instanceof Error ? e.message : e}`);
             continue;
         }
         if (!question.stub) {
             const representedBy = representingSamples[0];
             if (representedBy) {
+                assertResolvedTargetCoverage(representedBy.problem.labels, targetLabels, representedBy.sampleKey);
                 representedBy.associatedTargetIds.add(target.id);
                 console.warn(`[${moduleName}] Linked ${questionKey} to existing sample ${representedBy.sampleKey} after ${MAX_ATTEMPTS} duplicate attempts`);
                 continue;
@@ -264,6 +268,7 @@ function generateModuleSamples(
                 isDuplicate
             });
         } catch (e) {
+            if (e instanceof ResolvedLabelContractError) throw e;
             solution = { stub: null, attempt: 1, seed: computeSampleSeed(solutionKey, 1) };
         }
         // A view whose content space is too small to offer a second distinct

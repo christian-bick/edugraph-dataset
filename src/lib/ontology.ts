@@ -1,5 +1,5 @@
-import { Scope, specializesTransitive, structuresTransitive } from 'edugraph-ts';
-import type { CompetencyDescriptor } from 'edugraph-ts';
+import {Scope, bundledContext} from 'edugraph-ts/generated';
+import {RELATION_IRIS} from 'edugraph-ts/core';
 import {compositionalResolver, exactResolver} from '../types/schema.ts';
 
 export const DISTANCE_SCALE_LABELS = [
@@ -26,14 +26,7 @@ export function getCapabilityAncestors(concept: string): ReadonlySet<string> {
     const cached = capabilityAncestorCache.get(concept);
     if (cached) return cached;
 
-    const ancestors = new Set<string>([concept]);
-    try {
-        for (const parent of specializesTransitive(concept as CompetencyDescriptor) || []) {
-            ancestors.add(parent);
-        }
-    } catch {
-        // Unknown capabilities have no known ancestors, but still include themselves.
-    }
+    const ancestors = new Set([concept, ...bundledContext.traverse(concept, RELATION_IRIS.specializes)]);
 
     capabilityAncestorCache.set(concept, ancestors);
     return ancestors;
@@ -52,14 +45,7 @@ export function getStructuralAncestors(concept: string): ReadonlySet<string> {
     const cached = structuralAncestorCache.get(concept);
     if (cached) return cached;
 
-    const ancestors = new Set<string>([concept]);
-    try {
-        for (const parent of structuresTransitive(concept as CompetencyDescriptor) || []) {
-            ancestors.add(parent);
-        }
-    } catch {
-        // Unknown descriptors have no known ancestors, but still include themselves.
-    }
+    const ancestors = new Set([concept, ...bundledContext.traverse(concept, RELATION_IRIS.structures)]);
     structuralAncestorCache.set(concept, ancestors);
     return ancestors;
 }

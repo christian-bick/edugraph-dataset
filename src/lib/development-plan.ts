@@ -27,7 +27,7 @@ const GENERATOR_PATTERN = /^src\/generators\/([^/]+\/)?([^/]+)\//;
 const VIEW_PATTERN = /^src\/visuals\/views\/([^/]+\/)?([^/]+)\//;
 const SPEC_PATTERN = /^src\/spec\/([^/]+)(?:\/|\.ts$)/;
 const DOC_PATTERN = /^(?:README\.md|DOCS\.md|AGENTS\.md|docs\/.*\.md|\.agents\/skills\/.*\/SKILL\.md)$/;
-const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|type-parser|ontology|utils|module-resolver))/;
+const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|standards-validation|label-contracts|external-semantics|type-parser|ontology|utils|module-resolver))/;
 
 function normalizedFile(path: string): string {
     return path.replaceAll('\\', '/').replace(/^\.\//, '');
@@ -44,7 +44,7 @@ export function planDevelopmentValidation(
     const checks = new Set<DevelopmentCheck>();
     const specs = new Set<string>();
     const availableSpecSet = new Set(availableSpecs);
-    const productionSpecSet = new Set(productionSpecs);
+    const productionSpecSet = new Set([...productionSpecs, ...availableSpecs.filter(spec => spec === 'test')]);
     const reasons = new Map<string, Set<string>>();
     const missingFileSet = new Set(missingFiles.map(normalizedFile));
     let allSpecs = false;

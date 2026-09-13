@@ -2,11 +2,10 @@ import { execSync } from 'child_process';
 import { existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { normalizeAndValidateSpec } from '../lib/spec-validator.ts';
+import {validateStandardContracts} from '../lib/standards-validation.ts';
 import {
     loadGeneratorCatalog,
-    loadViewCatalog,
-    findGeneratorsWithoutTestPath
+    loadViewCatalog
 } from '../lib/generation.ts';
 import {listSpecModules} from '../lib/spec-catalog.ts';
 import { getCliOption } from '../lib/cli.ts';
@@ -69,14 +68,15 @@ async function main() {
     const specDir = resolve(PROJECT_ROOT, 'src', 'spec');
     let specsToValidate: string[] = [];
 
-    specsToValidate = requestedSpec ? [requestedSpec] : listSpecModules(specDir);
+    specsToValidate = requestedSpec ? requestedSpec.split(',').map(value => value.trim()).filter(Boolean) : listSpecModules(specDir);
 
     console.log(`Validating spec(s): [${specsToValidate.join(', ')}]`);
 
+    const [generatorCatalog, viewCatalog] = await Promise.all([loadGeneratorCatalog(), loadViewCatalog()]);
     for (const specName of specsToValidate) {
         console.log(`\nChecking spec module: "${specName}"...`);
         try {
-            const result = await normalizeAndValidateSpec(specName);
+            const result = await validateStandardContracts(specName, generatorCatalog, viewCatalog);
 
             console.log(`  Targets: ${result.stats.totalTargets} total | ${result.stats.uniqueTargets} unique | ${result.stats.deduplicatedCount} deduplicated`);
 
@@ -101,25 +101,6 @@ async function main() {
                 }
                 hasError = true;
             } else {
-                if (specName === 'test') {
-                    const [generatorCatalog, viewCatalog] = await Promise.all([
-                        loadGeneratorCatalog(),
-                        loadViewCatalog()
-                    ]);
-                    const uncovered = findGeneratorsWithoutTestPath(
-                        result.targets,
-                        generatorCatalog,
-                        viewCatalog
-                    );
-                    if (uncovered.length > 0) {
-                        console.error(
-                            `❌ Test spec has no generatable target/view path for: ${uncovered.join(', ')}`
-                        );
-                        hasError = true;
-                    } else {
-                        console.log(`✅ Test spec covers all ${generatorCatalog.length} generator modules.`);
-                    }
-                }
                 console.log(`✅ Spec "${specName}" valid.`);
             }
         } catch (e) {
