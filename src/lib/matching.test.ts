@@ -300,6 +300,27 @@ function delta(options: {
 }
 
 describe('delta target matching', () => {
+    it.each([
+        {required: Area.Square, rejected: Area.Rectangle, expected: []},
+        {required: Area.Rectangle, rejected: Area.Square, expected: ['rectangle']}
+    ])('agrees with direct matching after applicability changes: $required / $rejected', ({required, rejected, expected}) => {
+        const currentTargets = [
+            {id: 'rectangle', labels: [Area.Rectangle, Ability.ProcedureExecution]},
+            {id: 'square', labels: [Area.Square, Ability.ProcedureExecution]}
+        ];
+        const currentGenerators = [{generatorId: 'shape', labels: [Area.Square]}];
+        const originalView = {viewId: 'v', supportedLabels: [Ability.ProcedureExecution], requiredLabels: [Area.Rectangle]};
+        const currentView = {...originalView, requiredLabels: [required], rejectedLabels: [rejected]};
+        const previousGraph = matchingGraph({targets: currentTargets, generators: currentGenerators, views: [originalView]});
+        const full = matchTargets(currentTargets, currentGenerators, [currentView]);
+        const affected = delta({currentTargets, currentGenerators, currentViews: [currentView], previousGraph});
+        expect(currentTargets.filter(target => matchesTarget(target.labels, currentGenerators[0], currentView).matched)
+            .map(target => target.id)).toEqual(expected);
+        expect(full.tuples.map(tuple => tuple.target.id)).toEqual(expected);
+        expect(tupleIds(affected.tuples)).toEqual(tupleIds(full.tuples));
+        expect(affected.baseline).toBe(false);
+    });
+
     it('produces the full deterministic match set for a baseline', () => {
         const result = delta({previousGraph: null});
         const full = matchTargets(targets(), generators(), views());

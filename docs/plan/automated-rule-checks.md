@@ -2,7 +2,8 @@
 
 Implementation inventory after label consolidation. This plan links existing rules; it does not
 add new ontology semantics or change matching policy. The first implementation batch (D1, D2
-cardinality, D3 command parity, and D10) is now enforced.
+cardinality, D3 command parity, and D10) is now enforced. D4 ownership and D5 applicability
+consistency now share their deterministic checks between the spec gate and architecture audit.
 The remaining inventory retains its source review at `8d5c332`; later batches are still open.
 
 The ontology owns descriptor structure and eligibility. Its
@@ -28,7 +29,7 @@ should cite the relevant existing rule and identify the file, field, label, pair
 | D2. Target structure | Check target IDs, normalized permutations, definition collisions, declared equivalences, valid TODO packages, and production targets containing at least one Area and Ability. Scope remains optional; no primary label or upper limit. See TSPEC-1, TSPEC-5, TSPEC-8, TSPEC-14. | **Partial.** `spec-validator.ts` checks IDs/permutations; stale equivalences are warnings. TODO loaders validate package structure. Area/Ability cardinality is enforced by the shared standards gate; Scope remains optional. Semantic equivalence judgments remain review, not automatic proof. Preserve the current equivalence mechanism pending the [deferred review](#deferred-review-intra-standard-equivalences). |
 | D3. Inverse target coverage | Every normalized active target exported through `spec` has a compatible generator/view tuple. Every generator retains a generatable active `test` path. See TSPEC-1, TSPEC-9, TSPEC-12. | **Gate.** `standards-validation.ts` is shared by dedicated, full, affected and CI checks. Affected standards checks reuse `matchTargetsDelta` and the existing dataset graph when graph version and pinned ontology provenance agree; otherwise they match afresh. Capability changes also schedule the isolated test-path check. Never apply the match requirement to `implementationTodos`, `ontologyTodos`, or `beyondScope`. |
 | D4. Positive ownership | Reject generator Abilities, redundant invariant specialization ancestors, schema/general overlap, and overlapping positive ownership across a compatible pair. Keep label mechanics dimension-neutral. See SPEC-2, SPEC-7, SPEC-8, SPEC-11, SPEC-G3, SPEC-V5. | **Gate for declaration conflicts.** `spec-ownership.ts` supplies the same indexed checks, rule-linked diagnostics and declaration witnesses to the spec gate and architecture audit. Every module is checked, including unmatched ones; cross-role checks use all four invariant/schema combinations on the existing compatible-pair index. Full, affected and CI commands share the spec gate. Related schema alternatives and structural ancestry alone remain valid. Whether a capability is mathematically true or belongs in Area versus Scope remains semantic review. |
-| D5. Applicability consistency | Requirements are target preconditions, supported by each compatible pair, and do not contribute output labels. Rejections veto matches and never contain Abilities. Detect impossible required/rejected combinations. See SPEC-V3, SPEC-V7, SPEC-V8. | **Gate plus gap.** `spec-contracts.ts` checks pair support, missing compatible generators, exact required/rejected collisions, and rejected Abilities. Extend collision detection to specialization: requiring Square while rejecting Rectangle is impossible. Requiring Rectangle while rejecting Square is not automatically impossible. Proving a rejection boundary is complete remains review. |
+| D5. Applicability consistency | Requirements are target preconditions, supported by each compatible pair, and do not contribute output labels. Rejections veto matches and never contain Abilities. Detect impossible required/rejected combinations. See SPEC-V3, SPEC-V7, SPEC-V8. | **Gate for algorithmic consistency.** `spec-contracts.ts` supplies shared diagnostics to the spec gate and architecture audit for pair support, missing compatible generators, rejected Abilities, and equality/specialization contradictions. Requiring Square while rejecting Rectangle fails, with both full IRIs; requiring Rectangle while rejecting Square remains valid. Support checks reuse the production compatible-pair index and its capability closures. Unmatched views are checked too. The existing matcher and resolved-label construction preserve participation-only requirements and target-context rejections. Proving a rejection boundary is complete remains review. |
 | D6. Matching semantics | Conjunctive coverage uses equality or `specializes` only, never `partOf`, reverse inheritance, or progression. Direct, indexed, and delta matching agree, including additions and removals. See SPEC-1. | **Runtime plus regressions.** `matching.ts`, `ontology.test.ts`, and `matching.test.ts` cover these behaviors. Retain focused positive/negative fixtures and extend command-parity tests; do not duplicate the production matcher in a second validation engine. |
 | D7. Payload compatibility | A generator's possible output types must fit the view's declared input family; missing or unrecognized mappings must not silently admit a pair. See IMPL-8 and SPEC-V6. | **Partial; adoption required.** `matching.ts` accepts unknown types and permits a union producer to feed a member-only view when any `requiredLabels` exist. That is not proof of the output discriminant. Inventory these cases now; tighten the gate only with the consumer adoption in the [payload-family plan](payload-family-matching.md). Positive micro-filter semantics remain a separate design decision. |
 
@@ -63,9 +64,10 @@ enter the match-coverage set. An isolated `test` module still checks its active 
 Reuse the catalog, parsed type graph, compatible-pair index, and dependency planner. Centralize
 rule predicates and diagnostic results, not a second matching or invalidation implementation.
 Ownership checks reuse referenced ancestry and module indexes across compatible-pair edges instead
-of comparing every pair of labels. Applicability checks still have nested label comparisons and
-per-view generator scans; the [performance contract](improve_performance.md#performance-contract)
-is a requirement to verify, not a claim that every old validation loop already satisfies it.
+of comparing every pair of labels. Applicability groups the existing pair index once and checks
+requirements against its existing capability sets; contradiction checks look up required-label
+ancestry in a rejection set. Both expose work counters and growth tests under the
+[performance contract](improve_performance.md#performance-contract).
 
 Full checks must be linear in source/graph input plus necessary results. Shared indexes should
 avoid repeated file reads, all-module Cartesian scans, all-pairs ancestry tables, and repeated
@@ -90,7 +92,9 @@ to the installed ontology. See the performance contract for rebuild and reset bo
   D10 post-resolution coverage. These close direct paths to invalid or missing annotations.
 - [x] **D4:** share dimension-neutral ownership checks between the spec gate and architecture audit,
   with declaration witnesses, public gate fixtures, fresh/reused-graph parity, and work-growth tests.
-- [ ] **Next:** finish D5 applicability consistency, then D8/D9 resolver/source contracts
+- [x] **D5:** share specialization-aware applicability diagnostics, reuse indexed pair support,
+  and verify directionality, structural exclusions, unmatched views, graph reuse, and work growth.
+- [ ] **Next:** finish D8/D9 resolver/source contracts
   and D11/D12 implementation checks. Reuse existing tested predicates; retain their current gates.
 - [ ] **Alongside every batch:** add positive and negative fixtures, stable rule-linked diagnostics,
   full-versus-affected equivalence, and linear-work tests. Wire the same mandatory rules into full,

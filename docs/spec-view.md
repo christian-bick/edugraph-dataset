@@ -170,7 +170,11 @@ dimension-neutral: the same mechanism applies to Area, Scope, and Ability labels
 A requirement is not a capability. The compatible generator/view pair must still provide a label
 equal to or more specific than every required label. The provider may be the generator, the view,
 or both; `npm run check:generator-view-specs` verifies pair support without assigning ownership by
-dimension. A required label cannot also appear in `rejectedLabels`.
+dimension. A required label cannot equal or specialize a `rejectedLabels` entry: every target
+satisfying that requirement would also trigger the rejection. For example, requiring `Area.Square`
+while rejecting `Area.Rectangle` is contradictory. Requiring `Area.Rectangle` while rejecting
+`Area.Square` can remain valid, because the rejection excludes only the narrower context.
+Structural `partOf` ancestry alone does not imply this contradiction.
 
 Use the property for positive payload-family applicability when static typing cannot express the
 boundary, and for an invariant stronger sibling claim that should participate only when explicitly
@@ -201,7 +205,7 @@ task mode, and the implementation never inspects requirements or raw target labe
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — every Ability is declared by a view, directly evidenced by its rendered task, absent from all generators, and not parameterized when it changes task identity.
 - [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than implemented through parallel configuration branches; only its most specific required Ability is declared.
-- [ ] **SPEC-V7** — every `requiredLabels` entry is a necessary dimension-neutral target precondition, is supported by every compatible generator/view pair, is not rejected, and yields to a narrower payload type when static typing expresses the same boundary.
+- [ ] **SPEC-V7** — every `requiredLabels` entry is a necessary dimension-neutral target precondition, is supported by every compatible generator/view pair, neither equals nor specializes a rejected label, and yields to a narrower payload type when static typing expresses the same boundary.
 - [ ] **SPEC-V8** — `requiredLabels` controls matching participation only; a view-supplied requirement remains an invariant capability and never drives configuration or rendering behavior.
 - [ ] **SPEC-11** — every view-owned Area is independent of compatible generator Areas; presentation-driven refinement uses Scope.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

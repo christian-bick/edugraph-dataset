@@ -19,7 +19,10 @@ afterEach(() => {
     }
 });
 
-function fixture(viewLabel: string, numericName = false) {
+function fixture(viewLabel: string, {numericName = false, requiredLabels = [], rejectedLabels = [],
+    generatorLabels = [Area.Addition, Scope.ArabicNumerals]}: {
+    numericName?: boolean; requiredLabels?: string[]; rejectedLabels?: string[]; generatorLabels?: string[];
+} = {}) {
     mkdirSync(fixtureRoot, {recursive: true});
     const root = mkdtempSync(resolve(fixtureRoot, 'gate-'));
     fixtures.push(root);
@@ -31,10 +34,10 @@ function fixture(viewLabel: string, numericName = false) {
     mkdirSync(generatorDir, {recursive: true});
     mkdirSync(viewDir, {recursive: true});
     writeFileSync(resolve(generatorDir, 'spec.ts'),
-        `export const spec = ${JSON.stringify({generalLabels: [Area.Addition, Scope.ArabicNumerals]})};\n`
+        `export const spec = ${JSON.stringify({generalLabels: generatorLabels})};\n`
         + 'export const FixtureGeneratorGeneratorSchema = {};\n');
     writeFileSync(resolve(viewDir, 'spec.ts'),
-        `export const spec = ${JSON.stringify({viewId, generalLabels: [Ability.ProcedureExecution]})};\n`
+        `export const spec = ${JSON.stringify({viewId, generalLabels: [Ability.ProcedureExecution], requiredLabels, rejectedLabels})};\n`
         + `export const ${numericName ? 'FixtureView100' : 'FixtureView'}ViewSchema = ${JSON.stringify({notation: [viewLabel]})};\n`);
     return {generatorsDir, viewsDir};
 }
@@ -71,9 +74,39 @@ describe('public spec validation gate', () => {
     it('includes numeric module schema exports in both the public gate and audit catalog', async () => {
         vi.spyOn(console, 'log').mockImplementation(() => {});
         const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const roots = fixture(Scope.ArabicNumerals, true);
+        const roots = fixture(Scope.ArabicNumerals, {numericName: true});
         expect((await loadViewModelCatalog(roots.viewsDir))[0].schema).toEqual({notation: [Scope.ArabicNumerals]});
         expect(await validateSpecs(roots)).toBe(false);
         expect(errors.mock.calls.flat().join('\n')).toContain('view:fixture-view-100 schema.notation');
+    });
+
+    it('fails on a required specialization excluded by an ancestor, with both declaration witnesses', async () => {
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const roots = fixture(Scope.LinearArrangement, {generatorLabels: [Area.Square],
+            requiredLabels: [Area.Square], rejectedLabels: [Area.Rectangle]});
+        expect(await validateSpecs(roots)).toBe(false);
+        const diagnostics = errors.mock.calls.flat().join('\n');
+        expect(diagnostics).toContain('SPEC-V3/SPEC-V7 [view:fixture-view]');
+        expect(diagnostics).toContain(`requiredLabels '${Area.Square}'`);
+        expect(diagnostics).toContain(`rejectedLabels '${Area.Rectangle}'`);
+        expect(diagnostics).not.toContain('no compatible generator');
+    });
+
+    it('accepts a required ancestor with a narrower rejected specialization', async () => {
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+        expect(await validateSpecs(fixture(Scope.LinearArrangement, {generatorLabels: [Area.Rectangle],
+            requiredLabels: [Area.Rectangle], rejectedLabels: [Area.Square]}))).toBe(true);
+        expect(errors).not.toHaveBeenCalled();
+    });
+
+    it('still fails when a compatible pair cannot supply the requirement', async () => {
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+        expect(await validateSpecs(fixture(Scope.LinearArrangement, {requiredLabels: [Area.Rectangle]}))).toBe(false);
+        const diagnostics = errors.mock.calls.flat().join('\n');
+        expect(diagnostics).toContain(`SPEC-V7 [view:fixture-view] requiredLabels '${Area.Rectangle}'`);
+        expect(diagnostics).toContain('fixture-generator#fixture-view');
     });
 });

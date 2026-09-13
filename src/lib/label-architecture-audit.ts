@@ -35,6 +35,7 @@ import {extractSchemaLabels, shortenLabel} from './utils.ts';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {createWorkCounters, type WorkCounters} from './work-counters.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
+import {inspectApplicability, type ApplicabilityIssue} from './spec-contracts.ts';
 import {collectPositiveCapabilities, inspectPositiveOwnership,
     type CapabilityProvider, type CapabilityRole,
     type PositiveOwnershipIssue} from './spec-ownership.ts';
@@ -92,6 +93,7 @@ export interface LabelArchitectureFinding {
     affected_tuple_count: number;
     affected_tuples: AuditTupleRef[];
     ownership?: PositiveOwnershipIssue;
+    applicability?: ApplicabilityIssue;
 }
 
 export interface LabelArchitectureAuditReport {
@@ -557,7 +559,8 @@ function finding(options: Omit<LabelArchitectureFinding, 'id' | 'affected_tuple_
         files,
         affected_tuple_count: affectedTuples.length,
         affected_tuples: affectedTuples,
-        ...(options.ownership ? {ownership: options.ownership} : {})
+        ...(options.ownership ? {ownership: options.ownership} : {}),
+        ...(options.applicability ? {applicability: options.applicability} : {})
     };
 }
 
@@ -691,17 +694,6 @@ export function buildLabelArchitectureAudit(options: {
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
         }
-        const rejectedAbilities = (view.rejectedLabels ?? [])
-            .filter(label => labelDimension(label) === 'Ability');
-        if (rejectedAbilities.length > 0) {
-            findings.push(finding({
-                category: 'view-ability-rejectedLabels',
-                disposition: 'violation',
-                summary: `View ${view.viewId} contains Ability labels in rejectedLabels.`,
-                modules: [view.viewId], labels: rejectedAbilities, files: [],
-                affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
-            }));
-        }
         if ((view.requiredLabels ?? []).length > 0) {
             findings.push(finding({
                 category: 'required-label-review',
@@ -763,6 +755,26 @@ export function buildLabelArchitectureAudit(options: {
             files: issue.declarations.map(declaration => ownershipFiles.get(`${declaration.role}:${declaration.module_id}`)!),
             affected_tuples: affectedTuples ?? [],
             ownership: issue
+        }));
+    }
+
+    const viewsById = new Map(options.views.map(view => [view.viewId, view]));
+    for (const issue of inspectApplicability({views: options.views, pairIndex, counters})) {
+        const generatorId = issue.kind === 'pair-missing-required-label' ? issue.generatorId : undefined;
+        const affectedTuples = generatorId
+            ? tupleIndex.byPair.get(modulePairKey(generatorId, issue.viewId))
+            : tupleIndex.byView.get(issue.viewId);
+        findings.push(finding({
+            category: issue.kind === 'ability-rejection' ? 'view-ability-rejectedLabels' : issue.kind,
+            disposition: 'violation',
+            summary: issue.message,
+            modules: generatorId ? [generatorId, issue.viewId] : [issue.viewId],
+            labels: issue.kind === 'no-compatible-generator'
+                ? [...(viewsById.get(issue.viewId)!.requiredLabels ?? [])]
+                : issue.kind === 'required-and-rejected-label' ? [issue.label, issue.rejectedLabel] : [issue.label],
+            files: [ownershipFiles.get(`view:${issue.viewId}`)!],
+            affected_tuples: affectedTuples ?? [],
+            applicability: issue
         }));
     }
 

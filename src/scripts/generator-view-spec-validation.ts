@@ -7,12 +7,9 @@ import {
     findSchemaLabelResolutionIssues,
     findSchemaResolutionContractIssues
 } from '../lib/utils.ts';
-import { getViewToProblemTypeMap, getGeneratorProblemType, isProblemTypeCompatible } from '../lib/type-parser.ts';
+import { getViewToProblemTypeMap, getGeneratorProblemTypeFromPath } from '../lib/type-parser.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
-import {
-    findRejectedLabelContractIssues,
-    findRequiredLabelContractIssues
-} from '../lib/spec-contracts.ts';
+import {inspectApplicability} from '../lib/spec-contracts.ts';
 import {findGeneralLabelDeductionIssues} from '../lib/spec-source-contracts.ts';
 import {validateModuleLabelContract} from '../lib/label-contracts.ts';
 import {inspectPositiveOwnership} from '../lib/spec-ownership.ts';
@@ -46,11 +43,8 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
     const generatorModules = findLeafModules(generatorsDir);
     const viewModules = findLeafModules(viewsDir);
 
-    const generatorSchemaLabels: Record<string, string[]> = {};
-    const generatorGeneralLabels: Record<string, string[]> = {};
-    const generatorProblemTypes: Record<string, string> = {};
-    const ownershipGenerators: GeneratorModelDescriptor[] = [];
-    const ownershipViews: ViewModelDescriptor[] = [];
+    const generators: GeneratorModelDescriptor[] = [];
+    const views: ViewModelDescriptor[] = [];
 
     // 1. Validate Generators & Collect Schemas/Problem Types
     console.log('\n--- Auditing Generators ---');
@@ -72,7 +66,6 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                 }
 
                 const generalLabels = spec.generalLabels || [];
-                generatorGeneralLabels[item] = generalLabels;
                 const schemaName = moduleSchemaExportName(item, 'generator');
                 const schema = specModule[schemaName];
                 for (const issue of validateModuleLabelContract({...spec, schema}, specPath)) {
@@ -96,15 +89,10 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                         console.error(`❌ [generator:${item}] Schema parameter '${issue.field}' has multiple supported labels but no declared exact, predicate, aggregate, or compositional resolution contract`);
                         hasError = true;
                     }
-                    const paramLabels = extractSchemaLabels(schema);
-                    generatorSchemaLabels[item] = paramLabels;
                 }
 
-                const probType = getGeneratorProblemType(item);
-                if (probType) {
-                    generatorProblemTypes[item] = probType;
-                }
-                ownershipGenerators.push({generatorId: item, module: gMod, spec, schema,
+                const probType = getGeneratorProblemTypeFromPath(path.join(gMod.absolutePath, 'generator.ts'));
+                generators.push({generatorId: item, module: gMod, spec, schema,
                     generalLabels, labels: [...generalLabels, ...extractSchemaLabels(schema ?? {})],
                     problemType: probType});
             } catch (e) {
@@ -146,14 +134,9 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                 }
                 const paramLabels = schema ? extractSchemaLabels(schema) : [];
                 const problemType = viewToProblemType[item];
-                ownershipViews.push({viewId: item, module: vMod, spec, schema: schema ?? {},
+                views.push({viewId: item, module: vMod, spec, schema: schema ?? {},
                     generalLabels, supportedLabels: [...generalLabels, ...paramLabels],
                     requiredLabels, rejectedLabels, problemType});
-                const matchingGenIds = problemType
-                    ? Object.keys(generatorProblemTypes).filter(
-                        genId => isProblemTypeCompatible(generatorProblemTypes[genId], problemType)
-                    )
-                    : [];
                 
                 if (schema) {
                     for (const issue of findSchemaResolutionContractIssues(schema)) {
@@ -173,37 +156,6 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                     }
                 }
 
-                const requiredLabelIssues = findRequiredLabelContractIssues({
-                    requiredLabels,
-                    viewSupportedLabels: [...generalLabels, ...paramLabels],
-                    rejectedLabels,
-                    compatibleGenerators: matchingGenIds.map(generatorId => ({
-                        generatorId,
-                        supportedLabels: [
-                            ...(generatorGeneralLabels[generatorId] || []),
-                            ...(generatorSchemaLabels[generatorId] || [])
-                        ]
-                    }))
-                });
-                for (const issue of requiredLabelIssues) {
-                    if (issue.kind === 'required-and-rejected-label') {
-                        console.error(`❌ [view:${item}] Required label '${issue.label}' is also rejected, making the view contract impossible`);
-                    } else if (issue.kind === 'no-compatible-generator') {
-                        console.error(`❌ [view:${item}] requiredLabels cannot be evaluated because the view has no compatible generator`);
-                    } else {
-                        console.error(`❌ [view:${item}] Required label '${issue.label}' is not supported by compatible pair '${issue.generatorId}#${item}'`);
-                    }
-                    hasError = true;
-                }
-
-                const rejectedLabelIssues = findRejectedLabelContractIssues({
-                    rejectedLabels
-                });
-                for (const issue of rejectedLabelIssues) {
-                    console.error(`❌ [view:${item}] Rejected label '${issue.label}' is an Ability; rejectedLabels may only express stable, complete exclusion boundaries`);
-                    hasError = true;
-                }
-
             } catch (e) {
                 console.error(`❌ [view:${item}] Error validating spec:`, e);
                 hasError = true;
@@ -212,12 +164,12 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
     }
 
     const counters = createWorkCounters();
-    const pairIndex = buildCompatibleModulePairIndex(ownershipGenerators, ownershipViews, counters);
+    const pairIndex = buildCompatibleModulePairIndex(generators, views, counters);
     const ownershipIssues = inspectPositiveOwnership({
         modules: [
-            ...ownershipGenerators.map(generator => ({role: 'generator' as const,
+            ...generators.map(generator => ({role: 'generator' as const,
                 module_id: generator.generatorId, generalLabels: generator.generalLabels, schema: generator.schema})),
-            ...ownershipViews.map(view => ({role: 'view' as const,
+            ...views.map(view => ({role: 'view' as const,
                 module_id: view.viewId, generalLabels: view.generalLabels, schema: view.schema}))
         ],
         pairs: pairIndex.orderedPairs.map(pair => ({generatorId: pair.generator.generatorId, viewId: pair.view.viewId})),
@@ -225,6 +177,9 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
     });
     for (const issue of ownershipIssues) console.error(`❌ ${issue.message}`);
     hasError ||= ownershipIssues.length > 0;
+    const applicabilityIssues = inspectApplicability({views, pairIndex, counters});
+    for (const issue of applicabilityIssues) console.error(`❌ ${issue.message}`);
+    hasError ||= applicabilityIssues.length > 0;
     console.log(`[Work counters] ${JSON.stringify(counters.snapshot())}`);
 
     if (hasError) {

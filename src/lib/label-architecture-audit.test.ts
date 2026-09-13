@@ -27,6 +27,7 @@ import {
 import type {CompetencyTarget} from '../types/ml-engine.ts';
 import {createWorkCounters} from './work-counters.ts';
 import {inspectPositiveOwnership} from './spec-ownership.ts';
+import {inspectApplicability} from './spec-contracts.ts';
 
 const target: CompetencyTarget = {
     id: 'target-one',
@@ -290,5 +291,39 @@ describe('label architecture audit', () => {
             expect(finding.files[0]).toBe(`unused/${finding.modules[0]}/spec.ts`);
             expect(finding.ownership?.rule_ids.length).toBeGreaterThan(0);
         }
+    });
+
+    it('preserves identical applicability diagnostics across fresh matching and graph reuse', () => {
+        const contradictoryView = {...view, requiredLabels: [Area.Addition], rejectedLabels: [Area.Addition]};
+        const pairIndex = buildCompatibleModulePairIndex([generator], [contradictoryView]);
+        const expected = inspectApplicability({views: [contradictoryView], pairIndex});
+        // No target can match the contradiction. A current empty graph must not suppress the finding.
+        const emptyGraph = createDependencyGraphSnapshot([
+            ...Object.values(currentGraph(generator, contradictoryView).nodes).filter(node => node.kind !== 'match-tuple')
+        ], undefined, buildDependencyMatchingIndex([target], []));
+        for (const graph of [null, emptyGraph]) {
+            const report = buildLabelArchitectureAudit({projectRoot: '.', specName: 'test-spec', targets: [target],
+                generators: [generator], views: [contradictoryView], graph, sourceSignals: []});
+            expect(report.matching.source).toBe(graph ? 'persisted-graph' : 'fresh-indexed-match');
+            const findings = report.findings.filter(finding => finding.applicability);
+            expect(findings.map(finding => finding.applicability)).toEqual(expected);
+            expect(findings[0]).toMatchObject({disposition: 'violation', affected_tuple_count: 0,
+                files: ['unused/view-one/spec.ts']});
+            expect(report.findings.some(finding => finding.disposition === 'review')).toBe(true);
+        }
+    });
+
+    it.each([true, false])('reports unsupported applicability with a generator present: %s', withGenerator => {
+        const requiredView = {...view, requiredLabels: [Area.Square], rejectedLabels: [Ability.Formalization]};
+        const generators = withGenerator ? [generator] : [];
+        const report = buildLabelArchitectureAudit({projectRoot: '.', specName: 'test-spec', targets: [],
+            generators, views: [requiredView], graph: null, sourceSignals: []});
+        const findings = report.findings.filter(finding => finding.applicability);
+        expect(findings.map(finding => finding.applicability)).toEqual(inspectApplicability({views: [requiredView],
+            pairIndex: buildCompatibleModulePairIndex(generators, [requiredView])}));
+        expect(findings).toHaveLength(2);
+        expect(findings.every(finding => finding.files[0] === 'unused/view-one/spec.ts')).toBe(true);
+        expect(findings.find(finding => finding.applicability?.kind !== 'ability-rejection')?.modules)
+            .toEqual(withGenerator ? ['generator-one', 'view-one'] : ['view-one']);
     });
 });
