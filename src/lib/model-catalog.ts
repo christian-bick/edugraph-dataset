@@ -14,8 +14,12 @@ import type {WorkCounters} from './work-counters.ts';
 
 const PROJECT_ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 
-const camelCase = (value: string): string =>
-    value.replace(/-([a-z0-9])/g, match => match[1].toUpperCase());
+/** Shared naming convention for authored schema exports, including numeric name segments. */
+export function moduleSchemaExportName(moduleId: string, role: 'generator' | 'view'): string {
+    const prefix = (moduleId[0].toUpperCase() + moduleId.slice(1))
+        .replace(/-([a-z0-9])/g, match => match[1].toUpperCase());
+    return `${prefix}${role === 'generator' ? 'Generator' : 'View'}Schema`;
+}
 
 export interface GeneratorModelDescriptor extends GeneratorMatchInfo {
     module: LeafModule;
@@ -74,7 +78,7 @@ export async function loadGeneratorModelCatalog(
     const entries: GeneratorModelDescriptor[] = [];
     for (const module of modules) {
         const specModule = await import(pathToFileURL(resolve(module.absolutePath, 'spec.ts')).href);
-        const schemaName = camelCase(module.id[0].toUpperCase() + module.id.slice(1)) + 'GeneratorSchema';
+        const schemaName = moduleSchemaExportName(module.id, 'generator');
         const schema: ConfigSchema = specModule[schemaName] ?? {};
         const generalLabels = [...new Set<string>(
             (specModule.spec?.generalLabels ?? []) as readonly string[]
@@ -121,7 +125,7 @@ export async function loadViewModelCatalog(
     for (const module of modules) {
         const specModule = await import(pathToFileURL(resolve(module.absolutePath, 'spec.ts')).href);
         const spec: ViewSpec = specModule.spec;
-        const schemaName = camelCase(module.id[0].toUpperCase() + module.id.slice(1)) + 'ViewSchema';
+        const schemaName = moduleSchemaExportName(module.id, 'view');
         const schema: ConfigSchema = specModule[schemaName] ?? {};
         const generalLabels = [...new Set(spec.generalLabels || [])];
         entries.push({

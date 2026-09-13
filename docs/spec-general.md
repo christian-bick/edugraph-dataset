@@ -73,6 +73,10 @@ label you already declare. Structural ancestors are not inherited claims.
 **Why:** an ancestor declaration cannot add any match, and `validate-generator-view-specs`
 flags it as a redundant declaration.
 
+The automatic redundancy check applies to invariant `generalLabels`. Related supported schema
+alternatives are not an invariant conjunction and are not redundant merely because one specializes
+another; the resolver contract decides which configuration and labels are selected.
+
 ### SPEC-3 — "Most specific" does not mean "leaf"
 
 Apply the ontology's
@@ -265,7 +269,9 @@ fractions instead uses the relevant fraction and representation Scopes; the visi
 alone does not establish a fraction-notation learning claim. Apply the same distinction to decimal,
 digit, number-name, and other notation Areas.
 
-Across a compatible generator/view pair, ownership remains non-polymorphic. The pair must not
+Across a compatible generator/view pair, positive ownership remains non-polymorphic across all
+dimensions and declaration forms: equal or specialization-overlapping capabilities must not be
+split between the roles' `generalLabels` and schemas. In particular, the pair must not
 divide ownership by declaring equal or specialization-overlapping Areas, and a view must not
 specialize a generator-owned Area with a descendant Area. Presentation, representation, evidence
 source, or another contextual change within the same mathematical task is a Scope. A view may
@@ -293,5 +299,5 @@ required.
 - [ ] **SPEC-8** — no label parameterized by the generator is re-queried by the matching view.
 - [ ] **SPEC-9** — discrete label sets are expressed as plain arrays unless a resolver is genuinely required.
 - [ ] **SPEC-10** — `deductCompatible` appears only in schemas; `deductAdmitting` only in rejection lists.
-- [ ] **SPEC-11** — each Area changes the mathematical task or independently required body of knowledge; each Scope changes only the context, constraints, representation, range, or challenge within that task; notation Areas are not passive representation indicators; and no compatible generator/view pair shares equal or ancestor/descendant Areas.
+- [ ] **SPEC-11** — each Area changes the mathematical task or independently required body of knowledge; each Scope changes only the context, constraints, representation, range, or challenge within that task; notation Areas are not passive representation indicators; and no compatible generator/view pair shares equal or specialization-overlapping positive capabilities in any dimension or invariant/schema combination.
 - [ ] `npm run check:generator-view-specs` passes.

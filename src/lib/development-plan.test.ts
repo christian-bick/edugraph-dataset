@@ -61,6 +61,19 @@ describe('development validation plan', () => {
         expect(plan.specs).toEqual(['ccss', 'test']);
     });
 
+    it.each(['src/lib/spec-ownership.ts', 'src/lib/model-catalog.ts'])(
+        'keeps %s in affected module and standards gates', file => {
+            const plan = planDevelopmentValidation([file], specs, ['ccss']);
+            expect(plan.checks).toEqual(['types', 'related-tests', 'generator-view-specs', 'labels']);
+            expect(plan.specs).toEqual(['ccss', 'test']);
+        });
+
+    it.each(['src/scripts/validate-generator-view-specs.ts', 'src/scripts/generator-view-spec-validation.ts'])(
+        'runs the public gate when %s changes', file => {
+            const plan = planDevelopmentValidation([file], specs, ['ccss']);
+            expect(plan.checks).toEqual(['types', 'related-tests', 'generator-view-specs']);
+        });
+
     it('does not treat the explorer-only canonical tree as a dataset input', () => {
         const plan = planDevelopmentValidation(
             ['public/coverage/ccss-tree.json'],

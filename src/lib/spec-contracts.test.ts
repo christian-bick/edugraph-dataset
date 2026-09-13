@@ -2,7 +2,6 @@ import {describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     findAbilityLabels,
-    findCrossRoleAreaOverlaps,
     findRejectedLabelContractIssues,
     findRequiredLabelContractIssues
 } from './spec-contracts.ts';
@@ -14,32 +13,6 @@ describe('findAbilityLabels', () => {
             Ability.Formalization,
             Scope.ArabicNumerals
         ])).toEqual([Ability.Formalization]);
-    });
-});
-
-describe('findCrossRoleAreaOverlaps', () => {
-    it('rejects equal and specializing Areas across a generator/view boundary', () => {
-        expect(findCrossRoleAreaOverlaps({
-            generatorLabels: [Area.MeasuringObjects, Area.Rectangle],
-            viewLabels: [Area.MeasuringLength, Area.Square]
-        })).toEqual([
-            {generatorLabel: Area.MeasuringObjects, viewLabel: Area.MeasuringLength},
-            {generatorLabel: Area.Rectangle, viewLabel: Area.Square}
-        ]);
-    });
-
-    it('does not treat structural Area ancestry as positive overlap', () => {
-        expect(findCrossRoleAreaOverlaps({
-            generatorLabels: [Area.Measurement, Area.ShapeIdentity],
-            viewLabels: [Area.MeasuringObjects, Area.ShapeNaming]
-        })).toEqual([]);
-    });
-
-    it('allows independent Areas and ignores Scope taxonomy', () => {
-        expect(findCrossRoleAreaOverlaps({
-            generatorLabels: [Area.Addition, Scope.MeasurementScope],
-            viewLabels: [Area.Equation, Scope.LengthMeasurement]
-        })).toEqual([]);
     });
 });
 

@@ -35,6 +35,10 @@ import {extractSchemaLabels, shortenLabel} from './utils.ts';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {createWorkCounters, type WorkCounters} from './work-counters.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
+import {collectPositiveCapabilities, inspectPositiveOwnership,
+    type CapabilityProvider, type CapabilityRole,
+    type PositiveOwnershipIssue} from './spec-ownership.ts';
+export type {CapabilityProvider, CapabilityRole, CapabilityDeclaration} from './spec-ownership.ts';
 
 export const LABEL_ARCHITECTURE_AUDIT_SCHEMA_VERSION = 2;
 
@@ -43,22 +47,12 @@ const scopeLabels = new Set<string>(Object.values(Scope));
 const abilityLabels = new Set<string>(Object.values(Ability));
 
 export type LabelDimension = 'Area' | 'Scope' | 'Ability' | 'Other';
-export type CapabilityRole = 'generator' | 'view';
-export type CapabilityDeclaration = 'generalLabels' | 'schema';
 export type FindingDisposition = 'violation' | 'review' | 'signal';
 
 export interface AuditTupleRef {
     target_id: string;
     generator_id: string;
     view_id: string;
-}
-
-export interface CapabilityProvider {
-    role: CapabilityRole;
-    module_id: string;
-    declaration: CapabilityDeclaration;
-    parameter?: string;
-    capability: string;
 }
 
 export interface CapabilityProvenance {
@@ -97,6 +91,7 @@ export interface LabelArchitectureFinding {
     files: string[];
     affected_tuple_count: number;
     affected_tuples: AuditTupleRef[];
+    ownership?: PositiveOwnershipIssue;
 }
 
 export interface LabelArchitectureAuditReport {
@@ -171,21 +166,8 @@ function schemaParameterCapabilities(
     moduleId: string,
     schema: ConfigSchema
 ): DeclaredCapability[] {
-    const capabilities: DeclaredCapability[] = [];
-    for (const parameter of radixSortUtf8(Object.keys(schema))) {
-        const labels = extractSchemaLabels({[parameter]: schema[parameter]});
-        for (const capability of radixSortUtf8([...new Set(labels)])) {
-            capabilities.push({
-                role,
-                module_id: moduleId,
-                declaration: 'schema',
-                parameter,
-                capability,
-                dimension: labelDimension(capability)
-            });
-        }
-    }
-    return capabilities;
+    return collectPositiveCapabilities({role, module_id: moduleId, generalLabels: [], schema})
+        .map(capability => ({...capability, dimension: labelDimension(capability.capability)}));
 }
 
 function generalCapabilities(
@@ -193,13 +175,8 @@ function generalCapabilities(
     moduleId: string,
     labels: readonly string[]
 ): DeclaredCapability[] {
-    return radixSortUtf8([...new Set(labels)]).map(capability => ({
-        role,
-        module_id: moduleId,
-        declaration: 'generalLabels',
-        capability,
-        dimension: labelDimension(capability)
-    }));
+    return collectPositiveCapabilities({role, module_id: moduleId, generalLabels: labels})
+        .map(capability => ({...capability, dimension: labelDimension(capability.capability)}));
 }
 
 function generatorSchema(generator: GeneratorModelDescriptor): ConfigSchema {
@@ -579,7 +556,8 @@ function finding(options: Omit<LabelArchitectureFinding, 'id' | 'affected_tuple_
         labels,
         files,
         affected_tuple_count: affectedTuples.length,
-        affected_tuples: affectedTuples
+        affected_tuples: affectedTuples,
+        ...(options.ownership ? {ownership: options.ownership} : {})
     };
 }
 
@@ -642,50 +620,6 @@ function provenanceForTuples(options: {
     return radixSortUtf8([...byKey.keys()]).map(key => byKey.get(key)!);
 }
 
-function crossRolePositiveOverlaps(
-    generatorCapabilities: readonly DeclaredCapability[],
-    viewCapabilities: readonly DeclaredCapability[],
-    counters: WorkCounters
-): Array<{generator: DeclaredCapability; view: DeclaredCapability}> {
-    const directGenerators = new Map<string, DeclaredCapability[]>();
-    const generatorsBySatisfiedLabel = new Map<string, DeclaredCapability[]>();
-    for (const capability of generatorCapabilities) {
-        const direct = directGenerators.get(capability.capability);
-        if (direct) direct.push(capability);
-        else directGenerators.set(capability.capability, [capability]);
-        for (const ancestor of getCapabilityAncestors(capability.capability)) {
-            const providers = generatorsBySatisfiedLabel.get(ancestor);
-            if (providers) providers.push(capability);
-            else generatorsBySatisfiedLabel.set(ancestor, [capability]);
-            counters.add('label_audit.overlap_closure_entries');
-        }
-    }
-    const overlaps = new Map<string, {generator: DeclaredCapability; view: DeclaredCapability}>();
-    for (const view of viewCapabilities) {
-        const candidates = new Set<DeclaredCapability>(
-            generatorsBySatisfiedLabel.get(view.capability) ?? []
-        );
-        counters.add('label_audit.overlap_label_lookups');
-        for (const ancestor of getCapabilityAncestors(view.capability)) {
-            counters.add('label_audit.overlap_label_lookups');
-            for (const generator of directGenerators.get(ancestor) ?? []) candidates.add(generator);
-        }
-        for (const generator of candidates) {
-            const key = [
-                generator.declaration,
-                generator.parameter ?? '',
-                generator.capability,
-                view.declaration,
-                view.parameter ?? '',
-                view.capability
-            ].join('\u0000');
-            overlaps.set(key, {generator, view});
-            counters.add('label_audit.overlap_results');
-        }
-    }
-    return radixSortUtf8([...overlaps.keys()]).map(key => overlaps.get(key)!);
-}
-
 export function buildLabelArchitectureAudit(options: {
     projectRoot: string;
     specName: string;
@@ -742,22 +676,7 @@ export function buildLabelArchitectureAudit(options: {
         }));
     }
 
-    const generatorCaps = new Map(options.generators.map(generator => [
-        generator.generatorId,
-        declaredGeneratorCapabilities(generator)
-    ]));
     const viewCaps = new Map(options.views.map(view => [view.viewId, viewCapabilities(view)]));
-    for (const [generatorId, capabilities] of generatorCaps) {
-        for (const capability of capabilities.filter(entry => entry.dimension === 'Ability')) {
-            findings.push(finding({
-                category: 'generator-ability',
-                disposition: 'violation',
-                summary: `Generator ${generatorId} declares Ability ${shortenLabel(capability.capability)} in ${capability.declaration}.`,
-                modules: [generatorId], labels: [capability.capability], files: [],
-                affected_tuples: tupleIndex.byGenerator.get(generatorId) ?? []
-            }));
-        }
-    }
     for (const view of options.views) {
         const abilityParameters = schemaParameterCapabilities('view', view.viewId, view.schema)
             .filter(capability => capability.dimension === 'Ability');
@@ -815,25 +734,36 @@ export function buildLabelArchitectureAudit(options: {
         }
     }
 
-    for (const pair of pairIndex.orderedPairs) {
-        const generatorId = pair.generator.generatorId;
-        const viewId = pair.view.viewId;
-        const pairTuples = tupleIndex.byPair.get(modulePairKey(generatorId, viewId)) ?? [];
-        for (const overlap of crossRolePositiveOverlaps(
-            generatorCaps.get(generatorId) ?? [],
-            viewCaps.get(viewId) ?? [],
-            counters
-        )) {
-            findings.push(finding({
-                category: 'cross-role-positive-overlap',
-                disposition: 'violation',
-                summary: `Compatible pair ${generatorId}#${viewId} has overlapping positive capabilities.`,
-                modules: [generatorId, viewId],
-                labels: [overlap.generator.capability, overlap.view.capability],
-                files: [],
-                affected_tuples: pairTuples
-            }));
-        }
+    const ownershipModules = [
+        ...options.generators.map(generator => ({role: 'generator' as const,
+            module_id: generator.generatorId, generalLabels: generator.spec?.generalLabels ?? [],
+            schema: generator.schema, file: resolve(generator.module.absolutePath, 'spec.ts')})),
+        ...options.views.map(view => ({role: 'view' as const,
+            module_id: view.viewId, generalLabels: view.spec.generalLabels ?? [],
+            schema: view.schema, file: resolve(view.module.absolutePath, 'spec.ts')}))
+    ];
+    const ownershipFiles = new Map(ownershipModules.map(module => [
+        `${module.role}:${module.module_id}`, relative(options.projectRoot, module.file).replaceAll('\\', '/')
+    ]));
+    for (const issue of inspectPositiveOwnership({
+        modules: ownershipModules,
+        pairs: pairIndex.orderedPairs.map(pair => ({generatorId: pair.generator.generatorId, viewId: pair.view.viewId})),
+        counters
+    })) {
+        const [first, second] = issue.declarations;
+        const affectedTuples = issue.code === 'cross-role-positive-overlap'
+            ? tupleIndex.byPair.get(modulePairKey(first.module_id, second.module_id))
+            : (first.role === 'generator' ? tupleIndex.byGenerator : tupleIndex.byView).get(first.module_id);
+        findings.push(finding({
+            category: issue.code,
+            disposition: 'violation',
+            summary: issue.message,
+            modules: issue.declarations.map(declaration => declaration.module_id),
+            labels: issue.declarations.map(declaration => declaration.capability),
+            files: issue.declarations.map(declaration => ownershipFiles.get(`${declaration.role}:${declaration.module_id}`)!),
+            affected_tuples: affectedTuples ?? [],
+            ownership: issue
+        }));
     }
 
     const signalsByModule = new Map<string, SourceSignal[]>();

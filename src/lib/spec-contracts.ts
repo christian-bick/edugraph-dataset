@@ -1,28 +1,10 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability} from 'edugraph-ts';
 import {capabilitySatisfies} from './ontology.ts';
 
 const abilityLabels = new Set<string>(Object.values(Ability));
-const areaLabels = new Set<string>(Object.values(Area));
 
 export function findAbilityLabels(labels: readonly string[]): string[] {
     return labels.filter(label => abilityLabels.has(label));
-}
-
-export type CrossRoleAreaOverlap = {generatorLabel: string; viewLabel: string};
-
-export function findCrossRoleAreaOverlaps({
-    generatorLabels,
-    viewLabels
-}: {
-    generatorLabels: readonly string[];
-    viewLabels: readonly string[];
-}): CrossRoleAreaOverlap[] {
-    const generatorAreas = generatorLabels.filter(label => areaLabels.has(label));
-    const viewAreas = viewLabels.filter(label => areaLabels.has(label));
-    return viewAreas.flatMap(viewLabel => generatorAreas
-        .filter(generatorLabel => capabilitySatisfies(viewLabel, generatorLabel)
-            || capabilitySatisfies(generatorLabel, viewLabel))
-        .map(generatorLabel => ({generatorLabel, viewLabel})));
 }
 
 export interface CompatibleGeneratorLabels {

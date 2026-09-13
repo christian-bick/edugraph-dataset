@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     buildLabelArchitectureAudit,
     labelDimension,
@@ -26,6 +26,7 @@ import {
 } from './matching.ts';
 import type {CompetencyTarget} from '../types/ml-engine.ts';
 import {createWorkCounters} from './work-counters.ts';
+import {inspectPositiveOwnership} from './spec-ownership.ts';
 
 const target: CompetencyTarget = {
     id: 'target-one',
@@ -64,7 +65,7 @@ const view: ViewModelDescriptor = {
     schema: {}
 };
 
-function currentGraph() {
+function currentGraph(currentGenerator = generator, currentView = view) {
     const tuple: MatchTuple = {
         target,
         generatorId: generator.generatorId,
@@ -90,13 +91,13 @@ function currentGraph() {
         {
             id: generatorNode,
             kind: 'generator-capability',
-            input_hash: generatorCapabilityInputHash(generator),
+            input_hash: generatorCapabilityInputHash(currentGenerator),
             dependencies: []
         },
         {
             id: viewNode,
             kind: 'view-capability',
-            input_hash: viewCapabilityInputHash(view),
+            input_hash: viewCapabilityInputHash(currentView),
             dependencies: []
         },
         {
@@ -236,6 +237,58 @@ describe('label architecture audit', () => {
             'label_audit.provenance_provider_entries'
         ]) {
             expect(large.get(counter)).toBe(small.get(counter) * 2);
+        }
+    });
+
+    it('uses identical D4 diagnostics with fresh matching and a reusable graph', () => {
+        const modifiedGenerator = {...generator,
+            generalLabels: [Area.Addition, Scope.ArabicNumerals],
+            labels: [Area.Addition, Scope.ArabicNumerals],
+            spec: {...generator.spec, generalLabels: [Area.Addition, Scope.ArabicNumerals]}};
+        const modifiedView = {...view, schema: {notation: [Scope.ArabicNumerals]},
+            supportedLabels: [...view.supportedLabels, Scope.ArabicNumerals]};
+        const pairIndex = buildCompatibleModulePairIndex([modifiedGenerator], [modifiedView]);
+        const expected = inspectPositiveOwnership({
+            modules: [
+                {role: 'generator', module_id: generator.generatorId,
+                    generalLabels: modifiedGenerator.spec.generalLabels, schema: modifiedGenerator.schema},
+                {role: 'view', module_id: view.viewId,
+                    generalLabels: modifiedView.spec.generalLabels ?? [], schema: modifiedView.schema}
+            ],
+            pairs: pairIndex.orderedPairs.map(pair => ({generatorId: pair.generator.generatorId, viewId: pair.view.viewId}))
+        });
+        expect(expected).toHaveLength(1);
+        for (const graph of [null, currentGraph(modifiedGenerator, modifiedView)]) {
+            const report = buildLabelArchitectureAudit({projectRoot: '.', specName: 'test-spec', targets: [target],
+                generators: [modifiedGenerator], views: [modifiedView], graph, sourceSignals: []});
+            expect(report.matching.source).toBe(graph ? 'persisted-graph' : 'fresh-indexed-match');
+            const findings = report.findings.filter(finding => finding.ownership);
+            expect(findings.map(finding => finding.ownership)).toEqual(expected);
+            expect(findings[0].affected_tuple_count).toBe(1);
+            expect(findings[0].files.every(file => file.endsWith('/spec.ts'))).toBe(true);
+        }
+    });
+
+    it('reports module ownership violations with declaration files when no target matches', () => {
+        const generatorLabels = [Area.Addition, Area.Rectangle, Area.Square, Ability.Formalization];
+        const viewLabels = [Ability.ProcedureExecution, Scope.ArabicNumerals];
+        const report = buildLabelArchitectureAudit({projectRoot: '.', specName: 'test-spec', targets: [],
+            generators: [{...generator, generalLabels: generatorLabels, labels: generatorLabels,
+                spec: {...generator.spec, generalLabels: generatorLabels}, schema: {shape: [Area.Rectangle]}}],
+            views: [{...view, generalLabels: viewLabels, supportedLabels: viewLabels,
+                spec: {...view.spec, generalLabels: viewLabels}, schema: {notation: [Scope.ArabicNumerals]}}],
+            graph: null, sourceSignals: []});
+        const findings = report.findings.filter(finding => finding.ownership);
+        expect(findings.map(finding => finding.category).sort()).toEqual([
+            'generator-ability', 'redundant-general-labels',
+            'schema-general-overlap', 'schema-general-overlap', 'schema-general-overlap'
+        ]);
+        for (const finding of findings) {
+            expect(finding.disposition).toBe('violation');
+            expect(finding.affected_tuple_count).toBe(0);
+            expect(finding.files).toHaveLength(1);
+            expect(finding.files[0]).toBe(`unused/${finding.modules[0]}/spec.ts`);
+            expect(finding.ownership?.rule_ids.length).toBeGreaterThan(0);
         }
     });
 });
