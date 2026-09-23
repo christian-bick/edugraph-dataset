@@ -1,6 +1,6 @@
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {hasLabel} from '../../../lib/resolvers.ts';
+import {hasAllLabels, hasLabel} from '../../../lib/resolvers.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {arithmeticOperations, resolveDeclaredOperation} from '../helpers.ts';
@@ -32,7 +32,7 @@ export const ArithmeticOpsPairsGeneratorSchema = {
     ],
     requireEqualAddends: [
         [Area.IteratedOperation],
-        (labels: string[]) => labels.includes(Area.Addition) && labels.includes(Area.IteratedOperation)
+        hasAllLabels([Area.Addition, Area.IteratedOperation])
     ],
     requireEvenResult: [
         [Scope.EvenNumbers],

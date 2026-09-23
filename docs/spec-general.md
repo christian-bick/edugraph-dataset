@@ -132,7 +132,7 @@ examples include:
 
 | Module                 | Exports                                                                        |
 |------------------------|--------------------------------------------------------------------------------|
-| `src/lib/resolvers.ts` | `hasLabel`, `hasCapability`, `matchAllCapabilities`, `selectExactMatch`, `selectExactLabelMap`, `selectExactLabelSetMap`, `matchAllExactLabels`, `ontologyNeutral` |
+| `src/lib/resolvers.ts` | `hasLabel`, `hasAllLabels`, `hasCapability`, `matchAllCapabilities`, `selectExactMatch`, `selectExactLabelMap`, `selectExactLabelSetMap`, `matchAllExactLabels`, `ontologyNeutral` |
 | `src/lib/ontology.ts`  | label-derived helpers such as `resolveRangeFromLabels`, `capabilitySatisfies`, `getCapabilityAncestors`, `getStructuralAncestors` |
 | `src/types/schema.ts`  | `exactResolver`, `predicateResolver`, `aggregateResolver`, and `compositionalResolver` for explicit custom resolver semantics |
 

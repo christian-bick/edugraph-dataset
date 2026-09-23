@@ -10,7 +10,8 @@ import {
 import { getViewToProblemTypeMap, getGeneratorProblemTypeFromPath } from '../lib/type-parser.ts';
 import { findLeafModules } from '../lib/module-resolver.ts';
 import {inspectApplicability} from '../lib/spec-contracts.ts';
-import {findGeneralLabelDeductionIssues} from '../lib/spec-source-contracts.ts';
+import {inspectSpecSource} from '../lib/spec-source-contracts.ts';
+import {SourceSymbolIndex} from '../lib/source-symbol-index.ts';
 import {validateModuleLabelContract} from '../lib/label-contracts.ts';
 import {inspectPositiveOwnership} from '../lib/spec-ownership.ts';
 import {buildCompatibleModulePairIndex} from '../lib/matching.ts';
@@ -21,12 +22,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
-function checkGeneralLabelDeductions(kind: string, item: string, specPath: string): boolean {
-    const issues = findGeneralLabelDeductionIssues(fs.readFileSync(specPath, 'utf8'), specPath);
+function checkSourceContracts(kind: string, item: string, specPath: string,
+    sourceIndex: SourceSymbolIndex): boolean {
+    const issues = inspectSpecSource(fs.readFileSync(specPath, 'utf8'), specPath, sourceIndex);
     for (const issue of issues) {
         console.error(
-            `❌ [${kind}:${item}] SPEC-10 violation at spec.ts:${issue.line}:${issue.column}: `
-            + 'deductCompatible may declare supported capabilities in a schema, but not invariant generalLabels'
+            `❌ [${kind}:${item}] ${issue.rule} violation at ${specPath}:${issue.line}:${issue.column} `
+            + `(${issue.field}): ${issue.message}`
         );
     }
     return issues.length > 0;
@@ -45,6 +47,7 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
 
     const generators: GeneratorModelDescriptor[] = [];
     const views: ViewModelDescriptor[] = [];
+    const sourceIndex = new SourceSymbolIndex();
 
     // 1. Validate Generators & Collect Schemas/Problem Types
     console.log('\n--- Auditing Generators ---');
@@ -53,7 +56,7 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
         const specPath = path.join(gMod.absolutePath, 'spec.ts');
         if (fs.existsSync(specPath)) {
             try {
-                if (checkGeneralLabelDeductions('generator', item, specPath)) {
+                if (checkSourceContracts('generator', item, specPath, sourceIndex)) {
                     hasError = true;
                 }
                 const fileUrl = pathToFileURL(specPath).href;
@@ -111,7 +114,7 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
         const specPath = path.join(vMod.absolutePath, 'spec.ts');
         if (fs.existsSync(specPath)) {
             try {
-                if (checkGeneralLabelDeductions('view', item, specPath)) {
+                if (checkSourceContracts('view', item, specPath, sourceIndex)) {
                     hasError = true;
                 }
                 const fileUrl = pathToFileURL(specPath).href;

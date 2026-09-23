@@ -27,7 +27,7 @@ const GENERATOR_PATTERN = /^src\/generators\/([^/]+\/)?([^/]+)\//;
 const VIEW_PATTERN = /^src\/visuals\/views\/([^/]+\/)?([^/]+)\//;
 const SPEC_PATTERN = /^src\/spec\/([^/]+)(?:\/|\.ts$)/;
 const DOC_PATTERN = /^(?:README\.md|DOCS\.md|AGENTS\.md|docs\/.*\.md|\.agents\/skills\/.*\/SKILL\.md)$/;
-const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|standards-validation|label-contracts|external-semantics|type-parser|ontology|utils|module-resolver|model-catalog))/;
+const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|source-symbol-index|standards-validation|label-contracts|external-semantics|type-parser|ontology|utils|module-resolver|model-catalog))/;
 
 function normalizedFile(path: string): string {
     return path.replaceAll('\\', '/').replace(/^\.\//, '');

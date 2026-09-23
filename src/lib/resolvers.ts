@@ -18,6 +18,10 @@ export const hasLabel = (targetLabel: string): ResolverFn<boolean> => {
     return predicateResolver((labels: string[]) => labels.includes(targetLabel));
 };
 
+/** Requires every exact label of a conjunctive task condition. */
+export const hasAllLabels = (targetLabels: readonly string[]): ResolverFn<boolean> =>
+    predicateResolver((labels: string[]) => targetLabels.every(label => labels.includes(label)));
+
 export const hasCapability = (targetLabel: string): ResolverFn<boolean> => {
     return predicateResolver((labels: string[]) =>
         labels.some(label => capabilitySatisfies(label, targetLabel)));

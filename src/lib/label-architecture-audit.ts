@@ -35,6 +35,8 @@ import {extractSchemaLabels, shortenLabel} from './utils.ts';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {createWorkCounters, type WorkCounters} from './work-counters.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
+import {SourceSymbolIndex} from './source-symbol-index.ts';
+import {inspectSpecSource} from './spec-source-contracts.ts';
 import {inspectApplicability, type ApplicabilityIssue} from './spec-contracts.ts';
 import {collectPositiveCapabilities, inspectPositiveOwnership,
     type CapabilityProvider, type CapabilityRole,
@@ -74,7 +76,7 @@ export interface SchemaParameterAudit {
 }
 
 export interface SourceSignal {
-    kind: 'raw-label-access' | 'raw-ontology-iri' | 'payload-field-candidate';
+    kind: 'raw-label-access' | 'raw-ontology-iri' | 'payload-field-candidate' | 'spec-source-contract';
     module_id: string;
     role: CapabilityRole;
     file: string;
@@ -417,6 +419,18 @@ function scanModuleSources(
 ): SourceSignal[] {
     const signals: SourceSignal[] = [];
     const sourceIndex = new ModelSourceIndex(projectRoot, {includeAssets: false, counters});
+    const symbols = new SourceSymbolIndex();
+    for (const item of [
+        ...generators.map(module => ({role: 'generator' as const, id: module.generatorId, path: module.module.absolutePath})),
+        ...views.map(module => ({role: 'view' as const, id: module.viewId, path: module.module.absolutePath}))
+    ]) {
+        const absolute = resolve(item.path, 'spec.ts');
+        const file = relative(projectRoot, absolute).replaceAll('\\', '/');
+        for (const issue of inspectSpecSource(readFileSync(absolute, 'utf-8'), absolute, symbols)) {
+            signals.push({kind: 'spec-source-contract', role: item.role, module_id: item.id,
+                file, line: issue.line, value: `${issue.rule} ${issue.field}: ${issue.message}`});
+        }
+    }
     const ownersByFile = new Map<string, Array<{role: CapabilityRole; moduleId: string}>>();
     const generatorsRoot = resolve(projectRoot, 'src', 'generators');
     const viewsRoot = resolve(projectRoot, 'src', 'visuals');
@@ -792,7 +806,9 @@ export function buildLabelArchitectureAudit(options: {
         findings.push(finding({
             category: signal.kind,
             disposition: signal.kind === 'payload-field-candidate' ? 'review' : 'violation',
-            summary: signal.kind === 'payload-field-candidate'
+            summary: signal.kind === 'spec-source-contract'
+                ? `${signal.role} ${signal.module_id} has declaration source violations: ${values.join(', ')}.`
+                : signal.kind === 'payload-field-candidate'
                 ? `Generator ${signal.module_id} contains candidate payload fields: ${values.join(', ')}.`
                 : `${signal.role} ${signal.module_id} accesses unresolved ontology data: ${values.join(', ')}.`,
             modules: [signal.module_id], labels: [],

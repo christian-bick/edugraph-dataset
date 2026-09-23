@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     hasLabel,
+    hasAllLabels,
     hasCapability,
     matchAllExactLabels,
     matchAllCapabilities,
@@ -12,6 +13,12 @@ import { extractConfig } from './utils.ts';
 import { Scope, Area } from 'edugraph-ts';
 
 describe('Resolvers & Utilities', () => {
+    it('resolves a conjunctive exact-label predicate without ontology inheritance', () => {
+        const resolver = hasAllLabels([Area.Addition, Area.IteratedOperation]);
+        expect(resolver([Area.Addition, Area.IteratedOperation])).toBe(true);
+        expect(resolver([Area.IteratedOperation])).toBe(false);
+        expect(resolver.labelResolution).toBe('predicate');
+    });
     describe('hasLabel', () => {
         it('returns true if the exact label is present', () => {
             const resolver = hasLabel(Scope.NumbersWithZero);
