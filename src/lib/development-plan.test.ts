@@ -33,21 +33,21 @@ describe('development validation plan', () => {
 
     it('runs fresh scoped coverage for a changed generator implementation', () => {
         const plan = planDevelopmentValidation(['src/generators/counting/counting-basic/generator.ts'], specs, ['ccss']);
-        expect(plan.checks).toEqual(['types', 'related-tests', 'labels', 'generator-coverage']);
+        expect(plan.checks).toEqual(['types', 'related-tests', 'implementation-contracts', 'labels', 'generator-coverage']);
         expect(plan.specs).toEqual([]);
     });
 
     it('routes a changed or uncertain generator output contract through pair and active-target checks', () => {
         const file = 'src/generators/counting/counting-basic/generator.ts';
         const plan = planDevelopmentValidation([file], specs, ['ccss'], [], [file]);
-        expect(plan.checks).toEqual(['types', 'related-tests', 'generator-view-specs', 'labels', 'generator-coverage']);
+        expect(plan.checks).toEqual(['types', 'related-tests', 'implementation-contracts', 'generator-view-specs', 'labels', 'generator-coverage']);
         expect(plan.specs).toEqual(['ccss', 'test']);
     });
 
     it('treats a removed implementation as a capability-wide structural change', () => {
         const file = 'src/generators/counting/counting-basic/generator.ts';
         const plan = planDevelopmentValidation([file], specs, ['ccss'], [file]);
-        expect(plan.checks).toEqual(['types', 'related-tests', 'generator-view-specs', 'labels']);
+        expect(plan.checks).toEqual(['types', 'related-tests', 'implementation-contracts', 'generator-view-specs', 'labels']);
         expect(plan.specs).toEqual(['ccss', 'test']);
     });
 

@@ -25,7 +25,9 @@ export class SourceSymbolIndex {
     constructor(private readonly read: (path: string) => string = path => readFileSync(path, 'utf-8')) {}
 
     load(path: string, sourceOverride?: string): ts.SourceFile {
-        if (sourceOverride !== undefined) this.files.delete(path);
+        if (sourceOverride !== undefined && this.files.get(path)?.source.text !== sourceOverride) {
+            this.files.delete(path);
+        }
         if (this.files.has(path)) return this.files.get(path)!.source;
         const source = ts.createSourceFile(path, sourceOverride ?? this.read(path), ts.ScriptTarget.Latest, true,
             path.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);

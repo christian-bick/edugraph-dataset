@@ -17,6 +17,8 @@ import {inspectPositiveOwnership} from '../lib/spec-ownership.ts';
 import {buildCompatibleModulePairIndex} from '../lib/matching.ts';
 import {moduleSchemaExportName, type GeneratorModelDescriptor, type ViewModelDescriptor} from '../lib/model-catalog.ts';
 import {createWorkCounters} from '../lib/work-counters.ts';
+import {inspectModuleInventory} from '../lib/module-inventory.ts';
+import {inspectModuleImplementations} from '../lib/implementation-audit.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,7 +36,8 @@ function checkSourceContracts(kind: string, item: string, specPath: string,
     return issues.length > 0;
 }
 
-export async function validateSpecs(options: {generatorsDir?: string; viewsDir?: string} = {}): Promise<boolean> {
+export async function validateSpecs(options: {generatorsDir?: string; viewsDir?: string;
+    validateInventory?: boolean} = {}): Promise<boolean> {
     let hasError = false;
 
     console.log('=== Starting Spec Validation ===');
@@ -44,6 +47,13 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
 
     const generatorModules = findLeafModules(generatorsDir);
     const viewModules = findLeafModules(viewsDir);
+
+    const validateInventory = options.validateInventory ?? (!options.generatorsDir && !options.viewsDir);
+    const inventoryIssues = validateInventory
+        ? inspectModuleInventory({generators: generatorModules, views: viewModules,
+            viewTypes: getViewToProblemTypeMap(), generatorRoot: generatorsDir}) : [];
+    for (const issue of inventoryIssues) console.error(`❌ [${issue.role}:${issue.module_id}] ${issue.rule} ${issue.file}: ${issue.message}`);
+    hasError ||= inventoryIssues.length > 0;
 
     const generators: GeneratorModelDescriptor[] = [];
     const views: ViewModelDescriptor[] = [];
@@ -71,6 +81,10 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                 const generalLabels = spec.generalLabels || [];
                 const schemaName = moduleSchemaExportName(item, 'generator');
                 const schema = specModule[schemaName];
+                if (!schema) {
+                    console.error(`❌ [generator:${item}] SPEC-G1 missing '${schemaName}' export in spec.ts`);
+                    hasError = true;
+                }
                 for (const issue of validateModuleLabelContract({...spec, schema}, specPath)) {
                     console.error(issue);
                     hasError = true;
@@ -131,6 +145,10 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                 const rejectedLabels = spec.rejectedLabels || [];
                 const schemaName = moduleSchemaExportName(item, 'view');
                 const schema = specModule[schemaName];
+                if (!schema) {
+                    console.error(`❌ [view:${item}] SPEC-V1 missing '${schemaName}' export in spec.ts`);
+                    hasError = true;
+                }
                 for (const issue of validateModuleLabelContract({...spec, schema}, specPath)) {
                     console.error(issue);
                     hasError = true;
@@ -164,6 +182,20 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                 hasError = true;
             }
         }
+    }
+
+    if (validateInventory && inventoryIssues.length === 0) {
+        const implementationIssues = inspectModuleImplementations(PROJECT_ROOT, {
+            generators: generatorModules, views: viewModules,
+            generatorSchemaSizes: new Map(generators.map(generator =>
+                [generator.generatorId, Object.keys(generator.schema ?? {}).length]))
+        });
+        for (const issue of implementationIssues) {
+            const message = `[${issue.role}:${issue.module_id}] ${issue.rule} ${issue.file}:${issue.line}:${issue.column}: ${issue.message}`;
+            if (issue.severity === 'review') console.warn(`⚠️ ${message}`);
+            else console.error(`❌ ${message}`);
+        }
+        hasError ||= implementationIssues.some(issue => issue.severity !== 'review');
     }
 
     const counters = createWorkCounters();

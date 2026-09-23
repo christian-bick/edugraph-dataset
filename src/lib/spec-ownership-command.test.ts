@@ -51,7 +51,7 @@ describe('public spec validation gate', () => {
         expect(output).toContain('Starting Spec Validation');
         expect(output).toContain('ownership.modules');
         expect(output).toContain('Spec validation succeeded');
-    }, 30_000);
+    }, 60_000);
 
     it('fails on invariant-generator/schema-view Scope overlap even without matched targets', async () => {
         vi.spyOn(console, 'log').mockImplementation(() => {});

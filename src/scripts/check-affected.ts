@@ -95,6 +95,10 @@ function runCheck(check: DevelopmentCheck, sourceFiles: string[], generatorCover
         }
         case 'generator-view-specs':
             return runNode('node_modules/vite-node/dist/cli.mjs', ['src/scripts/validate-generator-view-specs.ts']);
+        case 'implementation-contracts':
+            return runNode('node_modules/vite-node/dist/cli.mjs', [
+                'src/scripts/validate-implementation-contracts.ts', `--files=${sourceFiles.join(',')}`
+            ]);
         case 'labels':
             return runNode('node_modules/vite-node/dist/cli.mjs', ['src/scripts/check-labels.ts']);
         case 'docs':

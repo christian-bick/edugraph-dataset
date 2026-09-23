@@ -3,6 +3,7 @@ import {radixSortUtf8} from './content-identity.ts';
 export const DEVELOPMENT_CHECKS = [
     'types',
     'related-tests',
+    'implementation-contracts',
     'generator-view-specs',
     'labels',
     'docs',
@@ -27,7 +28,8 @@ const GENERATOR_PATTERN = /^src\/generators\/([^/]+\/)?([^/]+)\//;
 const VIEW_PATTERN = /^src\/visuals\/views\/([^/]+\/)?([^/]+)\//;
 const SPEC_PATTERN = /^src\/spec\/([^/]+)(?:\/|\.ts$)/;
 const DOC_PATTERN = /^(?:README\.md|DOCS\.md|AGENTS\.md|docs\/.*\.md|\.agents\/skills\/.*\/SKILL\.md)$/;
-const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|source-symbol-index|standards-validation|label-contracts|external-semantics|type-parser|ontology|utils|module-resolver|model-catalog))/;
+const IMPLEMENTATION_SOURCE_PATTERN = /^src\/(?:generators\/|visuals\/(?:views|components|helpers)\/).*\.tsx?$/;
+const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|source-symbol-index|implementation-contracts|implementation-audit|module-inventory|standards-validation|label-contracts|external-semantics|type-parser|ontology|utils|module-resolver|model-catalog))/;
 
 function normalizedFile(path: string): string {
     return path.replaceAll('\\', '/').replace(/^\.\//, '');
@@ -72,6 +74,9 @@ export function planDevelopmentValidation(
         if (SOURCE_PATTERN.test(file)) {
             addCheck('types', file);
             if (file.startsWith('src/')) addCheck('related-tests', file);
+        }
+        if (!testSource && !file.endsWith('/spec.ts') && IMPLEMENTATION_SOURCE_PATTERN.test(file)) {
+            addCheck('implementation-contracts', file);
         }
 
         classificationSteps++;
@@ -121,6 +126,7 @@ export function planDevelopmentValidation(
         if (file === 'src/scripts/validate-generator-view-specs.ts'
             || file === 'src/scripts/generator-view-spec-validation.ts') addCheck('generator-view-specs', file);
         if (file === 'src/scripts/check-labels.ts') addCheck('labels', file);
+        if (file === 'src/scripts/validate-implementation-contracts.ts') addCheck('implementation-contracts', file);
         if (file === 'src/scripts/validate-standards-spec.ts') addAllSpecs(file);
 
     }

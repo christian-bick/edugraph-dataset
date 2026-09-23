@@ -37,6 +37,7 @@ import {createWorkCounters, type WorkCounters} from './work-counters.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
 import {SourceSymbolIndex} from './source-symbol-index.ts';
 import {inspectSpecSource} from './spec-source-contracts.ts';
+import {inspectImplementationSource} from './implementation-contracts.ts';
 import {inspectApplicability, type ApplicabilityIssue} from './spec-contracts.ts';
 import {collectPositiveCapabilities, inspectPositiveOwnership,
     type CapabilityProvider, type CapabilityRole,
@@ -76,7 +77,8 @@ export interface SchemaParameterAudit {
 }
 
 export interface SourceSignal {
-    kind: 'raw-label-access' | 'raw-ontology-iri' | 'payload-field-candidate' | 'spec-source-contract';
+    kind: 'raw-label-access' | 'raw-ontology-iri' | 'payload-field-candidate'
+        | 'spec-source-contract' | 'implementation-contract';
     module_id: string;
     role: CapabilityRole;
     file: string;
@@ -353,12 +355,6 @@ function matchesWithLines(content: string, pattern: RegExp): Array<{match: RegEx
     return matches;
 }
 
-const RAW_LABEL_PATTERNS = [
-    /\bpayload\s*(?:\?\.)?\.\s*labels\b/g,
-    /\bpayload\s*(?:\?\.)?\.\s*targetLabels\b/g,
-    /\bproblem\s*(?:\?\.)?\.\s*labels\b/g
-] as const;
-
 const PAYLOAD_FIELD_PATTERN = /\b(prompt|instruction|instructions|hint|explanation|rationale|question(?:[A-Z][A-Za-z0-9_]*)?|answer(?:Statement|Text|Sentence|Explanation|Prompt)[A-Za-z0-9_]*|solution(?:[A-Z][A-Za-z0-9_]*)|unknown(?:[A-Z][A-Za-z0-9_]*)?|blank(?:[A-Z][A-Za-z0-9_]*)?|responseDirection)\s*:/g;
 
 export function scanImplementationSource(options: {
@@ -367,31 +363,14 @@ export function scanImplementationSource(options: {
     file: string;
     content: string;
     includePayloadFields?: boolean;
+    symbols?: SourceSymbolIndex;
 }): SourceSignal[] {
-    const signals: SourceSignal[] = [];
-    for (const pattern of RAW_LABEL_PATTERNS) {
-        for (const {match, line} of matchesWithLines(options.content, pattern)) {
-            signals.push({
-                kind: 'raw-label-access',
-                role: options.role,
-                module_id: options.moduleId,
-                file: options.file,
-                line,
-                value: match[0]
-            });
-        }
-    }
-    const iriPattern = /http:\/\/edugraph\.io\/edu\/[A-Za-z0-9_-]+/g;
-    for (const {match, line} of matchesWithLines(options.content, iriPattern)) {
-        signals.push({
-            kind: 'raw-ontology-iri',
-            role: options.role,
-            module_id: options.moduleId,
-            file: options.file,
-            line,
-            value: match[0]
-        });
-    }
+    const signals: SourceSignal[] = inspectImplementationSource(options.content, options.file,
+        options.role, options.symbols).map(issue => ({
+        kind: issue.kind ?? 'implementation-contract', role: options.role,
+        module_id: options.moduleId, file: options.file, line: issue.line,
+        value: issue.value ?? issue.message
+    }));
     if (options.role === 'generator' && options.includePayloadFields !== false) {
         for (const {match, line} of matchesWithLines(options.content, PAYLOAD_FIELD_PATTERN)) {
             signals.push({
@@ -477,6 +456,7 @@ function scanModuleSources(
                 moduleId: owner.moduleId,
                 file,
                 content,
+                symbols,
                 includePayloadFields: basename(absolute) === 'generator.ts'
             }));
         }
@@ -806,7 +786,7 @@ export function buildLabelArchitectureAudit(options: {
         findings.push(finding({
             category: signal.kind,
             disposition: signal.kind === 'payload-field-candidate' ? 'review' : 'violation',
-            summary: signal.kind === 'spec-source-contract'
+            summary: signal.kind === 'spec-source-contract' || signal.kind === 'implementation-contract'
                 ? `${signal.role} ${signal.module_id} has declaration source violations: ${values.join(', ')}.`
                 : signal.kind === 'payload-field-candidate'
                 ? `Generator ${signal.module_id} contains candidate payload fields: ${values.join(', ')}.`
