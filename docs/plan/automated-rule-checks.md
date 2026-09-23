@@ -4,11 +4,10 @@ Implementation plan for the remaining approved checks after label consolidation.
 entry points, and focused regressions were reviewed on 2026-09-23 against dataset `07c57d6`, after
 fetching current remote history. This plan links existing rules; it does not add ontology semantics.
 
-D1, D2 cardinality, the shared D3 standards gate, D4, D5, and D10 are implemented. D8 already has
-its runtime contracts, spec gate, and focused regressions. The remaining work is gate scheduling
-and regression coverage, source analysis, module inventory, documentation discovery, and D7's
-payload-contract adoption. The [implementation sequence](#implementation-sequence) contains only
-that remaining work; completed checks must be reused.
+D1–D5 and D8–D12 now have the deterministic gates and regressions specified below. D6 and
+D13–D15 retain their existing runtime checks. The remaining implementation batches are D7's
+payload-contract adoption and D16's documentation discovery. Semantic truth and uncertain
+control-flow cases remain review work rather than invented static proof.
 
 The ontology owns descriptor structure and eligibility. Its
 [check inventory](https://github.com/christian-bick/edugraph-ontology/blob/main/docs/plan/automated-rule-checks.md)
@@ -58,7 +57,7 @@ should cite the relevant existing rule and identify the file, field, label, pair
 | --- | --- | --- |
 | D1. Known, eligible labels | Validate every target, `generalLabels`, schema-supported and fallback label, requirement, rejection, and resolved annotation against the complete pinned descriptor set. Reject organizational labels with constituent children; allow leaves and specialization families. See SPEC-3 and ontology ONT-E7. | **Gate.** `label-contracts.ts` delegates known/eligible checks to `edugraph-ts` v0.26.0's bundled context and adds dataset diagnostics. The same context supplies constituent-child facts for dependency identity. Module validation covers general, schema-supported, fallback, required and rejected labels even for unmatched modules. Shared standards validation checks active and implementation-TODO labels; generation checks resolved annotations. Proposed ontology-TODO names are excluded. |
 | D2. Target structure | Check target IDs, normalized permutations, definition collisions, declared equivalences, valid TODO packages, and production targets containing at least one Area and Ability. Scope remains optional; no primary label or upper limit. See TSPEC-1, TSPEC-5, TSPEC-8, TSPEC-14. | **Gate for deterministic structure.** `spec-validator.ts` checks IDs/permutations; stale equivalences are warnings. TODO loaders validate package structure. Area/Ability cardinality is enforced by the shared standards gate; Scope remains optional. No additional cardinality implementation remains. Semantic equivalence judgments remain review, not automatic proof. Preserve the current mechanism pending the [deferred review](#deferred-review-intra-standard-equivalences). |
-| D3. Inverse target coverage | Every normalized active target exported through `spec` has a compatible generator/view tuple. Every generator retains a generatable active `test` path. See TSPEC-1, TSPEC-9, TSPEC-12. | **Shared gate implemented; affected scheduling has one gap.** Dedicated, full, affected and CI checks call `standards-validation.ts`. Affected matching reuses a graph only when its version and pinned ontology provenance agree. Spec/capability edits schedule coverage, but an existing `generator.ts` edit does not, even if its declared output type changes. Close that scheduling gap in batch 1. Never require a match for `implementationTodos`, `ontologyTodos`, or `beyondScope`. |
+| D3. Inverse target coverage | Every normalized active target exported through `spec` has a compatible generator/view tuple. Every generator retains a generatable active `test` path. See TSPEC-1, TSPEC-9, TSPEC-12. | **Gate.** Dedicated, full, affected and CI checks call `standards-validation.ts`. Affected matching reuses a graph only with current version and ontology provenance. `check-affected` compares each changed generator's declared output type against its Git baseline: a change or uncertain parse schedules pair and active CCSS/test coverage; proven implementation-only edits retain the cheap route. TODO and beyond-scope records never enter inverse coverage. |
 | D4. Positive ownership | Reject generator Abilities, redundant invariant specialization ancestors, schema/general overlap, and overlapping positive ownership across a compatible pair. Keep label mechanics dimension-neutral. See SPEC-2, SPEC-7, SPEC-8, SPEC-11, SPEC-G3, SPEC-V5. | **Gate for declaration conflicts.** `spec-ownership.ts` supplies the same indexed checks, rule-linked diagnostics and declaration witnesses to the spec gate and architecture audit. Every module is checked, including unmatched ones; cross-role checks use all four invariant/schema combinations on the existing compatible-pair index. Full, affected and CI commands share the spec gate. Related schema alternatives and structural ancestry alone remain valid. Whether a capability is mathematically true or belongs in Area versus Scope remains semantic review. |
 | D5. Applicability consistency | Requirements are target preconditions, supported by each compatible pair, and do not contribute output labels. Rejections veto matches and never contain Abilities. Detect impossible required/rejected combinations. See SPEC-V3, SPEC-V7, SPEC-V8. | **Gate for algorithmic consistency.** `spec-contracts.ts` supplies shared diagnostics to the spec gate and architecture audit for pair support, missing compatible generators, rejected Abilities, and equality/specialization contradictions. Requiring Square while rejecting Rectangle fails, with both full IRIs; requiring Rectangle while rejecting Square remains valid. Support checks reuse the production compatible-pair index and its capability closures. Unmatched views are checked too. The existing matcher and resolved-label construction preserve participation-only requirements and target-context rejections. Proving a rejection boundary is complete remains review. |
 | D6. Matching semantics | Conjunctive coverage uses equality or `specializes` only, never `partOf`, reverse inheritance, or progression. Direct, indexed, and delta matching agree, including additions and removals. See SPEC-1. | **Runtime plus regressions.** `matching.ts`, `ontology.test.ts`, and `matching.test.ts` cover these behaviors. Retain focused positive/negative fixtures and extend command-parity tests; do not duplicate the production matcher in a second validation engine. |
@@ -75,11 +74,11 @@ enter the match-coverage set. An isolated `test` module still checks its active 
 
 | Item | Algorithmic check | Current coverage and remaining work |
 | --- | --- | --- |
-| D8. Resolver contracts | Non-empty label support; explicit exact/predicate/aggregate/compositional semantics; declared fallback sets contain only supported labels and resolve; function-only choices are `ontologyNeutral`. Verify deterministic resolution and complete recorded fallback labels. See SPEC-6. | **Implemented gate plus regressions.** `utils.ts`, `resolvers.ts`, and the spec gate cover markers, fallback membership/execution, conjunctions, completion, and ambiguity. Reuse these checks. Remaining source-form rules from SPEC-6 belong in batch 2; markers cannot prove arbitrary resolver semantics or the truth of fallback claims. No new combinatorial probing framework is required. |
-| D9. Correct deduction placement | Capability expansion belongs in schemas; rejection expansion uses `deductAdmitting`; invariant claims do not come from `deductCompatible`. See SPEC-10 and SPEC-V4. | **Partial, with reproduced blind spots.** `spec-source-contracts.ts` catches direct calls and root-package import aliases inside `generalLabels`. It misses aliases from `edugraph-ts/generated`, intermediate variables, and wrong helpers in rejection lists; it flags an unrelated object's same-named method. Replace spelling-based recognition with bounded symbol/source tracing. |
-| D10. Resolved labels and target coverage | Output labels equal generator/view invariant labels plus their resolved schema labels. Target, required, and rejected labels are not copied into that set. Every actual resolved draw must still satisfy every target claim through specialization. See SPEC-1, SPEC-6, IMPL-G3. | **Runtime gate implemented.** Generation calls `assertResolvedTargetCoverage` on actual resolved draws and duplicate-target associations; errors propagate through retry/solution handling. Helper and label-construction regressions exist. Add a focused pipeline regression for that propagation and association wiring in batch 1; do not implement a second guard. |
-| D11. Implementation isolation | Generator/view code and their implementation helpers do not inspect raw target/problem label bags, import spec decisions into rendering, or emit generator-authored annotations. See IMPL-G1, IMPL-G3, IMPL-V1, IMPL-V9. | **Partial.** Types restrict `ProblemStub` to data; the optional architecture audit uses text patterns for raw label access and IRIs. Add syntax/symbol-aware checks for aliases, destructuring, and reachable helpers. Exclude schema resolvers and framework configuration boundaries. A resolved enum-valued config is valid; banning every ontology import or enum occurrence would be wrong. |
-| D12. Module and validation structure | Check required module files/exports, view type mappings, checklist presence and heading-free form, configuration/payload validation, and known unseeded entropy calls. See IMPL-2, IMPL-4, IMPL-G2, IMPL-V1–V4, IMPL-V6, CHK-V6. | **Partial.** Typechecking, module tests, loaders, and render failures cover parts of this. Add explicit inventory checks and narrowly justified source checks. Recognize validation in shared entry helpers; mere presence of a function name is not proof it executes first. Keep uncertain data-flow findings advisory. Do not ban seeded randomness inside generators or views. |
+| D8. Resolver contracts | Non-empty label support; explicit exact/predicate/aggregate/compositional semantics; declared fallback sets contain only supported labels and resolve; function-only choices are `ontologyNeutral`. Verify deterministic resolution and complete recorded fallback labels. See SPEC-6. | **Gate plus regressions.** Existing runtime markers, fallbacks and ambiguity checks remain. The shared source index now rejects inline and prematurely executed schema resolvers while admitting references and known curried factories. Untraceable calls produce a review diagnostic, not a guessed failure. Mathematical truth of custom resolver code remains review. |
+| D9. Correct deduction placement | Capability expansion belongs in schemas; rejection expansion uses `deductAdmitting`; invariant claims do not come from `deductCompatible`. See SPEC-10 and SPEC-V4. | **Gate.** `spec-source-contracts.ts` traces package root/subpath imports, namespace and renamed imports, constant initializers and simple local re-exports to the operator's origin. It checks schemas, invariants, requirements and rejections without treating an unrelated same-named method as the operator. The spec gate and architecture audit share the findings. |
+| D10. Resolved labels and target coverage | Output labels equal generator/view invariant labels plus their resolved schema labels. Target, required, and rejected labels are not copied into that set. Every actual resolved draw must still satisfy every target claim through specialization. See SPEC-1, SPEC-6, IMPL-G3. | **Runtime gate plus orchestration regressions.** `generation-orchestration.ts` guards actual draws before task fingerprints or rendering and guards duplicate-target associations. Tests exercise first-question rejection, solution-error propagation instead of fallback, and valid duplicate association. The pipeline still uses the original guard, not a second matching algorithm. |
+| D11. Implementation isolation | Generator/view code and their implementation helpers do not inspect raw target/problem label bags, import spec decisions into rendering, or emit generator-authored annotations. See IMPL-G1, IMPL-G3, IMPL-V1, IMPL-V9. | **Gate.** Syntax-aware checks follow lexical aliases, destructuring, bracket access, spec imports and reachable local implementation helpers; the architecture audit reuses that scanner. The full spec gate checks all discovered modules, while the affected command checks changed implementation files and their owners. Schema/framework boundaries, type-only imports and resolved enum-valued config remain valid. |
+| D12. Module and validation structure | Check required module files/exports, view type mappings, checklist presence and heading-free form, configuration/payload validation, and known unseeded entropy calls. See IMPL-2, IMPL-4, IMPL-G2, IMPL-V1–V4, IMPL-V6, CHK-V6. | **Deterministic inventory/source gate.** Required files, exports, generator orphans, view mappings, checklist form and `withConfig` wrappers are checked for every leaf. Unseeded entropy calls fail. Nonempty generator schemas require validation at entry; a missing reachable call fails, while uncertain ordering/shared-helper cases are review signals. The check does not pretend to prove every view's payload-field validation order; that still needs runtime tests and review. |
 
 ## Runtime and artifact safeguards to retain
 
@@ -127,18 +126,18 @@ All batches below are approved in principle. Use a separate tested commit for ea
 or migrated payload module. A shared source-analysis helper may have its own preparatory commit.
 Do not mix code or documentation commits with generated VQA-cache changes.
 
-### 1. Close gate scheduling and integration coverage
+### 1. Close gate scheduling and integration coverage — complete
 
-- [ ] **D3 scheduling:** inspect output-contract changes in existing generator implementations
+- [x] **D3 scheduling:** inspect output-contract changes in existing generator implementations
   using the existing type/source machinery. A change from one declared `ProblemGenerator<T>` output
   to another must schedule module compatibility checks and active CCSS/test coverage. Preserve the
   cheap route for proven implementation-only edits; use the full standards gate when classification
   is uncertain. Current `development-plan.ts` deliberately schedules no standards checks for any
   existing generator implementation edit, and its test currently asserts that behavior.
-- [ ] **D3 command regressions:** exercise dedicated/full/affected entry-point wiring with an
+- [x] **D3 command regressions:** exercise dedicated/full/affected entry-point wiring with an
   unmatched active target, the same labels in an implementation TODO, and a changed payload type.
   Reuse `validateStandardContracts`; ontology TODOs and beyond-scope entries remain outside matching.
-- [ ] **D10 pipeline regression:** inject a missing resolved claim and verify failure before
+- [x] **D10 pipeline regression:** inject a missing resolved claim and verify failure before
   rendering, propagation through question retry and solution fallback, and the duplicate-target
   association path. Use a small fixture through the existing generation orchestration. No live VQA
   or full image generation is needed to test rejection of invalid labels.
@@ -147,18 +146,18 @@ Acceptance: the existing positive standards fixtures still pass; invalid active 
 fail through the relevant public paths with SPEC-1/SPEC-3/TSPEC diagnostics. These are additions to
 existing enforcement, not a reimplementation of D1–D5 or D10.
 
-### 2. Complete deduction and resolver source checks
+### 2. Complete deduction and resolver source checks — complete
 
-- [ ] **D9:** extend `spec-source-contracts.ts` with a reusable TypeScript source/symbol index.
+- [x] **D9:** extend `spec-source-contracts.ts` with a reusable TypeScript source/symbol index.
   Follow named and namespace imports, public package subpaths, simple aliases/re-exports, and
   constant initializers to their real origin. Connect shared constants to their consuming spec
   field. Check both deduction helpers against schemas, invariants, requirements, and rejections
   under SPEC-10/SPEC-V4. Avoid an arbitrary JavaScript execution or theorem-proving engine.
-- [ ] **D8 source form:** on the same source index, check the mechanical portion of SPEC-6:
+- [x] **D8 source form:** on the same source index, check the mechanical portion of SPEC-6:
   resolver references and valid factory results are distinguished from inline implementations or
   prematurely executed resolvers. Reuse the existing runtime marker and fallback checks. A marker
   cannot certify the mathematical meaning of custom resolver code.
-- [ ] Wire deterministic findings into `validateSpecs`, the architecture audit, and affected
+- [x] Wire deterministic findings into `validateSpecs`, the architecture audit, and affected
   routing. Shared-helper changes reach their owning modules through the existing import graph.
 
 Acceptance fixtures must include the reproduced failures: a renamed import from
@@ -167,18 +166,18 @@ feeding `rejectedLabels`. A local object's unrelated `deductCompatible` method m
 valid schema expansion, rejection expansion, curried factories, and imported resolvers passing.
 Unresolved dynamic source patterns receive a review diagnostic, not a guessed hard failure.
 
-### 3. Enforce implementation boundaries and module structure
+### 3. Enforce implementation boundaries and module structure — complete
 
-- [ ] **D11:** reuse the source index to detect raw target/problem-label reads through aliases,
+- [x] **D11:** reuse the source index to detect raw target/problem-label reads through aliases,
   destructuring, bracket access, and reachable implementation helpers. Detect spec-dependent task
   decisions in shared rendering code and generator-authored output labels. Exclude the legitimate
   schema/framework boundary; resolved enum-valued configuration, type-only imports, and generator
   schema registration remain valid. Do not reject all ontology imports.
-- [ ] **D12 inventory:** explicitly validate required files and exports, view ID/type mapping,
+- [x] **D12 inventory:** explicitly validate required files and exports, view ID/type mapping,
   and checklist presence/heading-free form for every discovered leaf. Missing schemas must not
   silently become empty schemas. Use the catalog/type graph and report orphan or unrecognized
   mappings; current production mappings and file inventory are complete.
-- [ ] **D12 implementation checks:** detect known unseeded entropy and provable missing validation
+- [x] **D12 implementation checks:** detect known unseeded entropy and provable missing validation
   at module entry. Recognize shared validation helpers. A function name or import alone cannot
   prove that validation runs first; uncertain control-flow cases stay advisory. Seeded instance
   randomness remains allowed in generators and views.
@@ -186,6 +185,44 @@ Unresolved dynamic source patterns receive a review diagnostic, not a guessed ha
 Acceptance: invalid fixtures fail without requiring an active target; valid shared renderers and
 mathematical helpers pass. Each diagnostic names its rule, file, location, and module owner.
 Existing payload-name and Ability-parameter warning signals remain semantic review hints.
+
+### Review after batches 1–3 (2026-09-23)
+
+The checks remain separated by the contract they prove. `standards-validation.ts` still owns
+inverse target coverage; `development-plan.ts` and `check-affected.ts` only schedule it. A
+cached TypeScript source-symbol index supports D8/D9 and memoizes shared-constant deduction
+traces across fields. D11's syntax scanner and D12's module inventory are independent library
+checks called by the existing spec gate. The
+architecture audit reuses the same source findings rather than maintaining a second regex
+implementation. `generation-orchestration.ts` makes D10's existing runtime guard testable
+without browser startup. No new matcher or ontology traversal was introduced.
+
+The full gate scans discovered source files and necessary module-to-helper ownership edges.
+The affected implementation command scans changed implementation files; direct entry edits
+load only their modules, while shared-helper edits resolve their owners through the source
+graph. Unknown output types deliberately schedule the full standards gate. Static source
+tracing is bounded: dynamic calls are review signals, not claims of mathematical proof.
+Validation ordering in indirect view components remains a semantic/runtime review boundary.
+
+Local green-path timing on Windows, warm workspace, `npm run check -- --spec=ccss,test`:
+
+| Phase | Final run (seconds) |
+| --- | ---: |
+| TypeScript | 3.61 |
+| Generator/view spec, inventory and implementation gate | 5.83 |
+| Label usage | 2.34 |
+| Documentation | 2.04 |
+| Active standards | 1.27 |
+| Generated split integrity | 4.85 |
+| Parent startup/coordination | 2.68 |
+| **Total** | **22.62** |
+
+Three preceding warm runs totaled 22.36, 23.76 and 23.37 seconds (median 23.37).
+The one pre-change baseline was 25.28 seconds; a single baseline cannot prove a speedup,
+but the added checks did not create an end-to-end regression in this environment. The
+spec-audit phase is now the largest static phase; the independent split-integrity phase is
+next. A scoped single-generator implementation check took 2.79 seconds including command
+startup. These are wall-clock observations, not asymptotic proofs or release benchmarks.
 
 ### 4. Complete payload-family compatibility
 
