@@ -6,6 +6,7 @@ import {OperationsPatternGenerationPracticeViewSchema, spec} from './spec.ts';
 describe('operations-pattern-generation-practice view spec', () => {
     it('owns invariant pattern procedure execution', () => {
         expect(spec.generalLabels).toEqual([
+            Area.PatternGeneration,
             Scope.ArabicNumerals,
             Ability.ProcedureExecution
         ]);

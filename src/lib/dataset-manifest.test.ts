@@ -605,7 +605,7 @@ describe('buildDatasetManifest', () => {
         const generator = {
             generatorId: 'demo',
             labels: ['http://edugraph.io/edu/Addition'],
-            problemType: 'arithmetic',
+            problemType: 'ArithmeticPairProblem',
             module: {
                 id: 'demo',
                 relativePath: 'demo',
@@ -618,7 +618,7 @@ describe('buildDatasetManifest', () => {
         const view = {
             viewId: 'demo-view',
             supportedLabels: ['http://edugraph.io/edu/ProcedureExecution'],
-            problemType: 'arithmetic',
+            problemType: 'ArithmeticPairProblem',
             module: {
                 id: 'demo-view',
                 relativePath: 'demo-view',

@@ -46,19 +46,19 @@ const targets = (): CompetencyTarget[] => [
 const generators = (): GeneratorMatchInfo[] => [{
     generatorId: 'addition',
     labels: [Area.Addition],
-    problemType: null
+    problemType: 'ArithmeticPairProblem'
 }];
 
 const views = (): ViewMatchInfo[] => [
     {
         viewId: 'execution-view',
         supportedLabels: [Ability.ProcedureExecution],
-        problemType: null
+        problemType: 'ArithmeticPairProblem'
     },
     {
         viewId: 'formalization-view',
         supportedLabels: [Ability.Formalization],
-        problemType: null
+        problemType: 'ArithmeticPairProblem'
     }
 ];
 
@@ -69,7 +69,7 @@ const tupleIds = (tuples: readonly MatchTuple[]): string[] => tuples.map(tuple =
 describe('required target labels', () => {
     it('selects a view only when the target requests its required Ability', () => {
         const view: ViewMatchInfo = {
-            viewId: 'written-method',
+            viewId: 'written-method', problemType: 'ArithmeticPairProblem',
             supportedLabels: [Ability.ProcedureUnderstanding, Ability.Formalization],
             requiredLabels: [Ability.Formalization]
         };
@@ -91,7 +91,7 @@ describe('required target labels', () => {
 
     it('accepts a target specialization of a required capability', () => {
         const view: ViewMatchInfo = {
-            viewId: 'bounded-view',
+            viewId: 'bounded-view', problemType: 'ArithmeticPairProblem',
             supportedLabels: [Ability.ProcedureExecution, Scope.NumbersSmaller10],
             requiredLabels: [Scope.NumericRange]
         };
@@ -108,7 +108,7 @@ describe('capability inheritance', () => {
         expect(matchesTarget(
             [Area.Addition, Ability.ProcedureUnderstanding],
             generators()[0]!,
-            {viewId: 'inversion', supportedLabels: [Ability.ProcedureInversion]}
+            {viewId: 'inversion', problemType: 'ArithmeticPairProblem', supportedLabels: [Ability.ProcedureInversion]}
         )).toEqual({matched: true});
     });
 
@@ -117,7 +117,7 @@ describe('capability inheritance', () => {
             [Area.Addition, Ability.ProcedureExecution, Scope.LengthMeasurement],
             generators()[0]!,
             {
-                viewId: 'tapemeter',
+                viewId: 'tapemeter', problemType: 'ArithmeticPairProblem',
                 supportedLabels: [Ability.ProcedureExecution, Scope.Tapemeter]
             }
         )).toEqual({
@@ -132,7 +132,7 @@ describe('capability inheritance', () => {
             [Area.Addition, Ability.ProcedureExecution, Scope.NumbersSmaller10],
             generators()[0]!,
             {
-                viewId: 'unbounded-only',
+                viewId: 'unbounded-only', problemType: 'ArithmeticPairProblem',
                 supportedLabels: [Ability.ProcedureExecution, Scope.NumbersSmaller10],
                 rejectedLabels: [Scope.NumericRange]
             }
@@ -144,72 +144,36 @@ describe('capability inheritance', () => {
     });
 });
 
-describe('required-label-guarded discriminated generator unions', () => {
-    it('indexes member leaves and selects only the target-compatible discriminant', () => {
-        const familyGenerator: GeneratorMatchInfo = {
-            generatorId: 'discriminated-family',
-            labels: [
-                Area.GenerativeRuleRecognition,
-                Area.PatternGeneration,
-                Area.EmergentFeatureRecognition
-            ],
-            problemType: 'WritingProblem'
-        };
-        const familyViews: ViewMatchInfo[] = [
-            {
-                viewId: 'table-leaf',
-                supportedLabels: [Ability.ConceptClassification],
-                requiredLabels: [Area.GenerativeRuleRecognition],
-                problemType: 'LegacyWritingProblem'
-            },
-            {
-                viewId: 'recurrence-leaf',
-                supportedLabels: [Ability.ProcedureExecution],
-                requiredLabels: [Area.PatternGeneration],
-                problemType: 'MultiDigitWritingProblem'
-            }
-        ];
-        const pairIndex = buildCompatibleModulePairIndex([familyGenerator], familyViews);
-        expect(pairIndex.orderedPairs.map(pair => pair.view.viewId)).toEqual([
-            'table-leaf',
-            'recurrence-leaf'
-        ]);
-
-        const result = matchTargets([
-            {
-                id: 'table-target',
-                labels: [Area.GenerativeRuleRecognition, Ability.ConceptClassification]
-            },
-            {
-                id: 'recurrence-target',
-                labels: [Area.PatternGeneration, Ability.ProcedureExecution]
-            }
-        ], [familyGenerator], familyViews, {pairIndex});
-        expect(tupleIds(result.tuples)).toEqual([
-            'table-target#discriminated-family#table-leaf',
-            'recurrence-target#discriminated-family#recurrence-leaf'
-        ]);
+describe('payload families', () => {
+    it.each([{requiredLabels: []}, {requiredLabels: [Area.PatternGeneration]}])('never narrows a producer union through requirements $requiredLabels', ({requiredLabels}) => {
+        const generator = {generatorId: 'family', labels: [Area.PatternGeneration], problemType: 'WritingProblem'};
+        const view = {viewId: 'member', supportedLabels: [Ability.ProcedureExecution],
+            requiredLabels, problemType: 'MultiDigitWritingProblem'};
+        expect(buildCompatibleModulePairIndex([generator], [view]).orderedPairs).toEqual([]);
+        expect(matchesTarget([Area.PatternGeneration, Ability.ProcedureExecution], generator, view))
+            .toEqual({matched: false, reason: 'incompatible-type'});
     });
 
-    it('does not index an unguarded member-only view for a union generator', () => {
-        const unionGenerator: GeneratorMatchInfo = {
-            generatorId: 'discriminated-family',
-            labels: [Area.PatternGeneration],
-            problemType: 'WritingProblem'
-        };
-        const unguardedView: ViewMatchInfo = {
-            viewId: 'unguarded-recurrence-leaf',
-            supportedLabels: [Ability.ProcedureExecution],
-            problemType: 'MultiDigitWritingProblem'
-        };
-        const pairIndex = buildCompatibleModulePairIndex([unionGenerator], [unguardedView]);
+    it.each([null, undefined, 'UndeclaredProblem'])('fails closed for unresolved type %s on either role', problemType => {
+        const generator = {...generators()[0], problemType};
+        const view = {...views()[0], problemType};
+        for (const [g, v] of [[generator, views()[0]], [generators()[0], view], [generator, view]] as const) {
+            expect(matchesTarget(targets()[0].labels, g, v))
+                .toEqual({matched: false, reason: 'incompatible-type'});
+            expect(buildCompatibleModulePairIndex([g], [v]).orderedPairs).toEqual([]);
+        }
+    });
 
-        expect(pairIndex.orderedPairs).toEqual([]);
-        expect(matchesTarget(
-            [Area.PatternGeneration, Ability.ProcedureExecution],
-            unionGenerator,
-            unguardedView
-        )).toEqual({matched: false, reason: 'incompatible-type'});
+    it('keeps direct, indexed and delta matching aligned when a producer gains an unsupported member', () => {
+        const target = {id: 'family', labels: [Area.Addition, Ability.ProcedureExecution]};
+        const generator = {...generators()[0], problemType: 'ArithmeticPairProblem'};
+        const view = {...views()[0], problemType: 'ArithmeticPairProblem'};
+        const previousGraph = matchingGraph({targets: [target], generators: [generator], views: [view]});
+        const broader = {...generator, problemType: 'ArithmeticProblem'};
+        expect(matchesTarget(target.labels, broader, view)).toEqual({matched: false, reason: 'incompatible-type'});
+        expect(matchTargets([target], [broader], [view]).tuples).toEqual([]);
+        expect(delta({currentTargets: [target], currentGenerators: [broader],
+            currentViews: [view], previousGraph}).tuples).toEqual([]);
     });
 });
 
@@ -308,8 +272,8 @@ describe('delta target matching', () => {
             {id: 'rectangle', labels: [Area.Rectangle, Ability.ProcedureExecution]},
             {id: 'square', labels: [Area.Square, Ability.ProcedureExecution]}
         ];
-        const currentGenerators = [{generatorId: 'shape', labels: [Area.Square]}];
-        const originalView = {viewId: 'v', supportedLabels: [Ability.ProcedureExecution], requiredLabels: [Area.Rectangle]};
+        const currentGenerators = [{generatorId: 'shape', labels: [Area.Square], problemType: 'ArithmeticPairProblem'}];
+        const originalView = {viewId: 'v', problemType: 'ArithmeticPairProblem', supportedLabels: [Ability.ProcedureExecution], requiredLabels: [Area.Rectangle]};
         const currentView = {...originalView, requiredLabels: [required], rejectedLabels: [rejected]};
         const previousGraph = matchingGraph({targets: currentTargets, generators: currentGenerators, views: [originalView]});
         const full = matchTargets(currentTargets, currentGenerators, [currentView]);

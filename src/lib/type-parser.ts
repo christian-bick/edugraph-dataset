@@ -2,6 +2,7 @@ import {existsSync, readFileSync} from 'fs';
 import {dirname, resolve} from 'path';
 import {fileURLToPath} from 'url';
 import {findLeafModules} from './module-resolver.ts';
+import ts from 'typescript';
 import type {WorkCounters} from './work-counters.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,8 +11,9 @@ const PROJECT_ROOT = resolve(__dirname, '..', '..');
 
 interface ProblemTypeGraph {
     viewToProblemType: Record<string, string>;
-    unionMembers: Map<string, readonly string[]>;
-    containingUnions: Map<string, readonly string[]>;
+    members: Map<string, ReadonlySet<string>>;
+    typesByMember: Map<string, string[]>;
+    acceptedTypes: Map<string, readonly string[]>;
 }
 
 let problemTypeGraph: ProblemTypeGraph | undefined;
@@ -20,31 +22,59 @@ const generatorProblemTypeFiles = new Map<string, string | null>();
 
 const parseProblemTypeGraph = (content: string): ProblemTypeGraph => {
     const viewToProblemType: Record<string, string> = {};
-    const interfaceMatch = content.match(/export\s+interface\s+ViewTypeMap\s*\{([\s\S]*?)\}/);
-    if (interfaceMatch) {
-        const regex = /['"]([^'"]+)['"]\s*:\s*(\w+)/;
-        for (const line of interfaceMatch[1].split('\n')) {
-            const match = line.match(regex);
-            if (match) viewToProblemType[match[1]] = match[2];
+
+    // Named object contracts are boundaries, not structural TypeScript assignability.
+    // Expand only explicit aliases and named unions, including nested unions.
+    const declarations = new Map<string, readonly string[] | null>();
+    const source = ts.createSourceFile('problems.ts', content, ts.ScriptTarget.Latest, false);
+    for (const statement of source.statements) {
+        if (!ts.isTypeAliasDeclaration(statement) && !ts.isInterfaceDeclaration(statement)) continue;
+        if (statement.name.text === 'ViewTypeMap') {
+            if (ts.isInterfaceDeclaration(statement)) {
+                for (const member of statement.members) {
+                    if (ts.isPropertySignature(member) && ts.isStringLiteral(member.name)
+                        && member.type && ts.isTypeReferenceNode(member.type)
+                        && ts.isIdentifier(member.type.typeName) && !member.type.typeArguments) {
+                        viewToProblemType[member.name.text] = member.type.typeName.text;
+                    }
+                }
+            }
+            continue;
+        }
+        const nodes = ts.isTypeAliasDeclaration(statement)
+            ? ts.isUnionTypeNode(statement.type) ? [...statement.type.types] : [statement.type]
+            : [];
+        const references = nodes.length > 0 && nodes.every(node =>
+            ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName) && !node.typeArguments);
+        declarations.set(statement.name.text, references
+            ? nodes.map(node => (node as ts.TypeReferenceNode).typeName.getText(source))
+            : null);
+    }
+    const members = new Map<string, ReadonlySet<string>>();
+    const visiting = new Set<string>();
+    const expand = (name: string): ReadonlySet<string> => {
+        const cached = members.get(name);
+        if (cached) return cached;
+        if (!declarations.has(name) || visiting.has(name)) return new Set();
+        visiting.add(name);
+        const children = declarations.get(name);
+        const expanded = children?.map(expand);
+        const result = expanded
+            ? expanded.some(set => set.size === 0) ? new Set<string>() : new Set(expanded.flatMap(set => [...set]))
+            : new Set([name]);
+        visiting.delete(name);
+        members.set(name, result);
+        return result;
+    };
+    const typesByMember = new Map<string, string[]>();
+    for (const name of declarations.keys()) {
+        for (const member of expand(name)) {
+            const posting = typesByMember.get(member);
+            if (posting) posting.push(name);
+            else typesByMember.set(member, [name]);
         }
     }
-
-    const unionMembers = new Map<string, readonly string[]>();
-    const unionPattern = /export\s+type\s+(\w+)\s*=\s*(\|?\s*\w+(?:\s*\|\s*\w+)+)\s*;/g;
-    for (const match of content.matchAll(unionPattern)) {
-        unionMembers.set(match[1], match[2].split('|').map(member => member.trim()).filter(Boolean));
-    }
-
-    const containingUnions = new Map<string, string[]>();
-    for (const [unionType, members] of unionMembers) {
-        for (const member of members) {
-            const containers = containingUnions.get(member);
-            if (containers) containers.push(unionType);
-            else containingUnions.set(member, [unionType]);
-        }
-    }
-
-    return {viewToProblemType, unionMembers, containingUnions};
+    return {viewToProblemType, members, typesByMember, acceptedTypes: new Map()};
 };
 
 const loadProblemTypeGraph = (counters?: WorkCounters): ProblemTypeGraph => {
@@ -54,8 +84,9 @@ const loadProblemTypeGraph = (counters?: WorkCounters): ProblemTypeGraph => {
     if (!existsSync(problemsPath)) {
         problemTypeGraph = {
             viewToProblemType: {},
-            unionMembers: new Map(),
-            containingUnions: new Map()
+            members: new Map(),
+            typesByMember: new Map(),
+            acceptedTypes: new Map()
         };
         return problemTypeGraph;
     }
@@ -142,16 +173,16 @@ export function getAcceptedGeneratorProblemTypes(
     viewType: string,
     counters?: WorkCounters
 ): readonly string[] {
-    const members = loadProblemTypeGraph(counters).unionMembers.get(viewType);
-    return members ? [viewType, ...members] : [viewType];
-}
-
-/** Returns named generator unions that can emit the supplied concrete member. */
-export function getContainingProblemUnionTypes(
-    memberType: string,
-    counters?: WorkCounters
-): readonly string[] {
-    return loadProblemTypeGraph(counters).containingUnions.get(memberType) ?? [];
+    const graph = loadProblemTypeGraph(counters);
+    const cached = graph.acceptedTypes.get(viewType);
+    if (cached) return cached;
+    const members = graph.members.get(viewType);
+    if (!members?.size) return [];
+    const candidates = new Set([...members].flatMap(member => graph.typesByMember.get(member) ?? []));
+    const accepted = [...candidates].filter(candidate =>
+        [...graph.members.get(candidate)!].every(member => members.has(member)));
+    graph.acceptedTypes.set(viewType, accepted);
+    return accepted;
 }
 
 /**
@@ -164,13 +195,7 @@ export function isProblemTypeCompatible(
     counters?: WorkCounters
 ): boolean {
     counters?.add('type.compatibility_checks');
-    if (getAcceptedGeneratorProblemTypes(viewType, counters).includes(generatorType)) return true;
-
-    // A discriminated generator family may safely feed a member-only leaf when
-    // that view guards its applicability with requiredLabels (SPEC-V6/V7).
-    // Label validation owns that runtime boundary; the type graph only needs
-    // to recognize the named union-member relationship in this direction.
-    return loadProblemTypeGraph(counters).unionMembers.get(generatorType)?.includes(viewType) ?? false;
+    return getAcceptedGeneratorProblemTypes(viewType, counters).includes(generatorType);
 }
 
 /** Clears process-local parser state for watch-mode invalidation and isolated tests. */

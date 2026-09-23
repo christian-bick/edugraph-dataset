@@ -3,9 +3,10 @@ import {resolve} from 'node:path';
 import ts from 'typescript';
 import type {LeafModule} from './module-resolver.ts';
 import {moduleSchemaExportName} from './model-catalog.ts';
+import {getAcceptedGeneratorProblemTypes, getGeneratorProblemTypeFromPath} from './type-parser.ts';
 
 export interface ModuleInventoryIssue {
-    rule: 'IMPL-2' | 'IMPL-4' | 'SPEC-G1' | 'SPEC-V1' | 'IMPL-V1' | 'CHK-V6';
+    rule: 'IMPL-2' | 'IMPL-4' | 'IMPL-G6' | 'SPEC-G1' | 'SPEC-V1' | 'IMPL-V1' | 'CHK-V6';
     role: 'generator' | 'view';
     module_id: string;
     file: string;
@@ -65,6 +66,9 @@ export function inspectModuleInventory(options: {
         }
         if (role === 'view') {
             if (!options.viewTypes[module.id]) add('SPEC-V1', 'view.tsx', 'missing ViewTypeMap payload mapping');
+            else if (getAcceptedGeneratorProblemTypes(options.viewTypes[module.id]).length === 0) {
+                add('SPEC-V1', 'view.tsx', `unrecognized ViewTypeMap payload type: ${options.viewTypes[module.id]}`);
+            }
             const checklist = resolve(module.absolutePath, 'checklist.md');
             if (existsSync(checklist) && /^#{1,6}\s/m.test(readFileSync(checklist, 'utf-8'))) {
                 add('CHK-V6', 'checklist.md', 'leaf checklist must not contain Markdown headings');
@@ -72,6 +76,11 @@ export function inspectModuleInventory(options: {
             const view = resolve(module.absolutePath, 'view.tsx');
             if (existsSync(view) && !/\bwithConfig\s*\(/.test(readFileSync(view, 'utf-8'))) {
                 add('IMPL-V1', 'view.tsx', 'leaf view does not wrap its core with withConfig');
+            }
+        } else if (existsSync(resolve(module.absolutePath, 'generator.ts'))) {
+            const type = getGeneratorProblemTypeFromPath(resolve(module.absolutePath, 'generator.ts'));
+            if (!type || getAcceptedGeneratorProblemTypes(type).length === 0) {
+                add('IMPL-G6', 'generator.ts', `missing or unrecognized ProblemGenerator payload type: ${type ?? '(missing)'}`);
             }
         }
     };

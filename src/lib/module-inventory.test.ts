@@ -34,7 +34,7 @@ describe('module inventory', () => {
         writeFileSync(resolve(view.absolutePath, 'view.tsx'), 'const View = withConfig(DemoViewSchema, Core);');
         writeFileSync(resolve(view.absolutePath, 'view.html'), '<div id="view"></div>');
         const issues = inspectModuleInventory({generators: [], views: [view],
-            viewTypes: {demo: 'DemoProblem', orphan: 'MissingProblem'}});
+            viewTypes: {demo: 'CountingProblem', orphan: 'MissingProblem'}});
         expect(issues.map(issue => issue.rule)).toEqual(['CHK-V6', 'SPEC-V1']);
     });
 
@@ -45,5 +45,16 @@ describe('module inventory', () => {
             generatorRoot: resolve(module.absolutePath, '..')});
         expect(issues.some(issue => issue.rule === 'IMPL-2'
             && issue.file === resolve(module.absolutePath, 'generator.ts'))).toBe(true);
+    });
+
+    it.each(['UndeclaredProblem', 'any', null])('rejects an unresolved output contract %s without an active target', type => {
+        const generator = leaf('generator');
+        writeFileSync(resolve(generator.absolutePath, 'generator.ts'), type
+            ? `class Demo implements ProblemGenerator<${type}, Config> {}` : 'class Demo {}');
+        const view = leaf('view');
+        const issues = inspectModuleInventory({generators: [generator], views: [view],
+            viewTypes: {demo: type ?? ''}});
+        expect(issues.some(issue => issue.rule === 'IMPL-G6' && issue.message.includes('payload type'))).toBe(true);
+        expect(issues.some(issue => issue.rule === 'SPEC-V1' && issue.message.includes('ViewTypeMap'))).toBe(true);
     });
 });

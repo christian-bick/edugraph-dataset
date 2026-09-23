@@ -12,8 +12,8 @@ import {
 
 const pairs = (generators: Array<[string, string[]]>, viewLabels: string[] = []) =>
     buildCompatibleModulePairIndex(
-        generators.map(([generatorId, labels]) => ({generatorId, labels})),
-        [{viewId: 'v', supportedLabels: viewLabels}]
+        generators.map(([generatorId, labels]) => ({generatorId, labels, problemType: 'CountingProblem'})),
+        [{viewId: 'v', supportedLabels: viewLabels, problemType: 'CountingProblem'}]
     ).orderedPairs.map(pair => ({generatorId: pair.generator.generatorId, supportedTargetLabels: pair.supportedTargetLabels}));
 
 describe('findAbilityLabels', () => {
@@ -164,10 +164,10 @@ describe('shared applicability inspection', () => {
     });
 
     it('uses the production pair index and reports precisely the unsupported compatible pair', () => {
-        const view = {viewId: 'v', supportedLabels: [], requiredLabels: [Area.Rectangle], problemType: 'ShapeProblem'};
+        const view = {viewId: 'v', supportedLabels: [], requiredLabels: [Area.Rectangle], problemType: 'ShapePolygonDefinitionProblem'};
         const issues = inspect([view], [
-            {generatorId: 'ok', labels: [Area.Square], problemType: 'ShapeProblem'},
-            {generatorId: 'missing', labels: [], problemType: 'ShapeProblem'},
+            {generatorId: 'ok', labels: [Area.Square], problemType: 'ShapePolygonDefinitionProblem'},
+            {generatorId: 'missing', labels: [], problemType: 'ShapePolygonDefinitionProblem'},
             {generatorId: 'incompatible', labels: [], problemType: 'ArithmeticProblem'}
         ]);
         expect(issues).toHaveLength(1);
@@ -189,10 +189,10 @@ describe('shared applicability inspection', () => {
 
     it('scales with view declarations and compatible pair edges using existing support closures', () => {
         const run = (size: number) => {
-            const views = Array.from({length: size}, (_, i) => ({viewId: `v${i}`, supportedLabels: [],
+            const views = Array.from({length: size}, (_, i) => ({viewId: `v${i}`, problemType: 'CountingProblem', supportedLabels: [],
                 requiredLabels: [Area.Square], rejectedLabels: [Area.Rectangle]}));
             const counters = createWorkCounters();
-            const pairIndex = buildCompatibleModulePairIndex([{generatorId: 'g', labels: [Area.Square]}], views);
+            const pairIndex = buildCompatibleModulePairIndex([{generatorId: 'g', labels: [Area.Square], problemType: 'CountingProblem'}], views);
             expect(inspectApplicability({views, pairIndex, counters})).toHaveLength(size);
             return counters;
         };

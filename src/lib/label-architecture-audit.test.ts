@@ -38,7 +38,7 @@ const generator: GeneratorModelDescriptor = {
     generatorId: 'generator-one',
     generalLabels: [Area.Addition],
     labels: [Area.Addition],
-    problemType: null,
+    problemType: 'CountingProblem',
     module: {
         id: 'generator-one',
         relativePath: 'generator-one',
@@ -55,7 +55,7 @@ const view: ViewModelDescriptor = {
     supportedLabels: [Ability.ProcedureExecution],
     requiredLabels: [],
     rejectedLabels: [],
-    problemType: null,
+    problemType: 'CountingProblem',
     module: {
         id: 'view-one',
         relativePath: 'view-one',

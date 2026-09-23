@@ -39,8 +39,8 @@ describe('shared standards checks', () => {
     });
     it('keeps full and affected results equal when an active target or capability changes', async () => {
         const target = {id: 'addition', labels: [Area.Addition, Ability.ProcedureExecution]};
-        const generator = {generatorId: 'math', labels: [Area.Addition]};
-        const view = {viewId: 'question', supportedLabels: [Ability.ProcedureExecution]};
+        const generator = {generatorId: 'math', labels: [Area.Addition], problemType: 'ArithmeticPairProblem'};
+        const view = {viewId: 'question', supportedLabels: [Ability.ProcedureExecution], problemType: 'ArithmeticPairProblem'};
         const graph = createDependencyGraphSnapshot([
             {id: matchingPolicyNodeId(), kind: 'matching-policy', input_hash: matchingPolicyInputHash(), dependencies: []},
             {id: targetCapabilityNodeId('ccss', target.id), kind: 'target-capability', input_hash: targetCapabilityInputHash(target), dependencies: []},

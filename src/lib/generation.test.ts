@@ -301,13 +301,13 @@ describe('matchesTarget', () => {
         expect(verdict).toEqual({ matched: true });
     });
 
-    it('skips the type check when either side has no known type', () => {
+    it('rejects a missing payload type', () => {
         const verdict = matchesTarget(
             [Area.DigitNotation],
             gen([Area.DigitNotation], null),
             view([], [], 'CountingProblem')
         );
-        expect(verdict).toEqual({ matched: true });
+        expect(verdict).toEqual({ matched: false, reason: 'incompatible-type' });
     });
 });
 
@@ -330,16 +330,13 @@ describe('compatible module pair indexing', () => {
 
         expect(pairIds).toEqual([
             'writing:writing-view',
-            'counting:counting-view',
-            'unknown:writing-view',
-            'unknown:counting-view'
+            'counting:counting-view'
         ]);
         expect([...index.byProblemType.keys()]).toEqual([
             'WritingProblem',
-            'CountingProblem',
-            '(unknown)'
+            'CountingProblem'
         ]);
-        expect(index.byProblemType.get('(unknown)')).toHaveLength(2);
+        expect(index.byProblemType.has('(unknown)')).toBe(false);
     });
 
     it('matches targets only against the compatible pair search space', () => {
@@ -347,9 +344,7 @@ describe('compatible module pair indexing', () => {
         const result = diagnoseTargetMatches([target], generators, views);
 
         expect(result.tuples.map(tuple => `${tuple.generatorId}:${tuple.viewId}`)).toEqual([
-            'writing:writing-view',
-            'unknown:writing-view',
-            'unknown:counting-view'
+            'writing:writing-view'
         ]);
         expect(result.rejections.map(rejection =>
             `${rejection.generatorId}:${rejection.viewId}:${rejection.verdict.reason}`
@@ -368,10 +363,10 @@ describe('compatible module pair indexing', () => {
 
             const result = matchTargets(targets, generators, views, {pairIndex, counters});
 
-            expect(result.tuples).toHaveLength(3 * targetCount);
+            expect(result.tuples).toHaveLength(targetCount);
             expect(counters.get('match.pair_index_builds')).toBe(1);
             expect(counters.get('match.targets')).toBe(targetCount);
-            expect(counters.get('match.capability_checks')).toBe(3 * targetCount);
+            expect(counters.get('match.capability_checks')).toBe(targetCount);
             expect(counters.get('match.rejections')).toBe(0);
         }
     });

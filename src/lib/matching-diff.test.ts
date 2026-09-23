@@ -10,12 +10,12 @@ import {
 
 describe('matching diff', () => {
     const generators = [
-        { generatorId: 'g1', labels: [Area.Addition], problemType: 'arithmetic' as const },
-        { generatorId: 'g2', labels: [Area.Subtraction], problemType: 'arithmetic' as const }
+        { generatorId: 'g1', labels: [Area.Addition], problemType: 'ArithmeticPairProblem' as const },
+        { generatorId: 'g2', labels: [Area.Subtraction], problemType: 'ArithmeticPairProblem' as const }
     ];
     const views = [
-        { viewId: 'v1', supportedLabels: [Area.Addition], rejectedLabels: [], problemType: 'arithmetic' as const },
-        { viewId: 'v2', supportedLabels: [Area.Subtraction], rejectedLabels: [], problemType: 'arithmetic' as const }
+        { viewId: 'v1', supportedLabels: [Area.Addition], rejectedLabels: [], problemType: 'ArithmeticPairProblem' as const },
+        { viewId: 'v2', supportedLabels: [Area.Subtraction], rejectedLabels: [], problemType: 'ArithmeticPairProblem' as const }
     ];
 
     it('captures sorted semantic pairs per target', () => {

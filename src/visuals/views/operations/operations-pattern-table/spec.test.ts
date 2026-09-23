@@ -6,6 +6,7 @@ import {OperationsPatternTableViewSchema, spec} from './spec.ts';
 describe('operations-pattern-table view spec', () => {
     it('owns invariant table-pattern classification', () => {
         expect(spec.generalLabels).toEqual([
+            Area.GenerativeRuleRecognition,
             Scope.ArabicNumerals,
             Ability.ConceptClassification
         ]);

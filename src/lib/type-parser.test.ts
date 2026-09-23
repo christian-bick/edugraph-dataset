@@ -41,19 +41,27 @@ describe('type-parser', () => {
         expect(isProblemTypeCompatible('ArithmeticTripleProblem', 'ArithmeticPairProblem')).toBe(false);
     });
 
-    it('accepts a required-label-guarded leaf from a discriminated generator union', () => {
+    it('rejects narrowing a generator union to one member', () => {
         expect(isProblemTypeCompatible(
             'WritingProblem',
             'LegacyWritingProblem'
-        )).toBe(true);
+        )).toBe(false);
         expect(isProblemTypeCompatible(
             'WritingProblem',
             'MultiDigitWritingProblem'
-        )).toBe(true);
+        )).toBe(false);
         expect(isProblemTypeCompatible(
             'WritingProblem',
             'ArithmeticPairProblem'
         )).toBe(false);
+    });
+
+    it('accepts complete subsets through nested unions and explicit aliases', () => {
+        expect(isProblemTypeCompatible('FractionScalingProblem', 'FractionLineProblem')).toBe(true);
+        expect(isProblemTypeCompatible('TenthsToHundredthsProblem', 'FractionLineProblem')).toBe(true);
+        expect(isProblemTypeCompatible('FractionLineProblem', 'FractionScalingProblem')).toBe(false);
+        expect(isProblemTypeCompatible('EqualGroupsCollectionProblem', 'EqualGroupsProblem')).toBe(true);
+        expect(isProblemTypeCompatible('UnknownProblem', 'UnknownProblem')).toBe(false);
     });
 
     it('reads each type source once across repeated lookups', () => {

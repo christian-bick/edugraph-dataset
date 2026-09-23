@@ -127,9 +127,10 @@ views and share their common rendering code.
 
 The leaf wrapper fixes the task mode passed to the shared renderer. The shared renderer
 must not inspect ontology labels or import one leaf's spec to recover that decision.
-When [SPEC-V7](spec-view.md#spec-v7--requiredlabels-declares-target-preconditions) scopes a
-leaf to one member of a canonical discriminated family, the wrapper also fixes the expected
-discriminant and the shared renderer fails strictly if the payload does not match it.
+The leaf's `ViewTypeMap` entry declares every mathematical payload it accepts. Runtime validation
+checks that contract, but cannot replace it: throwing for a valid member of an accepted generator
+union is a composition defect. `requiredLabels` controls target participation, not the producer's
+output type. Shared renderers may support several families while each leaf declares only its own.
 
 ### IMPL-V10 — The screenshot root shrink-wraps content up to the viewport
 

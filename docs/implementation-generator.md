@@ -70,6 +70,9 @@ npm run test -- src/generators/[<category>/]<module>/
 ### IMPL-G6 — A payload contract change is a two-module change
 
 The `ProblemStub` data a generator returns is a contract with every view that renders it.
+Declare that complete output as a named payload type in `ProblemGenerator<...>`, defined in
+`src/types/problems.ts`. Missing or unrecognized declarations fail module validation. A view must
+accept every member of that output; target requirements cannot narrow a producer union.
 When that contract changes — a renamed field, a new required field, a changed shape — the
 change is not complete until the consuming views are adopted:
 

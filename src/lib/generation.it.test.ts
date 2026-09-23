@@ -28,9 +28,9 @@ describe('catalogs and end-to-end matching', () => {
             `${generator.generatorId}\u0000${view.viewId}`));
         const exhaustivelyCompatiblePairs = new Set(generatorCatalog.flatMap(generator =>
             viewCatalog
-                .filter(view => generator.problemType == null
-                    || view.problemType == null
-                    || isProblemTypeCompatible(generator.problemType, view.problemType))
+                .filter(view => generator.problemType != null
+                    && view.problemType != null
+                    && isProblemTypeCompatible(generator.problemType, view.problemType))
                 .map(view => `${generator.generatorId}\u0000${view.viewId}`)
         ));
         expect(indexedPairs).toEqual(exhaustivelyCompatiblePairs);
@@ -97,9 +97,9 @@ describe('catalogs and end-to-end matching', () => {
         for (const tuple of tuples) {
             const gen = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!;
             const view = viewCatalog.find(v => v.viewId === tuple.viewId)!;
-            if (gen.problemType != null && view.problemType != null) {
-                expect(isProblemTypeCompatible(gen.problemType, view.problemType)).toBe(true);
-            }
+            expect(gen.problemType).toBeTruthy();
+            expect(view.problemType).toBeTruthy();
+            expect(isProblemTypeCompatible(gen.problemType!, view.problemType!)).toBe(true);
         }
 
         for (const rejection of rejections) {

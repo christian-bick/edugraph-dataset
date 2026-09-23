@@ -5,8 +5,9 @@ entry points, and focused regressions were reviewed on 2026-09-23 against datase
 fetching current remote history. This plan links existing rules; it does not add ontology semantics.
 
 D1–D5 and D8–D12 now have the deterministic gates and regressions specified below. D6 and
-D13–D15 retain their existing runtime checks. The remaining implementation batches are D7's
-payload-contract adoption and D16's documentation discovery. Semantic truth and uncertain
+D13–D15 retain their existing runtime checks. D7's payload-family adoption and fail-closed type
+matching are implemented; its positive micro-filter decision and D16's documentation discovery
+remain open. Semantic truth and uncertain
 control-flow cases remain review work rather than invented static proof.
 
 The ontology owns descriptor structure and eligibility. Its
@@ -61,7 +62,7 @@ should cite the relevant existing rule and identify the file, field, label, pair
 | D4. Positive ownership | Reject generator Abilities, redundant invariant specialization ancestors, schema/general overlap, and overlapping positive ownership across a compatible pair. Keep label mechanics dimension-neutral. See SPEC-2, SPEC-7, SPEC-8, SPEC-11, SPEC-G3, SPEC-V5. | **Gate for declaration conflicts.** `spec-ownership.ts` supplies the same indexed checks, rule-linked diagnostics and declaration witnesses to the spec gate and architecture audit. Every module is checked, including unmatched ones; cross-role checks use all four invariant/schema combinations on the existing compatible-pair index. Full, affected and CI commands share the spec gate. Related schema alternatives and structural ancestry alone remain valid. Whether a capability is mathematically true or belongs in Area versus Scope remains semantic review. |
 | D5. Applicability consistency | Requirements are target preconditions, supported by each compatible pair, and do not contribute output labels. Rejections veto matches and never contain Abilities. Detect impossible required/rejected combinations. See SPEC-V3, SPEC-V7, SPEC-V8. | **Gate for algorithmic consistency.** `spec-contracts.ts` supplies shared diagnostics to the spec gate and architecture audit for pair support, missing compatible generators, rejected Abilities, and equality/specialization contradictions. Requiring Square while rejecting Rectangle fails, with both full IRIs; requiring Rectangle while rejecting Square remains valid. Support checks reuse the production compatible-pair index and its capability closures. Unmatched views are checked too. The existing matcher and resolved-label construction preserve participation-only requirements and target-context rejections. Proving a rejection boundary is complete remains review. |
 | D6. Matching semantics | Conjunctive coverage uses equality or `specializes` only, never `partOf`, reverse inheritance, or progression. Direct, indexed, and delta matching agree, including additions and removals. See SPEC-1. | **Runtime plus regressions.** `matching.ts`, `ontology.test.ts`, and `matching.test.ts` cover these behaviors. Retain focused positive/negative fixtures and extend command-parity tests; do not duplicate the production matcher in a second validation engine. |
-| D7. Payload compatibility | A generator's possible output types must fit the view's declared input family; missing or unrecognized mappings must not silently admit a pair. See IMPL-8 and SPEC-V6. | **Partial; adoption required.** Unknown types still act as wildcards, though none occur in the current catalog. Six `arithmetic-patterns` pairs rely on the presence-only `requiredLabels` exception for union producers. Declaring a broad input type can also conceal a partial renderer in shape/fraction consumers. Adopt the contracts in the [payload-family plan](payload-family-matching.md), then tighten matching. Positive micro-filter semantics need concrete contract examples before replacing existing filters. |
+| D7. Payload compatibility | A generator's possible output types must fit the view's declared input family; missing or unrecognized mappings must not silently admit a pair. See IMPL-8 and SPEC-V6. | **Type gate implemented.** Unknown/missing types fail closed; complete producer unions must fit accepted view families. Arithmetic, shape and fraction consumers are adopted, with direct/indexed/delta regressions and no active-target loss. Positive micro-filter policy remains open, with reproduced whole/fractional/fallback cases in the [payload-family plan](payload-family-matching.md#positive-micro-filter-decision). |
 
 The D3 input is the normalized, deduplicated active `spec` export, not every declaration loaded
 from a standards file. TODO packages can have their own structural validation without being
@@ -226,12 +227,12 @@ startup. These are wall-clock observations, not asymptotic proofs or release ben
 
 ### 4. Complete payload-family compatibility
 
-- [ ] **D7 contract adoption:** follow the [payload-family plan](payload-family-matching.md).
+- [x] **D7 contract adoption:** follow the [payload-family plan](payload-family-matching.md).
   Start with `arithmetic-patterns`, whose six concrete union/member pairs use the exception;
   then review `shape-build-shape` and `fraction-equivalence`, whose broad accepted types can
   conceal partial implementations. Prefer precise mathematical generator outputs and reusable
   rendering components. Keep each module migration in its own tested commit.
-- [ ] Reject missing/unrecognized production type mappings and remove the presence-only
+- [x] Reject missing/unrecognized production type mappings and remove the presence-only
   `requiredLabels` union-member exception once its consumers have been adopted. Correct both
   `type-parser.ts` and the direct/indexed matching paths. A view accepting a union must support
   every member the generator can emit.
@@ -239,9 +240,15 @@ startup. These are wall-clock observations, not asymptotic proofs or release ben
   what is guaranteed over all resolved outputs, including broad targets and fallbacks. Target
   participation alone does not prove payload safety. Do not add pair-conditional capabilities or
   configuration-dependent output routing to retain an overly broad generator.
-- [ ] Adopt the resulting behavior in SPEC-V3/V6/V7 and IMPL-V9, including their existing advice
+- [x] Adopt the type-compatibility behavior in SPEC-V3/V6/V7 and IMPL-V9, including their existing advice
   about guarding union members with requirements. Update skill references when their workflow
   changes. The current rules remain in force until their replacement is implemented.
+
+The three producer-family migrations and strict type matching are implemented. All 681 active
+CCSS targets remain covered; the complete comparison has 15 added and 14 removed tuples, consisting
+of registration moves and one newly supported hexagon drawing. The positive micro-filter policy
+remains a separate review decision, with concrete whole/fractional/fallback evidence in the
+[payload-family plan](payload-family-matching.md#positive-micro-filter-decision).
 
 Acceptance: direct, indexed, and delta matching agree; no active target is silently lost; a new
 incompatible union member cannot reach a narrower view. Rebuild the generation graph after matching

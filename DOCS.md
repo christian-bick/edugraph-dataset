@@ -393,6 +393,13 @@ The only public dataset-generation entry point.
 
 *   **Applicability findings**: D5 findings embed the shared `applicability` diagnostic, identify the view spec, and include pair references for missing support. Graph reuse does not suppress contradictory or unsupported declarations. Reviews of whether preconditions are appropriate and exclusion boundaries are complete remain advisory.
 
+*   **Payload compatibility**: the shared parsed type graph expands explicit aliases and nested
+    named unions once. Both direct and indexed matching require every generator member to be
+    accepted by the view. Missing/unrecognized mappings fail the module inventory and cannot
+    match; target requirements do not narrow output types. Compatible-type postings are cached,
+    rather than comparing every generator with every view. A matching-policy epoch change
+    invalidates persisted matching; rebuild the generation graph after adopting this machinery.
+
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<module>[,<module>...]`
 *   **Shared contracts**: `standards-validation.ts` is called by dedicated, full and affected checks,

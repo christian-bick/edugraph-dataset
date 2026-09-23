@@ -13,16 +13,16 @@ work. Current normative rules remain in [spec-view.md](../spec-view.md),
 [implementation-generator.md](../implementation-generator.md), and
 [implementation-view.md](../implementation-view.md); this plan does not silently change them.
 
-## Verified pair inventory
+## Initial pair inventory
 
 Reviewed against dataset `07c57d6` on 2026-09-23, after the ontology-library adoption and D4/D5
-validation commits. The current catalog has 87 generators, 184 views, and 202 compatible pairs;
-every module has a parsed output/input type. Unknown-type acceptance remains a framework gap even
-though it has no current production instance.
+validation commits. That baseline had 87 generators, 184 views, and 202 compatible pairs;
+every module had a parsed output/input type. Unknown-type acceptance was a framework gap without
+a production instance. The adopted catalog has 93 generators, 188 views and 208 compatible pairs.
 
-Exactly six pairs rely on the matcher allowing a union producer to feed a member-only view merely
-because `requiredLabels` is non-empty. All are produced by `arithmetic-patterns`, whose
-`ArithmeticPatternProblem` output is a recurrence or an operation table:
+Exactly six pairs relied on the matcher allowing a union producer to feed a member-only view merely
+because `requiredLabels` was non-empty. All were produced by `arithmetic-patterns`, whose
+former `ArithmeticPatternProblem` output was a recurrence or an operation table:
 
 | View | Declared accepted member |
 | --- | --- |
@@ -33,17 +33,17 @@ because `requiredLabels` is non-empty. All are produced by `arithmetic-patterns`
 | `operations-pattern-generation-table` | `ArithmeticRecurrencePatternProblem` |
 | `operations-pattern-table` | `ArithmeticOperationTablePatternProblem` |
 
-The current schema chooses `recurrence` for PatternGeneration/EmergentFeatureRecognition and
-`operation-table` for GenerativeRuleRecognition. That concrete relationship explains why current
-targets work; the framework does not prove it from the mere presence of a requirement. Prefer two
-precisely typed generator entry points sharing pure mathematical helpers. Retain requirements
-only where they independently express a target participation policy.
+The former schema chose `recurrence` for PatternGeneration/EmergentFeatureRecognition and
+`operation-table` for GenerativeRuleRecognition. That concrete relationship explained why those
+targets worked, but the framework did not prove it from the mere presence of a requirement. The
+adoption below uses precise generator entry points, retaining requirements only where they
+independently express a target participation policy.
 
 This inventory covers declared type narrowing. A renderer that declares the entire union but
 supports only some members will not appear here; the shape and fraction reviews below remain
 necessary. D1–D5 and D10 do not establish that payload-totality property.
 
-## Open contract findings
+## Contract adoption
 
 ### Arithmetic adoption
 
@@ -65,7 +65,7 @@ The complete CCSS matching comparison changes only the two table-generator regis
 all 681 active targets remain covered. Table sample identities change with the generator id;
 recurrence ids are retained. Canonical rendering and final cache checks follow the contract work.
 
-### Remaining work
+### Shape and fraction adoption
 
 Shape adoption uses four precise producers: polygon definitions (`shape-build-shape`),
 circle definitions, attribute-count constraints, and excluded-quadrilateral relations.
@@ -88,10 +88,12 @@ target still matches; the only added realization is hexagon drawing for the exis
 attribute target. No target labels were changed. New generator/view ids deliberately change
 sample seeds and split assignments; cache verification must follow canonical generation.
 
-- [ ] **Union-member matching.** [matching.ts](../../src/lib/matching.ts) permits a generator
-  returning `A | B` to feed a view accepting only `A` when the view has any `requiredLabels`.
-  Their presence does not prove that the generated payload is `A`. Adopt the six inventoried
-  arithmetic-pattern pairs are adopted; remove that exception from matching and the parsed type contract.
+- [x] **Union-member matching.** After adopting the six arithmetic consumers,
+  [matching.ts](../../src/lib/matching.ts) rejects a producer union unless every member is
+  accepted by the view. Direct, indexed and delta regressions cover output widening, missing
+  and unknown mappings. Nested unions and aliases are expanded through the shared parsed type
+  graph; explicit input unions remain reusable. Inventory validation rejects unknown types even
+  without an active target. Matching policy epoch 5 invalidates old matching results.
 - [x] **Shape construction.** Precise mathematical producers and total, explicitly typed consumers
   replace the broad task union. Consumer and evidence checks are recorded above.
 - [x] **Fraction equivalence.** `fraction-equivalence` now emits proper-fraction scaling only.
@@ -113,6 +115,48 @@ sample seeds and split assignments; cache verification must follow canonical gen
   [fraction-line-view.tsx](../../src/visuals/views/numbers/fraction-line-view.tsx). It may disclose
   that caption only in the solution or in an equality-completion task (`IMPL-V5`).
   The number-line position remains the mathematical evidence for classification.
+
+## Positive micro-filter decision
+
+The concrete probe uses `measurement-data` and `measurement-line-plot`, which share a coherent
+`MeasurementDataProblem` contract. The latter accepts whole-unit and fractional data, but its
+`usesUnitSteps` view parameter requires `subdivisions === 1`. A target-only filter cannot establish
+that constraint for every configuration produced by the generator schema.
+
+All three cases below ask for Statistics, VisualArticulation, LinePlot and StepsOf1. The first
+column is the additional number-kind request. The current direct and indexed matcher admits all
+three. Schema resolution over 32 seeds reproduces the following domains:
+
+| Number kind | Produced subdivisions | Unit-step view contract |
+| --- | --- | --- |
+| IntegerNumbers | 1 | Satisfied |
+| FractionNumbers | 4 | Always violated |
+| Omitted | 1 or 4 | Fallback-dependent failure |
+
+Existing active CCSS whole-step targets also request IntegerNumbers; the fractional targets do not
+request StepsOf1. This is a real contract gap outside those active combinations, not a failure of
+their current artifacts. Keep it open explicitly rather than treating successful VQA as a proof
+of totality for arbitrary targets.
+
+The proposed semantics are a **positive guarantee filter within an accepted payload family**:
+
+1. Type compatibility still establishes the mathematical family independently of labels.
+2. The filter describes an accepted domain, not additional capabilities or a generator dispatch.
+3. Admit a target only when every generator configuration reachable after schema resolution,
+   including fallback alternatives, guarantees that domain. One passing seed is insufficient.
+4. In this example, activating unit-step presentation requires a guaranteed subdivision of one.
+   An explicit fractional request fails; an ambiguous fallback also fails under this policy.
+5. Compute such guarantees from declarative finite choices/bounds and their tested payload
+   contracts, not arbitrary code execution or the Cartesian product of every schema parameter.
+   Unknown guarantees fail closed, with a diagnostic explaining the unproved boundary.
+
+**Review before implementation:** should a filter only reject an ambiguous domain (recommended),
+or also restrict the generator's fallback choices to the accepted subset? The latter is constraint
+propagation into generator configuration and requires a shared resolution contract; it is not
+merely another name for `requiredLabels`. Neither policy is implemented here. In particular,
+`requiredLabels` and `rejectedLabels` retain their target-only semantics and no pair-conditional
+capability API has been added. The accepted-family migrations and fail-closed type matcher are
+independent of this remaining decision.
 
 ## Adoption order and boundaries
 

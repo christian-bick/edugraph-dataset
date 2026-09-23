@@ -5,6 +5,7 @@ import {spec} from './spec.ts';
 describe('operations-pattern-explanation view spec', () => {
     it('owns invariant textual procedure explanation', () => {
         expect(spec.generalLabels).toEqual([
+            Area.EmergentFeatureRecognition,
             Scope.ArabicNumerals,
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation

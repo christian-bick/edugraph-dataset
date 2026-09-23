@@ -21,6 +21,9 @@ A view `spec.ts` exports three things:
 | `ViewSchema`  | Maps ontology labels to the visual config.    |
 | `ViewConfig`  | The extracted type of the schema.             |
 
+Register the leaf's accepted named payload type in `ViewTypeMap` in `src/types/problems.ts`.
+Missing or unrecognized mappings fail validation; matching never treats them as wildcards.
+
 ### SPEC-V2 — The schema maps to visual configuration only
 
 Map ontology labels **only** to presentation configuration that leaves the learner action
@@ -97,7 +100,8 @@ every target range that admits values beyond 20.
 
 An exact rejection is truthful only when the view accepts every other compatible case. When the
 view accepts only a positively enumerable subset — for example, exactly step sizes 10 and 100 —
-use `requiredLabels`, a narrower payload type, or separate leaf views. Do not blacklist only the
+use a narrower payload type or separate leaf views. A `requiredLabels` precondition can restrict
+target participation, but does not by itself constrain every generated value. Do not blacklist only the
 alternatives known today, because a later ontology member would pass the incomplete boundary.
 
 Never put an Ability in `rejectedLabels`, use the list to work around matching direction, or add
@@ -146,10 +150,12 @@ request, or question/solution behavior are parallel task behaviors and require l
 composable branches for support or presentation within the same task remain valid. Ability
 parameterization is a warning sign for this review, not an automatic reason to split.
 
-Each leaf must use the narrowest payload type it actually accepts in `ViewTypeMap`. When a
-single canonical generator intentionally returns a discriminated mathematical family, use
-`requiredLabels` under [SPEC-V7](#spec-v7--requiredlabels-declares-target-preconditions) and
-strictly validate the expected discriminant. Declare only the most specific Ability required
+Each leaf must use the narrowest payload type it actually accepts in `ViewTypeMap`. Every member
+of the generator's declared output must be accepted by the view. A view may accept a named union
+when it renders all its members; a generator returning `A | B` cannot feed a view accepting only
+`A`, even if that view has `requiredLabels`. Split distinct mathematical producers and share pure
+helpers instead of relying on a label precondition to narrow a payload union. Missing or unknown
+type declarations fail validation and cannot match. Declare only the most specific Ability required
 by the task: a specialization already satisfies targets asking for its ancestor.
 
 Pure presentation parameters that do not change task identity remain valid schema
@@ -176,11 +182,12 @@ while rejecting `Area.Rectangle` is contradictory. Requiring `Area.Rectangle` wh
 `Area.Square` can remain valid, because the rejection excludes only the narrower context.
 Structural `partOf` ancestry alone does not imply this contradiction.
 
-Use the property for positive payload-family applicability when static typing cannot express the
-boundary, and for an invariant stronger sibling claim that should participate only when explicitly
-requested by the target. Prefer a narrower `ViewTypeMap` payload whenever it expresses the same
-boundary. Use `rejectedLabels` for complete exclusion boundaries, not as an incomplete substitute
-for a positive precondition.
+Use the property for an invariant stronger sibling claim that should participate only when explicitly
+requested by the target. Payload-family compatibility is established separately by the generator
+output type and `ViewTypeMap`; requirements never narrow those types. A target requirement also
+does not prove which values a broad schema or its fallbacks can generate. Review all admitted
+configurations when a view needs a within-family restriction. Use `rejectedLabels` for complete
+target exclusion boundaries, not as an incomplete substitute for a positive precondition.
 
 ### SPEC-V8 — `requiredLabels` does not parameterize the view
 

@@ -5,6 +5,7 @@ import {spec} from './spec.ts';
 describe('operations-pattern-feature-table view spec', () => {
     it('owns invariant generated-feature classification', () => {
         expect(spec.generalLabels).toEqual([
+            Area.EmergentFeatureRecognition,
             Scope.ArabicNumerals,
             Ability.ConceptClassification,
             Ability.ProcedureExecution

@@ -2,14 +2,20 @@ import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts/generated';
 import {validateSpecs} from '../scripts/generator-view-spec-validation.ts';
 import {clearModelCatalogCaches, loadViewModelCatalog} from './model-catalog.ts';
+import * as typeParser from './type-parser.ts';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const fixtureRoot = resolve(projectRoot, 'temp/d4-ownership/fixtures');
 const fixtures: string[] = [];
+beforeEach(() => {
+    const actual = typeParser.getViewToProblemTypeMap();
+    vi.spyOn(typeParser, 'getViewToProblemTypeMap').mockReturnValue({...actual,
+        'fixture-view': 'ArithmeticPairProblem', 'fixture-view-100': 'ArithmeticPairProblem'});
+});
 afterEach(() => {
     vi.restoreAllMocks();
     clearModelCatalogCaches();
@@ -33,6 +39,8 @@ function fixture(viewLabel: string, {numericName = false, requiredLabels = [], r
     const viewDir = resolve(viewsDir, viewId);
     mkdirSync(generatorDir, {recursive: true});
     mkdirSync(viewDir, {recursive: true});
+    writeFileSync(resolve(generatorDir, 'generator.ts'),
+        'export class Fixture implements ProblemGenerator<ArithmeticPairProblem, Config> {}');
     writeFileSync(resolve(generatorDir, 'spec.ts'),
         `export const spec = ${JSON.stringify({generalLabels: generatorLabels})};\n`
         + 'export const FixtureGeneratorGeneratorSchema = {};\n');

@@ -1,7 +1,6 @@
 import {capabilitySatisfies, getCapabilityAncestors} from './ontology.ts';
 import {
     getAcceptedGeneratorProblemTypes,
-    getContainingProblemUnionTypes,
     isProblemTypeCompatible
 } from './type-parser.ts';
 import {
@@ -48,12 +47,8 @@ function hasCompatibleProblemTypes(
     generatorInfo: GeneratorMatchInfo,
     viewInfo: ViewMatchInfo
 ): boolean {
-    if (generatorInfo.problemType == null || viewInfo.problemType == null) return true;
-    if (!isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType)) return false;
-
-    const acceptsOnlyUnionMember = getContainingProblemUnionTypes(viewInfo.problemType)
-        .includes(generatorInfo.problemType);
-    return !acceptsOnlyUnionMember || (viewInfo.requiredLabels?.length ?? 0) > 0;
+    return generatorInfo.problemType != null && viewInfo.problemType != null
+        && isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType);
 }
 
 function matchesTargetCapabilities(
@@ -260,23 +255,15 @@ export function buildCompatibleModulePairIndex(
     );
 
     for (const view of viewCatalog) {
-        if (view.problemType == null) {
-            for (const views of viewsByGeneratorType.values()) views.push(view);
-            continue;
-        }
+        if (view.problemType == null) continue;
         for (const acceptedType of getAcceptedGeneratorProblemTypes(view.problemType, counters)) {
             viewsByGeneratorType.get(acceptedType)?.push(view);
-        }
-        if ((view.requiredLabels?.length ?? 0) > 0) {
-            for (const containingUnion of getContainingProblemUnionTypes(view.problemType, counters)) {
-                viewsByGeneratorType.get(containingUnion)?.push(view);
-            }
         }
     }
 
     for (const generator of generatorCatalog) {
         const compatibleViews = generator.problemType == null
-            ? viewCatalog
+            ? []
             : viewsByGeneratorType.get(generator.problemType) ?? [];
         for (const view of compatibleViews) {
             const supportedTargetLabels = new Set<string>();
@@ -446,7 +433,7 @@ export function viewCapabilityInputHash(view: ViewMatchInfo): string {
     });
 }
 
-export const MATCHING_POLICY_EPOCH = 4;
+export const MATCHING_POLICY_EPOCH = 5;
 
 /**
  * Matching implementation code is deliberately outside automatic cache
