@@ -158,6 +158,27 @@ merely another name for `requiredLabels`. Neither policy is implemented here. In
 capability API has been added. The accepted-family migrations and fail-closed type matcher are
 independent of this remaining decision.
 
+## Verification checkpoint — 2026-09-23
+
+- Commits: `2b8ca71` arithmetic, `8553213` shapes, `d4acadd` fractions, `c30c171` strict matching.
+- `npm run test:coverage`: 486 files and 2,666 tests pass. Generator coverage thresholds pass
+  (96.35% statements, 92.71% branches, 100% functions, 99.19% lines). Focused type/parser,
+  inventory, direct/indexed/delta and production-catalog tests also pass after the final parser edits.
+- `npm run check -- --spec=ccss,test` passes. The complete matching comparison retains all
+  681 CCSS targets with no target-label edits; registration moves account for the removed tuples.
+- Canonical CCSS generation with `--rebuild-graph` passes: 1,944 images, zero rendering failures.
+  The final run reused 275 shards and wrote nine (560,920 image bytes); earlier runs also adopted
+  the arithmetic and shape changes. Source-shared type edits required broad graph regeneration.
+- Inspected question and solution examples for fraction classification, count-based shape
+  construction, circle rotation and excluded quadrilaterals. Their intended evidence is visible;
+  classification questions no longer disclose the explicit "same point" verdict.
+- Offline audit confirms current freshness, renderer identity and dataset structure. Split
+  integrity passes. There are 47 missing VQA cache records and 47 obsolete records.
+- **Pending:** upload the 47 current uncached PNGs and their full prompts to Gemini, resolve any
+  failures, rerun strict offline audit and churn review, then commit cache changes separately.
+  Approval review blocked this batch's upload pending explicit user authorization; no upload or
+  cache mutation was performed. The positive micro-filter decision above remains open separately.
+
 ## Adoption order and boundaries
 
 1. Use the verified union/member inventory above as the starting point. Extend it with broad-type
