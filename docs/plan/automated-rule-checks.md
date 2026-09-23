@@ -1,15 +1,46 @@
 # Automated rule checks — dataset
 
-Implementation inventory after label consolidation. This plan links existing rules; it does not
-add new ontology semantics or change matching policy. The first implementation batch (D1, D2
-cardinality, D3 command parity, and D10) is now enforced. D4 ownership and D5 applicability
-consistency now share their deterministic checks between the spec gate and architecture audit.
-The remaining inventory retains its source review at `8d5c332`; later batches are still open.
+Implementation plan for the remaining approved checks after label consolidation. Source, public
+entry points, and focused regressions were reviewed on 2026-09-23 against dataset `07c57d6`, after
+fetching current remote history. This plan links existing rules; it does not add ontology semantics.
+
+D1, D2 cardinality, the shared D3 standards gate, D4, D5, and D10 are implemented. D8 already has
+its runtime contracts, spec gate, and focused regressions. The remaining work is gate scheduling
+and regression coverage, source analysis, module inventory, documentation discovery, and D7's
+payload-contract adoption. The [implementation sequence](#implementation-sequence) contains only
+that remaining work; completed checks must be reused.
 
 The ontology owns descriptor structure and eligibility. Its
 [check inventory](https://github.com/christian-bick/edugraph-ontology/blob/main/docs/plan/automated-rule-checks.md)
 covers the source graph and generated clients. This repository validates declarations, resolution,
 composition, and dataset artifacts against its complete, pinned ontology package.
+
+## Verified baseline
+
+| Change | Evidence | Consequence for this plan |
+| --- | --- | --- |
+| `6ddf887` adopts ontology v0.26.0 and implements D1, D2 cardinality, D3, and D10 | `label-contracts.ts`, `standards-validation.ts`, `external-semantics.ts`, and the generation guards | No ontology release or v0.26.0 adoption task remains. |
+| `b7001cf` implements D4 | `spec-ownership.ts` is shared by the spec gate and architecture audit, using the compatible-pair index | Keep the indexed ownership checks and their public-command fixtures. |
+| `07c57d6` implements D5 | `spec-contracts.ts` supplies specialization-aware requirement/rejection checks to both callers | Keep applicability checks; payload type safety remains a separate D7 concern. |
+| Shared ontology validation is adopted in the editor | Its package pin is v0.26.0; `ontology-assessment.ts` uses the shared assessment APIs and `authoring-constraints.ts` uses O3b/O6 | Editor adoption is complete for this plan. Label eligibility is a content-annotation policy, not a validity requirement for every editor entity. |
+| Ontology v0.27.0 is published | [Release notes](https://github.com/christian-bick/edugraph-ontology/blob/v0.27.0/docs/releases/v0.27.0.md): Python snapshot APIs and shared relation contracts; authored Turtle unchanged from v0.26.0 | A package update is independent maintenance, not a prerequisite for these checks. |
+
+Verification in this review:
+
+- `npm run check:types` passed.
+- Thirteen focused suites passed, totaling 202 tests: label and standards contracts, ownership,
+  applicability, their public spec-command fixtures, ontology semantic deltas, development planning,
+  matching, architecture audit, source contracts, resolvers, configuration, and generation helpers.
+- `npm run check:standards-spec -- --spec=ccss,test` passed: 693 authored CCSS targets normalize to
+  681 active targets; the isolated test spec has 559. Existing equivalence/overlap warnings remain.
+- Catalog inspection found 87 generators, 184 views, and 202 compatible pairs. No current module
+  lacks a parsed payload mapping or required file, and no leaf checklist contains headings.
+- Six union-to-member pairs remain, all from `arithmetic-patterns`; their exact inventory is in the
+  [payload-family plan](payload-family-matching.md#verified-pair-inventory).
+
+This review did not regenerate images, change cache entries, or establish release readiness.
+Functional tests verify the existing contracts; semantic truth still needs mathematical review
+and rendered evidence.
 
 ## Reading the inventory
 
@@ -26,12 +57,12 @@ should cite the relevant existing rule and identify the file, field, label, pair
 | Item | Algorithmic check | Current coverage and remaining work |
 | --- | --- | --- |
 | D1. Known, eligible labels | Validate every target, `generalLabels`, schema-supported and fallback label, requirement, rejection, and resolved annotation against the complete pinned descriptor set. Reject organizational labels with constituent children; allow leaves and specialization families. See SPEC-3 and ontology ONT-E7. | **Gate.** `label-contracts.ts` delegates known/eligible checks to `edugraph-ts` v0.26.0's bundled context and adds dataset diagnostics. The same context supplies constituent-child facts for dependency identity. Module validation covers general, schema-supported, fallback, required and rejected labels even for unmatched modules. Shared standards validation checks active and implementation-TODO labels; generation checks resolved annotations. Proposed ontology-TODO names are excluded. |
-| D2. Target structure | Check target IDs, normalized permutations, definition collisions, declared equivalences, valid TODO packages, and production targets containing at least one Area and Ability. Scope remains optional; no primary label or upper limit. See TSPEC-1, TSPEC-5, TSPEC-8, TSPEC-14. | **Partial.** `spec-validator.ts` checks IDs/permutations; stale equivalences are warnings. TODO loaders validate package structure. Area/Ability cardinality is enforced by the shared standards gate; Scope remains optional. Semantic equivalence judgments remain review, not automatic proof. Preserve the current equivalence mechanism pending the [deferred review](#deferred-review-intra-standard-equivalences). |
-| D3. Inverse target coverage | Every normalized active target exported through `spec` has a compatible generator/view tuple. Every generator retains a generatable active `test` path. See TSPEC-1, TSPEC-9, TSPEC-12. | **Gate.** `standards-validation.ts` is shared by dedicated, full, affected and CI checks. Affected standards checks reuse `matchTargetsDelta` and the existing dataset graph when graph version and pinned ontology provenance agree; otherwise they match afresh. Capability changes also schedule the isolated test-path check. Never apply the match requirement to `implementationTodos`, `ontologyTodos`, or `beyondScope`. |
+| D2. Target structure | Check target IDs, normalized permutations, definition collisions, declared equivalences, valid TODO packages, and production targets containing at least one Area and Ability. Scope remains optional; no primary label or upper limit. See TSPEC-1, TSPEC-5, TSPEC-8, TSPEC-14. | **Gate for deterministic structure.** `spec-validator.ts` checks IDs/permutations; stale equivalences are warnings. TODO loaders validate package structure. Area/Ability cardinality is enforced by the shared standards gate; Scope remains optional. No additional cardinality implementation remains. Semantic equivalence judgments remain review, not automatic proof. Preserve the current mechanism pending the [deferred review](#deferred-review-intra-standard-equivalences). |
+| D3. Inverse target coverage | Every normalized active target exported through `spec` has a compatible generator/view tuple. Every generator retains a generatable active `test` path. See TSPEC-1, TSPEC-9, TSPEC-12. | **Shared gate implemented; affected scheduling has one gap.** Dedicated, full, affected and CI checks call `standards-validation.ts`. Affected matching reuses a graph only when its version and pinned ontology provenance agree. Spec/capability edits schedule coverage, but an existing `generator.ts` edit does not, even if its declared output type changes. Close that scheduling gap in batch 1. Never require a match for `implementationTodos`, `ontologyTodos`, or `beyondScope`. |
 | D4. Positive ownership | Reject generator Abilities, redundant invariant specialization ancestors, schema/general overlap, and overlapping positive ownership across a compatible pair. Keep label mechanics dimension-neutral. See SPEC-2, SPEC-7, SPEC-8, SPEC-11, SPEC-G3, SPEC-V5. | **Gate for declaration conflicts.** `spec-ownership.ts` supplies the same indexed checks, rule-linked diagnostics and declaration witnesses to the spec gate and architecture audit. Every module is checked, including unmatched ones; cross-role checks use all four invariant/schema combinations on the existing compatible-pair index. Full, affected and CI commands share the spec gate. Related schema alternatives and structural ancestry alone remain valid. Whether a capability is mathematically true or belongs in Area versus Scope remains semantic review. |
 | D5. Applicability consistency | Requirements are target preconditions, supported by each compatible pair, and do not contribute output labels. Rejections veto matches and never contain Abilities. Detect impossible required/rejected combinations. See SPEC-V3, SPEC-V7, SPEC-V8. | **Gate for algorithmic consistency.** `spec-contracts.ts` supplies shared diagnostics to the spec gate and architecture audit for pair support, missing compatible generators, rejected Abilities, and equality/specialization contradictions. Requiring Square while rejecting Rectangle fails, with both full IRIs; requiring Rectangle while rejecting Square remains valid. Support checks reuse the production compatible-pair index and its capability closures. Unmatched views are checked too. The existing matcher and resolved-label construction preserve participation-only requirements and target-context rejections. Proving a rejection boundary is complete remains review. |
 | D6. Matching semantics | Conjunctive coverage uses equality or `specializes` only, never `partOf`, reverse inheritance, or progression. Direct, indexed, and delta matching agree, including additions and removals. See SPEC-1. | **Runtime plus regressions.** `matching.ts`, `ontology.test.ts`, and `matching.test.ts` cover these behaviors. Retain focused positive/negative fixtures and extend command-parity tests; do not duplicate the production matcher in a second validation engine. |
-| D7. Payload compatibility | A generator's possible output types must fit the view's declared input family; missing or unrecognized mappings must not silently admit a pair. See IMPL-8 and SPEC-V6. | **Partial; adoption required.** `matching.ts` accepts unknown types and permits a union producer to feed a member-only view when any `requiredLabels` exist. That is not proof of the output discriminant. Inventory these cases now; tighten the gate only with the consumer adoption in the [payload-family plan](payload-family-matching.md). Positive micro-filter semantics remain a separate design decision. |
+| D7. Payload compatibility | A generator's possible output types must fit the view's declared input family; missing or unrecognized mappings must not silently admit a pair. See IMPL-8 and SPEC-V6. | **Partial; adoption required.** Unknown types still act as wildcards, though none occur in the current catalog. Six `arithmetic-patterns` pairs rely on the presence-only `requiredLabels` exception for union producers. Declaring a broad input type can also conceal a partial renderer in shape/fraction consumers. Adopt the contracts in the [payload-family plan](payload-family-matching.md), then tighten matching. Positive micro-filter semantics need concrete contract examples before replacing existing filters. |
 
 The D3 input is the normalized, deduplicated active `spec` export, not every declaration loaded
 from a standards file. TODO packages can have their own structural validation without being
@@ -44,9 +75,9 @@ enter the match-coverage set. An isolated `test` module still checks its active 
 
 | Item | Algorithmic check | Current coverage and remaining work |
 | --- | --- | --- |
-| D8. Resolver contracts | Non-empty label support; explicit exact/predicate/aggregate/compositional semantics; declared fallback sets contain only supported labels and resolve; function-only choices are `ontologyNeutral`. Verify deterministic resolution and complete recorded fallback labels. See SPEC-6. | **Gate plus regressions.** `utils.ts`, `resolvers.ts`, and the spec gate cover contract markers and fallback execution. A marker does not prove arbitrary custom code obeys its meaning. Keep focused resolver contract tests, including competing exact choices, conjunctions, absence defaults, and reorderings; do not enumerate a label power set. |
-| D9. Correct deduction placement | Capability expansion belongs in schemas; rejection expansion uses `deductAdmitting`; invariant claims do not come from `deductCompatible`. See SPEC-10 and SPEC-V4. | **Partial.** `spec-source-contracts.ts` detects `deductCompatible` inside `generalLabels`. Extend source analysis to the other prohibited placements and imported aliases. Resolve helper ownership rather than banning functions by coincidental spelling. |
-| D10. Resolved labels and target coverage | Output labels equal generator/view invariant labels plus their resolved schema labels. Target, required, and rejected labels are not copied into that set. Every actual resolved draw must still satisfy every target claim through specialization. See SPEC-1, SPEC-6, IMPL-G3. | **Runtime gate.** `resolvePairCapabilities` constructs the set. Generation validates actual resolved draws before rendering and checks transferred duplicate-target associations. Contract errors propagate rather than being swallowed by retry/fallback handling; missing claims are reported without copying target labels. |
+| D8. Resolver contracts | Non-empty label support; explicit exact/predicate/aggregate/compositional semantics; declared fallback sets contain only supported labels and resolve; function-only choices are `ontologyNeutral`. Verify deterministic resolution and complete recorded fallback labels. See SPEC-6. | **Implemented gate plus regressions.** `utils.ts`, `resolvers.ts`, and the spec gate cover markers, fallback membership/execution, conjunctions, completion, and ambiguity. Reuse these checks. Remaining source-form rules from SPEC-6 belong in batch 2; markers cannot prove arbitrary resolver semantics or the truth of fallback claims. No new combinatorial probing framework is required. |
+| D9. Correct deduction placement | Capability expansion belongs in schemas; rejection expansion uses `deductAdmitting`; invariant claims do not come from `deductCompatible`. See SPEC-10 and SPEC-V4. | **Partial, with reproduced blind spots.** `spec-source-contracts.ts` catches direct calls and root-package import aliases inside `generalLabels`. It misses aliases from `edugraph-ts/generated`, intermediate variables, and wrong helpers in rejection lists; it flags an unrelated object's same-named method. Replace spelling-based recognition with bounded symbol/source tracing. |
+| D10. Resolved labels and target coverage | Output labels equal generator/view invariant labels plus their resolved schema labels. Target, required, and rejected labels are not copied into that set. Every actual resolved draw must still satisfy every target claim through specialization. See SPEC-1, SPEC-6, IMPL-G3. | **Runtime gate implemented.** Generation calls `assertResolvedTargetCoverage` on actual resolved draws and duplicate-target associations; errors propagate through retry/solution handling. Helper and label-construction regressions exist. Add a focused pipeline regression for that propagation and association wiring in batch 1; do not implement a second guard. |
 | D11. Implementation isolation | Generator/view code and their implementation helpers do not inspect raw target/problem label bags, import spec decisions into rendering, or emit generator-authored annotations. See IMPL-G1, IMPL-G3, IMPL-V1, IMPL-V9. | **Partial.** Types restrict `ProblemStub` to data; the optional architecture audit uses text patterns for raw label access and IRIs. Add syntax/symbol-aware checks for aliases, destructuring, and reachable helpers. Exclude schema resolvers and framework configuration boundaries. A resolved enum-valued config is valid; banning every ontology import or enum occurrence would be wrong. |
 | D12. Module and validation structure | Check required module files/exports, view type mappings, checklist presence and heading-free form, configuration/payload validation, and known unseeded entropy calls. See IMPL-2, IMPL-4, IMPL-G2, IMPL-V1–V4, IMPL-V6, CHK-V6. | **Partial.** Typechecking, module tests, loaders, and render failures cover parts of this. Add explicit inventory checks and narrowly justified source checks. Recognize validation in shared entry helpers; mere presence of a function name is not proof it executes first. Keep uncertain data-flow findings advisory. Do not ban seeded randomness inside generators or views. |
 
@@ -72,38 +103,150 @@ ancestry in a rejection set. Both expose work counters and growth tests under th
 Full checks must be linear in source/graph input plus necessary results. Shared indexes should
 avoid repeated file reads, all-module Cartesian scans, all-pairs ancestry tables, and repeated
 closure walks per occurrence. Emit compact conflict witnesses instead of every redundant path.
-Record work counters and test growth, including wide and deep structures.
+Retain the existing work counters and performance regressions when changing these paths.
 
-Development checks reuse delta matching for affected standards; declaration eligibility remains a full linear scan of each selected catalog/spec. There is no second validation-result cache. Finer declaration selection remains future work. Eligibility has an
-important extra dependency: adding an unused child with `partOf X` changes whether X can label
-content. An index of only the labels' upward ancestors will miss that change. Track each referenced
-descriptor's child-role summary against the complete pinned ontology; additions, removals, and
-reparenting must invalidate the old and new parents' users. Unrelated ontology changes should not
-invalidate them. Reuse the current graph with explicit new dependencies, not another cache.
+Development checks already reuse delta matching for affected standards; declaration eligibility
+performs a full linear scan of each selected catalog/spec. There is no separate validation-result
+cache. `external-semantics.ts` includes each descriptor's constituent-child summary in its identity:
+adding an unused child with `partOf X` invalidates X's users. Regression tests cover this incoming
+dependency, reparenting, and unrelated changes. Reuse that mechanism in new checks.
+
+**Decision, 2026-09-23:** no additional ontology complexity-testing or incremental-validation
+project is required. Practical usage has demonstrated sufficient performance. This plan does not
+schedule finer declaration caching or a new benchmark suite; keep existing dataset performance
+contracts and delta behavior while adding the remaining checks.
 
 When an external delta cannot be established, retain the known pinned input and report the update
 as unassessed during development. An explicitly adopted new version must be checked authoritatively;
 never certify it using stale eligibility. Release checks remain complete and offline with respect
 to the installed ontology. See the performance contract for rebuild and reset boundaries.
 
-## Implementation order and acceptance
+## Implementation sequence
 
-- [x] **First:** implement ontology eligibility facts, D1, D2 cardinality, D3 command parity, and
-  D10 post-resolution coverage. These close direct paths to invalid or missing annotations.
-- [x] **D4:** share dimension-neutral ownership checks between the spec gate and architecture audit,
-  with declaration witnesses, public gate fixtures, fresh/reused-graph parity, and work-growth tests.
-- [x] **D5:** share specialization-aware applicability diagnostics, reuse indexed pair support,
-  and verify directionality, structural exclusions, unmatched views, graph reuse, and work growth.
-- [ ] **Next:** finish D8/D9 resolver/source contracts
-  and D11/D12 implementation checks. Reuse existing tested predicates; retain their current gates.
-- [ ] **Alongside every batch:** add positive and negative fixtures, stable rule-linked diagnostics,
-  full-versus-affected equivalence, and linear-work tests. Wire the same mandatory rules into full,
-  affected, and CI commands. Do not make optional heuristic signals fail by accident.
-- [ ] **With payload adoption:** complete D7 and its direct/indexed matching regressions. Do not
-  silently change required/rejected semantics as part of adding a validator.
-- [ ] **At completion:** demonstrate failures through public commands, retain D13–D16, and update
-  reference documents to state exactly which portions are enforced. Rules with semantic remainder
-  must not be labeled wholly automatic.
+All batches below are approved in principle. Use a separate tested commit for each numbered check
+or migrated payload module. A shared source-analysis helper may have its own preparatory commit.
+Do not mix code or documentation commits with generated VQA-cache changes.
+
+### 1. Close gate scheduling and integration coverage
+
+- [ ] **D3 scheduling:** inspect output-contract changes in existing generator implementations
+  using the existing type/source machinery. A change from one declared `ProblemGenerator<T>` output
+  to another must schedule module compatibility checks and active CCSS/test coverage. Preserve the
+  cheap route for proven implementation-only edits; use the full standards gate when classification
+  is uncertain. Current `development-plan.ts` deliberately schedules no standards checks for any
+  existing generator implementation edit, and its test currently asserts that behavior.
+- [ ] **D3 command regressions:** exercise dedicated/full/affected entry-point wiring with an
+  unmatched active target, the same labels in an implementation TODO, and a changed payload type.
+  Reuse `validateStandardContracts`; ontology TODOs and beyond-scope entries remain outside matching.
+- [ ] **D10 pipeline regression:** inject a missing resolved claim and verify failure before
+  rendering, propagation through question retry and solution fallback, and the duplicate-target
+  association path. Use a small fixture through the existing generation orchestration. No live VQA
+  or full image generation is needed to test rejection of invalid labels.
+
+Acceptance: the existing positive standards fixtures still pass; invalid active targets and draws
+fail through the relevant public paths with SPEC-1/SPEC-3/TSPEC diagnostics. These are additions to
+existing enforcement, not a reimplementation of D1–D5 or D10.
+
+### 2. Complete deduction and resolver source checks
+
+- [ ] **D9:** extend `spec-source-contracts.ts` with a reusable TypeScript source/symbol index.
+  Follow named and namespace imports, public package subpaths, simple aliases/re-exports, and
+  constant initializers to their real origin. Connect shared constants to their consuming spec
+  field. Check both deduction helpers against schemas, invariants, requirements, and rejections
+  under SPEC-10/SPEC-V4. Avoid an arbitrary JavaScript execution or theorem-proving engine.
+- [ ] **D8 source form:** on the same source index, check the mechanical portion of SPEC-6:
+  resolver references and valid factory results are distinguished from inline implementations or
+  prematurely executed resolvers. Reuse the existing runtime marker and fallback checks. A marker
+  cannot certify the mathematical meaning of custom resolver code.
+- [ ] Wire deterministic findings into `validateSpecs`, the architecture audit, and affected
+  routing. Shared-helper changes reach their owning modules through the existing import graph.
+
+Acceptance fixtures must include the reproduced failures: a renamed import from
+`edugraph-ts/generated`, an intermediate constant feeding `generalLabels`, and `deductCompatible`
+feeding `rejectedLabels`. A local object's unrelated `deductCompatible` method must pass. Keep
+valid schema expansion, rejection expansion, curried factories, and imported resolvers passing.
+Unresolved dynamic source patterns receive a review diagnostic, not a guessed hard failure.
+
+### 3. Enforce implementation boundaries and module structure
+
+- [ ] **D11:** reuse the source index to detect raw target/problem-label reads through aliases,
+  destructuring, bracket access, and reachable implementation helpers. Detect spec-dependent task
+  decisions in shared rendering code and generator-authored output labels. Exclude the legitimate
+  schema/framework boundary; resolved enum-valued configuration, type-only imports, and generator
+  schema registration remain valid. Do not reject all ontology imports.
+- [ ] **D12 inventory:** explicitly validate required files and exports, view ID/type mapping,
+  and checklist presence/heading-free form for every discovered leaf. Missing schemas must not
+  silently become empty schemas. Use the catalog/type graph and report orphan or unrecognized
+  mappings; current production mappings and file inventory are complete.
+- [ ] **D12 implementation checks:** detect known unseeded entropy and provable missing validation
+  at module entry. Recognize shared validation helpers. A function name or import alone cannot
+  prove that validation runs first; uncertain control-flow cases stay advisory. Seeded instance
+  randomness remains allowed in generators and views.
+
+Acceptance: invalid fixtures fail without requiring an active target; valid shared renderers and
+mathematical helpers pass. Each diagnostic names its rule, file, location, and module owner.
+Existing payload-name and Ability-parameter warning signals remain semantic review hints.
+
+### 4. Complete payload-family compatibility
+
+- [ ] **D7 contract adoption:** follow the [payload-family plan](payload-family-matching.md).
+  Start with `arithmetic-patterns`, whose six concrete union/member pairs use the exception;
+  then review `shape-build-shape` and `fraction-equivalence`, whose broad accepted types can
+  conceal partial implementations. Prefer precise mathematical generator outputs and reusable
+  rendering components. Keep each module migration in its own tested commit.
+- [ ] Reject missing/unrecognized production type mappings and remove the presence-only
+  `requiredLabels` union-member exception once its consumers have been adopted. Correct both
+  `type-parser.ts` and the direct/indexed matching paths. A view accepting a union must support
+  every member the generator can emit.
+- [ ] Define positive micro-filters using `measurement-line-plot` as the concrete case. Settle
+  what is guaranteed over all resolved outputs, including broad targets and fallbacks. Target
+  participation alone does not prove payload safety. Do not add pair-conditional capabilities or
+  configuration-dependent output routing to retain an overly broad generator.
+- [ ] Adopt the resulting behavior in SPEC-V3/V6/V7 and IMPL-V9, including their existing advice
+  about guarding union members with requirements. Update skill references when their workflow
+  changes. The current rules remain in force until their replacement is implemented.
+
+Acceptance: direct, indexed, and delta matching agree; no active target is silently lost; a new
+incompatible union member cannot reach a narrower view. Rebuild the generation graph after matching
+machinery changes, regenerate the affected canonical content, inspect question/solution evidence,
+and complete the relevant VQA and cache checks. Review any identity/seed churn from generator splits.
+
+### 5. Complete documentation discovery and close the plan
+
+- [ ] **D16:** discover nested Markdown plans and skill reference documents. Give references and
+  plans distinct roles in `docs-validator.ts`; validate plan links/anchors/rule citations without
+  requiring a normative Audit section. Keep remote document fetch failures advisory. Include a
+  fixture proving a broken nested-plan link fails through `check:docs`.
+- [ ] Update each affected rule's verification guidance and `DOCS.md` command coverage after its
+  check exists. Skills should reference the authoritative rules and applicable commands rather
+  than copy policy. Keep conceptual rules that require review explicitly identified as such.
+- [ ] Run the complete local/CI gate once all batches are implemented, including existing
+  D13–D15 safeguards. For source-check-only changes, do not regenerate or revalidate images merely
+  because a new lint gate exists. Preserve semantic equivalences pending their separate review.
+
+D16 is independent and may be implemented earlier. Ontology publication and editor adoption do not
+block any batch. A v0.27.0 dependency update can be a separate maintenance commit, with its normal
+semantic-delta verification; it does not replace these dataset checks.
+
+## Separate ontology consolidation
+
+The following remain open in ontology remote `main` at `bd68e4e` (v0.27.0). Keep their semantic
+changes separate from the deterministic dataset checks above; their authoritative plan is
+[ontology consolidation](https://github.com/christian-bick/edugraph-ontology/blob/main/docs/plan/ontology-consolidation.md).
+
+1. **Measurement definitions:** review `MetricDistanceScale` and its unit children, propose the
+   shared family wording, and verify that concrete unit definitions remain distinct. Publish the
+   definition correction, then adopt it through the dataset's existing ontology/VQA delta path.
+2. **Numeric boundaries:** inventory lower/upper-bound families and tabulate exact endpoints and
+   contradiction pairs. Decide which quantities the bounds describe and whether endpoints are
+   inclusive; then align definitions, relations, shared deduction behavior, and consumer range
+   resolution. Test boundary cases before publishing or changing dataset configurations.
+3. **Progression:** audit authored assertions first, then specify source/destination propagation
+   separately using justified examples and counterexamples. Existing cycle checks stay in place.
+   Do not infer capability substitution through `partOf` or introduce progression inference merely
+   because a traversal helper exists.
+
+No dedicated ontology performance or incremental-validation work is scheduled.
 
 ## Review and experiments, not deterministic gates
 

@@ -13,12 +13,42 @@ work. Current normative rules remain in [spec-view.md](../spec-view.md),
 [implementation-generator.md](../implementation-generator.md), and
 [implementation-view.md](../implementation-view.md); this plan does not silently change them.
 
+## Verified pair inventory
+
+Reviewed against dataset `07c57d6` on 2026-09-23, after the ontology-library adoption and D4/D5
+validation commits. The current catalog has 87 generators, 184 views, and 202 compatible pairs;
+every module has a parsed output/input type. Unknown-type acceptance remains a framework gap even
+though it has no current production instance.
+
+Exactly six pairs rely on the matcher allowing a union producer to feed a member-only view merely
+because `requiredLabels` is non-empty. All are produced by `arithmetic-patterns`, whose
+`ArithmeticPatternProblem` output is a recurrence or an operation table:
+
+| View | Declared accepted member |
+| --- | --- |
+| `operations-pattern-explanation` | `ArithmeticRecurrencePatternProblem` |
+| `operations-pattern-feature-explanation` | `ArithmeticRecurrencePatternProblem` |
+| `operations-pattern-feature-table` | `ArithmeticRecurrencePatternProblem` |
+| `operations-pattern-generation-practice` | `ArithmeticRecurrencePatternProblem` |
+| `operations-pattern-generation-table` | `ArithmeticRecurrencePatternProblem` |
+| `operations-pattern-table` | `ArithmeticOperationTablePatternProblem` |
+
+The current schema chooses `recurrence` for PatternGeneration/EmergentFeatureRecognition and
+`operation-table` for GenerativeRuleRecognition. That concrete relationship explains why current
+targets work; the framework does not prove it from the mere presence of a requirement. Prefer two
+precisely typed generator entry points sharing pure mathematical helpers. Retain requirements
+only where they independently express a target participation policy.
+
+This inventory covers declared type narrowing. A renderer that declares the entire union but
+supports only some members will not appear here; the shape and fraction reviews below remain
+necessary. D1–D5 and D10 do not establish that payload-totality property.
+
 ## Open contract findings
 
 - [ ] **Union-member matching.** [matching.ts](../../src/lib/matching.ts) permits a generator
   returning `A | B` to feed a view accepting only `A` when the view has any `requiredLabels`.
-  Their presence does not prove that the generated payload is `A`. Inventory these pairs and remove
-  that exception after adopting their contracts.
+  Their presence does not prove that the generated payload is `A`. Adopt the six inventoried
+  arithmetic-pattern pairs, then remove that exception from matching and the parsed type contract.
 - [ ] **Shape construction.** `shape-build-shape` retains attribute/count, rotation, and
   excluded-subcategory branches with task-shaped payloads. Its construction and drawing consumers
   are not total over the declared union. Review the mathematical responsibilities and every
@@ -44,13 +74,14 @@ work. Current normative rules remain in [spec-view.md](../spec-view.md),
 
 ## Adoption order and boundaries
 
-1. Inventory generator unions, member-only consumers, and family-selecting requirements/exclusions
-   using the parsed type graph and compatible-pair index. Record concrete failures and affected
-   targets; separate within-family limits from explicit target-participation policies.
+1. Use the verified union/member inventory above as the starting point. Extend it with broad-type
+   partial consumers and family-selecting requirements/exclusions. Record affected targets and
+   concrete failures; separate within-family limits from explicit target-participation policies.
 2. Establish precise mathematical output contracts. A view may accept a small named union only
    when it supports every member. Share pure helpers and rendering components; do not manufacture
    unrelated optional fields merely to preserve one generator registration.
-3. Review the positive micro-filter API with concrete examples before changing required/rejected
+3. Migrate arithmetic patterns, shape construction, and fraction equivalence one module at a time,
+   with a tested commit for each. Review the positive micro-filter API with concrete examples before changing required/rejected
    semantics globally. Preserve dimension neutrality and avoid duplicate generator parameterization
    in views. An allowlist of every generator label on every view is not the objective.
 4. Adopt consumers, then tighten matching and validation. Reject missing/unrecognized mappings and
