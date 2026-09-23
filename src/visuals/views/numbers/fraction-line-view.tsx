@@ -434,7 +434,7 @@ const FractionEquivalenceLine = ({
                     {secondNotation}
                 </text>
                 <text x={endpointX} y={AXIS_Y + 76} textAnchor="middle" className="fill-slate-600 text-[15px] font-semibold">
-                    same point
+                    {isClassification && !isSolutionView ? '' : 'same point'}
                 </text>
             </svg>
 

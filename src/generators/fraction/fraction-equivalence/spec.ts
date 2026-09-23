@@ -7,17 +7,14 @@ export const spec: GeneratorSpec = {
     generatorId: 'fraction-equivalence',
     generalLabels: [
         Area.FractionEquivalence,
-        Scope.Equal
+        Scope.Equal,
+        Scope.EqualShares,
+        Scope.ProperFractions
     ]
 };
 
 export const FractionEquivalenceGeneratorSchema = {
-    usesMultiplication: [[Area.Multiplication], hasLabel(Area.Multiplication)],
-    usesEqualShares: [[Scope.EqualShares], hasLabel(Scope.EqualShares)],
-    usesProperFractions: [[Scope.ProperFractions], hasLabel(Scope.ProperFractions)],
-    usesImproperFractions: [[Scope.ImproperFractions], hasLabel(Scope.ImproperFractions)],
-    usesIntegerNumbers: [[Scope.IntegerNumbers], hasLabel(Scope.IntegerNumbers)],
-    usesTenthFractions: [[Scope.TenthFractions], hasLabel(Scope.TenthFractions)]
+    usesMultiplication: [[Area.Multiplication], hasLabel(Area.Multiplication)]
 } as const;
 
 export type FractionEquivalenceGeneratorConfig = ConfigFromSchema<

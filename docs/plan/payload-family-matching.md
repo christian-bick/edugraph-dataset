@@ -94,23 +94,25 @@ sample seeds and split assignments; cache verification must follow canonical gen
   arithmetic-pattern pairs are adopted; remove that exception from matching and the parsed type contract.
 - [x] **Shape construction.** Precise mathematical producers and total, explicitly typed consumers
   replace the broad task union. Consumer and evidence checks are recorded above.
-- [ ] **Fraction equivalence.** `fraction-equivalence` returns proper-fraction scaling,
-  whole-number equivalence, or tenths-to-hundredths relations. Several views declare the whole
-  union while accepting only a subset. A synthetic target with FractionEquivalence, ProperFractions,
-  EqualShares, Equal, Formalization, and ArabicNumerals matches `fractions-whole-equivalence`, which
-  rejects the proper-fraction payload. Current active CCSS/test targets avoid that combination.
-  Decide whether a uniform mathematical model is truthful or precise generator entry points are
-  needed, then align view input types. No blacklist or artificial family flag should conceal it.
+- [x] **Fraction equivalence.** `fraction-equivalence` now emits proper-fraction scaling only.
+  `fraction-whole-equivalence` and `fraction-tenths-equivalence` supply their exact mathematical
+  families. Classification views accept proper equivalence, whole-number notation accepts whole
+  equivalence, and completion/explanation views accept only their fully supported unions.
+  Number-line articulation accepts only fraction-location data. The former proper-to-whole
+  false match is a permanent routing regression; all admitted scaling/whole projection combinations
+  are rendered in both modes by regression tests. All active CCSS and test targets remain covered;
+  five CCSS tuples move generator registration without changing target labels or mathematical
+  payload fields. Proper-fraction ids and seeded scale selection are retained.
 - [ ] **Positive micro-filters.** `measurement-line-plot` and its `usesUnitSteps` parameter provide
   a concrete starting case: an explicit whole-step requirement must agree with generated
   subdivisions. Decide whether filters inspect target constraints or resolved generator guarantees,
   and how broad targets, fallbacks, alternatives, and bounded domains are handled. A flat
   `requiredLabels` conjunction is not proof of the complete generated domain.
-- [ ] **Classification evidence.** Review the fraction-equivalence classification number-line
-  question's literal "same point" caption in
+- [x] **Classification evidence.** The fraction-equivalence classification number-line
+  question no longer prints the verdict "same point" in
   [fraction-line-view.tsx](../../src/visuals/views/numbers/fraction-line-view.tsx). It may disclose
-  the requested verdict (`IMPL-V5`). Replay representative question/solution artifacts before
-  deciding on a change; the completed structural cleanup does not settle this independent issue.
+  that caption only in the solution or in an equality-completion task (`IMPL-V5`).
+  The number-line position remains the mathematical evidence for classification.
 
 ## Adoption order and boundaries
 

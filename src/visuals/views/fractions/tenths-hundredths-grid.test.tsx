@@ -1,7 +1,7 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
-import {FractionEquivalenceGenerator} from '../../../generators/fraction/fraction-equivalence/generator.ts';
+import {FractionTenthsEquivalenceGenerator} from '../../../generators/fraction/fraction-tenths-equivalence/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {TenthsHundredthsGrid as SharedTenthsHundredthsGrid} from '../../components/TenthsHundredthsGrid.tsx';
 import {TenthsToHundredthsProblem} from '../../../types/problems.ts';
@@ -37,14 +37,7 @@ const generateAddition = (
 
 const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view'): TenthsToHundredthsProblem => {
     setSeed(seed);
-    const data = new FractionEquivalenceGenerator().generate({
-        usesMultiplication: true,
-        usesEqualShares: true,
-        usesProperFractions: false,
-        usesImproperFractions: false,
-        usesIntegerNumbers: false,
-        usesTenthFractions: true
-    }).data;
+    const data = new FractionTenthsEquivalenceGenerator().generate({}).data;
     if (data.task !== 'tenths-to-hundredths') {
         throw new Error('Expected a tenths-to-hundredths payload.');
     }

@@ -1,6 +1,6 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
-import {FractionEquivalenceGenerator} from '../../../generators/fraction/fraction-equivalence/generator.ts';
+import {FractionTenthsEquivalenceGenerator} from '../../../generators/fraction/fraction-tenths-equivalence/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {
@@ -14,7 +14,7 @@ import {FractionLineMode, FractionLineView} from './fraction-line-view.tsx';
 const payload = (
     data: FractionLineProblem,
     isSolutionView: boolean
-): ViewRenderPayload<'numbers-fraction-line-explanation'> => ({
+): ViewRenderPayload<'numbers-fraction-line' | 'numbers-fraction-line-explanation'> => ({
     problem: {type: 'fraction', data, labels: []},
     viewId: 'numbers-fraction-line-explanation',
     targetLabels: [],
@@ -46,14 +46,7 @@ const locationData: FractionNumberLineProblem = {
 function wholeTenthsData(): TenthsToHundredthsProblem {
     for (let attempt = 0; attempt < 200; attempt++) {
         setSeed(`fraction-line-whole-${attempt}`);
-        const data = new FractionEquivalenceGenerator().generate({
-            usesMultiplication: true,
-            usesEqualShares: true,
-            usesProperFractions: false,
-            usesImproperFractions: false,
-            usesIntegerNumbers: false,
-            usesTenthFractions: true
-        }).data;
+        const data = new FractionTenthsEquivalenceGenerator().generate({}).data;
         if (data.task === 'tenths-to-hundredths' && data.tenths.numerator === 10) return data;
     }
     throw new Error('Expected a seeded 10/10 to 100/100 equivalence model.');

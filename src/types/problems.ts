@@ -1356,6 +1356,8 @@ export type FractionEquivalenceProblem =
     | WholeNumberFractionEquivalenceProblem
     | TenthsToHundredthsProblem;
 
+export type FractionScalingProblem = ProperFractionEquivalenceProblem | TenthsToHundredthsProblem;
+
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
 
 export type LegacyFractionComparisonProblem = {
@@ -1845,10 +1847,10 @@ export interface ViewTypeMap {
     'operations-pattern-generation-practice': ArithmeticRecurrencePatternProblem;
     'operations-pattern-generation-table': ArithmeticRecurrencePatternProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
-    'numbers-fraction-line': FractionLineProblem;
-    'numbers-fraction-line-classification': FractionLineProblem;
-    'numbers-fraction-line-formalization': FractionLineProblem;
-    'numbers-fraction-line-explanation': FractionLineProblem;
+    'numbers-fraction-line': FractionNumberLineProblem;
+    'numbers-fraction-line-classification': ProperFractionEquivalenceProblem;
+    'numbers-fraction-line-formalization': FractionEquivalenceProblem;
+    'numbers-fraction-line-explanation': FractionEquivalenceProblem;
     'operations-number-array-total': NumberArrayProblem;
     'operations-number-array-equation-formalization': NumberArrayProblem;
     'operations-number-array-interpretation': NumberArrayProblem;
@@ -1982,10 +1984,10 @@ export interface ViewTypeMap {
     'geometry-angle-arithmetic-inversion': AngleArithmeticProblem;
     'geometry-primitives-drawing': GeometryPrimitivesProblem;
     'geometry-primitives-identification': GeometryPrimitivesProblem;
-    'fractions-equivalence-model': FractionEquivalenceProblem;
-    'fractions-equivalence-completion-model': FractionEquivalenceProblem;
-    'fractions-equivalence-explanation-model': FractionEquivalenceProblem;
-    'fractions-whole-equivalence': FractionEquivalenceProblem;
+    'fractions-equivalence-model': ProperFractionEquivalenceProblem;
+    'fractions-equivalence-completion-model': FractionScalingProblem;
+    'fractions-equivalence-explanation-model': FractionScalingProblem;
+    'fractions-whole-equivalence': WholeNumberFractionEquivalenceProblem;
     'fractions-compare-benchmark-models': FractionComparisonProblem;
     'fractions-compare-models': FractionComparisonProblem;
     'fractions-interpretation-model': FractionArithmeticProblem;

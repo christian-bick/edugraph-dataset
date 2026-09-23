@@ -1,118 +1,26 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
+import {generateWithLabels} from '../../../lib/utils.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
 import {FractionEquivalenceGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
-describe('FractionEquivalenceGenerator spec integration', () => {
-    const generator = new FractionEquivalenceGenerator();
-
-    it('declares exactly the invariant equivalence capabilities', () => {
-        expect(spec).toEqual({
-            generatorId: 'fraction-equivalence',
-            generalLabels: [
-                Area.FractionEquivalence,
-                Scope.Equal
-            ]
-        });
-    });
-
-    it.each([
-        {taskAbilities: [Ability.ConceptClassification]},
-        {taskAbilities: [Ability.Formalization, Ability.ProcedureUnderstanding]}
-    ] as const)('keeps the proper-fraction model neutral for $taskAbilities', ({taskAbilities}) => {
-        setSeed('proper-equivalence');
-        const stub = generateWithLabels(generator, [
-            Area.FractionEquivalence,
-            Scope.EqualShares,
-            Scope.ProperFractions,
-            Scope.Equal,
-            ...taskAbilities
-        ]);
-
-        expect(stub).not.toBeNull();
-        expect(stub!.data.task).toBe('relate-equivalent-fractions');
-        expect(stub!.labels).not.toEqual(expect.arrayContaining([...taskAbilities]));
-    });
-
-    it('resolves whole-number mathematics without consuming Formalization', () => {
-        setSeed('whole-number-fraction');
-        const stub = generateWithLabels(generator, [
-            Area.FractionEquivalence,
-            Scope.ImproperFractions,
-            Scope.IntegerNumbers,
-            Scope.Equal,
-            Ability.Formalization
-        ]);
-
-        expect(stub).not.toBeNull();
-        expect(stub!.data.task).toBe('represent-whole-as-fraction');
-        expect(stub!.labels).toEqual(expect.arrayContaining([
-            Scope.ImproperFractions,
-            Scope.IntegerNumbers
-        ]));
-        expect(stub!.labels).not.toContain(Ability.Formalization);
-        expect(stub!.labels).not.toContain(Scope.EqualShares);
-    });
-
-    it.each([
-        [Scope.VisualNumbers, '0ea3b2ba'],
-        [Scope.Numberline, 'e2c38541']
-    ] as const)('uses a deterministic seeded scaling model for the Grade 4 %s target', (representation, hash) => {
-        const labels = [
-            Area.FractionEquivalence,
-            Area.Multiplication,
-            Scope.EqualShares,
-            Scope.Equal,
-            Scope.TenthFractions,
-            Scope.SingleFrameOfReference,
-            Ability.ProcedureUnderstanding,
-            Ability.Formalization,
-            representation
-        ];
-        expect(labelSetHash(labels)).toBe(hash);
-        setSeed(hash);
-        const stub = generateWithLabels(generator, labels);
-        setSeed(hash);
-        const repeated = generateWithLabels(generator, labels);
-
-        expect(stub).not.toBeNull();
-        expect(repeated!.data).toEqual(stub!.data);
-        if (stub!.data.task !== 'tenths-to-hundredths') {
-            throw new Error('Expected the exact 10-to-100 denominator relation.');
+describe('proper-fraction capability', () => {
+    it('guarantees proper equivalent fractions independently of requested labels', () => {
+        expect(spec.generalLabels).toEqual(expect.arrayContaining([Area.FractionEquivalence, Scope.ProperFractions, Scope.EqualShares]));
+        const cases: string[][] = [[], [Area.Multiplication], [Ability.ConceptClassification]];
+        for (const labels of cases) {
+            const result = generateWithLabels(new FractionEquivalenceGenerator(), labels)!;
+            expect(result.data.task).toBe('relate-equivalent-fractions');
+            expect(result.labels.includes(Area.Multiplication)).toBe(labels.includes(Area.Multiplication));
+            expect(result.labels).not.toContain(Ability.ConceptClassification);
         }
-        expect(stub!.data.scaleFactor).toBe(10);
-        expect(stub!.labels).toContain(Area.Multiplication);
-        expect(stub!.labels).toContain(Scope.TenthFractions);
-        expect(stub!.labels).not.toContain(Ability.ProcedureUnderstanding);
-        expect(stub!.labels).not.toContain(Ability.Formalization);
-        expect(stub!.labels).not.toContain(Scope.SingleFrameOfReference);
-        expect(stub!.labels).not.toContain(representation);
     });
-
-    it('keeps the seeded multiplication model independent of the requested Ability', () => {
-        const labels = [
-            Area.FractionEquivalence,
-            Area.Multiplication,
-            Scope.EqualShares,
-            Scope.Equal,
-            Scope.TenthFractions,
-            Scope.SingleFrameOfReference,
-            Scope.VisualNumbers,
-            Ability.Formalization
-        ];
-        expect(labelSetHash(labels)).toBe('8d4de1af');
-        setSeed('shared-base-ten-model');
-        const formalization = generateWithLabels(generator, labels);
-        setSeed('shared-base-ten-model');
-        const procedure = generateWithLabels(generator, [
-            ...labels,
-            Ability.ProcedureUnderstanding
-        ]);
-
-        expect(formalization).not.toBeNull();
-        expect(procedure!.data).toEqual(formalization!.data);
-        expect(formalization!.labels).not.toContain(Ability.Formalization);
+    it('does not change the mathematical draw when the requested Ability changes', () => {
+        const generator = new FractionEquivalenceGenerator();
+        setSeed('same-relation');
+        const first = generateWithLabels(generator, [Area.Multiplication, Ability.ConceptClassification]);
+        setSeed('same-relation');
+        expect(generateWithLabels(generator, [Area.Multiplication, Ability.Formalization])!.data).toEqual(first!.data);
     });
 });
