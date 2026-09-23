@@ -94,4 +94,11 @@ describe('findGeneralLabelDeductionIssues', () => {
         expect(inspectSpecSource(source).filter(issue => issue.rule === 'SPEC-6').map(issue => issue.field))
             .toEqual(['inline', 'premature']);
     });
+
+    it('marks dynamically obtained resolver factories for review without guessing failure', () => {
+        const source = 'export const DemoViewSchema = {choice: [["x"], toolkit.pickFactory()]}';
+        expect(inspectSpecSource(source)).toMatchObject([
+            {rule: 'SPEC-6', field: 'choice', severity: 'review'}
+        ]);
+    });
 });

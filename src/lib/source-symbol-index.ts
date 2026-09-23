@@ -15,18 +15,25 @@ function localSource(from: string, specifier: string): string | null {
     if (!specifier.startsWith('.')) return null;
     const base = resolve(dirname(from), specifier);
     return [base, `${base}.ts`, `${base}.tsx`, resolve(base, 'index.ts')]
-        .find(candidate => existsSync(candidate)) ?? null;
+        .find(candidate => existsSync(candidate))?.replaceAll('\\', '/') ?? null;
 }
 
 /** A bounded, cached index of static source bindings; it does not execute user code. */
 export class SourceSymbolIndex {
     private readonly files = new Map<string, IndexedSource>();
+    private readonly origins = new Map<string, string | null>();
+    private readonly initializers = new Map<string,
+        {expression: ts.Expression; file: string} | null>();
 
     constructor(private readonly read: (path: string) => string = path => readFileSync(path, 'utf-8')) {}
 
     load(path: string, sourceOverride?: string): ts.SourceFile {
-        if (sourceOverride !== undefined && this.files.get(path)?.source.text !== sourceOverride) {
+        path = path.replaceAll('\\', '/');
+        if (sourceOverride !== undefined && this.files.has(path)
+            && this.files.get(path)!.source.text !== sourceOverride) {
             this.files.delete(path);
+            this.origins.clear();
+            this.initializers.clear();
         }
         if (this.files.has(path)) return this.files.get(path)!.source;
         const source = ts.createSourceFile(path, sourceOverride ?? this.read(path), ts.ScriptTarget.Latest, true,
@@ -64,6 +71,7 @@ export class SourceSymbolIndex {
     }
 
     private entry(path: string): IndexedSource {
+        path = path.replaceAll('\\', '/');
         this.load(path);
         return this.files.get(path)!;
     }
@@ -85,16 +93,24 @@ export class SourceSymbolIndex {
     }
 
     origin(expression: ts.Expression, file: string, seen = new Set<string>()): string | undefined {
+        file = file.replaceAll('\\', '/');
         const node = ts.isParenthesizedExpression(expression) ? expression.expression : expression;
         if (ts.isIdentifier(node)) {
-            const entry = this.entry(file);
-            const binding = entry.imports.get(node.text) ?? entry.exports.get(node.text);
-            if (binding) return this.bindingOrigin(binding, file, seen);
             const key = `${file}#${node.text}`;
+            if (this.origins.has(key)) return this.origins.get(key) ?? undefined;
             if (seen.has(key)) return undefined;
             seen.add(key);
+            const entry = this.entry(file);
+            const binding = entry.imports.get(node.text) ?? entry.exports.get(node.text);
+            if (binding) {
+                const origin = this.bindingOrigin(binding, file, seen);
+                this.origins.set(key, origin ?? null);
+                return origin;
+            }
             const initializer = entry.values.get(node.text);
-            return initializer ? this.origin(initializer, file, seen) : undefined;
+            const origin = initializer ? this.origin(initializer, file, seen) : undefined;
+            this.origins.set(key, origin ?? null);
+            return origin;
         }
         if (ts.isPropertyAccessExpression(node)) {
             const parent = this.origin(node.expression, file, seen);
@@ -107,31 +123,30 @@ export class SourceSymbolIndex {
         return undefined;
     }
 
-    /** Visit an expression and statically referenced constants, at most once per binding. */
-    trace(expression: ts.Expression, file: string,
-        visit: (node: ts.Node, source: ts.SourceFile) => void,
-        seen = new Set<string>()): void {
-        const source = this.entry(file).source;
-        const walk = (node: ts.Node): void => {
-            visit(node, source);
-            if (ts.isIdentifier(node)) {
-                const entry = this.entry(file);
-                const local = entry.values.get(node.text);
-                const binding = entry.imports.get(node.text);
-                const importedFile = binding ? localSource(file, binding.module) : null;
-                const imported = importedFile ? this.entry(importedFile).values.get(binding!.imported) : undefined;
-                const next = local ? {file, expression: local} : imported && importedFile
-                    ? {file: importedFile, expression: imported} : null;
-                if (next) {
-                    const key = `${next.file}#${node.text}`;
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        this.trace(next.expression, next.file, visit, seen);
-                    }
-                }
-            }
-            ts.forEachChild(node, walk);
-        };
-        walk(expression);
+    /** Static constant initializer reached by one local or imported identifier. */
+    referencedInitializer(name: string, file: string,
+        seen = new Set<string>()): {expression: ts.Expression; file: string} | undefined {
+        file = file.replaceAll('\\', '/');
+        const key = `${file}#${name}`;
+        if (this.initializers.has(key)) return this.initializers.get(key) ?? undefined;
+        if (seen.has(key)) return undefined;
+        seen.add(key);
+        const entry = this.entry(file);
+        const own = entry.values.get(name);
+        if (own) {
+            const result = {expression: own, file};
+            this.initializers.set(key, result);
+            return result;
+        }
+        const binding = entry.imports.get(name) ?? entry.exports.get(name);
+        if (!binding) {
+            this.initializers.set(key, null);
+            return undefined;
+        }
+        const local = localSource(file, binding.module);
+        const result = local ? this.referencedInitializer(binding.imported, local, seen) : undefined;
+        this.initializers.set(key, result ?? null);
+        return result;
     }
+
 }

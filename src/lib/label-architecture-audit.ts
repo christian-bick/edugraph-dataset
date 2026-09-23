@@ -84,6 +84,7 @@ export interface SourceSignal {
     file: string;
     line: number;
     value: string;
+    disposition?: FindingDisposition;
 }
 
 export interface LabelArchitectureFinding {
@@ -407,7 +408,8 @@ function scanModuleSources(
         const file = relative(projectRoot, absolute).replaceAll('\\', '/');
         for (const issue of inspectSpecSource(readFileSync(absolute, 'utf-8'), absolute, symbols)) {
             signals.push({kind: 'spec-source-contract', role: item.role, module_id: item.id,
-                file, line: issue.line, value: `${issue.rule} ${issue.field}: ${issue.message}`});
+                file, line: issue.line, value: `${issue.rule} ${issue.field}: ${issue.message}`,
+                disposition: issue.severity === 'review' ? 'review' : 'violation'});
         }
     }
     const ownersByFile = new Map<string, Array<{role: CapabilityRole; moduleId: string}>>();
@@ -774,7 +776,7 @@ export function buildLabelArchitectureAudit(options: {
 
     const signalsByModule = new Map<string, SourceSignal[]>();
     for (const signal of sourceSignals) {
-        const key = `${signal.kind}\u0000${signal.role}\u0000${signal.module_id}`;
+        const key = `${signal.kind}\u0000${signal.role}\u0000${signal.module_id}\u0000${signal.disposition ?? ''}`;
         const group = signalsByModule.get(key);
         if (group) group.push(signal);
         else signalsByModule.set(key, [signal]);
@@ -785,7 +787,7 @@ export function buildLabelArchitectureAudit(options: {
         const values = radixSortUtf8([...new Set(signals.map(entry => entry.value))]);
         findings.push(finding({
             category: signal.kind,
-            disposition: signal.kind === 'payload-field-candidate' ? 'review' : 'violation',
+            disposition: signal.disposition ?? (signal.kind === 'payload-field-candidate' ? 'review' : 'violation'),
             summary: signal.kind === 'spec-source-contract' || signal.kind === 'implementation-contract'
                 ? `${signal.role} ${signal.module_id} has declaration source violations: ${values.join(', ')}.`
                 : signal.kind === 'payload-field-candidate'

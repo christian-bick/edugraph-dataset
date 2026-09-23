@@ -7,6 +7,7 @@ export interface SpecSourceIssue {
     line: number;
     column: number;
     message: string;
+    severity?: 'error' | 'review';
 }
 
 export interface GeneralLabelDeductionIssue {line: number; column: number}
@@ -32,23 +33,56 @@ export function inspectSpecSource(source: string, fileName = 'spec.ts',
     const sourceFile = index.load(fileName, source);
     const issues: SpecSourceIssue[] = [];
     const report = (rule: SpecSourceIssue['rule'], field: string, node: ts.Node, message: string,
-        owner = sourceFile): void => {
+        owner = sourceFile, severity: SpecSourceIssue['severity'] = 'error'): void => {
         const location = owner.getLineAndCharacterOfPosition(node.getStart(owner));
-        issues.push({rule, field, line: location.line + 1, column: location.character + 1, message});
+        issues.push({rule, field, line: location.line + 1, column: location.character + 1, message, severity});
+    };
+    type DeductionOperator = 'deductCompatible' | 'deductAdmitting';
+    type DeductionCall = {node: ts.CallExpression; owner: ts.SourceFile};
+    const sharedCalls: Record<DeductionOperator, WeakMap<ts.Expression, DeductionCall[]>> = {
+        deductCompatible: new WeakMap(), deductAdmitting: new WeakMap()
+    };
+    const deductionCalls = (root: ts.Expression, rootOwner: ts.SourceFile,
+        wanted: DeductionOperator): DeductionCall[] => {
+        const found: DeductionCall[] = [];
+        const expanded = new Set<ts.Expression>();
+        const walk = (node: ts.Node, owner: ts.SourceFile, output: DeductionCall[]): void => {
+            if (ts.isCallExpression(node)) {
+                const operator = deductionName(index.origin(node.expression, owner.fileName));
+                if (operator === wanted) output.push({node, owner});
+            }
+            if (ts.isIdentifier(node)) {
+                const referenced = index.referencedInitializer(node.text, owner.fileName);
+                if (referenced && !expanded.has(referenced.expression)) {
+                    expanded.add(referenced.expression);
+                    const cached = sharedCalls[wanted].get(referenced.expression);
+                    if (cached) output.push(...cached);
+                    else {
+                        const nested: DeductionCall[] = [];
+                        sharedCalls[wanted].set(referenced.expression, nested);
+                        walk(referenced.expression, index.load(referenced.file), nested);
+                        output.push(...nested);
+                    }
+                }
+            }
+            ts.forEachChild(node, child => walk(child, owner, output));
+        };
+        walk(root, rootOwner, found);
+        return found;
     };
     const inspectField = (field: string, initializer: ts.Expression): void => {
-        index.trace(initializer, fileName, (node, owner) => {
-            if (!ts.isCallExpression(node)) return;
-            const deduction = deductionName(index.origin(node.expression, owner.fileName));
-            if (!deduction) return;
-            if (deduction === 'deductCompatible' && field !== 'schema') {
+        if (field !== 'schema') {
+            for (const {node, owner} of deductionCalls(initializer, sourceFile, 'deductCompatible')) {
                 report(field === 'rejectedLabels' ? 'SPEC-V4' : 'SPEC-10', field, node,
                     'deductCompatible may appear only in schema capabilities', owner);
-            } else if (deduction === 'deductAdmitting' && field !== 'rejectedLabels') {
+            }
+        }
+        if (field !== 'rejectedLabels') {
+            for (const {node, owner} of deductionCalls(initializer, sourceFile, 'deductAdmitting')) {
                 report(field === 'schema' ? 'SPEC-10' : 'SPEC-V4', field, node,
                     'deductAdmitting may appear only in rejectedLabels', owner);
             }
-        });
+        }
     };
     const inspectSchema = (initializer: ts.Expression): void => {
         inspectField('schema', initializer);
@@ -68,6 +102,10 @@ export function inspectSpecSource(source: string, fileName = 'spec.ts',
                 const name = origin?.split('#').at(-1);
                 if (name && !trustedFactoryNames.has(name)) {
                     report('SPEC-6', field, resolver, 'resolver is executed in the schema; pass its reference');
+                } else if (!name) {
+                    report('SPEC-6', field, resolver,
+                        'resolver call cannot be traced to an approved curried factory; review its source form',
+                        sourceFile, 'review');
                 }
             }
         }

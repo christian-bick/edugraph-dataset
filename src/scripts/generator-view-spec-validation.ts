@@ -28,12 +28,12 @@ function checkSourceContracts(kind: string, item: string, specPath: string,
     sourceIndex: SourceSymbolIndex): boolean {
     const issues = inspectSpecSource(fs.readFileSync(specPath, 'utf8'), specPath, sourceIndex);
     for (const issue of issues) {
-        console.error(
-            `❌ [${kind}:${item}] ${issue.rule} violation at ${specPath}:${issue.line}:${issue.column} `
-            + `(${issue.field}): ${issue.message}`
-        );
+        const message = `${issue.rule} at ${specPath}:${issue.line}:${issue.column} `
+            + `(${issue.field}): ${issue.message}`;
+        if (issue.severity === 'review') console.warn(`⚠️ [${kind}:${item}] ${message}`);
+        else console.error(`❌ [${kind}:${item}] ${message}`);
     }
-    return issues.length > 0;
+    return issues.some(issue => issue.severity !== 'review');
 }
 
 export async function validateSpecs(options: {generatorsDir?: string; viewsDir?: string;
