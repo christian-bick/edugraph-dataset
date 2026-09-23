@@ -1,9 +1,18 @@
 import {describe, expect, it} from 'vitest';
-import {planDevelopmentValidation} from './development-plan.ts';
+import {generatorOutputContractChanged, planDevelopmentValidation} from './development-plan.ts';
 
 const specs = ['ccss', 'test'];
 
 describe('development validation plan', () => {
+    it('compares declared output contracts and conservatively routes unknown declarations', () => {
+        const previous = 'class Demo implements ProblemGenerator<FirstProblem> { value = 1; }';
+        expect(generatorOutputContractChanged(previous,
+            'class Demo implements ProblemGenerator<FirstProblem> { value = 2; }')).toBe(false);
+        expect(generatorOutputContractChanged(previous,
+            'class Demo implements ProblemGenerator<SecondProblem> { value = 1; }')).toBe(true);
+        expect(generatorOutputContractChanged(previous, 'class Demo { value = 1; }')).toBe(true);
+        expect(generatorOutputContractChanged(null, previous)).toBe(true);
+    });
     it('maps one view-spec edit to all matching contracts but not documentation', () => {
         const plan = planDevelopmentValidation([
             'src/visuals/views/arithmetic/active-vocabulary/spec.ts'

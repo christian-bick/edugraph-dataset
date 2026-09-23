@@ -3,9 +3,9 @@ import {existsSync, readFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {getCliOption} from '../lib/cli.ts';
-import {planDevelopmentValidation, type DevelopmentCheck} from '../lib/development-plan.ts';
+import {generatorOutputContractChanged, planDevelopmentValidation,
+    type DevelopmentCheck} from '../lib/development-plan.ts';
 import {listSpecModules, listUnionSpecs} from '../lib/spec-catalog.ts';
-import {parseGeneratorProblemType} from '../lib/type-parser.ts';
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const args = process.argv.slice(2);
@@ -49,16 +49,16 @@ function changedGeneratorOutputTypes(files: readonly string[]): string[] {
         if (!/^src\/generators\/.*\/generator\.ts$/.test(file)) return false;
         const path = resolve(PROJECT_ROOT, file);
         if (!existsSync(path)) return true;
-        const current = parseGeneratorProblemType(readFileSync(path, 'utf-8'));
-        let previous: string | null = null;
+        const currentSource = readFileSync(path, 'utf-8');
+        let previousSource: string;
         try {
-            previous = parseGeneratorProblemType(execFileSync('git', ['show', `${baseline}:${file.replaceAll('\\', '/')}`], {
+            previousSource = execFileSync('git', ['show', `${baseline}:${file.replaceAll('\\', '/')}`], {
                 cwd: PROJECT_ROOT, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore']
-            }));
+            });
         } catch {
             return true;
         }
-        return !current || !previous || current !== previous;
+        return generatorOutputContractChanged(previousSource, currentSource);
     });
 }
 

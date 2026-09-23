@@ -1,4 +1,13 @@
 import {radixSortUtf8} from './content-identity.ts';
+import {parseGeneratorProblemType} from './type-parser.ts';
+
+/** Unknown declarations are structural changes until proven otherwise. */
+export function generatorOutputContractChanged(previousSource: string | null,
+    currentSource: string | null): boolean {
+    const previous = previousSource === null ? null : parseGeneratorProblemType(previousSource);
+    const current = currentSource === null ? null : parseGeneratorProblemType(currentSource);
+    return !previous || !current || previous !== current;
+}
 
 export const DEVELOPMENT_CHECKS = [
     'types',
