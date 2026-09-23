@@ -38,7 +38,8 @@ export function planDevelopmentValidation(
     changedFiles: readonly string[],
     availableSpecs: readonly string[],
     productionSpecs: readonly string[] = availableSpecs,
-    missingFiles: readonly string[] = []
+    missingFiles: readonly string[] = [],
+    changedGeneratorOutputTypes: readonly string[] = []
 ): DevelopmentValidationPlan {
     const files = radixSortUtf8([...new Set(changedFiles.map(normalizedFile).filter(Boolean))]);
     const checks = new Set<DevelopmentCheck>();
@@ -47,6 +48,7 @@ export function planDevelopmentValidation(
     const productionSpecSet = new Set([...productionSpecs, ...availableSpecs.filter(spec => spec === 'test')]);
     const reasons = new Map<string, Set<string>>();
     const missingFileSet = new Set(missingFiles.map(normalizedFile));
+    const changedOutputTypes = new Set(changedGeneratorOutputTypes.map(normalizedFile));
     let allSpecs = false;
     let classificationSteps = 0;
     const add = (key: DevelopmentCheck | `spec:${string}`, file: string): void => {
@@ -85,7 +87,7 @@ export function planDevelopmentValidation(
         } else if (moduleImplementation) {
             addCheck('labels', file);
             if (generatorModule && !removed) addCheck('generator-coverage', file);
-            if (removed) {
+            if (removed || changedOutputTypes.has(file)) {
                 addCheck('generator-view-specs', file);
                 addAllSpecs(file);
             }

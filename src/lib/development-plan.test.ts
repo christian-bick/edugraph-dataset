@@ -37,6 +37,13 @@ describe('development validation plan', () => {
         expect(plan.specs).toEqual([]);
     });
 
+    it('routes a changed or uncertain generator output contract through pair and active-target checks', () => {
+        const file = 'src/generators/counting/counting-basic/generator.ts';
+        const plan = planDevelopmentValidation([file], specs, ['ccss'], [], [file]);
+        expect(plan.checks).toEqual(['types', 'related-tests', 'generator-view-specs', 'labels', 'generator-coverage']);
+        expect(plan.specs).toEqual(['ccss', 'test']);
+    });
+
     it('treats a removed implementation as a capability-wide structural change', () => {
         const file = 'src/generators/counting/counting-basic/generator.ts';
         const plan = planDevelopmentValidation([file], specs, ['ccss'], [file]);

@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { Ability, Area, Scope } from 'edugraph-ts';
+import {assertResolvedTargetCoverage, ResolvedLabelContractError} from './label-contracts.ts';
 import {
     computeSampleKey,
     parseSampleKey,
@@ -403,6 +404,22 @@ describe('generateSample', () => {
 
 describe('generateSampleWithRetry', () => {
     const sampleKey = computeSampleKey(IDENTITY);
+
+    it('propagates resolved-claim failures from duplicate classification without retrying', () => {
+        let draws = 0;
+        const generator = makeStubGenerator(() => {
+            draws++;
+            return {data: {value: 1}};
+        });
+        expect(() => generateSampleWithRetry({
+            generator, labels: [], sampleKey,
+            isDuplicate: stub => {
+                assertResolvedTargetCoverage(stub.labels, [Area.Addition], sampleKey);
+                return false;
+            }
+        })).toThrow(ResolvedLabelContractError);
+        expect(draws).toBe(1);
+    });
 
     it('returns the first successful draw with attempt 1', () => {
         const generator = makeStubGenerator(() => ({ data: { value: Math.floor(random() * 100) } }));

@@ -105,10 +105,15 @@ export function readGeneratorProblemTypeFromPath(
     if (existsSync(generatorPath)) {
         counters?.add('type.generator_file_reads');
         const content = readFileSync(generatorPath, 'utf8');
-        const match = content.match(/implements\s+ProblemGenerator<([^>]+)>/);
-        problemType = match ? match[1].split(',')[0].trim() : null;
+        problemType = parseGeneratorProblemType(content);
     }
     return problemType;
+}
+
+/** The declaration-only payload contract, independent of implementation details. */
+export function parseGeneratorProblemType(source: string): string | null {
+    const match = source.match(/implements\s+ProblemGenerator<([^>]+)>/);
+    return match ? match[1].split(',')[0].trim() : null;
 }
 
 export function getViewToProblemTypeMap(counters?: WorkCounters): Record<string, string> {

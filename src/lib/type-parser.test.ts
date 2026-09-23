@@ -3,11 +3,19 @@ import {
     clearTypeParserCaches,
     getGeneratorProblemType,
     getViewToProblemTypeMap,
-    isProblemTypeCompatible
+    isProblemTypeCompatible,
+    parseGeneratorProblemType
 } from './type-parser.ts';
 import {createWorkCounters} from './work-counters.ts';
 
 describe('type-parser', () => {
+    it('extracts output contracts independently of generator behavior', () => {
+        expect(parseGeneratorProblemType('class Demo implements ProblemGenerator<FirstProblem> {}'))
+            .toBe('FirstProblem');
+        expect(parseGeneratorProblemType('class Demo implements ProblemGenerator<SecondProblem, Config> {}'))
+            .toBe('SecondProblem');
+        expect(parseGeneratorProblemType('class Demo {}')).toBeNull();
+    });
     it('successfully extracts view to problem type mapping', () => {
         const map = getViewToProblemTypeMap();
         expect(map['operations-vertical']).toBe('ArithmeticProblem');
