@@ -14,7 +14,7 @@ interface CoreProps {
 }
 
 const ShapeDrawCircularShapeCore = ({config: _config, payload}: CoreProps) => (
-    <ShapeDrawingView
+    <ShapeDrawingView mode="attributes"
         expectedFamily="circular"
         payload={payload}
         viewId="shape-draw-circular-shape"

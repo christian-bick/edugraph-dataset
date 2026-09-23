@@ -1,0 +1,2 @@
+- **Identity:** A turned polygon reference beside a drawing canvas asks for the same shape despite its changed orientation.
+- **Modes:** Question Mode keeps the response canvas blank; Solution Mode reveals the same shape in a different orientation while retaining the reference.

@@ -1,0 +1,3 @@
+- **Identity:** A required vertex, angle, or equal-face count identifies the requested shape construction.
+- **Modes:** Question Mode leaves the construction unfinished; Solution Mode shows a shape satisfying the count.
+- **Count evidence:** Angle solutions mark and total every interior angle; equal-face tasks show six congruent square pieces and a completed cube with its six-face net.

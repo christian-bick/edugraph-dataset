@@ -2,11 +2,11 @@ import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
-import {ShapeBuildShapeProblem} from '../../../types/problems.ts';
+import {ShapeDrawingDefinitionProblem} from '../../../types/problems.ts';
 import {getTracePath} from './shape-drawing-helpers.ts';
 import {ShapeDrawingView} from './shape-drawing-view.tsx';
 
-function renderDrawing(isSolutionView: boolean, data: ShapeBuildShapeProblem, seed = 27) {
+function renderDrawing(isSolutionView: boolean, data: ShapeDrawingDefinitionProblem, seed = 27, mode: 'rotation' | 'attributes' = 'rotation') {
     const circular = data.target === 'circle';
     const viewId = circular ? 'shape-draw-circular-shape' : 'shape-draw-linear-shape';
     const payload: ViewRenderPayload<typeof viewId> = {
@@ -18,6 +18,7 @@ function renderDrawing(isSolutionView: boolean, data: ShapeBuildShapeProblem, se
     };
     return renderToStaticMarkup(createElement(ShapeDrawingView, {
         expectedFamily: circular ? 'circular' : 'linear',
+        mode,
         payload,
         viewId
     }));
@@ -29,11 +30,10 @@ function svgFor(markup: string, label: string): string {
     return svg![0];
 }
 
-const circle: ShapeBuildShapeProblem = {
-    task: 'rotation-conservation',
+const circle: ShapeDrawingDefinitionProblem = {
+    kind: 'circle-definition',
     target: 'circle',
-    sides: 0,
-    corners: 0
+    definition: {closed: true, boundary: 'curved', sideCount: 0, vertexCount: 0}
 };
 
 describe('circle drawing rotation evidence', () => {
@@ -78,16 +78,16 @@ describe('circle drawing rotation evidence', () => {
 
     it('does not add circle turning marks to linear shapes or attribute construction', () => {
         const triangle = renderDrawing(true, {
-            task: 'rotation-conservation', target: 'triangle', sides: 3, corners: 3
+            kind: 'polygon-definition', target: 'triangle', definition: {closed: true, boundary: 'straight', sideCount: 3, vertexCount: 3}
         });
         expect(triangle).toContain('rotate(180 50 50)');
         expect(triangle).not.toContain('Boundary mark');
         expect(triangle).not.toContain('Clockwise turn');
 
         const attributes = renderDrawing(true, {
-            task: 'specify-attributes', target: 'circle', sides: 0, corners: 0,
+            kind: 'circle-definition', target: 'circle',
             definition: {closed: true, boundary: 'curved', sideCount: 0, vertexCount: 0}
-        });
+        }, 27, 'attributes');
         expect(attributes).toContain(`d="${getTracePath('circle')}"`);
         expect(attributes).not.toContain('Boundary mark');
         expect(attributes).not.toContain('Clockwise turn');

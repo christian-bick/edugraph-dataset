@@ -1,0 +1,3 @@
+- **Identity:** A turned circle reference beside a drawing canvas asks for the same shape despite its changed orientation.
+- **Modes:** Question Mode keeps the response canvas blank; Solution Mode reveals the same shape in a different orientation while retaining the reference.
+- **Turning evidence:** A boundary mark and a turn arrow make the change of orientation visible on the circle.

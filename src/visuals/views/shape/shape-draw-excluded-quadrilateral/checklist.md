@@ -1,0 +1,2 @@
+- **Identity:** Draw a quadrilateral outside the rhombus, rectangle, and square subcategories using their defining attributes.
+- **Modes:** Question Mode leaves the drawing blank; Solution Mode shows four straight sides with unequal lengths and no right angles, with evidence explaining each exclusion.

@@ -14,7 +14,7 @@ interface CoreProps {
 }
 
 const ShapeDrawLinearShapeCore = ({config: _config, payload}: CoreProps) => (
-    <ShapeDrawingView
+    <ShapeDrawingView mode="attributes"
         expectedFamily="linear"
         payload={payload}
         viewId="shape-draw-linear-shape"

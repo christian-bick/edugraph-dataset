@@ -4,21 +4,16 @@ import {ShapeDrawLinearShapeViewSchema, spec} from './spec.ts';
 
 describe('shape-draw-linear-shape view spec', () => {
     it('contributes linear drawing only for supported generator-established polygons', () => {
-        expect(spec.requiredLabels).toEqual([Area.Polygon]);
+        expect(spec.requiredLabels).toEqual([Area.ShapeClassification]);
         expect(spec.generalLabels).toEqual([
+            Area.ShapeClassification,
+            Scope.ShapeAttributes,
             Area.LinearShapeDrawing,
             Ability.ConceptSpecification,
             Ability.VisualArticulation
         ]);
         expect(spec.generalLabels).not.toContain(Area.CircularShapeDrawing);
-        expect(spec.rejectedLabels).toEqual([
-            Area.Hexagon,
-            Area.Pentagon,
-            Scope.ShapeProperties,
-            Scope.VertexCount,
-            Scope.AngleCount,
-            Scope.FaceCount
-        ]);
+        expect(spec).not.toHaveProperty('rejectedLabels');
         expect(ShapeDrawLinearShapeViewSchema).toEqual({});
     });
 });

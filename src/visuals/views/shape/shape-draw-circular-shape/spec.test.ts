@@ -4,19 +4,16 @@ import {ShapeDrawCircularShapeViewSchema, spec} from './spec.ts';
 
 describe('shape-draw-circular-shape view spec', () => {
     it('contributes circular drawing only for generator-established circles', () => {
-        expect(spec.requiredLabels).toEqual([Area.Circle]);
+        expect(spec.requiredLabels).toEqual([Area.ShapeClassification]);
         expect(spec.generalLabels).toEqual([
+            Area.ShapeClassification,
+            Scope.ShapeAttributes,
             Area.CircularShapeDrawing,
             Ability.ConceptSpecification,
             Ability.VisualArticulation
         ]);
         expect(spec.generalLabels).not.toContain(Area.LinearShapeDrawing);
-        expect(spec.rejectedLabels).toEqual([
-            Scope.ShapeProperties,
-            Scope.VertexCount,
-            Scope.AngleCount,
-            Scope.FaceCount
-        ]);
+        expect(spec).not.toHaveProperty('rejectedLabels');
         expect(ShapeDrawCircularShapeViewSchema).toEqual({});
     });
 });

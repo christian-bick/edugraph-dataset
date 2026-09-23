@@ -11,8 +11,8 @@ describe('shape drawing helpers', () => {
         for (const target of ['triangle', 'square', 'rectangle', 'quadrilateral']) {
             expect(getShapeDrawingFamily(target)).toBe('linear');
         }
-        expect(getShapeDrawingFamily('hexagon')).toBeUndefined();
-        expect(getShapeDrawingFamily('pentagon')).toBeUndefined();
+        expect(getShapeDrawingFamily('hexagon')).toBe('linear');
+        expect(getShapeDrawingFamily('pentagon')).toBe('linear');
     });
 
     it('returns the trace path for each supported shape', () => {

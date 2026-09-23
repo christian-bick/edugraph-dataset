@@ -67,7 +67,7 @@ describe('shape count payload validation', () => {
             target: 'pentagon',
             sides: 5,
             corners: 5,
-            task: 'specify-count',
+            kind: 'attribute-count',
             attribute: 'angles',
             requiredCount: 5
         };

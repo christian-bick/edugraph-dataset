@@ -1,3 +1,2 @@
-- **Identity:** A defining-attribute card or a required-count card makes the requested construction identifiable.
+- **Identity:** A defining-attribute card makes the requested polygon construction identifiable.
 - **Modes:** Question Mode leaves the requested construction unfinished; Solution Mode reveals the completed construction.
-- **Attribute counts:** Angle solutions mark and total every interior angle; equal-face tasks show six congruent square pieces and a completed cube with its six-face net.

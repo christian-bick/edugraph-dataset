@@ -1189,44 +1189,36 @@ export type ShapeEdgeCompositionProblem = {
     corners: 3 | 4 | 6;
 };
 
-export type ShapeRotationConstructionProblem = {
-    target: PlaneShapeName;
-    sides: number;
-    corners: number;
-    task: 'rotation-conservation';
+export type ShapePolygonDefinitionProblem = {
+    kind: 'polygon-definition';
+    target: Exclude<PlaneShapeName, 'circle' | 'rhombus'>;
+    definition: ShapeDefinition;
+};
+
+export type ShapeCircleDefinitionProblem = {
+    kind: 'circle-definition';
+    target: 'circle';
+    definition: ShapeDefinition;
 };
 
 export type ShapeExcludedQuadrilateralProblem = {
+    kind: 'excluded-quadrilateral';
     target: 'quadrilateral';
-    sides: 4;
-    corners: 4;
-    task: 'exclude-quadrilateral-subcategories';
     definition: ShapeDefinition;
     excludedCategories: ['rhombus', 'rectangle', 'square'];
 };
 
-export type ShapeAttributeSpecificationProblem = {
-    target: PlaneShapeName;
-    sides: number;
-    corners: number;
-    task: 'specify-attributes';
-    definition: ShapeDefinition;
-};
-
 export type ShapeAttributeCountSpecificationProblem = {
-    target: PlaneShapeName | 'cube';
+    kind: 'attribute-count';
+    target: Exclude<PlaneShapeName, 'circle' | 'rhombus'> | 'cube';
     sides: number;
     corners: number;
-    task: 'specify-count';
     attribute: ShapeCountAttribute;
     requiredCount: number;
 };
 
-export type ShapeBuildShapeProblem =
-    | ShapeRotationConstructionProblem
-    | ShapeExcludedQuadrilateralProblem
-    | ShapeAttributeSpecificationProblem
-    | ShapeAttributeCountSpecificationProblem;
+export type ShapeConstructionProblem = ShapePolygonDefinitionProblem | ShapeAttributeCountSpecificationProblem;
+export type ShapeDrawingDefinitionProblem = ShapePolygonDefinitionProblem | ShapeCircleDefinitionProblem;
 
 export type ShapeCompositionTargetId =
     | 'rectangle'
@@ -1949,7 +1941,8 @@ export interface ViewTypeMap {
     'shape-line-symmetry-drawing': ShapeLineSymmetryProblem;
     'shape-line-symmetry-identification': ShapeLineSymmetryProblem;
     'shape-same-attribute': ShapeSameAttributeProblem;
-    'shape-build-shape': ShapeBuildShapeProblem;
+    'shape-build-shape': ShapePolygonDefinitionProblem;
+    'shape-build-from-count': ShapeAttributeCountSpecificationProblem;
     'shape-build-from-parts': ShapeEdgeCompositionProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
     'shape-partition-equal': ShapePartitionProblem;
@@ -2004,6 +1997,9 @@ export interface ViewTypeMap {
     'numbers-decimal-line': DecimalNotationProblem;
     'numbers-decimal-measurement': DecimalNotationProblem;
     'numbers-decimal-comparison': DecimalComparisonProblem;
-    'shape-draw-circular-shape': ShapeBuildShapeProblem;
-    'shape-draw-linear-shape': ShapeBuildShapeProblem;
+    'shape-draw-circular-shape': ShapeCircleDefinitionProblem;
+    'shape-draw-circular-rotation': ShapeCircleDefinitionProblem;
+    'shape-draw-linear-shape': ShapePolygonDefinitionProblem;
+    'shape-draw-linear-rotation': ShapePolygonDefinitionProblem;
+    'shape-draw-excluded-quadrilateral': ShapeExcludedQuadrilateralProblem;
 }

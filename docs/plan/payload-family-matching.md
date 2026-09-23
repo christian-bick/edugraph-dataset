@@ -67,15 +67,33 @@ recurrence ids are retained. Canonical rendering and final cache checks follow t
 
 ### Remaining work
 
+Shape adoption uses four precise producers: polygon definitions (`shape-build-shape`),
+circle definitions, attribute-count constraints, and excluded-quadrilateral relations.
+The definition payloads no longer select rotation or drawing tasks or duplicate their counts.
+Rotation and attribute drawing are thin leaves sharing `shape-drawing-view.tsx`; count and
+attribute construction share `shape-construction-view.tsx`. Polygon drawing now supports
+pentagons and hexagons throughout its declared family.
+
+| Shape consumers | Active CCSS families | Contract verification |
+| --- | --- | --- |
+| `shape-build-shape`, `shape-draw-linear-shape` | 1.G.A.1 defining attributes | Polygon definitions; all six supported polygons render in both modes. |
+| `shape-draw-circular-shape` | 1.G.A.1 circle attributes | Circle definition; attribute evidence retained. |
+| `shape-draw-linear-rotation`, `shape-draw-circular-rotation` | K.G.B.5 rotation conservation | The same definitions; rotation selected by the leaf, including visible circle turning marks. |
+| `shape-build-from-count` | 2.G.A.1 angle/equal-face counts | Count constraints only; varied polygon witnesses and cube net render tests. |
+| `shape-draw-excluded-quadrilateral` | 3.G.A.1 other quadrilaterals | Exact exclusion relation; all subcategory witnesses remain visible. |
+
+The shape-focused suite passes 204 tests and the added payload-totality suite passes nine.
+Type, spec ownership/applicability and active CCSS/test checks pass. Every previous active
+target still matches; the only added realization is hexagon drawing for the existing Grade 1
+attribute target. No target labels were changed. New generator/view ids deliberately change
+sample seeds and split assignments; cache verification must follow canonical generation.
+
 - [ ] **Union-member matching.** [matching.ts](../../src/lib/matching.ts) permits a generator
   returning `A | B` to feed a view accepting only `A` when the view has any `requiredLabels`.
   Their presence does not prove that the generated payload is `A`. Adopt the six inventoried
   arithmetic-pattern pairs are adopted; remove that exception from matching and the parsed type contract.
-- [ ] **Shape construction.** `shape-build-shape` retains attribute/count, rotation, and
-  excluded-subcategory branches with task-shaped payloads. Its construction and drawing consumers
-  are not total over the declared union. Review the mathematical responsibilities and every
-  consuming projection together; do not repair routing by changing truthful targets. Consuming
-  schema-resolved ontology enum values is not itself raw-label parsing.
+- [x] **Shape construction.** Precise mathematical producers and total, explicitly typed consumers
+  replace the broad task union. Consumer and evidence checks are recorded above.
 - [ ] **Fraction equivalence.** `fraction-equivalence` returns proper-fraction scaling,
   whole-number equivalence, or tenths-to-hundredths relations. Several views declare the whole
   union while accepting only a subset. A synthetic target with FractionEquivalence, ProperFractions,

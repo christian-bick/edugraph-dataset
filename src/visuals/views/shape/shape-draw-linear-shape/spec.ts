@@ -4,19 +4,13 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'shape-draw-linear-shape',
-    requiredLabels: [Area.Polygon],
+    requiredLabels: [Area.ShapeClassification],
     generalLabels: [
+        Area.ShapeClassification,
+        Scope.ShapeAttributes,
         Area.LinearShapeDrawing,
         Ability.ConceptSpecification,
         Ability.VisualArticulation
-    ],
-    rejectedLabels: [
-        Area.Hexagon,
-        Area.Pentagon,
-        Scope.ShapeProperties,
-        Scope.VertexCount,
-        Scope.AngleCount,
-        Scope.FaceCount
     ]
 };
 

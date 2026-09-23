@@ -1,5 +1,5 @@
-import {ViewRenderPayload} from '../../../types/ml-engine.ts';
-import {ShapeDefinition, ShapeExcludedQuadrilateralProblem} from '../../../types/problems.ts';
+import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
+import {ShapeDefinition, ShapeDrawingDefinitionProblem, ShapeExcludedQuadrilateralProblem} from '../../../types/problems.ts';
 import {
     getShapeDrawingFamily,
     getTracePath,
@@ -10,11 +10,16 @@ import {
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {shapeConstructionCountsMatch} from './helpers.ts';
 
-interface ShapeDrawingViewProps {
+type ShapeDrawingViewProps = {
     expectedFamily: ShapeDrawingFamily;
-    payload: ViewRenderPayload<ShapeDrawingViewId>;
     viewId: ShapeDrawingViewId;
-}
+} & ({
+    mode: 'attributes' | 'rotation';
+    payload: RenderPayload<AbstractProblem<ShapeDrawingDefinitionProblem>>;
+} | {
+    mode: 'exclusions';
+    payload: RenderPayload<AbstractProblem<ShapeExcludedQuadrilateralProblem>>;
+});
 
 function ensureSupportedShape(
     shape: string,
@@ -101,7 +106,7 @@ function SpecificationDrawingLayout({
     );
 }
 
-function LegacyDrawingLayout({
+function RotationDrawingLayout({
     shape,
     isSolutionView
 }: {
@@ -165,8 +170,6 @@ function validateExcludedQuadrilateral(
     const exclusions = ['rhombus', 'rectangle', 'square'];
     if (
         data.target !== 'quadrilateral'
-        || data.sides !== 4
-        || data.corners !== 4
         || definition.sideCount !== 4
         || definition.vertexCount !== 4
         || definition.boundary !== 'straight'
@@ -239,36 +242,27 @@ function ExcludedQuadrilateralLayout({
     );
 }
 
-export function ShapeDrawingView({
-    expectedFamily,
-    payload,
-    viewId
-}: ShapeDrawingViewProps) {
+export function ShapeDrawingView(props: ShapeDrawingViewProps) {
+    const {expectedFamily, payload, viewId} = props;
     const {problem, isSolutionView} = payload;
     const data = problem.data;
-    validateProblemData(viewId, data, ['target', 'sides', 'corners']);
+    validateProblemData(viewId, data, ['kind', 'target', 'definition']);
     ensureSupportedShape(data.target, expectedFamily, viewId);
-    if (!shapeConstructionCountsMatch(data.target, data.sides, data.corners)) {
+    if (!shapeConstructionCountsMatch(data.target, data.definition.sideCount, data.definition.vertexCount)) {
         throw new ViewValidationError(viewId, 'The construction counts do not match the named shape.');
     }
 
-    if (data.task === 'exclude-quadrilateral-subcategories') {
-        validateProblemData(viewId, data, ['task', 'definition', 'excludedCategories']);
-        validateExcludedQuadrilateral(data, viewId);
-        return <ExcludedQuadrilateralLayout data={data} isSolutionView={isSolutionView} />;
+    if (props.mode === 'exclusions') {
+        const relation = props.payload.problem.data;
+        validateProblemData(viewId, relation, ['excludedCategories']);
+        validateExcludedQuadrilateral(relation, viewId);
+        return <ExcludedQuadrilateralLayout data={relation} isSolutionView={isSolutionView} />;
     }
 
-    if (data.task === 'rotation-conservation') {
-        return <LegacyDrawingLayout shape={data.target} isSolutionView={isSolutionView}/>;
+    if (props.mode === 'rotation') {
+        return <RotationDrawingLayout shape={data.target} isSolutionView={isSolutionView}/>;
     }
 
-    if (data.task !== 'specify-attributes') {
-        throw new ViewValidationError(
-            viewId,
-            'Attribute drawing requires a defining-attribute payload.'
-        );
-    }
-    validateProblemData(viewId, data, ['task', 'definition']);
     validateDefinition(data.definition, viewId);
     return (
         <SpecificationDrawingLayout

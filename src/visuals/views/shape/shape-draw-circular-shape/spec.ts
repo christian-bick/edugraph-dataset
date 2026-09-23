@@ -4,17 +4,13 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'shape-draw-circular-shape',
-    requiredLabels: [Area.Circle],
+    requiredLabels: [Area.ShapeClassification],
     generalLabels: [
+        Area.ShapeClassification,
+        Scope.ShapeAttributes,
         Area.CircularShapeDrawing,
         Ability.ConceptSpecification,
         Ability.VisualArticulation
-    ],
-    rejectedLabels: [
-        Scope.ShapeProperties,
-        Scope.VertexCount,
-        Scope.AngleCount,
-        Scope.FaceCount
     ]
 };
 
