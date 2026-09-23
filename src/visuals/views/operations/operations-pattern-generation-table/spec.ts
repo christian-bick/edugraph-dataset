@@ -7,6 +7,7 @@ import {ontologyNeutral} from '../../../../lib/resolvers.ts';
 export const spec: ViewSpec = {
     viewId: 'operations-pattern-generation-table',
     generalLabels: [
+        Area.PatternGeneration,
         Scope.ArabicNumerals,
         Ability.ProcedureExecution
     ],

@@ -30,7 +30,6 @@ function recurrence(
 ): ArithmeticRecurrencePatternProblem {
     setSeed(17);
     return generator.generate({
-        model: 'recurrence',
         operation,
         useCommutativeLaw: law === 'commutative',
         useAssociativeLaw: law === 'associative',

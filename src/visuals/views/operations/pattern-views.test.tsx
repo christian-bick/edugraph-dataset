@@ -1,6 +1,7 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {ArithmeticPatternsGenerator} from '../../../generators/arithmetic/arithmetic-patterns/generator.ts';
+import {ArithmeticOperationTableGenerator} from '../../../generators/arithmetic/arithmetic-operation-table/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {
@@ -14,19 +15,12 @@ const generator = new ArithmeticPatternsGenerator();
 
 function tableProblem(): ArithmeticOperationTablePatternProblem {
     setSeed(17);
-    return generator.generate({
-        model: 'operation-table',
-        operation: 'multiplication',
-        useCommutativeLaw: false,
-        useAssociativeLaw: false,
-        useDistributiveLaw: false
-    })!.data as ArithmeticOperationTablePatternProblem;
+    return new ArithmeticOperationTableGenerator().generate({operation: 'multiplication'})!.data;
 }
 
 function recurrenceProblem(withLaw: boolean): ArithmeticRecurrencePatternProblem {
     setSeed(17);
     return generator.generate({
-        model: 'recurrence',
         operation: 'multiplication',
         useCommutativeLaw: false,
         useAssociativeLaw: false,

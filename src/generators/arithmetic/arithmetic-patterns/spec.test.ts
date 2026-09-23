@@ -14,12 +14,9 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
             Scope.Base10,
             Scope.NumbersWithoutNegatives
         ]);
-        expect(generator.schema).toHaveProperty('model');
-        expect(generator.schema).not.toHaveProperty('task');
     });
 
     it.each([
-        [[Area.GenerativeRuleRecognition], 'operation-table'],
         [[Area.PatternGeneration], 'recurrence'],
         [[Area.EmergentFeatureRecognition], 'recurrence'],
         [[Area.PatternGeneration, Area.EmergentFeatureRecognition], 'recurrence']
@@ -33,14 +30,9 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         ])!;
 
         expect(stub.data.kind).toBe(model);
-        expect(stub.labels).toEqual(expect.arrayContaining([Area.Addition, ...patternAreas]));
-        const requestedPatternAreas: readonly string[] = patternAreas;
-        if (!requestedPatternAreas.includes(Area.PatternGeneration)) {
-            expect(stub.labels).not.toContain(Area.PatternGeneration);
-        }
-        if (!requestedPatternAreas.includes(Area.EmergentFeatureRecognition)) {
-            expect(stub.labels).not.toContain(Area.EmergentFeatureRecognition);
-        }
+        expect(stub.labels).toContain(Area.Addition);
+        expect(stub.labels).not.toContain(Area.PatternGeneration);
+        expect(stub.labels).not.toContain(Area.EmergentFeatureRecognition);
         expect(stub.labels).not.toContain(Ability.ProcedureExecution);
         expect(stub.labels).not.toContain(Ability.ConceptClassification);
     });
@@ -67,8 +59,7 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
         expect(stub.data.lawWitness?.result).toBeTypeOf('number');
         expect(stub.labels).toEqual(expect.arrayContaining([
             operation,
-            law,
-            Area.EmergentFeatureRecognition
+            law
         ]));
         expect(stub.labels).not.toContain(Ability.ProcedureUnderstanding);
         expect(stub.labels).not.toContain(Ability.TextualArticulation);

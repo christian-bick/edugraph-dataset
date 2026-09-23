@@ -45,10 +45,32 @@ necessary. D1–D5 and D10 do not establish that payload-totality property.
 
 ## Open contract findings
 
+### Arithmetic adoption
+
+`arithmetic-patterns` now emits only `ArithmeticRecurrencePatternProblem`;
+`arithmetic-operation-table` emits only `ArithmeticOperationTablePatternProblem`.
+PatternGeneration, EmergentFeatureRecognition and GenerativeRuleRecognition are invariant
+capabilities of the respective task views. The generator owns the operation and law witnesses.
+Existing target requirements remain participation policies, independent of payload typing.
+
+| Consumers | Active CCSS targets | Adoption and verification |
+| --- | --- | --- |
+| `operations-pattern-table` | 3.OA.D.9 rule recognition | Uses the new table generator; payload fields and renderer unchanged; complete table arithmetic tests. |
+| `operations-pattern-explanation` | 3.OA.D.9 law explanations | Existing recurrence generator and payload; law-witness and render tests. |
+| `operations-pattern-generation-practice`, `operations-pattern-generation-table` | 4.OA.C.5 generation | Existing recurrence payload; both mode render tests. |
+| `operations-pattern-feature-table`, `operations-pattern-feature-explanation` | 4.OA.C.5 features and explanations | Existing recurrence/feature evidence; both mode render tests. |
+
+The focused suite passes 44 tests. Type, declaration and CCSS/test active-target checks pass.
+The complete CCSS matching comparison changes only the two table-generator registrations;
+all 681 active targets remain covered. Table sample identities change with the generator id;
+recurrence ids are retained. Canonical rendering and final cache checks follow the contract work.
+
+### Remaining work
+
 - [ ] **Union-member matching.** [matching.ts](../../src/lib/matching.ts) permits a generator
   returning `A | B` to feed a view accepting only `A` when the view has any `requiredLabels`.
   Their presence does not prove that the generated payload is `A`. Adopt the six inventoried
-  arithmetic-pattern pairs, then remove that exception from matching and the parsed type contract.
+  arithmetic-pattern pairs are adopted; remove that exception from matching and the parsed type contract.
 - [ ] **Shape construction.** `shape-build-shape` retains attribute/count, rotation, and
   excluded-subcategory branches with task-shaped payloads. Its construction and drawing consumers
   are not total over the declared union. Review the mathematical responsibilities and every

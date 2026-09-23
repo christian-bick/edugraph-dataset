@@ -5,6 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 export const spec: ViewSpec = {
     viewId: 'operations-pattern-explanation',
     generalLabels: [
+        Area.EmergentFeatureRecognition,
         Scope.ArabicNumerals,
         Ability.ProcedureUnderstanding,
         Ability.TextualArticulation

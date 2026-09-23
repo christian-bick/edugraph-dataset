@@ -1,0 +1,22 @@
+import {Area, Scope} from 'edugraph-ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {GeneratorSpec} from '../../../types/generator-spec.ts';
+import {ConfigFromSchema} from '../../../types/schema.ts';
+
+export const spec: GeneratorSpec = {
+    generatorId: 'arithmetic-operation-table',
+    generalLabels: [Scope.IntegerNumbers, Scope.Base10, Scope.NumbersWithoutNegatives]
+};
+
+const resolveOperation = selectExactLabelMap([
+    [Area.Addition, 'addition'],
+    [Area.Multiplication, 'multiplication']
+] as const);
+
+export const ArithmeticOperationTableGeneratorSchema = {
+    operation: [[Area.Addition, Area.Multiplication], resolveOperation]
+} as const;
+
+export type ArithmeticOperationTableGeneratorConfig = ConfigFromSchema<
+    typeof ArithmeticOperationTableGeneratorSchema
+>;

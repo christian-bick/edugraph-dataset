@@ -6,10 +6,8 @@ import {ArithmeticPatternsGenerator} from './generator.ts';
 describe('ArithmeticPatternsGenerator', () => {
     const generator = new ArithmeticPatternsGenerator();
     const config = (
-        operation: 'addition' | 'multiplication',
-        model: 'operation-table' | 'recurrence' = 'recurrence'
+        operation: 'addition' | 'multiplication'
     ) => ({
-        model,
         operation,
         useCommutativeLaw: false,
         useAssociativeLaw: false,
@@ -18,30 +16,6 @@ describe('ArithmeticPatternsGenerator', () => {
 
     it('strictly validates configuration', () => {
         expect(() => generator.generate({} as never)).toThrow();
-    });
-
-    it('generates only the canonical operation-table model for rule recognition', () => {
-        for (const operation of ['addition', 'multiplication'] as const) {
-            setSeed(3);
-            const first = generator.generate(config(operation, 'operation-table'))!.data;
-            setSeed(81);
-            const second = generator.generate(config(operation, 'operation-table'))!.data;
-
-            expect(first).toEqual(second);
-            expect(first.kind).toBe('operation-table');
-            if (first.kind !== 'operation-table') throw new Error('Expected an operation table.');
-            expect(first.operands).toEqual([0, 1, 2, 3, 4, 5, 6]);
-            expect(first.values).toHaveLength(first.operands.length);
-            first.values.forEach((row, rowIndex) => row.forEach((value, columnIndex) => {
-                expect(value).toBe(operation === 'addition'
-                    ? first.operands[rowIndex]! + first.operands[columnIndex]!
-                    : first.operands[rowIndex]! * first.operands[columnIndex]!);
-            }));
-            expect(first).not.toHaveProperty('focusRow');
-            expect(first).not.toHaveProperty('sequence');
-            expect(first).not.toHaveProperty('highlightedCells');
-            expect(first).not.toHaveProperty('terms');
-        }
     });
 
     it('generates only a typed recurrence and its mathematical feature evidence', () => {
@@ -121,7 +95,6 @@ describe('ArithmeticPatternsGenerator', () => {
 
     it('rejects unsupported and contradictory mathematical configurations', () => {
         expect(generator.generate({...config('addition'), operation: 'unsupported'} as never)).toBeNull();
-        expect(generator.generate({...config('addition'), model: 'unsupported'} as never)).toBeNull();
         expect(generator.generate({
             ...config('multiplication'),
             useCommutativeLaw: true,
@@ -130,10 +103,6 @@ describe('ArithmeticPatternsGenerator', () => {
         expect(generator.generate({
             ...config('addition'),
             useDistributiveLaw: true
-        })).toBeNull();
-        expect(generator.generate({
-            ...config('addition', 'operation-table'),
-            useCommutativeLaw: true
         })).toBeNull();
     });
 });

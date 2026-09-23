@@ -2,9 +2,7 @@ import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
-    ArithmeticOperationTablePatternProblem,
     ArithmeticPatternOperation,
-    ArithmeticPatternProblem,
     ArithmeticPatternRecurrence,
     ArithmeticRecurrencePatternProblem
 } from '../../../types/problems.ts';
@@ -30,18 +28,6 @@ const buildTerms = (
             : previous * recurrence.operand);
     }
     return terms;
-};
-
-const createOperationTable = (operation: OperationKind): ArithmeticOperationTablePatternProblem => {
-    const isAddition = operation === 'addition';
-    return {
-        kind: 'operation-table',
-        operation,
-        operands: [...TABLE_OPERANDS],
-        values: TABLE_OPERANDS.map(row => TABLE_OPERANDS.map(column =>
-            isAddition ? row + column : row * column
-        ))
-    };
 };
 
 const createDefaultPattern = (operation: OperationKind): ArithmeticRecurrencePatternProblem => {
@@ -148,15 +134,14 @@ const createRecurrence = (
             : createDefaultPattern(operation);
 
 export class ArithmeticPatternsGenerator implements ProblemGenerator<
-    ArithmeticPatternProblem,
+    ArithmeticRecurrencePatternProblem,
     ArithmeticPatternsGeneratorConfig
 > {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticPatternsGeneratorSchema;
 
-    generate(config: ArithmeticPatternsGeneratorConfig): ProblemStub<ArithmeticPatternProblem> | null {
+    generate(config: ArithmeticPatternsGeneratorConfig): ProblemStub<ArithmeticRecurrencePatternProblem> | null {
         validateConfigFields('arithmetic-patterns', config, [
-            'model',
             'operation',
             'useCommutativeLaw',
             'useAssociativeLaw',
@@ -165,7 +150,6 @@ export class ArithmeticPatternsGenerator implements ProblemGenerator<
 
         const operation = config.operation;
         if (operation !== 'addition' && operation !== 'multiplication') return null;
-        if (config.model !== 'operation-table' && config.model !== 'recurrence') return null;
 
         const requestedProperties = [
             config.useCommutativeLaw ? 'commutative' : null,
@@ -173,13 +157,10 @@ export class ArithmeticPatternsGenerator implements ProblemGenerator<
             config.useDistributiveLaw ? 'distributive' : null
         ].filter((value): value is PatternProperty => value !== null);
         if (requestedProperties.length > 1) return null;
-        if (config.model === 'operation-table' && requestedProperties.length > 0) return null;
         if (requestedProperties[0] === 'distributive' && operation !== 'multiplication') return null;
 
         return {
-            data: config.model === 'operation-table'
-                ? createOperationTable(operation)
-                : createRecurrence(operation, requestedProperties[0])
+            data: createRecurrence(operation, requestedProperties[0])
         };
     }
 }
