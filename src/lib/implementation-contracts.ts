@@ -47,7 +47,17 @@ function property(node: ts.PropertyAccessExpression | ts.ElementAccessExpression
 export function inspectImplementationSource(source: string, file: string, role: 'generator' | 'view',
     symbols = new SourceSymbolIndex()): ImplementationIssue[] {
     const sourceFile = symbols.load(file, source);
-    const aliases = new Map<string, SourceKind>();
+    const scopes: Array<Map<string, SourceKind | null>> = [new Map()];
+    const bind = (name: string, kind: SourceKind | null): void => {
+        scopes[scopes.length - 1].set(name, kind);
+    };
+    const lookup = (name: string): SourceKind | undefined => {
+        for (let index = scopes.length - 1; index >= 0; index--) {
+            if (scopes[index].has(name)) return scopes[index].get(name) ?? undefined;
+        }
+        return name === 'payload' ? 'payload' : name === 'problem' ? 'problem'
+            : name === 'props' ? 'props' : undefined;
+    };
     const issues: ImplementationIssue[] = [];
     const report = (rule: ImplementationIssue['rule'], node: ts.Node, message: string,
         kind: NonNullable<ImplementationIssue['kind']> = 'implementation-contract'): void => {
@@ -57,8 +67,7 @@ export function inspectImplementationSource(source: string, file: string, role: 
     };
     const kindOf = (expression: ts.Expression): SourceKind | undefined => {
         if (ts.isIdentifier(expression)) {
-            return aliases.get(expression.text) ?? (expression.text === 'payload' ? 'payload'
-                : expression.text === 'problem' ? 'problem' : expression.text === 'props' ? 'props' : undefined);
+            return lookup(expression.text);
         }
         if (ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression)) {
             const parent = kindOf(expression.expression);
@@ -70,9 +79,12 @@ export function inspectImplementationSource(source: string, file: string, role: 
     };
     const inspectBinding = (name: ts.BindingName, initializer: ts.Expression): void => {
         const kind = kindOf(initializer);
-        if (!kind) return;
+        if (!kind) {
+            if (ts.isIdentifier(name)) bind(name.text, null);
+            return;
+        }
         if (ts.isIdentifier(name)) {
-            aliases.set(name.text, kind);
+            bind(name.text, kind);
         } else if (ts.isObjectBindingPattern(name)) {
             for (const element of name.elements) {
                 const key = element.propertyName && ts.isIdentifier(element.propertyName)
@@ -84,13 +96,49 @@ export function inspectImplementationSource(source: string, file: string, role: 
                         `raw ${kind}.${key} destructuring bypasses resolved configuration`, 'raw-label-access');
                 }
                 if (ts.isIdentifier(element.name)) {
-                    if (kind === 'payload' && key === 'problem') aliases.set(element.name.text, 'problem');
-                    if (kind === 'props' && key === 'payload') aliases.set(element.name.text, 'payload');
+                    if (kind === 'payload' && key === 'problem') bind(element.name.text, 'problem');
+                    if (kind === 'props' && key === 'payload') bind(element.name.text, 'payload');
                 }
             }
         }
     };
     const visit = (node: ts.Node): void => {
+        if (ts.isFunctionLike(node)) {
+            scopes.push(new Map());
+            for (const parameter of node.parameters) {
+                const annotation = parameter.type?.getText(sourceFile) ?? '';
+                const parameterKind: SourceKind = /(?:View)?RenderPayload\b/.test(annotation)
+                    ? 'payload' : /AbstractProblem\b/.test(annotation) ? 'problem' : 'props';
+                if (ts.isIdentifier(parameter.name)) {
+                    if (parameterKind !== 'props') bind(parameter.name.text, parameterKind);
+                } else if (ts.isObjectBindingPattern(parameter.name)) {
+                    for (const element of parameter.name.elements) {
+                        const key = element.propertyName && ts.isIdentifier(element.propertyName)
+                            ? element.propertyName.text : ts.isIdentifier(element.name) ? element.name.text : undefined;
+                        if (!key) continue;
+                        if (parameterKind === 'payload' && (key === 'labels' || key === 'targetLabels')
+                            || parameterKind === 'problem' && key === 'labels') {
+                            report(role === 'view' ? 'IMPL-V1' : 'IMPL-G3', element,
+                                `raw ${parameterKind}.${key} parameter destructuring bypasses resolved configuration`,
+                                'raw-label-access');
+                        }
+                        if (ts.isIdentifier(element.name)) {
+                            if (parameterKind === 'props' && key === 'payload') bind(element.name.text, 'payload');
+                            if (parameterKind === 'payload' && key === 'problem') bind(element.name.text, 'problem');
+                        }
+                    }
+                }
+            }
+            ts.forEachChild(node, visit);
+            scopes.pop();
+            return;
+        }
+        if (ts.isBlock(node)) {
+            scopes.push(new Map());
+            ts.forEachChild(node, visit);
+            scopes.pop();
+            return;
+        }
         if (ts.isVariableDeclaration(node) && node.initializer) inspectBinding(node.name, node.initializer);
         if ((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node))) {
             const name = property(node);

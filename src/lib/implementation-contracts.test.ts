@@ -24,6 +24,24 @@ describe('implementation source contracts', () => {
         expect(inspectImplementationSource(source, 'view.tsx', 'view')).toEqual([]);
     });
 
+    it('does not leak a raw-label alias into another lexical function', () => {
+        const source = `
+            function first(payload: object) { const selected = payload.problem; return selected.labels; }
+            function second() { const selected = {labels: ['local']}; return selected.labels; }
+        `;
+        expect(inspectImplementationSource(source, 'view.tsx', 'view').map(issue => issue.value))
+            .toEqual(['selected.labels']);
+    });
+
+    it('traces aliases introduced by typed and destructured function parameters', () => {
+        const source = `
+            function render(input: ViewRenderPayload<'demo'>) { return input['targetLabels']; }
+            const draw = ({payload: supplied}: {payload: object}) => supplied.problem.labels;
+        `;
+        expect(inspectImplementationSource(source, 'view.tsx', 'view').map(issue => issue.value))
+            .toEqual(["input['targetLabels']", 'supplied.problem.labels']);
+    });
+
     it('finds direct spec decisions, generated labels, and unseeded entropy', () => {
         const source = `
             import {spec as taskSpec} from './spec.ts';
