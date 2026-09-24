@@ -1,3 +1,4 @@
+import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
 import {describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {
@@ -6,7 +7,7 @@ import {
     reuseAuditTuplesFromGraph,
     scanImplementationSource
 } from './label-architecture-audit.ts';
-import {createDependencyGraphSnapshot, type DependencyNode} from './dependency-planner.ts';
+import {createDependencyGraphSnapshot, generationPlanDependencyHash, type DependencyNode} from './dependency-planner.ts';
 import type {GeneratorModelDescriptor, ViewModelDescriptor} from './model-catalog.ts';
 import {
     buildCompatibleModulePairIndex,
@@ -18,11 +19,11 @@ import {
     matchTupleNodeId,
     modulePairKey,
     modulePairNodeId,
+    matchTargets,
     targetCapabilityInputHash,
     targetCapabilityNodeId,
     viewCapabilityInputHash,
-    viewCapabilityNodeId,
-    type MatchTuple
+    viewCapabilityNodeId
 } from './matching.ts';
 import type {CompetencyTarget} from '../types/ml-engine.ts';
 import {createWorkCounters} from './work-counters.ts';
@@ -53,8 +54,6 @@ const view: ViewModelDescriptor = {
     viewId: 'view-one',
     generalLabels: [Ability.ProcedureExecution],
     supportedLabels: [Ability.ProcedureExecution],
-    requiredLabels: [],
-    rejectedLabels: [],
     problemType: 'CountingProblem',
     module: {
         id: 'view-one',
@@ -67,11 +66,7 @@ const view: ViewModelDescriptor = {
 };
 
 function currentGraph(currentGenerator = generator, currentView = view) {
-    const tuple: MatchTuple = {
-        target,
-        generatorId: generator.generatorId,
-        viewId: view.viewId
-    };
+    const tuples = matchTargets([target], [currentGenerator], [currentView]).tuples;
     const targetNode = targetCapabilityNodeId('test-spec', target.id);
     const generatorNode = generatorCapabilityNodeId(generator.generatorId);
     const viewNode = viewCapabilityNodeId(view.viewId);
@@ -107,22 +102,30 @@ function currentGraph(currentGenerator = generator, currentView = view) {
             input_hash: 'pair',
             dependencies: [matchingPolicyNodeId(), generatorNode, viewNode]
         },
-        {
+        ...tuples.map(tuple => ({
             id: matchTupleNodeId(
                 'test-spec', target.id, generator.generatorId, view.viewId
             ),
-            kind: 'match-tuple',
-            input_hash: 'matched',
+            kind: 'match-tuple' as const,
+            input_hash: generationPlanDependencyHash(tuple.plan),
             dependencies: [targetNode, pairNode]
-        }
+        }))
     ];
     return createDependencyGraphSnapshot(nodes, undefined, buildDependencyMatchingIndex(
         [target],
-        [tuple]
+        tuples
     ));
 }
 
 describe('label architecture audit', () => {
+    it('rejects generator learner-task declarations even without any candidate target', () => {
+        const invalidGenerator = {...generator, spec: {...generator.spec,
+            compatibility: [requireTargetLabels('learner-task-dispatch', [Ability.Formalization])]}};
+        expect(() => buildLabelArchitectureAudit({projectRoot: '.', specName: 'empty', targets: [],
+            generators: [invalidGenerator], views: [], sourceSignals: []}))
+            .toThrow(/cannot depend on learner Ability/);
+    });
+
     it('classifies ontology dimensions', () => {
         expect(labelDimension(Area.Addition)).toBe('Area');
         expect(labelDimension(Ability.ProcedureExecution)).toBe('Ability');
@@ -158,11 +161,7 @@ describe('label architecture audit', () => {
             graph: currentGraph()
         });
         expect(result.reason).toContain('match the persisted graph');
-        expect(result.tuples).toEqual([{
-            target,
-            generatorId: generator.generatorId,
-            viewId: view.viewId
-        }]);
+        expect(result.tuples).toEqual(matchTargets([target], [generator], [view]).tuples);
     });
 
     it('falls back when a current capability differs from the graph', () => {
@@ -180,6 +179,20 @@ describe('label architecture audit', () => {
         });
         expect(result.tuples).toBeNull();
         expect(result.reason).toContain('view capability changed');
+    });
+
+    it.each(['missing', 'corrupt', 'stale-input', 'stale-node'] as const)('rebuilds %s persisted generation plans', defect => {
+        const graph = currentGraph();
+        const pairKey = modulePairKey(generator.generatorId, view.viewId);
+        const plans = graph.matching_index!.generation_plans_by_target[target.id];
+        if (defect === 'missing') delete plans[pairKey];
+        if (defect === 'corrupt') plans[pairKey] = {...plans[pairKey], hash: 'tampered'};
+        if (defect === 'stale-input') plans[pairKey] = {...plans[pairKey], inputHash: 'stale'};
+        if (defect === 'stale-node') graph.nodes[matchTupleNodeId('test-spec', target.id, generator.generatorId, view.viewId)].input_hash = 'matched';
+        const result = reuseAuditTuplesFromGraph({specName: 'test-spec', targets: [target], generators: [generator],
+            views: [view], pairIndex: buildCompatibleModulePairIndex([generator], [view]), graph});
+        expect(result.tuples).toBeNull();
+        expect(result.reason).toMatch(/generation plan/);
     });
 
     it('records exact provider provenance without inventing findings', () => {
@@ -294,7 +307,7 @@ describe('label architecture audit', () => {
     });
 
     it('preserves identical applicability diagnostics across fresh matching and graph reuse', () => {
-        const contradictoryView = {...view, requiredLabels: [Area.Addition], rejectedLabels: [Area.Addition]};
+        const contradictoryView = {...view, compatibility: [requireTargetLabels('required', [Area.Addition]), rejectTargetLabels('rejected', [Area.Addition])]};
         const pairIndex = buildCompatibleModulePairIndex([generator], [contradictoryView]);
         const expected = inspectApplicability({views: [contradictoryView], pairIndex});
         // No target can match the contradiction. A current empty graph must not suppress the finding.
@@ -314,7 +327,7 @@ describe('label architecture audit', () => {
     });
 
     it.each([true, false])('reports unsupported applicability with a generator present: %s', withGenerator => {
-        const requiredView = {...view, requiredLabels: [Area.Square], rejectedLabels: [Ability.Formalization]};
+        const requiredView = {...view, compatibility: [requireTargetLabels('required', [Area.Square]), rejectTargetLabels('rejected', [Ability.Formalization])]};
         const generators = withGenerator ? [generator] : [];
         const report = buildLabelArchitectureAudit({projectRoot: '.', specName: 'test-spec', targets: [],
             generators, views: [requiredView], graph: null, sourceSignals: []});

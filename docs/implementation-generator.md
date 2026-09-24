@@ -20,6 +20,10 @@ function** that takes a strongly-typed `config` object and returns a `ProblemStu
 Returning `null` is a legitimate outcome: the pipeline retries with the next `attempt`,
 which deterministically yields a different draw.
 
+Each retry selects only from the match's authoritative generation plan. Use `null` for numeric
+sampling failure, not as the sole definition of a label-expressible compatibility restriction.
+Such restrictions belong in the generator spec; implementation guards remain defensive assertions.
+
 ### IMPL-G2 — Validate configuration strictly
 
 Import `validateConfigFields` from `../../../lib/errors.ts` — with the correct relative
@@ -28,6 +32,9 @@ depth matching the sub-directory structure — and call it at the **beginning** 
 
 It must throw a `GeneratorValidationError` when executed with missing or empty
 configuration. **Do not use silent internal fallbacks.**
+
+Generation must not independently randomize a label-bearing field after the plan has selected
+its binding. Mathematical variation within that configuration remains seeded generator logic.
 
 ### IMPL-G3 — Ontology labels are resolved outside the generator
 

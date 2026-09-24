@@ -1,3 +1,4 @@
+import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
@@ -9,7 +10,9 @@ export const spec: ViewSpec = {
         Ability.Formalization,
         Scope.ArabicNumerals
     ],
-    requiredLabels: [Area.NumerationWithIntegers]
+    compatibility: [
+        requireTargetLabels('integer-numeration-request', [Area.NumerationWithIntegers])
+    ]
 };
 
 

@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {computeTaskFingerprint, resolveViewConfig} from '../../../../lib/generation.ts';
@@ -10,9 +11,9 @@ describe('operations-pattern-table view spec', () => {
             Scope.ArabicNumerals,
             Ability.ConceptClassification
         ]);
-        expect(spec.requiredLabels).toEqual([Area.GenerativeRuleRecognition]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Area.GenerativeRuleRecognition]);
         expect(OperationsPatternTableViewSchema).toHaveProperty('focusOperand');
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 
     it('makes the selected table row fingerprint-visible', () => {

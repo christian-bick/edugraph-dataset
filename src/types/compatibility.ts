@@ -19,6 +19,8 @@ export interface CompatibilityRule<TScope extends LabelScope = LabelScope> {
     /** Omission conservatively depends on all permitted scopes; [] means no queries. */
     readonly dependencies?: readonly LabelDependency<TScope>[];
     readonly predicate: (labels: CompatibilityQueries<TScope>) => boolean;
+    /** Helper-authored audit metadata; never provides capabilities or adds a matching stage. */
+    readonly targetPolicy?: {readonly kind: 'require' | 'reject'; readonly labels: readonly string[]};
 }
 
 export type GeneratorCompatibilityRule = CompatibilityRule<GeneratorLabelScope>;

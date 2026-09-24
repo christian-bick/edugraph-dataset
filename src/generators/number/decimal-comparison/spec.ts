@@ -3,8 +3,15 @@ import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'decimal-comparison',
+    compatibility: [generatorLabelRule('comparison-relation', [
+        Area.NumericEquality, Area.NumericInequality, Scope.Equal, Scope.Greater, Scope.Less
+    ], selected => selected(Scope.Equal)
+        ? selected(Area.NumericEquality)
+        : selected(Area.NumericInequality) && (selected(Scope.Greater) || selected(Scope.Less)))],
     generalLabels: [
         Area.NumerationWithDecimals,
         Area.DecimalPrecission,

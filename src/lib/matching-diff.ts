@@ -7,12 +7,13 @@ import {
 } from './matching.ts';
 import { shortenLabel } from './utils.ts';
 
-export const MATCHING_SNAPSHOT_SCHEMA_VERSION = 1;
+export const MATCHING_SNAPSHOT_SCHEMA_VERSION = 2;
 
 export interface TargetMatchingSnapshot {
     disposition: MatchingDisposition;
     labels: string[];
     pairs: string[];
+    planHashes: Record<string, string>;
 }
 
 export type MatchingDisposition = 'spec' | 'implementationTodo';
@@ -35,6 +36,7 @@ export interface MatchingDiff {
     changedDispositions: string[];
     addedPairs: string[];
     removedPairs: string[];
+    changedPlans: string[];
 }
 
 export function createMatchingSnapshot(
@@ -53,9 +55,14 @@ export function createMatchingSnapshot(
     const targets = targetInputs.map(input => input.target);
     const dispositionById = new Map(targetInputs.map(input => [input.target.id, input.disposition]));
     const pairsByTarget = new Map<string, string[]>();
+    const plansByTarget = new Map<string, Record<string, string>>();
     for (const tuple of matchTargets(targets, generators, views).tuples) {
         if (!pairsByTarget.has(tuple.target.id)) pairsByTarget.set(tuple.target.id, []);
-        pairsByTarget.get(tuple.target.id)!.push(modulePairKey(tuple.generatorId, tuple.viewId));
+        const key = modulePairKey(tuple.generatorId, tuple.viewId);
+        pairsByTarget.get(tuple.target.id)!.push(key);
+        const plans = plansByTarget.get(tuple.target.id) ?? {};
+        plans[key] = tuple.plan.hash;
+        plansByTarget.set(tuple.target.id, plans);
     }
 
     const entries = [...targets]
@@ -63,7 +70,9 @@ export function createMatchingSnapshot(
         .map(target => [target.id, {
             disposition: dispositionById.get(target.id)!,
             labels: [...new Set(target.labels)].sort(),
-            pairs: [...new Set(pairsByTarget.get(target.id) ?? [])].sort()
+            pairs: [...new Set(pairsByTarget.get(target.id) ?? [])].sort(),
+            planHashes: Object.fromEntries(Object.entries(plansByTarget.get(target.id) ?? {})
+                .sort(([left], [right]) => left.localeCompare(right)))
         }] as const);
     return {
         schema_version: MATCHING_SNAPSHOT_SCHEMA_VERSION,
@@ -89,6 +98,7 @@ export function diffMatchingSnapshots(before: MatchingSnapshot, after: MatchingS
     const changedDispositions: string[] = [];
     const addedPairs: string[] = [];
     const removedPairs: string[] = [];
+    const changedPlans: string[] = [];
 
     for (const id of [...beforeIds].filter(id => afterIds.has(id)).sort()) {
         const previous = before.targets[id];
@@ -99,6 +109,11 @@ export function diffMatchingSnapshots(before: MatchingSnapshot, after: MatchingS
         const currentPairs = new Set(current.pairs);
         for (const pair of currentPairs) if (!previousPairs.has(pair)) addedPairs.push(`${id} -> ${pair}`);
         for (const pair of previousPairs) if (!currentPairs.has(pair)) removedPairs.push(`${id} -> ${pair}`);
+        for (const pair of currentPairs) {
+            if (previousPairs.has(pair) && previous.planHashes[pair] !== current.planHashes[pair]) {
+                changedPlans.push(`${id} -> ${pair}`);
+            }
+        }
     }
 
     for (const id of addedTargets) {
@@ -114,7 +129,8 @@ export function diffMatchingSnapshots(before: MatchingSnapshot, after: MatchingS
         changedLabels,
         changedDispositions,
         addedPairs: addedPairs.sort(),
-        removedPairs: removedPairs.sort()
+        removedPairs: removedPairs.sort(),
+        changedPlans: changedPlans.sort()
     };
 }
 
@@ -150,6 +166,7 @@ export function renderMatchingDiffMarkdown(
         `- Targets: ${Object.keys(before.targets).length} → ${Object.keys(after.targets).length}`,
         `- Added pairs: ${diff.addedPairs.length}`,
         `- Removed pairs: ${diff.removedPairs.length}`,
+        `- Changed generation plans: ${diff.changedPlans.length}`,
         `- Changed dispositions: ${diff.changedDispositions.length}`,
         '',
         section('Added targets', diff.addedTargets, id => renderTarget(id, after)),
@@ -162,6 +179,7 @@ export function renderMatchingDiffMarkdown(
         ),
         section('Added semantic pairs', diff.addedPairs, item => `- \`${item}\``),
         section('Removed semantic pairs', diff.removedPairs, item => `- \`${item}\``),
+        section('Changed generation plans', diff.changedPlans, item => `- \`${item}\``),
         section('Active targets without matches', activeWithoutMatches, id => renderTarget(id, after)),
         section('Implementation TODOs that now match', todosWithMatches, id => renderTarget(id, after))
     ].join('\n');

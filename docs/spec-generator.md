@@ -87,6 +87,13 @@ When an apparent Ability choice changes operands, unknowns, wording, hints, or r
 reasoning, the generator instead emits the canonical mathematical relation and the view
 constructs that task projection.
 
+Declare label-expressible configuration dependencies as generator-owned `compatibility` rules.
+For example, measurement data declares that `SingleFrameOfReference` requires `FractionNumbers`.
+The planner eliminates invalid combinations before generation and constrains unspecified choices;
+it does not inspect generated data. Keep numeric feasibility, concrete operand sampling, and
+defensive type/range validation in the implementation. Retain existing configuration guards as
+assertions of the declared contract, with tests that every admitted variant satisfies them.
+
 ---
 
 ## Audit

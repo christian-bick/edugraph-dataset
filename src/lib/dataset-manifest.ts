@@ -12,6 +12,7 @@ import {
     buildDependencyMatchingIndex,
     generatorCapabilityInputHash,
     generatorCapabilityNodeId,
+    generatorMatchingOntologyLabels,
     matchTargets,
     matchingPolicyInputHash,
     matchingPolicyNodeId,
@@ -22,6 +23,7 @@ import {
     targetCapabilityNodeId,
     viewCapabilityInputHash,
     viewCapabilityNodeId,
+    viewMatchingOntologyLabels,
     type CompatibleModulePairIndex
 } from './matching.ts';
 import {CompetencyTarget} from '../types/ml-engine.ts';
@@ -35,8 +37,10 @@ import {
     type SourceContentIndexStats
 } from './content-identity.ts';
 import {
+    DEPENDENCY_GRAPH_SCHEMA_VERSION,
     DEPENDENCY_PLANNER_EPOCH,
     createDependencyGraphSnapshot,
+    generationPlanDependencyHash,
     explainAffectedNode,
     planDependencyDelta,
     type DependencyDeltaPlan,
@@ -66,8 +70,8 @@ import {
 } from './development-observation.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
 
-export const DATASET_MANIFEST_SCHEMA_VERSION = 8;
-const GENERATION_PIPELINE_VERSION = 'unified-dependency-graph-v1';
+export const DATASET_MANIFEST_SCHEMA_VERSION = 9;
+const GENERATION_PIPELINE_VERSION = 'label-variant-generation-v1';
 
 export interface DatasetManifestEntry {
     generator: string;
@@ -146,6 +150,9 @@ interface DatasetManifestRow {
     target_id?: string;
     content_fingerprint: string;
     task_fingerprint: string;
+    generation_plan_hash?: string;
+    generation_replay?: unknown;
+    prepared_view?: unknown;
     labels?: string[];
     target_associations?: Array<{spec: string; target_id: string}>;
     _split: SampleSplit;
@@ -458,9 +465,11 @@ export function buildDatasetManifest(options: {
     const viewById = new Map(views.map(entry => [entry.viewId, entry]));
     const targetById = new Map(targets.map(target => [target.id, target]));
     const targetsByPair = new Map<string, CompetencyTarget[]>();
+    const plansByTargetAndPair = new Map<string, MatchTuple['plan']>();
     const pairsByTarget = new Map<string, string[]>();
     for (const tuple of tuples) {
         const key = modulePairKey(tuple.generatorId, tuple.viewId);
+        plansByTargetAndPair.set(`${tuple.target.id}\u0000${key}`, tuple.plan);
         const pairTargets = targetsByPair.get(key);
         if (pairTargets) pairTargets.push(tuple.target);
         else targetsByPair.set(key, [tuple.target]);
@@ -616,6 +625,8 @@ export function buildDatasetManifest(options: {
     const generatorNodeIds = new Map<string, string>();
     const generatorCapabilityNodeIds = new Map<string, string>();
     for (const generator of generators) {
+        const matchingSources = sourceDependencies(nodes, sourceIndex, generator.matchingSourcePaths
+            ?? modelSourceIndex.dependencies([resolve(generator.module.absolutePath, 'spec.ts')]));
         const sources = sourceDependencies(nodes, sourceIndex, modelSourceIndex.dependencies([
             resolve(generator.module.absolutePath, 'generator.ts'),
             resolve(generator.module.absolutePath, 'spec.ts')
@@ -629,7 +640,7 @@ export function buildDatasetManifest(options: {
             id: capabilityId,
             kind: 'generator-capability',
             input_hash: generatorCapabilityInputHash(generator),
-            dependencies: ontologyDependencies(generator.labels)
+            dependencies: [...matchingSources.ids, ...ontologyDependencies(generatorMatchingOntologyLabels(generator))]
         });
         addNode(nodes, {
             id,
@@ -646,6 +657,8 @@ export function buildDatasetManifest(options: {
     const viewCapabilityNodeIds = new Map<string, string>();
     const checklistDependencies = new Map<string, {ids: string[]; paths: string[]}>();
     for (const view of views) {
+        const matchingSources = sourceDependencies(nodes, sourceIndex, view.matchingSourcePaths
+            ?? modelSourceIndex.dependencies([resolve(view.module.absolutePath, 'spec.ts')]));
         const sources = sourceDependencies(nodes, sourceIndex, modelSourceIndex.dependencies([
             resolve(view.module.absolutePath, 'view.tsx'),
             resolve(view.module.absolutePath, 'spec.ts')
@@ -660,11 +673,8 @@ export function buildDatasetManifest(options: {
             kind: 'view-capability',
             input_hash: viewCapabilityInputHash(view),
             dependencies: [
-                ...ontologyDependencies([
-                    ...view.supportedLabels,
-                    ...(view.requiredLabels ?? []),
-                    ...(view.rejectedLabels ?? [])
-                ])
+                ...matchingSources.ids,
+                ...ontologyDependencies(viewMatchingOntologyLabels(view))
             ]
         });
         addNode(nodes, {
@@ -723,7 +733,7 @@ export function buildDatasetManifest(options: {
         addNode(nodes, {
             id,
             kind: 'match-tuple',
-            input_hash: digestIdentity({matched: true}),
+            input_hash: generationPlanDependencyHash(tuple.plan),
             dependencies: [targetCapabilityId, modulePairId]
         });
     }
@@ -771,13 +781,18 @@ export function buildDatasetManifest(options: {
         const contentSignature = pairRows.map(row => ({
             sample_key: row.sample_key,
             content_fingerprint: row.content_fingerprint,
-            task_fingerprint: row.task_fingerprint
+            task_fingerprint: row.task_fingerprint,
+            generation_plan_hash: row.generation_plan_hash,
+            generation_replay: row.generation_replay,
+            prepared_view: row.prepared_view
         }));
         const targetSignature = radixSortUtf8(pairTargets.map(target => target.id)).map(targetId => {
             const target = targetById.get(targetId)!;
             return {
                 id: target.id,
-                labels: radixSortUtf8([...target.labels])
+                labels: radixSortUtf8([...target.labels]),
+                generation_plan_hash: plansByTargetAndPair.get(`${targetId}\u0000${key}`)!.hash,
+                generation_plan_input_hash: plansByTargetAndPair.get(`${targetId}\u0000${key}`)!.inputHash
             };
         });
         const pairSplits = radixSortUtf8([...new Set(pairRows.map(row => row._split))]) as SampleSplit[];
@@ -825,6 +840,9 @@ export function buildDatasetManifest(options: {
                 sample_key: row.sample_key,
                 content_fingerprint: row.content_fingerprint,
                 task_fingerprint: row.task_fingerprint,
+                generation_plan_hash: row.generation_plan_hash,
+                generation_replay: row.generation_replay,
+                prepared_view: row.prepared_view,
                 image_sha256: imageDigest.sha256
             }),
             dependencies: [pairNodeId, ...rowMatchNodes],
@@ -1105,6 +1123,14 @@ export function datasetFreshnessIssues(
     }
     if (manifest.planner_epoch !== DEPENDENCY_PLANNER_EPOCH || manifest.complete !== true) {
         issues.push('manifest dependency plan is incomplete or uses an unsupported planner epoch.');
+    }
+    if (manifest.dependency_graph?.schema_version !== DEPENDENCY_GRAPH_SCHEMA_VERSION
+        || manifest.dependency_graph?.planner_epoch !== DEPENDENCY_PLANNER_EPOCH) {
+        issues.push('manifest dependency graph format is unsupported; rebuild generation plans.');
+    }
+    if (currentBuild.dependency_graph.matching_index
+        && !manifest.dependency_graph?.matching_index?.generation_plans_by_target) {
+        issues.push('manifest matching index lacks generation plans; rebuild the dependency graph.');
     }
     if (manifest.spec !== specName) issues.push(`manifest belongs to spec "${manifest.spec}", not "${specName}".`);
     if ((currentBuild.ontology_semantics.dependency

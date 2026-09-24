@@ -1,3 +1,4 @@
+import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
@@ -8,7 +9,9 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.VisualArticulation
     ],
-    requiredLabels: [Area.DigitNotation]
+    compatibility: [
+        requireTargetLabels('digit-notation-request', [Area.DigitNotation])
+    ]
 };
 
 

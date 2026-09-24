@@ -10,7 +10,7 @@ import {
     DATASET_MANIFEST_SCHEMA_VERSION,
     readDatasetManifest
 } from '../lib/dataset-manifest.ts';
-import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
+import {DEPENDENCY_PLANNER_EPOCH, DEPENDENCY_GRAPH_SCHEMA_VERSION} from '../lib/dependency-planner.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {CANONICAL_RENDERER_ID} from '../lib/render-environment.ts';
 
@@ -46,6 +46,10 @@ async function main(): Promise<void> {
         const manifest = readDatasetManifest(outDir);
         if (manifest?.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
             && manifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+            && manifest.dependency_graph?.schema_version === DEPENDENCY_GRAPH_SCHEMA_VERSION
+            && manifest.dependency_graph.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+            && manifest.dependency_graph.complete === true
+            && manifest.dependency_graph.matching_index?.generation_plans_by_target !== undefined
             && manifest.complete === true
             && manifest.spec === specName) {
             const observation = inspectDevelopmentInputObservation({

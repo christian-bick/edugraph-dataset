@@ -1,3 +1,4 @@
+import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
 import {describe, expect, it, vi} from 'vitest';
 import {Ability, Area, Scope, bundledContext} from 'edugraph-ts/generated';
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
@@ -74,7 +75,7 @@ describe('positive ownership contracts', () => {
 
     it('does not compare incompatible roles, or use requirements as positive declarations', () => {
         const modules = [module('generator', 'generalLabels', [Area.Square]),
-            {...module('view', 'schema', [Area.Square]), requiredLabels: [Area.Square], rejectedLabels: [Area.Rectangle]}];
+            {...module('view', 'schema', [Area.Square]), compatibility: [requireTargetLabels('required', [Area.Square]), rejectTargetLabels('rejected', [Area.Rectangle])]}];
         expect(inspectPositiveOwnership({modules, pairs: []})).toEqual([]);
         expect(inspectPair(modules[0], {...modules[1], schema: {}})).toEqual([]);
     });

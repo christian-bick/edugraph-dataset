@@ -23,7 +23,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
     ];
 
     it('declares exactly the invariant mathematical capabilities', () => {
-        expect(spec).toEqual({
+        expect({generatorId: spec.generatorId, generalLabels: spec.generalLabels}).toEqual({
             generatorId: 'fraction-arithmetic',
             generalLabels: [
                 Area.Equation,

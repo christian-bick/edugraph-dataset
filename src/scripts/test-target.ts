@@ -6,7 +6,6 @@ import {
     loadViewCatalog,
     diagnoseTargetMatches,
     generateTargetSamples,
-    resolvePairCapabilities,
     buildProblem,
     buildRenderPayload,
     sanitizeFilePart
@@ -155,19 +154,10 @@ async function main() {
         for (const sample of samples) {
             if (!sample.stub) continue;
             const generatorEntry = generatorCatalog.find(g => g.generatorId === sample.identity.generatorId)!;
-            const viewEntry = viewCatalog.find(v => v.viewId === sample.identity.viewId)!;
-            const pair = resolvePairCapabilities({
-                targetLabels: target.labels,
-                generatorGeneralLabels: generatorEntry.generalLabels,
-                generatorResolvedLabels: sample.stub.labels,
-                viewGeneralLabels: viewEntry.generalLabels,
-                viewSchema: viewEntry.schema,
-                seed: sample.seed
-            });
             const problem = buildProblem({
                 stub: sample.stub,
                 type: generatorEntry.generator.type,
-                labels: pair.labels
+                labels: sample.labels!
             });
             // Train and validation samples intentionally share their canonical
             // dataset filename. Qualify debug renders by split so they cannot
@@ -181,7 +171,8 @@ async function main() {
                     viewId: sample.identity.viewId,
                     targetLabels: [...target.labels],
                     mode: sample.identity.mode,
-                    seed: sample.seed
+                    seed: sample.seed,
+                    preparedView: sample.preparedView!
                 })
             });
             validableSamples.push({sample, renderFileName, labels: problem.labels});
@@ -214,6 +205,8 @@ async function main() {
                         instanceIdx: sample.identity.instanceIdx,
                         attempt: sample.attempt,
                         seed: sample.seed,
+                        generationPlan: sample.plan,
+                        generationReplay: sample.replay!,
                         fileName: sample.fileName,
                         labels,
                         apiKey,

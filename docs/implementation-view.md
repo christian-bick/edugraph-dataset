@@ -68,7 +68,10 @@ Mode-dependent expectations are asserted by the view's minimal checklist
 Derive **all** randomized visual decisions from `payload.seed` — icon choices, scatter
 positions, shuffles, rotations. Either use the seed directly (`payload.seed % ICONS.length`)
 or pass it into a helper that calls `setSeed(seed)` before drawing. The `withConfig` wrapper
-seeds the global PRNG from `payload.seed` before config resolution.
+restores the recorded PRNG continuation after the orchestrator's prepared config resolution.
+It consumes `payload.preparedView.config` without running schema resolvers again; a missing
+prepared configuration is an error. Presentation randomness must stay within the selected
+capabilities and must never reselect a label-bearing configuration field.
 
 Placement follows identity: an ontology-neutral choice that changes what is asked belongs in the
 resolved view schema so the task fingerprint includes it; a shuffle, rotation, or layout choice
@@ -129,7 +132,7 @@ The leaf wrapper fixes the task mode passed to the shared renderer. The shared r
 must not inspect ontology labels or import one leaf's spec to recover that decision.
 The leaf's `ViewTypeMap` entry declares every mathematical payload it accepts. Runtime validation
 checks that contract, but cannot replace it: throwing for a valid member of an accepted generator
-union is a composition defect. `requiredLabels` controls target participation, not the producer's
+union is a composition defect. `requireTargetLabels` controls target participation, not the producer's
 output type. Shared renderers may support several families while each leaf declares only its own.
 
 ### IMPL-V10 — The screenshot root shrink-wraps content up to the viewport
@@ -161,7 +164,7 @@ Evidence follows ownership. The generator contract supplies every canonical math
 witness; the view preserves those witnesses while making its Ability observable. When a
 witness is absent from the payload, follow
 [IMPL-V8](#impl-v8--needing-a-new-payload-field-is-a-two-module-change). When the payload
-contains it but the screenshot does not, correct the view. Use `rejectedLabels` only for a
+contains it but the screenshot does not, correct the view. Use `rejectTargetLabels` only for a
 truthful, stable, and complete exclusion boundary.
 
 ---

@@ -5,8 +5,14 @@ import {hasLabel} from '../../lib/resolvers.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
 import {resolveComparisonRelation} from './helpers.ts';
 
+import {generatorLabelRule} from '../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'comparison',
+    compatibility: [generatorLabelRule('equal-zero-negative-domain', [
+        Scope.Equal, Scope.NumbersWithZero, Scope.NumbersWithNegatives
+    ], selected => !selected(Scope.Equal)
+        || !selected(Scope.NumbersWithZero) || !selected(Scope.NumbersWithNegatives))],
     generalLabels: [
         Scope.IntegerNumbers
     ]

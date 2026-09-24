@@ -1,6 +1,7 @@
 import {Ability, Area, bundledContext} from 'edugraph-ts/generated';
 import type {OntologyContext} from 'edugraph-ts/core';
 import type {ConfigSchema} from '../types/schema.ts';
+import type {CompatibilityRule} from '../types/compatibility.ts';
 import {getCapabilityAncestors} from './ontology.ts';
 
 /** Translate shared ontology eligibility into dataset diagnostics over one complete snapshot. */
@@ -30,13 +31,17 @@ export function validateTargetLabelContract(labels: readonly string[], location:
 
 export function validateModuleLabelContract(spec: {
     generalLabels?: readonly string[];
-    requiredLabels?: readonly string[];
-    rejectedLabels?: readonly string[];
+    compatibility?: readonly CompatibilityRule<any>[];
     schema?: ConfigSchema;
 }, location: string): string[] {
     const errors: string[] = [];
-    for (const field of ['generalLabels', 'requiredLabels', 'rejectedLabels'] as const) {
-        errors.push(...labelContractIndex.validate(spec[field] ?? [], `${location}.${field}`));
+    for (const field of ['requiredLabels', 'rejectedLabels']) {
+        if (field in spec) errors.push(`SPEC-V4 ${location}.${field}: removed declaration; use compatibility target policies.`);
+    }
+    errors.push(...labelContractIndex.validate(spec.generalLabels ?? [], `${location}.generalLabels`));
+    for (const rule of spec.compatibility ?? []) {
+        errors.push(...labelContractIndex.validate((rule.dependencies ?? []).map(dependency => dependency.label),
+            `${location}.compatibility.${rule.id}`));
     }
     for (const [field, choice] of Object.entries(spec.schema ?? {})) {
         if (!Array.isArray(choice)) continue;
@@ -46,6 +51,15 @@ export function validateModuleLabelContract(spec: {
             for (const fallback of choice[2]) {
                 errors.push(...labelContractIndex.validate(fallback, `${location}.schema.${field}.fallback`));
             }
+        }
+        const contract = tuple ? choice[1].labelChoices : undefined;
+        if (contract) {
+            const labels = [...(contract.contextLabels ?? [])];
+            if (contract.kind === 'alternatives') {
+                labels.push(...(contract.alternatives ?? []).flat(), ...(contract.equivalenceGroups ?? []).flat(2));
+                for (const entry of contract.defaults ?? []) labels.push(...entry.labels, ...(entry.whenAll ?? []), ...(entry.whenNone ?? []));
+            } else labels.push(...(contract.predicate?.all ?? []));
+            errors.push(...labelContractIndex.validate([...new Set(labels)], `${location}.schema.${field}.choices`));
         }
     }
     return errors;

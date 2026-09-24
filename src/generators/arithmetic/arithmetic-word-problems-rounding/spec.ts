@@ -5,6 +5,7 @@ import {ArithmeticWordProblemsTwoStepGeneratorSchema, spec as baseSpec} from '..
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-word-problems-rounding',
+    compatibility: baseSpec.compatibility,
     generalLabels: [...baseSpec.generalLabels, Area.IntegerRounding]
 };
 

@@ -3,7 +3,6 @@ import {
     buildCompatibleModulePairIndex,
     computeSampleKey,
     computeSampleSeed,
-    generateSample,
     generateSampleByKey,
     generateTargetSamples,
     loadGeneratorCatalog,
@@ -15,6 +14,7 @@ import {
 import {loadTargets} from './spec-catalog.ts';
 import { isProblemTypeCompatible } from './type-parser.ts';
 import {extractSchemaLabels} from './utils.ts';
+import {generatePlannedDraw} from './planned-generation.ts';
 
 describe('catalogs and end-to-end matching', () => {
     it('routes CCSS comparison targets to representation-compatible views', async () => {
@@ -106,7 +106,8 @@ describe('catalogs and end-to-end matching', () => {
             expect([
                 'unsupported-label',
                 'missing-required-label',
-                'rejected-label'
+                'rejected-label',
+                'incompatible-label-variants'
             ])
                 .toContain(rejection.verdict.reason);
         }
@@ -124,14 +125,19 @@ describe('catalogs and end-to-end matching', () => {
         const replayed = await generateSampleByKey({ sampleKey, attempt: 1, specName: 'test' });
 
         const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
-        const direct = generateSample({
+        const direct = generatePlannedDraw({
             generator,
-            labels: [...tuple.target.labels],
+            viewSchema: viewCatalog.find(view => view.viewId === tuple.viewId)!.schema,
+            plan: tuple.plan,
+            sampleKey,
+            attempt: 1,
             seed: computeSampleSeed(sampleKey, 1)
         });
 
         expect(replayed.identity).toEqual(identity);
-        expect(replayed.stub).toEqual(direct);
+        expect(replayed.stub).toEqual(direct.stub);
+        expect(replayed.preparedView).toEqual(direct.view);
+        expect(replayed.replay).toEqual(direct.replay);
     }, 60000);
 
     it('generates all samples for a single target deterministically', async () => {

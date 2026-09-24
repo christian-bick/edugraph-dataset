@@ -8,9 +8,8 @@ import {
 } from './generation.ts';
 import type {MatchTuple} from './matching.ts';
 import {capabilitySatisfies} from './ontology.ts';
-import {setSeed} from './random.ts';
+import {resolvePlannedConfigurations} from './planned-generation.ts';
 import {
-    extractConfig,
     findSchemaCoResolutionGroups,
     schemaResolutionKey
 } from './utils.ts';
@@ -128,16 +127,9 @@ export function buildScopeCompletenessInventory(options: {
             instanceIdx: 0
         });
         const seed = computeSampleSeed(sampleKey, 1);
-        setSeed(seed);
-        const generatorResolution = extractConfig(generator.schema ?? {}, [...tuple.target.labels]);
-        setSeed(seed);
-        const viewResolution = extractConfig(view.schema, [...tuple.target.labels]);
-        const pairLabels = [...new Set([
-            ...generator.generalLabels,
-            ...generatorResolution.resolvedLabels,
-            ...view.generalLabels,
-            ...viewResolution.resolvedLabels
-        ])];
+        const resolved = resolvePlannedConfigurations({generatorSchema: generator.schema ?? {},
+            viewSchema: view.schema, plan: tuple.plan, sampleKey, attempt: 1, seed});
+        const pairLabels = resolved.labels;
         const resolvedScopes = scopeOnly(pairLabels);
         const requestedScopes = targetScopes(tuple.target);
         for (const label of resolvedScopes) {
@@ -188,13 +180,13 @@ export function buildScopeCompletenessInventory(options: {
         inspect(
             'generator',
             generator.generatorId,
-            generatorResolution.config as Record<string, unknown>,
+            resolved.generatorConfig,
             generatorCandidates.get(generator.generatorId) ?? []
         );
         inspect(
             'view',
             view.viewId,
-            viewResolution.config as Record<string, unknown>,
+            resolved.view.config,
             viewCandidates.get(view.viewId) ?? []
         );
     }

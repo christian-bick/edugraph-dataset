@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {ShapeLineSymmetryGenerator} from '../../../../generators/shape/shape-line-symmetry/generator.ts';
@@ -11,7 +12,7 @@ describe('shape-line-symmetry-identification view spec', () => {
             Ability.ConceptClassification,
             Ability.VisualRecognition
         ]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 
     it('resolves a fingerprint-visible semantic subset without consuming labels', () => {

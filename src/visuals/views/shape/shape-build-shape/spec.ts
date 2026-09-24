@@ -1,3 +1,4 @@
+import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
@@ -10,7 +11,9 @@ export const spec: ViewSpec = {
         Ability.ConceptSpecification,
         Ability.VisualArticulation
     ],
-    requiredLabels: [Area.ShapeClassification],
+    compatibility: [
+        requireTargetLabels('shape-classification-request', [Area.ShapeClassification])
+    ],
 };
 
 

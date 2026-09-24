@@ -3,6 +3,7 @@ import {getCapabilityAncestors} from './ontology.ts';
 import {radixSortUtf8} from './content-identity.ts';
 import type {CompatibleModulePairIndex, ViewMatchInfo} from './matching.ts';
 import type {WorkCounters} from './work-counters.ts';
+import {getTargetPolicyLabels} from './compatibility.ts';
 
 const abilityLabels = new Set<string>(Object.values(Ability));
 
@@ -110,19 +111,19 @@ function applicabilityIssue(viewId: string, issue: RequiredLabelContractIssue | 
     switch (issue.kind) {
         case 'required-and-rejected-label':
             rule_ids = ['SPEC-V3', 'SPEC-V7'];
-            detail = `requiredLabels '${issue.label}' is excluded by rejectedLabels '${issue.rejectedLabel}' through equality or specialization`;
+            detail = `required target policy '${issue.label}' is excluded by rejected target policy '${issue.rejectedLabel}' through equality or specialization`;
             break;
         case 'no-compatible-generator':
             rule_ids = ['SPEC-V7'];
-            detail = 'requiredLabels cannot be established because the view has no compatible generator';
+            detail = 'required target policy cannot be established because the view has no compatible generator';
             break;
         case 'pair-missing-required-label':
             rule_ids = ['SPEC-V7'];
-            detail = `requiredLabels '${issue.label}' is not supported by compatible pair '${issue.generatorId}#${viewId}'`;
+            detail = `required target policy '${issue.label}' is not supported by compatible pair '${issue.generatorId}#${viewId}'`;
             break;
         case 'ability-rejection':
             rule_ids = ['SPEC-V3'];
-            detail = `rejectedLabels '${issue.label}' is an Ability; rejection boundaries cannot exclude Abilities`;
+            detail = `rejected target policy '${issue.label}' is an Ability; rejection boundaries cannot exclude Abilities`;
             break;
     }
     return {...issue, viewId, rule_ids, message: `${rule_ids.join('/')} [view:${viewId}] ${detail}`};
@@ -146,13 +147,14 @@ export function inspectApplicability(options: {
     const viewsById = new Map(options.views.map(view => [view.viewId, view]));
     for (const viewId of radixSortUtf8([...viewsById.keys()])) {
         const view = viewsById.get(viewId)!;
+        const policies = view.spec?.compatibility ?? view.compatibility;
         options.counters?.add('applicability.views');
         const contracts = [
             ...findRequiredLabelContractIssues({
-                requiredLabels: view.requiredLabels ?? [], rejectedLabels: view.rejectedLabels ?? [],
+                requiredLabels: getTargetPolicyLabels(policies, 'require'), rejectedLabels: getTargetPolicyLabels(policies, 'reject'),
                 compatiblePairs: pairsByView.get(viewId) ?? [], counters: options.counters
             }),
-            ...findRejectedLabelContractIssues({rejectedLabels: view.rejectedLabels ?? []})
+            ...findRejectedLabelContractIssues({rejectedLabels: getTargetPolicyLabels(policies, 'reject')})
         ];
         issues.push(...contracts.map(issue => applicabilityIssue(viewId, issue)));
         options.counters?.add('applicability.issues', contracts.length);

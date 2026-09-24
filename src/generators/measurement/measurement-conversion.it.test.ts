@@ -36,8 +36,7 @@ describe('unit-relation payload contracts', () => {
 
         // No ontology precondition is needed to distinguish these payload families.
         for (const view of views) {
-            expect(view.requiredLabels ?? []).toEqual([]);
-            expect(view.rejectedLabels ?? []).toEqual([]);
+            expect(view.spec.compatibility ?? []).toEqual([]);
         }
         const index = buildCompatibleModulePairIndex(generators, views);
         for (const generator of generators) {

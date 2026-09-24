@@ -1,6 +1,6 @@
 import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {dirname, resolve, sep} from 'node:path';
+import {dirname, relative, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts/generated';
@@ -45,7 +45,8 @@ function fixture(viewLabel: string, {numericName = false, requiredLabels = [], r
         `export const spec = ${JSON.stringify({generalLabels: generatorLabels})};\n`
         + 'export const FixtureGeneratorGeneratorSchema = {};\n');
     writeFileSync(resolve(viewDir, 'spec.ts'),
-        `export const spec = ${JSON.stringify({viewId, generalLabels: [Ability.ProcedureExecution], requiredLabels, rejectedLabels})};\n`
+        `import {requireTargetLabels, rejectTargetLabels} from ${JSON.stringify(relative(viewDir, resolve(projectRoot, 'src/lib/compatibility.ts')).replaceAll('\\', '/'))};\n`
+        + `export const spec = {...${JSON.stringify({viewId, generalLabels: [Ability.ProcedureExecution]})}, compatibility: [requireTargetLabels('required', ${JSON.stringify(requiredLabels)}), rejectTargetLabels('rejected', ${JSON.stringify(rejectedLabels)})]};\n`
         + `export const ${numericName ? 'FixtureView100' : 'FixtureView'}ViewSchema = ${JSON.stringify({notation: [viewLabel]})};\n`);
     return {generatorsDir, viewsDir};
 }
@@ -96,8 +97,8 @@ describe('public spec validation gate', () => {
         expect(await validateSpecs(roots)).toBe(false);
         const diagnostics = errors.mock.calls.flat().join('\n');
         expect(diagnostics).toContain('SPEC-V3/SPEC-V7 [view:fixture-view]');
-        expect(diagnostics).toContain(`requiredLabels '${Area.Square}'`);
-        expect(diagnostics).toContain(`rejectedLabels '${Area.Rectangle}'`);
+        expect(diagnostics).toContain(`required target policy '${Area.Square}'`);
+        expect(diagnostics).toContain(`rejected target policy '${Area.Rectangle}'`);
         expect(diagnostics).not.toContain('no compatible generator');
     });
 
@@ -114,7 +115,7 @@ describe('public spec validation gate', () => {
         const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
         expect(await validateSpecs(fixture(Scope.LinearArrangement, {requiredLabels: [Area.Rectangle]}))).toBe(false);
         const diagnostics = errors.mock.calls.flat().join('\n');
-        expect(diagnostics).toContain(`SPEC-V7 [view:fixture-view] requiredLabels '${Area.Rectangle}'`);
+        expect(diagnostics).toContain(`SPEC-V7 [view:fixture-view] required target policy '${Area.Rectangle}'`);
         expect(diagnostics).toContain('fixture-generator#fixture-view');
     });
 });

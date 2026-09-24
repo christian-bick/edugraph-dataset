@@ -1,4 +1,5 @@
-import {describe, expect, it} from 'vitest';
+import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
+import {describe, expect, it, vi} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     buildCompatibleModulePairIndex,
@@ -6,6 +7,12 @@ import {
     buildTargetCapabilityPostingIndex,
     generatorCapabilityInputHash,
     matchTargets,
+    matchTarget,
+    diagnoseTargetMatches,
+    findTargetsWithoutMatch,
+    restorePersistedMatchTuple,
+    generatorMatchingOntologyLabels,
+    viewMatchingOntologyLabels,
     matchesTarget,
     matchTargetsDelta,
     matchingPolicyNodeId,
@@ -28,6 +35,11 @@ import {
 import {digestIdentity} from './content-identity.ts';
 import {createWorkCounters} from './work-counters.ts';
 import type {CompetencyTarget} from '../types/ml-engine.ts';
+import {hasLabel, selectExactLabelMap} from './resolvers.ts';
+import {withLabelChoices} from '../types/schema.ts';
+import {MeasurementDataGeneratorSchema, spec as measurementGeneratorSpec} from '../generators/statistics/measurement-data/spec.ts';
+import {MeasurementLinePlotViewSchema, spec as measurementViewSpec} from '../visuals/views/data/measurement-line-plot/spec.ts';
+import {extractSchemaLabels} from './utils.ts';
 
 const SPEC = 'test';
 const POLICY = 'matching-policy-v1';
@@ -71,7 +83,7 @@ describe('required target labels', () => {
         const view: ViewMatchInfo = {
             viewId: 'written-method', problemType: 'ArithmeticPairProblem',
             supportedLabels: [Ability.ProcedureUnderstanding, Ability.Formalization],
-            requiredLabels: [Ability.Formalization]
+            compatibility: [requireTargetLabels('formalization-request', [Ability.Formalization])]
         };
         expect(matchesTarget(
             [Area.Addition, Ability.ProcedureUnderstanding],
@@ -93,7 +105,7 @@ describe('required target labels', () => {
         const view: ViewMatchInfo = {
             viewId: 'bounded-view', problemType: 'ArithmeticPairProblem',
             supportedLabels: [Ability.ProcedureExecution, Scope.NumbersSmaller10],
-            requiredLabels: [Scope.NumericRange]
+            compatibility: [requireTargetLabels('numeric-range-request', [Scope.NumericRange])]
         };
         expect(matchesTarget(
             [Area.Addition, Ability.ProcedureExecution, Scope.NumbersSmaller10],
@@ -134,7 +146,7 @@ describe('capability inheritance', () => {
             {
                 viewId: 'unbounded-only', problemType: 'ArithmeticPairProblem',
                 supportedLabels: [Ability.ProcedureExecution, Scope.NumbersSmaller10],
-                rejectedLabels: [Scope.NumericRange]
+                compatibility: [rejectTargetLabels('numeric-range-exclusion', [Scope.NumericRange])]
             }
         )).toEqual({
             matched: false,
@@ -148,7 +160,7 @@ describe('payload families', () => {
     it.each([{requiredLabels: []}, {requiredLabels: [Area.PatternGeneration]}])('never narrows a producer union through requirements $requiredLabels', ({requiredLabels}) => {
         const generator = {generatorId: 'family', labels: [Area.PatternGeneration], problemType: 'WritingProblem'};
         const view = {viewId: 'member', supportedLabels: [Ability.ProcedureExecution],
-            requiredLabels, problemType: 'MultiDigitWritingProblem'};
+            compatibility: [requireTargetLabels('target-request', requiredLabels)], problemType: 'MultiDigitWritingProblem'};
         expect(buildCompatibleModulePairIndex([generator], [view]).orderedPairs).toEqual([]);
         expect(matchesTarget([Area.PatternGeneration, Ability.ProcedureExecution], generator, view))
             .toEqual({matched: false, reason: 'incompatible-type'});
@@ -273,8 +285,8 @@ describe('delta target matching', () => {
             {id: 'square', labels: [Area.Square, Ability.ProcedureExecution]}
         ];
         const currentGenerators = [{generatorId: 'shape', labels: [Area.Square], problemType: 'ArithmeticPairProblem'}];
-        const originalView = {viewId: 'v', problemType: 'ArithmeticPairProblem', supportedLabels: [Ability.ProcedureExecution], requiredLabels: [Area.Rectangle]};
-        const currentView = {...originalView, requiredLabels: [required], rejectedLabels: [rejected]};
+        const originalView = {viewId: 'v', problemType: 'ArithmeticPairProblem', supportedLabels: [Ability.ProcedureExecution], compatibility: [requireTargetLabels('rectangle-request', [Area.Rectangle])]};
+        const currentView = {...originalView, compatibility: [requireTargetLabels('required-request', [required]), rejectTargetLabels('excluded-request', [rejected])]};
         const previousGraph = matchingGraph({targets: currentTargets, generators: currentGenerators, views: [originalView]});
         const full = matchTargets(currentTargets, currentGenerators, [currentView]);
         const affected = delta({currentTargets, currentGenerators, currentViews: [currentView], previousGraph});
@@ -468,5 +480,114 @@ describe('delta target matching', () => {
         expect(result.evaluatedTargets).toBe(1);
         expect(counters.get('match.capability_checks')).toBe(1);
         expect(counters.get('match.delta_pair_candidate_targets')).toBe(1);
+    });
+});
+
+describe('authoritative label plans in matching', () => {
+    const generator: GeneratorMatchInfo = {
+        generatorId: measurementGeneratorSpec.generatorId,
+        labels: [...measurementGeneratorSpec.generalLabels, ...extractSchemaLabels(MeasurementDataGeneratorSchema)],
+        generalLabels: measurementGeneratorSpec.generalLabels, schema: MeasurementDataGeneratorSchema,
+        spec: measurementGeneratorSpec, problemType: 'MeasurementDataProblem', matchingSourceHash: 'generator-source'
+    };
+    const view: ViewMatchInfo = {
+        viewId: measurementViewSpec.viewId,
+        supportedLabels: [...measurementViewSpec.generalLabels, ...extractSchemaLabels(MeasurementLinePlotViewSchema)],
+        generalLabels: measurementViewSpec.generalLabels, schema: MeasurementLinePlotViewSchema,
+        spec: measurementViewSpec, problemType: 'MeasurementDataProblem', matchingSourceHash: 'view-source'
+    };
+    const requests = [
+        {id: 'unit-steps', labels: [Area.Statistics, Scope.StepsOf1]},
+        {id: 'single-frame', labels: [Area.Statistics, Scope.SingleFrameOfReference]},
+        {id: 'fraction-steps', labels: [Area.Statistics, Scope.FractionNumbers, Scope.StepsOf1]},
+        {id: 'single-frame-steps', labels: [Area.Statistics, Scope.SingleFrameOfReference, Scope.StepsOf1]}
+    ];
+
+    it('uses one planner for direct, indexed, diagnostic and unmatched-target routes', () => {
+        const direct = requests.flatMap(target => {
+            const verdict = matchTarget(target, generator, view);
+            expect(matchesTarget(target.labels, generator, view).matched).toBe(verdict.matched);
+            return verdict.matched ? [{target, generatorId: generator.generatorId, viewId: view.viewId, plan: verdict.plan}] : [];
+        });
+        const indexed = matchTargets(requests, [generator], [view]).tuples;
+        const diagnostic = diagnoseTargetMatches(requests, [generator], [view]);
+        expect(indexed).toEqual(direct);
+        expect(diagnostic.tuples).toEqual(direct);
+        expect(indexed.map(tuple => tuple.target.id)).toEqual(['unit-steps', 'single-frame']);
+        expect(findTargetsWithoutMatch(requests, [generator], [view]).map(target => target.id)).toEqual(['fraction-steps', 'single-frame-steps']);
+        expect(diagnostic.rejections.map(rejection => rejection.verdict.reason)).toEqual(['incompatible-label-variants', 'incompatible-label-variants']);
+        expect(indexed[0].plan.domains.find(domain => domain.field === 'numberKind')?.alternatives.map(alternative => alternative.labels))
+            .toEqual([[Scope.IntegerNumbers]]);
+        expect(indexed[1].plan.domains.find(domain => domain.field === 'numberKind')?.alternatives.map(alternative => alternative.labels))
+            .toEqual([[Scope.FractionNumbers]]);
+    });
+
+    it('restores byte-equivalent plans on the unchanged delta path', () => {
+        const full = matchTargets(requests, [generator], [view]);
+        const previousGraph = JSON.parse(JSON.stringify(matchingGraph({targets: requests, generators: [generator], views: [view]})));
+        const reused = delta({currentTargets: requests, currentGenerators: [generator], currentViews: [view], previousGraph});
+        expect(reused.tuples).toEqual(full.tuples);
+        expect(reused.reusedTuples).toBe(2);
+        expect(reused.evaluatedPairs).toBe(0);
+        const stored = previousGraph.matching_index.generation_plans_by_target[requests[0].id]['measurement-data#measurement-line-plot'];
+        expect(restorePersistedMatchTuple(requests[0], generator, view, stored)).toEqual(full.tuples[0]);
+    });
+
+    it('rebuilds legacy indexes but refuses stale or corrupt current-format plan records', () => {
+        const previousGraph = matchingGraph({targets: requests, generators: [generator], views: [view]});
+        const legacy = JSON.parse(JSON.stringify(previousGraph));
+        delete legacy.matching_index.generation_plans_by_target;
+        expect(delta({currentTargets: requests, currentGenerators: [generator], currentViews: [view], previousGraph: legacy}).baseline).toBe(true);
+        const plan = matchTargets(requests, [generator], [view]).tuples[0].plan;
+        expect(() => restorePersistedMatchTuple(requests[0], generator, view, undefined)).toThrow(/missing; rebuild matching/);
+        expect(() => restorePersistedMatchTuple(requests[1], generator, view, plan)).toThrow(/identity mismatch/);
+        expect(() => restorePersistedMatchTuple(requests[0], {...generator, matchingSourceHash: 'updated'}, view, plan)).toThrow(/inputs changed/);
+        expect(() => restorePersistedMatchTuple(requests[0], generator, view, {...plan, hash: 'changed'})).toThrow(/hash mismatch/);
+        const missing = JSON.parse(JSON.stringify(previousGraph));
+        delete missing.matching_index.generation_plans_by_target[requests[0].id]['measurement-data#measurement-line-plot'];
+        expect(() => delta({currentTargets: requests, currentGenerators: [generator], currentViews: [view], previousGraph: missing})).toThrow(/missing; rebuild matching/);
+    });
+
+    it('discovers newly admitted targets when only an imported rule helper changes', () => {
+        let enabled = false;
+        const predicate = vi.fn(() => enabled);
+        const changing: ViewMatchInfo = {...view, spec: {...measurementViewSpec, compatibility: [{id: 'helper-policy', dependencies: [], predicate}]}, matchingSourceHash: 'helper-before'};
+        const independent = {...view, viewId: 'unchanged', spec: {...measurementViewSpec, viewId: 'unchanged'}};
+        const target = requests[0];
+        const previousGraph = matchingGraph({targets: [target], generators: [generator], views: [changing, independent]});
+        expect(previousGraph.matching_index?.matched_pair_keys_by_target[target.id]).toEqual(['measurement-data#unchanged']);
+        enabled = true;
+        predicate.mockClear();
+        const currentView = {...changing, matchingSourceHash: 'helper-after'};
+        const result = delta({currentTargets: [target], currentGenerators: [generator], currentViews: [currentView, independent], previousGraph});
+        expect(result.reusedTuples).toBe(1);
+        expect(result.tuples.map(tuple => tuple.viewId)).toEqual([view.viewId, 'unchanged']);
+        expect(predicate).toHaveBeenCalledOnce();
+        expect(result.tuples).toEqual(matchTargets([target], [generator], [currentView, independent]).tuples);
+    });
+
+    it('changes input identity for rules, schemas, defaults and declared semantic reads', () => {
+        const base: GeneratorMatchInfo = {generatorId: 'g', labels: [Scope.IntegerNumbers, Scope.FractionNumbers], generalLabels: [], problemType: 'MeasurementDataProblem',
+            schema: {kind: [[Scope.IntegerNumbers, Scope.FractionNumbers], selectExactLabelMap([[Scope.IntegerNumbers, 'integer'], [Scope.FractionNumbers, 'fraction']])]}};
+        const withRule = {...base, compatibility: [{id: 'integer', dependencies: [{scope: 'generator' as const, label: Scope.IntegerNumbers}], predicate: () => true}]};
+        expect(generatorCapabilityInputHash(withRule)).not.toBe(generatorCapabilityInputHash(base));
+        expect(generatorCapabilityInputHash({...withRule, compatibility: [{...withRule.compatibility[0], predicate: () => false}]})).not.toBe(generatorCapabilityInputHash(withRule));
+        expect(generatorCapabilityInputHash({...base, matchingSourceHash: 'helper-1'})).not.toBe(generatorCapabilityInputHash({...base, matchingSourceHash: 'helper-2'}));
+        const defaultResolver = withLabelChoices(selectExactLabelMap([[Scope.IntegerNumbers, 'integer'], [Scope.FractionNumbers, 'fraction']]), {
+            kind: 'alternatives', defaults: [{whenAll: [Scope.SingleFrameOfReference], labels: [Scope.FractionNumbers]}, {labels: [Scope.IntegerNumbers]}], contextLabels: [Scope.SingleFrameOfReference]
+        });
+        const withDefault = {...base, schema: {kind: [[Scope.IntegerNumbers, Scope.FractionNumbers], defaultResolver] as const}};
+        expect(generatorCapabilityInputHash(withDefault)).not.toBe(generatorCapabilityInputHash(base));
+        expect(generatorMatchingOntologyLabels(withDefault)).toContain(Scope.SingleFrameOfReference);
+        expect(viewMatchingOntologyLabels({...view, compatibility: [{id: 'scope', dependencies: [{scope: 'generator', label: Scope.NumericRange}], predicate: () => true}], spec: undefined})).toContain(Scope.NumericRange);
+        expect(generatorMatchingOntologyLabels(generator)).toContain(Scope.FractionNumbers);
+    });
+
+    it('does not turn unresolved schema alternatives into invariant support', () => {
+        const generator: GeneratorMatchInfo = {generatorId: 'operation', labels: [Area.Addition, Area.Subtraction], problemType: 'ArithmeticPairProblem', schema: {operation: [Area.Addition, Area.Subtraction]}};
+        const view: ViewMatchInfo = {viewId: 'task', supportedLabels: [], problemType: 'ArithmeticPairProblem'};
+        expect(matchesTarget([Area.Addition, Area.Subtraction], generator, view)).toEqual({matched: false, reason: 'empty-label-domain'});
+        const predicateGenerator = {...generator, schema: {addition: [[Area.Addition], hasLabel(Area.Addition)] as const}, labels: [Area.Addition]};
+        expect(matchTargets([{id: 'absence', labels: []}], [predicateGenerator], [view]).tuples[0].plan.domains[0].alternatives[0].labels).toEqual([]);
     });
 });

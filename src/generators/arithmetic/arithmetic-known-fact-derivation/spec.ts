@@ -13,8 +13,23 @@ const resolveOperation = selectExactLabelMap([
     [Area.DivisionKnownFactDerivation, 'division']
 ] as const);
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-known-fact-derivation',
+    compatibility: [generatorLabelRule('known-fact-strategy', [
+        Area.MultiplicationKnownFactDerivation, Area.DivisionKnownFactDerivation,
+        Area.CommutativeLaw, Area.AssociativeLaw, Area.PlaceValue, Scope.TwoOperands, Scope.ThreeOperands
+    ], selected => {
+        const commutative = selected(Area.CommutativeLaw);
+        const associative = selected(Area.AssociativeLaw);
+        const scaling = selected(Area.PlaceValue);
+        const multiplication = selected(Area.MultiplicationKnownFactDerivation);
+        if (Number(commutative) + Number(associative) + Number(scaling) > 1) return false;
+        if ((commutative || scaling) && (!multiplication || !selected(Scope.TwoOperands))) return false;
+        if (associative && (!multiplication || !selected(Scope.ThreeOperands))) return false;
+        return !selected(Scope.ThreeOperands) || associative;
+    })],
     generalLabels: [
         Area.Equation,
         Scope.ArabicNumerals,

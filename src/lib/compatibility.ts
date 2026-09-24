@@ -1,5 +1,9 @@
 import {digestIdentity} from './content-identity.ts';
 import {getCapabilityAncestors} from './ontology.ts';
+import {Ability} from 'edugraph-ts/generated';
+import {CompatibilityContractError} from './compatibility-errors.ts';
+export {CompatibilityContractError} from './compatibility-errors.ts';
+export {getTargetPolicyLabels, requireTargetLabels, rejectTargetLabels} from './target-policies.ts';
 import type {
     CompatibilityPlanningInput, CompatibilityPlanningResult, CompatibilityPlanningWork,
     CompatibilityQueries, CompatibilityRule, GenerationPlan, GenerationPlanGroup,
@@ -11,13 +15,7 @@ export const GENERATION_PLAN_VERSION = 1 as const;
 export const DEFAULT_MAX_COMPATIBILITY_ASSIGNMENTS = 4096;
 const EDU_PREFIX = 'http://edugraph.io/edu/';
 const scopes: readonly LabelScope[] = ['target', 'generator', 'view'];
-
-export class CompatibilityContractError extends Error {
-    constructor(message: string, options?: ErrorOptions) {
-        super(message, options);
-        this.name = 'CompatibilityContractError';
-    }
-}
+const abilityLabels = new Set<string>(Object.values(Ability));
 
 /** A bounded planner cannot silently truncate an unrepresentable rule profile. */
 export class CompatibilityLimitError extends CompatibilityContractError {
@@ -101,12 +99,20 @@ export function validateCompatibilityRules(
     const ids = new Set<string>();
     for (const raw of rules) {
         const rule = record(raw, 'Compatibility rule');
-        keys(rule, ['id', 'description', 'dependencies', 'predicate'], 'Compatibility rule');
+        keys(rule, ['id', 'description', 'dependencies', 'predicate', 'targetPolicy'], 'Compatibility rule');
         const id = text(rule.id, 'Rule ID');
         if (ids.has(id)) fail(`Duplicate ${owner} rule ID ${id}`);
         ids.add(id);
         if (rule.description !== undefined) text(rule.description, `Description for rule ${id}`);
         if (typeof rule.predicate !== 'function') fail(`Rule ${id} must declare a predicate`);
+        let policyLabels: string[] | undefined;
+        if (rule.targetPolicy !== undefined) {
+            const policy = record(rule.targetPolicy, `Target policy for rule ${id}`);
+            keys(policy, ['kind', 'labels'], `Target policy for rule ${id}`);
+            if (policy.kind !== 'require' && policy.kind !== 'reject') fail(`Invalid target policy kind for rule ${id}`);
+            policyLabels = canonical(strings(policy.labels, 'Target policy labels'));
+            if (!Array.isArray(rule.dependencies)) fail(`Target policy ${id} must declare its target dependencies`);
+        }
         if (rule.dependencies === undefined) continue;
         if (!Array.isArray(rule.dependencies)) fail(`Dependencies for rule ${id} must be an array`);
         const dependencies = new Set<string>();
@@ -117,31 +123,19 @@ export function validateCompatibilityRules(
                 || (owner === 'generator' && dependency.scope === 'view')) {
                 fail(`Invalid dependency scope ${String(dependency.scope)} for ${owner} rule ${id}`);
             }
-            const key = dependencyKey({scope: dependency.scope as LabelScope, label: text(dependency.label, 'Dependency label')});
+            const label = text(dependency.label, 'Dependency label');
+            if (owner === 'generator' && abilityLabels.has(label)) {
+                fail(`Generator rule ${id} cannot depend on learner Ability ${label}`);
+            }
+            const key = dependencyKey({scope: dependency.scope as LabelScope, label});
             if (dependencies.has(key)) fail(`Duplicate dependency in rule ${id}: ${key}`);
             dependencies.add(key);
         }
+        if (policyLabels && (dependencies.size !== policyLabels.length
+            || policyLabels.some(label => !dependencies.has(dependencyKey({scope: 'target', label}))))) {
+            fail(`Target policy ${id} dependencies must match its target labels`);
+        }
     }
-}
-
-/** Legacy positive target policies are conjunctions over the original request. */
-export function requireTargetLabels(id: string, labels: readonly string[]): CompatibilityRule<'target'> {
-    const requested = canonical(strings(labels, 'Required labels'));
-    return {
-        id,
-        dependencies: requested.map(label => ({scope: 'target', label})),
-        predicate: context => requested.every(label => context.has('target', label))
-    };
-}
-
-/** Legacy negative policies reject a target that requests any listed capability. */
-export function rejectTargetLabels(id: string, labels: readonly string[]): CompatibilityRule<'target'> {
-    const rejected = canonical(strings(labels, 'Rejected labels'));
-    return {
-        id,
-        dependencies: rejected.map(label => ({scope: 'target', label})),
-        predicate: context => rejected.every(label => !context.has('target', label))
-    };
 }
 
 type ScopeLabels = Record<LabelScope, readonly string[]>;
@@ -262,6 +256,9 @@ function ruleConstraint(
                     fail(`Rule ${owner}:${rule.id} queried forbidden scope ${String(scope)}`);
                 }
                 text(label, `Query label for rule ${rule.id}`);
+                if (owner === 'generator' && abilityLabels.has(label)) {
+                    fail(`Generator rule ${rule.id} cannot query learner Ability ${label}`);
+                }
                 const dependency = {scope, label};
                 if (dependencies !== undefined && !permitted.has(dependencyKey(dependency))) {
                     fail(`Rule ${owner}:${rule.id} queried undeclared dependency ${dependencyKey(dependency)}`);
@@ -565,6 +562,23 @@ export function validateGenerationSelectionReceipt(planValue: unknown, value: un
     const expectedHash = variantHash(plan, choices);
     if (item.variantHash !== expectedHash) fail('Selection receipt variant hash mismatch');
     return {version: GENERATION_PLAN_VERSION, planHash: plan.hash, variantHash: expectedHash, choices};
+}
+
+/** Binds an existing realized assignment to an admitting plan, without random selection. */
+export function createGenerationSelectionReceipt(
+    planValue: GenerationPlan, selection: readonly SelectedLabelChoice[]
+): GenerationSelectionReceipt {
+    const plan = validateGenerationPlan(planValue);
+    const choices = [...selection].sort((left, right) => compare(fieldKey(left), fieldKey(right)));
+    if (choices.length !== plan.domains.length || choices.some((choice, index) =>
+        fieldKey(choice) !== fieldKey(plan.domains[index])
+        || !plan.domains[index].alternatives.some(alternative => alternative.id === choice.alternativeId))) {
+        fail('Realized assignment is outside this generation plan.');
+    }
+    return validateGenerationSelectionReceipt(plan, {
+        version: GENERATION_PLAN_VERSION, planHash: plan.hash,
+        variantHash: variantHash(plan, choices), choices
+    });
 }
 
 /** Uniform full-assignment selection within each independent retained factor. */

@@ -13,6 +13,7 @@ import {inspectApplicability} from '../lib/spec-contracts.ts';
 import {inspectSpecSource} from '../lib/spec-source-contracts.ts';
 import {SourceSymbolIndex} from '../lib/source-symbol-index.ts';
 import {validateModuleLabelContract} from '../lib/label-contracts.ts';
+import {validateCompatibilityRules} from '../lib/compatibility.ts';
 import {inspectPositiveOwnership} from '../lib/spec-ownership.ts';
 import {buildCompatibleModulePairIndex} from '../lib/matching.ts';
 import {moduleSchemaExportName, type GeneratorModelDescriptor, type ViewModelDescriptor} from '../lib/model-catalog.ts';
@@ -78,6 +79,7 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                     continue;
                 }
 
+                validateCompatibilityRules(spec.compatibility ?? [], 'generator');
                 const generalLabels = spec.generalLabels || [];
                 const schemaName = moduleSchemaExportName(item, 'generator');
                 const schema = specModule[schemaName];
@@ -140,9 +142,8 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                     continue;
                 }
 
+                validateCompatibilityRules(spec.compatibility ?? [], 'view');
                 const generalLabels = spec.generalLabels || [];
-                const requiredLabels = spec.requiredLabels || [];
-                const rejectedLabels = spec.rejectedLabels || [];
                 const schemaName = moduleSchemaExportName(item, 'view');
                 const schema = specModule[schemaName];
                 if (!schema) {
@@ -157,7 +158,7 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
                 const problemType = viewToProblemType[item];
                 views.push({viewId: item, module: vMod, spec, schema: schema ?? {},
                     generalLabels, supportedLabels: [...generalLabels, ...paramLabels],
-                    requiredLabels, rejectedLabels, problemType});
+                    problemType});
                 
                 if (schema) {
                     for (const issue of findSchemaResolutionContractIssues(schema)) {

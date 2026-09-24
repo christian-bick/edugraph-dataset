@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -5,6 +6,6 @@ import {spec} from './spec.ts';
 describe('shape-square-array-inversion view spec', () => {
     it('owns box-arrangement missing-dimension inversion', () => {
         expect(spec.generalLabels).toEqual([Ability.ProcedureInversion]);
-        expect(spec.requiredLabels).toEqual([Scope.BoxArrangement]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Scope.BoxArrangement]);
     });
 });

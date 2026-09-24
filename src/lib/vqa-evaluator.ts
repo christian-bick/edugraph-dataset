@@ -17,6 +17,10 @@ import {
     applyVqaValidationPolicy,
     readVqaSystemInstruction
 } from './vqa-policy.ts';
+import type {GenerationPlan} from '../types/compatibility.ts';
+import type {GenerationReplay} from '../types/generation-plan.ts';
+import {readSampleReplayRecord} from './sample-replay.ts';
+import {parseSampleKey} from './generation.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -64,6 +68,8 @@ export interface EvaluateSampleVqaInput {
     instanceIdx: number;
     attempt: number;
     seed: number;
+    generationPlan: GenerationPlan;
+    generationReplay: GenerationReplay;
     fileName: string;
     labels: readonly string[];
     apiKey?: string;
@@ -147,6 +153,20 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
     } = input;
 
     if (!preparedImageBuffer && !existsSync(imagePath)) return null;
+    const recipe = readSampleReplayRecord(sampleKey, {
+        generation_plan: input.generationPlan, generation_replay: input.generationReplay,
+        attempt, seed
+    });
+    const identity = parseSampleKey(sampleKey);
+    if (identity.targetId !== targetId || identity.generatorId !== generatorId || identity.viewId !== viewId
+        || identity.mode !== modeName || identity.instanceIdx !== instanceIdx) {
+        throw new Error('VQA sample metadata disagrees with its structural identity.');
+    }
+    const provenance = {
+        sample_key: sampleKey, target_id: targetId, generator: generatorId, view: viewId,
+        mode: modeName, instance: instanceIdx, attempt, seed, file_name: fileName,
+        generation_plan: recipe.recordedPlan, generation_plan_hash: recipe.recordedPlan.hash, generation_replay: recipe.replay
+    };
 
     const imageBuffer = preparedImageBuffer ?? readFileSync(imagePath);
     const imageSha256 = preparedImageSha256 ?? computeImageSha256(imageBuffer);
@@ -166,7 +186,9 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
     if (cacheManager) {
         const cached = cacheManager.get(valCacheKey);
         if (cached) {
-            return { entry: cached, isLiveEvaluated: false };
+            const entry = {...cached, ...provenance};
+            cacheManager.set(entry);
+            return { entry, isLiveEvaluated: false };
         }
     }
 
@@ -219,6 +241,9 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
         instance: instanceIdx,
         attempt,
         seed,
+        generation_plan: recipe.recordedPlan,
+        generation_plan_hash: recipe.recordedPlan.hash,
+        generation_replay: recipe.replay,
         file_name: fileName,
         image_sha256: imageSha256,
         checklist_hash: validationContext.checklistHash,

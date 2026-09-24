@@ -1,3 +1,4 @@
+import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
 import {describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
 import {planModelCompatibility, type GeneratorChoiceModel, type ViewChoiceModel} from './model-compatibility.ts';
@@ -94,18 +95,18 @@ describe('metadata model compatibility', () => {
     });
 
     it('does not satisfy a required target policy with a fallback-selected capability', () => {
-        const requiresIntegers = {...view, spec: {...view.spec, requiredLabels: [Scope.IntegerNumbers]}};
+        const requiresIntegers = {...view, spec: {...view.spec, compatibility: [requireTargetLabels('integer-request', [Scope.IntegerNumbers])]}};
         const result = planModelCompatibility({id: 'not-requested', labels: [Scope.StepsOf1]}, generator, requiresIntegers);
         expect(result.supported).toBe(false);
         if (result.supported) throw new Error('Expected unsupported');
-        expect(result.ruleIds).toContain('view:legacy.requiredLabels');
+        expect(result.ruleIds).toContain('view:integer-request');
     });
 
     it('adapts ontology-aware target rejections without treating them as capabilities', () => {
-        const rejectsIntegers = {...view, spec: {...view.spec, rejectedLabels: [Scope.IntegerNumbers]}};
+        const rejectsIntegers = {...view, spec: {...view.spec, compatibility: [rejectTargetLabels('integer-exclusion', [Scope.IntegerNumbers])]}};
         const result = planModelCompatibility({id: 'rejected', labels: [Scope.IntegerNumbers]}, generator, rejectsIntegers);
         expect(result.supported).toBe(false);
         if (result.supported) throw new Error('Expected unsupported');
-        expect(result.ruleIds).toContain('view:legacy.rejectedLabels');
+        expect(result.ruleIds).toContain('view:integer-exclusion');
     });
 });

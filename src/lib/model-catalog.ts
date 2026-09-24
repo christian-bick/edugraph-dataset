@@ -194,8 +194,6 @@ export async function loadViewModelCatalog(
                 ...generalLabels,
                 ...extractSchemaLabels(schema)
             ])],
-            requiredLabels: spec.requiredLabels || [],
-            rejectedLabels: spec.rejectedLabels || [],
             problemType: viewToType[spec.viewId] || null
         });
     }

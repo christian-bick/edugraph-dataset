@@ -4,6 +4,8 @@ import { resolve } from 'path';
 import { definition, type CompetencyDescriptor } from 'edugraph-ts';
 import type {WorkCounters} from './work-counters.ts';
 import {currentValidationPolicyInputHash} from './vqa-policy.ts';
+import type {GenerationPlan} from '../types/compatibility.ts';
+import type {GenerationReplay} from '../types/generation-plan.ts';
 
 const EDUGRAPH_NAMESPACE = 'http://edugraph.io/edu/';
 
@@ -39,9 +41,13 @@ export interface VqaCacheEntry {
     view: string;
     mode: string;
     instance: number;
-    /** The winning generation attempt — together with sample_key it determines the seed */
+    /** The actual winning draw; solution reuse may have a question sample key. */
     attempt: number;
     seed: number;
+    /** Optional only when reading legacy caches; new evaluations carry a complete recipe. */
+    generation_plan?: GenerationPlan;
+    generation_plan_hash?: string;
+    generation_replay?: GenerationReplay;
     file_name: string;
     image_sha256: string;
     checklist_hash: string;

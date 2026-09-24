@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -8,6 +9,6 @@ describe('operations-word-problem-remainder-interpretation view spec', () => {
             Ability.TextualReception,
             Ability.ResultInterpretation
         ]);
-        expect(spec.requiredLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([]);
     });
 });

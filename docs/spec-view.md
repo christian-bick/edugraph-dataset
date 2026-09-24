@@ -84,9 +84,9 @@ export const clockDrawingSpec: ViewSpec = {
 };
 ```
 
-### SPEC-V3 — `rejectedLabels` declares complete exclusion boundaries
+### SPEC-V3 — `rejectTargetLabels` declares complete exclusion boundaries
 
-View specs use `rejectedLabels` to veto otherwise matching target contexts that the view's
+View specs place `rejectTargetLabels(id, labels)` rules in `compatibility` to veto target contexts that the view's
 contract cannot accept. Every entry must describe a real, stable, and complete exclusion
 boundary. **Stable** means that the reason follows from the view contract rather than today's
 target or generator catalog. **Complete** means that the declaration covers the whole invalid
@@ -100,19 +100,21 @@ every target range that admits values beyond 20.
 
 An exact rejection is truthful only when the view accepts every other compatible case. When the
 view accepts only a positively enumerable subset — for example, exactly step sizes 10 and 100 —
-use a narrower payload type or separate leaf views. A `requiredLabels` precondition can restrict
+use a narrower payload type when the distinction is structural, or a positive compatibility
+predicate over selected generator/view labels when it is a configuration constraint. A
+`requireTargetLabels` precondition can restrict
 target participation, but does not by itself constrain every generated value. Do not blacklist only the
 alternatives known today, because a later ontology member would pass the incomplete boundary.
 
-Never put an Ability in `rejectedLabels`, use the list to work around matching direction, or add
+Never put an Ability in `rejectTargetLabels`, use the list to work around matching direction, or add
 an exclusion merely to suppress an inconvenient failure. Positive capabilities remain in
 `generalLabels` or the schema ([SPEC-1](spec-general.md#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific));
-an explicit target precondition belongs in `requiredLabels` when it can be stated directly
-([SPEC-V7](#spec-v7--requiredlabels-declares-target-preconditions)).
+an explicit target precondition belongs in `requireTargetLabels` when it can be stated directly
+([SPEC-V7](#spec-v7--requiretargetlabels-declares-target-preconditions)).
 
 ### SPEC-V4 — Expand rejection boundaries with `deductAdmitting`
 
-Use `...deductAdmitting([<boundary>])` in the rejected list to logically expand a rejection
+Use `...deductAdmitting([<boundary>])` in a `rejectTargetLabels` helper's labels to expand a rejection
 boundary — e.g. `...deductAdmitting([Scope.NumbersLarger10])` rejects every scope admitting
 numbers beyond the view's supported capacity of 10.
 
@@ -153,7 +155,7 @@ parameterization is a warning sign for this review, not an automatic reason to s
 Each leaf must use the narrowest payload type it actually accepts in `ViewTypeMap`. Every member
 of the generator's declared output must be accepted by the view. A view may accept a named union
 when it renders all its members; a generator returning `A | B` cannot feed a view accepting only
-`A`, even if that view has `requiredLabels`. Split distinct mathematical producers and share pure
+`A`, even if that view has `requireTargetLabels`. Split distinct mathematical producers and share pure
 helpers instead of relying on a label precondition to narrow a payload union. Missing or unknown
 type declarations fail validation and cannot match. Declare only the most specific Ability required
 by the task: a specialization already satisfies targets asking for its ancestor.
@@ -162,34 +164,39 @@ Pure presentation parameters that do not change task identity remain valid schem
 configuration under [SPEC-V2](#spec-v2--the-schema-maps-to-visual-configuration-only).
 
 When sibling leaves share the same capability set and differ only by an invariant Ability
-conjunction, require that Ability through dimension-neutral `requiredLabels` under
-[SPEC-V8](#spec-v8--requiredlabels-does-not-parameterize-the-view) to prevent the stronger task
+conjunction, require that Ability through dimension-neutral `requireTargetLabels` under
+[SPEC-V8](#spec-v8--requiretargetlabels-does-not-parameterize-the-view) to prevent the stronger task
 from matching a target that did not request it.
 
-### SPEC-V7 — `requiredLabels` declares target preconditions
+### SPEC-V7 — `requireTargetLabels` declares target preconditions
 
-Use `requiredLabels` when a leaf view may participate only if the target explicitly requests a
+Use `requireTargetLabels(id, labels)` within `compatibility` when a leaf view may participate only if the target explicitly requests a
 label. Every listed label must be present in the target, or be an ancestor of a more specific
-target label, before the tuple can match. Like all label-bearing spec constructs, the property is
+target label, before the tuple can match. Like all label-bearing spec constructs, the helper is
 dimension-neutral: the same mechanism applies to Area, Scope, and Ability labels.
 
 A requirement is not a capability. The compatible generator/view pair must still provide a label
 equal to or more specific than every required label. The provider may be the generator, the view,
 or both; `npm run check:generator-view-specs` verifies pair support without assigning ownership by
-dimension. A required label cannot equal or specialize a `rejectedLabels` entry: every target
+dimension. A required label cannot equal or specialize a `rejectTargetLabels` entry: every target
 satisfying that requirement would also trigger the rejection. For example, requiring `Area.Square`
 while rejecting `Area.Rectangle` is contradictory. Requiring `Area.Rectangle` while rejecting
 `Area.Square` can remain valid, because the rejection excludes only the narrower context.
 Structural `partOf` ancestry alone does not imply this contradiction.
 
-Use the property for an invariant stronger sibling claim that should participate only when explicitly
+Use the helper for an invariant stronger sibling claim that should participate only when explicitly
 requested by the target. Payload-family compatibility is established separately by the generator
 output type and `ViewTypeMap`; requirements never narrow those types. A target requirement also
 does not prove which values a broad schema or its fallbacks can generate. Review all admitted
-configurations when a view needs a within-family restriction. Use `rejectedLabels` for complete
+configurations when a view needs a within-family restriction, and declare it using selected-label
+compatibility predicates. For example, the measurement line plot requires generator integer
+measurements whenever its own selected step label is `StepsOf1`. That rule admits a whole-unit
+completion for an unspecified number kind and rejects explicit fractional/unit-step contradictions.
+It references semantic labels without naming the generator's `numberKind` parameter.
+Use `rejectTargetLabels` for complete
 target exclusion boundaries, not as an incomplete substitute for a positive precondition.
 
-### SPEC-V8 — `requiredLabels` does not parameterize the view
+### SPEC-V8 — `requireTargetLabels` does not parameterize the view
 
 A required label controls matching participation only. It must not change configuration, branch
 rendering, or make a capability conditionally true. If the required label is supplied by the view,
@@ -197,9 +204,9 @@ that capability remains invariant in `generalLabels` or the schema under the ord
 rules.
 
 For example, a stronger sibling that always exhibits `Ability.Formalization` may both declare the
-Ability in `generalLabels` and require it in `requiredLabels`. This says that the view always makes
+Ability in `generalLabels` and require it in `requireTargetLabels`. This says that the view always makes
 Formalization true but participates only when the target explicitly asks for it. Do not create a
-dimension-specific requirement property for this case. The leaf wrapper still fixes one local
+dimension-specific requirement mechanism for this case. The leaf wrapper still fixes one local
 task mode, and the implementation never inspects requirements or raw target labels.
 
 ---
@@ -208,11 +215,11 @@ task mode, and the implementation never inspects requirements or raw target labe
 
 - [ ] **SPEC-V1** — `spec`, `ViewSchema` and `ViewConfig` are all exported, with `ViewConfig` extracted from the schema.
 - [ ] **SPEC-V2** — every schema parameter is presentational and preserves learner action; no mathematical parameter or Ability-driven task selector appears, and each Ability parameter has been reviewed as a possible parallel-task branch.
-- [ ] **SPEC-V3** — every `rejectedLabels` declaration is a real, stable, and complete exclusion boundary; exact exclusions admit every other compatible case, and no entry is an Ability, an incomplete blacklist, a matching workaround, or failure suppression.
+- [ ] **SPEC-V3** — every `rejectTargetLabels` declaration is a real, stable, and complete exclusion boundary; exact exclusions admit every other compatible case, and no entry is an Ability, an incomplete blacklist, a matching workaround, or failure suppression.
 - [ ] **SPEC-V4** — rejection boundaries use `...deductAdmitting(...)`; `deductCompatible` appears nowhere in the rejection list.
 - [ ] **SPEC-V5** — every Ability is declared by a view, directly evidenced by its rendered task, absent from all generators, and not parameterized when it changes task identity.
 - [ ] **SPEC-V6** — every Ability that changes observable task identity is invariant on a separate, narrowly typed leaf view rather than implemented through parallel configuration branches; only its most specific required Ability is declared.
-- [ ] **SPEC-V7** — every `requiredLabels` entry is a necessary dimension-neutral target precondition, is supported by every compatible generator/view pair, neither equals nor specializes a rejected label, and yields to a narrower payload type when static typing expresses the same boundary.
-- [ ] **SPEC-V8** — `requiredLabels` controls matching participation only; a view-supplied requirement remains an invariant capability and never drives configuration or rendering behavior.
+- [ ] **SPEC-V7** — every `requireTargetLabels` entry is a necessary dimension-neutral target precondition, is supported by every compatible generator/view pair, neither equals nor specializes a rejected label, and yields to a narrower payload type when static typing expresses the same boundary.
+- [ ] **SPEC-V8** — `requireTargetLabels` controls matching participation only; a view-supplied requirement remains an invariant capability and never drives configuration or rendering behavior.
 - [ ] **SPEC-11** — every view-owned Area is independent of compatible generator Areas; presentation-driven refinement uses Scope.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

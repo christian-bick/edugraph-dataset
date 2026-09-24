@@ -1,1 +1,2 @@
-import {Ability} from 'edugraph-ts'; import {describe, expect, it} from 'vitest'; import {spec} from './spec.ts'; describe('shape-square-array-partition view spec', () => {it('owns invariant array articulation', () => {expect(spec.generalLabels).toEqual([Ability.VisualArticulation]); expect(spec.rejectedLabels).toBeUndefined();});});
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
+import {Ability} from 'edugraph-ts'; import {describe, expect, it} from 'vitest'; import {spec} from './spec.ts'; describe('shape-square-array-partition view spec', () => {it('owns invariant array articulation', () => {expect(spec.generalLabels).toEqual([Ability.VisualArticulation]); expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);});});

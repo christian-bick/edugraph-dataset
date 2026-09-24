@@ -20,8 +20,13 @@ withLabelChoices(resolveUnitScale, {
     contextLabels: [Scope.FractionNumbers]
 });
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-data',
+    compatibility: [generatorLabelRule('single-frame-fractions', [
+        Scope.SingleFrameOfReference, Scope.FractionNumbers
+    ], selected => !selected(Scope.SingleFrameOfReference) || selected(Scope.FractionNumbers))],
     generalLabels: [Area.Statistics]
 };
 

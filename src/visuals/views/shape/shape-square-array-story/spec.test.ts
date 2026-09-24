@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -8,6 +9,6 @@ describe('shape-square-array-story view spec', () => {
             Ability.ProcedureExecution,
             Ability.TextualReception
         ]);
-        expect(spec.requiredLabels).toEqual([Scope.TileScale]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Scope.TileScale]);
     });
 });

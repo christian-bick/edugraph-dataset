@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {PlaceValueArithmeticModelViewSchema, spec} from './spec.ts';
@@ -8,7 +9,7 @@ describe('place-value arithmetic model spec', () => {
             Scope.PhysicalNumbers,
             Ability.ProcedureUnderstanding
         ]);
-        expect(spec.rejectedLabels).toContain(Scope.NumbersSmaller10);
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toContain(Scope.NumbersSmaller10);
         expect(PlaceValueArithmeticModelViewSchema).toEqual({});
     });
 });

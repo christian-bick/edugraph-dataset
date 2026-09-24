@@ -14,8 +14,8 @@ describe('matching diff', () => {
         { generatorId: 'g2', labels: [Area.Subtraction], problemType: 'ArithmeticPairProblem' as const }
     ];
     const views = [
-        { viewId: 'v1', supportedLabels: [Area.Addition], rejectedLabels: [], problemType: 'ArithmeticPairProblem' as const },
-        { viewId: 'v2', supportedLabels: [Area.Subtraction], rejectedLabels: [], problemType: 'ArithmeticPairProblem' as const }
+        { viewId: 'v1', supportedLabels: [Area.Addition], problemType: 'ArithmeticPairProblem' as const },
+        { viewId: 'v2', supportedLabels: [Area.Subtraction], problemType: 'ArithmeticPairProblem' as const }
     ];
 
     it('captures sorted semantic pairs per target', () => {
@@ -33,10 +33,10 @@ describe('matching diff', () => {
             targets
         });
         const before = snapshot({
-            t1: { disposition: 'spec', labels: [Area.Addition], pairs: ['g1#v1'] }
+            t1: { disposition: 'spec', labels: [Area.Addition], pairs: ['g1#v1'], planHashes: {'g1#v1': 'before'} }
         });
         const after = snapshot({
-            t2: { disposition: 'implementationTodo', labels: [Area.Subtraction], pairs: ['g2#v2'] }
+            t2: { disposition: 'implementationTodo', labels: [Area.Subtraction], pairs: ['g2#v2'], planHashes: {'g2#v2': 'after'} }
         });
         const diff = diffMatchingSnapshots(before, after);
         expect(diff.addedTargets).toEqual(['t2']);
@@ -57,17 +57,33 @@ describe('matching diff', () => {
             schema_version: MATCHING_SNAPSHOT_SCHEMA_VERSION,
             spec: 'demo',
             targets: {
-                t1: { disposition: 'implementationTodo' as const, labels: [Area.Addition], pairs: [] }
+                t1: { disposition: 'implementationTodo' as const, labels: [Area.Addition], pairs: [], planHashes: {} }
             }
         };
         const current = {
             ...base,
             targets: {
-                t1: { disposition: 'spec' as const, labels: [Area.Addition], pairs: ['g1#v1'] }
+                t1: { disposition: 'spec' as const, labels: [Area.Addition], pairs: ['g1#v1'], planHashes: {'g1#v1': 'plan'} }
             }
         };
         const diff = diffMatchingSnapshots(base, current);
         expect(diff.changedDispositions).toEqual(['t1']);
         expect(renderMatchingDiffMarkdown(base, current, diff)).toContain('implementationTodo → spec');
+    });
+
+    it('reports admissible-space changes even when all matching pairs remain', () => {
+        const before = createMatchingSnapshot('demo', [{target: {id: 't', labels: [Area.Addition]}, disposition: 'spec'}], generators, views);
+        const after = structuredClone(before);
+        after.targets.t.planHashes['g1#v1'] = 'changed-admissible-space';
+        const diff = diffMatchingSnapshots(before, after);
+        expect(diff.addedPairs).toEqual([]);
+        expect(diff.removedPairs).toEqual([]);
+        expect(diff.changedPlans).toEqual(['t -> g1#v1']);
+        expect(renderMatchingDiffMarkdown(before, after, diff)).toContain('Changed generation plans (1)');
+    });
+
+    it('requires regeneration of legacy snapshots without plan identities', () => {
+        const current = createMatchingSnapshot('demo', [], generators, views);
+        expect(() => diffMatchingSnapshots({...current, schema_version: 1}, current)).toThrow('Unsupported matching snapshot schema');
     });
 });

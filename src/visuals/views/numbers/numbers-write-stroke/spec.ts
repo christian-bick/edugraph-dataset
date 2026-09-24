@@ -1,3 +1,4 @@
+import {requireTargetLabels, rejectTargetLabels} from '../../../../lib/target-policies.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
@@ -8,8 +9,10 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.VisualArticulation
     ],
-    requiredLabels: [Area.DigitNotation],
-    rejectedLabels: [...deductAdmitting([Scope.NumbersLarger120])]
+    compatibility: [
+        requireTargetLabels('digit-notation-request', [Area.DigitNotation]),
+        rejectTargetLabels('stroke-count-capacity', [...deductAdmitting([Scope.NumbersLarger120])])
+    ],
 };
 
 

@@ -3,7 +3,7 @@ import type {GeneratorSpec} from '../types/generator-spec.ts';
 import type {ViewSpec} from '../types/view-spec.ts';
 import type {ConfigSchema} from '../types/schema.ts';
 import type {CompatibilityPlanningResult} from '../types/compatibility.ts';
-import {planCompatibility, rejectTargetLabels, requireTargetLabels} from './compatibility.ts';
+import {planCompatibility} from './compatibility.ts';
 import {normalizeSchemaChoices} from './schema-choices.ts';
 
 export interface GeneratorChoiceModel {
@@ -40,12 +40,6 @@ export function planModelCompatibility(
             ...normalizeSchemaChoices(view.schema, target.labels, 'view')
         ],
         generatorRules: generator.spec.compatibility,
-        viewRules: [
-            ...(view.spec.requiredLabels?.length
-                ? [requireTargetLabels('legacy.requiredLabels', view.spec.requiredLabels)] : []),
-            ...(view.spec.rejectedLabels?.length
-                ? [rejectTargetLabels('legacy.rejectedLabels', view.spec.rejectedLabels)] : []),
-            ...(view.spec.compatibility ?? [])
-        ]
+        viewRules: view.spec.compatibility
     });
 }

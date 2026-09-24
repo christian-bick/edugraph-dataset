@@ -1,6 +1,6 @@
 # Label-variant matching and constrained generation
 
-Status: implementation started on `feat/label-variant-matching`. The choice contracts and metadata planner are implemented as independently tested foundations; production matching, persistence, and generation have not switched to them yet. Agreed design recorded on 2026-09-24 against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`.
+Status: production handover implemented on `feat/label-variant-matching`; final verification and rollout are in progress. Agreed design recorded on 2026-09-24 against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`.
 
 ## Implementation checkpoint
 
@@ -8,11 +8,20 @@ Status: implementation started on `feat/label-variant-matching`. The choice cont
 - Every catalog schema now declares inspectable choices. Factory metadata covers exact alternatives, predicates, aggregates, conjunctions, and empty defaults. Eleven custom resolvers declare their alternatives, defaults, and contextual label reads explicitly.
 - `normalizeSchemaChoices` never calls value resolvers. `resolveSchemaChoices` binds accepted labels per field and permits only declared semantic reads of other local selections or the original target. Context is never completed with a view's selections inside a generator.
 - The compatibility query facade separates original target, generator, and view scopes. Named dependencies restrict queries; independent domains remain factored and correlated domains retain complete accepted assignments. Plans and selection receipts have versioned canonical identities and validation helpers.
-- Catalogs record matching source identities from each spec's local import closure, including imported helpers. These identities are available for the pending graph integration; they are not yet used to authorize persisted plan reuse.
-- Measurement integration tests exercise constrained schema resolution and real generator calls over 64 seeds per supported case. Production measurement specs retain their existing behavior until the authoritative matching-to-generation handover is installed.
-- All existing CCSS/test tuples normalize without an empty domain. This is a domain check, not proof that every generator dependency has been migrated.
+- Catalogs record matching identities from each spec's local import closure, including imported helpers. Mandatory plans now cross fresh/indexed/delta/cached matching and generation. Source/default/rule/ontology changes invalidate the matching plan; renderer-only changes stay separate.
+- Prepared view configurations include their view identity, selected variant, and PRNG continuation. Retries, solution reuse, sample replay, target associations, and VQA preserve the actual draw's plan and receipt. Legacy rows cannot silently enter a planned generation route.
+- Twenty-six generator specs now declare label-expressible dependencies, and the measurement line plot constrains unit steps to integer measurements. The runtime implementations and numeric sampling behavior are retained.
+- Fifty target-policy declarations across 46 views have been translated to named predicate helpers. An exhaustive 70,405-case policy comparison and full CCSS/test tuple comparison found no policy-migration changes.
+- The dependency rules preserve all 830 CCSS routes and remove one of 692 test routes: elapsed-time without `IntegerNumbers` was already always null. All 559 test targets remain matched. A catalog probe made 6,084 draws across the resulting 1,521 tuples: 6,076 generated and replayed exactly, with no compatibility exceptions or coverage failures. Eight null draws belong to two pre-existing arithmetic-estimation test routes whose numeric ranges admit no generated operands; the legacy generator reproduces the same null result.
 
-The next milestone must carry mandatory plans through fresh and reused matching, generation, rendering, and replay before enabling production predicates. The generator guard inventory includes statistical graphs, fraction arithmetic/comparison, operation properties, place-value profiles, shape configurations, counting, currency, and time. Numeric sampling failures and defensive type/range assertions remain implementation concerns.
+Persistence deliberately migrates to manifest schema 9, graph schema 5, planner epoch 6, and `label-variant-generation-v1`. Full regeneration is required before scoped reuse. Variant sampling has a separate deterministic entropy stream; fallback choices and images can change while sample keys and per-tuple sample counts stay stable. Numeric sampling failures and defensive type/range validation remain implementation concerns.
+
+The implementation checkpoint passes type checking, all 2,955 tests in 521 files (including
+integration tests), every generator coverage threshold, CCSS/test contract checks, documentation
+validation, and the browser build. The new planner, resolution, replay, metadata, and rendering
+boundaries also have focused coverage reports. Pure target-policy and dataset-metadata modules
+keep server hashing and filesystem dependencies out of browser imports. Canonical dataset and
+visual validation results will be recorded below when rollout verification finishes.
 
 ## Objective and agreed decisions
 

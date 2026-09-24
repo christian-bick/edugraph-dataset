@@ -1,3 +1,4 @@
+import {rejectTargetLabels} from '../../../../lib/target-policies.ts';
 import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
@@ -8,8 +9,10 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.ProcedureExecution
     ],
-    rejectedLabels: [
-        ...deductAdmitting([Scope.NumbersWithNegatives])
+    compatibility: [
+        rejectTargetLabels('nonnegative-rounding-domain', [
+            ...deductAdmitting([Scope.NumbersWithNegatives])
+        ])
     ]
 };
 

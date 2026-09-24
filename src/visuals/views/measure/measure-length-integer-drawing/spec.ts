@@ -1,3 +1,4 @@
+import {requireTargetLabels, rejectTargetLabels} from '../../../../lib/target-policies.ts';
 import {Ability, Area, Scope, deductAdmitting} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
@@ -11,12 +12,14 @@ export const spec: ViewSpec = {
         Ability.VisualArticulation,
         Ability.ProcedureExecution
     ],
-    requiredLabels: [Ability.VisualArticulation],
-    rejectedLabels: [
-        Scope.DecimalNumbers,
-        Area.Estimation,
-        ...deductAdmitting([Scope.NumbersLarger100])
-    ]
+    compatibility: [
+        requireTargetLabels('drawing-request', [Ability.VisualArticulation]),
+        rejectTargetLabels('integer-length-domain', [
+            Scope.DecimalNumbers,
+            Area.Estimation,
+            ...deductAdmitting([Scope.NumbersLarger100])
+        ])
+    ],
 };
 
 export const MeasureLengthIntegerDrawingViewSchema = {} as const;

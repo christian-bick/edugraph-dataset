@@ -131,6 +131,14 @@ describe('schema label choices', () => {
         expect(() => resolveSchemaChoices(invalid, [], {a: ['a']})).toThrow('did not resolve a value');
     });
 
+    it('validates all bindings before executing any resolver', () => {
+        const resolver = vi.fn(() => 1);
+        const schema = {neutral: ontologyNeutral(resolver),
+            first: [['a'], withLabelChoices(resolver, {kind: 'alternatives'})], last: ['b']} as const;
+        expect(() => resolveSchemaChoices(schema, [], {first: ['a'], last: ['invalid']})).toThrow('outside');
+        expect(resolver).not.toHaveBeenCalled();
+    });
+
     it.each([
         [{a: [[], hasLabel('a')]}, 'supported labels'],
         [{a: [['a', 'a'], hasLabel('a')]}, 'unique'],

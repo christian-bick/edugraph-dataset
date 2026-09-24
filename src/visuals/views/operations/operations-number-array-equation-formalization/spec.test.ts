@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {OperationsNumberArrayEquationFormalizationViewSchema, spec} from './spec.ts';
@@ -11,8 +12,8 @@ describe('operations-number-array-equation-formalization view spec', () => {
             Scope.ArabicNumerals,
             Ability.Formalization
         ]);
-        expect(spec.requiredLabels).toBeUndefined();
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
         expect(OperationsNumberArrayEquationFormalizationViewSchema).toEqual({});
     });
 });

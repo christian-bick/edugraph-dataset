@@ -197,6 +197,14 @@ export function resolveSchemaChoices<T extends ConfigSchema>(
     for (const field of Object.keys(selection)) {
         if (!byField.has(field)) throw new SchemaChoiceContractError(field, 'unknown selected field.');
     }
+    // Check every binding before any resolver can consume entropy or context.
+    for (const {field, alternatives} of domains) {
+        const labels = selection[field];
+        if (!labels || new Set(labels).size !== labels.length
+            || !alternatives.some(alternative => alternative.id === key(labels))) {
+            throw new SchemaChoiceContractError(field, 'selection is missing or outside the admitted domain.');
+        }
+    }
     const config: Record<string, unknown> = {};
     const emitted = new Set<string>();
     const localContext = canonical([...targetLabels, ...Object.values(selection).flat()]);
@@ -206,10 +214,6 @@ export function resolveSchemaChoices<T extends ConfigSchema>(
             continue;
         }
         const labels = selection[field];
-        if (!labels || new Set(labels).size !== labels.length
-            || !byField.get(field)!.alternatives.some(alternative => alternative.id === key(labels))) {
-            throw new SchemaChoiceContractError(field, 'selection is missing or outside the admitted domain.');
-        }
         if (isTuple(value)) {
             const context = value[1].labelChoices!.contextLabels ?? [];
             const contextLabels = localContext.filter(label => !value[0].includes(label)

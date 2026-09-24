@@ -47,7 +47,8 @@ import {
 } from '../lib/dataset-store.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {resolveGraphExecutionMode} from '../lib/graph-execution-mode.ts';
-import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
+import {DEPENDENCY_PLANNER_EPOCH, DEPENDENCY_GRAPH_SCHEMA_VERSION} from '../lib/dependency-planner.ts';
+import {readSampleReplayRecord} from '../lib/sample-replay.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -114,6 +115,11 @@ function datasetStructureIssues(entries: any[], missingSplits: SampleSplit[]): s
         if (imagePaths.has(imagePath)) issues.push(`Duplicate metadata image path: ${displayPathOf(entry)}.`);
         imagePaths.add(imagePath);
         if (!existsSync(imagePath)) issues.push(`Metadata image is missing: ${displayPathOf(entry)}.`);
+        try {
+            readSampleReplayRecord(entry.sample_key, entry);
+        } catch (error) {
+            issues.push(`Invalid generation provenance for ${entry.sample_key}: ${error instanceof Error ? error.message : String(error)}`);
+        }
     }
 
     if (DATASET_SNAPSHOT.generationId === null) {
@@ -178,6 +184,8 @@ async function evaluateSingleSample(
         instanceIdx: entry.instance,
         attempt: entry.attempt,
         seed: entry.seed,
+        generationPlan: entry.generation_plan,
+        generationReplay: entry.generation_replay,
         fileName: entry.file_name,
         labels: entry.labels,
         apiKey,
@@ -302,6 +310,10 @@ async function main() {
         previousSupported: !existingManifest
             || (existingManifest.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
                 && existingManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+                && existingManifest.dependency_graph?.schema_version === DEPENDENCY_GRAPH_SCHEMA_VERSION
+                && existingManifest.dependency_graph.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+                && existingManifest.dependency_graph.complete === true
+                && existingManifest.dependency_graph.matching_index?.generation_plans_by_target !== undefined
                 && existingManifest.complete === true
                 && existingManifest.spec === specName),
         previousExternalIdentity: existingManifest?.ontology_provenance_hash,
@@ -318,6 +330,9 @@ async function main() {
         && !targetView
         && existingManifest?.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
         && existingManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+        && existingManifest.dependency_graph?.schema_version === DEPENDENCY_GRAPH_SCHEMA_VERSION
+        && existingManifest.dependency_graph.complete === true
+        && existingManifest.dependency_graph.matching_index?.generation_plans_by_target !== undefined
         && existingManifest.complete === true
         && existingManifest.spec === specName;
     const observation = canObserveCleanDevelopment
@@ -661,6 +676,9 @@ async function main() {
                         instance: record.instance,
                         attempt: record.attempt,
                         seed: record.seed,
+                        generation_plan: record.generation_plan,
+                        generation_plan_hash: record.generation_plan_hash,
+                        generation_replay: record.generation_replay,
                         file_name: record.file_name,
                         image_sha256: record.image_sha256,
                         checklist_hash: record.checklist_hash,

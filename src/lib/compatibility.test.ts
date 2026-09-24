@@ -1,8 +1,8 @@
 import {describe, expect, it, vi} from 'vitest';
-import {Area, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     CompatibilityContractError, CompatibilityLimitError, planCompatibility,
-    rejectTargetLabels, requireTargetLabels, sampleGenerationPlan,
+    getTargetPolicyLabels, rejectTargetLabels, requireTargetLabels, sampleGenerationPlan,
     validateCompatibilityRules, validateGenerationPlan, validateGenerationSelectionReceipt
 } from './compatibility.ts';
 import type {
@@ -139,6 +139,21 @@ describe('metadata compatibility planning', () => {
         expect(() => validateCompatibilityRules([{...bad, dependencies: [exact('view', 'x')]}], 'generator')).toThrow(/Invalid dependency scope/);
     });
 
+    it.each(['target', 'generator'] as const)('keeps learner Ability outside generator %s queries', scope => {
+        for (const query of ['has', 'exact'] as const) {
+            const rule: CompatibilityRule<'target' | 'generator'> = {
+                id: 'learner-task', predicate: labels => labels[query](scope, Ability.Formalization)
+            };
+            expect(() => validateCompatibilityRules([{...rule,
+                dependencies: [exact(scope, Ability.Formalization)]}], 'generator'))
+                .toThrow(/cannot depend on learner Ability/);
+            expect(() => planCompatibility(input({generatorRules: [rule]})))
+                .toThrow(/cannot query learner Ability/);
+            expect(() => validateCompatibilityRules([{...rule,
+                dependencies: [exact(scope, Ability.Formalization)]}], 'view')).not.toThrow();
+        }
+    });
+
     it('keeps fallback capabilities separate from original participation requirements', () => {
         const result = planCompatibility(input({
             fields: [{owner: 'generator', field: 'capability', alternatives: [{id: 'fallback', labels: [Scope.IntegerNumbers]}]}],
@@ -153,6 +168,21 @@ describe('metadata compatibility planning', () => {
         expect(planCompatibility(input({...inherited, viewRules: [requireTargetLabels('needs-both', [Scope.NumericRange, Area.Subtraction])]})).supported).toBe(false);
         expect(planCompatibility(input({...inherited, viewRules: [rejectTargetLabels('no-range', [Scope.NumericRange])]})).supported).toBe(false);
         expect(planCompatibility(input({...inherited, viewRules: [rejectTargetLabels('no-subtraction', [Area.Subtraction])]})).supported).toBe(true);
+    });
+
+    it('keeps audit policies canonical and rejects misleading dependency declarations', () => {
+        const required = requireTargetLabels('request', [Area.Subtraction, Area.Addition, Area.Addition]);
+        const rejected = rejectTargetLabels('exclude', [Scope.IntegerNumbers]);
+        expect(getTargetPolicyLabels([required, rejected], 'require')).toEqual([Area.Addition, Area.Subtraction]);
+        expect(getTargetPolicyLabels([required, rejected], 'reject')).toEqual([Scope.IntegerNumbers]);
+        expect(getTargetPolicyLabels(undefined, 'require')).toEqual([]);
+        expect(() => validateCompatibilityRules([required, rejected], 'view')).not.toThrow();
+        for (const dependencies of [undefined, [], [exact('generator', Area.Addition)], [exact('target', Area.Addition)]]) {
+            expect(() => validateCompatibilityRules([{...required, dependencies}], 'view'))
+                .toThrow(/Target policy/);
+        }
+        expect(() => validateCompatibilityRules([{...required, targetPolicy: {kind: 'unknown', labels: []}} as any], 'view'))
+            .toThrow(/Invalid target policy kind/);
     });
 
     it('distinguishes exact queries from capability queries', () => {

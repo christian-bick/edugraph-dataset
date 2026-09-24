@@ -3,8 +3,15 @@ import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-patterns',
+    compatibility: [generatorLabelRule('pattern-property-law', [
+        Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw, Area.Multiplication
+    ], selected => Number(selected(Area.CommutativeLaw)) + Number(selected(Area.AssociativeLaw))
+        + Number(selected(Area.DistributiveLaw)) <= 1
+        && (!selected(Area.DistributiveLaw) || selected(Area.Multiplication)))],
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10,

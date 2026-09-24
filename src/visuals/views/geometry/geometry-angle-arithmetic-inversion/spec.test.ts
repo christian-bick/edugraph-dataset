@@ -1,9 +1,10 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
 describe('geometry-angle-arithmetic-inversion view spec', () => {
     it('owns invariant unknown-component inversion', () => {
         expect(spec.generalLabels).toEqual([Ability.ProcedureInversion]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

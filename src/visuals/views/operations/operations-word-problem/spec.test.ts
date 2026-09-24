@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {deductAdmitting, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
@@ -10,9 +11,9 @@ describe('operations-word-problem view spec', () => {
             Scope.ArabicNumerals,
             Scope.PhysicalNumbers
         ]);
-        expect(spec.rejectedLabels).toEqual([
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([
             ...deductAdmitting([Scope.NumbersLarger20]),
             ...deductAdmitting([Scope.NumbersWithNegatives])
-        ]);
+        ].toSorted());
     });
 });

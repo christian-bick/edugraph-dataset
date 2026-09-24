@@ -5,8 +5,23 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {arithmeticOperations, resolvePropertyAwareOperation} from '../helpers.ts';
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-triples',
+    compatibility: [generatorLabelRule('three-operand-property-law', [
+        Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
+        Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw
+    ], selected => {
+        const commutative = selected(Area.CommutativeLaw);
+        const associative = selected(Area.AssociativeLaw);
+        const distributive = selected(Area.DistributiveLaw);
+        const multiplication = selected(Area.Multiplication);
+        if (Number(commutative) + Number(associative) + Number(distributive) > 1) return false;
+        if ((commutative || associative) && !selected(Area.Addition) && !multiplication) return false;
+        if (distributive && !multiplication) return false;
+        return !selected(Area.Addition) || !multiplication || distributive;
+    })],
     generalLabels: [
         Scope.ThreeOperands,
         Scope.IntegerNumbers,

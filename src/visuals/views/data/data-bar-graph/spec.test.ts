@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
@@ -9,6 +10,6 @@ describe('data-bar-graph view spec', () => {
             Scope.BarGraph,
             Ability.VisualArticulation
         ]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

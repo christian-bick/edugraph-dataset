@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -9,7 +10,7 @@ describe('operations-vertical-inversion view spec', () => {
             Ability.ProcedureExecution,
             Ability.ProcedureInversion
         ]);
-        expect(spec.rejectedLabels?.toSorted()).toEqual([
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')?.toSorted()).toEqual([
             Area.CommutativeLaw,
             Area.AssociativeLaw,
             Area.DistributiveLaw

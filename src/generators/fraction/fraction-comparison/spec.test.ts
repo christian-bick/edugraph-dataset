@@ -22,7 +22,7 @@ describe('FractionComparisonGenerator spec integration', () => {
     ];
 
     it('declares invariant mathematical capabilities without the visual representation', () => {
-        expect(spec).toEqual({
+        expect({generatorId: spec.generatorId, generalLabels: spec.generalLabels}).toEqual({
             generatorId: 'fraction-comparison',
             generalLabels: [
                 Scope.ProperFractions,

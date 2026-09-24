@@ -13,8 +13,13 @@ withLabelChoices(exactTool, {
     contextLabels: [Scope.CentimeterScale, Scope.MeterScale]
 });
 
+import {targetLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-length',
+    compatibility: [targetLabelRule('tool-based-length-context', [
+        Scope.CentimeterScale, Scope.MeterScale
+    ], selected => !selected(Scope.CentimeterScale) && !selected(Scope.MeterScale))],
     generalLabels: [
         Area.MeasuringLength,
         Scope.NumbersWithoutNegatives

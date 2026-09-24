@@ -1,7 +1,8 @@
 import {describe, expect, it} from 'vitest';
 import {Scope} from 'edugraph-ts';
-import type {MatchTuple} from './matching.ts';
+import {matchTargets} from './matching.ts';
 import {buildScopeCompletenessInventory} from './scope-completeness.ts';
+import {withLabelChoices} from '../types/schema.ts';
 
 const target = {
     id: 'length-target',
@@ -10,19 +11,19 @@ const target = {
     labels: [Scope.LengthMeasurement]
 };
 
-const tuples: MatchTuple[] = [{
-    target,
-    generatorId: 'measurement',
-    viewId: 'measure-view'
-}];
-
-const resolver = (labels: string[]) => labels.includes(Scope.LengthMeasurement)
+const resolver = withLabelChoices((labels: string[]) => labels.includes(Scope.LengthMeasurement)
     || labels.includes(Scope.MeterScale)
     ? 'length'
-    : undefined;
+    : undefined, {
+        kind: 'alternatives',
+        alternatives: [[Scope.LengthMeasurement], [Scope.MeterScale], [Scope.LengthMeasurement, Scope.MeterScale]],
+        equivalenceGroups: [[[Scope.LengthMeasurement], [Scope.MeterScale], [Scope.LengthMeasurement, Scope.MeterScale]]]
+    });
 
 const inventory = (schema: any) => buildScopeCompletenessInventory({
-    tuples,
+    tuples: matchTargets([target], [{generatorId: 'measurement', generalLabels: [],
+        labels: [Scope.LengthMeasurement, Scope.MeterScale], schema, problemType: 'ArithmeticPairProblem'}],
+    [{viewId: 'measure-view', generalLabels: [], supportedLabels: [], schema: {}, problemType: 'ArithmeticPairProblem'}]).tuples,
     generators: [{generatorId: 'measurement', generalLabels: [], schema}],
     views: [{viewId: 'measure-view', generalLabels: [], schema: {}}]
 });

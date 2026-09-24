@@ -77,19 +77,15 @@ describe('model catalogs', () => {
             labels,
             problemType
         })));
-        expect(modelViews.map(({viewId, generalLabels, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
+        expect(modelViews.map(({viewId, generalLabels, supportedLabels, problemType}) => ({
             viewId,
             generalLabels,
             supportedLabels,
-            requiredLabels,
-            rejectedLabels,
             problemType
-        }))).toEqual(fullViews.map(({viewId, generalLabels, supportedLabels, requiredLabels, rejectedLabels, problemType}) => ({
+        }))).toEqual(fullViews.map(({viewId, generalLabels, supportedLabels, problemType}) => ({
             viewId,
             generalLabels,
             supportedLabels,
-            requiredLabels,
-            rejectedLabels,
             problemType
         })));
     }, 30_000);

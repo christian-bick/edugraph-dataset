@@ -88,8 +88,29 @@ withLabelChoices(resolveTask, {
     contextLabels: [Area.Addition, Area.Subtraction, Area.Multiplication]
 });
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-arithmetic',
+    compatibility: [generatorLabelRule('fraction-task-operation', [
+        Area.Addition, Area.Subtraction, Area.Multiplication, Area.IteratedOperation,
+        Scope.IntegerNumbers, Scope.FractionNumbers, Scope.ProperFractions, Scope.ImproperFractions,
+        Scope.MixedNumbers, Scope.UnitFractions, Scope.TenthFractions, Scope.CommonDenominator
+    ], selected => {
+        const addition = selected(Area.Addition);
+        const multiplication = selected(Area.Multiplication);
+        const iterated = selected(Area.IteratedOperation);
+        if (multiplication && !addition) {
+            return iterated && selected(Scope.IntegerNumbers) && (
+                selected(Scope.UnitFractions) || selected(Scope.ProperFractions) || selected(Scope.ImproperFractions));
+        }
+        if (!selected(Scope.CommonDenominator) || iterated) return false;
+        if (selected(Scope.TenthFractions)) return addition && multiplication;
+        if (multiplication) return false;
+        if (selected(Scope.ProperFractions) || selected(Scope.ImproperFractions)) return addition;
+        return (selected(Scope.FractionNumbers) || selected(Scope.MixedNumbers))
+            && (addition || selected(Area.Subtraction));
+    })],
     generalLabels: [
         Area.Equation,
         Scope.SingleFrameOfReference

@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {computeTaskFingerprint, resolveViewConfig} from '../../../../lib/generation.ts';
@@ -10,9 +11,9 @@ describe('operations-pattern-generation-table view spec', () => {
             Scope.ArabicNumerals,
             Ability.ProcedureExecution
         ]);
-        expect(spec.requiredLabels).toEqual([Area.PatternGeneration]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Area.PatternGeneration]);
         expect(OperationsPatternGenerationTableViewSchema).toHaveProperty('missingTermIndex');
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 
     it('makes the missing recurrence term fingerprint-visible', () => {

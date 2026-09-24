@@ -15,6 +15,10 @@ import { ConfigFromSchema, ConfigSchema, ResolvedConfig } from '../types/schema.
 import type {WorkCounters} from './work-counters.ts';
 import {radixSortUtf8} from './content-identity.ts';
 import {loadTargets} from './spec-catalog.ts';
+import type {GenerationPlan} from '../types/compatibility.ts';
+import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
+import {generatePlannedDraw, type PlannedGenerationDraw} from './planned-generation.ts';
+import {CompatibilityContractError, validateGenerationPlan} from './compatibility.ts';
 import {
     clearModelCatalogCaches,
     loadGeneratorModelCatalog,
@@ -167,9 +171,11 @@ export function findGeneratorsWithoutTestPath(
                     instanceIdx: 0
                 });
                 try {
-                    return generateSampleWithRetry({
+                    const view = viewCatalog.find(view => view.viewId === tuple.viewId)!;
+                    return generatePlannedSampleWithRetry({
                         generator: entry.generator,
-                        labels: [...tuple.target.labels],
+                        viewSchema: view.schema,
+                        plan: tuple.plan,
                         sampleKey,
                         maxAttempts
                     }).stub !== null;
@@ -248,9 +254,9 @@ export interface GenerateSampleInput {
 }
 
 /**
- * Pure generation primitive: one exact deterministic draw. Takes only what
- * generation consumes — the view participates solely through the seed
- * (derived from a sample key that contains the viewId).
+ * Standalone generator-test primitive, without a matched view contract.
+ * Routed production and debugging must use generatePlannedSampleWithRetry or
+ * generateSampleByKey so both role selections stay inside the matched plan.
  */
 export function generateSample({ generator, labels, seed }: GenerateSampleInput): ResolvedProblemStub | null {
     setSeed(seed);
@@ -274,6 +280,7 @@ export interface RetryResult {
     seed: number;
 }
 
+/** Standalone generator-test retry helper; never use for a routed generator/view pair. */
 export function generateSampleWithRetry({
     generator,
     labels,
@@ -294,12 +301,44 @@ export function generateSampleWithRetry({
     return { stub: null, attempt, seed };
 }
 
+export interface PlannedRetryResult extends PlannedGenerationDraw {
+    attempt: number;
+    seed: number;
+}
+
+/** Mathematical retries may change the draw, but every draw remains inside the matched plan. */
+export function generatePlannedSampleWithRetry(input: {
+    generator: ProblemGenerator;
+    viewSchema: ConfigSchema;
+    plan: GenerationPlan;
+    sampleKey: string;
+    maxAttempts?: number;
+    isDuplicate?: (draw: PlannedGenerationDraw) => boolean;
+}): PlannedRetryResult {
+    const maxAttempts = input.maxAttempts ?? 50;
+    if (!Number.isSafeInteger(maxAttempts) || maxAttempts < 1) {
+        throw new CompatibilityContractError('maxAttempts must be a positive safe integer.');
+    }
+    let last: PlannedGenerationDraw | undefined;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const seed = computeSampleSeed(input.sampleKey, attempt);
+        const draw = generatePlannedDraw({...input, seed, attempt});
+        last = draw;
+        if (draw.stub && !input.isDuplicate?.(draw)) return {...draw, attempt, seed};
+    }
+    return {...last!, stub: null, attempt: maxAttempts, seed: last!.replay.seed};
+}
+
 export interface GenerateSampleByKeyInput {
     sampleKey: string;
     attempt: number;
     specName: string;
     specRoot?: string;
     generatorsRoot?: string;
+    viewsRoot?: string;
+    /** Required to reproduce an artifact's actual draw, including solution reuse. */
+    replay?: GenerationReplay;
+    recordedPlan?: GenerationPlan;
 }
 
 export interface GenerateSampleByKeyResult {
@@ -308,19 +347,26 @@ export interface GenerateSampleByKeyResult {
     targetLabels: string[];
     seed: number;
     stub: ResolvedProblemStub | null;
+    plan: GenerationPlan;
+    preparedView: PreparedViewConfiguration;
+    replay: GenerationReplay;
+    labels: string[];
 }
 
 /**
- * Replays one exact draw from its sample key alone. Resolves the target from
- * the spec module and the generator from the catalog, so a sample recorded in
- * metadata can be reproduced without re-running the pipeline.
+ * Resolves a current plan and reproduces a recorded draw, including question
+ * reuse by a solution. Without a recorded recipe, requests a fresh draw at the
+ * explicit attempt; a sample key alone does not identify prior retry choices.
  */
 export async function generateSampleByKey({
     sampleKey,
     attempt,
     specName,
     specRoot,
-    generatorsRoot
+    generatorsRoot,
+    viewsRoot,
+    replay,
+    recordedPlan
 }: GenerateSampleByKeyInput): Promise<GenerateSampleByKeyResult> {
     const identity = parseSampleKey(sampleKey);
 
@@ -337,9 +383,28 @@ export async function generateSampleByKey({
     }
 
     const targetLabels = [...target.labels];
-    const seed = computeSampleSeed(sampleKey, attempt);
-    const stub = generateSample({ generator: entry.generator, labels: targetLabels, seed });
-    return { identity, target, targetLabels, seed, stub };
+    const viewCatalog = await loadViewCatalog(viewsRoot);
+    const view = viewCatalog.find(view => view.viewId === identity.viewId);
+    if (!view) throw new Error(`View "${identity.viewId}" from sample key not found in catalog`);
+    const tuple = matchTargets([target], [entry], [view]).tuples[0];
+    if (!tuple) throw new CompatibilityContractError(`Sample ${sampleKey} has no current compatible generation plan.`);
+    if (recordedPlan) validateGenerationPlan(recordedPlan);
+    if (recordedPlan && (recordedPlan.hash !== tuple.plan.hash || recordedPlan.inputHash !== tuple.plan.inputHash)) {
+        throw new CompatibilityContractError('Recorded generation plan is stale; regenerate this sample explicitly.');
+    }
+    const origin = replay ? parseSampleKey(replay.sampleKey) : identity;
+    if (origin.targetId !== identity.targetId || origin.generatorId !== identity.generatorId
+        || origin.viewId !== identity.viewId || origin.split !== identity.split || origin.instanceIdx !== identity.instanceIdx
+        || (origin.mode !== identity.mode && !(identity.mode === 'solution' && origin.mode === 'question'))) {
+        throw new CompatibilityContractError('Recorded draw origin belongs to a different sample slot.');
+    }
+    const originKey = replay?.sampleKey ?? sampleKey;
+    const originAttempt = replay?.attempt ?? attempt;
+    const seed = computeSampleSeed(originKey, originAttempt);
+    const draw = generatePlannedDraw({generator: entry.generator, viewSchema: view.schema, plan: tuple.plan,
+        sampleKey: originKey, attempt: originAttempt, seed, replay});
+    return {identity, target, targetLabels, seed, stub: draw.stub, plan: tuple.plan,
+        preparedView: draw.view, replay: draw.replay, labels: draw.labels};
 }
 
 export interface TargetSample {
@@ -352,6 +417,10 @@ export interface TargetSample {
     fingerprint: string | null;
     /** Set when the generator threw for this tuple (e.g. a config validation error) — a matching problem worth surfacing, not a crash */
     error: string | null;
+    plan: GenerationPlan;
+    preparedView?: PreparedViewConfiguration;
+    replay?: GenerationReplay;
+    labels?: string[];
 }
 
 export interface GenerateTargetSamplesOptions {
@@ -378,6 +447,7 @@ export function generateTargetSamples(
     const { tuples } = matchTargets([target], generatorCatalog, viewCatalog);
     const modes: SampleMode[] = ['question', 'solution'];
     const generatorsById = new Map(generatorCatalog.map(entry => [entry.generatorId, entry.generator]));
+    const viewsById = new Map(viewCatalog.map(entry => [entry.viewId, entry]));
 
     const samples: TargetSample[] = [];
     for (const tuple of tuples) {
@@ -401,13 +471,16 @@ export function generateTargetSamples(
                     let attempt = 0;
                     let seed = computeSampleSeed(sampleKey, 1);
                     let error: string | null = null;
+                    let draw: PlannedRetryResult | undefined;
                     try {
-                        ({ stub, attempt, seed } = generateSampleWithRetry({
+                        draw = generatePlannedSampleWithRetry({
                             generator,
-                            labels: [...target.labels],
+                            viewSchema: viewsById.get(tuple.viewId)!.schema,
+                            plan: tuple.plan,
                             sampleKey,
                             maxAttempts
-                        }));
+                        });
+                        ({stub, attempt, seed} = draw);
                     } catch (e) {
                         error = e instanceof Error ? e.message : String(e);
                     }
@@ -419,7 +492,11 @@ export function generateTargetSamples(
                         attempt,
                         stub,
                         fingerprint: stub ? computeContentFingerprint(stub.data) : null,
-                        error
+                        error,
+                        plan: tuple.plan,
+                        preparedView: draw?.view,
+                        replay: draw?.replay,
+                        labels: draw?.labels
                     });
                 }
             }
@@ -569,15 +646,20 @@ export interface BuildRenderPayloadInput {
     targetLabels: string[];
     mode: SampleMode;
     seed: number;
+    preparedView: PreparedViewConfiguration;
 }
 
 /** Single constructor for the payload contract, including the render seed. */
-export function buildRenderPayload({ problem, viewId, targetLabels, mode, seed }: BuildRenderPayloadInput): RenderPayload {
+export function buildRenderPayload({ problem, viewId, targetLabels, mode, seed, preparedView }: BuildRenderPayloadInput): RenderPayload {
+    if (preparedView.viewId !== viewId) {
+        throw new CompatibilityContractError('Prepared configuration belongs to a different view.');
+    }
     return {
         problem,
         viewId,
         targetLabels,
         isSolutionView: mode === 'solution',
-        seed
+        seed,
+        preparedView
     };
 }

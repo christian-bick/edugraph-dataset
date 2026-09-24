@@ -13,7 +13,7 @@ Hand off to `/implement-spec` instead of proceeding when a failure turns out to 
 - a **new** generator or view module, or an extension of the supported ontological space (`IMPL-7` in `docs/implementation-general.md`);
 - resolution of an entry in `implementationTodos`, or promotion of targets into `spec`.
 
-**Never make a failure disappear by suppressing the match.** Do not weaken a declaration, add a convenient `rejectedLabels` entry, or edit a target merely so the sample stops being generated (`TSPEC-6`, `SPEC-V3`). An evidence-backed classification correction is legitimate when the ontology definition and rendered task show that the current claim is false and the replacement is the most specific directly observable claim (`SPEC-2`, `SPEC-V5`, `TSPEC-13`). Explain that evidence and obtain user confirmation before changing any view `spec.ts` or production target; update the aligned `test` target when one exists. A rejection remains legitimate only when it describes a truthful, stable, and complete invalid domain for the view; an exact exclusion requires the view to accept every other compatible case.
+**Never make a failure disappear by suppressing the match.** Do not weaken a declaration, add a convenient `rejectTargetLabels` entry, or edit a target merely so the sample stops being generated (`TSPEC-6`, `SPEC-V3`). An evidence-backed classification correction is legitimate when the ontology definition and rendered task show that the current claim is false and the replacement is the most specific directly observable claim (`SPEC-2`, `SPEC-V5`, `TSPEC-13`). Explain that evidence and obtain user confirmation before changing any view `spec.ts` or production target; update the aligned `test` target when one exists. A rejection remains legitimate only when it describes a truthful, stable, and complete invalid domain for the view; an exact exclusion requires the view to accept every other compatible case.
 
 ## Scope: One Standard at a Time
 
@@ -39,7 +39,7 @@ related defects are batched:
    payload evidence, and final projection. A failed render does not by itself invalidate the
    declaration.
 
-1. **Matching & generation failures** — targets that match nothing, and generators that fail or hit `rejectedLabels` boundaries:
+1. **Matching & generation failures** — targets that match nothing, and generators that fail or hit `rejectTargetLabels` boundaries:
    ```bash
    npm run show:matching -- --spec=<specModule>
    ```
