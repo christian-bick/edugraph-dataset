@@ -40,3 +40,8 @@ Representative complete domains:
 Validation has no images for 101 CCSS views (82 receive no validation allocation; 19 exhaust their content) and 99 test views (85 unallocated; 14 exhausted). The corresponding missing-label counts are 124 and 110. These are evaluation-coverage limitations, not missing production target assets.
 
 Keep content disjointness and current sample counts. Increasing retries cannot fill these gaps. Broader validation coverage is a separate policy/content choice: allocate eligible tuples per desired view or label, reserve finite content before training, add mathematical profiles where appropriate, and define how intrinsically singleton targets are evaluated. Merely drawing the same content differently does not create independent validation evidence. The endpoint-only comparison branch is a concrete future diversity candidate.
+
+Decision, 2026-09-24: generator content expansion is deferred. The estimate was 4–8 engineering
+days for a focused numeric/object-profile increment, or 20–35 days for a broader expansion with
+payload/view changes and validation. These are planning ranges, not a promise to eliminate all
+78 gaps. No allocation-policy change or content implementation is scheduled by this consolidation.

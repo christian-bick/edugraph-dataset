@@ -1,6 +1,8 @@
 # Label-variant matching and constrained generation
 
-Status: implemented and verified on `feat/label-variant-matching` on 2026-09-24. Agreed design recorded against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`.
+Status: implemented, verified, and merged through PR #1 on 2026-09-24. Agreed design recorded
+against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`. Checkpoints below describe that implementation;
+the [integration follow-ups](label-variant-followups.md) record subsequent repairs and final rollout.
 
 ## Implementation checkpoint
 
@@ -44,13 +46,12 @@ Verification logs and exhaustive probe reports are in ignored `temp/label-varian
 under ignored `out/`. The committed measurement VQA cache and this checkpoint retain the
 reviewable rollout evidence.
 
-Remaining diagnostics are outside label compatibility: two test arithmetic-estimation routes
-have impossible numeric ranges and reproduce the same all-null result with the legacy
-generator. Ordinary duplicate/retry limits leave 49 CCSS and 22 test validation allocations
-without a unique validation sample; the checker also reports incomplete validation view/label
-coverage and 12 CCSS duplicate-label target clusters. These warnings do not invalidate the
-emitted rows or their replay receipts. Numeric feasibility, sample-count policy, and broader
-coverage changes remain separate work.
+At this checkpoint, two test arithmetic-estimation routes reproduced an all-null result with the
+legacy generator; the [integration follow-ups](label-variant-followups.md) have since repaired them.
+The original primary-row-only coverage report counted 49 CCSS and 22 test validation gaps.
+The corrected report includes all matching plans and validated associations: 55 CCSS and 23 test
+allocations exhaust their implemented content against training. All production targets now have
+asset evidence. Broader content expansion is deferred, and allocation/sample-count policy is unchanged.
 
 ## Objective and agreed decisions
 

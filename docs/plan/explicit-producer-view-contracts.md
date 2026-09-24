@@ -1,6 +1,9 @@
 # Explicit producer/view payload contracts
 
-Status: implemented; validation recorded below. This is the producer/view contract phase, not a general schema-domain solver.
+Status: implemented and integrated; the phase-specific validation below is historical.
+The subsequent [label-variant implementation](label-variant-matching.md) and
+[integration follow-ups](label-variant-followups.md) complete domain handover, canonical rollout,
+numeric repairs, and full production VQA. This producer-contract phase is not a general numeric solver.
 
 ## Decisions
 
@@ -54,6 +57,12 @@ This matrix was inventoried before consumer edits and updated after adoption. Ev
 
 New producer IDs intentionally change structural sample seeds and validation-split assignment. Validation artifacts remain in the isolated checkout rather than being mixed into the source patch. Dataset/cache updates must be regenerated through the existing dependency planner; old registrations must not be relabeled as new samples.
 
-## Remaining domain work
+## Domain follow-up — completed for label compatibility
 
-Family compatibility is now explicit for these consumers. It does not establish that every schema fallback or conjunction is satisfiable. The measurement-line-plot number-kind/subdivision issue, general range satisfiability, and guarantees for omitted labels remain a separate design task. That solution must use declared types, mappings, labels, and explicit domain metadata; it must not inspect generated payloads. Successful samples and VQA do not prove arbitrary-domain totality.
+Family compatibility is explicit for these consumers. The subsequent label-variant implementation
+resolves the measurement-line-plot number-kind/subdivision issue, label-expressible conjunctions,
+and omitted-label alternatives using declared types, mappings, labels, and domain metadata.
+Matching preserves the admissible space through generation without inspecting payloads.
+General numeric satisfiability still requires mathematical implementation and tests; the two
+identified arithmetic-estimation failures are repaired in the integration follow-ups. Successful
+samples and VQA do not prove arbitrary-domain totality.

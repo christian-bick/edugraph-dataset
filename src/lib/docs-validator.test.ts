@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     collectRuleDefinitions,
+    documentationRole,
     extractAuditSection,
     isReferenceFile,
     parseDocsSections,
@@ -90,6 +91,16 @@ describe('isReferenceFile', () => {
         expect(isReferenceFile('docs/spec-general.md')).toBe(true);
         expect(isReferenceFile('docs/README.md')).toBe(false);
         expect(isReferenceFile('DOCS.md')).toBe(false);
+        expect(isReferenceFile('docs/plan/nested/migration.md')).toBe(false);
+    });
+});
+
+describe('documentation roles', () => {
+    it('distinguishes rules from plans and skill reference consumers', () => {
+        expect(documentationRole('docs/spec-general.md')).toBe('reference');
+        expect(documentationRole('docs/plan/nested/migration.md')).toBe('plan');
+        expect(documentationRole('.agents/skills/review/references/example.md')).toBe('consumer');
+        expect(documentationRole('docs/README.md')).toBe('consumer');
     });
 });
 
@@ -99,6 +110,8 @@ describe('collectRuleDefinitions', () => {
             ['docs/spec-general.md', '### SPEC-1 — A\n### SPEC-V2 — B\n'],
             ['docs/README.md', '### SPEC-9 — Not a definition\n'],
             ['DOCS.md', '### IMPL-G1 — Also not a definition\n'],
+            ['docs/plan/nested/example.md', '### SPEC-8 — A citation, not a definition\n'],
+            ['.agents/skills/review/references/example.md', '### SPEC-7 — Also a citation\n'],
         ]));
         expect([...definitions.keys()]).toEqual(['SPEC-1', 'SPEC-V2']);
     });
@@ -143,6 +156,38 @@ describe('parseDocsSections', () => {
 });
 
 describe('validateDocs', () => {
+    it('checks nested plans and skill references without requiring Audit sections', () => {
+        const result = validateDocs(buildInput({
+            'docs/plan/nested/migration.md': '# Migration\n### SPEC-1 — Apply matching\n[guide](../../../.agents/skills/review/references/guide.md#steps)\n',
+            '.agents/skills/review/references/guide.md': '# Guide\n## Steps\n[plan](../../../../docs/plan/nested/migration.md#migration)\nSee SPEC-1.\n',
+        }));
+        expect(result.errors).toEqual([]);
+        expect(result.warnings).toEqual([]);
+        expect(result.stats.referenceFiles).toBe(1);
+        expect(result.stats.rulesDefined).toBe(1);
+    });
+
+    it.each(['docs/plan/nested/migration.md', '.agents/skills/review/references/guide.md'])(
+        'rejects unresolved citations, links and anchors in %s', path => {
+            const result = validateDocs(buildInput({
+                [path]: '# Example\nSee SPEC-999 and [missing](missing.md) and [anchor](#missing).\n',
+            }));
+            expect(result.errors).toHaveLength(3);
+            expect(result.errors).toContainEqual(expect.stringContaining('cites rule SPEC-999'));
+            expect(result.errors).toContainEqual(expect.stringContaining('link target "missing.md"'));
+            expect(result.errors).toContainEqual(expect.stringContaining('unknown anchor "#missing"'));
+        }
+    );
+
+    it('checks nested plain documentation paths without importing a plan as a rule source', () => {
+        const result = validateDocs(buildInput({
+            'docs/plan/current.md': '### SPEC-999 — Unrecognized rule\nSee docs/plan/nested/missing.md.\n',
+        }));
+        expect(result.errors).toHaveLength(2);
+        expect(result.errors).toContainEqual(expect.stringContaining('cites rule SPEC-999'));
+        expect(result.errors).toContainEqual(expect.stringContaining('docs/plan/nested/missing.md'));
+    });
+
     it('reports no errors for a well-wired documentation set', () => {
         const result = validateDocs(buildInput());
         expect(result.errors).toEqual([]);

@@ -1,5 +1,10 @@
 # Payload-family matching and regression follow-ups
 
+Status: payload-family adoption and label-variant matching are implemented and integrated.
+Current rollout evidence is in [label-variant-followups.md](label-variant-followups.md).
+The synthetic regression experiment below remains optional and deferred; earlier counts and
+probe results in this document describe their named historical checkpoints.
+
 ## Agreed direction
 
 Use mathematical payload families and explicit view input types as the primary generator/view
@@ -9,8 +14,8 @@ payloads to decide compatibility. Ontology capability coverage remains necessary
 alone does not establish a target's claims.
 
 The unit-relation, measurement-extrema, shape-edge, fraction-partition, and angle-family splits are
-implemented and canonically validated. This plan retains the unfinished framework and consumer
-work. Current normative rules remain in [spec-view.md](../spec-view.md),
+implemented and canonically validated. This plan retains the contract decisions, verification,
+and optional experiment. Current normative rules remain in [spec-view.md](../spec-view.md),
 [implementation-generator.md](../implementation-generator.md), and
 [implementation-view.md](../implementation-view.md); this plan does not silently change them.
 
@@ -41,8 +46,8 @@ adoption below uses precise generator entry points, retaining requirements only 
 independently express a target participation policy.
 
 This inventory covers declared type narrowing. A renderer that declares the entire union but
-supports only some members will not appear here; the shape and fraction reviews below remain
-necessary. D1–D5 and D10 do not establish that payload-totality property.
+supports only some members will not appear here; the shape and fraction reviews recorded below
+addressed that separate concern. D1–D5 and D10 do not establish that payload-totality property.
 
 ## Contract adoption
 
@@ -106,18 +111,18 @@ sample seeds and split assignments; cache verification must follow canonical gen
   are rendered in both modes by regression tests. All active CCSS and test targets remain covered;
   five CCSS tuples move generator registration without changing target labels or mathematical
   payload fields. Proper-fraction ids and seeded scale selection are retained.
-- [ ] **Label-variant matching and constrained generation.** The design decision is settled in
-  [label-variant-matching.md](label-variant-matching.md). Implement spec-owned predicates over
-  semantic label selections, preserve valid joint choices in the matching result, and restrict
-  generation to that space. `measurement-data` / `measurement-line-plot` is the first adoption.
-  Payload inspection remains outside the design.
+- [x] **Label-variant matching and constrained generation.** Implemented in
+  [label-variant-matching.md](label-variant-matching.md) and integrated through PR #1. Spec-owned
+  predicates evaluate semantic label selections; matching preserves accepted choices and generation
+  is restricted to that space. Measurement unit-step constraints and 26 generator dependency
+  declarations are adopted. Payload inspection remains outside the design.
 - [x] **Classification evidence.** The fraction-equivalence classification number-line
   question no longer prints the verdict "same point" in
   [fraction-line-view.tsx](../../src/visuals/views/numbers/fraction-line-view.tsx). It may disclose
   that caption only in the solution or in an equality-completion task (`IMPL-V5`).
   The number-line position remains the mathematical evidence for classification.
 
-## Label-variant decision — planned
+## Label-variant decision — implemented
 
 The concrete probe uses `measurement-data` and `measurement-line-plot`, which share a coherent
 `MeasurementDataProblem` contract. The latter accepts whole-unit and fractional data, but its
@@ -125,8 +130,8 @@ The concrete probe uses `measurement-data` and `measurement-line-plot`, which sh
 that constraint for every configuration produced by the generator schema.
 
 All three cases below ask for Statistics, VisualArticulation, LinePlot and StepsOf1. The first
-column is the additional number-kind request. The current direct and indexed matcher admits all
-three. Schema resolution over 32 seeds reproduces the following domains:
+column is the additional number-kind request. Before the label-variant implementation, the direct
+and indexed matcher admitted all three. Schema resolution over 32 seeds reproduced these domains:
 
 | Number kind | Produced subdivisions | Unit-step view contract |
 | --- | --- | --- |
@@ -135,9 +140,9 @@ three. Schema resolution over 32 seeds reproduces the following domains:
 | Omitted | 1 or 4 | Fallback-dependent failure |
 
 Existing active CCSS whole-step targets also request IntegerNumbers; the fractional targets do not
-request StepsOf1. This is a real contract gap outside those active combinations, not a failure of
-their current artifacts. Keep it open explicitly rather than treating successful VQA as a proof
-of totality for arbitrary targets.
+request StepsOf1. The probe exposed a contract gap outside those active combinations. The
+implemented planner now rejects explicit fractions in unit-step mode and constrains an omitted
+number kind to integers; this guarantee comes from declared alternatives and rules, not VQA.
 
 The chosen approach is **label-variant matching with constrained generation**, specified in
 [label-variant-matching.md](label-variant-matching.md). It supersedes the earlier recommendation
@@ -154,9 +159,9 @@ to reject every target with an ambiguous fallback domain.
 6. Migrate required/rejected target policies into equivalent predicates through one shared evaluator.
 
 For the example above, an omitted number kind can now be planned as integer-only when unit steps
-are requested. Explicit fractions remain incompatible with that mode. No runtime implementation
-of this new plan exists yet; current required/rejected semantics and the existing matching behavior
-remain in place until the staged migration is implemented.
+are requested. Explicit fractions remain incompatible with that mode. Mandatory plans and actual
+selection receipts now cross matching, resolution, retries, persistence, replay, and VQA. The
+required/rejected target policies have been migrated to equivalent predicate helpers.
 
 ## Verification checkpoint — completed 2026-09-24
 
@@ -182,9 +187,9 @@ remain in place until the staged migration is implemented.
   are 32 added and 32 removed identities from the family/view registrations, with no attempt
   shifts, seed-scheme changes or unrelated image churn. Cache changes are committed separately
   from implementation and documentation.
-- **Follow-up:** domain policy was unresolved at this checkpoint. The later label-variant decision
-  above now has an implementation plan. Canonical generation, VQA and cache verification no longer
-  block the completed payload-family/type-safety work.
+- **Follow-up completed:** domain policy was unresolved at this historical checkpoint. The later
+  label-variant implementation and [integration follow-ups](label-variant-followups.md) now complete
+  the planned matching/generation handover, canonical regeneration, and full production VQA.
 
 ## Adoption order and boundaries
 
@@ -231,5 +236,6 @@ The broad declarations that relied on family-selecting labels have been adopted 
 [explicit-producer-view-contracts.md](explicit-producer-view-contracts.md). That inventory covers
 19 production consumers, 15 family-selecting requirements, and the tens/hundreds negative
 selector. It establishes precise producer declarations and view mappings without changing the
-matching algorithm. The remaining number-kind/range decision above must stay entirely
-declarative; successful generation is validation, not an eligibility mechanism.
+matching algorithm at that checkpoint. The later label-variant implementation resolves label-level
+number-kind dependencies declaratively. General numeric feasibility still belongs to mathematical
+generation and its tests; successful generation is validation, not an eligibility mechanism.

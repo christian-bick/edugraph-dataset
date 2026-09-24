@@ -36,7 +36,7 @@ const SOURCE_PATTERN = /^(src\/.*\.(?:ts|tsx)|(?:package|package-lock)\.json|tsc
 const GENERATOR_PATTERN = /^src\/generators\/([^/]+\/)?([^/]+)\//;
 const VIEW_PATTERN = /^src\/visuals\/views\/([^/]+\/)?([^/]+)\//;
 const SPEC_PATTERN = /^src\/spec\/([^/]+)(?:\/|\.ts$)/;
-const DOC_PATTERN = /^(?:README\.md|DOCS\.md|AGENTS\.md|docs\/.*\.md|\.agents\/skills\/.*\/SKILL\.md)$/;
+const DOC_PATTERN = /^(?:README\.md|DOCS\.md|AGENTS\.md|docs\/.*\.md|\.agents\/skills\/.*\.md)$/i;
 const IMPLEMENTATION_SOURCE_PATTERN = /^src\/(?:generators\/|visuals\/(?:views|components|helpers)\/).*\.tsx?$/;
 const MATCHING_FOUNDATION_PATTERN = /^src\/(?:types\/|lib\/(?:generation|matching|spec-|source-symbol-index|implementation-contracts|implementation-audit|module-inventory|standards-validation|label-contracts|external-semantics|type-parser|ontology|utils|module-resolver|model-catalog))/;
 
@@ -127,7 +127,8 @@ export function planDevelopmentValidation(
         }
 
         classificationSteps++;
-        if (DOC_PATTERN.test(file) || file === 'src/lib/docs-validator.ts') {
+        if (DOC_PATTERN.test(file) || file === 'src/lib/docs-validator.ts'
+            || file === 'src/lib/docs-discovery.ts' || file === 'src/scripts/validate-docs.ts') {
             addCheck('docs', file);
         }
 
