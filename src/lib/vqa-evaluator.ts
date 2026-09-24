@@ -69,6 +69,8 @@ export interface EvaluateSampleVqaInput {
     attempt: number;
     seed: number;
     generationPlan: GenerationPlan;
+    /** Optional stored identity; authoritative metadata must agree with its serialized plan. */
+    generationPlanHash?: string;
     generationReplay: GenerationReplay;
     fileName: string;
     labels: readonly string[];
@@ -86,6 +88,35 @@ export interface EvaluateSampleVqaInput {
 export interface EvaluateSampleVqaResult {
     entry: VqaCacheEntry;
     isLiveEvaluated: boolean;
+}
+
+export type VqaSampleProvenanceInput = Pick<EvaluateSampleVqaInput,
+    'sampleKey' | 'targetId' | 'generatorId' | 'viewId' | 'modeName' | 'instanceIdx'
+    | 'attempt' | 'seed' | 'generationPlan' | 'generationPlanHash' | 'generationReplay' | 'fileName'>;
+
+/** Validates the current artifact recipe without reading images, calling Gemini, or writing caches. */
+export function buildVqaSampleProvenance(input: VqaSampleProvenanceInput) {
+    const {sampleKey, targetId, generatorId, viewId, modeName, instanceIdx, attempt, seed, fileName} = input;
+    const recipe = readSampleReplayRecord(sampleKey, {
+        generation_plan: input.generationPlan, generation_plan_hash: input.generationPlanHash,
+        generation_replay: input.generationReplay,
+        attempt, seed
+    });
+    const identity = parseSampleKey(sampleKey);
+    if (identity.targetId !== targetId || identity.generatorId !== generatorId || identity.viewId !== viewId
+        || identity.mode !== modeName || identity.instanceIdx !== instanceIdx) {
+        throw new Error('VQA sample metadata disagrees with its structural identity.');
+    }
+    return {
+        sample_key: sampleKey, target_id: targetId, generator: generatorId, view: viewId,
+        mode: modeName, instance: instanceIdx, attempt, seed, file_name: fileName,
+        generation_plan: recipe.recordedPlan, generation_plan_hash: recipe.recordedPlan.hash, generation_replay: recipe.replay
+    };
+}
+
+/** A content-addressed verdict remains valid while the artifact's replay provenance changes. */
+export function refreshCachedVqaProvenance(cached: VqaCacheEntry, input: VqaSampleProvenanceInput): VqaCacheEntry {
+    return {...cached, ...buildVqaSampleProvenance(input)};
 }
 
 function formatLabelDefinitions(labelDefinitions: readonly VqaLabelDefinition[]): string {
@@ -153,20 +184,7 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
     } = input;
 
     if (!preparedImageBuffer && !existsSync(imagePath)) return null;
-    const recipe = readSampleReplayRecord(sampleKey, {
-        generation_plan: input.generationPlan, generation_replay: input.generationReplay,
-        attempt, seed
-    });
-    const identity = parseSampleKey(sampleKey);
-    if (identity.targetId !== targetId || identity.generatorId !== generatorId || identity.viewId !== viewId
-        || identity.mode !== modeName || identity.instanceIdx !== instanceIdx) {
-        throw new Error('VQA sample metadata disagrees with its structural identity.');
-    }
-    const provenance = {
-        sample_key: sampleKey, target_id: targetId, generator: generatorId, view: viewId,
-        mode: modeName, instance: instanceIdx, attempt, seed, file_name: fileName,
-        generation_plan: recipe.recordedPlan, generation_plan_hash: recipe.recordedPlan.hash, generation_replay: recipe.replay
-    };
+    const provenance = buildVqaSampleProvenance(input);
 
     const imageBuffer = preparedImageBuffer ?? readFileSync(imagePath);
     const imageSha256 = preparedImageSha256 ?? computeImageSha256(imageBuffer);
@@ -241,9 +259,9 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
         instance: instanceIdx,
         attempt,
         seed,
-        generation_plan: recipe.recordedPlan,
-        generation_plan_hash: recipe.recordedPlan.hash,
-        generation_replay: recipe.replay,
+        generation_plan: provenance.generation_plan,
+        generation_plan_hash: provenance.generation_plan_hash,
+        generation_replay: provenance.generation_replay,
         file_name: fileName,
         image_sha256: imageSha256,
         checklist_hash: validationContext.checklistHash,

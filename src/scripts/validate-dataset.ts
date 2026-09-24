@@ -12,7 +12,8 @@ import {
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
 import { isUnionSpec, resolveDatasetDir } from "../lib/dataset-paths.ts";
-import { evaluateSampleVqa, getChecklistPaths } from "../lib/vqa-evaluator.ts";
+import { buildVqaSampleProvenance, evaluateSampleVqa, getChecklistPaths, refreshCachedVqaProvenance,
+    type VqaSampleProvenanceInput } from "../lib/vqa-evaluator.ts";
 import {
     parseSampleKey,
     SampleSplit,
@@ -578,6 +579,21 @@ async function main() {
         return;
     }
 
+    const currentProvenance = new Map<string, VqaSampleProvenanceInput>();
+    for (const {entry, validationCacheKey} of preparedSamples) {
+        if (!validationCacheKey) continue;
+        const input: VqaSampleProvenanceInput = {
+            sampleKey: entry.sample_key, targetId: entry.target_id, generatorId: entry.generator,
+            viewId: entry.view, modeName: entry.mode, instanceIdx: entry.instance,
+            attempt: entry.attempt, seed: entry.seed, fileName: entry.file_name,
+            generationPlan: entry.generation_plan, generationPlanHash: entry.generation_plan_hash,
+            generationReplay: entry.generation_replay
+        };
+        // Fail before pruning or writing caches if any authoritative row cannot be replayed.
+        buildVqaSampleProvenance(input);
+        currentProvenance.set(entry.sample_key, input);
+    }
+
     const cacheManagers = new Map<string, VqaCacheManager>();
     const cacheManagerFor = (moduleName: string) => {
         let manager = cacheManagers.get(moduleName);
@@ -636,6 +652,9 @@ async function main() {
             .get(validationCacheKey);
 
         if (existingCache && !force) {
+            cacheManagerFor(entry.generator).set(refreshCachedVqaProvenance(
+                existingCache, currentProvenance.get(entry.sample_key)!
+            ));
             cachedCount++;
             if (existingCache.evaluation.pass) cachedPassed++;
             else cachedFailed++;

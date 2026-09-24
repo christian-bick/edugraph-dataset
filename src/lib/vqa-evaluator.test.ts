@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { buildVqaPromptParts, getChecklistPaths, initVqaClient, resolveViewChecklistPaths, evaluateSampleVqa as evaluateWithRecipe, type EvaluateSampleVqaInput } from './vqa-evaluator.ts';
+import { buildVqaPromptParts, buildVqaSampleProvenance, refreshCachedVqaProvenance, getChecklistPaths, initVqaClient, resolveViewChecklistPaths, evaluateSampleVqa as evaluateWithRecipe, type EvaluateSampleVqaInput } from './vqa-evaluator.ts';
 import { resolve } from 'path';
 import { writeFileSync, mkdirSync, existsSync, readFileSync, rmSync } from 'fs';
-import { VqaCacheManager } from './vqa-cache.ts';
+import { VqaCacheManager, type VqaCacheEntry } from './vqa-cache.ts';
 import { findLeafModules } from './module-resolver.ts';
 import {planCompatibility, sampleGenerationPlan} from './compatibility.ts';
 import {computeSampleSeed} from './generation.ts';
+import {readSampleReplayRecord} from './sample-replay.ts';
 
 function preparedInput(input: Omit<EvaluateSampleVqaInput, 'generationPlan' | 'generationReplay'>): EvaluateSampleVqaInput {
     const parts = input.sampleKey.split('#');
@@ -473,6 +474,72 @@ describe('vqa-evaluator', () => {
         await expect(evaluateWithRecipe({...input, generationReplay: {...input.generationReplay, seed: 7}}))
             .rejects.toThrow(/seed\/attempt/);
         await expect(evaluateWithRecipe({...input, modeName: 'solution'})).rejects.toThrow(/structural identity/);
+        expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it.each(['missing', 'stale'] as const)('refreshes a %s cached recipe without re-evaluating its verdict', recipeState => {
+        const current = preparedInput({imagePath: tmpImgPath, sampleKey: 'test#gen#view#train#question#inst:0',
+            targetId: 'test', generatorId: 'gen', viewId: testViewId, modeName: 'question',
+            instanceIdx: 0, attempt: 2, seed: 123, fileName: 'current.png', labels: []});
+        const previous = preparedInput({...current, targetId: 'old', sampleKey: 'old#gen#view#train#question#inst:0', attempt: 1});
+        const cached: VqaCacheEntry = {
+            ...buildVqaSampleProvenance(previous), validation_cache_key: 'same-image-and-context',
+            image_sha256: 'unchanged-pixels', checklist_hash: 'same-checklist', label_context_hash: 'same-labels',
+            validation_context_hash: 'same-context', validation_policy_hash: 'same-policy', validated_at: '2026-09-24T00:00:00Z',
+            evaluation: {pass: true, reasoning: '', label_checks: []}
+        };
+        if (recipeState === 'missing') {
+            delete cached.generation_plan;
+            delete cached.generation_plan_hash;
+            delete cached.generation_replay;
+        }
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        manager.set(cached);
+        manager.save();
+        const originalBytes = readFileSync(resolve(tmpCacheDir, 'dataset-test/gen.jsonl'), 'utf8');
+        const refreshed = refreshCachedVqaProvenance(cached, current);
+        expect(readFileSync(resolve(tmpCacheDir, 'dataset-test/gen.jsonl'), 'utf8')).toBe(originalBytes);
+        expect(refreshed.evaluation).toBe(cached.evaluation);
+        for (const key of ['validation_cache_key', 'image_sha256', 'checklist_hash', 'label_context_hash',
+            'validation_context_hash', 'validation_policy_hash', 'validated_at'] as const) {
+            expect(refreshed[key]).toBe(cached[key]);
+        }
+        expect(refreshed.sample_key).toBe(current.sampleKey);
+        expect(refreshed.generation_plan).toEqual(current.generationPlan);
+        expect(refreshed.generation_plan_hash).toBe(current.generationPlan.hash);
+        expect(refreshed.generation_replay).toEqual(current.generationReplay);
+        manager.set(refreshed);
+        manager.save();
+        const saved = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen').entries()[0];
+        expect(readSampleReplayRecord(current.sampleKey, saved).replay).toEqual(current.generationReplay);
+        expect(saved.evaluation.pass).toBe(true);
+        expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid authoritative cache-refresh metadata without changing the cached record', () => {
+        const current = preparedInput({imagePath: tmpImgPath, sampleKey: 'test#gen#view#train#question#inst:0',
+            targetId: 'test', generatorId: 'gen', viewId: testViewId, modeName: 'question',
+            instanceIdx: 0, attempt: 2, seed: 123, fileName: 'current.png', labels: []});
+        const cached: VqaCacheEntry = {
+            ...buildVqaSampleProvenance(current), validation_cache_key: 'same-image-and-context',
+            image_sha256: 'unchanged-pixels', checklist_hash: 'same-checklist', label_context_hash: 'same-labels',
+            validation_context_hash: 'same-context', validation_policy_hash: 'same-policy', validated_at: '2026-09-24T00:00:00Z',
+            evaluation: {pass: true, reasoning: '', label_checks: []}
+        };
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        manager.set(cached);
+        manager.save();
+        const originalBytes = readFileSync(resolve(tmpCacheDir, 'dataset-test/gen.jsonl'), 'utf8');
+        for (const invalid of [
+            {...current, generationReplay: undefined as any},
+            {...current, generationReplay: {...current.generationReplay, seed: 7}},
+            {...current, generationPlanHash: 'corrupt-authoritative-plan-hash'},
+            {...current, targetId: 'wrong-target'}
+        ]) {
+            expect(() => manager.set(refreshCachedVqaProvenance(cached, invalid))).toThrow();
+        }
+        expect(manager.get(cached.validation_cache_key)).toBe(cached);
+        expect(readFileSync(resolve(tmpCacheDir, 'dataset-test/gen.jsonl'), 'utf8')).toBe(originalBytes);
         expect(mockGenerateContent).not.toHaveBeenCalled();
     });
 });
