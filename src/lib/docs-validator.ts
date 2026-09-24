@@ -46,11 +46,12 @@ export interface DocsValidationInput {
     exists: (repoRelativePath: string) => boolean;
 }
 
-export type DocumentationRole = 'reference' | 'plan' | 'consumer';
+export type DocumentationRole = 'reference' | 'plan' | 'history' | 'consumer';
 
 /** Only the reference library defines rules; plans and skills cite those rules. */
 export function documentationRole(path: string): DocumentationRole {
     if (path.startsWith('docs/plan/')) return 'plan';
+    if (path.startsWith('docs/history/')) return 'history';
     if (path.startsWith(REFERENCE_DIR) && path !== REFERENCE_INDEX) return 'reference';
     return 'consumer';
 }

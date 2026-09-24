@@ -51,14 +51,14 @@ the architecture document's review order whenever a match, payload, or rendered 
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
 The producer/view contract migration is recorded in
-[explicit-producer-view-contracts.md](docs/plan/explicit-producer-view-contracts.md).
+[explicit-producer-view-contracts.md](docs/history/explicit-producer-view-contracts.md).
 Specialized consumers use precise entries in `ViewTypeMap`; shared renderers may still use
 explicit wider unions. For example, mass and liquid volume have separate producers, while
 the general strategy view accepts the named strategy union. Target requirements remain
 independent learner-task participation policies.
 
 Label compatibility is implemented through the design recorded in
-[label-variant-matching.md](docs/plan/label-variant-matching.md). After type and positive-capability
+[label-variant-matching.md](docs/history/label-variant-matching.md). After type and positive-capability
 matching, the planner admits only valid joint schema-label selections. Every tuple carries a
 versioned plan. Generation selects from it without increasing sample counts; rendering, retry,
 replay, target associations, and VQA preserve the actual selection. Generator configuration
@@ -402,7 +402,7 @@ The only public dataset-generation entry point.
 ### `src/scripts/validate-docs.ts`
 *   **Execution**: `npm run check:docs`
 *   **Function**: Validates the wiring of the reference library in [`docs/`](docs/README.md) using `src/lib/docs-validator.ts`. Errors on: a cited rule ID that no reference defines, a rule ID defined twice, a link or anchor that does not resolve, a reference to a missing `docs/` file, a `DOCS.md § n` citation for a section that no longer exists, and a reference file without an `## Audit` section (the review skills navigate to it by heading). Warns on: a rule missing from its own file's Audit section, a reference file not linked from the index, and machine-specific `file://` links.
-*   **Discovery and roles**: `src/lib/docs-discovery.ts` recursively reads Markdown under `docs/` and `.agents/skills/`, including nested plans and skill reference documents, plus `DOCS.md`, `AGENTS.md`, and `README.md`. Directory links are not traversed. Only rule references define local rule IDs and require Audit sections; `docs/plan/` documents are plans, and the index, root documents, and skills are consumers. Every role is checked for local links, anchors, and rule citations. Full and CI checks invoke the same command; affected checks schedule it for any discovered Markdown path or changes to its validator, discovery, or entry point.
+*   **Discovery and roles**: `src/lib/docs-discovery.ts` recursively reads Markdown under `docs/` and `.agents/skills/`, including nested plans, historical records, and skill reference documents, plus `DOCS.md`, `AGENTS.md`, and `README.md`. Directory links are not traversed. Only rule references define local rule IDs and require Audit sections; `docs/plan/` documents are plans, `docs/history/` documents are historical records, and the index, root documents, and skills are consumers. Every role is checked for local links, anchors, and rule citations. Full and CI checks invoke the same command; affected checks schedule it for any discovered Markdown path or changes to its validator, discovery, or entry point.
 *   **External documents**: HTTP(S) links to Markdown files are fetched once per document per run, with a five-second timeout. GitHub `blob` links use the raw document at the linked revision. Fetch failures and missing headings produce warnings, not validation errors. Remote content is not traversed recursively or imported into the local rule catalog; other external URL formats are left unchecked. URL paths are never interpreted as local `docs/` references, and no sibling checkout is needed.
 
 ### `src/scripts/validate-generator-view-specs.ts`
