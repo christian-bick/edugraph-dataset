@@ -6,10 +6,12 @@ import { DEFAULT_VAL_RATIO } from '../lib/generation.ts';
 import { buildSplitIntegrityReport, SplitIntegrityReport } from '../lib/split-report.ts';
 import {readDatasetSnapshot} from '../lib/dataset-store.ts';
 import type {MetadataRow} from '../lib/dataset-merge.ts';
+import type {DatasetManifest} from '../lib/dataset-manifest.ts';
 
 /**
  * Audits the train/validation split of a generated dataset: cross-split
  * mathematical-content leakage, within-split task redundancy, realized ratio,
+ * persisted matched-tuple realization (including validated associations),
  * and per-view/per-label validation coverage. Analysis lives in
  * `src/lib/split-report.ts`; this script is its CLI and formatting shell.
  *
@@ -34,7 +36,19 @@ function print(report: SplitIntegrityReport) {
 
     console.log(`Rows:        ${report.trainRows} train / ${report.valRows} validation`);
     console.log(`Val share:   ${(report.valShare * 100).toFixed(1)}% of rows (allocator targets ${(report.requestedRatio * 100).toFixed(0)}% of tuples)`);
-    console.log(`Tuples:      ${allocation.tuples} matched, ${allocation.allocated} allocated to validation, ${allocation.realized} realized`);
+    console.log(`Tuples:      ${allocation.tuples} ${allocation.denominator}, ${allocation.allocated} allocated to validation, ${allocation.realized} represented in validation`);
+    console.log(`Train:       ${allocation.trainRepresented} represented tuples (${allocation.primaryTrainTuples} primary, ${allocation.trainRepresented - allocation.primaryTrainTuples} association-only)`);
+    if (allocation.denominator === 'observed') {
+        console.log(`ℹ️ No persisted matching plans: tuples absent from both splits cannot be audited.`);
+    }
+
+    console.log(`\n--- Training coverage ---`);
+    if (allocation.missingTrain.length === 0) {
+        console.log(`✅ Every ${allocation.denominator} tuple has training evidence.`);
+    } else {
+        console.log(`⚠️ ${allocation.missingTrain.length} tuple(s) have no training evidence; ${allocation.missingEverywhere.length} have no evidence in either split.`);
+        listCapped(allocation.missingTrain, key => `    ${key}`);
+    }
 
     console.log(`\n--- Cross-split leakage ---`);
     if (report.leaks.length === 0) {
@@ -61,12 +75,12 @@ function print(report: SplitIntegrityReport) {
 
     console.log(`\n--- Allocation realized ---`);
     if (allocation.unrealized.length === 0) {
-        console.log(`✅ Every allocated tuple produced validation samples.`);
+        console.log(`✅ Every allocated tuple has validation evidence.`);
     } else {
         const share = allocation.allocated > 0 ? (allocation.unrealized.length / allocation.allocated) * 100 : 0;
-        console.log(`⚠️ ${allocation.unrealized.length} of ${allocation.allocated} allocated tuples (${share.toFixed(0)}%) produced no validation sample.`);
-        console.log(`   Either the generator found no content disjoint from train within its retry budget,`);
-        console.log(`   or the dataset predates the current allocator — regenerate before reading into this.`);
+        console.log(`⚠️ ${allocation.unrealized.length} of ${allocation.allocated} allocated tuples (${share.toFixed(0)}%) have no validation evidence.`);
+        console.log(`   Retry exhaustion, deduplication, or a training-only run can explain these gaps;`);
+        console.log(`   this report does not infer the cause from missing rows.`);
         listCapped(allocation.unrealized, key => `    ${key}`);
     }
 
@@ -122,18 +136,20 @@ function main() {
 
     const train = snapshot.rows('train') as unknown as MetadataRow[];
     const val = snapshot.rows('val') as unknown as MetadataRow[];
+    const manifest = snapshot.buildManifest as DatasetManifest | null;
+    const persistedPlans = manifest?.dependency_graph?.matching_index?.generation_plans_by_target;
+    const context = persistedPlans ? {plans: Object.values(persistedPlans).flatMap(plans => Object.values(plans))} : undefined;
 
-    if (train.length === 0) {
+    if (train.length === 0 && !context?.plans.length) {
         console.error(`❌ No train metadata found in ${outDir}`);
         console.error(`Generate it first: npm run generate:dataset -- --spec=${specName}`);
         process.exit(1);
     }
     if (val.length === 0) {
-        console.log(`ℹ️ No validation split present (generated with --training-only?). Nothing to audit.`);
-        return;
+        console.log(`ℹ️ No validation rows present (generated with --training-only?). Auditing training integrity and allocation coverage.`);
     }
 
-    const report = buildSplitIntegrityReport(train, val, DEFAULT_VAL_RATIO);
+    const report = buildSplitIntegrityReport(train, val, DEFAULT_VAL_RATIO, context);
     print(report);
 
     console.log();
