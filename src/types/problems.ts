@@ -312,6 +312,8 @@ export type EquationJudgmentProblem = {
 };
 
 export type ArithmeticEstimationProblem = {
+    /** Inclusive integer domain for the exact relation and its rounded evidence. */
+    numberDomain: {min: number; max: number};
     num1: number;
     num2: number;
     operation: ArithmeticOperation;

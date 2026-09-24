@@ -33,6 +33,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-answer-reasonableness', data, [
+        'numberDomain',
         'num1',
         'num2',
         'operation',
@@ -49,6 +50,10 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
             'Unsupported operation or rounding place.'
         );
     }
+    const {min, max} = data.numberDomain;
+    if (!Number.isInteger(min) || !Number.isInteger(max) || min < 0 || max > 1000 || min > max) {
+        throw new ViewValidationError('operations-answer-reasonableness', 'Invalid estimation number domain.');
+    }
     const values = [
         data.num1,
         data.num2,
@@ -57,10 +62,10 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
         data.exactAnswer,
         data.estimatedAnswer
     ];
-    if (values.some(value => !Number.isInteger(value) || value < 0 || value > 1000)) {
+    if (values.some(value => !Number.isInteger(value) || value < min || value > max)) {
         throw new ViewValidationError(
             'operations-answer-reasonableness',
-            'This layout requires whole-number values from 0 through 1000.'
+            'All mathematical values must lie within the supplied integer number domain.'
         );
     }
     const roundedNum1 = Math.round(data.num1 / data.roundingPlace) * data.roundingPlace;
