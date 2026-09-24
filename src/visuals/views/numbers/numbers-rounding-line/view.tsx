@@ -41,6 +41,8 @@ const LegacyRoundingLine = ({
     const numberX = toX(data.number);
     const midpointX = toX(data.midpoint);
     const roundedX = toX(data.roundedValue);
+    const pointLabelX = getPointLabelX(numberX, midpointX);
+    const sourceScaleCue = getSourceScaleCue(data.number, data.lowerMultiple, data.roundingPlace);
     const placeName = data.roundingPlace === 10 ? 'ten' : 'hundred';
     const ticks = Array.from({length: 11}, (_, index) => data.lowerMultiple
         + index * data.roundingPlace / 10);
@@ -74,9 +76,11 @@ const LegacyRoundingLine = ({
                 })}
                 <line x1={midpointX} y1={54} x2={midpointX} y2={AXIS_Y - 16} stroke="#f59e0b" strokeWidth="2" strokeDasharray="6 5" />
                 <text x={midpointX} y={43} textAnchor="middle" className="fill-amber-700 text-[15px] font-bold">midpoint {data.midpoint}</text>
-                <circle cx={numberX} cy={AXIS_Y} r="11" fill="#2563eb" stroke="white" strokeWidth="4" />
-                <text x={numberX} y={AXIS_Y - 28} textAnchor="middle" className="fill-blue-700 text-[21px] font-bold">{data.number}</text>
                 {isSolutionView && <circle cx={roundedX} cy={AXIS_Y} r="9" fill="#059669" />}
+                <line x1={numberX} y1={AXIS_Y - 4} x2={pointLabelX} y2={AXIS_Y - 38} stroke="#2563eb" strokeWidth="2" />
+                <rect x={pointLabelX - 64} y={AXIS_Y - 65} width="128" height="30" rx="8" fill="white" stroke="#93c5fd" strokeWidth="1.5" />
+                <text x={pointLabelX} y={AXIS_Y - 44} textAnchor="middle" className="fill-blue-700 text-[17px] font-bold">{data.number}</text>
+                <circle cx={numberX} cy={AXIS_Y} r="3" fill="#2563eb" stroke="white" strokeWidth="1.5" />
                 {isSolutionView && (
                     <g className="fill-slate-600 text-[14px] font-semibold">
                         <text x={(LEFT + numberX) / 2} y={AXIS_Y + 74} textAnchor="middle">distance {data.distanceLower}</text>
@@ -84,6 +88,12 @@ const LegacyRoundingLine = ({
                     </g>
                 )}
             </svg>
+
+            <div className="mb-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-center text-sm font-semibold text-blue-900">
+                {sourceScaleCue.kind === 'between'
+                    ? <>Local scale: {sourceScaleCue.lowerTick} &lt; <span className="font-bold text-blue-700">{data.number}</span> &lt; {sourceScaleCue.upperTick}</>
+                    : <>Exact scale tick: <span className="font-bold text-blue-700">{sourceScaleCue.tick}</span></>}
+            </div>
 
             <div className={`rounded-xl border-2 px-5 py-4 text-center text-xl font-bold ${isSolutionView ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-dashed border-slate-300 text-slate-400'}`}>
                 {isSolutionView ? `${data.number} → ${data.roundedValue}. ${reason}` : `${data.number} → ?`}

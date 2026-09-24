@@ -13,14 +13,19 @@
  *    and every view and label carrying train mass also carries val mass.
  *    Otherwise per-view and per-label validation metrics simply do not exist.
  *
- * All analysis here reads the on-disk metadata only, so it audits the dataset
- * that was actually produced rather than re-deriving what should have been.
- * A tuple that produced nothing in *either* split is invisible to it by
- * construction — `show:matching` is the tool that covers matching failures.
+ * Physical integrity reads the on-disk rows. Allocation coverage additionally
+ * uses the snapshot's persisted matching plans when available, so a matched
+ * tuple missing from both splits remains visible. Validated associations count
+ * as represented tuples without increasing image or label row counts.
  */
 
 import { MetadataRow, exerciseKey, rowTaskFingerprint } from './dataset-merge.ts';
 import { isValTuple } from './generation.ts';
+import type {GenerationPlan} from '../types/compatibility.ts';
+import {CompatibilityContractError, validateGenerationPlan, validateGenerationSelectionReceipt} from './compatibility.ts';
+import {selectionAdmittedByPlan} from './planned-generation.ts';
+import {readSampleReplayRecord} from './sample-replay.ts';
+import {publishedLabelsCoverRequested} from './asset-index.ts';
 
 /** The allocation unit: one matched (target, generator, view) tuple. */
 export function tupleKey(row: MetadataRow): string {
@@ -103,36 +108,119 @@ export function findWithinSplitRedundancy(rows: MetadataRow[], split: string): R
 }
 
 export interface AllocationStats {
+    denominator: 'matched' | 'observed';
     tuples: number;
     allocated: number;
+    /** Allocated tuples represented by validation rows, including associations. */
     realized: number;
-    /** Allocated tuples that produced no validation sample at all. */
+    primaryTrainTuples: number;
+    primaryValTuples: number;
+    trainRepresented: number;
+    /** Matched tuples without either a primary train row or a validated train association. */
+    missingTrain: string[];
+    /** Matched tuples unrepresented in both splits. */
+    missingEverywhere: string[];
+    /** Allocated tuples with no validation representation. */
     unrealized: string[];
 }
 
+export interface SplitAllocationContext {
+    /** Complete plans from the same immutable snapshot as the audited rows. */
+    plans: readonly GenerationPlan[];
+}
+
+type AllocationTuple = GenerationPlan['identity'];
+const allocationTupleKey = (tuple: AllocationTuple): string =>
+    [tuple.targetId, tuple.generatorId, tuple.viewId].join('#');
+const rowTuple = (row: MetadataRow): AllocationTuple =>
+    ({targetId: row.target_id, generatorId: row.generator, viewId: row.view});
+const samePlan = (left: GenerationPlan | undefined, right: GenerationPlan): boolean =>
+    left?.hash === right.hash && left?.inputHash === right.inputHash;
+
+function allocationIndex(train: MetadataRow[], val: MetadataRow[], context?: SplitAllocationContext) {
+    const plans = new Map<string, GenerationPlan>();
+    for (const candidate of context?.plans ?? []) {
+        const plan = validateGenerationPlan(candidate);
+        const key = allocationTupleKey(plan.identity);
+        if (plans.has(key) && !samePlan(plans.get(key), plan)) {
+            throw new CompatibilityContractError(`Conflicting allocation plans for ${key}.`);
+        }
+        plans.set(key, plan);
+    }
+    const tuples = new Map<string, AllocationTuple>(context
+        ? [...plans].map(([key, plan]) => [key, plan.identity])
+        : [...train, ...val].map(row => [tupleKey(row), rowTuple(row)]));
+    const represented = (rows: MetadataRow[]) => {
+        const keys = new Set<string>();
+        for (const row of rows) {
+            const key = tupleKey(row);
+            if (context && !tuples.has(key)) {
+                throw new CompatibilityContractError(`Sample tuple ${key} is absent from the snapshot matching plans.`);
+            }
+            keys.add(key);
+            const associations = (row.target_associations ?? []).filter(association => association.spec === row.spec);
+            if (associations.length === 0) continue;
+            const source = readSampleReplayRecord(row.sample_key, row);
+            if (allocationTupleKey(source.recordedPlan.identity) !== key
+                || (context && !samePlan(plans.get(key), source.recordedPlan))) {
+                throw new CompatibilityContractError(`Sample plan disagrees with allocation tuple ${key}.`);
+            }
+            for (const association of associations) {
+                const plan = validateGenerationPlan(association.generation_plan);
+                const identity = {...rowTuple(row), targetId: association.target_id};
+                const associationKey = allocationTupleKey(identity);
+                if (allocationTupleKey(plan.identity) !== associationKey
+                    || association.generation_plan_hash !== plan.hash
+                    || (context && !samePlan(plans.get(associationKey), plan))) {
+                    throw new CompatibilityContractError(`Association plan disagrees with allocation tuple ${associationKey}.`);
+                }
+                const selection = validateGenerationSelectionReceipt(plan, association.selection);
+                const admitted = selectionAdmittedByPlan(plan, source.recordedPlan, source.replay.selection);
+                if (!admitted || admitted.variantHash !== selection.variantHash) {
+                    throw new CompatibilityContractError(`Association does not admit the actual sample selection for ${associationKey}.`);
+                }
+                if (!publishedLabelsCoverRequested(row.labels ?? [], plan.targetLabels)) {
+                    throw new CompatibilityContractError(`Published labels do not cover associated target ${associationKey}.`);
+                }
+                if (!context) tuples.set(associationKey, identity);
+                keys.add(associationKey);
+            }
+        }
+        return keys;
+    };
+    const trainRepresented = represented(train);
+    const valRepresented = represented(val);
+    return {tuples, trainRepresented, valRepresented};
+}
+
 /**
- * Compares the tuples the allocator selects for validation against the ones
- * that actually produced samples. The gap is the silent-drop rate: tuples
- * whose generator could not find content disjoint from train within its retry
- * budget.
+ * Compares allocated tuples with physical or validated associated evidence.
+ * Missing evidence does not itself establish numeric failure or finite-space
+ * exhaustion; the retry diagnostics distinguish those causes.
  */
-export function analyzeAllocation(train: MetadataRow[], val: MetadataRow[], valRatio: number): AllocationStats {
-    const tuples = new Map<string, MetadataRow>();
-    for (const row of train) {
-        if (!tuples.has(tupleKey(row))) tuples.set(tupleKey(row), row);
-    }
-    const realized = new Set(val.map(tupleKey));
+export function analyzeAllocation(train: MetadataRow[], val: MetadataRow[], valRatio: number,
+    context?: SplitAllocationContext): AllocationStats {
+    return allocationStats(train, val, valRatio, allocationIndex(train, val, context), context !== undefined);
+}
 
+function allocationStats(train: MetadataRow[], val: MetadataRow[], valRatio: number,
+    index: ReturnType<typeof allocationIndex>, authoritative: boolean): AllocationStats {
+    const {tuples, trainRepresented, valRepresented} = index;
     const allocated: string[] = [];
-    for (const [key, row] of tuples) {
-        if (isValTuple(row.target_id, row.generator, row.view, valRatio)) allocated.push(key);
+    for (const [key, tuple] of tuples) {
+        if (isValTuple(tuple.targetId, tuple.generatorId, tuple.viewId, valRatio)) allocated.push(key);
     }
-
     return {
+        denominator: authoritative ? 'matched' : 'observed',
         tuples: tuples.size,
         allocated: allocated.length,
-        realized: realized.size,
-        unrealized: allocated.filter(key => !realized.has(key)).sort(),
+        realized: allocated.filter(key => valRepresented.has(key)).length,
+        primaryTrainTuples: new Set(train.map(tupleKey)).size,
+        primaryValTuples: new Set(val.map(tupleKey)).size,
+        trainRepresented: trainRepresented.size,
+        missingTrain: [...tuples.keys()].filter(key => !trainRepresented.has(key)).sort(),
+        missingEverywhere: [...tuples.keys()].filter(key => !trainRepresented.has(key) && !valRepresented.has(key)).sort(),
+        unrealized: allocated.filter(key => !valRepresented.has(key)).sort(),
     };
 }
 
@@ -144,22 +232,24 @@ export interface ViewCoverage {
 }
 
 /** Per-view train/val mass, worst-covered first. */
-export function analyzeViewCoverage(train: MetadataRow[], val: MetadataRow[], valRatio: number): ViewCoverage[] {
+export function analyzeViewCoverage(train: MetadataRow[], val: MetadataRow[], valRatio: number,
+    context?: SplitAllocationContext): ViewCoverage[] {
+    return viewCoverage(train, val, valRatio, allocationIndex(train, val, context).tuples);
+}
+
+function viewCoverage(train: MetadataRow[], val: MetadataRow[], valRatio: number,
+    tuples: ReadonlyMap<string, AllocationTuple>): ViewCoverage[] {
     const views = new Map<string, ViewCoverage>();
     const ensure = (view: string) => {
         if (!views.has(view)) views.set(view, { view, trainRows: 0, valRows: 0, allocatedTuples: 0 });
         return views.get(view)!;
     };
 
-    const countedTuples = new Set<string>();
-    for (const row of train) {
-        ensure(row.view).trainRows++;
-        const key = tupleKey(row);
-        if (!countedTuples.has(key) && isValTuple(row.target_id, row.generator, row.view, valRatio)) {
-            countedTuples.add(key);
-            ensure(row.view).allocatedTuples++;
-        }
+    for (const tuple of tuples.values()) {
+        const entry = ensure(tuple.viewId);
+        if (isValTuple(tuple.targetId, tuple.generatorId, tuple.viewId, valRatio)) entry.allocatedTuples++;
     }
+    for (const row of train) ensure(row.view).trainRows++;
     for (const row of val) ensure(row.view).valRows++;
 
     return [...views.values()].sort((a, b) => a.valRows - b.valRows || a.view.localeCompare(b.view));
@@ -208,7 +298,8 @@ export interface SplitIntegrityReport {
 export function buildSplitIntegrityReport(
     train: MetadataRow[],
     val: MetadataRow[],
-    valRatio: number
+    valRatio: number,
+    context?: SplitAllocationContext
 ): SplitIntegrityReport {
     const leaks = findCrossSplitLeaks(train, val);
     const redundancy = [
@@ -216,16 +307,17 @@ export function buildSplitIntegrityReport(
         ...findWithinSplitRedundancy(val, 'validation'),
     ];
     const total = train.length + val.length;
+    const allocation = allocationIndex(train, val, context);
 
     return {
         trainRows: train.length,
         valRows: val.length,
         valShare: total > 0 ? val.length / total : 0,
         requestedRatio: valRatio,
-        allocation: analyzeAllocation(train, val, valRatio),
+        allocation: allocationStats(train, val, valRatio, allocation, context !== undefined),
         leaks,
         redundancy,
-        viewCoverage: analyzeViewCoverage(train, val, valRatio),
+        viewCoverage: viewCoverage(train, val, valRatio, allocation.tuples),
         labelCoverage: analyzeLabelCoverage(train, val),
         hasErrors: leaks.length > 0 || redundancy.length > 0,
     };

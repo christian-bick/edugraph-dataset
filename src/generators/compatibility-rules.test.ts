@@ -6,6 +6,7 @@ import {planCompatibility, sampleGenerationPlan} from '../lib/compatibility.ts';
 import {bindingsForSelection} from '../lib/planned-generation.ts';
 import {resolveSchemaChoices} from '../lib/schema-choices.ts';
 import {generatorLabelRule} from './compatibility-rules.ts';
+import {ShapeClassifyAttributesGenerator} from './shape/shape-classify-attributes/generator.ts';
 
 let generators: Map<string, GeneratorModelDescriptor>;
 let views: Map<string, ViewModelDescriptor>;
@@ -112,8 +113,6 @@ const cases: readonly [string, string, readonly string[], readonly string[]][] =
         [Area.DistributiveLaw, Area.Multiplication, Scope.ThreeOperands], [Area.DistributiveLaw]],
     ['geometry-perimeter', 'rectangle equation',
         [Area.Rectangle, Area.Addition, Area.Equation], [Area.Rectangle, Area.Addition]],
-    ['shape-classify-attributes', 'attribute count exclusivity', [Scope.VertexCount], [Scope.VertexCount, Scope.AngleCount]],
-    ['shape-classify-attributes', 'equal face count', [Scope.FaceCount, Scope.Equal], [Scope.FaceCount]],
     ['shape-classify-attributes', 'criterion exclusivity', [Area.RightAngle], [Area.RightAngle, Area.AcuteAngle]],
     ['shape-classify-attributes', 'subsumption with criterion',
         [Area.ShapeSubsumption, Area.RightTriangle, Area.RightAngle],
@@ -139,6 +138,32 @@ describe('generator configuration compatibility', () => {
         const result = plan(generator, rejected);
         expect(result.supported, 'unsupported semantic configuration').toBe(false);
         if (!result.supported) expect(result.reason).toBe('incompatible-rules');
+    });
+
+    it('rejects competing explicit attribute count modes before rule evaluation', () => {
+        expect(plan('shape-classify-attributes', [Scope.VertexCount]).supported).toBe(true);
+        const result = plan('shape-classify-attributes', [Scope.VertexCount, Scope.AngleCount]);
+        expect(result).toMatchObject({supported: false, reason: 'empty-domain',
+            fields: [{owner: 'generator', field: 'attributeCounts'}]});
+    });
+
+    it.each([
+        {requested: [Scope.FaceCount]},
+        {requested: [Scope.FaceCount, Scope.Equal]}
+    ])('completes $requested with an admitted equal-face mode without altering the request', ({requested}) => {
+        const result = plan('shape-classify-attributes', requested);
+        expect(result.supported).toBe(true);
+        if (!result.supported) return;
+        expect(result.plan.targetLabels).toEqual([...requested].sort());
+        const receipt = sampleGenerationPlan(result.plan, () => 0);
+        const selection = bindingsForSelection(result.plan, receipt);
+        expect(selection.generator.attributeCounts).toEqual([Scope.Equal, Scope.FaceCount]);
+        const generator = new ShapeClassifyAttributesGenerator();
+        const resolved = resolveSchemaChoices(generator.schema, requested, selection.generator);
+        expect(resolved.config.attributeCounts).toEqual([Scope.FaceCount, Scope.Equal]);
+        expect(generator.generate(resolved.config)?.data).toMatchObject({
+            task: 'classify-count', attribute: 'equal-faces', requiredCount: 6
+        });
     });
 
     it('rejects a target scale that the tool-based length resolver cannot accept', () => {

@@ -33,6 +33,8 @@ Standing outside the matrix, because it describes standards rather than modules:
 - [Label-variant matching and constrained generation](plan/label-variant-matching.md) — agreed
   design and implementation checkpoints for spec predicates, compatible label selections,
   and generation plans.
+- [Label-variant integration follow-ups](plan/label-variant-followups.md) — format rollout,
+  numeric feasibility, complete production VQA, and final coverage investigation.
 - [Payload-family matching and regression](plan/payload-family-matching.md) — payload-family
   migration checkpoints, the compatibility case study, and optional synthetic regression work.
 - [Performance safeguards and follow-ups](plan/improve_performance.md) — the performance contract

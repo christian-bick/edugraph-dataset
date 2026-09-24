@@ -11,6 +11,7 @@ import {
 
 const MAX_ESTIMATION_VALUE = 1000;
 const ROUNDING_PLACE = 10;
+const PREFERRED_MINIMUM_OPERAND = 11;
 
 type OperationLabel = typeof Area.Addition
     | typeof Area.Subtraction
@@ -46,9 +47,12 @@ export class ArithmeticEstimationGenerator implements ProblemGenerator<
         const operation = config.operation;
         if (!operation || operation === 'unsupported') return null;
 
-        const minimum = Math.max(1, Math.ceil(config.range!.min));
+        const minimum = Math.max(0, Math.ceil(config.range!.min));
         const maximum = Math.min(MAX_ESTIMATION_VALUE, Math.floor(config.range!.max));
-        if (minimum >= maximum) return null;
+        if (!Number.isFinite(minimum) || !Number.isFinite(maximum) || minimum >= maximum) return null;
+        // Nonzero rounded operands and their rounded relation cannot all occupy a
+        // domain containing just one multiple of ten.
+        if (Math.ceil(minimum / ROUNDING_PLACE) >= Math.floor(maximum / ROUNDING_PLACE)) return null;
 
         const randomInteger = (min: number, max: number): number | null => {
             if (min > max) return null;
@@ -56,12 +60,13 @@ export class ArithmeticEstimationGenerator implements ProblemGenerator<
         };
 
         for (let attempt = 0; attempt < 300; attempt++) {
-            const candidate = this.createCandidate(operation, maximum, randomInteger);
+            const candidate = this.createCandidate(operation, minimum, maximum, randomInteger);
             if (!candidate) continue;
 
             return {
                 data: {
                     ...candidate,
+                    numberDomain: {min: minimum, max: maximum},
                     operation: operationNames[operation] as ArithmeticOperation,
                     roundingPlace: ROUNDING_PLACE
                 }
@@ -73,25 +78,28 @@ export class ArithmeticEstimationGenerator implements ProblemGenerator<
 
     private createCandidate(
         operation: OperationLabel,
+        minimum: number,
         maximum: number,
         randomInteger: (min: number, max: number) => number | null
     ): Candidate | null {
         let num1: number | null;
         let num2: number | null;
+        const minimumOperand = Math.max(1, minimum,
+            maximum < 2 * PREFERRED_MINIMUM_OPERAND ? 1 : PREFERRED_MINIMUM_OPERAND);
 
         if (operation === Area.Addition) {
-            num1 = randomInteger(11, Math.min(700, maximum - 11));
-            num2 = num1 === null ? null : randomInteger(11, maximum - num1);
+            num1 = randomInteger(minimumOperand, Math.min(700, maximum - minimumOperand));
+            num2 = num1 === null ? null : randomInteger(minimumOperand, maximum - num1);
         } else if (operation === Area.Subtraction) {
-            num2 = randomInteger(11, Math.min(400, maximum - 11));
-            const difference = num2 === null ? null : randomInteger(11, maximum - num2);
+            num2 = randomInteger(minimumOperand, Math.min(400, maximum - minimumOperand));
+            const difference = num2 === null ? null : randomInteger(minimumOperand, maximum - num2);
             num1 = num2 === null || difference === null ? null : num2 + difference;
         } else if (operation === Area.Multiplication) {
-            num1 = randomInteger(11, Math.min(49, maximum));
-            num2 = num1 === null ? null : randomInteger(11, Math.min(49, Math.floor(maximum / num1)));
+            num1 = randomInteger(minimumOperand, Math.min(49, maximum));
+            num2 = num1 === null ? null : randomInteger(minimumOperand, Math.min(49, Math.floor(maximum / num1)));
         } else {
-            num2 = randomInteger(11, Math.min(49, maximum));
-            const quotient = num2 === null ? null : randomInteger(2, Math.min(80, Math.floor(maximum / num2)));
+            num2 = randomInteger(minimumOperand, Math.min(49, maximum));
+            const quotient = num2 === null ? null : randomInteger(Math.max(2, minimum), Math.min(80, Math.floor(maximum / num2)));
             num1 = num2 === null || quotient === null ? null : num2 * quotient;
         }
 
@@ -104,8 +112,9 @@ export class ArithmeticEstimationGenerator implements ProblemGenerator<
 
         const exactAnswer = applyOperation(num1, num2, operation);
         const estimatedAnswer = applyOperation(roundedNum1, roundedNum2, operation);
-        const values = [num1, num2, roundedNum1, roundedNum2, exactAnswer, estimatedAnswer];
-        if (!values.every(value => Number.isInteger(value) && value >= 0 && value <= maximum)) return null;
+        const values = [num1, num2, roundedNum1, roundedNum2, exactAnswer, estimatedAnswer,
+            roundToTen(estimatedAnswer)];
+        if (!values.every(value => Number.isInteger(value) && value >= minimum && value <= maximum)) return null;
 
         return {num1, num2, roundedNum1, roundedNum2, exactAnswer, estimatedAnswer};
     }
