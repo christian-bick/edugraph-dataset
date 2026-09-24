@@ -1,8 +1,39 @@
 export type LabelResolution = 'exact' | 'predicate' | 'aggregate' | 'compositional';
 
+/** A default is selected from the original request, never from a random draw. */
+export interface LabelChoiceDefault {
+  readonly whenAll?: readonly string[];
+  readonly whenNone?: readonly string[];
+  readonly labels: readonly string[];
+}
+
+/**
+ * Inspectable label selection, separate from the function producing concrete values.
+ * `target` preserves a conjunction; `alternatives` selects one declared bundle.
+ * Omitted alternatives mean the supported labels are singleton alternatives.
+ */
+export type LabelChoiceContract = (
+  | {readonly kind: 'alternatives'; readonly alternatives?: readonly (readonly string[])[];
+      /** Selections that resolve identically and may share explicit fallback completion. */
+      readonly equivalenceGroups?: readonly (readonly (readonly string[])[])[];
+      readonly defaults?: readonly LabelChoiceDefault[]}
+  | {readonly kind: 'target'; readonly relation?: 'exact' | 'capability';
+      /** Boolean semantics used to preserve a predicate's value during fallback completion. */
+      readonly predicate?: {readonly all: readonly string[]; readonly relation?: 'exact' | 'capability'}}
+) & {
+  /** Additional labels read by the value resolver, beyond this field's labels. */
+  readonly contextLabels?: readonly string[];
+};
+
 export type ResolverFn<T> = ((labels: string[], supportedLabels?: readonly string[]) => T) & {
   readonly labelResolution?: LabelResolution;
+  readonly labelChoices?: LabelChoiceContract;
 };
+
+/** Declares choices without executing or attempting to inspect the resolver. */
+export const withLabelChoices = <T>(
+  resolver: ResolverFn<T>, labelChoices: LabelChoiceContract
+): ResolverFn<T> => Object.assign(resolver, {labelChoices});
 
 const markLabelResolution = <T, TResolution extends LabelResolution>(
   resolver: ResolverFn<T>,

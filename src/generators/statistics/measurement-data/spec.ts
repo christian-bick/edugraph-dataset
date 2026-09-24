@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 
 const resolveUnitScale = exactResolver((labels: string[]): 'cm' | 'in' => {
     const exactScale = selectExactLabelMap([
@@ -10,6 +10,14 @@ const resolveUnitScale = exactResolver((labels: string[]): 'cm' | 'in' => {
     ] as const)(labels);
     if (exactScale) return exactScale;
     return labels.includes(Scope.FractionNumbers) ? 'in' : 'cm';
+});
+withLabelChoices(resolveUnitScale, {
+    kind: 'alternatives',
+    defaults: [
+        {whenAll: [Scope.FractionNumbers], labels: [Scope.InchScale]},
+        {labels: [Scope.CentimeterScale]}
+    ],
+    contextLabels: [Scope.FractionNumbers]
 });
 
 export const spec: GeneratorSpec = {

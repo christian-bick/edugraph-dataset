@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {exactResolver} from '../../types/schema.ts';
+import {exactResolver, withLabelChoices} from '../../types/schema.ts';
 
 export type ComparisonRelation = Scope.Less | Scope.Equal | Scope.Greater;
 
@@ -30,3 +30,11 @@ export function resolveComparisonRelation(labels: string[]): ComparisonRelation 
 }
 
 exactResolver(resolveComparisonRelation);
+withLabelChoices(resolveComparisonRelation, {
+    kind: 'alternatives',
+    alternatives: [
+        [Area.NumericEquality, Scope.Equal],
+        [Area.NumericInequality, Scope.Less],
+        [Area.NumericInequality, Scope.Greater]
+    ]
+});

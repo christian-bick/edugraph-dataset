@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 
 const fractionArithmeticTaskLabels = [
     Area.IteratedOperation,
@@ -72,6 +72,20 @@ const resolveTask = exactResolver((labels: string[]): FractionArithmeticTaskConf
         return 'whole-number-fraction-product-improper';
     }
     return null;
+});
+withLabelChoices(resolveTask, {
+    kind: 'alternatives',
+    alternatives: [
+        [Scope.TenthFractions],
+        [Scope.FractionNumbers],
+        [Scope.ProperFractions],
+        [Scope.ImproperFractions, Scope.MixedNumbers],
+        [Scope.MixedNumbers],
+        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.UnitFractions],
+        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.ProperFractions],
+        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.ImproperFractions]
+    ],
+    contextLabels: [Area.Addition, Area.Subtraction, Area.Multiplication]
 });
 
 export const spec: GeneratorSpec = {

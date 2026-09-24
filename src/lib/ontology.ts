@@ -1,6 +1,6 @@
 import {Scope, bundledContext} from 'edugraph-ts/generated';
 import {RELATION_IRIS} from 'edugraph-ts/core';
-import {compositionalResolver, exactResolver} from '../types/schema.ts';
+import {compositionalResolver, exactResolver, withLabelChoices} from '../types/schema.ts';
 
 export const DISTANCE_SCALE_LABELS = [
     Scope.CentimeterScale,
@@ -71,6 +71,7 @@ export function resolveDistanceScale(
 }
 
 exactResolver(resolveDistanceScale);
+withLabelChoices(resolveDistanceScale, {kind: 'alternatives'});
 
 
 /**
@@ -124,4 +125,28 @@ export const resolveRangeFromLabels = compositionalResolver((labels: string[]): 
     }
 
     return { min, max };
+});
+withLabelChoices(resolveRangeFromLabels, {
+    kind: 'target',
+    relation: 'exact',
+    contextLabels: [
+        Scope.NumbersSmaller5,
+        Scope.NumbersSmaller10,
+        Scope.NumbersSmaller20,
+        Scope.NumbersSmaller100,
+        Scope.NumbersSmaller120,
+        Scope.NumbersSmaller1000,
+        Scope.NumbersSmaller10000,
+        Scope.NumbersSmaller100000,
+        Scope.NumbersSmaller1000000,
+        Scope.NumbersLarger5,
+        Scope.NumbersLarger10,
+        Scope.NumbersLarger20,
+        Scope.NumbersLarger100,
+        Scope.NumbersLarger120,
+        Scope.NumbersLarger1000,
+        Scope.NumbersLarger10000,
+        Scope.NumbersLarger100000,
+        Scope.NumbersLarger1000000
+    ]
 });

@@ -56,11 +56,13 @@ explicit wider unions. For example, mass and liquid volume have separate produce
 the general strategy view accepts the named strategy union. Target requirements remain
 independent learner-task participation policies.
 
-The next stage is planned in
-[label-variant-matching.md](docs/plan/label-variant-matching.md): matching will retain compatible
-schema-label selections and pass their joint constraints into generation. The plan preserves the
-current sample count and allows seeded selection among valid variants; this handover is not yet
-implemented.
+The next stage is tracked in
+[label-variant-matching.md](docs/plan/label-variant-matching.md). Its foundations include explicit
+schema choice metadata, a pure label compatibility planner, versioned plans/selection receipts,
+and spec source identities. The production handover is still pending: matching will retain
+compatible joint selections and generation will choose within them while preserving the current
+sample count. Existing production matching and rendering still use the prior path until that
+handover and its cache migration are complete.
 
 ### Ontology Scale Resolution
 Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in

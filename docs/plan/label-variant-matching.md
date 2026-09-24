@@ -1,6 +1,18 @@
 # Label-variant matching and constrained generation
 
-Status: implementation plan; no runtime changes made. Agreed design recorded on 2026-09-24 against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`.
+Status: implementation started on `feat/label-variant-matching`. The choice contracts and metadata planner are implemented as independently tested foundations; production matching, persistence, and generation have not switched to them yet. Agreed design recorded on 2026-09-24 against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`.
+
+## Implementation checkpoint
+
+- Baseline: 105 generators, 188 views, 211 type-compatible pairs; 830 CCSS tuples cover all 681 normalized targets, and 692 test tuples cover all 559 targets.
+- Every catalog schema now declares inspectable choices. Factory metadata covers exact alternatives, predicates, aggregates, conjunctions, and empty defaults. Eleven custom resolvers declare their alternatives, defaults, and contextual label reads explicitly.
+- `normalizeSchemaChoices` never calls value resolvers. `resolveSchemaChoices` binds accepted labels per field and permits only declared semantic reads of other local selections or the original target. Context is never completed with a view's selections inside a generator.
+- The compatibility query facade separates original target, generator, and view scopes. Named dependencies restrict queries; independent domains remain factored and correlated domains retain complete accepted assignments. Plans and selection receipts have versioned canonical identities and validation helpers.
+- Catalogs record matching source identities from each spec's local import closure, including imported helpers. These identities are available for the pending graph integration; they are not yet used to authorize persisted plan reuse.
+- Measurement integration tests exercise constrained schema resolution and real generator calls over 64 seeds per supported case. Production measurement specs retain their existing behavior until the authoritative matching-to-generation handover is installed.
+- All existing CCSS/test tuples normalize without an empty domain. This is a domain check, not proof that every generator dependency has been migrated.
+
+The next milestone must carry mandatory plans through fresh and reused matching, generation, rendering, and replay before enabling production predicates. The generator guard inventory includes statistical graphs, fraction arithmetic/comparison, operation properties, place-value profiles, shape configurations, counting, currency, and time. Numeric sampling failures and defensive type/range assertions remain implementation concerns.
 
 ## Objective and agreed decisions
 
